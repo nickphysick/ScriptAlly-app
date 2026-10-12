@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "AD8",
+  "where": "1512 empty: the placeholder title",
+  "ok": false,
+  "detail": "\"null\" · placeholder null"
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 the row's own comp cell exists",
+  "ok": true,
+  "detail": "{\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-d"
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 same element type and class set as a row's comp cell",
+  "ok": false,
+  "detail": "preview {\"tag\":\"DIV\",\"cls\":\"aprev-cell\",\"probe\":null,\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"disc\",\"probe\":null,\"kids\":[]},{\"tag\" · row {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-disc\",\"probe\":\"row-disc\",\"kids\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 its title is the Title input",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 its byline follows the fields",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1512 the next-move cell is the row's own, with no tray",
+  "ok": false,
+  "detail": "\"null\" · tray false"
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 empty: the placeholder title",
+  "ok": false,
+  "detail": "\"null\" · placeholder null"
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 the row's own comp cell exists",
+  "ok": true,
+  "detail": "{\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-d"
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 same element type and class set as a row's comp cell",
+  "ok": false,
+  "detail": "preview {\"tag\":\"DIV\",\"cls\":\"aprev-cell\",\"probe\":null,\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"disc\",\"probe\":null,\"kids\":[]},{\"tag\" · row {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"cv-disc\",\"probe\":\"row-disc\",\"kids\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 its title is the Title input",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 its byline follows the fields",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "AD8",
+  "where": "1280 the next-move cell is the row's own, with no tray",
+  "ok": false,
+  "detail": "\"null\" · tray false"
+ }
+]

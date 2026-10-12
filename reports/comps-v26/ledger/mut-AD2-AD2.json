@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: the card is open",
+  "ok": true,
+  "detail": "card true · link false"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: three points",
+  "ok": true,
+  "detail": "3 points"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: the hide link",
+  "ok": true,
+  "detail": "Got it, hide this"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 no comps: hiding folds it to the link",
+  "ok": true,
+  "detail": "card false · link true"
+ },
+ {
+  "lock": "AD2",
+  "where": "1512 with comps: only the folded link",
+  "ok": false,
+  "detail": "card true · link false · 3 points"
+ }
+]

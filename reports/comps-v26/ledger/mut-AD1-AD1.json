@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "AD1",
+  "where": "1512 first: one heading",
+  "ok": false,
+  "detail": "[{\"text\":\"Add your first comp\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 first: none in the body",
+  "ok": false,
+  "detail": "1 in the body"
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 first: subline",
+  "ok": true,
+  "detail": "A book, film or show your manuscript sits beside."
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 add: one heading",
+  "ok": false,
+  "detail": "[{\"text\":\"Add a comp\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 add: none in the body",
+  "ok": false,
+  "detail": "1 in the body"
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 edit: one heading",
+  "ok": false,
+  "detail": "[{\"text\":\"Edit Salt Road\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 edit: the byline is the subline",
+  "ok": true,
+  "detail": "Imogen Hale · Faber · 2023"
+ },
+ {
+  "lock": "AD1",
+  "where": "1512 edit: buttons",
+  "ok": true,
+  "detail": "Save changes · remove true · again false"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 first: one heading",
+  "ok": false,
+  "detail": "[{\"text\":\"Add your first comp\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 first: none in the body",
+  "ok": false,
+  "detail": "1 in the body"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 first: subline",
+  "ok": true,
+  "detail": "A book, film or show your manuscript sits beside."
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 add: one heading",
+  "ok": false,
+  "detail": "[{\"text\":\"Add a comp\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 add: none in the body",
+  "ok": false,
+  "detail": "1 in the body"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 edit: one heading",
+  "ok": false,
+  "detail": "[{\"text\":\"Edit Salt Road\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 edit: the byline is the subline",
+  "ok": true,
+  "detail": "Imogen Hale · Faber · 2023"
+ },
+ {
+  "lock": "AD1",
+  "where": "1280 edit: buttons",
+  "ok": true,
+  "detail": "Save changes · remove true · again false"
+ }
+]

@@ -1,0 +1,78 @@
+{
+ "AD1": {
+  "mutation": "restore the body's \"Add a comp\" heading (in page)",
+  "red": 10,
+  "first": [
+   "✗ AD1 · 1512 first: one heading — [{\"text\":\"Add your first comp\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]",
+   "✗ AD1 · 1512 first: none in the body — 1 in the body",
+   "✗ AD1 · 1512 add: one heading — [{\"text\":\"Add a comp\",\"inBody\":false,\"inHead\":true},{\"text\":\"Add a comp\",\"inBody\":true,\"inHead\":false}]"
+  ]
+ },
+ "AD2": {
+  "mutation": "open the card for every add (source)",
+  "red": 1,
+  "first": [
+   "✗ AD2 · 1512 with comps: only the folded link — card true · link false · 3 points"
+  ]
+ },
+ "AD3": {
+  "mutation": "clear the fields on type change (source)",
+  "red": 8,
+  "first": [
+   "✗ AD3 · 1512 film: typed values survive — {\"title\":\"Last Light\",\"who\":\"\",\"pub\":\"\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}",
+   "✗ AD3 · 1512 tv: typed values survive — {\"title\":\"Last Light\",\"who\":\"\",\"pub\":\"\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}",
+   "✗ AD3 · 1512 other: typed values survive — {\"title\":\"Last Light\",\"who\":\"\",\"pub\":\"\",\"year\":\"2023\",\"note\":\"\",\"tag\":\"\"}"
+  ]
+ },
+ "AD4": {
+  "mutation": "disable Save while not ready (source)",
+  "red": 4,
+  "first": [
+   "✗ AD4 · 1512 book, no publisher: Save is enabled — save disabled true",
+   "✗ AD4 · 1512 film, no year: needs a year — needs · A letter can only name it once it has a year. You can still save it without. · save disabled true",
+   "✗ AD4 · 1280 book, no publisher: Save is enabled — save disabled true"
+  ]
+ },
+ "AD5": {
+  "mutation": "put the foot inside the scrolling body (in page)",
+  "red": 4,
+  "first": [
+   "✗ AD5 · 1512 at the top: the foot's bottom is the drawer's bottom — scrollTop 0 · foot 1549.28125 · drawer 892",
+   "✗ AD5 · 1512 the foot did not move with the scroll — foot top 1476.28125 → 819.28125",
+   "✗ AD5 · 1280 at the top: the foot's bottom is the drawer's bottom — scrollTop 0 · foot 1549.28125 · drawer 792"
+  ],
+  "note": "The lock as specified (the foot read only with the body scrolled to its end) passed GREEN under this mutation. It went red once the foot was also read at the top and required not to move."
+ },
+ "AD6": {
+  "mutation": "close the drawer after saving (source)",
+  "red": 1,
+  "first": [
+   "✗ AD6 · 1512 the drawer stays open, in add mode — closed"
+  ]
+ },
+ "AD7": {
+  "mutation": "store tags comma-joined (source)",
+  "red": 2,
+  "first": [
+   "✗ AD7 · stored in matchAxis, joined as today — \"Tone, Coastal\"",
+   "✗ AD7 · \"Matches on\" reads them back as two chips — {\"title\":\"Salt and Iron\",\"label\":\"Matches on\",\"chips\":[\"Tone, Coastal\"]}"
+  ]
+ },
+ "AD8": {
+  "mutation": "render a hand-built preview (in page)",
+  "red": 10,
+  "first": [
+   "✗ AD8 · 1512 empty: the placeholder title — \"null\" · placeholder null",
+   "✗ AD8 · 1512 same element type and class set as a row's comp cell — preview {\"tag\":\"DIV\",\"cls\":\"aprev-cell\",\"probe\":null,\"kids\":[{\"tag\":\"SPAN\",\"cls\":\"disc\",\"probe\":null,\"kids\":[]},{\"tag\" · row {\"tag\":\"DIV\",\"cls\":\"cv-ag\",\"probe\":\"comp-cell\",\"kids\":[{\"tag\":\"SPAN",
+   "✗ AD8 · 1512 its title is the Title input — \"null\""
+  ]
+ },
+ "AD9": {
+  "mutation": "restore the query line (in page)",
+  "red": 2,
+  "first": [
+   "✗ AD9 · 1512 no query line — 1 line element(s)",
+   "✗ AD9 · 1280 no query line — 1 line element(s)"
+  ]
+ }
+}
