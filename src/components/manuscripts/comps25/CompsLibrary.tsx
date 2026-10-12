@@ -50,21 +50,55 @@ export interface LibraryProps {
 
 const BAND_ICON: Record<string, React.ReactNode> = { sent: <SendIcon />, unsent: <WaitIcon />, none: <ShelfIcon />, book: <KindIcon kind="book" />, screen: <KindIcon kind="film" /> };
 
+/**
+ * The row's COMP cell: the disc, the title and the byline. Exported because the add-and-edit form's
+ * preview draws this same component (comps v26, baked decision 5): a lookalike would drift.
+ * `onAddPublisher` absent draws the missing publisher as words, not a control (the preview).
+ */
+export const CompCell: React.FC<{ r: CompRow; placeholder?: string; onAddPublisher?: () => void }> = ({ r, placeholder, onAddPublisher }) => {
+  const c = r.comp;
+  const by: React.ReactNode[] = [];
+  if (c.author?.trim()) by.push(c.author.trim());
+  if (c.publisher?.trim()) by.push(c.publisher.trim());
+  else if (r.kind === "book") {
+    by.push(onAddPublisher
+      ? <button key="add" type="button" className="cv-addl" data-cv="add-publisher" onClick={(e) => { e.stopPropagation(); onAddPublisher(); }}>add publisher</button>
+      : <span key="add" className="cv-addl cv-addl--words" data-cv="add-publisher">add publisher</span>);
+  }
+  if (c.year) by.push(String(c.year));
+  const title = c.title.trim();
+  return (
+    <div className="cv-ag" data-cv="comp-cell">
+      <span className={`cv-disc${r.where !== "none" ? "" : " is-ring"}`} title={KIND_WORD[r.kind]} data-cv="row-disc"><KindIcon kind={r.kind} /></span>
+      <div>
+        <b data-cv="row-title" className={title ? undefined : "is-placeholder"}>{title || placeholder || ""}</b>
+        <small data-cv="row-by">{by.map((x, i) => <React.Fragment key={i}>{i > 0 ? " · " : ""}{x}</React.Fragment>)}</small>
+      </div>
+    </div>
+  );
+};
+
+/** The row's NEXT-MOVE cell: the words and the mono line, and (in the list) the hover tray. */
+export const NextCell: React.FC<{ r: CompRow; tray?: React.ReactNode }> = ({ r, tray }) => {
+  const nx = nextMove(r);
+  return (
+    <div className="cv-nx" data-cv="row-next">
+      <div className="cv-nxt">{nx.text}</div>
+      <div className={`cv-sub${nx.hot ? " is-hot" : ""}`}>{nx.mono}</div>
+      {tray}
+    </div>
+  );
+};
+
 const Row: React.FC<{ r: CompRow; p: LibraryProps }> = ({ r, p }) => {
   const c = r.comp;
   const nx = nextMove(r);
-  const inLetter = r.where !== "none";
   const act = () => {
     if (nx.act === "edit") p.onEdit(r.key);
     else if (nx.act === "open") p.onOpen(r.key);
     else if (nx.act === "pick") p.onPick(nx.letterId ?? null);
     else p.onPick(null, r.key);
   };
-  const by: React.ReactNode[] = [];
-  if (c.author?.trim()) by.push(c.author.trim());
-  if (c.publisher?.trim()) by.push(c.publisher.trim());
-  else if (r.kind === "book") by.push(<button key="add" type="button" className="cv-addl" data-cv="add-publisher" onClick={(e) => { e.stopPropagation(); p.onEdit(r.key); }}>add publisher</button>);
-  if (c.year) by.push(String(c.year));
   const sub = r.letters.length === 0 ? null : r.letters.some((l) => l.sent)
     ? (r.packages.length ? `In ${r.packages.join(", ")}` : "Sent")
     : "Not sent yet";
@@ -73,13 +107,7 @@ const Row: React.FC<{ r: CompRow; p: LibraryProps }> = ({ r, p }) => {
       aria-label={`${c.title}. Open details.`}
       onClick={() => p.onOpen(r.key)}
       onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); p.onOpen(r.key); } }}>
-      <div className="cv-ag">
-        <span className={`cv-disc${inLetter ? "" : " is-ring"}`} title={KIND_WORD[r.kind]} data-cv="row-disc"><KindIcon kind={r.kind} /></span>
-        <div>
-          <b data-cv="row-title">{c.title}</b>
-          <small data-cv="row-by">{by.map((x, i) => <React.Fragment key={i}>{i > 0 ? " · " : ""}{x}</React.Fragment>)}</small>
-        </div>
-      </div>
+      <CompCell r={r} onAddPublisher={() => p.onEdit(r.key)} />
       <div data-cv="row-named">
         {r.letters.length ? (
           <div className="cv-lets">
@@ -103,14 +131,12 @@ const Row: React.FC<{ r: CompRow; p: LibraryProps }> = ({ r, p }) => {
           </>
         ) : <span className="cv-none">{r.where === "unsent" ? "Not sent yet" : "No one yet"}</span>}
       </div>
-      <div className="cv-nx" data-cv="row-next">
-        <div className="cv-nxt">{nx.text}</div>
-        <div className={`cv-sub${nx.hot ? " is-hot" : ""}`}>{nx.mono}</div>
+      <NextCell r={r} tray={(
         <div className="cv-tray" data-cv="row-tray">
           <button type="button" className="cv-pillbtn" data-cv="tray-act" onClick={(e) => { e.stopPropagation(); act(); }}>{nx.tray}</button>
           <button type="button" className="cv-ghost" data-cv="tray-edit" onClick={(e) => { e.stopPropagation(); p.onEdit(r.key); }}>Edit</button>
         </div>
-      </div>
+      )} />
     </div>
   );
 };

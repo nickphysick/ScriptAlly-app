@@ -103,6 +103,17 @@ export function buildRows(i: RowsInput): CompRow[] {
   });
 }
 
+/**
+ * The row a comp WOULD be the moment it is saved: on the shelf, in no letter, seen by no one.
+ * The add-and-edit form's preview draws the library row's own cells from it (comps v26).
+ */
+export function draftRow(comp: CompTitle): CompRow {
+  return {
+    key: "draft", index: -1, comp, kind: kindOf(comp), ready: ready(comp), where: "none",
+    letters: [], packages: [], queries: [], askedForMore: 0, lastSent: null,
+  };
+}
+
 /* ══ the one filter ═══════════════════════════════════════════════════════════════════════════ */
 
 export type CompFilter = "sent" | "unsent" | "none" | "book" | "screen";
