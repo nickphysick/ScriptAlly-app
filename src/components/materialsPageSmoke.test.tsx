@@ -176,10 +176,12 @@ describe("/manuscripts/comps renders", () => {
     const html = renderPageSeeded(page(), "/manuscripts/comps");
     /* comps v25: the query line left the page (which comps a letter names is logged on the letter) */
     expect(html, "the query line is still on the page").not.toContain("Your query line");
-    /* the title panel, the strip, the band and the library all rendered, with the comp as a row */
+    /* the title panel, the strip and the library all rendered, with the comp as a row. Comps v27: the steps band
+       left the page (they open in a pop-up), so the header's link is what renders, and no steps do. */
     expect(html, "the title panel did not render").toContain('data-hp3="title"');
     expect(html, "the strip did not render").toContain("At a glance");
-    expect(html, "the band did not render").toContain("How comp tracking works.");
+    expect(html, "the pop-up's link did not render").toContain('data-cv="how-link"');
+    expect(html, "the steps are on the page").not.toContain('data-cv="how-step"');
     expect(html, "the library did not render").toContain("Your comparable titles library");
     expect(html, "the comp's row did not render").toMatch(/data-cv="row"[^>]*>[\s\S]*The Smoke Comp/);
     expect(html, "the row's next move did not run").toMatch(/Log in a letter|Add a publisher|Add a year/);

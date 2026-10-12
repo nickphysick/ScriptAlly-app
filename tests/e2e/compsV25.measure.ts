@@ -24,11 +24,10 @@ const stable = (v: unknown): string => JSON.stringify(v, (_k, x) => (x && typeof
 const MUTATIONS: Record<string, { css?: string; js?: string; what: string }> = {
   B1: { what: "restore the number panel", js: `(() => { const p = window.__q('[data-cv="panel"]'); if (!p || p.dataset.mut) return; p.dataset.mut = "1"; p.setAttribute("data-hp3", "number"); const h = p.querySelector("h1"); const n = document.createElement("span"); n.setAttribute("data-hp3-part", "number"); n.textContent = "7"; h.prepend(n); h.setAttribute("aria-label", "7 comp titles"); h.querySelector("[aria-label]")?.removeAttribute("aria-label"); })()` },
   B2: { what: "scroll on press", js: `(() => { const p = window.__cv(); if (p.dataset.mutb2) return; p.dataset.mutb2 = "1"; p.addEventListener("click", (e) => { if (e.target.closest("[data-gst-cell]")) p.closest(".wpg-scroll").scrollTop += 300; }, true); })()` },
-  C1: { what: "confine the band to the column", css: `.cv-how::before { box-shadow: none !important; clip-path: none !important; }` },
   D1: { what: "leave the heading on the column", css: `.cv-lib .cv-libhead { margin-inline: 24px !important; }` },
   D2: { what: "search flex: 1", css: `.cv-bar .cv-find { flex: 1 1 auto !important; }` },
   E1: { what: "expand the row inline", js: `(() => { const p = window.__cv(); if (p.dataset.mute1) return; p.dataset.mute1 = "1"; p.addEventListener("click", (e) => { const r = e.target.closest('[data-cv="row"]'); if (!r) return; const d = document.createElement("div"); d.className = "cv-inline"; d.textContent = "details"; r.after(d); }, true); })()` },
-  L1: { what: "drop the strip's figure boxes while loading", css: `.gst .gst-blank { display: none !important; }` },
+  L1: { what: "draw the loading header without its link row", css: `[data-cv="panel"][data-loading] [data-cv="how-link"] { display: none !important; }` },
 };
 const SOURCE_MUTATIONS = ["A1", "A3", "D3", "D4", "E2", "F1"];
 
@@ -162,37 +161,8 @@ test.describe("Comparable titles v25", () => {
     L.done(32);
   });
 
-  test("C1 · band: paper white to the sheet's edges; three steps in one row", async ({ page }) => {
-    const L = new Ledger("C1");
-    for (const vp of SIZES) {
-      await open(page, vp, "C1");
-      await scrollTo(page, '[data-cv="how"]', 60);
-      const r = await page.evaluate(() => {
-        const w = window as any;
-        const how = w.__q('[data-cv="how"]') as HTMLElement;
-        const sheet = document.querySelector(".ws-window") as HTMLElement;
-        const probe = document.createElement("i"); probe.style.cssText = "position:fixed;background:var(--ws-band)"; document.body.append(probe);
-        const band = getComputedStyle(probe).backgroundColor; probe.style.background = "var(--ws-page)"; const ground = getComputedStyle(probe).backgroundColor; probe.remove();
-        return {
-          how: w.__box(how), sheet: w.__box(sheet), col: w.__box(w.__q('[data-cv="panel"]')), band, ground,
-          steps: (w.__qa('[data-cv="how-step"]') as HTMLElement[]).map((s) => w.__box(s)),
-          h: how.querySelector("h2")!.textContent, heads: [...how.querySelectorAll("h3")].map((x) => x.textContent), link: how.querySelector('[data-cv="how-pick"]')!.textContent,
-        };
-      });
-      const w = `${vp.width}`;
-      const rgb = (s: string) => (s.match(/\d+/g) ?? []).slice(0, 3).join(",");
-      const y = r.how.y + 20;
-      const left = await pixelAt(page, r.sheet.x + 14, y), right = await pixelAt(page, r.sheet.r - 30, y), mid = await pixelAt(page, r.col.x + 40, y);
-      L.check(`${w} the band and the ground differ`, rgb(r.band) !== rgb(r.ground), `${r.band} vs ${r.ground}`);
-      L.check(`${w} the column stands inside the sheet`, r.col.x - r.sheet.x > 20 && r.sheet.r - r.col.r > 20, `column ${r.col.x}–${r.col.r} in sheet ${r.sheet.x}–${r.sheet.r}`);
-      L.check(`${w} band colour in the column`, mid === rgb(r.band), `${mid} vs ${rgb(r.band)}`);
-      L.check(`${w} band colour at the sheet's left edge`, left === rgb(r.band), `${left} vs ${rgb(r.band)}`);
-      L.check(`${w} band colour at the sheet's right edge`, right === rgb(r.band), `${right} vs ${rgb(r.band)}`);
-      L.check(`${w} three steps in one row`, r.steps.length === 3 && near(r.steps[0].y, r.steps[1].y) && near(r.steps[1].y, r.steps[2].y) && r.steps[0].x < r.steps[1].x && r.steps[1].x < r.steps[2].x, r.steps.map((s) => `${Math.round(s.x)},${Math.round(s.y)}`).join(" · "));
-      L.check(`${w} copy`, r.h === "How comp tracking works." && r.heads.length === 3 && r.link === "Log the comps in a letter", `${r.h} · ${r.heads.length} · ${r.link}`);
-    }
-    L.done(14);
-  });
+  /* C1 (the full-width "How comp tracking works" band) RETIRED with comps v27: the band left the page. The steps are held
+     by V3 (the empty page's card) and V7 (no steps on a page with comps until the link is pressed) in compsV27.measure.ts. */
 
   test("D1 · heading: its left and right edges are the list's", async ({ page }) => {
     const L = new Ledger("D1");
@@ -381,28 +351,29 @@ test.describe("Comparable titles v25", () => {
     L.done(24);
   });
 
-  test("L1 · no jump: the loading and loaded boxes of the panel, strip and heading are equal", async ({ page }) => {
+  /* comps v27 REWROTE L1. While comps load the page is its header and nothing below (v27 Part B), so the strip and the
+     library heading have no loading box to compare: they arrive with the data. What is still held is the panel. */
+  test("L1 · no jump: the panel's loading and loaded boxes are equal, and nothing is drawn below it while loading", async ({ page }) => {
     const L = new Ledger("L1");
     for (const vp of SIZES) {
       await open(page, vp, "L1", { hold: 5000 });
       const read = () => page.evaluate(() => {
-        const w = window as any;
-        return { loading: w.__q("[data-gst-box]")?.getAttribute("data-loading"), panel: w.__box(w.__q('[data-cv="panel"]')), strip: w.__box(w.__q('[data-gst="comps"]')), head: w.__box(w.__q('[data-cv="lib-head"]')), rows: w.__qa('[data-cv="row"]').length };
+        const w = window as any; const panel = w.__q('[data-cv="panel"]') as HTMLElement; const group = w.__q('[data-cv="group"]') as HTMLElement;
+        return { loading: panel.hasAttribute("data-loading"), panel: w.__box(panel), below: [...group.children].filter((c) => c !== panel && (c as HTMLElement).getBoundingClientRect().height > 0).length, rows: w.__qa('[data-cv="row"]').length };
       });
       const a = await read();
       const w = `${vp.width}`;
       /* the precondition: this reading WAS the loading state */
-      L.check(`${w} held loading`, a.loading === "true" && a.rows === 0, `data-loading ${a.loading} · ${a.rows} rows`);
+      L.check(`${w} held loading`, a.loading && a.rows === 0, `loading ${a.loading} · ${a.rows} rows`);
+      L.check(`${w} nothing below the header while loading`, a.below === 0, `${a.below} element(s) below`);
       await page.waitForFunction(() => (window as any).__qa('[data-cv="row"]').length > 0, null, { timeout: 30_000 });
       await page.waitForTimeout(500);
       const b = await read();
-      L.check(`${w} then loaded`, b.loading === "false" && b.rows === FX.comps, `data-loading ${b.loading} · ${b.rows} rows`);
-      for (const k of ["panel", "strip", "head"] as const) {
-        const x = a[k], y = b[k];
-        L.check(`${w} ${k}`, near(x.x, y.x) && near(x.y, y.y) && near(x.w, y.w) && near(x.h, y.h), `${Math.round(x.x)},${Math.round(x.y)} ${Math.round(x.w)}×${x.h.toFixed(1)} → ${Math.round(y.x)},${Math.round(y.y)} ${Math.round(y.w)}×${y.h.toFixed(1)}`);
-      }
+      L.check(`${w} then loaded`, !b.loading && b.rows === FX.comps, `loading ${b.loading} · ${b.rows} rows`);
+      const x = a.panel, y = b.panel;
+      L.check(`${w} panel`, near(x.x, y.x) && near(x.y, y.y) && near(x.w, y.w) && near(x.h, y.h), `${Math.round(x.x)},${Math.round(x.y)} ${Math.round(x.w)}×${x.h.toFixed(1)} → ${Math.round(y.x)},${Math.round(y.y)} ${Math.round(y.w)}×${y.h.toFixed(1)}`);
     }
-    L.done(10);
+    L.done(8);
   });
 
   /* ── the writing cases: each re-seeds first ── */
@@ -569,5 +540,5 @@ test.describe("Comparable titles v25", () => {
 });
 
 test("CV25 · every lock has a named mutation", () => {
-  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["A1", "A3", "B1", "B2", "C1", "D1", "D2", "D3", "D4", "E1", "E2", "F1", "L1"]);
+  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["A1", "A3", "B1", "B2", "D1", "D2", "D3", "D4", "E1", "E2", "F1", "L1"]);
 });

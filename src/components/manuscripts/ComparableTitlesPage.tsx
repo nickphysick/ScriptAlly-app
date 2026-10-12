@@ -43,7 +43,7 @@ import { escapeDepth } from "../../lib/escapeStack";
 import { useToast } from "../toast/ToastProvider";
 import { useCompsHold } from "../../lib/compsLoadHold";
 import { CompsStrip } from "./comps25/CompsStrip";
-import { CompsHow } from "./comps25/CompsHow";
+import { CompsHowDialog } from "./comps25/CompsHowDialog";
 import { CompsSteps } from "./comps25/CompsSteps";
 import { CompsLibrary } from "./comps25/CompsLibrary";
 import { CompDrawer, DrawerState } from "./comps25/CompDrawer";
@@ -82,6 +82,8 @@ export const ComparableTitlesPage: React.FC<{
   const [group, setGroup] = useState<GroupBy>("none");
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [picker, setPicker] = useState<PickerRequest | null>(null);
+  /** the "How comp tracking works" pop-up (comps v27): the steps, one click from the header */
+  const [how, setHow] = useState(false);
   /** the optimistic list while a write is in flight */
   const [pending, setPending] = useState<{ msId: string; comps: CompTitle[] } | null>(null);
   const seq = useRef(0);
@@ -152,7 +154,7 @@ export const ComparableTitlesPage: React.FC<{
   const fsRef = useRef(fs);
   fsRef.current = fs;
   const overlayRef = useRef(false);
-  overlayRef.current = !!drawer || !!picker;
+  overlayRef.current = !!drawer || !!picker || how;
 
   /* the page's keys: N adds, / finds, F is full screen. Never in a field, never over the drawer or
      the picker, and only when THIS page is the one on screen (every workspace page stays mounted). */
@@ -318,10 +320,16 @@ export const ComparableTitlesPage: React.FC<{
           <span className="cv-firstnote" data-cv="first-note">Only the title is needed to start.</span>
         </>
       ) : activeMs || loading ? (
-        <>
-          <button ref={primaryRef} type="button" className="hp3-btn hpanel-b1" data-cv="add" onClick={openAdd} disabled={full || loading}>{full ? "This list is full" : "+ Add a comp"}</button>
-          <button type="button" className="hp3-btn hpanel-b2" data-cv="see-all" onClick={seeAll} disabled={loading}>See all comps</button>
-        </>
+        <div className="cv-acts">
+          <div className="cv-actrow">
+            <button ref={primaryRef} type="button" className="hp3-btn hpanel-b1" data-cv="add" onClick={openAdd} disabled={full || loading}>{full ? "This list is full" : "+ Add a comp"}</button>
+            <button type="button" className="hp3-btn hpanel-b2" data-cv="see-all" onClick={seeAll} disabled={loading}>See all comps</button>
+          </div>
+          {/* a row of its own under the buttons; drawn while loading too, so the panel's height does not change */}
+          <button type="button" className="cv-howlink" data-cv="how-link" aria-haspopup="dialog" onClick={() => setHow(true)} disabled={loading}>
+            <i aria-hidden="true">?</i><span>How comp tracking works</span>
+          </button>
+        </div>
       ) : undefined}
       art={<img data-cv="panel-art" alt="" src={`${COMPS_HEADER_ART.src}?v=${COMPS_HEADER_ART.version}`} width={COMPS_HEADER_ART.width} height={COMPS_HEADER_ART.height} />}
     />
@@ -335,7 +343,6 @@ export const ComparableTitlesPage: React.FC<{
           {listed ? (
             <>
               <CompsStrip g={g} rows={rows} filter={filter} loading={false} onFilter={pickFilter} />
-              <CompsHow onPick={() => setPicker({ letterId: null })} />
               <CompsLibrary
                 loading={false} total={rows.length} rows={view} bands={bands} counts={counts}
                 filter={filter} find={find} sort={sort} group={group} full={fs.full}
@@ -384,7 +391,12 @@ export const ComparableTitlesPage: React.FC<{
             onNewVersion={(letterId) => void newVersion(letterId)}
             onOpenPackages={() => { setPicker(null); onNavigate?.("manuscripts", "Submission packages"); }}
           />
-          {listed && <CompsScout msTitle={activeMs.title} routeActive={routeActive} hidden={!!drawer || !!picker || fs.full} />}
+          <CompsHowDialog
+            open={routeActive && how && listed}
+            onClose={() => setHow(false)}
+            onPick={() => { setHow(false); setPicker({ letterId: null }); }}
+          />
+          {listed && <CompsScout msTitle={activeMs.title} routeActive={routeActive} hidden={!!drawer || !!picker || how || fs.full} />}
         </>
       )}
     </WorkspacePageGrid>

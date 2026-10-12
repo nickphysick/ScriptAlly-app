@@ -18,8 +18,7 @@ for (const vp of [...SIZES, { width: 1920, height: 1080 }, { width: 1024, height
   test(`shots · ${w}`, async ({ page }) => {
     await openComps(page, vp);
     await page.screenshot({ path: `${DIR}/top-${w}.png` });
-    await scrollTo(page, '[data-cv="how"]', 0);
-    await page.screenshot({ path: `${DIR}/how-${w}.png` });
+    /* the band left the page with comps v27: its shot is compsV27Shots' pop-up */
     await scrollTo(page, '[data-cv="lib-head"]', 24);
     await page.screenshot({ path: `${DIR}/list-${w}.png` });
     if (!refs) return;
