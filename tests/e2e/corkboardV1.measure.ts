@@ -208,7 +208,7 @@ test.describe("CB1 · Part C — the board", () => {
       L.check("C1", where, !!b.header && near(b.board.x, b.header.x, 1) && near(b.board.w, b.header.w, 1), `the board spans ${b.board.x}+${b.board.w}; the column (the header) ${b.header?.x}+${b.header?.w}`);
       L.check("C1", where, b.pinsInner.h >= 790, `the board is ${b.pinsInner.h} tall inside`);
       const lowest = Math.max(...b.items.map((i) => i.top + i.h));
-      L.check("C1", where, b.items.length === 8 && b.pinsInner.h >= lowest + 59, `the lowest item ends at ${lowest}; the board is ${b.pinsInner.h} inside`);
+      L.check("C1", where, b.items.filter((i) => i.note).length === 8 && b.pinsInner.h >= lowest + 59, `the lowest item ends at ${lowest}; the board is ${b.pinsInner.h} inside`);
       /* the row (it wraps when the column is narrower than its two halves): 22 under the panel, 14 above the board */
       L.check("C1", where, !!b.over && near(b.board.y - (b.over.y + b.over.h), 14, 1), `the board starts ${b.over ? (b.board.y - (b.over.y + b.over.h)).toFixed(1) : "?"} under the row`);
       L.check("C1", where, !!b.over && !!b.header && near(b.over.y - (b.header.y + b.header.h), 22, 1), `the row starts ${b.over && b.header ? (b.over.y - (b.header.y + b.header.h)).toFixed(1) : "?"} under the panel (header margin ${b.headerMb}, row margin ${b.overMt})`);
@@ -263,7 +263,7 @@ test.describe("CB1 · Part C — the board", () => {
       const after = (await readBoard(page))!.items.find((i) => i.key === start.key)!;
       L.check("C3", where, /\bcb-drag\b/.test(midClass) && midDeg === 0, `in the hand it is "${midClass.split(" ").filter((c) => c.startsWith("cb-")).join(" ")}" at ${midDeg}°`);
       L.check("C3", where, midZ > Math.max(...b0.items.filter((i) => i.key !== start.key).map((i) => i.z)), `in the hand its z-index is ${midZ}`);
-      L.check("C3", where, near(after.box.x - start.box.x, 300, 2) && near(after.box.y - start.box.y, 120, 2), `it moved ${(after.box.x - start.box.x).toFixed(1)}, ${(after.box.y - start.box.y).toFixed(1)}`);
+      L.check("C3", where, near(after.left - start.left, 300, 2) && near(after.top - start.top, 120, 2), `it moved ${after.left - start.left}, ${after.top - start.top} on the board`);
       L.check("C3", where, writes.length === 1, `${writes.length} write(s) for one drop`);
       const w = writes[0] ?? "";
       L.check("C3", where, w.includes(`todoPrefs.noteboard.layout.`) && w.includes(start.key) && /\/documents\/users\/[^/"]+"/.test(w), `the write is ${w.slice(0, 200)}`);
@@ -273,7 +273,8 @@ test.describe("CB1 · Part C — the board", () => {
       L.check("C3", where, Object.keys((await prefs())?.layout ?? {}).length === 1, "the map holds one entry");
       await open(page, ROUTE, vp);
       const again = (await readBoard(page))!.items.find((i) => i.key === start.key)!;
-      L.check("C3", where, near(again.box.x, after.box.x, 2) && near(again.box.y, after.box.y, 2), `after a reload it is at ${again.box.x.toFixed(1)}, ${again.box.y.toFixed(1)} (was ${after.box.x.toFixed(1)}, ${after.box.y.toFixed(1)})`);
+      /* its place ON THE BOARD (the page may be scrolled differently after a reload) */
+      L.check("C3", where, near(again.left, after.left, 2) && near(again.top, after.top, 2), `after a reload it is at ${again.left}, ${again.top} on the board (was ${after.left}, ${after.top})`);
       /* the keyboard: two presses are 32px, saved once, 600ms after the last key */
       const kw = await writesDuring(page, async () => {
         await page.locator(inPage(`[data-cb-item="${start.key}"]`)).focus();
@@ -354,26 +355,29 @@ test.describe("CB1 · Part C — the board", () => {
       const keys = tidy.items.map((i) => i.key);
       const want = arrange(keys, (k) => { const i = tidy.items.find((x) => x.key === k)!; return { w: i.w, h: i.h }; }, {}, tidy.pinsInner.w, "tidy");
       L.check("C6", where, tidy.items.every((i) => near(i.left, want.at[i.key].left, 1) && near(i.top, want.at[i.key].top, 1)), `places ${tidy.items.map((i) => `${i.left},${i.top}`).join(" ")} · the flow ${keys.map((k) => `${want.at[k].left},${want.at[k].top}`).join(" ")}`);
-      const cols = [...new Set(tidy.items.map((i) => i.left))].sort((p, q) => p - q);
-      L.check("C6", where, cols.length === want.columns && cols.length >= 2, `${cols.length} columns at ${cols.join(",")} (the flow has ${want.columns})`);
-      L.check("C6", where, keys.slice(0, cols.length).every((k, n) => tidy.items.find((i) => i.key === k)!.left === cols[n] && tidy.items.find((i) => i.key === k)!.top === 30), "the first notes in the order head the columns, left to right");
+      /* a column is its CENTRE: the Your tasks card is wider than a note, so its left edge is not the notes' */
+      const mid = (i: { left: number; w: number }) => Math.round(i.left + i.w / 2);
+      const cols = [...new Set(tidy.items.map(mid))].sort((p, q) => p - q).filter((c, n, all) => n === 0 || c - all[n - 1] > 2);
+      L.check("C6", where, cols.length === want.columns && cols.length >= 2, `${cols.length} columns centred at ${cols.join(",")} (the flow has ${want.columns})`);
+      L.check("C6", where, keys.slice(0, cols.length).every((k, n) => Math.abs(mid(tidy.items.find((i) => i.key === k)!) - cols[n]) <= 2 && tidy.items.find((i) => i.key === k)!.top === 30), "the first items in the order head the columns, left to right");
       L.check("C6", where, w.length === 1 && /todoPrefs\.noteboard\.view/.test(w[0]) && !/noteboard\.layout/.test(w[0]), `tidy wrote ${w.length}: ${(w[0] ?? "").slice(0, 160)}`);
       const p1 = await prefs();
       L.check("C6", where, p1?.view === "tidy" && canon(p1?.layout) === canon(place), `prefs are view ${p1?.view}, layout ${JSON.stringify(p1?.layout)}`);
       /* drag-to-reorder in tidy: the first note onto the third. It writes `order` and leaves `layout` alone. */
-      const from = keys[0], to = keys[2];
+      const noteKeys = tidy.items.filter((i) => i.note).map((i) => i.key);
+      const from = noteKeys[0], to = noteKeys[2];
       const rw = await writesDuring(page, async () => {
         await page.locator(inPage(`[data-cb-item="${from}"] .nb-body`)).dragTo(page.locator(inPage(`[data-cb-item="${to}"] .nb-body`)));
       }, 1800);
       const p2 = await prefs();
-      const orderNow = (await readBoard(page))!.items.map((i) => i.key);
+      const orderNow = (await readBoard(page))!.items.filter((i) => i.note).map((i) => i.key);
       L.check("C6", `${where} · reorder`, rw.length === 1 && /todoPrefs\.noteboard\.order/.test(rw[0]) && !/noteboard\.layout/.test(rw[0]), `reorder wrote ${rw.length}: ${(rw[0] ?? "").slice(0, 160)}`);
       L.check("C6", `${where} · reorder`, canon(p2?.layout) === canon(place), `layout after the reorder ${JSON.stringify(p2?.layout)}`);
-      L.check("C6", `${where} · reorder`, JSON.stringify(orderNow) === JSON.stringify(reorderIds(keys, from, to)) && JSON.stringify(p2?.order?.filter((k) => keys.includes(k))) === JSON.stringify(reorderIds(keys, from, to)), `the board reads ${orderNow.join(",")}`);
+      L.check("C6", `${where} · reorder`, JSON.stringify(orderNow) === JSON.stringify(reorderIds(noteKeys, from, to)) && JSON.stringify(p2?.order?.filter((k) => noteKeys.includes(k))) === JSON.stringify(reorderIds(noteKeys, from, to)), `the board reads ${orderNow.join(",")}`);
       /* back: every saved place is where it was */
       await tidyBtn.click(); await page.waitForTimeout(900);
       const back = (await readBoard(page))!;
-      L.check("C6", `${where} · back`, back.view === "free" && Object.keys(place).every((k) => { const a = free.items.find((i) => i.key === k)!, z = back.items.find((i) => i.key === k)!; return near(z.box.x, a.box.x, 2) && near(z.box.y, a.box.y, 2); }), `saved notes are back at ${Object.keys(place).map((k) => { const z = back.items.find((i) => i.key === k)!; return `${z.left},${z.top}`; }).join(" ")}`);
+      L.check("C6", `${where} · back`, back.view === "free" && Object.keys(place).every((k) => { const a = free.items.find((i) => i.key === k)!, z = back.items.find((i) => i.key === k)!; return near(z.left, a.left, 2) && near(z.top, a.top, 2); }), `saved notes are back at ${Object.keys(place).map((k) => { const z = back.items.find((i) => i.key === k)!; return `${z.left},${z.top}`; }).join(" ")}`);
       const p3 = await prefs();
       L.check("C6", `${where} · back`, p3?.view === "free", `prefs view is ${p3?.view}`);
     }
@@ -426,6 +430,103 @@ test.describe("CB1 · Part C — the board", () => {
   });
 });
 
+test.describe("CB1 · Part D — the Your tasks card", () => {
+  test.beforeAll(async () => { mkdirSync(DIR, { recursive: true }); if (!existsSync(SNAP)) await store.snap(SNAP); });
+  test.beforeEach(async () => { await store.restore(SNAP); });
+  test.afterEach(async () => { await store.restore(SNAP); });
+
+  test("D1 tasks card: the three open own tasks, not the note that became a task; a tick opens the To-do list's pane and writes nothing", async ({ page }) => {
+    const L = new Ledger("D1");
+    await only(page, PREFIX);
+    const tickId = "cbseed-t1";
+    const original = await store.task(tickId);
+    try {
+      for (const vp of SIZES) {
+        await open(page, ROUTE, vp);
+        const where = sz(vp);
+        const card = page.locator(inPage('[data-cb="tasks-card"]'));
+        L.check("D1", where, (await card.count()) === 1, `${await card.count()} Your tasks card(s) on the board`);
+        const read = await card.evaluate((el) => {
+          const cs = getComputedStyle(el);
+          const m = /matrix\(([^)]+)\)/.exec(cs.transform); const [a, b] = m ? m[1].split(",").map(Number) : [1, 0];
+          const h = el.querySelector<HTMLElement>(".cb-card-h")!;
+          return {
+            w: (el as HTMLElement).offsetWidth, bg: cs.backgroundColor, deg: Math.round((Math.atan2(b, a) * 180) / Math.PI * 10) / 10,
+            pin: (el.querySelector<HTMLElement>(":scope > .cb-pin")?.style.getPropertyValue("--pc") ?? ""),
+            heading: (h.textContent ?? "").trim(), hFont: `${getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "")} ${getComputedStyle(h).fontSize}`, hRule: `${getComputedStyle(h).borderBottomWidth} ${getComputedStyle(h).borderBottomColor}`,
+            rows: [...el.querySelectorAll<HTMLElement>("[data-cb-task]")].map((r) => ({ id: r.getAttribute("data-cb-task"), text: (r.querySelector(".cb-task-t")?.textContent ?? "").trim(), when: (r.querySelector("time")?.textContent ?? "").trim(), done: r.classList.contains("is-done"), checked: r.querySelector(".cb-tick")?.getAttribute("aria-checked"), struck: getComputedStyle(r.querySelector(".cb-task-t")!).textDecorationLine })),
+            add: (el.querySelector('[data-cb="card-add"]')?.textContent ?? "").trim(), foot: (el.querySelector(".cb-card-foot")?.textContent ?? "").trim(),
+            footFont: el.querySelector(".cb-card-foot") ? `${getComputedStyle(el.querySelector(".cb-card-foot")!).fontFamily.split(",")[0].replace(/"/g, "")} ${getComputedStyle(el.querySelector(".cb-card-foot")!).fontSize}` : "",
+            seeAll: !!el.querySelector('[data-cb="see-all"]'),
+          };
+        });
+        const openRows = read.rows.filter((r) => !r.done), doneRows = read.rows.filter((r) => r.done);
+        L.check("D1", where, JSON.stringify(openRows.map((r) => r.id)) === JSON.stringify(["cbseed-t1", "cbseed-t2", "cbseed-t3"]), `open rows: ${openRows.map((r) => r.id).join(",")} (the note on the to-do list, cbseed-n5, must not be one)`);
+        L.check("D1", where, !read.rows.some((r) => r.id === "cbseed-n5") && (await readBoard(page))!.items.some((i) => i.key === "cbseed-n5"), "the note that became a task is on the board as a note, and not in the card");
+        L.check("D1", where, doneRows.length === 1 && doneRows[0].id === "cbseed-t4" && doneRows[0].when === "Done" && doneRows[0].checked === "true" && /line-through/.test(doneRows[0].struck) && read.rows.indexOf(doneRows[0]) === 3, `finished rows: ${doneRows.map((r) => `${r.id} "${r.when}" ${r.struck}`).join(",")}, after the open ones`);
+        L.check("D1", where, openRows.every((r) => /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/.test(r.when) && r.checked === "false"), `the dates read ${openRows.map((r) => r.when).join(" · ")}`);
+        L.check("D1", where, read.w === 272 && read.bg === "rgb(255, 253, 248)" && read.deg === 0.8 && read.pin === "#2d3a50", `the card is ${read.w} wide, ${read.bg}, ${read.deg}°, pin ${read.pin}`);
+        L.check("D1", where, read.heading === "Your tasks" && read.hFont === "Special Elite 17px" && read.hRule === "2px rgb(106, 137, 167)", `the heading is "${read.heading}" in ${read.hFont} over ${read.hRule}`);
+        L.check("D1", where, read.add === "+ Add a task" && read.foot === "These also appear on your To-do list." && read.footFont === "JetBrains Mono 10.5px" && !read.seeAll, `"${read.add}" · "${read.foot}" in ${read.footFont} · see-all ${read.seeAll}`);
+        /* the tick: the To-do list's pane opens on that task, and nothing is written */
+        const before = canon(await store.task(tickId));
+        const writes = await writesDuring(page, async () => {
+          await card.locator(`[data-cb-task="${tickId}"] .cb-tick`).click();
+          await page.waitForURL(/\/todo$/, { timeout: 10_000 }).catch(() => {});
+        }, 2200);
+        L.check("D1", `${where} · tick`, new URL(page.url()).pathname === "/todo", `the tick landed on ${new URL(page.url()).pathname}`);
+        const pane = await page.locator(".tpn:visible").evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ").slice(0, 400)));
+        L.check("D1", `${where} · tick`, pane.length === 1 && pane[0].includes("Read chapters 1–3 aloud"), `the task pane is ${pane.length ? `open on "${pane[0].slice(0, 70)}…"` : "not open"}`);
+        L.check("D1", `${where} · tick`, writes.length === 0, `the tick made ${writes.length} write(s): ${(writes[0] ?? "").slice(0, 140)}`);
+        L.check("D1", `${where} · tick`, canon(await store.task(tickId)) === before, "the task document is unchanged");
+        await page.keyboard.press("Escape");
+      }
+    } finally {
+      /* the case puts its own fixture back whatever happened above */
+      if (original && canon(await store.task(tickId)) !== canon(original)) await store.putTask(tickId, original);
+    }
+    L.done(24);
+  });
+
+  test("D2 card moves: it drags and saves as layout.__tasks, it fades with a filter, and the header never counts it", async ({ page }) => {
+    const L = new Ledger("D2");
+    await only(page, PREFIX);
+    for (const vp of SIZES) {
+      await store.restore(SNAP);
+      await open(page, ROUTE, vp);
+      const where = sz(vp);
+      const b0 = (await readBoard(page))!;
+      const c0 = b0.items.find((i) => i.key === "__tasks");
+      L.check("D2", where, !!c0 && !c0.note, "the card is an item on the board, and not a note");
+      if (!c0) continue;
+      /* with nothing saved it heads the second column */
+      const cols = arrange(b0.items.map((i) => i.key), (k) => { const i = b0.items.find((x) => x.key === k)!; return { w: i.w, h: i.h }; }, {}, b0.pinsInner.w, "free");
+      L.check("D2", where, near(c0.left, cols.at.__tasks.left, 1) && near(c0.top, cols.at.__tasks.top, 1) && c0.left > b0.pinsInner.w / cols.columns - 100 && c0.top < 60, `by default the card is at ${c0.left}, ${c0.top} (the second of ${cols.columns} columns, near the top)`);
+      L.check("D2", where, (await readHeader(page))?.number === "8", `the header reads ${(await readHeader(page))?.number} with the card on the board`);
+      const writes = await writesDuring(page, async () => { const d = await dragItem(page, "__tasks", -120, 150); await d.release(); }, 1800);
+      const c1 = (await readBoard(page))!.items.find((i) => i.key === "__tasks")!;
+      L.check("D2", where, near(c1.left - c0.left, -120, 2) && near(c1.top - c0.top, 150, 2), `it moved ${c1.left - c0.left}, ${c1.top - c0.top}`);
+      L.check("D2", where, writes.length === 1 && /todoPrefs\.noteboard\.layout\.__tasks/.test(writes[0]) && !/\/tasks\//.test(writes[0]), `the drop wrote ${writes.length}: ${(writes[0] ?? "").slice(0, 150)}`);
+      const saved = (await store.prefs())?.layout;
+      L.check("D2", where, !!saved && canon(Object.keys(saved)) === canon(["__tasks"]) && saved.__tasks.x >= 0 && saved.__tasks.x <= 1 && near(saved.__tasks.y, c1.top, 1), `saved ${JSON.stringify(saved)}`);
+      L.check("D2", where, (await readHeader(page))?.number === "8", `after the drop the header reads ${(await readHeader(page))?.number}`);
+      await open(page, ROUTE, vp);
+      const c2 = (await readBoard(page))!.items.find((i) => i.key === "__tasks")!;
+      L.check("D2", where, near(c2.left, c1.left, 2) && near(c2.top, c1.top, 2), `after a reload it is at ${c2.left}, ${c2.top} on the board (was ${c1.left}, ${c1.top})`);
+      /* a filter fades the card with the notes that do not match */
+      await page.locator(inPage('[data-cb-chip="cbseed-tag-comps"]')).click(); await page.waitForTimeout(350);
+      const dim = (await readBoard(page))!.items.find((i) => i.key === "__tasks")!;
+      L.check("D2", where, near(dim.opacity, 0.22, 0.02), `with a tag chip on, the card's opacity is ${dim.opacity}`);
+    }
+    /* no own tasks at all: the card still stands, with "+ Add a task" and the foot only */
+    await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_CB_ONLY = "cbseed-n"; });
+    await open(page, ROUTE, SIZES[0]);
+    const bare = await page.locator(inPage('[data-cb="tasks-card"]')).evaluate((el) => ({ rows: el.querySelectorAll("[data-cb-task]").length, add: (el.querySelector('[data-cb="card-add"]')?.textContent ?? "").trim(), foot: (el.querySelector(".cb-card-foot")?.textContent ?? "").trim(), heading: (el.querySelector(".cb-card-h")?.textContent ?? "").trim() })).catch(() => null);
+    L.check("D2", "no own tasks", !!bare && bare.rows === 0 && bare.add === "+ Add a task" && bare.foot === "These also appear on your To-do list." && bare.heading === "Your tasks", `with no own tasks the card holds ${JSON.stringify(bare)}`);
+    L.done(19);
+  });
+});
+
 test.describe("CB1 · L — loading and what stands around the page", () => {
   test("L1 no jump: the panel and the board's top are where they will be while the page is still loading", async ({ page }) => {
     const L = new Ledger("L1");
@@ -439,7 +540,7 @@ test.describe("CB1 · L — loading and what stands around the page", () => {
       await page.waitForFunction(() => [...document.querySelectorAll('[data-cb="page"]')].some((e) => (e as HTMLElement).getBoundingClientRect().height > 0 && !e.hasAttribute("data-loading")), undefined, { timeout: 20_000 });
       await page.waitForTimeout(900);
       const h1 = await readHeader(page), b1 = await readBoard(page);
-      L.check("L1", where, h1?.number === "8" && b1?.items.length === 8, `loaded: number "${h1?.number}", ${b1?.items.length} items`);
+      L.check("L1", where, h1?.number === "8" && b1?.items.filter((i) => i.note).length === 8, `loaded: number "${h1?.number}", ${b1?.items.filter((i) => i.note).length} notes`);
       if (!h0 || !h1 || !b0 || !b1) continue;
       for (const k of ["x", "y", "w", "h"] as const) L.check("L1", where, near(h0.box[k], h1.box[k], 1), `the panel's ${k}: ${h0.box[k].toFixed(1)} loading, ${h1.box[k].toFixed(1)} loaded`);
       L.check("L1", where, near(b0.board.y, b1.board.y, 1) && near(b0.board.x, b1.board.x, 1) && near(b0.board.w, b1.board.w, 1), `the board's top: ${b0.board.y.toFixed(1)} loading, ${b1.board.y.toFixed(1)} loaded`);

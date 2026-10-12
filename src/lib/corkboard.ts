@@ -190,3 +190,32 @@ export function arrange(keys: readonly string[], size: (key: string) => Size, sa
   for (const k of keys) low = Math.max(low, at[k].top + size(k).h);
   return { at, height: Math.max(BOARD_MIN_H, low + BOARD_FOOT), columns: n };
 }
+
+/* ── the "Your tasks" card (Part D) ─────────────────────────────────────────────────────────── */
+
+export const TASKS_CARD_MAX = 6;
+export const TASKS_DONE_DAYS = 7;
+/** the one-shot key the To-do list reads on arrival: open THIS task in its pane (see ToDoPage) */
+export const TODO_OPEN_TASK_KEY = "sa.todoOpenTask";
+
+export interface OwnTaskRow { id: string; text: string; dueDate: string; done: boolean }
+export interface OwnTasks { rows: OwnTaskRow[]; total: number; more: boolean }
+
+/**
+ * The writer's own DATED tasks that are not already on the board as notes: open first, by date; then the
+ * ones finished in the last 7 days. At most six rows; `more` says there are others on the To-do list.
+ *
+ * ⚠️ A DATED TASK WITH A PAPER IS A NOTE (lib/noteboard `sortNotes`: the note that became a task keeps its
+ * place on the board and wears the stitched badge), so it is NOT listed here — one object, drawn once.
+ * ⚠️ A DATELESS TASK IS A NOTE TOO (the two-natures law), finished or not, and is never a row.
+ */
+export function ownTaskRows(tasks: readonly UserTask[], nowMs: number): OwnTasks {
+  const own = tasks.filter((t) => !!t.dueDate && t.colour === undefined);
+  const open = own.filter((t) => !t.done).sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : a.dueDate! > b.dueDate! ? 1 : (a.createdAt || "").localeCompare(b.createdAt || "")));
+  const since = nowMs - TASKS_DONE_DAYS * 86400000;
+  const done = own
+    .filter((t) => t.done && Number.isFinite(Date.parse(t.completedAt ?? "")) && Date.parse(t.completedAt!) >= since)
+    .sort((a, b) => (b.completedAt || "").localeCompare(a.completedAt || ""));
+  const all = [...open, ...done].map((t) => ({ id: t.id, text: t.text, dueDate: t.dueDate!, done: t.done }));
+  return { rows: all.slice(0, TASKS_CARD_MAX), total: all.length, more: all.length > TASKS_CARD_MAX };
+}

@@ -9,10 +9,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   BOARD_FOOT, BOARD_MIN_H, CORKBOARD_SUBLINE, CORK_TEXTURE, EDGE, NOTE_W, PAD_LABEL, PIN_COLOURS, TASKS_KEY,
-  arrange, chipCounts, clampLeft, clampTop, columnsFor, corkPrefs, corkboardHeaderCopy, fixingFor, idHash, jitterFor,
-  savedLeft, tiltFor, toPos,
+  TASKS_CARD_MAX, arrange, chipCounts, clampLeft, clampTop, columnsFor, corkPrefs, corkboardHeaderCopy, fixingFor, idHash, jitterFor,
+  ownTaskRows, savedLeft, tiltFor, toPos,
 } from "./corkboard";
-import { NOTE_COLOURS } from "./noteboard";
+import { NOTE_COLOURS, sortNotes } from "./noteboard";
+import type { UserTask } from "../types";
 import { wordsOf } from "../components/shell/PanelHeader";
 
 const ref = readFileSync(resolve(__dirname, "../../design-refs/corkboard-v4/corkboard-v4.html"), "utf8");
@@ -260,5 +261,62 @@ describe("the board component holds the rules the page cannot see broken", () =>
   it("the pointer's release is bound twice — up and cancel", () => {
     expect(board).toContain("onPointerUp={up(it)}");
     expect(board).toContain("onPointerCancel={cancel}");
+  });
+});
+
+/* ── Part D: the Your tasks card ────────────────────────────────────────────────────────────── */
+describe("the Your tasks card lists the writer's own dated tasks — and never a note", () => {
+  const NOW = Date.parse("2026-10-12T12:00:00Z");
+  const t = (id: string, over: Partial<UserTask> = {}): UserTask => ({ id, userId: "u", text: `task ${id}`, done: false, createdAt: "2026-10-01T09:00:00Z", updatedAt: "", ...over });
+  const mix: UserTask[] = [
+    t("open-late", { dueDate: "2026-10-26" }),
+    t("open-soon", { dueDate: "2026-10-15" }),
+    t("open-past", { dueDate: "2026-10-01" }),
+    t("note", {}),                                                          // dateless: a note
+    t("note-done", { done: true, completedAt: "2026-10-11T09:00:00Z" }),    // a finished dateless thing is not a task
+    t("note-as-task", { dueDate: "2026-10-16", colour: "sage" }),           // dated WITH a paper: a note on the board
+    t("done-yesterday", { dueDate: "2026-10-10", done: true, completedAt: "2026-10-11T09:00:00Z" }),
+    t("done-6-days", { dueDate: "2026-10-05", done: true, completedAt: "2026-10-06T13:00:00Z" }),
+    t("done-8-days", { dueDate: "2026-10-01", done: true, completedAt: "2026-10-04T09:00:00Z" }),
+    t("done-undated-stamp", { dueDate: "2026-10-02", done: true }),         // finished, but nothing says when
+  ];
+
+  it("open first by date, then the ones finished in the last 7 days, newest first", () => {
+    expect(ownTaskRows(mix, NOW).rows.map((r) => r.id)).toEqual(["open-past", "open-soon", "open-late", "done-yesterday", "done-6-days"]);
+    expect(ownTaskRows(mix, NOW).rows.map((r) => r.done)).toEqual([false, false, false, true, true]);
+  });
+
+  it("⚠️ one object, drawn once: nothing the board shows as a note is a row, and nothing in a row is on the board", () => {
+    const rows = new Set(ownTaskRows(mix, NOW).rows.map((r) => r.id));
+    const board = new Set(sortNotes(mix).map((n) => n.id));
+    expect(board.has("note-as-task") && board.has("note")).toBe(true);
+    for (const id of rows) expect(board.has(id), id).toBe(false);
+    expect(rows.has("note-as-task")).toBe(false);
+    expect(rows.has("note-done")).toBe(false);
+  });
+
+  it("at most six rows; `more` says there are others on the To-do list", () => {
+    const many = Array.from({ length: 9 }, (_, i) => t(`m${i}`, { dueDate: `2026-11-${String(10 + i).padStart(2, "0")}` }));
+    const r = ownTaskRows(many, NOW);
+    expect(r.rows).toHaveLength(TASKS_CARD_MAX);
+    expect(r.total).toBe(9);
+    expect(r.more).toBe(true);
+    expect(ownTaskRows(many.slice(0, 6), NOW).more).toBe(false);
+    expect(ownTaskRows([], NOW)).toEqual({ rows: [], total: 0, more: false });
+  });
+
+  it("⚠️ the card's tick never writes: the component takes no writer, and the page hands it a navigation", () => {
+    const card = readFileSync(resolve(__dirname, "../components/todo/CorkTasksCard.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const w of ["updateUserTask", "useScriptAllyDb", "addUserTask", "done: true"]) expect(card, w).not.toContain(w);
+    const page = readFileSync(resolve(__dirname, "../components/todo/TodoNoteboardPage.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const fn = page.slice(page.indexOf("const finishOnTodo = "), page.indexOf("const tasksItem"));
+    expect(fn.length).toBeGreaterThan(60);
+    expect(fn).toContain("sessionStorage.setItem(TODO_OPEN_TASK_KEY, id)");
+    expect(fn).toContain('onNavigatePath("/todo")');
+    expect(fn).not.toMatch(/updateUserTask|addUserTask|updateUserPaths/);
+    /* and the To-do list consumes the key once, through the ref */
+    const todo = readFileSync(resolve(__dirname, "../components/todo/ToDoPage.tsx"), "utf8");
+    expect(todo).toContain("sessionStorage.removeItem(TODO_OPEN_TASK_KEY)");
+    expect(todo).toContain("openDockRef.current(id);");
   });
 });

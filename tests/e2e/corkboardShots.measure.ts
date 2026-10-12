@@ -83,6 +83,12 @@ test.describe("Corkboard v1 — shots", () => {
     await shot(page, "08-zero-notes");
   });
 
+  test("the Your tasks card with no own tasks", async ({ page }) => {
+    await only(page, "cbseed-n");
+    await open(page, ROUTE, { width: 1512, height: 1206 });
+    await shot(page, "11-tasks-card-empty");
+  });
+
   test("390 wide: the tidy view only", async ({ page }) => {
     await only(page, "cbseed-");
     /* the shared `openRoute` cannot open a phone width (its shell probe is the hidden sidebar): sign in wide, reload narrow */

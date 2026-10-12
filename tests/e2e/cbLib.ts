@@ -186,7 +186,11 @@ export async function readBoard(page: Page) {
 /** Drag an item by its paper, with a real pointer: press on its lower-left (clear of the ⋯ and of any link), move, release. */
 export async function dragItem(page: Page, key: string, dx: number, dy: number) {
   const el = page.locator(inPage(`[data-cb-item="${key}"]`));
-  await el.scrollIntoViewIfNeeded();
+  /* ⚠️ THE WHOLE GESTURE MUST FIT THE VIEWPORT: a pointer carried past the window's edge stops reporting, and
+     the drag comes up short (measured: a 260px pull read as 213 at 900 tall and 113 at 800). Centre the
+     item first, and keep a lock's travel inside what is left. */
+  await el.evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior }));
+  await page.waitForTimeout(150);
   const b = (await el.boundingBox())!;
   const sx = b.x + 14, sy = b.y + b.height - 8;
   await page.mouse.move(sx, sy);

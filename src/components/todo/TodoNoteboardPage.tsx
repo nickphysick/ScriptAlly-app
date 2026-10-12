@@ -31,6 +31,7 @@ import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { PageHeader, type LivingHeader } from "../shell/PageHeader";
 import { ArtSlot } from "./ArtSlot";
 import { CorkBoard, type CorkItem } from "./CorkBoard";
+import { CorkTasksCard } from "./CorkTasksCard";
 import { PortalMenu } from "./PortalMenu";
 import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { useConfirmAsk } from "./ConfirmAsk";
@@ -53,7 +54,8 @@ import {
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import {
-  COMPOSE_W, CORKBOARD_EMPTY, CORKBOARD_SUBLINE, NOTE_W, PAD_LABEL, chipCounts, corkPrefs, corkboardHeaderCopy,
+  CARD_W, COMPOSE_W, CORKBOARD_EMPTY, CORKBOARD_SUBLINE, NOTE_W, PAD_LABEL, TASKS_KEY, TODO_OPEN_TASK_KEY,
+  chipCounts, corkPrefs, corkboardHeaderCopy, ownTaskRows,
   type CorkPos, type CorkView,
 } from "../../lib/corkboard";
 import { loadHoldForReview, onlyForReview } from "../../lib/corkboardReviewAid";
@@ -588,9 +590,24 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     key, width: COMPOSE_W, className: "cb-composeitem", label: compose?.id ? "Edit the note" : "New note",
     movable: false, fixing: null, front: true, node: composerCard,
   });
-  const boardItems: CorkItem[] = [
-    ...(compose && !compose.id ? [composeItem(COMPOSE_KEY)] : []),
-    ...pinned.map((n): CorkItem => (n.id === compose?.id ? composeItem(n.id) : {
+  /**
+   * THE "YOUR TASKS" CARD — one index card: the writer's own dated tasks that are not already on the board as
+   * notes. It is an item like a note (dragged and saved the same way, under `layout.__tasks`) and it is NOT a
+   * note: the header never counts it, and a search or a tag chip fades it with the notes that do not match.
+   * ⚠️ THE TICK OPENS THE TO-DO LIST'S OWN TASK PANE ON THAT TASK (a one-shot key, the "New task" door's
+   * idiom) and writes nothing; only the pane finishes a task.
+   */
+  const ownTasks = useMemo(() => ownTaskRows(userTasks, Date.now()), [userTasks]);
+  const finishOnTodo = (id: string) => {
+    try { sessionStorage.setItem(TODO_OPEN_TASK_KEY, id); } catch { /* private mode */ }
+    onNavigatePath("/todo");
+  };
+  const tasksItem: CorkItem = {
+    key: TASKS_KEY, width: CARD_W, className: "cb-card", attrs: { "data-cb": "tasks-card" }, label: "Your tasks",
+    tilt: 0.8, fixing: { kind: "pin", colour: "#2d3a50" }, dim: narrowing,
+    node: <CorkTasksCard tasks={ownTasks} onFinish={finishOnTodo} onAdd={openTaskComposer} onSeeAll={() => onNavigatePath("/todo")} />,
+  };
+  const noteItems: CorkItem[] = pinned.map((n): CorkItem => (n.id === compose?.id ? composeItem(n.id) : {
       key: n.id,
       width: NOTE_W,
       className: `nb-note nb-c-${noteColour(n)}`,
@@ -601,7 +618,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       /* a press that was not a drag opens the built editor, where the note is */
       onActivate: () => openEditor(n),
       node: noteInner(n),
-    })),
+    }));
+  /* the card is SECOND in the board's order, so with nothing saved it heads the second column (the ref) */
+  const boardItems: CorkItem[] = [
+    ...(compose && !compose.id ? [composeItem(COMPOSE_KEY)] : []),
+    ...noteItems.slice(0, 1), tasksItem, ...noteItems.slice(1),
   ];
 
   return (
