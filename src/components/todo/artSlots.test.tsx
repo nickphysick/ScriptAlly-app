@@ -142,8 +142,11 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
        no slot inside a card, on the board the app actually draws. */
     const taskBoard = readFileSync(join(here, "TaskBoard.tsx"), "utf8");
     expect(taskBoard, "the live board grew art inside a card").not.toContain("ArtSlot");
-    const noteCard = sliceBetween(noteboard, "<article", "</article>");
+    /* RE-POINTED (Corkboard v1): a note is drawn by `noteInner` on an item of `CorkBoard`, so the claim reads
+       both — the note's own content, and the board component that pins it. */
+    const noteCard = sliceBetween(noteboard, "const noteInner = (n: UserTask) => (", "const composeItem");
     expect(noteCard).not.toContain("ArtSlot");
+    expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8"), "the board grew art inside an item").not.toContain("ArtSlot");
     const calendar = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
     expect(calendar).not.toContain("ArtSlot"); // no pip, no cell, nowhere
   });

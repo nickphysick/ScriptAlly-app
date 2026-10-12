@@ -139,9 +139,12 @@ describe("⚠️ the composer IS the editor — one component, two slots, never 
 
   it("one composer node, mounted in exactly two places — the top slot and the note's slot", () => {
     /* two MOUNTS of one closure, not two copies of the JSX — copies drift */
-    expect([...page.matchAll(/composerCard/g)].length).toBe(3);   // the const + two mounts
-    expect(page).toContain("compose && !compose.id && composerCard");
-    expect(page).toContain("n.id === compose?.id");
+    /* RE-POINTED (Corkboard v1): the two places are two ITEMS on the board built by one `composeItem` — the
+       first free space when pinning, the note's own key (so its own place) when editing. */
+    expect([...page.matchAll(/composerCard/g)].length).toBe(2);   // the const + the one item that mounts it
+    expect([...page.matchAll(/composeItem\(/g)].length).toBe(2);  // the top slot and the note's slot
+    expect(page).toContain("compose && !compose.id ? [composeItem(COMPOSE_KEY)] : []");
+    expect(page).toContain("n.id === compose?.id ? composeItem(n.id)");
     /* and the commit button is the only fork */
     expect(page).toContain('compose.id ? saveEdit() : pinNote()');
   });

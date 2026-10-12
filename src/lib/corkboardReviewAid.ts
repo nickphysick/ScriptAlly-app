@@ -20,3 +20,14 @@ export function onlyForReview(tasks: UserTask[]): UserTask[] {
   if (typeof p !== "string" || !p) return tasks;
   return tasks.filter((t) => t.id.startsWith(p));
 }
+
+/**
+ * `window.__SA_CB_HOLD_MS = n` holds the page in its loading beat for n ms after the collections land — as if
+ * the writer's tasks had not answered yet — so the loading frame can be measured against the page that
+ * replaces it (lock L1). It delays INPUT (when the page believes its data has settled); nothing is drawn for it.
+ */
+export function loadHoldForReview(): number {
+  if (typeof window === "undefined") return 0;
+  const v = (window as unknown as { __SA_CB_HOLD_MS?: unknown }).__SA_CB_HOLD_MS;
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? v : 0;
+}

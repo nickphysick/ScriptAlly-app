@@ -141,3 +141,60 @@ export async function readNotes(page: Page) {
     });
   }, ROOT_FN);
 }
+
+/** The board and everything pinned to it, as rendered: boxes, the frame, each item's tilt, fixing and paper. */
+export async function readBoard(page: Page) {
+  return page.evaluate((ROOT) => {
+    const root = (0, eval)(ROOT) as HTMLElement;
+    const board = root.querySelector<HTMLElement>('[data-cb="board"]');
+    const pins = root.querySelector<HTMLElement>('[data-cb="pins"]');
+    const group = root.querySelector<HTMLElement>('[data-cb="page"]');
+    if (!board || !pins || !group) return null;
+    const box = (e: Element) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; };
+    const bs = getComputedStyle(board);
+    const header = root.querySelector<HTMLElement>("header.hp3, header.ph");
+    const addrow = root.querySelector<HTMLElement>('[data-cb="addrow"]');
+    const items = [...pins.querySelectorAll<HTMLElement>("[data-cb-item]")].map((el) => {
+      const cs = getComputedStyle(el);
+      const m = /matrix\(([^)]+)\)/.exec(cs.transform);
+      const [a, b] = m ? m[1].split(",").map(Number) : [1, 0];
+      return {
+        key: el.getAttribute("data-cb-item")!, note: el.getAttribute("data-note"),
+        box: box(el), left: el.offsetLeft, top: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight,
+        deg: Math.round((Math.atan2(b, a) * 180) / Math.PI * 10) / 10,
+        r: el.style.getPropertyValue("--r"),
+        pins: el.querySelectorAll(":scope > .cb-pin").length, tapes: el.querySelectorAll(":scope > .cb-tape").length,
+        pc: (el.querySelector<HTMLElement>(":scope > .cb-pin")?.style.getPropertyValue("--pc") ?? ""),
+        bgImage: cs.backgroundImage, bg: cs.backgroundColor, opacity: Number(cs.opacity), shadow: cs.boxShadow,
+        font: el.querySelector(".nb-body") ? `${getComputedStyle(el.querySelector(".nb-body")!).fontFamily.split(",")[0].replace(/"/g, "")} ${getComputedStyle(el.querySelector(".nb-body")!).fontSize}` : "",
+        z: Number(cs.zIndex) || 0, text: (el.querySelector(".nb-body")?.textContent ?? "").trim(),
+      };
+    });
+    return {
+      board: box(board), pins: box(pins), pinsInner: { w: pins.clientWidth, h: pins.clientHeight }, group: box(group),
+      header: header ? box(header) : null, addrow: addrow ? box(addrow) : null,
+      over: root.querySelector('[data-cb="over"]') ? box(root.querySelector('[data-cb="over"]')!) : null,
+      filters: root.querySelector('[data-cb="filters"]') ? box(root.querySelector('[data-cb="filters"]')!) : null,
+      headerMb: header ? getComputedStyle(header).marginBottom : "", overMt: root.querySelector('[data-cb="over"]') ? getComputedStyle(root.querySelector('[data-cb="over"]')!).marginTop : "",
+      bg: bs.backgroundColor, images: bs.backgroundImage === "none" ? 0 : bs.backgroundImage.split('url("data:').length - 1,
+      border: `${bs.borderTopWidth} ${bs.borderTopStyle} ${bs.borderTopColor}`, radius: bs.borderTopLeftRadius, shadow: bs.boxShadow,
+      view: board.getAttribute("data-cb-view"), items,
+    };
+  }, ROOT_FN);
+}
+
+/** Drag an item by its paper, with a real pointer: press on its lower-left (clear of the ⋯ and of any link), move, release. */
+export async function dragItem(page: Page, key: string, dx: number, dy: number) {
+  const el = page.locator(inPage(`[data-cb-item="${key}"]`));
+  await el.scrollIntoViewIfNeeded();
+  const b = (await el.boundingBox())!;
+  const sx = b.x + 14, sy = b.y + b.height - 8;
+  await page.mouse.move(sx, sy);
+  await page.mouse.down();
+  await page.mouse.move(sx + dx / 3, sy + dy / 3, { steps: 4 });
+  await page.mouse.move(sx + dx, sy + dy, { steps: 8 });
+  return { release: async () => { await page.mouse.up(); await page.waitForTimeout(700); } };
+}
+
+/** JSON with its keys in order, so two readings of one document compare as equal whatever order they arrived in. */
+export const canon = (v: unknown): string => JSON.stringify(v, (_k, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b))) : x));

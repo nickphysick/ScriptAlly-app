@@ -91,7 +91,15 @@ export interface User {
        for good; `order` = the writer's own arrangement of note ids (Phase 3 — the board falls
        back to createdAt for anything unlisted). Rules: `todoPrefs` is `is map`, unconstrained,
        so this ships with NO rules change — proven against the deployed ruleset before use. */
-    noteboard?: { dismissedExamples?: string[]; order?: string[] };
+    /* Corkboard v1 (12 Oct) adds two keys beside them, additively and with NO rules change (the same
+       unconstrained map): `layout` = where each note was pinned by hand — id → { x: its left edge as a
+       fraction of the board's inner width, y: its top in px }, plus `__tasks` for the "Your tasks" card — and
+       `view` = "free" | "tidy" (absent reads "free"). Both are preferences, never a source: read through
+       `corkPrefs` (lib/corkboard), which is total. */
+    noteboard?: {
+      dismissedExamples?: string[]; order?: string[];
+      layout?: Record<string, { x: number; y: number }>; view?: "free" | "tidy";
+    };
     /* The Manuscripts landing's promo tiles, following the Noteboard's precedent exactly:
        `todoPrefs` is `is map` and unconstrained, so this page-scoped sub-map ships with NO rules
        change. ⚠️ PROVED, NOT INHERITED — `rulesProbe.mjs` writes this shape against the deployed

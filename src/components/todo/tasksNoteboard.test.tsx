@@ -33,8 +33,10 @@ describe("⚠️ masonry, not a stretched grid — and it can be read as a colum
     /* ⚠️ RE-RE-POINTED (finish run, 1a): `columns: 3` → `column-width: 280px`. The fixed count
        was the mockup's, drawn against a 1240px card; on the full-width page it produced 505px
        notes at 1920. The count now falls out of the viewport. Same subject: columns, never grid. */
-    expect(css).toMatch(/\.nb-board\s*\{[^}]*column-width:\s*280px/);
-    expect(css).toContain("break-inside: avoid");
+    /* ⚠️ SUPERSEDED (Corkboard v1, Part C): the notes are pinned to a cork board and placed by `arrange`;
+       there is no multicol flow left. Still never a stretched grid. */
+    expect(css).not.toMatch(/\.nb-board\s*\{[^}]*column/);
+    expect(css).toMatch(/\.cb-item\s*\{[^}]*position:\s*absolute/);
     expect(css).not.toMatch(/\.nb-board[^}]*display:\s*grid/);
     expect(css).not.toContain(".nb-grid");   // and the old name is gone, not shadowed
   });
@@ -134,13 +136,15 @@ describe("⚠️ the ⋯ menu — the SAME grammar, the SAME shell", () => {
 
   it("the cards feed the SHARED PortalMenu and wear the SAME reserved-corner seat", () => {
     expect(page).toContain("<PortalMenu");
-    expect(page).toContain('className="tbd-more"');
+    expect(page).toContain('className="tbd-more cb-more"');
     /* ⚠️ THE RESERVED CORNER IS RETIRED, not relaxed. `todoBoard.css` seats `.tbd-more`
        `position: absolute` at a board card's bottom-right, and the body reserved 30px of padding
        so the two never met. The mockup draws the ⋯ as the last item of the FOOT ROW, in flow, so
        there is nothing to reserve against — the seat is overridden page-side (that file belongs
        to the board and is not edited) and the padding went with the overlap. */
-    expect(css).toMatch(/\.nb-note\s+\.tbd-more\s*\{[^}]*position:\s*static/);
+    /* RE-POINTED (Corkboard v1): the ⋯ is top right, on hover and on focus (the ref's `.more`); the body
+       keeps 14px clear of it. Still the page's own seat, never an edit to the board's file. */
+    expect(css).toMatch(/\.nb-note\s+\.tbd-more\.cb-more\s*\{[^}]*position:\s*absolute/);
     expect(css).not.toMatch(/padding-right:\s*30px/);
   });
 });

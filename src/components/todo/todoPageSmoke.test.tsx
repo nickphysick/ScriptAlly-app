@@ -296,7 +296,8 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
     expect(html).toContain("Open with the flood");
     expect(html).toContain("nb-board");  // renamed from nb-grid in the Noteboard rebuild
-    expect(html).toContain("1 AUG"); // the pin date
+    expect(html).toContain("Pinned 1 Aug"); // the pin date (the Corkboard's wording)
+    expect(html).toContain('data-cb="board"');
   });
 });
 

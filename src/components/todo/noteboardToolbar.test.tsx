@@ -109,7 +109,8 @@ describe("⚠️ search reads the note's words, whatever case they are in", () =
     expect(page).not.toContain("Nothing matches that search.");
     expect(page).toContain("pinned.map((n) =>");
     expect(page, "the board draws the filtered list").not.toMatch(/\{notes\.map\(/);
-    expect(page).toContain('narrowing && !matching.has(n.id) ? " cb-dim" : ""');
+    expect(page).toContain("dim: narrowing && !matching.has(n.id),");
+    expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8")).toContain('it.dim ? " cb-dim" : ""');
     expect(css).toMatch(/\.cb-dim\s*\{\s*opacity:\s*0\.22;?\s*\}/);
   });
 });
