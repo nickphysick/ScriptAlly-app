@@ -6,7 +6,8 @@
  * same query come from ONE derivation, so the two surfaces cannot disagree about what is next.
  */
 import { describe, expect, it } from "vitest";
-import { comingUp, cardsByQuery, COMING_VERB, COMING_ACTION, SEND_VERB, trayLabel, trayRequest } from "./qcComingUp";
+import { comingUp, cardsByQuery, COMING_VERB, COMING_ACTION, SEND_VERB, trayLabel, trayOpen, trayRequest } from "./qcComingUp";
+import { leadDoors, silenceLead } from "./queryActions/entry";
 import { cardBucket, taskDeed, BUCKET_ORDER, type Bucket } from "./todoBuckets";
 import type { BoardCard } from "./todoBoard";
 import type { QcRow } from "./qcSummary";
@@ -179,5 +180,31 @@ describe("Query panel v1 · the tray's label is the panel's button for the same 
   });
   it("an act the panel has no button for keeps the tray's own words", () => {
     expect(trayLabel("fix", { status: "Queried", court: "agent", dayN: 3 } as never)).toBe(COMING_ACTION.fix);
+  });
+});
+
+describe("one predicate for the panel's primary and the tray's first action (ruling, 12 Oct)", () => {
+  const S2 = { Q: "Queried", FS: "Full Sent", PR: "Partial Requested" };
+  const mk = (status: string, court: string, dayN: number | null, kept = false) => ({ id: "q", status, court, dayN, query: kept ? { closureOfferDismissed: true } : {} } as never);
+  const buckets = ["chase", "close", "fix"] as const;
+  it("a year silent: every bucket's tray button is the panel's primary, label and journey, before and after Keep tracking", () => {
+    const tally = { close: 0, resp: 0 };
+    for (const status of [S2.Q, S2.FS]) for (const kept of [false, true]) for (const b of buckets) {
+      const r = mk(status, "agent", 400, kept);
+      const primary = leadDoors(r).find((d) => d.primary)!;
+      expect(trayLabel(b, r), `${status} ${b} kept=${kept}`).toBe(primary.label);
+      expect(trayOpen(b, r)?.mode, `${status} ${b} kept=${kept}`).toBe(primary.mode);
+      tally[primary.mode as "close" | "resp"]++;
+    }
+    /* both branches were entered: Close leads before, Record a response after */
+    expect(tally).toEqual({ close: 6, resp: 6 });
+  });
+  it("Close as the tray's lead keeps the no-reply reason the close card's tray gave", () => {
+    expect(trayOpen("chase", mk(S2.Q, "agent", 400))).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
+  });
+  it("under a year, or not with the agent, nothing overrides the board card's own act", () => {
+    for (const r of [mk(S2.Q, "agent", 365), mk(S2.Q, "agent", 90, true), mk(S2.PR, "you", 400), mk(S2.Q, "agent", null)]) expect(silenceLead(r)).toBeNull();
+    expect(trayLabel("chase", mk(S2.Q, "agent", 90))).toBe("Nudge");
+    expect(trayOpen("chase", mk(S2.Q, "agent", 90))).toEqual(trayRequest("chase", S2.Q as never, "q"));
   });
 });

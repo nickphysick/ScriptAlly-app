@@ -413,6 +413,8 @@ test.describe("Query panel v2", () => {
         doors: [...p.querySelectorAll('[data-qcv="open-door"]')].map((b) => (b.textContent ?? "").trim()),
       };
     });
+    /* the list tray's first button for a row, read from the row itself (the tray is drawn, and shown on hover) */
+    const tray = (id: string) => page.evaluate((sel) => { const r = document.querySelector<HTMLElement>(sel); const b = r?.querySelector<HTMLElement>('[data-qcv="row-tray"] button'); return b ? `${(b.textContent ?? "").trim()}|${b.dataset.qcv}` : "(no tray button)"; }, `${ROW}[data-qid="${id}"]`);
     const openId = async (id: string) => { await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Tracking"); };
     const LINK = (k: string) => `${PANEL} [data-qp="stand-link"][data-link="${k}"]`;
     const STYLE = "Source Serif 4 15px rgb(42, 58, 82) 1px solid";
@@ -522,6 +524,7 @@ test.describe("Query panel v2", () => {
       /* over a year: Close leads; Remind me later hides itself; Keep tracking swaps the lead; the menu undoes it */
       await openId("qp2l-year");
       const y0 = await card();
+      L.check("V13", "over a year · the tray's first button is the panel's primary", (await tray("qp2l-year")) === `${y0?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y0?.lead}"`);
       L.check("V13", "over a year · Close leads the footer, Record a response beside it", y0?.lead === "Close query" && !!y0.doors.includes("Record a response"), `lead "${y0?.lead}" · ${y0?.doors.join(", ")}`);
       await page.locator(LINK("remindLater")).click();
       await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
@@ -533,6 +536,7 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y1 = await card();
       L.check("V13", "Keep tracking · Record a response leads instead of Close", y1?.lead === "Record a response" && !!y1.doors.includes("Close query"), `lead "${y1?.lead}" · ${y1?.doors.join(", ")}`);
+      L.check("V13", "Keep tracking · the tray's first button follows the panel's primary", (await tray("qp2l-year")) === `${y1?.lead}|row-act` && y1?.lead !== y0?.lead, `tray "${await tray("qp2l-year")}" · panel "${y1?.lead}" (was "${y0?.lead}")`);
       L.check("V13", "Keep tracking · the closing sentence and its links are gone", y1?.links.length === 0 && !/Closing it keeps/.test(y1?.text ?? "") && (y1?.text ?? "").length > 0, `${JSON.stringify(y1?.links)} · "${y1?.text}"`);
       L.check("V13", "Keep tracking · sets the existing flag", dump().queries["qp2l-year"]?.keep === true, JSON.stringify(dump().queries["qp2l-year"]));
       /* for good: it holds across a reload */
@@ -547,6 +551,7 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y3 = await card();
       L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && dump().queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify(dump().queries["qp2l-year"])}`);
+      L.check("V13", "Suggest closing again · the tray's first button is the panel's primary again", (await tray("qp2l-year")) === `${y3?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y3?.lead}"`);
       await page.locator(`${PANEL} [data-qcv="open-more"]`).click(); await page.waitForTimeout(300);
       const offered = await page.getByText("Suggest closing again", { exact: true }).count();
       L.check("V13", "Suggest closing again · is offered only while the flag is set", offered === 0, `${offered} in the menu`);
@@ -555,7 +560,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(48);
+    L.done(51);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {

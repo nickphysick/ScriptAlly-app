@@ -150,7 +150,7 @@ import {
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
 import { assembleBoardColumns, liveBoardCards } from "../lib/todoColumns";
-import { cardsByQuery, comingUp, nextMove, trayRequest, type ComingUp, type NextMove } from "../lib/qcComingUp";
+import { cardsByQuery, comingUp, nextMove, trayOpen, type ComingUp, type NextMove } from "../lib/qcComingUp";
 import { QcCarousel } from "./queries/centre/QcCarousel";
 import { AppFooter } from "./shell/AppFooter";
 import { carouselCountLine, carouselRows, type CzSort } from "../lib/qcCarousel";
@@ -5469,7 +5469,6 @@ export const Queries: React.FC<{
         if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
         openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
       }}
-      keepTracking={(activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true}
       onAction={(action, anchor) => {
         if (action === "nudge") openDeskVerb("nudge", anchor);
         /* "Suggest closing again" clears the flag "Keep tracking" set: the stand card's sentence, its links and
@@ -6964,7 +6963,7 @@ export const Queries: React.FC<{
                   /* Query panel v1 — …and on this page that journey steps INTO the row's panel (`stepRow`) */
                   onAct={(id, bucket) => {
                     const r = qcById.get(id);
-                    const req = r ? trayRequest(bucket, r.status, id) : null;
+                    const req = r ? trayOpen(bucket, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
                   }}
                   /* §3 — Edit and Close open their own journeys; neither commits anything. */
@@ -6987,7 +6986,7 @@ export const Queries: React.FC<{
                      (`trayRequest`); nothing here opens its own modal for an action any more. */
                   onAct={(id, bucket) => {
                     const r = qcById.get(id);
-                    const req = r ? trayRequest(bucket, r.status, id) : null;
+                    const req = r ? trayOpen(bucket, r) : null;
                     if (req) openQueryDrawer(req); else onOpenQuery?.(id);
                   }}
                   /* §3 — Edit and Close open their own drawer journeys; neither commits anything. */

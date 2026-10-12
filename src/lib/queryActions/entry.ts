@@ -73,6 +73,26 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
     { mode: "close", label: "Close query" },
   ];
 }
+
+/**
+ * ONE PREDICATE FOR THE PANEL'S FOOTER AND THE LIST'S TRAY (ruling, 12 Oct). Both ask the same row the same
+ * two questions — has it been with the agent for over a year, and did the writer press "Keep tracking"
+ * (`closureOfferDismissed`) — so the tray's first action and the panel's primary cannot disagree about it.
+ */
+export interface LeadRow { status: QueryStatus | string; court: string; dayN: number | null; query?: object | null }
+export const keptTracking = (row: LeadRow): boolean => (row.query as { closureOfferDismissed?: boolean } | null | undefined)?.closureOfferDismissed === true;
+export const longSilence = (row: LeadRow): boolean => row.court === "agent" && row.dayN != null && row.dayN > LONG_SILENCE_DAYS;
+/** The panel's doors for this row: a year of silence leads with Close, unless the writer chose to keep tracking. */
+export function leadDoors(row: LeadRow): Door[] {
+  return panelDoors(row.status, row.court === "agent" && !keptTracking(row) ? row.dayN : null);
+}
+/**
+ * The door that leads a query a year silent, WHATEVER card the board holds for it: Close, or Record a response
+ * once the writer keeps tracking. Null for every other row — there the tray's act is its board card's.
+ */
+export function silenceLead(row: LeadRow): Door | null {
+  return longSilence(row) ? leadDoors(row).find((d) => d.primary) ?? null : null;
+}
 /** The step's title in the query's panel, said for this query ("What did Eleanor say?"). */
 export function panelStepWords(mode: DrawerMode, status: QueryStatus | string | undefined, first: string): { title: string } {
   const who = first || "the agent";
