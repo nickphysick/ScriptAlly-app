@@ -32,7 +32,6 @@ import { peekOffered, setDockPeek, useDockPeek } from "../../lib/queryActions/do
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { DrawerShell, type ShellState } from "./DrawerShell";
 import { panelStepWords } from "../../lib/queryActions/entry";
-import { tileCourt } from "../../lib/qcSummary";
 import { SIDE_SLOT } from "../shell/SidePanel";
 import { ParkedChip } from "./ParkedChip";
 import type { JourneyView } from "./journey";

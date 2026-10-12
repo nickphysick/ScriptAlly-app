@@ -52,7 +52,7 @@ export interface StandCardView {
 const days = (a: number, b: number): number => Math.max(0, Math.round((b - a) / DAY));
 const plural = (n: number, w: string): string => `${n} ${w}${n === 1 ? "" : "s"}`;
 /** "9 May", with the year when it is not this one. */
-export const standDate = (ms: number, nowMs: number): string =>
+const standDate = (ms: number, nowMs: number): string =>
   formatDate(new Date(ms), new Date(ms).getFullYear() === new Date(nowMs).getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
 const NUM = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
 export const weeksWords = (w: number): string => `${Number.isInteger(w) && w >= 1 && w <= 12 ? NUM[w] : w} week${w === 1 ? "" : "s"}`;

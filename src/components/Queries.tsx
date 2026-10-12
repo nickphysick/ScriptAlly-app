@@ -176,7 +176,7 @@ import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
-import { SentBox, SentChip, FromPackageTag, sentView, ordinal } from "./queryActions/SentHow";
+import { SentChip, sentView, ordinal } from "./queryActions/SentHow";
 import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
 import { Who } from "./queryActions/controls";
 import { agentName as journeyAgentName, whoLine } from "./queryActions/journeys/common";
@@ -5281,8 +5281,6 @@ export const Queries: React.FC<{
                    status, which is what makes the waiting rung disappear when the ghost moots it. */
                 const proposedAny = deskProposed ?? deskMarkProposed ?? deskClosedProposed;
                 const eventsForRail = proposedAny ? [...trackingEvents, proposedAny] : trackingEvents;
-                const railStatus = (proposedAny?.resultingStatus ?? activeQuery.status) as QueryStatus;
-                const ta = getPrimaryAction(railStatus);
                 /**
                  * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
                  * the retired record view drew, from the same derivations: a PACKAGED send is the

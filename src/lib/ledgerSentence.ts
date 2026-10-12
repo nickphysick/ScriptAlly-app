@@ -40,9 +40,9 @@ export const LEDGER_SENTENCE: Record<QueryStatus, string> = {
   [S.NO_RESPONSE]: "You closed the query",
   [S.SIGNED]: "You signed with them",
 };
-export const LEDGER_NUDGE = "You nudged them";
-export const LEDGER_HOLDING = "They replied";
-export const LEDGER_RECONSTRUCTED = "from the imported status";
+const LEDGER_NUDGE = "You nudged them";
+const LEDGER_HOLDING = "They replied";
+const LEDGER_RECONSTRUCTED = "from the imported status";
 
 /** "by email", "by post", "through an online form", "through QueryManager" — the send's manner. */
 export function sendManner(method: string | undefined | null): string | undefined {
