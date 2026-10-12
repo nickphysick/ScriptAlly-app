@@ -2220,7 +2220,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onAddTask={addV2Task}
               onAddNote={addV2Note}
               onOpenRow={openV2Row}
-              onOpenNoteboard={() => navigate("/todo/noteboard")}
+              onOpenNoteboard={() => navigate("/todo/corkboard")}
             />
           </PageRail>
           </>

@@ -463,7 +463,7 @@ export function rowMeta(c: BoardCard): string {
      slot where the row's subject belongs — a destination standing in for a subject, which is the
      precise fault the note above describes. Measured on the page; no unit lock could see it. */
   if (isSweepCard(c) || c.taskType === "materials_unrecorded_bulk") return "";
-  return cardBucket(c) === "note" ? "Your noteboard" : "Submission packages";
+  return cardBucket(c) === "note" ? "Your corkboard" : "Submission packages";
 }
 
 /* ── the wait's anchor, per bucket (corrections, Phase 3a) ───────────────────────────────────── */

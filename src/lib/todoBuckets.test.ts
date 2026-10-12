@@ -199,7 +199,7 @@ describe("⚠️ THE META LINE IS COMPOSED ONCE", () => {
   });
 
   it("no agent at all: the standing subject, never an empty line", () => {
-    expect(rowMeta(card({ who: "", record: "", userTaskId: "u1" }))).toBe("Your noteboard");
+    expect(rowMeta(card({ who: "", record: "", userTaskId: "u1" }))).toBe("Your corkboard");
     expect(rowMeta(card({ who: "", record: "", taskType: "data_quality_poor" }))).toBe("Submission packages");
   });
 

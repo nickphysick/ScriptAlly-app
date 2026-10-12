@@ -9,7 +9,7 @@ const OUT = "reports/noteboard-empty-state";
 
 for (const width of [1280, 2300]) {
   test(`shot at ${width}: zero notes — workflow and examples together`, async ({ page }) => {
-    await openRoute(page, "/todo/noteboard", { width, height: 1200 });
+    await openRoute(page, "/todo/corkboard", { width, height: 1200 });
     await expect(page.locator(".nb-opening")).toBeVisible();
     expect(await page.locator("[data-example]").count()).toBe(3);
     await page.screenshot({ path: `${OUT}/zero-${width}.png`, fullPage: true });
@@ -19,7 +19,7 @@ for (const width of [1280, 2300]) {
 /* The remaining board states. Each asserts what its shot is meant to evidence before taking it. */
 for (const width of [1280, 2300]) {
   test(`shot at ${width}: zero notes, every example dismissed — workflow alone`, async ({ page }) => {
-    await openRoute(page, "/todo/noteboard", { width, height: 1200 });
+    await openRoute(page, "/todo/corkboard", { width, height: 1200 });
     await expect(page.locator(".nb-opening")).toBeVisible();
     for (const id of ["ex-yellow", "ex-pink", "ex-sage"]) {
       const x = page.locator(`[data-example="${id}"] .nb-exdismiss`);
@@ -34,7 +34,7 @@ for (const width of [1280, 2300]) {
    composer so the shots exercise the real create path rather than a fixture. */
 for (const width of [1280, 2300]) {
   test(`shot at ${width}: one note, then three`, async ({ page }) => {
-    await openRoute(page, "/todo/noteboard", { width, height: 1200 });
+    await openRoute(page, "/todo/corkboard", { width, height: 1200 });
     const pin = async (body: string) => {
       await page.locator(".tpl-tools .tdb-addb").filter({ hasText: "Pin a note" }).locator("visible=true").first().click();
       await page.locator(".nb-compose textarea").fill(body);

@@ -30,7 +30,7 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/queries/analytics",
   "/todo",
   "/todo/calendar",
-  "/todo/noteboard",
+  "/todo/corkboard",
   "/agents",
   "/agents/discover",
   "/manuscripts",

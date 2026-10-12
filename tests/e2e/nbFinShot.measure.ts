@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 test("shots: 1280 and 2300 with the three papers, and the drawer", async ({ page }) => {
-  await openRoute(page, "/todo/noteboard", { width: 1280, height: 900 });
+  await openRoute(page, "/todo/corkboard", { width: 1280, height: 900 });
   /* the three papers must be IN the shot, or it does not evidence what the report claims */
   for (const p of ["NBPAPER yellow", "NBPAPER pink", "NBPAPER sage"]) {
     await expect(page.locator(".nb-note").filter({ hasText: p }).first()).toBeVisible();

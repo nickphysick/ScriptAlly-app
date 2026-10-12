@@ -30,7 +30,7 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /* Comparable titles v25 §B: /manuscripts/comps is a TITLE page now ("Comparable titles" since v27), so H2, H3 and H7 no
    longer read it (tests/e2e/RETIRED-comps-v25.md); CV25 B1 holds its header. */
 export const NUMBER = ["/agents", "/manuscripts/packages", "/todo"] as const;
-export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar", "/todo/noteboard"] as const;
+export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar", "/todo/corkboard"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */

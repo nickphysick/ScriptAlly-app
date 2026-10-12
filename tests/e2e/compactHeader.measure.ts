@@ -26,7 +26,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
   { name: "To-do list",          route: "/todo",                 cls: "tdv2-wpg"  },
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
-  { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
+  { name: "Noteboard",           route: "/todo/corkboard",       cls: "tpl-wpg"  },
 ];
 
 /* ⚠️ THE VISIBLE GRID, NEVER `.first()`. Three pages share `tpl-wpg` and the shell keeps every page

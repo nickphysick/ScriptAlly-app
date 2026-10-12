@@ -5,7 +5,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const ROUTE = "/todo/noteboard";
+const ROUTE = "/todo/corkboard";
 
 test("0.3 — the toolbar wrap: which element shrinks, and what its flex resolves to", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 900 });

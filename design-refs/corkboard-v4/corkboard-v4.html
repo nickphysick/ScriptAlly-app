@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Corkboard v4 (frozen 12 Oct 2026). The Noteboard, renamed and redrawn as a cork pinboard. The header is the app's built navy panel as a number page. Below it: the "Add to your board" bar with the tag filters, then the framed cork board holding the writer's notes and one "Your tasks" card. The sidebar and top bar are a sketch of the built shell. All notes, tags, dates and counts are sample data. Files and links are not part of this version. -->
+<title>Corkboard v4</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Special+Elite&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --oat:#f2eee8; --paper:#fbf9f5; --ink:#1c130f; --shell:#1b2231; --band:#2d3a50; --cream:#f6efe2;
+  --slate:#6A89A7; --rust:#b9683c; --line:#ddd6ca; --mute:#6f675e;
+  --n-yellow:#fbf3d9; --n-yellow-b:#eddfae; --n-pink:#f5e2da; --n-pink-b:#e8c8bc; --n-sage:#e9ede6; --n-sage-b:#c9d3c5;
+  --serif:'Source Serif 4',Georgia,serif; --type:'Special Elite','Courier New',monospace; --mono:'JetBrains Mono',ui-monospace,monospace; --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--shell);color:var(--ink);font-family:var(--serif);font-size:15px;line-height:1.45}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh;min-width:1180px}
+
+/* ---------- shell sketch ---------- */
+.side{background:var(--shell);color:#c9d0dc;padding:18px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{font-family:var(--type);color:var(--cream);font-size:19px;padding:2px 8px 14px}
+.logq{display:flex;border:1px solid #46506297;border-radius:8px;background:#fbf9f5;color:var(--ink);height:36px;margin-bottom:12px;overflow:hidden}
+.logq span{flex:1;display:flex;align-items:center;padding:0 12px;font-weight:600;font-size:14px}
+.logq i{width:34px;display:grid;place-items:center;border-left:1px solid var(--line);font-style:normal;font-size:11px}
+.grp{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7f8a9d;padding:14px 8px 6px;border-top:1px solid #2c3546;margin-top:8px}
+.grp:first-of-type{border-top:0;margin-top:0}
+.nav{height:32px;display:flex;align-items:center;padding:0 10px;border-radius:7px;font-size:14px}
+.nav.on{background:#f6efe2;color:var(--ink);font-weight:600}
+.nav b{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:500;color:#9aa4b6}
+.side .foot{margin-top:auto;border:1px solid #3a4558;border-radius:8px;padding:9px 12px;font-size:13.5px;color:var(--cream)}
+.main{display:flex;flex-direction:column;min-width:0}
+.bar{height:52px;display:flex;align-items:flex-end;gap:2px;padding:0 20px 0 0}
+.tab{font-family:var(--type);font-size:14px;padding:9px 18px 8px;border-radius:10px 10px 0 0;color:#9aa4b6;background:#252e40}
+.tab.on{background:var(--oat);color:var(--ink);padding-bottom:10px}
+.bar .sp{flex:1}
+.search{align-self:center;width:210px;height:32px;border-radius:7px;background:#252e40;border:1px solid #3a4558;color:#8f9aad;font-size:13px;display:flex;align-items:center;padding:0 11px}
+.help{align-self:center;width:32px;height:32px;border-radius:50%;border:1px solid #3a4558;color:#c9d0dc;display:grid;place-items:center;margin-left:14px;font-family:var(--mono);font-size:13px}
+.sheet{flex:1;background:var(--oat);padding:26px 32px 56px}
+
+/* ---------- header: the app-wide navy panel ---------- */
+.pn{background:var(--band);color:var(--cream);border-radius:16px;display:flex;align-items:center;gap:28px;padding:20px 34px;min-height:156px;overflow:hidden}
+.pn-lead{display:flex;align-items:center;gap:20px;flex:1;min-width:0}
+.pn-num{font-family:var(--type);font-size:92px;line-height:.9;letter-spacing:-.02em;padding-top:10px}
+.pn-words h1{margin:0;font-family:var(--type);font-weight:400;font-size:30px;line-height:1.12}
+.pn-words p{margin:8px 0 0;font-size:15.5px;color:#c5cddb;max-width:44ch}
+.pn-act{display:flex;gap:10px;margin-top:16px}
+.btn{height:38px;padding:0 16px;border-radius:8px;border:1px solid transparent;font-weight:600;font-size:14px}
+.btn.pri{background:var(--cream);color:var(--ink)}
+.btn.sec{background:transparent;border-color:#7d8aa0;color:var(--cream)}
+.chip:focus-visible,.sup:focus-visible,.pad:focus-visible,.more:focus-visible{outline:2px solid var(--slate);outline-offset:2px}
+.pn-art{flex:none;width:250px;height:136px;border:1.5px dashed #7d8aa0;border-radius:10px;display:grid;place-items:center;text-align:center;font-family:var(--mono);font-size:11px;line-height:1.5;color:#aab4c4;padding:10px}
+
+/* ---------- the board ---------- */
+.over{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:22px 0 14px}
+.chip{height:30px;padding:0 13px;border-radius:15px;border:1px solid var(--line);background:var(--paper);font-size:13.5px}
+.chip b{font-family:var(--mono);font-weight:500;font-size:11px;opacity:.6;margin-left:5px}
+.chip[aria-pressed=true]{background:var(--band);border-color:var(--band);color:var(--cream)}
+.chip.tool{border-style:dashed;margin-left:6px}
+.find{height:30px;width:170px;border-radius:15px;border:1px solid var(--line);background:#fff;font:inherit;font-size:13.5px;padding:0 13px;outline:0}
+.find:focus{border-color:var(--band)}
+.board{border:9px solid var(--frame);border-radius:8px;background-color:var(--surf);background-image:var(--tex);position:relative;
+  box-shadow:inset 0 0 0 1px var(--frame-d),inset 0 4px 14px rgba(40,25,10,.3),0 1px 0 var(--frame-d),0 12px 20px -6px rgba(40,25,10,.28)}
+.board{--surf:#b9895a;--frame:#e4d6bd;--frame-d:#bfae90;
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 .24  0 0 0 0 .13  0 0 0 0 .05  0 0 0 1.5 -.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' numOctaves='3' seed='29'/%3E%3CfeColorMatrix values='0 0 0 0 .93  0 0 0 0 .78  0 0 0 0 .56  0 0 0 1.3 -.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pins{position:relative;min-height:790px;transition:min-height .3s}
+.item{position:absolute;transform:rotate(var(--r,0deg));transition:left .35s,top .35s,transform .2s,opacity .2s,box-shadow .2s;touch-action:none;cursor:grab;
+  box-shadow:0 1px 1px rgba(40,25,10,.22),0 12px 14px -7px rgba(40,25,10,.42)}
+.item.drag{transition:transform .15s,box-shadow .15s;transform:rotate(0) scale(1.02);cursor:grabbing;box-shadow:0 2px 2px rgba(40,25,10,.18),0 18px 28px rgba(40,25,10,.26)}
+.item.dim{opacity:.22}
+.pins.tidy .item{transform:none;cursor:default}
+.pin{position:absolute;top:-9px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.75) 0 14%,transparent 16%),radial-gradient(circle at 60% 70%,rgba(0,0,0,.28),transparent 62%),var(--pc,#2d3a50);
+  box-shadow:3px 6px 5px -1px rgba(30,20,10,.45),inset 0 0 0 1px rgba(0,0,0,.12)}
+.tape{position:absolute;top:-12px;left:50%;width:78px;height:24px;margin-left:-39px;background:rgba(106,137,167,.55);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(30,20,10,.18);pointer-events:none;
+  clip-path:polygon(0 0,3% 25%,0 50%,3% 75%,0 100%,100% 100%,97% 75%,100% 50%,97% 25%,100% 0)}
+.tape.t2{background:rgba(185,104,60,.5);transform:rotate(2deg)} .tape.t3{background:rgba(246,239,226,.78);transform:rotate(-5deg)}
+.note.small{width:172px}
+.more{position:absolute;top:6px;right:6px;width:26px;height:26px;border:0;border-radius:6px;background:transparent;font-size:16px;line-height:1;opacity:0;transition:opacity .15s}
+.item:hover .more,.more:focus-visible{opacity:.7}
+.more:hover{background:rgba(28,19,15,.08);opacity:1}
+/* notes — flat paper, no gradients */
+.note{width:204px;padding:20px 16px 12px;border:1px solid}
+.note.y{background:var(--n-yellow);border-color:var(--n-yellow-b)}
+.note.p{background:var(--n-pink);border-color:var(--n-pink-b)}
+.note.s{background:var(--n-sage);border-color:var(--n-sage-b)}
+.note .body{font-family:var(--hand);font-size:21px;line-height:1.32;color:var(--ink);white-space:pre-wrap;min-height:56px;padding-right:14px}
+.note .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+.tag{border:1px solid rgba(28,19,15,.22);border-radius:10px;padding:1px 7px}
+.stitch{margin-top:10px;border:1.5px dashed #8fa189;border-radius:6px;padding:4px 8px;font-family:var(--mono);font-size:10.5px;color:#3f5239;background:#e9ede6}
+
+/* index card of tasks */
+.card{width:272px;background:#fffdf8;border:1px solid var(--line);padding:16px 16px 12px}
+.card h3{margin:0 0 8px;font-family:var(--type);font-weight:400;font-size:17px;padding-bottom:8px;border-bottom:2px solid var(--slate)}
+.task{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #e3ebf2;font-size:14.5px}
+.task input{appearance:none;flex:none;width:17px;height:17px;margin:2px 0 0;border:1.5px solid var(--ink);border-radius:4px;background:#fff;cursor:pointer;display:grid;place-items:center}
+.task input:checked{background:var(--band);border-color:var(--band)}
+.task input:checked::after{content:"";width:8px;height:4px;border-left:2px solid var(--cream);border-bottom:2px solid var(--cream);transform:rotate(-45deg) translateY(-1px)}
+.task input:focus-visible{outline:2px solid var(--slate);outline-offset:2px}
+.task span{flex:1}
+.task input:checked+span{text-decoration:line-through;opacity:.5}
+.task time{font-family:var(--mono);font-size:10.5px;color:var(--mute);padding-top:3px;white-space:nowrap}
+.addtask{width:100%;margin-top:8px;border:0;border-bottom:1px dashed #b9c6d3;background:transparent;font:inherit;font-size:14.5px;padding:6px 0;text-align:left;color:var(--mute)}
+.addtask:hover,.addtask:focus-visible{border-bottom-color:var(--band);color:var(--ink);outline:0}
+.card small{display:block;margin-top:9px;font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+
+/* add row (joins the filter row above the board) */
+.addrow{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:7px 9px 7px 16px}
+.addlab{font-family:var(--type);font-size:15px;color:var(--ink);margin-right:6px;white-space:nowrap}
+.sup,.pads{display:flex;align-items:center;gap:8px;height:36px;padding:0 13px 0 9px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:600;font-size:14px}
+.sup:hover{border-color:var(--band)}
+.pads{gap:5px;padding-left:10px}
+.pads span{margin-left:4px}
+.pad{width:22px;height:22px;padding:0;border:1px solid;border-radius:0;box-shadow:1.5px 1.5px 0 rgba(40,25,10,.22);transition:transform .12s}
+.pad:hover{transform:translateY(-3px) rotate(-5deg)}
+.pad.y{background:var(--n-yellow);border-color:#d9c88a} .pad.p{background:var(--n-pink);border-color:#d9b0a1} .pad.s{background:var(--n-sage);border-color:#aebba9}
+.ico{width:22px;height:22px;display:grid;place-items:center}
+.ico svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.filters{display:flex;align-items:center;gap:6px;margin-left:auto}
+@media (prefers-reduced-motion:reduce){.item,.pins,.pad{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Sidebar (sketch)">
+    <div class="brand">QueryHawk</div>
+    <div class="logq"><span>Log a query</span><i>▾</i></div>
+    <div class="grp">Tasks</div>
+    <div class="nav">To-do list <b>4</b></div><div class="nav">Calendar</div><div class="nav on">Corkboard</div>
+    <div class="foot">Give feedback</div>
+  </aside>
+  <div class="main">
+    <div class="bar"><div class="tab">To-do list</div><div class="tab">Calendar</div><div class="tab on">Corkboard</div><div class="sp"></div><div class="search">Search…</div><div class="help">?</div></div>
+    <main class="sheet">
+
+      <header class="pn">
+        <div class="pn-lead">
+          <div class="pn-num" id="num">8</div>
+          <div class="pn-words">
+            <h1>notes pinned<br>to your corkboard</h1>
+            <p>Notes to self and your own tasks, kept in one place.</p>
+          </div>
+        </div>
+        <div class="pn-art">Illustration placeholder<br>the Courier pinning a note to a board</div>
+      </header>
+
+      <div class="over">
+        <div class="addrow" aria-label="Add to your board">
+          <span class="addlab">Add to your board</span>
+          <div class="pads" title="Pin a note">
+            <button class="pad y" data-add="y" aria-label="Pin a yellow note"></button>
+            <button class="pad p" data-add="p" aria-label="Pin a pink note"></button>
+            <button class="pad s" data-add="s" aria-label="Pin a sage note"></button>
+            <span>Note</span>
+          </div>
+          <button class="sup" data-add="task"><span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12.5l3 3 5-6"/></svg></span>Task</button>
+        </div>
+        <div class="filters" aria-label="Show">
+          <input class="find" id="find" placeholder="Find a note" aria-label="Find a note">
+          <button class="chip" aria-pressed="true" data-f="">All <b>8</b></button>
+          <button class="chip" aria-pressed="false" data-f="#manuscript">#manuscript <b>2</b></button>
+          <button class="chip" aria-pressed="false" data-f="#synopsis">#synopsis <b>1</b></button>
+          <button class="chip" aria-pressed="false" data-f="#comps">#comps <b>1</b></button>
+          <button class="chip" aria-pressed="false" data-f="#agents">#agents <b>1</b></button>
+          <button class="chip tool" id="tidy" aria-pressed="false">Tidy into columns</button>
+        </div>
+      </div>
+
+      <section class="board" id="board" aria-label="Corkboard">
+        <div class="pins" id="pins">
+          <div class="item note y" data-tag="#synopsis" style="left:3%;top:38px;--r:-2.2deg;--pc:#b9683c"><i class="pin"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Ask Jo if the synopsis gives away the ending too early</div>
+            <div class="meta"><span class="tag">#synopsis</span><span>Pinned 9 Oct</span></div></div>
+          <div class="item note p" data-tag="#agents" style="left:54%;top:52px;--r:1.8deg;--pc:#6A89A7"><i class="pin"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Priya Nair said on a podcast she's looking for small-town secrets. Mention it in the letter?</div>
+            <div class="meta"><span class="tag">#agents</span><span>Pinned 6 Oct</span></div></div>
+          <div class="item note s" data-tag="" style="left:78%;top:40px;--r:-1.4deg;--pc:#2d3a50"><i class="tape"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Festival pitch slot: 24 Oct, 2.40pm. Bring two printed copies of the first page</div>
+            <div class="meta"><span>Pinned 8 Oct</span></div></div>
+          <div class="item note p small" data-tag="" style="left:5%;top:300px;--r:-2.6deg;--pc:#2d3a50"><i class="tape t3"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Harlow Agency reopens to submissions 1 Nov</div>
+            <div class="meta"><span>Pinned 30 Sep</span></div></div>
+          <div class="item note s" data-tag="#comps" style="left:27%;top:410px;--r:-1.2deg;--pc:#b9683c"><i class="pin"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Comp idea: the lighthouse keeper one. Check its publication year</div>
+            <div class="meta"><span class="tag">#comps</span><span>Pinned 2 Oct</span></div><div class="stitch">✓ On your to-do list · 16 Oct</div></div>
+          <div class="item note y" data-tag="#manuscript" style="left:53%;top:400px;--r:2.4deg;--pc:#2d3a50"><i class="pin"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Word count on the title page still says 92,000. It's 88,400 now</div>
+            <div class="meta"><span class="tag">#manuscript</span><span>Pinned 11 Oct</span></div></div>
+          <div class="item note y" data-tag="" style="left:79%;top:330px;--r:1.6deg;--pc:#6A89A7"><i class="pin"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Read the query letter aloud before sending the next batch</div>
+            <div class="meta"><span>Pinned 4 Oct</span></div></div>
+          <div class="item note p" data-tag="#manuscript" style="left:6%;top:570px;--r:1.4deg;--pc:#2d3a50"><i class="pin"></i><button class="more" aria-label="Note options">⋯</button>
+            <div class="body">Ask the writing group about the title. Is it too light for the genre?</div>
+            <div class="meta"><span class="tag">#manuscript</span><span>Pinned 28 Sep</span></div></div>
+
+          <div class="item card" id="tcard" style="left:25%;top:30px;--r:.8deg;--pc:#2d3a50"><i class="pin"></i>
+            <h3>Your tasks</h3>
+            <div id="tasks">
+              <label class="task"><input type="checkbox"><span>Read chapters 1–3 aloud</span><time>Thu 15 Oct</time></label>
+              <label class="task"><input type="checkbox" checked><span>Trim the synopsis to one page</span><time>Done</time></label>
+              <label class="task"><input type="checkbox"><span>Book a one-to-one at the writing festival</span><time>Fri 23 Oct</time></label>
+              <label class="task"><input type="checkbox"><span>Update the bio paragraph</span><time>Mon 26 Oct</time></label>
+            </div>
+            <button class="addtask" data-add="task">+ Add a task</button>
+            <small>These also appear on your To-do list.</small></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+(function(){
+  var pins=document.getElementById('pins'), num=document.getElementById('num'), z=10, tidy=false, PINS=['#b9683c','#2d3a50','#6A89A7'];
+  function items(){return Array.prototype.slice.call(pins.querySelectorAll('.item'))}
+  function count(){num.textContent=pins.querySelectorAll('.note').length}
+  var d=null;
+  pins.addEventListener('pointerdown',function(e){
+    var it=e.target.closest('.item'); if(!it||tidy||e.target.closest('button,input,label')) return;
+    it.style.left=it.offsetLeft+'px'; it.style.zIndex=++z; it.classList.add('drag');
+    d={it:it,dx:e.clientX-it.offsetLeft,dy:e.clientY-it.offsetTop}; it.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  pins.addEventListener('pointermove',function(e){ if(!d) return;
+    var x=Math.max(4,Math.min(pins.clientWidth-d.it.offsetWidth-4,e.clientX-d.dx)), y=Math.max(12,Math.min(pins.clientHeight-d.it.offsetHeight-8,e.clientY-d.dy));
+    d.it.style.left=x+'px'; d.it.style.top=y+'px'; });
+  function drop(){if(d){d.it.classList.remove('drag'); d=null;}}
+  pins.addEventListener('pointerup',drop); pins.addEventListener('pointercancel',drop);
+  function layout(){
+    var W=pins.clientWidth, n=Math.max(1,Math.floor(W/290)), cw=W/n, h=[]; for(var i=0;i<n;i++) h.push(30);
+    items().forEach(function(it){var c=h.indexOf(Math.min.apply(null,h));
+      it.style.left=Math.round(c*cw+(cw-it.offsetWidth)/2)+'px'; it.style.top=h[c]+'px'; h[c]+=it.offsetHeight+38;});
+    pins.style.minHeight=Math.max(790,Math.max.apply(null,h)+10)+'px';
+  }
+  document.getElementById('tidy').addEventListener('click',function(){
+    tidy=!tidy; this.setAttribute('aria-pressed',tidy); this.textContent=tidy?'Back to free pinning':'Tidy into columns';
+    pins.classList.toggle('tidy',tidy);
+    if(tidy){items().forEach(function(it){it.dataset.l=it.style.left; it.dataset.t=it.style.top}); layout();}
+    else{items().forEach(function(it){if(it.dataset.l){it.style.left=it.dataset.l; it.style.top=it.dataset.t}}); pins.style.minHeight='';}
+  });
+  window.addEventListener('resize',function(){if(tidy) layout()});
+  var chips=document.querySelectorAll('[data-f]'), find=document.getElementById('find'), tag='';
+  function filter(){var q=find.value.trim().toLowerCase();
+    pins.querySelectorAll('.note').forEach(function(it){it.classList.toggle('dim',(tag&&it.dataset.tag!==tag)||(q&&it.textContent.toLowerCase().indexOf(q)<0))});
+    document.getElementById('tcard').classList.toggle('dim',!!(tag||q));}
+  chips.forEach(function(c){c.addEventListener('click',function(){chips.forEach(function(x){x.setAttribute('aria-pressed',x===c)}); tag=c.dataset.f; filter();})});
+  find.addEventListener('input',filter);
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-add]'); if(!b||b.dataset.add==='task') return;
+    var it=document.createElement('div'); it.className='item note '+b.dataset.add; it.dataset.tag='';
+    it.innerHTML='<i class="pin"></i><button class="more" aria-label="Note options">⋯</button><div class="body">New note</div><div class="meta"><span>Pinned today</span></div>';
+    it.style.left=Math.round(30+Math.random()*(pins.clientWidth-300))+'px'; it.style.top=Math.round(24+Math.random()*220)+'px';
+    it.style.setProperty('--r',(Math.random()*5-2.5).toFixed(1)+'deg'); it.style.setProperty('--pc',PINS[Math.floor(Math.random()*3)]); it.style.zIndex=++z;
+    pins.appendChild(it); count(); if(tidy) layout();
+  });
+  if(location.hash==='#tidy') document.getElementById('tidy').click();
+  count();
+})();
+</script>
+</body>
+</html>

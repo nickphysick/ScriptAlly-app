@@ -9,7 +9,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const ROUTE = "/todo/noteboard";
+const ROUTE = "/todo/corkboard";
 const WIDE = { width: 1440, height: 900 };
 
 /** Every element whose gradient actually PAINTS — declared gradient × effective opacity.

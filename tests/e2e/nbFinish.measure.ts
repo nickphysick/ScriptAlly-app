@@ -10,7 +10,7 @@ import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 import { gotoTodo } from "./todoOpen";
 
-const ROUTE = "/todo/noteboard";
+const ROUTE = "/todo/corkboard";
 
 const noteBoxes = (page: import("@playwright/test").Page) =>
   page.$$eval(".nb-note", (els) => els.map((e) => {

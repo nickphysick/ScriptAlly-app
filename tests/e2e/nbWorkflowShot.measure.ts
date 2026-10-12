@@ -6,7 +6,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 const OUT = "reports/noteboard-workflow";
-const ROUTE = "/todo/noteboard";
+const ROUTE = "/todo/corkboard";
 
 const pin = async (page: import("@playwright/test").Page, body: string) => {
   await page.locator(".tpl-tools .tdb-addb").filter({ hasText: "Pin a note" }).locator("visible=true").first().click();

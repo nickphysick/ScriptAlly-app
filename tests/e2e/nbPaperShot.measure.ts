@@ -5,7 +5,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const ROUTE = "/todo/noteboard";
+const ROUTE = "/todo/corkboard";
 const OUT = "reports/noteboard-paper";
 
 for (const width of [1280, 2300]) {

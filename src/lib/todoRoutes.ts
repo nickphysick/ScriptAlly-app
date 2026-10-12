@@ -39,8 +39,22 @@ export interface TodoRoute {
 export const TODO_ROUTES: TodoRoute[] = [
   { id: "list", label: "To-do list", path: "/todo", blurb: "Everything waiting on you, most pressing first" },
   { id: "calendar", label: "Calendar", path: "/todo/calendar", blurb: "Your work by date" },
-  { id: "noteboard", label: "Noteboard", path: "/todo/noteboard", blurb: "Notes to self, undated" },
+  /* Corkboard v1 (12 Oct): the Noteboard RENAMED. The label and the path are the writer's; the id stays
+     `noteboard` because it is an identifier (the nav key, `todoPrefs.noteboard`, the `nb-` classes), not a caption. */
+  { id: "noteboard", label: "Corkboard", path: "/todo/corkboard", blurb: "Notes to self and your own tasks, pinned" },
 ];
+
+/**
+ * RETIRED TO-DO PATHS (Corkboard v1). `/todo/noteboard` is the Corkboard's old address: bookmarks, the
+ * palette's history and every link written before 12 Oct still carry it. `todoPageForPath`'s fallback would
+ * answer `list` for it — the WRONG page, silently — so App.tsx redirects it first, keeping the query string.
+ */
+export const TODO_RETIRED_PATHS: Readonly<Record<string, string>> = { "/todo/noteboard": "/todo/corkboard" };
+/** Where a retired To-do path lives now, with its query string and hash carried; null for a live path. */
+export function todoRedirectFor(pathname: string, search = "", hash = ""): string | null {
+  const to = TODO_RETIRED_PATHS[pathname.replace(/\/+$/, "")];
+  return to ? `${to}${search}${hash}` : null;
+}
 
 export function todoPageForPath(pathname: string): TodoPageId | null {
   // Longest first: "/todo" is a prefix of every other route, so a first-match scan would answer

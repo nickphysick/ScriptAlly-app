@@ -45,7 +45,7 @@ const walk = (page: import("@playwright/test").Page, selector: string) =>
   }, selector);
 
 test("0.4 — what paints the fade, on the card and the composer", async ({ page }) => {
-  await openRoute(page, "/todo/noteboard", { width: 1440, height: 900 });
+  await openRoute(page, "/todo/corkboard", { width: 1440, height: 900 });
   const card = await walk(page, ".nb-note");
   expect(card, "no note card").toBeTruthy();
   console.log("CARD  self/::before/::after:", JSON.stringify(card!.out));

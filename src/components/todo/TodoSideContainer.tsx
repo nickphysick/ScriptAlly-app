@@ -104,7 +104,7 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
         that could only ever return nothing reads as a fault; a sign that says where they DO live
         is the honest thing to put in its place. */}
     <button type="button" className="tds-sign" onClick={onNoteboard}>
-      Notes to self live on the <b>Noteboard →</b>
+      Notes to self live on the <b>Corkboard →</b>
     </button>
 
     {/* ⚠️ THE REAL TAGS LIST (tasks-pages P5) — the "Coming soon" box is retired. Multi-select

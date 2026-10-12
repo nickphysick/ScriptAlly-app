@@ -32,7 +32,7 @@ export const SIZES = [
 export const BAR_ROUTES = [
   "/dashboard", "/queries", "/queries/analytics", "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/manuscripts/packages",
-  "/todo", "/todo/calendar", "/todo/noteboard", "/import", "/account/profile", "/plans", "/help",
+  "/todo", "/todo/calendar", "/todo/corkboard", "/import", "/account/profile", "/plans", "/help",
 ] as const;
 
 export async function openApp(page: Page, path: string, vp: { width: number; height: number }) {

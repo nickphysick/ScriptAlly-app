@@ -42,7 +42,7 @@ const PAGES: { title: string; mark: string; section: string; description?: strin
   { title: "Submission packages", mark: "packages", section: "Querying" },
   { title: "To-do", mark: "todo", section: "Tasks" },
   { title: "Calendar", mark: "calendar", section: "Tasks" },
-  { title: "Noteboard", mark: "noteboard", section: "Tasks", description: "Notes to self, undated." },
+  { title: "Corkboard", mark: "noteboard", section: "Tasks", description: "Notes to self, undated." },
 ];
 
 /** §3.3 — the pages that open with the full header; every other workspace route is compact. */

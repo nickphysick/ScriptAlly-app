@@ -18,7 +18,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute, liftMotionSuppression, scrollbarWidth } from "./measure";
 
-const ROUTE = "/todo/noteboard";
+const ROUTE = "/todo/corkboard";
 const WIDE = { width: 1440, height: 900 };
 const WIDER = { width: 1920, height: 1080 };
 

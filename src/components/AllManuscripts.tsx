@@ -666,7 +666,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
                */
               onWriteNote={(text, detail) =>
                 void addUserTask({ text, ...(detail ? { detail } : {}), manuscriptId: selected.id })}
-              onOpenNoteboard={() => navigate("/todo/noteboard")}
+              onOpenNoteboard={() => navigate("/todo/corkboard")}
               /* ⚠️ THE BOOK BAND'S OWN ACTIONS. They act on the manuscript, so they travel with the
                  band that names it — not into the masthead, which acts on the shelf. */
               bookActions={

@@ -46,7 +46,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
   { name: "To-do list",          route: "/todo",                 cls: "tdv2-wpg"  },
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
-  { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
+  { name: "Noteboard",           route: "/todo/corkboard",       cls: "tpl-wpg"  },
 ];
 
 /* ⚠️ 2300 IS THE ONE THAT MATTERS. Below ~1900 no page's measure binds, so 1280 and 1440 agree

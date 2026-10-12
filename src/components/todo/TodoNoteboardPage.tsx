@@ -460,7 +460,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           so a page that needs a class of its own hangs it one level down. */}
       <div className="tdb-wrap today-off nb-scope">
         <TasksPageLayout
-          title="Noteboard"
+          title="Corkboard"
           mark="noteboard"
           subtitle={NOTEBOARD_SUBTITLE}
           /* ⚠️ NO RESTING TALLY (finish run, 1c). "N notes pinned" sat left of the search box
