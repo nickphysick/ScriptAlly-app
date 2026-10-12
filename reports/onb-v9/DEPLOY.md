@@ -33,3 +33,9 @@ The new branch is `c22f2882` with `onb-v9` (`5e7d3350`) merged in; no conflicts.
 **Correction (later on 12 Oct): the cause was the machine's scrollbar mode, not the date. See REPORT.md §12.** What I wrote at the time: **The two failures are the date, not the merge.** `onbV5ImportPage` P1 (two widths) compares the importing loader with a capture taken on 11 Oct. The dashboard ghost's heading behind the loader sits 11px differently today. The same case fails today on the unchanged `onb-v9` build that passed it last night. The loader's own files are byte-identical to the base (R1). The capture needs retaking, or the ghost's heading needs a fixed clock; I did neither.
 
 **For whoever deploys to dev next:** dev serves `dev/query-panel-v1-onb9-tip-onb9`.
+
+## Third pass (12 Oct): the P1 lock fix, and no deploy
+
+Dev served `index-DbqJTP9V.js`, still `dev/query-panel-v1-onb9-tip-onb9` (`196eb875`). `onb-v9` (`541e39e0`, test-only) was merged into it as `2bc44f23`. Gates there: tsc 0, both builds 0, Vitest 8,591 passed with the same one file failing to load. Rendered: `onbV5ImportPage` and `onbV9` 48 passed, 1 skipped; P1 also green with the clock a week on.
+
+The build of `2bc44f23` is `index-DbqJTP9V.js`: byte for byte what dev already serves. **Nothing was deployed, because there was nothing to change.** Before and after: `index-DbqJTP9V.js`.
