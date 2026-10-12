@@ -10,7 +10,7 @@
 import React, { useState } from "react";
 import { FloatingTab } from "../../shell/FloatingTab";
 import { HalfDrawer } from "../../shell/HalfDrawer";
-import { CloseIcon } from "./marks";
+import { CloseButton } from "./marks";
 
 export const SCOUT_HEAD = { src: "/images/comps/scout-head.webp", version: "264838af" } as const;
 
@@ -28,7 +28,7 @@ export const CompsScout: React.FC<{ msTitle: string; routeActive: boolean; hidde
           <div className="cv-layer cv-sh-head">
             <img src={img} alt="" />
             <h3 className="cv-dt">The Scout<span className="cv-soon" data-cv="scout-soon">COMING SOON</span></h3>
-            <button type="button" className="cv-x" aria-label="Close" onClick={() => setOpen(false)}><CloseIcon /></button>
+            <CloseButton className="cv-x" data-cv="scout-close" onClick={() => setOpen(false)} />
           </div>
         )}
         foot={(

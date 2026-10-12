@@ -20,7 +20,7 @@ import { dayMonth } from "../../../lib/dates";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { StatusDot } from "../../StatusDot";
 import { CompFormBody, CompFormFoot, TypeIcon, splitTags, useCompForm } from "../CompForm";
-import { CloseIcon, KindIcon, LetterIcon, LockIcon } from "./marks";
+import { CloseButton, KindIcon, LetterIcon, LockIcon } from "./marks";
 
 export const DRAWER_WIDTH = "min(640px, 54vw)";
 
@@ -91,7 +91,7 @@ export const CompDrawer: React.FC<{
           </div>
         </>
       )}
-      <button type="button" className="cv-x" aria-label="Close" data-cv="drawer-close" onClick={p.onClose}><CloseIcon /></button>
+      <CloseButton className="cv-x" data-cv="drawer-close" onClick={p.onClose} />
     </div>
   );
 

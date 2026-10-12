@@ -123,7 +123,7 @@
 .cv-hwdim { position: fixed; inset: 0; z-index: 62; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(27, 36, 51, 0.5); }
 .cv-hwpop { position: relative; width: min(1080px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: #fbf9f5; color: #1c130f; border-radius: 16px; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.45); animation: cvHowIn 0.22s cubic-bezier(0.2, 0.7, 0.2, 1); }
 @keyframes cvHowIn { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: none; } }
-.cv-hwpop .cv-hwx { position: absolute; z-index: 2; top: 16px; right: 16px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #efe9e1; color: #1c130f; cursor: pointer; display: grid; place-items: center; font-size: 14px; line-height: 1; }
+.cv-hwpop .cv-hwx { position: absolute; z-index: 2; top: 16px; right: 16px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #efe9e1; color: #1c130f; cursor: pointer; }
 .cv-hwpop .cv-hwx:hover { background: #e4dcd2; }
 .cv-hwpop .cv-hsteps { --cv-hsteps-fig: 150px; padding: 52px 48px 44px; }
 .cv-hwpop .cv-hsteps-list { margin-top: 36px; }
@@ -315,7 +315,13 @@
 .cv-cdisc { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: #f4eee5; color: #2d3a50; }
 .cv-cdisc.is-ring { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.7); }
 .cv-cdisc svg { width: 24px; height: 24px; }
-.cv-x { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: #fff; cursor: pointer; font-size: 14px; line-height: 1; }
+/* ══ the close button (comps v27.1): ONE component, `CloseButton`, and this is its centring ══
+   A grid with no padding and no line box, so the ✕ (an SVG, never a character) sits on the button's centre.
+   ⚠️ Before, the button had no layout of its own and the svg is a block (Tailwind's preflight), so it sat at the
+   button's left edge: 11px off centre in a 34px button. */
+.cv-layer .cv-xb, .cv-xb { display: grid; place-items: center; padding: 0; line-height: 0; }
+.cv-xb svg { display: block; flex: none; }
+.cv-x { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: #fff; cursor: pointer; }
 .cv-x:hover { background: rgba(255, 255, 255, 0.2); }
 .cv-db { padding: 24px; }
 .cv-stat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 6px; background: #fff; border-radius: 12px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14); overflow: hidden; }

@@ -17,7 +17,7 @@ import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { CompsSteps } from "./CompsSteps";
-import { CloseIcon } from "./marks";
+import { CloseButton } from "./marks";
 
 const HEADING_ID = "cv-how-pop-h";
 
@@ -40,7 +40,7 @@ export const CompsHowDialog: React.FC<{ open: boolean; onClose: () => void; onPi
   return createPortal(
     <div className="cv-layer cv-hwdim" data-cv="how-dim" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="cv-hwpop" role="dialog" aria-modal="true" aria-labelledby={HEADING_ID} data-cv="how-pop">
-        <button type="button" className="cv-hwx" aria-label="Close" data-cv="how-close" ref={closeRef} onClick={onClose}><CloseIcon /></button>
+        <CloseButton size={36} className="cv-hwx" data-cv="how-close" ref={closeRef} onClick={onClose} />
         <CompsSteps headingId={HEADING_ID} onPick={() => { giveBack.current = false; onPick(); }} />
       </div>
     </div>,
