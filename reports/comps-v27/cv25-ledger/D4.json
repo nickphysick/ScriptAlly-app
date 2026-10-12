@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D4",
+  "where": "opens with no bands",
+  "ok": true,
+  "detail": "0 bands · 7 rows · None"
+ },
+ {
+  "lock": "D4",
+  "where": "Query letter: a band per recorded letter, then Not in a letter",
+  "ok": true,
+  "detail": "Query letter v2 (2) · Query letter v3 (2) · Not in a letter (4)"
+ },
+ {
+  "lock": "D4",
+  "where": "the unrecorded letter has no band",
+  "ok": true,
+  "detail": "letter:cv25-let-2,letter:cv25-let-3,none"
+ },
+ {
+  "lock": "D4",
+  "where": "each band says its own count",
+  "ok": true,
+  "detail": "2 comps · 2 comps · 4 comps"
+ },
+ {
+  "lock": "D4",
+  "where": "every comp is in a band",
+  "ok": true,
+  "detail": "7 distinct of 7 (8 rows drawn)"
+ },
+ {
+  "lock": "D4",
+  "where": "Where it's used: three bands that add up to the total",
+  "ok": true,
+  "detail": "Sent to agents 2 · In an unsent letter 1 · Not in a letter yet 4"
+ },
+ {
+  "lock": "D4",
+  "where": "Book or screen: two bands that add up to the total",
+  "ok": true,
+  "detail": "Books 5 · Film and TV 2"
+ },
+ {
+  "lock": "D4",
+  "where": "None: no bands again",
+  "ok": true,
+  "detail": "bands after None"
+ }
+]

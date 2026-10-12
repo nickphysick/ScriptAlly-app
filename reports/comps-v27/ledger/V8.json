@@ -2,7 +2,133 @@
  {
   "lock": "V8",
   "where": "1512 the link opens a dialog",
-  "ok": false,
-  "detail": "no dialog"
+  "ok": true,
+  "detail": "dialog · modal true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 labelled by its heading",
+  "ok": true,
+  "detail": "\"How comp tracking works.\""
+ },
+ {
+  "lock": "V8",
+  "where": "1512 it holds the three steps and the \"Log\" link",
+  "ok": true,
+  "detail": "3 steps · \"Log the comps in a letter\""
+ },
+ {
+  "lock": "V8",
+  "where": "1512 the box",
+  "ok": true,
+  "detail": "1080 wide of 1512 · rgb(251, 249, 245) · scrim rgba(27, 36, 51, 0.5)"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 ✕ is 36px, 16 from the top and right",
+  "ok": true,
+  "detail": "36 · 16.0 · 16.0"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 on open, focus is on ✕ (before ✕)",
+  "ok": true,
+  "detail": "opened true · focus on how-close"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 ✕ closes it and returns focus to the link",
+  "ok": true,
+  "detail": "closed true · focus on how-link"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 on open, focus is on ✕ (before Escape)",
+  "ok": true,
+  "detail": "opened true · focus on how-close"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 Escape closes it and returns focus to the link",
+  "ok": true,
+  "detail": "closed true · focus on how-link"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 on open, focus is on ✕ (before a click on the scrim)",
+  "ok": true,
+  "detail": "opened true · focus on how-close"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 a click on the scrim closes it and returns focus to the link",
+  "ok": true,
+  "detail": "closed true · focus on how-link"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 the link opens a dialog",
+  "ok": true,
+  "detail": "dialog · modal true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 labelled by its heading",
+  "ok": true,
+  "detail": "\"How comp tracking works.\""
+ },
+ {
+  "lock": "V8",
+  "where": "1280 it holds the three steps and the \"Log\" link",
+  "ok": true,
+  "detail": "3 steps · \"Log the comps in a letter\""
+ },
+ {
+  "lock": "V8",
+  "where": "1280 the box",
+  "ok": true,
+  "detail": "1080 wide of 1280 · rgb(251, 249, 245) · scrim rgba(27, 36, 51, 0.5)"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 ✕ is 36px, 16 from the top and right",
+  "ok": true,
+  "detail": "36 · 16.0 · 16.0"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 on open, focus is on ✕ (before ✕)",
+  "ok": true,
+  "detail": "opened true · focus on how-close"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 ✕ closes it and returns focus to the link",
+  "ok": true,
+  "detail": "closed true · focus on how-link"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 on open, focus is on ✕ (before Escape)",
+  "ok": true,
+  "detail": "opened true · focus on how-close"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 Escape closes it and returns focus to the link",
+  "ok": true,
+  "detail": "closed true · focus on how-link"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 on open, focus is on ✕ (before a click on the scrim)",
+  "ok": true,
+  "detail": "opened true · focus on how-close"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 a click on the scrim closes it and returns focus to the link",
+  "ok": true,
+  "detail": "closed true · focus on how-link"
  }
 ]

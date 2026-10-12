@@ -26,8 +26,8 @@
  {
   "lock": "V5",
   "where": "1512 removing it brings the empty page back",
-  "ok": false,
-  "detail": "card 1 · strip 0 · rows 0 · \"+ Add a comp\""
+  "ok": true,
+  "detail": "card 1 · strip 0 · rows 0 · \"+ Add your first comp\""
  },
  {
   "lock": "V5",
@@ -62,8 +62,8 @@
  {
   "lock": "V5",
   "where": "1280 removing it brings the empty page back",
-  "ok": false,
-  "detail": "card 1 · strip 0 · rows 0 · \"+ Add a comp\""
+  "ok": true,
+  "detail": "card 1 · strip 0 · rows 0 · \"+ Add your first comp\""
  },
  {
   "lock": "V5",

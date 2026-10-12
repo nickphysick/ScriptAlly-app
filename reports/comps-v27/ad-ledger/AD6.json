@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "AD6",
+  "where": "1512 before: the first-comp form, explainer open",
+  "ok": true,
+  "detail": "Add your first comp · card true"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 one comp written",
+  "ok": true,
+  "detail": "[{\"media\":\"film\",\"year\":2023,\"id\":\"cmp_341x990x0glw\",\"note\":\"One crossing, real time.\",\"source\":\"user\",\"author\":\"Tom Arden\",\"title\":\"Last Light\"}]"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 the drawer stays open, in add mode",
+  "ok": true,
+  "detail": "open"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 every field is empty",
+  "ok": true,
+  "detail": "{\"title\":\"\",\"who\":\"\",\"pub\":\"\",\"year\":\"\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 the type is back on Book",
+  "ok": true,
+  "detail": "book · Author"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 focus is in Title",
+  "ok": true,
+  "detail": "focus \"cpv-f-title\""
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 the explainer is folded, and the title says so",
+  "ok": true,
+  "detail": "card false · link true · Add a comp"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 the body is back at the top",
+  "ok": true,
+  "detail": "scrollTop 0"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 a plain Add closes it",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 before: the first-comp form, explainer open",
+  "ok": true,
+  "detail": "Add your first comp · card true"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 one comp written",
+  "ok": true,
+  "detail": "[{\"source\":\"user\",\"author\":\"Tom Arden\",\"note\":\"One crossing, real time.\",\"title\":\"Last Light\",\"id\":\"cmp_och09c4lcq9l\",\"media\":\"film\",\"year\":2023}]"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 the drawer stays open, in add mode",
+  "ok": true,
+  "detail": "open"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 every field is empty",
+  "ok": true,
+  "detail": "{\"title\":\"\",\"who\":\"\",\"pub\":\"\",\"year\":\"\",\"note\":\"\",\"tag\":\"\"}"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 the type is back on Book",
+  "ok": true,
+  "detail": "book · Author"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 focus is in Title",
+  "ok": true,
+  "detail": "focus \"cpv-f-title\""
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 the explainer is folded, and the title says so",
+  "ok": true,
+  "detail": "card false · link true · Add a comp"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 the body is back at the top",
+  "ok": true,
+  "detail": "scrollTop 0"
+ },
+ {
+  "lock": "AD6",
+  "where": "1280 a plain Add closes it",
+  "ok": true,
+  "detail": "closed"
+ }
+]

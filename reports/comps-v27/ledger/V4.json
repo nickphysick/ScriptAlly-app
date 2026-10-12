@@ -2,8 +2,8 @@
  {
   "lock": "V4",
   "where": "1512 the button",
-  "ok": false,
-  "detail": "\"+ Add a comp\""
+  "ok": true,
+  "detail": "\"+ Add your first comp\""
  },
  {
   "lock": "V4",
@@ -20,8 +20,8 @@
  {
   "lock": "V4",
   "where": "1280 the button",
-  "ok": false,
-  "detail": "\"+ Add a comp\""
+  "ok": true,
+  "detail": "\"+ Add your first comp\""
  },
  {
   "lock": "V4",

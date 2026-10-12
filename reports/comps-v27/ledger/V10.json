@@ -2,13 +2,49 @@
  {
   "lock": "V10",
   "where": "1512 both hosts draw the steps",
-  "ok": false,
-  "detail": "card false · pop-up false"
+  "ok": true,
+  "detail": "card true · pop-up true"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 the same root: tag and class set",
+  "ok": true,
+  "detail": "card <SECTION class=\"cv-hsteps\"> · pop-up <SECTION class=\"cv-hsteps\">"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 the same shape inside",
+  "ok": true,
+  "detail": "279 characters of shape"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 the same words",
+  "ok": true,
+  "detail": "\"How comp tracking works.\" · 3 and 3 step headings"
  },
  {
   "lock": "V10",
   "where": "1280 both hosts draw the steps",
-  "ok": false,
-  "detail": "card false · pop-up false"
+  "ok": true,
+  "detail": "card true · pop-up true"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 the same root: tag and class set",
+  "ok": true,
+  "detail": "card <SECTION class=\"cv-hsteps\"> · pop-up <SECTION class=\"cv-hsteps\">"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 the same shape inside",
+  "ok": true,
+  "detail": "279 characters of shape"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 the same words",
+  "ok": true,
+  "detail": "\"How comp tracking works.\" · 3 and 3 step headings"
  }
 ]
