@@ -1,0 +1,38 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.2s)
+  ✗ V9 · 1512 the pop-up opens — false
+[V9] 0/1 green
+  ✘  2 [measure] › tests/e2e/compsV27.measure.ts:260:3 › Comparable titles v27 › V9 · picker: the pop-up's link closes it and opens the picker; one Escape then closes only the picker (5.5s)
+
+
+  1) [measure] › tests/e2e/compsV27.measure.ts:260:3 › Comparable titles v27 › V9 · picker: the pop-up's link closes it and opens the picker; one Escape then closes only the picker 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "V9 · 1512 the pop-up opens — false",
+    + ]
+
+      47 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      48 |     if (!MUT && !process.env.V27_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:267:24
+
+    Error Context: test-results/compsV27.measure.ts-Compar-8dec5-then-closes-only-the-picker-measure/error-context.md
+
+    Error Context: test-results/compsV27.measure.ts-Compar-8dec5-then-closes-only-the-picker-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV27.measure.ts:260:3 › Comparable titles v27 › V9 · picker: the pop-up's link closes it and opens the picker; one Escape then closes only the picker 
+  1 passed (28.3s)

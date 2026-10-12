@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "V10",
+  "where": "1512 both hosts draw the steps",
+  "ok": false,
+  "detail": "card false · pop-up false"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 both hosts draw the steps",
+  "ok": false,
+  "detail": "card false · pop-up false"
+ }
+]

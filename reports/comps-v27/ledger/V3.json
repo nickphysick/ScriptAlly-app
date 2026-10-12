@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "V3",
+  "where": "1512 the card is on the page, with three steps and no \"Log\" link",
+  "ok": false,
+  "detail": "card true · 0 steps · 0 link(s)"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 its left and right edges are the panel's",
+  "ok": true,
+  "detail": "card 296.4–1455.6 · panel 296.4–1455.6"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 it sits 32 below the panel",
+  "ok": false,
+  "detail": "40.0"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 4px outside its left edge is the page, not paper",
+  "ok": true,
+  "detail": "outside 242,238,232 · the page 242,238,232"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 inside it is paper",
+  "ok": false,
+  "detail": "246,243,238"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 the card is on the page, with three steps and no \"Log\" link",
+  "ok": false,
+  "detail": "card true · 0 steps · 0 link(s)"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 its left and right edges are the panel's",
+  "ok": true,
+  "detail": "card 289.0–1231.0 · panel 289.0–1231.0"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 it sits 32 below the panel",
+  "ok": false,
+  "detail": "40.0"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 4px outside its left edge is the page, not paper",
+  "ok": true,
+  "detail": "outside 242,238,232 · the page 242,238,232"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 inside it is paper",
+  "ok": false,
+  "detail": "246,243,238"
+ }
+]

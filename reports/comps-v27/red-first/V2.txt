@@ -1,0 +1,56 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.1s)
+  ✗ V2 · 1512 exactly one button, "+ Add your first comp" — [+ Add a comp]
+  ✗ V2 · 1512 the note beside it — "null"
+  ✗ V2 · 1512 no Scout tab — 2
+  ✗ V2 · 1512 no exhibit — 4 exhibit element(s)
+  ✗ V2 · 1512 the steps card is there — 0
+  ✗ V2 · 1280 exactly one button, "+ Add your first comp" — [+ Add a comp]
+  ✗ V2 · 1280 the note beside it — "null"
+  ✗ V2 · 1280 no Scout tab — 2
+  ✗ V2 · 1280 no exhibit — 4 exhibit element(s)
+  ✗ V2 · 1280 the steps card is there — 0
+[V2] 6/16 green
+  ✘  2 [measure] › tests/e2e/compsV27.measure.ts:121:3 › Comparable titles v27 › V2 · empty: one button and the note in the header; no strip, library, Scout tab, link or exhibit (10.0s)
+
+
+  1) [measure] › tests/e2e/compsV27.measure.ts:121:3 › Comparable titles v27 › V2 · empty: one button and the note in the header; no strip, library, Scout tab, link or exhibit 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 12
+
+    - Array []
+    + Array [
+    +   "V2 · 1512 exactly one button, \"+ Add your first comp\" — [+ Add a comp]",
+    +   "V2 · 1512 the note beside it — \"null\"",
+    +   "V2 · 1512 no Scout tab — 2",
+    +   "V2 · 1512 no exhibit — 4 exhibit element(s)",
+    +   "V2 · 1512 the steps card is there — 0",
+    +   "V2 · 1280 exactly one button, \"+ Add your first comp\" — [+ Add a comp]",
+    +   "V2 · 1280 the note beside it — \"null\"",
+    +   "V2 · 1280 no Scout tab — 2",
+    +   "V2 · 1280 no exhibit — 4 exhibit element(s)",
+    +   "V2 · 1280 the steps card is there — 0",
+    + ]
+
+      47 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      48 |     if (!MUT && !process.env.V27_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:137:7
+
+    Error Context: test-results/compsV27.measure.ts-Compar-7dfd6-y-Scout-tab-link-or-exhibit-measure/error-context.md
+
+    Error Context: test-results/compsV27.measure.ts-Compar-7dfd6-y-Scout-tab-link-or-exhibit-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV27.measure.ts:121:3 › Comparable titles v27 › V2 · empty: one button and the note in the header; no strip, library, Scout tab, link or exhibit 
+  1 passed (32.9s)
