@@ -30,6 +30,6 @@ Dev had moved again. Another session had merged its newer query-panel work onto 
 
 The new branch is `c22f2882` with `onb-v9` (`5e7d3350`) merged in; no conflicts. On it: tsc 0, both builds 0, Vitest 566 files passed and the same one failing to load (8,591 passed, 3 skipped). Rendered: 154 passed, 2 skipped, 2 failed.
 
-**The two failures are the date, not the merge.** `onbV5ImportPage` P1 (two widths) compares the importing loader with a capture taken on 11 Oct. The dashboard ghost's heading behind the loader sits 11px differently today. The same case fails today on the unchanged `onb-v9` build that passed it last night. The loader's own files are byte-identical to the base (R1). The capture needs retaking, or the ghost's heading needs a fixed clock; I did neither.
+**Correction (later on 12 Oct): the cause was the machine's scrollbar mode, not the date. See REPORT.md §12.** What I wrote at the time: **The two failures are the date, not the merge.** `onbV5ImportPage` P1 (two widths) compares the importing loader with a capture taken on 11 Oct. The dashboard ghost's heading behind the loader sits 11px differently today. The same case fails today on the unchanged `onb-v9` build that passed it last night. The loader's own files are byte-identical to the base (R1). The capture needs retaking, or the ghost's heading needs a fixed clock; I did neither.
 
 **For whoever deploys to dev next:** dev serves `dev/query-panel-v1-onb9-tip-onb9`.

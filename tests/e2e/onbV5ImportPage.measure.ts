@@ -43,8 +43,22 @@ const P1_VIEWPORTS = [{ width: 1440, height: 900 }, { width: 390, height: 844 }]
 const CAPTURE = !!process.env.IP1_CAPTURE;
 const P1_FILE = resolve(FIX, "p1-before.json");
 
+/* The capture must not depend on the machine or the day.
+   THE MACHINE: the dashboard ghost behind the importing loader sits in `.ws-wbody`, which reserves a
+   scrollbar gutter on both edges (`scrollbar-gutter: stable both-edges`). Chromium follows the
+   machine's scrollbar mode, so on a machine showing classic bars the ghost is 11px further in on
+   each side than on one showing overlay bars. The capture was taken with overlay bars; on
+   12 Oct the same build measured the ghost's heading at 61 where the capture has 50. The gutter is
+   switched off for the capture, so the boxes are the same in either mode.
+   THE DAY: the clock is fixed (`P1_CLOCK`, or IP1_P1_CLOCK to move it), so nothing drawn from the
+   date can move a box. Nothing does today; this keeps it that way. */
+const P1_CLOCK = process.env.IP1_P1_CLOCK ?? "2026-10-11T12:00:00";
+const P1_NO_GUTTER = ".ws-wbody { scrollbar-gutter: auto !important; }";
+
 async function reach(page: Page, s: Screen) {
+  await page.clock.setFixedTime(new Date(P1_CLOCK));
   await lab(page, s.q);
+  if (!process.env.IP1_P1_GUTTER) await page.addStyleTag({ content: P1_NO_GUTTER });
   for (const step of s.steps ?? []) {
     await page.locator('[data-im="primary"]').first().click();
     await page.waitForTimeout(step === "import" ? 500 : 250);
@@ -90,7 +104,7 @@ for (const vp of P1_VIEWPORTS) {
         writeFileSync(P1_FILE, JSON.stringify({ ...all, ...now }, null, 0) + "\n");
         return;
       }
-      record("P1", vpName(vp), "screens", { compared: Object.keys(now).length, diffs });
+      record("P1", vpName(vp), "screens", { compared: Object.keys(now).length, diffs, clock: P1_CLOCK, gutterLeftOn: !!process.env.IP1_P1_GUTTER });
       expect(Object.keys(now).length, "every screen was compared").toBe(P1_SCREENS.length);
       expect(diffs).toEqual([]);
     });
