@@ -147,7 +147,7 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
        colour wherever it appears. */
     const nb = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
     /* the Noteboard: a derived chip row over the tags in use */
-    expect(nb).toContain("nb-chipset");
+    expect(nb).toContain("cb-chip"); // RE-POINTED (Corkboard v1): the chip row moved under the header
     expect(nb).toContain("noteTagChips(");
     expect(nb).not.toMatch(/["\s`]nb-tagwrap["\s`]/);   // the dropdown it replaced, bounded token
     /* both surfaces name a tag from the user's own defs, never from a raw id */

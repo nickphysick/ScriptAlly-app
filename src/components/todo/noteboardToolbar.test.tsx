@@ -80,14 +80,17 @@ describe("⚠️ the chip row is DERIVED — #All, then the tags actually in use
   it("the RENDERED row says the same thing, in the same order", () => {
     seed.userTasks = [note("a", "one", ["t-letter"]), note("b", "two", ["t-agents"])];
     const html = render();
-    const at = html.indexOf("nb-chipset");
-    expect(at, "no chip row").toBeGreaterThan(-1);        // the anchor, before the slice
-    const end = html.indexOf("</div>", html.indexOf("nb-chip", at));
-    const row = html.slice(at, end > at ? end + 400 : at + 900);
-    /* the ORDER is a property of the row, so it is read off the row */
-    for (const [i, label] of ["#All", "#agents", "#letter"].entries()) {
+    const at = html.indexOf('data-cb="filters"');
+    expect(at, "no filter row").toBeGreaterThan(-1);        // the anchor, before the slice
+    const stop = html.indexOf('data-cb="notes"', at);
+    expect(stop, "no board after the row").toBeGreaterThan(at);
+    const row = html.slice(at, stop);
+    /* the ORDER is a property of the row, so it is read off the row. RE-POINTED (Corkboard v1): "All" has no
+       hash (the ref's chip), and every chip states its count from the UNFILTERED list. */
+    const labels = [">All <b>2</b>", ">#agents <b>1</b>", ">#letter <b>1</b>"];
+    for (const [i, label] of labels.entries()) {
       expect(row.indexOf(label), label).toBeGreaterThan(-1);
-      if (i > 0) expect(row.indexOf(label)).toBeGreaterThan(row.indexOf(["#All", "#agents"][i - 1]));
+      if (i > 0) expect(row.indexOf(label)).toBeGreaterThan(row.indexOf(labels[i - 1]));
     }
     expect(row).not.toContain("zzz-never-used");
   });
@@ -99,34 +102,40 @@ describe("⚠️ search reads the note's words, whatever case they are in", () =
     expect(render()).toContain("Mushens closed until October");
   });
 
-  it("the empty-search sentence is the mockup's, and it can actually hide", () => {
-    expect(page).toContain("Nothing matches that search.");
-    /* ⚠️ THE `hidden` ATTRIBUTE LOSES TO `display: flex`. The UA sheet's `[hidden]{display:none}`
-       is weaker than any author display rule, so a flex element with `hidden` stays on screen.
-       Either the element is conditionally RENDERED, or the sheet restates the rule. */
-    const usesAttr = /className="nb-empty-search"[^>]*hidden/.test(page);
-    if (usesAttr) expect(css).toMatch(/\[hidden\]\s*\{\s*display:\s*none/);
-    else expect(page).toMatch(/\{[^}]*&&\s*\(?\s*<div className="nb-empty-search"/);
+  it("⚠️ filtering FADES, it does not hide — every pinned note stays mounted (Corkboard v1)", () => {
+    /* RE-POINTED: "Nothing matches that search." belonged to a board that removed non-matches. Now a note
+       outside the search or the chip stays where it is at 22%, and the "n of N notes" label says how many
+       match — so there is no empty board for a sentence to explain. */
+    expect(page).not.toContain("Nothing matches that search.");
+    expect(page).toContain("pinned.map((n) =>");
+    expect(page, "the board draws the filtered list").not.toMatch(/\{notes\.map\(/);
+    expect(page).toContain('narrowing && !matching.has(n.id) ? " cb-dim" : ""');
+    expect(css).toMatch(/\.cb-dim\s*\{\s*opacity:\s*0\.22;?\s*\}/);
   });
 });
 
 describe("⚠️ Board / Column is a segmented toggle — the sentence control is retired", () => {
-  it("two buttons, one pressed, and the old label is gone", () => {
-    expect(page).toContain("nb-viewtog");
+  it("the Note control is three paper buttons, each named, each opening the ONE composer with its colour", () => {
+    /* RE-POINTED (Corkboard v1): Board / Column is retired with the tool row. The claim that survives is the
+       one about a control a screen reader can use: each square is a button with its own name. */
+    expect(page).not.toContain("nb-viewtog");
     expect(page).not.toContain("Read as a column");
-    /* aria-pressed on both, or a screen reader is told which is a button and not which is on */
-    const tog = page.slice(page.indexOf("nb-viewtog"));
-    expect(page.indexOf("nb-viewtog")).toBeGreaterThan(-1);
-    const head = tog.slice(0, 900);
-    expect([...head.matchAll(/aria-pressed/g)].length).toBe(2);
-    expect(head).toContain(">Board<");
-    expect(head).toContain(">Column<");
+    seed.userTasks = [note("a", "one")];
+    const html = render();
+    for (const name of ["Pin a yellow note", "Pin a pink note", "Pin a sage note"]) expect(html, name).toContain(`aria-label="${name}"`);
+    expect([...html.matchAll(/data-cb-pad="/g)].length).toBe(3);
+    expect(page).toContain("onClick={() => openComposer({ colour: c })}");
   });
 
-  it("the tool row carries the mockup's five controls and nothing else", () => {
-    for (const control of ["nb-search", "nb-chipset", "nb-viewtog", "Examples", "Pin a note"]) {
+  it("the row under the header carries the Corkboard ref's controls: the add bar, find, the chips", () => {
+    /* RE-POINTED (Corkboard v1): the tool row is replaced by the ref's row — "Add to your board" (Note in three
+       papers, Task) on the left; Find a note and the tag chips on the right. Board/Column, Examples and the
+       pink "Pin a note" have no place in it (reported for Nick; the examples drawer is reached from the empty
+       state). */
+    for (const control of ["cb-addrow", "cb-pads", "cb-sup", "cb-find", "cb-chip", "Add to your board", "Find a note"]) {
       expect(page, control).toContain(control);
     }
+    for (const gone of ["nb-viewtog", "nb-search", ">Examples<", "Pin a note\n"]) expect(page, gone).not.toContain(gone);
     /* the dropdown the chips replaced is gone — bounded token, never a substring */
     expect(page).not.toMatch(/["\s`]nb-tagwrap["\s`]/);
   });

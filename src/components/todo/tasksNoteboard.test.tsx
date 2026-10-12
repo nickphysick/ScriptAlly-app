@@ -39,9 +39,10 @@ describe("⚠️ masonry, not a stretched grid — and it can be read as a colum
     expect(css).not.toContain(".nb-grid");   // and the old name is gone, not shadowed
   });
 
-  it("the toggle collapses to one reading column", () => {
-    expect(css).toMatch(/\.nb-board\.nb-col1\s*\{[^}]*columns:\s*1/);
-    expect(page).toContain('className={`nb-board${column ? " nb-col1" : ""}`}');
+  it("⚠️ the one-column reading view is RETIRED with the Board / Column toggle (Corkboard v1)", () => {
+    /* it has no place in the ref's row; "Tidy into columns" is the board's second view (Part C) */
+    expect(page).not.toMatch(/["\s`]nb-col1["\s`]/);
+    expect(page).not.toContain("setColumn");
   });
 });
 
@@ -176,8 +177,9 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
        which can only ever return an empty board. The chips are the tags IN USE, derived from the
        pinned notes, with the defs supplying the label. The page's filter DIMENSION is unchanged:
        one tag at a time, or #All. */
-    const tools = sliceBetween(page, "tools={", "/* ⚠️ NO sidebar prop");
-    expect(tools).toContain("nb-chipset");
+    /* RE-POINTED (Corkboard v1): the chips sit in the row under the header now (`cb-filters`), with counts. */
+    const tools = sliceBetween(page, 'data-cb="filters"', 'data-cb="notes"');
+    expect(tools).toContain("cb-chip");
     expect(tools).toContain("chips.map");
     expect(page).toContain("noteTagChips(pinned, currentUser?.tags ?? [])");
     /* ⚠️ AND IT DERIVES FROM `pinned`, NOT `notes`. From the filtered view the chips would vanish
@@ -192,8 +194,11 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
        `eyebrow`, so the layout renders no row and no hairline. The Add is the control bar's. */
     const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
     expect(listPage).not.toContain("function renderTools");
-    /* the Noteboard is unaffected — its row is its own and still carries the pink right */
-    expect(page).toContain("<TplGrow />");
+    /* RE-POINTED (Corkboard v1): the Corkboard's own row is the ref's — the add bar left, the filters right
+       (`margin-left: auto` on the filters does what the spacer did) — and it carries no pink. */
+    expect(page).not.toContain("<TplGrow />");
+    expect(page).toContain('className="cb-over"');
+    expect(css).toMatch(/\.cb-filters\s*\{[^}]*margin-left:\s*auto/);
   });
 
   it("the empty state TEACHES rather than apologises — and it is the WORKFLOW now", () => {

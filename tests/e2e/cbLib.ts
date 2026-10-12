@@ -20,7 +20,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
 export const DIR = "reports/corkboard-v1";
-export const ROUTE = "/todo/corkboard";
+/** `CB_ROUTE=/todo/noteboard` points the locks at the page's OLD address, for the red-first run on the build
+ *  without the pack — where `/todo/corkboard` is not a route at all and every probe would only crash. */
+export const ROUTE = process.env.CB_ROUTE ?? "/todo/corkboard";
 export const OLD_ROUTE = "/todo/noteboard";
 export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 export const sz = (v: { width: number; height: number }) => `${v.width}x${v.height}`;
@@ -54,6 +56,8 @@ export async function only(page: Page, prefix: string | null, extra: Record<stri
 }
 
 export async function open(page: Page, route: string, vp: { width: number; height: number }) {
+  /* a probe that finds no subject must say so in seconds, not wait out the test's seven minutes */
+  page.setDefaultTimeout(12_000);
   await openRoute(page, route, vp);
   await page.evaluate(async () => { await document.fonts.ready; });
   await page.waitForTimeout(700);
@@ -84,4 +88,56 @@ export async function readableText(page: Page): Promise<string> {
     out.push(document.title);
     return out.join(" \n ");
   });
+}
+
+/** The page root, then a selector inside it — every probe is scoped to the page a reader can see. */
+export const inPage = (sel: string) => `.nb-scope.tdb-wrap:visible ${sel}`;
+
+/**
+ * What the app WROTE to Firestore while `fn` ran: the bodies of the write channel's requests. Firestore's web
+ * client sends writes on `.../Write/channel`; listens go to `.../Listen/channel` and are not counted.
+ * ⚠️ THE INSTRUMENT IS PROVED BY C3, which requires exactly one write and reads `layout` out of it — so a
+ *    "wrote nothing" here is a reading, not a probe that cannot see.
+ */
+export async function writesDuring(page: Page, fn: () => Promise<void>, settleMs = 1500): Promise<string[]> {
+  const seen: string[] = [];
+  const on = (req: import("@playwright/test").Request) => {
+    if (req.method() !== "POST" || !/\/Write\/channel/.test(req.url())) return;
+    const body = req.postData() ?? "";
+    if (/writes/.test(decodeURIComponent(body))) seen.push(decodeURIComponent(body));
+  };
+  page.on("request", on);
+  try { await fn(); await page.waitForTimeout(settleMs); } finally { page.off("request", on); }
+  return seen;
+}
+
+/** The header as a reader meets it. */
+export async function readHeader(page: Page) {
+  return page.evaluate((ROOT) => {
+    const root = (0, eval)(ROOT) as HTMLElement;
+    const h = root.querySelector<HTMLElement>("header.hp3, header.ph");
+    if (!h) return null;
+    const r = h.getBoundingClientRect();
+    const txt = (sel: string) => (h.querySelector<HTMLElement>(sel)?.textContent ?? "").trim();
+    return {
+      box: { x: r.x, y: r.y, w: r.width, h: r.height },
+      bg: getComputedStyle(h).backgroundColor,
+      kind: h.getAttribute("data-hp3"), living: h.getAttribute("data-living"), loading: h.hasAttribute("data-loading"),
+      number: txt('[data-hp3-part="number"]:not(.hp3-blank)'), words: txt('[data-hp3-part="words"]:not(.hp3-blank)'),
+      name: h.querySelector("h1")?.getAttribute("aria-label") ?? "", sub: txt('[data-hp3-part="sub"]'),
+      buttons: h.querySelectorAll("button, a[href]").length,
+      art: h.querySelector("[data-art]")?.getAttribute("data-art") ?? null,
+    };
+  }, ROOT_FN);
+}
+
+/** Every note on the board: id, box, opacity, and whether it is in the document. */
+export async function readNotes(page: Page) {
+  return page.evaluate((ROOT) => {
+    const root = (0, eval)(ROOT) as HTMLElement;
+    return [...root.querySelectorAll<HTMLElement>("[data-note]")].map((el) => {
+      const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
+      return { id: el.getAttribute("data-note")!, x: r.x, y: r.y, w: r.width, h: r.height, opacity: Number(cs.opacity), text: (el.querySelector(".nb-body")?.textContent ?? "").trim() };
+    });
+  }, ROOT_FN);
 }

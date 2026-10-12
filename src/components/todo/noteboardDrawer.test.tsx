@@ -70,11 +70,14 @@ const drawerSource = (): string => {
 afterEach(() => { seed.userTasks = []; });
 
 describe("⚠️ (a) the board carries NO example papers, at any note count", () => {
-  it("zero notes: the board container exists and holds nothing example-shaped", () => {
+  it("zero notes: the empty state stands alone, and nothing example-shaped is on the page", () => {
     const html = render();
-    /* ⚠️ THE ANCHOR FIRST — a vacuous pass is the likely failure here. If the board never
-       mounted, "no examples in the board" would be trivially true and prove nothing. */
-    expect(html.indexOf("nb-board"), "no board container to look inside").toBeGreaterThan(-1);
+    /* ⚠️ THE ANCHOR FIRST — a vacuous pass is the likely failure here. RE-POINTED (Corkboard v1): at zero
+       notes the board is NOT rendered (nor the add bar, nor the filter row) — the built empty state is the
+       page — so the anchor is the workflow, and the board's absence is asserted rather than assumed. */
+    expect(html.indexOf("nb-wf"), "no empty state to look inside").toBeGreaterThan(-1);
+    expect(html).not.toMatch(/["\s`]nb-board["\s`]/);
+    expect(html).not.toContain('data-cb="addrow"');
     for (const dead of ["nb-example", "nb-exlabel", "nb-keep", "nb-exdismiss", "nb-exintro"]) {
       expect(html, dead).not.toMatch(new RegExp(`["\\s\`]${dead}["\\s\`]`));
     }

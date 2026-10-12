@@ -50,16 +50,23 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
     expect(layoutCss).toContain("--tdb-chrome-gap"); // named in the warning, so the tie is stated
   });
 
-  it("the Calendar and the Noteboard stand on the SAME component — the To-do list left it (v2)", () => {
+  it("the Calendar stands on the family layout — the To-do list (v2) and the Corkboard (v1) left it", () => {
     /* ⚠️ TWO SINCE 28 SEP (to-do list v2). The To-do list opens with the SHARED full header over its
        own group, beside the desk rail — the Contact list's and the Query Centre's arrangement — so
        it no longer wears the family's layout, and its top edge is held by the shared header's own
        locks (pageHeaderV2) rather than by this one. The two that remain still agree by
        construction. */
-    for (const [name, src] of [["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+    for (const [name, src] of [["calendar", calendarPage]] as const) {
       expect(src, name).toContain("<TasksPageLayout");
       expect(src, name).toContain('from "./TasksPageLayout"');
     }
+    /* ⚠️ ONE SINCE 12 OCT (Corkboard v1). The Corkboard is a NUMBER page: its panel is 260px tall, and fixed
+       above an internal scroller it would leave a framed board a 400px window. It takes the To-do list's
+       arrangement — the shared full header as the first row of its own scrolling group. */
+    expect(noteboardPage).not.toContain("<TasksPageLayout");
+    expect(noteboardPage).toContain('from "../shell/PageHeader"');
+    expect(noteboardPage).toContain('variant="full"');
+    expect(noteboardPage).toContain("masthead={null}");
     expect(listPage).not.toContain("<TasksPageLayout");
     expect(listPage).toContain('from "../shell/PageHeader"');
     expect(listPage).toContain('variant="full"');
@@ -129,9 +136,11 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
   });
 
   it("no page wraps the layout in a capped or padded container of its own", () => {
-    for (const [name, src] of [["list", listPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+    /* RE-POINTED (Corkboard v1): the Corkboard left the family layout (see the next-but-one case), so its
+       mount is the grid, as the To-do list's is. */
+    for (const [name, src, mount] of [["list", listPage, "<TasksPageLayout"], ["calendar", calendarPage, "<TasksPageLayout"], ["noteboard", noteboardPage, "<WorkspacePageGrid"]] as const) {
       // the mount sits directly inside the page wrap — never inside a max-width/pad wrapper
-      const before = src.slice(src.indexOf("return ("), src.indexOf("<TasksPageLayout"));
+      const before = src.slice(src.indexOf("return ("), src.indexOf(mount));
       expect(before, name).not.toContain("maxWidth");
       expect(before, name).not.toMatch(/["\s`]sa-content-col["\s`]/);
     }

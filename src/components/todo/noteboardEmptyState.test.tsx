@@ -91,8 +91,8 @@ const blocks = (html: string): string => {
       if ((m[1] ?? "").split(/\s+/).includes(cls)) seq.push({ at: m.index ?? 0, kind });
     }
   };
-  /* ⚠️ THE EMPTY BOARD STILL MOUNTS (it holds the ghost), so its presence is not the signal —
-     a NOTE inside it is. Marking the container unconditionally put a trailing "board" after the
+  /* ⚠️ THE EMPTY BOARD USED TO MOUNT (it held the ghost); since Corkboard v1 it does not. Either way its
+     presence is not the signal — a NOTE inside it is. Marking the container unconditionally put a trailing "board" after the
      empty state's own sequence and made a correct page look wrong. */
   if (/class="[^"]*\bnb-note\b/.test(html)) mark("nb-board", "board");
   mark("nb-wf-sep", "separator");
@@ -113,7 +113,9 @@ describe("⚠️ the arrangement — one ordered comparison, never per-section p
        ⚠️ THE ORDER WITHIN THE WORKFLOW REVERSES TOO — v2 puts the CTA between the lede and the
        panels, not after them. Phase 2 owns that; this case owns the absence. */
     const html = render();
-    expect(html.indexOf("nb-board"), "no board container").toBeGreaterThan(-1);
+    /* RE-POINTED (Corkboard v1): at zero notes there is no board at all — the anchor is the workflow */
+    expect(html.indexOf("nb-wf"), "no empty state").toBeGreaterThan(-1);
+    expect(html).not.toMatch(/["\s`]nb-board["\s`]/);
     expect(sections(html)).not.toContain("example");
     expect(html).not.toContain("data-example");
   });

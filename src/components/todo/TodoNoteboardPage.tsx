@@ -2,8 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TodoNoteboardPage — /todo/noteboard (tasks-pages pack, Phase 4; ref design-refs/tasks-pages.html,
- * the NOTEBOARD frame).
+ * TodoNoteboardPage — THE CORKBOARD, /todo/corkboard (Corkboard v1, 12 Oct; ref design-refs/corkboard-v4/).
+ * The Noteboard renamed and redrawn: the same notes, the same store, the same writes. The file, the `nb-`
+ * classes and `todoPrefs.noteboard` keep their names — they are identifiers, not captions.
+ * (History: tasks-pages pack, Phase 4; ref design-refs/tasks-pages.html, the NOTEBOARD frame.)
+ *
+ * ⚠️ THE PAGE SCROLLS, UNDER THE SHARED NUMBER PANEL ("8 notes pinned to your corkboard"). Under it, one row:
+ * the "Add to your board" bar (Note in three papers, Task) and the find box and tag chips. Filtering FADES.
  *
  * ⚠️ NOTES ONLY — NOTHING DERIVED REACHES THIS BOARD. A note is the app's only user-owned,
  * dateless, chase-free object (the two-natures law): userTasks with no dueDate and no tick.
@@ -21,8 +26,10 @@
  * confirm) and holds an 8s undo that re-creates the SAME document id through addUserTask.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Search, MoreHorizontal } from "lucide-react";
-import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
+import { MoreHorizontal } from "lucide-react";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
+import { PageHeader, type LivingHeader } from "../shell/PageHeader";
+import { ArtSlot } from "./ArtSlot";
 import { PortalMenu } from "./PortalMenu";
 import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { useConfirmAsk } from "./ConfirmAsk";
@@ -38,12 +45,14 @@ import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
-  NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
+  noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
   noteboardPrefs, orderNotes, reorderIds, linkifyBody,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
+import { CORKBOARD_EMPTY, CORKBOARD_SUBLINE, PAD_LABEL, chipCounts, corkboardHeaderCopy } from "../../lib/corkboard";
+import { onlyForReview } from "../../lib/corkboardReviewAid";
 import { NoteColour, UserTask, TagDef } from "../../types";
 import { formatDate } from "../../lib/dates";
 import "./tasksLayout.css";
@@ -61,15 +70,37 @@ export interface TodoNoteboardPageProps {
 const pinDate = (iso: string | undefined): string =>
   iso ? formatDate(new Date(iso), { day: "numeric", month: "short" }).toUpperCase() : "";
 
-export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
-  const { userTasks, addUserTask, updateUserTask, deleteUserTask, restoreUserTask, setUserTaskColour, updateUserProfile, currentUser } = useScriptAllyDb();
+export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigatePath = () => {} }) => {
+  const { userTasks: storedTasks, collectionsReady, addUserTask, updateUserTask, deleteUserTask, restoreUserTask, setUserTaskColour, updateUserProfile, currentUser } = useScriptAllyDb();
   const { toast, flash, dismiss, pause, resume } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
+
+  /* ⚠️ THE DEV REVIEW AID IS GATED HERE, AT THE CALL SITE: a statically replaced MODE makes the branch dead in
+     a production build, so the module is unreachable from it (the CB1 locks narrow the shared account with it). */
+  const userTasks = useMemo(
+    () => (import.meta.env.MODE === "production" ? storedTasks : onlyForReview(storedTasks)),
+    [storedTasks],
+  );
+
+  /**
+   * ⚠️ THE COUNT WAITS FOR THE WRITER'S TASKS. `collectionsReady` answers for manuscripts, agents and queries;
+   * the user-task listener is a fourth and delivers on its own. Until it has (its array is replaced by the
+   * first snapshot, even an empty one) the header's number is a blank of its full box — never a 0 that then
+   * becomes 8 — with a short fallback so nothing can hold the header pending for ever.
+   */
+  const tasksAtMount = useRef(storedTasks);
+  /* a first render that already has the collections (a remount long after load) has its tasks too */
+  const [settled, setSettled] = useState<boolean>(!!collectionsReady);
+  useEffect(() => {
+    if (settled || !collectionsReady) return undefined;
+    if (storedTasks !== tasksAtMount.current) { setSettled(true); return undefined; }
+    const t = window.setTimeout(() => setSettled(true), 800);
+    return () => window.clearTimeout(t);
+  }, [collectionsReady, storedTasks, settled]);
 
   const [search, setSearch] = useState("");
   const [tagSel, setTagSel] = useState<string | null>(null); // one tag, or null for #All
   const [examples, setExamples] = useState(false); // the Examples drawer (P7)
-  const [column, setColumn] = useState(false);
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
   /** The note being turned into a task — the popover collects ONE answer now, the date. One
    *  object has one text, so the projection-era title field went with the projection: a separate
@@ -98,11 +129,35 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     [userTasks, currentUser?.todoPrefs?.noteboard?.order],
   );
 
+  /* ⚠️ FILTERING FADES, IT DOES NOT HIDE (Corkboard v1). `notes` is still "what matches" — the label counts it
+     and the board reads it — but every pinned note stays mounted where it is and the ones outside it drop to
+     22%. A board that re-packed on every keystroke would move the note you were looking for. */
   const notes = useMemo(() => {
     const all = pinned;
     const searched = all.filter((n) => noteMatchesSearch(n, search));
     return tagSel ? searched.filter((n) => (n.tags ?? []).includes(tagSel)) : searched;
   }, [pinned, search, tagSel]);
+  const matching = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
+  const narrowing = !!(search.trim() || tagSel);
+  const counts = useMemo(() => chipCounts(pinned), [pinned]);
+
+  /* THE HEADER (header v3, a number page): the notes on the board, unfiltered; null until settled. */
+  const living: LivingHeader = {
+    count: settled ? pinned.length : null,
+    copy: corkboardHeaderCopy,
+    empty: settled && pinned.length === 0 ? { heading: CORKBOARD_EMPTY.heading, subline: [CORKBOARD_EMPTY.subline] } : undefined,
+  };
+
+  /**
+   * THE TASK DOOR. A task is made by the To-do list's own composer — the Calendar's "New task" goes the same
+   * way: a one-shot `sa.todoCompose` key that ToDoPage consumes on arrival. ⚠️ NEVER A DATELESS TASK from
+   * here: a dateless `UserTask` IS a note (the two-natures law), so a quick add on this page could only write
+   * a note wearing a task's name.
+   */
+  const openTaskComposer = () => {
+    try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
+    onNavigatePath("/todo");
+  };
 
   /* ⚠️ THE CHIPS READ `pinned`, NOT `notes`. Derived from the filtered view they would vanish as
      you used them — pick one and the others disappear, because nothing left on the board carries
@@ -186,28 +241,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     }
   };
 
-  /* ⚠️ THE HEM IS GATED ON MEASURED OVERFLOW, NOT EXISTENCE (paper run, Phase 1). It used to be
-     `hem={notes.length > 0}`, so the chassis's sticky gradient rendered over whatever sat at the
-     fold — measured: full-strength across two cards while the zone overflowed by TWO PIXELS,
-     which is the "fade" the screenshot showed on cards and composer alike; their own paint was
-     always flat. The state derives from the value (scrollHeight − clientHeight > 24), never from
-     an event that could be missed, and the observers watch the zone AND its child — a
-     ResizeObserver on a scroller alone says nothing when its content grows. */
   const boardRef = useRef<HTMLDivElement | null>(null);
-  const [zoneScrolls, setZoneScrolls] = useState(false);
-  useEffect(() => {
-    const board = boardRef.current;
-    const zone = board?.closest(".tpl-zone") as HTMLElement | null;
-    if (!zone) return;
-    const read = () => setZoneScrolls(zone.scrollHeight - zone.clientHeight > 24);
-    read();
-    const ro = new ResizeObserver(read);
-    ro.observe(zone);
-    if (board) ro.observe(board);
-    return () => ro.disconnect();
-    /* re-find the board when the empty-state branch swaps it in or out; sizes are the
-       observers' job, existence is this dependency's */
-  }, [notes.length === 0 && !compose]);
   const tagLabel = (id: string) => userTags.find((t) => t.id === id)?.label ?? id;
 
   /* ⚠️ DECLARED ABOVE ITS FIRST READER. `pinNote` calls `createTagDef`; a hook destructured
@@ -453,171 +487,167 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     </div>
   );
 
+  /**
+   * A note's paper: the words, the stitched badge, its tags, the pin date and the ⋯ button. One function,
+   * because the board draws a note in more than one arrangement and two copies would drift.
+   */
+  const noteInner = (n: UserTask) => (
+    <>
+      {/* ⚠️ NODES, NOT MARKUP — bare URLs become anchors and nothing else can.
+          The body is React children, which React escapes by construction, so a note
+          containing markup renders it as the words the writer typed. */}
+      <div className="nb-body">{linkifyBody(n.text)}</div>
+      {/* ⚠️ THE OLD SPLIT'S SECOND BLOCK. Nothing writes `detail` any more — the
+          composer is one body — but notes written under the split have prose in it
+          and dropping it would lose their words. */}
+      {n.detail && <div className="nb-body nb-body--legacy">{linkifyBody(n.detail)}</div>}
+      {/* the badge is the note's OWN date — one document, nothing to consult */}
+      {n.dueDate && (
+        <div className="nb-taskbadge">
+          ✓ On your to-do list · {formatDate(new Date(n.dueDate), { day: "numeric", month: "short" })}
+        </div>
+      )}
+      <div className="nb-foot">
+        {(n.tags ?? []).map((tid) => {
+          const def = userTags.find((t) => t.id === tid);
+          const tone = def ? TAG_PALETTE[def.colour] : undefined;
+          return (
+            <span key={tid} className="nb-tag" style={tone ? { background: tone.bg, color: tone.tx } : undefined}>
+              #{tagLabel(tid)}
+            </span>
+          );
+        })}
+        <span className="nb-date">{pinDate(n.createdAt)}</span>
+        <button
+          type="button"
+          className="tbd-more"
+          aria-haspopup="menu"
+          aria-expanded={menu?.note.id === n.id}
+          aria-label={`Actions for ${n.text}`}
+          onClick={(e) => {
+            const anchor = e.currentTarget;
+            setMenu((m) => (m?.note.id === n.id ? null : { note: n, anchor }));
+          }}
+        >
+          <MoreHorizontal size={15} aria-hidden />
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="t-f12 spine-root">
       {/* ⚠️ THE TOKENS SCOPE HERE, NOT ON THE ROOT. `tasksViewport` requires the exact
           attribute `className="t-f12 spine-root"` on all four Tasks pages — the one-column law —
           so a page that needs a class of its own hangs it one level down. */}
       <div className="tdb-wrap today-off nb-scope">
-        <TasksPageLayout
-          title="Corkboard"
-          mark="noteboard"
-          subtitle={NOTEBOARD_SUBTITLE}
-          /* ⚠️ NO RESTING TALLY (finish run, 1c). "N notes pinned" sat left of the search box
-             and read as the field's label; the board self-evidences. The count that survives is
-             the FILTERED one, in the tool row, only while a search or a chip narrows. */
-          tools={
-            <>
-              <span className="nb-search">
-                <Search size={13} aria-hidden />
-                <input
-                  type="text"
-                  placeholder="Search your notes…"
-                  aria-label="Search your notes"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Escape") setSearch(""); }}
-                />
-              </span>
-              {/* ⚠️ THE CHIPS ARE THE TAGS IN USE, not the taxonomy. A tag the writer defined and
-                  has not put on a note can only ever return nothing, so it is not offered. The
-                  defs still supply the label — a raw `#t-letter` in a chip row is a leak. */}
-              <span className="nb-chipset">
-                {chips.map((c) => (
-                  <button
-                    key={c.id ?? "all"}
-                    type="button"
-                    className={`nb-chip${tagSel === c.id ? " on" : ""}`}
-                    aria-pressed={tagSel === c.id}
-                    onClick={() => setTagSel(c.id)}
-                  >
-                    #{c.label}
-                  </button>
-                ))}
-              </span>
-              <TplGrow />
-              {/* only while something narrows — the pure label keeps the form in one place */}
-              {(search.trim() || tagSel) && (
-                <span className="nb-fcount">{noteFilterLabel(notes.length, pinned.length)}</span>
-              )}
-              {/* the mockup's segmented pair — it replaces the "Read as a column" sentence, which
-                  named one of the two states and left the other unspoken */}
-              <span className="nb-viewtog">
-                <button type="button" className={column ? "" : "on"} aria-pressed={!column} onClick={() => setColumn(false)}>Board</button>
-                <button type="button" className={column ? "on" : ""} aria-pressed={column} onClick={() => setColumn(true)}>Column</button>
-              </span>
-              <button type="button" className="nb-btn-ghost" onClick={() => setExamples(true)}>Examples</button>
-              <button type="button" className="tdb-addb" onClick={() => openComposer()}>
-                <Plus size={13} aria-hidden /> Pin a note
-              </button>
-            </>
-          }
-          /* ⚠️ NO sidebar prop — the contract renders no aside at all */
-        >
-          {/* ⚠️ THE MASONRY IS THE SCROLLZONE (tasks-viewport P4): the header and tool row are
-              fixed above it, and the notes scroll beneath under their own hem. */}
-          <TplZone label="Notes" hem={zoneScrolls}>
-          {/* ⚠️ THE WORKFLOW NEVER RETIRES (workflow run, Phase 2) — it renders at ANY note
-              count, in one of two arrangements. Empty, it stands alone ABOVE the board with its
-              CTA row; populated, it sits BELOW the board behind a separator, with no CTA. One
-              component, one panels child; the board mounts in both cases. */}
-          {notes.length === 0 && !compose && (
-            <NoteboardWorkflow empty onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
-          )}
-          <div ref={boardRef} className={`nb-board${column ? " nb-col1" : ""}`}>
-              {!(compose && !compose.id) && (
-                <button type="button" className="nb-ghost" onClick={() => openComposer()}>
-                  + Pin a note
-                </button>
-              )}
-              {compose && !compose.id && composerCard}
-              {notes.map((n) => (
-                /* while a note is being edited the composer takes ITS slot — the same masonry
-                   position, so the edit happens where the note is rather than at the top */
-                n.id === compose?.id ? (
-                  <React.Fragment key={n.id}>{composerCard}</React.Fragment>
-                ) : (
-                /* the paper is READ, never assumed — a note with no colour is yellow here, which
-                   is also what a denied colour write leaves behind */
-                <article
-                  key={n.id}
-                  data-note={n.id}
-                  /* ⚠️ REAL NOTES ONLY — the example papers are not the writer's data and are
-                     never draggable (they carry no handlers and no draggable attribute). */
-                  draggable
-                  onDragStart={(e) => { dragIdRef.current = n.id; setDragId(n.id); e.dataTransfer.effectAllowed = "move"; }}
-                  onDragEnd={() => { dragIdRef.current = null; setDragId(null); setOverId(null); }}
-                  onDragOver={(e) => { e.preventDefault(); if (dragIdRef.current && dragIdRef.current !== n.id) setOverId(n.id); }}
-                  onDragLeave={() => setOverId((o) => (o === n.id ? null : o))}
-                  onDrop={(e) => { e.preventDefault(); void dropOn(n.id); }}
-                  className={`nb-note nb-c-${noteColour(n)}${dragId === n.id ? " nb-dragging" : ""}${overId === n.id ? " nb-dragover" : ""}`}
-                >
-                  {/* ⚠️ NODES, NOT MARKUP — bare URLs become anchors and nothing else can.
-                      The body is React children, which React escapes by construction, so a note
-                      containing markup renders it as the words the writer typed. */}
-                  <div className="nb-body">{linkifyBody(n.text)}</div>
-                  {/* ⚠️ THE OLD SPLIT'S SECOND BLOCK. Nothing writes `detail` any more — the
-                      composer is one body — but notes written under the split have prose in it
-                      and dropping it would lose their words. */}
-                  {n.detail && <div className="nb-body nb-body--legacy">{linkifyBody(n.detail)}</div>}
-                  {/* the badge is the note's OWN date — one document, nothing to consult */}
-                  {n.dueDate && (
-                    <div className="nb-taskbadge">
-                      ✓ On your to-do list · {formatDate(new Date(n.dueDate), { day: "numeric", month: "short" })}
+        {/* ⚠️ THE PAGE SCROLLS, AND ITS HEADER IS THE SHARED FULL PANEL (Corkboard v1) — the To-do list's own
+            arrangement: the grid's masthead is declined and the header is the first row of the page's group.
+            It left the Tasks family's fill chassis because a number panel is 260px tall: fixed above an
+            internal scroller it would leave a framed board a 400px window at 1280 × 800. */}
+        <WorkspacePageGrid className="tpl-wpg nb-wpg" scrollLabel="Corkboard" masthead={null}>
+          <div className="nb-group" data-cb="page" data-loading={settled ? undefined : ""}>
+            <PageHeader
+              variant="full"
+              panel
+              title="Corkboard"
+              description={CORKBOARD_SUBLINE}
+              living={living}
+              /* the drawing is not ready: a registered placeholder of its box (the Courier pinning a note) */
+              art={<ArtSlot name="corkboard-header" maxWidth={250} className="cb-hart" />}
+            />
+            {/* ⚠️ ZERO NOTES IS THE BUILT EMPTY STATE AND NOTHING ELSE: no add bar, no filter row, no board.
+                The composer it opens is the one exception — it needs a board to sit on. */}
+            {settled && pinned.length === 0 && !compose ? (
+              <NoteboardWorkflow empty onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
+            ) : (
+              <>
+                <div className="cb-over" data-cb="over">
+                  <div className="cb-addrow" role="group" aria-label="Add to your board" data-cb="addrow">
+                    <span className="cb-addlab">Add to your board</span>
+                    <div className="cb-pads" title="Pin a note" data-cb="pads">
+                      {NOTE_COLOURS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          className={`cb-pad nb-c-${c}`}
+                          aria-label={PAD_LABEL[c]}
+                          data-cb-pad={c}
+                          /* the built compose editor, with this paper already chosen */
+                          onClick={() => openComposer({ colour: c })}
+                        />
+                      ))}
+                      <span>Note</span>
                     </div>
-                  )}
-                  <div className="nb-foot">
-                    {(n.tags ?? []).map((tid) => {
-                      const def = userTags.find((t) => t.id === tid);
-                      const tone = def ? TAG_PALETTE[def.colour] : undefined;
-                      return (
-                        <span key={tid} className="nb-tag" style={tone ? { background: tone.bg, color: tone.tx } : undefined}>
-                          #{tagLabel(tid)}
-                        </span>
-                      );
-                    })}
-                    <span className="nb-date">{pinDate(n.createdAt)}</span>
-                    <button
-                      type="button"
-                      className="tbd-more"
-                      aria-haspopup="menu"
-                      aria-expanded={menu?.note.id === n.id}
-                      aria-label={`Actions for ${n.text}`}
-                      onClick={(e) => {
-                        const anchor = e.currentTarget;
-                        setMenu((m) => (m?.note.id === n.id ? null : { note: n, anchor }));
-                      }}
-                    >
-                      <MoreHorizontal size={15} aria-hidden />
+                    <button type="button" className="cb-sup" data-cb="add-task" onClick={openTaskComposer}>
+                      <span className="cb-ico" aria-hidden>
+                        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 12.5l3 3 5-6" /></svg>
+                      </span>
+                      Task
                     </button>
                   </div>
-                </article>
-                )
-              ))}
-              {/* ⚠️ EXAMPLE PAPERS — below every real note, never in filtered results, and only
-                  while the board holds fewer than three. Each is a dashed reduced-opacity card
-                  wearing its colour and an EXAMPLE chip; Keep pins a REAL copy through the
-                  normal create path and retires the example for good. */}
-              {/* ⚠️ CONDITIONALLY RENDERED, never `hidden`. The UA sheet's `[hidden]{display:none}`
-                  is weaker than any author display rule, so a flex or grid element wearing the
-                  attribute stays on screen — the element is simply absent instead. It appears only
-                  when a search or a chip is narrowing: an empty BOARD is a different state with
-                  its own panel, and "nothing matches" would be the wrong sentence for it. */}
-              {notes.length === 0 && (search.trim() || tagSel) && (
-                <div className="nb-empty-search">Nothing matches that search.</div>
-              )}
-          </div>
+                  <div className="cb-filters" role="group" aria-label="Show" data-cb="filters">
+                    <input
+                      className="cb-find"
+                      type="text"
+                      placeholder="Find a note"
+                      aria-label="Find a note"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Escape") setSearch(""); }}
+                    />
+                    {/* ⚠️ THE CHIPS ARE THE TAGS IN USE, not the taxonomy, and they read the UNFILTERED list —
+                        so do their counts. The defs supply the label: a raw `#t-letter` in a chip is a leak. */}
+                    {chips.map((c) => (
+                      <button
+                        key={c.id ?? "all"}
+                        type="button"
+                        className="cb-chip"
+                        aria-pressed={tagSel === c.id}
+                        data-cb-chip={c.id ?? "all"}
+                        onClick={() => setTagSel(c.id)}
+                      >
+                        {c.id === null ? c.label : `#${c.label}`} <b>{counts.get(c.id) ?? 0}</b>
+                      </button>
+                    ))}
+                    {/* only while something narrows — the pure label keeps the form in one place */}
+                    {narrowing && <span className="nb-fcount" data-cb="fcount">{noteFilterLabel(notes.length, pinned.length)}</span>}
+                  </div>
+                </div>
 
-          {/* ⚠️ BELOW THE BOARD, IN THE FLOW — not merely later in the DOM. The board is a
-              multicol block that closes above this, so the separator and the panels stack
-              beneath whatever the columns grew to; the geometric half is measured in the
-              browser (nbWorkflow.measure.ts), because DOM order alone would not have caught
-              the multicol flow problem that bit the examples' hint line one run earlier. */}
-          {notes.length > 0 && (
-            <NoteboardWorkflow empty={false} onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
-          )}
-          </TplZone>
-        </TasksPageLayout>
+                <div ref={boardRef} className="nb-board" data-cb="notes">
+                  {compose && !compose.id && composerCard}
+                  {pinned.map((n) => (
+                    /* while a note is being edited the composer takes ITS slot, so the edit happens where
+                       the note is rather than at the top */
+                    n.id === compose?.id ? (
+                      <React.Fragment key={n.id}>{composerCard}</React.Fragment>
+                    ) : (
+                      <article
+                        key={n.id}
+                        data-note={n.id}
+                        draggable
+                        onDragStart={(e) => { dragIdRef.current = n.id; setDragId(n.id); e.dataTransfer.effectAllowed = "move"; }}
+                        onDragEnd={() => { dragIdRef.current = null; setDragId(null); setOverId(null); }}
+                        onDragOver={(e) => { e.preventDefault(); if (dragIdRef.current && dragIdRef.current !== n.id) setOverId(n.id); }}
+                        onDragLeave={() => setOverId((o) => (o === n.id ? null : o))}
+                        onDrop={(e) => { e.preventDefault(); void dropOn(n.id); }}
+                        className={`nb-note nb-c-${noteColour(n)}${narrowing && !matching.has(n.id) ? " cb-dim" : ""}${dragId === n.id ? " nb-dragging" : ""}${overId === n.id ? " nb-dragover" : ""}`}
+                      >
+                        {noteInner(n)}
+                      </article>
+                    )
+                  ))}
+                </div>
+
+                {/* the built workflow panels, beneath a board that has notes — unchanged */}
+                {settled && pinned.length > 0 && (
+                  <NoteboardWorkflow empty={false} onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
+                )}
+              </>
+            )}
+          </div>
+        </WorkspacePageGrid>
       </div>
 
       {menu && (

@@ -414,3 +414,86 @@
 
 /* `.nb-uselink` went with "Use as a starting point →" — the drawer's action WRITES now and wears
    `.nb-keep`, which it inherited from the board papers. */
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   CORKBOARD v1 (12 Oct; ref design-refs/corkboard-v4/corkboard-v4.html) — the Noteboard renamed and
+   redrawn. Everything below is `cb-`: the row under the header, then the cork board.
+   The fonts are the APP'S built stacks (--sp-type, --sp-serif, --sp-mono, Caveat); the ref loads its
+   own from the web and its screenshots were taken on fallbacks.
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+.nb-scope {
+  --cb-paper: #fbf9f5;
+  --cb-line: #ddd6ca;
+  --cb-band: #2d3a50;
+  --cb-cream: #f6efe2;
+  --cb-ink: #1c130f;
+  --cb-mute: #6f675e;
+  --cb-slate: #6A89A7;
+  --cb-rust: #b9683c;
+}
+
+/* the page's group: the shared panel header, then the row, then the board — one column, scrolling */
+.nb-group { display: block; min-width: 0; padding-bottom: 56px; }
+
+/* the header's drawing is a registered placeholder until it is supplied: the ref's 250 × 136 box, dashed
+   on the navy. ⚠️ Scoped to the placeholder (`.cb-hart`), so the day an image lands the shared disc applies. */
+.nb-group .hp3 .hp3-art:has(.cb-hart) { width: 250px; height: auto; padding: 0; aspect-ratio: auto; border-radius: 0; background: none; box-shadow: none; }
+.nb-group .cb-hart .art-box { border-color: #7d8aa0; background: none; }
+.nb-group .cb-hart .art-phk { color: #aab4c4; font-size: 9px; }
+
+/* ── the row under the header: 22 below the panel, 14 above the board; it wraps when narrow ── */
+.cb-over { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 22px 0 14px; }
+
+.cb-addrow {
+  display: flex; align-items: center; gap: 8px; box-sizing: border-box;
+  background: var(--cb-paper); border: 1px solid var(--cb-line); border-radius: 12px; padding: 7px 9px 7px 16px;
+}
+.cb-addlab { font-family: var(--sp-type); font-size: 15px; line-height: 1.45; color: var(--cb-ink); margin-right: 6px; white-space: nowrap; }
+.cb-sup, .cb-pads {
+  display: flex; align-items: center; gap: 8px; box-sizing: border-box; height: 36px; padding: 0 13px 0 9px;
+  border-radius: 8px; border: 1px solid var(--cb-line); background: #fff; color: var(--cb-ink);
+  font-family: var(--sp-serif); font-weight: 600; font-size: 14px; line-height: 1.45;
+}
+.cb-sup { cursor: pointer; }
+.cb-sup:hover { border-color: var(--cb-band); }
+.cb-pads { gap: 5px; padding-left: 10px; }
+.cb-pads > span { margin-left: 4px; }
+/* ⚠️ THE SQUARES ARE THE NOTE PAPERS: `.nb-c-*` supplies the fill (one definition of each colour), and this
+   rule — two classes, so it outranks the paper's own border colour — states the deeper edge a 22px square needs. */
+.cb-pad {
+  box-sizing: border-box; width: 22px; height: 22px; padding: 0; border: 1px solid; border-radius: 0; cursor: pointer;
+  box-shadow: 1.5px 1.5px 0 rgba(40, 25, 10, 0.22); transition: transform 0.12s;
+}
+.cb-pad:hover { transform: translateY(-3px) rotate(-5deg); }
+.cb-pads .cb-pad.nb-c-yellow { border-color: #d9c88a; }
+.cb-pads .cb-pad.nb-c-pink { border-color: #d9b0a1; }
+.cb-pads .cb-pad.nb-c-sage { border-color: #aebba9; }
+.cb-ico { width: 22px; height: 22px; display: grid; place-items: center; }
+.cb-ico svg { display: block; width: 20px; height: 20px; stroke: var(--cb-ink); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+.cb-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.cb-find {
+  box-sizing: border-box; height: 30px; width: 170px; border-radius: 15px; border: 1px solid var(--cb-line); background: #fff;
+  font-family: var(--sp-serif); font-size: 13.5px; line-height: normal; color: var(--cb-ink); padding: 0 13px; outline: 0;
+}
+.cb-find::placeholder { color: var(--cb-mute); }
+.cb-find:focus { border-color: var(--cb-band); }
+.cb-chip {
+  box-sizing: border-box; height: 30px; padding: 0 13px; border-radius: 15px; border: 1px solid var(--cb-line); background: var(--cb-paper);
+  font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.45; color: var(--cb-ink); cursor: pointer; white-space: nowrap;
+}
+.cb-chip b { font-family: var(--sp-mono); font-weight: 500; font-size: 11px; opacity: 0.6; margin-left: 5px; }
+.cb-chip[aria-pressed="true"] { background: var(--cb-band); border-color: var(--cb-band); color: var(--cb-cream); }
+.cb-chip--tool { border-style: dashed; margin-left: 6px; }
+.cb-chip:focus-visible, .cb-sup:focus-visible, .cb-pad:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
+
+/* ⚠️ THE "n of N notes" LABEL TAKES NO ROOM. In the row it widened the filters by its own width, the row wrapped
+   at 1512 and the whole board dropped a line the moment a chip was pressed (measured). It hangs in the 14px
+   under the filters instead, so narrowing changes what is bright and moves nothing. */
+.cb-filters { position: relative; }
+.cb-filters .nb-fcount { position: absolute; right: 4px; top: 100%; margin: 1px 0 0; line-height: 12px; white-space: nowrap; }
+
+/* ⚠️ FILTERING FADES, IT DOES NOT HIDE: a note outside the search or the chip stays where it is at 22%. */
+.cb-dim { opacity: 0.22; }
+
+@media (prefers-reduced-motion: reduce) { .cb-pad { transition: none; } }

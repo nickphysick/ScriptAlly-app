@@ -102,14 +102,15 @@ describe("⚠️ the composer keeps what you have already written", () => {
     expect(new Set(all.map((d) => d.body)).size).toBe(1);
   });
 
-  it("one composer, two doors — the toolbar button and the ghost tile open the SAME one", () => {
+  it("one composer, several doors — the three paper squares and the empty state open the SAME one", () => {
     /* two openers with two bodies is two surfaces for one action, and they drift */
     const opens = [...page.matchAll(/openComposer\(/g)].length;
     expect(opens).toBeGreaterThanOrEqual(2);
     expect(page).toContain("const openComposer");
-    /* and the ghost is FIRST in the flow, replaced by the composer rather than sitting beside it */
-    expect(page).toContain("nb-ghost");
-    expect(page.indexOf("nb-ghost")).toBeLessThan(page.indexOf("notes.map"));
+    expect([...page.matchAll(/const openComposer\b/g)].length).toBe(1);
+    /* RE-POINTED (Corkboard v1): the ghost tile is retired — adding happens in the bar above the board
+       (baked decision 3) — so there is no tile for the composer to replace. */
+    expect(page).not.toMatch(/["\s`]nb-ghost["\s`]/);
   });
 });
 
