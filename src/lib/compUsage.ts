@@ -242,3 +242,38 @@ export function resolutionCounts(manuscript: Manuscript, versions: readonly Vers
   }
   return { resolved, unresolved, ambiguous };
 }
+
+/* ══ everything the comps page reads, in one pass ═════════════════════════════════════════════ */
+
+export interface UsageModel {
+  letters: VersionLike[];
+  usage: Map<string, CompUse>;
+  /** query id → its letter id, for the queries that resolve to one */
+  letterOfQuery: Map<string, string>;
+  /** letter id → the number of queries it went out with */
+  sentByLetter: Map<string, number>;
+  /** ids of the queries that reached a partial or full request, or an offer */
+  asked: Set<string>;
+  attachment: Attachment;
+  unrecorded: UnrecordedLetter[];
+}
+
+export function usageModel(manuscript: Manuscript, versions: readonly VersionLike[], packages: readonly PackageLike[], queries: readonly QueryLike[], activities: readonly Activity[] = []): UsageModel {
+  const mine = queries.filter((q) => q.manuscriptId === manuscript.id);
+  const letterOfQuery = new Map<string, string>();
+  const sentByLetter = new Map<string, number>();
+  for (const q of mine) {
+    const l = letterOf(q, versions, packages);
+    if (!l) continue;
+    letterOfQuery.set(q.id, l);
+    sentByLetter.set(l, (sentByLetter.get(l) ?? 0) + 1);
+  }
+  return {
+    letters: lettersOf(manuscript.id, versions),
+    usage: compUsage(manuscript, versions, packages, queries, activities),
+    letterOfQuery, sentByLetter,
+    asked: new Set(buildRows(mine as Query[], [...activities], [], 0).filter((r) => r.reachedRequest).map((r) => r.id)),
+    attachment: attachment(manuscript, versions, packages, queries),
+    unrecorded: unrecordedLetters(manuscript, versions, packages, queries),
+  };
+}
