@@ -11,7 +11,7 @@
  *
  *   node tests/e2e/seedCompsV25.mjs            # (re)write it — delete-before-write
  *   node tests/e2e/seedCompsV25.mjs --restore  # delete everything it wrote
- *   node tests/e2e/seedCompsV25.mjs --dump     # {"comps":[…],"letters":{id:compIds|null}} as stored
+ *   node tests/e2e/seedCompsV25.mjs --dump     # {"comps":[…],"letters":{id:compIds|null}} as stored (--ms <id> for another manuscript's comps)
  *   node tests/e2e/seedCompsV25.mjs --empty    # also write `cv25-ms-empty` (no comps)
  */
 import { readFileSync, existsSync } from "node:fs";
@@ -99,7 +99,9 @@ const ms = (id, comps) => ({
 });
 
 if (process.argv.includes("--dump")) {
-  const m = await getDoc(at("manuscripts", MS));
+  /* `--ms <id>` dumps another of the fixture's manuscripts (the empty one, for comps v26's AD6) */
+  const mi = process.argv.indexOf("--ms");
+  const m = await getDoc(at("manuscripts", mi > -1 ? process.argv[mi + 1] : MS));
   const letters = {};
   const vs = await getDocs(query(collection(db, "users", uid, "versions"), where("manuscriptId", "==", MS)));
   for (const d of vs.docs) if (d.data().componentType === "Query Letter") letters[d.id] = { name: d.data().versionName, compIds: d.data().compIds ?? null };

@@ -252,6 +252,8 @@
   box-shadow: var(--cpv-shadow);
   position: relative;
 }
+/* the exhibit's picture of a card (comps v26): no grip column, since drag-to-reorder left the page */
+.cpv-comp.cpv-comp--ex { grid-template-columns: 46px minmax(0, 1fr) auto; padding-left: 16px; }
 .cpv-comp.is-in { box-shadow: inset 0 0 0 1.5px rgba(138, 74, 60, 0.45), var(--cpv-shadow); }
 .cpv-comp.is-dragging { opacity: 0.4; }
 .cpv-comp.drop-before::before, .cpv-comp.drop-after::after {
@@ -475,5 +477,7 @@ body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing
   .cpv-fgrid { grid-template-columns: 1fr 1fr; }
   .cpv-comp { grid-template-columns: 18px 40px minmax(0, 1fr); }
   .cpv-comp .cpv-cside { grid-column: 3; flex-direction: row; align-items: center; justify-content: space-between; margin-top: 2px; }
+  .cpv-comp.cpv-comp--ex { grid-template-columns: 40px minmax(0, 1fr); }
+  .cpv-comp.cpv-comp--ex .cpv-cside { grid-column: 2; }
   .cpv-spine { width: 40px; height: 58px; }
 }

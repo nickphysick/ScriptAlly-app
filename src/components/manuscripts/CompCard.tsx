@@ -58,7 +58,7 @@ export const CompCard: React.FC<CompCardProps> = ({
   const facets = compFacets(c);
   const by = [c.author, c.publisher].filter((x): x is string => !!x && !!x.trim()).join(" · ");
   const on = !!inLetter;
-  const cls = ["cpv-comp", on ? "is-in" : "", dragging ? "is-dragging" : "", drop ? `drop-${drop}` : "", flash ? "flash" : ""]
+  const cls = ["cpv-comp", example ? "cpv-comp--ex" : "", on ? "is-in" : "", dragging ? "is-dragging" : "", drop ? `drop-${drop}` : "", flash ? "flash" : ""]
     .filter(Boolean).join(" ");
 
   /* ⚠️ A FUNCTION, NOT A COMPONENT DEFINED IN RENDER — a component declared here is a new type on
@@ -75,9 +75,8 @@ export const CompCard: React.FC<CompCardProps> = ({
 
   return (
     <article className={cls} data-cpv="comp" data-title={c.title}>
-      {example ? (
-        <span className="cpv-grip" aria-hidden="true"><GripDots /></span>
-      ) : (
+      {/* the exhibit's picture has no grip: drag-to-reorder left the page with comps v25 */}
+      {example ? null : (
         <button
           type="button"
           className="cpv-grip"
