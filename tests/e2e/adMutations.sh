@@ -10,12 +10,13 @@
 set -u
 cd "$(dirname "$0")/../.." || exit 1
 : "${SA_E2E_BASE_URL:?set SA_E2E_BASE_URL}"
-OUT=reports/comps-v26/mutation-runs; mkdir -p "$OUT"
+OUT=reports/comps-v26-1/mutation-runs; mkdir -p "$OUT"
 BAK="${TMPDIR:-/tmp}/ad-mut-$$"; mkdir -p "$BAK"
 want() { [ -z "${ONLY:-}" ] || case " $ONLY " in *" $1 "*) true;; *) false;; esac; }
-run() {
-  AD_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV26.measure.ts -g "^.*$1 · " > "$OUT/$1.log" 2>&1
-  echo "$1: exit $? · $(grep -c '✗' "$OUT/$1.log") red reading(s)"
+run() { # lock [tag: a second mutation of the same lock logs under lock-tag]
+  local log="$OUT/$1${2:+-$2}.log"
+  AD_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV26.measure.ts -g "^.*$1 · " > "$log" 2>&1
+  echo "$1${2:+ ($2)}: exit $? · $(grep -c '✗' "$log") red reading(s)"
 }
 for L in AD1 AD5 AD8 AD9; do want "$L" && run "$L"; done
 
@@ -28,7 +29,7 @@ import sys
 p=sys.argv[1]; s=open(p,encoding='utf-8').read(); o=sys.argv[2]; n=sys.argv[3]
 assert s.count(o)==1, ('mutation anchor not found exactly once', p, o[:60], s.count(o))
 open(p,'w',encoding='utf-8').write(s.replace(o,n))" "$2" "$3" "$4" || { cp "$BAK/$key" "$2"; echo "$1: MUTATION NOT APPLIED"; return; }
-  if npm run build:dev > "$OUT/$1.build.log" 2>&1; then run "$1"; else echo "$1: the mutated build failed"; fi
+  if npm run build:dev > "$OUT/$1.build.log" 2>&1; then run "$1" "${5:-}"; else echo "$1: the mutated build failed"; fi
   cp "$BAK/$key" "$2"
 }
 FORM=src/components/manuscripts/CompForm.tsx
@@ -37,6 +38,9 @@ src AD3 "$FORM" 'onClick={() => set({ media: m.value })}' 'onClick={() => set({ 
 src AD4 "$FORM" 'data-cf="save" disabled={!form.hasTitle}' 'data-cf="save" disabled={!form.hasTitle || form.state !== "ready"}'
 src AD6 src/components/manuscripts/ComparableTitlesPage.tsx 'if (!o.again) setDrawer(null);' 'setDrawer(null);'
 src AD7 "$FORM" '.filter(Boolean).join(" · ");' '.filter(Boolean).join(", ");'
+# comps v26.1
+src AD9 src/components/manuscripts/CompCard.tsx '{on && !example && btn(' '{(on || example) && btn(' switch
+src AD10 src/components/manuscripts/ComparableTitlesPage.tsx 'if (el && el.isConnected && !picker) el.focus({ preventScroll: true });' 'void el;'
 
 npm run build:dev > "$OUT/restore.build.log" 2>&1 && echo "restored and rebuilt"
 node tests/e2e/seedCompsV25.mjs --restore > /dev/null 2>&1

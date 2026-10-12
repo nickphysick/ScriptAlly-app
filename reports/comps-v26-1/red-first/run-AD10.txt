@@ -1,0 +1,52 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.2s)
+  ✗ AD10 · 1512 add: ✕ closes the drawer and returns focus to "Add a comp" — closed true · focus on body
+  ✗ AD10 · 1512 add: Cancel closes the drawer and returns focus to "Add a comp" — closed true · focus on body
+  ✗ AD10 · 1512 add: Escape closes the drawer and returns focus to "Add a comp" — closed true · focus on body
+  ✗ AD10 · 1512 edit: Escape returns focus to the row's Edit — closed true · focus on body
+  ✗ AD10 · 1280 add: ✕ closes the drawer and returns focus to "Add a comp" — closed true · focus on body
+  ✗ AD10 · 1280 add: Cancel closes the drawer and returns focus to "Add a comp" — closed true · focus on body
+  ✗ AD10 · 1280 add: Escape closes the drawer and returns focus to "Add a comp" — closed true · focus on body
+  ✗ AD10 · 1280 edit: Escape returns focus to the row's Edit — closed true · focus on body
+[AD10] 14/22 green
+  ✘  2 [measure] › tests/e2e/compsV26.measure.ts:385:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note (34.8s)
+
+
+  1) [measure] › tests/e2e/compsV26.measure.ts:385:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "AD10 · 1512 add: ✕ closes the drawer and returns focus to \"Add a comp\" — closed true · focus on body",
+    +   "AD10 · 1512 add: Cancel closes the drawer and returns focus to \"Add a comp\" — closed true · focus on body",
+    +   "AD10 · 1512 add: Escape closes the drawer and returns focus to \"Add a comp\" — closed true · focus on body",
+    +   "AD10 · 1512 edit: Escape returns focus to the row's Edit — closed true · focus on body",
+    +   "AD10 · 1280 add: ✕ closes the drawer and returns focus to \"Add a comp\" — closed true · focus on body",
+    +   "AD10 · 1280 add: Cancel closes the drawer and returns focus to \"Add a comp\" — closed true · focus on body",
+    +   "AD10 · 1280 add: Escape closes the drawer and returns focus to \"Add a comp\" — closed true · focus on body",
+    +   "AD10 · 1280 edit: Escape returns focus to the row's Edit — closed true · focus on body",
+    + ]
+
+      44 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      45 |     if (!MUT) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 46 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      47 |   }
+      48 | }
+      49 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps261/tests/e2e/compsV26.measure.ts:46:95)
+        at /Users/nickphysick/ScriptAlly-comps261/tests/e2e/compsV26.measure.ts:429:7
+
+    Error Context: test-results/compsV26.measure.ts-Compar-6c3d2-l-Enter-saves-from-the-note-measure/error-context.md
+
+    Error Context: test-results/compsV26.measure.ts-Compar-6c3d2-l-Enter-saves-from-the-note-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV26.measure.ts:385:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note 
+  1 passed (58.6s)

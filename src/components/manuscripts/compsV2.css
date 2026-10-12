@@ -22,13 +22,11 @@
 /* ⚠️ FIRST IN THE SHEET, AT 0-1-0: `lib/brand.tsx` names a body family on bare span/p/div/button/
    input/label at runtime (0-0-1). This beats it by one class and — being first — loses on source
    order to every `.cpv-*` rule below that states its own face (the qcvPage.css arrangement). */
-:is(.cpv-page, .cpv-scope) :where(span, p, div, label, li, ol, b, i, a, button, input, textarea, section, article, aside, form) {
+.cpv-page :where(span, p, div, label, li, ol, b, i, a, button, input, textarea, section, article, aside, form) {
   font-family: inherit;
 }
 
-/* `.cpv-scope` is the same vocabulary for what the page portals out of itself (comps v25: the comp
-   form inside the drawer). A portal is outside `.cpv-page`, where every token below would resolve to nothing. */
-.cpv-scope, .cpv-page {
+.cpv-page {
   --cpv-ink: var(--sp-ink);
   --cpv-muted: var(--shell-mute);
   --cpv-hair: var(--shell-hairline);
@@ -40,7 +38,6 @@
   --cpv-shadow: var(--mat-soft);
   --cpv-ms: var(--o-ms);
   --cpv-scout: var(--o-scout);
-  --cpv-requested: var(--state-you);
   --cpv-type: var(--sp-type);
   --cpv-serif: var(--sp-serif);
   --cpv-mono: var(--font-mono);
@@ -55,7 +52,7 @@
   padding-bottom: 110px;
   min-width: 0;
 }
-:is(.cpv-page, .cpv-scope) *, :is(.cpv-page, .cpv-scope) *::before, :is(.cpv-page, .cpv-scope) *::after { box-sizing: border-box; }
+.cpv-page *, .cpv-page *::before, .cpv-page *::after { box-sizing: border-box; }
 
 /* ── the group: the full header is row 1 across both tracks; the column and the rail are row 2 at
    the rule + 24 (page-anatomy-v2 §3 — the Contact list's `.clv-group`, exactly) ── */
@@ -72,15 +69,7 @@
 .cpv-group > .cpv-rail { grid-column: 2; grid-row: 2; margin-top: 24px; }
 .cpv-main { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 
-/* ── shared bits: labels, tags, buttons ── */
-.cpv-lbl {
-  font-family: var(--cpv-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--cpv-muted);
-  font-weight: 600;
-}
+/* ── shared bits: tags, buttons ── */
 .cpv-ex {
   font-family: var(--cpv-mono);
   font-size: 7.5px;
@@ -357,72 +346,6 @@ body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing
 @media (prefers-reduced-motion: reduce) { .cpv-inl .sw, .cpv-inl .sw::after { transition: none; } }
 .cpv-cacts { display: flex; gap: 2px; }
 
-/* ── the inline add / edit form ── */
-.cpv-form { background: #fff; border-radius: 12px; padding: 18px 18px 16px; box-shadow: inset 0 0 0 1.5px var(--cpv-btn), var(--cpv-shadow); }
-.cpv-fh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.cpv-fh b { font-family: var(--cpv-type); font-weight: 400; font-size: 18px; }
-.cpv-keys { font-family: var(--cpv-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cpv-muted); }
-.cpv-fgrid { display: grid; grid-template-columns: 2fr 1.4fr 1.4fr 90px; gap: 12px; }
-.cpv-fgrid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
-.cpv-mrow { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
-.cpv-f { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.cpv-f label, .cpv-f .fl {
-  font-family: var(--cpv-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--cpv-muted);
-  font-weight: 600;
-}
-.cpv-f .req { color: var(--cpv-ms); }
-.cpv-f input, .cpv-f textarea {
-  border: 0;
-  border-radius: 9px;
-  background: var(--cpv-parch-2);
-  padding: 9px 11px;
-  font-family: var(--cpv-serif);
-  font-size: 14.5px;
-  color: var(--cpv-ink);
-  width: 100%;
-  box-shadow: inset 0 0 0 1px transparent;
-  /* ⚠️ STATED, because it is inherited otherwise: Tailwind's preflight gives form controls
-     `font: inherit`, so the page's 1.45 reached these inputs (39px) where the mock's keep the
-     browser's `normal` (38px). The textarea below restates its own. */
-  line-height: normal;
-}
-.cpv-f textarea { resize: vertical; min-height: 60px; line-height: 1.45; }
-.cpv-f input:focus, .cpv-f textarea:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--cpv-btn); background: #fff; }
-.cpv-f .hint { font-size: 12px; color: var(--cpv-muted); }
-.cpv-f .err { font-size: 12.5px; color: var(--cpv-ink); }
-.cpv-chipin {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  align-items: center;
-  background: var(--cpv-parch-2);
-  border-radius: 9px;
-  padding: 6px 8px;
-  min-height: 40px;
-}
-.cpv-chipin:focus-within { box-shadow: inset 0 0 0 1.5px var(--cpv-btn); background: #fff; }
-.cpv-chipin .cpv-facet { display: inline-flex; align-items: center; gap: 5px; background: #fff; box-shadow: inset 0 0 0 1px var(--cpv-hair); }
-.cpv-chipin .cpv-facet button { border: 0; background: none; padding: 0; font-size: 11px; line-height: 1; color: var(--cpv-muted); cursor: pointer; }
-.cpv-f .cpv-chipin input { border: 0; background: transparent; flex: 1; min-width: 120px; width: auto; padding: 3px 4px; box-shadow: none; }
-.cpv-f .cpv-chipin input:focus { box-shadow: none; background: transparent; }
-.cpv-dupe {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--cpv-requested);
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-size: 13.5px;
-}
-.cpv-dupe > span { flex: 1; }
-.cpv-ff { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; }
-.cpv-ff .hint { font-size: 12.5px; color: var(--cpv-muted); }
-.cpv-ff .btns { display: flex; gap: 8px; }
 .cpv-full { font-size: 13.5px; color: var(--cpv-muted); padding: 10px 4px; }
 
 /* ── the empty state: the exhibition's own stack (living headers v3 §5) — the main column's rhythm.
@@ -474,7 +397,6 @@ body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing
 .cpv-sacts { display: flex; gap: 6px; margin-top: 8px; }
 
 @media (max-width: 1360px) {
-  .cpv-fgrid { grid-template-columns: 1fr 1fr; }
   .cpv-comp { grid-template-columns: 18px 40px minmax(0, 1fr); }
   .cpv-comp .cpv-cside { grid-column: 3; flex-direction: row; align-items: center; justify-content: space-between; margin-top: 2px; }
   .cpv-comp.cpv-comp--ex { grid-template-columns: 40px minmax(0, 1fr); }

@@ -10,14 +10,15 @@
 set -u
 cd "$(dirname "$0")/../.." || exit 1
 : "${SA_E2E_BASE_URL:?set SA_E2E_BASE_URL}"
-OUT=reports/comps-v25/mutation-runs; mkdir -p "$OUT"
+OUT="${OUT:-reports/comps-v25/mutation-runs}"; mkdir -p "$OUT"
 BAK="${TMPDIR:-/tmp}/cv25-mut-$$"; mkdir -p "$BAK"
 
 # ONLY="C1 D1" limits the run to those locks.
 want() { [ -z "${ONLY:-}" ] || case " $ONLY " in *" $1 "*) true;; *) false;; esac; }
-run() { # lock
-  CV25_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV25.measure.ts -g "^.*$1 · " > "$OUT/$1.log" 2>&1
-  echo "$1: exit $? · $(grep -c '✗' "$OUT/$1.log") red reading(s)"
+run() { # lock [tag: a second mutation of the same lock logs under lock-tag]
+  local log="$OUT/$1${2:+-$2}.log"
+  CV25_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV25.measure.ts -g "^.*$1 · " > "$log" 2>&1
+  echo "$1${2:+ ($2)}: exit $? · $(grep -c '✗' "$log") red reading(s)"
 }
 for L in B1 B2 C1 D1 D2 E1 L1; do want "$L" && run "$L"; done
 
@@ -30,7 +31,7 @@ import sys
 p=sys.argv[1]; s=open(p,encoding='utf-8').read(); o=sys.argv[2]; n=sys.argv[3]
 assert s.count(o)==1, ('mutation anchor not found exactly once', p, o[:60], s.count(o))
 open(p,'w',encoding='utf-8').write(s.replace(o,n))" "$2" "$3" "$4" || { cp "$BAK/$key" "$2"; echo "$1: MUTATION NOT APPLIED"; return; }
-  if npm run build:dev > "$OUT/$1.build.log" 2>&1; then run "$1"; else echo "$1: the mutated build failed"; fi
+  if npm run build:dev > "$OUT/$1.build.log" 2>&1; then run "$1" "${5:-}"; else echo "$1: the mutated build failed"; fi
   cp "$BAK/$key" "$2"
 }
 PAGE=src/components/manuscripts/ComparableTitlesPage.tsx
@@ -39,6 +40,8 @@ src A3 src/components/manuscripts/comps25/CompLetterPicker.tsx 'const fixed = se
 src D3 src/lib/compsLibrary.ts 'const firstDir = (k: SortKey): 1 | -1 => (k === "title" ? 1 : -1);' 'const firstDir = (_k: SortKey): 1 | -1 => 1;'
 src D4 "$PAGE" 'useState<GroupBy>("none")' 'useState<GroupBy>("where")'
 src E2 "$PAGE" 'const err = await updateVersion(letterId, { compIds: ids });' 'let err: string | null = null; for (const l of letters) { const e = await updateVersion(l.id, { compIds: ids }); if (l.id === letterId) err = e; }'
+# comps v26.1: the picker's first frame. The letter is chosen in an effect, after the picker is first drawn.
+src E2 src/components/manuscripts/comps25/CompLetterPicker.tsx '  if (stale) sync();' '  React.useEffect(() => { if (stale) sync(); });' firstframe
 src F1 src/components/shell/useFullScreenList.ts 'useEffect(() => (full ? holdSidebarCollapsed() : undefined), [full]);' 'useEffect(() => undefined, [full]);'
 
 npm run build:dev > "$OUT/restore.build.log" 2>&1 && echo "restored and rebuilt"

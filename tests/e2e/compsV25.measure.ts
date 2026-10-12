@@ -466,16 +466,31 @@ test.describe("Comparable titles v25", () => {
     await scrollTo(page, '[data-cv="lib-head"]', 24);
     /* Nine Miles Out is in no letter: its row's door opens the picker on the CURRENT letter (v3, not sent), ticked */
     await page.locator(`${P}[data-cv="row"]`).nth(2).hover();
+    /* everything that changes INSIDE the picker after it is first put in the document. An attribute record carries the
+       value it had before, so the first frame's letter is known whenever this callback runs. */
+    await page.evaluate(() => {
+      const w = window as any; w.__pk = [];
+      new MutationObserver((recs) => {
+        for (const r of recs) {
+          const el = (r.target.nodeType === 1 ? r.target : r.target.parentElement) as HTMLElement | null;
+          if (!el || !el.closest('[data-cv="picker"]') || r.type === "childList") continue;
+          w.__pk.push({ what: r.type === "attributes" ? r.attributeName : "text", on: el.getAttribute("data-cv") ?? el.tagName, was: r.oldValue });
+        }
+      }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeOldValue: true, attributeFilter: ["data-letter", "data-fixed", "aria-checked", "aria-pressed"], characterData: true, characterDataOldValue: true });
+    });
     await page.locator(`${P}[data-cv="row"]`).nth(2).locator('[data-cv="tray-act"]').click();
     await page.waitForSelector('[data-cv="picker"]');
-    /* ⚠️ SETTLED, NOT FIRST PAINT. The picker chooses its letter in an effect, so for one render it is mounted with no
-       letter and no ticks. Read in that frame it reports "no letter, 0 logged" about a picker that is about to be right
-       (comps v26 moved the timing enough to land there every run). Wait for the letter, with a bound, then read. */
-    await page.waitForFunction(() => !!(document.querySelector('[data-cv="picker"]') as HTMLElement | null)?.dataset.letter, null, { timeout: 5_000 }).catch(() => {});
+    /* ⚠️ THE FIRST FRAME (comps v26.1). The picker opens with its letter already chosen: this reads it the moment it
+       mounts, with no wait. v26 waited for it to settle, because the picker chose its letter in an effect. */
     const p0 = await page.evaluate(() => { const p = document.querySelector('[data-cv="picker"]') as HTMLElement; return { letter: p.dataset.letter, fixed: p.dataset.fixed, on: [...p.querySelectorAll('[data-cv="picker-comp"][aria-checked="true"]')].map((x) => (x as HTMLElement).dataset.key), count: p.querySelector('[data-cv="picker-count"]')!.textContent, off: [...p.querySelectorAll('[data-cv="picker-comp"][aria-disabled="true"]')].map((x) => x.querySelector("b")!.textContent) }; });
     L.check("opens on the current letter, not fixed", p0.letter === FX.L3 && p0.fixed === "false", `${p0.letter} · fixed ${p0.fixed}`);
     L.check("its record plus the comp the door named", [...p0.on].sort().join("|") === ["cmp_cv25last", "cmp_cv25nine", "cmp_cv25tide"].join("|") && p0.count === "3 logged", `${p0.on} · ${p0.count}`);
     L.check("a comp that is not ready cannot be ticked", p0.off.join("|") === "The Ferry at Dusk", p0.off.join(","));
+    await page.waitForTimeout(600);
+    const pk = await page.evaluate(() => (window as any).__pk as { what: string; on: string; was: string | null }[]);
+    const first = pk.find((x) => x.what === "data-letter" && x.on === "picker");
+    L.check("first frame: the letter is chosen when the picker is first drawn", (first ? first.was : p0.letter) === FX.L3, first ? `drawn with "${first.was}", then changed` : `${p0.letter}`);
+    L.check("first frame: nothing in the picker changes after it is drawn", pk.length === 0, pk.length ? pk.slice(0, 6).map((x) => `${x.on} ${x.what} was "${x.was}"`).join(" · ") : "0 changes");
     await page.locator('[data-cv="picker-save"]').click();
     await expect.poll(() => (dump().letters[FX.L3]?.compIds ?? []).length, { timeout: 20_000 }).toBe(3);
     const a = dump();
@@ -487,12 +502,12 @@ test.describe("Comparable titles v25", () => {
     const undo = page.locator(".sa-toast-undo").last();
     L.check("Undo is offered", (await undo.count()) > 0, "toast");
     /* with no Undo to press there is nothing more to read, and a click would wait out the whole timeout */
-    if (!(await undo.count())) { L.done(9); return; }
+    if (!(await undo.count())) { L.done(11); return; }
     await undo.click();
     await expect.poll(() => JSON.stringify(dump().letters[FX.L3]?.compIds), { timeout: 20_000 }).toBe(JSON.stringify(before.letters[FX.L3].compIds));
     const u = dump();
     L.check("Undo restores every letter exactly", JSON.stringify(u.letters) === JSON.stringify(before.letters), JSON.stringify(u.letters[FX.L3].compIds));
-    L.done(9);
+    L.done(11);
   });
 
   test("A3 · fixed: a sent, recorded letter offers no checkbox and makes a new version; a sent, unrecorded one accepts one save", async ({ page }) => {

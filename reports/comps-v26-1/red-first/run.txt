@@ -1,0 +1,74 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.9s)
+  ✗ E2 · first frame: the letter is chosen when the picker is first drawn — drawn with "", then changed
+  ✗ E2 · first frame: nothing in the picker changes after it is drawn — picker-letter aria-pressed was "false" · picker-comp aria-checked was "false" · picker-comp aria-checked was "false" · picker-comp aria-checked was "false" · picker-count text was "0" · picker data-letter was ""
+[E2] 9/11 green
+  ✘  2 [measure] › tests/e2e/compsV25.measure.ts:461:3 › Comparable titles v25 › E2 · picker: Save writes compIds to the chosen letter only; Undo restores it exactly (15.0s)
+  ✗ AD9 · 1512 no In-query-letter switch — 5 switch element(s) · the words "In query letter"
+  ✗ AD9 · 1280 no In-query-letter switch — 5 switch element(s) · the words "In query letter"
+[AD9] 8/10 green
+  ✘  3 [measure] › tests/e2e/compsV26.measure.ts:278:3 › Comparable titles v26 › AD9 · empty page: the exhibit draws no query line, no drag handle and no In-query-letter switch (9.5s)
+  -  4 [measure] › tests/e2e/compsV26.measure.ts:385:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note
+
+
+  1) [measure] › tests/e2e/compsV25.measure.ts:461:3 › Comparable titles v25 › E2 · picker: Save writes compIds to the chosen letter only; Undo restores it exactly 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "E2 · first frame: the letter is chosen when the picker is first drawn — drawn with \"\", then changed",
+    +   "E2 · first frame: nothing in the picker changes after it is drawn — picker-letter aria-pressed was \"false\" · picker-comp aria-checked was \"false\" · picker-comp aria-checked was \"false\" · picker-comp aria-checked was \"false\" · picker-count text was \"0\" · picker data-letter was \"\"",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps261/tests/e2e/compsV25.measure.ts:48:95)
+        at /Users/nickphysick/ScriptAlly-comps261/tests/e2e/compsV25.measure.ts:510:7
+
+    Error Context: test-results/compsV25.measure.ts-Compar-abc4c-ly-Undo-restores-it-exactly-measure/error-context.md
+
+    Error Context: test-results/compsV25.measure.ts-Compar-abc4c-ly-Undo-restores-it-exactly-measure/error-context.md
+
+  2) [measure] › tests/e2e/compsV26.measure.ts:278:3 › Comparable titles v26 › AD9 · empty page: the exhibit draws no query line, no drag handle and no In-query-letter switch 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "AD9 · 1512 no In-query-letter switch — 5 switch element(s) · the words \"In query letter\"",
+    +   "AD9 · 1280 no In-query-letter switch — 5 switch element(s) · the words \"In query letter\"",
+    + ]
+
+      44 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      45 |     if (!MUT) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 46 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      47 |   }
+      48 | }
+      49 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps261/tests/e2e/compsV26.measure.ts:46:95)
+        at /Users/nickphysick/ScriptAlly-comps261/tests/e2e/compsV26.measure.ts:293:7
+
+    Error Context: test-results/compsV26.measure.ts-Compar-69982-d-no-In-query-letter-switch-measure/error-context.md
+
+    Error Context: test-results/compsV26.measure.ts-Compar-69982-d-no-In-query-letter-switch-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/compsV25.measure.ts:461:3 › Comparable titles v25 › E2 · picker: Save writes compIds to the chosen letter only; Undo restores it exactly 
+    [measure] › tests/e2e/compsV26.measure.ts:278:3 › Comparable titles v26 › AD9 · empty page: the exhibit draws no query line, no drag handle and no In-query-letter switch 
+  1 did not run
+  1 passed (51.7s)

@@ -12,7 +12,7 @@
  *
  * The ticks are the dialog's own draft; nothing is written until Save.
  */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CompTitle } from "../../../types";
 import { MAX_LETTER_COMPS, compKey, ready } from "../../../lib/compUsage";
@@ -57,12 +57,17 @@ export const CompLetterPicker: React.FC<{
     setTicks(next);
   };
 
-  /* opening: the letter the door named, else the current one */
-  useEffect(() => {
-    if (!p.request) return;
-    load(p.request.letterId ?? p.currentLetterId ?? p.letters[p.letters.length - 1]?.id ?? null, p.request.forKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.request, wantedHere]);
+  /* opening: the letter the door named, else the current one.
+     ⚠️ CHOSEN DURING RENDER, NEVER IN AN EFFECT (comps v26.1). An effect runs after the picker is drawn, so for one
+     frame it stood with no letter, no ticks and "0 logged". Setting state while rendering makes React render again
+     before anything is put on screen, so the first frame drawn is the chosen letter's. */
+  const [loaded, setLoaded] = useState<{ request: PickerRequest | null; here: boolean }>({ request: null, here: false });
+  const stale = loaded.request !== p.request || (!!p.request && loaded.here !== wantedHere);
+  const sync = () => {
+    setLoaded({ request: p.request, here: wantedHere });
+    if (p.request) load(p.request.letterId ?? p.currentLetterId ?? p.letters[p.letters.length - 1]?.id ?? null, p.request.forKey);
+  };
+  if (stale) sync();
 
   useEscapeLayer(open, p.onClose, ESC_LEVEL.pageModal);
   if (!open || typeof document === "undefined") return null;

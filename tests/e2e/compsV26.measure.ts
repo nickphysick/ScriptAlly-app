@@ -4,19 +4,21 @@
  * (`cv25-ms`, seven comps; `cv25-ms-empty`, none).
  *
  *   AD1 one heading · AD2 explainer · AD3 labels · AD4 ready · AD5 foot · AD6 again · AD7 tags ·
- *   AD8 preview · AD9 empty page
+ *   AD8 preview · AD9 empty page · AD10 focus and keys (v26.1)
  *
  * MUTATIONS. `AD_MUTATE=<lock>` applies that lock's named break. Four are applied in the page (below).
  * Five are edits to the source and need a rebuilt bundle; `adMutations.sh` makes the edit, rebuilds,
- * runs the lock and puts the file back from a copy: AD2, AD3, AD4, AD6, AD7.
+ * runs the lock and puts the file back from a copy: AD2, AD3, AD4, AD6, AD7, AD10, and AD9's second
+ * mutation (the exhibit's "In query letter" switch restored).
  *
- * ⚠️ AD6 AND AD7 WRITE COMPS. Each re-seeds first, and the fixture is removed after the run.
+ * ⚠️ AD6, AD7 AND AD10 WRITE COMPS. Each re-seeds first, and the fixture is removed after the run.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { MS_EMPTY, SIZES, type Vp, dump, openComps, scrollTo, seed } from "./cv25Lib";
 
-const DIR = "reports/comps-v26";
+/* v26.1 writes its own ledgers, so the ones committed with v26 are not rewritten by a run */
+const DIR = "reports/comps-v26-1";
 const MUT = process.env.AD_MUTATE ?? "";
 const near = (a: number, b: number, t = 1) => Math.abs(a - b) <= t;
 
@@ -26,7 +28,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string; what: string }> = {
   AD8: { what: "render a hand-built preview", js: `(() => { const p = document.querySelector('[data-hdr="comp"] [data-cf="preview"]'); if (!p || p.dataset.mut) return; p.dataset.mut = "1"; const t = (document.querySelector('[data-hdr="comp"] #cpv-f-title') || {}).value || ""; p.innerHTML = '<div class="aprev-cell"><span class="disc"></span><div><b>' + t + '</b><small></small></div></div><div class="st"><span>Log in a letter</span></div>'; })()` },
   AD9: { what: "restore the query line", js: `(() => { const s = window.__q('[data-lh="band"] .cpv-exstack'); if (!s || s.querySelector('[data-cpv="ex-line"]')) return; const q = document.createElement("section"); q.className = "cpv-qcard"; q.setAttribute("data-cpv", "ex-line"); q.innerHTML = "<h2>Your query line</h2>"; s.prepend(q); })()` },
 };
-const SOURCE_MUTATIONS = ["AD2", "AD3", "AD4", "AD6", "AD7"];
+const SOURCE_MUTATIONS = ["AD2", "AD3", "AD4", "AD6", "AD7", "AD10"];
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
 class Ledger {
@@ -273,21 +275,22 @@ test.describe("Comparable titles v26", () => {
     L.done(12);
   });
 
-  test("AD9 · empty page: the exhibit draws no query line and no drag handle", async ({ page }) => {
+  test("AD9 · empty page: the exhibit draws no query line, no drag handle and no In-query-letter switch", async ({ page }) => {
     const L = new Ledger("AD9");
     for (const vp of SIZES) {
       const w = `${vp.width}`;
       await emptyPage(page, vp); await mutate(page, "AD9");
       const r = await page.evaluate(() => {
         const w2 = window as any; const band = w2.__q('[data-lh="band"]') as HTMLElement | null;
-        return { band: !!band, text: band?.textContent ?? "", line: band ? band.querySelectorAll('[data-cpv="ex-line"], [data-cpv="qline"], .cpv-qcard, .cpv-qline').length : -1, grips: band ? band.querySelectorAll(".cpv-grip").length : -1, cards: band ? band.querySelectorAll('[data-cpv="comp"]').length : -1, heading: band?.querySelector(".cpv-sech h2")?.textContent ?? null, buttons: band ? band.querySelectorAll("button").length : -1, label: w2.__q('[data-lh="exhibition"]')?.textContent?.slice(0, 44) ?? null, empty: w2.__q('[data-cv="empty-heading"]')?.textContent ?? null };
+        return { band: !!band, text: band?.textContent ?? "", line: band ? band.querySelectorAll('[data-cpv="ex-line"], [data-cpv="qline"], .cpv-qcard, .cpv-qline').length : -1, grips: band ? band.querySelectorAll(".cpv-grip").length : -1, switches: band ? band.querySelectorAll('.cpv-inl, [role="switch"], [data-cpv="inq"], [data-cpv="pos"]').length : -1, cards: band ? band.querySelectorAll('[data-cpv="comp"]').length : -1, heading: band?.querySelector(".cpv-sech h2")?.textContent ?? null, buttons: band ? band.querySelectorAll("button").length : -1, label: w2.__q('[data-lh="exhibition"]')?.textContent?.slice(0, 44) ?? null, empty: w2.__q('[data-cv="empty-heading"]')?.textContent ?? null };
       });
       L.check(`${w} the exhibit is on the page`, r.band && r.cards === 3, `band ${r.band} · ${r.cards} cards`);
       L.check(`${w} no query line`, r.line === 0 && !/Your query line/.test(r.text), `${r.line} line element(s)`);
       L.check(`${w} no drag handle`, r.grips === 0 && !/Drag to reorder/.test(r.text), `${r.grips} grip(s)`);
+      L.check(`${w} no In-query-letter switch`, r.switches === 0 && !/In query letter/i.test(r.text), `${r.switches} switch element(s)${/In query letter/i.test(r.text) ? ' · the words "In query letter"' : ""}`);
       L.check(`${w} what remains`, r.heading === "Your comps 3" && r.buttons === 0 && r.empty === "No comp titles yet", `${r.heading} · ${r.buttons} buttons · ${r.empty}`);
     }
-    L.done(8);
+    L.done(10);
   });
 
   /* ── the writing cases: each re-seeds first ── */
@@ -378,8 +381,55 @@ test.describe("Comparable titles v26", () => {
     L.check("\"Matches on\" reads them back as two chips", back.title === "Salt and Iron" && back.label === "Matches on" && back.chips.join("|") === "Tone|Coastal", JSON.stringify(back));
     L.done(10);
   });
+
+  test("AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note", async ({ page }) => {
+    const L = new Ledger("AD10");
+    /* what has focus, named: an id, else its probe */
+    const focus = () => page.evaluate(() => { const a = document.activeElement as HTMLElement | null; return !a || a === document.body ? "body" : a.id || a.getAttribute("data-cv") || a.getAttribute("data-cf") || a.tagName; });
+    const closed = async () => { await page.waitForSelector('[data-hdr="comp"]', { state: "detached", timeout: 5_000 }).catch(() => {}); await page.waitForTimeout(250); return (await page.locator('[data-hdr="comp"]').count()) === 0; };
+    for (const [i, vp] of SIZES.entries()) {
+      const w = `${vp.width}`;
+      seed("--empty");
+      await openComps(page, vp);
+      const WAYS: [string, () => Promise<void>][] = [
+        ["✕", () => page.locator(`${D}[data-cv="drawer-close"]`).click()],
+        ["Cancel", () => page.locator(`${D}[data-cf="cancel"]`).click()],
+        ["Escape", () => page.keyboard.press("Escape")],
+      ];
+      for (const [name, close] of WAYS) {
+        await openAdd(page);
+        L.check(`${w} add: opening puts focus in Title (before ${name})`, (await focus()) === "cpv-f-title", await focus());
+        await close();
+        const shut = await closed();
+        const back = await page.evaluate((sel) => document.activeElement === document.querySelector(sel), `${P}[data-cv="add"]`);
+        L.check(`${w} add: ${name} closes the drawer and returns focus to "Add a comp"`, shut && back, `closed ${shut} · focus on ${await focus()}`);
+      }
+      /* edit, opened from a row's own Edit */
+      await openEdit(page, 1);
+      L.check(`${w} edit: opening puts focus in Title`, (await focus()) === "cpv-f-title", await focus());
+      await page.keyboard.press("Escape");
+      const shut = await closed();
+      const back = await page.evaluate((sel) => document.activeElement === document.querySelectorAll(sel)[1]?.querySelector('[data-cv="tray-edit"]'), `${P}[data-cv="row"]`);
+      L.check(`${w} edit: Escape returns focus to the row's Edit`, shut && back, `closed ${shut} · focus on ${await focus()}`);
+      /* Cmd + Enter at one size, Ctrl + Enter at the other, from the note */
+      const key = i === 0 ? "Meta+Enter" : "Control+Enter";
+      const n0 = dump().comps.length;
+      await scrollTo(page, '[data-cv="page"]', 0).catch(() => {});
+      await openAdd(page);
+      await page.locator(`${D}#cpv-f-title`).fill("Keyed Save");
+      await page.locator(`${D}#cpv-f-note`).fill("Saved from the note.");
+      L.check(`${w} the caret is in the note`, (await focus()) === "cpv-f-note", await focus());
+      await page.keyboard.press(key);
+      await expect.poll(() => dump().comps.length, { timeout: 15_000 }).toBe(n0 + 1).catch(() => {});
+      const after = dump().comps;
+      const made = after.find((c) => c.title === "Keyed Save");
+      L.check(`${w} ${key} from the note saves the comp, once`, after.length === n0 + 1 && made?.note === "Saved from the note.", `${n0} → ${after.length} · note "${made?.note ?? "none"}"`);
+      L.check(`${w} and the drawer closes`, await closed(), `drawer count ${await page.locator('[data-hdr="comp"]').count()}`);
+    }
+    L.done(22);
+  });
 });
 
 test("AD · every lock has a named mutation", () => {
-  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["AD1", "AD2", "AD3", "AD4", "AD5", "AD6", "AD7", "AD8", "AD9"]);
+  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["AD1", "AD10", "AD2", "AD3", "AD4", "AD5", "AD6", "AD7", "AD8", "AD9"]);
 });
