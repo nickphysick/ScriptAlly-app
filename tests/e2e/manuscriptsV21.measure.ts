@@ -516,7 +516,7 @@ for (const vp of VPS) {
     const d = EXPECT.doors;
     expect((await texts(page, '[data-ms21="door-n"]')).map(Number), "the three numbers").toEqual([d.comps, d.letters + d.synopses, d.packages]);
     expect(await texts(page, '[data-ms21="door-sentence"]')).toEqual([
-      `Books and films like yours. ${d.inQuery} are in your query letter.`,
+      `Books and films like yours. ${d.inLetter} are in your query letter.`,
       `${d.letters} query letters and ${d.synopses} synopses. You're using ${d.letterInUse}.`,
       `The letter, synopsis and pages you send together. ${d.packageQueries} queries sent so far.`,
     ]);

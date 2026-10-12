@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * compsPage — the pure derivations behind the Comparable Titles page (design-refs/
- * comparable-titles-flat.html). Store only facts + one intent (`inQuery`); everything a writer sees
+ * comparable-titles-flat.html). Store only facts; everything a writer sees
  * about a comp's ROLE, the query-letter LINE, its HEALTH and the recency FLAG is computed here from
  * the stored fields, never persisted. All functions take the current year as a parameter so they
  * stay pure and testable; `currentYear()` is the single live source callers pass in.
@@ -118,7 +118,7 @@ export function compFacets(c: CompTitle): string[] {
  * their comp is bad. A boolean cannot say "12"; the wording had to be a verdict because the shape
  * left nothing else to say.
  *
- * ⚠️ AND IT NO LONGER REQUIRES `inQuery`. The old gate fired only on a ticked comp, on the reasoning
+ * ⚠️ AND IT DOES NOT ASK WHETHER THE COMP IS IN A LETTER. The old gate fired only on a ticked comp, on the reasoning
  * that it was "being asked to carry a market case it can't" — reasoning that is itself an appraisal.
  * An age is a fact about the book whether or not the writer has ticked it, and both the pack (Phase
  * 2) and the v5 ref show it unconditionally.
@@ -168,31 +168,27 @@ function joinTitles(titles: string[]): LineSeg[] {
 
 const segText = (segs: LineSeg[]): string => segs.map((s) => s.text).join("");
 
-/** The phrase the empty prompt and its caption both name — the switch's own label, verbatim. */
-export const IN_QUERY_LABEL = "In query letter";
-
 /**
- * The query-letter line, composed from the switched-on comps IN LIST ORDER.
+ * The query-letter line, composed from the comps THE LETTER NAMES, in list order.
  *
- * ⚠️ LIST ORDER IS THE CONTRACT, which is why the list is reorderable and why the caption says so.
- * Sorting here — by year, by recency, by anything — would silently overrule the writer's own
- * arrangement of their sentence.
+ * ⚠️ THE CALLER PASSES THE LETTER'S COMPS (comps v25): `compsInLetter(comps, letter)` in
+ * lib/compUsage. This function filters nothing, because which comps a letter mentions is the
+ * letter's own record (`compIds`) and never a flag on the comp.
  *
- * ⚠️ THE COPY IS THE v2 MOCK'S (27 Sep), and the composition LEFT the caption: it is a fact about
- * the whole library now and sits under "Your comps" (`compositionLine`). The caption says only how
- * the line was built.
+ * ⚠️ LIST ORDER IS THE CONTRACT. Sorting here — by year, by recency, by anything — would silently
+ * overrule the writer's own arrangement of their sentence.
  */
-export function queryLine(comps: CompTitle[], manuscriptTitle: string, format: QueryFormat): QueryLine {
-  const inq = comps.filter((c) => c.inQuery);
-  const waiting = `Switch on “${IN_QUERY_LABEL}” for a comp below`;
+export function queryLine(inLetter: CompTitle[], manuscriptTitle: string, format: QueryFormat): QueryLine {
+  const inq = inLetter;
+  const waiting = "No comps are logged in your query letter yet";
   if (inq.length === 0) {
-    return { kind: "empty", prompt: `Switch on ${IN_QUERY_LABEL} for a comp to start your line.`, caption: waiting };
+    return { kind: "empty", prompt: "Log the comps your query letter mentions to start your line.", caption: waiting };
   }
   if (format === "meets" && inq.length !== 2) {
-    /* factual: what the format needs, and how many are switched on. No instruction, no "only". */
+    /* factual: what the format needs, and how many the letter names. No instruction, no "only". */
     return {
       kind: "unavailable",
-      prompt: `“A meets B” takes exactly two comps. ${inq.length} ${inq.length === 1 ? "is" : "are"} switched on.`,
+      prompt: `“A meets B” takes exactly two comps. ${inq.length} ${inq.length === 1 ? "is" : "are"} in your letter.`,
       caption: waiting,
     };
   }
@@ -203,7 +199,7 @@ export function queryLine(comps: CompTitle[], manuscriptTitle: string, format: Q
     kind: "line",
     text: segText(segments),
     segments,
-    caption: `Built from ${inq.length} comp${inq.length === 1 ? "" : "s"} switched on below, in list order`,
+    caption: `Built from the ${inq.length} comp${inq.length === 1 ? "" : "s"} in your query letter, in list order`,
   };
 }
 
@@ -245,7 +241,3 @@ export function spineInitial(title: string): string {
   return (t.charAt(0) || title.trim().charAt(0) || "·").toUpperCase();
 }
 
-/** Masthead + strategy-strip counts. */
-export function compCounts(comps: CompTitle[]): { total: number; inQuery: number } {
-  return { total: comps.length, inQuery: comps.filter((c) => c.inQuery).length };
-}

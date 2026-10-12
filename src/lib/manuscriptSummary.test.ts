@@ -243,8 +243,9 @@ describe("other materials", () => {
 });
 
 describe("comps and scope", () => {
-  it("the tray tally reads inQuery, absent meaning false", () => {
-    expect(compLetterTally([{ title: "A", inQuery: true }, { title: "B", inQuery: true }, { title: "C" }]))
+  it("the tray tally reads the current letter's compIds; a comp it does not name is not counted", () => {
+    expect(compLetterTally([{ title: "A", id: "a" }, { title: "B", id: "b" }, { title: "C", id: "c" }, { title: "D" }]).inLetter).toBe(0);
+    expect(compLetterTally([{ title: "A", id: "a" }, { title: "B", id: "b" }, { title: "C" }], ["a", "b", "gone"]))
       .toEqual({ total: 3, inLetter: 2 });
   });
 

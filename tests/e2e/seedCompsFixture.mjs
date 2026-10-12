@@ -63,11 +63,11 @@ export const EMPTY = "seed-ms-comps0";
 /* The mock's SEED, field for field. Absent fields are OMITTED — Firestore maps reject `undefined`,
    and an empty string would be a recorded value the card then renders. */
 const COMPS = [
-  { title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021, media: "book", matchAxis: "single day · close third · coastal", note: "A whole novel on one day on the water, told close to one narrator.", inQuery: true, source: "user" },
-  { title: "Salt Road", author: "Imogen Hale", publisher: "Faber", year: 2023, media: "book", matchAxis: "Irish coast · missing brother", note: "Coastal Irish setting, a missing brother, short punchy chapters.", inQuery: true, source: "user" },
-  { title: "Nine Miles Out", author: "Callum Reid", publisher: "BBC Two", year: 2022, media: "tv", matchAxis: "ticking clock · tides", note: "The tide as a clock. Same pace I want in the second half.", inQuery: false, source: "user" },
-  { title: "Bright Water", author: "Aoife Brennan", publisher: "Tinder Press", year: 2024, media: "book", matchAxis: "family secrets · harbour town", inQuery: false, source: "user" },
-  { title: "Kestrel Hour", author: "D. Lindqvist", publisher: "Orion", year: 2019, media: "book", inQuery: false, source: "user" },
+  { title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021, media: "book", matchAxis: "single day · close third · coastal", note: "A whole novel on one day on the water, told close to one narrator.", source: "user" },
+  { title: "Salt Road", author: "Imogen Hale", publisher: "Faber", year: 2023, media: "book", matchAxis: "Irish coast · missing brother", note: "Coastal Irish setting, a missing brother, short punchy chapters.", source: "user" },
+  { title: "Nine Miles Out", author: "Callum Reid", publisher: "BBC Two", year: 2022, media: "tv", matchAxis: "ticking clock · tides", note: "The tide as a clock. Same pace I want in the second half.", source: "user" },
+  { title: "Bright Water", author: "Aoife Brennan", publisher: "Tinder Press", year: 2024, media: "book", matchAxis: "family secrets · harbour town", source: "user" },
+  { title: "Kestrel Hour", author: "D. Lindqvist", publisher: "Orion", year: 2019, media: "book", source: "user" },
 ];
 
 const base = (id, comps) => ({

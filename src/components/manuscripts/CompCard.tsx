@@ -30,7 +30,9 @@ const GripDots = () => (
 
 export interface CompCardProps {
   comp: CompTitle;
-  /** 1-based position among the switched-on comps, or null when off. */
+  /** Whether the current letter names this comp (comps v25: the letter's own record, never a flag on the comp). */
+  inLetter?: boolean;
+  /** 1-based position among the letter's comps, or null when it is not in the letter. */
   position: number | null;
   now: number;
   example?: boolean;
@@ -48,14 +50,14 @@ export interface CompCardProps {
 }
 
 export const CompCard: React.FC<CompCardProps> = ({
-  comp: c, position, now, example, dragging, drop, flash,
+  comp: c, inLetter, position, now, example, dragging, drop, flash,
   onToggle, onEdit, onRemove, onGripPointerDown, onGripKey, gripRef, editRef,
 }) => {
   const media = compMedia(c);
   const screen = media !== "book";
   const facets = compFacets(c);
   const by = [c.author, c.publisher].filter((x): x is string => !!x && !!x.trim()).join(" · ");
-  const on = !!c.inQuery;
+  const on = !!inLetter;
   const cls = ["cpv-comp", on ? "is-in" : "", dragging ? "is-dragging" : "", drop ? `drop-${drop}` : "", flash ? "flash" : ""]
     .filter(Boolean).join(" ");
 
@@ -120,7 +122,8 @@ export const CompCard: React.FC<CompCardProps> = ({
         <div className="cpv-age" data-cpv="age">{compAgeLine(c, now)}</div>
       </div>
       <div className="cpv-cside">
-        {btn(
+        {/* a mark, not a control (comps v25): which comps a letter names is logged on the letter */}
+        {(on || example) && btn(
           { className: "cpv-inl", role: "switch", "aria-checked": on, "data-cpv": "inq", "aria-label": `In query letter: ${c.title}`, onClick: onToggle },
           <>
             <span className="sw" aria-hidden="true" />

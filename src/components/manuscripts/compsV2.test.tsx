@@ -72,7 +72,7 @@ describe("C7 · the empty state's examples are pictures", () => {
     expect(html).toContain("HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW");
   });
   it("the live card is the same component with real buttons", () => {
-    const html = renderToStaticMarkup(<CompCard comp={{ title: "A", inQuery: true }} position={1} now={2026} />);
+    const html = renderToStaticMarkup(<CompCard comp={{ title: "A" }} inLetter position={1} now={2026} />);
     expect((html.match(/<button\b/g) ?? []).length).toBeGreaterThanOrEqual(4);
     expect(html).toContain('role="switch"');
     expect(html).toContain(">1st<");

@@ -186,6 +186,7 @@ if (!only || only === "filled") {
         versionName: v.versionName, fileAttached: false, createdDate: v.createdDate,
         contentType: "text", contentDraft: type === "Synopsis" ? "It begins on the water." : "Dear agent,",
         wordCount: v.wordCount,
+        ...(v.compIds ? { compIds: v.compIds } : {}),
       });
     }
   }

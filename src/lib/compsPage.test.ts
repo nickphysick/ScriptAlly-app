@@ -2,6 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
+import { compsInLetter } from "./compUsage";
 import { describe, it, expect } from "vitest";
 import { CompTitle } from "../types";
 import {
@@ -11,7 +12,6 @@ import {
   compAgeLine,
   queryLine,
   compositionLine,
-  compCounts,
   ordinal,
   spineInitial,
 } from "./compsPage";
@@ -102,13 +102,13 @@ describe("compAge", () => {
   });
 
   /**
-   * ⚠️ THE `inQuery` GATE IS GONE, deliberately. It fired only on a ticked comp, on the reasoning
+   * ⚠️ THE IN-LETTER GATE IS GONE, deliberately. It fired only on a ticked comp, on the reasoning
    * that it was "being asked to carry a market case it can't" — reasoning that is itself an
    * appraisal. An age is a fact about the book either way.
    */
   it("does not care whether the comp is ticked", () => {
-    expect(compAge(comp({ title: "A", media: "book", year: 2010, inQuery: true }), NOW)).toBe(16);
-    expect(compAge(comp({ title: "A", media: "book", year: 2010, inQuery: false }), NOW)).toBe(16);
+    expect(compAge(comp({ title: "A", media: "book", year: 2010, id: "cmp_a" }), NOW)).toBe(16);
+    expect(compAge(comp({ title: "A", media: "book", year: 2010 }), NOW)).toBe(16);
   });
 
   it("is null for non-book media and for a book with no year", () => {
@@ -117,18 +117,18 @@ describe("compAge", () => {
   });
 });
 
-describe("queryLine (comps v2 — the mock's copy)", () => {
+describe("queryLine (the caller passes the comps the letter names — comps v25)", () => {
   const MS = "Murphy's Day Out";
   const on = (title: string, over: Partial<CompTitle> = {}) =>
-    comp({ title, inQuery: true, media: "book", year: 2024, ...over });
+    comp({ title, media: "book", year: 2024, ...over });
   const text = (r: ReturnType<typeof queryLine>) => (r.kind === "line" ? r.text : r.prompt);
 
-  it("prompts identically in both formats when nothing is switched on", () => {
+  it("prompts identically in both formats when the letter names nothing", () => {
     for (const f of ["readers", "meets"] as const) {
-      const r = queryLine([comp({ title: "A" })], MS, f);
+      const r = queryLine([], MS, f);
       expect(r.kind).toBe("empty");
-      expect(text(r)).toBe("Switch on In query letter for a comp to start your line.");
-      expect(r.caption).toBe("Switch on “In query letter” for a comp below");
+      expect(text(r)).toBe("Log the comps your query letter mentions to start your line.");
+      expect(r.caption).toBe("No comps are logged in your query letter yet");
     }
   });
 
@@ -148,9 +148,11 @@ describe("queryLine (comps v2 — the mock's copy)", () => {
   /* ⚠️ C1 — LIST ORDER, and a reorder changes the line. Built from two orders of the SAME comps, so
      a sort of any kind (title, year, insertion) produces one sentence for both and fails. */
   it("C1 · follows the switches in LIST ORDER, and reordering changes the line", () => {
-    const a = on("Zebra", { year: 1999 }), b = comp({ title: "Skip" }), c = on("Apple", { year: 2025 });
-    expect(text(queryLine([a, b, c], MS, "readers"))).toBe("Murphy's Day Out will appeal to readers of Zebra and Apple.");
-    expect(text(queryLine([c, b, a], MS, "readers"))).toBe("Murphy's Day Out will appeal to readers of Apple and Zebra.");
+    const a = on("Zebra", { year: 1999, id: "z" }), b = comp({ title: "Skip", id: "s" }), c = on("Apple", { year: 2025, id: "a" });
+    /* the letter names two of the three; the order it lists them in is not the line's order, the shelf's is */
+    const letter = { compIds: ["a", "z"] };
+    expect(text(queryLine(compsInLetter([a, b, c], letter), MS, "readers"))).toBe("Murphy's Day Out will appeal to readers of Zebra and Apple.");
+    expect(text(queryLine(compsInLetter([c, b, a], letter), MS, "readers"))).toBe("Murphy's Day Out will appeal to readers of Apple and Zebra.");
     expect(text(queryLine([a, c], MS, "meets"))).toBe("Zebra meets Apple.");
     expect(text(queryLine([c, a], MS, "meets"))).toBe("Apple meets Zebra.");
   });
@@ -158,17 +160,17 @@ describe("queryLine (comps v2 — the mock's copy)", () => {
   it("C1 · A meets B at any count but two states the rule and the count, agreeing in number", () => {
     const r1 = queryLine([on("T0")], MS, "meets");
     expect(r1.kind).toBe("unavailable");
-    expect(text(r1)).toBe("“A meets B” takes exactly two comps. 1 is switched on.");
+    expect(text(r1)).toBe("“A meets B” takes exactly two comps. 1 is in your letter.");
     const r3 = queryLine([on("T0"), on("T1"), on("T2")], MS, "meets");
-    expect(text(r3)).toBe("“A meets B” takes exactly two comps. 3 are switched on.");
-    expect(r3.caption).toBe("Switch on “In query letter” for a comp below");
+    expect(text(r3)).toBe("“A meets B” takes exactly two comps. 3 are in your letter.");
+    expect(r3.caption).toBe("No comps are logged in your query letter yet");
   });
 
   it("the caption says how the line was built — count, singular, list order — and nothing else", () => {
     expect(queryLine([on("A"), on("B"), on("C", { year: 2001 })], MS, "readers").caption)
-      .toBe("Built from 3 comps switched on below, in list order");
-    expect(queryLine([on("A")], MS, "readers").caption).toBe("Built from 1 comp switched on below, in list order");
-    expect(queryLine([on("A"), on("B")], MS, "meets").caption).toBe("Built from 2 comps switched on below, in list order");
+      .toBe("Built from the 3 comps in your query letter, in list order");
+    expect(queryLine([on("A")], MS, "readers").caption).toBe("Built from the 1 comp in your query letter, in list order");
+    expect(queryLine([on("A"), on("B")], MS, "meets").caption).toBe("Built from the 2 comps in your query letter, in list order");
   });
 });
 
@@ -176,7 +178,7 @@ describe("compositionLine (the library fact under Your comps)", () => {
   const book = (t: string, year?: number, over: Partial<CompTitle> = {}) => comp({ title: t, media: "book", year, ...over });
 
   it("counts books against books, and screen comps as their own clause — switched on or not", () => {
-    const lib = [book("A", 2021), book("B", 2023, { inQuery: true }), comp({ title: "T", media: "tv", year: 2022 }), book("C", 2024), book("D", 2019)];
+    const lib = [book("A", 2021), book("B", 2023), comp({ title: "T", media: "tv", year: 2022 }), book("C", 2024), book("D", 2019)];
     expect(compositionLine(lib, NOW)).toBe("3 of 4 books published in the last five years · 1 film or TV");
   });
 
@@ -228,17 +230,5 @@ describe("ordinal and spineInitial", () => {
   it("spineInitial sets a leading The / A / An aside", () => {
     expect(["The Tidewater Line", "Salt Road", "A Tidy Ending", "An Echo", "the appeal", "Anne", "  ", "The"].map(spineInitial))
       .toEqual(["T", "S", "T", "E", "A", "A", "·", "T"]);
-  });
-});
-
-describe("compCounts", () => {
-  it("counts total and in-query", () => {
-    expect(
-      compCounts([
-        comp({ title: "A", inQuery: true }),
-        comp({ title: "B", inQuery: false }),
-        comp({ title: "C", inQuery: true }),
-      ])
-    ).toEqual({ total: 3, inQuery: 2 });
   });
 });

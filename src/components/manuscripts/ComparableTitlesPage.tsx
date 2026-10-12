@@ -9,9 +9,10 @@
  * add form included) and the rail (the Scout, coming soon). `WorkspacePageGrid` is given
  * `masthead={null}` — the header is the page's first row, not the grid's slab.
  *
- * ⚠️ STORE FACTS AND ONE INTENT. `inQuery` is the only stored intent; the order is array position
- * (no stored `order`); the line, the ordinals, the composition and the ages are derived at render
- * (lib/compsPage.ts). Every write goes through `normalizeComp`, so optional fields stay omit-empty.
+ * ⚠️ STORE FACTS. The order is array position (no stored `order`); the composition and the ages are
+ * derived at render (lib/compsPage.ts). Every write goes through `normalizeComp`, so optional fields
+ * stay omit-empty, and through `withCompIds`, so every comp the page writes has a stable id
+ * (comps v25). Which comps a letter mentions is the letter's own `compIds` (lib/compUsage.ts).
  *
  * ⚠️ NO WRITE FAILS SILENTLY (Phase 5). Each write shows its change at once, awaits the store, and
  * on a refusal puts the list back and says so (`lib/compsWrite.ts`). It used to be
@@ -33,12 +34,12 @@ import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import {
   CompDraft, MAX_COMPS, manuscriptComps, normalizeComp, withCompAdded, withCompEdited, withCompMoved, withCompRemoved,
 } from "../../lib/comps";
-import { QueryFormat, compCounts, compositionLine, currentYear } from "../../lib/compsPage";
+import { compositionLine, currentYear } from "../../lib/compsPage";
+import { compsInLetter, currentLetter, ready, withCompIds } from "../../lib/compUsage";
 import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
 import { useToast } from "../toast/ToastProvider";
 import { CompCard } from "./CompCard";
 import { CompForm } from "./CompForm";
-import { CompsQueryLine } from "./CompsQueryLine";
 import { CompsScoutRail } from "./CompsScoutRail";
 import { CompsExhibit } from "./CompsEmpty";
 import "./compsV2.css";
@@ -49,7 +50,7 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 export const COMPS_EMPTY_HEADING = "No comp titles yet";
 
 /** Not letter-ready: a book with no publisher, or anything with no year (a film or a show has no publisher). */
-export const compMissingDetails = (c: CompTitle): boolean => !c.year || ((c.media ?? "book") === "book" && !c.publisher?.trim());
+export const compMissingDetails = (c: CompTitle): boolean => !ready(c);
 
 type FormState = { mode: "add" } | { mode: "edit"; index: number; focusNote: boolean };
 
@@ -66,12 +67,11 @@ function cardKeys(comps: CompTitle[]): string[] {
 export const ComparableTitlesPage: React.FC<{
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
 }> = () => {
-  const { currentUser, manuscripts, updateManuscript, collectionsReady } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, updateManuscript, collectionsReady } = useScriptAllyDb();
   const { showToast } = useToast();
 
   /* ⚠️ EVERY HOOK ABOVE THE FIRST EARLY RETURN — the old page declared a `useRef` below
      `if (!currentUser) return null`, a hook whose presence depended on a branch. */
-  const [format, setFormat] = useState<QueryFormat>("readers");
   const [form, setForm] = useState<FormState | null>(null);
   /** the manuscript whose empty-state form the writer dismissed (the form is open by default at 0) */
   const [emptyClosedFor, setEmptyClosedFor] = useState<string | null>(null);
@@ -157,7 +157,8 @@ export const ComparableTitlesPage: React.FC<{
     if (!activeMs) return false;
     const msId = activeMs.id;
     const mine = ++seq.current;
-    const clean = next.map(normalizeComp);
+    /* every comp the page writes carries a stable id; one that has an id keeps it (CV25 A1) */
+    const clean = withCompIds(next.map(normalizeComp));
     setPending({ msId, comps: clean });
     const ok = await runWrite(
       () => updateManuscript(msId, { comps: clean }),
@@ -205,7 +206,7 @@ export const ComparableTitlesPage: React.FC<{
   };
 
   const add = (draft: CompDraft) => {
-    const comp = normalizeComp({ ...draft, inQuery: false, source: "user" });
+    const comp = normalizeComp({ ...draft, source: "user" });
     const next = withCompAdded(compsRef.current, comp);
     setForm(null);
     void commit(next);
@@ -249,9 +250,6 @@ export const ComparableTitlesPage: React.FC<{
       },
     });
   };
-
-  const toggle = (index: number) =>
-    void commit(compsRef.current.map((c, i) => (i === index ? { ...c, inQuery: !c.inQuery } : c)));
 
   const move = (from: number, to: number, keyboard: boolean) => {
     if (to < 0 || to >= compsRef.current.length || from === to) return;
@@ -305,7 +303,8 @@ export const ComparableTitlesPage: React.FC<{
   };
 
   // ── render ──
-  const counts = compCounts(comps);
+  /* comps v25: "in your letter" is the current letter's own record */
+  const inLetter = compsInLetter(comps, activeMs ? currentLetter(activeMs.id, versions) : null);
   const fact = compositionLine(comps, now);
   /* ── the living header (living headers v3) — settled on `collectionsReady`, because the comps live
      on the manuscript and the manuscripts are one of the three collections it waits for. ── */
@@ -316,7 +315,7 @@ export const ComparableTitlesPage: React.FC<{
     count: collectionsReady ? compCount : null,
     copy: (n) => compsHeaderCopy(n, {
       missing: comps.filter(compMissingDetails).length,
-      inLetter: comps.filter((c) => c.inQuery).map((c) => c.title),
+      inLetter: inLetter.map((c) => c.title),
       firstTitle: comps[0]?.title ?? null,
     }),
     empty: { heading: COMPS_EMPTY_HEADING, subline: ["Add the books ", { ms: activeMs.title }, " sits beside, and QueryHawk keeps them ready for your letter."] },
@@ -370,11 +369,10 @@ export const ComparableTitlesPage: React.FC<{
               </>
             ) : (
               <>
-                <CompsQueryLine comps={comps} msTitle={activeMs.title} format={format} onFormat={setFormat} />
                 <div>
                   <div className="cpv-sech">
-                    <h2>Your comps <span className="cpv-pill" data-cpv="lib-count">{counts.total}</span></h2>
-                    <span className="cpv-hint">Drag to reorder. The order sets your query line.</span>
+                    <h2>Your comps <span className="cpv-pill" data-cpv="lib-count">{comps.length}</span></h2>
+                    <span className="cpv-hint">Drag to reorder.</span>
                   </div>
                   {fact && <div className="cpv-libfact" data-cpv="lib-fact">{fact}</div>}
                   <div className="cpv-list" data-cpv="list" ref={listRef}>
@@ -385,17 +383,18 @@ export const ComparableTitlesPage: React.FC<{
                     )}
                     {comps.map((c, i) => {
                       if (liveForm?.mode === "edit" && liveForm.index === i) return <React.Fragment key={keys[i]}>{formEl(liveForm)}</React.Fragment>;
-                      const pos = c.inQuery ? comps.slice(0, i + 1).filter((x) => x.inQuery).length : null;
+                      const at = inLetter.indexOf(c);
+                      const pos = at >= 0 ? at + 1 : null;
                       return (
                         <CompCard
                           key={keys[i]}
                           comp={c}
+                          inLetter={at >= 0}
                           position={pos}
                           now={now}
                           dragging={drag?.from === i}
                           drop={drag?.over?.index === i ? (drag.over.after ? "after" : "before") : null}
                           flash={flash?.key === keys[i]}
-                          onToggle={() => toggle(i)}
                           onEdit={(focusNote) => openEdit(i, !!focusNote)}
                           onRemove={() => remove(i)}
                           onGripPointerDown={onGripDown(i)}

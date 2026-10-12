@@ -50,6 +50,7 @@ import { Msv21AddManuscript, Msv21EditDetails, Msv21Version } from "./Msv21Dialo
 import "./msv12.css";
 import "./msv21.css";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { compsInLetter, currentLetter } from "../../../lib/compUsage";
 
 /** The shell's shared scope key — the sidebar switcher writes it; this page only reads. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -122,7 +123,9 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
     [ms, currentUser, since, current],
   );
   /* the comps page keeps no saved format: it opens on "readers", and so does this line */
-  const line = useMemo(() => queryLine([...comps], ms?.title ?? "", "readers"), [comps, ms]);
+  /* comps v25: "in your letter" is the CURRENT letter's own record, never a flag on the comp */
+  const nowLetter = useMemo(() => (ms ? currentLetter(ms.id, versions) : null), [ms, versions]);
+  const line = useMemo(() => queryLine(compsInLetter([...comps], nowLetter), ms?.title ?? "", "readers"), [comps, nowLetter, ms]);
   const rows = useMemo(() => {
     if (!ms) return [];
     const now = new Date();
@@ -138,10 +141,10 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   );
   const lede = useMemo(() => versionsLede(cards, ms?.title ?? ""), [cards, ms]);
   const doors = useMemo(() => materialDoors({
-    comps, letters: letters.length, synopses: synopses.length,
+    comps, letterCompIds: nowLetter?.compIds ?? null, letters: letters.length, synopses: synopses.length,
     letterName: letters.find((l) => l.id === inUseLetter)?.versionName ?? null,
     livePackages: msPackages.length, packageQueries: packagesFact(msPackages, msQueries).queries,
-  }), [comps, letters, synopses, inUseLetter, msPackages, msQueries]);
+  }), [comps, nowLetter, letters, synopses, inUseLetter, msPackages, msQueries]);
 
   /* ══ the page's own dialogs ═════════════════════════════════════════════════════════════════ */
 

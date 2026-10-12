@@ -47,12 +47,14 @@ export interface CompRow {
  * follows the dated ones, and the list's own order (append-only, so later is newer) breaks every tie.
  * The same order at any length, so a fourth comp never reshuffles the three already shown.
  */
-export const compRows = (comps: readonly CompTitle[]): CompRow[] =>
-  comps
+export const compRows = (comps: readonly CompTitle[], letterCompIds: readonly string[] = []): CompRow[] => {
+  /* comps v25: "in the letter" is the current letter's `compIds`, never a flag on the comp */
+  const named = (c: CompTitle) => !!c.id && letterCompIds.includes(c.id);
+  return comps
     .map((comp, i) => ({ comp, i }))
     .sort((a, b) => {
-      const la = a.comp.inQuery === true ? 0 : 1;
-      const lb = b.comp.inQuery === true ? 0 : 1;
+      const la = named(a.comp) ? 0 : 1;
+      const lb = named(b.comp) ? 0 : 1;
       if (la !== lb) return la - lb;
       const ya = typeof a.comp.year === "number" ? a.comp.year : null;
       const yb = typeof b.comp.year === "number" ? b.comp.year : null;
@@ -71,9 +73,10 @@ export const compRows = (comps: readonly CompTitle[]): CompRow[] =>
         comp,
         initial: (comp.title ?? "").trim().charAt(0).toUpperCase() || "?",
         meta,
-        inLetter: comp.inQuery === true,
+        inLetter: named(comp),
       };
     });
+};
 
 /* ══ the materials card ═══════════════════════════════════════════════════════════════════════ */
 

@@ -256,7 +256,9 @@ export interface Door {
 }
 
 export const materialDoors = (i: {
-  comps: readonly Pick<CompTitle, "inQuery">[];
+  comps: readonly Pick<CompTitle, "id">[];
+  /** the current letter's `compIds` (comps v25); null when the book has no letter, or its comps are not recorded */
+  letterCompIds: readonly string[] | null;
   letters: number;
   synopses: number;
   /** the letter in use, by name; null when no sent query resolves to one */
@@ -266,7 +268,8 @@ export const materialDoors = (i: {
   /** queries sent with a package */
   packageQueries: number;
 }): Door[] => {
-  const k = i.comps.filter((c) => c.inQuery === true).length;
+  const ids = i.letterCompIds ?? [];
+  const k = i.comps.filter((c) => !!c.id && ids.includes(c.id)).length;
   const saved = i.letters + i.synopses;
   return [
     {

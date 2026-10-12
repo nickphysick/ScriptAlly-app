@@ -224,7 +224,7 @@ export function visibleSuggestions(
 
 /**
  * An accepted suggestion becomes a shelf comp, UNTICKED — empty optionals omitted (Firestore maps
- * reject undefined); `media` omitted when "book" (the additive default); the writer decides inQuery.
+ * reject undefined); `media` omitted when "book" (the additive default); the writer decides which letter names it.
  *
  * ⚠️ THIS IS THE ONLY WRITER OF `verification` IN THE APP (baked decision 23), and carrying it is
  * what lets the ✓ VERIFIED chip exist on a comp at all. Before it did, a Scout comp lost its

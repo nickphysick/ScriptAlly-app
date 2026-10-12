@@ -26,10 +26,13 @@ import { CompsQueryLine } from "./CompsQueryLine";
 export const COMPS_EXHIBIT_LABEL = "HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW";
 
 export const COMPS_SAMPLE: CompTitle[] = [
-  { title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021, media: "book", matchAxis: "single day · close third · coastal", note: "A whole novel on one day on the water, told close to one narrator.", inQuery: true },
-  { title: "Salt Road", author: "Imogen Hale", publisher: "Faber", year: 2023, media: "book", matchAxis: "Irish coast · missing brother", note: "Coastal Irish setting, a missing brother, short punchy chapters.", inQuery: true },
-  { title: "The Lantern Keeper", author: "Mara Quill", year: 2024, media: "book", matchAxis: "lighthouse · grief", note: "Undecided: the grief is right, the pace is slower.", inQuery: false },
+  { title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021, media: "book", matchAxis: "single day · close third · coastal", note: "A whole novel on one day on the water, told close to one narrator." },
+  { title: "Salt Road", author: "Imogen Hale", publisher: "Faber", year: 2023, media: "book", matchAxis: "Irish coast · missing brother", note: "Coastal Irish setting, a missing brother, short punchy chapters." },
+  { title: "The Lantern Keeper", author: "Mara Quill", year: 2024, media: "book", matchAxis: "lighthouse · grief", note: "Undecided: the grief is right, the pace is slower." },
 ];
+
+/** The exhibit's letter names the first two. */
+const SAMPLE_IN_LETTER = 2;
 
 const noop = () => {};
 
@@ -44,7 +47,7 @@ export const CompsExhibit: React.FC<{ msTitle: string; now: number }> = ({ msTit
         </div>
         <div className="cpv-list">
           {COMPS_SAMPLE.map((c, i) => (
-            <CompCard key={c.title} comp={c} position={c.inQuery ? i + 1 : null} now={now} example />
+            <CompCard key={c.title} comp={c} inLetter={i < SAMPLE_IN_LETTER} position={i < SAMPLE_IN_LETTER ? i + 1 : null} now={now} example />
           ))}
         </div>
       </div>

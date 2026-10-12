@@ -264,9 +264,8 @@ interface CompStage {
  * analytics do not exist, and copy states what the code does today.
  *
  * ⚠️ AND ITS PARAGRAPH IS TRIMMED FOR THE SAME REASON, WHICH IS A DEVIATION FROM "take it verbatim".
- * The ref ends it "…and see which letters carried which comps". Nothing links a comp to a letter:
- * `SubmissionPackage` carries three version ids and no comps, and `CompTitle` carries an `inQuery`
- * intent and no usage record. The brief pre-emptively fixed the HEADING for exactly this reason and
+ * The ref ends it "…and see which letters carried which comps". When this was written nothing linked a comp to a letter.
+ * (Comps v25 added the link: a query letter records its `compIds`, lib/compUsage.ts.) The brief pre-emptively fixed the HEADING for exactly this reason and
  * did not reach the sentence beneath it. Flagged in the report; the clause returns the day the link
  * does.
  */

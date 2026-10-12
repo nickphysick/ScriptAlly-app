@@ -156,7 +156,7 @@ describe("versions", () => {
 });
 
 describe("your materials", () => {
-  const base = { comps: [{ inQuery: true }, { inQuery: true }, { inQuery: false }], letters: 3, synopses: 2, letterName: "Query letter v3", livePackages: 3, packageQueries: 6 };
+  const base = { comps: [{ id: "a" }, { id: "b" }, { id: "c" }], letterCompIds: ["a", "b"] as string[] | null, letters: 3, synopses: 2, letterName: "Query letter v3", livePackages: 3, packageQueries: 6 };
 
   it("three doors, each with one number and one sentence", () => {
     const d = materialDoors(base);
@@ -169,16 +169,19 @@ describe("your materials", () => {
   });
 
   it("singular where the count is one; 'None yet.' at none; no 'using' sentence when no letter is in use", () => {
-    const d = materialDoors({ comps: [{ inQuery: true }], letters: 1, synopses: 1, letterName: null, livePackages: 1, packageQueries: 1 });
+    const d = materialDoors({ comps: [{ id: "a" }], letterCompIds: ["a"], letters: 1, synopses: 1, letterName: null, livePackages: 1, packageQueries: 1 });
     expect([d[0].unit, d[0].sentence]).toEqual(["comp", "Books and films like yours. 1 is in your query letter."]);
     expect(d[1].sentence).toBe("1 query letter and 1 synopsis.");
     expect(d[2].sentence).toBe("The letter, synopsis and pages you send together. 1 query sent so far.");
-    const none = materialDoors({ comps: [], letters: 0, synopses: 0, letterName: null, livePackages: 0, packageQueries: 0 });
+    const none = materialDoors({ comps: [], letterCompIds: null, letters: 0, synopses: 0, letterName: null, livePackages: 0, packageQueries: 0 });
     expect(none.map((x) => x.n)).toEqual([0, 0, 0]);
     expect(none.map((x) => x.sentence)).toEqual([
       "Books and films like yours. None yet.", "Query letters and synopses. None yet.",
       "The letter, synopsis and pages you send together. None yet.",
     ]);
-    expect(materialDoors({ ...base, comps: [{ inQuery: false }] })[0].sentence).toBe("Books and films like yours. None are in your query letter yet.");
+    expect(materialDoors({ ...base, comps: [{ id: "z" }] })[0].sentence).toBe("Books and films like yours. None are in your query letter yet.");
+    /* a letter whose comps are not recorded names none, and so does a comp with no id yet */
+    expect(materialDoors({ ...base, letterCompIds: null })[0].sentence).toBe("Books and films like yours. None are in your query letter yet.");
+    expect(materialDoors({ ...base, comps: [{}] })[0].sentence).toBe("Books and films like yours. None are in your query letter yet.");
   });
 });

@@ -54,6 +54,8 @@ function normalizeVerification(v: CompVerification): CompVerification {
  */
 export function normalizeComp(c: CompTitle): CompTitle {
   const out: CompTitle = { title: c.title.trim() };
+  /* the stable id rides through every write; a comp without one is given one by `withCompIds` */
+  if (typeof c.id === "string" && c.id) out.id = c.id;
   const author = c.author?.trim();
   if (author) out.author = author;
   const publisher = c.publisher?.trim();
@@ -64,7 +66,6 @@ export function normalizeComp(c: CompTitle): CompTitle {
   const axis = c.matchAxis?.trim();
   if (axis) out.matchAxis = axis;
   if (c.media && c.media !== "book") out.media = c.media;
-  if (c.inQuery) out.inQuery = true;
   if (c.source) out.source = c.source;
   /* validated, not merely present — a malformed record must not survive a write and light the chip */
   if (c.verification && isVerified(c)) out.verification = normalizeVerification(c.verification);
@@ -190,7 +191,7 @@ export function withCompMoved(comps: CompTitle[], from: number, to: number): Com
  * ⚠️ AN EDIT MERGES ONTO THE STORED COMP — it never rebuilds one from the draft alone, and that
  * distinction was live data loss rather than a style preference.
  *
- * The page used to write `{ ...draft, source, inQuery }`, so any stored field the draft did not
+ * The page used to write a comp rebuilt from the draft, so any stored field the draft did not
  * carry was destroyed on every save. `note` was exactly that field: nothing on the comps page
  * writes it or renders it, and its only renderer is on the Manuscripts card — so the loss happened
  * on one page and showed on another, which is why it survived unnoticed.
@@ -205,7 +206,7 @@ export function withCompMoved(comps: CompTitle[], from: number, to: number): Com
  * "simplify" this back into a rebuild, and do not fix it by naming `note` explicitly — the next
  * field the form does not carry would go the same way.
  *
- * `inQuery` rides through on the spread (it is the writer's tick, never the form's), and `source`
+ * The comp's `id` rides through on the spread (a letter names the comp by it), and `source`
  * keeps its long-standing "absent reads as user" default rather than silently going absent.
  */
 export function withCompEdited(comps: CompTitle[], index: number, draft: CompDraft): CompTitle[] {

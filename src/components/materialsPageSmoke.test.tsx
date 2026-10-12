@@ -174,7 +174,8 @@ describe("/manuscripts/comps renders", () => {
   it("…and the workspace branch runs its derivations, not the first-visit block", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
-    expect(html, "the query line did not render").toContain("Your query line");
+    /* comps v25: the query line left the page (which comps a letter names is logged on the letter) */
+    expect(html, "the query line is still on the page").not.toContain("Your query line");
     /* the comp card rendered, with the two read-time derivations that only run here */
     expect(html, "the comp card did not render").toContain("The Smoke Comp");
     expect(html, "compAgeLine did not run").toMatch(/2021 · (\d+ years? ago|this year)/);

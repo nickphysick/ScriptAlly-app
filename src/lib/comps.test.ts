@@ -150,7 +150,7 @@ describe("withCompAdded / withCompRemoved", () => {
  * ⚠️ THE REGRESSION THESE GUARD IS SILENT AND CROSS-PAGE. The comps page used to rebuild an edited
  * comp from the draft alone, so `note` — which that page neither writes nor renders — was destroyed
  * on every save, and the only place it shows is the Manuscripts card. Nothing on screen changed at
- * the moment the data went. Verified red against the old `{ ...draft, source, inQuery }` shape
+ * the moment the data went. Verified red against the old rebuild-from-the-draft shape
  * before the fix was believed.
  */
 describe("withCompEdited", () => {
@@ -161,7 +161,7 @@ describe("withCompEdited", () => {
     year: 2020,
     note: "the corridors, the tides",
     matchAxis: "tone · atmosphere",
-    inQuery: true,
+    id: "cmp_piranesi",
     source: "suggested",
   };
   const shelf: CompTitle[] = [{ title: "Gideon the Ninth", source: "user" }, stored];
@@ -186,9 +186,9 @@ describe("withCompEdited", () => {
     expect(edited[1].note).toBe("the corridors, the tides");
   });
 
-  it("keeps inQuery and source, which are the writer's and the shelf's, never the form's", () => {
+  it("keeps the id and source, which are the shelf's, never the form's", () => {
     const edited = withCompEdited(shelf, 1, { title: "Piranesi", note: stored.note });
-    expect(edited[1].inQuery).toBe(true);
+    expect(edited[1].id).toBe("cmp_piranesi");
     expect(edited[1].source).toBe("suggested");
   });
 
@@ -266,13 +266,13 @@ describe("normalizeComp", () => {
     expect("note" in out).toBe(false);
   });
 
-  it("keeps note, matchAxis and inQuery, and omits a redundant book media", () => {
+  it("keeps note, matchAxis and the id, and omits a redundant book media", () => {
     const out = normalizeComp({
-      title: "T", note: "the tides", matchAxis: "tone", inQuery: true, media: "book",
+      title: "T", note: "the tides", matchAxis: "tone", id: "cmp_t", media: "book",
     });
     expect(out.note).toBe("the tides");
     expect(out.matchAxis).toBe("tone");
-    expect(out.inQuery).toBe(true);
+    expect(out.id).toBe("cmp_t");
     expect("media" in out).toBe(false);
     expect(normalizeComp({ title: "T", media: "film" }).media).toBe("film");
   });
@@ -308,7 +308,7 @@ describe("withCompMoved", () => {
    * stored order; a per-item field would be a second source of truth for the same fact.
    */
   it("carries every field with the moved comp, and adds no ordering field", () => {
-    const rich: CompTitle = { title: "B", author: "X", inQuery: true, note: "n", source: "suggested" };
+    const rich: CompTitle = { title: "B", author: "X", id: "cmp_b", note: "n", source: "suggested" };
     const out = withCompMoved([{ title: "A" }, rich, { title: "C" }], 1, 0);
     expect(out[0]).toEqual(rich);
     expect("order" in out[0]).toBe(false);
