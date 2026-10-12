@@ -289,11 +289,7 @@ export function QueryDrawer() {
 
   const inPanel = !!req?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
-  const panelFrame = inPanel && req?.panel ? {
-    ...req.panel,
-    court: (pq ? tileCourt(pq.status as never) : null) ?? "closed",
-    ...panelStepWords(req.mode, pq?.status, req.panel.first),
-  } : null;
+  const panelFrame = inPanel && req?.panel ? { first: req.panel.first, title: panelStepWords(req.mode, pq?.status, req.panel.first).title } : null;
 
   return (
     <>

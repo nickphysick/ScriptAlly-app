@@ -79,7 +79,7 @@ export const QueryPanelHost: React.FC<{
   }, []);
 
   return (
-    <SidePanel label="Query" step={step} className="qsp" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined} attrs={{ "data-qp": "panel", "data-qp-id": id, "data-qp-from": from }}>
+    <SidePanel label="Query" step={step} dim={step} className="qsp" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined} attrs={{ "data-qp": "panel", "data-qp-id": id, "data-qp-from": from }}>
       {children}
     </SidePanel>
   );

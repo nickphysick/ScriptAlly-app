@@ -24,6 +24,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { createPortal } from "react-dom";
 import { SIDE_SLOT } from "../shell/SidePanel";
 import { IlloSlot } from "./IlloSlot";
+import { QadHead, backWords } from "../queryActions/DrawerShell";
+import "../queryActions/queryDrawer.css";
 import "./correctionDesk.css";
 
 export interface CorrectionDeskProps {
@@ -38,13 +40,19 @@ export interface CorrectionDeskProps {
   spot?: string;
   onClose: () => void;
   children: React.ReactNode;
+  /**
+   * Query panel v2 §D — what the drawer's head says while the desk is stepped into the query's panel: whose
+   * query to go back to, the eyebrow, the title, the agent card, and (where the desk has steps) their names and
+   * which one is open. Read only in the panel; the free-standing desk draws no head.
+   */
+  head?: { first: string; eyebrow: string; title: string; who?: React.ReactNode; steps?: readonly string[]; step?: number };
 }
 
 /** One artwork per verb. EMPTY until the illustrator delivers — one entry per line, and the slot
  *  drops its placeholder chrome by itself. */
 const SPOT_ART: Partial<Record<string, React.ReactNode>> = {};
 
-export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, returnTo, onClose, children, spot }) => {
+export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, returnTo, onClose, children, spot, head }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; maxH: number | null; arrow: number | null }>({ top: 92, maxH: null, arrow: null });
 
@@ -112,13 +120,28 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, r
   /* Query panel v1 §C — WHILE THE QUERY'S SIDE PANEL IS OPEN THE DESK STEPS INTO IT (its slot), with "← Back
      to query", instead of standing beside it as a second card. Its fields and its logic are unchanged. */
   if (slot && slot.isConnected) {
+    /* Query panel v2 §D — in the panel the desk wears the action drawer's look: its head (the way back, the eyebrow,
+       the typewriter title, the quill, the close, the agent card), its numbered stepper where the desk has steps,
+       and a white body. `.qad-root` carries the drawer's tokens; there is no `.qad-drawer` and no dialog here. */
     return createPortal(
-      <div className={`t-f12 qc-neutral qcd qcd--panel qcc--st-${state}`} role="presentation" data-qp-step="correct">
-        <div className="qcd-ptop">
-          <button type="button" className="qcd-pback" data-qp="step-back" onClick={onClose}>{"\u2190"} Back to query</button>
-        </div>
-        <div ref={cardRef} className="qcd-card" role="group" aria-label="Correct this entry" data-notch="off">
-          <div className="qcd-scroll">{children}</div>
+      <div className={`qad-root qad-root--panel is-open t-f12 qc-neutral qcd qcd--panel qcc--st-${state}`} role="presentation" data-qp-step="correct">
+        <QadHead from={backWords(head?.first)} onFrom={onClose} eyebrow={head?.eyebrow ?? "CORRECT AN ENTRY"} title={head?.title ?? "Correct this entry"} who={head?.who} onClose={onClose} back />
+        <div className="qad-body qcd-pbody" data-qad-body>
+          {head?.steps ? (
+            <div className="qad-stepper" data-qad-stepper>
+              {head.steps.map((t, i) => (
+                <React.Fragment key={t}>
+                  <span className={`qad-stp ${i === head.step ? "cur" : i < (head.step ?? 0) ? "done" : "auto"}`} data-qad-step={i} aria-current={i === head.step ? "step" : undefined}>
+                    <i>{i < (head.step ?? 0) ? "\u2713" : i + 1}</i><em>{t}</em>
+                  </span>
+                  {i < head.steps!.length - 1 ? <span className={`qad-stl${i < (head.step ?? 0) ? " done" : ""}`} /> : null}
+                </React.Fragment>
+              ))}
+            </div>
+          ) : null}
+          <div ref={cardRef} className="qcd-card" role="group" aria-label="Correct this entry" data-notch="off">
+            <div className="qcd-scroll">{children}</div>
+          </div>
         </div>
       </div>,
       slot,

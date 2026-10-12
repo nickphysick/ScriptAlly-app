@@ -46,13 +46,43 @@ export interface ShellProps {
   /** where the shell stands, kept current for the host's park */
   stateRef?: React.MutableRefObject<ShellState | null>;
   /**
-   * Query panel v1 §C — the journey is stepped INTO the query's side panel. The shell then draws the step's
-   * frame (the court band naming the step, "← Back to query", the title, the consequence line) in place of
-   * the ink header, and neither a scrim nor a dialog of its own: the panel is the one dialog.
+   * The journey is stepped INTO the query's side panel (Query panel v1 §C, restyled by v2 §D). It wears the
+   * drawer's own head, led by "← Back to {first}'s query" and titled for this query ("What did Eleanor say?"),
+   * and keeps the consequence line above the foot. It has no scrim and no dialog of its own: the panel is the one
+   * dialog, and the panel dims the page.
    */
-  panel?: { name: string; agency: string; first: string; court: string; doing: string; title: string } | null;
+  panel?: { first: string; title: string } | null;
 }
-const COURT_WORDS: Record<string, string> = { you: "With you", agent: "With the agent", closed: "Closed" };
+/** "Back to Eleanor's query" — or "Back to the query" where there is no first name to use. */
+export const backWords = (first: string | null | undefined): string => (first && first.trim() ? `Back to ${first.trim()}\u2019s query` : "Back to the query");
+
+/**
+ * The action drawer's head (`.qad-head`): the way back, the mode's eyebrow, the typewriter title, the quill, the
+ * close, and the agent card. Shared by the standalone drawer, a journey stepped into the query's panel, and the
+ * correction desk there (Query panel v2 §D) — one head, so the three cannot come to look different.
+ */
+export function QadHead({ from, onFrom, eyebrow, title, who, onClose, back = false }: {
+  from?: string | null; onFrom: () => void; eyebrow: string; title: string; who?: React.ReactNode; onClose: () => void;
+  /** the way back is the panel's own ("← Back to …'s query"): it carries the panel's probe */
+  back?: boolean;
+}) {
+  return (
+    <div className="qad-head" data-qad-head>
+      <div className="qad-top">
+        <div className="qad-tt">
+          {from ? <button type="button" className="qad-from" data-qad-from data-qp={back ? "step-back" : undefined} onClick={onFrom}>← {from}</button> : null}
+          <div className="qad-mode">{eyebrow}</div>
+          {/* ⚠️ NOT AN <h2>: brand.tsx forces every h1–h3 into the brand serif with !important, so
+              the typewriter title would silently become Playfair. The role keeps it a heading. */}
+          <div className="qad-h2" role="heading" aria-level={2} data-qp={back ? "step-title" : undefined}>{title}</div>
+        </div>
+        <span className="qad-qwrap" aria-hidden="true"><img src={QUILL_SRC} alt="" /></span>
+      </div>
+      <button type="button" className="qad-dx" aria-label="Close" onClick={onClose}>×</button>
+      {who}
+    </div>
+  );
+}
 
 export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, onCancel, onPark, onSave, stateRef, panel = null }: ShellProps) {
   const { openCal, setOpenCal } = useDrawer();
@@ -152,33 +182,10 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
     <>
       {panel ? null : <div className="qad-scrim" onClick={leave} data-qad-scrim />}
       <aside className={`qad-drawer${panel ? " qad-drawer--panel" : ""}`} role={panel ? "group" : "dialog"} aria-modal={panel ? undefined : "true"} aria-label={panel ? panel.title : view.title}
-        data-qad-drawer={mode} data-qp-step={panel ? mode : undefined} data-court={panel?.court}>
-        {panel ? (
-          <div className="qps-frame" data-qp="step-frame">
-            <div className="qps-band" data-qp="step-band"><b>{COURT_WORDS[panel.court] ?? "Closed"}</b><b data-qp="step-doing">{panel.doing}</b></div>
-            <div className="qps-top">
-              <button type="button" className="qps-back" data-qp="step-back" onClick={leave}>{"\u2190"} Back to query</button>
-              <span className="qps-who" data-qp="step-who">{[panel.name, panel.agency].filter(Boolean).join(" \u00b7 ")}</span>
-            </div>
-            {/* not an <h2>: brand.tsx forces every h1–h3 into the brand serif */}
-            <div className="qps-title" role="heading" aria-level={2} data-qp="step-title">{panel.title}</div>
-          </div>
-        ) : (
-        <div className="qad-head" data-qad-head>
-          <div className="qad-top">
-            <div className="qad-tt">
-              {from ? <button type="button" className="qad-from" data-qad-from onClick={leave}>← {from}</button> : null}
-              <div className="qad-mode">{view.eyebrow}</div>
-              {/* ⚠️ NOT AN <h2>: brand.tsx forces every h1–h3 into the brand serif with !important, so
-                  the typewriter title would silently become Playfair. The role keeps it a heading. */}
-              <div className="qad-h2" role="heading" aria-level={2}>{view.title}</div>
-            </div>
-            <span className="qad-qwrap" aria-hidden="true"><img src={QUILL_SRC} alt="" /></span>
-          </div>
-          <button type="button" className="qad-dx" aria-label="Close" onClick={requestClose}>×</button>
-          {view.who}
-        </div>
-        )}
+        data-qad-drawer={mode} data-qp-step={panel ? mode : undefined}>
+        {/* Query panel v2 §D — ONE HEAD, in both homes: the ink header, the quill in its blush disc, the close and the
+            white agent card. Stepped into the query's panel it leads with "← Back to {first}'s query". */}
+        <QadHead from={panel ? backWords(panel.first) : from} onFrom={leave} eyebrow={view.eyebrow} title={panel ? panel.title : view.title} who={view.who} onClose={requestClose} back={!!panel} />
 
         <div className="qad-body" ref={bodyRef} data-qad-body>
           {view.steps.length ? (

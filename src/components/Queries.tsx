@@ -178,6 +178,8 @@ import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { SentBox, SentChip, FromPackageTag, sentView, ordinal } from "./queryActions/SentHow";
 import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
+import { Who } from "./queryActions/controls";
+import { agentName as journeyAgentName, whoLine } from "./queryActions/journeys/common";
 import { StandCard } from "./queries/panel/StandCard";
 import { standCard } from "../lib/standCard";
 /** "CORRECTED 28 SEP · WAS…" → a sentence: the ledger says nothing in capitals. */
@@ -6398,6 +6400,14 @@ export const Queries: React.FC<{
             returnTo={correctingTriggerRef.current}
             spot="correct"
             onClose={() => setCorrecting(null)}
+            /* Query panel v2 §D — in the panel the desk wears the drawer's head; the edit and its preview read as
+               two steps */
+            head={{
+              first: (activeAgent?.name || "").trim().split(/\s+/)[0] ?? "",
+              eyebrow: "CORRECT AN ENTRY", title: "Correct this entry",
+              who: <Who name={journeyAgentName(activeAgent)} sub={whoLine(activeAgent, activeQuery)} />,
+              ...(correcting.step === "edit" || correcting.step === "sheet" ? { steps: ["The details", "What changes"], step: correcting.step === "edit" ? 0 : 1 } : {}),
+            }}
           >
             <>
               {correcting.step === "fork" && (
