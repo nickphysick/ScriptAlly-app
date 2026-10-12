@@ -1,7 +1,7 @@
 # Query panel v2 — the rulings of 12 Oct
 
-On `query-panel-v2`, one commit each. Ruling 3 was held in the first pass; it is built now, apart from
-"Set a send-by date", which is **stopped for a decision**. See "Ruling 3, as decided" at the foot.
+On `query-panel-v2`, one commit each. Ruling 3 was held in the first pass, built in the second apart from
+"Set a send-by date", and finished in the third. See "Third pass" at the foot.
 
 ## False premises
 
@@ -193,3 +193,80 @@ On that build: tsc and both builds clean; Vitest 8,691 passed, 3 skipped, the sa
 pass; the journeys 15 pass.
 
 The next session to deploy to dev should base its integration on that branch.
+
+## Third pass (12 Oct): the send-by step, the tray, deskPaint2
+
+| Item | Commit | Result |
+| --- | --- | --- |
+| 1 · Set a send-by date | `0c1cd656` | A step on the edit journey, for a request. The stand card's fifth link opens it in the panel |
+| 2 · 7 Oct | none | Kept. Nothing changed |
+| 3 · the tray follows the panel | `3b928b2e` | One predicate in `lib/queryActions/entry.ts`, read by the panel's footer and the list's tray |
+| 4 · deskPaint2 | `c6771c20` | Skipped in place, listed in `tests/e2e/RETIRED-query-panel-v2.md` |
+
+### 1 · Set a send-by date
+
+- **Shows** on the stand card of a request (partial, full or revision) with no send-by date.
+- **Opens** the edit journey in the panel at one step, "When you'll send it by" ("When you'll resubmit by"
+  for a revision): the response journey's date chips (in a week, two weeks, four weeks, a date of your own, no
+  date given) and reminder choices (two days before, the day before, on the day, no reminder).
+- **Saves** `expectedSendDate` and `sendReminderDate` and nothing else. No entry is edited, so nothing is
+  recomputed. Undo is the journey's own.
+- **Defaults** are the response journey's: two weeks, reminded the day before.
+- **"No date given"** behaves as it does there: no send-by date is saved, and a "Send the pages" reminder is
+  set for three working days on. The link then still shows, because there is still no send-by date.
+- **Not changed:** editing a request entry from the ··· menu. That still opens the date-and-note step only.
+  Say if the send-by step should follow it there too.
+
+### 3 · The tray follows the panel
+
+False premise, found on the rendered page: **after "Keep tracking" the tray had no first action at all.** The
+tray's button came from the board's card for the query. Keep tracking removes the close card, so the button
+went with it and "Edit" became the tray's first button.
+
+What is built:
+
+- `leadDoors(row)` is the panel's doors. `silenceLead(row)` is the door that leads a query with the agent for
+  over 365 days: Close, or Record a response once the flag is set.
+- The panel's footer, the tray's label, the journey the tray opens and the Birds-eye drawer's pill all read
+  them. `QcOpenCard` no longer takes the flag as a prop.
+- A year-silent row always has a tray button, card or no card, and it is the panel's primary.
+
+Things to know:
+
+- **This also changes the tray before Keep tracking.** A year-silent query whose board card is a nudge used to
+  offer "Nudge" in the tray while the panel led with "Close query". The tray now says "Close query" there, as
+  the ruling asks. Rows under a year are untouched: their tray is still their board card's act.
+- **The "Next move" column's words are not changed.** A year-silent row can still read "Consider closing" or
+  "Nudge" there beside a tray button that says something else. Say if the column should follow too.
+
+### V13, extended
+
+70 of 70 green. Added readings:
+
+- the fifth link shows only on a request with no send-by date, and not once it has one;
+- the step holds all eight choices, in the panel, with the page dimmed;
+- before and after the save, on the query document: the changed fields are exactly `expectedSendDate` and
+  `sendReminderDate`; its log, the feed and the lock's other queries are unchanged;
+- the tray's first button equals the panel's primary before Keep tracking, after it, and after "Suggest
+  closing again".
+
+| Mutation | Red |
+| --- | --- |
+| The send-by step writes a third field | "changed: expectedSendDate, lastStatusChange, sendReminderDate" |
+| The tray draws no button for a year-silent row with no card (the build before the fix) | "tray "Edit" · panel "Record a response"", twice |
+
+### Deploy (third pass)
+
+Dev still served my second-pass integration, so I merged onto the same branch,
+`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b`, and deployed it. No conflicts.
+**Dev serves `index-CdbYLzG9.js`.**
+
+On that build: tsc and both builds clean; Vitest 8,694 passed, 3 skipped, the same one file failing to load
+(`functions/src/email.test.ts`, as on main). qcMove 3 pass; QP2 V1 to V13 green (V13 70 of 70); QP1 green;
+QC137 13 pass; feed drawer v2 4 pass; delete entry 8 pass; the journeys 15 pass; QC132 10 pass, 6 skipped as
+before.
+
+**Two locks failed inside the full run and passed alone:** QP2 V12 (134 of 134 alone) and QP1 P7 to P8 (93 of
+93 alone). Both walk every step of every action, and each lost a click on the shared account, as P7 did in the
+first pass. Neither reads anything this pass changed. They are worth making steadier; I have not done that
+here.
