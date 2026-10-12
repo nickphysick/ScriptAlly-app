@@ -182,6 +182,7 @@ import { Who } from "./queryActions/controls";
 import { agentName as journeyAgentName, whoLine } from "./queryActions/journeys/common";
 import { StandCard } from "./queries/panel/StandCard";
 import { standCard } from "../lib/standCard";
+import { ensureAppSerifItalic } from "../lib/appItalic";
 /** "CORRECTED 28 SEP · WAS…" → a sentence: the ledger says nothing in capitals. */
 const sentenceCase = (t: string): string => { const l = t.toLowerCase(); return l ? l[0].toUpperCase() + l.slice(1) : l; };
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
@@ -2362,6 +2363,9 @@ export const Queries: React.FC<{
   /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
   const pickOpenRef = useRef<(id: string) => void>(() => {});
   useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
+  /* ruling 2 — the serif's real italic, asked for by the app alone (this component is mounted on every workspace
+     page and on no public one) */
+  useEffect(() => { ensureAppSerifItalic(); }, []);
   /* the picker's panel goes when its journey does, unless a query took it over */
   useEffect(() => subscribeDrawer((r) => { if (!r) setPicking(false); }), []);
 

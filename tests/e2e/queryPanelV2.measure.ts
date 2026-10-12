@@ -331,6 +331,36 @@ test.describe("Query panel v2", () => {
     L.done(120);
   });
 
+  /* ── V11 · the serif's italic is a real face (ruling 2). Its mutation is not a style or a script in the page: the
+        italic's stylesheet is refused on the network, which is what "never loaded" is. ── */
+  test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {
+    test.setTimeout(240_000);
+    const L = new Ledger("V11");
+    if (MUT === "V11") await page.route(/fonts\.googleapis\.com\/css2\?family=Source\+Serif\+4:ital/, (r) => r.abort());
+    for (const vp of SIZES) {
+      const w = `${vp.width}`;
+      await openQC(page, vp, "none");
+      await openRow(page, rowOf("agent")); await tab(page, "Tracking");
+      const r = await page.evaluate(async () => {
+        const el = document.querySelector<HTMLElement>('[data-qp="panel"] [data-qp="stand"] .qsc-bl span') ?? document.querySelector<HTMLElement>('[data-qp="panel"] .qcv-open-ag');
+        if (!el) return null;
+        const cs = getComputedStyle(el);
+        /* ask for the face the element uses, then wait for whatever that starts */
+        await document.fonts.load(`italic ${cs.fontWeight} ${cs.fontSize} "Source Serif 4"`, el.textContent ?? "a").catch(() => []);
+        await document.fonts.ready;
+        const faces = [...document.fonts].filter((f) => /Source Serif 4/.test(f.family));
+        return {
+          what: el.className || el.tagName, style: cs.fontStyle, family: cs.fontFamily.split(",")[0].replace(/"/g, ""), weight: cs.fontWeight,
+          italicFaces: faces.filter((f) => f.style === "italic").length, italicLoaded: faces.filter((f) => f.style === "italic" && f.status === "loaded").length,
+          uprightLoaded: faces.filter((f) => f.style === "normal" && f.status === "loaded").length, link: !!document.getElementById("sa-app-serif-italic"),
+        };
+      });
+      L.check("V11", `${w} an italic span in the stand card`, !!r && r.style === "italic" && r.family === "Source Serif 4", r ? `${r.what}: ${r.family} ${r.style} ${r.weight}` : "no italic span found");
+      L.check("V11", `${w} a Source Serif 4 italic face is LOADED (so the slant is drawn, not synthesised)`, !!r && r.italicLoaded > 0, r ? `${r.italicLoaded} of ${r.italicFaces} italic face(s) loaded · ${r.uprightLoaded} upright loaded · the app's link present ${r.link}` : "none");
+    }
+    L.done(4);
+  });
+
   test("V6 V7 V8 · browsing is light; acting dims, wears the drawer, and is one surface", async ({ page }) => {
     test.setTimeout(600_000);
     page.setDefaultTimeout(10_000);
