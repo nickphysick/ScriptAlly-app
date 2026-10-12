@@ -108,7 +108,14 @@ const courtRows = async (page: Page, court: string): Promise<string[]> => {
   expect(ids.length, `rows with court ${court} on screen`).toBeGreaterThan(0);
   return ids;
 };
-const clickRow = async (page: Page, id: string) => { await page.locator(`${ROW}[data-qid="${id}"] .qcw-agt`).click(); await page.waitForTimeout(450); };
+/* ⚠️ IT WAITS FOR THE PANEL TO BE THAT ROW'S (ruling 6). A fixed 450ms was usually enough and once was not: P3 then
+   read a panel that had not mounted ("Cannot set properties of null"). The mounted state is the panel carrying the
+   row's id; the short settle after it is for the swap's paint. */
+const clickRow = async (page: Page, id: string) => {
+  await page.locator(`${ROW}[data-qid="${id}"] .qcw-agt`).click();
+  await expect(page.locator(`${PANEL}[data-qp-id="${id}"]`), `the panel did not become ${id}'s`).toBeVisible({ timeout: 10_000 });
+  await page.waitForTimeout(300);
+};
 const scrollTop = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.querySelector(".qcv-group.qc13") && e.getBoundingClientRect().height > 0)!.scrollTop);
 const panel = (page: Page) => page.evaluate(() => {
   const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
