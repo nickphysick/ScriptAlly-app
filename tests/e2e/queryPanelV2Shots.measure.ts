@@ -80,3 +80,27 @@ test("shots", async ({ page }) => {
     await shot(page, "track-800");
   } finally { execSync("node tests/e2e/seedQp1Save.mjs --clean", { stdio: "inherit" }); }
 });
+
+/* The three states the brief's table did not have (the rulings pack): a query with the agent and no reply date
+   recorded, a withdrawn one and a signed one. The signed query is seeded (`seedQp1Save.mjs --signed`) and removed. */
+test("shots · the three added states", async ({ page }) => {
+  test.skip(!process.env.QP2_SHOTS, "QP2_SHOTS=1 writes the report's shots");
+  test.setTimeout(400_000);
+  page.setDefaultTimeout(10_000);
+  mkdirSync(OUT, { recursive: true });
+  execSync("node tests/e2e/seedQp1Save.mjs --signed", { stdio: "inherit" });
+  try {
+    await open(page, { width: 1512, height: 900 });
+    const words: Record<string, string> = {};
+    const read = async (name: string) => { words[name] = await page.evaluate(() => { const s = document.querySelector('[data-qp="panel"] [data-qp="stand"]'); return `${s?.querySelector('[data-qp="stand-heading"]')?.textContent ?? ""} | ${s?.querySelector('[data-qp="stand-figure"]')?.textContent ?? "(no figure)"} | ${s?.querySelector('[data-qp="stand-text"]')?.textContent ?? ""}`; }); await shot(page, name); };
+    await row(page, `${ROW}[data-status="Withdrawn"]`); await tab(page, "Tracking"); await read("state-withdrawn-1512");
+    await row(page, `${ROW}[data-qid="qp1s-signed"]`); await read("state-signed-1512");
+    const agents = await page.locator(`${ROW}[data-court="agent"]`).evaluateAll((els) => els.filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).map((e) => (e as HTMLElement).dataset.qid!));
+    for (const id of agents) {
+      await row(page, `${ROW}[data-qid="${id}"]`);
+      if (/No reply date/.test(await page.locator(`${PANEL} [data-qp="stand-text"]`).innerText().catch(() => ""))) { await read("state-no-reply-date-1512"); break; }
+    }
+    console.log("STATE WORDS", JSON.stringify(words, null, 1));
+    expect(Object.keys(words).length, "all three states were found").toBe(3);
+  } finally { execSync("node tests/e2e/seedQp1Save.mjs --clean", { stdio: "inherit" }); }
+});

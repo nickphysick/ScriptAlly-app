@@ -81,6 +81,21 @@ b.set(doc(db, "users", uid, "queries", Q), {
 const act = `${PREFIX}act-sent`;
 b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MS, activityType: "Query Sent", description: "Query sent to Petra Nwosu at Nwosu & Hale", date: iso(SENT), details: "Sent via Email", resultingStatus: "Queried" });
 b.set(doc(db, "users", uid, "queries", Q, "activity", act), { type: "Queried", resultingStatus: "Queried", createdAt: new Date(iso(SENT)), note: "Query sent to Petra Nwosu at Nwosu & Hale", queryId: Q, agentName: "Petra Nwosu", manuscriptTitle: "seed" });
+/* `--signed` (Query panel v2): a second query, signed, so the stand card's "You signed with {first}" can be seen.
+   The harness account holds no signed query. */
+if (process.argv.includes("--signed")) {
+  const Q2 = `${PREFIX}signed`;
+  b.set(doc(db, "users", uid, "queries", Q2), {
+    id: Q2, userId: uid, agentId: AG, manuscriptId: MS, dateSent: iso(60), status: "Signed", sendMethod: "Email",
+    personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
+    revisionRound: 1, hasAgentResponded: true, lastStatusChange: iso(3), responseReceivedAt: iso(20),
+  });
+  for (const [k, type, d, words] of [["sent", "Queried", 60, "Query sent to Petra Nwosu at Nwosu & Hale"], ["offer", "Offer", 20, "Offer from Petra Nwosu at Nwosu & Hale"], ["signed", "Signed", 3, "Signed with Petra Nwosu at Nwosu & Hale"]]) {
+    const id = `${PREFIX}signed-${k}`;
+    b.set(doc(db, "users", uid, "activities", id), { id, userId: uid, queryId: Q2, manuscriptId: MS, activityType: k === "sent" ? "Query Sent" : "Status Changed", description: words, date: iso(d), details: "", resultingStatus: type });
+    b.set(doc(db, "users", uid, "queries", Q2, "activity", id), { type, resultingStatus: type, createdAt: new Date(iso(d)), note: words, queryId: Q2, agentName: "Petra Nwosu", manuscriptTitle: "seed" });
+  }
+}
 await b.commit();
 console.log("qp1s: seeded");
 process.exit(0);
