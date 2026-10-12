@@ -415,6 +415,15 @@ test.describe("Query panel v2", () => {
     });
     /* the list tray's first button for a row, read from the row itself (the tray is drawn, and shown on hover) */
     const tray = (id: string) => page.evaluate((sel) => { const r = document.querySelector<HTMLElement>(sel); const b = r?.querySelector<HTMLElement>('[data-qcv="row-tray"] button'); return b ? `${(b.textContent ?? "").trim()}|${b.dataset.qcv}` : "(no tray button)"; }, `${ROW}[data-qid="${id}"]`);
+    /* the row's "Next move" words */
+    const verb = (id: string) => page.evaluate((sel) => (document.querySelector<HTMLElement>(`${sel} [data-qcv="row-verb"]`)?.textContent ?? "").trim(), `${ROW}[data-qid="${id}"]`);
+    /* ONE DECISION SAID THREE WAYS: the column's words for each button the tray can lead with */
+    const WORDS: Record<string, string[]> = {
+      "Close query": ["Consider closing"], "Record a response": ["Waiting"], "Nudge": ["Nudge"],
+      "Mark partial sent": ["Send partial"], "Mark full sent": ["Send full"], "Mark revision sent": ["Send revision"],
+      "Record your answer": ["Decide on offer"], "Record what you sent": ["Record what you sent"],
+    };
+    const triple = async (id: string) => { const t = (await tray(id)).split("|"); const c = await card(); return { column: await verb(id), tray: t[1] === "row-act" ? t[0] : "", panel: c?.lead ?? "" }; };
     const openId = async (id: string) => { await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Tracking"); };
     const LINK = (k: string) => `${PANEL} [data-qp="stand-link"][data-link="${k}"]`;
     const STYLE = "Source Serif 4 15px rgb(42, 58, 82) 1px solid";
@@ -424,6 +433,7 @@ test.describe("Query panel v2", () => {
       execSync("node tests/e2e/seedQp2Links.mjs", { stdio: "inherit" });
       await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); } catch { /* */ } });
       const seen: Record<string, number> = {};
+      const agree: Record<string, number> = {}; const apart: string[] = [];
       for (const vp of SIZES) {
         const w = `${vp.width}`;
         await openQC(page, vp, "none");
@@ -434,6 +444,8 @@ test.describe("Query panel v2", () => {
           L.check("V13", `${w} ${id} · exactly its links`, JSON.stringify(c?.links) === JSON.stringify(want), `${JSON.stringify(c?.links)} (wants ${JSON.stringify(want)})`);
           L.check("V13", `${w} ${id} · quiet links: Source Serif 15, navy, an underline rule, under the paragraph`, c?.style === STYLE && c.under, `${c?.style} · under the paragraph ${c?.under}`);
           for (const l of c?.links ?? []) seen[l] = (seen[l] ?? 0) + 1;
+          const t = await triple(id);
+          if (t.tray) { agree[`${t.column} · ${t.tray}`] = (agree[`${t.column} · ${t.tray}`] ?? 0) + 1; L.check("V13", `${w} ${id} · the column's words are the tray button's`, (WORDS[t.tray] ?? []).includes(t.column), `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
         }
         /* the other states: a request, a closed query, and a query with the agent inside its dated wait */
         for (const court of ["you", "closed", "agent"]) {
@@ -450,6 +462,12 @@ test.describe("Query panel v2", () => {
             const stray = (c?.links ?? []).filter((l) => !earned.includes(l));
             L.check("V13", `${w} ${court} row ${n} (${c?.id}) · no link outside its state`, c != null && stray.length === 0, stray.length ? `stray: ${stray.join(", ")}` : `${c?.links.length} link(s), ${earned.length ? "earned" : "none earned"}`);
             if (c && earned.length === 0) seen[`none:${court}`] = (seen[`none:${court}`] ?? 0) + 1;
+            const t = c ? await triple(c.id) : null;
+            if (t?.tray) {
+              agree[`${t.column} · ${t.tray}`] = (agree[`${t.column} · ${t.tray}`] ?? 0) + 1;
+              L.check("V13", `${w} ${court} row ${n} (${c!.id}) · the column's words are the tray button's`, (WORDS[t.tray] ?? []).includes(t.column), `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`);
+              if (t.tray !== t.panel) apart.push(`${c!.id}: tray "${t.tray}", panel "${t.panel}"`);
+            }
             read++;
           }
           L.check("V13", `${w} ${court} · rows were read`, read > 0, `${read} row(s)`);
@@ -457,6 +475,9 @@ test.describe("Query panel v2", () => {
       }
       /* each state was entered, and so was "no links" for a request and a closed query */
       console.log(`[V13] states seen: ${JSON.stringify(seen)}`);
+      console.log(`[V13] column · tray pairs read: ${JSON.stringify(agree)}`);
+      console.log(`[V13] rows under a year whose tray is their board card's act, not the panel's primary: ${[...new Set(apart)].join("; ") || "none"}`);
+      L.check("V13", "the tally · more than one column and tray pair was read", Object.keys(agree).length >= 2, Object.keys(agree).join(" | "));
       /* "no links" on a request is read below, on this lock's own request once it has a date */
       for (const k of ["Add the date you sent it", "Set a date", "Remind me later", "Keep tracking", "Set a send-by date", "none:closed"]) L.check("V13", `the tally · ${k}`, (seen[k] ?? 0) > 0, `${seen[k] ?? 0}`);
 
@@ -577,6 +598,7 @@ test.describe("Query panel v2", () => {
       /* over a year: Close leads; Remind me later hides itself; Keep tracking swaps the lead; the menu undoes it */
       await openId("qp2l-year");
       const y0 = await card();
+      { const t = await triple("qp2l-year"); L.check("V13", "over a year · column, tray and panel agree", t.tray === t.panel && (WORDS[t.panel] ?? []).includes(t.column) && t.column === "Consider closing", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "over a year · the tray's first button is the panel's primary", (await tray("qp2l-year")) === `${y0?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y0?.lead}"`);
       L.check("V13", "over a year · Close leads the footer, Record a response beside it", y0?.lead === "Close query" && !!y0.doors.includes("Record a response"), `lead "${y0?.lead}" · ${y0?.doors.join(", ")}`);
       await page.locator(LINK("remindLater")).click();
@@ -589,6 +611,7 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y1 = await card();
       L.check("V13", "Keep tracking · Record a response leads instead of Close", y1?.lead === "Record a response" && !!y1.doors.includes("Close query"), `lead "${y1?.lead}" · ${y1?.doors.join(", ")}`);
+      { const t = await triple("qp2l-year"); L.check("V13", "Keep tracking · column, tray and panel agree, on different words than before", t.tray === t.panel && (WORDS[t.panel] ?? []).includes(t.column) && t.column === "Waiting", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "Keep tracking · the tray's first button follows the panel's primary", (await tray("qp2l-year")) === `${y1?.lead}|row-act` && y1?.lead !== y0?.lead, `tray "${await tray("qp2l-year")}" · panel "${y1?.lead}" (was "${y0?.lead}")`);
       L.check("V13", "Keep tracking · the closing sentence and its links are gone", y1?.links.length === 0 && !/Closing it keeps/.test(y1?.text ?? "") && (y1?.text ?? "").length > 0, `${JSON.stringify(y1?.links)} · "${y1?.text}"`);
       L.check("V13", "Keep tracking · sets the existing flag", dump().queries["qp2l-year"]?.keep === true, JSON.stringify(dump().queries["qp2l-year"]));
@@ -604,6 +627,7 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y3 = await card();
       L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && dump().queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify(dump().queries["qp2l-year"])}`);
+      { const t = await triple("qp2l-year"); L.check("V13", "Suggest closing again · column, tray and panel agree again", t.tray === t.panel && t.column === "Consider closing", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "Suggest closing again · the tray's first button is the panel's primary again", (await tray("qp2l-year")) === `${y3?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y3?.lead}"`);
       await page.locator(`${PANEL} [data-qcv="open-more"]`).click(); await page.waitForTimeout(300);
       const offered = await page.getByText("Suggest closing again", { exact: true }).count();
@@ -613,7 +637,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(60);
+    L.done(66);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {

@@ -90,7 +90,7 @@
  },
  "V13": {
   "lock": "V13",
-  "green": "82/82",
+  "green": "100/100",
   "mutations": [
    {
     "name": "every link drawn in every state (source: StandCard ignores the view's links)",
@@ -116,6 +116,11 @@
     "name": "the correction form offers the send-by fields to no request (source: the live-request test inverted)",
     "red": "'\u00b7\u00b7\u00b7 edit \u00b7 the request shows the step after date and note, on the recorded date \u2014 chip on: \"\"', and the walk stops there",
     "log": "mutation-runs/V13-fix.txt"
+   },
+   {
+    "name": "the Next move column does not read the predicate (source: nextLine ignores silenceWords)",
+    "red": "2 readings: 'Keep tracking \u00b7 column, tray and panel agree \u2014 column \"Nudge\" \u00b7 tray \"Record a response\" \u00b7 panel \"Record a response\"', and 'Suggest closing again \u2026 column \"Nudge\" \u00b7 tray \"Close query\"'",
+    "log": "mutation-runs/V13-column.txt"
    }
   ],
   "patch": "mutation-runs/V13.patch (both source mutations)"

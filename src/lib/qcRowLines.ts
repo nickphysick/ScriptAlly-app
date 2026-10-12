@@ -20,6 +20,7 @@ import { MATERIAL_SLOTS } from "./queryCardFacts";
 import { MATERIAL_ROW_NAMES, type MaterialKind } from "./agentMaterials";
 import { tileCourt, STAGE_NAME, type QcRow } from "./qcSummary";
 import type { ComingUp } from "./qcComingUp";
+import { silenceWords } from "./queryActions/entry";
 
 const DAY = 86_400_000;
 const WEEKDAY = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -119,6 +120,14 @@ export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine 
   }
 
   /* with the agent */
+  /* ⚠️ A YEAR SILENT: THE COLUMN SAYS WHAT THE TRAY'S BUTTON AND THE PANEL'S PRIMARY DO (`silenceWords`, the
+     one predicate in lib/queryActions/entry). Whatever card the board holds, the words are "Consider closing"
+     — or "Waiting", once the writer has pressed "Keep tracking". */
+  const silent = silenceWords(r);
+  if (silent) {
+    const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
+    return { phrase: silent, line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
+  }
   if (c?.bucket === "fix") return { phrase: c.verb, line: exp != null ? `REPLY BY ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
   if (over && (c?.bucket === "close" || -left! > CLOSE_AFTER_DAYS)) {
     const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
