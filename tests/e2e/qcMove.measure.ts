@@ -19,7 +19,15 @@ import { snapshotQuery, stable, type QuerySnapshot } from "./harnessDocs";
  * entry it needed and reported a failure about the app; the third then timed out waiting for a
  * picker that could not open. Order-dependence in a destructive suite reads as a product fault.
  */
-test.beforeEach(() => { execFileSync("node", ["tests/e2e/seedCorrection.mjs"], { stdio: "ignore" }); });
+/* ⚠️ THE FIXTURE IS DATED FROM A FIXED DAY, NOT FROM TODAY (ruling, 12 Oct). Dated from today, every run on a
+   later day moved the correction queries' rows, and two other locks had captured them: QP2 V10's history
+   months and feed drawer B6's baseline.
+   ⚠️ THE DAY IS 7 OCT 2026, NOT B6's OWN CLOCK (11 Oct). It is the day the fixture stood at when both captures
+   were taken, read back from them: B6's baseline heads days at 27 and 17 September (the closures at 10 and 20
+   days), and V10's fixture puts cor-move-a's send, 70 days back, in July. Dated from 11 Oct both stay red:
+   "8 days vs 7", and "Aug 2026" for "Jul 2026". */
+const SEED_NOW = "2026-10-07T12:00:00.000Z";
+test.beforeEach(() => { execFileSync("node", ["tests/e2e/seedCorrection.mjs"], { stdio: "ignore", env: { ...process.env, SEED_NOW } }); });
 
 /**
  * Open the move sheet for the last correctable entry and return what the two blocks CLAIM.

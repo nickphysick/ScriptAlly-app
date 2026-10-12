@@ -388,6 +388,7 @@ test.describe("Query panel v2", () => {
 
   /* ── V11 · the serif's italic is a real face (ruling 2). Its mutation is not a style or a script in the page: the
         italic's stylesheet is refused on the network, which is what "never loaded" is. ── */
+
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("V11");
@@ -527,12 +528,9 @@ test.describe("Query panel v2", () => {
         await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Agent");
         const now = await agentFacts(page);
         for (const k of ["place", "door", "links", "figures", "wishlist", "asks", "history", "footer"] as const) {
-          /* ⚠️ A HISTORY ROW'S MONTH IS THE RECORD'S OWN, AND THE SHARED ACCOUNT RE-DATES IT. The correction fixture
-             (seedCorrection.mjs) dates its queries from today, so re-seeding it moved "Jul 2026" to "Aug 2026" on a
-             row both builds draw alike. What v1 showed is the row: its title, its status and whether it is this
-             query. A month is compared as "a month". */
-          const norm = (v: unknown) => (k === "history" && Array.isArray(v) ? v.map((r) => String(r).replace(/\| [A-Z][a-z]{2,3} \d{4}$/, "| (month)")) : v);
-          const a = JSON.stringify(norm(v1[id]?.[k])); const b = JSON.stringify(norm(now?.[k]));
+          /* strict, months included: the correction fixture that once re-dated these rows is held to a fixed
+             date now (qcMove's SEED_NOW) */
+          const a = JSON.stringify(v1[id]?.[k]); const b = JSON.stringify(now?.[k]);
           L.check("V10", `${w} ${id} · ${k}`, a === b, a === b ? `${b.slice(0, 80)}` : `v1 ${a} → ${b}`);
         }
       }
