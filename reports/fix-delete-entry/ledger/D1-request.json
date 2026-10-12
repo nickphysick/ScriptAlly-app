@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "request · the write happened",
+  "ok": true,
+  "detail": "status Full Requested; log 1 → 2; feed 1 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "request · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row 0c8KVPiOVefXvfZS5M46 · logEntryId \"IclXpCkq6J44RvhrEL9l\" · log entry IclXpCkq6J44RvhrEL9l"
+ },
+ {
+  "lock": "D1",
+  "where": "request · the query document equals its starting snapshot, field for field",
+  "ok": true,
+  "detail": "13 fields, all as they started"
+ },
+ {
+  "lock": "D1",
+  "where": "request · no feed row remains",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "request · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "request · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]

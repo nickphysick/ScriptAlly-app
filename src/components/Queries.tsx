@@ -20,7 +20,6 @@ import {
   query,
   orderBy,
   limit,
-  deleteDoc,
   getDoc,
   getDocs
 } from "firebase/firestore";
@@ -192,7 +191,7 @@ import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
 import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
-import { recomputeQuery as recomputeQueryById } from "../lib/recomputeQuery";
+import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
@@ -1743,12 +1742,11 @@ export const Queries: React.FC<{
     if (!d || !q || !currentUser) return;
     if (d.whole) { await deleteQueryWithUndo(q.id); return; }
     const uid = currentUser.id;
-    const snap = await takeSnapshot(uid, [q.id]);
-    for (const id of d.ids) {
-      await deleteDoc(doc(db, "users", uid, "queries", q.id, "activity", id));
-      await deleteDoc(doc(db, "users", uid, "activities", id));
-    }
-    await recomputeQueryById(uid, q.id);
+    /* fix-delete-entry: ONE batch takes the entry, its feed row (found even where the two have different ids) and
+       the journey fields the entry owned (`lib/entryDeleteWrite`). The snapshot holds every query it can touch —
+       this one, and any other that carries this query's offer mark — so Undo puts all of it back. */
+    const snap = await takeSnapshot(uid, [q.id, ...(await offerMarkedBy(uid, q.id))]);
+    await deleteTimelineEntries(uid, q.id, d.ids);
     /* The re-delete that stood here is gone with the runtime repair it chased (clean-up pass,
        28 Sep): nothing writes a step behind the writer's back now, so a deleted step stays deleted. */
     const after = await getDoc(doc(db, "users", uid, "queries", q.id));

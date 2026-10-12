@@ -1,0 +1,7 @@
+  ✗ D1 · response (a pass) · no feed row remains — fde-act-sent → L2awmS52LlvoAEHlx8cs,fde-act-sent
+  ✗ D1 · request · no feed row remains — fde-act-sent → 6PtU5ZLyyYrv7xZXMwqO,fde-act-sent
+  ✗ D1 · offer · no feed row remains — fde-act-sent → 5if7hhWRNjNI7SYNb6dx,fde-act-sent
+  ✗ D1 · close · no feed row remains — fde-act-sent → YoPYFC0AkSG67K1mdx7K,fde-act-sent
+  ✗ D2 · no feed row remains — fde-act-req,fde-act-sent → fde-act-req,fde-act-sent,sFjt7Yh0V3VyzoZ4yZdE
+  5 failed
+  3 passed (3.4m)

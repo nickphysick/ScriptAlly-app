@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "offer · the write happened",
+  "ok": true,
+  "detail": "status Offer; log 1 → 2; feed 1 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row 5if7hhWRNjNI7SYNb6dx · logEntryId \"A2nyiGhgou7DX0kqPUYD\" · log entry A2nyiGhgou7DX0kqPUYD"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · the query document equals its starting snapshot, field for field",
+  "ok": true,
+  "detail": "13 fields, all as they started"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · no feed row remains",
+  "ok": false,
+  "detail": "fde-act-sent → 5if7hhWRNjNI7SYNb6dx,fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "offer · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]

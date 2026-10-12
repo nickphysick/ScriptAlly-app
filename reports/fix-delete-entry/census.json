@@ -1,0 +1,19 @@
+{
+ "queries": 73,
+ "logEntries": 113,
+ "feedRowsOnThoseQueries": 205,
+ "foundBy": {
+  "logEntryId": 0,
+  "sameId": 27,
+  "typeAndTime": 16,
+  "none": 70
+ },
+ "none": {
+  "noFeedRowOfThatTypeExists": 69,
+  "aRowExistsButCannotBeMatched": 1
+ },
+ "statusOrNudgeFeedRowsNoEntryClaims": 161,
+ "unmatched": [
+  "seed-query-10 · Full Sent · act-status-full-sent-seed-query-10 (2 row(s) of that type, counts disagree)"
+ ]
+}

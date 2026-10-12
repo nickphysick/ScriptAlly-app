@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "send · the write happened",
+  "ok": true,
+  "detail": "status Full Sent; log 2 → 3; feed 2 → 3"
+ },
+ {
+  "lock": "D1",
+  "where": "send · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row act-hohvwytcy · logEntryId absent · log entry act-hohvwytcy"
+ },
+ {
+  "lock": "D1",
+  "where": "send · the query document equals its starting snapshot, field for field",
+  "ok": true,
+  "detail": "15 fields, all as they started"
+ },
+ {
+  "lock": "D1",
+  "where": "send · no feed row remains",
+  "ok": true,
+  "detail": "fde-act-req,fde-act-sent → fde-act-req,fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "send · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-req,fde-act-sent → fde-act-req,fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "send · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]
