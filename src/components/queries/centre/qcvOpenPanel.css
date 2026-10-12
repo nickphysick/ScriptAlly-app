@@ -67,3 +67,11 @@
   .qsp .qcv-open-x span { display: none; }
   .qsp .qcv-open-x::before { content: "\2190  Back"; }
 }
+
+/* Contact list v16 §F — the query was opened from its agent's panel: "← Back to {first}" leads the masthead */
+.qsp .qcv-open-back {
+  display: block; margin: 16px 26px -14px; padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--sp-serif); font-size: 15px; line-height: 21px; color: rgba(244, 238, 229, 0.8);
+}
+.qsp .qcv-open-back:hover { color: #f4eee5; text-decoration: underline; text-underline-offset: 3px; }
+.qsp .qcv-open-back:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }

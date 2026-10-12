@@ -52,7 +52,7 @@ export interface ShellProps {
    * and keeps the consequence line above the foot. It has no scrim and no dialog of its own: the panel is the one
    * dialog, and the panel dims the page.
    */
-  panel?: { first: string; title: string; back?: boolean } | null;
+  panel?: { first: string; title: string; back?: boolean; backLabel?: string } | null;
 }
 export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, onCancel, onPark, onSave, stateRef, panel = null }: ShellProps) {
   const { openCal, setOpenCal } = useDrawer();
@@ -155,7 +155,7 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
         data-qad-drawer={mode} data-qp-step={panel ? mode : undefined}>
         {/* Query panel v2 §D — ONE HEAD, in both homes: the ink header, the quill in its blush disc, the close and the
             white agent card. Stepped into the query's panel it leads with "← Back to {first}'s query". */}
-        <QadHead from={panel ? (panel.back === false ? null : backWords(panel.first)) : from} onFrom={leave} eyebrow={view.eyebrow} title={panel ? panel.title : view.title} who={view.who} onClose={requestClose} back={!!panel} />
+        <QadHead from={panel ? (panel.backLabel ?? (panel.back === false ? null : backWords(panel.first))) : from} onFrom={leave} eyebrow={view.eyebrow} title={panel ? panel.title : view.title} who={view.who} onClose={requestClose} back={!!panel} />
 
         <div className="qad-body" ref={bodyRef} data-qad-body>
           {view.steps.length ? (

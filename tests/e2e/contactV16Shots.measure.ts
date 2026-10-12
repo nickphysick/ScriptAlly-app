@@ -45,4 +45,54 @@ test.describe("Contact list v16 · shots", () => {
       }
     });
   }
+
+  for (const vp of [{ width: 1512, height: 900 }, { width: 1280, height: 800 }]) {
+    test(`agent panel · ${vp.width}`, async ({ page }) => {
+      test.setTimeout(400_000);
+      mkdirSync(OUT, { recursive: true });
+      await openContacts16(page, vp);
+      const row = (stand: string) => page.locator(`.aglist [data-clv="row"][data-stand="${stand}"]`).filter({ visible: true }).first();
+      const panel = page.locator('[data-ap="panel"]');
+      const shot = async (n: string) => { await page.waitForTimeout(500); await page.screenshot({ path: `${OUT}/${n}-${vp.width}.png` }); };
+      const tab = (t: string) => panel.locator(`[data-ap-tab="${t}"]`).click();
+      /* a "your move" agent: a request to send */
+      await page.evaluate(() => { const h = [...document.querySelectorAll<HTMLElement>('[data-cl16="list-heading"]')].find((e) => e.getBoundingClientRect().height > 0); h?.scrollIntoView({ block: "start" }); });
+      if (await row("you").count()) {
+        await row("you").click({ position: { x: 120, y: 30 } });
+        await panel.waitFor({ timeout: 10_000 });
+        if (want("06-agent-with-you")) await shot("06-agent-with-you");
+        await tab("queries"); if (want("08-agent-queries")) await shot("08-agent-queries");
+        if (await panel.locator('[data-ap="ledger-entry"]').count()) {
+          await panel.locator('[data-ap="ledger-entry"]').first().click();
+          await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 });
+          if (want("09-agent-query")) await shot("09-agent-query");
+          await page.locator('[data-qcv="open-back"]').click();
+          await panel.waitFor({ timeout: 10_000 });
+        }
+        await tab("notes"); if (want("10-agent-notes")) await shot("10-agent-notes");
+        await tab("profile");
+        await panel.locator('[data-ap="edit"]').click();
+        await panel.locator('[data-ap="edit"], [data-ap-act="edit"]').first().waitFor();
+        if (want("11-act-edit")) await shot("11-act-edit");
+        await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      }
+      /* an agent with a query out: Record a response */
+      if (await row("agent").count()) {
+        await row("agent").click({ position: { x: 120, y: 30 } });
+        await page.waitForTimeout(500);
+        await panel.locator('[data-ap="primary"]').click();
+        if (want("13-act-response")) await shot("13-act-response");
+        await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+      }
+      /* an agent not yet queried: the profile, then Log a query */
+      await row("none").click({ position: { x: 120, y: 30 } });
+      await page.waitForTimeout(500);
+      if (want("07-agent-not-queried")) await shot("07-agent-not-queried");
+      if (await panel.locator('[data-ap="primary"][data-act="log"]').count()) {
+        await panel.locator('[data-ap="primary"]').click();
+        if (want("12-act-log")) await shot("12-act-log");
+        await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+      }
+    });
+  }
 });

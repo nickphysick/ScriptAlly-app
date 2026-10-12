@@ -39,6 +39,12 @@ export interface AgentCardOptions {
   originRect?: AgentCardOrigin | null;
   /** the opener's current order and filter — what ‹ › step through; absent, the arrows hide */
   sequence?: readonly string[];
+  /**
+   * Contact list v16 §F — THE EDITOR STEPS INTO THE AGENT'S SIDE PANEL: no centred card, no quick view. The
+   * session renders the editor alone, into the panel's act slot (`[data-ap-act-slot]`), and closes when the
+   * editor is left or saved. Everything it writes, and how, is the card's own.
+   */
+  host?: "panel";
 }
 
 export interface AgentCardRequest extends AgentCardOptions {

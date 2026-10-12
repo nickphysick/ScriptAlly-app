@@ -49,6 +49,11 @@ export const QcOpenCard: React.FC<{
   packages?: readonly SubmissionPackage[];
   /** Clear the selection — the view goes back to full width. */
   onClose?: () => void;
+  /**
+   * Contact list v16 §F — the query was opened from its agent's panel: the masthead leads with "← Back to {first}",
+   * and there is no Agent tab (the reader came from the agent).
+   */
+  backTo?: { label: string; onBack: () => void } | null;
   manuscriptTitle: string | null;
   /** Audience, genre, word count — each omitted where the manuscript does not state it. */
   manuscriptTags: readonly string[];
@@ -72,9 +77,11 @@ export const QcOpenCard: React.FC<{
    * nothing ("none"); opened over any other page it is one muted caption under the head ("caption").
    */
   manuscript?: "none" | "caption";
-}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none" }) => {
+}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none", backTo = null }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
+  /* opened from the agent's panel there is no Agent tab: a remembered "agent" reads as Tracking there */
+  const shownTab: PanelTab = backTo && tab === "agent" ? "tracking" : tab;
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLButtonElement>(null);
@@ -108,10 +115,11 @@ export const QcOpenCard: React.FC<{
   return (
     <FramedCard as="aside" container={false} probe="open" className="qcv-open qcv-own" frameClassName="qcv-open-fr"
       label={`${row.agentName}, ${row.agency}`}
-      rest={{ "data-status": row.status, "data-id": row.id, "data-court": court, "data-over": over ? "true" : undefined, "data-tab": tab }}>
+      rest={{ "data-status": row.status, "data-id": row.id, "data-court": court, "data-over": over ? "true" : undefined, "data-tab": shownTab }}>
       {/* Query panel v2 §A — the masthead: navy, the court's colour along its top edge, and nothing in small capitals.
           Whose court it is in is said by that colour, the disc and the footer's line, never by a label. */}
       <header className="qcv-open-mast" data-qcv="open-mast">
+        {backTo ? <button type="button" className="qcv-open-back" data-qcv="open-back" onClick={backTo.onBack}>{"\u2190"} {backTo.label}</button> : null}
         <div className="qcv-open-who">
           <span className="qcv-open-ini" aria-hidden="true">{row.initials}</span>
           <div className="qcv-open-whotx">
@@ -131,8 +139,8 @@ export const QcOpenCard: React.FC<{
           <p className="qcv-open-for" data-qcv="open-for">for <i>{manuscriptTitle}</i></p>
         )}
         <div className="qcv-open-tabs" role="tablist" aria-label="Query detail">
-          {(["tracking", "agent", "notes"] as const).map((t) => (
-            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => pickTab(t)}>
+          {(backTo ? (["tracking", "notes"] as const) : (["tracking", "agent", "notes"] as const)).map((t) => (
+            <button key={t} type="button" role="tab" aria-selected={shownTab === t} onClick={() => pickTab(t)}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : noteCount > 0 ? <>Notes <i className="qcv-open-tabn">{"\u00b7"} {noteCount}</i></> : "Notes"}
             </button>
           ))}
@@ -141,12 +149,12 @@ export const QcOpenCard: React.FC<{
 
       <div className="qcv-open-body">
         <div className="qcv-open-tab qcv-legacy" role="tabpanel">
-          {tab === "tracking" ? tracking : tab === "agent" ? agentTab : notesTab}
+          {shownTab === "notes" ? notesTab : shownTab === "agent" ? agentTab : tracking}
         </div>
       </div>
 
       {/* §C — on the Notes tab the composer is the foot (the notes thread draws it): the action footer steps aside */}
-      {tab === "notes" ? null : <>
+      {shownTab === "notes" ? null : <>
       <div className="qcv-open-ft" data-qcv="open-foot">
         <p className="qcv-open-stand"><b>{standLine(row)}</b><span>{sentence(factLine(row, nowMs))}</span></p>
         {more.length > 0 && (

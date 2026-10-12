@@ -1,0 +1,144 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v16 §F — THE AGENT PANEL (ref design-refs/contact-list-v16/contact-list-v16.html `#ap`).
+ *
+ * The container, the masthead, the tabs, the scrolling body and the footer are Query panel v2's own rules
+ * (`.qsp .qcv-open-*`, queries/centre/qcvOpenPanel.css; `.spanel`, shell/sidePanel.css; the faces,
+ * queries/queryPanelHost.css): the panel wears those classes. This sheet states only what is the agent's.
+ */
+
+/* the box: as the query panel's (`.qsp .spanel-own > .qcv-open`), for a card that is not a FramedCard */
+.apn .spanel-own > .apn-card { position: static; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+.apn .spanel-own > .apn-card > .qcv-open-fr { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ── the masthead: the top edge and the active tab follow whether the agent is taking queries ── */
+.qsp.apn .qcv-open { --qp-mid: var(--ap-edge, #d8cfc2); }
+.qsp.apn .qcv-open-ini.apn-ini { background: #f4eee5; color: #1c130f; }
+.qsp.apn .qcv-open-ini.apn-ini.is-grey { background: #b3aca5; color: #2b2622; }
+.qsp.apn .qcv-open .qcv-open-line.apn-line { justify-content: space-between; flex-wrap: nowrap; gap: 14px; }
+.qsp.apn .qcv-open .apn-door { flex: none; gap: 8px; }
+.qsp.apn .apn-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.qsp.apn .apn-links { display: flex; align-items: center; gap: 18px; min-width: 0; white-space: nowrap; }
+.qsp.apn .apn-link {
+  padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--sp-serif); font-size: 14.5px; line-height: 21px; color: #f4eee5;
+  text-decoration: underline; text-decoration-color: rgba(244, 238, 229, 0.45); text-underline-offset: 4px;
+}
+.qsp.apn .apn-link:hover { text-decoration-color: #f4eee5; }
+.qsp.apn .apn-link:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
+
+/* ── Profile · 1 · where you stand: Query panel v2's stand card (its rules live in the query ledger's sheet,
+   scoped to the ledger; restated here value for value for a card that stands alone). ── */
+.apn .apn-stand .qsc { --qsc-tint: #e2e7ef; --qsc-c: #3d5070; position: relative; margin: 0; padding: 18px 20px; border-radius: 14px; background: var(--qsc-tint); }
+.apn .apn-stand .qsc--you { --qsc-tint: #f6e2d8; --qsc-c: #b0603e; }
+.apn .apn-stand .qsc--closed { --qsc-tint: #ece8e3; --qsc-c: #7c7168; }
+.apn .apn-stand .qsc--plain { --qsc-tint: #efe9df; --qsc-c: #7c7168; }
+.apn .apn-stand .qsc .qsc-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.apn .apn-stand .qsc .qsc-h b { min-width: 0; font-family: var(--sp-type); font-weight: 400; font-size: 22px; line-height: 1.15; color: #1c130f; }
+.apn .apn-stand .qsc .qsc-h span { flex: none; font-family: var(--sp-type); font-weight: 400; font-size: 14px; line-height: 1.3; white-space: nowrap; color: var(--qsc-c); }
+.apn .apn-stand .qsc .qsc-h span.hot { color: #a2452a; }
+.apn .apn-stand .qsc p { margin: 8px 0 0; font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.78); }
+.apn .apn-stand .qsc p i { font-family: var(--sp-type); font-style: normal; }
+
+/* ── Profile · 2 · the index card: white, a rust top edge, a margin line, ruled rows ── */
+.apn .apn-index {
+  --apn-margin: 118px;
+  position: relative; margin: 22px 0 0; padding: 0; background: #fff; border-radius: 6px; border-top: 3px solid #c2564a;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 26px -20px rgba(28, 19, 15, 0.45);
+}
+/* full size is the panel's own switch (shell/sidePanel.css): wider than a 1440 window */
+@media (min-width: 1441px) { .apn .apn-index { --apn-margin: 132px; } }
+.apn .apn-index::before { content: ""; position: absolute; top: 0; bottom: 0; left: var(--apn-margin); width: 1px; background: rgba(194, 86, 74, 0.35); pointer-events: none; }
+.apn .apn-ir { display: grid; grid-template-columns: var(--apn-margin) minmax(0, 1fr); min-height: 46px; margin: 0; }
+.apn .apn-ir + .apn-ir { border-top: 1px solid rgba(61, 80, 112, 0.13); }
+.apn .apn-ir dt { margin: 0; padding: 13px 10px 11px 18px; font-family: var(--sp-type); font-weight: 400; font-size: 14px; line-height: 1.45; color: rgba(28, 19, 15, 0.55); }
+.apn .apn-ir dd { margin: 0; padding: 11px 18px 11px 20px; min-width: 0; font-family: var(--sp-serif); font-size: 16px; line-height: 1.45; color: #1c130f; }
+.apn .apn-ir dd .apn-wish { font-style: italic; }
+.apn .apn-ir dd .apn-note { display: block; margin-top: 2px; font-family: var(--sp-serif); font-style: italic; font-size: 14px; line-height: 1.4; color: rgba(28, 19, 15, 0.55); }
+.apn .apn-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.apn .apn-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: 13px; background: #f1ece4; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1; color: #1c130f; white-space: nowrap; }
+.apn .apn-chip.is-hit { background: #e3eadf; color: #3f5a39; }
+.apn .apn-add {
+  padding: 0; border: 0; border-bottom: 1px solid rgba(42, 58, 82, 0.35); background: none; cursor: pointer;
+  font-family: var(--sp-type); font-size: 14.5px; line-height: 1.4; color: #2a3a52;
+}
+.apn .apn-add:hover { border-bottom-color: #2a3a52; }
+.apn .apn-add:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
+
+/* ── Queries: the ledger's own grid and spine (`.qlg`), each entry a white card ── */
+.apn .apn-ledger .qlg-c { padding: 0 0 18px 0; }
+.apn .apn-qc {
+  display: block; width: 100%; box-sizing: border-box; padding: 13px 16px 12px; border: 0; border-radius: 12px; background: #fff; cursor: pointer; text-align: left;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1);
+}
+.apn .apn-qc:hover { box-shadow: 0 0 0 1px rgba(42, 58, 82, 0.45); }
+.apn .apn-qc:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.apn .apn-qc .apn-qt { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 17px; line-height: 1.25; color: #1c130f; }
+.apn .apn-qc .apn-qs { display: block; margin-top: 3px; font-family: var(--sp-serif); font-style: italic; font-size: 15px; line-height: 1.4; color: rgba(28, 19, 15, 0.62); }
+.apn .apn-qc .apn-qf { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.apn .apn-qchip { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 12px; background: #e2e7ef; font-family: var(--sp-serif); font-size: 13.5px; line-height: 1; color: #2a3a52; white-space: nowrap; }
+.apn .apn-qchip[data-court="you"], .apn .apn-qchip[data-court="offer"] { background: #f6e2d8; color: #8a3f24; }
+.apn .apn-qchip[data-court="closed"] { background: #ece8e3; color: #5b524a; }
+.apn .apn-qo { font-family: var(--sp-serif); font-size: 14.5px; line-height: 1; color: #2a3a52; white-space: nowrap; }
+.apn .apn-none { margin: 40px 0 0; text-align: center; font-family: var(--sp-serif); font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.62); }
+
+/* ── the footer: the status on the left (one line at 1280), ⋯, then the buttons ── */
+.qsp.apn .qcv-open-ft .apn-status { flex: 1 1 auto; min-width: 0; }
+.qsp.apn .qcv-open-ft .apn-status b, .qsp.apn .qcv-open-ft .apn-status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qsp.apn .qcv-open-ft { position: relative; }
+.qsp.apn .qcv-open-doors { justify-content: flex-end; }
+.apn .apn-menu {
+  position: absolute; right: 26px; bottom: calc(100% - 8px); z-index: 4; min-width: 220px; padding: 6px; border-radius: 12px; background: #fff;
+  box-shadow: 0 18px 40px -16px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.1);
+}
+.apn .apn-menu button { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; text-align: left; font-family: var(--sp-serif); font-size: 15px; color: #1c130f; }
+.apn .apn-menu button:hover { background: #f5f1ec; }
+.apn .apn-menu button.is-danger { color: #a2452a; }
+.qsp.apn .apn-del { flex-direction: column; align-items: stretch; gap: 10px; padding-top: 16px; border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.apn .apn-del p { margin: 0; font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; color: #1c130f; }
+.apn .apn-del .apn-delin { height: 40px; padding: 0 12px; border: 0; border-radius: 10px; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.25); font-family: var(--sp-serif); font-size: 15px; }
+.apn .apn-del .apn-delacts { display: flex; justify-content: flex-end; gap: 10px; }
+.qsp.apn .qcv-open-doors .apn-delgo { background: #a2452a; }
+.qsp.apn .qcv-open-doors .apn-delgo:disabled { opacity: 0.45; cursor: default; }
+
+/* ── acting · Edit profile: the action drawer's head over the agent card's own editor ── */
+.apn .apn-actroot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.apn .apn-actroot .qad-drawer { display: flex; flex-direction: column; }
+.apn .apn-actslot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: #fff; }
+.apn .apn-edit { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+/* ⚠️ THE EDITOR'S RULES HANG FROM `.ac` (card/agentCard.css): its host wears that class here, so the fields, their
+   validation lines and the Also-changes notes are the card's own. What this restates is only the chrome around
+   them, at one class more than the card's rules. */
+/* the editor's own band says "Editing" and closes: the head above says both */
+.apn .apn-edit > .ac-band { display: none; }
+.apn .apn-edit > .ae-body.ac-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 16px; }
+/* its three sections, as a sticky segmented row in place of the stepper */
+.apn .apn-edit .ae-tabs {
+  position: sticky; top: 0; z-index: 4; display: flex; gap: 8px; margin: 0 -4px 4px; padding: 18px 28px 16px; border: 0;
+  background: #fff; box-shadow: 0 1px 0 rgba(28, 19, 15, 0.1);
+}
+.apn .apn-edit .ae-tabs button {
+  height: 38px; padding: 0 16px; border: 0; border-radius: 19px; background: #f3efe8; cursor: pointer; white-space: nowrap;
+  font: 400 15.5px/1 var(--sp-serif); color: #1c130f; display: inline-flex; align-items: center; gap: 7px;
+}
+.apn .apn-edit .ae-tabs button[aria-selected="true"] { background: #2a3a52; color: #f4eee5; }
+.apn .apn-edit .ae-tabs button[aria-selected="true"]::after { content: none; }
+.apn .apn-edit .ae-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* the foot is always there in the panel: the summary on the left, Cancel and Save on the right */
+.apn .apn-edit > .ac-foot, .apn .apn-edit > .ac-foot.on { flex: none; max-height: none; overflow: visible; border-top: 1px solid rgba(28, 19, 15, 0.1); background: #fff; }
+.apn .apn-edit > .ac-foot > div { padding: 14px 28px 18px; }
+.apn .apn-edit > .ac-foot :is([data-ae="cancel"], [data-ae="save"], [data-ae="keep"], [data-ae="discard"]) {
+  height: 44px; padding: 2px 22px 0; border: 0; border-radius: 22px; cursor: pointer; white-space: nowrap; font: 400 17px/1 var(--sp-type);
+}
+.apn .apn-edit > .ac-foot :is([data-ae="cancel"], [data-ae="keep"]) { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
+.apn .apn-edit > .ac-foot :is([data-ae="save"], [data-ae="discard"]) { background: #2a3a52; color: #f4eee5; }
+.apn .apn-edit > .ac-foot [data-ae="save"]:disabled { opacity: 0.45; cursor: default; }
+
+/* the open row: a warm ground and a 3px ink edge on its left (the row says it with `aria-current`, as built) */
+@media (min-width: 768px) {
+  .cl16-list .clv-row[aria-current="true"] { background: #f7f3ed; box-shadow: inset 3px 0 0 #2a3a52; outline: 0; }
+}
+/* the editor's foot is one row in the panel: the summary gives way, the buttons do not wrap */
+.apn .apn-edit > .ac-foot > div { flex-wrap: nowrap; }
+.apn .apn-edit > .ac-foot .msg { flex: 1 1 0; min-width: 0; }

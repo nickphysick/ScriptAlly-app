@@ -139,7 +139,7 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
 import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, queryPanelBack, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -5450,6 +5450,11 @@ export const Queries: React.FC<{
     if (cardQueryId !== q.id || extPanel) { if (extPanel) closeQueryPanel(); onOpenQuery?.(q.id); }
     else bumpStep((n) => n + 1); /* already open on this row: a render, so the effect above sees the slot */
   };
+  /* Contact list v16 §F — the query view opened from an agent's panel. Escape and "← Back" return to the agent
+     (the agent's panel is still the page's `?agent`, and redraws the moment this one closes); the × closes both. */
+  const fromAgent = extPanel?.from === "agent" ? queryPanelBack() : null;
+  const backToAgent = () => closeQueryPanel();
+  const closeFromAgent = () => { window.dispatchEvent(new CustomEvent("sa:agent-panel-close")); closeQueryPanel(); };
   const qcOpenCardNode = panelRow && activeQuery && qcById.get(activeQuery.id) ? (
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
@@ -5458,7 +5463,9 @@ export const Queries: React.FC<{
       /* §1 — the ✕, Escape and the scrim are ONE act, and it knows which door opened the card:
          a query opened inside the calendar is the calendar's, one from the ledger or `?q` is the
          page's. Clearing both would drop the page's selection for a click made in an overlay. */
-      onClose={closeQueryCard}
+      onClose={fromAgent ? closeFromAgent : closeQueryCard}
+      /* Contact list v16 §F — opened from its agent's panel: a way back, and no Agent tab */
+      backTo={fromAgent ? { label: `Back to ${fromAgent.first}`, onBack: backToAgent } : null}
       manuscriptTitle={activeMs?.title ?? null}
       manuscript={extPanel ? "caption" : "none"}
       manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
@@ -7102,7 +7109,7 @@ export const Queries: React.FC<{
               and never the panel: the journey's form is portalled into this element's slot. */}
           {((qcOpenCardNode && cardQueryId) || picking) && (
             <QueryPanelHost id={qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel ? extPanel.from : "queries"}
-              step={(qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))} onClose={closeQueryCard}>
+              step={(qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))} onClose={fromAgent ? backToAgent : closeQueryCard}>
               {qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
             </QueryPanelHost>
           )}

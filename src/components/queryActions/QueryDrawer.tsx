@@ -297,8 +297,8 @@ export function QueryDrawer() {
   const pa = pq ? db.agents.find((a) => a.id === pq.agentId) : undefined;
   const pfirst = pq ? ((pa?.name || "").trim().split(/\s+/)[0] ?? "") : (req?.panel?.first ?? "");
   const panelFrame = inPanel && req?.panel ? {
-    first: pfirst, back: pq ? true : req.panel.back,
-    title: req.mode === "resp" && !req.queryId ? "Who replied?" : panelStepWords(req.mode, pq?.status, pfirst).title,
+    first: pfirst, back: pq ? true : req.panel.back, backLabel: req.panel.backLabel,
+    title: req.panel.title ?? (req.mode === "resp" && !req.queryId ? "Who replied?" : panelStepWords(req.mode, pq?.status, pfirst).title),
   } : null;
 
   return (

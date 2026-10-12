@@ -11,7 +11,7 @@
  *
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
 import { Agent } from "../../types";
@@ -48,7 +48,7 @@ import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactOpenHeader } from "./contact/ContactOpenHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
@@ -73,6 +73,13 @@ import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { ContactListHeading, ContactStrip } from "./contact/ContactStrip";
 import { useContactPins } from "./contact/useContactPins";
+import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
+import type { PanelAct } from "../../lib/agentPanel";
+import { firstNameOf } from "../../lib/agentPanel";
+import { genreLabel } from "../../lib/genres";
+import { destroyManifest } from "../../lib/cascade";
+import { emitAgentCardEvent, closeAgentCard } from "../../lib/agentCardStore";
+import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from "../../lib/queryPanelStore";
 import { GLANCE_CHIP, glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { holdSidebarCollapsed } from "../shell/useSidebarCollapsed";
 import { fitsGenre } from "../../lib/contactStrip";
@@ -123,7 +130,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths,
+    currentUser, updateUserPaths, taskFlags, deleteAgent,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -523,31 +530,52 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      only what is the LIST's: the ring on the open row, the notice and FLIP after a save, the ring
      on a new row. The card no longer closes when its agent leaves the filter — opened, it stays
      open, and ‹ › step through the order it was opened from. */
+  /* Housekeeping's drawer closes when an agent's panel opens from it (declared further down; read through a ref) */
+  const setHkOpenRef = useRef<(v: boolean) => void>(() => {});
   const cardReq = useAgentCardRequest();
-  const openId = cardReq?.agentId ?? null;
-  /** the list's current order and filter — what the card's ‹ › step through */
-  const sequence = useMemo(() => visibleFacts.map((x) => x.agent.id), [visibleFacts]);
-  const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => {
+  /* ── v16 §F — THE AGENT PANEL. On this page an agent opens in the query panel's container, and the page's
+     address says which: `?agent={id}`. The row, a "+ Add" on a row, Housekeeping's doors and the row keys all open
+     it; nothing here opens the centred agent card any more. Opening pushes one history entry (so Back closes the
+     panel); swapping to another agent and closing replace it. */
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const panelParam = active ? params.get("agent") : null;
+  const panelAgent = panelParam ? agents.find((a) => a.id === panelParam) ?? null : null;
+  const panelId = panelAgent?.id ?? null;
+  const [panelTab, setPanelTab] = useState<AgentPanelTab>("profile");
+  const setPanelParam = useCallback((id: string | null, how: "push" | "replace") => {
+    setParams((prev) => { const n = new URLSearchParams(prev); if (id) n.set("agent", id); else n.delete("agent"); return n; }, { replace: how === "replace" });
+  }, [setParams]);
+  const panelIdRef = useRef(panelId);
+  panelIdRef.current = panelId;
+  const closePanel = useCallback(() => { closeAgentCard(); if (panelIdRef.current) setPanelParam(null, "replace"); }, [setPanelParam]);
+  /** open the panel on this agent — and, when a door asks for it, the editor at a field */
+  const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
     if (!agents.some((a) => a.id === agentId)) return;
-    openAgentCard(agentId, { ...opts, sequence });
-  }, [agents, sequence]);
-  /** OPEN the card on this agent — reading, from the top (v11 §7.1) — growing out of the row. */
-  const onOpen = useCallback((agentId: string, from?: DOMRect) => openCard(agentId, {
-    from: "row",
-    originRect: from ? { x: from.x, y: from.y, width: from.width, height: from.height } : null,
-  }), [openCard]);
-  /** a Housekeeping name opens the card too — but it is not a list row, so the card lifts */
-
-  /* ‹ › on the card move the SAME session to the next agent; the list scrolls that row into view
-     behind the card, and its ring (aria-current, from `openId`) has already moved with it. */
-  const lastOpen = useRef<string | null>(null);
+    setHkOpenRef.current(false);
+    if (panelIdRef.current !== agentId) { setPanelTab("profile"); setPanelParam(agentId, panelIdRef.current ? "replace" : "push"); }
+    if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row", host: "panel" });
+    else closeAgentCard();
+  }, [agents, setPanelParam]);
+  /* an id the list does not hold (deleted, or a stale link) clears itself once the agents can answer */
+  useEffect(() => { if (active && panelParam && collectionsReady && agents.length > 0 && !panelAgent) setPanelParam(null, "replace"); }, [active, panelParam, panelAgent, collectionsReady, agents.length, setPanelParam]);
+  /* the query view opened from this panel has its own ×: it closes the agent too */
   useEffect(() => {
-    const was = lastOpen.current;
-    lastOpen.current = openId;
-    if (!was || !openId || was === openId) return;
-    const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${openId}"]`)].find((e) => e.getBoundingClientRect().height > 0);
-    row?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-  }, [openId]);
+    const on = () => { if (panelIdRef.current) setPanelParam(null, "replace"); };
+    window.addEventListener("sa:agent-panel-close", on);
+    return () => window.removeEventListener("sa:agent-panel-close", on);
+  }, [setPanelParam]);
+  /* while one of this agent's queries has the box (opened from the Queries tab), the agent's panel stands aside */
+  const qPanel = useSyncExternalStore(subscribeQueryPanel, currentQueryPanel, currentQueryPanel);
+  const queryHasBox = qPanel?.from === "agent";
+  const openId = panelId;
+  /** the list's current order and filter */
+  const sequence = useMemo(() => visibleFacts.map((x) => x.agent.id), [visibleFacts]);
+  /** OPEN this agent — a row, a strip, a key */
+  const onOpen = useCallback((agentId: string, _from?: DOMRect) => openPanel(agentId), [openPanel]);
+  /* kept under its old name for the doors that asked for the card's editor at a field */
+  const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => openPanel(agentId, opts.tab || opts.focus || opts.prefill ? { tab: opts.tab, focus: opts.focus, prefill: opts.prefill } : undefined), [openPanel]);
+
   /** "+ Add an agent" — the empty card, growing out of the button that asked for it. */
   const openAdd = useCallback(() => {
     const r = addBtnRef.current?.getBoundingClientRect();
@@ -712,6 +740,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
+  setHkOpenRef.current = setHkOpen;
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
@@ -775,8 +804,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     const target = { reply: { tab: "work", focus: "reply" }, materials: { tab: "want", focus: "materials" }, genres: { tab: "want", focus: "genres" },
       wishlist: { tab: "want", focus: "wishlist" }, reopen: { tab: "work", focus: "reopen" } } as const;
     const t = target[item.gap];
-    openAgentCard(item.agent.id, { tab: t.tab, focus: t.focus, prefill: Object.keys(prefill).length ? prefill : undefined, from: "hk", sequence });
-  }, [sequence]);
+    openPanel(item.agent.id, { tab: t.tab, focus: t.focus, prefill: Object.keys(prefill).length ? prefill : undefined });
+  }, [openPanel]);
 
   const onWishlistStill = useCallback(async (agentId: string) => {
     const agent = agents.find((a) => a.id === agentId);
@@ -876,6 +905,67 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [addUserTask, openCard]);
   remindRef.current = onHkRemind;
 
+  /* ── v16 §F — the panel's acts ─────────────────────────────────────────────────────────────────────────── */
+  const panelFacts = useMemo(() => (panelAgent ? agentFacts(panelAgent, qcRows, scoped?.id ?? null) : null), [panelAgent, qcRows, scoped]);
+  const panelQ = useMemo(() => (panelAgent ? cardQuery(cardRows(qcRows, panelAgent.id, scoped?.id ?? null)) : null), [panelAgent, qcRows, scoped]);
+  const panelRows = useMemo(() => (panelAgent ? qcRows.filter((r) => r.query.agentId === panelAgent.id) : []), [panelAgent, qcRows]);
+  const panelGenres = useMemo(
+    () => (panelAgent?.genres ?? []).map((g) => ({ label: genreLabel(g, personalGenres), hit: bookHit(g) })),
+    [panelAgent, personalGenres, bookHit],
+  );
+  const titleOf = useCallback((id: string) => manuscripts.find((m) => m.id === id)?.title?.trim() || null, [manuscripts]);
+  /** ↑ ↓ J K: the row before or after the open one, in the order the list draws */
+  const walkPanel = useCallback((dir: 1 | -1) => {
+    const ids = rowKeys.current.displayIds;
+    const i = panelIdRef.current ? ids.indexOf(panelIdRef.current) : -1;
+    const next = ids[Math.max(0, Math.min(ids.length - 1, i < 0 ? 0 : i + dir))];
+    if (!next || next === panelIdRef.current) return;
+    closeAgentCard();
+    setPanelTab("profile");
+    setPanelParam(next, "replace");
+    requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${next}"]`)].find((x) => x.getBoundingClientRect().height > 0);
+      row?.scrollIntoView({ block: "nearest", behavior: "auto" });
+    });
+  }, [setPanelParam]);
+  /** a query journey, stepped into the panel in the action drawer's look */
+  const actInPanel = useCallback((act: PanelAct) => {
+    const a = panelAgent;
+    if (!a || act.kind !== "journey") return;
+    const first = firstNameOf(a);
+    const nm = (a.name || a.agency || "The agent").trim();
+    const panel = { name: nm, agency: (a.name ? a.agency ?? "" : "").trim(), first, backLabel: `Back to ${first}`, ...(act.mode === "log" ? { title: `Query ${first}` } : {}) };
+    if (act.mode === "log") { openQueryDrawer({ mode: "log", agentId: a.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}), panel }); return; }
+    if (panelQ) openQueryDrawer({ mode: act.mode, queryId: panelQ.id, panel });
+  }, [panelAgent, panelQ, scoped]);
+  const panelDeleteFacts = useMemo(() => {
+    if (!panelAgent) return null;
+    const m = destroyManifest("agent", panelAgent.id, { queries, activities, taskFlags });
+    return { queries: m.queries, history: m.activityRecords };
+  }, [panelAgent, queries, activities, taskFlags]);
+  /** ⋯ → Delete agent…, confirmed: the panel closes, the row collapses (the list's own aftermath), then the cascade runs */
+  const deletePanelAgent = useCallback(async () => {
+    const a = panelAgent;
+    if (!a) return;
+    const name = (a.name ?? "").trim() || a.agency;
+    closePanel();
+    emitAgentCardEvent({ type: "deleting", agentId: a.id });
+    await new Promise((r) => window.setTimeout(r, 240));
+    try { await deleteAgent(a.id); } catch { emitAgentCardEvent({ type: "delete-failed", agentId: a.id, name }); }
+  }, [panelAgent, closePanel, deleteAgent]);
+  const writePanelAgent = useCallback(async (id: string, patch: AgentEditPatch): Promise<SaveAgentResult> => {
+    if (sandbox?.writeAgent) return sandbox.writeAgent(id, patch);
+    if (!currentUser) return { ok: false, error: "Not signed in." } as SaveAgentResult;
+    return commitAgentEdits(firestoreDb, currentUser.id, id, patch);
+  }, [sandbox, currentUser]);
+  const panelMenu = useMemo(() => {
+    const out: { key: string; label: string; run: () => void }[] = [];
+    if (panelQ) out.push({ key: "qc", label: "Open in Query Centre", run: () => navigate(`/queries?q=${encodeURIComponent(panelQ.id)}`) });
+    if (panelQ && panelQ.court === "agent" && panelQ.pastExpected) out.push({ key: "nudge", label: "Send a nudge", run: () => actInPanel({ kind: "journey", mode: "nudge" }) });
+    if (panelAgent && panelFacts?.door === "closed" && reopenReminder(panelAgent)) out.push({ key: "remind", label: "Remind me when they reopen", run: () => remindRef.current(panelAgent) });
+    return out;
+  }, [panelQ, panelAgent, panelFacts, navigate, actInPanel]);
+
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -941,12 +1031,27 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
             onShowAll={async () => { await updateUserPaths(showAllPath()); }}
             onCard={onHkCard}
-            onAgentCard={(id, tab) => openAgentCard(id, { tab, from: "hk", sequence })}
+            onAgentCard={(id, tab) => openPanel(id, tab ? { tab } : undefined)}
             alsoFor={hkAlsoFor}
             onCheckinEvery={async (every: WishlistEvery) => { await updateUserPaths(wishlistEveryPath(every)); }}
             onCheckinNext={async () => { await updateUserPaths(wishlistNextPath(hkPrefs, hkToday)); }}
             onWishlistStill={onWishlistStill}
-            onWishlistChanged={(id) => openAgentCard(id, { tab: "want", focus: "wishlist", from: "hk", sequence })}
+            onWishlistChanged={(id) => openPanel(id, { tab: "want", focus: "wishlist" })}
+          />
+        )}
+        {/* v16 §F — the agent's panel (portalled): only while this is the page on screen, and not while one of the
+            agent's queries has the box */}
+        {showList && active && panelAgent && panelFacts && !queryHasBox && (
+          <AgentPanel
+            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
+            genres={panelGenres} nowMs={nowMs} uid={currentUser?.id ?? null} writeAgent={writePanelAgent}
+            tab={panelTab} onTab={setPanelTab}
+            editing={cardReq?.host === "panel" && cardReq.agentId === panelAgent.id}
+            onClose={closePanel} onWalk={walkPanel}
+            onEdit={(tab, focus) => openPanel(panelAgent.id, { tab: tab ?? "who", focus })}
+            onAct={actInPanel}
+            onOpenQuery={(queryId) => openQueryPanelFromAgent(queryId, { agentId: panelAgent.id, first: firstNameOf(panelAgent) })}
+            menu={panelMenu} deleteFacts={panelDeleteFacts} onDelete={deletePanelAgent}
           />
         )}
         {showList && active && guideCorner && tabH > 0 && (

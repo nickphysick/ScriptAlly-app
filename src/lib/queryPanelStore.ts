@@ -12,7 +12,8 @@
  *
  * Module scope, like `drawerStore`: nothing to mount means nothing to forget.
  */
-export type PanelOrigin = "dashboard" | "feed" | "other";
+/* "agent" (Contact list v16 §F): opened from an agent's panel, on its Queries tab — the query view carries a way back */
+export type PanelOrigin = "dashboard" | "feed" | "other" | "agent";
 export interface PanelRequest { id: string; from: PanelOrigin }
 
 let current: PanelRequest | null = null;
@@ -22,10 +23,25 @@ const tell = () => { for (const f of [...subs]) f(); };
 export const currentQueryPanel = (): PanelRequest | null => current;
 export function openQueryPanel(id: string, from: PanelOrigin = "other"): void {
   if (current?.id === id && current.from === from) return;
+  back = null;
   current = { id, from };
   tell();
 }
+/**
+ * Contact list v16 §F — THE AGENT A QUERY WAS OPENED FROM. The agent's panel shows one of its queries in the query
+ * panel's own view, in the same box; that view then offers "← Back to {first}" and no Agent tab (the reader came
+ * from the agent). Set with the open, cleared with the close.
+ */
+export interface PanelBack { agentId: string; first: string }
+let back: PanelBack | null = null;
+export const queryPanelBack = (): PanelBack | null => back;
+export function openQueryPanelFromAgent(id: string, from: PanelBack): void {
+  back = from;
+  current = { id, from: "agent" };
+  tell();
+}
 export function closeQueryPanel(): void {
+  back = null;
   if (!current) return;
   current = null;
   tell();
@@ -53,7 +69,7 @@ export const responsePickerHosted = (): boolean => pickerSubs.size > 0;
  * ONE RIGHT-HAND PANEL AT A TIME. The query panel, the activity feed drawer and the Birds-eye drawer share
  * the window's right edge; whoever opens says so here, and the others close themselves.
  */
-export type RightPanelOwner = "query" | "feed" | "birds";
+export type RightPanelOwner = "query" | "feed" | "birds" | "agent";
 let owner: RightPanelOwner | null = null;
 const ownerSubs = new Set<(o: RightPanelOwner | null) => void>();
 export const rightPanelOwner = (): RightPanelOwner | null => owner;

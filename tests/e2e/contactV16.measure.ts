@@ -13,7 +13,7 @@
  *    measured sizes with the sidebar open the sheet is under 1440, so the page is compact at both.
  */
 import { test, type Page } from "@playwright/test";
-import { LIB16, Ledger, SIZES16, near, openContacts16, mutate16, setScroll16 } from "./cl16Lib";
+import { LIB16, Ledger, MUT16, SIZES16, near, openContacts16, mutate16, setScroll16 } from "./cl16Lib";
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the hero number back in the panel */
@@ -38,6 +38,20 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   E1: { js: `(() => { if (window.__m16e1) return; window.__m16e1 = true; const g = [...document.querySelectorAll(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0); const sc = g.closest(".wpg-scroll"); new MutationObserver(() => { if (!g.hasAttribute("data-full")) for (const t of [0, 50, 400, 700]) setTimeout(() => { sc.scrollTop = 0; }, t); }).observe(g, { attributes: true, attributeFilter: ["data-full"] }); })()` },
   /* the list's width measured once, and again only when the window is resized */
   E2: { js: `(() => { if (window.__m16e2) return; window.__m16e2 = true; const m = [...document.querySelectorAll(".aglist .clv-group > .clv-main")].find((e) => e.getBoundingClientRect().height > 0); const pin = () => m.style.setProperty("--hsheet-w", (m.getBoundingClientRect().width + 48) + "px"); pin(); window.addEventListener("resize", () => { m.style.removeProperty("--hsheet-w"); requestAnimationFrame(pin); }); })()` },
+  /* a scrim while only browsing */
+  F1: { css: `.spanel-scrim { opacity: 1 !important; }` },
+  /* the top edge coloured by the query's court (the query panel's rule), not by the door */
+  F2: { css: `.qsp.apn .qcv-open { --qp-mid: #d9967a !important; }` },
+  /* the index card's margin line dropped */
+  F3: { css: `.apn .apn-index::before { display: none !important; }` },
+  /* the query opens in a second panel beside the agent's */
+  F4: { js: `(() => { if (window.__m16f4) return; window.__m16f4 = true; document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-ap="ledger-entry"]')) { const p = document.querySelector('[data-ap="panel"]'); if (p) { const c = p.cloneNode(true); c.setAttribute("data-mut", ""); c.removeAttribute("data-ap"); c.style.right = "580px"; document.body.appendChild(c); setTimeout(() => c.remove(), 1500); } } }, true); })()` },
+  /* acting without a scrim */
+  F5: { css: `.spanel-scrim { opacity: 0 !important; }` },
+  /* the footer's primary is always "Edit profile" */
+  F6: { js: `(() => { if (window.__m16f6) return; window.__m16f6 = true; const fix = () => document.querySelectorAll('[data-ap="primary"]').forEach((b) => { if (b.textContent !== "Edit profile") b.textContent = "Edit profile"; }); new MutationObserver(fix).observe(document.body, { childList: true, subtree: true, characterData: true }); fix(); })()` },
+  /* closing the panel lets the click through to the old handler: the centred card opens */
+  G1: { js: `(() => { if (window.__m16g1) return; window.__m16g1 = true; document.addEventListener("click", (e) => { const x = e.target.closest && e.target.closest('[data-ap="close"]'); if (x) { const id = document.querySelector('[data-ap="panel"]')?.getAttribute("data-ap-id"); setTimeout(() => window.__saAgentCard && window.__saAgentCard.open(id), 60); setTimeout(() => window.__saAgentCard && window.__saAgentCard.close(), 900); } }, true); })()` },
 };
 const open = async (page: Page, vp: { width: number; height: number }, lock: string) => { await openContacts16(page, vp); await mutate16(page, lock, MUTATIONS); };
 
@@ -634,5 +648,415 @@ test.describe("Contact list v16", () => {
       await page.keyboard.press("f"); await page.waitForTimeout(500);
     }
     L.done(8);
+  });
+
+  /* ── F · the agent panel ─────────────────────────────────────────────────────────────────────────────────── */
+  const PANEL = '[data-ap="panel"]';
+  const rowOf = (page: Page, sel: string) => page.locator(`.aglist [data-clv="row"]${sel}`).filter({ visible: true }).first();
+  const clickRow = async (page: Page, sel: string) => { const r = rowOf(page, sel); if (!(await r.count())) return false; await r.scrollIntoViewIfNeeded(); await r.click({ position: { x: 150, y: 28 } }); await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(350); return true; };
+  /** one read of the panel, the scrim and the page behind */
+  const readPanel = (page: Page) => page.evaluate(() => {
+    const box = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, b: r.bottom, r: r.right }; };
+    const vis = <T extends Element>(l: Iterable<T>) => [...l].filter((e) => e.getBoundingClientRect().height > 0);
+    const panels = vis(document.querySelectorAll<HTMLElement>("[data-side-panel]"));
+    const p = document.querySelector<HTMLElement>('[data-ap="panel"]');
+    const scrim = document.querySelector<HTMLElement>("[data-side-scrim]");
+    const bar = vis(document.querySelectorAll<HTMLElement>(".ws-pagebar"))[0] ?? null;
+    const mast = p?.querySelector<HTMLElement>('[data-ap="mast"]') ?? null;
+    const name = p?.querySelector<HTMLElement>('[data-ap="name"]') ?? null;
+    const card = p?.querySelector<HTMLElement>('[data-ap="card"]') ?? null;
+    const tabOn = p?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]') ?? null;
+    const index = p?.querySelector<HTMLElement>('[data-ap="index"]') ?? null;
+    const rows = vis(document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]'));
+    const sel = rows.filter((r) => r.getAttribute("aria-current") === "true");
+    const disc = p?.querySelector<HTMLElement>('[data-ap="disc"]') ?? null;
+    return {
+      panels: panels.length, dialogs: vis(document.querySelectorAll('[role="dialog"]')).length,
+      box: box(p), barB: bar ? bar.getBoundingClientRect().bottom : null, vw: window.innerWidth, vh: window.innerHeight,
+      scrim: scrim ? { on: scrim.getAttribute("data-on"), opacity: parseFloat(getComputedStyle(scrim).opacity), bg: getComputedStyle(scrim).backgroundColor, events: getComputedStyle(scrim).pointerEvents } : null,
+      id: p?.getAttribute("data-ap-id") ?? null, acting: p?.getAttribute("data-ap-acting") ?? null, url: location.search,
+      selected: sel.map((r) => r.getAttribute("data-agent-card")), selBg: sel[0] ? getComputedStyle(sel[0]).backgroundColor : null, selEdge: sel[0] ? getComputedStyle(sel[0]).boxShadow : null,
+      door: card?.getAttribute("data-door") ?? null, edge: mast ? getComputedStyle(mast).boxShadow : "", tabLine: tabOn ? getComputedStyle(tabOn).borderBottomColor : "", tab: card?.getAttribute("data-tab") ?? null,
+      mastBg: mast ? getComputedStyle(mast).backgroundColor : "",
+      name: name ? { text: name.textContent, size: parseFloat(getComputedStyle(name).fontSize), face: getComputedStyle(name).fontFamily } : null,
+      place: (() => { const e = p?.querySelector<HTMLElement>('[data-ap="place"]'); return e ? { text: e.textContent, style: getComputedStyle(e).fontStyle, size: parseFloat(getComputedStyle(e).fontSize) } : null; })(),
+      disc: disc ? { bg: getComputedStyle(disc).backgroundColor, fg: getComputedStyle(disc).color } : null,
+      doorPill: (p?.querySelector('[data-ap="door"]')?.textContent ?? "").trim(),
+      links: [...(p?.querySelectorAll<HTMLElement>("[data-ap-link]") ?? [])].map((l) => ({ k: l.getAttribute("data-ap-link"), text: (l.textContent ?? "").trim(), href: l.getAttribute("href") })),
+      tabs: [...(p?.querySelectorAll<HTMLElement>("[data-ap-tab]") ?? [])].map((t) => (t.textContent ?? "").replace(/\s+/g, " ").trim()),
+      stand: (() => { const st = p?.querySelector<HTMLElement>('[data-ap="stand"]'); const c = st?.querySelector<HTMLElement>('[data-qp="stand"]'); return st && c ? { state: st.getAttribute("data-state"), heading: (c.querySelector('[data-qp="stand-heading"]')?.textContent ?? "").trim(), figure: (c.querySelector('[data-qp="stand-figure"]')?.textContent ?? "").trim() || null, text: (c.querySelector('[data-qp="stand-text"]')?.textContent ?? "").trim(), bg: getComputedStyle(c).backgroundColor, radius: getComputedStyle(c).borderTopLeftRadius, hSize: parseFloat(getComputedStyle(c.querySelector('[data-qp="stand-heading"]')!).fontSize) } : null; })(),
+      stands: p?.querySelectorAll('[data-qp="stand"]').length ?? 0,
+      index: index ? { top: getComputedStyle(index).borderTopColor + " " + getComputedStyle(index).borderTopWidth, bg: getComputedStyle(index).backgroundColor, radius: getComputedStyle(index).borderTopLeftRadius, line: getComputedStyle(index, "::before").display === "none" ? null : parseFloat(getComputedStyle(index, "::before").left), lineBg: getComputedStyle(index, "::before").backgroundColor, lineW: getComputedStyle(index, "::before").width,
+        gap: (() => { const st = p!.querySelector('[data-ap="stand"]'); return st ? index.getBoundingClientRect().top - st.getBoundingClientRect().bottom : null; })(),
+        rows: [...index.querySelectorAll<HTMLElement>("[data-ap-row]")].map((r) => ({ k: r.getAttribute("data-ap-row"), label: (r.querySelector("dt")?.textContent ?? "").trim(), missing: r.getAttribute("data-missing") === "true", add: (r.querySelector("[data-ap-add]")?.textContent ?? "").trim() || null, h: r.getBoundingClientRect().height })) } : null,
+      foot: { status: (p?.querySelector('[data-ap="status"]')?.textContent ?? "").trim(), detail: (p?.querySelector('[data-ap="status-detail"]')?.textContent ?? "").trim() || null, primary: (p?.querySelector('[data-ap="primary"]')?.textContent ?? "").trim(), act: p?.querySelector('[data-ap="primary"]')?.getAttribute("data-act") ?? null, edit: !!p?.querySelector('[data-ap="edit"]'), more: !!p?.querySelector('[data-ap="more"]'), lines: (() => { const b = p?.querySelector<HTMLElement>('[data-ap="status"]'); return b ? Math.round(b.getBoundingClientRect().height / parseFloat(getComputedStyle(b).lineHeight)) : 0; })() },
+      qad: { head: vis(document.querySelectorAll('[data-ap="panel"] [data-qad-head]')).length, quill: vis(document.querySelectorAll('[data-ap="panel"] .qad-qwrap img')).length, from: (vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] [data-qad-from]'))[0]?.textContent ?? "").trim(), eyebrow: (vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] .qad-mode'))[0]?.textContent ?? "").trim(), title: (vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] .qad-h2'))[0]?.textContent ?? "").trim(), who: vis(document.querySelectorAll('[data-ap="panel"] [data-qad-who]')).length, stepper: vis(document.querySelectorAll('[data-ap="panel"] [data-qad-stepper]')).length, segs: vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] .apn-edit .ae-tabs button')).map((b) => (b.textContent ?? "").trim()) },
+      hkTab: (() => { const t = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]'); return t ? parseFloat(getComputedStyle(t).opacity) : null; })(),
+      old: { card: vis(document.querySelectorAll(".ac-ov, [data-ac='quick'], .acq-head")).length, dock: vis(document.querySelectorAll("[data-qad-dock]")).length, journey: vis(document.querySelectorAll(".qad-root.is-open")).length },
+      focusInField: (() => { const a = document.activeElement as HTMLElement | null; return a ? { tag: a.tagName, ae: a.closest("[data-ae]")?.getAttribute("data-ae") ?? a.getAttribute("data-ae"), inPanel: !!a.closest('[data-ap="panel"]') } : null; })(),
+    };
+  });
+  const rgbOf = (hex: string) => { const n = parseInt(hex.slice(1), 16); return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`; };
+
+  test("F1 · panel box: a row opens the agent in the query panel's container, with no scrim", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("F1");
+    for (const vp of SIZES16) {
+      await open(page, vp, "F1");
+      const w = `${vp.width}`;
+      if (!(await clickRow(page, '[data-stand="none"]').catch(() => false))) { L.check("F1", `${w} panel`, false, "a row click opened no agent panel"); continue; }
+      const r = await readPanel(page);
+      if (!r.box) { L.check("F1", `${w} panel`, false, "no panel"); continue; }
+      const width = vp.width > 1440 ? 560 : 520;
+      L.check("F1", `${w} its top is the bar's bottom`, near(r.box.y, r.barB ?? -99, 1), `${r.box.y.toFixed(1)} · bar ${r.barB?.toFixed(1)}`);
+      L.check("F1", `${w} right and bottom 8`, near(r.vw - r.box.r, 8, 1) && near(r.vh - r.box.b, 8, 1), `${(r.vw - r.box.r).toFixed(1)} · ${(r.vh - r.box.b).toFixed(1)}`);
+      L.check("F1", `${w} width ${width}`, near(r.box.w, width, 2), `${r.box.w.toFixed(1)}`);
+      L.check("F1", `${w} no scrim while browsing`, !!r.scrim && r.scrim.on !== "true" && r.scrim.opacity < 0.02 && r.scrim.events === "none", JSON.stringify(r.scrim));
+      L.check("F1", `${w} one panel, one dialog`, r.panels === 1 && r.dialogs === 1, `${r.panels} panels · ${r.dialogs} dialogs`);
+      L.check("F1", `${w} exactly one row is selected, and it is this agent's`, r.selected.length === 1 && r.selected[0] === r.id, `${r.selected.join()} · panel ${r.id}`);
+      L.check("F1", `${w} the selected row: #f7f3ed with a 3px ink left edge`, r.selBg === "rgb(247, 243, 237)" && /rgb\(42, 58, 82\) 3px 0px 0px 0px inset/.test(r.selEdge ?? ""), `${r.selBg} · ${r.selEdge}`);
+      L.check("F1", `${w} the address carries the agent`, r.url === `?agent=${r.id}`, r.url);
+      L.check("F1", `${w} the Housekeeping tab stands down`, r.hkTab !== null && r.hkTab < 0.05, `${r.hkTab}`);
+      /* another row swaps the agent in the same panel; ↓ walks to the next row */
+      const before = r.id;
+      await rowOf(page, `[data-stand="none"]:not([data-agent-card="${before}"])`).click({ position: { x: 150, y: 28 } }); await page.waitForTimeout(400);
+      const r2 = await readPanel(page);
+      L.check("F1", `${w} another row swaps the agent`, r2.panels === 1 && !!r2.id && r2.id !== before && r2.selected.length === 1 && r2.selected[0] === r2.id, `${before} → ${r2.id} · ${r2.panels} panels`);
+      const order = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.getAttribute("data-agent-card")));
+      await page.keyboard.press("ArrowDown"); await page.waitForTimeout(400);
+      const r3 = await readPanel(page);
+      L.check("F1", `${w} ↓ walks to the next visible row`, r3.id === order[order.indexOf(r2.id) + 1], `${r2.id} → ${r3.id} · next is ${order[order.indexOf(r2.id) + 1]}`);
+      await page.keyboard.press("k"); await page.waitForTimeout(400);
+      const r4 = await readPanel(page);
+      L.check("F1", `${w} K walks back`, r4.id === r2.id, `${r3.id} → ${r4.id}`);
+      /* Back closes it (one history entry for the open, none for the swaps); Escape closes it */
+      await page.goBack(); await page.waitForTimeout(500);
+      const r5 = await readPanel(page);
+      L.check("F1", `${w} browser Back closes the panel`, r5.panels === 0 && r5.url === "" && r5.selected.length === 0, `${r5.panels} panels · "${r5.url}"`);
+      await clickRow(page, '[data-stand="none"]');
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      const r6 = await readPanel(page);
+      L.check("F1", `${w} Escape closes it`, r6.panels === 0 && r6.url === "", `${r6.panels} panels · "${r6.url}"`);
+    }
+    L.done(26);
+  });
+
+  test("F2 · masthead: the top edge says whether they take queries; the name, the place and the links on record", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("F2");
+    const seen: Record<string, number> = {};
+    for (const vp of SIZES16) {
+      await open(page, vp, "F2");
+      const w = `${vp.width}`;
+      for (const [door, hex, pill] of [["open", "#a9bf9f", /^Open to queries$/], ["closed", "#b5aca4", /^Closed (to queries|till \d+ \w+( \d+)?)$/], ["unknown", "#d8cfc2", /^Not known$/]] as const) {
+        if (!(await clickRow(page, `[data-door="${door}"]`).catch(() => false))) { L.check("F2", `${w} ${door}`, door === "unknown", `no ${door} agent on this account${door === "unknown" ? " (the unit suite holds the colour)" : ""}`); continue; }
+        seen[door] = (seen[door] ?? 0) + 1;
+        const r = await readPanel(page);
+        L.check("F2", `${w} ${door}: the 5px top edge is ${hex}`, r.edge.includes(rgbOf(hex)) && /0px 5px 0px 0px inset/.test(r.edge) && r.door === door, r.edge);
+        L.check("F2", `${w} ${door}: the active tab's underline is the same colour`, r.tabLine === rgbOf(hex), r.tabLine);
+        L.check("F2", `${w} ${door}: the pill`, pill.test(r.doorPill), `"${r.doorPill}"`);
+        L.check("F2", `${w} ${door}: navy masthead, the name in Special Elite 30`, r.mastBg === "rgb(45, 58, 80)" && !!r.name && near(r.name.size, 30, 1) && /Special Elite/.test(r.name.face) && (r.name.text ?? "").length > 2, JSON.stringify(r.name));
+        L.check("F2", `${w} ${door}: the place is italic, 16`, r.place === null || (r.place.style === "italic" && near(r.place.size, 16, 0.5)), JSON.stringify(r.place));
+        L.check("F2", `${w} ${door}: only links on record, and never a submission form`, r.links.every((l) => (l.k === "email" ? l.text === "Copy email" : !!l.href && /^https?:/.test(l.href))) && !r.links.some((l) => /submission/i.test(l.text)) && new Set(r.links.map((l) => l.k)).size === r.links.length, JSON.stringify(r.links));
+        L.check("F2", `${w} ${door}: tabs are Profile, Queries and Notes, counted only above zero`, r.tabs.length === 3 && r.tabs[0] === "Profile" && /^Queries( · [1-9]\d*)?$/.test(r.tabs[1]) && /^Notes( · [1-9]\d*)?$/.test(r.tabs[2]), r.tabs.join(" | "));
+        const grey = door === "closed";
+        L.check("F2", `${w} ${door}: the disc`, !!r.disc && (grey ? r.disc.bg === "rgb(179, 172, 165)" : ["rgb(244, 238, 229)", "rgb(179, 172, 165)"].includes(r.disc.bg)), JSON.stringify(r.disc));
+        await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      }
+    }
+    console.log(`[F2] doors seen: ${JSON.stringify(seen)}`);
+    L.check("F2", "an open and a closed agent were both read", (seen.open ?? 0) > 0 && (seen.closed ?? 0) > 0, JSON.stringify(seen));
+    L.done(17);
+  });
+
+  test("F3 · profile: one stand card in the agent's own state, and the index card", async ({ page }) => {
+    test.setTimeout(400_000);
+    const L = new Ledger("F3");
+    const seen: Record<string, number> = {};
+    const HEAD: Record<string, RegExp> = {
+      send: /^Send .+ the (partial|full|new version)$/, offer: /^Answer .+’s offer$/, waiting: /^Waiting on .+$/, late: /^.+ is late$/,
+      closed: /^(.+ passed|Closed, no reply|Withdrawn)$/, fit: /^A fit for .+$/, none: /^Not queried yet$/, shut: /^Closed to queries$/,
+    };
+    const TINT: Record<string, string> = { send: "rgb(246, 226, 216)", offer: "rgb(246, 226, 216)", waiting: "rgb(226, 231, 239)", late: "rgb(226, 231, 239)", closed: "rgb(236, 232, 227)", fit: "rgb(239, 233, 223)", none: "rgb(239, 233, 223)", shut: "rgb(239, 233, 223)" };
+    for (const vp of SIZES16) {
+      await open(page, vp, "F3");
+      const w = `${vp.width}`;
+      const ids = await page.evaluate(() => {
+        const rows = [...document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]')].filter((e) => e.getBoundingClientRect().height > 0);
+        /* one agent of every stand × door the account holds: the states the page can show */
+        const pick = new Map<string, string>();
+        for (const r of rows) { const k = `${r.dataset.stand}|${r.dataset.door}|${r.dataset.status}|${/\u2713/.test(r.querySelector(".clv-gch")?.textContent ?? "") ? "fit" : ""}`; if (!pick.has(k)) pick.set(k, r.getAttribute("data-agent-card")!); }
+        return [...pick.values()];
+      });
+      let first = true;
+      for (const id of ids) {
+        await clickRow(page, `[data-agent-card="${id}"]`);
+        const r = await readPanel(page);
+        if (!r.stand || !r.index) { L.check("F3", `${w} ${id}`, false, "no stand card or index card"); continue; }
+        seen[r.stand.state ?? "?"] = (seen[r.stand.state ?? "?"] ?? 0) + 1;
+        const st = r.stand.state ?? "";
+        L.check("F3", `${w} ${st}: heading`, r.stands === 1 && !!HEAD[st] && HEAD[st].test(r.stand.heading), `"${r.stand.heading}" · ${r.stands} cards`);
+        L.check("F3", `${w} ${st}: tint, radius 14, heading 22`, r.stand.bg === TINT[st] && r.stand.radius === "14px" && near(r.stand.hSize, 22, 0.5), `${r.stand.bg} · ${r.stand.radius} · ${r.stand.hSize}`);
+        L.check("F3", `${w} ${st}: one paragraph, no pronoun`, r.stand.text.length > 10 && !/\b(he|she|his|her|hers|him)\b/i.test(`${r.stand.heading} ${r.stand.text}`), `"${r.stand.text}"`);
+        if (!first) continue;
+        first = false;
+        L.check("F3", `${w} index card: white, radius 6, a 3px rust top edge`, r.index.top === "rgb(194, 86, 74) 3px" && r.index.bg === "rgb(255, 255, 255)" && r.index.radius === "6px", `${r.index.top} · ${r.index.bg} · ${r.index.radius}`);
+        L.check("F3", `${w} index card: the margin line at ${vp.width > 1440 ? 132 : 118}`, r.index.line !== null && near(r.index.line, vp.width > 1440 ? 132 : 118, 1) && r.index.lineW === "1px" && r.index.lineBg === "rgba(194, 86, 74, 0.35)", `${r.index.line} · ${r.index.lineW} · ${r.index.lineBg}`);
+        L.check("F3", `${w} index card: 22 under the stand card`, near(r.index.gap, 22, 1.5), `${r.index.gap?.toFixed(1)}`);
+        L.check("F3", `${w} index card: six rows, in order, each at least 46 tall`, r.index.rows.map((x) => x.label).join("|") === "Looking for|Genres|Takes queries|Replies|Send them|Your queries" && r.index.rows.every((x) => x.h >= 45.5), r.index.rows.map((x) => `${x.label}:${x.h.toFixed(0)}`).join(" · "));
+        L.check("F3", `${w} a missing answer shows its "+ Add", and nothing else is blank`, r.index.rows.every((x) => x.missing === !!x.add) && r.index.rows.filter((x) => x.missing).every((x) => /^\+ Add /.test(x.add ?? "")), r.index.rows.filter((x) => x.missing).map((x) => x.add).join(" · ") || "none missing");
+      }
+      /* a "+ Add" opens Edit profile on that field's section, with the field focused */
+      const missing = await page.evaluate(() => {
+        const rows = [...document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]')].filter((e) => e.getBoundingClientRect().height > 0);
+        return rows.find((r) => r.querySelector('[data-clv="torn-wish"]'))?.getAttribute("data-agent-card") ?? null;
+      });
+      if (!missing) { L.check("F3", `${w} an agent with no wishlist`, false, "none on this account"); continue; }
+      await clickRow(page, `[data-agent-card="${missing}"]`);
+      await page.locator(`${PANEL} [data-ap-add="wishlist"]`).click(); await page.waitForTimeout(700);
+      const e = await readPanel(page);
+      const section = await page.evaluate(() => (document.querySelector('[data-ap="panel"] .apn-edit .ae-tabs [aria-selected="true"]')?.textContent ?? "").trim());
+      L.check("F3", `${w} "+ Add their wishlist" opens Edit profile on "What they want"`, e.acting === "edit" && section === "What they want", `acting ${e.acting} · section "${section}"`);
+      L.check("F3", `${w} …with the wishlist field focused`, e.focusInField?.inPanel === true && e.focusInField.tag === "TEXTAREA" && e.focusInField.ae === "wishlist", JSON.stringify(e.focusInField));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+    }
+    console.log(`[F3] stand states seen: ${JSON.stringify(seen)}`);
+    L.check("F3", "several states were read, a not-queried one and a queried one among them", Object.keys(seen).length >= 3 && Object.keys(seen).some((k) => ["fit", "none", "shut"].includes(k)) && Object.keys(seen).some((k) => ["send", "offer", "waiting", "late", "closed"].includes(k)), JSON.stringify(seen));
+    L.done(30);
+  });
+
+  test("F4 · tabs: every query, newest first; a query opens in the same panel with a way back; notes", async ({ page }) => {
+    test.setTimeout(400_000);
+    const L = new Ledger("F4");
+    for (const vp of SIZES16) {
+      await open(page, vp, "F4");
+      const w = `${vp.width}`;
+      /* an agent with a query */
+      if (!(await clickRow(page, '[data-stand="agent"], .aglist [data-clv="row"][data-stand="you"]').catch(() => false))) { L.check("F4", `${w} panel`, false, "no agent panel opened"); continue; }
+      const id = (await readPanel(page)).id;
+      await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(300);
+      const q = await page.evaluate(() => {
+        const p = document.querySelector('[data-ap="panel"]')!;
+        const e = [...p.querySelectorAll<HTMLElement>('[data-ap="ledger-entry"]')];
+        return {
+          n: e.length, tab: (p.querySelector('[data-ap-tab="queries"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+          dates: [...p.querySelectorAll<HTMLElement>('[data-ap="ledger-date"]')].map((d) => (d.textContent ?? "").trim()),
+          first: e[0] ? { title: (e[0].querySelector(".apn-qt")?.textContent ?? "").trim(), titleFace: getComputedStyle(e[0].querySelector(".apn-qt")!).fontFamily, stage: (e[0].querySelector(".apn-qs")?.textContent ?? "").trim(), stageStyle: getComputedStyle(e[0].querySelector(".apn-qs")!).fontStyle, chip: (e[0].querySelector(".apn-qchip")?.textContent ?? "").trim(), open: (e[0].querySelector(".apn-qo")?.textContent ?? "").trim(), bg: getComputedStyle(e[0]).backgroundColor, radius: getComputedStyle(e[0]).borderTopLeftRadius, query: e[0].getAttribute("data-query") } : null,
+          dots: p.querySelectorAll(".apn-ledger .qlg-g svg, .apn-ledger .qlg-g [data-status-dot], .apn-ledger .qlg-g > *").length, foot: !!p.querySelector('[data-ap="foot"]'),
+        };
+      });
+      L.check("F4", `${w} the Queries tab lists the agent's queries, and counts them`, q.n > 0 && q.tab === `Queries · ${q.n}` && q.dates.length === q.n && q.dots >= q.n, `${q.n} entries · tab "${q.tab}" · ${q.dates.join(", ")}`);
+      L.check("F4", `${w} an entry is a white card: the book in the typewriter, the stage in italics, a court chip, "Open the query ›"`, !!q.first && q.first.bg === "rgb(255, 255, 255)" && q.first.radius === "12px" && /Special Elite/.test(q.first.titleFace) && q.first.stageStyle === "italic" && /^(With you|With the agent|Closed)$/.test(q.first.chip) && /^Open the query/.test(q.first.open) && q.first.title.length > 1, JSON.stringify(q.first));
+      /* open the query: the same box, the query panel's view, a way back, no Agent tab */
+      await page.locator(`${PANEL} [data-ap="ledger-entry"]`).first().click();
+      await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 }); await page.waitForTimeout(400);
+      const v = await page.evaluate(() => {
+        const vis = [...document.querySelectorAll<HTMLElement>("[data-side-panel]")].filter((e) => e.getBoundingClientRect().height > 0);
+        const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
+        return { panels: vis.length, agent: !!document.querySelector('[data-ap="panel"]'), id: p?.getAttribute("data-qp-id") ?? null, from: p?.getAttribute("data-qp-from") ?? null,
+          back: (p?.querySelector('[data-qcv="open-back"]')?.textContent ?? "").trim(), tabs: [...(p?.querySelectorAll('[role="tab"]') ?? [])].map((t) => (t.textContent ?? "").replace(/\s+/g, " ").trim().replace(/ · \d+$/, "")),
+          ledger: !!p?.querySelector('[data-qp="ledger"]'), box: p ? p.getBoundingClientRect().width : 0, url: location.search };
+      });
+      L.check("F4", `${w} "Open the query" shows it in ONE panel: the query panel's own view`, v.panels === 1 && !v.agent && v.id === q.first?.query && v.from === "agent" && v.ledger, `${v.panels} panels · agent panel ${v.agent} · ${v.id} · from ${v.from}`);
+      L.check("F4", `${w} "← Back to {first}", and no Agent tab`, /^← Back to \S+/.test(v.back) && v.tabs.join("|") === "Tracking|Notes", `"${v.back}" · ${v.tabs.join("|")}`);
+      L.check("F4", `${w} the address still names the agent`, v.url === `?agent=${id}`, v.url);
+      await page.locator('[data-qcv="open-back"]').click();
+      await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(300);
+      const b = await readPanel(page);
+      L.check("F4", `${w} Back returns to the agent, on the Queries tab`, b.panels === 1 && b.id === id && b.tab === "queries", `${b.panels} panels · ${b.id} · tab ${b.tab}`);
+      /* Escape in the query view steps back too */
+      await page.locator(`${PANEL} [data-ap="ledger-entry"]`).first().click();
+      await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 }); await page.waitForTimeout(300);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      const esc = await readPanel(page);
+      L.check("F4", `${w} Escape in the query view steps back to the agent`, esc.panels === 1 && esc.id === id && esc.tab === "queries", `${esc.panels} panels · ${esc.id} · tab ${esc.tab}`);
+      /* an agent with no query FOR ANY BOOK (a not-queried row may hold a query for another manuscript, and the
+         Queries tab rightly lists it): the first whose tab carries no count */
+      const noneRows = page.locator('.aglist [data-clv="row"][data-stand="none"]').filter({ visible: true });
+      let bare = false;
+      const tabText: string[] = [];
+      for (let i = 0; i < (await noneRows.count()) && !bare; i++) {
+        await noneRows.nth(i).scrollIntoViewIfNeeded(); await noneRows.nth(i).click({ position: { x: 150, y: 28 } });
+        await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(250);
+        const t = ((await page.locator(`${PANEL} [data-ap-tab="queries"]`).textContent()) ?? "").replace(/\s+/g, " ").trim();
+        tabText.push(t);
+        bare = t === "Queries";
+      }
+      L.check("F4", `${w} an agent with no query for any book is on the account`, bare, `tabs read: ${[...new Set(tabText)].join(" | ")}`);
+      await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(250);
+      const none = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap="queries-none"]')?.textContent ?? "").trim());
+      L.check("F4", `${w} no queries: one sentence`, /^You haven’t queried .+ yet\.$/.test(none), `"${none}"`);
+      /* Notes: the composer replaces the footer; a note is added, edited and deleted (the account is left as found) */
+      await page.locator(`${PANEL} [data-ap-tab="notes"]`).click(); await page.waitForTimeout(400);
+      /* ⚠️ THE ACCOUNT IS LEFT AS FOUND, AND A NOTE AN EARLIER RUN LEFT IS REMOVED FIRST. The confirmation's button is
+         found INSIDE THE CONFIRMATION: a bare `button` locator resolved first to another mounted page's hidden
+         "Delete", then to the note's own Delete under the confirmation's scrim, and each time waited out the whole
+         timeout with the note still on the account. */
+      const confirmDelete = () => page.locator(".sa-confirm-scrim button").filter({ hasText: /^Delete$/, visible: true }).first().click();
+      const stale = page.locator(`${PANEL} .qn-note`, { hasText: "CL16 lock note" });
+      for (let i = 0; i < 6 && (await stale.count()) > 0; i++) {
+        await stale.first().hover(); await stale.first().locator(".qn-acts button", { hasText: "Delete" }).click();
+        await confirmDelete(); await page.waitForTimeout(1200);
+      }
+      const stamp = `CL16 lock note ${Date.now()}`;
+      const n0 = await page.evaluate(() => { const p = document.querySelector('[data-ap="panel"]')!; return { foot: !!p.querySelector('[data-ap="foot"]'), doors: !!p.querySelector('[data-ap="doors"]'), area: p.querySelectorAll("textarea").length, notes: p.querySelectorAll(".qn-note").length, pin: [...p.querySelectorAll("button")].filter((x) => /^(Pin|Unpin)$/.test((x.textContent ?? "").trim())).length }; });
+      L.check("F4", `${w} Notes: the composer replaces the footer`, !n0.foot && !n0.doors && n0.area >= 1, JSON.stringify(n0));
+      await page.locator(`${PANEL} textarea`).last().fill(stamp);
+      await page.locator(`${PANEL} .qn-send`).click();
+      await page.locator(`${PANEL} .qn-note`, { hasText: stamp }).first().waitFor({ timeout: 10_000 }).catch(() => {});
+      const added = await page.locator(`${PANEL} .qn-note`, { hasText: stamp }).count();
+      L.check("F4", `${w} Notes: a note is added`, added === 1, `${added} notes with the stamp`);
+      const tabN = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap-tab="notes"]')?.textContent ?? "").replace(/\s+/g, " ").trim());
+      L.check("F4", `${w} Notes: the tab counts it`, /^Notes · [1-9]\d*$/.test(tabN), `"${tabN}"`);
+      const note = page.locator(`${PANEL} .qn-note`, { hasText: stamp }).first();
+      await note.hover();
+      const acts = await note.locator(".qn-acts button").allTextContents();
+      /* ⚠️ NO PIN ON AN AGENT'S NOTE: the rules allow an update to change `text` only and nothing writes a pin. The
+         control is absent, by a stop condition raised with Nick (the report's first item), not by oversight. */
+      L.check("F4", `${w} Notes: Edit and Delete on a note; no Pin (no such write exists)`, acts.join("|") === "Edit|Delete" && n0.pin === 0, acts.join("|"));
+      await note.locator(".qn-acts button", { hasText: "Edit" }).click();
+      await note.locator("textarea").fill(`${stamp} edited`);
+      await note.locator("button", { hasText: /^Save/ }).first().click(); await page.waitForTimeout(900);
+      const edited = await page.locator(`${PANEL} .qn-note`, { hasText: `${stamp} edited` }).count();
+      L.check("F4", `${w} Notes: the note is edited`, edited === 1, `${edited}`);
+      const n2 = page.locator(`${PANEL} .qn-note`, { hasText: stamp }).first();
+      await n2.hover(); await n2.locator(".qn-acts button", { hasText: "Delete" }).click();
+      await confirmDelete(); await page.waitForTimeout(1200);
+      const left = await page.locator(`${PANEL} .qn-note`, { hasText: stamp }).count();
+      L.check("F4", `${w} Notes: the note is deleted, and the account is as it was`, left === 0, `${left} left`);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+    }
+    L.done(26);
+  });
+
+  test("F5 · acting: every action dims the page and wears the action drawer, in the one panel", async ({ page }) => {
+    test.setTimeout(400_000);
+    const L = new Ledger("F5");
+    const seen: Record<string, number> = {};
+    for (const vp of SIZES16) {
+      await openContacts16(page, vp, { motion: true });
+      await mutate16(page, "F5", MUTATIONS);
+      const w = `${vp.width}`;
+      const acts: { name: string; row: string; press: string; eyebrow: RegExp; title: RegExp; kind: "edit" | "journey" }[] = [
+        { name: "Edit profile", row: '[data-stand="agent"]', press: '[data-ap="edit"]', eyebrow: /^EDIT AGENT$/, title: /^Edit .+’s profile$/, kind: "edit" },
+        { name: "Log a query", row: '[data-stand="none"][data-door="open"]', press: '[data-ap="primary"][data-act="log"]', eyebrow: /^LOG A QUERY$/i, title: /^Query .+$/, kind: "journey" },
+        /* the send journey's own eyebrow, as built ("SENT WHAT THEY ASKED FOR"); the brief's "LOG THE SEND" is not its copy */
+        { name: "Mark sent", row: '[data-stand="you"][data-status$="requested"]', press: '[data-ap="primary"][data-act="sent"]', eyebrow: /SEN[DT]/i, title: /.+/, kind: "journey" },
+        { name: "Record a response", row: '[data-stand="agent"]', press: '[data-ap="primary"][data-act="resp"]', eyebrow: /RESPONSE/i, title: /^What did .+ say\?$/, kind: "journey" },
+      ];
+      for (const a of acts) {
+        const row = page.locator(`.aglist [data-clv="row"]${a.row}`).filter({ visible: true });
+        if (!(await row.count())) { console.log(`[F5] ${w}: no row for ${a.name}`); continue; }
+        /* a row whose panel offers this act (the first requested row may be a revision, the first agent row a nudge) */
+        let found = false;
+        for (let i = 0; i < Math.min(await row.count(), 6) && !found; i++) {
+          await row.nth(i).scrollIntoViewIfNeeded(); await row.nth(i).click({ position: { x: 150, y: 28 } });
+          await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(350);
+          found = (await page.locator(`${PANEL} ${a.press}`).count()) > 0;
+        }
+        if (!found) { console.log(`[F5] ${w}: no agent offers ${a.name}`); await page.keyboard.press("Escape"); continue; }
+        seen[a.name] = (seen[a.name] ?? 0) + 1;
+        const first = ((await readPanel(page)).name?.text ?? "").trim().split(/\s+/)[0];
+        await page.locator(`${PANEL} ${a.press}`).click();
+        await page.waitForTimeout(250);
+        const r = await readPanel(page);
+        L.check("F5", `${w} ${a.name}: within 250ms the page is dimmed at 0.45`, !!r.scrim && r.scrim.on === "true" && r.scrim.opacity > 0.98 && /rgba\(28, 19, 15, 0\.4[3-7]\d*\)/.test(r.scrim.bg), JSON.stringify(r.scrim));
+        L.check("F5", `${w} ${a.name}: the action drawer's head, with the quill`, r.qad.head === 1 && r.qad.quill === 1, `${r.qad.head} heads · ${r.qad.quill} quills`);
+        L.check("F5", `${w} ${a.name}: exactly one dialog and one panel`, r.dialogs === 1 && r.panels === 1 && r.old.card === 0 && r.old.dock === 0, `${r.dialogs} dialogs · ${r.panels} panels · card ${r.old.card} · dock ${r.old.dock}`);
+        L.check("F5", `${w} ${a.name}: "← Back to ${first}"`, r.qad.from.replace(/^←\s*/, "") === `Back to ${first}`, `"${r.qad.from}"`);
+        L.check("F5", `${w} ${a.name}: eyebrow and title`, a.eyebrow.test(r.qad.eyebrow) && a.title.test(r.qad.title), `"${r.qad.eyebrow}" · "${r.qad.title}"`);
+        if (a.kind === "edit") L.check("F5", `${w} ${a.name}: the agent's card with its tags, and three sections in place of the stepper`, r.qad.who === 1 && r.qad.stepper === 0 && r.qad.segs.join("|") === "Details|What they want|How to query", `who ${r.qad.who} · stepper ${r.qad.stepper} · ${r.qad.segs.join("|")}`);
+        else L.check("F5", `${w} ${a.name}: the journey's stepper`, r.qad.stepper === 1, `${r.qad.stepper}`);
+        /* ↑ ↓ stand down while acting */
+        const idBefore = r.id;
+        await page.locator(`${PANEL} [data-qad-head]`).click({ position: { x: 200, y: 60 } });
+        await page.keyboard.press("ArrowDown"); await page.waitForTimeout(200);
+        L.check("F5", `${w} ${a.name}: ↓ does not walk the list while acting`, (await readPanel(page)).id === idBefore, `${idBefore}`);
+        /* Escape goes back to the agent, and the dim lifts within 250ms */
+        await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+        const back = await readPanel(page);
+        L.check("F5", `${w} ${a.name}: Escape returns to the agent, on the same tab`, back.acting === null && back.id === idBefore && back.tab === "profile" && back.panels === 1, `acting ${back.acting} · ${back.id} · tab ${back.tab}`);
+        L.check("F5", `${w} ${a.name}: the dim is gone within 250ms`, !!back.scrim && back.scrim.on !== "true" && back.scrim.opacity < 0.1, JSON.stringify(back.scrim));
+        await page.keyboard.press("Escape"); await page.waitForTimeout(350);
+      }
+    }
+    console.log(`[F5] acts run: ${JSON.stringify(seen)}`);
+    L.check("F5", "Edit profile, Log a query and Record a response all ran", (seen["Edit profile"] ?? 0) > 0 && (seen["Log a query"] ?? 0) > 0 && (seen["Record a response"] ?? 0) > 0, JSON.stringify(seen));
+    L.done(40);
+  });
+
+  test("F6 · primary: the footer's button is the agent's next step", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("F6");
+    const seen: Record<string, number> = {};
+    const WANT: { key: string; sel: string; ok: (f: { primary: string; edit: boolean; status: string }) => boolean; say: string }[] = [
+      { key: "not queried, open", sel: '[data-stand="none"][data-door="open"]', ok: (f) => f.primary === "Log a query" && f.edit && f.status === "Not queried yet", say: "Log a query" },
+      { key: "request to send", sel: '[data-stand="you"][data-status$="requested"]', ok: (f) => /^Mark (partial|full) sent$/.test(f.primary) && f.edit, say: "Mark partial/full sent" },
+      { key: "with the agent", sel: '[data-stand="agent"]', ok: (f) => f.primary === "Record a response" && f.edit, say: "Record a response" },
+      { key: "past the reply date", sel: '[data-stand="you"][data-status="Queried"]', ok: (f) => f.primary === "Record a response" && f.edit, say: "Record a response" },
+      { key: "closed", sel: '[data-stand="closed"]', ok: (f) => f.primary === "Edit profile" && !f.edit, say: "Edit profile, alone" },
+      { key: "closed to queries", sel: '[data-stand="none"][data-door="closed"]', ok: (f) => f.primary === "Edit profile" && !f.edit && f.status === "Closed to queries", say: "Edit profile, alone" },
+      { key: "offer", sel: '[data-status="Offer"]', ok: (f) => f.primary === "Record your answer" && f.edit, say: "Record your answer" },
+    ];
+    for (const vp of SIZES16) {
+      await open(page, vp, "F6");
+      const w = `${vp.width}`;
+      for (const c of WANT) {
+        if (!(await rowOf(page, c.sel).count())) continue;
+        await clickRow(page, c.sel);
+        const r = await readPanel(page);
+        seen[c.key] = (seen[c.key] ?? 0) + 1;
+        L.check("F6", `${w} ${c.key}: ${c.say}`, c.ok(r.foot), `"${r.foot.primary}" · Edit profile beside it ${r.foot.edit} · status "${r.foot.status}"`);
+        L.check("F6", `${w} ${c.key}: the status is one line, with ⋯ beside it`, r.foot.lines === 1 && r.foot.more && r.foot.status.length > 2, `${r.foot.lines} lines · "${r.foot.status}" · "${r.foot.detail}"`);
+        await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+      }
+    }
+    console.log(`[F6] positions seen: ${JSON.stringify(seen)}`);
+    L.check("F6", "at least four of the table's positions were read, a closed one among them", Object.keys(seen).length >= 4 && ((seen.closed ?? 0) > 0 || (seen["closed to queries"] ?? 0) > 0), JSON.stringify(seen));
+    L.done(18);
+  });
+
+  test("G1 · nothing else: closing the panel leaves no card, chip or journey, and the row is the row", async ({ page }) => {
+    test.setTimeout(400_000);
+    const L = new Ledger("G1");
+    for (const vp of SIZES16) {
+      await open(page, vp, "G1");
+      const w = `${vp.width}`;
+      const after = async (how: string) => {
+        await page.waitForTimeout(450);
+        const r = await readPanel(page);
+        await page.waitForTimeout(MUT16 === "G1" ? 900 : 0);
+        const hit = await page.evaluate(() => {
+          const rows = [...document.querySelectorAll<HTMLElement>('.aglist [data-clv="row"]')].filter((e) => { const b = e.getBoundingClientRect(); return b.height > 0 && b.top > 260 && b.bottom < window.innerHeight - 20; });
+          const row = rows[1] ?? rows[0];
+          if (!row) return { ok: false, what: "no row on screen" };
+          const b = row.getBoundingClientRect();
+          const t = document.elementFromPoint(b.left + 160, b.top + b.height / 2);
+          return { ok: !!t && (t === row || row.contains(t)), what: t ? `${t.tagName}.${(t as HTMLElement).className}`.slice(0, 60) : "nothing" };
+        });
+        L.check("G1", `${w} ${how}: no panel, card, dock chip or journey is left`, r.panels === 0 && r.old.card === 0 && r.old.dock === 0 && r.old.journey === 0 && (!r.scrim || r.scrim.opacity < 0.05), `panels ${r.panels} · card ${r.old.card} · dock ${r.old.dock} · journey ${r.old.journey} · scrim ${r.scrim?.opacity}`);
+        L.check("G1", `${w} ${how}: a row's centre is the row`, hit.ok, hit.what);
+      };
+      /* from browsing: ×, Escape */
+      await clickRow(page, '[data-stand="agent"]');
+      await page.locator(`${PANEL} [data-ap="close"]`).click(); await after("× from the profile");
+      await clickRow(page, '[data-stand="agent"]');
+      await page.keyboard.press("Escape"); await after("Escape from the profile");
+      /* from each act: the scrim (it steps back to the agent, as Escape does), then × */
+      for (const [name, press] of [["Edit profile", '[data-ap="edit"]'], ["Record a response", '[data-ap="primary"][data-act="resp"]']] as const) {
+        const rows = page.locator('.aglist [data-clv="row"][data-stand="agent"]').filter({ visible: true });
+        let ok = false;
+        for (let i = 0; i < Math.min(await rows.count(), 6) && !ok; i++) { await rows.nth(i).scrollIntoViewIfNeeded(); await rows.nth(i).click({ position: { x: 150, y: 28 } }); await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(300); ok = (await page.locator(`${PANEL} ${press}`).count()) > 0; }
+        if (!ok) { L.check("G1", `${w} ${name}`, false, "no agent offers it"); continue; }
+        await page.locator(`${PANEL} ${press}`).click(); await page.waitForTimeout(450);
+        /* the scrim, well clear of the panel */
+        await page.mouse.click(300, 420); await page.waitForTimeout(450);
+        const stepped = await readPanel(page);
+        L.check("G1", `${w} ${name}: the scrim steps back to the agent, and opens nothing else`, stepped.panels === 1 && stepped.acting === null && stepped.old.card === 0 && stepped.old.dock === 0 && stepped.old.journey === 0, `panels ${stepped.panels} · acting ${stepped.acting} · card ${stepped.old.card} · journey ${stepped.old.journey}`);
+        await page.locator(`${PANEL} [data-ap="close"]`).click(); await after(`× after ${name}`);
+      }
+    }
+    L.done(20);
   });
 });

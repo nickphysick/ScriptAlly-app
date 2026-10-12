@@ -35,6 +35,9 @@ import { VIA } from "../../queryActions/journeys/common";
 import { Combo, CountryField, DateField, GenreField, MaterialsField, Seg, Stepper, type ComboItem } from "./cardInputs";
 
 const TABS: [CardTab, string][] = [["who", "Contact"], ["want", "Wishlist"], ["work", "Submissions"], ["notes", "Notes"]];
+/* Contact list v16 §F — in the agent's side panel the same three sections are a segmented row, in the panel's words;
+   Notes is the panel's own tab, so it is not a section here */
+const PANEL_TABS: [CardTab, string][] = [["who", "Details"], ["want", "What they want"], ["work", "How to query"]];
 /** The enum's four, labelled as the drawer labels them (§5: Email · QueryManager · Online form · Post). */
 const METHODS: [SubmissionMethod, string][] = [...VIA, [SubmissionMethod.POST, "Post"]];
 /** The Also-changes notes, by the tab whose fields cause them. */
@@ -73,6 +76,12 @@ export interface AgentCardEditorProps {
   onDeleteNote: (n: AgentNote) => Promise<boolean>;
   /** the host's backdrop reaches the editor through this — a click there LEAVES (dirty asks) */
   bindLeave: React.MutableRefObject<(() => void) | null>;
+  /**
+   * Contact list v16 §F — "panel": the editor is drawn in the agent's side panel. Its three sections are named in
+   * the panel's words and Notes is not among them (the panel has its own Notes tab). Fields, validation, the
+   * Also-changes preview and what Save writes are untouched.
+   */
+  variant?: "panel";
 }
 
 /** One labelled row of the form, the mock's `.ac-f`. */
@@ -87,13 +96,13 @@ const F: React.FC<{ label: string; children: React.ReactNode; vl?: React.ReactNo
 );
 
 export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
-  const { mode, agent, agents, nowMs } = p;
+  const { mode, agent, agents, nowMs, variant } = p;
   /* ⚠️ THE BASE IS FROZEN AT THE OPEN — what "changed" is measured against must not move because
      a snapshot of the same record arrived while the writer was typing */
   const [base] = useState<CardDraft>(() => (agent ? draftOf(agent, p.personal) : emptyCardDraft()));
   const [initial] = useState<CardDraft>(() => ({ ...base, ...(p.prefill ?? {}) }));
   const [d, setD] = useState<CardDraft>(initial);
-  const [tab, setTab] = useState<CardTab>(mode === "new" && p.tab === "notes" ? "who" : p.tab);
+  const [tab, setTab] = useState<CardTab>((mode === "new" || variant === "panel") && p.tab === "notes" ? "who" : p.tab);
   /* §2: carried-over answers say so in the foot until the next edit */
   const [carried, setCarried] = useState(() => Object.keys(p.prefill ?? {}).length > 0);
   const [ask, setAsk] = useState(false);
@@ -127,7 +136,7 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
   }, [d.name, agents, agent]);
   const canSave = !saving && !firstProblem && !dup && (mode === "new" || dirty);
 
-  const tabs = TABS.filter(([k]) => !(mode === "new" && k === "notes"));
+  const tabs = variant === "panel" ? PANEL_TABS : TABS.filter(([k]) => !(mode === "new" && k === "notes"));
   const dotOf = (k: CardTab): "err" | "ch" | "" => {
     if (k === "notes") return "";
     if ((Object.keys(problems) as CardProblemKey[]).some((x) => PROBLEM_TAB[x] === k) || (k === "who" && dup)) return "err";
@@ -307,7 +316,7 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
         <button type="button" className="ac-ib" data-ac="close" aria-label="Close" title="Close (Esc)" onClick={leave}>✕</button>
       </div>
       <div
-        className="ac-body ae-body" data-ac="body" data-ae-mode={mode} ref={rootRef}
+        className="ac-body ae-body" data-ac="body" data-ae-mode={mode} data-ae-variant={variant} ref={rootRef}
         onKeyDown={(e) => {
           if (e.key !== "Enter" || e.shiftKey || e.defaultPrevented) return;
           const t = e.target as HTMLElement;
