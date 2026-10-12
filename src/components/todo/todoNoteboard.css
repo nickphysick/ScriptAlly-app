@@ -407,8 +407,11 @@
 .nb-group { display: block; min-width: 0; padding-bottom: 56px; }
 
 /* the header's drawing is a registered placeholder until it is supplied: the ref's 250 × 136 box, dashed
-   on the navy. ⚠️ Scoped to the placeholder (`.cb-hart`), so the day an image lands the shared disc applies. */
-.nb-group .hp3 .hp3-art:has(.cb-hart) { width: 250px; height: auto; padding: 0; aspect-ratio: auto; border-radius: 0; background: none; box-shadow: none; }
+   on the navy. ⚠️ Scoped to the placeholder (`.cb-hart`), so the day an image lands the shared disc applies.
+   ⚠️ THE SLOT KEEPS THE SHARED PANEL'S HEIGHT (196, or 236 on a wide sheet): header v3's H6 holds every
+   number page's drawing to it, and a slot sized to its placeholder was 138 (red on the first L2 run). The
+   placeholder is centred inside the slot instead. */
+.nb-group .hp3 .hp3-art:has(.cb-hart) { width: 250px; padding: 0; aspect-ratio: auto; border-radius: 0; background: none; box-shadow: none; display: flex; align-items: center; }
 .nb-group .cb-hart .art-box { border-color: #7d8aa0; background: none; }
 .nb-group .cb-hart .art-phk { color: #aab4c4; font-size: 9px; }
 
