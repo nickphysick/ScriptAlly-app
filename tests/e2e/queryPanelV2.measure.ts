@@ -269,7 +269,7 @@ test.describe("Query panel v2", () => {
     test.setTimeout(600_000);
     const L = new Ledger("V4-V5");
     const seen: Record<string, number> = {};
-    const STATES: [string, RegExp][] = [["waiting", /^Waiting on /], ["late", / is late$/], ["year", /^Still waiting on /], ["send", /^Send .+ the (partial|full|revision)$/], ["offer", /^Your answer is due$/], ["closed", / passed$|^Closed, no reply$|^You withdrew it$|^You signed with /]];
+    const STATES: [string, RegExp][] = [["waiting", /^Waiting on /], ["past", /^No word from .+ yet$/], ["year", /^Still waiting on /], ["send", /^Send .+ the (partial|full|revision)$/], ["offer", /^Your answer is due$/], ["closed", / passed$|^Closed, no reply$|^You withdrew it$|^You signed with /]];
     /* ⚠️ THE HARNESS ACCOUNT HOLDS NO QUERY THAT IS WAITING AND NOT YET DUE (every agent's-turn query on it is past
        its window, by fixture drift), so that branch is met on a query of its own: Queried five days ago against an
        eight-week window. Removed in the same run. */
@@ -300,8 +300,8 @@ test.describe("Query panel v2", () => {
             court: p.querySelector<HTMLElement>(".qcv-open")?.dataset.court ?? "", dates, marks, entries: entries.length, cols: getComputedStyle(lg).gridTemplateColumns, gap: getComputedStyle(lg).columnGap,
             sentHasSlip: sent ? !!sent.querySelector('[data-qp="slip"]') : null, textLeft: entries[0] ? entries[0].getBoundingClientRect().left - lr.left : -1,
             stands: stands.length, standLast: !!st && lg.lastElementChild === st, standBg: st ? getComputedStyle(st).backgroundColor : "", standSpan: st ? Math.abs(st.getBoundingClientRect().width - lr.width) : -1,
-            heading: st?.querySelector('[data-qp="stand-heading"]')?.textContent ?? "", figure: st?.querySelector('[data-qp="stand-figure"]')?.textContent ?? "", late: st?.dataset.late === "true", tone: st?.dataset.tone ?? "",
-            old: p.querySelectorAll(".tl-wbar, .tl-pastfig, .tl-conv, .tl-offer, .tl-nhist").length, headFace: st ? getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontFamily : "", headSize: st ? parseFloat(getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontSize) : 0,
+            heading: st?.querySelector('[data-qp="stand-heading"]')?.textContent ?? "", figure: st?.querySelector('[data-qp="stand-figure"]')?.textContent ?? "", late: st?.dataset.past === "true", tone: st?.dataset.tone ?? "",
+            old: p.querySelectorAll(".tl-wbar, .tl-pastfig, .tl-conv, .tl-offer, .tl-nhist").length, words: (p.innerText || "").replace(/Record a late reply/g, ""), headFace: st ? getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontFamily : "", headSize: st ? parseFloat(getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontSize) : 0,
           };
         });
         const c = `${w} ${r.id}`;
@@ -314,9 +314,13 @@ test.describe("Query panel v2", () => {
         L.check("V5", `${c} exactly one stand card, and it ends the ledger`, g.stands === 1 && g.standLast && near(g.standSpan, 0, 1), `${g.stands} card(s) · last ${g.standLast} · ${g.standSpan}px short of the ledger's width`);
         L.check("V5", `${c} its ground is the court's tint`, g.standBg === TINT[g.court], `${g.standBg} (court ${g.court})`);
         L.check("V5", `${c} no old verdict line is left`, g.old === 0, `${g.old}`);
+        /* Nick's ruling (12 Oct): the panel never says "late" or "overdue". The one exception is the name of an action
+           he ruled stays, "Record a late reply" — a reply that came after the close, not a verdict on anybody. */
+        const m = /\b(late|overdue)\b/i.exec(g.words);
+        L.check("V5", `${c} the panel says neither "late" nor "overdue"`, !m, m ? `"${g.words.slice(Math.max(0, m.index - 30), m.index + 30).replace(/\s+/g, " ")}"` : "neither");
         const state = STATES.find(([, re]) => re.test(g.heading))?.[0] ?? null;
         L.check("V5", `${c} its heading is one of the table's`, !!state && /Special Elite/.test(g.headFace) && near(g.headSize, 22, 1), `"${g.heading}" · ${g.headFace.split(",")[0]} ${g.headSize}`);
-        const agree = state === "waiting" ? (!g.figure || /days? to go$/.test(g.figure)) && !g.late : state === "late" ? /days? over$/.test(g.figure) && g.late : state === "year" ? /year/.test(g.figure) && g.late : state === "send" ? (!g.figure || /days? (left|over)$/.test(g.figure)) && g.court === "you" : state === "offer" ? (!g.figure || /days? (left|over)$/.test(g.figure)) : state === "closed" ? g.court === "closed" && !g.late : false;
+        const agree = state === "waiting" ? (!g.figure || /days? to go$/.test(g.figure)) && !g.late : state === "past" ? /days? past your date$/.test(g.figure) && g.late : state === "year" ? /year/.test(g.figure) && g.late : state === "send" ? (!g.figure || /days? (left|over)$/.test(g.figure)) && g.court === "you" : state === "offer" ? (!g.figure || /days? (left|over)$/.test(g.figure)) : state === "closed" ? g.court === "closed" && !g.late : false;
         L.check("V5", `${c} the figure and the court agree with it`, agree, `"${g.heading}" · figure "${g.figure}" · late ${g.late} · court ${g.court}`);
         if (state) { mine[state] = (mine[state] ?? 0) + 1; seen[state] = (seen[state] ?? 0) + 1; }
       }

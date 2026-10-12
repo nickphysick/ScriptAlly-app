@@ -17,16 +17,16 @@ describe("the stand card — the pack's table, one state at a time", () => {
     expect(v.heading).toBe("Waiting on Eleanor");
     expect(v.figure).toBe("36 days to go");
     expect(v.p).toBe("You expect a reply by 17 Nov. Nothing to do until then.");
-    expect(v.late).toBe(false);
+    expect(v.past).toBe(false);
     expect(v.bar).toMatchObject({ hot: false, left: "Sent 22 Sep", right: "Reply by 17 Nov" });
     expect(v.bar!.pct).toBe(36);
   });
   it("with the agent, past the date", () => {
     const v = text({ stageStartMs: NOW - 70 * DAY, expectedMs: NOW - 14 * DAY });
-    expect(v.heading).toBe("Eleanor is late");
-    expect(v.figure).toBe("14 days over");
+    expect(v.heading).toBe("No word from Eleanor yet");
+    expect(v.figure).toBe("14 days past your date");
     expect(v.p).toBe("You expected a reply by 28 Sep.");
-    expect(v.late).toBe(true);
+    expect(v.past).toBe(true);
     expect(v.bar).toMatchObject({ hot: true, pct: 100 });
   });
   it("over a year with no reply: the window, when it closed, and the unanswered nudge", () => {
@@ -46,7 +46,7 @@ describe("the stand card — the pack's table, one state at a time", () => {
     expect(over.heading).toBe("Send Eleanor the partial");
     expect(over.figure).toBe("3 days over");
     expect(over.p).toBe("It was due on 9 Oct. Mark it sent once it’s gone.");
-    expect(over.late).toBe(true);
+    expect(over.past).toBe(true);
     expect(text({ status: S.REVISE_RESUBMIT, court: "you", expectedMs: null }).heading).toBe("Send Eleanor the revision");
   });
   it("an offer", () => {
@@ -84,6 +84,14 @@ describe("⚠️ a clause whose fact is missing is dropped, never filled in", ()
   });
   it("a close with no date: no figure", () => {
     expect(text({ court: "closed", status: S.REJECTED, closedHow: "passed", stageStartMs: null }).figure).toBeNull();
+  });
+  it("⚠️ it never appraises: no heading, figure or sentence says late or overdue, in any state", () => {
+    const DAYS = [-400, -70, -14, -1, 1, 9, 36];
+    for (const s of Object.values(S)) for (const d of DAYS) for (const start of [20, 500]) {
+      const court = s === S.OFFER ? "offer" : [S.REJECTED, S.NO_RESPONSE, S.WITHDRAWN, S.SIGNED].includes(s) ? "closed" : [S.PARTIAL_REQUESTED, S.FULL_REQUESTED, S.REVISE_RESUBMIT].includes(s) ? "you" : "agent";
+      const v = text({ status: s, court, stageStartMs: NOW - start * DAY, expectedMs: NOW + d * DAY, unansweredNudgeMs: NOW - 5 * DAY });
+      for (const t of [v.heading, v.figure ?? "", v.p, v.bar?.left ?? "", v.bar?.right ?? ""]) expect(t, `${s} ${d}`).not.toMatch(/\b(late|overdue)\b/i);
+    }
   });
   it("no branch is left out: every status yields a heading and a paragraph", () => {
     for (const s of Object.values(S)) {

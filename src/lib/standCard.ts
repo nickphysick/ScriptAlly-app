@@ -43,7 +43,7 @@ export interface StandCardView {
   heading: string;
   figure: string | null;
   /** the figure is past its date: rust */
-  late: boolean;
+  past: boolean;
   paragraph: StandPart[];
   /** queries with the agent only: how far through the wait, and its two end labels */
   bar: { pct: number; hot: boolean; left: string; right: string } | null;
@@ -66,6 +66,10 @@ export function longSpan(d: number): string {
   return `${whole}${half ? "½" : ""} years`;
 }
 
+/**
+ * ⚠️ IT NEVER APPRAISES. A date gone by is "past your date"; nobody is "late" and nothing is "overdue" (Nick's
+ *    ruling, 12 Oct). The lock sweeps every heading, figure and sentence this returns for both words.
+ */
 export function standCard(f: StandFacts, nowMs: number): StandCardView {
   const date = (ms: number) => standDate(ms, nowMs);
 
@@ -74,7 +78,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
       : f.closedHow === "passed" || f.status === S.REJECTED ? `${f.first} passed`
       : f.closedHow === "withdrawn" || f.status === S.WITHDRAWN ? "You withdrew it"
       : "Closed, no reply";
-    return { tone: "closed", heading, figure: f.stageStartMs != null ? date(f.stageStartMs) : null, late: false, paragraph: [{ text: "This query is closed. It stays here, and in your figures." }], bar: null };
+    return { tone: "closed", heading, figure: f.stageStartMs != null ? date(f.stageStartMs) : null, past: false, paragraph: [{ text: "This query is closed. It stays here, and in your figures." }], bar: null };
   }
 
   if (f.court === "offer") {
@@ -87,7 +91,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
     return {
       tone: "you", heading: "Your answer is due",
       figure: f.expectedMs == null ? null : over ? `${plural(days(f.expectedMs, nowMs), "day")} over` : `${plural(left!, "day")} left`,
-      late: over, paragraph, bar: null,
+      past: over, paragraph, bar: null,
     };
   }
 
@@ -97,7 +101,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
     return {
       tone: "you", heading: `Send ${f.first} the ${what}`,
       figure: f.expectedMs == null ? null : over ? `${plural(days(f.expectedMs, nowMs), "day")} over` : `${plural(days(nowMs, f.expectedMs), "day")} left`,
-      late: over,
+      past: over,
       paragraph: [{ text: f.expectedMs == null ? "Mark it sent once it’s gone." : over ? `It was due on ${date(f.expectedMs)}. Mark it sent once it’s gone.` : `They’re expecting it by ${date(f.expectedMs)}. Mark it sent once it’s gone.` }],
       bar: null,
     };
@@ -121,16 +125,16 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
     } else if (nudge) parts.push(`Your nudge in ${nudge} went unanswered.`);
     parts.push("Closing it keeps your reply rate honest; you can still record a reply if one ever comes.");
     return {
-      tone: "agent", heading: `Still waiting on ${f.first}`, figure: longSpan(waited), late: true, paragraph: [{ text: parts.join(" ") }],
+      tone: "agent", heading: `Still waiting on ${f.first}`, figure: longSpan(waited), past: true, paragraph: [{ text: parts.join(" ") }],
       bar: bar && closedMs != null ? { ...bar, hot: true, pct: 100, right: `Window closed ${date(closedMs)}` } : bar,
     };
   }
   if (f.expectedMs == null) {
     /* no date promised and none set: nothing to count towards, and none is invented */
-    return { tone: "agent", heading: `Waiting on ${f.first}`, figure: null, late: false, paragraph: [{ text: "No reply date is recorded for this query." }], bar: null };
+    return { tone: "agent", heading: `Waiting on ${f.first}`, figure: null, past: false, paragraph: [{ text: "No reply date is recorded for this query." }], bar: null };
   }
   if (over) {
-    return { tone: "agent", heading: `${f.first} is late`, figure: `${plural(days(f.expectedMs, nowMs), "day")} over`, late: true, paragraph: [{ text: `You expected a reply by ${date(f.expectedMs)}.` }], bar };
+    return { tone: "agent", heading: `No word from ${f.first} yet`, figure: `${plural(days(f.expectedMs, nowMs), "day")} past your date`, past: true, paragraph: [{ text: `You expected a reply by ${date(f.expectedMs)}.` }], bar };
   }
-  return { tone: "agent", heading: `Waiting on ${f.first}`, figure: `${plural(days(nowMs, f.expectedMs), "day")} to go`, late: false, paragraph: [{ text: `You expect a reply by ${date(f.expectedMs)}. Nothing to do until then.` }], bar };
+  return { tone: "agent", heading: `Waiting on ${f.first}`, figure: `${plural(days(nowMs, f.expectedMs), "day")} to go`, past: false, paragraph: [{ text: `You expect a reply by ${date(f.expectedMs)}. Nothing to do until then.` }], bar };
 }
