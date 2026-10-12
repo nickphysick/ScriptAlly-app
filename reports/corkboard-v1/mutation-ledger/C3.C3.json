@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "a note to drag"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "in the hand it is \"cb-item cb-drag\" at 0°"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "in the hand its z-index is 11"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "it moved 300.0, 120.0"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": false,
+  "detail": "12 write(s) for one drop"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the write is count=2&ofs=1&req0___data__={\"streamToken\":\"GRBoQgKB9LW1\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"fields\":{\"todoPrefs\":{"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "it wrote no user task"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "saved {\"y\":161,\"x\":0.3409}; drawn at 389, 161 on a board 1141 wide"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the map holds one entry"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "after a reload it is at 691.0, 690.2 (was 691.0, 690.2)"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900 · keys",
+  "ok": true,
+  "detail": "three arrow keys moved it 32, 16"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x900 · keys",
+  "ok": true,
+  "detail": "1 write(s) for one run of keys"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "a note to drag"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "in the hand it is \"cb-item cb-drag\" at 0°"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "in the hand its z-index is 11"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "it moved 300.0, 120.0"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": false,
+  "detail": "12 write(s) for one drop"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the write is count=2&ofs=1&req0___data__={\"streamToken\":\"GRBoQgKB9LW1\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"fields\":{\"todoPrefs\":{"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "it wrote no user task"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "saved {\"y\":161,\"x\":0.382}; drawn at 353, 161 on a board 924 wide"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the map holds one entry"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "after a reload it is at 647.6, 690.2 (was 647.6, 690.2)"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800 · keys",
+  "ok": true,
+  "detail": "three arrow keys moved it 32, 16"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800 · keys",
+  "ok": true,
+  "detail": "1 write(s) for one run of keys"
+ }
+]

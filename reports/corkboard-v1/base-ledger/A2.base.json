@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1512x900",
+  "ok": true,
+  "detail": "landed on /todo/noteboard"
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1512x900",
+  "ok": true,
+  "detail": "the query string is \"?q=x\""
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1512x900",
+  "ok": true,
+  "detail": "1 visible board page(s)"
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1512x900",
+  "ok": false,
+  "detail": "the current sidebar row is [\"Noteboard\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1280x800",
+  "ok": true,
+  "detail": "landed on /todo/noteboard"
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1280x800",
+  "ok": true,
+  "detail": "the query string is \"?q=x\""
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1280x800",
+  "ok": true,
+  "detail": "1 visible board page(s)"
+ },
+ {
+  "lock": "A2",
+  "where": "/todo/noteboard?q=x 1280x800",
+  "ok": false,
+  "detail": "the current sidebar row is [\"Noteboard\"]"
+ }
+]

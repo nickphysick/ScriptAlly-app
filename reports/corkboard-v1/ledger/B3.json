@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "8 notes at rest, opacities 1"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the chips read [\"All 8\",\"#agents 1\",\"#comps 1\",\"#manuscript 2\",\"#synopsis 1\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "8 notes mounted with the chip on"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "non-matching opacities 0.22,0.22,0.22,0.22,0.22,0.22"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "matching opacities 1,1"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "no note moved when the chip went on"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the header reads \"8\" (was \"8\")"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the pressed chip is rgb(45, 58, 80) on rgb(246, 239, 226)"
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the label reads \"2 OF 8 NOTES\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "\"PRIYA\" leaves cbseed-n2 bright of 8"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "8 notes at rest, opacities 1"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the chips read [\"All 8\",\"#agents 1\",\"#comps 1\",\"#manuscript 2\",\"#synopsis 1\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "8 notes mounted with the chip on"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "non-matching opacities 0.22,0.22,0.22,0.22,0.22,0.22"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "matching opacities 1,1"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "no note moved when the chip went on"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the header reads \"8\" (was \"8\")"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the pressed chip is rgb(45, 58, 80) on rgb(246, 239, 226)"
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the label reads \"2 OF 8 NOTES\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "\"PRIYA\" leaves cbseed-n2 bright of 8"
+ }
+]

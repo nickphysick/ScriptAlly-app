@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": false,
+  "detail": "0 notes on the board"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "fixings per note: "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "tilts "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "paper images: "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "widths "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "body faces "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "shadows "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": false,
+  "detail": "0 notes on the board"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "fixings per note: "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "tilts "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "paper images: "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "widths "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "body faces "
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "shadows "
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": false,
+  "detail": "0 notes on the board"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "fixings per note: "
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "tilts "
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "paper images: "
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "widths "
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "body faces "
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "shadows "
+ },
+ {
+  "lock": "C2",
+  "where": "across renders",
+  "ok": true,
+  "detail": "render 1 {} · render 2 {}"
+ },
+ {
+  "lock": "C2",
+  "where": "variety",
+  "ok": false,
+  "detail": "0 distinct tilts; fixings seen: "
+ }
+]

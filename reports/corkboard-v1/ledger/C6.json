@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "starts free, tilts -2,0.8,0.5,2,-2.2,0.2,-0.5,0.8,-1.3"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the chip reads \"Tidy into columns\""
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "tidy tilts 0,0,0,0,0,0,0,0,0"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "pressed, the chip reads \"Back to free pinning\""
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "places 88,30 435,30 849,30 849,214 88,263 849,422 469,435 88,503 849,658 · the flow 88,30 435,30 849,30 849,214 88,263 849,422 469,435 88,503 849,658"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "3 columns centred at 190,571,951 (the flow has 3)"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the first items in the order head the columns, left to right"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "tidy wrote 1: count=1&ofs=1&req0___data__={\"streamToken\":\"GRBoQgKB9LW1\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN8"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "prefs are view tidy, layout {\"cbseed-n3\":{\"y\":96,\"x\":0.3},\"cbseed-n6\":{\"y\":520,\"x\":0.05},\"cbseed-n1\":{\"y\":410,\"x\":0.62}}"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 · reorder",
+  "ok": true,
+  "detail": "reorder wrote 1: count=1&ofs=2&req0___data__={\"streamToken\":\"EAEZEGhCAoH0tbU=\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCE"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 · reorder",
+  "ok": true,
+  "detail": "layout after the reorder {\"cbseed-n1\":{\"x\":0.62,\"y\":410},\"cbseed-n3\":{\"y\":96,\"x\":0.3},\"cbseed-n6\":{\"x\":0.05,\"y\":520}}"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 · reorder",
+  "ok": true,
+  "detail": "the board reads cbseed-n1,cbseed-n3,cbseed-n6,cbseed-n2,cbseed-n7,cbseed-n5,cbseed-n4,cbseed-n8"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 · back",
+  "ok": true,
+  "detail": "saved notes are back at 707,410 57,520 342,96"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 · back",
+  "ok": true,
+  "detail": "prefs view is free"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "starts free, tilts -2,0.8,0.5,2,-2.2,0.2,-0.5,0.8,-1.3"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the chip reads \"Tidy into columns\""
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "tidy tilts 0,0,0,0,0,0,0,0,0"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "pressed, the chip reads \"Back to free pinning\""
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "places 52,30 326,30 668,30 668,214 52,263 668,422 360,435 52,503 668,658 · the flow 52,30 326,30 668,30 668,214 52,263 668,422 360,435 52,503 668,658"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "3 columns centred at 154,462,770 (the flow has 3)"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the first items in the order head the columns, left to right"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "tidy wrote 1: count=1&ofs=1&req0___data__={\"streamToken\":\"GRBoQgKB9LW1\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN8"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "prefs are view tidy, layout {\"cbseed-n6\":{\"x\":0.05,\"y\":520},\"cbseed-n3\":{\"y\":96,\"x\":0.3},\"cbseed-n1\":{\"x\":0.62,\"y\":410}}"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800 · reorder",
+  "ok": true,
+  "detail": "reorder wrote 1: count=1&ofs=2&req0___data__={\"streamToken\":\"EAEZEGhCAoH0tbU=\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCE"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800 · reorder",
+  "ok": true,
+  "detail": "layout after the reorder {\"cbseed-n1\":{\"x\":0.62,\"y\":410},\"cbseed-n6\":{\"x\":0.05,\"y\":520},\"cbseed-n3\":{\"y\":96,\"x\":0.3}}"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800 · reorder",
+  "ok": true,
+  "detail": "the board reads cbseed-n1,cbseed-n3,cbseed-n6,cbseed-n2,cbseed-n7,cbseed-n5,cbseed-n4,cbseed-n8"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800 · back",
+  "ok": true,
+  "detail": "saved notes are back at 573,410 46,520 277,96"
+ },
+ {
+  "lock": "C6",
+  "where": "1280x800 · back",
+  "ok": true,
+  "detail": "prefs view is free"
+ }
+]

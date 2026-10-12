@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the fixture put 8 notes on the board"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the header is number/settled"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the panel is rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the number reads \"8\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the words read \"notes pinned to your corkboard\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the title is named \"8 notes pinned to your corkboard\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the subline reads \"Notes to self and your own tasks, kept in one place.\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the panel holds 0 button(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900",
+  "ok": true,
+  "detail": "the drawing's slot is corkboard-header"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1512x900 · filtered",
+  "ok": false,
+  "detail": "with a chip and a search on, the number reads \"2\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the fixture put 8 notes on the board"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the header is number/settled"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the panel is rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the number reads \"8\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the words read \"notes pinned to your corkboard\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the title is named \"8 notes pinned to your corkboard\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the subline reads \"Notes to self and your own tasks, kept in one place.\""
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the panel holds 0 button(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800",
+  "ok": true,
+  "detail": "the drawing's slot is corkboard-header"
+ },
+ {
+  "lock": "B1",
+  "where": "8 notes 1280x800 · filtered",
+  "ok": false,
+  "detail": "with a chip and a search on, the number reads \"2\""
+ },
+ {
+  "lock": "B1",
+  "where": "1 note",
+  "ok": true,
+  "detail": "the fixture put 1 note(s) on the board"
+ },
+ {
+  "lock": "B1",
+  "where": "1 note",
+  "ok": true,
+  "detail": "the number reads \"1\""
+ },
+ {
+  "lock": "B1",
+  "where": "1 note",
+  "ok": true,
+  "detail": "the words read \"note pinned to your corkboard\""
+ }
+]

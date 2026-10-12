@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": false,
+  "detail": "the board rendered"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": false,
+  "detail": "the board rendered"
+ },
+ {
+  "lock": "C5",
+  "where": "errors",
+  "ok": true,
+  "detail": "page errors: none"
+ }
+]

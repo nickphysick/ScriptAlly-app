@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board rendered"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "items: cbseed-n6,__tasks,cbseed-n1,cbseed-n3,cbseed-n2,cbseed-n7,cbseed-n5,cbseed-n4,cbseed-n8"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "8 notes drawn"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the notes the map never named are on the board"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the note it does name is at 114, 300"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the header still counts 8"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board rendered"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "items: cbseed-n6,__tasks,cbseed-n1,cbseed-n3,cbseed-n2,cbseed-n7,cbseed-n5,cbseed-n4,cbseed-n8"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "8 notes drawn"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the notes the map never named are on the board"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the note it does name is at 92, 300"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the header still counts 8"
+ },
+ {
+  "lock": "C5",
+  "where": "errors",
+  "ok": true,
+  "detail": "page errors: none"
+ }
+]
