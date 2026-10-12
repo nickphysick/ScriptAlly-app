@@ -130,6 +130,22 @@ export const ComparableTitlesPage: React.FC<{
     setPicker(null);
     setDrawer({ mode: "add" });
   }, []);
+  /* focus goes back where it came from (comps v26.1): the control that opened the drawer is remembered as it opens,
+     and takes focus again when it closes. Not when the drawer hands over to the picker, and not when the opener has
+     left the page (the empty page's button, once the first comp is added). Opened by the N key there is no opener. */
+  const openerRef = useRef<HTMLElement | null>(null);
+  const drawerOpen = !!drawer;
+  useEffect(() => {
+    if (drawerOpen) {
+      const a = document.activeElement as HTMLElement | null;
+      openerRef.current = a && a !== document.body ? a : null;
+      return;
+    }
+    const el = openerRef.current;
+    openerRef.current = null;
+    if (el && el.isConnected && !picker) el.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawerOpen]);
   const openAddRef = useRef(openAdd);
   openAddRef.current = openAdd;
   const fsRef = useRef(fs);

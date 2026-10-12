@@ -121,8 +121,9 @@ export const CompCard: React.FC<CompCardProps> = ({
         <div className="cpv-age" data-cpv="age">{compAgeLine(c, now)}</div>
       </div>
       <div className="cpv-cside">
-        {/* a mark, not a control (comps v25): which comps a letter names is logged on the letter */}
-        {(on || example) && btn(
+        {/* a mark, not a control (comps v25): which comps a letter names is logged on the letter. The exhibit's
+            picture draws none (comps v26.1): the switch was retired with the query line. */}
+        {on && !example && btn(
           { className: "cpv-inl", role: "switch", "aria-checked": on, "data-cpv": "inq", "aria-label": `In query letter: ${c.title}`, onClick: onToggle },
           <>
             <span className="sw" aria-hidden="true" />
