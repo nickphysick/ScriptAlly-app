@@ -1,0 +1,60 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.7s)
+  ✗ V1 · 1512 with comps: the h1 — "Every comp, and where it went" on 2 line(s)
+  ✗ V1 · 1512 with comps: the subline — "Log the comps each letter names, and see which agents saw them, for Murphy's Day Out."
+  ✗ V1 · 1512 with comps: no manuscript title in the panel — 1 title element(s) · names "Murphy's Day Out"
+  ✗ V1 · 1512 empty: the h1 — "Every comp, and where it went" on 2 line(s)
+  ✗ V1 · 1512 empty: the subline — "Log the comps each letter names, and see which agents saw them, for Murphy's Day Out."
+  ✗ V1 · 1512 empty: no manuscript title in the panel — 1 title element(s) · names "Murphy's Day Out"
+  ✗ V1 · 1280 with comps: the h1 — "Every comp, and where it went" on 2 line(s)
+  ✗ V1 · 1280 with comps: the subline — "Log the comps each letter names, and see which agents saw them, for Murphy's Day Out."
+  ✗ V1 · 1280 with comps: no manuscript title in the panel — 1 title element(s) · names "Murphy's Day Out"
+  ✗ V1 · 1280 empty: the h1 — "Every comp, and where it went" on 2 line(s)
+  ✗ V1 · 1280 empty: the subline — "Log the comps each letter names, and see which agents saw them, for Murphy's Day Out."
+  ✗ V1 · 1280 empty: no manuscript title in the panel — 1 title element(s) · names "Murphy's Day Out"
+[V1] 0/12 green
+  ✘  2 [measure] › tests/e2e/compsV27.measure.ts:106:3 › Comparable titles v27 › V1 · header: "Comparable titles" and the new subline in both states; no manuscript title in the panel (17.9s)
+
+
+  1) [measure] › tests/e2e/compsV27.measure.ts:106:3 › Comparable titles v27 › V1 · header: "Comparable titles" and the new subline in both states; no manuscript title in the panel 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 14
+
+    - Array []
+    + Array [
+    +   "V1 · 1512 with comps: the h1 — \"Every comp, and where it went\" on 2 line(s)",
+    +   "V1 · 1512 with comps: the subline — \"Log the comps each letter names, and see which agents saw them, for Murphy's Day Out.\"",
+    +   "V1 · 1512 with comps: no manuscript title in the panel — 1 title element(s) · names \"Murphy's Day Out\"",
+    +   "V1 · 1512 empty: the h1 — \"Every comp, and where it went\" on 2 line(s)",
+    +   "V1 · 1512 empty: the subline — \"Log the comps each letter names, and see which agents saw them, for Murphy's Day Out.\"",
+    +   "V1 · 1512 empty: no manuscript title in the panel — 1 title element(s) · names \"Murphy's Day Out\"",
+    +   "V1 · 1280 with comps: the h1 — \"Every comp, and where it went\" on 2 line(s)",
+    +   "V1 · 1280 with comps: the subline — \"Log the comps each letter names, and see which agents saw them, for Murphy's Day Out.\"",
+    +   "V1 · 1280 with comps: no manuscript title in the panel — 1 title element(s) · names \"Murphy's Day Out\"",
+    +   "V1 · 1280 empty: the h1 — \"Every comp, and where it went\" on 2 line(s)",
+    +   "V1 · 1280 empty: the subline — \"Log the comps each letter names, and see which agents saw them, for Murphy's Day Out.\"",
+    +   "V1 · 1280 empty: no manuscript title in the panel — 1 title element(s) · names \"Murphy's Day Out\"",
+    + ]
+
+      47 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      48 |     if (!MUT && !process.env.V27_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:118:7
+
+    Error Context: test-results/compsV27.measure.ts-Compar-1eee6-nuscript-title-in-the-panel-measure/error-context.md
+
+    Error Context: test-results/compsV27.measure.ts-Compar-1eee6-nuscript-title-in-the-panel-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV27.measure.ts:106:3 › Comparable titles v27 › V1 · header: "Comparable titles" and the new subline in both states; no manuscript title in the panel 
+  1 passed (39.6s)

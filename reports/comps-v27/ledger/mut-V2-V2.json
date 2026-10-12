@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "V2",
+  "where": "1512 exactly one button, \"+ Add your first comp\"",
+  "ok": true,
+  "detail": "[+ Add your first comp]"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 the note beside it",
+  "ok": true,
+  "detail": "\"Only the title is needed to start.\""
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no strip",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no library",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no Scout tab",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no \"How comp tracking works\" link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no exhibit",
+  "ok": true,
+  "detail": "0 exhibit element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 the steps card is there",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 exactly one button, \"+ Add your first comp\"",
+  "ok": true,
+  "detail": "[+ Add your first comp]"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 the note beside it",
+  "ok": true,
+  "detail": "\"Only the title is needed to start.\""
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no strip",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no library",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no Scout tab",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no \"How comp tracking works\" link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no exhibit",
+  "ok": true,
+  "detail": "0 exhibit element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 the steps card is there",
+  "ok": true,
+  "detail": "1"
+ }
+]

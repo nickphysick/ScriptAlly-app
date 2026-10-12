@@ -1,0 +1,44 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.9s)
+  ✗ V7 · 1512 no steps anywhere in the document — 4 element(s)
+  ✗ V7 · 1512 pressing the link draws them once, in the pop-up — opened false · 0 in the pop-up · 0 on the page
+  ✗ V7 · 1280 no steps anywhere in the document — 4 element(s)
+  ✗ V7 · 1280 pressing the link draws them once, in the pop-up — opened false · 0 in the pop-up · 0 on the page
+[V7] 2/6 green
+  ✘  2 [measure] › tests/e2e/compsV27.measure.ts:207:3 › Comparable titles v27 › V7 · no band: with comps, no steps render until the link is pressed (10.5s)
+
+
+  1) [measure] › tests/e2e/compsV27.measure.ts:207:3 › Comparable titles v27 › V7 · no band: with comps, no steps render until the link is pressed 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "V7 · 1512 no steps anywhere in the document — 4 element(s)",
+    +   "V7 · 1512 pressing the link draws them once, in the pop-up — opened false · 0 in the pop-up · 0 on the page",
+    +   "V7 · 1280 no steps anywhere in the document — 4 element(s)",
+    +   "V7 · 1280 pressing the link draws them once, in the pop-up — opened false · 0 in the pop-up · 0 on the page",
+    + ]
+
+      47 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      48 |     if (!MUT && !process.env.V27_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:220:7
+
+    Error Context: test-results/compsV27.measure.ts-Compar-0b960-r-until-the-link-is-pressed-measure/error-context.md
+
+    Error Context: test-results/compsV27.measure.ts-Compar-0b960-r-until-the-link-is-pressed-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV27.measure.ts:207:3 › Comparable titles v27 › V7 · no band: with comps, no steps render until the link is pressed 
+  1 passed (34.0s)

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "V7",
+  "where": "1512 no steps anywhere in the document",
+  "ok": false,
+  "detail": "4 element(s)"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 the strip follows the header at its own spacing",
+  "ok": true,
+  "detail": "34.0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 pressing the link draws them once, in the pop-up",
+  "ok": false,
+  "detail": "opened true · 1 in the pop-up · 1 on the page"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 no steps anywhere in the document",
+  "ok": false,
+  "detail": "4 element(s)"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 the strip follows the header at its own spacing",
+  "ok": true,
+  "detail": "34.0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 pressing the link draws them once, in the pop-up",
+  "ok": false,
+  "detail": "opened true · 1 in the pop-up · 1 on the page"
+ }
+]

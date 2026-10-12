@@ -18,7 +18,7 @@ run() { # lock [tag: a second mutation of the same lock logs under lock-tag]
   AD_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV26.measure.ts -g "^.*$1 · " > "$log" 2>&1
   echo "$1${2:+ ($2)}: exit $? · $(grep -c '✗' "$log") red reading(s)"
 }
-for L in AD1 AD5 AD8 AD9; do want "$L" && run "$L"; done
+for L in AD1 AD5 AD8; do want "$L" && run "$L"; done
 
 src() { # lock file old new
   want "$1" || return
@@ -39,7 +39,6 @@ src AD4 "$FORM" 'data-cf="save" disabled={!form.hasTitle}' 'data-cf="save" disab
 src AD6 src/components/manuscripts/ComparableTitlesPage.tsx 'if (!o.again) setDrawer(null);' 'setDrawer(null);'
 src AD7 "$FORM" '.filter(Boolean).join(" · ");' '.filter(Boolean).join(", ");'
 # comps v26.1
-src AD9 src/components/manuscripts/CompCard.tsx '{on && !example && btn(' '{(on || example) && btn(' switch
 src AD10 src/components/manuscripts/ComparableTitlesPage.tsx 'if (el && el.isConnected && !picker) el.focus({ preventScroll: true });' 'void el;'
 
 npm run build:dev > "$OUT/restore.build.log" 2>&1 && echo "restored and rebuilt"

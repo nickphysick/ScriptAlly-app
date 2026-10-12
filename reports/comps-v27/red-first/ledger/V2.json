@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "V2",
+  "where": "1512 exactly one button, \"+ Add your first comp\"",
+  "ok": false,
+  "detail": "[+ Add a comp]"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 the note beside it",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no strip",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no library",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no Scout tab",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no \"How comp tracking works\" link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 no exhibit",
+  "ok": false,
+  "detail": "4 exhibit element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 the steps card is there",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 exactly one button, \"+ Add your first comp\"",
+  "ok": false,
+  "detail": "[+ Add a comp]"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 the note beside it",
+  "ok": false,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no strip",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no library",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no Scout tab",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no \"How comp tracking works\" link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 no exhibit",
+  "ok": false,
+  "detail": "4 exhibit element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 the steps card is there",
+  "ok": false,
+  "detail": "0"
+ }
+]

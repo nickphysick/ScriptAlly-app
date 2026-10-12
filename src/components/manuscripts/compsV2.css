@@ -30,7 +30,6 @@
   --cpv-ink: var(--sp-ink);
   --cpv-muted: var(--shell-mute);
   --cpv-hair: var(--shell-hairline);
-  --cpv-ring: var(--shell-ring);
   --cpv-btn: var(--sp-anthracite);
   --cpv-parch-1: var(--shell-active-fg);
   --cpv-parch-2: var(--mat-parch-2);
@@ -115,22 +114,9 @@
 .cpv-btn:hover { background: var(--cpv-parch-3); }
 .cpv-btn--dark { background: var(--cpv-btn); color: var(--cpv-parch-1); }
 .cpv-btn--dark:hover { background: #34476a; }
-.cpv-btn--line { background: transparent; box-shadow: inset 0 0 0 1px var(--cpv-ring); align-self: flex-start; }
-.cpv-btn--line:hover { background: var(--shell-btn-hover); }
+
 .cpv-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
-.cpv-txt {
-  border: 0;
-  background: none;
-  padding: 4px 6px;
-  border-radius: 6px;
-  font-family: var(--cpv-type);
-  font-size: 12px;
-  color: var(--cpv-ink);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.cpv-txt:hover { background: var(--cpv-parch-2); }
-.cpv-txt--quiet { color: var(--cpv-muted); }
+
 .cpv-seg { display: inline-flex; background: var(--cpv-parch-2); border-radius: 10px; padding: 3px; gap: 2px; }
 .cpv-seg button {
   border: 0;
@@ -162,10 +148,9 @@
   margin-right: 6px;
   vertical-align: 1px;
 }
-.cpv-hint { font-size: 13.5px; color: var(--cpv-muted); }
+
 /* ⚠️ FADED AND INERT — a picture of the page, never a second set of controls */
 .cpv-ghost { opacity: 0.5; filter: saturate(0.7); pointer-events: none; user-select: none; }
-
 
 /* ── the query-line card ── */
 .cpv-qcard { background: #fff; border-radius: 14px; box-shadow: var(--cpv-shadow); padding: 18px 20px; }
@@ -200,83 +185,16 @@
 .cpv-copied { font-size: 13px; color: var(--cpv-muted); line-height: 1.45; }
 
 /* ── the library heading ── */
-.cpv-sech { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 2px; }
-.cpv-page .cpv-sech h2 {
-  margin: 0;
-  font-family: var(--cpv-type) !important;
-  font-weight: 400;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.cpv-pill {
-  font-family: var(--cpv-mono);
-  font-size: 10px;
-  line-height: 1.45;
-  background: #fff;
-  border-radius: 10px;
-  padding: 2px 8px;
-  box-shadow: inset 0 0 0 1px var(--cpv-hair);
-}
-.cpv-libfact {
-  font-family: var(--cpv-mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--cpv-muted);
-  margin: 14px 2px 0;
-}
-.cpv-list { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
 
 /* ── a comp card ── */
-.cpv-comp {
-  display: grid;
-  grid-template-columns: 18px 46px minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: start;
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px 16px 14px 10px;
-  box-shadow: var(--cpv-shadow);
-  position: relative;
-}
+
 /* the exhibit's picture of a card (comps v26): no grip column, since drag-to-reorder left the page */
-.cpv-comp.cpv-comp--ex { grid-template-columns: 46px minmax(0, 1fr) auto; padding-left: 16px; }
-.cpv-comp.is-in { box-shadow: inset 0 0 0 1.5px rgba(138, 74, 60, 0.45), var(--cpv-shadow); }
-.cpv-comp.is-dragging { opacity: 0.4; }
-.cpv-comp.drop-before::before, .cpv-comp.drop-after::after {
-  content: "";
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--cpv-btn);
-}
-.cpv-comp.drop-before::before { top: -7px; }
-.cpv-comp.drop-after::after { bottom: -7px; }
-.cpv-comp.flash { animation: cpv-flash 1.2s ease-out; }
+
 @keyframes cpv-flash {
   0% { box-shadow: inset 0 0 0 2px #2a3a52, 0 1px 2px rgba(28, 19, 15, 0.05); }
   100% { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 6px 18px rgba(28, 19, 15, 0.06); }
 }
-@media (prefers-reduced-motion: reduce) { .cpv-comp.flash { animation: none; } }
-body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing !important; }
-.cpv-grip {
-  touch-action: none;
-  width: 18px;
-  height: 62px;
-  border: 0;
-  background: none;
-  padding: 0;
-  cursor: grab;
-  color: rgba(28, 19, 15, 0.35);
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-}
-.cpv-grip:hover, .cpv-grip:focus-visible { color: var(--cpv-ink); background: var(--cpv-parch-2); }
+
 .cpv-spine {
   width: 46px;
   height: 66px;
@@ -295,63 +213,16 @@ body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing
 .cpv-spine .i { font-family: var(--cpv-type); font-size: 19px; line-height: 1; }
 .cpv-spine .y { font-family: var(--cpv-mono); font-size: 7.5px; }
 .cpv-spine .md { font-family: var(--cpv-mono); font-size: 6px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
-.cpv-spine--screen { background: #fff; color: var(--cpv-ms); box-shadow: inset 0 0 0 1.5px var(--cpv-ms); }
-.cpv-spine--screen::before { background: rgba(138, 74, 60, 0.3); }
-.cpv-cbody { min-width: 0; }
+
 /* 1.2, the mock's: Special Elite in a box with no height and no clipping ancestor, so its
    descenders have room (the house 1.3 floor is about Playfair in clipping boxes). */
 .cpv-ct { font-family: var(--cpv-type); font-size: 17px; line-height: 1.2; }
 .cpv-ca { font-size: 13.5px; color: var(--cpv-muted); margin-top: 2px; }
-.cpv-facets { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
-.cpv-facet {
-  font-family: var(--cpv-mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: var(--cpv-parch-2);
-  border-radius: 6px;
-  padding: 4px 7px;
-}
-.cpv-note { font-size: 14px; line-height: 1.5; margin-top: 8px; max-width: 62ch; }
-.cpv-note--miss { color: var(--cpv-muted); }
-.cpv-age {
-  font-family: var(--cpv-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--cpv-muted);
-  margin-top: 9px;
-}
-.cpv-cside { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-.cpv-inl {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  background: var(--cpv-parch-2);
-  border-radius: 20px;
-  padding: 5px 12px 5px 6px;
-  font-family: var(--cpv-type);
-  font-size: 12px;
-  white-space: nowrap;
-  color: var(--cpv-ink);
-  cursor: pointer;
-}
-.cpv-inl .sw { width: 28px; height: 16px; border-radius: 9px; background: rgba(28, 19, 15, 0.18); position: relative; flex: none; transition: background 0.15s; }
-.cpv-inl .sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: left 0.15s; }
-.cpv-inl[aria-checked="true"] { background: #fff; box-shadow: inset 0 0 0 1px rgba(138, 74, 60, 0.45); color: var(--cpv-ms); }
-.cpv-inl[aria-checked="true"] .sw { background: var(--cpv-ms); }
-.cpv-inl[aria-checked="true"] .sw::after { left: 14px; }
-.cpv-inl .pos { font-family: var(--cpv-mono); font-size: 8.5px; font-weight: 700; background: var(--cpv-ms); color: #fff; border-radius: 6px; padding: 2px 5px; }
-@media (prefers-reduced-motion: reduce) { .cpv-inl .sw, .cpv-inl .sw::after { transition: none; } }
-.cpv-cacts { display: flex; gap: 2px; }
-
-.cpv-full { font-size: 13.5px; color: var(--cpv-muted); padding: 10px 4px; }
 
 /* ── the empty state: the exhibition's own stack (living headers v3 §5) — the main column's rhythm.
    comps v2's "How your comps work" (.cpv-how/.cpv-steps) and the tagged example wrap are retired with
    the components that drew them; `.cpv-stepn` stays, the Scout rail still numbers its steps with it. ── */
-.cpv-exstack { display: flex; flex-direction: column; gap: 22px; }
+
 /* ── the rail's contents: the Scout, coming soon (the card itself is PageRail's) ── */
 .cpv-tray { min-height: 188px; padding: 22px 20px 18px; }
 .cpv-page .cpv-tray h2 {
@@ -397,9 +268,9 @@ body.cpv-reordering, body.cpv-reordering * { user-select: none; cursor: grabbing
 .cpv-sacts { display: flex; gap: 6px; margin-top: 8px; }
 
 @media (max-width: 1360px) {
-  .cpv-comp { grid-template-columns: 18px 40px minmax(0, 1fr); }
-  .cpv-comp .cpv-cside { grid-column: 3; flex-direction: row; align-items: center; justify-content: space-between; margin-top: 2px; }
-  .cpv-comp.cpv-comp--ex { grid-template-columns: 40px minmax(0, 1fr); }
-  .cpv-comp.cpv-comp--ex .cpv-cside { grid-column: 2; }
+  
+  
+  
+  
   .cpv-spine { width: 40px; height: 58px; }
 }

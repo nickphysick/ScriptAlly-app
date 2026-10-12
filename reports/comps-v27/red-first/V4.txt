@@ -1,0 +1,40 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.3s)
+  ✗ V4 · 1512 the button — "+ Add a comp"
+  ✗ V4 · 1280 the button — "+ Add a comp"
+[V4] 4/6 green
+  ✘  2 [measure] › tests/e2e/compsV27.measure.ts:158:3 › Comparable titles v27 › V4 · first: the button opens the drawer titled "Add your first comp" with the explainer open (11.9s)
+
+
+  1) [measure] › tests/e2e/compsV27.measure.ts:158:3 › Comparable titles v27 › V4 · first: the button opens the drawer titled "Add your first comp" with the explainer open 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "V4 · 1512 the button — \"+ Add a comp\"",
+    +   "V4 · 1280 the button — \"+ Add a comp\"",
+    + ]
+
+      47 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      48 |     if (!MUT && !process.env.V27_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:172:7
+
+    Error Context: test-results/compsV27.measure.ts-Compar-d4e7a-omp-with-the-explainer-open-measure/error-context.md
+
+    Error Context: test-results/compsV27.measure.ts-Compar-d4e7a-omp-with-the-explainer-open-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV27.measure.ts:158:3 › Comparable titles v27 › V4 · first: the button opens the drawer titled "Add your first comp" with the explainer open 
+  1 passed (35.1s)

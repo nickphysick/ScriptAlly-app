@@ -1,0 +1,48 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.8s)
+  ✗ V3 · 1512 the card is on the page, with three steps and no "Log" link — card true · 0 steps · 0 link(s)
+  ✗ V3 · 1512 it sits 32 below the panel — 40.0
+  ✗ V3 · 1512 inside it is paper — 246,243,238
+  ✗ V3 · 1280 the card is on the page, with three steps and no "Log" link — card true · 0 steps · 0 link(s)
+  ✗ V3 · 1280 it sits 32 below the panel — 40.0
+  ✗ V3 · 1280 inside it is paper — 246,243,238
+[V3] 4/10 green
+  ✘  2 [measure] › tests/e2e/compsV27.measure.ts:140:3 › Comparable titles v27 › V3 · card: the steps card is the panel's width, and the page shows around it (10.3s)
+
+
+  1) [measure] › tests/e2e/compsV27.measure.ts:140:3 › Comparable titles v27 › V3 · card: the steps card is the panel's width, and the page shows around it 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "V3 · 1512 the card is on the page, with three steps and no \"Log\" link — card true · 0 steps · 0 link(s)",
+    +   "V3 · 1512 it sits 32 below the panel — 40.0",
+    +   "V3 · 1512 inside it is paper — 246,243,238",
+    +   "V3 · 1280 the card is on the page, with three steps and no \"Log\" link — card true · 0 steps · 0 link(s)",
+    +   "V3 · 1280 it sits 32 below the panel — 40.0",
+    +   "V3 · 1280 inside it is paper — 246,243,238",
+    + ]
+
+      47 |     /* under a mutation a case may stop at its first red, so the floor is the green run's */
+      48 |     if (!MUT && !process.env.V27_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 | async function mutate(page: Page, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-comps27/tests/e2e/compsV27.measure.ts:155:7
+
+    Error Context: test-results/compsV27.measure.ts-Compar-e3bf0-nd-the-page-shows-around-it-measure/error-context.md
+
+    Error Context: test-results/compsV27.measure.ts-Compar-e3bf0-nd-the-page-shows-around-it-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV27.measure.ts:140:3 › Comparable titles v27 › V3 · card: the steps card is the panel's width, and the page shows around it 
+  1 passed (33.0s)

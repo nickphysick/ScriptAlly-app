@@ -4,12 +4,11 @@
  * (`cv25-ms`, seven comps; `cv25-ms-empty`, none).
  *
  *   AD1 one heading · AD2 explainer · AD3 labels · AD4 ready · AD5 foot · AD6 again · AD7 tags ·
- *   AD8 preview · AD9 empty page · AD10 focus and keys (v26.1)
+ *   AD8 preview · AD10 focus and keys (v26.1) · AD9 retired with comps v27
  *
  * MUTATIONS. `AD_MUTATE=<lock>` applies that lock's named break. Four are applied in the page (below).
  * Five are edits to the source and need a rebuilt bundle; `adMutations.sh` makes the edit, rebuilds,
- * runs the lock and puts the file back from a copy: AD2, AD3, AD4, AD6, AD7, AD10, and AD9's second
- * mutation (the exhibit's "In query letter" switch restored).
+ * runs the lock and puts the file back from a copy: AD2, AD3, AD4, AD6, AD7, AD10.
  *
  * ⚠️ AD6, AD7 AND AD10 WRITE COMPS. Each re-seeds first, and the fixture is removed after the run.
  */
@@ -26,7 +25,6 @@ const MUTATIONS: Record<string, { css?: string; js?: string; what: string }> = {
   AD1: { what: "restore the body's \"Add a comp\" heading", js: `(() => { const b = document.querySelector('[data-hdr="comp"] [data-cf="form"]'); if (!b || b.querySelector("h4.mut")) return; const h = document.createElement("h4"); h.className = "mut"; h.textContent = "Add a comp"; b.prepend(h); })()` },
   AD5: { what: "put the foot inside the scrolling body", js: `(() => { const d = document.querySelector('[data-hdr="comp"]'); const f = d && d.querySelector('[data-hdr="foot"]'); const b = d && d.querySelector('[data-hdr="body"]'); if (f && b && f.parentElement !== b) b.append(f); })()` },
   AD8: { what: "render a hand-built preview", js: `(() => { const p = document.querySelector('[data-hdr="comp"] [data-cf="preview"]'); if (!p || p.dataset.mut) return; p.dataset.mut = "1"; const t = (document.querySelector('[data-hdr="comp"] #cpv-f-title') || {}).value || ""; p.innerHTML = '<div class="aprev-cell"><span class="disc"></span><div><b>' + t + '</b><small></small></div></div><div class="st"><span>Log in a letter</span></div>'; })()` },
-  AD9: { what: "restore the query line", js: `(() => { const s = window.__q('[data-lh="band"] .cpv-exstack'); if (!s || s.querySelector('[data-cpv="ex-line"]')) return; const q = document.createElement("section"); q.className = "cpv-qcard"; q.setAttribute("data-cpv", "ex-line"); q.innerHTML = "<h2>Your query line</h2>"; s.prepend(q); })()` },
 };
 const SOURCE_MUTATIONS = ["AD2", "AD3", "AD4", "AD6", "AD7", "AD10"];
 
@@ -275,23 +273,8 @@ test.describe("Comparable titles v26", () => {
     L.done(12);
   });
 
-  test("AD9 · empty page: the exhibit draws no query line, no drag handle and no In-query-letter switch", async ({ page }) => {
-    const L = new Ledger("AD9");
-    for (const vp of SIZES) {
-      const w = `${vp.width}`;
-      await emptyPage(page, vp); await mutate(page, "AD9");
-      const r = await page.evaluate(() => {
-        const w2 = window as any; const band = w2.__q('[data-lh="band"]') as HTMLElement | null;
-        return { band: !!band, text: band?.textContent ?? "", line: band ? band.querySelectorAll('[data-cpv="ex-line"], [data-cpv="qline"], .cpv-qcard, .cpv-qline').length : -1, grips: band ? band.querySelectorAll(".cpv-grip").length : -1, switches: band ? band.querySelectorAll('.cpv-inl, [role="switch"], [data-cpv="inq"], [data-cpv="pos"]').length : -1, cards: band ? band.querySelectorAll('[data-cpv="comp"]').length : -1, heading: band?.querySelector(".cpv-sech h2")?.textContent ?? null, buttons: band ? band.querySelectorAll("button").length : -1, label: w2.__q('[data-lh="exhibition"]')?.textContent?.slice(0, 44) ?? null, empty: w2.__q('[data-cv="empty-heading"]')?.textContent ?? null };
-      });
-      L.check(`${w} the exhibit is on the page`, r.band && r.cards === 3, `band ${r.band} · ${r.cards} cards`);
-      L.check(`${w} no query line`, r.line === 0 && !/Your query line/.test(r.text), `${r.line} line element(s)`);
-      L.check(`${w} no drag handle`, r.grips === 0 && !/Drag to reorder/.test(r.text), `${r.grips} grip(s)`);
-      L.check(`${w} no In-query-letter switch`, r.switches === 0 && !/In query letter/i.test(r.text), `${r.switches} switch element(s)${/In query letter/i.test(r.text) ? ' · the words "In query letter"' : ""}`);
-      L.check(`${w} what remains`, r.heading === "Your comps 3" && r.buttons === 0 && r.empty === "No comp titles yet", `${r.heading} · ${r.buttons} buttons · ${r.empty}`);
-    }
-    L.done(10);
-  });
+  /* AD9 (the exhibit draws no query line, no drag handle and no switch) RETIRED with comps v27: the exhibit is deleted.
+     Its absence is held by V2 in compsV27.measure.ts. */
 
   /* ── the writing cases: each re-seeds first ── */
 
@@ -431,5 +414,5 @@ test.describe("Comparable titles v26", () => {
 });
 
 test("AD · every lock has a named mutation", () => {
-  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["AD1", "AD10", "AD2", "AD3", "AD4", "AD5", "AD6", "AD7", "AD8", "AD9"]);
+  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["AD1", "AD10", "AD2", "AD3", "AD4", "AD5", "AD6", "AD7", "AD8"]);
 });

@@ -20,7 +20,7 @@ run() { # lock [tag: a second mutation of the same lock logs under lock-tag]
   CV25_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV25.measure.ts -g "^.*$1 · " > "$log" 2>&1
   echo "$1${2:+ ($2)}: exit $? · $(grep -c '✗' "$log") red reading(s)"
 }
-for L in B1 B2 C1 D1 D2 E1 L1; do want "$L" && run "$L"; done
+for L in B1 B2 D1 D2 E1 L1; do want "$L" && run "$L"; done
 
 src() { # lock file python-edit
   want "$1" || return

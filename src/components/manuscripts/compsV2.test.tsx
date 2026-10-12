@@ -16,8 +16,6 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinTags, splitTags, yearError } from "./CompForm";
-import { CompCard } from "./CompCard";
-import { CompsExhibit } from "./CompsEmpty";
 import { CompsScoutRail } from "./CompsScoutRail";
 import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
 
@@ -41,7 +39,7 @@ describe("C3 · the form's rules", () => {
 });
 
 describe("C5 · the page cannot reach the Scout", () => {
-  const page = ["ComparableTitlesPage.tsx", "CompsScoutRail.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx", "CompsEmpty.tsx"];
+  const page = ["ComparableTitlesPage.tsx", "CompsScoutRail.tsx", "CompForm.tsx", "CompsQueryLine.tsx"];
   it("nothing the page mounts imports the Scout's client or its panel", () => {
     for (const f of page) {
       const s = src(f);
@@ -59,29 +57,12 @@ describe("C5 · the page cannot reach the Scout", () => {
   });
 });
 
-describe("C7 · the empty state's examples are pictures", () => {
-  /* living headers v3 §5: the examples are the exhibition now — the band is aria-hidden and inert,
-     and the cards inside are CompCard's example picture (no button); the copy button is disabled. */
-  it("the exhibition's cards render no live button, and the band is aria-hidden and inert", () => {
-    const html = renderToStaticMarkup(<CompsExhibit msTitle="Murphy’s Day Out" now={2026} />);
-    expect(html).toContain('data-lh="exhibition"');
-    expect(html).toMatch(/data-lh="band" aria-hidden="true" inert=""/);
-    expect(html, "a live comp card's switch rendered").not.toContain('role="switch"');
-    /* comps v26: the query line's picture (and its format radios) left the exhibit, so no button is left in it */
-    expect(html).not.toContain("<button");
-    expect(html, "the retired query line is drawn").not.toContain("Your query line");
-    expect(html, "a drag handle is drawn").not.toMatch(/["\s]cpv-grip["\s]/);
-    expect(html, "the reorder hint is still there").not.toContain("Drag to reorder");
-    /* what remains: the heading with its count, and the three sample cards */
-    expect(html).toContain("Your comps");
-    expect((html.match(/data-cpv="comp"/g) ?? []).length).toBe(3);
-    expect(html).toContain("HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW");
-  });
-  it("the live card is the same component with real buttons", () => {
-    const html = renderToStaticMarkup(<CompCard comp={{ title: "A" }} inLetter position={1} now={2026} />);
-    expect((html.match(/<button\b/g) ?? []).length).toBeGreaterThanOrEqual(4);
-    expect(html).toContain('role="switch"');
-    expect(html).toContain(">1st<");
+describe("C7 · the exhibit is gone (comps v27)", () => {
+  /* The empty page is the header and the steps card. The exhibition and the comp card it drew are deleted, not left
+     beside it; V2 holds their absence on the rendered page. */
+  it("the page mounts no exhibition and no comp card", () => {
+    const s = src("ComparableTitlesPage.tsx");
+    expect(s).not.toMatch(/CompsExhibit|CompsEmpty|CompCard|LivingExhibition/);
   });
   it("the page no longer mounts the v3 marketing blocks", () => {
     expect(src("ComparableTitlesPage.tsx")).not.toMatch(/StagesBlock|FeatureBlock|compsMarketing/);

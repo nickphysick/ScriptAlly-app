@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "V4",
+  "where": "1512 the button",
+  "ok": true,
+  "detail": "\"+ Add your first comp\""
+ },
+ {
+  "lock": "V4",
+  "where": "1512 the drawer's title",
+  "ok": false,
+  "detail": "\"Add a comp\""
+ },
+ {
+  "lock": "V4",
+  "where": "1512 the explainer is open",
+  "ok": false,
+  "detail": "open false · 0 points"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 the button",
+  "ok": true,
+  "detail": "\"+ Add your first comp\""
+ },
+ {
+  "lock": "V4",
+  "where": "1280 the drawer's title",
+  "ok": false,
+  "detail": "\"Add a comp\""
+ },
+ {
+  "lock": "V4",
+  "where": "1280 the explainer is open",
+  "ok": false,
+  "detail": "open false · 0 points"
+ }
+]

@@ -46,7 +46,7 @@ describe("CV25 A4: inQuery is retired", () => {
     expect(MAY_NAME_IT.length).toBe(2);
   });
   it("the Scout's client, the one other file that names it, has no caller on the comps page", () => {
-    const page = ["ComparableTitlesPage.tsx", "comps25/CompsScout.tsx", "comps25/CompsLibrary.tsx", "comps25/CompDrawer.tsx", "comps25/CompLetterPicker.tsx", "comps25/CompsStrip.tsx", "comps25/CompsHow.tsx"]
+    const page = ["ComparableTitlesPage.tsx", "comps25/CompsScout.tsx", "comps25/CompsLibrary.tsx", "comps25/CompDrawer.tsx", "comps25/CompLetterPicker.tsx", "comps25/CompsStrip.tsx", "comps25/CompsSteps.tsx", "comps25/CompsHowDialog.tsx"]
       .map((f) => readFileSync(`src/components/manuscripts/${f}`, "utf8")).join("\n");
     /* an import, never a mention: comments in those files say what they do not reach */
     expect(page).not.toMatch(/from\s+["'][^"']*suggestComps["']/);

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "V5",
+  "where": "1512 it starts empty",
+  "ok": true,
+  "detail": "card 1 · strip 0 · rows 0"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 saving the first comp shows the strip and the library",
+  "ok": true,
+  "detail": "card 0 · strip 1 · heading 1 · rows 1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 with no reload",
+  "ok": true,
+  "detail": "same document"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 and the header's button is \"+ Add a comp\" again",
+  "ok": true,
+  "detail": "\"+ Add a comp\""
+ },
+ {
+  "lock": "V5",
+  "where": "1512 removing it brings the empty page back",
+  "ok": false,
+  "detail": "card 1 · strip 0 · rows 0 · \"+ Add a comp\""
+ },
+ {
+  "lock": "V5",
+  "where": "1512 still with no reload",
+  "ok": true,
+  "detail": "same document"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 it starts empty",
+  "ok": true,
+  "detail": "card 1 · strip 0 · rows 0"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 saving the first comp shows the strip and the library",
+  "ok": true,
+  "detail": "card 0 · strip 1 · heading 1 · rows 1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 with no reload",
+  "ok": true,
+  "detail": "same document"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 and the header's button is \"+ Add a comp\" again",
+  "ok": true,
+  "detail": "\"+ Add a comp\""
+ },
+ {
+  "lock": "V5",
+  "where": "1280 removing it brings the empty page back",
+  "ok": false,
+  "detail": "card 1 · strip 0 · rows 0 · \"+ Add a comp\""
+ },
+ {
+  "lock": "V5",
+  "where": "1280 still with no reload",
+  "ok": true,
+  "detail": "same document"
+ }
+]

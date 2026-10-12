@@ -21,7 +21,7 @@ import { definedTokens, readTokens, renderedClasses, styledClasses } from "../..
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "compsV2.css"), "utf8");
-const FILES = ["ComparableTitlesPage.tsx", "CompCard.tsx", "CompForm.tsx", "CompsQueryLine.tsx", "CompsScoutRail.tsx", "CompsEmpty.tsx"];
+const FILES = ["ComparableTitlesPage.tsx", "CompForm.tsx", "CompsQueryLine.tsx", "CompsScoutRail.tsx"];
 const tsx = FILES.map((f) => readFileSync(join(here, f), "utf8")).join("\n");
 
 describe("compsV2.css — every token it defines is read", () => {
@@ -42,9 +42,10 @@ describe("compsV2.css — every class the page renders has a rule", () => {
 
   /** ⚠️ AND THE GUARD MUST BE READING SOMETHING — both halves above pass on empty extractions. */
   it("is actually extracting classes and tokens, not passing on empty sets", () => {
-    expect(renderedClasses(tsx, "cpv-").length).toBeGreaterThan(30);
+    /* comps v27 deleted the comp card and the exhibit, which rendered most of the page's cpv- classes */
+    expect(renderedClasses(tsx, "cpv-").length).toBeGreaterThan(20);
     expect(definedTokens(css, "cpv-").length).toBeGreaterThan(10);
-    expect(styledClasses(css, "cpv-").length).toBeGreaterThan(30);
+    expect(styledClasses(css, "cpv-").length).toBeGreaterThan(20);
   });
 
   /** an `id` is not a class — the form's inputs carry `id="cpv-f-title"` and friends */
