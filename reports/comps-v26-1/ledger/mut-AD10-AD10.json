@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "AD10",
+  "where": "1512 add: opening puts focus in Title (before ✕)",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 add: ✕ closes the drawer and returns focus to \"Add a comp\"",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 add: opening puts focus in Title (before Cancel)",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 add: Cancel closes the drawer and returns focus to \"Add a comp\"",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 add: opening puts focus in Title (before Escape)",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 add: Escape closes the drawer and returns focus to \"Add a comp\"",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 edit: opening puts focus in Title",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 edit: Escape returns focus to the row's Edit",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 the caret is in the note",
+  "ok": true,
+  "detail": "cpv-f-note"
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 Meta+Enter from the note saves the comp, once",
+  "ok": true,
+  "detail": "7 → 8 · note \"Saved from the note.\""
+ },
+ {
+  "lock": "AD10",
+  "where": "1512 and the drawer closes",
+  "ok": true,
+  "detail": "drawer count 0"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 add: opening puts focus in Title (before ✕)",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 add: ✕ closes the drawer and returns focus to \"Add a comp\"",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 add: opening puts focus in Title (before Cancel)",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 add: Cancel closes the drawer and returns focus to \"Add a comp\"",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 add: opening puts focus in Title (before Escape)",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 add: Escape closes the drawer and returns focus to \"Add a comp\"",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 edit: opening puts focus in Title",
+  "ok": true,
+  "detail": "cpv-f-title"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 edit: Escape returns focus to the row's Edit",
+  "ok": false,
+  "detail": "closed true · focus on body"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 the caret is in the note",
+  "ok": true,
+  "detail": "cpv-f-note"
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 Control+Enter from the note saves the comp, once",
+  "ok": true,
+  "detail": "7 → 8 · note \"Saved from the note.\""
+ },
+ {
+  "lock": "AD10",
+  "where": "1280 and the drawer closes",
+  "ok": true,
+  "detail": "drawer count 0"
+ }
+]

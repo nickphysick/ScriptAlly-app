@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "E2",
+  "where": "opens on the current letter, not fixed",
+  "ok": true,
+  "detail": "cv25-let-3 · fixed false"
+ },
+ {
+  "lock": "E2",
+  "where": "its record plus the comp the door named",
+  "ok": true,
+  "detail": "cmp_cv25tide,cmp_cv25nine,cmp_cv25last · 3 logged"
+ },
+ {
+  "lock": "E2",
+  "where": "a comp that is not ready cannot be ticked",
+  "ok": true,
+  "detail": "The Ferry at Dusk"
+ },
+ {
+  "lock": "E2",
+  "where": "first frame: the letter is chosen when the picker is first drawn",
+  "ok": false,
+  "detail": "drawn with \"\", then changed"
+ },
+ {
+  "lock": "E2",
+  "where": "first frame: nothing in the picker changes after it is drawn",
+  "ok": false,
+  "detail": "picker-letter aria-pressed was \"false\" · picker-comp aria-checked was \"false\" · picker-comp aria-checked was \"false\" · picker-comp aria-checked was \"false\" · picker-count text was \"0\" · picker data-letter was \"\""
+ },
+ {
+  "lock": "E2",
+  "where": "the chosen letter has the three",
+  "ok": true,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "no other letter changed",
+  "ok": true,
+  "detail": "{\"l1\":null,\"l2\":[\"cmp_cv25tide\",\"cmp_cv25salt\"]}"
+ },
+ {
+  "lock": "E2",
+  "where": "the unrecorded letter is still unrecorded",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "E2",
+  "where": "the comps were not rewritten",
+  "ok": true,
+  "detail": "= = = = = = ="
+ },
+ {
+  "lock": "E2",
+  "where": "Undo is offered",
+  "ok": true,
+  "detail": "toast"
+ },
+ {
+  "lock": "E2",
+  "where": "Undo restores every letter exactly",
+  "ok": true,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\"]"
+ }
+]
