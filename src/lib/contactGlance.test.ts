@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "vitest";
 import type { Agent, Query } from "../types";
-import { QueryStatus } from "../types";
+import { QueryStatus, SubmissionStatus } from "../types";
 import { agentFacts } from "./contactList";
 import { buildQcRows } from "./qcSummary";
 import { GLANCE_WEEKS, glanceModel, glanceOf } from "./contactGlance";
@@ -25,7 +25,7 @@ const query = (id: string, agentId: string, status: QueryStatus, sentDaysAgo: nu
 
 const AGENTS: Agent[] = [
   agent("a1", "Ada Able", { dateAdded: iso(0) }),                              // not queried, ready; added this week
-  agent("a2", "Bo Baker", { submissionStatus: "Closed", dateAdded: iso(3) }),   // not queried, closed to submissions; last week, this month
+  agent("a2", "Bo Baker", { submissionStatus: SubmissionStatus.CLOSED, dateAdded: iso(3) }),   // not queried, closed to submissions; last week, this month
   agent("a3", "Cy Carr", { dateAdded: iso(20) }),                               // querying, inside the window
   agent("a4", "Di Dunn"),                                                       // querying, a request to send: waiting on you
   agent("a5", "Ed Eyre"),                                                       // querying, past their reply time
