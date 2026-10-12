@@ -1,0 +1,2954 @@
+[
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-19 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-19 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "5 Jan@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-19 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-19 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-19 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-19 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-19 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-19 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-19 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Rachel is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-19 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Rachel is late\" · figure \"225 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-6 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-6 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Jul@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-6 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-6 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-6 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-6 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-6 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-6 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-6 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Sam is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-6 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Sam is late\" · figure \"31 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed20-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed20-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "11 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed20-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed20-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed20-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed20-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed20-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed20-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed20-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Cormac is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed20-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Cormac is late\" · figure \"35 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-undo three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-undo every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "4 Jul@0/92/right 6 Aug@0/92/right 9 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-undo every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-undo the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-undo the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-undo exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-undo its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-undo no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-undo its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Sam is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-undo the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Sam is late\" · figure \"45 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 msv12-q-1 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 msv12-q-1 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "5 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 msv12-q-1 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 msv12-q-1 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 msv12-q-1 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 msv12-q-1 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 msv12-q-1 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 msv12-q-1 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 msv12-q-1 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Mira is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 msv12-q-1 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Mira is late\" · figure \"285 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-pair three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-pair every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "8 Aug@0/92/right 28 Aug@0/92/right 2 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-pair every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-pair the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-pair the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-pair exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-pair its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-pair no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-pair its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Elinor is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-pair the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Elinor is late\" · figure \"10 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-chase three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-chase every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "22 Jul@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-chase every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-chase the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-chase the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-chase exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-chase its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-chase no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-chase its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tobias is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-chase the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tobias is late\" · figure \"54 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-6 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-6 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Apr@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-6 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-6 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-6 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-6 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-6 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-6 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-6 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tobias is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-6 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tobias is late\" · figure \"149 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-5 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-5 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "9 Apr@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-5 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-5 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-5 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-5 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-5 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-5 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-5 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Rosalind is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-5 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Rosalind is late\" · figure \"144 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-4 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-4 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "31 Mar@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-4 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-4 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-4 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-4 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-4 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-4 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-4 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Devendra is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-4 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Devendra is late\" · figure \"125 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-3 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-3 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "22 Mar@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-3 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-3 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-3 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-3 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-3 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-3 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-3 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Imogen is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-3 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Imogen is late\" · figure \"148 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-5 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-5 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "29 Jul@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-5 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-5 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-5 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-5 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-5 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-5 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-5 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Joan is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-5 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Joan is late\" · figure \"20 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-2 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-2 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "13 Mar@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-2 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-2 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-cohort-2 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-2 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-2 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-2 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-2 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tobias is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-cohort-2 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tobias is late\" · figure \"185 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-3 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-3 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "9 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-3 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-3 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-3 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-3 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-3 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-3 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-3 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Marcus is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-3 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Marcus is late\" · figure \"9 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-dupe three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-dupe every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "13 Jul@0/92/right 8 Sep@0/92/right 21 Sep@0/92/right 21 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-dupe every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-dupe the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-dupe the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-dupe exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-dupe its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-dupe no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-dupe its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Tobias the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-dupe the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Tobias the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Apr2024@0/92/right 18 Apr2024@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-send three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-send every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "23 Jul@0/92/right 11 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-send every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-send the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rj-send the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-send exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-send its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-send no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-send its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Imogen the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rj-send the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Imogen the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-12 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-12 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "10 Jun@0/92/right 24 Jun@0/92/right 8 Jul@0/92/right 22 Jul@0/92/right 5 Aug@0/92/right 19 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-12 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0 0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-12 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-query-12 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-12 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-12 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-12 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-12 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Your answer is due\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-query-12 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Your answer is due\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-move-c three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-move-c every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "9 Jul@0/92/right 27 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-move-c every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-move-c the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-move-c the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-move-c exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-move-c its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) (court closed)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-move-c no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-move-c its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Joan passed\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-move-c the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Joan passed\" · figure \"27 Sep\" · late false · court closed"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-closed three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-closed every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "19 Jul@0/92/right 13 Aug@0/92/right 17 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-closed every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-closed the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 cor-closed the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-closed exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-closed its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) (court closed)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-closed no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-closed its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tom passed\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 cor-closed the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tom passed\" · figure \"17 Sep\" · late false · court closed"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rej-query-1 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rej-query-1 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "2 Aug@0/92/right 12 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rej-query-1 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rej-query-1 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 rej-query-1 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rej-query-1 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rej-query-1 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) (court closed)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rej-query-1 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rej-query-1 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Imogen passed\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 rej-query-1 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Imogen passed\" · figure \"30 Aug\" · late false · court closed"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Apr2024@0/92/right 18 Apr2024@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 seed-cal-passed865-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 seed-cal-passed865-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-close three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-close every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "16 Aug2025@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-close every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-close the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 thin-q-close the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-close exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-close its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-close no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-close its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Still waiting on Rosalind\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 thin-q-close the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Still waiting on Rosalind\" · figure \"a year\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 qp1s-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 362px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 qp1s-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "7 Oct@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 qp1s-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 qp1s-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1512 qp1s-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 qp1s-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 qp1s-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 qp1s-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 qp1s-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Waiting on Petra\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 qp1s-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Waiting on Petra\" · figure \"51 days to go\" · late false · court agent"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 a query in the \"waiting\" state was met",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 a query in the \"late\" state was met",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 a query in the \"year\" state was met",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 a query in the \"send\" state was met",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 a query in the \"offer\" state was met",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1512 a query in the \"closed\" state was met",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-19 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-19 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "5 Jan@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-19 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-19 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-19 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-19 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-19 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-19 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-19 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Rachel is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-19 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Rachel is late\" · figure \"225 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-6 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-6 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Jul@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-6 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-6 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-6 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-6 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-6 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-6 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-6 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Sam is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-6 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Sam is late\" · figure \"31 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed20-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed20-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "11 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed20-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed20-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed20-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed20-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed20-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed20-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed20-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Cormac is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed20-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Cormac is late\" · figure \"35 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-undo three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-undo every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "4 Jul@0/92/right 6 Aug@0/92/right 9 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-undo every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-undo the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-undo the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-undo exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-undo its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-undo no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-undo its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Sam is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-undo the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Sam is late\" · figure \"45 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 msv12-q-1 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 msv12-q-1 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "5 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 msv12-q-1 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 msv12-q-1 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 msv12-q-1 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 msv12-q-1 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 msv12-q-1 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 msv12-q-1 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 msv12-q-1 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Mira is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 msv12-q-1 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Mira is late\" · figure \"285 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-pair three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-pair every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "8 Aug@0/92/right 28 Aug@0/92/right 2 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-pair every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-pair the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-pair the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-pair exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-pair its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-pair no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-pair its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Elinor is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-pair the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Elinor is late\" · figure \"10 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-chase three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-chase every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "22 Jul@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-chase every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-chase the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-chase the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-chase exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-chase its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-chase no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-chase its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tobias is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-chase the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tobias is late\" · figure \"54 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-6 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-6 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Apr@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-6 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-6 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-6 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-6 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-6 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-6 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-6 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tobias is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-6 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tobias is late\" · figure \"149 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-5 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-5 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "9 Apr@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-5 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-5 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-5 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-5 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-5 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-5 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-5 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Rosalind is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-5 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Rosalind is late\" · figure \"144 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-4 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-4 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "31 Mar@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-4 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-4 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-4 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-4 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-4 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-4 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-4 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Devendra is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-4 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Devendra is late\" · figure \"125 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-3 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-3 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "22 Mar@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-3 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-3 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-3 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-3 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-3 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-3 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-3 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Imogen is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-3 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Imogen is late\" · figure \"148 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-5 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-5 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "29 Jul@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-5 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-5 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-5 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-5 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-5 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-5 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-5 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Joan is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-5 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Joan is late\" · figure \"20 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-2 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-2 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "13 Mar@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-2 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-2 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-cohort-2 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-2 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-2 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-2 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-2 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tobias is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-cohort-2 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tobias is late\" · figure \"185 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-3 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-3 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "9 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-3 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-3 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-3 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-3 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-3 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-3 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-3 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Marcus is late\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-3 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Marcus is late\" · figure \"9 days over\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-dupe three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-dupe every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "13 Jul@0/92/right 8 Sep@0/92/right 21 Sep@0/92/right 21 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-dupe every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-dupe the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-dupe the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-dupe exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-dupe its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-dupe no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-dupe its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Tobias the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-dupe the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Tobias the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Apr2024@0/92/right 18 Apr2024@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-send three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-send every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "23 Jul@0/92/right 11 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-send every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-send the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rj-send the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-send exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-send its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-send no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-send its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Imogen the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rj-send the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Imogen the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-12 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-12 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "10 Jun@0/92/right 24 Jun@0/92/right 8 Jul@0/92/right 22 Jul@0/92/right 5 Aug@0/92/right 19 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-12 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0 0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-12 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-query-12 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-12 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-12 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-12 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-12 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Your answer is due\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-query-12 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Your answer is due\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-move-c three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-move-c every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "9 Jul@0/92/right 27 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-move-c every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-move-c the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-move-c the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-move-c exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-move-c its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) (court closed)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-move-c no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-move-c its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Joan passed\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-move-c the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Joan passed\" · figure \"27 Sep\" · late false · court closed"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-closed three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-closed every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "19 Jul@0/92/right 13 Aug@0/92/right 17 Sep@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-closed every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-closed the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 cor-closed the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-closed exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-closed its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) (court closed)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-closed no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-closed its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Tom passed\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 cor-closed the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Tom passed\" · figure \"17 Sep\" · late false · court closed"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rej-query-1 three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rej-query-1 every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "2 Aug@0/92/right 12 Aug@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rej-query-1 every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rej-query-1 the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 rej-query-1 the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rej-query-1 exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rej-query-1 its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) (court closed)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rej-query-1 no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rej-query-1 its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Imogen passed\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 rej-query-1 the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Imogen passed\" · figure \"30 Aug\" · late false · court closed"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "18 Apr2024@0/92/right 18 Apr2024@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0 0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 seed-cal-passed865-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) (court you)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 seed-cal-passed865-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Send Ottoline the full\" · figure \"\" · late false · court you"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-close three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-close every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "16 Aug2025@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-close every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-close the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 thin-q-close the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-close exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-close its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-close no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-close its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Still waiting on Rosalind\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 thin-q-close the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Still waiting on Rosalind\" · figure \"a year\" · late true · court agent"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 qp1s-q three columns, 92 · 26 · the rest, 14 apart",
+  "ok": true,
+  "detail": "92px 26px 322px · gap 14px"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 qp1s-q every date is right-aligned in the first 92px column",
+  "ok": true,
+  "detail": "7 Oct@0/92/right"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 qp1s-q every StatusDot's centre is on the spine",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 qp1s-q the entry's text is in the third column",
+  "ok": true,
+  "detail": "146"
+ },
+ {
+  "lock": "V4",
+  "where": "1280 qp1s-q the query-sent entry holds the slip",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 qp1s-q exactly one stand card, and it ends the ledger",
+  "ok": false,
+  "detail": "1 card(s) · last false · 0px short of the ledger's width"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 qp1s-q its ground is the court's tint",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) (court agent)"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 qp1s-q no old verdict line is left",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 qp1s-q its heading is one of the table's",
+  "ok": true,
+  "detail": "\"Waiting on Petra\" · \"Special Elite\" 22"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 qp1s-q the figure and the court agree with it",
+  "ok": true,
+  "detail": "\"Waiting on Petra\" · figure \"51 days to go\" · late false · court agent"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 a query in the \"waiting\" state was met",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 a query in the \"late\" state was met",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 a query in the \"year\" state was met",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 a query in the \"send\" state was met",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 a query in the \"offer\" state was met",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V5",
+  "where": "1280 a query in the \"closed\" state was met",
+  "ok": true,
+  "detail": "3"
+ }
+]

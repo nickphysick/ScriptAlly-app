@@ -1,0 +1,482 @@
+[
+ {
+  "lock": "V3",
+  "where": "1512 Queried · Tracking",
+  "ok": true,
+  "detail": "27 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · Agent",
+  "ok": true,
+  "detail": "43 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · resp · step 1",
+  "ok": true,
+  "detail": "31 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · nudge · step 1",
+  "ok": true,
+  "detail": "42 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · nudge · step 2",
+  "ok": true,
+  "detail": "41 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · nudge · step 3",
+  "ok": true,
+  "detail": "47 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · nudge · step 4",
+  "ok": true,
+  "detail": "48 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · close · step 1",
+  "ok": true,
+  "detail": "40 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · close · step 2",
+  "ok": true,
+  "detail": "45 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · close · step 3",
+  "ok": true,
+  "detail": "39 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · fork",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Queried · correct · the details",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · Tracking",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · Agent",
+  "ok": true,
+  "detail": "33 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · sent · step 1",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · sent · step 2",
+  "ok": true,
+  "detail": "28 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · sent · step 3",
+  "ok": true,
+  "detail": "39 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · sent · step 4",
+  "ok": true,
+  "detail": "50 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · sent · step 5",
+  "ok": true,
+  "detail": "50 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · resp · step 1",
+  "ok": true,
+  "detail": "30 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Full Requested · close · step 1",
+  "ok": true,
+  "detail": "30 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · Tracking",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · Agent",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · offer · step 1",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · offer · step 2",
+  "ok": true,
+  "detail": "68 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · offer · step 3",
+  "ok": true,
+  "detail": "28 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · offer · step 4",
+  "ok": true,
+  "detail": "35 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · offer · step 5",
+  "ok": true,
+  "detail": "44 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Offer · close · step 1",
+  "ok": true,
+  "detail": "28 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Rejected · Tracking",
+  "ok": true,
+  "detail": "26 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Rejected · Agent",
+  "ok": true,
+  "detail": "43 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Rejected · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Rejected · resp · step 1",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Rejected · fork",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 Rejected · correct · the details",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 the picker",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1512 the sweep had something to read",
+  "ok": true,
+  "detail": "1295 elements over 39 scans"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · Tracking",
+  "ok": true,
+  "detail": "27 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · Agent",
+  "ok": true,
+  "detail": "43 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · resp · step 1",
+  "ok": true,
+  "detail": "31 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · nudge · step 1",
+  "ok": true,
+  "detail": "42 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · nudge · step 2",
+  "ok": true,
+  "detail": "41 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · nudge · step 3",
+  "ok": true,
+  "detail": "47 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · nudge · step 4",
+  "ok": true,
+  "detail": "48 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · close · step 1",
+  "ok": true,
+  "detail": "40 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · close · step 2",
+  "ok": true,
+  "detail": "45 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · close · step 3",
+  "ok": true,
+  "detail": "39 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · fork",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Queried · correct · the details",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · Tracking",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · Agent",
+  "ok": true,
+  "detail": "33 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · sent · step 1",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · sent · step 2",
+  "ok": true,
+  "detail": "28 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · sent · step 3",
+  "ok": true,
+  "detail": "39 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · sent · step 4",
+  "ok": true,
+  "detail": "50 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · sent · step 5",
+  "ok": true,
+  "detail": "50 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · resp · step 1",
+  "ok": true,
+  "detail": "30 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Full Requested · close · step 1",
+  "ok": true,
+  "detail": "30 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · Tracking",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · Agent",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · offer · step 1",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · offer · step 2",
+  "ok": true,
+  "detail": "68 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · offer · step 3",
+  "ok": true,
+  "detail": "28 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · offer · step 4",
+  "ok": true,
+  "detail": "35 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · offer · step 5",
+  "ok": true,
+  "detail": "44 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Offer · close · step 1",
+  "ok": true,
+  "detail": "28 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Rejected · Tracking",
+  "ok": true,
+  "detail": "26 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Rejected · Agent",
+  "ok": true,
+  "detail": "43 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Rejected · Notes",
+  "ok": true,
+  "detail": "12 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Rejected · resp · step 1",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Rejected · fork",
+  "ok": true,
+  "detail": "22 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 Rejected · correct · the details",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 the picker",
+  "ok": true,
+  "detail": "32 elements"
+ },
+ {
+  "lock": "V3",
+  "where": "1280 the sweep had something to read",
+  "ok": true,
+  "detail": "1295 elements over 79 scans"
+ }
+]

@@ -1,0 +1,16 @@
+  ✗ V7 · 1512 agent · resp: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1512 agent · nudge: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1512 agent · close: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1512 you · sent: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1512 you · resp: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1512 you · close: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1512 the ··· fork: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 agent · resp: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 agent · nudge: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 agent · close: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 you · sent: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 you · resp: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 you · close: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  ✗ V7 · 1280 the ··· fork: within 250ms a 0.45 scrim covers the page — opacity 0 · alpha 0.45 · covers false
+  1 failed
+  1 passed (49.0s)

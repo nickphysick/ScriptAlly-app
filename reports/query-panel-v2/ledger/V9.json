@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "V9",
+  "where": "1512 the picker is in the panel, titled \"Who replied?\"",
+  "ok": true,
+  "detail": "\"Who replied?\" · 1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 the open query is listed first, under \"The query you had open\"",
+  "ok": true,
+  "detail": "first seed-query-10 \"Peter Vance\" · heading \"The query you had open\" · 9 rows"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 the page is dimmed",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 choosing another query continues to \"What did {first} say?\" in the same panel",
+  "ok": true,
+  "detail": "chose cv25-q-10 · \"What did Aisha say?\" · same panel true · 1 dialog(s)"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 the panel is now that query's",
+  "ok": true,
+  "detail": "cv25-q-10"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 back at the query: its ledger, and its row selected",
+  "ok": true,
+  "detail": "cv25-q-10 · selected cv25-q-10"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the picker is in the panel, titled \"Who replied?\"",
+  "ok": true,
+  "detail": "\"Who replied?\" · 1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the open query is listed first, under \"The query you had open\"",
+  "ok": true,
+  "detail": "first seed-query-10 \"Peter Vance\" · heading \"The query you had open\" · 9 rows"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the page is dimmed",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 choosing another query continues to \"What did {first} say?\" in the same panel",
+  "ok": true,
+  "detail": "chose cv25-q-10 · \"What did Aisha say?\" · same panel true · 1 dialog(s)"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the panel is now that query's",
+  "ok": true,
+  "detail": "cv25-q-10"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 back at the query: its ledger, and its row selected",
+  "ok": true,
+  "detail": "cv25-q-10 · selected cv25-q-10"
+ }
+]

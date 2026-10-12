@@ -23,6 +23,12 @@ import { StatusDot } from "../StatusDot";
 import { previewBody, type CorrectionDiff, type SurfaceChange } from "../../lib/correctionPreview";
 import { filterCandidates, MOVE_BLOCK_TITLES, type MoveCandidate, type MoveNotices } from "../../lib/correctionMove";
 import "./correctionSheet.css";
+import { CorSurface } from "./corSurface";
+
+const CorSheet: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, ...rest }) => {
+  const role = React.useContext(CorSurface);
+  return <div role={role} aria-modal={role === "dialog" ? "true" : undefined} {...rest}>{children}</div>;
+};
 
 /* ── the fork ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -47,7 +53,7 @@ export interface CorrectionForkProps {
 }
 
 export const CorrectionFork: React.FC<CorrectionForkProps> = ({ subject, onCorrect, onAppend, onMove, onDelete, onCancel }) => (
-  <div className="cor-sheet" role="dialog" aria-modal="true" aria-label="What would you like to do?">
+  <CorSheet className="cor-sheet" aria-label="What would you like to do?">
     <div className="cor-top" aria-hidden="true" />
     <div className="cor-body">
       <h2 className="cor-q">What would you like to do?</h2>
@@ -91,7 +97,7 @@ export const CorrectionFork: React.FC<CorrectionForkProps> = ({ subject, onCorre
       )}
       <button type="button" className="cor-cancel" onClick={onCancel}>Cancel</button>
     </div>
-  </div>
+  </CorSheet>
 );
 
 /* ── the edit form ────────────────────────────────────────────────────────────────────────── */
@@ -144,10 +150,8 @@ export const CorrectionEdit: React.FC<CorrectionEditProps> = ({
   const future = !!draft.dateISO && draft.dateISO > todayInput();
 
   return (
-    <div
+    <CorSheet
       className="cor-sheet"
-      role="dialog"
-      aria-modal="true"
       aria-label={`Edit ${subject}`}
       onKeyDown={(e) => {
         if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); }
@@ -204,7 +208,7 @@ export const CorrectionEdit: React.FC<CorrectionEditProps> = ({
           >Save</button>
         </div>
       </div>
-    </div>
+    </CorSheet>
   );
 };
 
@@ -247,10 +251,8 @@ export const ConsequenceSheet: React.FC<ConsequenceSheetProps> = ({ question, su
   const removedIds = new Set(diff.removed.map((r) => r.activityId ?? r.title));
 
   return (
-    <div
+    <CorSheet
       className="cor-sheet"
-      role="dialog"
-      aria-modal="true"
       aria-label={question}
       onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); } }}
     >
@@ -317,7 +319,7 @@ export const ConsequenceSheet: React.FC<ConsequenceSheetProps> = ({ question, su
           <button type="button" className="cor-cancel" onClick={onCancel}>Cancel</button>
         </div>
       </div>
-    </div>
+    </CorSheet>
   );
 };
 
@@ -352,10 +354,8 @@ export const MovePicker: React.FC<MovePickerProps> = ({ subject, candidates, onP
   const shown = filterCandidates(candidates, term);
 
   return (
-    <div
+    <CorSheet
       className="cor-sheet"
-      role="dialog"
-      aria-modal="true"
       aria-label="Move this entry to another query"
       onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); } }}
     >
@@ -401,7 +401,7 @@ export const MovePicker: React.FC<MovePickerProps> = ({ subject, candidates, onP
 
         <button type="button" className="cor-cancel" onClick={onCancel}>Cancel</button>
       </div>
-    </div>
+    </CorSheet>
   );
 };
 
@@ -450,10 +450,8 @@ const MoveBlock: React.FC<{ title: string; who: string; diff: CorrectionDiff }> 
 export const MoveSheet: React.FC<MoveSheetProps> = ({
   subject, target, notices, sourceDiff, targetDiff, note, onNoteChange, actions, onCancel,
 }) => (
-  <div
+  <CorSheet
     className="cor-sheet cor-sheet--wide"
-    role="dialog"
-    aria-modal="true"
     aria-label={`Move ${subject} to ${target.agentName}`}
     onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); } }}
   >
@@ -497,5 +495,5 @@ export const MoveSheet: React.FC<MoveSheetProps> = ({
         <button type="button" className="cor-cancel" onClick={onCancel}>Cancel</button>
       </div>
     </div>
-  </div>
+  </CorSheet>
 );

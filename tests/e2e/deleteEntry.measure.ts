@@ -21,6 +21,9 @@
  * behaviour before the fix. `FDE_MUTATE=FEED` sets `__SA_SKIP_FEED_MATCH`: the feed row is looked for under the
  * log entry's own id, as before, so a response's row is left. reports/fix-delete-entry/mutation-D1.txt, -FEED.txt.
  *
+ * The timeline's titles are matched in both dresses: the timeline's labels ("Full requested") and, in the query's
+ * side panel, the ledger's sentences ("They asked for the full manuscript", Query panel v2 §B).
+ *
  * ⚠️ IT WRITES, on documents of its own (tests/e2e/seedDeleteEntry.mjs, the `fde-` prefix, a manuscript of
  *    their own), re-seeded before each case and removed at the end of the run.
  */
@@ -113,10 +116,10 @@ async function deleteNewest(page: Page, heading: RegExp) {
 /** the six entry types: the fixture each starts from, the journey that writes it, and how the timeline names it */
 const CASES: { type: string; fixture: string; mode: string; picks: (string | RegExp)[]; heading: RegExp; status: string }[] = [
   { type: "response (a pass)", fixture: "queried", mode: "resp", picks: [/^Pass$/], heading: /rejected|pass/i, status: "Rejected" },
-  { type: "request", fixture: "queried", mode: "resp", picks: [/^Full requested$/], heading: /^Full requested/i, status: "Full Requested" },
+  { type: "request", fixture: "queried", mode: "resp", picks: [/^Full requested$/], heading: /^Full requested|asked for the full/i, status: "Full Requested" },
   { type: "send", fixture: "fullreq", mode: "sent", picks: [], heading: /full.*sent|sent.*full/i, status: "Full Sent" },
   { type: "nudge", fixture: "queried", mode: "nudge", picks: [/I.ve sent a nudge/], heading: /nudge/i, status: "Queried" },
-  { type: "offer", fixture: "queried", mode: "resp", picks: [/^Offer$/], heading: /^Offer/i, status: "Offer" },
+  { type: "offer", fixture: "queried", mode: "resp", picks: [/^Offer$/], heading: /^Offer|offered representation/i, status: "Offer" },
   { type: "close", fixture: "queried", mode: "close", picks: [/I.m withdrawing/], heading: /withdr|closed/i, status: "Withdrawn" },
 ];
 
@@ -131,7 +134,7 @@ test.describe("delete entry", () => {
       const before = dump();
       await open(page);
       await journey(page, c.mode, c.picks);
-      const mid = await until(`${w}: the journey wrote its entry`, (d) => d.log.length === before.log.length + 1 && d.query?.status === c.status);
+      const mid = await until(`${w}: the journey wrote its entry`, (d) => d.log.length === before.log.length + 1 && d.feed.length === before.feed.length + 1 && d.query?.status === c.status);
       check("D1", `${w} · the write happened`, mid.query?.status === c.status && mid.feed.length === before.feed.length + 1, `status ${mid.query?.status}; log ${before.log.length} → ${mid.log.length}; feed ${before.feed.length} → ${mid.feed.length}`);
       const wrote = diff(before.query!, mid.query!);
       console.log(`  ${w} wrote: ${wrote.join(" · ")}`);
@@ -161,7 +164,7 @@ test.describe("delete entry", () => {
     await journey(page, "resp", [/^Full requested$/]);
     const mid = await until("D2: the second request was written", (d) => d.log.length === before.log.length + 1 && d.query?.status === "Full Requested");
     check("D2", "the second request wrote over the first's send-by date", mid.query?.status === "Full Requested" && FIELDS.some((f) => JSON.stringify(mid.query![f]) !== JSON.stringify(before.query![f])), FIELDS.map((f) => `${f}: ${show(before.query![f])} → ${show(mid.query![f])}`).join(" · "));
-    await deleteNewest(page, /^Full requested/i);
+    await deleteNewest(page, /^Full requested|asked for the full/i);
     await until("D2: the entry left the log", (d) => d.log.length === before.log.length);
     await page.waitForTimeout(5000);
     const end = dump();

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "V6",
+  "where": "1512 browsing: nothing outside the panel is dimmed",
+  "ok": false,
+  "detail": "scrim opacity 1 · pointer-events auto"
+ },
+ {
+  "lock": "V6",
+  "where": "1512 browsing: a row click swaps the query",
+  "ok": false,
+  "detail": "seed-query-19 → seed-query-19 (clicked seed-query-12)"
+ },
+ {
+  "lock": "V6",
+  "where": "1280 browsing: nothing outside the panel is dimmed",
+  "ok": false,
+  "detail": "scrim opacity 1 · pointer-events auto"
+ },
+ {
+  "lock": "V6",
+  "where": "1280 browsing: a row click swaps the query",
+  "ok": false,
+  "detail": "seed-query-19 → seed-query-19 (clicked seed-query-20)"
+ }
+]

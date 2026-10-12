@@ -1,0 +1,362 @@
+[
+ {
+  "lock": "V6",
+  "where": "1512 browsing: nothing outside the panel is dimmed",
+  "ok": true,
+  "detail": "scrim opacity 0 · pointer-events none"
+ },
+ {
+  "lock": "V6",
+  "where": "1512 browsing: a row click swaps the query",
+  "ok": true,
+  "detail": "seed-query-19 → seed-query-12 (clicked seed-query-12)"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · resp: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · resp: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 agent · resp: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · resp: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · nudge: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · nudge: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 agent · nudge: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · nudge: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · close: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · close: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 agent · close: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 agent · close: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · sent: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · sent: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 you · sent: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · sent: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · resp: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · resp: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 you · resp: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · resp: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · close: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · close: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 you · close: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 you · close: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 the ··· fork: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1512 the ··· fork: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 the ··· fork: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V8",
+  "where": "1512 \"Something changed since\" runs the response journey in the panel",
+  "ok": false,
+  "detail": "step correct · 2 dialog(s) · 1 outside · \"Correct this entry\""
+ },
+ {
+  "lock": "V6",
+  "where": "1280 browsing: nothing outside the panel is dimmed",
+  "ok": true,
+  "detail": "scrim opacity 0 · pointer-events none"
+ },
+ {
+  "lock": "V6",
+  "where": "1280 browsing: a row click swaps the query",
+  "ok": true,
+  "detail": "seed-query-19 → seed-query-20 (clicked seed-query-20)"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · resp: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · resp: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 agent · resp: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · resp: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · nudge: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · nudge: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 agent · nudge: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · nudge: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · close: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · close: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 agent · close: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 agent · close: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · sent: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · sent: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 you · sent: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · sent: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · resp: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · resp: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 you · resp: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · resp: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · close: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · close: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 you · close: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 you · close: within 250ms of Escape the scrim is gone",
+  "ok": true,
+  "detail": "stepped 0 · opacity 0"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 the ··· fork: within 250ms a 0.45 scrim covers the page",
+  "ok": true,
+  "detail": "opacity 1 · alpha 0.45 · covers true"
+ },
+ {
+  "lock": "V7",
+  "where": "1280 the ··· fork: the panel shows the drawer's head, with the quill",
+  "ok": true,
+  "detail": "head true · quill true"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 the ··· fork: one dialog, and no drawer outside the panel",
+  "ok": true,
+  "detail": "1 dialog(s) · 0 drawer(s) outside"
+ },
+ {
+  "lock": "V8",
+  "where": "1280 \"Something changed since\" runs the response journey in the panel",
+  "ok": false,
+  "detail": "step correct · 2 dialog(s) · 1 outside · \"Correct this entry\""
+ }
+]

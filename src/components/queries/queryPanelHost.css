@@ -39,6 +39,8 @@
 html :where(.qsp) p, html :where(.qsp) span, html :where(.qsp) div, html :where(.qsp) button, html :where(.qsp) input,
 html :where(.qsp) select, html :where(.qsp) textarea, html :where(.qsp) label, html :where(.qsp) a { font-family: inherit; }
 .spanel.qsp h1, .spanel.qsp h2, .spanel.qsp h3, .spanel.qsp h4 { font-family: var(--sp-type) !important; }
+/* the correction sheets' buttons name Inter outright (correctionSheet.css): in the panel they take the typewriter */
+.spanel.qsp .cor-cancel, .spanel.qsp .cor-cancel-inline, .spanel.qsp .cor-save { font-family: var(--sp-type); font-weight: 400; font-size: 13px; }
 
 /* the open row: a warm ground and a 3px edge in its court's colour */
 @media (min-width: 768px) {

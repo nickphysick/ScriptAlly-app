@@ -44,7 +44,7 @@ async function wipe() {
     if (!d.id.includes(PREFIX)) continue;
     for (const a of (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs) { await deleteDoc(a.ref); gone++; }
   }
-  for (const coll of ["queries", "agents", "taskFlags", "activities", "tasks"]) {
+  for (const coll of ["queries", "agents", "taskFlags", "activities", "tasks", "journalEntries"]) {
     for (const d of (await getDocs(collection(db, "users", uid, coll))).docs) if (d.id.includes(PREFIX) || d.data()?.queryId === Q || d.data()?.relatedRecordId === Q) { await deleteDoc(d.ref); gone++; }
   }
   return gone;

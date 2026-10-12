@@ -129,7 +129,10 @@ test.describe("Query panel v1", () => {
       await mutate(page, "P1"); await mutate(page, "P2");
       await page.waitForTimeout(250);
       const p = await panel(page); const w = `${vp.width}`;
-      L.check("P1", `${w} 8 from the right, top and bottom`, !!p && near(p.r, 8, 1) && near(p.t, 8, 1) && near(p.b, 8, 1), p ? `right ${p.r} · top ${p.t} · bottom ${p.b}` : "no panel");
+      /* RE-POINTED (Query panel v2 §A): the panel's top is the shell bar's bottom, so the bar's Search and "Log a query"
+         stay reachable. Right and bottom are still 8. (QP2 V2 holds the bar's side of it.) */
+      const barBottom = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-pagebar")].find((b) => b.getBoundingClientRect().height > 0)?.getBoundingClientRect().bottom ?? -1);
+      L.check("P1", `${w} 8 from the right and bottom, and its top at the bar's bottom`, !!p && near(p.r, 8, 1) && near(p.t, barBottom, 1) && near(p.b, 8, 1), p ? `right ${p.r} · top ${p.t} (bar ends ${barBottom}) · bottom ${p.b}` : "no panel");
       L.check("P1", `${w} width`, !!p && near(p.w, vp.width <= 1440 ? 520 : 560, 2), `${p?.w}`);
       L.check("P1", `${w} radius 12`, p?.radius === "12px", `${p?.radius}`);
       /* P2: a row clear of the panel is still the thing under the pointer, and nothing on the page is dimmed */
@@ -223,7 +226,7 @@ test.describe("Query panel v1", () => {
     const L = new Ledger("P7-P8");
     const want: Record<string, { primary: RegExp; title: (f: string) => string }> = {
       agent: { primary: /^Record a response$/, title: (f) => `What did ${f} say?` },
-      silent: { primary: /^Close query$/, title: (f) => `Close ${f}'s query?` },
+      silent: { primary: /^Close query$/, title: (f) => `Close ${f}\u2019s query?` },
       you: { primary: /^Mark (partial|full|revision) sent$/, title: (f) => `What went to ${f}?` },
       offer: { primary: /^Record your answer$/, title: (f) => `Your answer to ${f}` },
       /* ⚠️ the brief's table says "Reopen query"; the app has no reopen journey — a late reply is what reopens */
@@ -268,6 +271,9 @@ test.describe("Query panel v1", () => {
             const over: string[] = [];
             for (const e of document.querySelectorAll<HTMLElement>("body *")) {
               if (p.contains(e) || !vis(e)) continue;
+              /* RE-POINTED (Query panel v2 §D): while an action runs the page is dimmed by the panel's own scrim. It
+                 is the panel's, one z under it, and not a second surface. (QP2 V7 and V8 hold it.) */
+              if (e.hasAttribute("data-side-scrim")) continue;
               const cs = getComputedStyle(e); if (cs.position === "static") continue;
               const z = parseInt(cs.zIndex, 10); if (!Number.isFinite(z) || z <= bar) continue;
               const r = e.getBoundingClientRect(); if (r.width * r.height < 400) continue;
@@ -415,7 +421,8 @@ test.describe("Query panel v1", () => {
         const at0 = (await order()).indexOf(QID);
         await page.locator(`${R} .qcw-agt`).click();
         await expect(page.locator(PANEL)).toBeVisible({ timeout: 8000 });
-        const tl0 = (await page.locator(`${PANEL} .tl-ev`).allInnerTexts()).filter((t) => /^Full requested/.test(t.trim())).length;
+        /* RE-POINTED (Query panel v2 §B): the ledger says what happened as a sentence */
+        const tl0 = (await page.locator(`${PANEL} .tl-ev`).allInnerTexts()).filter((t) => /^They asked for the full manuscript/.test(t.trim())).length;
         await page.locator(`${PANEL} [data-door="resp"]`).click();
         await expect(page.locator(`${PANEL} [data-qp-step]`)).toBeVisible({ timeout: 8000 });
         await page.waitForTimeout(500);
@@ -446,7 +453,7 @@ test.describe("Query panel v1", () => {
         }, { rowSel: ROW, id: QID });
         L.check("P13", `${w} the panel returns to the query`, after.panel && after.pid === QID && !after.step && after.ownShown && /Petra/.test(after.name), `panel ${after.panel} · step ${after.step} · card shown ${after.ownShown}`);
         /* ⚠️ the timeline is oldest first, so the new entry is its LAST row, not its first (the brief says first) */
-        L.check("P13", `${w} the new entry is the latest on the timeline`, tl0 === 0 && /^Full requested/.test(after.lastEv), `it was not there before (${tl0}); the last of ${after.evs} entries is "${after.lastEv}"`);
+        L.check("P13", `${w} the new entry is the latest on the timeline`, tl0 === 0 && /^They asked for the full manuscript/.test(after.lastEv), `it was not there before (${tl0}); the last of ${after.evs} entries is "${after.lastEv}"`);
         L.check("P13", `${w} the card's status is the new one`, /Full requested/i.test(after.pill), `"${after.pill}"`);
         L.check("P13", `${w} the row's status updated in place`, after.status === "Full Requested" && after.court === "you", `${after.status} · ${after.court}`);
         L.check("P13", `${w} the row moved, and is still the one selected row`, after.at !== at0 && after.selected.length === 1 && after.selected[0] === QID, `index ${at0} → ${after.at}; selected ${after.selected.join()}`);

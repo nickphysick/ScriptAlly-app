@@ -1,0 +1,8 @@
+  ✗ V1 · 1512 agent the masthead is navy — rgb(255, 255, 255)
+  ✗ V1 · 1512 you the masthead is navy — rgb(255, 255, 255)
+  ✗ V1 · 1512 closed the masthead is navy — rgb(255, 255, 255)
+  ✗ V1 · 1280 agent the masthead is navy — rgb(255, 255, 255)
+  ✗ V1 · 1280 you the masthead is navy — rgb(255, 255, 255)
+  ✗ V1 · 1280 closed the masthead is navy — rgb(255, 255, 255)
+  1 failed
+  1 passed (34.9s)

@@ -32,7 +32,7 @@
 .qsp .qcv-open .qcv-open-line { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0; padding: 16px 26px 0; }
 .qsp .qcv-open .qcv-open-pill { display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 13px; border-radius: 15px; background: #f4eee5; color: #1c130f; font-family: var(--sp-serif); font-size: 15px; line-height: 1; white-space: nowrap; }
 .qsp .qcv-open .qcv-open-day { margin: 0; font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 21px; letter-spacing: 0; text-transform: none; color: rgba(244, 238, 229, 0.75); }
-.qsp .qcv-open .qcv-open-for { margin: 8px 26px 0; font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 14px; line-height: 1.4; color: rgba(244, 238, 229, 0.6); }
+.qsp .qcv-open .qcv-open-for { margin: 8px 26px 0; font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 13.5px; line-height: 1.4; color: rgba(244, 238, 229, 0.6); }
 .qsp .qcv-open .qcv-open-for i { font-family: var(--sp-type); font-style: normal; }
 .qsp .qcv-open-tabs { display: flex; gap: 28px; margin: 20px 0 0; padding: 0 26px; border-bottom: 0; }
 .qsp .qcv-open-tabs button { margin: 0; padding: 0 0 12px; border: 0; border-bottom: 3px solid transparent; background: none; cursor: pointer; font-family: var(--sp-serif); font-size: 16.5px; line-height: 23px; color: rgba(244, 238, 229, 0.55); }

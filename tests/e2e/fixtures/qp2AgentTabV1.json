@@ -1,0 +1,83 @@
+{
+ "seed-query-10": {
+  "place": "London",
+  "door": "Open to submissions",
+  "links": [
+   "✉ peter@example.com|mailto:peter@example.com"
+  ],
+  "figures": [
+   "8wks",
+   "Email",
+   "Means no",
+   "2"
+  ],
+  "wishlist": "",
+  "asks": [
+   "Covering letter",
+   "Synopsis"
+  ],
+  "history": [
+   "The Smoke Test | Full Sent | this query",
+   "The Smoke Test | Partial Sent | Jul 2026"
+  ],
+  "footer": [
+   "Open in Contact list ›",
+   "Edit agent ›"
+  ]
+ },
+ "seed-pkgq-9": {
+  "place": "London",
+  "door": "Open to submissions",
+  "links": [
+   "✉ ana@example.com|mailto:ana@example.com"
+  ],
+  "figures": [
+   "8wks",
+   "Email",
+   "Not a no",
+   "3"
+  ],
+  "wishlist": "",
+  "asks": [
+   "Covering letter",
+   "Synopsis"
+  ],
+  "history": [
+   "The Smoke Test | Full Sent | May 2026",
+   "The Smoke Test | Full Requested | Jul 2026",
+   "The Smoke Test | Full Sent | this query"
+  ],
+  "footer": [
+   "Open in Contact list ›",
+   "Edit agent ›"
+  ]
+ },
+ "seed-query-3": {
+  "place": "London",
+  "door": "Open to submissions",
+  "links": [
+   "✉ marcus@example.com|mailto:marcus@example.com"
+  ],
+  "figures": [
+   "8wks",
+   "Email",
+   "Not a no",
+   "4"
+  ],
+  "wishlist": "",
+  "asks": [
+   "Covering letter",
+   "Synopsis"
+  ],
+  "history": [
+   "The Smoke Test | Full Requested | Jun 2026",
+   "The Smoke Test | Partial Requested | Jul 2026",
+   "The Smoke Test | Rejected | Aug 2026",
+   "The Smoke Test | Queried | this query"
+  ],
+  "footer": [
+   "Open in Contact list ›",
+   "Edit agent ›"
+  ]
+ }
+}

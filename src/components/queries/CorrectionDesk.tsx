@@ -24,7 +24,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { createPortal } from "react-dom";
 import { SIDE_SLOT } from "../shell/SidePanel";
 import { IlloSlot } from "./IlloSlot";
-import { QadHead, backWords } from "../queryActions/DrawerShell";
+import { QadHead, backWords } from "../queryActions/QadHead";
+import { CorSurface } from "../reading-pane/corSurface";
 import "../queryActions/queryDrawer.css";
 import "./correctionDesk.css";
 
@@ -140,7 +141,7 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, r
             </div>
           ) : null}
           <div ref={cardRef} className="qcd-card" role="group" aria-label="Correct this entry" data-notch="off">
-            <div className="qcd-scroll">{children}</div>
+            <div className="qcd-scroll"><CorSurface.Provider value="group">{children}</CorSurface.Provider></div>
           </div>
         </div>
       </div>,

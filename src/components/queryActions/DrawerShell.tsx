@@ -26,7 +26,8 @@ import type { JourneyView, StepState } from "./journey";
 /** Where the shell stands — what a park records (§6.3: "step 2 of 5"). */
 export interface ShellState { step: number; seen: number[]; of: number }
 
-export const QUILL_SRC = "/images/qa/quill.webp";
+export { QUILL_SRC, QadHead, backWords } from "./QadHead";
+import { QadHead, backWords } from "./QadHead";
 /** The save button holds its busy state this long before the write goes (the mock's 420ms). */
 export const SAVE_BEAT_MS = 420;
 
@@ -53,37 +54,6 @@ export interface ShellProps {
    */
   panel?: { first: string; title: string; back?: boolean } | null;
 }
-/** "Back to Eleanor's query" — or "Back to the query" where there is no first name to use. */
-export const backWords = (first: string | null | undefined): string => (first && first.trim() ? `Back to ${first.trim()}\u2019s query` : "Back to the query");
-
-/**
- * The action drawer's head (`.qad-head`): the way back, the mode's eyebrow, the typewriter title, the quill, the
- * close, and the agent card. Shared by the standalone drawer, a journey stepped into the query's panel, and the
- * correction desk there (Query panel v2 §D) — one head, so the three cannot come to look different.
- */
-export function QadHead({ from, onFrom, eyebrow, title, who, onClose, back = false }: {
-  from?: string | null; onFrom: () => void; eyebrow: string; title: string; who?: React.ReactNode; onClose: () => void;
-  /** the way back is the panel's own ("← Back to …'s query"): it carries the panel's probe */
-  back?: boolean;
-}) {
-  return (
-    <div className="qad-head" data-qad-head>
-      <div className="qad-top">
-        <div className="qad-tt">
-          {from ? <button type="button" className="qad-from" data-qad-from data-qp={back ? "step-back" : undefined} onClick={onFrom}>← {from}</button> : null}
-          <div className="qad-mode">{eyebrow}</div>
-          {/* ⚠️ NOT AN <h2>: brand.tsx forces every h1–h3 into the brand serif with !important, so
-              the typewriter title would silently become Playfair. The role keeps it a heading. */}
-          <div className="qad-h2" role="heading" aria-level={2} data-qp={back ? "step-title" : undefined}>{title}</div>
-        </div>
-        <span className="qad-qwrap" aria-hidden="true"><img src={QUILL_SRC} alt="" /></span>
-      </div>
-      <button type="button" className="qad-dx" aria-label="Close" onClick={onClose}>×</button>
-      {who}
-    </div>
-  );
-}
-
 export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, onCancel, onPark, onSave, stateRef, panel = null }: ShellProps) {
   const { openCal, setOpenCal } = useDrawer();
   const n = view.steps.length;

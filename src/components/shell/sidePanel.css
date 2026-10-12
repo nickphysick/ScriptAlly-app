@@ -33,6 +33,7 @@
 
 /* ── Query panel v2 §D · the scrim: while an action runs in the panel, everything but the panel dims — the
    shell's bar included. z 65, one under the panel. Clear and inert otherwise, so browsing costs nothing. ── */
-.spanel-scrim { position: fixed; inset: 0; z-index: 65; background: rgba(28, 19, 15, 0.45); opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
-.spanel-scrim[data-on="true"] { opacity: 1; pointer-events: auto; }
+.spanel-scrim { position: fixed; inset: 0; z-index: 65; background: rgba(28, 19, 15, 0.45); opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+/* in over 200ms; out a little quicker, so the page is back by the time the query is */
+.spanel-scrim[data-on="true"] { opacity: 1; pointer-events: auto; transition-duration: 200ms; }
 @media (prefers-reduced-motion: reduce) { .spanel-scrim { transition: none; } }

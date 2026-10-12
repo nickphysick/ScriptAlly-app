@@ -135,7 +135,9 @@ export function QueryDrawer() {
     /* ⚠️ ONLY THE REQUEST THAT ASKED TO CLOSE IS CLOSED. The slide-out takes 240ms, and a drawer
        opened inside that window (a door clicked straight after Cancel) is a NEW request: closing
        whatever is current then shut the new one as it arrived (packages-journey, 28 Sep). */
-    window.setTimeout(() => { if (currentDrawerRequest() === r) closeQueryDrawer(); r?.onCancel?.(); }, 240);
+    /* stepped into the query's panel there is no slide-out to wait for: the panel returns to the query, and the
+       page's dim lifts, at once (Query panel v2 §D) */
+    window.setTimeout(() => { if (currentDrawerRequest() === r) closeQueryDrawer(); r?.onCancel?.(); }, r?.panel ? 0 : 240);
   }, []);
 
   const switchTo = useCallback((mode: DrawerMode, preset?: DrawerPreset) => {
