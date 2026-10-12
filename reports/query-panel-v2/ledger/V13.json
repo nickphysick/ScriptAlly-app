@@ -1,0 +1,314 @@
+[
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nosent · the panel shows this query, with one stand card",
+  "ok": true,
+  "detail": "qp2l-nosent · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nosent · exactly its links",
+  "ok": true,
+  "detail": "[\"Add the date you sent it\"] (wants [\"Add the date you sent it\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nosent · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nowin · the panel shows this query, with one stand card",
+  "ok": true,
+  "detail": "qp2l-nowin · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nowin · exactly its links",
+  "ok": true,
+  "detail": "[\"Set a date\"] (wants [\"Set a date\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nowin · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-year · the panel shows this query, with one stand card",
+  "ok": true,
+  "detail": "qp2l-year · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-year · exactly its links",
+  "ok": true,
+  "detail": "[\"Remind me later\",\"Keep tracking\"] (wants [\"Remind me later\",\"Keep tracking\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-year · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you row 0 (rj-dupe) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you · rows were read",
+  "ok": true,
+  "detail": "1 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 closed row 0 (cor-move-c) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 closed · rows were read",
+  "ok": true,
+  "detail": "1 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 agent row 0 (seed-query-19) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 agent row 1 (seed-query-6) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 agent row 2 (seed-cal-passed20-q) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 agent · rows were read",
+  "ok": true,
+  "detail": "3 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nosent · the panel shows this query, with one stand card",
+  "ok": true,
+  "detail": "qp2l-nosent · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nosent · exactly its links",
+  "ok": true,
+  "detail": "[\"Add the date you sent it\"] (wants [\"Add the date you sent it\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nosent · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nowin · the panel shows this query, with one stand card",
+  "ok": true,
+  "detail": "qp2l-nowin · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nowin · exactly its links",
+  "ok": true,
+  "detail": "[\"Set a date\"] (wants [\"Set a date\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nowin · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-year · the panel shows this query, with one stand card",
+  "ok": true,
+  "detail": "qp2l-year · 1 card(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-year · exactly its links",
+  "ok": true,
+  "detail": "[\"Remind me later\",\"Keep tracking\"] (wants [\"Remind me later\",\"Keep tracking\"])"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-year · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
+  "ok": true,
+  "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you row 0 (rj-dupe) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you · rows were read",
+  "ok": true,
+  "detail": "1 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 closed row 0 (cor-move-c) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 closed · rows were read",
+  "ok": true,
+  "detail": "1 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 agent row 0 (seed-query-19) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 agent row 1 (seed-query-6) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 agent row 2 (seed-cal-passed20-q) · no link outside its state",
+  "ok": true,
+  "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 agent · rows were read",
+  "ok": true,
+  "detail": "3 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · Add the date you sent it",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · Set a date",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · Remind me later",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · Keep tracking",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · none:you",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · none:closed",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "Add the date you sent it · opens the sent-date editor, above the panel",
+  "ok": true,
+  "detail": "the field is what is under its own centre"
+ },
+ {
+  "lock": "V13",
+  "where": "Add the date you sent it · leaving the editor writes nothing",
+  "ok": true,
+  "detail": "{\"dateSent\":null,\"keep\":null,\"expected\":null}"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a date · opens the weeks slider in the card, and the link stands down",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "V13",
+  "where": "Set a date · Cancel puts the link back and writes nothing",
+  "ok": true,
+  "detail": "[\"Set a date\"] · {\"dateSent\":\"2026-08-28T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
+ },
+ {
+  "lock": "V13",
+  "where": "over a year · Close leads the footer, Record a response beside it",
+  "ok": true,
+  "detail": "lead \"Close query\" · Record a response, Nudge"
+ },
+ {
+  "lock": "V13",
+  "where": "Remind me later · adds one open \"Nudge {agent}\" to-do, and hides while it stands",
+  "ok": true,
+  "detail": "[{\"text\":\"Nudge Petra Nwosu\",\"queryId\":\"qp2l-year\",\"done\":false}]"
+ },
+ {
+  "lock": "V13",
+  "where": "Keep tracking · Record a response leads instead of Close",
+  "ok": true,
+  "detail": "lead \"Record a response\" · Nudge, Close query"
+ },
+ {
+  "lock": "V13",
+  "where": "Keep tracking · the closing sentence and its links are gone",
+  "ok": true,
+  "detail": "[] · \"Nwosu & Hale said they’d reply within eight weeks. That window closed 11 months ago.\""
+ },
+ {
+  "lock": "V13",
+  "where": "Keep tracking · sets the existing flag",
+  "ok": true,
+  "detail": "{\"dateSent\":\"2025-09-07T11:00:00.000Z\",\"keep\":true,\"expected\":null}"
+ },
+ {
+  "lock": "V13",
+  "where": "Keep tracking · holds after a reload",
+  "ok": true,
+  "detail": "[] · lead \"Record a response\""
+ },
+ {
+  "lock": "V13",
+  "where": "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back",
+  "ok": true,
+  "detail": "lead \"Close query\" · [\"Keep tracking\"] · {\"dateSent\":\"2025-09-07T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
+ },
+ {
+  "lock": "V13",
+  "where": "Suggest closing again · is offered only while the flag is set",
+  "ok": true,
+  "detail": "0 in the menu"
+ }
+]

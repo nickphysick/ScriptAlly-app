@@ -84,7 +84,8 @@ const mk = (id, agentId, who, sentDays) => {
   b.set(doc(db, "users", uid, "queries", id, "activity", a), { type: "Queried", resultingStatus: "Queried", createdAt: new Date(iso(sentDays)), note: `Query sent to ${who}`, queryId: id, agentName: who.split(" at ")[0], manuscriptTitle: "seed" });
 };
 mk(`${PREFIX}nosent`, AG, "Petra Nwosu at Nwosu & Hale", null);
-mk(`${PREFIX}nowin`, AG2, "Oran Achterberg at Achterberg Literary", 20);
+/* 45 days, not 20: feed drawer B6 reads the 30 days to 11 Oct, and a send dated inside them adds a day to it */
+mk(`${PREFIX}nowin`, AG2, "Oran Achterberg at Achterberg Literary", 45);
 mk(`${PREFIX}year`, AG, "Petra Nwosu at Nwosu & Hale", 400);
 await b.commit();
 console.log("qp2l: seeded");
