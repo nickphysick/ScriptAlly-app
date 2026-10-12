@@ -2,7 +2,7 @@
  * Comparable titles v25 — the rendered-page locks (CV25). Each is measured on the page the app
  * serves, on the fixture `seedCompsV25.mjs` writes, at 1512 × 900 and 1280 × 800 unless noted.
  *
- *   A1 ids · A3 fixed · B1 header · B2 strip · C1 band · D1 heading · D2 bar · D3 sort · D4 groups
+ *   A1 ids · A3 fixed · B1 header · B2 strip · (C1 band: retired with comps v27) · D1 heading · D2 bar · D3 sort · D4 groups
  *   E1 drawer · E2 picker · F1 full · L1 no jump          (A2 and A4 are unit locks)
  *
  * MUTATIONS. `CV25_MUTATE=<lock>` applies that lock's named break. Seven are applied in the page
@@ -310,7 +310,8 @@ test.describe("Comparable titles v25", () => {
     L.done(18);
   });
 
-  test("F1 · full screen: hides the panel, strip and band, collapses the sidebar, keeps the heading; Escape restores both and the scroll", async ({ page }) => {
+  /* comps v27: the band left the page, so F1 no longer reads it */
+  test("F1 · full screen: hides the panel and strip, collapses the sidebar, keeps the heading; Escape restores both and the scroll", async ({ page }) => {
     const L = new Ledger("F1");
     for (const vp of SIZES) {
       await open(page, vp, "F1");
@@ -319,18 +320,18 @@ test.describe("Comparable titles v25", () => {
         const w = window as any; const h = (s: string) => { const e = w.__q(s) as HTMLElement | null; return e ? e.getBoundingClientRect().height : -1; };
         const sheet = document.querySelector(".ws-window") as HTMLElement;
         return {
-          panel: h('[data-cv="panel"]'), strip: h('[data-gst="comps"]'), how: h('[data-cv="how"]'), foot: h(".af"), head: w.__box(w.__q('[data-cv="lib-head"]')), list: w.__box(w.__q('[data-cv="list"]')), sheet: w.__box(sheet),
+          panel: h('[data-cv="panel"]'), strip: h('[data-gst="comps"]'), foot: h(".af"), head: w.__box(w.__q('[data-cv="lib-head"]')), list: w.__box(w.__q('[data-cv="list"]')), sheet: w.__box(sheet),
           shut: !!document.querySelector(".ws-app.sb-shut"), side: (document.querySelector(".ws-panel") as HTMLElement).getBoundingClientRect().width,
           scroll: (w.__cv().closest(".wpg-scroll") as HTMLElement).scrollTop, url: location.search, btn: w.__q('[data-cv="full-btn"]').getAttribute("aria-pressed"), full: w.__cv().dataset.full, stored: localStorage.getItem("sa.compsFull"),
         };
       });
       const a = await read();
       const w = `${vp.width}`;
-      L.check(`${w} before: expanded, scrolled`, !a.shut && a.side > 200 && a.scroll > 200 && a.panel > 0 && a.strip > 0 && a.how > 0, `sidebar ${a.side} · scroll ${a.scroll}`);
+      L.check(`${w} before: expanded, scrolled`, !a.shut && a.side > 200 && a.scroll > 200 && a.panel > 0 && a.strip > 0, `sidebar ${a.side} · scroll ${a.scroll}`);
       await page.locator(`${P}[data-cv="full-btn"]`).click();
       await page.waitForTimeout(900);
       const b = await read();
-      L.check(`${w} on: panel, strip and band hidden`, b.panel === 0 && b.strip === 0 && b.how === 0 && b.foot <= 0, `panel ${b.panel} · strip ${b.strip} · band ${b.how} · footer ${b.foot}`);
+      L.check(`${w} on: panel and strip hidden`, b.panel === 0 && b.strip === 0 && b.foot <= 0, `panel ${b.panel} · strip ${b.strip} · footer ${b.foot}`);
       L.check(`${w} on: the heading stays above the list`, b.head.h > 0 && b.head.b <= b.list.y && b.head.y >= b.sheet.y, `heading ${b.head.y}–${b.head.b} · list from ${b.list.y}`);
       L.check(`${w} on: the sidebar is at its icons`, b.shut && b.side < 100, `sb-shut ${b.shut} · ${b.side} wide`);
       L.check(`${w} on: the list is the sheet less 12 each side`, near(b.list.x - b.sheet.x, 12, 1.5) && near(b.sheet.r - b.list.r, 12, 1.5), `left ${b.list.x - b.sheet.x} · right ${b.sheet.r - b.list.r}`);
@@ -338,7 +339,7 @@ test.describe("Comparable titles v25", () => {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(900);
       const c = await read();
-      L.check(`${w} Escape: everything is back`, c.panel > 0 && c.strip > 0 && c.how > 0 && c.full === "false" && !c.url.includes("full=1") && c.stored === null, `panel ${c.panel} · ${c.url || "(no query)"} · stored ${c.stored}`);
+      L.check(`${w} Escape: everything is back`, c.panel > 0 && c.strip > 0 && c.full === "false" && !c.url.includes("full=1") && c.stored === null, `panel ${c.panel} · ${c.url || "(no query)"} · stored ${c.stored}`);
       L.check(`${w} Escape: the sidebar is what it was`, !c.shut && near(c.side, a.side), `${c.side} of ${a.side}`);
       L.check(`${w} Escape: the scroll position you left from`, near(c.scroll, a.scroll, 2), `${a.scroll} → ${c.scroll}`);
       /* F toggles it, and not while typing */
@@ -530,8 +531,10 @@ test.describe("Comparable titles v25", () => {
     await page.waitForTimeout(600);
     const rows = await page.evaluate(() => { const w = window as any; const r = (w.__qa('[data-cv="row"]') as HTMLElement[]).find((x) => x.dataset.key === "cmp_cv25brit")!; return { where: r.dataset.where, n: (r.querySelector('[data-cv="row-seen"]') as HTMLElement).dataset.n, unrec: w.__qa('[data-cv="unrec"]').length, rate: w.__q('[data-gst-cell="rate"] [data-gst-fig]').textContent }; });
     L.check("v1 saved once: its five queries are tracked", rows.where === "sent" && rows.n === "5" && rows.unrec === 0 && rows.rate === "100%", JSON.stringify(rows));
-    await page.locator(`${P}[data-cv="how-pick"]`).scrollIntoViewIfNeeded();
-    await page.locator(`${P}[data-cv="how-pick"]`).click();
+    /* comps v27: the door into the picker is in the "How comp tracking works" pop-up now */
+    await page.evaluate(() => { const sc = (window as any).__cv().closest(".wpg-scroll") as HTMLElement; sc.scrollTop = 0; });
+    await page.locator(`${P}[data-cv="how-link"]`).click();
+    await page.locator('[data-cv="how-pop"] [data-cv="how-pick"]').click();
     await page.waitForSelector('[data-cv="picker"]');
     await page.locator(`[data-cv="picker-letter"][data-letter="${FX.L1}"]`).click();
     const s4 = await state();
