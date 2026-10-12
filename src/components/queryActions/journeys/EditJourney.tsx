@@ -19,11 +19,11 @@
  * `expectedSendDate` and `sendReminderDate` and NOTHING else: no entry is edited, so nothing is recomputed.
  */
 import React, { useEffect, useState } from "react";
-import { deleteField, Timestamp } from "firebase/firestore";
+import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, type Query } from "../../../types";
 import { activityEventLabel } from "../../../lib/activityEvent";
-import { addDays, dayDiff, dayIso, dm, fmt, futureWeeks, offWeekend, pastAnchors, toDay, up, type Anchor } from "../../../lib/queryActions/dates";
+import { dayDiff, dayIso, dm, fmt, pastAnchors, toDay, up, type Anchor } from "../../../lib/queryActions/dates";
 import { EVENT_LABEL, isEventKey } from "../../../lib/queryActions/eventKeys";
 import { Chips, DateField, Fl, Note, SampleControl, TextBox, Toggle, Who } from "../controls";
 import { ComponentType } from "../../../types";
@@ -33,7 +33,8 @@ import { bookOf, blankSample, type Materials, type Sample } from "../../../lib/q
 import { ordinal } from "../SentHow";
 import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyView } from "../journey";
-import { emptyView, REMIND } from "./ResponseJourney";
+import { emptyView } from "./ResponseJourney";
+import { REMIND, sendByAnswer, sendByFields } from "../../../lib/queryActions/sendBy";
 import { agentName, dayIn, dayOut, firstName, nrmnOf, seedOf, whoLine } from "./common";
 
 interface Entry { id: string; name: string; day: Date; note: string; status: string | null; isNudge: boolean }
@@ -98,15 +99,9 @@ export function EditJourney({ req, today, children }: JourneyProps) {
   if (sendByOnly) {
     const rr = q.status === QueryStatus.REVISE_RESUBMIT;
     const what = rr ? "revision" : q.status === QueryStatus.FULL_REQUESTED ? "full" : "pages";
-    const weeks = futureWeeks(today, [["1w", "In a week", 7], ["2w", "In two weeks", 14], ["4w", "In four weeks", 28]]);
+    const ans = sendByAnswer(today, sendByMode, sendByCustom, remind);
+    const { weeks, none, sendBy, reminder, noDateTask } = ans;
     const sendAnch = [...weeks, { k: "none", label: "No date given", d: null }];
-    const none = sendByMode === "none";
-    const sendBy: Date | null = none ? null : sendByMode === "custom" && sendByCustom ? sendByCustom : (weeks.find((x) => x.k === sendByMode) || weeks[1]).d;
-    const remindOff = REMIND.find((r) => r[0] === remind)?.[2] ?? null;
-    const remindOn = sendBy && remindOff !== null ? addDays(sendBy, remindOff) : null;
-    const noDateTask = offWeekend(addDays(today, 3));
-    const reminder = none ? noDateTask : remindOn;
-    const stamp = (x: Date) => Timestamp.fromDate(new Date(dayIso(x)));
     return children({
       eyebrow: "YOUR MOVE", title: "Set a send-by date", verb: "save", verbDone: "saved", button: "Save", ok: true,
       steps: [{
@@ -135,11 +130,9 @@ export function EditJourney({ req, today, children }: JourneyProps) {
       ],
       who, dirty: touched, snapshot, touched: () => [q.id],
       commit: async () => {
-        /* ⚠️ THESE TWO FIELDS AND NOTHING ELSE: no entry is edited, so `editActivity` and its recompute do not run */
-        const fields: Record<string, unknown> = {};
-        if (sendBy) fields.expectedSendDate = stamp(sendBy);
-        if (reminder) fields.sendReminderDate = stamp(reminder);
-        else if (q.sendReminderDate != null) fields.sendReminderDate = deleteField();
+        /* ⚠️ THESE TWO FIELDS AND NOTHING ELSE: no entry is edited, so `editActivity` and its recompute do not run.
+           "No date given" leaves a recorded date alone here, as the response journey's does. */
+        const fields = sendByFields(ans, { due: q.expectedSendDate != null, reminder: q.sendReminderDate != null }, false);
         if (Object.keys(fields).length) await db.updateQuery(q.id, fields as Partial<Query>);
         return { queryId: q.id, message: `Send-by date set · ${agentName(agent)}`, sub: sendBy ? `SEND BY ${up(sendBy)}` : `REMINDER ${up(noDateTask)}`, touched: [q.id] };
       },

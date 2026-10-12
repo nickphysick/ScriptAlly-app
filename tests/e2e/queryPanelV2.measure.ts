@@ -521,6 +521,59 @@ test.describe("Query panel v2", () => {
       const sc = await card();
       L.check("V13", "Set a send-by date · a request with a date offers no link, and the card counts to it", sc?.links.length === 0 && /expecting it by/.test(sc?.text ?? ""), `"${sc?.text}" · ${JSON.stringify(sc?.links)}`);
 
+      /* ··· → "I'm correcting a mistake" on the REQUEST carries the send-by date; on any other entry it does not */
+      const openFix = async (n: number) => {
+        await page.locator(`${PANEL} .qlg-fix`).nth(n).click();
+        await page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first().click();
+        await expect(page.locator(`${PANEL} .cor-ta`), "the correction form did not open").toBeVisible();
+      };
+      const closeFix = async () => { await leaveStep(page); await expect(page.locator(`${PANEL} .cor-ta`)).toHaveCount(0); };
+      const SB = `${PANEL} [data-qp="send-by"]`;
+      await expect(page.locator(`${PANEL} .qlg-fix`)).toHaveCount(2);
+      await openFix(0);
+      L.check("V13", "··· edit · the sent entry of the same query shows no send-by step", (await page.locator(SB).count()) === 0, `${await page.locator(SB).count()} section(s)`);
+      await closeFix();
+      await openFix(1);
+      const recorded = (await page.locator(`${SB} .qad-chip.on`).allInnerTexts()).join("|").replace(/\s+/g, " ");
+      L.check("V13", "··· edit · the request shows the step after date and note, on the recorded date", (await page.locator(SB).count()) === 1 && /^As recorded/.test(recorded)
+        && await page.evaluate((sel) => { const sb = document.querySelector(sel)!; const ta = document.querySelector('[data-qp="panel"] .cor-ta')!; return !!(ta.compareDocumentPosition(sb) & Node.DOCUMENT_POSITION_FOLLOWING); }, SB), `chip on: "${recorded}"`);
+      const e0 = dump();
+      await page.locator(`${SB} [data-qad-chip="4w"]`).click();
+      await page.locator(`${SB} [data-qad-chip="0"]`).click();
+      await page.locator(`${PANEL} .cor-save`).click();
+      const undo = page.locator(".sa-toast-undo");
+      await expect(undo, "no Undo after the correction saved").toBeVisible({ timeout: 15_000 });
+      await expect.poll(() => String(dump().docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).not.toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
+      const e1 = dump().docs["qp2l-request"] ?? {};
+      const due2 = String(e1.expectedSendDate ?? "").slice(0, 10); const rem2 = String(e1.sendReminderDate ?? "").slice(0, 10);
+      L.check("V13", "··· edit · saving changes the send-by date and its reminder with the rest", days(due2) === 28 && days(rem2) === 28, `send by ${due2} (+${days(due2)}) · reminder ${rem2} (+${days(rem2)})`);
+      await undo.click();
+      await expect.poll(() => String(dump().docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
+      const e2 = dump().docs["qp2l-request"] ?? {};
+      L.check("V13", "··· edit · Undo puts both back", e2.expectedSendDate === e0.docs["qp2l-request"]?.expectedSendDate && e2.sendReminderDate === e0.docs["qp2l-request"]?.sendReminderDate, `send by ${String(e2.expectedSendDate).slice(0, 10)} · reminder ${String(e2.sendReminderDate).slice(0, 10)}`);
+      /* every other entry type the account holds: no step */
+      const kinds: Record<string, number> = {};
+      for (const court of ["agent", "closed", "you"]) {
+        const sel = court === "closed" ? rowOf(court) : `${ROW}[data-court="${court}"]:not([data-qid^="qp2l-"])`;
+        for (let n = 0; n < 2; n++) {
+          if (!(await page.locator(sel).nth(n).count())) break;
+          await openRow(page, `${sel} >> nth=${n}`); await tab(page, "Tracking");
+          const fixes = await page.locator(`${PANEL} .qlg-fix`).count();
+          const status = (await page.locator(`${PANEL} .qcv-open`).getAttribute("data-status")) ?? "";
+          for (let i = 0; i < fixes; i++) {
+            await openFix(i);
+            const subject = ((await page.locator(`${PANEL} .cor-subj`).first().innerText().catch(() => "")) || `entry ${i}`).replace(/\s+/g, " ").split(" · ")[0].slice(0, 40);
+            const has = (await page.locator(SB).count()) > 0;
+            /* the one entry that may carry it: the LAST entry of a query that still owes material */
+            const live = court === "you" && i === fixes - 1;
+            if (!live) { kinds[subject] = (kinds[subject] ?? 0) + 1; L.check("V13", `··· edit · ${status} · "${subject}" shows no send-by step`, !has, has ? "it shows one" : "none"); }
+            await closeFix();
+          }
+        }
+      }
+      console.log(`[V13] entry kinds read without the step: ${JSON.stringify(kinds)}`);
+      L.check("V13", "··· edit · several kinds of entry were read", Object.keys(kinds).length >= 3, Object.keys(kinds).join(" | "));
+
       /* over a year: Close leads; Remind me later hides itself; Keep tracking swaps the lead; the menu undoes it */
       await openId("qp2l-year");
       const y0 = await card();
@@ -560,7 +613,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(51);
+    L.done(60);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {

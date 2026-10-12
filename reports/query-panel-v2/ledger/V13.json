@@ -355,6 +355,78 @@
  },
  {
   "lock": "V13",
+  "where": "··· edit · the sent entry of the same query shows no send-by step",
+  "ok": true,
+  "detail": "0 section(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · the request shows the step after date and note, on the recorded date",
+  "ok": true,
+  "detail": "chip on: \"As recorded 26 Oct\""
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · saving changes the send-by date and its reminder with the rest",
+  "ok": true,
+  "detail": "send by 2026-11-09 (+28) · reminder 2026-11-09 (+28)"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Undo puts both back",
+  "ok": true,
+  "detail": "send by 2026-10-26 · reminder 2026-10-25"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Queried · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Queried · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Rejected · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Rejected · \"THEY PASSED\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Full Requested · \"THEY ASKED FOR THE FULL MANUSCRIPT\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Full Requested · \"YOU SENT THE FULL MANUSCRIPT\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Full Requested · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · several kinds of entry were read",
+  "ok": true,
+  "detail": "YOU SENT THE QUERY | THEY PASSED | THEY ASKED FOR THE FULL MANUSCRIPT | YOU SENT THE FULL MANUSCRIPT"
+ },
+ {
+  "lock": "V13",
   "where": "over a year · the tray's first button is the panel's primary",
   "ok": true,
   "detail": "tray \"Close query|row-act\" · panel \"Close query\""

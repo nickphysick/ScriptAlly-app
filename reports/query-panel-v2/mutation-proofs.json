@@ -90,7 +90,7 @@
  },
  "V13": {
   "lock": "V13",
-  "green": "70/70",
+  "green": "82/82",
   "mutations": [
    {
     "name": "every link drawn in every state (source: StandCard ignores the view's links)",
@@ -111,6 +111,11 @@
     "name": "the tray draws no button for a year-silent row with no board card (the build before QcList132 read silenceLead)",
     "red": "2 readings: 'Keep tracking \u00b7 the tray's first button follows the panel's primary \u2014 tray \"Edit|row-edit\" \u00b7 panel \"Record a response\"', and the same after Suggest closing again",
     "log": "mutation-runs/V13-tray.txt"
+   },
+   {
+    "name": "the correction form offers the send-by fields to no request (source: the live-request test inverted)",
+    "red": "'\u00b7\u00b7\u00b7 edit \u00b7 the request shows the step after date and note, on the recorded date \u2014 chip on: \"\"', and the walk stops there",
+    "log": "mutation-runs/V13-fix.txt"
    }
   ],
   "patch": "mutation-runs/V13.patch (both source mutations)"
