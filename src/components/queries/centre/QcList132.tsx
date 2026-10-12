@@ -26,6 +26,7 @@ import type { SubmissionPackage } from "../../../types";
 import type { ListGroup, GroupBy } from "../../../lib/qcCalView";
 import type { QcRow, QcSort } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
+import { silenceLead } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell, standLine } from "../../../lib/qcRowLines";
 import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import { QC_INKWELL } from "./qcArt";
@@ -135,7 +136,8 @@ export const QcList132: React.FC<{
   nowMs: number;
   coming?: ReadonlyMap<string, ComingUp>;
   packageOf?: (id: string) => SubmissionPackage | null;
-  onAct?: (id: string, bucket: ComingUp["bucket"]) => void;
+  /** `bucket` is null where the row has no board card and the button is the panel's own primary (a year silent) */
+  onAct?: (id: string, bucket: ComingUp["bucket"] | null) => void;
   onEdit?: (id: string) => void;
   onClose?: (id: string) => void;
   onAddSent?: (id: string) => void;
@@ -214,9 +216,11 @@ export const QcList132: React.FC<{
           <div className="qcw-nxt" data-qcv="row-verb">{nx.phrase}</div>
           <div className={`qcw-sub${nx.hot ? " hot" : ""}`} data-qcv="row-nextline" data-hot={nx.hot || undefined}>{nx.line}</div>
           <span className="qcw-tray" data-qcv="row-tray">
-            {next && !closed && (
+            {/* a query a year silent leads with the panel's primary even when the board holds no card for it
+                (`silenceLead`, the panel footer's own predicate): after "Keep tracking" its close card is gone */}
+            {(next || silenceLead(r)) && !closed && (
               <button type="button" className="qcw-pillbtn" data-qcv="row-act"
-                onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next.bucket); }}>{next.action}</button>
+                onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next?.bucket ?? null); }}>{next?.action ?? silenceLead(r)!.label}</button>
             )}
             <button type="button" className="qcw-ghost" data-qcv="row-edit"
               onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }} aria-label={`Edit the query to ${r.agentName}`}><span className="qcw-gw">Edit</span>{ICON.pen}</button>

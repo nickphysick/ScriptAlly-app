@@ -34,7 +34,8 @@ const RL: Record<RType, string> = { partial: "Partial requested", full: "Full re
 const SAVED_LABEL: Record<RType, string> = { partial: "Partial requested", full: "Full requested", rr: "Revise & resubmit", pass: "Passed", offer: "Offer" };
 const DOT: Record<RType, string> = { partial: "var(--qad-rose)", full: "var(--qad-rose)", rr: "var(--qad-rose)", pass: "var(--qad-stone)", offer: "var(--qad-offer)" };
 const KEY: Record<RType, EventKey> = { partial: "partial_requested", full: "full_requested", rr: "rr_requested", pass: "pass", offer: "offer" };
-const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2], ["1d", "The day before", -1], ["0", "On the day", 0], ["no", "No reminder", null]];
+/* exported: the edit journey's send-by step offers the same reminder choices (Query panel v2, ruling 3) */
+export const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2], ["1d", "The day before", -1], ["0", "On the day", 0], ["no", "No reminder", null]];
 
 /**
  * v1.1 — opened with no query at all (the sidebar's "Record a response"), the first step is

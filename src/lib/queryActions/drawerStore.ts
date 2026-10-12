@@ -24,6 +24,11 @@ export interface DrawerPreset {
   nudgeTab?: "sent" | "plan";
   /** D5: the reason, e.g. "noreply" from a "Consider closing" task. */
   closeWhy?: "noreply" | "withdraw" | "gone";
+  /**
+   * D7, for a request entry: the edit journey shows ONE step, "When you'll send it by", and saves only the
+   * send-by date and its reminder (the stand card's "Set a send-by date").
+   */
+  sendBy?: boolean;
   /** Open at this step index rather than the first. */
   step?: number;
 }

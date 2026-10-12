@@ -26,7 +26,7 @@ import { turnFor } from "../../../lib/queryCardFacts";
 import { STAGE_NAME, factLine, primaryActionLabel, standLine, tileCourt, type QcRow } from "../../../lib/qcSummary";
 import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
-import { panelDoors } from "../../../lib/queryActions/entry";
+import { keptTracking, leadDoors } from "../../../lib/queryActions/entry";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import type { SubmissionPackage } from "../../../types";
 import { formatDate } from "../../../lib/dates";
@@ -72,12 +72,7 @@ export const QcOpenCard: React.FC<{
    * nothing ("none"); opened over any other page it is one muted caption under the head ("caption").
    */
   manuscript?: "none" | "caption";
-  /**
-   * The writer pressed "Keep tracking" on the stand card (ruling 3): Close stops leading the footer however
-   * long the silence, and the ⋯ menu offers "Suggest closing again" to clear the flag.
-   */
-  keepTracking?: boolean;
-}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none", keepTracking = false }) => {
+}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none" }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
@@ -89,7 +84,10 @@ export const QcOpenCard: React.FC<{
   const verbs = queryVerbs(turnFor(row.status));
   const action = primaryActionLabel(row.status);
   /* Query panel v1 §C — the next move is the primary (`panelDoors`); a year of silence leads with Close */
-  const doors = onDoor ? panelDoors(row.status, row.court === "agent" && !keepTracking ? row.dayN : null) : [];
+  /* `leadDoors` is the list tray's predicate too: after "Keep tracking" Close stops leading both, and the ⋯ menu
+     offers "Suggest closing again" to clear the flag */
+  const doors = onDoor ? leadDoors(row) : [];
+  const keepTracking = keptTracking(row);
   const more: { key: OpenAction; label: string }[] = onDoor
     ? [
       ...(verbs.nudge ? [{ key: "snooze" as const, label: "Snooze the nudge" }] : []),

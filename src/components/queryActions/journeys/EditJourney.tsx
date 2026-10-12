@@ -13,15 +13,19 @@
  *
  * The "told" variant (a `withdraw_tell` / `signed_tell` task): one step, "I've told …", which sets
  * `withdrawTold` and so retires the task that asked.
+ *
+ * The "send-by" variant (`preset.sendBy`, Query panel v2 ruling 3) — for a request with no send-by date: one
+ * step, the response journey's own "When you'll send it by" chips and reminder choices. It writes
+ * `expectedSendDate` and `sendReminderDate` and NOTHING else: no entry is edited, so nothing is recomputed.
  */
 import React, { useEffect, useState } from "react";
-import { deleteField } from "firebase/firestore";
+import { deleteField, Timestamp } from "firebase/firestore";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, type Query } from "../../../types";
 import { activityEventLabel } from "../../../lib/activityEvent";
-import { dayDiff, dayIso, dm, fmt, pastAnchors, toDay, up, type Anchor } from "../../../lib/queryActions/dates";
+import { addDays, dayDiff, dayIso, dm, fmt, futureWeeks, offWeekend, pastAnchors, toDay, up, type Anchor } from "../../../lib/queryActions/dates";
 import { EVENT_LABEL, isEventKey } from "../../../lib/queryActions/eventKeys";
-import { DateField, Fl, Note, SampleControl, TextBox, Toggle, Who } from "../controls";
+import { Chips, DateField, Fl, Note, SampleControl, TextBox, Toggle, Who } from "../controls";
 import { ComponentType } from "../../../types";
 import { currentVersion, editionsOn, readSummary, sentPieces, summaryOf, summaryWith, type EditionChoice } from "../../../lib/queryActions/packages";
 import { sentRecordOf } from "../../../lib/queryActions/sentRecord";
@@ -29,7 +33,7 @@ import { bookOf, blankSample, type Materials, type Sample } from "../../../lib/q
 import { ordinal } from "../SentHow";
 import type { JourneyProps } from "../QueryDrawer";
 import type { Guard, JourneyView } from "../journey";
-import { emptyView } from "./ResponseJourney";
+import { emptyView, REMIND } from "./ResponseJourney";
 import { agentName, dayIn, dayOut, firstName, nrmnOf, seedOf, whoLine } from "./common";
 
 interface Entry { id: string; name: string; day: Date; note: string; status: string | null; isNudge: boolean }
@@ -48,6 +52,8 @@ export function entryName(data: Record<string, unknown>): string {
 interface EditAnswers {
   d: string | null; note: string | null; told: boolean;
   sent: { how: "package"; key: string } | { how: "individual"; mat: Materials } | null;
+  /* the send-by variant's three answers, as the response journey parks them */
+  sendByMode?: string; sendByCustom?: string | null; remind?: string;
 }
 
 export function EditJourney({ req, today, children }: JourneyProps) {
@@ -64,10 +70,15 @@ export function EditJourney({ req, today, children }: JourneyProps) {
   const tellMode = !req.entryId;
   /* §A4 — what was sent, corrected. null = unchanged; the writer's choice replaces the snapshot. */
   const [sent, setSent] = useState<{ how: "package"; key: string } | { how: "individual"; mat: Materials } | null>(S.sent ?? null);
-  const snapshot = (): EditAnswers => ({ d: dayOut(d), note, told, sent });
+  /* the send-by variant: the response journey's own defaults (two weeks; the day before) */
+  const sendByOnly = req.preset?.sendBy === true;
+  const [sendByMode, setSendByMode] = useState<string>(S.sendByMode ?? "2w");
+  const [sendByCustom, setSendByCustom] = useState<Date | null>(dayIn(S.sendByCustom ?? null));
+  const [remind, setRemind] = useState<string>(S.remind ?? "1d");
+  const snapshot = (): EditAnswers => ({ d: dayOut(d), note, told, sent, ...(sendByOnly ? { sendByMode, sendByCustom: dayOut(sendByCustom), remind } : {}) });
 
   useEffect(() => {
-    if (!q || tellMode) return;
+    if (!q || tellMode || sendByOnly) return;
     let live = true;
     void db.readQueryActivity(q.id).then((rows) => {
       if (!live) return;
@@ -83,6 +94,57 @@ export function EditJourney({ req, today, children }: JourneyProps) {
   if (!q) return children(emptyView("CORRECT THE RECORD", "Edit an entry"));
   const first = firstName(agent);
   const who = <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmnOf(q, agent)} />;
+
+  if (sendByOnly) {
+    const rr = q.status === QueryStatus.REVISE_RESUBMIT;
+    const what = rr ? "revision" : q.status === QueryStatus.FULL_REQUESTED ? "full" : "pages";
+    const weeks = futureWeeks(today, [["1w", "In a week", 7], ["2w", "In two weeks", 14], ["4w", "In four weeks", 28]]);
+    const sendAnch = [...weeks, { k: "none", label: "No date given", d: null }];
+    const none = sendByMode === "none";
+    const sendBy: Date | null = none ? null : sendByMode === "custom" && sendByCustom ? sendByCustom : (weeks.find((x) => x.k === sendByMode) || weeks[1]).d;
+    const remindOff = REMIND.find((r) => r[0] === remind)?.[2] ?? null;
+    const remindOn = sendBy && remindOff !== null ? addDays(sendBy, remindOff) : null;
+    const noDateTask = offWeekend(addDays(today, 3));
+    const reminder = none ? noDateTask : remindOn;
+    const stamp = (x: Date) => Timestamp.fromDate(new Date(dayIso(x)));
+    return children({
+      eyebrow: "YOUR MOVE", title: "Set a send-by date", verb: "save", verbDone: "saved", button: "Save", ok: true,
+      steps: [{
+        title: rr ? "When you'll resubmit by" : "When you'll send it by",
+        summary: none ? "No date given" : `By ${fmt(sendBy!)}`,
+        body: (
+          <>
+            <DateField id="sendBy" label={rr ? "RESUBMIT BY" : "SEND BY"} value={sendBy} anchors={sendAnch} dir="future"
+              forceKey={none ? "none" : sendByMode === "custom" ? null : sendByMode}
+              onPick={(x, k) => { if (k === "custom") { setSendByMode("custom"); setSendByCustom(x); } else setSendByMode(k); setTouched(true); }} />
+            {!none ? (
+              <>
+                <Fl>REMIND ME</Fl>
+                <Chips name="remind" value={remind} onPick={(k) => { setRemind(k); setTouched(true); }} options={REMIND.map(([k, l]) => [k, l] as [string, string])} />
+              </>
+            ) : (
+              <Note kind="info" tag="TIP">Agents who don't set a date still notice speed. We'll put “Send the {what}” on your to-do for <b>{fmt(noDateTask)}</b>, so it doesn't drift.</Note>
+            )}
+          </>
+        ),
+      }],
+      saves: [
+        { text: none ? "No send-by date is recorded" : `Your move, due ${fmt(sendBy!)}` },
+        ...(reminder ? [{ text: `Reminder on ${fmt(reminder)}`, dot: "var(--qad-blush)" }] : []),
+        { text: "Nothing else about this query changes" },
+      ],
+      who, dirty: touched, snapshot, touched: () => [q.id],
+      commit: async () => {
+        /* ⚠️ THESE TWO FIELDS AND NOTHING ELSE: no entry is edited, so `editActivity` and its recompute do not run */
+        const fields: Record<string, unknown> = {};
+        if (sendBy) fields.expectedSendDate = stamp(sendBy);
+        if (reminder) fields.sendReminderDate = stamp(reminder);
+        else if (q.sendReminderDate != null) fields.sendReminderDate = deleteField();
+        if (Object.keys(fields).length) await db.updateQuery(q.id, fields as Partial<Query>);
+        return { queryId: q.id, message: `Send-by date set · ${agentName(agent)}`, sub: sendBy ? `SEND BY ${up(sendBy)}` : `REMINDER ${up(noDateTask)}`, touched: [q.id] };
+      },
+    });
+  }
 
   if (tellMode) {
     const signed = q.closingReason === "accepted_offer";

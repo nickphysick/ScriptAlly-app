@@ -1,0 +1,4 @@
+Red first, on the build with the shared label but before the list drew a button for a row with no board card:
+  ✗ V13 · Keep tracking · the tray's first button follows the panel's primary — tray "Edit|row-edit" · panel "Record a response" (was "Close query")
+  ✗ V13 · Suggest closing again · the tray's first button is the panel's primary again — tray "Edit|row-edit" · panel "Close query"
+[V13] 68/70 green

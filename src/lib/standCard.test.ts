@@ -134,12 +134,13 @@ describe("ruling 3 — the quiet links, each in its one state", () => {
     overYearReminder: { ...year, reminderOpen: true },
     overYearKept: { ...year, keepTracking: true },
     request: { status: S.FULL_REQUESTED, court: "you", expectedMs: null },
+    requestDated: { status: S.FULL_REQUESTED, court: "you", expectedMs: NOW + 9 * DAY },
     offer: { status: S.OFFER, court: "offer" },
     closed: { status: S.REJECTED, court: "closed", closedHow: "passed" },
   };
   const want: Record<string, string[]> = {
     waiting: [], past: [], noReplyDate: ["setDate"], noSentDate: ["addSentDate"], overYear: ["remindLater", "keepTracking"],
-    overYearReminder: ["keepTracking"], overYearKept: [], request: [], offer: [], closed: [],
+    overYearReminder: ["keepTracking"], overYearKept: [], request: ["setSendBy"], requestDated: [], offer: [], closed: [],
   };
   it("every state offers exactly its own links", () => {
     const got = Object.fromEntries(Object.entries(states).map(([k, f]) => [k, standCard({ ...base, ...f }, NOW).links]));

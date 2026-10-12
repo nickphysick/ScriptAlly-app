@@ -1,6 +1,8 @@
 import { test } from "@playwright/test";
 import { openRoute } from "./measure";
 import { openQueryById, openTab, pressAction } from "./openQuery";
+/* RETIRED by Query panel v2 (tests/e2e/RETIRED-query-panel-v2.md): the desk beside the query stopped opening on 27 Sep, when the action drawer went live; there is no desk top edge to read. */
+test.beforeEach(() => { test.skip(true, "RETIRED by Query panel v2: the desk beside the query stopped opening on 27 Sep, when the action drawer went live"); });
 test("token scope + the rung's inline method — 1440", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
   const host = await openQueryById(page, "cor-move-b");

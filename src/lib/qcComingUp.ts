@@ -27,7 +27,7 @@ import type { BoardCard } from "./todoBoard";
 import { elapsedPhrase } from "./elapsed";
 import type { QcRow } from "./qcSummary";
 import type { QueryStatus } from "../types";
-import { panelDoors, primaryDoor } from "./queryActions/entry";
+import { leadDoors, primaryDoor, silenceLead } from "./queryActions/entry";
 import type { OpenRequest } from "./queryActions/drawerStore";
 
 const DAY = 86_400_000;
@@ -71,9 +71,12 @@ export const COMING_ACTION: Record<Exclude<Bucket, "note">, string> = {
  * send"). So the words come from the panel's own table (`panelDoors`), by the journey the bucket opens;
  * `COMING_ACTION` is only the fallback for an act the panel has no button for (the "fix" bucket's edit).
  */
-export function trayLabel(bucket: Exclude<Bucket, "note">, row: Pick<QcRow, "status" | "court" | "dayN">): string {
+export function trayLabel(bucket: Exclude<Bucket, "note">, row: Pick<QcRow, "status" | "court" | "dayN"> & { query?: object | null }): string {
+  /* a year silent: the panel's primary leads the tray too, whatever the board's card says (`silenceLead`) */
+  const lead = silenceLead(row);
+  if (lead) return lead.label;
   const mode = trayRequest(bucket, row.status, "")?.mode;
-  const door = mode ? panelDoors(row.status, row.court === "agent" ? row.dayN : null).find((d) => d.mode === mode) : undefined;
+  const door = mode ? leadDoors(row).find((d) => d.mode === mode) : undefined;
   return door?.label ?? COMING_ACTION[bucket];
 }
 
@@ -170,6 +173,17 @@ export function trayRequest(bucket: Exclude<Bucket, "note">, status: QueryStatus
 }
 
 /**
+ * What the tray's button OPENS for this row: the panel's primary for a query a year silent (the same door
+ * `trayLabel` names), and otherwise the journey its bucket names. Label and journey come from one place.
+ */
+export function trayOpen(bucket: Exclude<Bucket, "note"> | null, row: Pick<QcRow, "id" | "status" | "court" | "dayN"> & { query?: object | null }): OpenRequest | null {
+  const lead = silenceLead(row);
+  if (lead) return { mode: lead.mode, queryId: row.id, ...(lead.mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) };
+  /* no board card and no year of silence: the tray draws no button, so there is nothing to open */
+  return bucket ? trayRequest(bucket, row.status, row.id) : null;
+}
+
+/**
  * v126.2 — A ROW'S ONE NEXT MOVE IN THE BIRDS-EYE DRAWER: the words on its action pill and the
  * journey that pill opens. It is the list tray's own primary where the query has something coming
  * up (`comingUp` → `trayRequest`, so the tray and the drawer cannot offer different acts for one
@@ -181,7 +195,7 @@ export interface NextMove { label: string; request: OpenRequest }
 export function nextMove(card: BoardCard | undefined | null, row: QcRow, nowMs: number): NextMove | null {
   const c = comingUp(card, row, nowMs);
   if (c) {
-    const request = trayRequest(c.bucket, row.status, row.id);
+    const request = trayOpen(c.bucket, row);
     if (request) return { label: c.action, request };
   }
   const door = primaryDoor(row.status);

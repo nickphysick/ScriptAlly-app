@@ -49,13 +49,15 @@ export interface StandFacts {
  *   setDate      — with the agent, sent, and no reply date to count towards
  *   remindLater  — more than a year waiting, closing still suggested, no reminder open
  *   keepTracking — more than a year waiting, closing still suggested
+ *   setSendBy    — a request the writer owes, with no send-by date
  */
-export type StandLink = "addSentDate" | "setDate" | "remindLater" | "keepTracking";
+export type StandLink = "addSentDate" | "setDate" | "remindLater" | "keepTracking" | "setSendBy";
 export const STAND_LINK_LABEL: Record<StandLink, string> = {
   addSentDate: "Add the date you sent it",
   setDate: "Set a date",
   remindLater: "Remind me later",
   keepTracking: "Keep tracking",
+  setSendBy: "Set a send-by date",
 };
 export interface StandPart { text: string; em?: boolean }
 export interface StandCardView {
@@ -128,7 +130,7 @@ export function standCard(f: StandFacts, nowMs: number): StandCardView {
       figure: f.expectedMs == null ? null : over ? `${plural(days(f.expectedMs, nowMs), "day")} over` : `${plural(days(nowMs, f.expectedMs), "day")} left`,
       past: over,
       paragraph: [{ text: f.expectedMs == null ? "Mark it sent once it’s gone." : over ? `It was due on ${date(f.expectedMs)}. Mark it sent once it’s gone.` : `They’re expecting it by ${date(f.expectedMs)}. Mark it sent once it’s gone.` }],
-      bar: null, links: [],
+      bar: null, links: f.expectedMs == null ? ["setSendBy"] : [],
     };
   }
 

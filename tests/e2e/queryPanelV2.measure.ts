@@ -395,7 +395,7 @@ test.describe("Query panel v2", () => {
     test.setTimeout(420_000);
     page.setDefaultTimeout(10_000);
     const L = new Ledger("V13");
-    const dump = () => JSON.parse(execSync("node tests/e2e/seedQp2Links.mjs --dump", { encoding: "utf8" }).trim().split("\n").pop()!) as { queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
+    const dump = () => JSON.parse(execSync("node tests/e2e/seedQp2Links.mjs --dump", { encoding: "utf8" }).trim().split("\n").pop()!) as { docs: Record<string, Record<string, unknown>>; log: Record<string, string[]>; feed: string[]; queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
     const card = () => page.evaluate(() => {
       const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
       if (!p) return null;
@@ -413,11 +413,13 @@ test.describe("Query panel v2", () => {
         doors: [...p.querySelectorAll('[data-qcv="open-door"]')].map((b) => (b.textContent ?? "").trim()),
       };
     });
+    /* the list tray's first button for a row, read from the row itself (the tray is drawn, and shown on hover) */
+    const tray = (id: string) => page.evaluate((sel) => { const r = document.querySelector<HTMLElement>(sel); const b = r?.querySelector<HTMLElement>('[data-qcv="row-tray"] button'); return b ? `${(b.textContent ?? "").trim()}|${b.dataset.qcv}` : "(no tray button)"; }, `${ROW}[data-qid="${id}"]`);
     const openId = async (id: string) => { await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Tracking"); };
     const LINK = (k: string) => `${PANEL} [data-qp="stand-link"][data-link="${k}"]`;
     const STYLE = "Source Serif 4 15px rgb(42, 58, 82) 1px solid";
     /* the states that must offer nothing, on the account's own rows, and the three that offer theirs */
-    const WANT: Record<string, string[]> = { "qp2l-nosent": ["Add the date you sent it"], "qp2l-nowin": ["Set a date"], "qp2l-year": ["Remind me later", "Keep tracking"] };
+    const WANT: Record<string, string[]> = { "qp2l-nosent": ["Add the date you sent it"], "qp2l-nowin": ["Set a date"], "qp2l-year": ["Remind me later", "Keep tracking"], "qp2l-request": ["Set a send-by date"] };
     try {
       execSync("node tests/e2e/seedQp2Links.mjs", { stdio: "inherit" });
       await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); } catch { /* */ } });
@@ -435,7 +437,7 @@ test.describe("Query panel v2", () => {
         }
         /* the other states: a request, a closed query, and a query with the agent inside its dated wait */
         for (const court of ["you", "closed", "agent"]) {
-          const sel = court === "agent" ? `${ROW}[data-court="agent"]:not([data-qid^="qp2l-"])` : rowOf(court);
+          const sel = court === "closed" ? rowOf(court) : `${ROW}[data-court="${court}"]:not([data-qid^="qp2l-"])`;
           let read = 0;
           for (let n = 0; n < 3; n++) {
             const row = page.locator(sel).nth(n);
@@ -443,7 +445,8 @@ test.describe("Query panel v2", () => {
             await openRow(page, `${sel} >> nth=${n}`); await tab(page, "Tracking");
             const c = await card();
             /* a row of the account's own may itself be in a link state; what it may not show is a link its text does not earn */
-            const earned = /Closing it keeps your reply rate honest/.test(c?.text ?? "") ? ["Remind me later", "Keep tracking"] : /No reply date is recorded/.test(c?.text ?? "") ? ["Add the date you sent it", "Set a date"] : [];
+            const earned = /Closing it keeps your reply rate honest/.test(c?.text ?? "") ? ["Remind me later", "Keep tracking"] : /No reply date is recorded/.test(c?.text ?? "") ? ["Add the date you sent it", "Set a date"]
+              : /^Mark it sent once/.test(c?.text ?? "") ? ["Set a send-by date"] : [];
             const stray = (c?.links ?? []).filter((l) => !earned.includes(l));
             L.check("V13", `${w} ${court} row ${n} (${c?.id}) · no link outside its state`, c != null && stray.length === 0, stray.length ? `stray: ${stray.join(", ")}` : `${c?.links.length} link(s), ${earned.length ? "earned" : "none earned"}`);
             if (c && earned.length === 0) seen[`none:${court}`] = (seen[`none:${court}`] ?? 0) + 1;
@@ -454,7 +457,8 @@ test.describe("Query panel v2", () => {
       }
       /* each state was entered, and so was "no links" for a request and a closed query */
       console.log(`[V13] states seen: ${JSON.stringify(seen)}`);
-      for (const k of ["Add the date you sent it", "Set a date", "Remind me later", "Keep tracking", "none:you", "none:closed"]) L.check("V13", `the tally · ${k}`, (seen[k] ?? 0) > 0, `${seen[k] ?? 0}`);
+      /* "no links" on a request is read below, on this lock's own request once it has a date */
+      for (const k of ["Add the date you sent it", "Set a date", "Remind me later", "Keep tracking", "Set a send-by date", "none:closed"]) L.check("V13", `the tally · ${k}`, (seen[k] ?? 0) > 0, `${seen[k] ?? 0}`);
 
       /* ── pressing them, at 1512 ── a step that cannot be taken is a red reading, not a thrown run: the
          readings above it still print */
@@ -482,9 +486,45 @@ test.describe("Query panel v2", () => {
       const after = await card();
       L.check("V13", "Set a date · Cancel puts the link back and writes nothing", JSON.stringify(after?.links) === '["Set a date"]' && dump().queries["qp2l-nowin"]?.expected === null, `${JSON.stringify(after?.links)} · ${JSON.stringify(dump().queries["qp2l-nowin"])}`);
 
+      /* Set a send-by date → the edit journey's one step, in the panel; saving changes two fields and nothing else */
+      await openId("qp2l-request");
+      await page.locator(LINK("setSendBy")).click();
+      const step = page.locator(`${PANEL} [data-qp-step]`);
+      await expect(step, "the send-by step did not open in the panel").toBeVisible({ timeout: 8000 });
+      await page.waitForTimeout(500);
+      const stepText = (await step.innerText()).replace(/\s+/g, " ");
+      const chips = ["In a week", "In two weeks", "In four weeks", "No date given", "Two days before", "The day before", "On the day", "No reminder"];
+      const missing = chips.filter((c) => !stepText.includes(c));
+      L.check("V13", "Set a send-by date · the response journey's chips and reminder choices, in the panel", missing.length === 0 && /When you.ll send it by/.test(stepText) && (await scrim(page)).opacity > 0, missing.length ? `missing: ${missing.join(", ")}` : `all 8 choices · scrim opacity ${(await scrim(page)).opacity}`);
+      /* the account at rest: the app settles its own documents after a load, and that is not this save */
+      let before = dump();
+      for (let i = 0; i < 6; i++) { await page.waitForTimeout(1500); const again = dump(); if (JSON.stringify(again) === JSON.stringify(before)) break; before = again; }
+      for (let i = 0; i < 4; i++) {
+        const b = page.locator(`${PANEL} [data-qad-primary]`);
+        const label = await b.innerText();
+        await b.click();
+        if (!/^Next/.test(label)) break;
+        await page.waitForTimeout(450);
+      }
+      await expect.poll(async () => (await card())?.links.length ?? -1, { timeout: 15_000 }).toBe(0);
+      await page.waitForTimeout(800);
+      const afterSave = dump();
+      const d0 = before.docs["qp2l-request"] ?? {}; const d1 = afterSave.docs["qp2l-request"] ?? {};
+      const changed = [...new Set([...Object.keys(d0), ...Object.keys(d1)])].filter((k) => JSON.stringify(d0[k]) !== JSON.stringify(d1[k])).sort();
+      L.check("V13", "Set a send-by date · only the send-by date and its reminder changed on the query", JSON.stringify(changed) === '["expectedSendDate","sendReminderDate"]', `changed: ${changed.join(", ") || "nothing"}`);
+      const keysOf = (k: string) => [...new Set([...Object.keys(before.docs[k] ?? {}), ...Object.keys(afterSave.docs[k] ?? {})])].filter((f) => JSON.stringify(before.docs[k]?.[f]) !== JSON.stringify(afterSave.docs[k]?.[f]));
+      const others = Object.keys(before.docs).filter((k) => k !== "qp2l-request" && keysOf(k).length > 0).map((k) => `${k} (${keysOf(k).join(", ")})`);
+      L.check("V13", "Set a send-by date · no entry, feed row or other query changed", JSON.stringify(before.log) === JSON.stringify(afterSave.log) && JSON.stringify(before.feed) === JSON.stringify(afterSave.feed) && others.length === 0, `log ${JSON.stringify(afterSave.log["qp2l-request"])} · feed ${afterSave.feed.length} (was ${before.feed.length}) · other queries changed: ${others.join(", ") || "none"}`);
+      const due = String(d1.expectedSendDate ?? "").slice(0, 10); const rem = String(d1.sendReminderDate ?? "").slice(0, 10);
+      const days = (iso: string) => Math.round((new Date(iso).getTime() - new Date(new Date().toISOString().slice(0, 10)).getTime()) / 86_400_000);
+      L.check("V13", "Set a send-by date · the defaults saved: two weeks out, reminded the day before", days(due) === 14 && days(rem) === 13, `send by ${due} (+${days(due)}) · reminder ${rem} (+${days(rem)})`);
+      const sc = await card();
+      L.check("V13", "Set a send-by date · a request with a date offers no link, and the card counts to it", sc?.links.length === 0 && /expecting it by/.test(sc?.text ?? ""), `"${sc?.text}" · ${JSON.stringify(sc?.links)}`);
+
       /* over a year: Close leads; Remind me later hides itself; Keep tracking swaps the lead; the menu undoes it */
       await openId("qp2l-year");
       const y0 = await card();
+      L.check("V13", "over a year · the tray's first button is the panel's primary", (await tray("qp2l-year")) === `${y0?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y0?.lead}"`);
       L.check("V13", "over a year · Close leads the footer, Record a response beside it", y0?.lead === "Close query" && !!y0.doors.includes("Record a response"), `lead "${y0?.lead}" · ${y0?.doors.join(", ")}`);
       await page.locator(LINK("remindLater")).click();
       await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
@@ -496,6 +536,7 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y1 = await card();
       L.check("V13", "Keep tracking · Record a response leads instead of Close", y1?.lead === "Record a response" && !!y1.doors.includes("Close query"), `lead "${y1?.lead}" · ${y1?.doors.join(", ")}`);
+      L.check("V13", "Keep tracking · the tray's first button follows the panel's primary", (await tray("qp2l-year")) === `${y1?.lead}|row-act` && y1?.lead !== y0?.lead, `tray "${await tray("qp2l-year")}" · panel "${y1?.lead}" (was "${y0?.lead}")`);
       L.check("V13", "Keep tracking · the closing sentence and its links are gone", y1?.links.length === 0 && !/Closing it keeps/.test(y1?.text ?? "") && (y1?.text ?? "").length > 0, `${JSON.stringify(y1?.links)} · "${y1?.text}"`);
       L.check("V13", "Keep tracking · sets the existing flag", dump().queries["qp2l-year"]?.keep === true, JSON.stringify(dump().queries["qp2l-year"]));
       /* for good: it holds across a reload */
@@ -510,6 +551,7 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y3 = await card();
       L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && dump().queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify(dump().queries["qp2l-year"])}`);
+      L.check("V13", "Suggest closing again · the tray's first button is the panel's primary again", (await tray("qp2l-year")) === `${y3?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y3?.lead}"`);
       await page.locator(`${PANEL} [data-qcv="open-more"]`).click(); await page.waitForTimeout(300);
       const offered = await page.getByText("Suggest closing again", { exact: true }).count();
       L.check("V13", "Suggest closing again · is offered only while the flag is set", offered === 0, `${offered} in the menu`);
@@ -518,7 +560,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(40);
+    L.done(51);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {
