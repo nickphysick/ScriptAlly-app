@@ -133,9 +133,11 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
       expect(whole.split("tracking={qpTracking}").length - 1, "the one tracking body has one taker, the panel's card").toBe(1);
       return whole.slice(at, end);
     })();
-    expect(mount).toContain("<QueryTimeline");
-    /* §3 — the ⋯ opens the desk at the fork directly; onEntryFork is what makes it render at all */
-    expect(mount, "the ⋯ is off — corrections unreachable from the drawer").toContain("onEntryFork={(entry, trigger)");
+    /* RE-POINTED (Query panel v2 §B): the tracking body is the ledger, a second dress for `buildTimelineRows`'
+       own rows. The law survives: the ··· is wired, so corrections are reachable, and the open entry is marked. */
+    expect(mount).toContain("<QueryLedger");
+    expect(mount).toContain("rows={buildTimelineRows(eventsForRail, activeQuery, activeAgent)}");
+    expect(mount, "the ··· is off — corrections unreachable from the panel").toContain("onFork={(entry, trigger)");
     expect(mount, "the desk's ring is unwired").toContain("highlightId={correcting?.entry.activityId");
   });
 
@@ -166,9 +168,12 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     expect([...desk.matchAll(/editActivity\(/g)].length, "an editActivity call escaped the desk").toBe(2);
   });
 
-  it("the ⋯ and the dotted method both open the desk at the fork", () => {
-    expect(src).toMatch(/onEntryFork=\{\(entry, trigger\)[\s\S]{0,220}step: "fork"/);
-    expect(src).toMatch(/onEditSendMethod=\{sentActivity[\s\S]{0,320}step: "fork"/);
+  it("the ··· opens the desk at the fork; the dotted method is retired on the panel (Query panel v2 §B: the ··· is the one trigger)", () => {
+    expect(src).toMatch(/onFork=\{\(entry, trigger\)[\s\S]{0,220}step: "fork"/);
+    const at = src.indexOf("const qpTracking = ");
+    const end = src.indexOf("const qpAgentTab = ", at);
+    expect(at).toBeGreaterThan(-1); expect(end).toBeGreaterThan(at);
+    expect(src.slice(at, end), "a second correction trigger on the panel's ledger").not.toContain("onEditSendMethod=");
     /* the withdrawn shortcuts are GONE, not merely unwired */
     for (const dead of ["cycleSendMethod", "openRungDateEdit", "toggleQueryMaterial", "setPanelMatsEdit"]) {
       expect(src, `${dead} survives — a second editing route beside the fork`).not.toContain(dead);

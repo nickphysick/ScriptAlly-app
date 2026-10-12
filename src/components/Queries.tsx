@@ -176,7 +176,10 @@ import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
-import { SentBox, SentChip, FromPackageTag } from "./queryActions/SentHow";
+import { SentBox, SentChip, FromPackageTag, sentView, ordinal } from "./queryActions/SentHow";
+import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
+/** "CORRECTED 28 SEP · WAS…" → a sentence: the ledger says nothing in capitals. */
+const sentenceCase = (t: string): string => { const l = t.toLowerCase(); return l ? l[0].toUpperCase() + l.slice(1) : l; };
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
@@ -5266,61 +5269,40 @@ export const Queries: React.FC<{
                 const queriedAct = (trackingEvents as { id: string; type?: string }[]).find((e) => (e.type as QueryStatus) === QueryStatus.QUERIED);
                 /* item 2 (clean-up pass, 28 Sep): a requery says why, above the materials, and the link
                    opens the earlier query in this same view */
+                /* Query panel v2 §B — what went, as the ledger's slip: the same frozen record (`sentView`), in words */
+                const sv = sentView(activeQuery, packages);
+                const slipDetail = [
+                  sv.how === "package" ? `${ordinal(sv.edition ?? 1)} edition${sv.retired ? ", since retired" : ""}` : null,
+                  sv.how === "individual" && sv.basedOn && sv.name ? `based on the ${sv.name} package` : null,
+                  sv.how === "unrecorded" && sv.pieces.length ? "what the query lists; what went was not recorded" : null,
+                  sv.corrected ? sentenceCase(sv.corrected) : null,
+                ].filter(Boolean).join(" \u00b7 ") || null;
                 const sentExtra = (
                   <SendExtras requery={requeryLine(activeQuery, queries)} onOpenQuery={(id) => pickRow(id)}>
-                    <SentBox q={activeQuery} packages={packages}
+                    <LedgerSlip how={sv.how} name={sv.how === "package" ? sv.name : null} detail={slipDetail}
+                      items={sv.pieces.map((pc) => (pc.value ? `${pc.label} \u00b7 ${pc.value}` : pc.label))}
                       onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
-                      onAddWhatSent={queriedAct && DRAWER_LIVE.edit ? () => openQueryDrawer({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
+                      onAdd={queriedAct && DRAWER_LIVE.edit ? () => stepRow({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
                   </SendExtras>
                 );
-                const requestExtra = <FromPackageTag q={activeQuery} packages={packages} />;
-                /**
-                 * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
-                 * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
-                 * rung is a real activity — a synthesised root (dateSent with no Queried doc) has
-                 * no record to correct, and TimelineRows' own convention renders plain text when
-                 * the handler is absent rather than a dead control.
-                 */
-                const sentActivity = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED);
                 return (
-                  /* the drawer's own rhythm for the shared renderer — the ref's 19px titles; a
-                     token override at the use site, never an edit to TimelineRows */
-                  <QueryTimeline
-                    query={activeQuery}
-                    agent={activeAgent}
-                    events={eventsForRail}
-                    primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
-                    ghostId={proposedAny ? "__ghost" : null}
-                    freshId={deskFreshId}
-                    /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
-                       Edit/Delete menu (append is its second branch, remove lives on the edit
-                       form), so the two-item hop is gone. The trigger rides a ref for the notch
-                       and the focus return. */
-                    onEntryFork={(entry, trigger) => {
+                  <QueryLedger
+                    rows={buildTimelineRows(eventsForRail, activeQuery, activeAgent)}
+                    nowMs={Date.now()}
+                    sendMethod={activeQuery.sendMethod}
+                    revisionRound={activeQuery.revisionRound}
+                    /* the ··· opens the correction fork with the entry and its own button, as the timeline's ⋯ did */
+                    onFork={(entry, trigger) => {
                       setDeskVerb(null); /* one desk at a time */
                       correctingTriggerRef.current = trigger;
                       setCorrecting({ step: "fork", entry });
                     }}
                     highlightId={correcting?.entry.activityId ?? null}
+                    freshId={deskFreshId}
                     confirmFor={entryDel?.activityId ?? null}
                     confirmNode={entryConfirmNode}
-                    /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
-                       that asked (the same anchor contract as the fork's ⋯). The modal it used to
-                       open survives only as the mobile surface below. */
-                    onNudge={(anchor) => openDeskVerb("nudge", anchor)}
-                    onSetExpectedDate={(iso) => commitExpectedDate(iso)}
-                    /* ⚠️ §4 — the offer tray's close joins the quick pair. It was the desk, beside
-                       its "Nudge now" neighbour; Nudge STAYS on the desk (it composes a draft) and
-                       close does not. One verb, one behaviour, wherever it is pressed — two close
-                       controls that opened different surfaces would be the fork this section is
-                       correcting, wearing a second face. */
-                    onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
-                    onEditSendMethod={sentActivity ? (anchor) => {
-                      const entry = rungEntry(sentActivity.id);
-                      if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
-                    } : undefined}
                     sentExtra={sentExtra}
-                    requestExtra={requestExtra}
+                    fromPackage={sv.how === "package" ? sv.name : null}
                   />
                 );
               })()) : null;

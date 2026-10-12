@@ -56,7 +56,9 @@ describe("⚠️ the editor is NOT gated on status — that is what makes the ex
     /* the mount: `sentExtra` is assigned unconditionally — no turn/status test guards it */
     /* retargeted (clean-up pass item 2, 28 Sep): the SentBox now sits inside SendExtras, beneath the
        requery line — still assigned unconditionally, still no status test between them */
-    expect(code).toMatch(/const sentExtra = \(\n\s+<SendExtras [^\n]*\n\s+<SentBox/);
+    /* retargeted again (Query panel v2 §B): the panel's ledger draws what went as `LedgerSlip`, from the same
+       `sentView`. The law is unchanged: assigned unconditionally, no status test between the two. */
+    expect(code).toMatch(/const sentExtra = \(\n\s+<SendExtras [^\n]*\n\s+<LedgerSlip/);
   });
 
   it("⚠️ the two halves reconcile: what the task list drops, the pane still reaches", () => {
