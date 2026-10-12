@@ -112,7 +112,9 @@ const courtRows = async (page: Page, court: string): Promise<string[]> => {
    read a panel that had not mounted ("Cannot set properties of null"). The mounted state is the panel carrying the
    row's id; the short settle after it is for the swap's paint. */
 const clickRow = async (page: Page, id: string) => {
-  await page.locator(`${ROW}[data-qid="${id}"] .qcw-agt`).click();
+  /* the page is dimmed for a moment after a step is left (Query panel v2 §D): a row under the scrim cannot be pressed */
+  await page.waitForFunction(() => !document.querySelector('[data-side-scrim][data-on="true"]'), null, { timeout: 10_000 }).catch(() => {});
+  await page.locator(`${ROW}[data-qid="${id}"] .qcw-agt`).click({ timeout: 15_000 });
   await expect(page.locator(`${PANEL}[data-qp-id="${id}"]`), `the panel did not become ${id}'s`).toBeVisible({ timeout: 10_000 });
   await page.waitForTimeout(300);
 };
