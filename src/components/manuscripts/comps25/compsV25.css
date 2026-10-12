@@ -32,7 +32,6 @@
 .ws-app.sheet-wide .cv-group > .cv-panel.hp3.hp3 { padding: 34px 44px 36px 48px; }
 .cv-panel .hp3-txt .hp3-sub { margin-top: 14px; max-width: none; }
 .ws-app.sheet-wide .cv-panel .hp3-txt .hp3-sub { margin-top: 16px; }
-.cv-panel.hp3 .hp3-txt .hp3-sub i.cv-ms { font-family: var(--sp-type) !important; font-style: normal; font-weight: 400; }
 .cv-panel .hp3-art { margin-right: 12px; }
 .cv-panel .hp3-art img { display: block; height: 100%; width: auto; }
 

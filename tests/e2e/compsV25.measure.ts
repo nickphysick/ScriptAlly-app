@@ -78,6 +78,7 @@ test.beforeAll(() => { mkdirSync(DIR, { recursive: true }); seed("--empty"); });
 test.afterAll(() => { if (!process.env.CV25_KEEP) seed("--restore"); });
 
 test.describe("Comparable titles v25", () => {
+  /* comps v27: the h1 is "Comparable titles" on one line, and the subline no longer names the manuscript */
   test("B1 · header: the title panel, no number, the drawing 196 tall", async ({ page }) => {
     const L = new Ledger("B1");
     for (const vp of SIZES) {
@@ -94,20 +95,20 @@ test.describe("Comparable titles v25", () => {
           numbers: p.querySelectorAll('[data-hp3-part="number"]').length,
           lines: Math.round(h1.getBoundingClientRect().height / parseFloat(getComputedStyle(h1).lineHeight)),
           face: getComputedStyle(h1).fontFamily, art: w.__box(art), img: w.__box(img), panel: w.__box(p),
-          sub: p.querySelector('[data-cv="panel-sub"]')?.textContent ?? "", msFace: getComputedStyle(p.querySelector('[data-cv="panel-ms"]')!).fontFamily,
+          sub: p.querySelector('[data-cv="panel-sub"]')?.textContent ?? "", ms: p.querySelectorAll('[data-cv="panel-ms"]').length,
           add: p.querySelector('[data-cv="add"]')?.textContent, see: p.querySelector('[data-cv="see-all"]')?.textContent,
           wide: !!document.querySelector(".ws-app.sheet-wide"),
         };
       });
       const w = `${vp.width}`;
       L.check(`${w} title panel`, r.kind === "title" && r.bg === "rgb(45, 58, 80)", `${r.kind} · ${r.bg}`);
-      L.check(`${w} h1`, r.name === "Every comp, and where it went", `"${r.name}"`);
+      L.check(`${w} h1`, r.name === "Comparable titles", `"${r.name}"`);
       L.check(`${w} no number`, r.numbers === 0, `${r.numbers} number part(s)`);
-      L.check(`${w} two lines, Special Elite`, r.lines === 2 && /Special Elite/.test(r.face), `${r.lines} lines · ${r.face}`);
+      L.check(`${w} one line, Special Elite`, r.lines === 1 && /Special Elite/.test(r.face), `${r.lines} line(s) · ${r.face}`);
       L.check(`${w} compact sheet`, r.wide === false, `sheet-wide ${r.wide}`);
       L.check(`${w} drawing 196`, !!r.art && near(r.art.h, 196) && !!r.img && near(r.img.h, 196), `slot ${r.art?.h} · image ${r.img?.h}`);
       L.check(`${w} drawing inside the panel`, !!r.img && r.img.y >= r.panel.y && r.img.b <= r.panel.b && r.img.r <= r.panel.r, `image ${r.img?.y}–${r.img?.b} in ${r.panel.y}–${r.panel.b}`);
-      L.check(`${w} subline`, r.sub === "Log the comps each letter names, and see which agents saw them, for Murphy's Day Out." && /Special Elite/.test(r.msFace), `"${r.sub}" · ${r.msFace}`);
+      L.check(`${w} subline`, r.sub === "Build your comps library, add to query letters, and track what’s working." && r.ms === 0, `"${r.sub}" · ${r.ms} manuscript title(s)`);
       L.check(`${w} buttons`, r.add === "+ Add a comp" && r.see === "See all comps", `${r.add} · ${r.see}`);
     }
     L.done(18);

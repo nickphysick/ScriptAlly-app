@@ -27,7 +27,7 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /** §0.3, as filled in: the pages whose header leads with a count, and the pages that lead with a title. */
 /* Query Centre v137 §A: /queries is a TITLE page now ("Every query, in one place"), so H2, H3 and H7 no longer read it
    (tests/e2e/RETIRED-query-centre-v137.md); QC137 A1 holds its header. */
-/* Comparable titles v25 §B: /manuscripts/comps is a TITLE page now ("Every comp, and where it went"), so H2, H3 and H7 no
+/* Comparable titles v25 §B: /manuscripts/comps is a TITLE page now ("Comparable titles" since v27), so H2, H3 and H7 no
    longer read it (tests/e2e/RETIRED-comps-v25.md); CV25 B1 holds its header. */
 export const NUMBER = ["/agents", "/manuscripts/packages", "/todo"] as const;
 export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar", "/todo/noteboard"] as const;

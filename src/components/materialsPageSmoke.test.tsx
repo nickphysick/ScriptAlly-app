@@ -159,8 +159,8 @@ describe("/manuscripts/comps renders", () => {
   it("…and that render is scoped to the active manuscript, not the empty branch", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
-    /* comps v25: the title panel's subline names the active manuscript, and the library lists its comp */
-    expect(html).toContain('data-cv="panel-ms"');
+    /* comps v27: the subline no longer names the manuscript; the library listing its comp is what scopes it */
+    expect(html).not.toContain('data-cv="panel-ms"');
     expect(html).toContain("The Smoke Comp");
     expect(html).not.toContain("No manuscript to compare yet");
   });

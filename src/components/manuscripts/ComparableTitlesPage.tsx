@@ -59,7 +59,9 @@ export const COMPS_ROUTE = "/manuscripts/comps";
 export const COMPS_FULL_KEY = "sa.compsFull";
 /** The empty state's heading. */
 export const COMPS_EMPTY_HEADING = "No comp titles yet";
-export const COMPS_TITLE = "Every comp, and where it went";
+export const COMPS_TITLE = "Comparable titles";
+/** The header's subline, the same with comps and without (comps v27). */
+export const COMPS_SUB = "Build your comps library, add to query letters, and track what’s working.";
 /** The header's drawing: the file is the disc (520×470), so it takes no white disc of its own. */
 export const COMPS_HEADER_ART = { src: "/images/comps/comps-header-disc.webp", version: "1fa669c9", width: 520, height: 470 } as const;
 
@@ -304,9 +306,9 @@ export const ComparableTitlesPage: React.FC<{
   const header = (
     <PanelHeader
       kind="title" className="cv-panel" attrs={{ "data-cv": "panel", "data-own-header": "" }}
-      title={<span aria-label={COMPS_TITLE}><span aria-hidden="true">Every comp,<br />and where it went</span></span>}
+      title={COMPS_TITLE}
       sub={activeMs || loading
-        ? <span data-cv="panel-sub">Log the comps each letter names, and see which agents saw them{activeMs ? <>, for <i className="cv-ms" data-cv="panel-ms">{activeMs.title}</i></> : null}.</span>
+        ? <span data-cv="panel-sub">{COMPS_SUB}</span>
         : <span data-cv="panel-sub">Add a manuscript to build its comp list.</span>}
       loading={loading}
       primary={activeMs || loading ? { label: full ? "This list is full" : "+ Add a comp", onClick: openAdd, disabled: full || loading, btnRef: primaryRef, attrs: { "data-cv": "add" } } : undefined}
