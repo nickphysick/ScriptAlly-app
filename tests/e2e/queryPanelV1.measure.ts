@@ -469,13 +469,14 @@ test.describe("Query panel v1", () => {
           const end = dump();
           const ids = (x: { id: string }[]) => x.map((e) => e.id).join();
           /* ⚠️ WHAT THE DELETE-ENTRY PRIMITIVE PUTS BACK, AND WHAT IT DOES NOT (found by this lock, 11 Oct). The status, the
-             stage dates and both logs return. Two derived fields do not: `responseDeadline` (cleared when the request
-             was recorded) stays absent, and `expectedSendDate` (set by it) stays on the query. Neither is the panel's
+             stage dates and the query's log return. Two fields the response wrote do not: `expectedSendDate` and
+             `sendReminderDate` stay on the query. (`responseDeadline` was reported here at first; that was the
+             fixture's — see seedQp1Save.mjs.) Neither is the panel's
              doing, and data writes are out of this pack's scope — so the lock holds what returns, and RECORDS the two
              that do not rather than passing over them. The journey's own Undo (a snapshot) restores both. */
           const moved = ["status", "dateSent", "fullRequestedDate", "partialRequestedDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
           L.check("P13", `${w} undone: the status and the stage dates are as they started`, end.query?.status === "Queried" && moved.length === 0, `status ${end.query?.status}; differing: ${moved.join() || "none"}`);
-          const left = ["responseDeadline", "expectedSendDate", "sendReminderDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
+          const left = ["expectedSendDate", "sendReminderDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
           console.log(`  P13 ${w}: NOT put back by the delete-entry primitive: ${left.join(", ") || "nothing"}`);
           L.check("P13", `${w} undone: the query's own log holds the entries it started with`, ids(end.log) === ids(before.log), `log ${ids(end.log)}`);
           /* ⚠️ …and the FEED's row for the deleted entry is sometimes still there six seconds later (seen in two runs of

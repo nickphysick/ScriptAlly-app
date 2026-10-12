@@ -71,7 +71,10 @@ b.set(doc(db, "users", uid, "agents", AG), {
 });
 b.set(doc(db, "users", uid, "queries", Q), {
   id: Q, userId: uid, agentId: AG, manuscriptId: MS, dateSent: iso(SENT), status: "Queried", sendMethod: "Email",
-  responseDeadline: iso(SENT - 56), personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
+  /* ⚠️ NO `responseDeadline`: it is a retired stored field. The app's expected-date migration drops an
+     agency-derived one on load, so a fixture that writes it loses it the moment the page opens — which P13 first
+     read as the delete-entry flow failing to put it back. */
+  personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
 });
 const act = `${PREFIX}act-sent`;
 b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MS, activityType: "Query Sent", description: "Query sent to Petra Nwosu at Nwosu & Hale", date: iso(SENT), details: "Sent via Email", resultingStatus: "Queried" });
