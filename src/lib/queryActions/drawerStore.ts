@@ -59,7 +59,9 @@ export interface OpenRequest {
    * Query panel v1 — opened from the query's side panel: the journey's form steps INTO that panel (its slot),
    * with "← Back to query", instead of opening as a drawer of its own. Carries what the step's frame names.
    */
-  panel?: { name: string; agency: string; first: string };
+  panel?: { name: string; agency: string; first: string; /** false: there is no query behind the step to go back to (the picker opened with nothing open) */ back?: boolean };
+  /** Query panel v2 §E — the picker lists this query first, under "The query you had open". */
+  hadOpen?: string;
   /**
    * The docked card is told when to step aside and when to come back: true while the drawer is on
    * screen, false the moment it is not — saved, cancelled, parked, or hidden by a failed save — so
@@ -122,6 +124,21 @@ export function onDrawerLeaveAsk(f: () => void): () => void {
   return () => { if (leaveAsk === f) leaveAsk = null; };
 }
 export function askDrawerToLeave(): void { leaveAsk?.(); }
+
+/**
+ * Query panel v2 §E — THE PICKER CHOSE A QUERY. The open request takes the id in place (it is the same journey,
+ * continuing), and whoever hosts the panel is told, so the panel can become that query's.
+ */
+type PickListener = (queryId: string) => void;
+const pickListeners = new Set<PickListener>();
+export function noteDrawerPick(queryId: string): void {
+  if (current) current.queryId = queryId;
+  for (const l of [...pickListeners]) l(queryId);
+}
+export function subscribeDrawerPick(l: PickListener): () => void {
+  pickListeners.add(l);
+  return () => { pickListeners.delete(l); };
+}
 
 export function closeQueryDrawer(): void {
   current = null;

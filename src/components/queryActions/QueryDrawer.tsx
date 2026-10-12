@@ -22,6 +22,7 @@ import {
   closeQueryDrawer, onDrawerLeaveAsk, currentClash, currentDrawerRequest, currentParked, discardParked, parkQueryDrawer, restoreParked,
   showUndoBar, subscribeDrawer, subscribeParked,
   type DrawerMode, type DrawerPreset, type OpenRequest, type ParkedJourney,
+  noteDrawerPick,
 } from "../../lib/queryActions/drawerStore";
 import { journeyDoing, journeyTitle } from "../../lib/queryActions/parking";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
@@ -143,6 +144,8 @@ export function QueryDrawer() {
     setGen((g) => g + 1);
   }, []);
   const pickQuery = useCallback((queryId: string) => {
+    /* §E — the store's request takes the id too, and the panel's host hears it */
+    noteDrawerPick(queryId);
     setReq((r) => (r ? { ...r, queryId } : r));
     setGen((g) => g + 1);
   }, []);
@@ -289,7 +292,13 @@ export function QueryDrawer() {
 
   const inPanel = !!req?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
-  const panelFrame = inPanel && req?.panel ? { first: req.panel.first, title: panelStepWords(req.mode, pq?.status, req.panel.first).title } : null;
+  /* §E — a picked query names the head: its agent's first name, whatever the request opened with */
+  const pa = pq ? db.agents.find((a) => a.id === pq.agentId) : undefined;
+  const pfirst = pq ? ((pa?.name || "").trim().split(/\s+/)[0] ?? "") : (req?.panel?.first ?? "");
+  const panelFrame = inPanel && req?.panel ? {
+    first: pfirst, back: pq ? true : req.panel.back,
+    title: req.mode === "resp" && !req.queryId ? "Who replied?" : panelStepWords(req.mode, pq?.status, pfirst).title,
+  } : null;
 
   return (
     <>

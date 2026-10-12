@@ -43,6 +43,11 @@ export const SidePanel: React.FC<{
     document.body.classList.add("spanel-open");
     return () => { document.body.classList.remove("spanel-open"); };
   }, []);
+  /* …and whether the page is dimmed behind it: the shell's bar rises over the panel only while it is not */
+  useEffect(() => {
+    document.body.classList.toggle("spanel-dim", dim);
+    return () => { document.body.classList.remove("spanel-dim"); };
+  }, [dim]);
   return createPortal(
     <>
     {/* always mounted while the panel is, so it can fade both ways; inert and clear until an action runs */}

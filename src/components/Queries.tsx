@@ -138,8 +138,8 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
-import { QueryPanelHost } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, releaseRightPanel, subscribeQueryPanel, subscribeRightPanel } from "../lib/queryPanelStore";
+import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -197,7 +197,7 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, type OpenRequest } from "../lib/queryActions/drawerStore";
+import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
@@ -2335,11 +2335,35 @@ export const Queries: React.FC<{
   const [, bumpStep] = useState(0);
   useEffect(() => {
     const p = pendingStepRef.current;
-    if (!p || !p.queryId) return;
-    if (!document.querySelector(`[data-qp="panel"][data-qp-id="${CSS.escape(p.queryId)}"] [data-side-slot]`)) return;
+    if (!p) return;
+    /* a step for a query waits for THAT query's panel; the picker (no query yet) for any panel */
+    const sel = p.queryId ? `[data-qp="panel"][data-qp-id="${CSS.escape(p.queryId)}"] [data-side-slot]` : '[data-qp="panel"] [data-side-slot]';
+    if (!document.querySelector(sel)) return;
     pendingStepRef.current = null;
     openQueryDrawer(p);
   });
+  /**
+   * Query panel v2 §E — "RECORD A RESPONSE" FROM THE SHELL'S MENU OPENS THE PANEL AT THE PICKER. With a query open
+   * the picker steps into its panel and lists it first; with none, the panel opens for the picker alone
+   * (`picking`), and becomes the chosen query's when one is picked.
+   */
+  const [picking, setPicking] = useState(false);
+  const openIdRef = useRef<string | null>(null);
+  const queriesRef = useRef<Query[]>([]);
+  const agentsRef = useRef<Agent[]>([]);
+  useEffect(() => subscribeResponsePicker(() => {
+    const had = openIdRef.current;
+    const q = had ? queriesRef.current.find((x) => x.id === had) : undefined;
+    const ag = q ? agentsRef.current.find((a) => a.id === q.agentId) : undefined;
+    pendingStepRef.current = { mode: "resp", hadOpen: q?.id, panel: { name: "", agency: "", first: (ag?.name || "").trim().split(/\s+/)[0] ?? "", back: !!q } };
+    setPicking(true);
+    bumpStep((n) => n + 1);
+  }), []);
+  /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
+  const pickOpenRef = useRef<(id: string) => void>(() => {});
+  useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
+  /* the picker's panel goes when its journey does, unless a query took it over */
+  useEffect(() => subscribeDrawer((r) => { if (!r) setPicking(false); }), []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -2786,6 +2810,14 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  /* §E — what the picker's listeners read: the query open now, and how a pick opens the panel on it */
+  openIdRef.current = cardQueryId ?? null;
+  queriesRef.current = queries;
+  agentsRef.current = agents;
+  pickOpenRef.current = (id: string) => {
+    if (id === cardQueryId) return;
+    if (routeActive && !extPanel) onOpenQuery?.(id); else openQueryPanel(id, extPanel?.from ?? "other");
+  };
   /**
    * §1 (v65.6) — CLOSING THE CARD IS ONE ACT, whichever door opened it. The ✕, Escape and a press
    * on the scrim all come here: a second path is a second behaviour, and this card is reachable
@@ -6419,7 +6451,8 @@ export const Queries: React.FC<{
                   onAppend={() => {
                     setCorrecting(null);
                     /* v1.1 — what happened next is a response, and responses finish in the drawer. */
-                    if (activeQuery && DRAWER_LIVE.resp) { openQueryDrawer({ mode: "resp", queryId: activeQuery.id }); return; }
+                    /* Query panel v2 §E — in the panel, not a drawer of its own */
+                    if (activeQuery && DRAWER_LIVE.resp) { stepRow({ mode: "resp", queryId: activeQuery.id }); return; }
                     setIsRecordResponseFocusFormOpen(true);
                   }}
                   onDelete={() => onDeleteEntry(correcting.entry)}
@@ -7035,9 +7068,12 @@ export const Queries: React.FC<{
           {/* Query panel v1 — THE OPEN QUERY IS A SIDE PANEL: 8px in on the right, no scrim, the list live
               beside it. One mount for every door (a row, `?q`, a Birds-eye bar, another page through the
               store). The centred modal and the under-900 drawer it replaces are gone. */}
-          {qcOpenCardNode && cardQueryId && (
-            <QueryPanelHost id={cardQueryId} from={extPanel ? extPanel.from : "queries"} step={(qaOpen && qaPanel) || !!correcting || !!deskVerb} onClose={closeQueryCard}>
-              {qcOpenCardNode}
+          {/* §E — ONE host element whether it holds a query or only the picker, so a pick changes its contents
+              and never the panel: the journey's form is portalled into this element's slot. */}
+          {((qcOpenCardNode && cardQueryId) || picking) && (
+            <QueryPanelHost id={qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel ? extPanel.from : "queries"}
+              step={(qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))} onClose={closeQueryCard}>
+              {qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
             </QueryPanelHost>
           )}
           </>

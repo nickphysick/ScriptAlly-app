@@ -116,9 +116,11 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
     expect(page.split("agentTab={qpAgentTab").length - 1).toBe(1);
     for (const c of ["const qpTracking = ", "const qpAgentTab = ", "const qpNotesTab = "]) expect(page.split(c).length - 1, c).toBe(1);
   });
-  it("the panel is mounted once, for a chosen query only, and the modal and the narrow drawer are gone", () => {
+  /* RE-POINTED (Query panel v2 §E): the one host is also mounted for the response picker alone ("Record a
+     response" from the shell's menu with nothing open). The law is unchanged: ONE host element. */
+  it("the panel is mounted once, for a chosen query or the response picker, and the modal and the narrow drawer are gone", () => {
     expect(page.split("<QueryPanelHost").length - 1).toBe(1);
-    expect(page).toContain("{qcOpenCardNode && cardQueryId && (");
+    expect(page).toContain("{((qcOpenCardNode && cardQueryId) || picking) && (");
     expect(page).not.toContain("<QcQueryModal");
     expect(page).not.toContain("qcDocked === false && (");
   });

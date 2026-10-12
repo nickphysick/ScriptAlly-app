@@ -17,6 +17,9 @@ import { SidePanel } from "../shell/SidePanel";
 import { askDrawerToLeave, currentDrawerRequest } from "../../lib/queryActions/drawerStore";
 import "./queryPanelHost.css";
 
+/** The panel's id while it holds only the response picker and no query yet (Query panel v2 §E). */
+export const PICKER_PANEL_ID = "__pick";
+
 export const QueryPanelHost: React.FC<{
   id: string;
   /** which page opened it: "queries" (the list, `?q`), or another page through the store */
@@ -44,7 +47,9 @@ export const QueryPanelHost: React.FC<{
   const first = useRef(true);
   useEffect(() => {
     if (first.current) { first.current = false; return undefined; }
-    if (currentDrawerRequest()?.panel) askDrawerToLeave();
+    /* §E — the panel became the query its own journey is for (the picker chose it): that journey stays */
+    const r = currentDrawerRequest();
+    if (r?.panel && r.queryId !== id) askDrawerToLeave();
     return undefined;
   }, [id]);
   useEffect(() => () => { if (currentDrawerRequest()?.panel) askDrawerToLeave(); }, []);
