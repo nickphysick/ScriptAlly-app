@@ -25,9 +25,9 @@
  */
 import React from "react";
 import { PanelHeader } from "../../shell/PanelHeader";
-import { FACE_ORDER, FACE_WORDS, type FacesModel } from "../../../lib/contactFaces";
 import "../../shell/headerPanel.css";
 import "./contactV15.css";
+import "./contactV16.css";
 
 /** the header's drawing: a flying hawk carrying an agent card, facing left, transparent */
 export const CONTACT_HEADER_HAWK = { src: "/images/contact/contact-header-hawk.png", width: 576, height: 383 };
@@ -50,32 +50,38 @@ export const CONTACT_BANNER_LINE = "Your agent will be the one who champions you
 /** "{N} agents on file" — one agent is "1 agent on file" */
 export const onFileTitle = (n: number): string => `${n} agent${n === 1 ? "" : "s"} on file`;
 
+/** v16 §A — the header's fixed title, broken after the comma, and its accessible name */
+export const CONTACT_HEADER_TITLE = "Every agent, in one place";
+/** v16 §A — the disc's drawing: the hawk carrying an agent card, on its own ground (the sheet draws the disc) */
+export const CONTACT_DISC_HAWK = { src: "/images/contact/contact-disc-hawk.webp", version: 1 };
+
+/**
+ * Contact list v16 §A — THE TITLE PANEL (the shared panel header's title kind, as Query Centre v137's). The hero
+ * number, the stamp and the faces are gone from here: the "At a glance" strip carries them.
+ *
+ * ⚠️ THE SUBLINE NAMES THE BOOK ONLY WHEN ONE IS IN SCOPE; with none it says "your agents" and names nothing.
+ * ⚠️ THE DISC IS THE SHEET'S (contactV16.css), NOT THE FILE'S: 236 (196), #f4f1ec, clipping a drawing 118% of its
+ *    width, shifted 6% left. `aria-hidden` (the panel's art slot).
+ */
 export const ContactOpenHeader: React.FC<{
-  /** the living count; null while the page settles (the title holds its shape, painted over) */
-  count: number | null;
+  /** true while the page settles: the panel holds its shape and its buttons are inert */
+  loading: boolean;
+  /** the manuscript in scope, or null */
+  msTitle: string | null;
   addRef?: React.Ref<HTMLButtonElement>;
   onAdd: () => void;
-  /** scrolls to the list and puts the caret in its Find field (v15.2 §5) */
-  onViewAll: () => void;
-  /** the faces and their key (v15.3 §3); null while the page settles */
-  faces?: FacesModel | null;
-  /** a disc opens that agent's card */
-  onOpenAgent?: (id: string) => void;
-}> = ({ count, addRef, onAdd, onViewAll, faces = null }) => {
-  const loading = count === null;
-  const n = count ?? 0;
-  /* HEADER v3 (10 Oct): the shared panel header, as a NUMBER page — the count, "agents on file", the page's intro,
-     the two buttons and the hawk. The stamp and the faces row are gone from every header; the faces' three counts
-     stay as one sentence a screen reader reads, and the faces data still feeds the desk. */
-  return (
-    <PanelHeader
-      kind="number" className="cl15-hd" attrs={{ "data-cl15": "header", "data-own-header": "" }}
-      number={loading ? null : n} words={n === 1 && !loading ? "agent on file" : "agents on file"} loading={loading}
-      sub={CONTACT_HEADER_SUB}
-      said={!loading && faces ? <span data-cl15="faces-said">{FACE_ORDER.filter((st) => faces.counts[st] > 0).map((st) => `${faces.counts[st]} ${FACE_WORDS[st].key}`).join(", ")}.</span> : undefined}
-      primary={{ label: "+ Add an agent", onClick: onAdd, btnRef: addRef, attrs: { "data-cl15": "add" } }}
-      secondary={{ label: "View all agents", onClick: onViewAll, attrs: { "data-cl15": "view-all" } }}
-      art={<img data-cl15="header-art" src={CONTACT_HEADER_HAWK.src} width={CONTACT_HEADER_HAWK.width} height={CONTACT_HEADER_HAWK.height} alt="" />}
-    />
-  );
-};
+  /** opens Discover; omitted when the route cannot be taken, and the button is then not drawn */
+  onDiscover?: () => void;
+}> = ({ loading, msTitle, addRef, onAdd, onDiscover }) => (
+  <PanelHeader
+    kind="title" className="cl15-hd cl16-hd" attrs={{ "data-cl15": "header", "data-cl16": "header", "data-own-header": "" }}
+    title={<span aria-label={CONTACT_HEADER_TITLE}><span aria-hidden="true">Every agent,<br />in one place</span></span>}
+    sub={<span data-cl16="sub">{msTitle
+      ? <>Find, compare and keep track of the agents for <i className="cl16-ms" data-cl16="ms">{msTitle}</i>.</>
+      : "Find, compare and keep track of your agents."}</span>}
+    loading={loading}
+    primary={{ label: "+ Add an agent", onClick: onAdd, btnRef: addRef, attrs: { "data-cl15": "add" } }}
+    secondary={onDiscover ? { label: "Discover agents", onClick: onDiscover, attrs: { "data-cl16": "discover" } } : undefined}
+    art={<span className="cl16-disc" data-cl16="disc"><img data-cl16="disc-art" alt="" src={`${CONTACT_DISC_HAWK.src}?v=${CONTACT_DISC_HAWK.version}`} /></span>}
+  />
+);

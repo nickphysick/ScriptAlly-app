@@ -79,7 +79,6 @@ import { notifyPrefs } from "../../lib/accountPrefs";
 import { takesBook } from "../../lib/genreMatch";
 import { SubmissionStatus } from "../../types";
 import { ContactDesk } from "./contact/ContactDesk";
-import { facesModel } from "../../lib/contactFaces";
 import { deskModel } from "../../lib/contactDesk";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -644,13 +643,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     agents, queries, msId: scoped?.id ?? null, now: new Date(nowMs),
     hk: { complete: hk.complete, total: hk.total, gaps: hk.items.length, gapAgents: hk.gapAgents },
   }), [agents, queries, scoped, nowMs, hk]);
-  /* v15.3 §3 — the header's faces and key, over the unfiltered agents and through the desk's own status derivation */
-  const faces = useMemo(() => facesModel(agents, queries, scoped?.id ?? null), [agents, queries, scoped]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
-  /* v15 §2: the open header's title is the living count — the LivingHeaders review aid's override wins in dev */
-  const headerCount = pageState === "list" ? (lhOverride ?? agents.length) : null;
-
   /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
      the snapshot first, the reply-time deadline fan-out in the same batch, the data-quality flag, and
      a snapshot Undo. In the lab the card's sandbox writer stands in, with the inverse patch as Undo. */
@@ -843,17 +837,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setSearch("");
   }, [YOU_FILTERS]);
   /* "See all N in the list": the ready-only mode, then the list scrolled into view. */
-  /* v15.2 §5 — "View all agents": the page scrolls until the list's bar is 24 under the scroller's top (smoothly, or
-     at once under reduced motion), and the caret goes to Find without a second scroll. */
-  const viewAllAgents = useCallback(() => {
-    const ws = wsRef.current;
-    const bar = ws?.querySelector<HTMLElement>('[data-cl14="bar"]') ?? ws;
-    const sc = bar?.closest<HTMLElement>(".wpg-scroll");
-    if (!bar || !sc) return;
-    const top = sc.scrollTop + bar.getBoundingClientRect().top - sc.getBoundingClientRect().top - 24;
-    sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    ws?.querySelector<HTMLInputElement>('[data-cl13-find="banner"] input')?.focus({ preventScroll: true });
-  }, []);
   const seeAllReady = useCallback(() => {
     setPillSet("ready");
     window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
@@ -961,12 +944,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <div className="clv-group" data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
-        {/* v15 §2 — THE OPEN HEADER (page-local, ruling 8): the count as the title, one line, two buttons, and the
-            flying hawk to their right, centred against each other over a hairline. It renders over a LIST only
-            (and while settling, painted over): the blank account's pitch is ContactEmpty, with its own header. */}
+        {/* v16 §A — THE TITLE PANEL: "Every agent, in one place", the book in its subline, two buttons and the hawk
+            on its disc. Over a LIST only (and while settling): the blank account's pitch is ContactEmpty. */}
         {(showList || pageState === "settling") && (
-          <ContactOpenHeader count={headerCount} addRef={addBtnRef} onAdd={openAdd} onViewAll={viewAllAgents}
-            faces={pageState === "list" ? faces : null} onOpenAgent={(id) => openCard(id)} />
+          <ContactOpenHeader loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null} addRef={addBtnRef} onAdd={openAdd}
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
         {pageState === "settling" && (
           <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}

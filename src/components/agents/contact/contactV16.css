@@ -1,0 +1,32 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v16 (design-refs/contact-list-v16/contact-list-v16.html) — the list is the page, as Query Centre
+ * v137. One authoritative block per part; values read off the rendered oracle at 1512 × 900 and 1280 × 800.
+ *
+ * ⚠️ "FULL (COMPACT)" IS THE PAGE SHEET'S WIDTH, AS v137 BUILT IT: the base rules are the compact values and
+ *    `.ws-app.sheet-wide` (the sheet is wider than 1440) restates the full ones. The oracle switches on the
+ *    WINDOW's width, so at a 1512 window with the sidebar open the oracle is full and the app is compact.
+ */
+
+/* ── §A · THE TITLE PANEL. The shared panel's box (shell/headerPanel.css `.hp3`); this states the padding, the
+   subline and the disc, which are this page's own. ── */
+.clv-group > .cl16-hd.hp3.hp3 { padding: 28px 32px 30px 36px; }
+.ws-app.sheet-wide .clv-group > .cl16-hd.hp3.hp3 { padding: 34px 44px 36px 48px; }
+.cl16-hd .hp3-txt .hp3-sub { margin-top: 14px; max-width: 520px; color: rgba(244, 238, 229, 0.86); }
+.ws-app.sheet-wide .cl16-hd .hp3-txt .hp3-sub { margin-top: 16px; }
+/* ⚠️ brand.tsx names bare spans as the body sans at runtime, injected last: the title's and the subline's inner
+   spans take their parent's face back (the Query Centre's own reset does this for its header; this page has none) */
+.cl16-hd .hp3-title span, .cl16-hd .hp3-sub span { font-family: inherit !important; }
+/* the book's title in the typewriter face, upright (brand.tsx names bare `i`: two classes and !important) */
+.cl16-hd .hp3-sub .cl16-ms { font-family: var(--sp-type) !important; font-style: normal; }
+/* the disc: the panel's art slot holds it at the slot's own height, 12 from the panel's padding */
+.cl16-hd .hp3-art { margin-right: 12px; width: 196px; }
+.ws-app.sheet-wide .cl16-hd .hp3-art { width: 236px; }
+.cl16-hd .hp3-art .cl16-disc {
+  display: flex; align-items: center; box-sizing: border-box; width: 100%; height: 100%;
+  border-radius: 50%; background: #f4f1ec; overflow: hidden;
+}
+/* 0-3-1, over the slot's own `img { height: 100% }` */
+.cl16-hd .hp3-art .cl16-disc > img { display: block; flex: none; width: 118%; height: auto; max-width: none; margin-left: -6%; }
