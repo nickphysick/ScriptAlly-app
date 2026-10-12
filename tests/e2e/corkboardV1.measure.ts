@@ -420,7 +420,9 @@ test.describe("CB1 · Part C — the board", () => {
       const mid = await read();
       L.check("C7", "remove", writes.length === 0 && mid !== "absent", `before the answer: ${writes.length} write(s), the note is ${mid === "absent" ? "gone" : "there"}`);
       L.check("C7", "remove", asks === 2, `the confirm offers ${asks} of its two buttons`);
-      await page.getByRole("button", { name: "Remove note" }).click();
+      /* ⚠️ A PROBE THAT FINDS NO CONFIRM SAYS SO AS A READING. Pressing a button that is not there waits out
+         its timeout and throws, and the rows above (which already say the note went without asking) are lost. */
+      if (asks === 2) await page.getByRole("button", { name: "Remove note" }).click();
       await page.waitForTimeout(900);
       L.check("C7", "remove", (await read()) === "absent", "confirmed, the document is gone");
       const undo = page.locator(".tdb-toast:visible .tdb-toast-act");
@@ -477,6 +479,11 @@ test.describe("CB1 · Part D — the Your tasks card", () => {
         L.check("D1", where, read.add === "+ Add a task" && read.foot === "These also appear on your To-do list." && read.footFont === "JetBrains Mono 10.5px" && !read.seeAll, `"${read.add}" · "${read.foot}" in ${read.footFont} · see-all ${read.seeAll}`);
         /* the tick: the To-do list's pane opens on that task, and nothing is written */
         const before = canon(await store.task(tickId));
+        /* ⚠️ THE ROW MUST BE OPEN TO BE TICKED. A finished row's tick is `aria-disabled`, which a click waits
+           on until it times out — so a fixture left finished (by a tick that WROTE) is a reading here, not a throw. */
+        const isOpen = openRows.some((r) => r.id === tickId);
+        L.check("D1", `${where} · tick`, isOpen, `the fixture's task ${tickId} is ${isOpen ? "open" : "FINISHED — something ticked it"}`);
+        if (!isOpen) continue;
         const writes = await writesDuring(page, async () => {
           await card.locator(`[data-cb-task="${tickId}"] .cb-tick`).click();
           await page.waitForURL(/\/todo$/, { timeout: 10_000 }).catch(() => {});
@@ -492,7 +499,7 @@ test.describe("CB1 · Part D — the Your tasks card", () => {
       /* the case puts its own fixture back whatever happened above */
       if (original && canon(await store.task(tickId)) !== canon(original)) await store.putTask(tickId, original);
     }
-    L.done(24);
+    L.done(26);
   });
 
   test("D2 card moves: it drags and saves as layout.__tasks, it fades with a filter, and the header never counts it", async ({ page }) => {
