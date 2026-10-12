@@ -139,6 +139,8 @@ test.describe("Comparable titles v26", () => {
       await openComps(page, vp); await openAdd(page);
       r = await drawer(page);
       L.check(`${w} with comps: only the folded link`, !r.explain && r.link && r.points === 0, `card ${r.explain} · link ${r.link} · ${r.points} points`);
+      /* with no link to press, a click would wait out the whole timeout */
+      if (L.red) { L.done(14); return; }
       await page.locator(`${D}[data-cf="explain-link"] button`).click(); await page.waitForTimeout(150);
       r = await drawer(page);
       L.check(`${w} with comps: the link opens the card`, r.explain && r.points === 3 && r.hide === "Hide", `card ${r.explain} · ${r.points} points · ${r.hide}`);
@@ -222,18 +224,23 @@ test.describe("Comparable titles v26", () => {
       });
       const a = await read();
       L.check(`${w} the body scrolls`, a.can > 100, `${a.can}px to scroll`);
+      /* ⚠️ AT THE TOP AS WELL AS AT THE END. A foot inside the scrolling body also sits on the drawer's bottom once the
+         body is scrolled to its end, so the end alone cannot tell a pinned foot from a scrolled one (the named mutation
+         passed green against it). Pinned means: on the drawer's bottom wherever the body is. */
+      L.check(`${w} at the top: the foot's bottom is the drawer's bottom`, a.top === 0 && near(a.f.b, a.d.b, 1), `scrollTop ${a.top} · foot ${a.f.b} · drawer ${a.d.b}`);
       await page.evaluate(() => { const b = document.querySelector('[data-hdr="comp"] [data-hdr="body"]') as HTMLElement; b.scrollTop = b.scrollHeight; });
       await page.waitForTimeout(200);
       const z = await read();
       L.check(`${w} scrolled to the end`, near(z.top, z.can, 1), `scrollTop ${z.top} of ${z.can}`);
-      L.check(`${w} the foot's bottom is the drawer's bottom`, near(z.f.b, z.d.b, 1), `foot ${z.f.b} · drawer ${z.d.b}`);
+      L.check(`${w} at the end: the foot's bottom is the drawer's bottom`, near(z.f.b, z.d.b, 1), `foot ${z.f.b} · drawer ${z.d.b}`);
+      L.check(`${w} the foot did not move with the scroll`, near(z.f.y, a.f.y, 0.5), `foot top ${a.f.y} → ${z.f.y}`);
       L.check(`${w} the head stays at the drawer's top`, near(z.h.y, z.d.y, 1), `head ${z.h.y} · drawer ${z.d.y}`);
       L.check(`${w} the drawer floats: inset 8, on screen`, near(z.d.y, 8) && near(z.vh - z.d.b, 8) && near(z.vw - z.d.r, 8), `top ${z.d.y} · bottom ${z.vh - z.d.b} · right ${z.vw - z.d.r}`);
       L.check(`${w} no horizontal overflow`, z.over <= 0 && z.wide === 0, `${z.over}px · ${z.wide} element(s) past the edge`);
       const r = await drawer(page);
       L.check(`${w} Add is disabled with an empty title`, r.save?.disabled === true && r.save?.text === "Add comp" && r.again?.text === "Add and add another" && r.cancel?.text === "Cancel", `${r.save?.text} disabled ${r.save?.disabled}`);
     }
-    L.done(14);
+    L.done(18);
   });
 
   test("AD8 · preview: the library row's own comp cell, and its title is the Title input", async ({ page }) => {
