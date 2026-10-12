@@ -1,0 +1,53 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queryPanelV1.measure.ts:497:3 › Query panel v1 › P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog
+[measure] › tests/e2e/queryPanelV1.measure.ts:497:3 › Query panel v1 › P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog
+  ✗ P14 · 1512 exactly one dialog, and it is the panel — 1 dialogs · the panel false (tray button "Log the send")
+
+  ✗ P14 · 1512 the panel is that row's, at the action's step — panel  · step null · ""
+
+  ✗ P14 · 1512 no scrim, and the row is the open query — 1 scrims · q=null
+
+  ✗ P14 · 1280 exactly one dialog, and it is the panel — 1 dialogs · the panel false (tray button "Log the send")
+
+  ✗ P14 · 1280 the panel is that row's, at the action's step — panel  · step null · ""
+
+  ✗ P14 · 1280 no scrim, and the row is the open query — 1 scrims · q=null
+
+[P14] 0/6 green
+
+  1) [measure] › tests/e2e/queryPanelV1.measure.ts:497:3 › Query panel v1 › P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "P14 · 1512 exactly one dialog, and it is the panel — 1 dialogs · the panel false (tray button \"Log the send\")",
+    +   "P14 · 1512 the panel is that row's, at the action's step — panel  · step null · \"\"",
+    +   "P14 · 1512 no scrim, and the row is the open query — 1 scrims · q=null",
+    +   "P14 · 1280 exactly one dialog, and it is the panel — 1 dialogs · the panel false (tray button \"Log the send\")",
+    +   "P14 · 1280 the panel is that row's, at the action's step — panel  · step null · \"\"",
+    +   "P14 · 1280 no scrim, and the row is the open query — 1 scrims · q=null",
+    + ]
+
+      73 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      74 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 75 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      76 |   }
+      77 | }
+      78 |
+        at Ledger.done (/private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:75:95)
+        at /private/tmp/sa-qp1/tests/e2e/queryPanelV1.measure.ts:531:7
+
+    Error Context: test-results/queryPanelV1.measure.ts-Qu-7bd18-he-panel-is-the-only-dialog-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queryPanelV1.measure.ts:497:3 › Query panel v1 › P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog 
+  1 passed (40.2s)

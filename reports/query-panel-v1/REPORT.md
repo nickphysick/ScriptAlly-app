@@ -51,6 +51,65 @@ does not build; A, C and D each build on what is before them.
     Query Centre, from its visible rows. A query hidden by a filter left on there will not open over the
     Dashboard.
 
+## Follow-up, 11 Oct: your three decisions, the older suites, P13 and P14
+
+Decisions as ruled: no reopen-without-a-reply; the parking chip stays; the row moves after a save.
+
+**Found by P13, in the existing delete-entry flow (not the panel's, and not changed):** deleting an entry through
+the timeline's "It never happened" puts back the status, the stage dates and the query's own log. It does not put
+back everything:
+- `responseDeadline`, cleared when the request was recorded, stays absent;
+- `expectedSendDate` and `sendReminderDate`, set by it, stay on the query;
+- the feed's row for the deleted entry ("…requested a full manuscript") was still there six seconds later in
+  every run of the final suite (it was gone in one earlier run, so it looks like a race).
+
+The journey's own Undo is a snapshot and restores all of these. P13 holds what returns and prints what does not.
+The seeder's `--clean` removes the test query and every leftover, so the account is as it was.
+
+**The timeline is oldest first.** The brief asks for the new entry to be first; it is the last row. P13 asserts
+"the latest".
+
+### The three commits
+
+| Commit | What |
+| --- | --- |
+| `45aaf306` | the older suites open the panel |
+| `ee694ec4` | on `/queries` a row's tray button steps that row's panel; lock P14 |
+| `803f03b8` | lock P13 (a save, then undone), with P3's moved-row checks |
+
+A fourth commit carries two helper fixes found by the re-run, and this record.
+
+### P13 and P14
+
+| Lock | Green reading | Mutation | Red reading |
+| --- | --- | --- | --- |
+| P13 save | the panel returns to the query; "Full requested" is the latest entry; the card's pill and the row say Full requested; the row moved group and is the one selected row; then the entry is deleted and the status, stage dates and log are as they started | the panel does not return after the save | "panel true · step false · card shown false" |
+| P3 (added, inside P13) | after the move, Down opens the row now below it and Up returns to the moved row | (P13's) | — |
+| P14 tray | one dialog, it is the panel, it is that row's, step `sent`, title "What went to …", no scrim, `?q=` is the row | the tray opens the drawer | "1 dialogs · the panel false", 1 scrim |
+
+The tray's button reads "Log the send" on a Full Requested row, not "Mark full sent": that is the tray's own
+label and I left it. It opens the same journey.
+
+### The older suites
+
+| Suite | Result | Notes |
+| --- | --- | --- |
+| `queryPanelV1` | 11 tests passed (P1–P14) | |
+| `qcV137` | 13 passed | |
+| `feedDrawerV2` | 4 passed | |
+| `qcV132` | 10 passed, 6 skipped | W7 and W9 now read the panel |
+| `qcV134` | 1 passed, 10 skipped | the one reference to the modal is in a retired test |
+| `queryActions` | 3 passed | §F was already red on `main` (it clicked the row's centre); it now opens the query by the agent's name and passes |
+| `contactV13` | CL13-10 passes. **CL13-12 fails, and fails the same way on `main`** (its loading frame's tab and band shape) | one check retired: "the query card peeks above its dock chip" asserted the modal's dock |
+| `qcV126` | 17 passed, 7 skipped, **6 failed, the same six that fail on `main`** | QC126-2 (old colours in `a17.css` and `msv21.css`), -6, -7, -11 and -20's featured-card check (all about "Recently updated", removed by v137), and -2.10 (no torn starts on the account). QC126-18 and the rest of -20 now read the panel and pass |
+| `agentCardV1` | 45 passed | lock 10 was red on `main` (the shared opener clicked the row's centre); the opener now clicks the agent's name |
+
+Retired by name: contactV13's query-card dock-peek readings (ten of them), for the reason above. Nothing else
+asserted the modal itself.
+
+Gates after the follow-up: tsc clean, both builds clean, Vitest 8,570 passed, 3 skipped, the same 1 file failing
+to load.
+
 ## §0 Recon
 
 **Base:** `origin/main` @ `13313c9d`. Baseline: tsc clean, both builds clean, Vitest 563 files passed and 1

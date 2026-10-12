@@ -30,7 +30,10 @@ export type QueryHost = { root: string; docked: boolean };
 export async function openQueryById(page: Page, id: string): Promise<QueryHost> {
   const row = page.locator(`.qcv-page [data-qcv="row"][data-id="${id}"]`);
   await expect(row, `no row for ${id} — is it on the current manuscript scope and filter?`).toBeVisible({ timeout: 20_000 });
-  await row.click();
+  /* ⚠️ THE AGENT'S NAME, NOT THE ROW'S CENTRE. Since v132 the centre of a row is its "What you sent" cell, whose slot
+     opens the edit journey — and since Query panel v1 that journey steps the row's panel, hiding the card's tabs. */
+  const name = row.locator('[data-qcv="row-agent"]');
+  if (await name.count()) await name.first().click(); else await row.click();
   /* the docked card and the drawer are mutually exclusive; wait for whichever arrives */
   /* ⚠️ v65 moved the open query into the RAIL (`[data-qcv="rail"]`), a track of `.qcv-group` beside
      the page rather than inside it — so `.qcv-page [data-qcv="open"]` matched nothing from then on. */

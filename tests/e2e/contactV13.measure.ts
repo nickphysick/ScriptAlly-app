@@ -397,7 +397,7 @@ test("CL13-10 · the dock chip expands the card (agent card and the Query Centre
   await page.locator('[data-qp="panel"] [data-qcv="open-action"]').click();
   await page.locator('[data-qp="panel"] [data-qp-step]').waitFor({ timeout: 10_000 });
   await page.waitForTimeout(400);
-  const qp = await page.evaluate(() => ({ chip: document.querySelectorAll("[data-qad-dock]").length, step: !!document.querySelector('[data-qp="panel"] [data-qp-step]'), dialogs: [...document.querySelectorAll('[role="dialog"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; }).length }));
+  const qp = await page.evaluate(() => ({ chip: document.querySelectorAll("[data-qad-dock]").length, step: !!document.querySelector('[data-qp="panel"] [data-qp-step]'), dialogs: [...document.querySelectorAll('[role="dialog"]')].filter((e) => { if (e.closest('[data-qcv="guide"]')) return false; /* the page guide is a standing card, not a dialog an action opened */ const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; }).length }));
   L.check("CL13-10 the Query Centre's card steps its panel: no dock chip, one dialog", "1512", qp.step && qp.chip === 0 && qp.dialogs === 1, JSON.stringify(qp));
   await page.keyboard.press("Escape");
   /* below 1100px there is no room beside the drawer: the chip keeps Agent card v1's behaviour */

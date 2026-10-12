@@ -75,8 +75,10 @@ test("§F the query card's footer draws the mock's doors, and a door opens the d
   await liftMotionSuppression(page);
   const row = page.locator('.qcv-page [data-qcv="row"]').first();
   await expect(row).toBeVisible({ timeout: 20_000 });
-  await row.click();
-  const doors = page.locator('[data-qcv="open-doors"]');
+  /* RE-POINTED: since v132 a row's centre is its "What you sent" cell (this was already red on main); the agent's
+     name opens the query, which is the side panel now */
+  await row.locator('[data-qcv="row-agent"]').click();
+  const doors = page.locator('[data-qp="panel"] [data-qcv="open-doors"]');
   await expect(doors).toBeVisible({ timeout: 10_000 });
   const labels = await doors.locator("button").allTextContents();
   expect(labels.length).toBeGreaterThan(0);

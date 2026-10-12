@@ -6,17 +6,18 @@
  * page at 1512 × 900 and 1280 × 800 with the shell (P12 at 800 × 900).
  *
  * P1 container · P2 no scrim · P3 swap · P4 selected · P5 keyboard · P6 scroll kept · P7 one surface ·
- * P8 next move · P9 pinned foot · P10 no repeat · P11 URL · P12 narrow. (L1 is the QC137 and feed drawer v2
+ * P8 next move · P9 pinned foot · P10 no repeat · P11 URL · P12 narrow · P13 save · P14 tray. (L1 is the QC137 and feed drawer v2
  * suites, run beside this one.)
  *
  * Each was run with its named mutation (`QP1_MUTATE=<lock>`: one named thing broken IN THE PAGE) before its
  * green was believed: reports/query-panel-v1/mutation-proofs.json.
  *
- * ⚠️ NOTHING HERE SAVES. Every step is opened and left by "← Back to query", Cancel or Escape, so the shared
- *    account is as it was.
+ * ⚠️ ONLY P13 SAVES, and on a query of its own (tests/e2e/seedQp1Save.mjs, the `qp1s-` prefix), which it removes
+ *    in the same run. Every other step is opened and left by "← Back to query", Cancel or Escape.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { openRoute } from "./measure";
 
 const DIR = "reports/query-panel-v1";
@@ -52,6 +53,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   P10: { js: `(() => { if (window.__m10) return; window.__m10 = true; new MutationObserver(() => { const b = document.querySelector('${PANEL} .qcv-open-body'); if (b && !b.querySelector(".qcv-open-ms")) { const d = document.createElement("div"); d.className = "qcv-open-ms"; d.innerHTML = "<em>Querying</em><b>The Smoke Test</b>"; b.insertBefore(d, b.children[1] || null); } }).observe(document.body, { subtree: true, childList: true }); })()` },
   /* the param dropped from the address */
   P11: { js: `(() => { if (window.__m11) return; window.__m11 = true; setInterval(() => { const u = new URL(location.href); if (u.searchParams.has("q")) { u.searchParams.delete("q"); history.replaceState(history.state, "", u); } }, 30); })()` },
+  /* the panel does not return to the query after a save: it stays stepped aside, showing nothing */
+  P13: { js: `(() => { if (window.__m13) return; window.__m13 = true; let stepped = false; new MutationObserver(() => { const p = document.querySelector('${PANEL}'); if (!p) return; const own = p.querySelector("[data-side-own]"); if (p.hasAttribute("data-step")) { stepped = true; return; } if (stepped && own && !own.hasAttribute("hidden")) { own.setAttribute("hidden", ""); own.style.display = "none"; } }).observe(document.body, { subtree: true, attributes: true, childList: true }); })()` },
+  /* the tray opens the shared drawer, as it did */
+  P14: { js: `(() => { if (window.__m14) return; window.__m14 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest('[data-qcv="row-act"]'); if (!b) return; const row = b.closest('${ROW}'); e.stopImmediatePropagation(); e.preventDefault(); window.__saQueryDrawer.open({ mode: "sent", queryId: row.dataset.qid }); }, true); })()` },
   /* the 8px float kept on a narrow window */
   P12: { css: `.spanel { top: 8px !important; right: 8px !important; bottom: 8px !important; left: auto !important; width: 520px !important; border-radius: 12px !important; }` },
 };
@@ -387,5 +392,142 @@ test.describe("Query panel v1", () => {
     L.check("P12", "no radius", p?.radius === "0px", `${p?.radius}`);
     L.check("P12", "the close reads Back", !!back && /Back/.test(back.label), `${back?.label}`);
     L.done(3);
+  });
+
+  /* ── P13 · a save, on a query of its own (tests/e2e/seedQp1Save.mjs), undone by deleting the entry ── */
+  test("P13 · save: back to the query, the new entry on the timeline, the row updated and still selected; then undone", async ({ page }) => {
+    test.setTimeout(600_000);
+    const L = new Ledger("P13");
+    const QID = "qp1s-q";
+    const dump = () => JSON.parse(execSync("node tests/e2e/seedQp1Save.mjs --dump", { encoding: "utf8" }).trim().split("\n").pop()!) as { query: Record<string, unknown> | null; log: { id: string }[]; feed: { id: string }[]; flags: string[] };
+    const R = `${ROW}[data-qid="${QID}"]`;
+    try {
+      for (const vp of SIZES) {
+        execSync("node tests/e2e/seedQp1Save.mjs", { stdio: "inherit" });
+        const before = dump(); const w = `${vp.width}`;
+        await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ } });
+        await openRoute(page, "/queries", vp);
+        await expect(page.locator(R)).toBeVisible({ timeout: 30_000 });
+        await page.locator(R).evaluate((e) => e.scrollIntoView({ block: "center" }));
+        await page.waitForTimeout(400);
+        await mutate(page, "P13");
+        const order = () => page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].filter((r) => r.getBoundingClientRect().height > 0).map((r) => r.dataset.qid!), ROW);
+        const at0 = (await order()).indexOf(QID);
+        await page.locator(`${R} .qcw-agt`).click();
+        await expect(page.locator(PANEL)).toBeVisible({ timeout: 8000 });
+        const tl0 = (await page.locator(`${PANEL} .tl-ev`).allInnerTexts()).filter((t) => /^Full requested/.test(t.trim())).length;
+        await page.locator(`${PANEL} [data-door="resp"]`).click();
+        await expect(page.locator(`${PANEL} [data-qp-step]`)).toBeVisible({ timeout: 8000 });
+        await page.waitForTimeout(500);
+        await page.locator(`${PANEL} [data-qp-step] button`, { hasText: /^Full requested$/ }).click();
+        await page.waitForTimeout(500);
+        const cons = await page.locator(`${PANEL} [data-qp="step-consequence"]`).innerText().catch(() => "");
+        L.check("P13", `${w} the consequence line says what saving changes`, /Full requested/.test(cons), `"${cons.replace(/\s+/g, " ").slice(0, 90)}"`);
+        for (let i = 0; i < 6; i++) {
+          const b = page.locator(`${PANEL} [data-qad-primary]`);
+          const label = await b.innerText();
+          await b.click();
+          if (!/^Next/.test(label)) break;
+          await page.waitForTimeout(450);
+        }
+        await expect(page.locator(R), `${w}: the row's status after the save`).toHaveAttribute("data-status", "Full Requested", { timeout: 15_000 });
+        await page.waitForTimeout(1500);
+        const after = await page.evaluate(({ rowSel, id }) => {
+          const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
+          const own = p?.querySelector<HTMLElement>("[data-side-own]");
+          const evs = p ? [...p.querySelectorAll<HTMLElement>(".tl-ev")] : [];
+          const rows = [...document.querySelectorAll<HTMLElement>(rowSel)].filter((r) => r.getBoundingClientRect().height > 0);
+          const row = rows.find((r) => r.dataset.qid === id);
+          return {
+            panel: !!p, pid: p?.dataset.qpId ?? "", step: !!p?.querySelector("[data-qp-step]"), ownShown: !!own && own.getBoundingClientRect().height > 0, name: p?.querySelector(".qcv-open-nm")?.textContent ?? "",
+            pill: p?.querySelector(".qcv-open-pill")?.textContent ?? "", evs: evs.length, lastEv: (evs[evs.length - 1]?.textContent ?? "").replace(/\s+/g, " ").slice(0, 60),
+            status: row?.dataset.status ?? "", court: row?.dataset.court ?? "", selected: rows.filter((r) => r.getAttribute("aria-selected") === "true").map((r) => r.dataset.qid), at: rows.indexOf(row!), next: rows[rows.indexOf(row!) + 1]?.dataset.qid ?? null, prev: rows[rows.indexOf(row!) - 1]?.dataset.qid ?? null,
+          };
+        }, { rowSel: ROW, id: QID });
+        L.check("P13", `${w} the panel returns to the query`, after.panel && after.pid === QID && !after.step && after.ownShown && /Petra/.test(after.name), `panel ${after.panel} · step ${after.step} · card shown ${after.ownShown}`);
+        /* ⚠️ the timeline is oldest first, so the new entry is its LAST row, not its first (the brief says first) */
+        L.check("P13", `${w} the new entry is the latest on the timeline`, tl0 === 0 && /^Full requested/.test(after.lastEv), `it was not there before (${tl0}); the last of ${after.evs} entries is "${after.lastEv}"`);
+        L.check("P13", `${w} the card's status is the new one`, /Full requested/i.test(after.pill), `"${after.pill}"`);
+        L.check("P13", `${w} the row's status updated in place`, after.status === "Full Requested" && after.court === "you", `${after.status} · ${after.court}`);
+        L.check("P13", `${w} the row moved, and is still the one selected row`, after.at !== at0 && after.selected.length === 1 && after.selected[0] === QID, `index ${at0} → ${after.at}; selected ${after.selected.join()}`);
+        /* a panel that did not come back cannot be driven any further: the reading above is the verdict */
+        if (!after.ownShown) continue;
+        /* P3's addition: ↑ ↓ continue from the row's NEW position */
+        await page.locator(`${PANEL} .qcv-open-nm`).click();
+        if (after.next) { await page.keyboard.press("ArrowDown"); await page.waitForTimeout(500); L.check("P3", `${w} after the move, Down opens the row now below it`, (await panel(page))?.id === after.next, `${(await panel(page))?.id} (below is ${after.next})`); await page.keyboard.press("ArrowUp"); await page.waitForTimeout(500); }
+        else { await page.keyboard.press("ArrowUp"); await page.waitForTimeout(500); L.check("P3", `${w} after the move, Up opens the row now above it`, (await panel(page))?.id === after.prev, `${(await panel(page))?.id} (above is ${after.prev})`); await page.keyboard.press("ArrowDown"); await page.waitForTimeout(500); }
+        L.check("P3", `${w} …and back to the moved row`, (await panel(page))?.id === QID, `${(await panel(page))?.id}`);
+        /* undone through the existing delete-entry primitive: ⋯ on the entry, "It never happened", Delete */
+        const mid = dump();
+        L.check("P13", `${w} the write happened`, mid.query?.status === "Full Requested" && mid.log.length === before.log.length + 1, `${mid.query?.status} · ${before.log.length} → ${mid.log.length} log entries`);
+        if (MUT !== "P13") {
+          await page.locator(`${PANEL} .tl-ev`).last().locator(".tl-more").click();
+          await page.locator(`${PANEL} [data-side-slot] .cor-branch`, { hasText: /It never happened/ }).click();
+          await page.locator(`${PANEL} [data-qcv="entry-del-go"]`).click();
+          await expect(page.locator(R), `${w}: the row's status after the undo`).toHaveAttribute("data-status", "Queried", { timeout: 15_000 });
+          await page.waitForTimeout(6000);
+          const end = dump();
+          const ids = (x: { id: string }[]) => x.map((e) => e.id).join();
+          /* ⚠️ WHAT THE DELETE-ENTRY PRIMITIVE PUTS BACK, AND WHAT IT DOES NOT (found by this lock, 11 Oct). The status, the
+             stage dates and both logs return. Two derived fields do not: `responseDeadline` (cleared when the request
+             was recorded) stays absent, and `expectedSendDate` (set by it) stays on the query. Neither is the panel's
+             doing, and data writes are out of this pack's scope — so the lock holds what returns, and RECORDS the two
+             that do not rather than passing over them. The journey's own Undo (a snapshot) restores both. */
+          const moved = ["status", "dateSent", "fullRequestedDate", "partialRequestedDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
+          L.check("P13", `${w} undone: the status and the stage dates are as they started`, end.query?.status === "Queried" && moved.length === 0, `status ${end.query?.status}; differing: ${moved.join() || "none"}`);
+          const left = ["responseDeadline", "expectedSendDate", "sendReminderDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
+          console.log(`  P13 ${w}: NOT put back by the delete-entry primitive: ${left.join(", ") || "nothing"}`);
+          L.check("P13", `${w} undone: the query's own log holds the entries it started with`, ids(end.log) === ids(before.log), `log ${ids(end.log)}`);
+          /* ⚠️ …and the FEED's row for the deleted entry is sometimes still there six seconds later (seen in two runs of
+             four). Recorded, not asserted: it is the delete-entry primitive's, and the seeder's --clean removes it. */
+          const feedLeft = end.feed.filter((e) => !before.feed.some((b) => b.id === e.id)).length;
+          console.log(`  P13 ${w}: feed rows left by the delete-entry primitive: ${feedLeft}`);
+          L.check("P13", `${w} undone: no task flag left behind`, end.flags.join() === before.flags.join(), `${end.flags.join() || "none"}`);
+          const extra = Object.keys(end.query ?? {}).filter((k) => !(k in (before.query ?? {})));
+          console.log(`  P13 ${w}: keys on the query that were not there at the start: ${extra.join(", ") || "none"}`);
+        }
+        await page.locator(`${PANEL} [data-qcv="open-close"]`).click().catch(() => {});
+      }
+    } finally {
+      execSync("node tests/e2e/seedQp1Save.mjs --clean", { stdio: "inherit" });
+    }
+    L.done(MUT === "P13" ? 6 : 20);
+  });
+
+  test("P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("P14");
+    for (const vp of SIZES) {
+      await openQC(page, vp, "P14");
+      const w = `${vp.width}`;
+      const id = await page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].find((r) => r.dataset.status === "Full Requested" && r.getBoundingClientRect().height > 0)?.dataset.qid ?? null, ROW);
+      expect(id, "a Full Requested row on the account").toBeTruthy();
+      const row = page.locator(`${ROW}[data-qid="${id}"]`);
+      await row.evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(300);
+      await row.hover();
+      const act = row.locator('[data-qcv="row-act"]');
+      const label = (await act.innerText()).trim();
+      await act.click();
+      await page.waitForTimeout(1200);
+      const r = await page.evaluate(() => {
+        const vis = (e: Element) => { const b = e.getBoundingClientRect(); const cs = getComputedStyle(e); return b.width > 0 && b.height > 0 && cs.visibility !== "hidden" && cs.display !== "none"; };
+        const dialogs = [...document.querySelectorAll<HTMLElement>('[role="dialog"], dialog[open]')].filter(vis);
+        const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
+        const scrim = [...document.querySelectorAll<HTMLElement>(".qad-scrim")].filter((e) => vis(e) && parseFloat(getComputedStyle(e).opacity) > 0.05).length;
+        return { dialogs: dialogs.length, isPanel: dialogs.length === 1 && dialogs[0] === p, pid: p?.dataset.qpId ?? "", step: p?.querySelector<HTMLElement>("[data-qp-step]")?.dataset.qpStep ?? null, title: p?.querySelector('[data-qp="step-title"]')?.textContent ?? "", scrim, q: new URL(location.href).searchParams.get("q") };
+      });
+      L.check("P14", `${w} exactly one dialog, and it is the panel`, r.dialogs === 1 && r.isPanel, `${r.dialogs} dialogs · the panel ${r.isPanel} (tray button "${label}")`);
+      L.check("P14", `${w} the panel is that row's, at the action's step`, r.pid === id && r.step === "sent" && /^What went to /.test(r.title), `panel ${r.pid} · step ${r.step} · "${r.title}"`);
+      L.check("P14", `${w} no scrim, and the row is the open query`, r.scrim === 0 && r.q === id, `${r.scrim} scrims · q=${r.q}`);
+      /* left as it was found: nothing is saved */
+      const back = page.locator(`${PANEL} [data-qp="step-back"]`);
+      if (await back.count()) await back.click({ timeout: 4000 }).catch(() => {}); else await page.keyboard.press("Escape");
+      await page.waitForTimeout(500);
+      await page.locator(`${PANEL} [data-qcv="open-close"]`).click({ timeout: 3000 }).catch(() => {});
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(300);
+    }
+    L.done(6);
   });
 });

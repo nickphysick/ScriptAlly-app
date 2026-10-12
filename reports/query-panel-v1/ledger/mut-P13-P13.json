@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "P13",
+  "where": "1512 the consequence line says what saving changes",
+  "ok": true,
+  "detail": "\"Petra Nwosu → Full requested, Sun 11 Oct Your move, due Sun 25 Oct — it joins “Your move” \""
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the panel returns to the query",
+  "ok": false,
+  "detail": "panel true · step false · card shown false"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the new entry is the latest on the timeline",
+  "ok": true,
+  "detail": "it was not there before (0); the last of 2 entries is \"Full requested11 OCT⋯Petra asked for the full\""
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the card's status is the new one",
+  "ok": true,
+  "detail": "\"Full requested\""
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the row's status updated in place",
+  "ok": true,
+  "detail": "Full Requested · you"
+ },
+ {
+  "lock": "P13",
+  "where": "1512 the row moved, and is still the one selected row",
+  "ok": true,
+  "detail": "index 44 → 0; selected qp1s-q"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the consequence line says what saving changes",
+  "ok": true,
+  "detail": "\"Petra Nwosu → Full requested, Sun 11 Oct Your move, due Sun 25 Oct — it joins “Your move” \""
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the panel returns to the query",
+  "ok": false,
+  "detail": "panel true · step false · card shown false"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the new entry is the latest on the timeline",
+  "ok": true,
+  "detail": "it was not there before (0); the last of 2 entries is \"Full requested11 OCT⋯Petra asked for the full\""
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the card's status is the new one",
+  "ok": true,
+  "detail": "\"Full requested\""
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the row's status updated in place",
+  "ok": true,
+  "detail": "Full Requested · you"
+ },
+ {
+  "lock": "P13",
+  "where": "1280 the row moved, and is still the one selected row",
+  "ok": true,
+  "detail": "index 44 → 0; selected qp1s-q"
+ }
+]
