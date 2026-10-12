@@ -1,0 +1,56 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.7s)
+  ✗ X1 · 1512 the comp drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1512 the add drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1512 the picker: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1512 the Scout drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1512 the pop-up: the glyph is an SVG, 14 × 14 in 36 — svg true · text "" · glyph 12.0 × 12.0 · button 36.0 × 36.0
+  ✗ X1 · 1280 the comp drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1280 the add drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1280 the picker: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1280 the Scout drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down
+  ✗ X1 · 1280 the pop-up: the glyph is an SVG, 14 × 14 in 36 — svg true · text "" · glyph 12.0 × 12.0 · button 36.0 × 36.0
+[X1] 20/30 green
+  ✘  2 [measure] › tests/e2e/compsV271.measure.ts:120:3 › Comparable titles v27.1 › X1 · centred: each of the five close buttons holds an SVG ✕ at its centre, and is named "Close" (25.7s)
+
+
+  1) [measure] › tests/e2e/compsV271.measure.ts:120:3 › Comparable titles v27.1 › X1 · centred: each of the five close buttons holds an SVG ✕ at its centre, and is named "Close" 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 12
+
+    - Array []
+    + Array [
+    +   "X1 · 1512 the comp drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1512 the add drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1512 the picker: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1512 the Scout drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1512 the pop-up: the glyph is an SVG, 14 × 14 in 36 — svg true · text \"\" · glyph 12.0 × 12.0 · button 36.0 × 36.0",
+    +   "X1 · 1280 the comp drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1280 the add drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1280 the picker: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1280 the Scout drawer: its centre is the button's (±0.5) — off by -11.00 across, 0.00 down",
+    +   "X1 · 1280 the pop-up: the glyph is an SVG, 14 × 14 in 36 — svg true · text \"\" · glyph 12.0 × 12.0 · button 36.0 × 36.0",
+    + ]
+
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      36 |     if (!MUT && !process.env.V271_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 37 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      38 |   }
+      39 | }
+      40 | async function open(page: Page, vp: Vp, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps271/tests/e2e/compsV271.measure.ts:37:95)
+        at /Users/nickphysick/ScriptAlly-comps271/tests/e2e/compsV271.measure.ts:153:7
+
+    Error Context: test-results/compsV271.measure.ts-Compa-14e61--centre-and-is-named-Close--measure/error-context.md
+
+    Error Context: test-results/compsV271.measure.ts-Compa-14e61--centre-and-is-named-Close--measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV271.measure.ts:120:3 › Comparable titles v27.1 › X1 · centred: each of the five close buttons holds an SVG ✕ at its centre, and is named "Close" 
+  1 passed (48.4s)

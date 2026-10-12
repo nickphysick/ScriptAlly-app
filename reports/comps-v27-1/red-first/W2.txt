@@ -1,0 +1,38 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+  ✗ W2 · 1920 normal: rows use the compact grid — 446 446 284 284 at a list 1600 wide
+[W2] 13/14 green
+  ✘  2 [measure] › tests/e2e/compsV271.measure.ts:92:3 › Comparable titles v27.1 › W2 · grid: the compact row grid in the column; the bar one row with no overflow at 1024, 1280 and 1512 (20.9s)
+
+
+  1) [measure] › tests/e2e/compsV271.measure.ts:92:3 › Comparable titles v27.1 › W2 · grid: the compact row grid in the column; the bar one row with no overflow at 1024, 1280 and 1512 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "W2 · 1920 normal: rows use the compact grid — 446 446 284 284 at a list 1600 wide",
+    + ]
+
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      36 |     if (!MUT && !process.env.V271_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 37 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      38 |   }
+      39 | }
+      40 | async function open(page: Page, vp: Vp, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps271/tests/e2e/compsV271.measure.ts:37:95)
+        at /Users/nickphysick/ScriptAlly-comps271/tests/e2e/compsV271.measure.ts:117:7
+
+    Error Context: test-results/compsV271.measure.ts-Compa-2749a-rflow-at-1024-1280-and-1512-measure/error-context.md
+
+    Error Context: test-results/compsV271.measure.ts-Compa-2749a-rflow-at-1024-1280-and-1512-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV271.measure.ts:92:3 › Comparable titles v27.1 › W2 · grid: the compact row grid in the column; the bar one row with no overflow at 1024, 1280 and 1512 
+  1 passed (44.2s)

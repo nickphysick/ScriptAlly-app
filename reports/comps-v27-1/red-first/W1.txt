@@ -1,0 +1,48 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+  ✗ W1 · 1512 normal: the list's edges are the panel's — list 272.0–1480.0 · panel 296.4–1455.6
+  ✗ W1 · 1512 normal: and the strip's — list 272.0–1480.0 · strip 296.4–1455.6
+  ✗ W1 · 1512 back in the column after full screen — list 272.0–1480.0 · panel 296.4–1455.6
+  ✗ W1 · 1280 normal: the list's edges are the panel's — list 272.0–1248.0 · panel 289.0–1231.0
+  ✗ W1 · 1280 normal: and the strip's — list 272.0–1248.0 · strip 289.0–1231.0
+  ✗ W1 · 1280 back in the column after full screen — list 272.0–1248.0 · panel 289.0–1231.0
+[W1] 10/16 green
+  ✘  2 [measure] › tests/e2e/compsV271.measure.ts:69:3 › Comparable titles v27.1 › W1 · column: in normal view the library's edges are the panel's and the strip's; full screen spans the sheet less 12 (13.7s)
+
+
+  1) [measure] › tests/e2e/compsV271.measure.ts:69:3 › Comparable titles v27.1 › W1 · column: in normal view the library's edges are the panel's and the strip's; full screen spans the sheet less 12 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "W1 · 1512 normal: the list's edges are the panel's — list 272.0–1480.0 · panel 296.4–1455.6",
+    +   "W1 · 1512 normal: and the strip's — list 272.0–1480.0 · strip 296.4–1455.6",
+    +   "W1 · 1512 back in the column after full screen — list 272.0–1480.0 · panel 296.4–1455.6",
+    +   "W1 · 1280 normal: the list's edges are the panel's — list 272.0–1248.0 · panel 289.0–1231.0",
+    +   "W1 · 1280 normal: and the strip's — list 272.0–1248.0 · strip 289.0–1231.0",
+    +   "W1 · 1280 back in the column after full screen — list 272.0–1248.0 · panel 289.0–1231.0",
+    + ]
+
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      36 |     if (!MUT && !process.env.V271_REDFIRST) expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 37 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      38 |   }
+      39 | }
+      40 | async function open(page: Page, vp: Vp, lock: string) {
+        at Ledger.done (/Users/nickphysick/ScriptAlly-comps271/tests/e2e/compsV271.measure.ts:37:95)
+        at /Users/nickphysick/ScriptAlly-comps271/tests/e2e/compsV271.measure.ts:89:7
+
+    Error Context: test-results/compsV271.measure.ts-Compa-febdf-een-spans-the-sheet-less-12-measure/error-context.md
+
+    Error Context: test-results/compsV271.measure.ts-Compa-febdf-een-spans-the-sheet-less-12-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV271.measure.ts:69:3 › Comparable titles v27.1 › W1 · column: in normal view the library's edges are the panel's and the strip's; full screen spans the sheet less 12 
+  1 passed (38.2s)
