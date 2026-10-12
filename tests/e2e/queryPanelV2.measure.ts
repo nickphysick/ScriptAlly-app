@@ -527,7 +527,12 @@ test.describe("Query panel v2", () => {
         await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Agent");
         const now = await agentFacts(page);
         for (const k of ["place", "door", "links", "figures", "wishlist", "asks", "history", "footer"] as const) {
-          const a = JSON.stringify(v1[id]?.[k]); const b = JSON.stringify(now?.[k]);
+          /* ⚠️ A HISTORY ROW'S MONTH IS THE RECORD'S OWN, AND THE SHARED ACCOUNT RE-DATES IT. The correction fixture
+             (seedCorrection.mjs) dates its queries from today, so re-seeding it moved "Jul 2026" to "Aug 2026" on a
+             row both builds draw alike. What v1 showed is the row: its title, its status and whether it is this
+             query. A month is compared as "a month". */
+          const norm = (v: unknown) => (k === "history" && Array.isArray(v) ? v.map((r) => String(r).replace(/\| [A-Z][a-z]{2,3} \d{4}$/, "| (month)")) : v);
+          const a = JSON.stringify(norm(v1[id]?.[k])); const b = JSON.stringify(norm(now?.[k]));
           L.check("V10", `${w} ${id} · ${k}`, a === b, a === b ? `${b.slice(0, 80)}` : `v1 ${a} → ${b}`);
         }
       }
