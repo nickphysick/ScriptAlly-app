@@ -7,7 +7,7 @@
  * the perched art, the pills, the tabs and the Housekeeping tab appear only with data.
  *
  * ⚠️ NOTHING JUMPS WHEN THE DATA ARRIVES BECAUSE THESE ARE THE PAGE'S OWN COMPONENTS (lock 12). Each
- * placeholder IS its real counterpart — the same `ContactDesk`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
+ * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
  * `ContactRows` — drawn over a handful of
  * PLACEHOLDER agents through the page's own derivations, in the same parents, with their text made
  * transparent and a shimmer painted on (contactV13.css, `[data-loading]`). A box drawn by hand to
@@ -20,8 +20,7 @@
 import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
 import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
-import { deskModel } from "../../../lib/contactDesk";
-import { ContactDesk } from "./ContactDesk";
+import { BLANK_GLANCE, ContactStrip } from "./ContactStrip";
 import { CONTACT_BANNER_LINE } from "./ContactOpenHeader";
 import { YourAgentsBar } from "./YourAgentsBar";
 import { ContactIndexStrip } from "./ContactIndexStrip";
@@ -58,8 +57,6 @@ export const ContactSkeleton: React.FC<{
   perch: { src: string; width: number; height: number };
 }> = ({ msTitle, msGenre, controls, perch }) => {
   const nowMs = useMemo(() => Date.now(), []);
-  /* v15 §3 — the desk over the same placeholders: three cards at their loaded size, painted over */
-  const desk = useMemo(() => deskModel({ agents: PLACEHOLDERS, queries: [], msId: null, now: new Date(nowMs), hk: { complete: 0, total: PLACEHOLDERS.length, gaps: 0, gapAgents: 0 } }), [nowMs]);
   const facts = useMemo(() => sortFacts(PLACEHOLDERS.map((a) => agentFacts(a, [], null)), "surname"), []);
   const byId = useMemo(() => new Map(facts.map((x) => [x.agent.id, x])), [facts]);
   const groups = useMemo(() => contactGroups("letter", facts), [facts]);
@@ -67,7 +64,8 @@ export const ContactSkeleton: React.FC<{
 
   return (
     <>
-      <ContactDesk model={desk} onQueried={noop} onProfiles={noop} />
+      {/* v16 §B — the strip, every figure a blank of its box */}
+      <ContactStrip model={BLANK_GLANCE} onGroup={noop} onAll={noop} loading />
       {/* v15 §4 — the next-step section over the placeholders: they are open, take the genre and are unqueried,
           so it draws its Ready state, the shape the page settles into most often. Over TWO of them, so the card
           sets the section's height and the list beside it never does: how many agents are ready is the writer's

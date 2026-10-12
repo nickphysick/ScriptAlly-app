@@ -30,3 +30,18 @@
 }
 /* 0-3-1, over the slot's own `img { height: 100% }` */
 .cl16-hd .hp3-art .cl16-disc > img { display: block; flex: none; width: 118%; height: auto; max-width: none; margin-left: -6%; }
+
+/* ── §B · "AT A GLANCE". The strip wears v137's own classes (`.qcs-*`, queries/centre/qcvStrip137.css): the box,
+   the cells, the type, the cue, the pressed state, the blanks and the folds are those rules. This states only its
+   place in this page's group and its faces' colours.
+   ⚠️ brand.tsx names bare spans as the body sans at runtime: this page has no font reset of its own (the Query
+      Centre's `.qcv-own` does that job there), so the strip's spans state their faces at 0-3-0. ── */
+.clv-group > .qcs.cl16-gl { grid-column: 1 / -1; grid-row: 2; min-width: 0; margin-top: 34px; container: qcs / inline-size; }
+.ws-app.sheet-wide .clv-group > .qcs.cl16-gl { margin-top: 40px; }
+.cl16-gl.qcs .qcs-head .qcs-k, .cl16-gl.qcs .qcs-cell .qcs-lb, .cl16-gl.qcs .qcs-cell .qcs-cue { font-family: var(--font-mono) !important; }
+.cl16-gl.qcs .qcs-cell .qcs-line, .cl16-gl.qcs .qcs-faces .qcs-more { font-family: var(--sp-serif) !important; }
+.cl16-gl.qcs .qcs-faces .qcs-fc { font-family: var(--font-mono) !important; }
+/* the faces: not queried is white with an ink ring; querying is ink with cream initials; closed is grey */
+.cl16-gl.qcs .qcs-faces .cl16-fc--none { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 2px #fff; }
+.cl16-gl.qcs .qcs-faces .cl16-fc--live { background: #2a3a52; color: #f4eee5; }
+.cl16-gl.qcs .qcs-faces .cl16-fc--closed { background: #b3aca5; color: #2b2622; }

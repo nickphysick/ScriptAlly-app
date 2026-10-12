@@ -78,8 +78,8 @@ import { DISCOVER_LIVE, communityAgentFields } from "../../lib/discoverShared";
 import { notifyPrefs } from "../../lib/accountPrefs";
 import { takesBook } from "../../lib/genreMatch";
 import { SubmissionStatus } from "../../types";
-import { ContactDesk } from "./contact/ContactDesk";
-import { deskModel } from "../../lib/contactDesk";
+import { ContactStrip } from "./contact/ContactStrip";
+import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
 import { cardQuery, cardRows, primaryFor, type CardAct, type CardPrimary } from "../../lib/agentCard";
@@ -165,6 +165,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      any filter leaves it; remembered and validated with the rest. Every filter write goes through `setFilters`,
      which leaves the mode — the pill is the one caller that uses the raw setter. */
   const [readyOnly, setReadyOnly] = useState<boolean>(() => remembered?.readyOnly ?? false);
+  /* v16 §B — THE "AT A GLANCE" GROUP the list is filtered to (Not queried · Querying · Closed), or null. It sits
+     BESIDE the chips: both apply, a chip change leaves it alone, and "Clear all" clears both. */
+  const [glance, setGlance] = useState<GlanceKey | null>(() => remembered?.glance ?? null);
   const setFilters = useCallback((f: ContactFilters) => { setReadyOnly(false); setFiltersRaw(f); }, []);
   const [search, setSearch] = useState(() => searchQuery?.trim() || remembered?.search || "");
   /* v12 §9: the page opens on the card index — grouped by letter, ordered by surname */
@@ -175,7 +178,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [density, setDensity] = useState<Density>(() => remembered?.density ?? "comfortable");
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
-  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, readyOnly }); }, [filters, search, groupKey, sortKey, reversed, density, readyOnly]);
+  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, readyOnly, glance }); }, [filters, search, groupKey, sortKey, reversed, density, readyOnly, glance]);
   const pop = usePopover<ContactPop>();
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
@@ -279,8 +282,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
   /* the pool: Find, and (in the ready-only mode) the next-step section's own ready set — so every count is faceted under it */
   const inPool = useCallback(
-    (x: { agent: Agent; stand: string }) => matchesAgentSearch(x.agent, search) && (!readyOnly || readyIds.has(x.agent.id)),
-    [search, readyOnly, readyIds],
+    (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!readyOnly || readyIds.has(x.agent.id)) && (!glance || glanceOf(x) === glance),
+    [search, readyOnly, readyIds, glance],
+  );
+  /* v16 §B — the strip's figures, over every agent (never the filtered view) */
+  const glanceM = useMemo(
+    () => glanceModel({ facts: factsAll, rows: qcRows, msId: scoped?.id ?? null, readyIds: step.ready.map((a) => a.id), nowMs }),
+    [factsAll, qcRows, scoped, step, nowMs],
   );
   const genreWord = book.length ? joinGenres(book) : null;
   /* v14 §4: every control's count is faceted — under every OTHER control and Find */
@@ -321,7 +329,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const railLetters = useMemo(() => new Set(groupKey === "letter" ? groups.map((g) => g.label) : []), [groups, groupKey]);
   const shownGroups = groups;
   const visible = visibleFacts;
-  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); }, [setFilters]);
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
   /* "M NEED YOU" — the agents whose move it is (the v12 union: requests, offers and past-date nudges) */
   const needYou = useMemo(() => factsAll.filter((x) => x.stand === "you").length, [factsAll]);
   /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
@@ -342,6 +350,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const resetList = useCallback(() => {
     setFilters(emptyContactFilters());
     setSearch("");
+    setGlance(null);
     setGroupKey("letter");
     setSortKey("surname");
   }, [setSortKey, setFilters]);
@@ -638,11 +647,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
-  /* v15 §3 — THE DESK's three cards, over the unfiltered agents: Profiles reads Housekeeping's own completeness (`hk`) */
-  const desk = useMemo(() => deskModel({
-    agents, queries, msId: scoped?.id ?? null, now: new Date(nowMs),
-    hk: { complete: hk.complete, total: hk.total, gaps: hk.items.length, gapAgents: hk.gapAgents },
-  }), [agents, queries, scoped, nowMs, hk]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
@@ -955,14 +959,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             controls={controls}
             perch={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }} />
         )}
-        {/* v15 §3 — the desk, 28 under the header's hairline: three cards; Queried filters the list, Profiles opens Housekeeping */}
+        {/* v16 §B — "At a glance": four cells; choosing one filters the list and never scrolls */}
         {showList && (
-          <ContactDesk model={desk}
-            onQueried={() => {
-              setFilters({ ...emptyContactFilters(), queried: "yes" }); setSearch("");
-              window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
-            }}
-            onProfiles={() => setHkOpen(true)} />
+          <ContactStrip model={glanceM} active={glance}
+            onGroup={(k) => setGlance((g) => (g === k ? null : k))} onAll={() => setGlance(null)} />
         )}
         {/* v15 §4 — the next-step section: one of three states, from the writer's data */}
         {showList && (
@@ -1011,7 +1011,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           />
           {/* v14 §4 — the filter strip: on one line, folding into "More filters" when it would wrap */}
           <div className="cl14-frow" data-cl14="frow">
-            <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop} />
+            <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
+              extraOn={!!glance} onClearAll={() => { setFilters(emptyContactFilters()); setGlance(null); }} />
           </div>
           <div className="cl14-list" data-cl14="list">
         {groupKey === "letter" && (
@@ -1087,6 +1088,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 onClick={() => {
                   setFilters(emptyContactFilters());
                   setSearch("");
+                  setGlance(null);
                   setNotice(null);
                   // let the cleared list render, then bring the card into view
                   window.setTimeout(() => {

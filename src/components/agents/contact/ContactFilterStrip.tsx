@@ -35,6 +35,10 @@ export interface ContactFilterStripProps {
   /** "N on your list" per genre key */
   tallies: ReadonlyMap<string, number>;
   pop: PopoverState<ContactPop>;
+  /** v16 §B — something beside the chips is filtering the list (the "At a glance" group): "Clear all" shows for it too */
+  extraOn?: boolean;
+  /** v16 §B — "Clear all" clears the chips AND whatever `extraOn` stands for; without it, the chips alone */
+  onClearAll?: () => void;
 }
 
 const label = (id: string) => CANONICAL_GENRES.find((g) => g.id === id)?.label ?? id;
@@ -115,7 +119,7 @@ const Chip: React.FC<{ k: string; on: boolean; n: number; title?: string; onTogg
 );
 
 /** the row, folded or not — rendered twice: once for real, once (inert, hidden) to measure the unfolded width */
-const Row: React.FC<ContactFilterStripProps & { folded: boolean; inert?: boolean }> = ({ filters, onFilters, counts, tallies, pop, folded, inert }) => {
+const Row: React.FC<ContactFilterStripProps & { folded: boolean; inert?: boolean }> = ({ filters, onFilters, counts, tallies, pop, folded, inert, extraOn = false, onClearAll }) => {
   const f = filters;
   const set = (patch: Partial<ContactFilters>) => onFilters({ ...f, ...patch });
   const mine = (k: ContactPop) => !inert && pop.open === k && pop.anchor?.closest('[data-cl14="fbar"]') != null;
@@ -143,8 +147,8 @@ const Row: React.FC<ContactFilterStripProps & { folded: boolean; inert?: boolean
       {!folded && chips[2]}
       {folded && dd("more", <>More filters{onChips ? <em>{onChips}</em> : null}</>, onChips > 0)}
       <GenreField filters={f} onFilters={onFilters} tallies={tallies} inert={inert} />
-      {contactFilterCount(f) > 0 && (
-        <button type="button" className="cl14-fclear" data-cl14="clear-all" tabIndex={inert ? -1 : 0} onClick={() => onFilters(emptyContactFilters())}>Clear all</button>
+      {(contactFilterCount(f) > 0 || extraOn) && (
+        <button type="button" className="cl14-fclear" data-cl14="clear-all" tabIndex={inert ? -1 : 0} onClick={() => (onClearAll ? onClearAll() : onFilters(emptyContactFilters()))}>Clear all</button>
       )}
 
       {mine("status") && (
