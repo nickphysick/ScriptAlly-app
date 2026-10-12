@@ -22,11 +22,13 @@
 /* ⚠️ FIRST IN THE SHEET, AT 0-1-0: `lib/brand.tsx` names a body family on bare span/p/div/button/
    input/label at runtime (0-0-1). This beats it by one class and — being first — loses on source
    order to every `.cpv-*` rule below that states its own face (the qcvPage.css arrangement). */
-.cpv-page :where(span, p, div, label, li, ol, b, i, a, button, input, textarea, section, article, aside, form) {
+:is(.cpv-page, .cpv-scope) :where(span, p, div, label, li, ol, b, i, a, button, input, textarea, section, article, aside, form) {
   font-family: inherit;
 }
 
-.cpv-page {
+/* `.cpv-scope` is the same vocabulary for what the page portals out of itself (comps v25: the comp
+   form inside the drawer). A portal is outside `.cpv-page`, where every token below would resolve to nothing. */
+.cpv-scope, .cpv-page {
   --cpv-ink: var(--sp-ink);
   --cpv-muted: var(--shell-mute);
   --cpv-hair: var(--shell-hairline);
@@ -53,7 +55,7 @@
   padding-bottom: 110px;
   min-width: 0;
 }
-.cpv-page *, .cpv-page *::before, .cpv-page *::after { box-sizing: border-box; }
+:is(.cpv-page, .cpv-scope) *, :is(.cpv-page, .cpv-scope) *::before, :is(.cpv-page, .cpv-scope) *::after { box-sizing: border-box; }
 
 /* ── the group: the full header is row 1 across both tracks; the column and the rail are row 2 at
    the rule + 24 (page-anatomy-v2 §3 — the Contact list's `.clv-group`, exactly) ── */
