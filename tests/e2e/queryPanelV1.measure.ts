@@ -468,31 +468,22 @@ test.describe("Query panel v1", () => {
           await page.waitForTimeout(6000);
           const end = dump();
           const ids = (x: { id: string }[]) => x.map((e) => e.id).join();
-          /* ⚠️ WHAT THE DELETE-ENTRY PRIMITIVE PUTS BACK, AND WHAT IT DOES NOT (found by this lock, 11 Oct). The status, the
-             stage dates and the query's log return. Two fields the response wrote do not: `expectedSendDate` and
-             `sendReminderDate` stay on the query. (`responseDeadline` was reported here at first; that was the
-             fixture's — see seedQp1Save.mjs.) Neither is the panel's
-             doing, and data writes are out of this pack's scope — so the lock holds what returns, and RECORDS the two
-             that do not rather than passing over them. The journey's own Undo (a snapshot) restores both. */
-          const moved = ["status", "dateSent", "fullRequestedDate", "partialRequestedDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
-          L.check("P13", `${w} undone: the status and the stage dates are as they started`, end.query?.status === "Queried" && moved.length === 0, `status ${end.query?.status}; differing: ${moved.join() || "none"}`);
-          const left = ["expectedSendDate", "sendReminderDate"].filter((k) => JSON.stringify(end.query?.[k] ?? null) !== JSON.stringify(before.query?.[k] ?? null));
-          console.log(`  P13 ${w}: NOT put back by the delete-entry primitive: ${left.join(", ") || "nothing"}`);
+          /* ASSERTED since fix-delete-entry (12805f56) merged here: "It never happened" clears what the entry wrote
+             and removes its feed row, so the query is its starting snapshot again, field for field. (Before the fix
+             this lock printed `expectedSendDate`, `sendReminderDate` and the feed row as leftovers.) */
+          const all = [...new Set([...Object.keys(before.query ?? {}), ...Object.keys(end.query ?? {})])].sort();
+          const differ = all.filter((k) => JSON.stringify(end.query?.[k]) !== JSON.stringify(before.query?.[k]));
+          L.check("P13", `${w} undone: the query document equals its starting snapshot, field for field`, end.query?.status === "Queried" && differ.length === 0, differ.length ? differ.map((k) => `${k}: ${JSON.stringify(before.query?.[k]) ?? "absent"} → ${JSON.stringify(end.query?.[k]) ?? "absent"}`).join(" · ") : `${all.length} fields, all as they started`);
           L.check("P13", `${w} undone: the query's own log holds the entries it started with`, ids(end.log) === ids(before.log), `log ${ids(end.log)}`);
-          /* ⚠️ …and the FEED's row for the deleted entry is sometimes still there six seconds later (seen in two runs of
-             four). Recorded, not asserted: it is the delete-entry primitive's, and the seeder's --clean removes it. */
-          const feedLeft = end.feed.filter((e) => !before.feed.some((b) => b.id === e.id)).length;
-          console.log(`  P13 ${w}: feed rows left by the delete-entry primitive: ${feedLeft}`);
+          L.check("P13", `${w} undone: no feed row remains`, ids(end.feed) === ids(before.feed), `${ids(before.feed)} → ${ids(end.feed)}`);
           L.check("P13", `${w} undone: no task flag left behind`, end.flags.join() === before.flags.join(), `${end.flags.join() || "none"}`);
-          const extra = Object.keys(end.query ?? {}).filter((k) => !(k in (before.query ?? {})));
-          console.log(`  P13 ${w}: keys on the query that were not there at the start: ${extra.join(", ") || "none"}`);
         }
         await page.locator(`${PANEL} [data-qcv="open-close"]`).click().catch(() => {});
       }
     } finally {
       execSync("node tests/e2e/seedQp1Save.mjs --clean", { stdio: "inherit" });
     }
-    L.done(MUT === "P13" ? 6 : 20);
+    L.done(MUT === "P13" ? 6 : 22);
   });
 
   test("P14 · tray: a row's tray button steps that row's panel, and the panel is the only dialog", async ({ page }) => {

@@ -75,6 +75,8 @@ b.set(doc(db, "users", uid, "queries", Q), {
      agency-derived one on load, so a fixture that writes it loses it the moment the page opens — which P13 first
      read as the delete-entry flow failing to put it back. */
   personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
+  /* what `recomputeQuery` derives for a Queried query, so "equal to its starting snapshot" is a fair test */
+  revisionRound: 1, hasAgentResponded: false, lastStatusChange: iso(SENT),
 });
 const act = `${PREFIX}act-sent`;
 b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MS, activityType: "Query Sent", description: "Query sent to Petra Nwosu at Nwosu & Hale", date: iso(SENT), details: "Sent via Email", resultingStatus: "Queried" });
