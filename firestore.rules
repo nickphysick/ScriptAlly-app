@@ -137,7 +137,9 @@ service cloud.firestore {
         && (!data.keys().hasAny(['setting']) || (data.setting is string && data.setting.size() <= 2048))
         && (!data.keys().hasAny(['series']) || (data.series is string && data.series.size() <= 2048))
         // Structured comps — a list of maps {title, author?, publisher?, year?, note?, media?,
-        // matchAxis?, id?, source?}. Per-item shape is client-enforced (rules can't iterate a
+        // matchAxis?, id?, source?}, plus the retired `inQuery?` (comps v25: the app no
+        // longer reads or writes it; a stored value is still ACCEPTED on a write, nothing here rejects
+        // it and nothing migrates it). Per-item shape is client-enforced (rules can't iterate a
         // list); optional-when-present so docs written before any field was added stay updatable.
         // The comps-page v2 fields (publisher/media/matchAxis) and `verification` needed NO
         // rule change — the list is only size-capped, and `comps` is already in the update allowlist.

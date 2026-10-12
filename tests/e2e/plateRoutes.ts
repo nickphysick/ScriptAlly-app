@@ -31,7 +31,8 @@ export const BAND_ROUTES: readonly string[] = ["/queries/analytics"];
  * Manuscripts joined on 9 Oct (Manuscripts v21): the book's title as a 72px typewriter title, one line, two buttons,
  * the Archivist in the flow at the column's right edge. Its geometry belongs to `manuscriptsV21` H1/H2.
  */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts"];
+/* /manuscripts/comps joined with Comparable titles v25 (12 Oct): its title panel is page-local (`data-own-header`), CV25 B1 holds it. */
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The

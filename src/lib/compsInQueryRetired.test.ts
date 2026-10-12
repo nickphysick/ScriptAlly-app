@@ -15,8 +15,18 @@ import { compRows } from "./manuscriptShelf";
 import type { CompTitle } from "../types";
 
 const FLAG = ["in", "Query"].join("");
-/** The files allowed to spell the retired name: its declaration, the test asserting the Scout never sets it, and this lock. */
-const MAY_NAME_IT = ["src/types.ts", "src/lib/suggestComps.test.ts", "src/lib/compsInQueryRetired.test.ts"];
+/**
+ * THE EXEMPT SET: exactly two files may spell the retired name.
+ *   - `src/types.ts` declares it, marked retired, because stored documents may still carry it;
+ *   - `src/lib/suggestComps.ts` names it in a comment. That file is the Scout's client, which this
+ *     pack may not touch, and NOTHING CALLS IT: the comps page mounts no Scout and `SCOUT_LIVE` is
+ *     off. It is a known leftover for when the Scout goes live.
+ * This lock audits the app's source. It does not audit firestore.rules, which go on accepting a
+ * stored value (no migration writes).
+ */
+const MAY_NAME_IT = ["src/types.ts", "src/lib/suggestComps.ts"];
+/** The scanner has to spell what it hunts for; it skips itself by name, apart from the exempt set. */
+const SELF = "src/lib/compsInQueryRetired.test.ts";
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const f of readdirSync(dir)) {
@@ -31,9 +41,15 @@ describe("CV25 A4: inQuery is retired", () => {
   it("no source outside types.ts names it", () => {
     const files = walk("src");
     expect(files.length, "the sweep found the source tree").toBeGreaterThan(500);
-    const hits = files.filter((p) => readFileSync(p, "utf8").includes(FLAG)).sort();
+    const hits = files.filter((p) => p !== SELF && readFileSync(p, "utf8").includes(FLAG)).sort();
     expect(hits).toEqual([...MAY_NAME_IT].sort());
-    expect(MAY_NAME_IT.length).toBe(3);
+    expect(MAY_NAME_IT.length).toBe(2);
+  });
+  it("the Scout's client, the one other file that names it, has no caller on the comps page", () => {
+    const page = ["ComparableTitlesPage.tsx", "comps25/CompsScout.tsx", "comps25/CompsLibrary.tsx", "comps25/CompDrawer.tsx", "comps25/CompLetterPicker.tsx", "comps25/CompsStrip.tsx", "comps25/CompsHow.tsx"]
+      .map((f) => readFileSync(`src/components/manuscripts/${f}`, "utf8")).join("\n");
+    /* an import, never a mention: comments in those files say what they do not reach */
+    expect(page).not.toMatch(/from\s+["'][^"']*suggestComps["']/);
   });
   it("the declaration that remains says it is retired", () => {
     const types = readFileSync("src/types.ts", "utf8");

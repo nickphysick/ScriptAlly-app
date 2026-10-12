@@ -27,17 +27,19 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /** §0.3, as filled in: the pages whose header leads with a count, and the pages that lead with a title. */
 /* Query Centre v137 §A: /queries is a TITLE page now ("Every query, in one place"), so H2, H3 and H7 no longer read it
    (tests/e2e/RETIRED-query-centre-v137.md); QC137 A1 holds its header. */
-export const NUMBER = ["/agents", "/manuscripts/comps", "/manuscripts/packages", "/todo"] as const;
-export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/todo/calendar", "/todo/noteboard"] as const;
+/* Comparable titles v25 §B: /manuscripts/comps is a TITLE page now ("Every comp, and where it went"), so H2, H3 and H7 no
+   longer read it (tests/e2e/RETIRED-comps-v25.md); CV25 B1 holds its header. */
+export const NUMBER = ["/agents", "/manuscripts/packages", "/todo"] as const;
+export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar", "/todo/noteboard"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
 const WORDS: Record<string, RegExp> = {
-  "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/, "/manuscripts/comps": /^comp titles?$/,
+  "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/,
   "/manuscripts/packages": /^packages?$/, "/todo": /^things? to do$/,
 };
 /** what each page's own body counts, for H3: a selector whose visible matches are the count, or a reader */
-const ROWS: Record<string, string> = { "/manuscripts/comps": '[data-cpv="comp"]', "/manuscripts/packages": '[data-ppv="pkg"]' };
+const ROWS: Record<string, string> = { "/manuscripts/packages": '[data-ppv="pkg"]' };
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* restore v136's open header on /queries: no surface, a ruled corner */
