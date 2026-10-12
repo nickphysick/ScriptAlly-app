@@ -1,0 +1,4 @@
+  ✗ P13 · 1512 undone: the query document equals its starting snapshot, field for field — expectedSendDate: absent → {"type":"firestore/timestamp/1.0","seconds":1793016000,"nanoseconds":0} · sendReminderDate: absent → {"type":"firestore/timestamp/1.0","seconds":1792839600,"nanoseconds":0}
+  ✗ P13 · 1280 undone: the query document equals its starting snapshot, field for field — expectedSendDate: absent → {"type":"firestore/timestamp/1.0","seconds":1793016000,"nanoseconds":0} · sendReminderDate: absent → {"type":"firestore/timestamp/1.0","seconds":1792839600,"nanoseconds":0}
+  1 failed
+  1 passed (1.3m)

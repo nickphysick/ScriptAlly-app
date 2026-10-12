@@ -461,6 +461,8 @@ test.describe("Query panel v1", () => {
         const mid = dump();
         L.check("P13", `${w} the write happened`, mid.query?.status === "Full Requested" && mid.log.length === before.log.length + 1, `${mid.query?.status} · ${before.log.length} → ${mid.log.length} log entries`);
         if (MUT !== "P13") {
+          /* `QP1_MUTATE=P13CLEAR`: the delete skips its journey-field clear (lib/entryDeleteWrite's development switch) */
+          if (MUT === "P13CLEAR") await page.evaluate(() => { (window as unknown as { __SA_SKIP_ENTRY_CLEAR: boolean }).__SA_SKIP_ENTRY_CLEAR = true; });
           await page.locator(`${PANEL} .tl-ev`).last().locator(".tl-more").click();
           await page.locator(`${PANEL} [data-side-slot] .cor-branch`, { hasText: /It never happened/ }).click();
           await page.locator(`${PANEL} [data-qcv="entry-del-go"]`).click();
