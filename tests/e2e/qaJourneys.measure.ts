@@ -16,6 +16,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { collection, doc, getDoc, getDocs, query as fsQuery, where } from "firebase/firestore";
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
+import { rawSet, restoreSet, type Raw } from "./journeyGuard";
 
 let asserted = 0;
 const ok = (c: unknown, m: string) => { asserted++; expect(c, m).toBeTruthy(); };
@@ -73,7 +74,23 @@ async function toReview(page: Page) {
   }
   await expect(page.locator("[data-qad-review]")).toBeVisible();
 }
+/**
+ * ⚠️ EVERY SAVE IN THIS FILE IS PUT BACK AT THE END OF ITS TEST, PASS OR FAIL (`journeyGuard`). The app's Undo is
+ *    what each case asserts; it is not what the account depends on. `saveAndUndo` records the documents as they
+ *    stood before the save, and the `afterEach` below writes back anything still different — the toast that
+ *    never came, the lost click, the assertion that threw before the press. A clean case clears its own record.
+ *    `QA_SKIP_UNDO=1` skips the press, to prove the guard: the case fails, and the account is still put back.
+ */
+let guard: { before: Raw; ids: () => string[] } | null = null;
+test.afterEach(async () => {
+  const g = guard; guard = null;
+  if (!g) return;
+  const fixed = await restoreSet(g.before, g.ids());
+  if (fixed.length) console.log(`[journeyGuard] the app's Undo did not put the account back; restored directly:\n  ${fixed.join("\n  ")}`);
+});
+
 async function saveAndUndo(page: Page, ids: () => string[], before: Docs, onSaved: () => Promise<void>) {
+  guard = { before: await rawSet(ids()), ids };
   await page.locator("[data-qad-primary]").click();
   /* a big save (an accept withdrawing many queries) can take well past 20s; the wait is long because
      a toast that never arrives means NO undo runs, and the mutation run left 115 documents that way */
@@ -83,12 +100,15 @@ async function saveAndUndo(page: Page, ids: () => string[], before: Docs, onSave
      account changed — it happened once, on `msv12-q-8`, and was repaired by hand. */
   let failure: unknown = null;
   try { await onSaved(); } catch (e) { failure = e; }
+  if (process.env.QA_SKIP_UNDO) throw new Error("QA_SKIP_UNDO: the Undo was not pressed (the guard's own proof)");
   const undo = page.locator("[data-qad-undo]");
   ok(await undo.count() > 0, "no Undo on the bar — THE HARNESS ACCOUNT HAS BEEN CHANGED; restore it by hand");
   await undo.click();
   await expect(page.locator('[data-qad-toast="done"]')).toBeVisible({ timeout: 20_000 });
   await expect.poll(async () => diffSets(before, await readSet(ids())), { timeout: 15_000, message: "undo left the account different from before" }).toEqual([]);
   asserted++;
+  /* the account is as it was: nothing for the guard to do */
+  guard = null;
   if (failure) throw failure;
 }
 

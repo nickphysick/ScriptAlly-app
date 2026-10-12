@@ -22,6 +22,7 @@ import { mkdirSync } from "node:fs";
 import { collection, doc, getDoc, getDocs, query as fsQuery, where } from "firebase/firestore";
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
+import { rawSet, restoreSet } from "./journeyGuard";
 import { openQueryById, openTab } from "./openQuery";
 
 const TERMINAL = new Set(["Rejected", "Withdrawn", "No Response", "Signed"]);
@@ -79,6 +80,7 @@ test.describe("v1.1 — deleting a history entry", () => {
     expect(target, "a Partial Requested query with two status rungs").toBeTruthy();
     const id = target!.id;
     const before = await readSet(id);
+    const raw = await rawSet([id]);
     const log = await rungs(id);
     const host = await openQueryById(page, id);
     await openTab(page, host, "Tracking");
@@ -102,10 +104,15 @@ test.describe("v1.1 — deleting a history entry", () => {
       const expected = remaining[remaining.length - 1].st;
       await expect.poll(async () => String((await getDoc(doc((await harnessDb()).db, "users", (await harnessDb()).uid, "queries", id))).data()?.status), { timeout: 15_000, message: "the status did not go back to the entry before it" }).toBe(expected);
       await expect(page.locator(".qad-toast")).toContainText(`STATUS NOW ${expected.toUpperCase()}`);
-    } catch (e) { failure = e; } finally {
+    } catch (e) { failure = e; }
+    /* the app's Undo is asserted; whatever it leaves, the entry is put back directly at the end (`journeyGuard`) */
+    try {
       await page.locator("[data-qad-undo]").click();
       await expect(page.locator('[data-qad-toast="done"]')).toBeVisible({ timeout: 30_000 });
       await expect.poll(async () => diffSets(before, await readSet(id)), { timeout: 20_000, message: "Undo left the account different" }).toEqual([]);
+    } catch (e) { failure = failure ?? e; } finally {
+      const fixed = await restoreSet(raw, [id]);
+      if (fixed.length) console.log(`[journeyGuard] the delete was not undone; restored directly:\n  ${fixed.join("\n  ")}`);
     }
     if (failure) throw failure;
   });
