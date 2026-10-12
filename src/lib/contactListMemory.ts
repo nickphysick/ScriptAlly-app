@@ -35,14 +35,12 @@ export interface ListMemory {
   sort: SortKey;
   reversed: boolean;
   density: Density;
-  /** v15 §4 — the list shows only the agents who are ready to query (the next-step section's own rule) */
-  readyOnly: boolean;
   /** v16 §B — the "At a glance" group the list is filtered to, or null */
   glance: GlanceKey | null;
 }
 
 export const DEFAULT_LIST_MEMORY = (): ListMemory =>
-  ({ filters: emptyContactFilters(), search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable", readyOnly: false, glance: null });
+  ({ filters: emptyContactFilters(), search: "", group: "none", sort: "surname", reversed: false, density: "comfortable", glance: null });
 
 const oneOf = <T extends string>(v: unknown, keys: readonly T[], fallback: T): T =>
   (typeof v === "string" && (keys as readonly string[]).includes(v) ? (v as T) : fallback);
@@ -72,7 +70,6 @@ export function sanitiseListMemory(raw: unknown): ListMemory | null {
     sort: oneOf<SortKey>(r.sort, SORT_OPTIONS.map((s) => s.key), d.sort),
     reversed: r.reversed === true,
     density: r.density === "compact" ? "compact" : d.density,
-    readyOnly: r.readyOnly === true,
     glance: typeof r.glance === "string" && (GLANCE_KEYS as readonly string[]).includes(r.glance) ? (r.glance as GlanceKey) : null,
   };
 }

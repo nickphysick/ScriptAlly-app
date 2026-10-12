@@ -45,3 +45,58 @@
 .cl16-gl.qcs .qcs-faces .cl16-fc--none { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 2px #fff; }
 .cl16-gl.qcs .qcs-faces .cl16-fc--live { background: #2a3a52; color: #f4eee5; }
 .cl16-gl.qcs .qcs-faces .cl16-fc--closed { background: #b3aca5; color: #2b2622; }
+
+/* ── §C · THE LIST IS THE PAGE. The group's rows are header · strip · "The full list" · list · footer. The heading
+   stays on the column; the list breaks out to 24px from the page sheet's edges, capped at 1600 and centred.
+   ⚠️ THE SHEET'S WIDTH IS `--hsheet-w` (shell/headerSheet.css, from the shell's published sheet edges), never a
+      container unit: making the scroller a size container would contain its fixed descendants.
+   ⚠️ `.clv-main` IS STILL THE ROWS' SIZE CONTAINER (`col`), so every narrow rule follows the LIST's width. ── */
+.clv-group > .qcs.cl16-flh { grid-row: 3; margin-top: 48px; container: none; }
+.ws-app.sheet-wide .clv-group > .qcs.cl16-flh { margin-top: 56px; }
+.cl16-flh.qcs .qcs-head { margin: 0; }
+@media (min-width: 768px) {
+  .clv-group > .clv-main {
+    grid-row: 4; justify-self: start; box-sizing: border-box; max-width: none;
+    --cl16-w: min(1600px, calc(var(--hsheet-w) - 48px));
+    width: var(--cl16-w);
+    margin: 16px 0 0 calc(50% - var(--cl16-w) / 2);
+  }
+}
+@media (max-width: 767.98px) { .clv-group > .clv-main { grid-row: 4; margin-top: 16px; } }
+/* the list's box: v14's white panel, no longer 20px wider than its column (the breakout is the column's) */
+.cl16-list.cl14-ws { margin: 0 0 20px; }
+/* the ink control bar: the list's first row */
+.cl16-bar.cl14-bar { background: #1f2a3c; border-radius: 16px 16px 0 0; padding: 18px 28px; }
+/* the filter row: white, the chips left and the count right, on one line */
+.cl16-frow.cl14-frow {
+  display: flex; align-items: center; gap: 12px; padding: 18px 28px;
+  background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.07);
+}
+.cl16-frow .cl14-fwrap { flex: 1 1 0; min-width: 0; }
+.cl16-frow .cl14-fbar { margin: 0; }
+.cl16-frow .cl16-showing { flex: none; white-space: nowrap; font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl16-frow .cl16-showing b, .cl16-frow .cl16-showing span { font-family: var(--sp-serif) !important; }
+.cl16-frow .cl16-showing b { font-weight: 600; color: #1c130f; }
+/* "for {title}" goes when the list is narrower than it is at a 1440 window (1144): the row is one line at 1280 */
+@container col (max-width: 1143.98px) { .cl16-frow .cl16-showing .cl16-for { display: none; } }
+
+/* the letter tabs (the oracle's `#idx`): card-file tabs on an ink line, under the filter row. Never sticky. */
+.cl16-list .clv-idxwrap { margin: 0 0 10px; position: static; }
+.cl16-list .clv-idx {
+  grid-template-columns: 72px repeat(26, minmax(0, 1fr)); gap: 3px; align-items: end;
+  padding: 0 18px; background: none; border-radius: 0; overflow: visible; box-shadow: none;
+  border-bottom: 2px solid #1f2a3c;
+}
+.cl16-list .clv-ixtab {
+  height: 40px; border-left: 0; border-radius: 9px 9px 0 0; background: none;
+  font: 400 17px/1 var(--sp-type); color: rgba(28, 19, 15, 0.22);
+}
+.cl16-list .clv-ixtab.has { background: #efe9df; color: #1c130f; }
+.cl16-list .clv-ixtab.has:hover { background: #e6dfd3; }
+.cl16-list .clv-ixtab.has i { font: 400 7.5px/1.3 var(--font-mono); font-style: normal; color: rgba(28, 19, 15, 0.5); margin-top: 3px; }
+.cl16-list .clv-ixtab.on { background: #1f2a3c; color: #f4eee5; }
+.cl16-list .clv-ixtab.on i { color: rgba(244, 238, 229, 0.7); }
+.cl16-list .clv-ixtab.clv-ixall { background: #e6dfd3; font: 500 12px/1 var(--sp-serif); color: #1c130f; }
+.cl16-list .clv-ixtab:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+/* a letter's landing: the row it scrolled to, washed for 1.4s (the page removes the mark) */
+.cl16-list .clv-row[data-wash] { background: #fbf6ea; }

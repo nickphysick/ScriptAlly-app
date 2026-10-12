@@ -240,8 +240,16 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
   ];
   const xRows = buildQcRows([...QUERIES, ...extra], CONTACT_FIXTURE_AGENTS, [], NOW);
   const xFacts = CONTACT_FIXTURE_AGENTS.map((a) => agentFacts(a, xRows, MS.id));
-  it("the four groupings, Letter first", () => {
-    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["Letter", "Status", "Action required", "Country"]);
+  it("the five groupings, No grouping first (v16 §C: the list opens ungrouped)", () => {
+    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["No grouping", "Letter", "Status", "Action required", "Country"]);
+  });
+  it("No grouping: one unlabelled group holding the ordered list as it was sorted; an empty list has no group", () => {
+    const ordered = sortFacts(xFacts, "surname");
+    const g = contactGroups("none", ordered);
+    expect(g).toHaveLength(1);
+    expect(g[0].label).toBe("");
+    expect(g[0].ids).toEqual(ordered.map((x) => x.agent.id));
+    expect(contactGroups("none", [])).toEqual([]);
   });
   it("Status: furthest along first, Not queried then Closed last — ruling Q6's order, from the produced groups", () => {
     const g = contactGroups("status", sortFacts(xFacts, "surname"));

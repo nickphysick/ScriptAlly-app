@@ -87,6 +87,21 @@ const Faces: React.FC<{ k: GlanceKey; faces: readonly GlanceFace[]; total: numbe
   );
 };
 
+export const LIST_HEADING = "The full list";
+export const LIST_KICKER = "Every agent on file";
+export const LIST_HINT = "Click a column heading to sort";
+
+/** v16 §C — "The full list": the strip's heading row again, in the same type, leading into the list */
+export const ContactListHeading: React.FC = () => (
+  <div className="qcs cl16-gl cl16-flh" data-cl16="list-heading-row">
+    <div className="qcs-head">
+      <h2 className="qcs-h" data-cl16="list-heading">{LIST_HEADING}</h2>
+      <span className="qcs-k" data-cl16="list-kicker">{LIST_KICKER}</span>
+      <i className="qcs-hint" data-cl16="list-hint">{LIST_HINT}</i>
+    </div>
+  </div>
+);
+
 /** the model the strip draws while the page settles: every figure a blank of its box */
 export const BLANK_GLANCE: GlanceModel = {
   total: 0, week: 0, month: 0, weeks: [],

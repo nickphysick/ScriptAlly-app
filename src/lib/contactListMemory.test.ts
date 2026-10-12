@@ -18,7 +18,7 @@ describe("sanitiseListMemory", () => {
   it("a good value round-trips", () => {
     const m = {
       filters: { ...emptyContactFilters(), status: ["queried", "pr"], action: true, open: "open", queried: "no", mats: true, always: true, genres: ["thriller", "crime"], genreMode: "all" },
-      search: "ell", group: "action", sort: "reply", reversed: true, density: "compact", readyOnly: true, glance: "live",
+      search: "ell", group: "action", sort: "reply", reversed: true, density: "compact", glance: "live",
     };
     expect(sanitiseListMemory(JSON.parse(JSON.stringify({ v: 4, ...m })))).toEqual(m);
   });
@@ -28,26 +28,24 @@ describe("sanitiseListMemory", () => {
     expect(sanitiseListMemory({ v: 1, filters: {}, group: "letter" })).toBeNull();
     expect(sanitiseListMemory({ v: 2, filters: {}, group: "letter", readyOnly: true })).toBeNull();
   });
-  it("junk reads as the default, field by field — a grouping that no longer exists is Letter", () => {
+  it("junk reads as the default, field by field — a grouping that no longer exists is No grouping", () => {
     const r = sanitiseListMemory({
-      v: 4, readyOnly: "yes", glance: "queried",
+      v: 4, glance: "queried",
       filters: { status: ["queried", "Offer", 3, "queried"], action: "yes", open: ["open"], queried: "maybe", stand: ["you"], genres: [1, "crime", ""], genreMode: "most" },
       search: 7, group: "agency", sort: "due", reversed: "yes", density: "huge",
     })!;
     expect(r.filters).toEqual({ ...emptyContactFilters(), status: ["queried"], genres: ["crime"] });
     expect(r.search).toBe("");
-    expect(r.group).toBe("letter");
+    expect(r.group).toBe("none");
     expect(r.sort).toBe("surname");
     expect(r.reversed).toBe(false);
     expect(r.density).toBe("comfortable");
-    /* the mode is on only for a stored `true` — anything else is the whole list */
-    expect(r.readyOnly).toBe(false);
     /* v16: a group the strip does not have is no group */
     expect(r.glance).toBeNull();
     expect(sanitiseListMemory(null)).toBeNull();
     expect(sanitiseListMemory("x")).toBeNull();
   });
-  it("the defaults are Letter and Surname, A to Z", () => {
-    expect(DEFAULT_LIST_MEMORY()).toEqual({ filters: emptyContactFilters(), search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable", readyOnly: false, glance: null });
+  it("the defaults are No grouping and Surname, A to Z (v16 §C)", () => {
+    expect(DEFAULT_LIST_MEMORY()).toEqual({ filters: emptyContactFilters(), search: "", group: "none", sort: "surname", reversed: false, density: "comfortable", glance: null });
   });
 });

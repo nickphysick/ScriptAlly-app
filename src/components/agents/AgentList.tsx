@@ -49,8 +49,7 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation } from "react-router-dom";
-import { CONTACT_INDEX_HAWK } from "./contact/ContactHeader";
-import { CONTACT_BANNER_LINE, ContactOpenHeader } from "./contact/ContactOpenHeader";
+import { ContactOpenHeader } from "./contact/ContactOpenHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
@@ -62,9 +61,8 @@ import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { ContactListControls, type ContactPop } from "./contact/ContactListControls";
 import { ContactFilterStrip } from "./contact/ContactFilterStrip";
-import { ContactAzRail, ContactBarExtras, CountTo, useReflow } from "./contact/ContactTouches";
+import { ContactBarExtras, CountTo, useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
-import { YourAgentsBar } from "./contact/YourAgentsBar";
 import { usePopover } from "../shell/ListPills";
 import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -72,13 +70,8 @@ import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import "./contact/contactV13.css";
 import "./contact/contactV14.css";
-import { ContactNextStep } from "./contact/ContactNextStep";
-import { nextStep, reopenReminderTask } from "../../lib/contactNextStep";
-import { DISCOVER_LIVE, communityAgentFields } from "../../lib/discoverShared";
-import { notifyPrefs } from "../../lib/accountPrefs";
-import { takesBook } from "../../lib/genreMatch";
-import { SubmissionStatus } from "../../types";
-import { ContactStrip } from "./contact/ContactStrip";
+import { nextStep } from "../../lib/contactNextStep";
+import { ContactListHeading, ContactStrip } from "./contact/ContactStrip";
 import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -125,7 +118,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths, communityAgents, addAgent,
+    currentUser, updateUserPaths,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -159,26 +152,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      to the page puts the list back as it was; a fresh session starts from the defaults. A search
      handed in from the shell wins over a remembered one. */
   const remembered = useMemo(() => readListMemory(), []);
-  const [filters, setFiltersRaw] = useState<ContactFilters>(() => remembered?.filters ?? emptyContactFilters());
-  /* v15 §4 — THE READY-ONLY LIST MODE: the list shows exactly the agents the next-step section calls ready (fits the
-     book OR genres unknown — a set no plain filter can express). The pill and "See all" switch it on; ✕ or touching
-     any filter leaves it; remembered and validated with the rest. Every filter write goes through `setFilters`,
-     which leaves the mode — the pill is the one caller that uses the raw setter. */
-  const [readyOnly, setReadyOnly] = useState<boolean>(() => remembered?.readyOnly ?? false);
+  const [filters, setFilters] = useState<ContactFilters>(() => remembered?.filters ?? emptyContactFilters());
   /* v16 §B — THE "AT A GLANCE" GROUP the list is filtered to (Not queried · Querying · Closed), or null. It sits
      BESIDE the chips: both apply, a chip change leaves it alone, and "Clear all" clears both. */
   const [glance, setGlance] = useState<GlanceKey | null>(() => remembered?.glance ?? null);
-  const setFilters = useCallback((f: ContactFilters) => { setReadyOnly(false); setFiltersRaw(f); }, []);
   const [search, setSearch] = useState(() => searchQuery?.trim() || remembered?.search || "");
-  /* v12 §9: the page opens on the card index — grouped by letter, ordered by surname */
-  const [groupKey, setGroupKey] = useState<GroupKey>(() => remembered?.group ?? "letter");
+  /* v16 §C: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill), and the
+     choice is remembered with the rest (sessionStorage `sa.contactList.v4`: for the visit, as the pill's was) */
+  const [groupKey, setGroupKey] = useState<GroupKey>(() => remembered?.group ?? "none");
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => remembered?.sort ?? "surname");
   const [reversed, setReversed] = useState<boolean>(() => remembered?.reversed ?? false);
   /* v14 §5 — the row density (Phase 6 draws its toggle); remembered with the rest */
   const [density, setDensity] = useState<Density>(() => remembered?.density ?? "comfortable");
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
-  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, readyOnly, glance }); }, [filters, search, groupKey, sortKey, reversed, density, readyOnly, glance]);
+  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, glance }); }, [filters, search, groupKey, sortKey, reversed, density, glance]);
   const pop = usePopover<ContactPop>();
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
@@ -268,7 +256,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
     [agents, queries, scoped, book, todayIso],
   );
-  const readyIds = useMemo(() => new Set(step.ready.map((a) => a.id)), [step]);
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
   const factsAll = useMemo(
@@ -280,17 +267,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (x: { genres: string[] }) => x.genres.some(bookHit),
     [bookHit],
   );
-  /* the pool: Find, and (in the ready-only mode) the next-step section's own ready set — so every count is faceted under it */
+  /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
   const inPool = useCallback(
-    (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!readyOnly || readyIds.has(x.agent.id)) && (!glance || glanceOf(x) === glance),
-    [search, readyOnly, readyIds, glance],
+    (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!glance || glanceOf(x) === glance),
+    [search, glance],
   );
   /* v16 §B — the strip's figures, over every agent (never the filtered view) */
   const glanceM = useMemo(
     () => glanceModel({ facts: factsAll, rows: qcRows, msId: scoped?.id ?? null, readyIds: step.ready.map((a) => a.id), nowMs }),
     [factsAll, qcRows, scoped, step, nowMs],
   );
-  const genreWord = book.length ? joinGenres(book) : null;
   /* v14 §4: every control's count is faceted — under every OTHER control and Find */
   const counts = useMemo(() => facetCounts(factsAll, filters, inPool), [factsAll, filters, inPool]);
   const tallies = useMemo(() => genreTallies(factsAll), [factsAll]);
@@ -325,19 +311,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   rowKeys.current = { ...rowKeys.current, kfId, displayIds, factsById };
   /* §7.2 — the gentle reflow, on any filter, group, sort or Find change (never on first load) */
   useReflow(gridRef, JSON.stringify([filters, groupKey, sortKey, reversed, search.trim()]));
-  /* §7.4 — the A–Z rail's letters: the dividers the list draws */
-  const railLetters = useMemo(() => new Set(groupKey === "letter" ? groups.map((g) => g.label) : []), [groups, groupKey]);
   const shownGroups = groups;
   const visible = visibleFacts;
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
-  /* "M NEED YOU" — the agents whose move it is (the v12 union: requests, offers and past-date nudges) */
-  const needYou = useMemo(() => factsAll.filter((x) => x.stand === "you").length, [factsAll]);
   /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
   const controls = (
     <ContactListControls
       find={search} onFind={setSearch}
       groupKey={groupKey} onGroup={setGroupKey}
-      sortKey={sortKey} reversed={reversed} onSort={setSortKey} onReverse={() => setReversed((r) => !r)}
       pop={pop}
       findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>}
       /* §7.6–7.7 — Comfortable / Compact and the key sheet, at the controls row's right */
@@ -351,7 +332,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setFilters(emptyContactFilters());
     setSearch("");
     setGlance(null);
-    setGroupKey("letter");
+    setGroupKey("none");
     setSortKey("surname");
   }, [setSortKey, setFilters]);
 
@@ -393,28 +374,49 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     };
   }, [active, groupKey, visibleFacts]);
 
-  /* a letter scrolls its divider under the sticky bar (the divider's own scroll-margin-top lands
-     it); under another grouping the pick RESTORES the letter grouping first. "All" clears the mark
-     and returns to the top of the list. */
+  /* v16 §C — A LETTER TAB. In the ungrouped list it scrolls to the first agent whose surname starts with the
+     letter, lands that row just under the pinned controls and washes it for 1.4s. Grouped by letter it scrolls to
+     the letter's divider; under any other grouping the pick restores the letter grouping first. "All" returns to
+     the list's top.
+     ⚠️ THE LANDING IS MEASURED, IN PASSES: the stack the row lands under changes height as it pins, so the target
+     is re-read after each jump (the column headings' own bottom, once they have stuck) until it holds. An instant
+     jump, never a smooth one: a smooth scroll cannot be corrected until it ends. */
+  const landUnder = useCallback((el: HTMLElement) => {
+    const sc = el.closest<HTMLElement>(".wpg-scroll");
+    if (!sc) return;
+    let passes = 0;
+    const pass = () => {
+      const labels = el.closest(".lt-panel")?.querySelector<HTMLElement>(":scope > .lt-labels");
+      const line = labels ? labels.getBoundingClientRect().bottom : sc.getBoundingClientRect().top + 12;
+      const delta = el.getBoundingClientRect().top - line;
+      if (Math.abs(delta) < 0.5 || passes >= 4) return;
+      passes += 1;
+      sc.scrollTo({ top: sc.scrollTop + delta, behavior: "instant" as ScrollBehavior });
+      requestAnimationFrame(() => requestAnimationFrame(pass));
+    };
+    pass();
+  }, []);
   const pickLetter = useCallback((letter: string | null) => {
-    const behavior = prefersReducedMotion() ? ("auto" as const) : ("smooth" as const);
-    const toBand = (L: string) =>
-      mainColRef.current
-        ?.querySelector(`[data-clv="band"][data-letter="${L}"]`)
-        ?.scrollIntoView({ block: "start", behavior });
+    const col = mainColRef.current;
+    const sc = col?.closest<HTMLElement>(".wpg-scroll");
+    if (!col || !sc) return;
     if (letter === null) {
       setMarkedLetter(null);
-      mainColRef.current?.scrollIntoView({ block: "start", behavior });
+      sc.scrollTo({ top: Math.max(0, sc.scrollTop + col.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12), behavior: "instant" as ScrollBehavior });
+      return;
+    }
+    const toBand = () => { const b = col.querySelector<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`); if (b) landUnder(b); };
+    if (groupKey === "none") {
+      const row = col.querySelector<HTMLElement>(`[data-clv="row"][data-initial="${letter}"]`);
+      if (!row) return;
+      landUnder(row);
+      row.setAttribute("data-wash", "");
+      window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
       return;
     }
     setMarkedLetter(letter);
-    if (groupKey !== "letter") {
-      setGroupKey("letter");
-      window.setTimeout(() => toBand(letter), 0);
-    } else {
-      toBand(letter);
-    }
-  }, [groupKey]);
+    if (groupKey !== "letter") { setGroupKey("letter"); window.setTimeout(toBand, 0); } else toBand();
+  }, [groupKey, landUnder]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
 
   /**
@@ -806,63 +808,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [addUserTask, openCard]);
   remindRef.current = onHkRemind;
 
-  /* ── v15 §4 — THE NEXT-STEP SECTION's wiring (`step` itself is derived above, beside the pipeline) ── */
-  const allFactsById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x])), [factsAll]);
-  const qFor = useCallback((id: string) => cardQuery(cardRows(qcRows, id, scoped?.id ?? null)), [qcRows, scoped]);
-  const reminded = useCallback((a: Agent) => !!reopenReminderTask(a, userTasks ?? []), [userTasks]);
-  /* Remind me — a dated To-do on the day the agent reopens (the card's own `reopenReminder`); pressed again,
-     the task it found is deleted. The reminder is the To-do list's existing dated task, never a new store. */
-  const toggleRemind = useCallback(async (a: Agent) => {
-    const t = reopenReminderTask(a, userTasks ?? []);
-    if (t) { await deleteUserTask(t.id); return; }
-    const task = reopenReminder(a);
-    if (task) await addUserTask(task);
-  }, [userTasks, addUserTask, deleteUserTask]);
-  const toggleRemindAll = useCallback(async (list: readonly Agent[]) => {
-    const tasks = userTasks ?? [];
-    const allOn = list.every((a) => !!reopenReminderTask(a, tasks));
-    for (const a of list) {
-      const t = reopenReminderTask(a, tasks);
-      if (allOn && t) await deleteUserTask(t.id);
-      else if (!allOn && !t) { const task = reopenReminder(a); if (task) await addUserTask(task); }
-    }
-  }, [userTasks, addUserTask, deleteUserTask]);
-  /* v14 §3 / v15 §4 — the two count pills: each leaves the list showing EXACTLY its own set. "Waiting on you" is
-     v13's your-move standing, a plain filter. "Ready to query" is the ready-only MODE over the next-step section's
-     own ready set (one rule: the section, the pill and See all) — no filters, no Find, the mode on. A pill pressed
-     again clears. */
-  const YOU_FILTERS = useMemo<ContactFilters>(() => ({ ...emptyContactFilters(), action: true }), []);
-  const sameFilters = (a: ContactFilters, b: ContactFilters) => JSON.stringify(a) === JSON.stringify(b);
-  const youOn = !readyOnly && !search.trim() && sameFilters(filters, YOU_FILTERS);
-  const readyOn = readyOnly && !search.trim() && sameFilters(filters, emptyContactFilters());
-  const setPillSet = useCallback((k: "you" | "ready" | null) => {
-    setFiltersRaw(k === "you" ? YOU_FILTERS : emptyContactFilters());
-    setReadyOnly(k === "ready");
-    setSearch("");
-  }, [YOU_FILTERS]);
-  /* "See all N in the list": the ready-only mode, then the list scrolled into view. */
-  const seeAllReady = useCallback(() => {
-    setPillSet("ready");
-    window.setTimeout(() => (wsRef.current ?? mainColRef.current)?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" }), 0);
-  }, [setPillSet]);
-  /* "In Discover" (live only): Discover agents who take the book and are open, and are not already on the list */
-  const discoverPicks = useMemo(() => {
-    if (!DISCOVER_LIVE || !book.length) return [];
-    const held = new Set(agents.map((a) => `${(a.name ?? "").trim().toLowerCase()}|${(a.agency ?? "").trim().toLowerCase()}`));
-    return (communityAgents ?? []).filter((ca) => takesBook(ca.genres, book) && ca.submissionStatus !== SubmissionStatus.CLOSED
-      && !held.has(`${(ca.name ?? "").trim().toLowerCase()}|${(ca.agency ?? "").trim().toLowerCase()}`));
-  }, [communityAgents, agents, book]);
-  /* v15 §4 — "Tell me when it's ready": the request is one leaf on the writer's profile, `notifyPrefs.discover`,
-     written as a dotted path so the map's other keys are left alone (Settings saves the whole map from its reader,
-     which carries this key through). */
-  const notifyDiscover = notifyPrefs(currentUser?.notifyPrefs).discover;
-  const toggleNotifyDiscover = useCallback(() => { void updateUserPaths({ "notifyPrefs.discover": !notifyDiscover }).catch(() => {}); }, [updateUserPaths, notifyDiscover]);
-  const goDiscover = useCallback(() => { if (DISCOVER_LIVE && DISCOVER) onNavigate?.(DISCOVER.tab, DISCOVER.sub); }, [onNavigate]);
-
-
-
-
-
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -936,8 +881,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onWishlistChanged={(id) => openAgentCard(id, { tab: "want", focus: "wishlist", from: "hk", sequence })}
           />
         )}
-        {/* §7.4 — the A–Z rail (portalled; gated on this page being on screen) */}
-        {showList && <ContactAzRail active={active} byLetter={groupKey === "letter"} listRef={mainColRef} letters={railLetters} />}
         {showList && active && guideCorner && tabH > 0 && (
           <PageGuide page={CONTACT_GUIDE_PAGE} steps={CONTACT_GUIDE}
             dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",
@@ -955,37 +898,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
         {pageState === "settling" && (
-          <ContactSkeleton msTitle={scoped?.title?.trim() || null} msGenre={scoped?.genre ?? null}
-            controls={controls}
-            perch={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }} />
+          <ContactSkeleton controls={controls} />
         )}
         {/* v16 §B — "At a glance": four cells; choosing one filters the list and never scrolls */}
         {showList && (
           <ContactStrip model={glanceM} active={glance}
             onGroup={(k) => setGlance((g) => (g === k ? null : k))} onAll={() => setGlance(null)} />
         )}
-        {/* v15 §4 — the next-step section: one of three states, from the writer's data */}
-        {showList && (
-          <ContactNextStep
-            step={step} hasBook={!!scoped} bookTitle={scoped?.title?.trim() || null} genres={genreWord ?? ""}
-            factsById={allFactsById} qFor={qFor} genreHit={bookHit} personal={personalGenres} todayIso={todayIso}
-            reminded={reminded} discoverLive={DISCOVER_LIVE} discover={discoverPicks}
-            notifyDiscover={notifyDiscover} onNotifyDiscover={toggleNotifyDiscover}
-            onOpen={(id, r) => onOpen(id, r)} onAct={actWithoutCard}
-            onAdd={(id, focus) => openCard(id, { tab: "want", focus, from: "slip" })}
-            onSeeAll={seeAllReady}
-            onNewAgent={(r) => openNewAgentCard({ from: "button", originRect: r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null })}
-            onDiscover={goDiscover} onRemind={(a) => void toggleRemind(a)} onRemindAll={(l) => void toggleRemindAll(l)}
-            onAddDiscover={(ca) => void addAgent(communityAgentFields(ca, scoped?.title?.trim() || null))}
-          />
-        )}
-        {/* v15.2 §4 — the banner above the list: a blush band the sheet's full width, its bottom edge an arrow down at
-            the list. 56 (48) of plain page above it, after the next-step band; the list's bar 76 (64) below. */}
-        {showList && (
-          <section className="cl15-ban" data-cl15="banner" aria-label="A note">
-            <p>{CONTACT_BANNER_LINE}</p>
-          </section>
-        )}
+        {/* v16 §C — "The full list": the strip's heading row again, on the column, leading into the list */}
+        {showList && <ContactListHeading />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -994,35 +915,24 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {!showList ? null : (
         <>
 
-        {/* v14 §3 — "YOUR AGENTS": the white panel, 20px wider than the content above on each side, 56 under the
-            next-step section — the ink bar (the hawk, the title, the line, the two pills; the controls on white),
-            the filter strip, then the list. It replaces v13's open banner, slim bar and slate workspace. */}
+        {/* v16 §C — THE LIST IS THE PAGE. It breaks out of the column to 24px from the page sheet's edges (capped at
+            1600, centred): the ink control bar, the white filter row with the count at its right, the letter tabs,
+            then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
-        <section className="cl14-ws" data-cl14="ws" ref={wsRef} aria-label="Agents on file">
-          <YourAgentsBar
-            shown={visibleFacts.length} total={factsAll.length} book={scoped?.title?.trim() || null}
-            you={needYou} ready={step.ready.length} youOn={youOn} readyOn={readyOn}
-            readyOnly={readyOnly} onLeaveReady={() => setReadyOnly(false)}
-            onYou={() => setPillSet(youOn ? null : "you")} onReady={() => setPillSet(readyOn ? null : "ready")}
-            art={{ src: `${CONTACT_INDEX_HAWK.src}?v=${CONTACT_INDEX_HAWK.version}`, width: CONTACT_INDEX_HAWK.width, height: CONTACT_INDEX_HAWK.height }}
-            controls={controls}
-            /* §7.1 — the live count */
-            shownNode={<CountTo value={visibleFacts.length} />}
-          />
-          {/* v14 §4 — the filter strip: on one line, folding into "More filters" when it would wrap */}
-          <div className="cl14-frow" data-cl14="frow">
+        <section className="cl14-ws cl16-list" data-cl14="ws" data-cl16="list" ref={wsRef} aria-label="The full list">
+          <div className="cl14-bar cl16-bar" data-cl16="bar">{controls}</div>
+          {/* the filter row: the chips on one line, folding into "More filters" when they would wrap; the count right */}
+          <div className="cl14-frow cl16-frow" data-cl14="frow" data-cl16="frow">
             <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
               extraOn={!!glance} onClearAll={() => { setFilters(emptyContactFilters()); setGlance(null); }} />
+            <span className="cl16-showing" data-cl16="showing" role="status">
+              Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b>
+              {scoped?.title?.trim() ? <span className="cl16-for" data-cl16="showing-for"> for <b>{scoped.title.trim()}</b></span> : null}
+            </span>
           </div>
           <div className="cl14-list" data-cl14="list">
-        {groupKey === "letter" && (
-          <ContactIndexStrip
-            total={visibleFacts.length}
-            counts={stripCounts}
-            marked={markedLetter}
-            onPick={pickLetter}
-          />
-        )}
+          {/* the letter tabs, under every grouping: they scroll away with the list and never pin */}
+          <ContactIndexStrip total={visibleFacts.length} counts={stripCounts} marked={groupKey === "letter" ? markedLetter : null} onPick={pickLetter} />
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
             default selector, so a filter change still animates the reflow. */}
@@ -1052,8 +962,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               genreHit={bookHit}
               /* §4: under Status and Action grouping the heading already says it */
               hideYourMove={groupKey === "status" || groupKey === "action"}
-              /* §5: Letter draws one panel with letter dividers; any other grouping a powder band per group */
+              /* §5: Letter draws one panel with letter dividers; any other grouping a powder band per group;
+                 v16 §C: no grouping is one panel with no dividers */
               byLetter={groupKey === "letter"}
+              ungrouped={groupKey === "none"}
               /* §6: the sortable column labels drive the page's own sort */
               sort={{ key: sortKey, reversed, onSort: setSortKey, onReverse: () => setReversed((r) => !r) }}
               /* §7.7 the keyboard's ring · §7.3 the Find text marked · §7.6 the density */

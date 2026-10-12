@@ -15,7 +15,7 @@ import { ListDivider, ListGroupHeader, ListPanel, type ListColumn } from "../../
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
-import { AgentFacts, ContactGroup, RowDateLine, type SortKey, rowDateLine } from "../../../lib/contactList";
+import { AgentFacts, ContactGroup, RowDateLine, type SortKey, rowDateLine, surnameInitial } from "../../../lib/contactList";
 import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { dayMonth } from "../../../lib/dates";
@@ -166,6 +166,8 @@ const Row: React.FC<{
       data-clv="row"
       /* flip.ts's own default selector — the FLIP and the save-notice scroll both find rows by it */
       data-agent-card={a.id}
+      /* v16 §C: the surname's initial — what a letter tab scrolls to in the ungrouped list */
+      data-initial={surnameInitial(a)}
       data-shut={shut || undefined}
       data-stand={x.stand}
       data-door={x.door}
@@ -255,15 +257,15 @@ const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPre
 export interface ContactSortControl { key: SortKey; reversed: boolean; onSort: (k: SortKey) => void; onReverse: () => void }
 
 export const ContactRows: React.FC<ContactRowsProps & {
-  byLetter?: boolean; sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
+  byLetter?: boolean; ungrouped?: boolean; sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
 }> = ({
   groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
-  byLetter = true, sort, focusId = null, highlight = "", compact = false,
+  byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false,
 }) => {
   const col = (label: string, k: SortKey | null, align?: "end"): ListColumn => ({
     label, align,
     sort: k && sort ? {
-      on: sort.key === k, reversed: sort.key === k && sort.reversed,
+      on: sort.key === k, reversed: sort.key === k && sort.reversed, ariaSort: true,
       onPress: () => (sort.key === k ? sort.onReverse() : sort.onSort(k)),
     } : undefined,
   });
@@ -283,7 +285,12 @@ export const ContactRows: React.FC<ContactRowsProps & {
   });
   return (
     <div className={`clv-list${compact ? " clv-list--compact" : ""}`} data-clv="list" data-density={compact ? "compact" : "comfortable"}>
-      {byLetter ? (
+      {ungrouped ? (
+        /* v16 §C — no grouping: ONE panel, the labels and then every row, no dividers */
+        <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
+          {groups.map((g) => <React.Fragment key={g.key}>{rowsOf(g)}</React.Fragment>)}
+        </ListPanel>
+      ) : byLetter ? (
         /* Letter: ONE panel — the labels, then each letter's divider and its rows as siblings */
         <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
           {groups.map((g) => (
