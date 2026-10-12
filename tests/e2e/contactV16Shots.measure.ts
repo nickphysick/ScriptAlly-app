@@ -28,6 +28,21 @@ test.describe("Contact list v16 · shots", () => {
         await page.screenshot({ path: `${OUT}/02-full-list-${vp.width}.png` });
       }
       if (want("03-pinned")) { await setScroll16(page, 1700); await page.waitForTimeout(300); await page.screenshot({ path: `${OUT}/03-pinned-${vp.width}.png` }); }
+      if (want("04-filtered")) {
+        await setScroll16(page, 0);
+        await page.locator('.aglist [data-cl16="strip-cell"][data-k="live"]').filter({ visible: true }).first().click();
+        await page.waitForTimeout(700);
+        await page.evaluate(() => { const h = [...document.querySelectorAll<HTMLElement>('[data-cl16="strip-wrap"]')].find((e) => e.getBoundingClientRect().height > 0); h?.scrollIntoView({ block: "start" }); });
+        await page.waitForTimeout(300);
+        await page.screenshot({ path: `${OUT}/04-filtered-${vp.width}.png` });
+        await page.locator('.aglist [data-cl16="strip-cell"][data-k="all"]').filter({ visible: true }).first().click();
+      }
+      if (want("05-full-screen")) {
+        await setScroll16(page, 0);
+        await page.keyboard.press("f"); await page.waitForTimeout(800);
+        await page.screenshot({ path: `${OUT}/05-full-screen-${vp.width}.png` });
+        await page.keyboard.press("f"); await page.waitForTimeout(500);
+      }
     });
   }
 });

@@ -13,7 +13,7 @@
  *    measured sizes with the sidebar open the sheet is under 1440, so the page is compact at both.
  */
 import { test, type Page } from "@playwright/test";
-import { Ledger, SIZES16, near, openContacts16, mutate16, setScroll16 } from "./cl16Lib";
+import { LIB16, Ledger, SIZES16, near, openContacts16, mutate16, setScroll16 } from "./cl16Lib";
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the hero number back in the panel */
@@ -34,6 +34,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   D1: { css: `.cl16-list .clv-idxwrap { position: sticky !important; top: 190px !important; z-index: 20 !important; background: #fff; }` },
   /* pinned from a box that changes with the answer: the sentinel grows once pinned, with scroll anchoring back on */
   D2: { css: `.agl-wpg .wpg-scroll, .cl16-list { overflow-anchor: auto !important; } .cl16-list[data-pinned="true"] .cl16-sentinel { height: 60px !important; }` },
+  /* leaving full screen does not put the page back where it was */
+  E1: { js: `(() => { if (window.__m16e1) return; window.__m16e1 = true; const g = [...document.querySelectorAll(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0); const sc = g.closest(".wpg-scroll"); new MutationObserver(() => { if (!g.hasAttribute("data-full")) for (const t of [0, 50, 400, 700]) setTimeout(() => { sc.scrollTop = 0; }, t); }).observe(g, { attributes: true, attributeFilter: ["data-full"] }); })()` },
+  /* the list's width measured once, and again only when the window is resized */
+  E2: { js: `(() => { if (window.__m16e2) return; window.__m16e2 = true; const m = [...document.querySelectorAll(".aglist .clv-group > .clv-main")].find((e) => e.getBoundingClientRect().height > 0); const pin = () => m.style.setProperty("--hsheet-w", (m.getBoundingClientRect().width + 48) + "px"); pin(); window.addEventListener("resize", () => { m.style.removeProperty("--hsheet-w"); requestAnimationFrame(pin); }); })()` },
 };
 const open = async (page: Page, vp: { width: number; height: number }, lock: string) => { await openContacts16(page, vp); await mutate16(page, lock, MUTATIONS); };
 
@@ -524,5 +528,111 @@ test.describe("Contact list v16", () => {
       L.check("D2", `${w} scrollTop is what was set`, r.drift <= 1, `worst drift ${r.drift.toFixed(1)}`);
     }
     L.done(6);
+  });
+
+  /** the page's frame: the sidebar, what is hidden, the list and the page's scroll */
+  const readFull = (page: Page) => page.evaluate(() => {
+    const { g, sc, sheet } = (window as never as { __cl: () => { g: HTMLElement; sc: HTMLElement; sheet: HTMLElement } }).__cl();
+    const box = (window as never as { __box: (e: Element | null) => { x: number; y: number; w: number; h: number; r: number; b: number } | null }).__box;
+    const shown = (s: string, root: ParentNode = g) => [...root.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().height > 0).length;
+    const side = document.getElementById("ws-sidebar");
+    const btn = [...g.querySelectorAll<HTMLElement>('[data-cl16="full"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    const list = g.querySelector<HTMLElement>('[data-cl16="list"]');
+    const pin = g.querySelector<HTMLElement>('[data-cl16="bar-pin"]');
+    const chips = [...g.querySelectorAll<HTMLElement>('[data-cl16="full-chip"]')].filter((e) => e.getBoundingClientRect().height > 0);
+    return {
+      on: g.hasAttribute("data-full"), stored: localStorage.getItem("sa.contactFull"),
+      shut: !!document.querySelector(".ws-app.sb-shut"), sideCollapsed: side?.classList.contains("sb-collapsed") ?? false, sideW: side ? side.getBoundingClientRect().width : null,
+      sideStored: localStorage.getItem("scriptally:sidebar-collapsed"),
+      header: shown('[data-cl15="header"]'), strip: shown('[data-cl16="strip"]'), heading: shown('[data-cl16="list-heading"]'), footer: shown('[data-probe="app-footer"]'),
+      showing: shown('[data-cl16="showing"]'), summary: shown('[data-cl16="summary"]'),
+      btn: btn ? { text: (btn.textContent ?? "").trim(), pressed: btn.getAttribute("aria-pressed"), h: btn.getBoundingClientRect().height, bg: getComputedStyle(btn).backgroundColor, fg: getComputedStyle(btn).color, ring: getComputedStyle(btn).boxShadow, right: pin ? pin.getBoundingClientRect().right - btn.getBoundingClientRect().right : null } : null,
+      chips: chips.map((c) => ({ k: c.dataset.k ?? "", text: (c.textContent ?? "").replace(/\s+/g, " ").trim(), pressed: c.getAttribute("aria-pressed"), h: c.getBoundingClientRect().height, bg: getComputedStyle(c).backgroundColor, fg: getComputedStyle(c).color })),
+      figs: [...g.querySelectorAll<HTMLElement>('[data-cl16="strip-cell"]')].map((c) => `${c.dataset.k}:${(c.querySelector('[data-cl16="strip-fig"]')?.textContent ?? "").trim()}`),
+      pinned: list?.getAttribute("data-pinned") === "true", pinTop: pin ? pin.getBoundingClientRect().top - sc.getBoundingClientRect().top : null,
+      list: box(list), sheet: box(sheet)!, scrollTop: sc.scrollTop,
+      rows: [...g.querySelectorAll<HTMLElement>('[data-clv="row"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
+      live: [...g.querySelectorAll<HTMLElement>('[data-clv="row"]')].filter((e) => e.getBoundingClientRect().height > 0 && (e.dataset.stand === "you" || e.dataset.stand === "agent")).length,
+    };
+  });
+
+  test("E1 · full screen: F gives the content area to the list; leaving puts everything back, the scroll included", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("E1");
+    for (const vp of SIZES16) {
+      await open(page, vp, "E1");
+      const w = `${vp.width}`;
+      const at = await setScroll16(page, 900);
+      const r0 = await readFull(page);
+      if (!r0.btn) { L.check("E1", `${w} button`, false, "no Full screen button in the bar"); continue; }
+      const figs = r0.figs;
+      L.check("E1", `${w} at rest: off, the sidebar open, the button at the bar's right`, !r0.on && !r0.shut && r0.btn.text === "Full screen" && r0.btn.pressed === "false" && near(r0.btn.h, r0.pinned ? 36 : 40, 0.5) && near(r0.btn.right, 28, 1), `${JSON.stringify(r0.btn)} · shut ${r0.shut}`);
+      L.check("E1", `${w} the button is transparent with a cream ring`, r0.btn.bg === "rgba(0, 0, 0, 0)" && r0.btn.fg === "rgb(244, 238, 229)" && /rgba\(244, 238, 229, 0\.55\) 0px 0px 0px 1\.5px inset/.test(r0.btn.ring), `${r0.btn.bg} · ${r0.btn.fg} · ${r0.btn.ring}`);
+      L.check("E1", `${w} the page is scrolled before it starts`, at === 900 && r0.scrollTop === 900, `${r0.scrollTop}`);
+      await page.keyboard.press("f"); await page.waitForTimeout(600);
+      const r1 = await readFull(page);
+      L.check("E1", `${w} F turns it on, and it is stored`, r1.on && r1.stored === "1" && r1.btn?.text === "Exit full screen" && r1.btn.pressed === "true", `on ${r1.on} · stored ${r1.stored} · ${r1.btn?.text}`);
+      L.check("E1", `${w} the pressed button is cream with ink text`, r1.btn?.bg === "rgb(244, 238, 229)" && r1.btn.fg === "rgb(31, 42, 60)", `${r1.btn?.bg} · ${r1.btn?.fg}`);
+      L.check("E1", `${w} the sidebar is in its icon state, and the writer's own setting is untouched`, r1.shut && r1.sideCollapsed && near(r1.sideW, 68, 2) && r1.sideStored === r0.sideStored, `shut ${r1.shut} · ${r1.sideW} wide · stored ${r1.sideStored} (was ${r0.sideStored})`);
+      L.check("E1", `${w} the panel, the strip, the heading and the footer are hidden`, r1.header === 0 && r1.strip === 0 && r1.heading === 0 && r1.footer === 0, `${r1.header} · ${r1.strip} · ${r1.heading} · ${r1.footer}`);
+      L.check("E1", `${w} the list is at the top, already pinned`, r1.pinned && near(r1.pinTop, 12, 1) && r1.scrollTop === 0, `pinned ${r1.pinned} · bar ${r1.pinTop?.toFixed(1)} · scrollTop ${r1.scrollTop}`);
+      L.check("E1", `${w} the list fills the wider sheet`, !!r1.list && near(r1.list.w, Math.min(1600, r1.sheet.w - 48), 2) && r1.sheet.w > r0.sheet.w + 100, `list ${r1.list?.w.toFixed(1)} · sheet ${r1.sheet.w.toFixed(1)} (was ${r0.sheet.w.toFixed(1)})`);
+      L.check("E1", `${w} three count chips stand in for "Showing" and Summary`, r1.chips.length === 3 && r1.showing === 0 && r1.summary === 0 && r1.chips.map((c) => `${c.k}:${c.text.match(/^\d+/)?.[0]}`).join() === figs.slice(1).join() && r1.chips.map((c) => c.text.replace(/^\d+ /, "")).join("|") === "not queried|querying|closed", r1.chips.map((c) => c.text).join(" · "));
+      L.check("E1", `${w} the chips are 30 pinned, #f3efe8, none pressed`, r1.chips.every((c) => near(c.h, 30, 0.5) && c.bg === "rgb(243, 239, 232)" && c.pressed === "false"), r1.chips.map((c) => `${c.h} ${c.bg} ${c.pressed}`).join(" · "));
+      /* a chip sets and clears the strip's own group */
+      await page.locator('.aglist [data-cl16="full-chip"][data-k="live"]').filter({ visible: true }).first().click(); await page.waitForTimeout(600);
+      const r2 = await readFull(page);
+      const liveChip = r2.chips.find((c) => c.k === "live");
+      L.check("E1", `${w} a chip filters to its group: navy with cream text`, liveChip?.pressed === "true" && liveChip.bg === "rgb(45, 58, 80)" && liveChip.fg === "rgb(244, 238, 229)" && r2.rows === r2.live && r2.rows === Number(liveChip.text.match(/^\d+/)?.[0]), `${JSON.stringify(liveChip)} · ${r2.rows} rows · ${r2.live} querying`);
+      await page.locator('.aglist [data-cl16="full-chip"][data-k="live"]').filter({ visible: true }).first().click(); await page.waitForTimeout(600);
+      const r3 = await readFull(page);
+      L.check("E1", `${w} pressing it again clears it`, r3.chips.every((c) => c.pressed === "false") && r3.rows === r0.rows, `${r3.rows} rows (was ${r0.rows})`);
+      /* a reload keeps it on */
+      await page.reload(); await page.waitForLoadState("domcontentloaded");
+      await page.locator(".clv-group:not([data-loading]) .clv-row").first().waitFor({ timeout: 30_000 });
+      await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
+      await page.waitForTimeout(800);
+      await page.evaluate(LIB16);
+      await mutate16(page, "E1", MUTATIONS);
+      const r4 = await readFull(page);
+      L.check("E1", `${w} a reload keeps it on`, r4.on && r4.shut && r4.header === 0 && r4.pinned, `on ${r4.on} · shut ${r4.shut} · header ${r4.header} · pinned ${r4.pinned}`);
+      /* Escape leaves; the sidebar and everything else come back */
+      await page.keyboard.press("Escape"); await page.waitForTimeout(900);
+      const r5 = await readFull(page);
+      L.check("E1", `${w} Escape turns it off, and it is forgotten`, !r5.on && r5.stored === null && r5.btn?.text === "Full screen", `on ${r5.on} · stored ${r5.stored}`);
+      L.check("E1", `${w} everything comes back, the sidebar as it was`, !r5.shut && near(r5.sideW, r0.sideW ?? 0, 2) && r5.header === 1 && r5.strip === 1 && r5.heading === 1 && r5.footer === 1 && r5.showing === 1 && r5.chips.length === 0, `shut ${r5.shut} · side ${r5.sideW} (was ${r0.sideW}) · ${r5.header}${r5.strip}${r5.heading}${r5.footer}`);
+      /* F, then F: the scroll position before full screen is the one after it */
+      const at2 = await setScroll16(page, 900);
+      await page.keyboard.press("f"); await page.waitForTimeout(600);
+      const mid = await readFull(page);
+      await page.keyboard.press("f"); await page.waitForTimeout(1100);
+      const r6 = await readFull(page);
+      L.check("E1", `${w} F again turns it off`, mid.on && !r6.on && !r6.shut, `mid ${mid.on} · after ${r6.on}`);
+      L.check("E1", `${w} the page returns to the scroll position it had`, near(r6.scrollTop, at2, 2), `${at2} → ${mid.scrollTop} → ${r6.scrollTop}`);
+    }
+    L.done(34);
+  });
+
+  test("E2 · refit: 400ms after full screen turns on, with the sidebar's own motion, the list is the new sheet less 48", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("E2");
+    for (const vp of SIZES16) {
+      await openContacts16(page, vp, { motion: true });
+      await mutate16(page, "E2", MUTATIONS);
+      const w = `${vp.width}`;
+      const r0 = await readFull(page);
+      if (!r0.btn) { L.check("E2", `${w} button`, false, "no Full screen button in the bar"); continue; }
+      const moving = await page.evaluate(() => { const s = document.getElementById("ws-sidebar"); const p = s?.querySelector(".ws-pin") ?? s; return p ? getComputedStyle(p).transitionDuration : ""; });
+      await page.keyboard.press("f");
+      await page.waitForTimeout(400);
+      const r1 = await readFull(page);
+      const want = Math.min(1600, r1.sheet.w - 48);
+      L.check("E2", `${w} the sidebar's motion is on for this reading`, /0\.\d+s|[1-9]/.test(moving) && !/^0s(, 0s)*$/.test(moving), moving);
+      L.check("E2", `${w} full screen is on and the sheet has grown`, r1.on && r1.sheet.w > r0.sheet.w + 100, `sheet ${r0.sheet.w.toFixed(1)} → ${r1.sheet.w.toFixed(1)}`);
+      L.check("E2", `${w} the list is the new sheet less 48 (at most 1600)`, !!r1.list && near(r1.list.w, want, 2), `list ${r1.list?.w.toFixed(1)} · want ${want.toFixed(1)}`);
+      L.check("E2", `${w} 24 from the sheet's edges`, !!r1.list && (want === 1600 || (near(r1.list.x - r1.sheet.x, 24, 1.5) && near(r1.sheet.r - r1.list.r, 24, 1.5))), `${r1.list ? (r1.list.x - r1.sheet.x).toFixed(1) : "?"} · ${r1.list ? (r1.sheet.r - r1.list.r).toFixed(1) : "?"}`);
+      await page.keyboard.press("f"); await page.waitForTimeout(500);
+    }
+    L.done(8);
   });
 });

@@ -16,7 +16,7 @@
  * names `scriptally:sidebar-collapsed` verbatim, and a stated name beats a convention.
  */
 import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 export const SIDEBAR_COLLAPSED_KEY = "scriptally:sidebar-collapsed";
 
@@ -65,6 +65,24 @@ export function sidebarShortcut(e: {
   return null;
 }
 
+/**
+ * ⚠️ A PAGE MAY HOLD THE SIDEBAR IN ITS ICON STATE WITHOUT TOUCHING THE WRITER'S OWN SETTING (Contact list v16 §E,
+ * full screen). The hold is a second fact beside the stored one: the sidebar is collapsed while EITHER is true,
+ * and letting go of the hold returns it to whatever the writer had — nothing is saved and nothing is restored
+ * by hand. Module scope, because the page that asks is not a child of the hook's one caller (the shell).
+ *
+ * Toggling the sidebar by hand while it is held releases the hold and opens it: the writer asked for it open.
+ */
+let held = false;
+const holdSubs = new Set<() => void>();
+export function holdSidebarCollapsed(on: boolean): void {
+  if (held === on) return;
+  held = on;
+  holdSubs.forEach((f) => f());
+}
+export const isSidebarHeld = (): boolean => held;
+const subscribeHold = (f: () => void) => { holdSubs.add(f); return () => { holdSubs.delete(f); }; };
+
 export interface SidebarCollapsedState {
   collapsed: boolean;
   toggle: () => void;
@@ -82,9 +100,12 @@ export interface SidebarCollapsedState {
 export function useSidebarCollapsed(): SidebarCollapsedState {
   /* ⚠️ READ SYNCHRONOUSLY IN THE INITIALISER, never in an effect — an effect-based read renders
      expanded first and snaps shut after paint on every load of a collapsed sidebar. */
-  const [collapsed, setCollapsedState] = useState<boolean>(() =>
+  const [stored, setCollapsedState] = useState<boolean>(() =>
     readSidebarCollapsed(typeof localStorage === "undefined" ? null : localStorage),
   );
+  /* a page's hold (full screen): collapsed while it lasts, and the stored setting is untouched by it */
+  const holding = useSyncExternalStore(subscribeHold, isSidebarHeld, () => false);
+  const collapsed = stored || holding;
   const [ready, setReady] = useState(false);
 
   const setCollapsed = useCallback((v: boolean) => {
@@ -93,6 +114,13 @@ export function useSidebarCollapsed(): SidebarCollapsedState {
   }, []);
 
   const toggle = useCallback(() => {
+    /* held shut by a page: the writer's toggle opens it, and lets go of the hold */
+    if (isSidebarHeld()) {
+      holdSidebarCollapsed(false);
+      setCollapsedState(false);
+      writeSidebarCollapsed(typeof localStorage === "undefined" ? null : localStorage, false);
+      return;
+    }
     setCollapsedState((prev) => {
       const next = !prev;
       writeSidebarCollapsed(typeof localStorage === "undefined" ? null : localStorage, next);

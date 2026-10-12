@@ -73,7 +73,8 @@ import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { ContactListHeading, ContactStrip } from "./contact/ContactStrip";
 import { useContactPins } from "./contact/useContactPins";
-import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { GLANCE_CHIP, glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { holdSidebarCollapsed } from "../shell/useSidebarCollapsed";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
 import { cardQuery, cardRows, primaryFor, type CardAct, type CardPrimary } from "../../lib/agentCard";
@@ -99,6 +100,9 @@ import { floatInset } from "../shell/inkTokens";
  * `/agents/discover`, and `railNav` already names that pair for the rail entry — so reading it
  * is one destination in one place rather than two that agree until somebody renames a sub-page.
  */
+/** v16 §E — full screen, remembered on this device */
+const FULL_KEY = "sa.contactFull";
+
 const DISCOVER = RAIL_GROUPS.flatMap((g) => g.items).find((i) => i.path === "/agents/discover");
 
 interface AgentListProps {
@@ -169,6 +173,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
   useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, glance }); }, [filters, search, groupKey, sortKey, reversed, density, glance]);
   const pop = usePopover<ContactPop>();
+  /* v16 §E — FULL SCREEN: the list takes the whole content area and the sidebar goes to its icons. Remembered on
+     this device (localStorage `sa.contactFull`, like the sidebar's own setting), so a reload keeps it. */
+  const [full, setFullRaw] = useState<boolean>(() => { try { return window.localStorage.getItem(FULL_KEY) === "1"; } catch { return false; } });
+  /** the page's scroll position when full screen was turned on: leaving puts it back */
+  const fullScroll = useRef<number | null>(null);
+  const scrollerOf = () => mainColRef.current?.closest<HTMLElement>(".wpg-scroll") ?? null;
+  const setFull = useCallback((on: boolean) => {
+    if (on) fullScroll.current = scrollerOf()?.scrollTop ?? 0;
+    try { if (on) window.localStorage.setItem(FULL_KEY, "1"); else window.localStorage.removeItem(FULL_KEY); } catch { /* the mode still works for the visit */ }
+    setFullRaw(on);
+  }, []);
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -323,7 +338,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       pop={pop}
       findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>}
       /* §7.6–7.7 — Comfortable / Compact and the key sheet, at the controls row's right */
-      extra={<ContactBarExtras density={density} onDensity={setDensity} />}
+      extra={<>
+        <ContactBarExtras density={density} onDensity={setDensity} />
+        {/* v16 §E — Full screen, at the bar's right */}
+        <button type="button" className="cl16-fsb" data-cl16="full" aria-pressed={full} title={`${full ? "Exit full screen" : "Full-screen list"} (${shortcutLabel("contactsFull")})`}
+          onClick={() => setFull(!full)}>
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+            {full ? <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" /> : <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />}
+          </svg>
+          {full ? "Exit full screen" : "Full screen"}
+        </button>
+      </>}
     />
   );
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
@@ -457,6 +482,32 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
   const showList = pageState === "list" && !showEmpty;
   useEffect(() => { setPinsOn(showList); }, [showList]);
+  /* v16 §E — full screen is on only over a list, on this page's own route */
+  const fullOn = full && showList;
+  /* the sidebar is HELD in its icon state while full screen is on and this is the page on screen; letting go
+     returns it to the writer's own setting (the shell's one collapsed state: a hold beside it, never a second
+     sidebar). A layout effect, so a reload in full screen paints collapsed first. */
+  useLayoutEffect(() => {
+    holdSidebarCollapsed(fullOn && active);
+    return () => holdSidebarCollapsed(false);
+  }, [fullOn, active]);
+  /* on: the list sits at the top. Off: the page returns to the scroll position it had before — set at once, and
+     again once the sidebar has finished opening (0.24s), in case the page was briefly too short to hold it. */
+  const fullWas = useRef(fullOn);
+  useLayoutEffect(() => {
+    if (fullWas.current === fullOn) return undefined;
+    fullWas.current = fullOn;
+    const sc = scrollerOf();
+    if (!sc) return undefined;
+    if (fullOn) { sc.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); return undefined; }
+    const back = fullScroll.current;
+    fullScroll.current = null;
+    if (back == null) return undefined;
+    const put = () => sc.scrollTo({ top: back, behavior: "instant" as ScrollBehavior });
+    put();
+    const t = window.setTimeout(put, 320);
+    return () => window.clearTimeout(t);
+  }, [fullOn]);
   /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
      are the only sticky element in the list. */
 
@@ -753,8 +804,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
      Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
      or a popover is open, and only while this is the page on screen. */
-  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false });
-  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0 };
+  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false, full: false, setFull });
+  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0, full: fullOn, setFull };
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -763,7 +814,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       const down = matchesShortcut(SHORTCUTS.contactsDown, e), up = matchesShortcut(SHORTCUTS.contactsUp, e);
       const openK = matchesShortcut(SHORTCUTS.contactsOpen, e), actK = matchesShortcut(SHORTCUTS.contactsAct, e);
       const letGo = matchesShortcut(SHORTCUTS.contactsLetGo, e);
-      if (!hk && !find && !down && !up && !openK && !actK && !letGo) return;
+      const fullK = matchesShortcut(SHORTCUTS.contactsFull, e);
+      if (!hk && !find && !down && !up && !openK && !actK && !letGo && !fullK) return;
       const k = hkKeyState.current;
       if (!k.active || k.hkOpen || k.popOpen || k.cardOpen || !k.enabled) return;
       if (isEditableTarget(e.target)) return;
@@ -775,6 +827,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
          only from the page itself — a focused control answers its own Enter. */
       if (down || up || openK || actK || letGo) {
         const r = rowKeys.current;
+        /* v16 §E: Escape with no row held leaves full screen (a held row lets go first; an open panel, popover or
+           drawer has already taken the key, above) */
+        if (letGo && !r.kfId && k.full) { e.preventDefault(); k.setFull(false); return; }
         if ((openK || actK || letGo) && !r.kfId) return;
         if (openK && e.target instanceof HTMLElement && e.target.closest("button, a, [role='button']") && !e.target.closest('[data-clv="row"]')) return;
         e.preventDefault();
@@ -802,6 +857,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         return;
       }
       e.preventDefault();
+      if (fullK) { k.setFull(!k.full); return; }
       if (hk) { setHkOpen(true); return; }
       /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
       const input = [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
@@ -900,7 +956,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         )}
 
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
-        <div className="clv-group" data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group" data-full={fullOn ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v16 §A — THE TITLE PANEL: "Every agent, in one place", the book in its subline, two buttons and the hawk
@@ -941,12 +997,27 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <div className="cl14-frow cl16-frow" data-cl14="frow" data-cl16="frow">
             <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
               extraOn={!!glance} onClearAll={() => { setFilters(emptyContactFilters()); setGlance(null); }} />
-            <span className="cl16-showing" data-cl16="showing" role="status">
-              Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b>
-              {scoped?.title?.trim() ? <span className="cl16-for" data-cl16="showing-for"> for <b>{scoped.title.trim()}</b></span> : null}
-            </span>
-            {/* v16 §D — shown only while the controls are pinned (CSS, off `data-pinned`): back to the top of the page */}
-            <button type="button" className="cl16-sum" data-cl16="summary" onClick={toSummary}><span aria-hidden="true">{"\u2191"}</span> Summary</button>
+            {fullOn ? (
+              /* v16 §E — in full screen the strip is hidden, so its three groups ride here: each sets and clears
+                 the same group filter */
+              <span className="cl16-fchips" data-cl16="full-chips" role="group" aria-label="Show a group">
+                {glanceM.cells.map((c) => (
+                  <button key={c.key} type="button" className="cl16-fchip" data-cl16="full-chip" data-k={c.key} aria-pressed={glance === c.key}
+                    onClick={() => setGlance((g) => (g === c.key ? null : c.key))}>
+                    <b>{c.n}</b> {GLANCE_CHIP[c.key]}
+                  </button>
+                ))}
+              </span>
+            ) : (
+              <>
+              <span className="cl16-showing" data-cl16="showing" role="status">
+                Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b>
+                {scoped?.title?.trim() ? <span className="cl16-for" data-cl16="showing-for"> for <b>{scoped.title.trim()}</b></span> : null}
+              </span>
+              {/* v16 §D — shown only while the controls are pinned (CSS, off `data-pinned`): back to the top of the page */}
+              <button type="button" className="cl16-sum" data-cl16="summary" onClick={toSummary}><span aria-hidden="true">{"\u2191"}</span> Summary</button>
+              </>
+            )}
           </div>
           <div className="cl14-list" data-cl14="list">
           {/* the letter tabs, under every grouping: they scroll away with the list and never pin */}

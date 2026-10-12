@@ -12,6 +12,7 @@
 import { expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
+import { liftMotionSuppression } from "./measure";
 
 export const DIR16 = "reports/contact-list-v16";
 export const SIZES16 = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -52,7 +53,7 @@ window.__box = (e) => { if (!e) return null; const r = e.getBoundingClientRect()
 export const MEMORY_KEYS = ["sa.contactList.v3", "sa.contactList.v4"];
 export const FULL_KEY = "sa.contactFull";
 
-export async function openContacts16(page: Page, vp: VP, opts: { keep?: boolean; query?: string } = {}) {
+export async function openContacts16(page: Page, vp: VP, opts: { keep?: boolean; query?: string; motion?: boolean } = {}) {
   await page.addInitScript(({ keep, keys, full }) => {
     try {
       for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1");
@@ -66,7 +67,8 @@ export async function openContacts16(page: Page, vp: VP, opts: { keep?: boolean;
   await openApp(page, `/agents${opts.query ?? ""}`, vp);
   await expect(page.locator(LOADED_ROW16).first()).toBeVisible({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
-  await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
+  if (opts.motion) await liftMotionSuppression(page);
+  else await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
   await page.waitForTimeout(400);
   await page.evaluate(LIB16);
 }
