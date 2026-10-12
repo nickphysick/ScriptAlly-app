@@ -1,0 +1,109 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The Agent and Notes tabs inside the query's side panel (Query panel v2 §C; ref `#qdroot .ag-*`, `.nt*`).
+ * Their content and behaviour are as built (QueryAgentTab, NotesThread); this is how they read in the panel.
+ *
+ * ⚠️ EVERY RULE IS `.qsp`-SCOPED AND TWO CLASSES DEEP, so it wins over the tab bodies' own single-class rules
+ *    whatever the bundle's order, and reaches nothing outside the panel.
+ * ⚠️ LITERALS: the panel portals to `document.body`.
+ */
+.qn-when { display: none; }
+
+/* ── Agent ── */
+.qsp .qat { font-family: var(--sp-serif); color: #1c130f; }
+.qsp .qat .qat-facts { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.4; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.7); }
+.qsp .qat .qat-fseg { display: inline-flex; align-items: center; gap: 7px; font: inherit; letter-spacing: 0; text-transform: none; color: inherit; }
+.qsp .qat .qat-open {
+  display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; border: 0; border-radius: 14px;
+  font-family: var(--sp-serif); font-weight: 400; font-size: 14px; line-height: 1; letter-spacing: 0; text-transform: none;
+  background: #ece8e3; color: rgba(28, 19, 15, 0.7); margin: 0;
+}
+.qsp .qat .qat-open::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: #9a9088; }
+.qsp .qat .qat-open[data-door="open"] { background: #e7efe4; color: #3f5a3a; }
+.qsp .qat .qat-open[data-door="open"]::before { background: #5c7a55; }
+.qsp .qat .qat-acts { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.qsp .qat .qat-actb {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 34px; max-width: 100%; padding: 0 14px; border: 0; border-radius: 17px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); font-family: var(--sp-serif); font-weight: 400; font-size: 14.5px; line-height: 1.2; letter-spacing: 0;
+  text-transform: none; text-decoration: none; color: #2a3a52; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qsp .qat .qat-actb:hover { background: #f7f3ed; }
+/* the four figures: one white strip of four cells */
+.qsp .qat .qat-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 20px 0 0; border: 0; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.qsp .qat .qat-tile { padding: 14px 14px 12px; border: 0; border-radius: 0; background: none; box-shadow: none; text-align: left; }
+.qsp .qat .qat-tile + .qat-tile { box-shadow: inset 1px 0 0 rgba(28, 19, 15, 0.08); }
+.qsp .qat .qat-tv { font-family: var(--sp-type); font-weight: 400; font-size: 24px; line-height: 1; letter-spacing: 0; color: #1c130f; }
+.qsp .qat .qat-tv span { margin-left: 5px; font-family: var(--sp-type); font-style: normal; font-size: 24px; letter-spacing: 0; text-transform: none; color: inherit; }
+.qsp .qat .qat-tk { margin-top: 6px; font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 13.5px; line-height: 1.4; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.55); }
+/* the wishlist, as a quote */
+.qsp .qat .qat-quote {
+  margin: 22px 0 0; padding: 4px 0 4px 18px; border: 0; border-left: 3px solid var(--qp-mid, #8b9bb3); border-radius: 0; background: none;
+  font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 17px; line-height: 1.55; color: #1c130f;
+}
+.qsp .qat .qat-quote::before { content: none; }
+.qsp .qat .qat-qk { display: block; margin-top: 8px; font-family: var(--sp-serif); font-style: normal; font-size: 13.5px; line-height: 1.4; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.5); }
+.qsp .qat .qat-asks { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 26px 0 0; }
+.qsp .qat .qat-ak, .qsp .qat .qat-hk { flex-basis: 100%; margin: 0 0 4px; font-family: var(--sp-type); font-weight: 400; font-size: 19px; line-height: 1.2; letter-spacing: 0; text-transform: none; color: #1c130f; }
+.qsp .qat .qat-achip { display: inline-flex; align-items: center; min-height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: #f1ece4; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.3; letter-spacing: 0; text-transform: none; color: #1c130f; }
+/* the history: a white list; this query's row is tinted, titles in the typewriter */
+.qsp .qat .qat-hist { margin: 26px 0 0; }
+.qsp .qat .qat-hk { margin-bottom: 10px; }
+.qsp .qat .qat-hrow {
+  display: grid; grid-template-columns: 14px auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 16px; border: 0; background: #fff;
+  box-shadow: inset 1px 0 0 rgba(28, 19, 15, 0.1), inset -1px 0 0 rgba(28, 19, 15, 0.1), inset 0 -1px 0 rgba(28, 19, 15, 0.1); font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.35;
+}
+.qsp .qat .qat-hk + .qat-hrow { border-radius: 12px 12px 0 0; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.qsp .qat .qat-hrow:last-child { border-radius: 0 0 12px 12px; }
+.qsp .qat .qat-hk + .qat-hrow:last-child { border-radius: 12px; }
+.qsp .qat .qat-hrow--this { background: #f7f3ed; }
+.qsp .qat .qat-sw { width: 12px; height: 12px; border-radius: 50%; }
+.qsp .qat .qat-hw { min-width: 0; font-family: var(--sp-type); font-weight: 400; font-size: 15.5px; letter-spacing: 0; color: #1c130f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qsp .qat .qat-hs { min-width: 0; font-family: var(--sp-serif); font-size: 15px; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qsp .qat .qat-hd { font-family: var(--sp-serif); font-style: italic; font-size: 14px; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+.qsp .qat .qat-links { display: flex; flex-wrap: wrap; gap: 18px; margin: 22px 0 0; }
+.qsp .qat .qat-lnk { padding: 0; border: 0; border-bottom: 1px solid rgba(42, 58, 82, 0.3); background: none; cursor: pointer; font-family: var(--sp-type); font-weight: 400; font-size: 15px; line-height: 1.1; letter-spacing: 0; text-transform: none; color: #2a3a52; }
+.qsp .qat .qat-lnk:hover { border-bottom-color: #2a3a52; }
+
+/* ── Notes: the thread scrolls, and its composer IS the panel's foot while this tab is open ── */
+.qsp .qcv-open[data-tab="notes"] .qcv-open-tab { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.qsp .qn-wrap { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; font-family: var(--sp-serif); }
+.qsp .qn-wrap .qn-pinned { flex: none; display: flex; align-items: flex-start; gap: 10px; margin: 26px 26px 0; padding: 12px 14px; border: 0; border-radius: 12px; background: #f6ecd6; }
+.qsp .qn-wrap .qn-pinned svg { flex: none; width: 16px; height: 16px; margin-top: 3px; }
+.qsp .qn-wrap .qn-pinnedtx { flex: 1 1 auto; min-width: 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.5; color: #1c130f; }
+.qsp .qn-wrap .qn-unpin { flex: none; padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; line-height: 1.6; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.55); }
+.qsp .qn-wrap .qn-unpin:hover { color: #1c130f; }
+.qsp .qn-wrap .qn-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 18px 26px 14px; }
+.qsp .qn-wrap .qn-day { display: none; }
+.qsp .qn-wrap .qn-note { position: relative; margin: 0 0 14px; padding: 14px 16px 12px; border: 0; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.qsp .qn-wrap .qn-note--pin { background: #fffdf7; }
+.qsp .qn-wrap .qn-when { display: inline; font-family: var(--sp-type); font-weight: 400; font-size: 13.5px; line-height: 1; color: rgba(28, 19, 15, 0.5); }
+.qsp .qn-wrap .qn-body { margin: 6px 0 0; font-family: var(--sp-serif); font-size: 16px; line-height: 1.55; color: #1c130f; white-space: pre-wrap; }
+.qsp .qn-wrap .qn-meta { position: absolute; top: 9px; right: 10px; display: flex; align-items: center; gap: 8px; margin: 0; }
+.qsp .qn-wrap .qn-meta > span:first-child { font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; letter-spacing: 0; color: rgba(28, 19, 15, 0.45); }
+.qsp .qn-wrap .qn-acts { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
+.qsp .qn-wrap .qn-note:hover .qn-acts, .qsp .qn-wrap .qn-acts:focus-within { opacity: 1; }
+@media (hover: none) { .qsp .qn-wrap .qn-acts { opacity: 1; } }
+.qsp .qn-wrap .qn-acts button { padding: 3px 7px; border: 0; border-radius: 6px; background: none; cursor: pointer; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; line-height: 1.5; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.6); }
+.qsp .qn-wrap .qn-acts button:hover { background: #f4f0ea; color: #1c130f; }
+.qsp .qn-wrap .qn-empty { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 26px; text-align: center; }
+.qsp .qn-wrap .qn-empty p { margin: 0; font-family: var(--sp-serif); font-style: italic; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.55); }
+.qsp .qn-wrap .qn-edit .qn-editta { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font-family: var(--sp-serif); font-size: 16px; line-height: 1.5; color: #1c130f; }
+.qsp .qn-wrap .qn-editrow { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.qsp .qn-wrap .qn-editx, .qsp .qn-wrap .qn-editgo { height: 34px; padding: 1px 16px 0; border: 0; border-radius: 17px; cursor: pointer; font-family: var(--sp-type); font-size: 14.5px; letter-spacing: 0; text-transform: none; }
+.qsp .qn-wrap .qn-editx { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
+.qsp .qn-wrap .qn-editgo { background: #2d3a50; color: #f4eee5; }
+.qsp .qn-wrap .qn-editgo:disabled { opacity: 0.45; cursor: default; }
+/* the composer: the panel's foot. A 48px field and a navy Save */
+.qsp .qn-wrap .qn-dock { flex: 0 0 auto; margin: 0; padding: 16px 26px 18px; border-top: 1px solid rgba(28, 19, 15, 0.1); background: #fbf9f5; }
+.qsp .qn-wrap .qn-compose { display: flex; flex-direction: row; align-items: flex-end; gap: 10px; width: 100%; box-sizing: border-box; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.qsp .qn-wrap .qn-ta {
+  flex: 1 1 0; width: auto; min-width: 0; min-height: 48px; box-sizing: border-box; padding: 12px 14px; border: 0; border-radius: 12px; background: #fff; resize: none;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font-family: var(--sp-serif); font-size: 16px; line-height: 24px; color: #1c130f;
+}
+.qsp .qn-wrap .qn-ta:focus { outline: none; box-shadow: inset 0 0 0 2px #2d3a50; }
+.qsp .qn-wrap .qn-ta::placeholder { font-family: var(--sp-serif); font-style: italic; color: rgba(28, 19, 15, 0.45); }
+.qsp .qn-wrap .qn-crow { flex: none; display: flex; align-self: flex-end; width: auto; margin: 0; padding: 0; border: 0; }
+.qsp .qn-wrap .qn-send { height: 48px; padding: 2px 22px 0; border: 0; border-radius: 24px; background: #2d3a50; color: #f4eee5; cursor: pointer; font-family: var(--sp-type); font-weight: 400; font-size: 16px; line-height: 1; letter-spacing: 0; text-transform: none; }
+.qsp .qn-wrap .qn-send--off { opacity: 0.45; cursor: default; }

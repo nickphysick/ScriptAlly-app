@@ -6,7 +6,7 @@
  * same query come from ONE derivation, so the two surfaces cannot disagree about what is next.
  */
 import { describe, expect, it } from "vitest";
-import { comingUp, cardsByQuery, COMING_VERB, COMING_ACTION, SEND_VERB } from "./qcComingUp";
+import { comingUp, cardsByQuery, COMING_VERB, COMING_ACTION, SEND_VERB, trayLabel, trayRequest } from "./qcComingUp";
 import { cardBucket, taskDeed, BUCKET_ORDER, type Bucket } from "./todoBuckets";
 import type { BoardCard } from "./todoBoard";
 import type { QcRow } from "./qcSummary";
@@ -139,7 +139,8 @@ describe("v126.2 · the Birds-eye row's one next move", () => {
     for (const [b, t] of Object.entries(TYPE_FOR) as [Exclude<Bucket, "note">, string][]) {
       const st = b === "decide" ? S.OFFER : b === "send" ? S.FULL_REQUESTED : S.QUERIED;
       const m = nextMove(card(t), r(st), NOW);
-      expect(m?.label, b).toBe(COMING_ACTION[b]);
+      /* RE-POINTED (Query panel v1): the label is the PANEL's button for the same journey (`trayLabel`) */
+      expect(m?.label, b).toBe(trayLabel(b, r(st)));
       expect(m?.request, b).toEqual(trayRequest(b, st, "q1"));
     }
     /* nothing raised: the card's own primary door */
@@ -157,5 +158,26 @@ describe("v126.2.1 · an overdue send reads '<Stage> N days over', without the v
     const soon = comingUp(card("partial_requested"), row(NOW + 5 * DAY), NOW)!;
     expect(soon.verb).toBe(SEND_VERB.partial);
     expect(soon.tail?.lead).toBe("in");
+  });
+});
+
+describe("Query panel v1 · the tray's label is the panel's button for the same journey", () => {
+  it("one label for one act, from the panel's own table", async () => {
+    const { QueryStatus: S } = await import("../types");
+    const { panelDoors } = await import("./queryActions/entry");
+    const row = (status: string, court = "you", dayN: number | null = 10) => ({ status, court, dayN } as never);
+    expect(trayLabel("send", row(S.FULL_REQUESTED))).toBe("Mark full sent");
+    expect(trayLabel("send", row(S.PARTIAL_REQUESTED))).toBe("Mark partial sent");
+    expect(trayLabel("decide", row(S.OFFER))).toBe("Record your answer");
+    expect(trayLabel("chase", row(S.QUERIED, "agent"))).toBe("Nudge");
+    expect(trayLabel("close", row(S.QUERIED, "agent", 400))).toBe("Close query");
+    /* derived against the panel's table, never a second list: every bucket whose journey the panel offers */
+    for (const [b, st] of [["send", S.FULL_REQUESTED], ["chase", S.QUERIED], ["close", S.QUERIED], ["decide", S.OFFER]] as const) {
+      const mode = trayRequest(b, st as never, "x")!.mode;
+      expect(panelDoors(st, 10).find((d) => d.mode === mode)?.label, b).toBe(trayLabel(b, row(st, b === "send" || b === "decide" ? "you" : "agent")));
+    }
+  });
+  it("an act the panel has no button for keeps the tray's own words", () => {
+    expect(trayLabel("fix", { status: "Queried", court: "agent", dayN: 3 } as never)).toBe(COMING_ACTION.fix);
   });
 });

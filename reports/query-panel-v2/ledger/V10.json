@@ -1,0 +1,326 @@
+[
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · place",
+  "ok": true,
+  "detail": "\"London\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · door",
+  "ok": true,
+  "detail": "\"Open to submissions\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · links",
+  "ok": true,
+  "detail": "[\"✉ peter@example.com|mailto:peter@example.com\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · figures",
+  "ok": true,
+  "detail": "[\"8wks\",\"Email\",\"Means no\",\"2\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · wishlist",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · asks",
+  "ok": true,
+  "detail": "[\"Covering letter\",\"Synopsis\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · history",
+  "ok": true,
+  "detail": "[\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | Jul "
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-10 · footer",
+  "ok": true,
+  "detail": "[\"Open in Contact list ›\",\"Edit agent ›\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · place",
+  "ok": true,
+  "detail": "\"London\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · door",
+  "ok": true,
+  "detail": "\"Open to submissions\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · links",
+  "ok": true,
+  "detail": "[\"✉ ana@example.com|mailto:ana@example.com\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · figures",
+  "ok": true,
+  "detail": "[\"8wks\",\"Email\",\"Not a no\",\"3\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · wishlist",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · asks",
+  "ok": true,
+  "detail": "[\"Covering letter\",\"Synopsis\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · history",
+  "ok": true,
+  "detail": "[\"The Smoke Test | Full Sent | May 2026\",\"The Smoke Test | Full Requested | Jul "
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-pkgq-9 · footer",
+  "ok": true,
+  "detail": "[\"Open in Contact list ›\",\"Edit agent ›\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · place",
+  "ok": true,
+  "detail": "\"London\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · door",
+  "ok": true,
+  "detail": "\"Open to submissions\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · links",
+  "ok": true,
+  "detail": "[\"✉ marcus@example.com|mailto:marcus@example.com\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · figures",
+  "ok": true,
+  "detail": "[\"8wks\",\"Email\",\"Not a no\",\"4\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · wishlist",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · asks",
+  "ok": true,
+  "detail": "[\"Covering letter\",\"Synopsis\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · history",
+  "ok": true,
+  "detail": "[\"The Smoke Test | Full Requested | Jun 2026\",\"The Smoke Test | Partial Requeste"
+ },
+ {
+  "lock": "V10",
+  "where": "1512 seed-query-3 · footer",
+  "ok": true,
+  "detail": "[\"Open in Contact list ›\",\"Edit agent ›\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · place",
+  "ok": true,
+  "detail": "\"London\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · door",
+  "ok": true,
+  "detail": "\"Open to submissions\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · links",
+  "ok": true,
+  "detail": "[\"✉ peter@example.com|mailto:peter@example.com\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · figures",
+  "ok": true,
+  "detail": "[\"8wks\",\"Email\",\"Means no\",\"2\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · wishlist",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · asks",
+  "ok": true,
+  "detail": "[\"Covering letter\",\"Synopsis\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · history",
+  "ok": true,
+  "detail": "[\"The Smoke Test | Full Sent | this query\",\"The Smoke Test | Partial Sent | Jul "
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-10 · footer",
+  "ok": true,
+  "detail": "[\"Open in Contact list ›\",\"Edit agent ›\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · place",
+  "ok": true,
+  "detail": "\"London\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · door",
+  "ok": true,
+  "detail": "\"Open to submissions\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · links",
+  "ok": true,
+  "detail": "[\"✉ ana@example.com|mailto:ana@example.com\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · figures",
+  "ok": true,
+  "detail": "[\"8wks\",\"Email\",\"Not a no\",\"3\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · wishlist",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · asks",
+  "ok": true,
+  "detail": "[\"Covering letter\",\"Synopsis\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · history",
+  "ok": true,
+  "detail": "[\"The Smoke Test | Full Sent | May 2026\",\"The Smoke Test | Full Requested | Jul "
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-pkgq-9 · footer",
+  "ok": true,
+  "detail": "[\"Open in Contact list ›\",\"Edit agent ›\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · place",
+  "ok": true,
+  "detail": "\"London\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · door",
+  "ok": true,
+  "detail": "\"Open to submissions\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · links",
+  "ok": true,
+  "detail": "[\"✉ marcus@example.com|mailto:marcus@example.com\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · figures",
+  "ok": true,
+  "detail": "[\"8wks\",\"Email\",\"Not a no\",\"4\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · wishlist",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · asks",
+  "ok": true,
+  "detail": "[\"Covering letter\",\"Synopsis\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · history",
+  "ok": true,
+  "detail": "[\"The Smoke Test | Full Requested | Jun 2026\",\"The Smoke Test | Partial Requeste"
+ },
+ {
+  "lock": "V10",
+  "where": "1280 seed-query-3 · footer",
+  "ok": true,
+  "detail": "[\"Open in Contact list ›\",\"Edit agent ›\"]"
+ },
+ {
+  "lock": "V10",
+  "where": "notes · the composer replaces the action footer",
+  "ok": true,
+  "detail": "action footer shown false · field 48px · Save rgb(45, 58, 80) · one row true"
+ },
+ {
+  "lock": "V10",
+  "where": "notes · the composer saves a note",
+  "ok": true,
+  "detail": "A note from the QP2 lock."
+ },
+ {
+  "lock": "V10",
+  "where": "notes · a note is a white card with its date in the typewriter",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · \"Special Elite\" \"12 Oct\""
+ },
+ {
+  "lock": "V10",
+  "where": "notes · Edit changes it",
+  "ok": true,
+  "detail": "edited"
+ },
+ {
+  "lock": "V10",
+  "where": "notes · Pin shows it in the gold strip",
+  "ok": true,
+  "detail": "rgb(246, 236, 214)"
+ },
+ {
+  "lock": "V10",
+  "where": "notes · Delete removes it",
+  "ok": true,
+  "detail": "0 note(s), as before"
+ }
+]

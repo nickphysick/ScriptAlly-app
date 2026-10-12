@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e",
@@ -268,10 +268,22 @@
     "design-refs/comps-v26/ref-first-1280@2x.png": "e9caced7f1457b4095e58774876ce5155d3c10becd33aade86f8928b02f52e8f",
     "design-refs/comps-v26/ref-first-1512@2x.png": "2a8593375a3ce45b435d077ea83eedc6c36ae8a0f440fcc72929470463996fea",
     "design-refs/comps-v26/ref-first-end-1280@2x.png": "31fed4778ede85e8fc02568bd469718b272e1a22dbd455359bc5bbf5ed70327a",
-    "design-refs/comps-v26/ref-first-end-1512@2x.png": "0472b10b4399b830265ae225d25dc2b3ff7ad4a473d181b0df029f04cb741be1"
+    "design-refs/comps-v26/ref-first-end-1512@2x.png": "0472b10b4399b830265ae225d25dc2b3ff7ad4a473d181b0df029f04cb741be1",
+    "design-refs/query-panel-v2/query-panel-v2.html": "f3cf6a473dee9b5e426542a022de34473119f9c8b1b120f4169fbdef568e487a",
+    "design-refs/query-panel-v2/query-panel-v2-in-shell.html": "b651e1301734b6ce3cb67ec9b3ada0e9dd9fec88366e7c8cac2e00ae6060456b",
+    "design-refs/query-panel-v2/ref-act-correct-1512@2x.png": "7d56cdf7d8ad21e6a150a852df3d334e1098e868336541fe3e1e20d82426fdf0",
+    "design-refs/query-panel-v2/ref-act-correct-preview-1512@2x.png": "bed6044c028f67c94842f428d6395baa778aa6d94cffab21f2f840d8b7f33bd7",
+    "design-refs/query-panel-v2/ref-act-picker-1512@2x.png": "341e1f0b499ea919d7ac214a259a7afa7dc7eb15dc4cd7a223e7da844a9cc16d",
+    "design-refs/query-panel-v2/ref-act-response-1512@2x.png": "c717d73eda27a000318513f1a326d333bc034d352930a5a694d54d666d4c0009",
+    "design-refs/query-panel-v2/ref-act-review-1512@2x.png": "71ea3366437c6b54c94faabbe454f9f22f89e5db631ec00d85939d17bd34e2ac",
+    "design-refs/query-panel-v2/ref-agent-1512@2x.png": "bbb891552d0c6666f1804757631df9787909a78cf0013ed62815e89b1c5a76f5",
+    "design-refs/query-panel-v2/ref-notes-1512@2x.png": "9c3e42622a16c7a2b7dfe47d6713b0176a5f1081009ce9ec50e5ba670d80de88",
+    "design-refs/query-panel-v2/ref-track-1280@2x.png": "b4a7e73258670ece0d3ed6c9d61539df5b7dfd1135cedef48d47c7724b1feb4b",
+    "design-refs/query-panel-v2/ref-track-1512@2x.png": "3890220c4fff2d5192028c9d0818b7e93c1c890ee97f506c569d9900e9b4a605",
+    "design-refs/query-panel-v2/ref-track-you-1512@2x.png": "67eb91cb157d8c4c1bb7b4f4c0bcd6c32165a4d5b282724e936e9040d2691dae"
   },
   "superseded": {
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
     "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }

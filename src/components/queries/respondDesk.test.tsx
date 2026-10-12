@@ -297,18 +297,18 @@ describe("§5 · the popover is gone, the modal is mobile-only, the desk took th
     expect(chip, "the chip must not select the query it nudges").not.toMatch(/setSelectedQueryId|onOpenQuery/);
   });
 
-  it("the closure offer's Nudge now opens the DESK, notched to the button that asked", () => {
-    /* sliced to the drawer's Tracking mount — the page-wide string would also match the top-bar
-       wiring, and a lock either caller satisfies distinguishes nothing (proved by mutation) */
-    const at = page.indexOf('ghostId={proposedAny ? "__ghost" : null}');
-    expect(at, "the Tracking mount has moved").toBeGreaterThan(-1);
-    const end = page.indexOf("onSetExpectedDate", at);
-    expect(end, "the mount's far anchor is missing").toBeGreaterThan(at);
+  /* RETIRED AND RE-STATED (Query panel v2 §B–C): the closure offer and its "Nudge now" were the timeline's trailing
+     block, which the panel's ledger does not draw; the stand card states where things are and the footer's Nudge
+     door is the one way to nudge. What survives is the law: nudging from the panel never opens the old modal. */
+  it("the panel's tracking body offers no nudge of its own; the footer's Nudge door is the one way, and never the modal", () => {
+    const at = page.indexOf("const qpTracking = ");
+    const end = page.indexOf("const qpAgentTab = ", at);
+    expect(at, "the tracking body is missing").toBeGreaterThan(-1);
+    expect(end, "the agent tab no longer bounds the tracking slice").toBeGreaterThan(at);
     const mount = page.slice(at, end);
-    expect(mount).toContain('onNudge={(anchor) => openDeskVerb("nudge", anchor)}');
+    expect(mount).not.toContain("onNudge=");
     expect(mount).not.toContain("setIsNudgeOpen");
-    const timeline = readFileSync(join(process.cwd(), "src/components/reading-pane/QueryTimeline.tsx"), "utf8");
-    expect(timeline).toContain("onClick={(e) => onNudge(e.currentTarget)}");
+    expect(page).toContain('else if (mode === "nudge") openDeskVerb("nudge", anchor);');
   });
 
   it("the version field renders at two versions and not at one — D8, behaviourally", () => {
@@ -350,7 +350,9 @@ describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth
     /* Query actions v1 (27 Sep): 3 — the card footer's Close door falls back to the same popover while
        the drawer's Close journey is not live, and carries its own anchor like the other two. */
     /* RE-POINTED (Query panel v1): 2 — the under-900 drawer and its close control are gone with the panel */
-    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(2);
+    /* RE-POINTED (Query panel v2 §B): 1 — the timeline's offer tray and its "Mark closed" are not drawn in the
+       panel's ledger; the footer's Close door is the one close control left on the card */
+    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(1);
     expect(page, "a close control went back through the desk")
       .not.toMatch(/openDeskVerb\("closed"/);
     /* ⚠️ AND NUDGE STAYS ON THE DESK, which is the distinction §4.5 refuses to collapse: nudging

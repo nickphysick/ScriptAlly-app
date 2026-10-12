@@ -22,6 +22,7 @@ import {
   closeQueryDrawer, onDrawerLeaveAsk, currentClash, currentDrawerRequest, currentParked, discardParked, parkQueryDrawer, restoreParked,
   showUndoBar, subscribeDrawer, subscribeParked,
   type DrawerMode, type DrawerPreset, type OpenRequest, type ParkedJourney,
+  noteDrawerPick,
 } from "../../lib/queryActions/drawerStore";
 import { journeyDoing, journeyTitle } from "../../lib/queryActions/parking";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
@@ -31,7 +32,6 @@ import { peekOffered, setDockPeek, useDockPeek } from "../../lib/queryActions/do
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { DrawerShell, type ShellState } from "./DrawerShell";
 import { panelStepWords } from "../../lib/queryActions/entry";
-import { tileCourt } from "../../lib/qcSummary";
 import { SIDE_SLOT } from "../shell/SidePanel";
 import { ParkedChip } from "./ParkedChip";
 import type { JourneyView } from "./journey";
@@ -135,7 +135,9 @@ export function QueryDrawer() {
     /* ⚠️ ONLY THE REQUEST THAT ASKED TO CLOSE IS CLOSED. The slide-out takes 240ms, and a drawer
        opened inside that window (a door clicked straight after Cancel) is a NEW request: closing
        whatever is current then shut the new one as it arrived (packages-journey, 28 Sep). */
-    window.setTimeout(() => { if (currentDrawerRequest() === r) closeQueryDrawer(); r?.onCancel?.(); }, 240);
+    /* stepped into the query's panel there is no slide-out to wait for: the panel returns to the query, and the
+       page's dim lifts, at once (Query panel v2 §D) */
+    window.setTimeout(() => { if (currentDrawerRequest() === r) closeQueryDrawer(); r?.onCancel?.(); }, r?.panel ? 0 : 240);
   }, []);
 
   const switchTo = useCallback((mode: DrawerMode, preset?: DrawerPreset) => {
@@ -143,6 +145,8 @@ export function QueryDrawer() {
     setGen((g) => g + 1);
   }, []);
   const pickQuery = useCallback((queryId: string) => {
+    /* §E — the store's request takes the id too, and the panel's host hears it */
+    noteDrawerPick(queryId);
     setReq((r) => (r ? { ...r, queryId } : r));
     setGen((g) => g + 1);
   }, []);
@@ -289,10 +293,12 @@ export function QueryDrawer() {
 
   const inPanel = !!req?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
+  /* §E — a picked query names the head: its agent's first name, whatever the request opened with */
+  const pa = pq ? db.agents.find((a) => a.id === pq.agentId) : undefined;
+  const pfirst = pq ? ((pa?.name || "").trim().split(/\s+/)[0] ?? "") : (req?.panel?.first ?? "");
   const panelFrame = inPanel && req?.panel ? {
-    ...req.panel,
-    court: (pq ? tileCourt(pq.status as never) : null) ?? "closed",
-    ...panelStepWords(req.mode, pq?.status, req.panel.first),
+    first: pfirst, back: pq ? true : req.panel.back,
+    title: req.mode === "resp" && !req.queryId ? "Who replied?" : panelStepWords(req.mode, pq?.status, pfirst).title,
   } : null;
 
   return (

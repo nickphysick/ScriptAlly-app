@@ -47,14 +47,12 @@ describe("panelDoors", () => {
 });
 
 describe("panelStepWords", () => {
-  it("the table's titles", () => {
-    expect(panelStepWords("resp", QueryStatus.QUERIED, "Fenella")).toEqual({ doing: "Recording a response", title: "What did Fenella say?" });
-    expect(panelStepWords("close", QueryStatus.QUERIED, "Fenella").title).toBe("Close Fenella's query?");
-    expect(panelStepWords("sent", QueryStatus.PARTIAL_REQUESTED, "Fenella")).toEqual({ doing: "Marking the partial sent", title: "What went to Fenella?" });
-    expect(panelStepWords("sent", QueryStatus.FULL_REQUESTED, "Fenella").doing).toBe("Marking the full sent");
-    expect(panelStepWords("offer", QueryStatus.OFFER, "Fenella").title).toBe("Your answer to Fenella");
-  });
-  it("no first name: the agent, never an empty gap", () => {
+  /* RE-POINTED (Query panel v2 §D): the status band that said what was being done is gone with the drawer's own
+     head; what is left is the step's title, said for this query */
+  it("the step's title, said for this query", () => {
+    expect(panelStepWords("resp", QueryStatus.QUERIED, "Fenella")).toEqual({ title: "What did Fenella say?" });
+    expect(panelStepWords("close", QueryStatus.QUERIED, "Fenella").title).toBe("Close Fenella\u2019s query?");
+    expect(panelStepWords("sent", QueryStatus.PARTIAL_REQUESTED, "Fenella")).toEqual({ title: "What went to Fenella?" });
     expect(panelStepWords("resp", QueryStatus.QUERIED, "").title).toBe("What did the agent say?");
   });
 });

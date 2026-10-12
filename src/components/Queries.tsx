@@ -20,7 +20,6 @@ import {
   query,
   orderBy,
   limit,
-  deleteDoc,
   getDoc,
   getDocs
 } from "firebase/firestore";
@@ -139,8 +138,8 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
-import { QueryPanelHost } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, releaseRightPanel, subscribeQueryPanel, subscribeRightPanel } from "../lib/queryPanelStore";
+import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -177,7 +176,15 @@ import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
-import { SentBox, SentChip, FromPackageTag } from "./queryActions/SentHow";
+import { SentChip, sentView, ordinal } from "./queryActions/SentHow";
+import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
+import { Who } from "./queryActions/controls";
+import { agentName as journeyAgentName, whoLine } from "./queryActions/journeys/common";
+import { StandCard } from "./queries/panel/StandCard";
+import { standCard } from "../lib/standCard";
+import { ensureAppSerifItalic } from "../lib/appItalic";
+/** "CORRECTED 28 SEP · WAS…" → a sentence: the ledger says nothing in capitals. */
+const sentenceCase = (t: string): string => { const l = t.toLowerCase(); return l ? l[0].toUpperCase() + l.slice(1) : l; };
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
@@ -191,9 +198,9 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, type OpenRequest } from "../lib/queryActions/drawerStore";
+import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
-import { recomputeQuery as recomputeQueryById } from "../lib/recomputeQuery";
+import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
@@ -1744,12 +1751,11 @@ export const Queries: React.FC<{
     if (!d || !q || !currentUser) return;
     if (d.whole) { await deleteQueryWithUndo(q.id); return; }
     const uid = currentUser.id;
-    const snap = await takeSnapshot(uid, [q.id]);
-    for (const id of d.ids) {
-      await deleteDoc(doc(db, "users", uid, "queries", q.id, "activity", id));
-      await deleteDoc(doc(db, "users", uid, "activities", id));
-    }
-    await recomputeQueryById(uid, q.id);
+    /* fix-delete-entry: ONE batch takes the entry, its feed row (found even where the two have different ids) and
+       the journey fields the entry owned (`lib/entryDeleteWrite`). The snapshot holds every query it can touch —
+       this one, and any other that carries this query's offer mark — so Undo puts all of it back. */
+    const snap = await takeSnapshot(uid, [q.id, ...(await offerMarkedBy(uid, q.id))]);
+    await deleteTimelineEntries(uid, q.id, d.ids);
     /* The re-delete that stood here is gone with the runtime repair it chased (clean-up pass,
        28 Sep): nothing writes a step behind the writer's back now, so a deleted step stays deleted. */
     const after = await getDoc(doc(db, "users", uid, "queries", q.id));
@@ -2330,11 +2336,38 @@ export const Queries: React.FC<{
   const [, bumpStep] = useState(0);
   useEffect(() => {
     const p = pendingStepRef.current;
-    if (!p || !p.queryId) return;
-    if (!document.querySelector(`[data-qp="panel"][data-qp-id="${CSS.escape(p.queryId)}"] [data-side-slot]`)) return;
+    if (!p) return;
+    /* a step for a query waits for THAT query's panel; the picker (no query yet) for any panel */
+    const sel = p.queryId ? `[data-qp="panel"][data-qp-id="${CSS.escape(p.queryId)}"] [data-side-slot]` : '[data-qp="panel"] [data-side-slot]';
+    if (!document.querySelector(sel)) return;
     pendingStepRef.current = null;
     openQueryDrawer(p);
   });
+  /**
+   * Query panel v2 §E — "RECORD A RESPONSE" FROM THE SHELL'S MENU OPENS THE PANEL AT THE PICKER. With a query open
+   * the picker steps into its panel and lists it first; with none, the panel opens for the picker alone
+   * (`picking`), and becomes the chosen query's when one is picked.
+   */
+  const [picking, setPicking] = useState(false);
+  const openIdRef = useRef<string | null>(null);
+  const queriesRef = useRef<Query[]>([]);
+  const agentsRef = useRef<Agent[]>([]);
+  useEffect(() => subscribeResponsePicker(() => {
+    const had = openIdRef.current;
+    const q = had ? queriesRef.current.find((x) => x.id === had) : undefined;
+    const ag = q ? agentsRef.current.find((a) => a.id === q.agentId) : undefined;
+    pendingStepRef.current = { mode: "resp", hadOpen: q?.id, panel: { name: "", agency: "", first: (ag?.name || "").trim().split(/\s+/)[0] ?? "", back: !!q } };
+    setPicking(true);
+    bumpStep((n) => n + 1);
+  }), []);
+  /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
+  const pickOpenRef = useRef<(id: string) => void>(() => {});
+  useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
+  /* ruling 2 — the serif's real italic, asked for by the app alone (this component is mounted on every workspace
+     page and on no public one) */
+  useEffect(() => { ensureAppSerifItalic(); }, []);
+  /* the picker's panel goes when its journey does, unless a query took it over */
+  useEffect(() => subscribeDrawer((r) => { if (!r) setPicking(false); }), []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -2781,6 +2814,14 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  /* §E — what the picker's listeners read: the query open now, and how a pick opens the panel on it */
+  openIdRef.current = cardQueryId ?? null;
+  queriesRef.current = queries;
+  agentsRef.current = agents;
+  pickOpenRef.current = (id: string) => {
+    if (id === cardQueryId) return;
+    if (routeActive && !extPanel) onOpenQuery?.(id); else openQueryPanel(id, extPanel?.from ?? "other");
+  };
   /**
    * §1 (v65.6) — CLOSING THE CARD IS ONE ACT, whichever door opened it. The ✕, Escape and a press
    * on the scrim all come here: a second path is a second behaviour, and this card is reachable
@@ -5244,8 +5285,6 @@ export const Queries: React.FC<{
                    status, which is what makes the waiting rung disappear when the ghost moots it. */
                 const proposedAny = deskProposed ?? deskMarkProposed ?? deskClosedProposed;
                 const eventsForRail = proposedAny ? [...trackingEvents, proposedAny] : trackingEvents;
-                const railStatus = (proposedAny?.resultingStatus ?? activeQuery.status) as QueryStatus;
-                const ta = getPrimaryAction(railStatus);
                 /**
                  * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
                  * the retired record view drew, from the same derivations: a PACKAGED send is the
@@ -5268,61 +5307,60 @@ export const Queries: React.FC<{
                 const queriedAct = (trackingEvents as { id: string; type?: string }[]).find((e) => (e.type as QueryStatus) === QueryStatus.QUERIED);
                 /* item 2 (clean-up pass, 28 Sep): a requery says why, above the materials, and the link
                    opens the earlier query in this same view */
+                /* Query panel v2 §B — what went, as the ledger's slip: the same frozen record (`sentView`), in words */
+                const sv = sentView(activeQuery, packages);
+                const slipDetail = [
+                  sv.how === "package" ? `${ordinal(sv.edition ?? 1)} edition${sv.retired ? ", since retired" : ""}` : null,
+                  sv.how === "individual" && sv.basedOn && sv.name ? `based on the ${sv.name} package` : null,
+                  sv.how === "unrecorded" && sv.pieces.length ? "what the query lists; what went was not recorded" : null,
+                  sv.corrected ? sentenceCase(sv.corrected) : null,
+                ].filter(Boolean).join(" \u00b7 ") || null;
                 const sentExtra = (
                   <SendExtras requery={requeryLine(activeQuery, queries)} onOpenQuery={(id) => pickRow(id)}>
-                    <SentBox q={activeQuery} packages={packages}
+                    <LedgerSlip how={sv.how} name={sv.how === "package" ? sv.name : null} detail={slipDetail}
+                      items={sv.pieces.map((pc) => (pc.value ? `${pc.label} \u00b7 ${pc.value}` : pc.label))}
                       onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
-                      onAddWhatSent={queriedAct && DRAWER_LIVE.edit ? () => openQueryDrawer({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
+                      onAdd={queriedAct && DRAWER_LIVE.edit ? () => stepRow({ mode: "edit", queryId: activeQuery.id, entryId: queriedAct.id }) : undefined} />
                   </SendExtras>
                 );
-                const requestExtra = <FromPackageTag q={activeQuery} packages={packages} />;
-                /**
-                 * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
-                 * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
-                 * rung is a real activity — a synthesised root (dateSent with no Queried doc) has
-                 * no record to correct, and TimelineRows' own convention renders plain text when
-                 * the handler is absent rather than a dead control.
-                 */
-                const sentActivity = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED);
+                /* Query panel v2 §C — where things stand, from facts the record holds (lib/standCard) and no others */
+                const ledgerRows = buildTimelineRows(eventsForRail, activeQuery, activeAgent);
+                const qcRow = qcById.get(activeQuery.id);
+                const standNow = Date.now();
+                const stand = qcRow ? (
+                  <StandCard view={standCard({
+                    status: qcRow.status,
+                    first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
+                    agency: (activeAgent?.agency || "").trim(),
+                    court: qcRow.court,
+                    stageStartMs: qcRow.stageStartMs,
+                    expectedMs: qcRow.expectedMs,
+                    windowWeeks: typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null,
+                    unansweredNudgeMs: ledgerRows.filter((r) => r.kind === "nudge" && /no reply/i.test(r.title) && (r.timeMs ?? 0) >= (qcRow.stageStartMs ?? 0))
+                      .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
+                    closedHow: qcRow.closedHow,
+                    manuscriptTitle: activeMs?.title ?? null,
+                  }, standNow)} />
+                ) : null;
                 return (
-                  /* the drawer's own rhythm for the shared renderer — the ref's 19px titles; a
-                     token override at the use site, never an edit to TimelineRows */
-                  <QueryTimeline
-                    query={activeQuery}
-                    agent={activeAgent}
-                    events={eventsForRail}
-                    primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
-                    ghostId={proposedAny ? "__ghost" : null}
-                    freshId={deskFreshId}
-                    /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
-                       Edit/Delete menu (append is its second branch, remove lives on the edit
-                       form), so the two-item hop is gone. The trigger rides a ref for the notch
-                       and the focus return. */
-                    onEntryFork={(entry, trigger) => {
+                  <QueryLedger
+                    rows={ledgerRows}
+                    stand={stand}
+                    nowMs={Date.now()}
+                    sendMethod={activeQuery.sendMethod}
+                    revisionRound={activeQuery.revisionRound}
+                    /* the ··· opens the correction fork with the entry and its own button, as the timeline's ⋯ did */
+                    onFork={(entry, trigger) => {
                       setDeskVerb(null); /* one desk at a time */
                       correctingTriggerRef.current = trigger;
                       setCorrecting({ step: "fork", entry });
                     }}
                     highlightId={correcting?.entry.activityId ?? null}
+                    freshId={deskFreshId}
                     confirmFor={entryDel?.activityId ?? null}
                     confirmNode={entryConfirmNode}
-                    /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
-                       that asked (the same anchor contract as the fork's ⋯). The modal it used to
-                       open survives only as the mobile surface below. */
-                    onNudge={(anchor) => openDeskVerb("nudge", anchor)}
-                    onSetExpectedDate={(iso) => commitExpectedDate(iso)}
-                    /* ⚠️ §4 — the offer tray's close joins the quick pair. It was the desk, beside
-                       its "Nudge now" neighbour; Nudge STAYS on the desk (it composes a draft) and
-                       close does not. One verb, one behaviour, wherever it is pressed — two close
-                       controls that opened different surfaces would be the fork this section is
-                       correcting, wearing a second face. */
-                    onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
-                    onEditSendMethod={sentActivity ? (anchor) => {
-                      const entry = rungEntry(sentActivity.id);
-                      if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
-                    } : undefined}
                     sentExtra={sentExtra}
-                    requestExtra={requestExtra}
+                    fromPackage={sv.how === "package" ? sv.name : null}
                   />
                 );
               })()) : null;
@@ -6396,6 +6434,14 @@ export const Queries: React.FC<{
             returnTo={correctingTriggerRef.current}
             spot="correct"
             onClose={() => setCorrecting(null)}
+            /* Query panel v2 §D — in the panel the desk wears the drawer's head; the edit and its preview read as
+               two steps */
+            head={{
+              first: (activeAgent?.name || "").trim().split(/\s+/)[0] ?? "",
+              eyebrow: "CORRECT AN ENTRY", title: "Correct this entry",
+              who: <Who name={journeyAgentName(activeAgent)} sub={whoLine(activeAgent, activeQuery)} />,
+              ...(correcting.step === "edit" || correcting.step === "sheet" ? { steps: ["The details", "What changes"], step: correcting.step === "edit" ? 0 : 1 } : {}),
+            }}
           >
             <>
               {correcting.step === "fork" && (
@@ -6407,7 +6453,8 @@ export const Queries: React.FC<{
                   onAppend={() => {
                     setCorrecting(null);
                     /* v1.1 — what happened next is a response, and responses finish in the drawer. */
-                    if (activeQuery && DRAWER_LIVE.resp) { openQueryDrawer({ mode: "resp", queryId: activeQuery.id }); return; }
+                    /* Query panel v2 §E — in the panel, not a drawer of its own */
+                    if (activeQuery && DRAWER_LIVE.resp) { stepRow({ mode: "resp", queryId: activeQuery.id }); return; }
                     setIsRecordResponseFocusFormOpen(true);
                   }}
                   onDelete={() => onDeleteEntry(correcting.entry)}
@@ -7023,9 +7070,12 @@ export const Queries: React.FC<{
           {/* Query panel v1 — THE OPEN QUERY IS A SIDE PANEL: 8px in on the right, no scrim, the list live
               beside it. One mount for every door (a row, `?q`, a Birds-eye bar, another page through the
               store). The centred modal and the under-900 drawer it replaces are gone. */}
-          {qcOpenCardNode && cardQueryId && (
-            <QueryPanelHost id={cardQueryId} from={extPanel ? extPanel.from : "queries"} step={(qaOpen && qaPanel) || !!correcting || !!deskVerb} onClose={closeQueryCard}>
-              {qcOpenCardNode}
+          {/* §E — ONE host element whether it holds a query or only the picker, so a pick changes its contents
+              and never the panel: the journey's form is portalled into this element's slot. */}
+          {((qcOpenCardNode && cardQueryId) || picking) && (
+            <QueryPanelHost id={qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel ? extPanel.from : "queries"}
+              step={(qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))} onClose={closeQueryCard}>
+              {qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
             </QueryPanelHost>
           )}
           </>

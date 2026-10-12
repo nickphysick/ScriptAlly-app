@@ -73,21 +73,17 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
     { mode: "close", label: "Close query" },
   ];
 }
-/** The step's frame: what the band says is happening, and the step's title. */
-export function panelStepWords(mode: DrawerMode, status: QueryStatus | string | undefined, first: string): { doing: string; title: string } {
+/** The step's title in the query's panel, said for this query ("What did Eleanor say?"). */
+export function panelStepWords(mode: DrawerMode, status: QueryStatus | string | undefined, first: string): { title: string } {
   const who = first || "the agent";
-  if (mode === "resp") return ENDED.has(String(status))
-    ? { doing: "Recording a late reply", title: `What did ${who} say?` }
-    : { doing: "Recording a response", title: `What did ${who} say?` };
-  if (mode === "sent") return {
-    doing: status === QueryStatus.PARTIAL_REQUESTED ? "Marking the partial sent" : status === QueryStatus.FULL_REQUESTED ? "Marking the full sent" : "Marking the revision sent",
-    title: `What went to ${who}?`,
-  };
-  if (mode === "offer") return { doing: "Recording your answer", title: `Your answer to ${who}` };
-  if (mode === "nudge") return { doing: "Recording a nudge", title: `A nudge to ${who}` };
-  if (mode === "close") return { doing: "Closing the query", title: `Close ${who}'s query?` };
-  if (mode === "edit") return { doing: "Correcting the record", title: `Correct ${who}'s record` };
-  return { doing: "Logging a query", title: "Log a query" };
+  void status;
+  if (mode === "resp") return { title: `What did ${who} say?` };
+  if (mode === "sent") return { title: `What went to ${who}?` };
+  if (mode === "offer") return { title: `Your answer to ${who}` };
+  if (mode === "nudge") return { title: `A nudge to ${who}` };
+  if (mode === "close") return { title: `Close ${who}\u2019s query?` };
+  if (mode === "edit") return { title: `Correct ${who}\u2019s record` };
+  return { title: "Log a query" };
 }
 
 /** A Query Centre row's hover actions, by status (MOCK-SPEC §3.3). */

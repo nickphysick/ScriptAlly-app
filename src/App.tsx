@@ -33,7 +33,7 @@ import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
 import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
-import { closeQueryPanel } from "./lib/queryPanelStore";
+import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib/queryPanelStore";
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
@@ -383,8 +383,9 @@ function AppContent() {
       return;
     }
     if (subPageName === "Record a response") {
-      /* Query actions v1.1 — the drawer, opened with no query: its first step is choosing one. */
-      openQueryDrawer({ mode: "resp" });
+      /* Query actions v1.1 — opened with no query: its first step is choosing one. Query panel v2 §E — in the
+         query's side panel ("Who replied?"), not a drawer of its own, wherever the panel's host is mounted. */
+      if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" });
       return;
     }
     if (subPageName === "Add a manuscript" || subPageName === "Add a Manuscript") {

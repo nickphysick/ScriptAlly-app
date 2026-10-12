@@ -942,6 +942,8 @@ export interface Activity {
   // these by recomputeQuery — never from parsing description strings. Absent on non-status
   // events (agent added, nudge, …) and on pre-migration records.
   resultingStatus?: QueryStatus;
+  /** The id of this row's entry in the query's own log, where the two ids differ (fix-delete-entry). */
+  logEntryId?: string;
   /**
    * Which BOOK version this send carried (D3) — see `BookVersion`. Present only on a `Full Sent` /
    * `Partial Sent` event; no other activity type takes one.

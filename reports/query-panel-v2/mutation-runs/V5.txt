@@ -1,0 +1,54 @@
+  ✗ V5 · 1512 seed-query-19 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-query-19 no old verdict line is left — 1
+  ✗ V5 · 1512 seed-query-6 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-query-6 no old verdict line is left — 1
+  ✗ V5 · 1512 seed-cal-passed20-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-cal-passed20-q no old verdict line is left — 1
+  ✗ V5 · 1512 cor-undo exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 cor-undo no old verdict line is left — 1
+  ✗ V5 · 1512 msv12-q-1 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 msv12-q-1 no old verdict line is left — 1
+  ✗ V5 · 1512 cor-pair exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 cor-pair no old verdict line is left — 1
+  ✗ V5 · 1512 thin-q-chase exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 thin-q-chase no old verdict line is left — 1
+  ✗ V5 · 1512 thin-q-cohort-6 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 thin-q-cohort-6 no old verdict line is left — 1
+  ✗ V5 · 1512 thin-q-cohort-5 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 thin-q-cohort-5 no old verdict line is left — 1
+  ✗ V5 · 1512 thin-q-cohort-4 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 thin-q-cohort-4 no old verdict line is left — 1
+  ✗ V5 · 1512 thin-q-cohort-3 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 thin-q-cohort-3 no old verdict line is left — 1
+  ✗ V5 · 1512 seed-query-5 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-query-5 no old verdict line is left — 1
+  ✗ V5 · 1512 thin-q-cohort-2 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 thin-q-cohort-2 no old verdict line is left — 1
+  ✗ V5 · 1512 seed-query-3 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-query-3 no old verdict line is left — 1
+  ✗ V5 · 1512 rj-dupe exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 rj-dupe no old verdict line is left — 1
+  ✗ V5 · 1512 seed-cal-passed865-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-cal-passed865-q no old verdict line is left — 1
+  ✗ V5 · 1512 rj-send exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 rj-send no old verdict line is left — 1
+  ✗ V5 · 1512 seed-query-12 exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 seed-query-12 no old verdict line is left — 1
+  ✗ V5 · 1512 cor-move-c exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 cor-move-c no old verdict line is left — 1
+  ✗ V5 · 1512 cor-closed exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width
+  ✗ V5 · 1512 cor-closed no old verdict line is left — 1
+    +   "V5 · 1512 seed-cal-passed20-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
+    +   "V5 · 1512 seed-cal-passed20-q no old verdict line is left — 1",
+    +   "V5 · 1512 seed-cal-passed865-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
+    +   "V5 · 1512 seed-cal-passed865-q no old verdict line is left — 1",
+    +   "V5 · 1512 seed-cal-passed865-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
+    +   "V5 · 1512 seed-cal-passed865-q no old verdict line is left — 1",
+    +   "V5 · 1280 seed-cal-passed20-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
+    +   "V5 · 1280 seed-cal-passed20-q no old verdict line is left — 1",
+    +   "V5 · 1280 seed-cal-passed865-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
+    +   "V5 · 1280 seed-cal-passed865-q no old verdict line is left — 1",
+    +   "V5 · 1280 seed-cal-passed865-q exactly one stand card, and it ends the ledger — 1 card(s) · last false · 0px short of the ledger's width",
+    +   "V5 · 1280 seed-cal-passed865-q no old verdict line is left — 1",
+  1 failed
+  1 passed (1.6m)

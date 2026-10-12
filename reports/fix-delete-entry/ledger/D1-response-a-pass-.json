@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "response (a pass) · the write happened",
+  "ok": true,
+  "detail": "status Rejected; log 1 → 2; feed 1 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "response (a pass) · the new feed row names its log entry",
+  "ok": true,
+  "detail": "row 4a54BDYgLBRsctpPPhLb · logEntryId \"KPA9Zo8YbjRBMLcUTn97\" · log entry KPA9Zo8YbjRBMLcUTn97"
+ },
+ {
+  "lock": "D1",
+  "where": "response (a pass) · the query document equals its starting snapshot, field for field",
+  "ok": true,
+  "detail": "13 fields, all as they started"
+ },
+ {
+  "lock": "D1",
+  "where": "response (a pass) · no feed row remains",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "response (a pass) · the log is its starting entries",
+  "ok": true,
+  "detail": "fde-act-sent → fde-act-sent"
+ },
+ {
+  "lock": "D1",
+  "where": "response (a pass) · no task, task flag or mark on another query is left",
+  "ok": true,
+  "detail": "flags [] · tasks [] · marked []"
+ }
+]

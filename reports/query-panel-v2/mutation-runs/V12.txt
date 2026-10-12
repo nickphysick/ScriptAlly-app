@@ -1,0 +1,42 @@
+  ✗ V12 · 1512 Queried · resp · step 1: a numbered circle for every step, and only the current step's name is drawn — 2 steps · names drawn: The response | Check and save
+  ✗ V12 · 1512 Queried · resp · step 1: no name wraps, and it stays inside the panel — "The response" 1 line(s) · "Check and save" 2 line(s)
+  ✗ V12 · 1512 Queried · nudge · step 1: a numbered circle for every step, and only the current step's name is drawn — 4 steps · names drawn: Where it stands | The nudge | If it's still quiet | Check and log
+  ✗ V12 · 1512 Queried · nudge · step 1: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "The nudge" 1 line(s) · "If it's still quiet" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Queried · nudge · step 2: a numbered circle for every step, and only the current step's name is drawn — 4 steps · names drawn: Where it stands | The nudge | If it's still quiet | Check and log
+  ✗ V12 · 1512 Queried · nudge · step 2: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "The nudge" 1 line(s) · "If it's still quiet" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Queried · nudge · step 3: a numbered circle for every step, and only the current step's name is drawn — 4 steps · names drawn: Where it stands | The nudge | If it's still quiet | Check and log
+  ✗ V12 · 1512 Queried · nudge · step 3: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "The nudge" 1 line(s) · "If it's still quiet" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Queried · nudge · step 4: a numbered circle for every step, and only the current step's name is drawn — 4 steps · names drawn: Where it stands | The nudge | If it's still quiet | Check and log
+  ✗ V12 · 1512 Queried · nudge · step 4: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "The nudge" 1 line(s) · "If it's still quiet" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Queried · close · step 1: a numbered circle for every step, and only the current step's name is drawn — 3 steps · names drawn: Where it stands | Calling it | Check and close
+  ✗ V12 · 1512 Queried · close · step 1: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "Calling it" 1 line(s) · "Check and close" 2 line(s)
+  ✗ V12 · 1512 Queried · close · step 2: a numbered circle for every step, and only the current step's name is drawn — 3 steps · names drawn: Where it stands | Calling it | Check and close
+  ✗ V12 · 1512 Queried · close · step 2: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "Calling it" 1 line(s) · "Check and close" 2 line(s)
+  ✗ V12 · 1512 Queried · close · step 3: a numbered circle for every step, and only the current step's name is drawn — 3 steps · names drawn: Where it stands | Calling it | Check and close
+  ✗ V12 · 1512 Queried · close · step 3: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "Calling it" 1 line(s) · "Check and close" 2 line(s)
+  ✗ V12 · 1512 Full Requested · sent · step 1: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The request | What you're sending | Sending it | Reading window | Check and log
+  ✗ V12 · 1512 Full Requested · sent · step 1: no name wraps, and it stays inside the panel — "The request" 1 line(s) · "What you're sending" 2 line(s) · "Sending it" 1 line(s) · "Reading window" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Full Requested · sent · step 2: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The request | What you're sending | Sending it | Reading window | Check and log
+  ✗ V12 · 1512 Full Requested · sent · step 2: no name wraps, and it stays inside the panel — "The request" 1 line(s) · "What you're sending" 2 line(s) · "Sending it" 1 line(s) · "Reading window" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Full Requested · sent · step 3: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The request | What you're sending | Sending it | Reading window | Check and log
+  ✗ V12 · 1512 Full Requested · sent · step 3: no name wraps, and it stays inside the panel — "The request" 1 line(s) · "What you're sending" 2 line(s) · "Sending it" 1 line(s) · "Reading window" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Full Requested · sent · step 4: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The request | What you're sending | Sending it | Reading window | Check and log
+  ✗ V12 · 1512 Full Requested · sent · step 4: no name wraps, and it stays inside the panel — "The request" 1 line(s) · "What you're sending" 2 line(s) · "Sending it" 1 line(s) · "Reading window" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Full Requested · sent · step 5: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The request | What you're sending | Sending it | Reading window | Check and log
+  ✗ V12 · 1512 Full Requested · sent · step 5: no name wraps, and it stays inside the panel — "The request" 1 line(s) · "What you're sending" 2 line(s) · "Sending it" 1 line(s) · "Reading window" 2 line(s) · "Check and log" 2 line(s)
+  ✗ V12 · 1512 Full Requested · resp · step 1: a numbered circle for every step, and only the current step's name is drawn — 2 steps · names drawn: The response | Check and save
+  ✗ V12 · 1512 Full Requested · resp · step 1: no name wraps, and it stays inside the panel — "The response" 1 line(s) · "Check and save" 2 line(s)
+  ✗ V12 · 1512 Full Requested · close · step 1: a numbered circle for every step, and only the current step's name is drawn — 2 steps · names drawn: Where it stands | Check and close
+  ✗ V12 · 1512 Full Requested · close · step 1: no name wraps, and it stays inside the panel — "Where it stands" 2 line(s) · "Check and close" 2 line(s)
+  ✗ V12 · 1512 Offer · offer · step 1: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The offer | The others | The call | Your decision | Check and save
+  ✗ V12 · 1512 Offer · offer · step 1: no name wraps, and it stays inside the panel — "The offer" 1 line(s) · "The others" 1 line(s) · "The call" 1 line(s) · "Your decision" 2 line(s) · "Check and save" 2 line(s)
+  ✗ V12 · 1512 Offer · offer · step 2: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The offer | The others | The call | Your decision | Check and save
+  ✗ V12 · 1512 Offer · offer · step 2: no name wraps, and it stays inside the panel — "The offer" 1 line(s) · "The others" 1 line(s) · "The call" 1 line(s) · "Your decision" 2 line(s) · "Check and save" 2 line(s)
+  ✗ V12 · 1512 Offer · offer · step 3: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The offer | The others | The call | Your decision | Check and save
+  ✗ V12 · 1512 Offer · offer · step 3: no name wraps, and it stays inside the panel — "The offer" 1 line(s) · "The others" 1 line(s) · "The call" 1 line(s) · "Your decision" 2 line(s) · "Check and save" 2 line(s)
+  ✗ V12 · 1512 Offer · offer · step 4: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The offer | The others | The call | Your decision | Check and save
+  ✗ V12 · 1512 Offer · offer · step 4: no name wraps, and it stays inside the panel — "The offer" 1 line(s) · "The others" 1 line(s) · "The call" 1 line(s) · "Your decision" 2 line(s) · "Check and save" 2 line(s)
+  ✗ V12 · 1512 Offer · offer · step 5: a numbered circle for every step, and only the current step's name is drawn — 5 steps · names drawn: The offer | The others | The call | Your decision | Check and save
+  ✗ V12 · 1512 Offer · offer · step 5: no name wraps, and it stays inside the panel — "The offer" 1 line(s) · "The others" 1 line(s) · "The call" 1 line(s) · "Your decision" 2 line(s) · "Check and save" 2 line(s)
+  1 failed
+  1 passed (1.2m)

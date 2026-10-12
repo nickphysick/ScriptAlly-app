@@ -1,0 +1,12 @@
+  ✗ V9 · 1512 the picker is in the panel, titled "Who replied?" — "" · 2 dialog(s) · 1 drawer(s) outside
+  ✗ V9 · 1512 the open query is listed first, under "The query you had open" — first null "" · heading "" · 0 rows
+  ✗ V9 · 1512 the page is dimmed — 0
+  ✗ V9 · 1512 choosing another query continues to "What did {first} say?" in the same panel — chose null · "" · same panel true · 2 dialog(s)
+  ✗ V9 · 1512 the panel is now that query's — seed-query-10
+  ✗ V9 · 1280 the picker is in the panel, titled "Who replied?" — "" · 2 dialog(s) · 1 drawer(s) outside
+  ✗ V9 · 1280 the open query is listed first, under "The query you had open" — first null "" · heading "" · 0 rows
+  ✗ V9 · 1280 the page is dimmed — 0
+  ✗ V9 · 1280 choosing another query continues to "What did {first} say?" in the same panel — chose null · "" · same panel true · 2 dialog(s)
+  ✗ V9 · 1280 the panel is now that query's — seed-query-10
+  1 failed
+  1 passed (52.0s)

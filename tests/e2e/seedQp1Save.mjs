@@ -44,7 +44,7 @@ async function wipe() {
     if (!d.id.includes(PREFIX)) continue;
     for (const a of (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs) { await deleteDoc(a.ref); gone++; }
   }
-  for (const coll of ["queries", "agents", "taskFlags", "activities", "tasks"]) {
+  for (const coll of ["queries", "agents", "taskFlags", "activities", "tasks", "journalEntries"]) {
     for (const d of (await getDocs(collection(db, "users", uid, coll))).docs) if (d.id.includes(PREFIX) || d.data()?.queryId === Q || d.data()?.relatedRecordId === Q) { await deleteDoc(d.ref); gone++; }
   }
   return gone;
@@ -71,11 +71,31 @@ b.set(doc(db, "users", uid, "agents", AG), {
 });
 b.set(doc(db, "users", uid, "queries", Q), {
   id: Q, userId: uid, agentId: AG, manuscriptId: MS, dateSent: iso(SENT), status: "Queried", sendMethod: "Email",
-  responseDeadline: iso(SENT - 56), personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
+  /* ⚠️ NO `responseDeadline`: it is a retired stored field. The app's expected-date migration drops an
+     agency-derived one on load, so a fixture that writes it loses it the moment the page opens — which P13 first
+     read as the delete-entry flow failing to put it back. */
+  personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
+  /* what `recomputeQuery` derives for a Queried query, so "equal to its starting snapshot" is a fair test */
+  revisionRound: 1, hasAgentResponded: false, lastStatusChange: iso(SENT),
 });
 const act = `${PREFIX}act-sent`;
 b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MS, activityType: "Query Sent", description: "Query sent to Petra Nwosu at Nwosu & Hale", date: iso(SENT), details: "Sent via Email", resultingStatus: "Queried" });
 b.set(doc(db, "users", uid, "queries", Q, "activity", act), { type: "Queried", resultingStatus: "Queried", createdAt: new Date(iso(SENT)), note: "Query sent to Petra Nwosu at Nwosu & Hale", queryId: Q, agentName: "Petra Nwosu", manuscriptTitle: "seed" });
+/* `--signed` (Query panel v2): a second query, signed, so the stand card's "You signed with {first}" can be seen.
+   The harness account holds no signed query. */
+if (process.argv.includes("--signed")) {
+  const Q2 = `${PREFIX}signed`;
+  b.set(doc(db, "users", uid, "queries", Q2), {
+    id: Q2, userId: uid, agentId: AG, manuscriptId: MS, dateSent: iso(60), status: "Signed", sendMethod: "Email",
+    personalisationNotes: "", packageId: "", materialsWanted: ["Query letter"],
+    revisionRound: 1, hasAgentResponded: true, lastStatusChange: iso(3), responseReceivedAt: iso(20),
+  });
+  for (const [k, type, d, words] of [["sent", "Queried", 60, "Query sent to Petra Nwosu at Nwosu & Hale"], ["offer", "Offer", 20, "Offer from Petra Nwosu at Nwosu & Hale"], ["signed", "Signed", 3, "Signed with Petra Nwosu at Nwosu & Hale"]]) {
+    const id = `${PREFIX}signed-${k}`;
+    b.set(doc(db, "users", uid, "activities", id), { id, userId: uid, queryId: Q2, manuscriptId: MS, activityType: k === "sent" ? "Query Sent" : "Status Changed", description: words, date: iso(d), details: "", resultingStatus: type });
+    b.set(doc(db, "users", uid, "queries", Q2, "activity", id), { type, resultingStatus: type, createdAt: new Date(iso(d)), note: words, queryId: Q2, agentName: "Petra Nwosu", manuscriptTitle: "seed" });
+  }
+}
 await b.commit();
 console.log("qp1s: seeded");
 process.exit(0);

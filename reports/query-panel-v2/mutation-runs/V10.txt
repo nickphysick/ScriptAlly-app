@@ -1,0 +1,8 @@
+  ✗ V10 · 1512 seed-query-10 · history — v1 ["The Smoke Test | Full Sent | this query","The Smoke Test | Partial Sent | Jul 2026"] → []
+  ✗ V10 · 1512 seed-pkgq-9 · history — v1 ["The Smoke Test | Full Sent | May 2026","The Smoke Test | Full Requested | Jul 2026","The Smoke Test | Full Sent | this query"] → []
+  ✗ V10 · 1512 seed-query-3 · history — v1 ["The Smoke Test | Full Requested | Jun 2026","The Smoke Test | Partial Requested | Jul 2026","The Smoke Test | Rejected | Aug 2026","The Smoke Test | Queried | this query"] → []
+  ✗ V10 · 1280 seed-query-10 · history — v1 ["The Smoke Test | Full Sent | this query","The Smoke Test | Partial Sent | Jul 2026"] → []
+  ✗ V10 · 1280 seed-pkgq-9 · history — v1 ["The Smoke Test | Full Sent | May 2026","The Smoke Test | Full Requested | Jul 2026","The Smoke Test | Full Sent | this query"] → []
+  ✗ V10 · 1280 seed-query-3 · history — v1 ["The Smoke Test | Full Requested | Jun 2026","The Smoke Test | Partial Requested | Jul 2026","The Smoke Test | Rejected | Aug 2026","The Smoke Test | Queried | this query"] → []
+  1 failed
+  1 passed (40.6s)

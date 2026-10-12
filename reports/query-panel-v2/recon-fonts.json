@@ -1,0 +1,134 @@
+[
+ {
+  "where": "tracking",
+  "out": {
+   "div.tl-chaplab ⇒ \"Source Sans 3\"": {
+    "n": 2,
+    "eg": "The query",
+    "rules": [
+     ".tl-chaplab → var(--f12-mono)",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "span.tl-ttl ⇒ \"Source Sans 3\"": {
+    "n": 2,
+    "eg": "Recorded from the imported status",
+    "rules": [
+     ".tl-ttl → var(--f12-serif)",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "span. ⇒ \"Source Sans 3\"": {
+    "n": 2,
+    "eg": "18 APR",
+    "rules": [
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "button.tl-more ⇒ \"Source Sans 3\"": {
+    "n": 2,
+    "eg": "⋯",
+    "rules": [
+     "button, input, select, optgroup, textarea → inherit",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "div. ⇒ Inter": {
+    "n": 2,
+    "eg": "Query sent",
+    "rules": [
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "span. ⇒ \"Playfair Display\"": {
+    "n": 1,
+    "eg": "Your move — send the full",
+    "rules": [
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   }
+  }
+ },
+ {
+  "where": "Agent",
+  "out": {
+   "span. ⇒ \"Source Sans 3\"": {
+    "n": 2,
+    "eg": "London",
+    "rules": [
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "a.qat-actb ⇒ \"Source Sans 3\"": {
+    "n": 1,
+    "eg": "✉ ottoline@example.com",
+    "rules": []
+   },
+   "div.qat-tv ⇒ \"Playfair Display\"": {
+    "n": 4,
+    "eg": "4wks",
+    "rules": [
+     ".qat-tv → var(--font-serif)",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "span.qat-achip ⇒ \"Source Sans 3\"": {
+    "n": 2,
+    "eg": "Covering letter",
+    "rules": [
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "span.qat-hw ⇒ \"Playfair Display\"": {
+    "n": 1,
+    "eg": "The Smoke Test",
+    "rules": [
+     ".qat-hw → var(--font-serif)",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "span.qat-hs ⇒ \"Source Sans 3\"": {
+    "n": 1,
+    "eg": "Full Requested",
+    "rules": [
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   }
+  }
+ },
+ {
+  "where": "Notes",
+  "out": {
+   "p. ⇒ Inter": {
+    "n": 1,
+    "eg": "Nothing noted yet.First impressions, wha",
+    "rules": [
+     ".qn-empty p → Inter, sans-serif",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "textarea.qn-ta ⇒ Inter": {
+    "n": 1,
+    "eg": "",
+    "rules": [
+     ".qn-ta → Inter, sans-serif",
+     "button, input, select, optgroup, textarea → inherit",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   },
+   "button.qn-send.qn-send--off ⇒ Inter": {
+    "n": 1,
+    "eg": "Save",
+    "rules": [
+     ".qn-send → Inter, sans-serif",
+     "button, input, select, optgroup, textarea → inherit",
+     ".font-sans, p, span, div, button, input, select, textarea, label → \"Source Sans 3\", system-ui, -apple-syste"
+    ]
+   }
+  }
+ },
+ {
+  "where": "step:sent",
+  "out": {}
+ }
+]

@@ -27,7 +27,7 @@ import type { BoardCard } from "./todoBoard";
 import { elapsedPhrase } from "./elapsed";
 import type { QcRow } from "./qcSummary";
 import type { QueryStatus } from "../types";
-import { primaryDoor } from "./queryActions/entry";
+import { panelDoors, primaryDoor } from "./queryActions/entry";
 import type { OpenRequest } from "./queryActions/drawerStore";
 
 const DAY = 86_400_000;
@@ -64,6 +64,18 @@ export const COMING_ACTION: Record<Exclude<Bucket, "note">, string> = {
   close: "Close it",
   fix: "Fill it in",
 };
+
+/**
+ * Query panel v1 — THE TRAY'S BUTTON SAYS WHAT THE PANEL'S BUTTON SAYS. The tray opens a journey, and the open
+ * query's panel has a button for that same journey: one label for one act ("Mark full sent", not "Log the
+ * send"). So the words come from the panel's own table (`panelDoors`), by the journey the bucket opens;
+ * `COMING_ACTION` is only the fallback for an act the panel has no button for (the "fix" bucket's edit).
+ */
+export function trayLabel(bucket: Exclude<Bucket, "note">, row: Pick<QcRow, "status" | "court" | "dayN">): string {
+  const mode = trayRequest(bucket, row.status, "")?.mode;
+  const door = mode ? panelDoors(row.status, row.court === "agent" ? row.dayN : null).find((d) => d.mode === mode) : undefined;
+  return door?.label ?? COMING_ACTION[bucket];
+}
 
 export interface ComingUp {
   /** which act — shared with the To-do list, and what a lock reconciles on */
@@ -117,7 +129,7 @@ export function comingUp(card: BoardCard | undefined | null, row: QcRow, nowMs: 
   const lateSend = b === "send" && dated && days < 0;
   const said = lateSend ? (card.taskType === "partial_requested" ? SEND_OVER_VERB.partial : SEND_OVER_VERB.full) : verb;
 
-  return { bucket: b, verb: said, tail, over, action: COMING_ACTION[b] };
+  return { bucket: b, verb: said, tail, over, action: trayLabel(b, row) };
 }
 
 /**

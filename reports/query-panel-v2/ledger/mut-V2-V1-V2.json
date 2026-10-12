@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "V1",
+  "where": "1512 agent the masthead is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 agent its top edge is the court's mid colour, 5px",
+  "ok": true,
+  "detail": "rgb(139, 155, 179) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 agent the name is Special Elite 30 in cream",
+  "ok": true,
+  "detail": "\"Special Elite\" 30px rgb(244, 238, 229)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 agent the active tab's underline is 3px in the court's mid colour",
+  "ok": true,
+  "detail": "3px rgb(139, 155, 179)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 agent no small capitals in the masthead",
+  "ok": true,
+  "detail": "0 uppercase element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 agent the panel's top is the bar's bottom",
+  "ok": false,
+  "detail": "top 8 · bar bottom 105.75"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 agent right and bottom stay 8",
+  "ok": true,
+  "detail": "right 8 · bottom 8"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 agent \"Log a query\" and Search are on top at their own centres",
+  "ok": true,
+  "detail": "log true · search true"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 you the masthead is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 you its top edge is the court's mid colour, 5px",
+  "ok": true,
+  "detail": "rgb(217, 150, 122) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 you the name is Special Elite 30 in cream",
+  "ok": true,
+  "detail": "\"Special Elite\" 30px rgb(244, 238, 229)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 you the active tab's underline is 3px in the court's mid colour",
+  "ok": true,
+  "detail": "3px rgb(217, 150, 122)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 you no small capitals in the masthead",
+  "ok": true,
+  "detail": "0 uppercase element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 you the panel's top is the bar's bottom",
+  "ok": false,
+  "detail": "top 8 · bar bottom 105.75"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 you right and bottom stay 8",
+  "ok": true,
+  "detail": "right 8 · bottom 8"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 you \"Log a query\" and Search are on top at their own centres",
+  "ok": true,
+  "detail": "log true · search true"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 closed the masthead is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 closed its top edge is the court's mid colour, 5px",
+  "ok": true,
+  "detail": "rgb(181, 172, 164) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 closed the name is Special Elite 30 in cream",
+  "ok": true,
+  "detail": "\"Special Elite\" 30px rgb(244, 238, 229)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 closed the active tab's underline is 3px in the court's mid colour",
+  "ok": true,
+  "detail": "3px rgb(181, 172, 164)"
+ },
+ {
+  "lock": "V1",
+  "where": "1512 closed no small capitals in the masthead",
+  "ok": true,
+  "detail": "0 uppercase element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 closed the panel's top is the bar's bottom",
+  "ok": false,
+  "detail": "top 8 · bar bottom 105.75"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 closed right and bottom stay 8",
+  "ok": true,
+  "detail": "right 8 · bottom 8"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 closed \"Log a query\" and Search are on top at their own centres",
+  "ok": true,
+  "detail": "log true · search true"
+ },
+ {
+  "lock": "V2",
+  "where": "1512 the bar's menu opens over the panel",
+  "ok": true,
+  "detail": "ok"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 agent the masthead is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 agent its top edge is the court's mid colour, 5px",
+  "ok": true,
+  "detail": "rgb(139, 155, 179) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 agent the name is Special Elite 30 in cream",
+  "ok": true,
+  "detail": "\"Special Elite\" 30px rgb(244, 238, 229)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 agent the active tab's underline is 3px in the court's mid colour",
+  "ok": true,
+  "detail": "3px rgb(139, 155, 179)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 agent no small capitals in the masthead",
+  "ok": true,
+  "detail": "0 uppercase element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 agent the panel's top is the bar's bottom",
+  "ok": false,
+  "detail": "top 8 · bar bottom 105.75"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 agent right and bottom stay 8",
+  "ok": true,
+  "detail": "right 8 · bottom 8"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 agent \"Log a query\" and Search are on top at their own centres",
+  "ok": true,
+  "detail": "log true · search true"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 you the masthead is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 you its top edge is the court's mid colour, 5px",
+  "ok": true,
+  "detail": "rgb(217, 150, 122) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 you the name is Special Elite 30 in cream",
+  "ok": true,
+  "detail": "\"Special Elite\" 30px rgb(244, 238, 229)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 you the active tab's underline is 3px in the court's mid colour",
+  "ok": true,
+  "detail": "3px rgb(217, 150, 122)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 you no small capitals in the masthead",
+  "ok": true,
+  "detail": "0 uppercase element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 you the panel's top is the bar's bottom",
+  "ok": false,
+  "detail": "top 8 · bar bottom 105.75"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 you right and bottom stay 8",
+  "ok": true,
+  "detail": "right 8 · bottom 8"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 you \"Log a query\" and Search are on top at their own centres",
+  "ok": true,
+  "detail": "log true · search true"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 closed the masthead is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 closed its top edge is the court's mid colour, 5px",
+  "ok": true,
+  "detail": "rgb(181, 172, 164) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 closed the name is Special Elite 30 in cream",
+  "ok": true,
+  "detail": "\"Special Elite\" 30px rgb(244, 238, 229)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 closed the active tab's underline is 3px in the court's mid colour",
+  "ok": true,
+  "detail": "3px rgb(181, 172, 164)"
+ },
+ {
+  "lock": "V1",
+  "where": "1280 closed no small capitals in the masthead",
+  "ok": true,
+  "detail": "0 uppercase element(s)"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 closed the panel's top is the bar's bottom",
+  "ok": false,
+  "detail": "top 8 · bar bottom 105.75"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 closed right and bottom stay 8",
+  "ok": true,
+  "detail": "right 8 · bottom 8"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 closed \"Log a query\" and Search are on top at their own centres",
+  "ok": true,
+  "detail": "log true · search true"
+ },
+ {
+  "lock": "V2",
+  "where": "1280 the bar's menu opens over the panel",
+  "ok": true,
+  "detail": "ok"
+ }
+]

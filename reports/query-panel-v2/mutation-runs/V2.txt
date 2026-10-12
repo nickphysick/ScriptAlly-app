@@ -1,0 +1,8 @@
+  ✗ V2 · 1512 agent the panel's top is the bar's bottom — top 8 · bar bottom 105.75
+  ✗ V2 · 1512 you the panel's top is the bar's bottom — top 8 · bar bottom 105.75
+  ✗ V2 · 1512 closed the panel's top is the bar's bottom — top 8 · bar bottom 105.75
+  ✗ V2 · 1280 agent the panel's top is the bar's bottom — top 8 · bar bottom 105.75
+  ✗ V2 · 1280 you the panel's top is the bar's bottom — top 8 · bar bottom 105.75
+  ✗ V2 · 1280 closed the panel's top is the bar's bottom — top 8 · bar bottom 105.75
+  1 failed
+  1 passed (34.4s)

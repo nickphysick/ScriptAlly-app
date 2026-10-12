@@ -170,7 +170,7 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
       eyebrow: "NUDGE", title: "Nudge", verb: "log", verbDone: "logged", button: "Log nudge", ok: true, steps,
       saves: [
         { text: <><b>Nudge sent</b> to {agentName(agent)}, {fmt(sent)}, via {viaLabel(via)}</>, dot: "var(--qad-blush)" },
-        { text: `The overdue flag clears; the row reads “Nudged ${up(sent)}”` },
+        { text: `The row stops reading past its date; it reads “Nudged ${up(sent)}”` },
         { text: `“Consider closing” lands on your to-do on ${fmt(then)}`, dot: "var(--qad-stone)" },
         ...(plannedAhead ? [{ text: `Your planned reminder for ${fmt(plannedAhead)} is done — it comes off your to-do` }] : []),
       ],
@@ -217,7 +217,7 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
       eyebrow: "NUDGE", title: "Nudge", verb: "schedule", verbDone: "scheduled", button: "Schedule nudge", ok: true, steps,
       saves: [
         { text: `“Nudge ${first}” on your to-do for ${fmt(when)} — tapping it opens this drawer, ready to log the nudge`, dot: "var(--qad-blush)" },
-        { text: `The row reads “Nudge planned ${up(when)}” until then, instead of overdue` },
+        { text: `The row reads “Nudge planned ${up(when)}” until then, instead of past its date` },
         { text: "If they reply first, the reminder cancels itself" },
       ],
       who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmn} />,

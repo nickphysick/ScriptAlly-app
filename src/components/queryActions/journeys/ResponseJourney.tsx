@@ -41,7 +41,7 @@ const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2]
  * choosing one. A wrapper rather than a branch inside the journey, so no hook is ever conditional.
  */
 export function ResponseJourney(props: JourneyProps) {
-  if (!props.req.queryId) return <QueryPicker onPick={props.pickQuery} seed={props.req.seed}>{(v) => props.children(v)}</QueryPicker>;
+  if (!props.req.queryId) return <QueryPicker onPick={props.pickQuery} seed={props.req.seed} hadOpen={props.req.hadOpen}>{(v) => props.children(v)}</QueryPicker>;
   return <ResponseJourneyForQuery {...props} />;
 }
 

@@ -58,7 +58,9 @@ Decisions as ruled: no reopen-without-a-reply; the parking chip stays; the row m
 **Found by P13, in the existing delete-entry flow (not the panel's, and not changed):** deleting an entry through
 the timeline's "It never happened" puts back the status, the stage dates and the query's own log. It does not put
 back everything:
-- `responseDeadline`, cleared when the request was recorded, stays absent;
+- ~~`responseDeadline` stays absent~~ **Corrected 12 Oct:** that one was my fixture's. `responseDeadline` is a
+  retired stored field, and the app's expected-date migration drops it when the page loads. The seeder no longer
+  writes it. The recon is in `reports/fix-delete-entry/RECON.md` on branch `fix-delete-entry`;
 - `expectedSendDate` and `sendReminderDate`, set by it, stay on the query;
 - the feed's row for the deleted entry ("…requested a full manuscript") was still there six seconds later in
   every run of the final suite (it was gone in one earlier run, so it looks like a race).

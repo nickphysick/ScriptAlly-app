@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "V9",
+  "where": "1512 the picker is in the panel, titled \"Who replied?\"",
+  "ok": false,
+  "detail": "\"\" · 2 dialog(s) · 1 drawer(s) outside"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 the open query is listed first, under \"The query you had open\"",
+  "ok": false,
+  "detail": "first null \"\" · heading \"\" · 0 rows"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 the page is dimmed",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 choosing another query continues to \"What did {first} say?\" in the same panel",
+  "ok": false,
+  "detail": "chose null · \"\" · same panel true · 2 dialog(s)"
+ },
+ {
+  "lock": "V9",
+  "where": "1512 the panel is now that query's",
+  "ok": false,
+  "detail": "seed-query-10"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the picker is in the panel, titled \"Who replied?\"",
+  "ok": false,
+  "detail": "\"\" · 2 dialog(s) · 1 drawer(s) outside"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the open query is listed first, under \"The query you had open\"",
+  "ok": false,
+  "detail": "first null \"\" · heading \"\" · 0 rows"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the page is dimmed",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 choosing another query continues to \"What did {first} say?\" in the same panel",
+  "ok": false,
+  "detail": "chose null · \"\" · same panel true · 2 dialog(s)"
+ },
+ {
+  "lock": "V9",
+  "where": "1280 the panel is now that query's",
+  "ok": false,
+  "detail": "seed-query-10"
+ }
+]

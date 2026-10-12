@@ -29,6 +29,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { dayLabel } from "../../lib/elapsed";
+import { formatDate } from "../../lib/dates";
 
 export interface ThreadNote {
   id: string;
@@ -53,6 +54,12 @@ const SETTLE_MS = 2400;
 /** A few lines, then the composer scrolls inside itself rather than pushing the thread off screen. */
 const COMPOSER_MAX = 132;
 
+/** "14 Mar", and the year when it is not this one. */
+const whenLabel = (ms: number): string => {
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return "";
+  return formatDate(d, d.getFullYear() === new Date().getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
+};
 const timeOf = (n: ThreadNote) => new Date(n.createdAt).getTime();
 const hhmm = (ms: number) => {
   const d = new Date(ms);
@@ -198,6 +205,8 @@ export const NotesThread: React.FC<NotesThreadProps> = ({ notes, onAdd, onEdit, 
                     </div>
                   ) : (
                     <>
+                      {/* Query panel v2 §C — the note's own date, drawn only where the panel's sheet shows it */}
+                      <span className="qn-when">{whenLabel(ms)}</span>
                       <div className="qn-body">{n.entryText}</div>
                       <div className="qn-meta">
                         <span>{hhmm(ms)}</span>

@@ -1,0 +1,48 @@
+  ✗ V4 · 1512 seed-query-19 every date is right-aligned in the first 92px column — 5 Jan@146/362/left
+  ✗ V4 · 1512 seed-query-6 every date is right-aligned in the first 92px column — 18 Jul@146/362/left
+  ✗ V4 · 1512 seed-cal-passed20-q every date is right-aligned in the first 92px column — 11 Aug@146/362/left
+  ✗ V4 · 1512 cor-undo every date is right-aligned in the first 92px column — 4 Jul@146/362/left 6 Aug@146/362/left 9 Sep@146/362/left
+  ✗ V4 · 1512 msv12-q-1 every date is right-aligned in the first 92px column — 5 Sep@146/362/left
+  ✗ V4 · 1512 cor-pair every date is right-aligned in the first 92px column — 8 Aug@146/362/left 28 Aug@146/362/left 2 Sep@146/362/left
+  ✗ V4 · 1512 thin-q-chase every date is right-aligned in the first 92px column — 22 Jul@146/362/left
+  ✗ V4 · 1512 thin-q-cohort-6 every date is right-aligned in the first 92px column — 18 Apr@146/362/left
+  ✗ V4 · 1512 thin-q-cohort-5 every date is right-aligned in the first 92px column — 9 Apr@146/362/left
+  ✗ V4 · 1512 thin-q-cohort-4 every date is right-aligned in the first 92px column — 31 Mar@146/362/left
+  ✗ V4 · 1512 thin-q-cohort-3 every date is right-aligned in the first 92px column — 22 Mar@146/362/left
+  ✗ V4 · 1512 seed-query-5 every date is right-aligned in the first 92px column — 29 Jul@146/362/left
+  ✗ V4 · 1512 thin-q-cohort-2 every date is right-aligned in the first 92px column — 13 Mar@146/362/left
+  ✗ V4 · 1512 seed-query-3 every date is right-aligned in the first 92px column — 9 Aug@146/362/left
+  ✗ V4 · 1512 rj-dupe every date is right-aligned in the first 92px column — 13 Jul@146/362/left 8 Sep@146/362/left 21 Sep@146/362/left 21 Sep@146/362/left
+  ✗ V4 · 1512 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/362/left 18 Apr2024@146/362/left
+  ✗ V4 · 1512 rj-send every date is right-aligned in the first 92px column — 23 Jul@146/362/left 11 Sep@146/362/left
+  ✗ V4 · 1512 seed-query-12 every date is right-aligned in the first 92px column — 10 Jun@146/362/left 24 Jun@146/362/left 8 Jul@146/362/left 22 Jul@146/362/left 5 Aug@146/362/left 19 Aug@146/362/left
+  ✗ V4 · 1512 cor-move-c every date is right-aligned in the first 92px column — 9 Jul@146/362/left 27 Sep@146/362/left
+  ✗ V4 · 1512 cor-closed every date is right-aligned in the first 92px column — 19 Jul@146/362/left 13 Aug@146/362/left 17 Sep@146/362/left
+  ✗ V4 · 1512 rej-query-1 every date is right-aligned in the first 92px column — 2 Aug@146/362/left 12 Aug@146/362/left
+  ✗ V4 · 1512 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/362/left 18 Apr2024@146/362/left
+  ✗ V4 · 1512 thin-q-close every date is right-aligned in the first 92px column — 16 Aug2025@146/362/left
+  ✗ V4 · 1512 qp1s-q every date is right-aligned in the first 92px column — 7 Oct@146/362/left
+  ✗ V4 · 1280 seed-query-19 every date is right-aligned in the first 92px column — 5 Jan@146/322/left
+  ✗ V4 · 1280 seed-query-6 every date is right-aligned in the first 92px column — 18 Jul@146/322/left
+  ✗ V4 · 1280 seed-cal-passed20-q every date is right-aligned in the first 92px column — 11 Aug@146/322/left
+  ✗ V4 · 1280 cor-undo every date is right-aligned in the first 92px column — 4 Jul@146/322/left 6 Aug@146/322/left 9 Sep@146/322/left
+  ✗ V4 · 1280 msv12-q-1 every date is right-aligned in the first 92px column — 5 Sep@146/322/left
+  ✗ V4 · 1280 cor-pair every date is right-aligned in the first 92px column — 8 Aug@146/322/left 28 Aug@146/322/left 2 Sep@146/322/left
+  ✗ V4 · 1280 thin-q-chase every date is right-aligned in the first 92px column — 22 Jul@146/322/left
+  ✗ V4 · 1280 thin-q-cohort-6 every date is right-aligned in the first 92px column — 18 Apr@146/322/left
+  ✗ V4 · 1280 thin-q-cohort-5 every date is right-aligned in the first 92px column — 9 Apr@146/322/left
+  ✗ V4 · 1280 thin-q-cohort-4 every date is right-aligned in the first 92px column — 31 Mar@146/322/left
+  ✗ V4 · 1280 thin-q-cohort-3 every date is right-aligned in the first 92px column — 22 Mar@146/322/left
+  ✗ V4 · 1280 seed-query-5 every date is right-aligned in the first 92px column — 29 Jul@146/322/left
+  ✗ V4 · 1280 thin-q-cohort-2 every date is right-aligned in the first 92px column — 13 Mar@146/322/left
+  ✗ V4 · 1280 seed-query-3 every date is right-aligned in the first 92px column — 9 Aug@146/322/left
+  ✗ V4 · 1280 rj-dupe every date is right-aligned in the first 92px column — 13 Jul@146/322/left 8 Sep@146/322/left 21 Sep@146/322/left 21 Sep@146/322/left
+  ✗ V4 · 1280 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/322/left 18 Apr2024@146/322/left
+    +   "V4 · 1512 seed-cal-passed20-q every date is right-aligned in the first 92px column — 11 Aug@146/362/left",
+    +   "V4 · 1512 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/362/left 18 Apr2024@146/362/left",
+    +   "V4 · 1512 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/362/left 18 Apr2024@146/362/left",
+    +   "V4 · 1280 seed-cal-passed20-q every date is right-aligned in the first 92px column — 11 Aug@146/322/left",
+    +   "V4 · 1280 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/322/left 18 Apr2024@146/322/left",
+    +   "V4 · 1280 seed-cal-passed865-q every date is right-aligned in the first 92px column — 18 Apr2024@146/322/left 18 Apr2024@146/322/left",
+  1 failed
+  1 passed (1.6m)
