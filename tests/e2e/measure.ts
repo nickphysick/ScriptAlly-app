@@ -131,11 +131,28 @@ export async function ensureSignedIn(page: Page) {
   if (settled === "shell") return;
   const pw = process.env.SA_E2E_PASSWORD ?? passwordFromEnvLocal();
   if (!pw) throw new Error("No SA_E2E_PASSWORD — see tests/e2e/auth.setup.ts");
-  await page.goto("/#/signin");
-  await page.locator("#au-email").fill(process.env.SA_E2E_EMAIL ?? "harness@scriptally.test");
-  await page.locator("#au-pw").fill(pw);
-  await page.getByRole("button", { name: /^Sign in$/ }).last().click();
-  await expect(page.locator(SHELL).first()).toBeVisible({ timeout: 30_000 });
+  /**
+   * ⚠️ A REFUSED SIGN-IN IS WAITED OUT, NOT FAILED. Every measurement signs in with the password (Firebase auth
+   * lives in IndexedDB, which storageState cannot carry), and Firebase's quota for verifying passwords is shared
+   * by every session on the dev project. With two other sessions running suites, a sign-in was refused
+   * ("auth/quota-exceeded") and the test failed here, reading as "the shell never rendered" — twice in one full
+   * run on 12 Oct, on journeys that were fine. So: press Sign in, wait for the shell; if the form is still there,
+   * the sign-in was refused — wait, and press again. Four tries over about three minutes, then the honest failure.
+   */
+  let last: unknown = null;
+  for (const pause of [0, 30_000, 60_000, 90_000]) {
+    if (pause) await page.waitForTimeout(pause);
+    await page.goto("/#/signin");
+    /* an earlier press may have landed after all */
+    if (await page.locator(SHELL).first().isVisible().catch(() => false)) return;
+    await page.locator("#au-email").fill(process.env.SA_E2E_EMAIL ?? "harness@scriptally.test");
+    await page.locator("#au-pw").fill(pw);
+    await page.getByRole("button", { name: /^Sign in$/ }).last().click();
+    try { await expect(page.locator(SHELL).first()).toBeVisible({ timeout: 30_000 }); return; } catch (e) { last = e; }
+    if (!(await page.locator("#au-pw").count())) break; /* past the form and still no shell: not a refused sign-in */
+    console.log(`[ensureSignedIn] the sign-in was refused (the form is still up); waiting before pressing again`);
+  }
+  throw last ?? new Error("sign-in did not reach the shell");
 }
 
 /** `.env.local` is not loaded by this process, so read it directly. */
