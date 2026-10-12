@@ -1807,7 +1807,7 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - Locks: `tests/e2e/analyticsV17.measure.ts` (AN17-1…18 at 1280/1440/1512/1920 and 390/414/760), red first against the unchanged build (`REDFIRST.md`) and by each lock's named mutation (`mutation-proofs.jsonl`).
 
 ## Next session — start here
-**Onboarding v9 is DONE on branch `onb-v9` (off `dev/…-truth-qc137` @ 4a8e41b5), NOT merged to `main`.** Read `reports/onb-v9/REPORT.md`, §1 and §10 first: four decisions are open (Title TBC and the readiness question, the fork's drop zone, Smart Import status questions with no cell to quote, two FAQ answers).
+**Onboarding v9 is DONE on branch `onb-v9` (off `dev/…-truth-qc137` @ 4a8e41b5), NOT merged to `main`. Dev serves it from `dev/query-panel-v1-onb9` (`query-panel-v1` at 45aaf306 with `onb-v9` merged in; 11 Oct): a deploy of `query-panel-v1` alone removes it.** Read `reports/onb-v9/REPORT.md`, §1 and §10 first: four decisions are open (Title TBC and the readiness question, the fork's drop zone, Smart Import status questions with no cell to quote, two FAQ answers).
 
 **Query panel v1 is DONE on branch `query-panel-v1` (cut from `main` at 13313c9d), NOT merged.** Read `reports/query-panel-v1/REPORT.md` first: thirteen false premises, including no reopen journey, the row not held after a save, and the commit order (B landed before A).
 

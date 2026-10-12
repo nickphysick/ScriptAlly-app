@@ -78,21 +78,23 @@ export const DUP_FAQS: Faq[] = [
   { q: "What happens when I merge?", a: "You keep one and its queries move onto it — nothing's lost." },
   { q: "Can I fix this later?", a: "Yes — you can come back to this step from the agents screen." },
 ];
+/** The answer both steps give to "Needs an answer" (v9). */
+const NEEDS_AN_ANSWER = "Something in that row is missing, or your sheet said it in a way that reads two ways. Pick an answer, or say you don't have it where that's allowed. Continue lights once every one is answered.";
 /** The agents step's questions, verbatim. ⚠️ A NAME **OR** AN AGENCY IS ENOUGH — never assert that
  *  an agency is required; the row a few centimetres to the left offers "carry on without one". */
 export const AGENT_FAQS: Faq[] = [
-  { q: 'What does “needs a look” mean?', a: "We've flagged something worth a glance — a suspected duplicate, or a missing agency. Everything else is ready to import as-is." },
+  { q: 'What does "Needs an answer" mean?', a: NEEDS_AN_ANSWER },
   { q: "Can I add more agents later?", a: "Any time, from your dashboard — by import or by hand." },
-  { q: "What if I don't have the agent's name?", a: "Leave the name blank and we'll track them by agency only. Add it whenever you find out." },
-  { q: "Is the agency name required?", a: "No — a name or an agency is enough. An agency sharpens the record and can be added at any time." },
+  { q: "What if I don't have the agent's name?", a: 'If you know the agency, choose "Reference by agency only". If the row has neither a name nor an agency, add one or remove the row.' },
+  { q: "Is the agency name required?", a: 'No. Add it if you know it, or choose "Carry on without an agency". Either counts as an answer.' },
   { q: "What happens when I delete a duplicate?", a: "We import just one of the two records and merge any queries from the duplicate onto that single agent — so nothing's lost." },
 ];
 /** The queries step's questions, verbatim. */
 export const QUERY_FAQS: Faq[] = [
-  { q: 'What does “needs a look” mean?', a: "We've flagged a query where we spotted two dates, an odd-looking date, or a status we weren't sure how to read. Everything else is ready to import." },
+  { q: 'What does "Needs an answer" mean?', a: NEEDS_AN_ANSWER },
   { q: "Can I add more queries later?", a: "Any time — log a new query from your dashboard whenever you send one." },
-  { q: "What if I don't know the date I sent it?", a: "Leave it undated. We'll never guess a date for you — you can fill it in later if it turns up." },
-  { q: "Can a query have no agent?", a: "No — every query is linked to an agent. Match it to one you already have, or add the agent as new." },
+  { q: "What if I don't know the date I sent it?", a: 'Choose "I don\'t have this date". The query is kept undated, and the dashboard shows it as waiting on you until you add one.' },
+  { q: "Can a query have no agent?", a: "No. Give the row an agent name or an agency, or remove it. A removed row is listed as not imported." },
   { q: "What does the status mean?", a: "It's where the query sits in your pipeline — queried, partial, full, and so on. We read it from your file; correct any that look off." },
 ];
 

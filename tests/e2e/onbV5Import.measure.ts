@@ -376,8 +376,8 @@ test.describe("OB2", () => {
       /* ── the review: which lab query lands on which step ── */
       const STEPS: Array<{ step: "duplicates" | "agents" | "queries"; fx: string; path: string[]; firstQ: string; nQ: number; guide: string }> = [
         { step: "duplicates", fx: "dupes", path: [], firstQ: "What's a duplicate?", nQ: 4, guide: "Same agent, twice?" },
-        { step: "agents", fx: "review", path: [], firstQ: "What does “needs a look” mean?", nQ: 5, guide: "Anything marked needs a quick look." },
-        { step: "queries", fx: "review", path: ["agents"], firstQ: "What does “needs a look” mean?", nQ: 5, guide: "Dates drive your reminders." },
+        { step: "agents", fx: "review", path: [], firstQ: 'What does "Needs an answer" mean?', nQ: 5, guide: "Anything marked needs a quick look." },
+        { step: "queries", fx: "review", path: ["agents"], firstQ: 'What does "Needs an answer" mean?', nQ: 5, guide: "Dates drive your reminders." },
       ];
       const toStep = async (page: Page, t: (typeof STEPS)[number]) => {
         /* The break is applied once the step is reached: a break that covers the page would stop
