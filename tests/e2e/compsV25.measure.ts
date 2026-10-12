@@ -24,7 +24,7 @@ const stable = (v: unknown): string => JSON.stringify(v, (_k, x) => (x && typeof
 const MUTATIONS: Record<string, { css?: string; js?: string; what: string }> = {
   B1: { what: "restore the number panel", js: `(() => { const p = window.__q('[data-cv="panel"]'); if (!p || p.dataset.mut) return; p.dataset.mut = "1"; p.setAttribute("data-hp3", "number"); const h = p.querySelector("h1"); const n = document.createElement("span"); n.setAttribute("data-hp3-part", "number"); n.textContent = "7"; h.prepend(n); h.setAttribute("aria-label", "7 comp titles"); h.querySelector("[aria-label]")?.removeAttribute("aria-label"); })()` },
   B2: { what: "scroll on press", js: `(() => { const p = window.__cv(); if (p.dataset.mutb2) return; p.dataset.mutb2 = "1"; p.addEventListener("click", (e) => { if (e.target.closest("[data-gst-cell]")) p.closest(".wpg-scroll").scrollTop += 300; }, true); })()` },
-  D1: { what: "leave the heading on the column", css: `.cv-lib .cv-libhead { margin-inline: 24px !important; }` },
+  D1: { what: "inset the heading from the list", css: `.cv-lib .cv-libhead { margin-inline: 24px !important; }` },
   D2: { what: "search flex: 1", css: `.cv-bar .cv-find { flex: 1 1 auto !important; }` },
   E1: { what: "expand the row inline", js: `(() => { const p = window.__cv(); if (p.dataset.mute1) return; p.dataset.mute1 = "1"; p.addEventListener("click", (e) => { const r = e.target.closest('[data-cv="row"]'); if (!r) return; const d = document.createElement("div"); d.className = "cv-inline"; d.textContent = "details"; r.after(d); }, true); })()` },
   /* comps v27: hiding the loading header's link row changes nothing (the drawing sets the panel's height), so the break is the height itself */
@@ -165,7 +165,8 @@ test.describe("Comparable titles v25", () => {
   /* C1 (the full-width "How comp tracking works" band) RETIRED with comps v27: the band left the page. The steps are held
      by V3 (the empty page's card) and V7 (no steps on a page with comps until the link is pressed) in compsV27.measure.ts. */
 
-  test("D1 · heading: its left and right edges are the list's", async ({ page }) => {
+  /* comps v27.1: the library sits in the page column, so the heading's and the list's edges are also the panel's */
+  test("D1 · heading: its left and right edges are the list's, and both are the panel's", async ({ page }) => {
     const L = new Ledger("D1");
     for (const vp of SIZES) {
       await open(page, vp, "D1");
@@ -173,7 +174,7 @@ test.describe("Comparable titles v25", () => {
       const w = `${vp.width}`;
       L.check(`${w} left edge`, near(r.head.x, r.list.x), `heading ${r.head.x} · list ${r.list.x}`);
       L.check(`${w} right edge`, near(r.head.r, r.list.r), `heading ${r.head.r} · list ${r.list.r}`);
-      L.check(`${w} the list is wider than the column`, r.list.w > r.col.w + 20, `list ${r.list.w} · column ${r.col.w}`);
+      L.check(`${w} the list's edges are the panel's`, near(r.list.x, r.col.x) && near(r.list.r, r.col.r), `list ${r.list.x}–${r.list.r} · panel ${r.col.x}–${r.col.r}`);
       L.check(`${w} copy`, r.text === "Your comparable titles library" && r.tag === "7 titles · in your own order", `${r.text} · ${r.tag}`);
     }
     L.done(8);
@@ -182,8 +183,11 @@ test.describe("Comparable titles v25", () => {
   test("D2 · bar: one row, no overflow at 1024, 1280 and 1512; the search is 280 / 220 / 170 by width", async ({ page }) => {
     const L = new Ledger("D2");
     const seen = new Set<number>();
-    for (const vp of [{ width: 1024, height: 768 }, ...SIZES, { width: 1920, height: 1080 }]) {
+    /* comps v27.1: the widths are by the LIST's width, and the list is the column. The widest column is under 1300, so
+       the 280 search is only reached in full screen: the last pass opens it at 1920. */
+    for (const [vp, fullScreen] of [[{ width: 1024, height: 768 }, false], [SIZES[0], false], [SIZES[1], false], [{ width: 1920, height: 1080 }, false], [{ width: 1920, height: 1080 }, true]] as const) {
       await open(page, vp, "D2");
+      if (fullScreen) { await page.locator(`${P}[data-cv="full-btn"]`).click(); await page.waitForTimeout(900); }
       const r = await page.evaluate(() => {
         const w = window as any;
         const bar = w.__q('[data-cv="bar"]') as HTMLElement;
@@ -191,8 +195,8 @@ test.describe("Comparable titles v25", () => {
         const chips = (w.__qa('[data-cv="chip"]') as HTMLElement[]).filter((c) => c.getBoundingClientRect().width > 0).map((c) => ({ ...w.__box(c), f: c.dataset.f }));
         return { bar: w.__box(bar), sw: bar.scrollWidth, cw: bar.clientWidth, kids, chips, find: w.__box(w.__q('[data-cv="find"]')), lib: w.__box(w.__q('[data-cv="lib"]')), fs: w.__q('[data-cv="full-btn"]').textContent, bg: getComputedStyle(bar).backgroundColor, doc: document.documentElement.scrollWidth - document.documentElement.clientWidth };
       });
-      const w = `${vp.width}`;
-      const want = r.lib.w >= 1252 ? 280 : r.lib.w >= 1052 ? 220 : 170;
+      const w = `${vp.width}${fullScreen ? " full screen" : ""}`;
+      const want = r.lib.w >= 1300 ? 280 : r.lib.w >= 1100 ? 220 : 170;
       seen.add(want);
       L.check(`${w} one row`, r.bar.h <= 64, `bar ${r.bar.h} tall`);
       L.check(`${w} ink`, r.bg === "rgb(27, 36, 51)", r.bg);
@@ -202,11 +206,11 @@ test.describe("Comparable titles v25", () => {
       L.check(`${w} no two controls overlap`, clash === 0, `${clash} overlap(s)`);
       L.check(`${w} chips keep to their own boxes`, r.chips.slice(1).every((c, i) => c.x >= r.chips[i].r - 0.5), r.chips.map((c) => `${c.f}:${Math.round(c.x)}–${Math.round(c.r)}`).join(" "));
       L.check(`${w} search ${want}`, near(r.find.w, want), `search ${r.find.w} at a list ${r.lib.w} wide`);
-      L.check(`${w} Books and Film and TV by width`, r.chips.some((c) => c.f === "book") === (r.lib.w >= 1252), `${r.chips.map((c) => c.f)} at ${r.lib.w}`);
+      L.check(`${w} Books and Film and TV by width`, r.chips.some((c) => c.f === "book") === (r.lib.w >= 1300), `${r.chips.map((c) => c.f)} at ${r.lib.w}`);
     }
     /* each of the three widths was entered */
     L.check("all three search widths seen", seen.has(280) && seen.has(220) && seen.has(170), [...seen].join(", "));
-    L.done(29);
+    L.done(36);
   });
 
   test("D3 · sort: Seen by orders by query count, descending, ascending, then the writer's own order", async ({ page }) => {
@@ -328,6 +332,8 @@ test.describe("Comparable titles v25", () => {
       const a = await read();
       const w = `${vp.width}`;
       L.check(`${w} before: expanded, scrolled`, !a.shut && a.side > 200 && a.scroll > 200 && a.panel > 0 && a.strip > 0, `sidebar ${a.side} · scroll ${a.scroll}`);
+      /* comps v27.1: the break-out is full screen's alone. Before it the list is inside the sheet by more than 12 */
+      L.check(`${w} before: the list does not break out`, a.list.x - a.sheet.x > 13 && a.sheet.r - a.list.r > 13, `left ${a.list.x - a.sheet.x} · right ${a.sheet.r - a.list.r}`);
       await page.locator(`${P}[data-cv="full-btn"]`).click();
       await page.waitForTimeout(900);
       const b = await read();
@@ -340,6 +346,7 @@ test.describe("Comparable titles v25", () => {
       await page.waitForTimeout(900);
       const c = await read();
       L.check(`${w} Escape: everything is back`, c.panel > 0 && c.strip > 0 && c.full === "false" && !c.url.includes("full=1") && c.stored === null, `panel ${c.panel} · ${c.url || "(no query)"} · stored ${c.stored}`);
+      L.check(`${w} Escape: the list is back where it was`, near(c.list.x, a.list.x) && near(c.list.w, a.list.w), `${a.list.x}, ${a.list.w} wide → ${c.list.x}, ${c.list.w} wide`);
       L.check(`${w} Escape: the sidebar is what it was`, !c.shut && near(c.side, a.side), `${c.side} of ${a.side}`);
       L.check(`${w} Escape: the scroll position you left from`, near(c.scroll, a.scroll, 2), `${a.scroll} → ${c.scroll}`);
       /* F toggles it, and not while typing */
@@ -350,7 +357,7 @@ test.describe("Comparable titles v25", () => {
       await page.locator(`${P}[data-cv="find"] input`).fill(""); await page.locator(`${P}[data-cv="full-btn"]`).click(); await page.waitForTimeout(700);
       L.check(`${w} the button exits`, (await read()).full === "false", "after Exit full screen");
     }
-    L.done(24);
+    L.done(28);
   });
 
   /* comps v27 REWROTE L1. While comps load the page is its header and nothing below (v27 Part B), so the strip and the
