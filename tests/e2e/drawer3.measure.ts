@@ -26,6 +26,8 @@ async function openDrawerOn(page: import("@playwright/test").Page, queryId: stri
   await expect(page.locator(".qpn .tl-more").first()).toBeVisible({ timeout: 20_000 });
 }
 
+/* RETIRED by Query panel v2 (tests/e2e/RETIRED-query-panel-v2.md): its three desks stopped opening on 27 Sep and its stage block belonged to the old drawer; the open query is the side panel (QP2 V1 to V13, QP1). */
+test.beforeEach(() => { test.skip(true, "RETIRED by Query panel v2: its three desks stopped opening on 27 Sep and its stage block belonged to the old drawer"); });
 test("§1 · one tint across the block, equal to the card's band, three stages — 1440", async ({ page }) => {
   mkdirSync(SHOTS, { recursive: true });
   const stages: [string, string][] = [["cor-move-b", "queried"], ["cor-move-a", "partialreq"], ["cor-closed", "rejected"]];
