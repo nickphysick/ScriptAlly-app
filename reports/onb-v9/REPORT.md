@@ -210,3 +210,26 @@ The acknowledgement's stamp and the success mark are drawn in code, not slots.
 - The answered-card state of the deck (going back with an arrow and pressing "Change this") is exercised by hand, not by a lock.
 - The deck's fallback cards (two dates found, a month with no day, a stray spreadsheet number, a response date) keep the build's own question and controls inside the card. V4 answers one of each; no lock holds their look.
 - `queryReasonText` still holds the old sentences for the five reasons the deck redrew. Nothing shows them now.
+
+## 11. Follow-up (12 Oct): rulings on §10.1, and the FAQ
+
+Rulings: Title TBC and readiness stay as built; the drop zone stays gone; Smart Import status questions keep the unquoted question. One commit.
+
+**FAQ answers replaced, each with the ruling's words exactly:**
+
+| Step | Question | Was |
+|---|---|---|
+| Agents | `What does "Needs an answer" mean?` | the question was `What does “needs a look” mean?` |
+| Agents | `Is the agency name required?` | "No — a name or an agency is enough…" |
+| Agents | `What if I don't have the agent's name?` | "Leave the name blank and we'll track them by agency only…" |
+| Queries | `What does "Needs an answer" mean?` (same answer as the agents step) | the question was `What does “needs a look” mean?` |
+| Queries | `What if I don't know the date I sent it?` | "Leave it undated…" |
+| Queries | `Can a query have no agent?` | "…Match it to one you already have, or add the agent as new." |
+
+No string needed a nearest equivalent. One thing to know: "Reference by agency only" is offered in a ready row's "Add details" editor, not on a deck card.
+
+**Code:** `reviewBandLabel` is deleted; nothing rendered it and it had no tests. Five comments in `smartImportReviewModel.ts` now describe the gate. The tier is still named `sharpen` in code; it means "needs an answer".
+
+**Left alone, as ruled:** "· optional" on the word count; "(optional)" on Strapline and title in the Import page's book step.
+
+Gates: tsc 0, both builds 0, Vitest 8,584 passed with the same one file failing to load. Re-pointed: `reviewCopyClaims` (the agency answer) and `onbV5Import` V1 (the first question's words).

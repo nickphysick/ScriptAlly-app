@@ -26,7 +26,8 @@ describe("the agents step's questions", () => {
   const agency = AGENT_FAQS.find((f) => /agency name required/i.test(f.q));
   it("still carry the agency question", () => { expect(agency).toBeTruthy(); });
   it("do not answer it with a yes", () => { expect(agency!.a).not.toMatch(/^yes\b/i); });
-  it("say a name or an agency is enough", () => { expect(agency!.a).toMatch(/a name or an agency is enough/i); });
+  /* RE-POINTED (v9 follow-up): the answer is Nick's new one. It still opens on "No", and names the way through. */
+  it("say no, and name the way through", () => { expect(agency!.a).toBe('No. Add it if you know it, or choose "Carry on without an agency". Either counts as an answer.'); });
   it("no answer on any step asserts an agency is required", () => {
     const all = [...AGENT_FAQS, ...QUERY_FAQS, ...DUP_FAQS];
     expect(all.length).toBeGreaterThan(10);

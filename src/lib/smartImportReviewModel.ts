@@ -57,7 +57,7 @@ export interface ReviewAgent {
   agencyWaived?: boolean;
 }
 
-/** Why a card needs a look. `duplicate` resolves via the remove-one / keep-both controls; `mapping`
+/** Why a card asks something. `duplicate` resolves via the remove-one / keep-both controls; `mapping`
  *  is the low-confidence / flagged-by-the-mapper reason, resolved by "Mark as checked". */
 export type CheckReason = "duplicate" | "mapping";
 /** `undoable` notes show an Undo beside "✓ Checked"; a destructively-merged duplicate is not. */
@@ -81,9 +81,9 @@ export const keepBothLabel = (count: number) =>
 /** The settled-cluster verdict label for a kept-apart cluster. */
 export const keptClusterLabel = (count: number) => (count > 2 ? "Kept all" : "Kept both");
 
-/** Status precedence: a missing agency surfaces as `needs-agency` (an OPTIONAL chance to sharpen — it
- *  never blocks Continue/Import); any open reason — or an unresolved duplicate — is `needs-check`;
- *  otherwise `captured`. "all clear" means genuinely nothing left, but import is never gated on it. */
+/** Status precedence: a missing agency surfaces as `needs-agency` (a question: add it, or carry on
+ *  without one); any open reason — or an unresolved duplicate — is `needs-check`; otherwise
+ *  `captured`. Since onboarding v9 the step's primary waits until none is left (lib/reviewGate). */
 export type AgentStatus = "needs-agency" | "needs-check" | "captured";
 export const hasOpenReasons = (a: ReviewAgent) => a.reasons.some((r) => !r.resolved);
 export const agentStatus = (a: ReviewAgent, dupOpen = false): AgentStatus =>
@@ -172,11 +172,11 @@ export const queryStatusOf = (q: ReviewQuery): "needs-check" | "captured" =>
 export const currentDate = (q: ReviewQuery): string | null => q.sentDate;
 
 // ── Two-tier review classification (overview + pills + guided overlay all read this) ──────────────
-// Import is NEVER gated on a per-record review (both reviews are advisory). FIX is reserved for the one
-// genuine hard decision — an unresolved duplicate — which lives on its own dedicated duplicates stage
-// BEFORE the per-record review. SHARPEN (OPTIONAL): a missing agency, a query's typed reasons, or an
-// agent's "mapping" flag — each has a safe default and is skippable; it never blocks Continue/Import.
-// Everything else is READY.
+// Every tier but READY is gated (onboarding v9): a step's primary waits until it is empty. FIX is an
+// unresolved duplicate, decided on its own duplicates stage BEFORE the per-record review. `sharpen`
+// keeps its v5 name and now means NEEDS AN ANSWER: a missing agency, a row with no agent and no
+// agency, an agent's "mapping" flag, or a query's typed reasons. Some can be answered "I don't have
+// it" (an agency, a missing date); none can be walked past. Everything else is READY.
 export type ReviewTier = "ready" | "fix" | "sharpen";
 
 /** Agents in an unresolved duplicate cluster — the leaders carrying an open `duplicate` reason and
@@ -202,16 +202,16 @@ export const queryTier = (q: ReviewQuery): ReviewTier =>
   q.reasons.some((r) => !r.resolved) ? "sharpen" : "ready";
 
 /** A single population's counts. Its tiers always reconcile to `total` — every live record in that
- *  population sits in exactly one tier. Agents use ready+fix (fix = blocking); queries use
- *  ready+sharpen (sharpen = optional). A record with multiple reasons counts ONCE (by tier, not reason). */
+ *  population sits in exactly one tier. `fix` is a duplicate to decide; `sharpen` is a record that
+ *  needs an answer. A record with multiple reasons counts ONCE (by tier, not reason). */
 export interface PopulationTally { total: number; ready: number; fix: number; sharpen: number; }
 export interface ReviewTallies { agents: PopulationTally; queries: PopulationTally; }
 
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
  *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
- *  to its own total. Both populations are advisory now: ready + sharpen, never blocking. (Agents can
- *  also carry `fix` only for an unresolved duplicate — handled on the duplicates stage, so it's 0 by
- *  the time the per-record agents review runs.) A record with multiple reasons counts ONCE (by tier). */
+ *  to its own total. (Agents carry `fix` only for an unresolved duplicate — decided on the duplicates
+ *  stage, which waits for it, so it is 0 by the time the per-record agents review runs.) A record
+ *  with multiple reasons counts ONCE (by tier). */
 export function reviewTallies(agents: ReviewAgent[], queries: ReviewQuery[]): ReviewTallies {
   const liveAgents = agents.filter((a) => !a.deleted);
   const liveQueries = queries.filter((q) => !q.removed);
@@ -733,8 +733,8 @@ export const quoteStatuses = (text: string): string =>
  * state, it has to be reading the same number, or "all clear" means something different depending
  * on where you are standing.
  *
- * `fix` and `sharpen` both count: nothing in this flow BLOCKS, but a duplicate still awaits a real
- * decision and a sharpen is still something a writer has not looked at.
+ * `fix` and `sharpen` both count: a duplicate awaits a decision and a `sharpen` record awaits an
+ * answer, and since onboarding v9 the step's primary waits for both.
  */
 export function reviewNeedCount(agents: ReviewAgent[], queries: ReviewQuery[]): number {
   const t = reviewTallies(agents, queries);
@@ -744,10 +744,3 @@ export function reviewNeedCount(agents: ReviewAgent[], queries: ReviewQuery[]): 
 /** True when nothing anywhere in the import is waiting on the writer. */
 export const reviewAllClear = (agents: ReviewAgent[], queries: ReviewQuery[]): boolean =>
   reviewNeedCount(agents, queries) === 0;
-
-/**
- * What the band says. States the count in words — never a bare number, and never a verdict about
- * whether that count is a lot (the app reports, it does not appraise).
- */
-export const reviewBandLabel = (needCount: number): string =>
-  needCount === 0 ? "All clear" : needCount === 1 ? "1 needs a look" : `${needCount} need a look`;
