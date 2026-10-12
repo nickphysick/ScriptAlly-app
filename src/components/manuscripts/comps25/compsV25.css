@@ -308,10 +308,85 @@
 .cv-df { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; border-top: 1px solid rgba(28, 19, 15, 0.08); background: #fff; }
 .cv-df > span { font: 400 13.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
 .cv-df .cv-bt { display: flex; gap: 8px; flex: none; }
-.cv-remove { margin-top: 18px; padding: 0; border: 0; background: none; cursor: pointer; font: 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.58); text-decoration: underline; text-underline-offset: 3px; }
-.cv-remove:disabled { text-decoration: none; cursor: default; }
-/* the comp form, inside the drawer: its own card chrome comes off, the drawer is the frame */
-.cv-db .cpv-form { box-shadow: none; padding: 0; border-radius: 0; }
+
+/* ══ the add-and-edit form (comps v26; ref design-refs/materials/comps-v26-add.html) ══
+   One column in three numbered sections, on paper, scrolling under the drawer's pinned head and
+   foot. Compact is the page narrower than 1100px (the mock's own breakpoint): the drawer is portalled
+   and 54vw wide, so this is a viewport query, the only thing that can see it. */
+.cf-body { box-sizing: border-box; min-height: 100%; padding: 22px 28px 28px; background: #fbf9f5; color: #1c130f; }
+.cf-sec { margin-bottom: 26px; }
+.cf-sec:last-child { margin-bottom: 0; }
+.cf-sech { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font: 400 18px/1.25 var(--sp-type); color: #1c130f; }
+.cf-sech .cf-n { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px #a2452a; color: #a2452a; font: 600 10.5px/1 var(--font-mono); }
+.cf-sech em { margin-left: auto; font: 600 9px/1.3 var(--font-mono); font-style: normal; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); text-align: right; }
+
+.cf-type { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 5px; margin-bottom: 16px; border-radius: 14px; background: #efe9e1; }
+.cf-type button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; min-width: 0; padding: 0; border: 0; border-radius: 10px; background: none; cursor: pointer; font: 400 15px/1 var(--sp-type); color: rgba(28, 19, 15, 0.58); }
+.cf-type button svg { flex: none; width: 17px; height: 17px; }
+.cf-type button:hover { color: #1c130f; }
+.cf-type button[aria-checked="true"] { background: #fff; color: #1c130f; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.12), 0 0 0 1px rgba(28, 19, 15, 0.08); }
+.cf-type button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
+
+.cf-fld { display: block; margin-bottom: 14px; min-width: 0; }
+.cf-fld > span { display: flex; align-items: baseline; gap: 8px; margin-bottom: 7px; font: 600 9px/1.3 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.cf-fld .cf-req { font-weight: 600; color: #a2452a; }
+.cf-fld input, .cf-fld textarea, .cf-tagbox {
+  box-sizing: border-box; width: 100%; height: 46px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 16px/normal var(--sp-serif); color: #1c130f; outline: none; transition: box-shadow 0.15s;
+}
+.cf-fld input.cf-big { height: 52px; font-size: 19px; }
+.cf-fld textarea { display: block; height: auto; min-height: 92px; padding: 12px 14px; line-height: 1.5; resize: vertical; }
+.cf-fld input::placeholder, .cf-fld textarea::placeholder, .cf-tagbox input::placeholder { color: rgba(28, 19, 15, 0.36); }
+.cf-fld input:focus, .cf-fld textarea:focus, .cf-tagbox:focus-within { box-shadow: inset 0 0 0 2px #2d3a50; }
+.cf-fld.is-err input { box-shadow: inset 0 0 0 2px #a2452a; }
+.cf-pair { display: grid; grid-template-columns: minmax(0, 1fr) 124px; gap: 12px; }
+.cf-err { margin: -6px 0 12px; font: 400 14px/1.4 var(--sp-serif); color: #a2452a; }
+.cf-dupe { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin: -4px 0 14px; padding: 10px 14px; border-radius: 10px; background: #f6e2d8; font: 400 14.5px/1.4 var(--sp-serif); color: #5b2a1f; }
+.cf-dupe span { flex: 1 1 auto; }
+.cf-dupe b { font-weight: 600; }
+.cf-dupe button { padding: 0; border: 0; background: none; cursor: pointer; font: 400 14px/1.3 var(--sp-type); color: #7c3a2a; text-decoration: underline; text-underline-offset: 3px; }
+
+.cf-ready { display: flex; align-items: center; gap: 10px; margin-top: 2px; padding: 11px 14px; border-radius: 10px; font: 400 14.5px/1.4 var(--sp-serif); background: #efe9e1; color: rgba(28, 19, 15, 0.58); }
+.cf-ready i { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: #fff; font: 600 11px/1 var(--font-mono); font-style: normal; color: rgba(28, 19, 15, 0.58); }
+.cf-ready.is-needs { background: #f6e2d8; color: #7c3a2a; }
+.cf-ready.is-needs i { color: #a2452a; }
+.cf-ready.is-ready { background: #e2e7ef; color: #2d3a50; }
+.cf-ready.is-ready i { color: #2d3a50; }
+
+.cf-tagbox { height: auto; min-height: 46px; padding: 7px 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; cursor: text; }
+.cf-fld .cf-tagbox input { flex: 1; min-width: 140px; width: auto; height: 30px; padding: 0 6px; border-radius: 0; background: none; box-shadow: none; }
+.cf-fld .cf-tagbox input:focus { box-shadow: none; }
+.cf-tg { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 12px; border-radius: 15px; background: #f4f1ec; font: 400 13.5px/1 var(--sp-type); letter-spacing: 0; text-transform: none; color: #1c130f; }
+.cf-tg button { width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: none; display: grid; place-items: center; cursor: pointer; font-size: 10px; line-height: 1; color: rgba(28, 19, 15, 0.58); }
+.cf-tg button:hover { background: rgba(28, 19, 15, 0.1); }
+.cf-sugg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 16px; }
+.cf-sugg > span { margin-right: 4px; font: 600 9px/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.cf-sugg button { height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: none; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font: 400 13px/1 var(--sp-type); color: rgba(28, 19, 15, 0.58); }
+.cf-sugg button:hover:not(:disabled) { color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.4); }
+.cf-sugg button:disabled { opacity: 0.35; cursor: default; }
+
+/* the preview: the library row's own comp cell and next-move cell, in a card */
+.cf-prev { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.cf-prev .cv-ag { flex: 1 1 auto; }
+.cf-prev .cv-nx { flex: none; }
+.cv-ag b.is-placeholder { color: rgba(28, 19, 15, 0.3); }
+.cv-addl--words { text-decoration: none; cursor: default; }
+
+/* the foot: pinned (it is the drawer's own foot, never inside the scrolling body) */
+.cf-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 28px; border-top: 1px solid rgba(28, 19, 15, 0.08); background: #fff; color: #1c130f; }
+.cf-foot > span:first-child { flex: 1 1 auto; min-width: 0; font: 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.cf-foot .cf-bt { flex: none; display: flex; align-items: center; gap: 8px; }
+.cv-layer.cf-foot .cv-pillbtn, .cv-layer.cf-foot .cv-ghost { height: 40px; padding: 0 18px; border-radius: 20px; font-size: 14.5px; }
+.cv-layer.cf-foot .cv-pillbtn:disabled { opacity: 1; background: #b9b3ad; }
+.cv-layer.cf-foot .cv-ghost:disabled { opacity: 0.45; cursor: default; }
+.cf-remove { height: 40px; padding: 0 12px; border: 0; background: none; cursor: pointer; font: 400 14.5px/1 var(--sp-type); color: #a2452a; }
+.cf-remove:disabled { color: rgba(28, 19, 15, 0.36); cursor: default; }
+
+@media (max-width: 1099.98px) {
+  .cf-body { padding: 20px 22px 24px; }
+  .cf-foot { padding: 14px 22px; }
+  .cf-foot > span:first-child { display: none; }
+}
 
 /* ══ the letter picker: a centred dialog ══ */
 .cv-pdim { position: fixed; inset: 0; z-index: 62; display: grid; place-items: center; background: rgba(18, 24, 34, 0.45); }

@@ -178,16 +178,17 @@ export const ComparableTitlesPage: React.FC<{
 
   const indexOfKey = (key: string): number => compsRef.current.findIndex((c, i) => compKey(c, i) === key);
 
-  const add = (draft: CompDraft) => {
+  /** `again` ("Add and add another") keeps the drawer open on a cleared form; a plain add closes it. */
+  const add = (draft: CompDraft, o: { again: boolean } = { again: false }) => {
     const [comp] = withCompIds([normalizeComp({ ...draft, source: "user" })]);
     const next = withCompAdded(compsRef.current, comp);
     void commit(next);
-    setDrawer({ mode: "view", key: comp.id! });
+    if (!o.again) setDrawer(null);
     showToast({
-      message: `Added ${comp.title}.`,
+      message: `Added ${comp.title} to your library.`,
       undo: async () => {
         const at = compsRef.current.findIndex((c) => c.id === comp.id);
-        if (at >= 0) { setDrawer(null); await commit(withCompRemoved(compsRef.current, at)); }
+        if (at >= 0) { setDrawer((d) => (d && d.mode !== "add" && d.key === comp.id ? null : d)); await commit(withCompRemoved(compsRef.current, at)); }
       },
     });
   };

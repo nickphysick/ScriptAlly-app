@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "AD9",
+  "where": "1512 the exhibit is on the page",
+  "ok": true,
+  "detail": "band true · 3 cards"
+ },
+ {
+  "lock": "AD9",
+  "where": "1512 no query line",
+  "ok": false,
+  "detail": "1 line element(s)"
+ },
+ {
+  "lock": "AD9",
+  "where": "1512 no drag handle",
+  "ok": true,
+  "detail": "0 grip(s)"
+ },
+ {
+  "lock": "AD9",
+  "where": "1512 what remains",
+  "ok": true,
+  "detail": "Your comps 3 · 0 buttons · No comp titles yet"
+ },
+ {
+  "lock": "AD9",
+  "where": "1280 the exhibit is on the page",
+  "ok": true,
+  "detail": "band true · 3 cards"
+ },
+ {
+  "lock": "AD9",
+  "where": "1280 no query line",
+  "ok": false,
+  "detail": "1 line element(s)"
+ },
+ {
+  "lock": "AD9",
+  "where": "1280 no drag handle",
+  "ok": true,
+  "detail": "0 grip(s)"
+ },
+ {
+  "lock": "AD9",
+  "where": "1280 what remains",
+  "ok": true,
+  "detail": "Your comps 3 · 0 buttons · No comp titles yet"
+ }
+]

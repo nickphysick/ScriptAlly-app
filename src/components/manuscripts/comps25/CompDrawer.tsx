@@ -3,20 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Comparable titles v25, Part E: the comp drawer. A row opens it; "+ Add a comp" opens it on the
- * empty form; Edit swaps its body for the existing comp form. It floats on the right (HalfDrawer:
- * 8px in, 12px corners) and sits on the escape stack.
+ * empty form; Edit swaps its body for the comp form. It floats on the right (HalfDrawer: 8px in,
+ * 12px corners) and sits on the escape stack.
  *
- * ⚠️ PORTALLED, so everything in it hangs off `.cv-layer` (literals and `:root` tokens) and the
- * comp form inside it is wrapped in `.cpv-scope`, which carries the form's own tokens.
+ * Comps v26: add and edit are ONE form (`../CompForm`). The drawer calls its hook once, so the head
+ * (the chosen type's disc, the drawer's only heading), the scrolling body and the pinned foot all
+ * read the same state.
+ *
+ * ⚠️ PORTALLED, so everything in it hangs off `.cv-layer` (literals and `:root` tokens).
  */
-import React from "react";
+import React, { useRef } from "react";
 import type { CompTitle } from "../../../types";
 import type { CompDraft } from "../../../lib/comps";
 import type { CompRow } from "../../../lib/compsLibrary";
 import { dayMonth } from "../../../lib/dates";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { StatusDot } from "../../StatusDot";
-import { CompForm, splitTags } from "../CompForm";
+import { CompFormBody, CompFormFoot, TypeIcon, splitTags, useCompForm } from "../CompForm";
 import { CloseIcon, KindIcon, LetterIcon, LockIcon } from "./marks";
 
 export const DRAWER_WIDTH = "min(640px, 54vw)";
@@ -41,7 +44,8 @@ export const CompDrawer: React.FC<{
   onBackToView: () => void;
   onPick: () => void;
   onSave: (draft: CompDraft) => void;
-  onAdd: (draft: CompDraft) => void;
+  /** `again`: the writer pressed "Add and add another", so the drawer stays open */
+  onAdd: (draft: CompDraft, o: { again: boolean }) => void;
   onRemove: () => void;
   onShowExisting: (index: number) => void;
 }> = (p) => {
@@ -52,21 +56,50 @@ export const CompDrawer: React.FC<{
   const byline = c ? [c.author?.trim(), c.publisher?.trim() || (row!.kind === "book" ? "publisher not recorded" : ""), c.year ? String(c.year) : ""].filter(Boolean).join(" · ") : "";
   const tags = c ? splitTags(c.matchAxis) : [];
 
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const first = p.comps.length === 0;
+  const form = useCompForm({
+    /* a new key whenever the drawer opens on something else, so the form starts from that comp */
+    resetKey: !state ? "closed" : state.mode === "add" ? "add" : state.mode === "edit" ? `edit:${state.key}` : `view:${state.key}`,
+    mode: state?.mode === "edit" ? "edit" : "add",
+    initial: state?.mode === "edit" ? c : undefined,
+    focusNote: state?.mode === "edit" && !!state.focusNote,
+    existing: p.comps.map((x, index) => ({ title: x.title, index })),
+    first,
+    onSave: (d, o) => (state?.mode === "edit" ? p.onSave(d) : p.onAdd(d, o)),
+    onShowExisting: p.onShowExisting,
+    onCleared: () => { if (bodyRef.current) bodyRef.current.scrollTop = 0; },
+  });
+
   const head = (
     <div className="cv-layer cv-dh" data-cv="drawer-head">
       {state?.mode === "add" || !row ? (
-        <div><h3 className="cv-dt">Add a comp</h3><small className="cv-dby">A book, a film or a show like yours.</small></div>
+        <>
+          {/* a new comp's disc is ringed, and shows the type chosen below */}
+          <span className="cv-cdisc is-ring" data-cv="drawer-disc" data-media={form.f.media}><TypeIcon media={form.f.media} /></span>
+          <div>
+            <h3 className="cv-dt" data-cv="drawer-title">{first ? "Add your first comp" : "Add a comp"}</h3>
+            <small className="cv-dby">A book, film or show your manuscript sits beside.</small>
+          </div>
+        </>
       ) : (
         <>
-          <span className={`cv-cdisc${row.where === "none" ? " is-ring" : ""}`}><KindIcon kind={row.kind} /></span>
-          <div><h3 className="cv-dt" data-cv="drawer-title">{c!.title}</h3><small className="cv-dby">{byline}</small></div>
+          <span className={`cv-cdisc${row.where === "none" ? " is-ring" : ""}`} data-cv="drawer-disc"><KindIcon kind={row.kind} /></span>
+          <div>
+            <h3 className="cv-dt" data-cv="drawer-title">{state?.mode === "edit" ? `Edit ${c!.title}` : c!.title}</h3>
+            <small className="cv-dby">{byline}</small>
+          </div>
         </>
       )}
       <button type="button" className="cv-x" aria-label="Close" data-cv="drawer-close" onClick={p.onClose}><CloseIcon /></button>
     </div>
   );
 
-  const foot = !editing && row ? (
+  const foot = editing ? (
+    <CompFormFoot form={form}
+      onCancel={() => (state!.mode === "edit" ? p.onBackToView() : p.onClose())}
+      onRemove={state!.mode === "edit" ? p.onRemove : undefined} removeBlocked={p.removeBlocked} />
+  ) : row ? (
     <div className="cv-layer cv-df" data-cv="drawer-foot">
       <span>{row.where === "sent" ? "Its letter has gone out, so this record is fixed." : "You can still change which letters name it."}</span>
       <span className="cv-bt">
@@ -77,25 +110,9 @@ export const CompDrawer: React.FC<{
   ) : undefined;
 
   return (
-    <HalfDrawer probe="comp" open={open} onClose={p.onClose} label={state?.mode === "add" ? "Add a comp" : "Comp details"} width={DRAWER_WIDTH} head={head} foot={foot}>
+    <HalfDrawer probe="comp" open={open} onClose={p.onClose} label={state?.mode === "add" ? "Add a comp" : state?.mode === "edit" ? "Edit a comp" : "Comp details"} width={DRAWER_WIDTH} head={head} foot={foot} bodyRef={bodyRef}>
       {editing ? (
-        <div className="cv-layer cv-db cpv-scope" data-cv="drawer-form">
-          <CompForm
-            key={state!.mode === "edit" ? `edit-${row?.key}` : "add"}
-            mode={state!.mode === "edit" ? "edit" : "add"}
-            initial={state!.mode === "edit" ? c : undefined}
-            focusNote={state!.mode === "edit" && !!state.focusNote}
-            existing={p.comps.map((x, index) => ({ title: x.title, index }))}
-            onSave={(d) => (state!.mode === "edit" ? p.onSave(d) : p.onAdd(d))}
-            onCancel={() => (state!.mode === "edit" ? p.onBackToView() : p.onClose())}
-            onShowExisting={p.onShowExisting}
-          />
-          {state!.mode === "edit" && (
-            <button type="button" className="cv-remove" data-cv="drawer-remove" disabled={!!p.removeBlocked} onClick={p.onRemove}>
-              {p.removeBlocked ?? "Remove this comp from your shelf"}
-            </button>
-          )}
-        </div>
+        <CompFormBody form={form} first={first} row={state?.mode === "edit" ? row : null} />
       ) : row ? (
         <div className="cv-layer cv-db" data-cv="drawer-body">
           <div className="cv-stat">

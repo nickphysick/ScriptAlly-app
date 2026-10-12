@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "AD6",
+  "where": "1512 before: the first-comp form, explainer open",
+  "ok": true,
+  "detail": "Add your first comp · card true"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 one comp written",
+  "ok": true,
+  "detail": "[{\"year\":2023,\"media\":\"film\",\"title\":\"Last Light\",\"author\":\"Tom Arden\",\"source\":\"user\",\"note\":\"One crossing, real time.\",\"id\":\"cmp_2mflj1jv42jd\"}]"
+ },
+ {
+  "lock": "AD6",
+  "where": "1512 the drawer stays open, in add mode",
+  "ok": false,
+  "detail": "closed"
+ }
+]

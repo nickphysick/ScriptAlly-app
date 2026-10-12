@@ -419,7 +419,7 @@ test.describe("Comparable titles v25", () => {
     await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator('[data-cv="drawer-edit"]').click();
     await page.locator("#cpv-f-pub").fill("Faber & Faber");
-    await page.locator('[data-cv="drawer-form"] button[type="submit"], [data-cv="drawer-form"] [data-cpv="save"]').first().click();
+    await page.locator('[data-hdr="comp"] [data-cf="save"]').click(); /* comps v26: the form's buttons are the drawer's pinned foot */
     await expect.poll(() => (dump().comps.find((c) => c.title === "Salt Road") as any)?.publisher, { timeout: 20_000 }).toBe("Faber & Faber");
     const a = dump();
     const ids = a.comps.map((c) => c.id as string | undefined);
@@ -435,7 +435,7 @@ test.describe("Comparable titles v25", () => {
     await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator("#cpv-f-title").fill("Low Water");
     await page.locator("#cpv-f-year").fill("2024");
-    await page.locator('[data-cv="drawer-form"] button[type="submit"], [data-cv="drawer-form"] [data-cpv="save"]').first().click();
+    await page.locator('[data-hdr="comp"] [data-cf="save"]').click(); /* comps v26: the form's buttons are the drawer's pinned foot */
     await expect.poll(() => dump().comps.length, { timeout: 20_000 }).toBe(FX.comps + 1);
     const b = dump();
     const bid = b.comps.map((c) => c.id as string);
@@ -444,8 +444,12 @@ test.describe("Comparable titles v25", () => {
     if (L.red) { L.done(8); return; }
     /* remove it through the drawer, then Undo: it comes back with the SAME id */
     const added = bid[bid.length - 1];
+    /* comps v26: a plain Add closes the drawer, so the new comp is opened from its row; Remove is in the edit form's foot */
+    await page.waitForTimeout(700);
+    await page.locator(`${P}[data-cv="row"]`).last().click();
+    await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator('[data-cv="drawer-edit"]').click();
-    await page.locator('[data-cv="drawer-remove"]').click();
+    await page.locator('[data-hdr="comp"] [data-cf="remove"]').click();
     await expect.poll(() => dump().comps.length, { timeout: 20_000 }).toBe(FX.comps);
     await page.locator(".sa-toast-undo").last().click();
     await expect.poll(() => dump().comps.length, { timeout: 20_000 }).toBe(FX.comps + 1);
@@ -464,6 +468,10 @@ test.describe("Comparable titles v25", () => {
     await page.locator(`${P}[data-cv="row"]`).nth(2).hover();
     await page.locator(`${P}[data-cv="row"]`).nth(2).locator('[data-cv="tray-act"]').click();
     await page.waitForSelector('[data-cv="picker"]');
+    /* ⚠️ SETTLED, NOT FIRST PAINT. The picker chooses its letter in an effect, so for one render it is mounted with no
+       letter and no ticks. Read in that frame it reports "no letter, 0 logged" about a picker that is about to be right
+       (comps v26 moved the timing enough to land there every run). Wait for the letter, with a bound, then read. */
+    await page.waitForFunction(() => !!(document.querySelector('[data-cv="picker"]') as HTMLElement | null)?.dataset.letter, null, { timeout: 5_000 }).catch(() => {});
     const p0 = await page.evaluate(() => { const p = document.querySelector('[data-cv="picker"]') as HTMLElement; return { letter: p.dataset.letter, fixed: p.dataset.fixed, on: [...p.querySelectorAll('[data-cv="picker-comp"][aria-checked="true"]')].map((x) => (x as HTMLElement).dataset.key), count: p.querySelector('[data-cv="picker-count"]')!.textContent, off: [...p.querySelectorAll('[data-cv="picker-comp"][aria-disabled="true"]')].map((x) => x.querySelector("b")!.textContent) }; });
     L.check("opens on the current letter, not fixed", p0.letter === FX.L3 && p0.fixed === "false", `${p0.letter} · fixed ${p0.fixed}`);
     L.check("its record plus the comp the door named", [...p0.on].sort().join("|") === ["cmp_cv25last", "cmp_cv25nine", "cmp_cv25tide"].join("|") && p0.count === "3 logged", `${p0.on} · ${p0.count}`);

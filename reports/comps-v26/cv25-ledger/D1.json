@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 left edge",
+  "ok": true,
+  "detail": "heading 272 · list 272"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 right edge",
+  "ok": true,
+  "detail": "heading 1480 · list 1480"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the list is wider than the column",
+  "ok": true,
+  "detail": "list 1208 · column 1159.25"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 copy",
+  "ok": true,
+  "detail": "Your comparable titles library · 7 titles · in your own order"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 left edge",
+  "ok": true,
+  "detail": "heading 272 · list 272"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 right edge",
+  "ok": true,
+  "detail": "heading 1248 · list 1248"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the list is wider than the column",
+  "ok": true,
+  "detail": "list 976 · column 942.09375"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 copy",
+  "ok": true,
+  "detail": "Your comparable titles library · 7 titles · in your own order"
+ }
+]

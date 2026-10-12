@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "AD4",
+  "where": "1512 no title: idle, Save disabled",
+  "ok": true,
+  "detail": "idle · save disabled true · \"\""
+ },
+ {
+  "lock": "AD4",
+  "where": "1512 book, no publisher: needs",
+  "ok": true,
+  "detail": "needs · A letter can only name it once it has a publisher and year. You can still save it without."
+ },
+ {
+  "lock": "AD4",
+  "where": "1512 book, no publisher: Save is enabled",
+  "ok": false,
+  "detail": "save disabled true"
+ },
+ {
+  "lock": "AD4",
+  "where": "1512 book, no publisher: the foot's line",
+  "ok": true,
+  "detail": "\"Fill in the rest any time.\""
+ },
+ {
+  "lock": "AD4",
+  "where": "1512 book, ready",
+  "ok": true,
+  "detail": "ready · Ready to log in a query letter. · \"Ready for a letter.\""
+ },
+ {
+  "lock": "AD4",
+  "where": "1512 film with a year: ready",
+  "ok": true,
+  "detail": "ready"
+ },
+ {
+  "lock": "AD4",
+  "where": "1512 film, no year: needs a year",
+  "ok": false,
+  "detail": "needs · A letter can only name it once it has a year. You can still save it without. · save disabled true"
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 no title: idle, Save disabled",
+  "ok": true,
+  "detail": "idle · save disabled true · \"\""
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 book, no publisher: needs",
+  "ok": true,
+  "detail": "needs · A letter can only name it once it has a publisher and year. You can still save it without."
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 book, no publisher: Save is enabled",
+  "ok": false,
+  "detail": "save disabled true"
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 book, no publisher: the foot's line",
+  "ok": true,
+  "detail": "\"Fill in the rest any time.\""
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 book, ready",
+  "ok": true,
+  "detail": "ready · Ready to log in a query letter. · \"Ready for a letter.\""
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 film with a year: ready",
+  "ok": true,
+  "detail": "ready"
+ },
+ {
+  "lock": "AD4",
+  "where": "1280 film, no year: needs a year",
+  "ok": false,
+  "detail": "needs · A letter can only name it once it has a year. You can still save it without. · save disabled true"
+ }
+]

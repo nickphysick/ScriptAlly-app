@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * THE COMPARABLE TITLES EXHIBITION (living headers v3 §5) — how the page looks once the writer has
- * added a few, drawn by the page's OWN parts (`CompsQueryLine`, the "Your comps" heading, `CompCard`)
- * over a SAMPLE constant declared here and nowhere else.
+ * added a few: the "Your comps" heading and three `CompCard`s over a SAMPLE constant declared here
+ * and nowhere else.
+ *
+ * Comps v26: the "Your query line" example and the cards' drag handles are GONE from it. Comps v25
+ * retired both from the page, and a picture of the page may not show what the page no longer has.
  *
  * ⚠️ IT REPLACES comps v2's "How your comps work" block and its tagged example cards. The ref draws
  * the empty state as a heading, a sentence, the buttons and the exhibition — nothing between — and
@@ -14,14 +17,12 @@
  * first save moves the page to the filled state because the count changed.
  *
  * ⚠️ IT READS NOTHING LIVE AND DOES NOTHING. `LivingExhibition` makes the band `inert` and
- * `aria-hidden`; the line is `CompsQueryLine`'s own `example` picture and every card is the real
- * `CompCard` in its `example` mode, so nothing inside is a control.
+ * `aria-hidden`; every card is `CompCard` in its `example` mode, so nothing inside is a control.
  */
 import React from "react";
 import { CompTitle } from "../../types";
 import { LivingExhibition } from "../shell/LivingExhibition";
 import { CompCard } from "./CompCard";
-import { CompsQueryLine } from "./CompsQueryLine";
 
 export const COMPS_EXHIBIT_LABEL = "HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW";
 
@@ -34,16 +35,12 @@ export const COMPS_SAMPLE: CompTitle[] = [
 /** The exhibit's letter names the first two. */
 const SAMPLE_IN_LETTER = 2;
 
-const noop = () => {};
-
-export const CompsExhibit: React.FC<{ msTitle: string; now: number }> = ({ msTitle, now }) => (
+export const CompsExhibit: React.FC<{ msTitle?: string; now: number }> = ({ now }) => (
   <LivingExhibition label={COMPS_EXHIBIT_LABEL}>
     <div className="cpv-exstack">
-      <CompsQueryLine comps={[]} msTitle={msTitle} format="readers" onFormat={noop} example />
       <div>
         <div className="cpv-sech">
           <h2>Your comps <span className="cpv-pill">{COMPS_SAMPLE.length}</span></h2>
-          <span className="cpv-hint">Drag to reorder. The order sets your query line.</span>
         </div>
         <div className="cpv-list">
           {COMPS_SAMPLE.map((c, i) => (

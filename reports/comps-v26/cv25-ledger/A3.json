@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A3",
+  "where": "v1: sent, nothing recorded, open to one save",
+  "ok": true,
+  "detail": "cv25-let-1 · fixed false · 6 tickable"
+ },
+ {
+  "lock": "A3",
+  "where": "v1: the notice says its queries are tracked too",
+  "ok": true,
+  "detail": "QL v1 has already gone out with 5 queries. Log what it mentioned and those queries are tracked too."
+ },
+ {
+  "lock": "A3",
+  "where": "sent letters carry a padlock",
+  "ok": true,
+  "detail": "cv25-let-1:lock cv25-let-2:lock cv25-let-3:open"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: fixed, no checkbox",
+  "ok": true,
+  "detail": "fixed true · 0 tickable · save false"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: its record is shown, read-only",
+  "ok": true,
+  "detail": "cmp_cv25tide,cmp_cv25salt"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: the notice and the door",
+  "ok": true,
+  "detail": "QL v2 has gone out with 9 queries, so its comps are fixed. To change them, make a new version of the letter. · New version of QL v2"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: a click ticks nothing",
+  "ok": true,
+  "detail": "ticks after a click"
+ },
+ {
+  "lock": "A3",
+  "where": "New version: the next name, the same comps",
+  "ok": true,
+  "detail": "Query letter v4 · [\"cmp_cv25tide\",\"cmp_cv25salt\"]"
+ },
+ {
+  "lock": "A3",
+  "where": "New version: v2 is untouched",
+  "ok": true,
+  "detail": "{\"name\":\"Query letter v2\",\"compIds\":[\"cmp_cv25tide\",\"cmp_cv25salt\"]}"
+ },
+ {
+  "lock": "A3",
+  "where": "New version: the picker moves to it, and it can be edited",
+  "ok": true,
+  "detail": "fixed false · 2 ticked"
+ },
+ {
+  "lock": "A3",
+  "where": "v1 saved once: its five queries are tracked",
+  "ok": true,
+  "detail": "{\"where\":\"sent\",\"n\":\"5\",\"unrec\":0,\"rate\":\"100%\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "v1 is now fixed",
+  "ok": true,
+  "detail": "fixed true · 0 tickable"
+ }
+]

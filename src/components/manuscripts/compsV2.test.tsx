@@ -67,8 +67,14 @@ describe("C7 · the empty state's examples are pictures", () => {
     expect(html).toContain('data-lh="exhibition"');
     expect(html).toMatch(/data-lh="band" aria-hidden="true" inert=""/);
     expect(html, "a live comp card's switch rendered").not.toContain('role="switch"');
-    /* every button sits inside the inert band — the format radios are CompsQueryLine's own picture */
-    expect(html.indexOf("<button")).toBeGreaterThan(html.indexOf('data-lh="band"'));
+    /* comps v26: the query line's picture (and its format radios) left the exhibit, so no button is left in it */
+    expect(html).not.toContain("<button");
+    expect(html, "the retired query line is drawn").not.toContain("Your query line");
+    expect(html, "a drag handle is drawn").not.toMatch(/["\s]cpv-grip["\s]/);
+    expect(html, "the reorder hint is still there").not.toContain("Drag to reorder");
+    /* what remains: the heading with its count, and the three sample cards */
+    expect(html).toContain("Your comps");
+    expect((html.match(/data-cpv="comp"/g) ?? []).length).toBe(3);
     expect(html).toContain("HOW THE PAGE LOOKS ONCE YOU’VE ADDED A FEW");
   });
   it("the live card is the same component with real buttons", () => {

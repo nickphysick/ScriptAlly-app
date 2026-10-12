@@ -256,7 +256,19 @@
     "design-refs/comps-v25/ref-list-1512@2x.png": "d5f4708802a9d044131cecefb264284ab2b5a113485585eb83d7d11821eef62b",
     "design-refs/comps-v25/ref-picker-1512@2x.png": "13f7d0a73778bf20c4e3de22ed2eb5ccc26b2601aed49597f46a98861b8bf42c",
     "design-refs/comps-v25/ref-top-1280@2x.png": "004c23a0a24489b83f80fb05419883e2270cc932e4e903f6941f2cdc1ee7f6f6",
-    "design-refs/comps-v25/ref-top-1512@2x.png": "8e24098cba5318bb869e91b762950e61c94f17cf857ae0e788fed0b188c10422"
+    "design-refs/comps-v25/ref-top-1512@2x.png": "8e24098cba5318bb869e91b762950e61c94f17cf857ae0e788fed0b188c10422",
+    "design-refs/materials/comps-v26-add.html": "dc5957a1dddec85c871cba5d1b76871e82b48233b699f58612340113a0198927",
+    "design-refs/materials/comps-v26-add-in-shell.html": "7669dd8285a380ba5a0cdd773a0d2018ed858537dea1fb006f8434f4229f43b8",
+    "design-refs/comps-v26/ref-another-empty-1280@2x.png": "5aaccb2b29b1b4f27cf04d805aca2f0b54f4ff1f1c8767cb49f38fb696ff68c9",
+    "design-refs/comps-v26/ref-another-empty-1512@2x.png": "829bd87a3d0f5b15aa47aa0f6df60033968db23c774ba68882dbb9cdf4fee3d1",
+    "design-refs/comps-v26/ref-another-filled-1280@2x.png": "7b0e9221a41bbb0a9a25fe874c3aca7a411b5e84224073c2e848ab006e495b19",
+    "design-refs/comps-v26/ref-another-filled-1512@2x.png": "de4c5a48f8dd8c894040849b8e7a509301cb45a1d078525a64bd63c264ecd64f",
+    "design-refs/comps-v26/ref-film-ready-1280@2x.png": "77f5422b3cbb1096ac284be8d145fe010155066933b820a0cdcba563527b390f",
+    "design-refs/comps-v26/ref-film-ready-1512@2x.png": "1136b9f9ad97a97936454d58892441250387c2dab953c5ac21e7bdbe58f219d9",
+    "design-refs/comps-v26/ref-first-1280@2x.png": "e9caced7f1457b4095e58774876ce5155d3c10becd33aade86f8928b02f52e8f",
+    "design-refs/comps-v26/ref-first-1512@2x.png": "2a8593375a3ce45b435d077ea83eedc6c36ae8a0f440fcc72929470463996fea",
+    "design-refs/comps-v26/ref-first-end-1280@2x.png": "31fed4778ede85e8fc02568bd469718b272e1a22dbd455359bc5bbf5ed70327a",
+    "design-refs/comps-v26/ref-first-end-1512@2x.png": "0472b10b4399b830265ae225d25dc2b3ff7ad4a473d181b0df029f04cb741be1"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
