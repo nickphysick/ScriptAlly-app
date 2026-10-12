@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board is on the page"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board's colour is rgb(185, 137, 90)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "2 background image(s)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the frame is 9px solid rgb(228, 214, 189)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the frame's radius is 8px"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the frame's shadows are rgb(191, 174, 144) 0px 0px 0px 1px inset, rgba(40, 25, 10, 0.3) 0px 4px 14px 0px inset, rgb(191, 174, 144) 0px 1px 0px 0px, rgba(40, 25, 10, 0.28) 0px 12px 20px -6px"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board spans 296.375+1159.25; the column (the header) 296.375+1159.25"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board is 909 tall inside"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the lowest item ends at 849; the board is 909 inside"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board starts 14.0 under the row"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the row starts 22.0 under the panel (header margin 0px, row margin 22px)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board is on the page"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board's colour is rgb(185, 137, 90)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "2 background image(s)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the frame is 9px solid rgb(228, 214, 189)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the frame's radius is 8px"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the frame's shadows are rgb(191, 174, 144) 0px 0px 0px 1px inset, rgba(40, 25, 10, 0.3) 0px 4px 14px 0px inset, rgb(191, 174, 144) 0px 1px 0px 0px, rgba(40, 25, 10, 0.28) 0px 12px 20px -6px"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board spans 288.953125+942.09375; the column (the header) 288.953125+942.09375"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board is 909 tall inside"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the lowest item ends at 849; the board is 909 inside"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board starts 14.0 under the row"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the row starts 22.0 under the panel (header margin 0px, row margin 22px)"
+ }
+]

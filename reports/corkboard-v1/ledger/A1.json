@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1512x900",
+  "ok": true,
+  "detail": "the page rendered words to read (5760 chars)"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1512x900",
+  "ok": true,
+  "detail": "no Noteboard"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1512x900",
+  "ok": true,
+  "detail": "the current sidebar row is [\"Corkboard\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1512x900",
+  "ok": true,
+  "detail": "the folder tab reads [\"Corkboard\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1512x900",
+  "ok": true,
+  "detail": "sidebar rows [\"Dashboard\",\"Query Centre\",\"Analytics\",\"Contact list\",\"Discover\",\"Manuscripts\",\"Comparable titles\",\"Submission packages\",\"To-do list\",\"Calendar\",\"Corkboard\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1512x900",
+  "ok": true,
+  "detail": "the address is /todo/corkboard"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1280x800",
+  "ok": true,
+  "detail": "the page rendered words to read (5760 chars)"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1280x800",
+  "ok": true,
+  "detail": "no Noteboard"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1280x800",
+  "ok": true,
+  "detail": "the current sidebar row is [\"Corkboard\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1280x800",
+  "ok": true,
+  "detail": "the folder tab reads [\"Corkboard\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1280x800",
+  "ok": true,
+  "detail": "sidebar rows [\"Dashboard\",\"Query Centre\",\"Analytics\",\"Contact list\",\"Discover\",\"Manuscripts\",\"Comparable titles\",\"Submission packages\",\"To-do list\",\"Calendar\",\"Corkboard\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo/corkboard 1280x800",
+  "ok": true,
+  "detail": "the address is /todo/corkboard"
+ },
+ {
+  "lock": "A1",
+  "where": "/todo desk",
+  "ok": true,
+  "detail": "the desk's link reads \"Open the Corkboard\""
+ },
+ {
+  "lock": "A1",
+  "where": "/todo",
+  "ok": true,
+  "detail": "no Noteboard"
+ }
+]

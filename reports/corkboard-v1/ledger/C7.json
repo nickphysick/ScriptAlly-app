@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "C7",
+  "where": "rest",
+  "ok": true,
+  "detail": "at rest the ⋯ button's opacity is 0"
+ },
+ {
+  "lock": "C7",
+  "where": "hover",
+  "ok": true,
+  "detail": "hovered, its opacity is 0.7"
+ },
+ {
+  "lock": "C7",
+  "where": "hover",
+  "ok": true,
+  "detail": "it is at 558,442 on a note at 385,432 206 wide"
+ },
+ {
+  "lock": "C7",
+  "where": "focus",
+  "ok": true,
+  "detail": "focused, its opacity is 0.7"
+ },
+ {
+  "lock": "C7",
+  "where": "menu",
+  "ok": true,
+  "detail": "the menu reads [\"Edit the note…\",\"Tags…\",\"Turn into a task…\",\"Remove note…\"]; the built menu [\"Edit the note…\",\"Tags…\",\"Turn into a task…\",\"Remove note…\"]"
+ },
+ {
+  "lock": "C7",
+  "where": "remove",
+  "ok": true,
+  "detail": "before the answer: 0 write(s), the note is there"
+ },
+ {
+  "lock": "C7",
+  "where": "remove",
+  "ok": true,
+  "detail": "the confirm offers 2 of its two buttons"
+ },
+ {
+  "lock": "C7",
+  "where": "remove",
+  "ok": true,
+  "detail": "confirmed, the document is gone"
+ },
+ {
+  "lock": "C7",
+  "where": "undo",
+  "ok": true,
+  "detail": "the toast offers Undo"
+ },
+ {
+  "lock": "C7",
+  "where": "undo",
+  "ok": true,
+  "detail": "restored field for field"
+ },
+ {
+  "lock": "C7",
+  "where": "undo",
+  "ok": true,
+  "detail": "the note is back on the board"
+ }
+]

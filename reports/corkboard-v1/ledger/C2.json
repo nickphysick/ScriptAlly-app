@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "8 notes on the board"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "fixings per note: 11111111"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "tilts -2, 0.5, 2, -2.2, 0.2, -0.5, 0.8, -1.3"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "paper images: none"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "widths 204"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "body faces Caveat 21px"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 1",
+  "ok": true,
+  "detail": "shadows rgba(40, 25, 10, 0.22) 0px 1px 1px 0px, rgba(40, 25, 10, 0.42) 0px 12px 14px -7px"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "8 notes on the board"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "fixings per note: 11111111"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "tilts -2, 0.5, 2, -2.2, 0.2, -0.5, 0.8, -1.3"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "paper images: none"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "widths 204"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "body faces Caveat 21px"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 · render 2",
+  "ok": true,
+  "detail": "shadows rgba(40, 25, 10, 0.22) 0px 1px 1px 0px, rgba(40, 25, 10, 0.42) 0px 12px 14px -7px"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "8 notes on the board"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "fixings per note: 11111111"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "tilts -2, 0.5, 2, -2.2, 0.2, -0.5, 0.8, -1.3"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "paper images: none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "widths 204"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "body faces Caveat 21px"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 · render 3",
+  "ok": true,
+  "detail": "shadows rgba(40, 25, 10, 0.22) 0px 1px 1px 0px, rgba(40, 25, 10, 0.42) 0px 12px 14px -7px"
+ },
+ {
+  "lock": "C2",
+  "where": "across renders",
+  "ok": true,
+  "detail": "render 1 {\"cbseed-n6\":\"-2|tape\",\"cbseed-n1\":\"0.5|pin #b9683c\",\"cbseed-n3\":\"2|pin #6A89A7\",\"cbseed-n2\":\"-2.2|tape\",\"cbseed-n7\":\"0.2|tape\",\"cbseed-n5\":\"-0.5|pin #b9683c\",\"cbseed-n4\":\"0.8|pin #6A89A7\",\"cbseed-n8\":\"-1.3|pin #2d3a50\"} · render 2 {\"cbseed-n6\":\"-2|tape\",\"cbseed-n1\":\"0.5|pin #b9683c\",\"cbseed-n3\":\"2|pin #6A89A7\",\"cbseed-n2\":\"-2.2|tape\",\"cbseed-n7\":\"0.2|tape\",\"cbseed-n5\":\"-0.5|pin #b9683c\",\"cbseed-n4\":\"0.8|pin #6A89A7\",\"cbseed-n8\":\"-1.3|pin #2d3a50\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "variety",
+  "ok": true,
+  "detail": "8 distinct tilts; fixings seen: tape, pin"
+ }
+]

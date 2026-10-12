@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "while loading the header is pending with number \"\""
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "while loading the board holds 0 item(s)"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "loaded: number \"8\", 8 notes"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the panel's x: 296.4 loading, 296.4 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the panel's y: 133.8 loading, 133.8 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the panel's w: 1159.3 loading, 1159.3 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the panel's h: 260.0 loading, 260.0 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the board's top: 523.8 loading, 523.8 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the add bar: 415.8 loading, 415.8 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "while loading the header is pending with number \"\""
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "while loading the board holds 0 item(s)"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "loaded: number \"8\", 8 notes"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the panel's x: 289.0 loading, 289.0 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the panel's y: 133.8 loading, 133.8 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the panel's w: 942.1 loading, 942.1 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the panel's h: 260.0 loading, 260.0 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the board's top: 523.8 loading, 523.8 loaded"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the add bar: 415.8 loading, 415.8 loaded"
+ }
+]

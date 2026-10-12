@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512x900",
+  "ok": false,
+  "detail": "a note to drag"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800",
+  "ok": false,
+  "detail": "a note to drag"
+ }
+]

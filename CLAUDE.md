@@ -764,6 +764,7 @@
 - **⚠️ A saved place is one LEAF (`updateUserPaths`, `todoPrefs.noteboard.layout.<id>`): `x` = left edge ÷ the board's inner width, `y` = top in px.** The order write is a leaf now too. The card's key is `__tasks`.
 - **⚠️ `idHash` ends in an avalanche.** Bare FNV-1a barely moves its high bits when only the last character of an id changes; eight notes drew eight navy pins at one tilt.
 - **Filtering fades (22%), it does not hide.** The header counts the board, never the filter.
+- **⚠️ The header's words may wrap on this page only** (`.nb-group .hp3 …`, balanced lines): the shared panel sets a number page's words `nowrap`, and these are the longest. One line at 1512, two at 1280, three at 1024. The lock reads the words' INK (a `Range`'s rects), not the element's box: an unbreakable tail overflowed its box into the drawing while the box measured clear.
 - **Retired with the old tool row:** Board / Column, the Examples button (the drawer is reached from the empty state only), the pink "Pin a note" and the ghost tile. Zero notes is the built empty state alone, under the open header ("Nothing pinned yet").
 - **Dev-only review aid (`lib/corkboardReviewAid`, gated at the call site):** `window.__SA_CB_ONLY = "cbseed-"` narrows the page to one id prefix; `__SA_CB_HOLD_MS` holds the loading beat. `tests/e2e/seedCorkboard.mjs` writes the `cbseed-*` fixture.
 - **⚠️ The locks read the store through `tests/e2e/cbStore.ts` (one sign-in per run).** Shelling out to a seeder per read throttled the harness account mid-suite.

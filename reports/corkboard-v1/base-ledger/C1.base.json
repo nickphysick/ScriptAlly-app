@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512x900",
+  "ok": false,
+  "detail": "the board is on the page"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800",
+  "ok": false,
+  "detail": "the board is on the page"
+ }
+]

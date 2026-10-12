@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the Note control holds 3 button(s)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "they are named [\"Pin a yellow note\",\"Pin a pink note\",\"Pin a sage note\"]"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "their boxes are 22×22, 22×22, 22×22"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the bar's label reads \"Add to your board\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the bar is rgb(251, 249, 245), 1px rgb(221, 214, 202), radius 12px, padding 7px 9px 7px 16px"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "1 compose editor(s) open"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the editor's paper is nb-compose nb-c-pink with [\"pink\"] pressed"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "opening the editor made 0 write(s)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "Task landed on /todo"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "the own-task composer is tdb-nc tdb-nc--task (✓ Task)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x900",
+  "ok": true,
+  "detail": "pressing Task made 0 write(s): "
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the Note control holds 3 button(s)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "they are named [\"Pin a yellow note\",\"Pin a pink note\",\"Pin a sage note\"]"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "their boxes are 22×22, 22×22, 22×22"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the bar's label reads \"Add to your board\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the bar is rgb(251, 249, 245), 1px rgb(221, 214, 202), radius 12px, padding 7px 9px 7px 16px"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "1 compose editor(s) open"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the editor's paper is nb-compose nb-c-pink with [\"pink\"] pressed"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "opening the editor made 0 write(s)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "Task landed on /todo"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "the own-task composer is tdb-nc tdb-nc--task (✓ Task)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "pressing Task made 0 write(s): "
+ }
+]
