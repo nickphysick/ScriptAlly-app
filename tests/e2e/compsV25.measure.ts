@@ -27,7 +27,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string; what: string }> = {
   D1: { what: "leave the heading on the column", css: `.cv-lib .cv-libhead { margin-inline: 24px !important; }` },
   D2: { what: "search flex: 1", css: `.cv-bar .cv-find { flex: 1 1 auto !important; }` },
   E1: { what: "expand the row inline", js: `(() => { const p = window.__cv(); if (p.dataset.mute1) return; p.dataset.mute1 = "1"; p.addEventListener("click", (e) => { const r = e.target.closest('[data-cv="row"]'); if (!r) return; const d = document.createElement("div"); d.className = "cv-inline"; d.textContent = "details"; r.after(d); }, true); })()` },
-  L1: { what: "draw the loading header without its link row", css: `[data-cv="panel"][data-loading] [data-cv="how-link"] { display: none !important; }` },
+  /* comps v27: hiding the loading header's link row changes nothing (the drawing sets the panel's height), so the break is the height itself */
+  L1: { what: "give the loading header its own height", css: `[data-cv="panel"][data-loading] { padding-bottom: 80px !important; }` },
 };
 const SOURCE_MUTATIONS = ["A1", "A3", "D3", "D4", "E2", "F1"];
 
