@@ -23,6 +23,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { atRest, leaveStep as leaveStepSteady, pressDoor, pressNext } from "./panelSteady";
 
 const DIR = "reports/query-panel-v2";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -365,24 +366,27 @@ test.describe("Query panel v2", () => {
         await openRow(page, sel);
         const who = (await page.locator(`${PANEL} .qcv-open`).getAttribute("data-status")) ?? sel;
         const doors = await page.locator(`${PANEL} [data-door]`).evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.door!));
+        /* ⚠️ EVERY PRESS WAITS FOR WHAT IT PRODUCES (panelSteady): the door's step, the next step, the card's
+           return. A fixed pause let a press land while the panel was still changing, and the press was lost. */
         for (const d of doors) {
-          await page.locator(`${PANEL} [data-door="${d}"]`).click(); await page.waitForTimeout(600);
+          await pressDoor(page, d);
           for (let i = 0; i < 6; i++) {
             await read(`${who} · ${d} · step ${i + 1}`);
-            /* read in one go: the foot re-renders between steps, and a locator held across that can go stale */
-            const nx = await page.evaluate(() => { const b = document.querySelector<HTMLButtonElement>('[data-qp="panel"] [data-qad-primary]'); return b && !b.disabled && /^Next/.test((b.textContent ?? "").trim()); });
-            if (!nx) break;
-            await page.locator(`${PANEL} [data-qad-primary]`).click(); await page.waitForTimeout(450);
+            if (!(await pressNext(page))) break;
           }
-          await leaveStep(page);
+          await leaveStepSteady(page);
         }
       }
       /* the correction's two steps */
       await openRow(page, `${ROW}[data-qid="seed-query-10"]`);
-      await page.locator(`${PANEL} .qlg-fix`).first().click({ force: true }); await page.waitForTimeout(500);
-      await page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first().click(); await page.waitForTimeout(500);
+      await page.locator(`${PANEL} .qlg-fix`).first().click();
+      const mistake = page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first();
+      await expect(mistake, "the correction fork did not open").toBeVisible();
+      await mistake.click();
+      await expect(page.locator(`${PANEL} .cor-ta`), "the correction's details did not open").toBeVisible();
+      await atRest(page);
       await read("the correction · the details");
-      await leaveStep(page); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      await leaveStepSteady(page);
       L.check("V12", `${w} the walk met steppers`, steps >= 8, `${steps} stepper states read`);
     }
     L.done(40);
