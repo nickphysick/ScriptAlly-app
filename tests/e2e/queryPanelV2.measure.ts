@@ -563,7 +563,10 @@ test.describe("Query panel v2", () => {
       const others = Object.keys(before.docs).filter((k) => k !== "qp2l-request" && keysOf(k).length > 0).map((k) => `${k} (${keysOf(k).join(", ")})`);
       L.check("V13", "Set a send-by date · no entry, feed row or other query changed", JSON.stringify(before.log) === JSON.stringify(afterSave.log) && JSON.stringify(before.feed) === JSON.stringify(afterSave.feed) && others.length === 0, `log ${JSON.stringify(afterSave.log["qp2l-request"])} · feed ${afterSave.feed.length} (was ${before.feed.length}) · other queries changed: ${others.join(", ") || "none"}`);
       const due = String(d1.expectedSendDate ?? "").slice(0, 10); const rem = String(d1.sendReminderDate ?? "").slice(0, 10);
-      const days = (iso: string) => Math.round((new Date(iso).getTime() - new Date(new Date().toISOString().slice(0, 10)).getTime()) / 86_400_000);
+      /* ⚠️ "TODAY" IS THE LOCAL DAY, AS THE APP'S IS. Taken from the UTC clock it was one day behind for the hour
+         after midnight in British Summer Time, and a correct "two weeks out" read as fifteen days (a run that
+         started at 23:54 on 12 Oct found it). The stored date is the local calendar day at UTC midnight. */
+      const days = (iso: string) => { const n = new Date(); return Math.round((new Date(iso.slice(0, 10)).getTime() - Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())) / 86_400_000); };
       L.check("V13", "Set a send-by date · the defaults saved: two weeks out, reminded the day before", days(due) === 14 && days(rem) === 13, `send by ${due} (+${days(due)}) · reminder ${rem} (+${days(rem)})`);
       const sc = await card();
       L.check("V13", "Set a send-by date · a request with a date offers no link, and the card counts to it", sc?.links.length === 0 && /expecting it by/.test(sc?.text ?? ""), `"${sc?.text}" · ${JSON.stringify(sc?.links)}`);
