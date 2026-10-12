@@ -42,9 +42,9 @@ import { nextVersionName } from "../../lib/versionLock";
 import { escapeDepth } from "../../lib/escapeStack";
 import { useToast } from "../toast/ToastProvider";
 import { useCompsHold } from "../../lib/compsLoadHold";
-import { CompsExhibit } from "./CompsEmpty";
 import { CompsStrip } from "./comps25/CompsStrip";
 import { CompsHow } from "./comps25/CompsHow";
+import { CompsSteps } from "./comps25/CompsSteps";
 import { CompsLibrary } from "./comps25/CompsLibrary";
 import { CompDrawer, DrawerState } from "./comps25/CompDrawer";
 import { CompLetterPicker, PickerRequest } from "./comps25/CompLetterPicker";
@@ -58,7 +58,6 @@ export const COMPS_ROUTE = "/manuscripts/comps";
 /** The device remembers a full-screen list (Part F). */
 export const COMPS_FULL_KEY = "sa.compsFull";
 /** The empty state's heading. */
-export const COMPS_EMPTY_HEADING = "No comp titles yet";
 export const COMPS_TITLE = "Comparable titles";
 /** The header's subline, the same with comps and without (comps v27). */
 export const COMPS_SUB = "Build your comps library, add to query letters, and track what’s working.";
@@ -296,23 +295,34 @@ export const ComparableTitlesPage: React.FC<{
 
   // ── render ──
   const loading = !collectionsReady || held;
-  const now = currentYear();
-  /* the empty state: a manuscript, loaded, with no comps */
-  const exhibit = !loading && !!activeMs && comps.length === 0;
-  const listed = loading || (!!activeMs && comps.length > 0);
+  /* ⚠️ THREE STATES, AND LOADING IS NEITHER OF THE OTHER TWO (comps v27). While comps are loading the page is its
+     header and nothing below: an account with comps must never be shown the empty page first. The state is the comp
+     count and nothing else, so the first save and the last remove switch it with no reload. */
+  const isEmpty = comps.length === 0;
+  const empty = !loading && !!activeMs && isEmpty;
+  const listed = !loading && !!activeMs && !isEmpty;
   const pickFilter = (f: CompFilter | null) => { setFilter(f); if (f === null) setFind(""); };
   const seeAll = () => libHeadRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const header = (
     <PanelHeader
-      kind="title" className="cv-panel" attrs={{ "data-cv": "panel", "data-own-header": "" }}
+      kind="title" className={`cv-panel${empty ? " cv-panel--empty" : ""}`} attrs={{ "data-cv": "panel", "data-own-header": "" }}
       title={COMPS_TITLE}
       sub={activeMs || loading
         ? <span data-cv="panel-sub">{COMPS_SUB}</span>
         : <span data-cv="panel-sub">Add a manuscript to build its comp list.</span>}
       loading={loading}
-      primary={activeMs || loading ? { label: full ? "This list is full" : "+ Add a comp", onClick: openAdd, disabled: full || loading, btnRef: primaryRef, attrs: { "data-cv": "add" } } : undefined}
-      secondary={listed ? { label: "See all comps", onClick: seeAll, attrs: { "data-cv": "see-all" } } : undefined}
+      acts={empty ? (
+        <>
+          <button ref={primaryRef} type="button" className="hp3-btn hpanel-b1 cv-first" data-cv="add" onClick={openAdd}>+ Add your first comp</button>
+          <span className="cv-firstnote" data-cv="first-note">Only the title is needed to start.</span>
+        </>
+      ) : activeMs || loading ? (
+        <>
+          <button ref={primaryRef} type="button" className="hp3-btn hpanel-b1" data-cv="add" onClick={openAdd} disabled={full || loading}>{full ? "This list is full" : "+ Add a comp"}</button>
+          <button type="button" className="hp3-btn hpanel-b2" data-cv="see-all" onClick={seeAll} disabled={loading}>See all comps</button>
+        </>
+      ) : undefined}
       art={<img data-cv="panel-art" alt="" src={`${COMPS_HEADER_ART.src}?v=${COMPS_HEADER_ART.version}`} width={COMPS_HEADER_ART.width} height={COMPS_HEADER_ART.height} />}
     />
   );
@@ -324,10 +334,10 @@ export const ComparableTitlesPage: React.FC<{
           {header}
           {listed ? (
             <>
-              <CompsStrip g={g} rows={rows} filter={filter} loading={loading} onFilter={pickFilter} />
+              <CompsStrip g={g} rows={rows} filter={filter} loading={false} onFilter={pickFilter} />
               <CompsHow onPick={() => setPicker({ letterId: null })} />
               <CompsLibrary
-                loading={loading} total={rows.length} rows={view} bands={bands} counts={counts}
+                loading={false} total={rows.length} rows={view} bands={bands} counts={counts}
                 filter={filter} find={find} sort={sort} group={group} full={fs.full}
                 rate={model?.attachment.rate ?? null} unrecorded={model?.unrecorded ?? []} needs={pills.needs}
                 openKey={drawer && drawer.mode !== "add" ? drawer.key : null}
@@ -340,12 +350,12 @@ export const ComparableTitlesPage: React.FC<{
               />
               <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />
             </>
-          ) : exhibit ? (
-            <div className="cv-empty" data-cv="empty">
-              <p className="cv-emptyh" data-cv="empty-heading">{COMPS_EMPTY_HEADING}</p>
-              <CompsExhibit msTitle={activeMs!.title} now={now} />
-            </div>
-          ) : (
+          ) : empty ? (
+            <>
+              <section className="cv-stepcard" data-cv="empty"><CompsSteps headingId="cv-hsteps-card-h" /></section>
+              <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />
+            </>
+          ) : loading ? null : (
             <p className="cv-hintline" data-cv="no-ms">No manuscript to compare yet.</p>
           )}
         </div>
@@ -374,7 +384,7 @@ export const ComparableTitlesPage: React.FC<{
             onNewVersion={(letterId) => void newVersion(letterId)}
             onOpenPackages={() => { setPicker(null); onNavigate?.("manuscripts", "Submission packages"); }}
           />
-          <CompsScout msTitle={activeMs.title} routeActive={routeActive} hidden={!!drawer || !!picker || fs.full} />
+          {listed && <CompsScout msTitle={activeMs.title} routeActive={routeActive} hidden={!!drawer || !!picker || fs.full} />}
         </>
       )}
     </WorkspacePageGrid>
