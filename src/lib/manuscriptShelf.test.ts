@@ -19,16 +19,16 @@ const comp = (title: string, over: Partial<CompTitle> = {}): CompTitle => ({ tit
 describe("compRows", () => {
   it("in the letter first, then the newest by year; undated after dated; list order breaks ties", () => {
     const rows = compRows([
-      comp("Aster", { year: 2015, inQuery: false }),
-      comp("Birch", { year: 2019, inQuery: true }),
-      comp("Cedar", { inQuery: true }),
-      comp("Damson", { year: 2023, inQuery: false }),
-      comp("Elder", { year: 2021, inQuery: true }),
-    ]);
+      comp("Aster", { year: 2015, id: "a" }),
+      comp("Birch", { year: 2019, id: "b" }),
+      comp("Cedar", { id: "c" }),
+      comp("Damson", { year: 2023, id: "d" }),
+      comp("Elder", { year: 2021, id: "e" }),
+    ], ["b", "c", "e"]);
     expect(rows.length).toBe(COMP_ROWS_MAX);
     expect(rows.map((r) => r.comp.title)).toEqual(["Elder", "Birch", "Cedar"]);
     /* below the cap the order is the same rule, so a fourth comp never reshuffles the three shown */
-    expect(compRows([comp("Aster", { year: 2015 }), comp("Birch", { year: 2019, inQuery: true })]).map((r) => r.comp.title))
+    expect(compRows([comp("Aster", { year: 2015 }), comp("Birch", { year: 2019, id: "b" })], ["b"]).map((r) => r.comp.title))
       .toEqual(["Birch", "Aster"]);
     expect(compRows([comp("Ash"), comp("Bay")]).map((r) => r.comp.title), "later in the list is newer").toEqual(["Bay", "Ash"]);
   });
@@ -41,7 +41,7 @@ describe("compRows", () => {
     expect(film.meta).toBe("Film · 2019");
     const [bare] = compRows([comp("Salt Road")]);
     expect(bare.meta, "absent pieces drop their clause rather than rendering a hole").toBe("");
-    expect(bare.inLetter, "absent inQuery is false").toBe(false);
+    expect(bare.inLetter, "a comp the letter does not name is not in it").toBe(false);
   });
 });
 

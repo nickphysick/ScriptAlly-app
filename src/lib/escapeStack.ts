@@ -27,6 +27,8 @@
 import { useEffect, useRef } from "react";
 
 export const ESC_LEVEL = {
+  /** a page's own MODE (a full-screen list): Escape leaves it last, after every popover, drawer and dialog */
+  pageMode: 4,
   /** a page's own popover (the Contact list's labelled pills) — under anything that opens over the page */
   page: 5,
   /** a page's half-screen drawer (Contact list v13 Housekeeping) — under the agent card, which opens over it */

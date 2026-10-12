@@ -120,6 +120,7 @@ import { computeResponseDeadline } from "./responseDeadline";
 import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
 import { nextEdition, contentsChanged, summaryFrom } from "./packageEditions";
 import { isVersionSent } from "./versionLock";
+import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
@@ -300,7 +301,7 @@ interface DbContextType {
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
-  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<string | null>;
+  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds", unknown>>, opts?: { restoring?: boolean }) => Promise<string | null>;
   /**
    * Delete a material outright. Returns `false` WITHOUT writing when a package still holds it.
    *
@@ -1805,9 +1806,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const updateVersion = async (
     id: string,
     fields: Partial<Record<
-      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount",
+      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds",
       unknown
     >>,
+    opts?: { restoring?: boolean },
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     /* ⚠️ A SENT VERSION'S CONTENT NEVER CHANGES (Part B §B2). An edit makes the next version — the
@@ -1816,6 +1818,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const content = (["contentDraft", "fileAttached", "fileName", "contentType", "contentLink", "wordCount"] as const).some((k) => k in fields);
     if (content && isVersionSent(id, queries, packages)) {
       return "This version has been sent, so its content stays as it went. Edit it to make the next version.";
+    }
+    /* ⚠️ A SENT LETTER'S RECORDED COMPS ARE FIXED (comps v25, Part A). A change is a new version of the
+       letter. A sent letter with nothing recorded accepts one save. `restoring` is the Undo of that
+       one save, which puts the record back as it was; the rules cannot enforce any of this. */
+    if ("compIds" in fields && !opts?.restoring) {
+      const letter = versions.find((v) => v.id === id);
+      if (letter && letterFixed(letter, queries, versions, packages)) {
+        return "This letter has gone out, so its comps are fixed. Make a new version of the letter to change them.";
+      }
     }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "versions", id), fields);

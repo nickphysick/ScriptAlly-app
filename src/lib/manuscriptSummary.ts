@@ -302,10 +302,10 @@ export const otherMaterialTiles = (
 
 /* ══ comps ════════════════════════════════════════════════════════════════════════════════════ */
 
-/** The tray's two chips: how many comps, how many the letter names (`inQuery`, absent = false). */
-export const compLetterTally = (comps: readonly CompTitle[]): { total: number; inLetter: number } => ({
+/** The tray's two chips: how many comps, how many the current letter names (its `compIds`; comps v25). */
+export const compLetterTally = (comps: readonly CompTitle[], letterCompIds: readonly string[] = []): { total: number; inLetter: number } => ({
   total: comps.length,
-  inLetter: comps.filter((c) => c.inQuery === true).length,
+  inLetter: comps.filter((c) => !!c.id && letterCompIds.includes(c.id)).length,
 });
 
 /* ══ the scoped manuscript ════════════════════════════════════════════════════════════════════ */

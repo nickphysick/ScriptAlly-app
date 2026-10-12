@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e",
@@ -244,10 +244,22 @@
     "design-refs/query-panel-v1/ref-open-1280@2x.png": "c9fb27d42021c5a3787d345ca6581c5751918a1746ec1f5808257fc1e5558d1a",
     "design-refs/query-panel-v1/ref-open-you-1512@2x.png": "53bbb2de80ade4c8d43aed55b09f455a8c9ff45e2700f4147ce3616b8c2c3302",
     "design-refs/query-panel-v1/ref-step-response-1512@2x.png": "174772bd71116383fe7cd4be925c9a27102466098aa210f9c439eca9ca16b4db",
-    "design-refs/query-panel-v1/ref-step-sent-1512@2x.png": "86d3fe409f8dd442a9d6b03ca01c0a192d60d526cd27b23048f181d629ff6c92"
+    "design-refs/query-panel-v1/ref-step-sent-1512@2x.png": "86d3fe409f8dd442a9d6b03ca01c0a192d60d526cd27b23048f181d629ff6c92",
+    "design-refs/materials/comps-v25.html": "1a749a03180afc59a58715040ceab64426fb1c8dd2082b80a40f815492ffdd96",
+    "design-refs/materials/comps-v25-in-shell.html": "115129f0ab5ddd67c67ff5c0a18aa7cb170ed20e21f19a4f43a6da6bde4d6ce8",
+    "design-refs/comps-v25/ref-drawer-1280@2x.png": "11a324567373649cf0f93df79d133a1a046add5ae9fcd81a9cc46e7f193a7e11",
+    "design-refs/comps-v25/ref-drawer-1512@2x.png": "ddeadb46d999cbd58dc696ab937ef87421fa1927b53c37911098942adcb00259",
+    "design-refs/comps-v25/ref-full-1280@2x.png": "65951dbda3db5e47e4ef83fa8dfeacb4822343f942a96feb1e1c40539666b8d0",
+    "design-refs/comps-v25/ref-full-1512@2x.png": "2dce813df050a05f7d645b318e1c93adecee9b831fe16ede19522c7d4993e08d",
+    "design-refs/comps-v25/ref-grouped-1512@2x.png": "52a2e1294ebc734862dedde77ef7cdb9fe2684db0dff0f405a11b4f302cdbb6e",
+    "design-refs/comps-v25/ref-list-1280@2x.png": "50b096d154e87ea8052529e612a2083b0d79c5ce853f9f906b2b18dfdc6ad33e",
+    "design-refs/comps-v25/ref-list-1512@2x.png": "d5f4708802a9d044131cecefb264284ab2b5a113485585eb83d7d11821eef62b",
+    "design-refs/comps-v25/ref-picker-1512@2x.png": "13f7d0a73778bf20c4e3de22ed2eb5ccc26b2601aed49597f46a98861b8bf42c",
+    "design-refs/comps-v25/ref-top-1280@2x.png": "004c23a0a24489b83f80fb05419883e2270cc932e4e903f6941f2cdc1ee7f6f6",
+    "design-refs/comps-v25/ref-top-1512@2x.png": "8e24098cba5318bb869e91b762950e61c94f17cf857ae0e788fed0b188c10422"
   },
   "superseded": {
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
     "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }

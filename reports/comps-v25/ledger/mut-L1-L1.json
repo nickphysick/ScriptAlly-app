@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512 held loading",
+  "ok": true,
+  "detail": "data-loading true · 0 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 then loaded",
+  "ok": true,
+  "detail": "data-loading false · 7 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 panel",
+  "ok": true,
+  "detail": "296,134 1159×270.2 → 296,134 1159×270.2"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 strip",
+  "ok": false,
+  "detail": "296,438 1159×90.7 → 296,438 1159×255.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 head",
+  "ok": false,
+  "detail": "272,1214 1208×34.0 → 272,1379 1208×34.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 held loading",
+  "ok": true,
+  "detail": "data-loading true · 0 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 then loaded",
+  "ok": true,
+  "detail": "data-loading false · 7 rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 panel",
+  "ok": true,
+  "detail": "289,134 942×295.4 → 289,134 942×295.4"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 strip",
+  "ok": false,
+  "detail": "289,463 942×90.7 → 289,463 942×275.3"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 head",
+  "ok": false,
+  "detail": "272,1240 976×34.0 → 272,1424 976×34.0"
+ }
+]

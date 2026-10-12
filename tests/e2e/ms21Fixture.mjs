@@ -68,7 +68,8 @@ export const CURRENT_BV = "ms21-bv-3";
 export const LETTERS = [
   { id: "ms21-let-1", versionName: "Query letter v1", wordCount: 402, createdDate: "2026-03-01T12:00:00.000Z" },
   { id: "ms21-let-2", versionName: "Query letter v2", wordCount: 355, createdDate: "2026-08-29T12:00:00.000Z" },
-  { id: "ms21-let-3", versionName: "Query letter v3", wordCount: 310, createdDate: "2026-09-01T12:00:00.000Z" },
+  /* comps v25: the newest letter is the current one, and it records the two comps it mentions */
+  { id: "ms21-let-3", versionName: "Query letter v3", wordCount: 310, createdDate: "2026-09-01T12:00:00.000Z", compIds: ["cmp_ms21tide", "cmp_ms21salt"] },
 ];
 export const SYNOPSES = [
   { id: "ms21-syn-1", versionName: "Synopsis, 1 page", wordCount: 480, createdDate: "2026-08-20T12:00:00.000Z" },
@@ -128,11 +129,11 @@ export const QUERIES = [
 export const MS_UPDATED = { id: "ms21-act-msupd", day: "2026-09-02" };
 
 export const COMPS = [
-  { title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021,
-    note: "A single day on the water, told close to one narrator.", inQuery: true, source: "user" },
-  { title: "Salt Road", author: "Imogen Hale", publisher: "Faber", year: 2023,
-    note: "Coastal setting, a missing brother, short chapters.", inQuery: true, source: "user" },
-  { title: "Kestrel Hour", media: "film", year: 2019, inQuery: false, source: "user" },
+  { id: "cmp_ms21tide", title: "The Tidewater Line", author: "R. Okafor", publisher: "Harvill", year: 2021,
+    note: "A single day on the water, told close to one narrator.", source: "user" },
+  { id: "cmp_ms21salt", title: "Salt Road", author: "Imogen Hale", publisher: "Faber", year: 2023,
+    note: "Coastal setting, a missing brother, short chapters.", source: "user" },
+  { id: "cmp_ms21kest", title: "Kestrel Hour", media: "film", year: 2019, source: "user" },
 ];
 
 /** What the page must show — derived by hand from the above, and asserted against the render. */
@@ -149,6 +150,6 @@ export const EXPECT = {
   activityTop5: ["ms21-q-3", "ms21-q-4", "ms21-q-6", "ms21-q-6", "ms21-q-5"],
   owed: ["ms21-q-3", "ms21-q-4"],
   yourMove: { "ms21-q-3": "Send the first 50 pages by 12 Oct", "ms21-q-4": "Send the full manuscript" },
-  doors: { comps: 3, inQuery: 2, letters: 3, synopses: 2, packages: 3, packageQueries: 6, letterInUse: "Query letter v3" },
+  doors: { comps: 3, inLetter: 2, letters: 3, synopses: 2, packages: 3, packageQueries: 6, letterInUse: "Query letter v3" },
   lede: { versions: 3, current: "Fast-paced opening", queries: 4, requests: 2 },
 };

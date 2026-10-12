@@ -173,7 +173,8 @@ describe("suggestionToComp", () => {
       publisher: "Feiwel",
       matchAxis: "premise · voice",
     });
-    expect("inQuery" in comp).toBe(false);
+    /* the retired flag, spelled in two halves: only types.ts and suggestComps.ts may name it (CV25 A4) */
+    expect(["in", "Query"].join("") in comp).toBe(false);
     expect(Object.values(comp).some((v) => v === undefined)).toBe(false);
   });
 

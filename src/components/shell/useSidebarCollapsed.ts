@@ -16,7 +16,8 @@
  * names `scriptally:sidebar-collapsed` verbatim, and a stated name beats a convention.
  */
 import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { releaseSidebarHolds, sidebarHeld, subscribeSidebarHold } from "./sidebarForce";
 
 export const SIDEBAR_COLLAPSED_KEY = "scriptally:sidebar-collapsed";
 
@@ -92,7 +93,17 @@ export function useSidebarCollapsed(): SidebarCollapsedState {
     writeSidebarCollapsed(typeof localStorage === "undefined" ? null : localStorage, v);
   }, []);
 
+  /* A page's hold (a full-screen list) reads as collapsed without touching the writer's own choice. */
+  const held = useSyncExternalStore(subscribeSidebarHold, sidebarHeld, () => false);
+
   const toggle = useCallback(() => {
+    /* pressed while a page holds it shut: the writer wants it open, so the hold goes and it opens */
+    if (sidebarHeld()) {
+      releaseSidebarHolds();
+      setCollapsedState(false);
+      writeSidebarCollapsed(typeof localStorage === "undefined" ? null : localStorage, false);
+      return;
+    }
     setCollapsedState((prev) => {
       const next = !prev;
       writeSidebarCollapsed(typeof localStorage === "undefined" ? null : localStorage, next);
@@ -126,5 +137,5 @@ export function useSidebarCollapsed(): SidebarCollapsedState {
     };
   }, []);
 
-  return { collapsed, toggle, setCollapsed, ready };
+  return { collapsed: collapsed || held, toggle, setCollapsed, ready };
 }

@@ -159,9 +159,9 @@ describe("/manuscripts/comps renders", () => {
   it("…and that render is scoped to the active manuscript, not the empty branch", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
-    /* living headers v3: the header no longer restates the manuscript's title — its subline names the
-       active manuscript's comp, which is the same claim (the render is scoped to that manuscript). */
-    expect(html).toContain("The Smoke Comp</b> is saved");
+    /* comps v25: the title panel's subline names the active manuscript, and the library lists its comp */
+    expect(html).toContain('data-cv="panel-ms"');
+    expect(html).toContain("The Smoke Comp");
     expect(html).not.toContain("No manuscript to compare yet");
   });
 
@@ -174,15 +174,17 @@ describe("/manuscripts/comps renders", () => {
   it("…and the workspace branch runs its derivations, not the first-visit block", () => {
     setActiveManuscript();
     const html = renderPageSeeded(page(), "/manuscripts/comps");
-    expect(html, "the query line did not render").toContain("Your query line");
-    /* the comp card rendered, with the two read-time derivations that only run here */
-    expect(html, "the comp card did not render").toContain("The Smoke Comp");
-    expect(html, "compAgeLine did not run").toMatch(/2021 · (\d+ years? ago|this year)/);
-    expect(html, "compFacets did not run").toContain("structure");
-    /* comps v2: the rail is the Scout, coming soon — and the working Scout panel is not mounted */
-    expect(html, "the rail did not render").toContain("Coming soon");
+    /* comps v25: the query line left the page (which comps a letter names is logged on the letter) */
+    expect(html, "the query line is still on the page").not.toContain("Your query line");
+    /* the title panel, the strip, the band and the library all rendered, with the comp as a row */
+    expect(html, "the title panel did not render").toContain('data-hp3="title"');
+    expect(html, "the strip did not render").toContain("At a glance");
+    expect(html, "the band did not render").toContain("How comp tracking works.");
+    expect(html, "the library did not render").toContain("Your comparable titles library");
+    expect(html, "the comp's row did not render").toMatch(/data-cv="row"[^>]*>[\s\S]*The Smoke Comp/);
+    expect(html, "the row's next move did not run").toMatch(/Log in a letter|Add a publisher|Add a year/);
+    /* the working Scout panel is not mounted, and nothing inline expands */
     expect(html, "ScoutPanel is mounted on the page").not.toMatch(/ct-sbody|ct-upsell/);
-    expect(html, "the page renders the full header").toContain('data-size="full"');
   });
 });
 

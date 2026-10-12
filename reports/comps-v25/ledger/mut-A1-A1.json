@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "A1",
+  "where": "the fixture holds a comp with no id",
+  "ok": true,
+  "detail": "6 of 7 have ids"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: every comp has an id",
+  "ok": true,
+  "detail": "cmp_4mgh316xkkhx cmp_ebx2qbsdmiau cmp_dtkby6sajk70 cmp_4jzii60qv6ev cmp_suqazpjw09vt cmp_hqnxdskawqh5 cmp_xdpe1kpur0ii"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: the ids are unique",
+  "ok": true,
+  "detail": "7 distinct of 7"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: every id that existed is unchanged, on the same comp",
+  "ok": false,
+  "detail": "cmp_cv25tide→cmp_4mgh316xkkhx cmp_cv25salt→cmp_ebx2qbsdmiau cmp_cv25nine→cmp_dtkby6sajk70 cmp_cv25brit→cmp_4jzii60qv6ev (none)→cmp_suqazpjw09vt cmp_cv25ferr→cmp_hqnxdskawqh5 cmp_cv25last→cmp_xdpe1kpur0ii"
+ },
+ {
+  "lock": "A1",
+  "where": "after an edit: the order is the writer's",
+  "ok": true,
+  "detail": "The Tidewater Line · Salt Road · Nine Miles Out · Bright Water · Kestrel Hour · The Ferry at Dusk · Last Crossing"
+ }
+]

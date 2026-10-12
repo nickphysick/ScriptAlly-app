@@ -1,0 +1,54 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The shared "At a glance" strip (GlanceStrip.tsx). The Query Centre v137 strip's values
+ * (queries/centre/qcvStrip137.css), restated under their own prefix: the base rules are the compact
+ * sheet's, and `.ws-app.sheet-wide` restates the full-size ones (the page sheet is 1440px or wider).
+ * Every colour is a literal or a `:root` token, so the strip reads the same wherever it is mounted.
+ */
+/* lib/brand.tsx names a body family on bare span/b/i/button at runtime (0-0-1). First in the sheet
+   at 0-1-0, so it beats that and loses on source order to every rule below that states its face. */
+.gst :where(span, b, i, em, small, button, div) { font-family: inherit; }
+
+.gst { min-width: 0; container: gst / inline-size; }
+.gst .gst-head { display: flex; align-items: baseline; gap: 16px; margin: 0 0 14px; min-width: 0; }
+.gst .gst-head h2.gst-h { margin: 0; font: 400 25px/1.1 var(--sp-type) !important; letter-spacing: 0; color: #1c130f; white-space: nowrap; }
+.ws-app.sheet-wide .gst .gst-head h2.gst-h { font-size: 28px !important; }
+.gst .gst-head .gst-k { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.gst .gst-head .gst-hint { margin-left: auto; font: italic 400 14px/1.2 var(--sp-serif); color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+
+.gst .gst-box { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.16); overflow: hidden; }
+.gst .gst-cell {
+  position: relative; box-sizing: border-box; min-width: 0; margin: 0; border: 0; border-radius: 0; background: #fff; cursor: pointer; text-align: left;
+  display: flex; flex-direction: column; align-items: flex-start; padding: 18px; color: #1c130f;
+  box-shadow: -1px 0 0 rgba(28, 19, 15, 0.13);
+}
+.ws-app.sheet-wide .gst .gst-cell { padding: 22px 24px 20px; }
+.gst .gst-cell:hover:not(:disabled), .gst .gst-cell.is-on { background: #fcfaf7; }
+.gst .gst-cell.is-on::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: #2d3a50; }
+.gst .gst-cell:disabled { cursor: default; }
+.gst .gst-cell:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; z-index: 1; }
+.gst .gst-cell .gst-lb { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.58); }
+.gst .gst-cell .gst-cue { position: absolute; top: 18px; right: 16px; font: 400 9.5px/1.2 var(--font-mono); letter-spacing: 0.06em; color: rgba(28, 19, 15, 0.4); opacity: 0; white-space: nowrap; }
+.gst .gst-cell:hover:not(:disabled) .gst-cue, .gst .gst-cell:focus-visible .gst-cue, .gst .gst-cell.is-on .gst-cue { opacity: 1; }
+.gst .gst-cell .gst-fig { margin-top: 10px; font: 400 44px/1 var(--sp-type); letter-spacing: -0.02em; color: #1c130f; }
+.ws-app.sheet-wide .gst .gst-cell .gst-fig { font-size: 52px; }
+.gst .gst-cell .gst-line { margin-top: 10px; font: italic 400 14.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.ws-app.sheet-wide .gst .gst-cell .gst-line { font-size: 16px; }
+.gst .gst-cell .gst-line b { font-family: inherit; font-style: normal; font-weight: 600; color: #1c130f; }
+.gst .gst-cell .gst-line b.is-hot { color: #a2452a; }
+.gst .gst-cell .gst-foot { display: flex; align-items: flex-end; width: 100%; min-width: 0; margin-top: auto; padding-top: 18px; min-height: 52px; box-sizing: content-box; }
+/* a blank holds its box and draws nothing */
+.gst .gst-blank { visibility: hidden; }
+
+@container gst (max-width: 779.98px) {
+  .gst .gst-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gst .gst-cell:nth-child(n + 3) { box-shadow: -1px 0 0 rgba(28, 19, 15, 0.13), 0 -1px 0 rgba(28, 19, 15, 0.13); }
+  .gst .gst-head .gst-k { display: none; }
+}
+@container gst (max-width: 519.98px) {
+  .gst .gst-box { grid-template-columns: minmax(0, 1fr); }
+  .gst .gst-cell:nth-child(n + 2) { box-shadow: 0 -1px 0 rgba(28, 19, 15, 0.13); }
+  .gst .gst-head .gst-hint { display: none; }
+}

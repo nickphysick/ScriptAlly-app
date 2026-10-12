@@ -13,7 +13,7 @@
  */
 import React, { useState } from "react";
 import { CompTitle } from "../../types";
-import { IN_QUERY_LABEL, QueryFormat, queryLine } from "../../lib/compsPage";
+import { QueryFormat, queryLine } from "../../lib/compsPage";
 
 export interface CompsQueryLineProps {
   comps: CompTitle[];
@@ -34,7 +34,7 @@ export const CompsQueryLine: React.FC<CompsQueryLineProps> = ({ comps, msTitle, 
           { text: "The Tidewater Line", emphasis: "title" as const }, { text: " and " },
           { text: "Salt Road", emphasis: "title" as const }, { text: "." },
         ],
-        caption: "Example · built from the comps you switch on",
+        caption: "Example · built from the comps your letter names",
       }
     : queryLine(comps, msTitle, format);
 
@@ -49,17 +49,11 @@ export const CompsQueryLine: React.FC<CompsQueryLineProps> = ({ comps, msTitle, 
     }
   };
 
-  /* the empty prompt names the switch in bold — the label, verbatim, so it matches the control */
-  const prompt = (text: string) => {
-    const i = text.indexOf(IN_QUERY_LABEL);
-    return i < 0 ? text : <>{text.slice(0, i)}<b>{IN_QUERY_LABEL}</b>{text.slice(i + IN_QUERY_LABEL.length)}</>;
-  };
-
   const body = (
     <div className="cpv-qline" data-cpv={example ? undefined : "qline"} data-kind={q.kind} aria-live={example ? undefined : "polite"}>
       {q.kind === "line"
         ? q.segments.map((s, i) => (s.emphasis ? <i key={i}>{s.text}</i> : <React.Fragment key={i}>{s.text}</React.Fragment>))
-        : prompt(q.prompt)}
+        : q.prompt}
     </div>
   );
 

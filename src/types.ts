@@ -226,12 +226,18 @@ export interface CompVerification {
  * Presentation facts (the derived role, the query line, the recency flag) are computed at render
  * from these stored fields — never stored. See src/lib/compsPage.ts for the derivations.
  *
- * The comps-page v2 fields (publisher/media/matchAxis/inQuery) are ADDITIVE and read with defaults:
- * an absent `media` reads as "book", an absent `inQuery` as false. Optional fields are OMITTED when
- * empty (never written as undefined/null — Firestore rejects undefined inside a map). `inQuery` is
- * the only stored intent; everything a writer sees about "role" or "health" is derived from it.
+ * The comps-page v2 fields (publisher/media/matchAxis) are ADDITIVE and read with defaults: an
+ * absent `media` reads as "book". Optional fields are OMITTED when empty (never written as
+ * undefined/null — Firestore rejects undefined inside a map). Which comps a query letter mentions
+ * is the LETTER's record (`ManuscriptVersion.compIds`), never a flag here (comps v25).
  */
 export interface CompTitle {
+  /**
+   * A stable id (`cmp_` + random), given on the comp's first write and never reused within a
+   * manuscript. Query letters name comps by it (`ManuscriptVersion.compIds`). Absent on a comp stored
+   * before comps v25 until its next write; reads never depend on it (`compKey` in lib/compUsage).
+   */
+  id?: string;
   title: string;
   author?: string;
   /** Imprint / label / studio. Optional. */
@@ -242,8 +248,11 @@ export interface CompTitle {
   media?: CompMedia;
   /** Free-text comp axis, e.g. "tone · atmosphere" — set by the writer or the Scout. */
   matchAxis?: string;
-  /** The only stored intent: is this comp part of the query-letter line? Absent === false. */
-  inQuery?: boolean;
+  /**
+   * RETIRED (comps v25). Nothing reads or writes it: which comps a letter mentions is the letter's
+   * `compIds`. Declared only because stored documents may still carry it; a comp loses it on its next write.
+   */
+  inQuery?: boolean; // retired
   source?: "user" | "suggested";
   /** The catalogue check behind the ✓ VERIFIED chip. Absent on every manual comp, by design. */
   verification?: CompVerification;
@@ -415,6 +424,11 @@ export interface ManuscriptVersion {
   fileAttached: boolean; // attachment mock flag
   fileName?: string;
   createdDate: string; // ISO String
+  /**
+   * Query Letter versions only: the ids of the comps this letter mentions (comps v25).
+   * ABSENT means "not recorded". `[]` means "recorded: mentions none". At most 12 (firestore.rules).
+   */
+  compIds?: string[];
   contentDraft?: string; // the pasted/typed text body (reused as the v1 "Paste" content for text mode)
   // Authoring fields (redesign). `contentType` selects the mode: 'text' uses contentDraft, 'link' uses
   // contentLink; 'file' is reserved (v1 renders Attach-file as a disabled "coming soon" — no Storage).

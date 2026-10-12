@@ -11,9 +11,9 @@ import { resolve } from "node:path";
 import { narratesManuscriptWrite } from "./manuscriptFeed";
 
 describe("narratesManuscriptWrite", () => {
-  const comps = [{ title: "Salt Road", inQuery: true }, { title: "The Tidewater Line" }];
+  const comps = [{ title: "Salt Road", id: "cmp_salt" }, { title: "The Tidewater Line" }];
 
-  it("a write that changes `comps` alone narrates nothing — add, edit, remove, reorder, the switch all send exactly { comps }", () => {
+  it("a write that changes `comps` alone narrates nothing — add, edit, remove, reorder all send exactly { comps }", () => {
     expect(narratesManuscriptWrite({ comps })).toBe(false);
     expect(narratesManuscriptWrite({ comps: [] })).toBe(false);
   });

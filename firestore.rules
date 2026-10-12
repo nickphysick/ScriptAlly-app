@@ -137,9 +137,11 @@ service cloud.firestore {
         && (!data.keys().hasAny(['setting']) || (data.setting is string && data.setting.size() <= 2048))
         && (!data.keys().hasAny(['series']) || (data.series is string && data.series.size() <= 2048))
         // Structured comps — a list of maps {title, author?, publisher?, year?, note?, media?,
-        // matchAxis?, inQuery?, source?}. Per-item shape is client-enforced (rules can't iterate a
+        // matchAxis?, id?, source?}, plus the retired `inQuery?` (comps v25: the app no
+        // longer reads or writes it; a stored value is still ACCEPTED on a write, nothing here rejects
+        // it and nothing migrates it). Per-item shape is client-enforced (rules can't iterate a
         // list); optional-when-present so docs written before any field was added stay updatable.
-        // The comps-page v2 fields (publisher/media/matchAxis/inQuery) and `verification` needed NO
+        // The comps-page v2 fields (publisher/media/matchAxis) and `verification` needed NO
         // rule change — the list is only size-capped, and `comps` is already in the update allowlist.
         // Capped at 100: a document-size and write-cost guard, NOT a commercial limit (free users get
         // unlimited comps; the Pro boundary is the Scout). ARTEFACT-LOCKED to MAX_COMPS in
@@ -241,7 +243,13 @@ service cloud.firestore {
         // A ref or file material carries no wordCount at all rather than a 0, which would assert the
         // document is empty rather than unread. Bounded because a stored count is a claim about text
         // we hold, and contentDraft itself is capped at 256KB.
-        && (!data.keys().hasAll(['wordCount']) || (data.wordCount is int && data.wordCount >= 0 && data.wordCount <= 10000000));
+        && (!data.keys().hasAll(['wordCount']) || (data.wordCount is int && data.wordCount >= 0 && data.wordCount <= 10000000))
+      // Comps v25: the comps a QUERY LETTER mentions, by comp id. Absent = not recorded; [] = recorded,
+      // mentions none. Capped at 12, ARTEFACT-LOCKED to MAX_LETTER_COMPS in src/lib/compUsage.ts.
+      // Rules cannot iterate the list, and cannot tell whether the letter has been sent (that needs a
+      // QUERY over the user's queries, which rules cannot run), so "a sent letter's comps are fixed"
+      // is enforced by the client (db.tsx updateVersion), not here.
+      && (!data.keys().hasAll(['compIds']) || (data.compIds is list && data.compIds.size() <= 12));
     }
 
     function isValidPackage(data, userId) {
@@ -861,7 +869,7 @@ service cloud.firestore {
           // be perfectly validated above and still be undeployable, because isValidVersion runs on
           // every write while hasOnly runs only on updates. Archiving IS an update and nothing else,
           // so leaving it out here would deny every archive silently while the validator said yes.
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId', 'compIds'])
         );
       }
 

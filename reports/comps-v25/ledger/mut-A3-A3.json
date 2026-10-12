@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "A3",
+  "where": "v1: sent, nothing recorded, open to one save",
+  "ok": true,
+  "detail": "cv25-let-1 · fixed false · 6 tickable"
+ },
+ {
+  "lock": "A3",
+  "where": "v1: the notice says its queries are tracked too",
+  "ok": true,
+  "detail": "QL v1 has already gone out with 5 queries. Log what it mentioned and those queries are tracked too."
+ },
+ {
+  "lock": "A3",
+  "where": "sent letters carry a padlock",
+  "ok": true,
+  "detail": "cv25-let-1:lock cv25-let-2:lock cv25-let-3:open"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: fixed, no checkbox",
+  "ok": false,
+  "detail": "fixed false · 6 tickable · save true"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: its record is shown, read-only",
+  "ok": true,
+  "detail": "cmp_cv25tide,cmp_cv25salt"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: the notice and the door",
+  "ok": false,
+  "detail": "QL v2 has already gone out with 9 queries. Log what it mentioned and those queries are tracked too. · null"
+ },
+ {
+  "lock": "A3",
+  "where": "v2: a click ticks nothing",
+  "ok": false,
+  "detail": "ticks after a click"
+ }
+]
