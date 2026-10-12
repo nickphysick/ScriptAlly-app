@@ -419,7 +419,7 @@ test.describe("Comparable titles v25", () => {
     await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator('[data-cv="drawer-edit"]').click();
     await page.locator("#cpv-f-pub").fill("Faber & Faber");
-    await page.locator('[data-cv="drawer-form"] button[type="submit"], [data-cv="drawer-form"] [data-cpv="save"]').first().click();
+    await page.locator('[data-hdr="comp"] [data-cf="save"]').click(); /* comps v26: the form's buttons are the drawer's pinned foot */
     await expect.poll(() => (dump().comps.find((c) => c.title === "Salt Road") as any)?.publisher, { timeout: 20_000 }).toBe("Faber & Faber");
     const a = dump();
     const ids = a.comps.map((c) => c.id as string | undefined);
@@ -435,7 +435,7 @@ test.describe("Comparable titles v25", () => {
     await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator("#cpv-f-title").fill("Low Water");
     await page.locator("#cpv-f-year").fill("2024");
-    await page.locator('[data-cv="drawer-form"] button[type="submit"], [data-cv="drawer-form"] [data-cpv="save"]').first().click();
+    await page.locator('[data-hdr="comp"] [data-cf="save"]').click(); /* comps v26: the form's buttons are the drawer's pinned foot */
     await expect.poll(() => dump().comps.length, { timeout: 20_000 }).toBe(FX.comps + 1);
     const b = dump();
     const bid = b.comps.map((c) => c.id as string);
@@ -444,8 +444,12 @@ test.describe("Comparable titles v25", () => {
     if (L.red) { L.done(8); return; }
     /* remove it through the drawer, then Undo: it comes back with the SAME id */
     const added = bid[bid.length - 1];
+    /* comps v26: a plain Add closes the drawer, so the new comp is opened from its row; Remove is in the edit form's foot */
+    await page.waitForTimeout(700);
+    await page.locator(`${P}[data-cv="row"]`).last().click();
+    await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator('[data-cv="drawer-edit"]').click();
-    await page.locator('[data-cv="drawer-remove"]').click();
+    await page.locator('[data-hdr="comp"] [data-cf="remove"]').click();
     await expect.poll(() => dump().comps.length, { timeout: 20_000 }).toBe(FX.comps);
     await page.locator(".sa-toast-undo").last().click();
     await expect.poll(() => dump().comps.length, { timeout: 20_000 }).toBe(FX.comps + 1);
