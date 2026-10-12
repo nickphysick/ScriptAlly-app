@@ -1,0 +1,176 @@
+[
+ {
+  "lock": "D2",
+  "where": "1024 one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "D2",
+  "where": "1024 ink",
+  "ok": true,
+  "detail": "rgb(27, 36, 51)"
+ },
+ {
+  "lock": "D2",
+  "where": "1024 no overflow",
+  "ok": true,
+  "detail": "scroll 720 / 720 · furthest right 980 of 992"
+ },
+ {
+  "lock": "D2",
+  "where": "1024 no two controls overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "D2",
+  "where": "1024 chips keep to their own boxes",
+  "ok": true,
+  "detail": "sent:512–616 unsent:620–753 none:757–860"
+ },
+ {
+  "lock": "D2",
+  "where": "1024 search 170",
+  "ok": false,
+  "detail": "search 222.390625 at a list 720 wide"
+ },
+ {
+  "lock": "D2",
+  "where": "1024 Books and Film and TV by width",
+  "ok": true,
+  "detail": "sent,unsent,none at 720"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 ink",
+  "ok": true,
+  "detail": "rgb(27, 36, 51)"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 no overflow",
+  "ok": true,
+  "detail": "scroll 1208 / 1208 · furthest right 1464 of 1480"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 no two controls overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 chips keep to their own boxes",
+  "ok": true,
+  "detail": "sent:633–766 unsent:772–936 none:942–1073"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 search 220",
+  "ok": false,
+  "detail": "search 337.40625 at a list 1208 wide"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 Books and Film and TV by width",
+  "ok": true,
+  "detail": "sent,unsent,none at 1208"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 ink",
+  "ok": true,
+  "detail": "rgb(27, 36, 51)"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 no overflow",
+  "ok": true,
+  "detail": "scroll 976 / 976 · furthest right 1232 of 1248"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 no two controls overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 chips keep to their own boxes",
+  "ok": true,
+  "detail": "sent:570–702 unsent:708–872 none:878–1009"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 search 170",
+  "ok": false,
+  "detail": "search 273.796875 at a list 976 wide"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 Books and Film and TV by width",
+  "ok": true,
+  "detail": "sent,unsent,none at 976"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 one row",
+  "ok": true,
+  "detail": "bar 64 tall"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 ink",
+  "ok": true,
+  "detail": "rgb(27, 36, 51)"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 no overflow",
+  "ok": true,
+  "detail": "scroll 1600 / 1600 · furthest right 1864 of 1880"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 no two controls overlap",
+  "ok": true,
+  "detail": "0 overlap(s)"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 chips keep to their own boxes",
+  "ok": true,
+  "detail": "sent:731–864 unsent:870–1034 none:1040–1171 book:1177–1256 screen:1262–1383"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 search 280",
+  "ok": false,
+  "detail": "search 427.28125 at a list 1600 wide"
+ },
+ {
+  "lock": "D2",
+  "where": "1920 Books and Film and TV by width",
+  "ok": true,
+  "detail": "sent,unsent,none,book,screen at 1600"
+ },
+ {
+  "lock": "D2",
+  "where": "all three search widths seen",
+  "ok": true,
+  "detail": "170, 220, 280"
+ }
+]

@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 title panel",
+  "ok": true,
+  "detail": "title · rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 h1",
+  "ok": true,
+  "detail": "\"Every comp, and where it went\""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no number",
+  "ok": true,
+  "detail": "0 number part(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 two lines, Special Elite",
+  "ok": true,
+  "detail": "2 lines · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 compact sheet",
+  "ok": true,
+  "detail": "sheet-wide false"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 drawing 196",
+  "ok": true,
+  "detail": "slot 196 · image 196"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 drawing inside the panel",
+  "ok": true,
+  "detail": "image 169.84375–365.84375 in 133.75–403.9375"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 subline",
+  "ok": true,
+  "detail": "\"Log the comps each letter names, and see which agents saw them, for Murphy's Day Out.\" · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 buttons",
+  "ok": true,
+  "detail": "+ Add a comp · See all comps"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title panel",
+  "ok": true,
+  "detail": "title · rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 h1",
+  "ok": true,
+  "detail": "\"Every comp, and where it went\""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no number",
+  "ok": true,
+  "detail": "0 number part(s)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 two lines, Special Elite",
+  "ok": true,
+  "detail": "2 lines · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 compact sheet",
+  "ok": true,
+  "detail": "sheet-wide false"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 drawing 196",
+  "ok": true,
+  "detail": "slot 196 · image 196"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 drawing inside the panel",
+  "ok": true,
+  "detail": "image 182.4375–378.4375 in 133.75–429.125"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 subline",
+  "ok": true,
+  "detail": "\"Log the comps each letter names, and see which agents saw them, for Murphy's Day Out.\" · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 buttons",
+  "ok": true,
+  "detail": "+ Add a comp · See all comps"
+ }
+]

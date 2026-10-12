@@ -1,0 +1,38 @@
+{
+ "queries": 73,
+ "letters": 7,
+ "lettersRecorded": 0,
+ "resolved": 16,
+ "unresolved": 57,
+ "ambiguous": 0,
+ "via": {
+  "package": 16
+ },
+ "byManuscript": {
+  "seed-ms-1": {
+   "title": "The Smoke Test",
+   "resolved": 9,
+   "unresolved": 42
+  },
+  "msv12-ms": {
+   "title": "Harbour of Glass",
+   "resolved": 7,
+   "unresolved": 1
+  },
+  "": {
+   "title": "(gone)",
+   "resolved": 0,
+   "unresolved": 2
+  },
+  "seed-ms-2": {
+   "title": "The Quiet Second",
+   "resolved": 0,
+   "unresolved": 2
+  },
+  "thin-ms": {
+   "title": "The Quiet Fixture",
+   "resolved": 0,
+   "unresolved": 10
+  }
+ }
+}

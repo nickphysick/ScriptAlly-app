@@ -10,6 +10,7 @@ const DIR = "reports/comps-v25/shots";
 test.skip(!process.env.CV25_SHOTS, "set CV25_SHOTS=1 to write the report's screenshots");
 test.describe.configure({ mode: "serial" });
 test.beforeAll(() => { mkdirSync(DIR, { recursive: true }); seed(); });
+test.afterAll(() => { if (!process.env.CV25_KEEP) seed("--restore"); });
 
 for (const vp of [...SIZES, { width: 1920, height: 1080 }, { width: 1024, height: 768 }]) {
   const w = vp.width;
@@ -42,5 +43,7 @@ for (const vp of [...SIZES, { width: 1920, height: 1080 }, { width: 1024, height
     await page.locator('[data-cv="page"] [data-cv="full-btn"]').click();
     await page.waitForTimeout(900);
     await page.screenshot({ path: `${DIR}/full-${w}.png` });
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(700);
   });
 }

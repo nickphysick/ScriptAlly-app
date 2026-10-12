@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 inset 8",
+  "ok": true,
+  "detail": "top 8 · right 8 · bottom 8"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 radius 12",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 width min(640, 54vw)",
+  "ok": true,
+  "detail": "640 of 640"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 no inline detail",
+  "ok": false,
+  "detail": "1 non-row child(ren) among 8"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the open row is marked",
+  "ok": true,
+  "detail": "1 open"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the comp",
+  "ok": true,
+  "detail": "The Tidewater Line · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 its queries are the usage",
+  "ok": true,
+  "detail": "9 queries · says 9"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the three cells",
+  "ok": true,
+  "detail": "QL v2, QL v3 · 9 agents · 6"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 Escape closes it",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 inset 8",
+  "ok": true,
+  "detail": "top 8 · right 8 · bottom 8"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 radius 12",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 width min(640, 54vw)",
+  "ok": true,
+  "detail": "640 of 640"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 no inline detail",
+  "ok": false,
+  "detail": "1 non-row child(ren) among 8"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the open row is marked",
+  "ok": true,
+  "detail": "1 open"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the comp",
+  "ok": true,
+  "detail": "The Tidewater Line · \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 its queries are the usage",
+  "ok": true,
+  "detail": "9 queries · says 9"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the three cells",
+  "ok": true,
+  "detail": "QL v2, QL v3 · 9 agents · 6"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 Escape closes it",
+  "ok": true,
+  "detail": "closed"
+ }
+]

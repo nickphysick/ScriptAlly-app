@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 the band and the ground differ",
+  "ok": true,
+  "detail": "rgb(251, 249, 245) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the column stands inside the sheet",
+  "ok": true,
+  "detail": "column 296.375–1455.625 in sheet 248–1504"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 band colour in the column",
+  "ok": true,
+  "detail": "251,249,245 vs 251,249,245"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 band colour at the sheet's left edge",
+  "ok": false,
+  "detail": "242,238,232 vs 251,249,245"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 band colour at the sheet's right edge",
+  "ok": false,
+  "detail": "242,238,232 vs 251,249,245"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 three steps in one row",
+  "ok": true,
+  "detail": "336,302 · 709,302 · 1083,302"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 copy",
+  "ok": true,
+  "detail": "How comp tracking works. · 3 · Log the comps in a letter"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the band and the ground differ",
+  "ok": true,
+  "detail": "rgb(251, 249, 245) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the column stands inside the sheet",
+  "ok": true,
+  "detail": "column 288.953125–1231.046875 in sheet 248–1272"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band colour in the column",
+  "ok": true,
+  "detail": "251,249,245 vs 251,249,245"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band colour at the sheet's left edge",
+  "ok": false,
+  "detail": "242,238,232 vs 251,249,245"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band colour at the sheet's right edge",
+  "ok": false,
+  "detail": "242,238,232 vs 251,249,245"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 three steps in one row",
+  "ok": true,
+  "detail": "289,301 · 616,301 · 944,301"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 copy",
+  "ok": true,
+  "detail": "How comp tracking works. · 3 · Log the comps in a letter"
+ }
+]

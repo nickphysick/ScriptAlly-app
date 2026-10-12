@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "E2",
+  "where": "opens on the current letter, not fixed",
+  "ok": true,
+  "detail": "cv25-let-3 · fixed false"
+ },
+ {
+  "lock": "E2",
+  "where": "its record plus the comp the door named",
+  "ok": true,
+  "detail": "cmp_cv25tide,cmp_cv25nine,cmp_cv25last · 3 logged"
+ },
+ {
+  "lock": "E2",
+  "where": "a comp that is not ready cannot be ticked",
+  "ok": true,
+  "detail": "The Ferry at Dusk"
+ },
+ {
+  "lock": "E2",
+  "where": "the chosen letter has the three",
+  "ok": true,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "no other letter changed",
+  "ok": false,
+  "detail": "{\"l1\":[\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"],\"l2\":[\"cmp_cv25tide\",\"cmp_cv25salt\"]}"
+ },
+ {
+  "lock": "E2",
+  "where": "the unrecorded letter is still unrecorded",
+  "ok": false,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "the comps were not rewritten",
+  "ok": true,
+  "detail": "= = = = = = ="
+ },
+ {
+  "lock": "E2",
+  "where": "Undo is offered",
+  "ok": true,
+  "detail": "toast"
+ },
+ {
+  "lock": "E2",
+  "where": "Undo restores every letter exactly",
+  "ok": false,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\"]"
+ }
+]

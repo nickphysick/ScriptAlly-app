@@ -1,0 +1,134 @@
+{
+ "A1": {
+  "mutation": "regenerate ids on save (source)",
+  "red": 1,
+  "first": [
+   "✗ A1 · after an edit: every id that existed is unchanged, on the same comp — cmp_cv25tide→cmp_4mgh316xkkhx cmp_cv25salt→cmp_ebx2qbsdmiau cmp_cv25nine→cmp_dtkby6sajk70 cmp_cv25brit→cmp_4jzii60qv6ev (none)→cmp_suqazpjw09vt cmp_cv25ferr→cmp_hqnxdskawqh5 cmp_cv25l"
+  ]
+ },
+ "A2": {
+  "mutation": "count unrecorded letters as logged (source, unit)",
+  "red": 1,
+  "first": [
+   "× CV25 A2: usage, attachment and the unrecorded letters > a query with no letter, and one whose letter records nothing, are not logged 9ms"
+  ]
+ },
+ "A3": {
+  "mutation": "allow edits on a fixed letter (source)",
+  "red": 3,
+  "first": [
+   "✗ A3 · v2: fixed, no checkbox — fixed false · 6 tickable · save true",
+   "✗ A3 · v2: the notice and the door — QL v2 has already gone out with 9 queries. Log what it mentioned and those queries are tracked too. · null",
+   "✗ A3 · v2: a click ticks nothing — ticks after a click"
+  ]
+ },
+ "A4": {
+  "mutation": "read inQuery in manuscriptShelf (source, unit)",
+  "red": 3,
+  "first": [
+   "× CV25 A4: inQuery is retired > no source outside types.ts names it 285ms",
+   "× CV25 A4: inQuery is retired > a stored flag does not survive a write, and reads as nothing 1ms",
+   "× CV25 A4: inQuery is retired > the Manuscripts page's comps facts equal the current letter's compIds 0ms"
+  ]
+ },
+ "B1": {
+  "mutation": "restore the number panel (in page)",
+  "red": 6,
+  "first": [
+   "✗ B1 · 1512 title panel — number · rgb(45, 58, 80)",
+   "✗ B1 · 1512 h1 — \"7 comp titles\"",
+   "✗ B1 · 1512 no number — 1 number part(s)",
+   "✗ B1 · 1280 title panel — number · rgb(45, 58, 80)"
+  ]
+ },
+ "B2": {
+  "mutation": "scroll on press (in page)",
+  "red": 2,
+  "first": [
+   "✗ B2 · 1512 press does not scroll — scrollTop 0 → 300",
+   "✗ B2 · 1280 press does not scroll — scrollTop 0 → 300"
+  ]
+ },
+ "C1": {
+  "mutation": "confine the band to the column (in page)",
+  "red": 4,
+  "first": [
+   "✗ C1 · 1512 band colour at the sheet's left edge — 242,238,232 vs 251,249,245",
+   "✗ C1 · 1512 band colour at the sheet's right edge — 242,238,232 vs 251,249,245",
+   "✗ C1 · 1280 band colour at the sheet's left edge — 242,238,232 vs 251,249,245",
+   "✗ C1 · 1280 band colour at the sheet's right edge — 242,238,232 vs 251,249,245"
+  ]
+ },
+ "D1": {
+  "mutation": "leave the heading on the column (in page)",
+  "red": 4,
+  "first": [
+   "✗ D1 · 1512 left edge — heading 296 · list 272",
+   "✗ D1 · 1512 right edge — heading 1456 · list 1480",
+   "✗ D1 · 1280 left edge — heading 296 · list 272",
+   "✗ D1 · 1280 right edge — heading 1224 · list 1248"
+  ]
+ },
+ "D2": {
+  "mutation": "search flex: 1 (in page)",
+  "red": 4,
+  "first": [
+   "✗ D2 · 1024 search 170 — search 222.390625 at a list 720 wide",
+   "✗ D2 · 1512 search 220 — search 337.40625 at a list 1208 wide",
+   "✗ D2 · 1280 search 170 — search 273.796875 at a list 976 wide",
+   "✗ D2 · 1920 search 280 — search 427.28125 at a list 1600 wide"
+  ]
+ },
+ "D3": {
+  "mutation": "sort ascending first (source)",
+  "red": 4,
+  "first": [
+   "✗ D3 · first click: highest first — 0,0,0,0,0,9,9",
+   "✗ D3 · first click: aria-sort descending — {\"title\":\"none\",\"named\":\"none\",\"seen\":\"ascending\",\"next\":\"none\"}",
+   "✗ D3 · first click: ties keep the writer's order — Nine Miles Out · Bright Water · Kestrel Hour · The Ferry at Dusk · Last Crossing · The Tidewater Line · Salt Road",
+   "✗ D3 · second click: lowest first — 9,9,0,0,0,0,0 · descending"
+  ]
+ },
+ "D4": {
+  "mutation": "default to Where it's used (source)",
+  "red": 1,
+  "first": [
+   "✗ D4 · opens with no bands — 3 bands · 7 rows · Where it’s used"
+  ]
+ },
+ "E1": {
+  "mutation": "expand the row inline (in page)",
+  "red": 2,
+  "first": [
+   "✗ E1 · 1512 no inline detail — 1 non-row child(ren) among 8",
+   "✗ E1 · 1280 no inline detail — 1 non-row child(ren) among 8"
+  ]
+ },
+ "E2": {
+  "mutation": "write to every letter (source)",
+  "red": 3,
+  "first": [
+   "✗ E2 · no other letter changed — {\"l1\":[\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"],\"l2\":[\"cmp_cv25tide\",\"cmp_cv25salt\"]}",
+   "✗ E2 · the unrecorded letter is still unrecorded — [\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"]",
+   "✗ E2 · Undo restores every letter exactly — [\"cmp_cv25tide\",\"cmp_cv25last\"]"
+  ]
+ },
+ "F1": {
+  "mutation": "leave the sidebar expanded (source)",
+  "red": 2,
+  "first": [
+   "✗ F1 · 1512 on: the sidebar is at its icons — sb-shut false · 248 wide",
+   "✗ F1 · 1280 on: the sidebar is at its icons — sb-shut false · 248 wide"
+  ]
+ },
+ "L1": {
+  "mutation": "drop the strip's figure boxes while loading (in page)",
+  "red": 4,
+  "first": [
+   "✗ L1 · 1512 strip — 296,438 1159×90.7 → 296,438 1159×255.0",
+   "✗ L1 · 1512 head — 272,1214 1208×34.0 → 272,1379 1208×34.0",
+   "✗ L1 · 1280 strip — 289,463 942×90.7 → 289,463 942×275.3",
+   "✗ L1 · 1280 head — 272,1240 976×34.0 → 272,1424 976×34.0"
+  ]
+ }
+}

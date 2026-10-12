@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 before: expanded, scrolled",
+  "ok": true,
+  "detail": "sidebar 248 · scroll 1153"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 on: panel, strip and band hidden",
+  "ok": true,
+  "detail": "panel 0 · strip 0 · band 0 · footer 0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 on: the heading stays above the list",
+  "ok": true,
+  "detail": "heading 121.75–155.75 · list from 167.75"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 on: the sidebar is at its icons",
+  "ok": false,
+  "detail": "sb-shut false · 248 wide"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 on: the list is the sheet less 12 each side",
+  "ok": true,
+  "detail": "left 12 · right 12"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 on: the URL and the device say so",
+  "ok": true,
+  "detail": "?full=1 · stored 1 · pressed true"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Escape: everything is back",
+  "ok": true,
+  "detail": "panel 270.1875 · (no query) · stored null"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Escape: the sidebar is what it was",
+  "ok": true,
+  "detail": "248 of 248"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Escape: the scroll position you left from",
+  "ok": true,
+  "detail": "1153 → 1153"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 F enters",
+  "ok": true,
+  "detail": "after F"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 F in the search types",
+  "ok": true,
+  "detail": "still full, the field holds f"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the button exits",
+  "ok": true,
+  "detail": "after Exit full screen"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 before: expanded, scrolled",
+  "ok": true,
+  "detail": "sidebar 248 · scroll 1199"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 on: panel, strip and band hidden",
+  "ok": true,
+  "detail": "panel 0 · strip 0 · band 0 · footer 0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 on: the heading stays above the list",
+  "ok": true,
+  "detail": "heading 121.75–155.75 · list from 167.75"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 on: the sidebar is at its icons",
+  "ok": false,
+  "detail": "sb-shut false · 248 wide"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 on: the list is the sheet less 12 each side",
+  "ok": true,
+  "detail": "left 12 · right 12"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 on: the URL and the device say so",
+  "ok": true,
+  "detail": "?full=1 · stored 1 · pressed true"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Escape: everything is back",
+  "ok": true,
+  "detail": "panel 295.375 · (no query) · stored null"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Escape: the sidebar is what it was",
+  "ok": true,
+  "detail": "248 of 248"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Escape: the scroll position you left from",
+  "ok": true,
+  "detail": "1199 → 1199"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 F enters",
+  "ok": true,
+  "detail": "after F"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 F in the search types",
+  "ok": true,
+  "detail": "still full, the field holds f"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the button exits",
+  "ok": true,
+  "detail": "after Exit full screen"
+ }
+]
