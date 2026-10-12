@@ -515,10 +515,12 @@ test.describe("Query panel v1", () => {
         const dialogs = [...document.querySelectorAll<HTMLElement>('[role="dialog"], dialog[open]')].filter(vis);
         const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
         const scrim = [...document.querySelectorAll<HTMLElement>(".qad-scrim")].filter((e) => vis(e) && parseFloat(getComputedStyle(e).opacity) > 0.05).length;
-        return { dialogs: dialogs.length, isPanel: dialogs.length === 1 && dialogs[0] === p, pid: p?.dataset.qpId ?? "", step: p?.querySelector<HTMLElement>("[data-qp-step]")?.dataset.qpStep ?? null, title: p?.querySelector('[data-qp="step-title"]')?.textContent ?? "", scrim, q: new URL(location.href).searchParams.get("q") };
+        return { dialogs: dialogs.length, isPanel: dialogs.length === 1 && dialogs[0] === p, pid: p?.dataset.qpId ?? "", primary: p?.querySelector<HTMLElement>('[data-qcv="open-action"]')?.textContent?.trim() ?? "", step: p?.querySelector<HTMLElement>("[data-qp-step]")?.dataset.qpStep ?? null, title: p?.querySelector('[data-qp="step-title"]')?.textContent ?? "", scrim, q: new URL(location.href).searchParams.get("q") };
       });
       L.check("P14", `${w} exactly one dialog, and it is the panel`, r.dialogs === 1 && r.isPanel, `${r.dialogs} dialogs · the panel ${r.isPanel} (tray button "${label}")`);
       L.check("P14", `${w} the panel is that row's, at the action's step`, r.pid === id && r.step === "sent" && /^What went to /.test(r.title), `panel ${r.pid} · step ${r.step} · "${r.title}"`);
+      /* one label for one act: the tray's button says what the panel's primary says for the same query */
+      L.check("P14", `${w} the tray's label is the panel's primary`, label === r.primary && label === "Mark full sent", `tray "${label}" · panel "${r.primary}"`);
       L.check("P14", `${w} no scrim, and the row is the open query`, r.scrim === 0 && r.q === id, `${r.scrim} scrims · q=${r.q}`);
       /* left as it was found: nothing is saved */
       const back = page.locator(`${PANEL} [data-qp="step-back"]`);
@@ -528,6 +530,6 @@ test.describe("Query panel v1", () => {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(300);
     }
-    L.done(6);
+    L.done(8);
   });
 });
