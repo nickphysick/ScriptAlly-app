@@ -295,3 +295,82 @@
 .cl16-list .cl17-log:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 3px; }
 .cl16-list .cl17-shut { font: 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); white-space: nowrap; }
 .cl16-list .clv-list--compact .cl17-track, .cl16-list .clv-list--compact .cl17-dl { display: none; }
+
+/* ── §E · THE FILTERS. Pills: 40 tall, white with a hairline; navy once set, with the choice as the label and a
+   round × that clears just that filter. One More filters pill holds the three switches. ── */
+.cl17-hd .cl17-fbar.cl14-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; margin: 0; }
+@container cl17hd (max-width: 899.98px) { .cl17-hd .cl17-fbar.cl14-fbar { flex-wrap: wrap; } }
+.cl17-fbar .cl17-fpw { position: relative; display: inline-flex; flex: none; }
+.cl17-fbar .cl17-fp.cl14-fp {
+  display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: 40px; padding: 0 14px 0 16px; margin: 0; border: 0;
+  border-radius: 20px; background: #fff; color: #1c130f; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14), 0 1px 2px rgba(28, 19, 15, 0.05);
+  font: 400 15px/1 var(--sp-serif) !important;
+}
+.cl17-fbar .cl17-fp.cl14-fp .cl17-fpl { font: inherit !important; }
+.cl17-fbar .cl17-fp.cl14-fp:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3), 0 1px 2px rgba(28, 19, 15, 0.05); }
+.cl17-fbar .cl17-fp .cl17-chev { flex: none; color: rgba(28, 19, 15, 0.6); }
+.cl17-fbar .cl17-fp .cl17-fpn {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 22px; height: 22px; padding: 0 7px;
+  border-radius: 11px; background: rgba(28, 19, 15, 0.07); font: 500 11.5px/1 var(--font-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.6);
+}
+.cl17-fbar .cl17-fpw.on .cl17-fp.cl14-fp { background: #2d3a50; color: #f4eee5; box-shadow: none; padding-right: 40px; }
+.cl17-fbar .cl17-fpw.on .cl17-fp .cl17-chev { color: rgba(244, 238, 229, 0.7); }
+.cl17-fbar .cl17-fpw.on .cl17-fp .cl17-fpn { background: rgba(244, 238, 229, 0.16); color: #f4eee5; }
+.cl17-fbar .cl17-fpx {
+  position: absolute; right: 8px; top: 8px; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0;
+  border: 0; border-radius: 50%; background: rgba(244, 238, 229, 0.14); color: #f4eee5; cursor: pointer;
+}
+.cl17-fbar .cl17-fpx:hover { background: rgba(244, 238, 229, 0.28); }
+.cl17-fbar .cl17-fp:focus-visible, .cl17-fbar .cl17-fpx:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+/* the genre type-ahead, as built: a 40px white field */
+.cl17-fbar .cl14-gtok {
+  box-sizing: border-box; min-height: 40px; border-radius: 20px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14), 0 1px 2px rgba(28, 19, 15, 0.05);
+}
+
+/* the panels: portalled to the body, so every value here is stated (no page token reaches them) */
+.lpop.cl17-pop {
+  box-sizing: border-box; min-width: 300px; width: max-content; max-width: min(380px, calc(100vw - 32px)); padding: 6px 6px 0; border-radius: 16px;
+  background: #fff; color: #1c130f; overflow: hidden; display: flex; flex-direction: column;
+  max-height: min(560px, calc(100vh - 220px));
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 40px -20px rgba(28, 19, 15, 0.45), 0 4px 10px -6px rgba(28, 19, 15, 0.2);
+}
+.cl17-pop .cl17-pop-h { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 10px 12px 8px; }
+.cl17-pop .cl17-pop-h b { font: 400 17px/1.2 var(--sp-type) !important; }
+.cl17-pop .cl17-pop-h span { font: italic 400 13px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.cl17-pop .cl17-pop-b { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 6px; }
+.cl17-pop .cl17-pop-g h6 { margin: 8px 12px 2px; font: 400 13px/1.3 var(--sp-type) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.5); }
+.cl17-pop .cl17-opt {
+  display: flex; align-items: center; gap: 10px; box-sizing: border-box; width: 100%; min-height: 40px; margin: 0; padding: 6px 12px; border: 0;
+  border-radius: 10px; background: none; color: #1c130f; text-align: left; cursor: pointer; font: 400 15.5px/1.25 var(--sp-serif) !important;
+}
+.cl17-pop .cl17-opt:hover { background: #f6f3ee; }
+.cl17-pop .cl17-opt.on { background: #f2f4f8; }
+.cl17-pop .cl17-opt:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
+.cl17-pop .cl17-opt.zero .cl17-ol, .cl17-pop .cl17-opt.zero small { color: rgba(28, 19, 15, 0.4); }
+.cl17-pop .cl17-opt .cl17-ol { flex: 1 1 auto; min-width: 0; font: inherit !important; }
+.cl17-pop .cl17-opt .cl17-ol i { display: block; margin-top: 1px; font: italic 400 13px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.cl17-pop .cl17-opt small { flex: none; font: 400 11.5px/1 var(--font-mono) !important; color: rgba(28, 19, 15, 0.45); }
+.cl17-pop .cl17-bx {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 18px; height: 18px; border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); font: 700 12px/1 var(--sp-serif) !important; color: #fff;
+}
+.cl17-pop .cl17-opt.on .cl17-bx { background: #2d3a50; box-shadow: none; }
+.cl17-pop .cl17-dot { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; }
+.cl17-pop .cl17-dot-none { display: block; box-sizing: border-box; width: 11px; height: 11px; border-radius: 50%; background: #f4eee5; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl17-pop .cl17-rd { flex: none; box-sizing: border-box; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); }
+.cl17-pop .cl17-opt.on .cl17-rd { box-shadow: inset 0 0 0 5.5px #2d3a50; }
+.cl17-pop .cl17-sw { flex: none; position: relative; box-sizing: border-box; width: 34px; height: 20px; border-radius: 10px; background: #e5e0d8; transition: background 0.14s ease; }
+.cl17-pop .cl17-sw i { position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.3); transition: transform 0.14s ease; }
+.cl17-pop .cl17-sw[data-on] { background: #2d3a50; }
+.cl17-pop .cl17-sw[data-on] i { transform: translateX(14px); }
+.cl17-pop .cl17-pop-f {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 -6px; padding: 10px 12px;
+  background: #fbf9f5; border-top: 1px solid rgba(28, 19, 15, 0.08);
+}
+.cl17-pop .cl17-pop-clear { padding: 0; border: 0; background: none; cursor: pointer; font: 400 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; text-decoration: underline; text-underline-offset: 3px; }
+.cl17-pop .cl17-pop-show { box-sizing: border-box; height: 36px; padding: 0 16px; border: 0; border-radius: 18px; background: #2d3a50; color: #f4eee5; cursor: pointer; white-space: nowrap; font: 400 15px/1 var(--sp-type) !important; }
+.cl17-pop .cl17-pop-show:hover { background: #1c130f; }
+.cl17-pop button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .cl17-pop .cl17-sw, .cl17-pop .cl17-sw i { transition: none; } }

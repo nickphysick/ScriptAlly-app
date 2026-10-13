@@ -15,8 +15,11 @@
  * that is not in it cannot be added. ↑ ↓ move, Enter adds, Backspace on an empty field removes the last token,
  * Escape clears the typing — through the ONE escape stack, so it never reaches past the field.
  */
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { PopOption, PopRule, PopSection, Popover, type PopoverState } from "../../shell/ListPills";
+import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { type PopoverState } from "../../shell/ListPills";
+import { StatusDot } from "../../StatusDot";
+import { QueryStatus } from "../../../types";
 import { CANONICAL_GENRES, matchKey } from "../../../lib/genres";
 import { genreKey } from "../../../lib/genreMatch";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -41,6 +44,10 @@ export interface ContactFilterStripProps {
   onClearAll?: () => void;
   /** v17 §B — "Clear all" lives beside "Showing…" on the list sheet; the row then draws none of its own */
   hideClear?: boolean;
+  /** v17 §E — the rows the list is showing now: each panel's "Show {n} agents" */
+  showing?: number;
+  /** v17 §E — the manuscript in scope, for the "Queried for this book?" panel's note */
+  msTitle?: string | null;
 }
 
 const label = (id: string) => CANONICAL_GENRES.find((g) => g.id === id)?.label ?? id;
@@ -114,125 +121,192 @@ const GenreField: React.FC<{ filters: ContactFilters; onFilters: (f: ContactFilt
   );
 };
 
-const Chip: React.FC<{ k: string; on: boolean; n: number; title?: string; onToggle: () => void; inert?: boolean; children: React.ReactNode }> = ({ k, on, n, title, onToggle, inert, children }) => (
-  <button type="button" className={`cl14-fp${on ? " on" : ""}`} data-cl14-chip={k} aria-pressed={on} title={title} tabIndex={inert ? -1 : 0} onClick={onToggle}>
-    {on ? "✓ " : ""}{children}<em>{n}</em>
-  </button>
+/* ── v17 §E · THE PILLS AND THEIR PANELS ─────────────────────────────────────────────────────────────────────
+ * ⚠️ EVERY CONTROL READS THE FILTER'S REAL STATE (`filters`), never a copy of another control: the More filters
+ *    switches are drawn from `f.action` / `f.mats` / `f.always`, and there is exactly one More filters control.
+ * ⚠️ THE PANEL KEEPS THE `.lpop` CLASS: `usePopover`'s outside-press and scroll rules know a panel by it. */
+
+/** the status a filter option stands for, for its StatusDot (Not queried has none) */
+const STATUS_DOT: Partial<Record<StatusKey, QueryStatus>> = {
+  queried: QueryStatus.QUERIED, pr: QueryStatus.PARTIAL_REQUESTED, ps: QueryStatus.PARTIAL_SENT, fr: QueryStatus.FULL_REQUESTED,
+  fs: QueryStatus.FULL_SENT, rr: QueryStatus.REVISE_RESUBMIT, resub: QueryStatus.RESUBMITTED, offer: QueryStatus.OFFER,
+  signed: QueryStatus.SIGNED, closed: QueryStatus.REJECTED,
+};
+/** the Status panel's three groups (the summary card's own three) */
+const STATUS_GROUPS: { title: string; keys: StatusKey[] }[] = [
+  { title: "Not queried", keys: ["none"] },
+  { title: "Querying", keys: ["queried", "pr", "ps", "fr", "fs", "rr", "resub", "offer", "signed"] },
+  { title: "Closed", keys: ["closed"] },
+];
+const OPEN_LINE: Record<OpenChoice, string> = {
+  either: "Everyone on file", open: "Open to new queries now", closed: "Closed, or reopening later", unknown: "Their profile doesn’t say",
+};
+const QUERIED_LINE: Record<QueriedChoice, string> = {
+  either: "Everyone on file", yes: "At least one query sent", no: "Never queried with this book",
+};
+export const MORE_ROWS: { key: "action" | "mats" | "always"; label: string; line: string }[] = [
+  { key: "action", label: "Action required", line: "Something to send, answer or chase" },
+  { key: "mats", label: "Missing materials", line: "What to send isn’t recorded" },
+  { key: "always", label: "Always responds", line: "Agents who reply even when it’s a no" },
+];
+
+const Chevron: React.FC = () => (
+  <svg className="cl17-chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" /></svg>
 );
 
-/** the row, folded or not — rendered twice: once for real, once (inert, hidden) to measure the unfolded width */
-const Row: React.FC<ContactFilterStripProps & { folded: boolean; inert?: boolean }> = ({ filters, onFilters, counts, tallies, pop, folded, inert, extraOn = false, onClearAll, hideClear = false }) => {
-  const f = filters;
-  const set = (patch: Partial<ContactFilters>) => onFilters({ ...f, ...patch });
-  const mine = (k: ContactPop) => !inert && pop.open === k && pop.anchor?.closest('[data-cl14="fbar"]') != null;
-  const dd = (k: ContactPop, text: React.ReactNode, on: boolean) => (
-    <button type="button" className={`cl14-fp cl14-fp--dd${on ? " on" : ""}`} data-cl14-dd={k} aria-haspopup="menu" aria-expanded={mine(k)}
-      tabIndex={inert ? -1 : 0} onClick={(e) => pop.toggle(k, e.currentTarget)}>
-      {text}<i aria-hidden="true">{"⌄"}</i>
-    </button>
+/** the drop-down: 10 under its pill (its left edge, or its right for More filters), scrolling inside */
+const Panel: React.FC<{
+  k: ContactPop; anchor: HTMLElement | null; id: string; title: string; note: string; align?: "left" | "right";
+  showing?: number; onClear?: () => void; onClose: () => void; children: React.ReactNode;
+}> = ({ k, anchor, id, title, note, align = "left", showing, onClear, onClose, children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!anchor) return;
+    const r = anchor.getBoundingClientRect();
+    setPos(align === "right"
+      ? { top: r.bottom + 10, right: Math.max(16, window.innerWidth - r.right) }
+      : { top: r.bottom + 10, left: Math.max(16, Math.min(r.left, window.innerWidth - 300 - 16)) });
+  }, [anchor, align]);
+  /* focus goes to the first option on open, and back to the pill when the panel goes while holding it */
+  useEffect(() => {
+    if (!pos) return undefined;
+    const el = ref.current;
+    el?.querySelector<HTMLElement>("[data-opt]")?.focus({ preventScroll: true });
+    return () => { if (el && el.contains(document.activeElement) && anchor?.isConnected) anchor.focus({ preventScroll: true }); };
+  }, [pos, anchor]);
+  if (!anchor || !pos) return null;
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    const opts = [...(ref.current?.querySelectorAll<HTMLElement>("[data-opt]") ?? [])];
+    if (!opts.length) return;
+    e.preventDefault();
+    const i = opts.indexOf(document.activeElement as HTMLElement);
+    opts[(i + (e.key === "ArrowDown" ? 1 : opts.length - 1) + (i < 0 && e.key === "ArrowUp" ? 1 : 0)) % opts.length].focus();
+  };
+  return createPortal(
+    <div className="lpop cl17-pop" data-lpop={k} data-cl17="panel" id={id} role="dialog" aria-label={title} ref={ref} onKeyDown={onKey}
+      style={{ top: pos.top, left: pos.left, right: pos.right }}>
+      <div className="cl17-pop-h" data-cl17="panel-head"><b>{title}</b><span>{note}</span></div>
+      <div className="cl17-pop-b">{children}</div>
+      <div className="cl17-pop-f" data-cl17="panel-foot">
+        {onClear ? <button type="button" className="cl17-pop-clear" data-cl17="panel-clear" onClick={onClear}>Clear</button> : <span />}
+        <button type="button" className="cl17-pop-show" data-cl17="panel-show" onClick={() => { anchor.focus({ preventScroll: true }); onClose(); }}>
+          Show {showing ?? 0} {showing === 1 ? "agent" : "agents"}
+        </button>
+      </div>
+    </div>,
+    document.body,
   );
-  const chips = [
-    <Chip key="action" k="action" on={f.action} n={counts.action} inert={inert} onToggle={() => set({ action: !f.action })}>Action required</Chip>,
-    <Chip key="mats" k="mats" on={f.mats} n={counts.mats} inert={inert} onToggle={() => set({ mats: !f.mats })}>Missing materials</Chip>,
-    <Chip key="always" k="always" on={f.always} n={counts.always} inert={inert} title="Agents who reply even when it's a no" onToggle={() => set({ always: !f.always })}>Always responds</Chip>,
-  ];
-  const onChips = (f.action ? 1 : 0) + (f.mats ? 1 : 0) + (f.always ? 1 : 0);
+};
+
+const Row: React.FC<ContactFilterStripProps> = ({ filters, onFilters, counts, tallies, pop, extraOn = false, onClearAll, hideClear = false, showing, msTitle }) => {
+  const f = filters;
+  const uid = useId();
+  const set = (patch: Partial<ContactFilters>) => onFilters({ ...f, ...patch });
+  const mine = (k: ContactPop) => pop.open === k && pop.anchor?.closest('[data-cl14="fbar"]') != null;
+  const pid = (k: ContactPop) => `${uid}-${k}`;
+  /** a pill: navy with its choice as the label and a clear × once set */
+  const pill = (k: ContactPop, text: React.ReactNode, on: boolean, clear: () => void, chip?: React.ReactNode) => (
+    <span className={`cl17-fpw${on ? " on" : ""}`} data-cl17="pill" data-k={k} data-on={on ? "" : undefined}>
+      <button type="button" className={`cl14-fp cl14-fp--dd cl17-fp${on ? " on" : ""}`} data-cl14-dd={k} aria-haspopup="dialog" aria-expanded={mine(k)}
+        aria-controls={mine(k) ? pid(k) : undefined} onClick={(e) => pop.toggle(k, e.currentTarget)}>
+        <span className="cl17-fpl" data-cl17="pill-label">{text}</span>{chip}<Chevron />
+      </button>
+      {on ? (
+        <button type="button" className="cl17-fpx" data-cl17="pill-clear" aria-label={`Clear ${k === "more" ? "more filters" : String(k)}`} onClick={clear}>
+          <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 2l6 6M8 2 2 8" /></svg>
+        </button>
+      ) : null}
+    </span>
+  );
+  const onMore = (f.action ? 1 : 0) + (f.mats ? 1 : 0) + (f.always ? 1 : 0);
+  const statusLabel = f.status.length === 0 ? "Status" : f.status.length === 1 ? (STATUS_CHOICES.find((c) => c.key === f.status[0])?.label ?? "Status") : `${f.status.length} statuses`;
   const openLabel = OPEN_CHOICES.find((c) => c.key === f.open)?.label ?? "Either";
   const queriedLabel = QUERIED_CHOICES.find((c) => c.key === f.queried)?.label ?? "Either";
+  const toggleStatus = (k: StatusKey) => set({ status: f.status.includes(k) ? f.status.filter((x) => x !== k) : [...f.status, k] as StatusKey[] });
   return (
     <>
-      {dd("status", <>Status{f.status.length ? <em>{f.status.length}</em> : null}</>, f.status.length > 0)}
-      {!folded && chips[0]}
-      {dd("open", f.open === "either" ? "Open for submissions" : openLabel, f.open !== "either")}
-      {dd("queried", f.queried === "either" ? "Queried or not" : queriedLabel, f.queried !== "either")}
-      {!folded && chips[1]}
-      {!folded && chips[2]}
-      {folded && dd("more", <>More filters{onChips ? <em>{onChips}</em> : null}</>, onChips > 0)}
-      <GenreField filters={f} onFilters={onFilters} tallies={tallies} inert={inert} />
+      {pill("status", statusLabel, f.status.length > 0, () => set({ status: [] }))}
+      {pill("open", f.open === "either" ? "Open for submissions" : openLabel, f.open !== "either", () => set({ open: "either" }))}
+      {pill("queried", f.queried === "either" ? "Queried or not" : queriedLabel, f.queried !== "either", () => set({ queried: "either" }))}
+      {pill("more", "More filters", onMore > 0, () => set({ action: false, mats: false, always: false }),
+        <em className="cl17-fpn" data-cl17="more-count">{onMore ? `${onMore} on` : MORE_ROWS.length}</em>)}
+      <GenreField filters={f} onFilters={onFilters} tallies={tallies} />
       {!hideClear && (contactFilterCount(f) > 0 || extraOn) && (
-        <button type="button" className="cl14-fclear" data-cl14="clear-all" tabIndex={inert ? -1 : 0} onClick={() => (onClearAll ? onClearAll() : onFilters(emptyContactFilters()))}>Clear all</button>
+        <button type="button" className="cl14-fclear" data-cl14="clear-all" onClick={() => (onClearAll ? onClearAll() : onFilters(emptyContactFilters()))}>Clear all</button>
       )}
 
       {mine("status") && (
-        <Popover k="status" anchor={pop.anchor} width={280} label="Status">
-          <PopSection title="Status">
-            {STATUS_CHOICES.map((c) => (
-              <span key={c.key} className={counts.status[c.key] === 0 ? "cl14-zero" : undefined} data-cl14-zero={counts.status[c.key] === 0 || undefined}>
-                <PopOption k={`status:${c.key}`} kind="check" on={f.status.includes(c.key)} label={c.label} count={counts.status[c.key]}
-                  onPick={() => set({ status: f.status.includes(c.key) ? f.status.filter((x) => x !== c.key) : [...f.status, c.key] as StatusKey[] })} />
-              </span>
-            ))}
-          </PopSection>
-          <PopRule />
-          <button type="button" className="cl14-popclear" data-cl14="status-clear" onClick={() => set({ status: [] })}>Clear</button>
-        </Popover>
+        <Panel k="status" id={pid("status")} anchor={pop.anchor} title="Where they stand" note="Pick any number" showing={showing}
+          onClear={() => set({ status: [] })} onClose={pop.close}>
+          {STATUS_GROUPS.map((g) => (
+            <div className="cl17-pop-g" key={g.title} data-cl17="panel-group" data-lpop-sec={g.title}>
+              <h6>{g.title}</h6>
+              {g.keys.map((k) => {
+                const c = STATUS_CHOICES.find((x) => x.key === k);
+                if (!c) return null;
+                const on = f.status.includes(k), dot = STATUS_DOT[k];
+                return (
+                  <button key={k} type="button" className={`cl17-opt${on ? " on" : ""}${counts.status[k] === 0 ? " zero" : ""}`} data-opt={`status:${k}`}
+                    role="menuitemcheckbox" aria-checked={on} onClick={() => toggleStatus(k)}>
+                    <span className="cl17-bx" aria-hidden="true">{on ? "✓" : ""}</span>
+                    <span className="cl17-dot" aria-hidden="true">{dot ? <StatusDot status={dot} overrideSize={12} /> : <i className="cl17-dot-none" />}</span>
+                    <span className="cl17-ol">{c.label}</span>
+                    <small data-cl17="opt-count">{counts.status[k]}</small>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </Panel>
       )}
       {mine("open") && (
-        <Popover k="open" anchor={pop.anchor} width={240} label="Open for submissions">
-          <PopSection title="Open for submissions">
-            {OPEN_CHOICES.map((c) => (
-              <PopOption key={c.key} k={`open:${c.key}`} kind="radio" on={f.open === c.key} label={c.label}
-                count={c.key === "either" ? undefined : counts.open[c.key as Exclude<OpenChoice, "either">]}
-                onPick={() => { set({ open: c.key }); pop.close(); }} />
-            ))}
-          </PopSection>
-        </Popover>
+        <Panel k="open" id={pid("open")} anchor={pop.anchor} title="Taking queries?" note="From their profile" showing={showing} onClose={pop.close}>
+          {OPEN_CHOICES.map((c) => (
+            <button key={c.key} type="button" className={`cl17-opt cl17-opt--2${f.open === c.key ? " on" : ""}`} data-opt={`open:${c.key}`}
+              role="menuitemradio" aria-checked={f.open === c.key} onClick={() => set({ open: c.key })}>
+              <span className="cl17-rd" aria-hidden="true" />
+              <span className="cl17-ol">{c.label}<i>{OPEN_LINE[c.key]}</i></span>
+              {c.key === "either" ? null : <small data-cl17="opt-count">{counts.open[c.key as Exclude<OpenChoice, "either">]}</small>}
+            </button>
+          ))}
+        </Panel>
       )}
       {mine("queried") && (
-        <Popover k="queried" anchor={pop.anchor} width={240} label="Queried or not">
-          <PopSection title="Queried or not">
-            {QUERIED_CHOICES.map((c) => (
-              <PopOption key={c.key} k={`queried:${c.key}`} kind="radio" on={f.queried === c.key} label={c.label}
-                count={c.key === "either" ? undefined : counts.queried[c.key as Exclude<QueriedChoice, "either">]}
-                onPick={() => { set({ queried: c.key }); pop.close(); }} />
-            ))}
-          </PopSection>
-        </Popover>
+        <Panel k="queried" id={pid("queried")} anchor={pop.anchor} title="Queried for this book?" note={msTitle?.trim() || "Your book"} showing={showing} onClose={pop.close}>
+          {QUERIED_CHOICES.map((c) => (
+            <button key={c.key} type="button" className={`cl17-opt cl17-opt--2${f.queried === c.key ? " on" : ""}`} data-opt={`queried:${c.key}`}
+              role="menuitemradio" aria-checked={f.queried === c.key} onClick={() => set({ queried: c.key })}>
+              <span className="cl17-rd" aria-hidden="true" />
+              <span className="cl17-ol">{c.label}<i>{QUERIED_LINE[c.key]}</i></span>
+              {c.key === "either" ? null : <small data-cl17="opt-count">{counts.queried[c.key as Exclude<QueriedChoice, "either">]}</small>}
+            </button>
+          ))}
+        </Panel>
       )}
       {mine("more") && (
-        <Popover k="more" anchor={pop.anchor} width={260} label="More filters">
-          <PopSection title="More filters">
-            <PopOption k="more:action" kind="check" on={f.action} label="Action required" count={counts.action} onPick={() => set({ action: !f.action })} />
-            <PopOption k="more:mats" kind="check" on={f.mats} label="Missing materials" count={counts.mats} onPick={() => set({ mats: !f.mats })} />
-            <PopOption k="more:always" kind="check" on={f.always} label="Always responds" count={counts.always} onPick={() => set({ always: !f.always })} />
-          </PopSection>
-        </Popover>
+        <Panel k="more" id={pid("more")} anchor={pop.anchor} align="right" title="More filters" note="Switch on any you need" showing={showing}
+          onClear={onMore ? () => set({ action: false, mats: false, always: false }) : undefined} onClose={pop.close}>
+          {MORE_ROWS.map((r) => (
+            <button key={r.key} type="button" className={`cl17-opt cl17-opt--2 cl17-opt--sw${f[r.key] ? " on" : ""}`} data-opt={`more:${r.key}`} data-cl14-chip={r.key}
+              role="switch" aria-checked={f[r.key]} onClick={() => set({ [r.key]: !f[r.key] } as Partial<ContactFilters>)}>
+              <span className="cl17-ol">{r.label}<i>{r.line}</i></span>
+              <small data-cl17="opt-count">{counts[r.key]}</small>
+              <span className="cl17-sw" data-cl17="switch" data-on={f[r.key] ? "" : undefined} aria-hidden="true"><i /></span>
+            </button>
+          ))}
+        </Panel>
       )}
     </>
   );
 };
 
-export const ContactFilterStrip: React.FC<ContactFilterStripProps> = (props) => {
-  const barRef = useRef<HTMLDivElement>(null);
-  const measureRef = useRef<HTMLDivElement>(null);
-  const [folded, setFolded] = useState(false);
-  /* the unfolded row's natural width against the strip's — measured, on every resize and every change */
-  const measure = () => {
-    const bar = barRef.current, m = measureRef.current;
-    if (!bar || !m || bar.clientWidth === 0) return;
-    const want = m.scrollWidth > bar.clientWidth + 0.5;
-    setFolded((f) => (f === want ? f : want));
-  };
-  useLayoutEffect(measure);
-  useEffect(() => {
-    const bar = barRef.current;
-    if (!bar || typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(bar);
-    return () => ro.disconnect();
-  }, []);
-  return (
-    <div className="cl14-fwrap">
-      <div className="cl14-fbar" data-cl14="fbar" data-folded={folded || undefined} ref={barRef}>
-        <Row {...props} folded={folded} />
-      </div>
-      {/* the measurer sits in a zero-size host that clips it: its own width stays readable, but it can never widen the
-          page's scroller (with the book's genres as tokens it is wider than the panel — measured, 101px of overflow) */}
-      <div className="cl14-fmeasure" aria-hidden="true">
-        <div className="cl14-fbar cl14-fbar--measure" ref={measureRef} inert>
-          <Row {...props} folded={false} inert />
-        </div>
-      </div>
+/** v17 §E: the three chips live in ONE More filters menu at every width, so nothing folds and nothing is measured */
+export const ContactFilterStrip: React.FC<ContactFilterStripProps> = (props) => (
+  <div className="cl14-fwrap">
+    <div className="cl14-fbar cl17-fbar" data-cl14="fbar" data-folded="">
+      <Row {...props} />
     </div>
-  );
-};
+  </div>
+);

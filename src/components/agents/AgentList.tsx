@@ -1082,7 +1082,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>} />
               {pageState === "list" ? (
                 <div className="cl14-frow cl17-pills" data-cl14="frow" data-cl17="pills">
-                  <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop} hideClear />
+                  <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop} hideClear
+                    showing={visibleFacts.length} msTitle={scoped?.title?.trim() || null} />
                 </div>
               ) : null}
             </div>
