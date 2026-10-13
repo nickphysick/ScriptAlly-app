@@ -49,7 +49,7 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactOpenHeader } from "./contact/ContactOpenHeader";
+import { ContactLightHeader } from "./contact/ContactLightHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
@@ -71,7 +71,7 @@ import "./contact/contactV11.css";
 import "./contact/contactV13.css";
 import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
-import { ContactListHeading, ContactStrip } from "./contact/ContactStrip";
+import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { useContactPins } from "./contact/useContactPins";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
@@ -1041,22 +1041,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <div className="clv-group" data-full={fullOn ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
-        {/* v16 §A — THE TITLE PANEL: "Every agent, in one place", the book in its subline, two buttons and the hawk
-            on its disc. Over a LIST only (and while settling): the blank account's pitch is ContactEmpty. */}
+        {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
+            card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
+            only, and while settling: the blank account's page is ContactEmpty. */}
         {(showList || pageState === "settling") && (
-          <ContactOpenHeader loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null} addRef={addBtnRef} onAdd={openAdd}
+          <ContactLightHeader loading={pageState !== "list"} total={pageState === "list" ? factsAll.length : null}
+            msTitle={scoped?.title?.trim() || null} model={pageState === "list" ? glanceM : BLANK_GLANCE} active={glance}
+            onGroup={(k) => setGlance((g) => (g === k ? null : k))}
+            addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
         {pageState === "settling" && (
           <ContactSkeleton controls={controls} />
         )}
-        {/* v16 §B — "At a glance": four cells; choosing one filters the list and never scrolls */}
-        {showList && (
-          <ContactStrip model={glanceM} active={glance}
-            onGroup={(k) => setGlance((g) => (g === k ? null : k))} onAll={() => setGlance(null)} />
-        )}
-        {/* v16 §C — "The full list": the strip's heading row again, on the column, leading into the list */}
-        {showList && <ContactListHeading />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;

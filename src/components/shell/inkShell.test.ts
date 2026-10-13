@@ -83,7 +83,8 @@ describe("ink fix-ups — the header card (the Query Centre's; the Contact list 
     expect(qc).toMatch(/\n\s+card\n/);
     expect(empty).toMatch(/\n\s+card\n/);
     expect(contacts).not.toMatch(/<PageHeader\b/);
-    expect(contacts).toMatch(/<ContactOpenHeader\b/);
+    /* Contact list v17: the page-local header is the light one (`ContactLightHeader`); until v17 it was `ContactOpenHeader` */
+    expect(contacts).toMatch(/<ContactLightHeader\b/);
     for (const f of ["src/components/QueryAnalytics.tsx"]) {
       expect(readFileSync(f, "utf8"), f).not.toMatch(/\n\s+card\n|\bcard=\{/);
     }

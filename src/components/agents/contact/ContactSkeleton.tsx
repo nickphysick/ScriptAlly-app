@@ -20,7 +20,6 @@
 import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
 import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
-import { BLANK_GLANCE, ContactListHeading, ContactStrip } from "./ContactStrip";
 import { ContactIndexStrip } from "./ContactIndexStrip";
 import { ContactRows } from "./ContactRows";
 import type { CardPrimary } from "../../../lib/agentCard";
@@ -57,9 +56,6 @@ export const ContactSkeleton: React.FC<{
 
   return (
     <>
-      {/* v16 §B — the strip, every figure a blank of its box */}
-      <ContactStrip model={BLANK_GLANCE} onGroup={noop} onAll={noop} loading />
-      <ContactListHeading />
       <div className="clv-main">
         <section className="cl14-ws cl16-list" aria-hidden="true">
           <div className="cl14-bar cl16-bar">{controls}</div>
