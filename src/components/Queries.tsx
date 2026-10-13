@@ -6610,7 +6610,13 @@ export const Queries: React.FC<{
                       };
                       /* ⚠️ AN EMPTY DIFF RAISES NO SHEET — it saves, toasts, and is done. */
                       if (diff.empty) { void commit(); return; }
-                      setCorrecting({ step: "sheet", entry: correcting.entry, question: "Save this correction?", diff, commit, partners: [] });
+                      /* the sheet is shown for the other changes: a send-by change made on the same form is listed
+                         with them. A send-by change ALONE raises no sheet (the empty test above is on the entry's own diff). */
+                      const sbDay = (v: unknown) => { const d = dayOf(v); return d ? formatDate(d, { day: "numeric", month: "short" }) : "none"; };
+                      const shown = sbChanged && "expectedSendDate" in sbWrite
+                        ? { ...diff, changes: [...diff.changes, { surface: "sendBy" as const, before: sbDay(sbWas.due), after: sbAnswer.sendBy ? sbDay(sbAnswer.sendBy) : "none" }] }
+                        : diff;
+                      setCorrecting({ step: "sheet", entry: correcting.entry, question: "Save this correction?", diff: shown, commit, partners: [] });
                     }}
                   />
                   </>

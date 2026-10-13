@@ -41,7 +41,9 @@ export interface PreviewRow extends ChapterableRow {
 /** One human-readable consequence, in the writer's terms rather than the model's. */
 export interface SurfaceChange {
   /** Which surface moved — the sheet groups by this. */
-  surface: "status" | "timeline" | "chapters" | "anchor" | "window";
+  /* "sendBy" is not derived here: the correction form adds it when the writer changed the request's send-by
+     date on the same form, so the sheet that is shown for other changes lists it too */
+  surface: "status" | "timeline" | "chapters" | "anchor" | "window" | "sendBy";
   before: string;
   after: string;
 }

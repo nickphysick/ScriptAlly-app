@@ -1,0 +1,4 @@
+  ✗ V13 · What changes · the sheet lists the send-by change beside the others — "← Back to Oran’s query CORRECT AN ENTRY Correct this entry × OA Oran Achterberg ACHTERBERG LITERARY · PARTIAL REQUESTED · SENT 4 AUG ✓ 2 WHAT CHANGES Save this correction? THEY ASKED FOR A PARTIAL · 29 AUG 2026 THE TIMEL"
+[V13] 115/116 green
+  1 failed
+  1 passed (2.1m)

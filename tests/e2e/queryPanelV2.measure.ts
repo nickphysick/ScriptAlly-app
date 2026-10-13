@@ -636,6 +636,25 @@ test.describe("Query panel v2", () => {
       await expect.poll(async () => String((await dump()).docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
       const e2 = (await dump()).docs["qp2l-request"] ?? {};
       L.check("V13", "··· edit · Undo puts both back", e2.expectedSendDate === e0.docs["qp2l-request"]?.expectedSendDate && e2.sendReminderDate === e0.docs["qp2l-request"]?.sendReminderDate, `send by ${String(e2.expectedSendDate).slice(0, 10)} · reminder ${String(e2.sendReminderDate).slice(0, 10)}`);
+      /* the "What changes" sheet: shown for another change, it lists the send-by change too. (A send-by change
+         alone saved above with no sheet: the Undo arrived straight after Save.) */
+      await openFix(1);
+      const dateField = page.locator(`${PANEL} #cor-date`);
+      const was = await dateField.inputValue();
+      /* a change the sheet IS shown for: the request dated before the send, which re-orders the record. (Three
+         days earlier changed nothing a writer can see, so it saved with no sheet — as a send-by change alone does.) */
+      const earlier = new Date(new Date(`${was}T12:00:00Z`).getTime() - 40 * 86_400_000).toISOString().slice(0, 10);
+      await dateField.fill(earlier);
+      await page.locator(`${SB} [data-qad-chip="1w"]`).click();
+      await page.locator(`${PANEL} .cor-save`).click();
+      const sheetText = page.locator(`${PANEL} .cor-ledger, ${PANEL} .cor-tlsum`).first();
+      await expect(sheetText, "moving the entry's date raised no \"What changes\" sheet").toBeVisible();
+      const listed2 = (await page.locator(`${PANEL} [data-qp-step]`).innerText()).replace(/\s+/g, " ");
+      L.check("V13", "What changes · the sheet lists the send-by change beside the others", /send by/i.test(listed2) && /→/.test(listed2), `"${listed2.slice(0, 220)}"`);
+      const untouched = await dump();
+      L.check("V13", "What changes · nothing is saved until the sheet is answered", JSON.stringify(untouched.docs["qp2l-request"]) === JSON.stringify(e2), "the query is as it was");
+      await closeFix();
+
       /* every other entry type the account holds: no step */
       const kinds: Record<string, number> = {};
       for (const court of ["agent", "closed", "you"]) {
@@ -704,7 +723,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(74);
+    L.done(76);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {
