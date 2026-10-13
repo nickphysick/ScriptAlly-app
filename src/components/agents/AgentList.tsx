@@ -43,7 +43,7 @@ import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { agentRows } from "../../lib/contactList";
+import { contactFilterCount, agentRows } from "../../lib/contactList";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
@@ -59,7 +59,7 @@ import { ContactIndexStrip } from "./contact/ContactIndexStrip";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { ContactListControls, type ContactPop } from "./contact/ContactListControls";
+import { ContactFind, ContactListControls, type ContactPop } from "./contact/ContactListControls";
 import { ContactFilterStrip } from "./contact/ContactFilterStrip";
 import { ContactBarExtras, CountTo, useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
@@ -80,7 +80,7 @@ import { genreLabel } from "../../lib/genres";
 import { destroyManifest } from "../../lib/cascade";
 import { emitAgentCardEvent, closeAgentCard } from "../../lib/agentCardStore";
 import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from "../../lib/queryPanelStore";
-import { GLANCE_CHIP, glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { useFullScreenList } from "../shell/useFullScreenList";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -331,14 +331,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useReflow(gridRef, JSON.stringify([filters, groupKey, sortKey, reversed, search.trim()]));
   const shownGroups = groups;
   const visible = visibleFacts;
+  /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
+  const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
   /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
   const controls = (
     <ContactListControls
-      find={search} onFind={setSearch}
+      find={search} onFind={setSearch} noFind
       groupKey={groupKey} onGroup={setGroupKey}
       pop={pop}
-      findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>}
       /* §7.6–7.7 — Comfortable / Compact and the key sheet, at the controls row's right */
       extra={<>
         <ContactBarExtras density={density} onDensity={setDensity} />
@@ -1049,7 +1050,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             msTitle={scoped?.title?.trim() || null} model={pageState === "list" ? glanceM : BLANK_GLANCE} active={glance}
             onGroup={(k) => setGlance((g) => (g === k ? null : k))}
             addRef={addBtnRef} onAdd={openAdd}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
+            {/* v17 §B — search and the filter pills, in the header, above its rule */}
+            <div className="cl17-fr" data-cl17="filter-row">
+              <ContactFind find={search} onFind={setSearch} disabled={pageState !== "list"}
+                findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>} />
+              {pageState === "list" ? (
+                <div className="cl14-frow cl17-pills" data-cl14="frow" data-cl17="pills">
+                  <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop} hideClear />
+                </div>
+              ) : null}
+            </div>
+          </ContactLightHeader>
         )}
         {pageState === "settling" && (
           <ContactSkeleton controls={controls} />
@@ -1069,34 +1081,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <section className="cl14-ws cl16-list" data-cl14="ws" data-cl16="list" ref={wsRef} aria-label="The full list">
           {/* v16 §D — the pin line's sentinel: zero height, above everything in the list that changes size */}
           <i className="cl16-sentinel" data-cl16="pin-sentinel" aria-hidden="true" />
-          {/* the bar's sticky box is its wrapper: pinned, the wrapper paints the page's colour behind the bar's
-              rounded corners, so no row shows through them */}
-          <div className="cl16-barpin" data-cl16="bar-pin"><div className="cl14-bar cl16-bar" data-cl16="bar">{controls}</div></div>
-          {/* the filter row: the chips on one line, folding into "More filters" when they would wrap; the count right */}
-          <div className="cl14-frow cl16-frow" data-cl14="frow" data-cl16="frow">
-            <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
-              extraOn={!!glance} onClearAll={() => { setFilters(emptyContactFilters()); setGlance(null); }} />
-            {fullOn ? (
-              /* v16 §E — in full screen the strip is hidden, so its three groups ride here: each sets and clears
-                 the same group filter */
-              <span className="cl16-fchips" data-cl16="full-chips" role="group" aria-label="Show a group">
-                {glanceM.cells.map((c) => (
-                  <button key={c.key} type="button" className="cl16-fchip" data-cl16="full-chip" data-k={c.key} aria-pressed={glance === c.key}
-                    onClick={() => setGlance((g) => (g === c.key ? null : c.key))}>
-                    <b>{c.n}</b> {GLANCE_CHIP[c.key]}
-                  </button>
-                ))}
-              </span>
-            ) : (
-              <>
-              <span className="cl16-showing" data-cl16="showing" role="status">
-                Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b>
-                {scoped?.title?.trim() ? <span className="cl16-for" data-cl16="showing-for"> for <b>{scoped.title.trim()}</b></span> : null}
-              </span>
-              {/* v16 §D — shown only while the controls are pinned (CSS, off `data-pinned`): back to the top of the page */}
-              <button type="button" className="cl16-sum" data-cl16="summary" onClick={toSummary}><span aria-hidden="true">{"\u2191"}</span> Summary</button>
-              </>
-            )}
+          {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
+              control bar is gone: search and the filters are in the header. */}
+          <div className="cl17-sv" data-cl17="sheet-row">
+            <span className="cl17-showing" data-cl16="showing" data-cl17="showing" role="status">
+              {visibleFacts.length === factsAll.length && !anyActive ? (
+                <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b></>
+              ) : (
+                <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b>
+                  <span aria-hidden="true"> · </span>
+                  <button type="button" className="cl17-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button></>
+              )}
+            </span>
+            {controls}
           </div>
           <div className="cl14-list" data-cl14="list">
           {/* the letter tabs, under every grouping: they scroll away with the list and never pin */}

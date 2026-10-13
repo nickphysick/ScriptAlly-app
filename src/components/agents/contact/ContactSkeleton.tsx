@@ -58,9 +58,8 @@ export const ContactSkeleton: React.FC<{
     <>
       <div className="clv-main">
         <section className="cl14-ws cl16-list" aria-hidden="true">
-          <div className="cl14-bar cl16-bar">{controls}</div>
-          {/* the filter row's one line, held at its loaded height; the chips and the count wait for data */}
-          <div className="cl14-frow cl16-frow"><div className="cl14-fwrap"><div className="cl14-fbar" aria-hidden="true"><span className="cl14-fp" style={{ width: 420, visibility: "hidden" }} /></div></div></div>
+          {/* v17 §B — the sheet's top row at its loaded height; the count and the tools wait for data */}
+          <div className="cl17-sv"><span className="cl17-showing">{"\u00a0"}</span>{controls}</div>
           <div className="cl14-list">
           <ContactIndexStrip total={facts.length} counts={counts} marked={null} onPick={noop} />
           <div>

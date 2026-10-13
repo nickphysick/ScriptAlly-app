@@ -27,22 +27,31 @@ export interface ContactListControlsProps {
   findKey?: React.ReactNode;
   /** anything after the grouping: the density toggle, the key sheet, Full screen */
   extra?: React.ReactNode;
+  /** v17 §B — the search box lives in the header's filter row (`ContactFind`); this then draws the view tools alone */
+  noFind?: boolean;
 }
 
+/** v17 §B — the search box, on its own: the header's filter row holds it, beside the filter pills. */
+export const ContactFind: React.FC<{
+  find: string; onFind: (v: string) => void; findRef?: React.Ref<HTMLInputElement>; findKey?: React.ReactNode; disabled?: boolean;
+}> = ({ find, onFind, findRef, findKey, disabled }) => (
+  <label className="cl13-find cl17-find" data-clv="find" data-cl13-find="banner" data-cl17="find">
+    <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+    </svg>
+    <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" disabled={disabled} />
+    {findKey}
+  </label>
+);
+
 export const ContactListControls: React.FC<ContactListControlsProps> = ({
-  find, onFind, findRef, groupKey, onGroup, pop, findKey, extra,
+  find, onFind, findRef, groupKey, onGroup, pop, findKey, extra, noFind,
 }) => {
   const group = GROUP_OPTIONS.find((g) => g.key === groupKey) ?? GROUP_OPTIONS[0];
   const mine = (k: ContactPop) => pop.open === k && pop.anchor?.closest('[data-cl13-ctl="banner"]') != null;
   return (
-    <div className="cl13-ctl" data-cl13-ctl="banner">
-      <label className="cl13-find" data-clv="find" data-cl13-find="banner">
-        <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-        </svg>
-        <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" />
-        {findKey}
-      </label>
+    <div className={`cl13-ctl${noFind ? " cl17-vt" : ""}`} data-cl13-ctl="banner" data-cl17={noFind ? "view-tools" : undefined}>
+      {noFind ? null : <ContactFind find={find} onFind={onFind} findRef={findRef} findKey={findKey} />}
       {/* v16 §C: no Sort pill — the column headings sort */}
       <ListPill k="group" icon={"☰"} prefix="Grouped:" value={group.label} caret set={groupKey !== "none"} open={mine("group")} onPress={(a) => pop.toggle("group", a)} />
       {extra}

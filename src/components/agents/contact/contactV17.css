@@ -123,3 +123,61 @@
 @media (prefers-reduced-motion: reduce) {
   .cl17-card .cl17-row, .cl17-card .cl17-sg { transition: none; }
 }
+
+/* ── §B · THE FILTER ROW, in the header: 22 under the title row, above a 1px rule, 18 of padding over the row.
+   Search first, then the pills. One line at 1280; narrower, the search takes a line of its own. ── */
+.cl17-hd .cl17-fr {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+  margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(28, 19, 15, 0.14);
+}
+.cl17-hd .cl17-fr .cl17-find.cl13-find {
+  flex: none; box-sizing: border-box; width: 300px; height: 40px; padding: 0 12px 0 14px; border-radius: 20px;
+  background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14), 0 1px 2px rgba(28, 19, 15, 0.05);
+}
+.ws-app.sheet-wide .cl17-hd .cl17-fr .cl17-find.cl13-find { width: 360px; }
+.cl17-hd .cl17-fr .cl17-find.cl13-find:focus-within { box-shadow: inset 0 0 0 1.5px #2d3a50; }
+/* the pills' row is the filter strip as built, without the list's tinted band around it */
+.cl17-hd .cl17-fr .cl17-pills.cl14-frow { flex: 1 1 0; min-width: 0; padding: 0; border: 0; background: none; }
+@container cl17hd (max-width: 899.98px) {
+  .cl17-hd .cl17-fr { flex-wrap: wrap; }
+  .cl17-hd .cl17-fr .cl17-find.cl13-find, .ws-app.sheet-wide .cl17-hd .cl17-fr .cl17-find.cl13-find { flex: 1 1 100%; width: auto; }
+  .cl17-hd .cl17-fr .cl17-pills.cl14-frow { flex: 1 1 100%; }
+}
+
+/* ── §B · THE SHEET'S TOP ROW: the first row inside the white list sheet. "Showing…" left; grouping, density and
+   full screen right, each 36 tall on #fbf9f5. ── */
+.cl16-list .cl17-sv {
+  display: flex; align-items: center; gap: 12px; box-sizing: border-box; min-width: 0;
+  padding: 14px 18px 12px 22px; border-bottom: 1px solid rgba(28, 19, 15, 0.08);
+  border-radius: 24px 24px 0 0; background: #fff;
+}
+.cl17-sv .cl17-showing { flex: 1 1 auto; min-width: 0; font: 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); white-space: nowrap; }
+.cl17-sv .cl17-showing b { font: 600 15px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.cl17-sv .cl17-showing b span { font: inherit !important; }
+.cl17-sv .cl17-clear {
+  padding: 0; border: 0; background: none; cursor: pointer; font: 400 15px/1.3 var(--sp-serif) !important; color: #2a3a52;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.cl17-sv .cl17-vt.cl13-ctl { display: flex; align-items: center; gap: 8px; flex: none; opacity: 1; }
+.cl17-sv .cl17-vt .lp, .cl17-sv .cl17-vt .lp.is-set {
+  height: 36px; background: #fbf9f5; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
+}
+.cl17-sv .cl17-vt .lp.is-set em { color: rgba(28, 19, 15, 0.5); }
+.cl17-sv .cl17-vt .cl14-dens { box-sizing: border-box; height: 36px; padding: 3px; border-radius: 18px; background: #fbf9f5; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+.cl17-sv .cl17-vt .cl14-dens button { height: 30px; border-radius: 15px; color: rgba(28, 19, 15, 0.55); }
+.cl17-sv .cl17-vt .cl14-dens button.on { background: #2a3a52; color: #f4eee5; }
+.cl17-sv .cl17-vt .cl14-dens button:focus-visible { outline-color: #2a3a52; }
+.cl17-sv .cl17-vt .cl14-kbh { color: #2a3a52; }
+.cl17-sv .cl17-vt .cl16-fsb {
+  display: inline-flex; align-items: center; gap: 7px; flex: none; box-sizing: border-box; height: 36px; padding: 0 14px;
+  margin: 0; border: 0; border-radius: 18px; background: #fbf9f5; color: #1c130f; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); font: 500 14px/1 var(--sp-serif) !important;
+}
+.cl17-sv .cl17-vt .cl16-fsb svg { display: block; flex: none; }
+.cl17-sv .cl17-vt .cl16-fsb:hover, .cl17-sv .cl17-vt .cl16-fsb[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.cl17-sv .cl17-vt .cl16-fsb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+@media (max-width: 767.98px) { .cl17-sv .cl17-vt .cl16-fsb { display: none; } }
+/* the list follows 22px under the header's filter row */
+@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px; padding-top: 0; } }
+/* full screen: the header is hidden; the list is the page */
+.clv-group[data-full] > .cl17-hd { display: none; }
