@@ -204,3 +204,27 @@ that field): the wishlist, for most agents; the reply time, for several; MSWL an
 ## 10. Shots
 
 In `shots/`, each beside the `design-refs/contact-list-v16/screens/` file of the same number.
+
+## 11. Deploy: STOPPED, not deployed
+
+Dev serves `dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1` at `b2e1a737`
+(bundle `index-rhbmgLAi.js`), checked 13 Oct. I made the integration branch `…-corkboard1-cl16` off it (worktree
+`~/ScriptAlly-cl16int`) and merged `contact-list-v16`. The merge conflicts in four files. Two are the allowed ones
+(`CLAUDE.md`, `design-refs/.refhashes.json`). Two are not, so the merge is aborted and nothing is deployed:
+
+1. **`src/components/shell/useSidebarCollapsed.ts`.** Comparable titles v25 (on dev, not on `query-panel-v2`)
+   already built a sidebar hold, `shell/sidebarForce.ts`, and a shared `shell/useFullScreenList.ts` whose header
+   says "Shared, so the Contact list can adopt it". v16's Part E built the same thing a second time
+   (`holdSidebarCollapsed` inside `useSidebarCollapsed`, and the full-screen state in `AgentList`). The two differ:
+   the shared hook keeps full screen in the URL (`?full=1`, Back leaves it) and leaves on Escape at its own
+   `ESC_LEVEL.pageMode`; v16's keeps it in `localStorage["sa.contactFull"]` only.
+2. **`tests/e2e/headerV3.measure.ts`.** Both sides edited the NUMBER and TITLE route tables (dev moved
+   `/manuscripts/comps` to TITLE and renamed the Noteboard route to `/todo/corkboard`; v16 moved `/agents` to
+   TITLE). The resolution is mechanical: take dev's tables and move `/agents`.
+
+**The question for Nick:** on the integration branch, should the Contact list drop its own full-screen code and
+adopt `useFullScreenList` and `sidebarForce` (one implementation; full screen gains `?full=1`; CL16 E1 and E2
+need re-proving), or should the integration keep v16's as built beside the shared hook? I recommend adopting the
+shared hook. Either way the deploy waits for the answer.
+
+`contact-list-v16` is pushed at its tip. The integration branch exists locally, unmerged and clean.
