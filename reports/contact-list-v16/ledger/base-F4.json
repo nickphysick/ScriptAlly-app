@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "F4",
+  "where": "1512 panel",
+  "ok": false,
+  "detail": "no agent panel opened"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 panel",
+  "ok": false,
+  "detail": "no agent panel opened"
+ }
+]

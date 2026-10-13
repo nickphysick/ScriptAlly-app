@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 at rest nothing is pinned, and no Summary",
+  "ok": true,
+  "detail": "pinned false · summary false · 18px 18px · 18px 18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 three sticky layers; the letter tabs are not one",
+  "ok": false,
+  "detail": "sticky,sticky,sticky,sticky"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 scroll anchoring is off on the scroller and the list",
+  "ok": true,
+  "detail": "none,none"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 pinned",
+  "ok": true,
+  "detail": "true at scrollTop 2097"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the bar sits 12 under the scroller's top",
+  "ok": true,
+  "detail": "12.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the filter row is directly under it",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the headings are directly under that",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the letter tabs have scrolled away",
+  "ok": false,
+  "detail": "tabs' bottom 337.8 · scroller top 105.8"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 rows pass beneath the stack, and each layer owns its own pixels",
+  "ok": true,
+  "detail": "3 rows under · owns true,true,true"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 pinned: the bar and the row are 10 top and bottom",
+  "ok": true,
+  "detail": "10px 10px · 10px 10px"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 pinned: controls 36, chips 30",
+  "ok": true,
+  "detail": "find 36 · pill 36 · chip 30"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 pinned: the headings carry the shadow",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.35) 0px 10px 18px -14px"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 \"↑ Summary\" shows at the filter row's end",
+  "ok": true,
+  "detail": "{\"shown\":true,\"h\":34,\"ring\":\"rgba(28, 19, 15, 0.4) 0px 0px 0px 1.5px inset\",\"text\":\"↑ Summary\",\"right\":28}"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the stack releases at the list's end",
+  "ok": true,
+  "detail": "stack 117.8–268.8 · list -2756.4–438.6"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 Summary returns to the top and focuses the heading",
+  "ok": true,
+  "detail": "scrollTop 0 · focus true · pinned false · path 1633,920,386,150,54,11,0,0,0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 at rest nothing is pinned, and no Summary",
+  "ok": true,
+  "detail": "pinned false · summary false · 18px 18px · 18px 18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 three sticky layers; the letter tabs are not one",
+  "ok": false,
+  "detail": "sticky,sticky,sticky,sticky"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 scroll anchoring is off on the scroller and the list",
+  "ok": true,
+  "detail": "none,none"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 pinned",
+  "ok": true,
+  "detail": "true at scrollTop 2117"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the bar sits 12 under the scroller's top",
+  "ok": true,
+  "detail": "12.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the filter row is directly under it",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the headings are directly under that",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the letter tabs have scrolled away",
+  "ok": false,
+  "detail": "tabs' bottom 337.8 · scroller top 105.8"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 rows pass beneath the stack, and each layer owns its own pixels",
+  "ok": true,
+  "detail": "3 rows under · owns true,true,true"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 pinned: the bar and the row are 10 top and bottom",
+  "ok": true,
+  "detail": "10px 10px · 10px 10px"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 pinned: controls 36, chips 30",
+  "ok": true,
+  "detail": "find 36 · pill 36 · chip 30"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 pinned: the headings carry the shadow",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.35) 0px 10px 18px -14px"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 \"↑ Summary\" shows at the filter row's end",
+  "ok": true,
+  "detail": "{\"shown\":true,\"h\":34,\"ring\":\"rgba(28, 19, 15, 0.4) 0px 0px 0px 1.5px inset\",\"text\":\"↑ Summary\",\"right\":28}"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the stack releases at the list's end",
+  "ok": true,
+  "detail": "stack 117.8–268.8 · list -2864.1–338.1"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 Summary returns to the top and focuses the heading",
+  "ok": true,
+  "detail": "scrollTop 0 · focus true · pinned false · path 1704,983,420,193,64,14,0,0,0"
+ }
+]

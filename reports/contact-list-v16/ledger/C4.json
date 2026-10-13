@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "C4",
+  "where": "1512 26 letters, and a letter is disabled exactly when it has no agent",
+  "ok": true,
+  "detail": "26 tabs · 9 off · wrong: "
+ },
+ {
+  "lock": "C4",
+  "where": "1512 the tabs are not sticky",
+  "ok": true,
+  "detail": "static,static"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 \"V\" travelled",
+  "ok": true,
+  "detail": "scrollTop 3305"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 its first agent's row is within 4px under the pinned stack",
+  "ok": true,
+  "detail": "row top 268.6 · headings' bottom 268.8 · stack 268.8 · scrollTop 3305/3633"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 nothing pinned sits over the row",
+  "ok": true,
+  "detail": "row top 268.6 · stack 268.8"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 the row is washed",
+  "ok": true,
+  "detail": "true · rgb(251, 246, 234)"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 the wash is gone after 1.4s",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 26 letters, and a letter is disabled exactly when it has no agent",
+  "ok": true,
+  "detail": "26 tabs · 9 off · wrong: "
+ },
+ {
+  "lock": "C4",
+  "where": "1280 the tabs are not sticky",
+  "ok": true,
+  "detail": "static,static"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 \"V\" travelled",
+  "ok": true,
+  "detail": "scrollTop 3332"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 its first agent's row is within 4px under the pinned stack",
+  "ok": true,
+  "detail": "row top 269.1 · headings' bottom 268.8 · stack 268.8 · scrollTop 3332/3761"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 nothing pinned sits over the row",
+  "ok": true,
+  "detail": "row top 269.1 · stack 268.8"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 the row is washed",
+  "ok": true,
+  "detail": "true · rgb(251, 246, 234)"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 the wash is gone after 1.4s",
+  "ok": true,
+  "detail": "false"
+ }
+]

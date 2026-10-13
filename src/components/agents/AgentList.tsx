@@ -375,10 +375,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * strip pick lands a divider on, re-read rAF-throttled on every scroll — a reading that cannot go
    * stale. Capture-phase on document because scroll does not bubble and the page's scroller is the
    * shell's, not this component's to name. Letters only: under any other grouping nothing marks.
-   * ⚠️ THE LINE IS READ, NOT RESTATED: the scroller's top, plus its own `scroll-padding-top`, plus the
-   * divider's `scroll-margin-top` — the two values a pick's `scrollIntoView` lands by — so a picked
-   * letter is always the marked one, and moving either value moves both together. */
+   * ⚠️ THE LINE IS READ, NOT RESTATED: the bottom of the list's pinned headings, which is where `landUnder` puts a
+   * picked divider, so a picked letter is always the marked one. */
   const [markedLetter, setMarkedLetter] = useState<string | null>(null);
+  /** the scroll position "All" left the list at, while the reader is still there; else null */
+  const allAt = useRef<number | null>(null);
   useEffect(() => {
     if (!active || groupKey !== "letter") { setMarkedLetter(null); return; }
     let raf = 0;
@@ -388,10 +389,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       const scroller = col?.closest<HTMLElement>(".wpg-scroll");
       const bands = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-clv="band"][data-letter]')) : [];
       if (!col || !scroller || !bands.length) return;
-      const line = scroller.getBoundingClientRect().top
-        + (parseFloat(getComputedStyle(scroller).scrollPaddingTop) || 0)
-        + (parseFloat(getComputedStyle(bands[0]).scrollMarginTop) || 0) + 2;
+      /* v16: a pick lands its divider just under the PINNED headings (`landUnder`), so that is the line read here
+         too: read against the old scroll margin, the picked letter sat below the line and the one before it was marked */
+      const labels = bands[0].closest(".lt-panel")?.querySelector<HTMLElement>(":scope > .lt-labels");
+      const line = (labels ? labels.getBoundingClientRect().bottom : scroller.getBoundingClientRect().top + 12) + 2;
       let cur: string | null = null;
+      /* "All" puts the list's top where the first letter's pick would: the same place, two meanings. The press says
+         which, and holds until the reader scrolls away from it. */
+      if (allAt.current !== null && Math.abs(scroller.scrollTop - allAt.current) < 4) { setMarkedLetter(null); return; }
+      allAt.current = null;
       for (const band of bands) {
         if (band.getBoundingClientRect().top <= line) cur = band.dataset.letter ?? null;
         else break;
@@ -436,6 +442,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (letter === null) {
       setMarkedLetter(null);
       sc.scrollTo({ top: Math.max(0, sc.scrollTop + col.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12), behavior: "instant" as ScrollBehavior });
+      allAt.current = sc.scrollTop;
       return;
     }
     const toBand = () => { const b = col.querySelector<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`); if (b) landUnder(b); };
@@ -447,6 +454,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
       return;
     }
+    allAt.current = null;
     setMarkedLetter(letter);
     if (groupKey !== "letter") { setGroupKey("letter"); window.setTimeout(toBand, 0); } else toBand();
   }, [groupKey, landUnder]);

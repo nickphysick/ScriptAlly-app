@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 no desk",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no next-step section",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no banner",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no list title bar, hawk or pills",
+  "ok": true,
+  "detail": "0 parts"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no letter rail",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading",
+  "ok": true,
+  "detail": "{\"text\":\"The full list\",\"size\":25,\"face\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"} · \"Every agent on file\" · \"Click a column heading to sort\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the heading is 48 under the strip",
+  "ok": true,
+  "detail": "48.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the heading is on the column",
+  "ok": true,
+  "detail": "296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the list is 16 under the heading",
+  "ok": false,
+  "detail": "178.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the ink bar is the list's first row",
+  "ok": true,
+  "detail": "rgb(31, 42, 60) · 16px · 18px 18px · first true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no desk",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no next-step section",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no banner",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no list title bar, hawk or pills",
+  "ok": true,
+  "detail": "0 parts"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no letter rail",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading",
+  "ok": true,
+  "detail": "{\"text\":\"The full list\",\"size\":25,\"face\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"} · \"Every agent on file\" · \"Click a column heading to sort\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the heading is 48 under the strip",
+  "ok": true,
+  "detail": "48.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the heading is on the column",
+  "ok": true,
+  "detail": "289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the list is 16 under the heading",
+  "ok": false,
+  "detail": "142.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the ink bar is the list's first row",
+  "ok": true,
+  "detail": "rgb(31, 42, 60) · 16px · 18px 18px · first true"
+ }
+]

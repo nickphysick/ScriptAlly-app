@@ -187,7 +187,8 @@ async function readStage(page: Page) {
 }
 
 /* ── K5 (ready half) · the tuck in the ready state keeps v15's 150 / 130 ── */
-test("CL15.2-K5 · tuck, ready", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15.2-K5 · tuck, ready", async ({ page }) => {
   const L = new Ledger("cl152-tuck-ready");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -204,7 +205,8 @@ test("CL15.2-K5 · tuck, ready", async ({ page }) => {
 });
 
 /* ── K2 (queried), K5, K6, K7 · the all-queried state, on its own manuscript (seeded and removed in this run) ── */
-test("CL15.2-K5–K7 · all queried", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15.2-K5–K7 · all queried", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("cl152-done");
   execSync("node tests/e2e/seedAllQueried.mjs A", { stdio: "inherit" });
@@ -259,7 +261,8 @@ test("CL15.2-K5–K7 · all queried", async ({ page }) => {
 
 /* ── K8 · the banner above the list ── */
 const BLUSH = [243, 221, 210], PAGE = [242, 238, 232];
-test("CL15.2-K8 · banner", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the banner is gone (CL16 C1). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15.2-K8 · banner", async ({ page }) => {
   const L = new Ledger("cl152-banner");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -307,7 +310,8 @@ test("CL15.2-K8 · banner", async ({ page }) => {
 });
 
 /* ── K9 · the copy, and View all agents ── */
-test("CL15.2-K9 · copy", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the header's second button and the list bar's title are v16's (CL16 A1, C1). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15.2-K9 · copy", async ({ page }) => {
   const L = new Ledger("cl152-copy");
   for (const vp of WIDTHS) {
     /* the scroll is measured with motion as the page has it; the wait below lets a smooth scroll finish */

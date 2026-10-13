@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 four cells, labelled",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 strip",
+  "ok": false,
+  "detail": "no strip"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 four cells, labelled",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 strip",
+  "ok": false,
+  "detail": "no strip"
+ }
+]

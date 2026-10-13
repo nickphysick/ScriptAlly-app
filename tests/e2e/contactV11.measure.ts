@@ -125,9 +125,10 @@ test("the header row and the rows — one renderer, StatusDot on every queried r
   /* v12 P2 (3 Oct): the page opens on the card index — the first divider is a LETTER tab and
      its <small> states the section's population ("2 agents"), where the v11 standing band led
      with "Your move". */
-  expect(r.bands[0]?.label ?? "", "the default grouping's first band is a letter").toMatch(/^[A-Z]$/);
-  expect(r.bands[0]?.n ?? "", "the divider's count small").toMatch(/^\d+ agents?$/);
-  bump(8);
+  /* RE-POINTED (Contact list v16, 12 Oct): the list opens UNGROUPED, A to Z by surname, so the default draws no band
+     at all (CL16 C3 holds the order). Until v16 the first band was a letter tab. */
+  expect(r.bands.length, "the default list is ungrouped: no band is drawn").toBe(0);
+  bump(7);
 });
 
 /* §11.4 (the v12 Filter panel) and §11.10 (the floating active-filter bar) are RETIRED by v13 P3: the
@@ -154,7 +155,8 @@ const toWork = async (page: import("@playwright/test").Page) => {
   await page.waitForSelector('[data-ac="card"] [data-sec="work"].on');
 };
 
-test("Escape and the backdrop return a CLEAN editor to the quick view, ask on a dirty one, and never discard in silence (§11.6)", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): on /agents a row opens the agent panel, not the centred card; there is no quick view to return to. Escape in the panel's editor is CL16 F5. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("Escape and the backdrop return a CLEAN editor to the quick view, ask on a dirty one, and never discard in silence (§11.6)", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   await page.click(`${scope} [data-clv="row"]`);
@@ -187,6 +189,21 @@ test("Escape and the backdrop return a CLEAN editor to the quick view, ask on a 
   bump(6);
 });
 
+/* RE-POINTED (Contact list v16, 12 Oct): on /agents a row opens the agent PANEL, and Edit profile is the same editor in
+   the panel's act view. The note, the foot's count and Discard are the editor's own and are read there. */
+const PANEL = '[data-ap="panel"]';
+const PED = '[data-ap="panel"] [data-ae-mode="edit"]';
+const toWorkP = async (page: import("@playwright/test").Page) => {
+  await page.click(`${PANEL} [data-ae="tabs"] [data-tab="work"]`);
+  await page.waitForSelector(`${PANEL} [data-sec="work"].on`);
+};
+/** leave the panel's editor, discarding the draft: back to the agent's browse view */
+const leaveEdit = async (page: import("@playwright/test").Page) => {
+  await page.click(`${PANEL} [data-ae="cancel"]`);
+  await page.click(`${PANEL} [data-ae="discard"]`);
+  await page.waitForSelector(PED, { state: "detached" });
+};
+
 test("§11.7 — the reply-time note is live as the draft changes, names the engine's dates, and Discard writes nothing", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
@@ -206,15 +223,15 @@ test("§11.7 — the reply-time note is live as the draft changes, names the eng
   let touchedId = "";
   for (const id of candidates) {
     await page.click(`${scope} [data-agent-card="${id}"]`);
-    await page.waitForSelector('[data-ac="card"]');
-    await page.click('[data-ac="card"] [data-ac="edit"]');
-    await page.waitForSelector(ED);
-    await toWork(page);
+    await page.waitForSelector(PANEL);
+    await page.click(`${PANEL} button[data-ap="edit"]`);
+    await page.waitForSelector(PED);
+    await toWorkP(page);
     const orig = await weeksText(page);
     /* + from Unknown goes to 6, from a window it adds a week; at 26 the minus takes one */
-    const plus = page.locator('[data-ac="card"] [data-ae="weeks"] [data-d="1"]');
+    const plus = page.locator(`${PANEL} [data-ae="weeks"] [data-d="1"]`);
     if (await plus.isEnabled()) await plus.click();
-    else await page.click('[data-ac="card"] [data-ae="weeks"] [data-d="-1"]');
+    else await page.click(`${PANEL} [data-ae="weeks"] [data-d="-1"]`);
     const note = await page.evaluate(() => ({
       also: (document.querySelector('[data-ae="also-work"]') as HTMLElement | null)?.textContent ?? "",
       sum: (document.querySelector('[data-ae="sum"]') as HTMLElement | null)?.textContent ?? "",
@@ -225,11 +242,9 @@ test("§11.7 — the reply-time note is live as the draft changes, names the eng
       perQuery = note.also; before = orig; touchedId = id;
       break;
     }
-    await page.click('[data-ac="card"] [data-ae="cancel"]');
-    await page.click('[data-ac="card"] [data-ae="discard"]');
-    await page.waitForSelector('[data-ac="card"] [data-ac="head"]');
+    await leaveEdit(page);
     await page.keyboard.press("Escape");
-    await page.waitForSelector('[data-ac="card"]', { state: "detached" });
+    await page.waitForSelector(PANEL, { state: "detached" });
   }
   expect(generic, "the reply note never appeared at all").toContain("To-do list and Dashboard");
   expect(generic).toContain("Analytics");
@@ -241,21 +256,20 @@ test("§11.7 — the reply-time note is live as the draft changes, names the eng
   expect(perQuery).toMatch(/(\d{1,2} [A-Z][a-z]{2}|no date) → (\d{1,2} [A-Z][a-z]{2}|no date)/);
   expect(perQuery).toMatch(/\d{1,2} [A-Z][a-z]{2}/);
   /* Discard writes NOTHING: reopen and the stored value is the original */
-  await page.click('[data-ac="card"] [data-ae="cancel"]');
-  await page.click('[data-ac="card"] [data-ae="discard"]');
-  await page.waitForSelector('[data-ac="card"] [data-ac="head"]');
-  await page.click('[data-ac="card"] [data-ac="edit"]');
-  await page.waitForSelector(ED);
-  await toWork(page);
+  await leaveEdit(page);
+  await page.click(`${PANEL} button[data-ap="edit"]`);
+  await page.waitForSelector(PED);
+  await toWorkP(page);
   const after = await weeksText(page);
   expect(after, `Discard wrote a draft value to ${touchedId} — the account has been changed`).toBe(before);
   await page.keyboard.press("Escape");
-  await page.waitForSelector('[data-ac="card"] [data-ac="head"]');
+  await page.waitForSelector(PED, { state: "detached" });
   await page.keyboard.press("Escape");
   bump(7);
 });
 
-test("§11.7 write half — save says what else moved, and the fixture agent is restored in the same run", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): it drove the save through the centred card's quick view and foot, which a row no longer opens. The editor and its save are unchanged; NOT re-pointed to the panel (a gap, named in the v16 report). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("§11.7 write half — save says what else moved, and the fixture agent is restored in the same run", async ({ page }) => {
   const ID = "clv-fx-never";
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
@@ -407,15 +421,9 @@ test("§11.9 after adding (the lab, over known content) — under its letter, ce
   expect(ringed, "the new row carries no ring").toBe(true);
   /* v12 P2 (3 Oct): the page opens on the card index, so the nearest preceding divider names
      the agent's SURNAME INITIAL — "Zz Probe Agent"'s surname is "Agent", the A divider. */
-  const band = await row.evaluate((el) => {
-    let n: Element | null = el;
-    while (n) {
-      let p = n.previousElementSibling;
-      while (p) { if (p.matches('[data-clv="band"]')) return p.getAttribute("data-letter") ?? ""; p = p.previousElementSibling; }
-      n = n.parentElement;
-    }
-    return "";
-  });
+  /* RE-POINTED (Contact list v16): the list is ungrouped, so there is no divider to sit under; the row states its own
+     surname initial (the letter tabs land on it). */
+  const band = (await row.getAttribute("data-initial")) ?? "";
   expect(band, "the new agent is not under its surname's letter").toBe("A");
   /* in view, centred: poll until two reads agree, then judge the rect */
   let last = -1;
@@ -433,7 +441,8 @@ test("§11.9 after adding (the lab, over known content) — under its letter, ce
   bump(5);
 });
 
-test("§11.7's third leg — saving a window that crosses today MOVES the row's group, and moves it back", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): as the write half: it entered through the centred card from a row, and it asserted a GROUP move in a list that now opens ungrouped. Not re-pointed (a gap, named in the v16 report). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("§11.7's third leg — saving a window that crosses today MOVES the row's group, and moves it back", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   /* a with-the-agent row whose send is older than a week on this fixture, so a one-week window
@@ -534,17 +543,10 @@ test("Log query opens the query drawer on this page — no navigation, the agent
     [...document.querySelectorAll(".agl-wpg")].some((e) => e.getBoundingClientRect().height > 0));
   const scope2 = await visiblePage(page, ".agl-wpg");
   await page.waitForSelector(`${scope2} [data-clv="row"]`);
-  /* door 2: the agent card's Log a query — the card yields to the drawer (one asking surface at a
-     time). Retargeted (Agent card v1 P5): it no longer CLOSES, it DOCKS — mounted, so it comes back
-     where it was, but stepped aside: out of reach and out of sight (lock 7 holds the rest) */
-  await page.click(`${scope2} [data-clv="row"][data-stand="none"][data-door="open"]`);
-  await page.waitForSelector('[data-ac="card"]');
-  await page.click('[data-ac="card"] [data-ac="primary"][data-act="log"]');
-  await page.waitForSelector("[data-qad-root].is-open", { state: "attached" });
-  expect(await page.evaluate(() => window.location.pathname)).toBe("/agents");
-  await expect(page.locator('[data-ac="overlay"].is-docked'), "the card stayed up behind the drawer — two asking surfaces at once").toHaveCount(1, { timeout: 5_000 });
-  await expect(page.locator('[data-ac="card"]'), "a docked card is still on screen").toBeHidden();
-  bump(5);
+  /* door 2 (the agent card's Log a query, docking the card) is RETIRED by Contact list v16: a row opens the agent panel,
+     and Log a query steps that panel (CL16 F5). */
+  void scope2;
+  bump(3);
 });
 
 
@@ -567,10 +569,10 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
   expect(await page.locator('[data-clv="quickadd"]').count(), "the quick-add drop came back").toBe(0);
   await page.keyboard.press("Escape");
   await page.waitForSelector('[data-ac="card"]', { state: "detached" });
-  expect(await page.locator(`${scope} [data-cl15="discover"]`).count(), "the header's Discover button came back").toBe(0);
-  await page.click(`${scope} [data-cl15="view-all"]`);
-  await page.waitForTimeout(600);
-  expect(new URL(page.url()).pathname, "View all agents left the page").toBe("/agents");
+  /* RE-POINTED (Contact list v16): "View all agents" is retired (the list is the page) and the second button is
+     "Discover agents" again (CL16 A1). */
+  expect(await page.locator(`${scope} [data-cl15="view-all"]`).count(), "View all agents came back").toBe(0);
+  expect(await page.locator(`${scope} [data-cl16="discover"]`).count(), "the header has no Discover agents button").toBe(1);
   bump(3);
 });
 
@@ -578,7 +580,15 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
 
 test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider on its margin, marked", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
+  /* RE-POINTED (Contact list v16): the list opens ungrouped, so this case asks for the LETTER grouping first (the
+     visit's memory, the same record the Grouped pill writes) and reloads. The census and the landing are unchanged. */
+  await page.evaluate(() => sessionStorage.setItem("sa.contactList.v4", JSON.stringify({
+    v: 4, filters: { status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" },
+    search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable", glance: null })));
+  await page.reload();
+  await page.waitForFunction(() => [...document.querySelectorAll(".agl-wpg")].some((e) => e.getBoundingClientRect().height > 0));
   const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="band"]`);
   await page.waitForSelector(`${scope} [data-clv="idx"]`);
 
   /* ── the census: strip cells against the dividers against the rows — three derivations of one
@@ -661,11 +671,12 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
       detail: `top ${top.toFixed(1)} want ${want.toFixed(1)} bar ${bar ? bar.getBoundingClientRect().bottom.toFixed(1) : "none"} cell ${cellBg} disc ${discBg}`,
     };
   }, [scope, target] as const);
-  expect(Math.abs(landed.off), `the divider lands on its own scroll margin — ${landed.detail}`).toBeLessThanOrEqual(2);
+  /* RE-POINTED (Contact list v16): a letter lands just under the PINNED headings now, not on the divider's own scroll
+     margin (CL16 C4 measures the landing), and the marked tab is the list's ink bar colour, not the discs'. */
+  void landed.off;
   /* RETIRED (Contact list v14, ruling Q7, 7 Oct): "the divider lands clear of the slim bar" — the slim bar retired
      with the open banner (RETIRED-contact-list-v14.md). The landing on its own margin and the mark still hold. */
   expect(landed.marked, "the picked cell is marked").toBe(true);
-  expect(landed.inkMatch, `the marked cell wears the discs' own ink — ${landed.detail}`).toBe(true);
 
   /* ── All clears the mark and returns to the top of the list. The SAME settle as the landing:
      the derivation re-marks letters PASSING the strip mid-scroll (by design — it is a scroll-spy),
@@ -688,7 +699,7 @@ test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click
     marked: !!document.querySelector(`${scope} [data-clv="ixtab"].on`),
   }), scope);
   expect(cleared.marked, "All clears the marked cell").toBe(false);
-  bump(4);
+  bump(2);
 });
 
 /* v12 §10.3 (the head row: dashed title, tally, the controls dropping under) is RETIRED by v13 P3 — the

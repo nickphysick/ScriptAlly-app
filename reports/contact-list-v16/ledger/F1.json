@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 its top is the bar's bottom",
+  "ok": true,
+  "detail": "105.8 · bar 105.8"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 right and bottom 8",
+  "ok": true,
+  "detail": "8.0 · 8.0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 width 560",
+  "ok": true,
+  "detail": "560.0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 no scrim while browsing",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 one panel, one dialog",
+  "ok": true,
+  "detail": "1 panels · 1 dialogs"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 exactly one row is selected, and it is this agent's",
+  "ok": true,
+  "detail": "qp2l-ag-nowin · panel qp2l-ag-nowin"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the selected row: #f7f3ed with a 3px ink left edge",
+  "ok": true,
+  "detail": "rgb(247, 243, 237) · rgb(42, 58, 82) 3px 0px 0px 0px inset"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the address carries the agent",
+  "ok": true,
+  "detail": "?agent=qp2l-ag-nowin"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the Housekeeping tab stands down",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 another row swaps the agent",
+  "ok": true,
+  "detail": "qp2l-ag-nowin → seed-cal-near · 1 panels"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 ↓ walks to the next visible row",
+  "ok": true,
+  "detail": "seed-cal-near → seed-cal-soon · next is seed-cal-soon"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 K walks back",
+  "ok": true,
+  "detail": "seed-cal-soon → seed-cal-near"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 browser Back closes the panel",
+  "ok": true,
+  "detail": "0 panels · \"\""
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Escape closes it",
+  "ok": true,
+  "detail": "0 panels · \"\""
+ },
+ {
+  "lock": "F1",
+  "where": "1280 its top is the bar's bottom",
+  "ok": true,
+  "detail": "105.8 · bar 105.8"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 right and bottom 8",
+  "ok": true,
+  "detail": "8.0 · 8.0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 width 520",
+  "ok": true,
+  "detail": "520.0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 no scrim while browsing",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 one panel, one dialog",
+  "ok": true,
+  "detail": "1 panels · 1 dialogs"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 exactly one row is selected, and it is this agent's",
+  "ok": true,
+  "detail": "qp2l-ag-nowin · panel qp2l-ag-nowin"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the selected row: #f7f3ed with a 3px ink left edge",
+  "ok": true,
+  "detail": "rgb(247, 243, 237) · rgb(42, 58, 82) 3px 0px 0px 0px inset"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the address carries the agent",
+  "ok": true,
+  "detail": "?agent=qp2l-ag-nowin"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the Housekeeping tab stands down",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 another row swaps the agent",
+  "ok": true,
+  "detail": "qp2l-ag-nowin → seed-cal-near · 1 panels"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 ↓ walks to the next visible row",
+  "ok": true,
+  "detail": "seed-cal-near → seed-cal-soon · next is seed-cal-soon"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 K walks back",
+  "ok": true,
+  "detail": "seed-cal-soon → seed-cal-near"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 browser Back closes the panel",
+  "ok": true,
+  "detail": "0 panels · \"\""
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Escape closes it",
+  "ok": true,
+  "detail": "0 panels · \"\""
+ }
+]

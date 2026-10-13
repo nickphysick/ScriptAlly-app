@@ -2,8 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v14 §8 / v15 (v13 §8's mechanism) — the page guide's four steps, verbatim from the packs, each with the subject it
- * scrolls to and rings. The shared `PageGuide` draws them; the page key is `contacts`
+ * Contact list v16 §G (v13 §8's mechanism) — the page guide's four steps, each with the subject it scrolls to and rings.
+ * Steps 1 to 3 were re-pointed by v16 at the strip, the header's buttons and the list; their words are this build's, not a
+ * pack's (the v16 pack gave none), and are listed for Nick in the v16 report. The shared `PageGuide` draws them; the page key is `contacts`
  * (`sa.guide.contacts`).
  */
 import type { GuideStep } from "../../shell/PageGuide";
@@ -18,13 +19,13 @@ export const CONTACT_GUIDE: readonly GuideStep[] = [
     subject: '[data-cl16="strip"]',
   },
   {
-    title: "Your next step",
+    title: "Add agents",
     /* v16 §G: the next-step section is gone; the header's two buttons are where a next agent comes from */
     body: ["Add an agent you already know of, or find more in Discover."],
     subject: '[data-cl16="header"] [data-hp3-part="acts"]',
   },
   {
-    title: "Agents on file",
+    title: "The full list",
     /* v16 §G: the list is the page; an agent opens in a side panel, and the column headings sort */
     body: ["Every agent on your list. Search, filter and group it your way, sort it from its column headings, or jump by letter. Click an agent to open them."],
     subject: '[data-cl16="list"]',

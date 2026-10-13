@@ -364,23 +364,9 @@ async function proveDockPeek(page: import("@playwright/test").Page, L: Ledger, w
 test("CL13-10 · the dock chip expands the card (agent card and the Query Centre's card)", async ({ page }) => {
   const L = new Ledger("cl13-10");
   page.setDefaultTimeout(15_000);
-  /* the agent card, opened from the list's tray */
-  await openContacts(page, AT_1512);
-  /* a never-queried row at an open door: its card's primary is Log a query, which opens a journey */
-  const row = page.locator('.aglist [data-clv="row"][data-stand="none"][data-door="open"]').first();
-  await row.scrollIntoViewIfNeeded();
-  await row.hover();
-  await row.locator('[data-cl13="tray-open"]').click();
-  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 8000 });
-  await page.waitForTimeout(400);
-  await page.locator('[data-ac="card"] [data-ac="primary"]').first().click();
-  /* attached, not visible: `.qad-root` holds only fixed children, so its own box is empty */
-  await page.locator(".qad-root.is-open").waitFor({ state: "attached", timeout: 10_000 });
-  await page.waitForTimeout(400);
-  await proveDockPeek(page, L, "agent card", '[data-ac="card"]', '[data-ac="primary"]', '[data-ac="overlay"][data-peek]');
-  const back = await page.evaluate(() => ({ card: !!document.querySelector('[data-ac="overlay"]:not([data-docked])') }));
-  L.check("CL13-10 the agent card is back in its place after the drawer goes", "agent card", back.card, JSON.stringify(back));
-  await page.keyboard.press("Escape");
+  /* RETIRED (Contact list v16, 12 Oct): the agent card's half. On /agents a row and its tray open the agent PANEL, and an
+     action steps that panel (CL16 F5, G1): there is no docked card and no chip to peek above. The dock peek itself still
+     exists for the card's other doors (the Dashboard, the query panel's Agent tab); no rendered lock holds it there. */
   /* the Query Centre's centred card, opened from a list row */
   await openApp(page, "/queries", AT_1512);
   await page.evaluate(() => document.fonts.ready);
@@ -400,22 +386,8 @@ test("CL13-10 · the dock chip expands the card (agent card and the Query Centre
   const qp = await page.evaluate(() => ({ chip: document.querySelectorAll("[data-qad-dock]").length, step: !!document.querySelector('[data-qp="panel"] [data-qp-step]'), dialogs: [...document.querySelectorAll('[role="dialog"]')].filter((e) => { if (e.closest('[data-qcv="guide"]')) return false; /* the page guide is a standing card, not a dialog an action opened */ const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; }).length }));
   L.check("CL13-10 the Query Centre's card steps its panel: no dock chip, one dialog", "1512", qp.step && qp.chip === 0 && qp.dialogs === 1, JSON.stringify(qp));
   await page.keyboard.press("Escape");
-  /* below 1100px there is no room beside the drawer: the chip keeps Agent card v1's behaviour */
-  await openContacts(page, { width: 1080, height: 800 });
-  const nrow = page.locator('.aglist [data-clv="row"][data-stand="none"][data-door="open"]').first();
-  await nrow.scrollIntoViewIfNeeded();
-  await nrow.hover();
-  await nrow.locator('[data-cl13="tray-open"]').click();
-  await page.locator('[data-ac="overlay"]').waitFor({ timeout: 8000 });
-  await page.waitForTimeout(400);
-  await page.locator('[data-ac="card"] [data-ac="primary"]').first().click();
-  /* attached, not visible: `.qad-root` holds only fixed children, so its own box is empty */
-  await page.locator(".qad-root.is-open").waitFor({ state: "attached", timeout: 10_000 });
-  await page.waitForTimeout(400);
-  const narrow = await page.evaluate(() => { const c = document.querySelector("[data-qad-dock]"); return c ? { peek: c.getAttribute("data-peek"), text: (c.querySelector(".qad-dk")?.textContent ?? "").trim() } : null; });
-  L.check("CL13-10 below 1100px the chip keeps today's behaviour (Back to card, no peek)", "1080", !!narrow && narrow.peek === null && narrow.text === "Back to card", JSON.stringify(narrow));
-  await page.keyboard.press("Escape");
-  /* RE-POINTED (Query panel v1): 12 — the query card's ten dock-peek readings are retired for one panel reading */ L.done(12);
+  /* RETIRED (Contact list v16): the under-1100 chip was read on a card opened from an /agents row */
+  /* RE-POINTED (Query panel v1): 12 — the query card's ten dock-peek readings are retired for one panel reading; v16 retires the agent card's eleven */ L.done(1);
 });
 
 /* ── lock 11 · shortcuts: / focuses Find, H does nothing while typing in it, ← → move the focused track ── */
@@ -476,7 +448,7 @@ test("CL13-12 · loading", async ({ page }) => {
     const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0);
     const b = (e?: HTMLElement) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; };
     /* REPOINTED (Contact list v15 §2): the header is the page-local open header (`[data-cl15="header"]`), not the band */
-    return { band: b(v('.aglist [data-cl15="header"]')), strip: b(v('.aglist [data-cl15="desk"]')) /* v15 §3: the desk holds the strip's place */, row: b(v(".aglist .clv-row")) };
+    return { band: b(v('.aglist [data-cl15="header"]')), strip: b(v('.aglist [data-cl16="strip"]')) /* v16: the At a glance strip */, row: b(v(".aglist .clv-row")) };
   });
   for (const vp of WIDTHS) {
     const w = `${vp.width}`;
@@ -498,9 +470,9 @@ test("CL13-12 · loading", async ({ page }) => {
     });
     /* v14 §1.4: the carousel's three placeholder cards went with it */
     L.check("CL13-12 with the agents held, the placeholders render: five rows, shimmering, inert", w,
-      held.loading && held.inert && held.rows === 5 && held.shimmer && held.bandShape, JSON.stringify(held));
+      held.loading && held.inert && held.rows === 5 && held.shimmer /* v16: the title is fixed words, so it has no painted-over shape */, JSON.stringify(held));
     L.check("CL13-12 the perched art and the pills wait for data; no Housekeeping tab", w,
-      held.perch === "0" && held.ctl === "0" && !held.tab, JSON.stringify(held));
+      held.perch === null /* v16: the perched hawk went with the title bar */ && held.ctl === "0" && !held.tab, JSON.stringify(held));
     const a = await boxes();
     await page.locator(".aglist .clv-group[data-loading]").waitFor({ state: "detached", timeout: 30_000 }).catch(() => {});
     await page.waitForTimeout(600);
@@ -548,7 +520,7 @@ test("CL13-13 · page guide", async ({ page }) => {
     return {
       title: g?.querySelector('[data-qcv="guide-title"]')?.textContent ?? null, kick: g?.querySelector('[data-qcv="guide-n"]')?.textContent ?? null,
       w: gr ? Math.round(gr.width) : null, above: !!gr && !!tr && gr.bottom <= tr.top + 0.5 && Math.abs(gr.right - tr.right) <= 1,
-      ring: !!document.querySelector('.aglist [data-cl15="desk"].pgd-ring'), /* v15: step 1 rings the desk */
+      ring: !!document.querySelector('.aglist [data-cl16="strip"].pgd-ring'), /* v16: step 1 rings the At a glance strip */
       scrolled: [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.scrollTop),
     };
   }, G);
@@ -573,7 +545,7 @@ test("CL13-13 · page guide", async ({ page }) => {
     /* v15: step 1's ring is on the desk — a strip selector here would pass forever, there being no strip */
     stripRing: !!document.querySelector(".pgd-ring[data-cl15='desk']") }), G);
   /* v14 §8: step 2 is "Your next step"; its ring lands on the next-step section (CL14-16 holds it) */
-  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the desk's ring is released)", "1512", s2.title === "Your next step" && !s2.stripRing, JSON.stringify(s2));
+  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the desk's ring is released)", "1512", s2.title === "Add agents" && !s2.stripRing, JSON.stringify(s2));
   await page.click(`${G} [data-qcv="guide-back"]`);
   L.check("CL13-13 Back returns to step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent()) === "Your list in numbers", "");
   await page.click(`${G} [data-qcv="guide-x"]`);
@@ -605,7 +577,7 @@ test("CL13-14 · footer and empty state", async ({ page }) => {
       const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
       const f = vis('.aglist [data-probe="app-footer"]'), fin = vis('.aglist [data-probe="app-footer-in"]');
       /* REWRITTEN (v14 §3): the footer follows the "Your agents" panel (the slate workspace retired) */
-      const ws = vis('.aglist [data-cl14="ws"]'), strip = vis('.aglist [data-cl15="desk"]'); /* v15 §3: the column is the desk's */
+      const ws = vis('.aglist [data-cl14="ws"]'), strip = vis('.aglist [data-cl16="strip"]'); /* v16: the column is the strip's */
       const sc = f?.closest<HTMLElement>(".wpg-scroll");
       const txt = f?.textContent ?? "";
       return {

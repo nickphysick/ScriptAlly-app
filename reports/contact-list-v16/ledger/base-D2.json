@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 sentinel",
+  "ok": false,
+  "detail": "no pin sentinel: nothing pins"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 sentinel",
+  "ok": false,
+  "detail": "no pin sentinel: nothing pins"
+ }
+]

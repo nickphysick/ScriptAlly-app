@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512 at rest nothing is pressed",
+  "ok": true,
+  "detail": "false,false,false,false"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 the page is scrolled, with the strip on screen",
+  "ok": true,
+  "detail": "scrollTop 140 · cell y 362"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 Querying is pressed",
+  "ok": true,
+  "detail": "true · rgb(45, 58, 80) 3px"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 the list is that group",
+  "ok": true,
+  "detail": "5 rows · 5 querying · figure 5"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 \"Showing\" matches",
+  "ok": true,
+  "detail": "showing 5 · 5 rows"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 the figures did not move",
+  "ok": true,
+  "detail": "37,31,5,1"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 the press did not scroll",
+  "ok": true,
+  "detail": "140 → 140"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 with a chip: both apply",
+  "ok": true,
+  "detail": "5 rows · 5 querying and open · was 5"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 \"Clear all\" is offered",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 \"Clear all\" clears both",
+  "ok": true,
+  "detail": "37 rows · false,false,false,false"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 Closed filters to closed",
+  "ok": true,
+  "detail": "1 rows · 1 closed · figure 1"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 pressing it again restores all",
+  "ok": true,
+  "detail": "37 rows"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 Not queried filters to not queried",
+  "ok": true,
+  "detail": "31 rows · 31 not queried"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 On file clears the filter and is never pressed",
+  "ok": true,
+  "detail": "37 rows"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 no press scrolled",
+  "ok": true,
+  "detail": "140 → 140"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 at rest nothing is pressed",
+  "ok": true,
+  "detail": "false,false,false,false"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 the page is scrolled, with the strip on screen",
+  "ok": true,
+  "detail": "scrollTop 140 · cell y 362"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 Querying is pressed",
+  "ok": true,
+  "detail": "true · rgb(45, 58, 80) 3px"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 the list is that group",
+  "ok": true,
+  "detail": "5 rows · 5 querying · figure 5"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 \"Showing\" matches",
+  "ok": true,
+  "detail": "showing 5 · 5 rows"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 the figures did not move",
+  "ok": true,
+  "detail": "37,31,5,1"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 the press did not scroll",
+  "ok": true,
+  "detail": "140 → 140"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 with a chip: both apply",
+  "ok": true,
+  "detail": "5 rows · 5 querying and open · was 5"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 \"Clear all\" is offered",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 \"Clear all\" clears both",
+  "ok": true,
+  "detail": "37 rows · false,false,false,false"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 Closed filters to closed",
+  "ok": true,
+  "detail": "1 rows · 1 closed · figure 1"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 pressing it again restores all",
+  "ok": true,
+  "detail": "37 rows"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 Not queried filters to not queried",
+  "ok": true,
+  "detail": "31 rows · 31 not queried"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 On file clears the filter and is never pressed",
+  "ok": true,
+  "detail": "37 rows"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 no press scrolled",
+  "ok": true,
+  "detail": "140 → 140"
+ }
+]

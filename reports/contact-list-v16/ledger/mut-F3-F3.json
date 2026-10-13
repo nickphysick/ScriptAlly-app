@@ -1,0 +1,380 @@
+[
+ {
+  "lock": "F3",
+  "where": "1512 send: heading",
+  "ok": true,
+  "detail": "\"Send Theo the full\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 send: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 send: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Theo asked for the full of Harbour of Glass on 19 Sep.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 index card: white, radius 6, a 3px rust top edge",
+  "ok": true,
+  "detail": "rgb(194, 86, 74) 3px · rgb(255, 255, 255) · 6px"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 index card: the margin line at 132",
+  "ok": false,
+  "detail": "null · 1px · rgba(194, 86, 74, 0.35)"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 index card: 22 under the stand card",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 index card: six rows, in order, each at least 46 tall",
+  "ok": true,
+  "detail": "Looking for:47 · Genres:49 · Takes queries:46 · Replies:48 · Send them:46 · Your queries:46"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 a missing answer shows its \"+ Add\", and nothing else is blank",
+  "ok": true,
+  "detail": "+ Add their wishlist · + Add their reply time"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 none: heading",
+  "ok": true,
+  "detail": "\"Not queried yet\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 none: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(239, 233, 223) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 none: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You haven’t queried Wren with Harbour of Glass yet.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 shut: heading",
+  "ok": true,
+  "detail": "\"Closed to queries\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 shut: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(239, 233, 223) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 shut: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Elinor isn’t taking queries right now.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 late: heading",
+  "ok": true,
+  "detail": "\"Mira is late\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 late: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 late: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You expected a reply by 1 Jan.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 waiting: heading",
+  "ok": true,
+  "detail": "\"Waiting on Sun-hee\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 waiting: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 waiting: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You queried Sun-hee with Harbour of Glass on 1 Jul.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 closed: heading",
+  "ok": true,
+  "detail": "\"Rosa passed\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 closed: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 closed: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Your query for Harbour of Glass is closed. You can query Rosa again with your next book.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 waiting: heading",
+  "ok": true,
+  "detail": "\"Waiting on Douglas\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 waiting: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 waiting: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You queried Douglas with Harbour of Glass on 8 Sep.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 send: heading",
+  "ok": true,
+  "detail": "\"Send Edda the partial\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 send: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 send: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Edda asked for the partial of Harbour of Glass on 12 Sep.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 \"+ Add their wishlist\" opens Edit profile on \"What they want\"",
+  "ok": true,
+  "detail": "acting edit · section \"What they want\""
+ },
+ {
+  "lock": "F3",
+  "where": "1512 …with the wishlist field focused",
+  "ok": true,
+  "detail": "{\"tag\":\"TEXTAREA\",\"ae\":\"wishlist\",\"inPanel\":true}"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 send: heading",
+  "ok": true,
+  "detail": "\"Send Theo the full\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 send: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 send: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Theo asked for the full of Harbour of Glass on 19 Sep.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 index card: white, radius 6, a 3px rust top edge",
+  "ok": true,
+  "detail": "rgb(194, 86, 74) 3px · rgb(255, 255, 255) · 6px"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 index card: the margin line at 118",
+  "ok": false,
+  "detail": "null · 1px · rgba(194, 86, 74, 0.35)"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 index card: 22 under the stand card",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 index card: six rows, in order, each at least 46 tall",
+  "ok": true,
+  "detail": "Looking for:47 · Genres:49 · Takes queries:66 · Replies:48 · Send them:46 · Your queries:66"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 a missing answer shows its \"+ Add\", and nothing else is blank",
+  "ok": true,
+  "detail": "+ Add their wishlist · + Add their reply time"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 none: heading",
+  "ok": true,
+  "detail": "\"Not queried yet\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 none: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(239, 233, 223) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 none: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You haven’t queried Wren with Harbour of Glass yet.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 shut: heading",
+  "ok": true,
+  "detail": "\"Closed to queries\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 shut: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(239, 233, 223) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 shut: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Elinor isn’t taking queries right now.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 late: heading",
+  "ok": true,
+  "detail": "\"Mira is late\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 late: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 late: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You expected a reply by 1 Jan.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 waiting: heading",
+  "ok": true,
+  "detail": "\"Waiting on Sun-hee\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 waiting: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 waiting: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You queried Sun-hee with Harbour of Glass on 1 Jul.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 closed: heading",
+  "ok": true,
+  "detail": "\"Rosa passed\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 closed: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(236, 232, 227) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 closed: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Your query for Harbour of Glass is closed. You can query Rosa again with your next book.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 waiting: heading",
+  "ok": true,
+  "detail": "\"Waiting on Douglas\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 waiting: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(226, 231, 239) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 waiting: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"You queried Douglas with Harbour of Glass on 8 Sep.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 send: heading",
+  "ok": true,
+  "detail": "\"Send Edda the partial\" · 1 cards"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 send: tint, radius 14, heading 22",
+  "ok": true,
+  "detail": "rgb(246, 226, 216) · 14px · 22"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 send: one paragraph, no pronoun",
+  "ok": true,
+  "detail": "\"Edda asked for the partial of Harbour of Glass on 12 Sep.\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 \"+ Add their wishlist\" opens Edit profile on \"What they want\"",
+  "ok": true,
+  "detail": "acting edit · section \"What they want\""
+ },
+ {
+  "lock": "F3",
+  "where": "1280 …with the wishlist field focused",
+  "ok": true,
+  "detail": "{\"tag\":\"TEXTAREA\",\"ae\":\"wishlist\",\"inPanel\":true}"
+ },
+ {
+  "lock": "F3",
+  "where": "several states were read, a not-queried one and a queried one among them",
+  "ok": true,
+  "detail": "{\"send\":4,\"none\":2,\"shut\":2,\"late\":2,\"waiting\":4,\"closed\":2}"
+ }
+]

@@ -2,26 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v15 §2, v15.3 §2–3 — THE OPEN HEADER: no card, no band, no container. A two-column grid on the page —
- * the text block (the HERO NUMBER: the count large with "agents on file" beside it; one line under it; a row of agent
- * FACES coloured by query status, with a key; two buttons) and the flying hawk to its right, the two centred against
- * each other — closed by a hairline.
+ * Contact list v16 §A — the page's header: the shared panel header's TITLE kind ("Every agent, in one place"), one
+ * line naming the book, two buttons and the disc. Until v16 this file drew a hero number, a stamp and a row of faces;
+ * the "At a glance" strip carries those facts now.
  *
- * ⚠️ THE FACES ARE `aria-hidden`; THE KEY IS THE TEXT. A disc is a pointer shortcut into that agent's card and carries
- * a tooltip; the key's three counts (every agent, never the discs shown) are what a reader is told.
- * ⚠️ THE ROW NEVER PUSHES INTO THE DRAWING: it is measured against the room the text block has (the header, less the
- * drawing and the column gap) and discs are dropped FROM THE END until it fits — never the key. The reading is of the
- * header's own width, which dropping a disc cannot move, so the answer cannot feed back into the question.
- *
- * ⚠️ PAGE-LOCAL, NOT `PageHeader` (ruling 8): the shared header has no hero-number typewriter title, no form without an
- * eyebrow, and no drawing in the flow beside the text. `/agents` therefore sits in the e2e censuses' own-header
- * list (`tests/e2e/plateRoutes.ts` OWN_HEADER_ROUTES), not the band or compact lists.
- *
- * ⚠️ THE TITLE KEEPS `data-page-title`, the hook the shared header gives every page title, so anything that asks
- * "has the page's title scrolled past?" finds this one too.
- *
- * ⚠️ THE ART IS SWAPPABLE BY FILE: no version query and no size the layout depends on — the sheet sets the width,
- * and the attributes only carry the drawing's ratio (a 2× export keeps it).
+ * ⚠️ THE TITLE KEEPS `data-page-title` (the shared panel sets it), the hook anything asking "has the page's title
+ * scrolled past?" reads.
  */
 import React from "react";
 import { PanelHeader } from "../../shell/PanelHeader";

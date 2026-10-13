@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512 one panel, no group labels",
+  "ok": true,
+  "detail": "0 bands · 1 panels · 38 rows"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 \"Grouped: No grouping\"",
+  "ok": true,
+  "detail": "\"☰Grouped:No grouping⌄\""
+ },
+ {
+  "lock": "C3",
+  "where": "1512 rows are A to Z by surname",
+  "ok": true,
+  "detail": "abara · ashcombe · blaine · bligh · bright · crewe · duarte · ellery"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 the order is not a single letter (the claim has something to order)",
+  "ok": true,
+  "detail": "17 initials"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 no sort pill in the bar",
+  "ok": true,
+  "detail": "0 sort controls"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Agent, Replies and Query status sort; What they want does not",
+  "ok": true,
+  "detail": "Agent:BUTTON · What they want:SPAN · Replies:BUTTON · Query status:BUTTON"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 the active heading states the order",
+  "ok": true,
+  "detail": "Agent:ascending:Agent ↓ · What they want:null:What they want · Replies:null:Replies · Query status:null:Query status"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Replies sorts by reply time, fastest first, unknown last",
+  "ok": true,
+  "detail": "4,4,4,6,6,6,6,8,8,8,8,8"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 aria-sort moves to Replies",
+  "ok": true,
+  "detail": "Agent:null · What they want:null · Replies:ascending · Query status:null"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 pressing it again reverses",
+  "ok": true,
+  "detail": "16,12,10,10,8,8,8,8,8,8,8,8"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 one panel, no group labels",
+  "ok": true,
+  "detail": "0 bands · 1 panels · 38 rows"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 \"Grouped: No grouping\"",
+  "ok": true,
+  "detail": "\"☰Grouped:No grouping⌄\""
+ },
+ {
+  "lock": "C3",
+  "where": "1280 rows are A to Z by surname",
+  "ok": true,
+  "detail": "abara · ashcombe · blaine · bligh · bright · crewe · duarte · ellery"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 the order is not a single letter (the claim has something to order)",
+  "ok": true,
+  "detail": "17 initials"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 no sort pill in the bar",
+  "ok": true,
+  "detail": "0 sort controls"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Agent, Replies and Query status sort; What they want does not",
+  "ok": true,
+  "detail": "Agent:BUTTON · What they want:SPAN · Replies:BUTTON · Query status:BUTTON"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 the active heading states the order",
+  "ok": true,
+  "detail": "Agent:ascending:Agent ↓ · What they want:null:What they want · Replies:null:Replies · Query status:null:Query status"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Replies sorts by reply time, fastest first, unknown last",
+  "ok": true,
+  "detail": "4,4,4,6,6,6,6,8,8,8,8,8"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 aria-sort moves to Replies",
+  "ok": true,
+  "detail": "Agent:null · What they want:null · Replies:ascending · Query status:null"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 pressing it again reverses",
+  "ok": true,
+  "detail": "16,12,10,10,8,8,8,8,8,8,8,8"
+ }
+]

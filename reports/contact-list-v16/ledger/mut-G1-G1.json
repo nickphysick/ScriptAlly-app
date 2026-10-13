@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "G1",
+  "where": "1512 × from the profile: no panel, card, dock chip or journey is left",
+  "ok": false,
+  "detail": "panels 0 · card 2 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 × from the profile: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1512 Escape from the profile: no panel, card, dock chip or journey is left",
+  "ok": true,
+  "detail": "panels 0 · card 0 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 Escape from the profile: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1512 Edit profile: the scrim steps back to the agent, and opens nothing else",
+  "ok": true,
+  "detail": "panels 1 · acting null · card 0 · journey 0"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 × after Edit profile: no panel, card, dock chip or journey is left",
+  "ok": false,
+  "detail": "panels 0 · card 2 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 × after Edit profile: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1512 Record a response: the scrim steps back to the agent, and opens nothing else",
+  "ok": true,
+  "detail": "panels 1 · acting null · card 0 · journey 0"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 × after Record a response: no panel, card, dock chip or journey is left",
+  "ok": false,
+  "detail": "panels 0 · card 2 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 × after Record a response: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1280 × from the profile: no panel, card, dock chip or journey is left",
+  "ok": false,
+  "detail": "panels 0 · card 2 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 × from the profile: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1280 Escape from the profile: no panel, card, dock chip or journey is left",
+  "ok": true,
+  "detail": "panels 0 · card 0 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 Escape from the profile: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1280 Edit profile: the scrim steps back to the agent, and opens nothing else",
+  "ok": true,
+  "detail": "panels 1 · acting null · card 0 · journey 0"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 × after Edit profile: no panel, card, dock chip or journey is left",
+  "ok": false,
+  "detail": "panels 0 · card 2 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 × after Edit profile: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ },
+ {
+  "lock": "G1",
+  "where": "1280 Record a response: the scrim steps back to the agent, and opens nothing else",
+  "ok": true,
+  "detail": "panels 1 · acting null · card 0 · journey 0"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 × after Record a response: no panel, card, dock chip or journey is left",
+  "ok": false,
+  "detail": "panels 0 · card 2 · dock 0 · journey 0 · scrim undefined"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 × after Record a response: a row's centre is the row",
+  "ok": true,
+  "detail": "B."
+ }
+]

@@ -1,0 +1,212 @@
+[
+ {
+  "lock": "F2",
+  "where": "1512 open: the 5px top edge is #a9bf9f",
+  "ok": false,
+  "detail": "rgb(217, 150, 122) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: the active tab's underline is the same colour",
+  "ok": false,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: the pill",
+  "ok": true,
+  "detail": "\"Open to queries\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: navy masthead, the name in Special Elite 30",
+  "ok": true,
+  "detail": "{\"text\":\"Theo Abara\",\"size\":30,\"face\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: the place is italic, 16",
+  "ok": true,
+  "detail": "{\"text\":\"Abara Grant Agency\",\"style\":\"italic\",\"size\":16}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: only links on record, and never a submission form",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: tabs are Profile, Queries and Notes, counted only above zero",
+  "ok": true,
+  "detail": "Profile | Queries · 1 | Notes · 1"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 open: the disc",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: the 5px top edge is #b5aca4",
+  "ok": false,
+  "detail": "rgb(217, 150, 122) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: the active tab's underline is the same colour",
+  "ok": false,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: the pill",
+  "ok": true,
+  "detail": "\"Closed to queries\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: navy masthead, the name in Special Elite 30",
+  "ok": true,
+  "detail": "{\"text\":\"Elinor Hale\",\"size\":30,\"face\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: the place is italic, 16",
+  "ok": true,
+  "detail": "{\"text\":\"Cavendish & Roe · London\",\"style\":\"italic\",\"size\":16}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: only links on record, and never a submission form",
+  "ok": true,
+  "detail": "[{\"k\":\"email\",\"text\":\"Copy email\",\"href\":null}]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: tabs are Profile, Queries and Notes, counted only above zero",
+  "ok": true,
+  "detail": "Profile | Queries · 8 | Notes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 closed: the disc",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(179, 172, 165)\",\"fg\":\"rgb(43, 38, 34)\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 unknown",
+  "ok": true,
+  "detail": "no unknown agent on this account (the unit suite holds the colour)"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: the 5px top edge is #a9bf9f",
+  "ok": false,
+  "detail": "rgb(217, 150, 122) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: the active tab's underline is the same colour",
+  "ok": false,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: the pill",
+  "ok": true,
+  "detail": "\"Open to queries\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: navy masthead, the name in Special Elite 30",
+  "ok": true,
+  "detail": "{\"text\":\"Theo Abara\",\"size\":30,\"face\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: the place is italic, 16",
+  "ok": true,
+  "detail": "{\"text\":\"Abara Grant Agency\",\"style\":\"italic\",\"size\":16}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: only links on record, and never a submission form",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: tabs are Profile, Queries and Notes, counted only above zero",
+  "ok": true,
+  "detail": "Profile | Queries · 1 | Notes · 1"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 open: the disc",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: the 5px top edge is #b5aca4",
+  "ok": false,
+  "detail": "rgb(217, 150, 122) 0px 5px 0px 0px inset"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: the active tab's underline is the same colour",
+  "ok": false,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: the pill",
+  "ok": true,
+  "detail": "\"Closed to queries\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: navy masthead, the name in Special Elite 30",
+  "ok": true,
+  "detail": "{\"text\":\"Elinor Hale\",\"size\":30,\"face\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: the place is italic, 16",
+  "ok": true,
+  "detail": "{\"text\":\"Cavendish & Roe · London\",\"style\":\"italic\",\"size\":16}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: only links on record, and never a submission form",
+  "ok": true,
+  "detail": "[{\"k\":\"email\",\"text\":\"Copy email\",\"href\":null}]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: tabs are Profile, Queries and Notes, counted only above zero",
+  "ok": true,
+  "detail": "Profile | Queries · 8 | Notes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 closed: the disc",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(179, 172, 165)\",\"fg\":\"rgb(43, 38, 34)\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 unknown",
+  "ok": true,
+  "detail": "no unknown agent on this account (the unit suite holds the colour)"
+ },
+ {
+  "lock": "F2",
+  "where": "an open and a closed agent were both read",
+  "ok": true,
+  "detail": "{\"open\":2,\"closed\":2}"
+ }
+]

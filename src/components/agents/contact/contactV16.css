@@ -15,12 +15,18 @@
 .clv-group > .cl16-hd.hp3.hp3 { padding: 28px 32px 30px 36px; }
 .ws-app.sheet-wide .clv-group > .cl16-hd.hp3.hp3 { padding: 34px 44px 36px 48px; }
 .cl16-hd .hp3-txt .hp3-sub { margin-top: 14px; max-width: 520px; color: rgba(244, 238, 229, 0.86); }
+/* THE SUBLINE HOLDS TWO LINES, ALWAYS. It names the book, the book arrives after the first paint, and with a title
+   of ordinary length the sentence is two lines: a one-line sentence while loading made the panel 31px shorter than
+   it settles (measured, header panel v2's P6). A short title leaves the second line empty rather than moving the page. */
+.cl16-hd .hp3-txt .hp3-sub { min-height: 2.8em; }
 .ws-app.sheet-wide .cl16-hd .hp3-txt .hp3-sub { margin-top: 16px; }
 /* ⚠️ brand.tsx names bare spans as the body sans at runtime, injected last: the title's and the subline's inner
    spans take their parent's face back (the Query Centre's own reset does this for its header; this page has none) */
 .cl16-hd .hp3-title span, .cl16-hd .hp3-sub span { font-family: inherit !important; }
 /* the book's title in the typewriter face, upright (brand.tsx names bare `i`: two classes and !important) */
-.cl16-hd .hp3-sub .cl16-ms { font-family: var(--sp-type) !important; font-style: normal; }
+/* line-height 1: Special Elite's metrics make its inline box taller than the line it sits on, which grew each line
+   it appears on by 3px and the panel by 6 once the book's name arrived (measured: 292 loading, 298 loaded). */
+.cl16-hd .hp3-sub .cl16-ms { font-family: var(--sp-type) !important; font-style: normal; line-height: 1; }
 /* the disc: the panel's art slot holds it at the slot's own height, 12 from the panel's padding */
 .cl16-hd .hp3-art { margin-right: 12px; width: 196px; }
 .ws-app.sheet-wide .cl16-hd .hp3-art { width: 236px; }

@@ -1,0 +1,386 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 four cells, labelled",
+  "ok": true,
+  "detail": "all:On file · none:Not queried · live:Querying · closed:Closed"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no desk",
+  "ok": true,
+  "detail": "0 desk"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 the list is unfiltered and has rows",
+  "ok": true,
+  "detail": "37 rows · showing 37"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cell 1 is every agent",
+  "ok": true,
+  "detail": "37 · 37 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cell 1 = cells 2 + 3 + 4",
+  "ok": true,
+  "detail": "37 · 31 + 5 + 1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 not queried is the list's own",
+  "ok": true,
+  "detail": "31 · 31 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 querying is the list's own",
+  "ok": true,
+  "detail": "5 · 5 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed is the list's own",
+  "ok": true,
+  "detail": "1 · 1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 on file line",
+  "ok": true,
+  "detail": "\"0 added this week, 4 this month\""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 not queried line",
+  "ok": true,
+  "detail": "\"2 ready to query, 4 closed to submissions\" · 4 shut rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 querying line",
+  "ok": true,
+  "detail": "\"2 waiting on you, 1 past their reply time\" · 3 your-move rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 waiting on you is hot only above zero",
+  "ok": true,
+  "detail": "{\"n\":2,\"hot\":true,\"colour\":\"rgb(162, 69, 42)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed line",
+  "ok": true,
+  "detail": "\"1 passed, 0 no reply\" · 1 passed rows · 0 no-reply rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 twenty bars, this week's in rust and no other",
+  "ok": true,
+  "detail": "20 bars · last #a2452a · 0 other rust"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 none: its faces and its \"+N\" are its figure",
+  "ok": true,
+  "detail": "7 faces + 24 · figure 31"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 none: one row of faces",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 none: face colours",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgb(42, 58, 82)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 none: face size",
+  "ok": true,
+  "detail": "26 wide · step 21"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 live: its faces and its \"+N\" are its figure",
+  "ok": true,
+  "detail": "5 faces + 0 · figure 5"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 live: one row of faces",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 live: face colours",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 live: face size",
+  "ok": true,
+  "detail": "26 wide · step 21"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed: its faces and its \"+N\" are its figure",
+  "ok": true,
+  "detail": "1 faces + 0 · figure 1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed: one row of faces",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed: face colours",
+  "ok": true,
+  "detail": "rgb(179, 172, 165) · rgb(43, 38, 34)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed: face size",
+  "ok": true,
+  "detail": "26 wide · step null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 a group overflows its faces",
+  "ok": true,
+  "detail": "none +24 · live +0 · closed +0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 one white box, radius 14",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":296.375,\"y\":501.640625,\"w\":1159.25,\"h\":203.484375,\"b\":705.125,\"r\":1455.625},\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"14px\",\"cols\":4}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 equal cells in one row",
+  "ok": true,
+  "detail": "289.8 · 289.8 · 289.8 · 289.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 on the column",
+  "ok": true,
+  "detail": "296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 heading row",
+  "ok": true,
+  "detail": "At a glance 25 · \"Where your agents stand\" · \"Choose a card to filter the list\""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 34 under the panel, the box 14 under the heading",
+  "ok": true,
+  "detail": "34.0 · 14.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 four cells, labelled",
+  "ok": true,
+  "detail": "all:On file · none:Not queried · live:Querying · closed:Closed"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no desk",
+  "ok": true,
+  "detail": "0 desk"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 the list is unfiltered and has rows",
+  "ok": true,
+  "detail": "37 rows · showing 37"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 cell 1 is every agent",
+  "ok": true,
+  "detail": "37 · 37 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 cell 1 = cells 2 + 3 + 4",
+  "ok": true,
+  "detail": "37 · 31 + 5 + 1"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 not queried is the list's own",
+  "ok": true,
+  "detail": "31 · 31 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 querying is the list's own",
+  "ok": true,
+  "detail": "5 · 5 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed is the list's own",
+  "ok": true,
+  "detail": "1 · 1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 on file line",
+  "ok": true,
+  "detail": "\"0 added this week, 4 this month\""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 not queried line",
+  "ok": true,
+  "detail": "\"2 ready to query, 4 closed to submissions\" · 4 shut rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 querying line",
+  "ok": true,
+  "detail": "\"2 waiting on you, 1 past their reply time\" · 3 your-move rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 waiting on you is hot only above zero",
+  "ok": true,
+  "detail": "{\"n\":2,\"hot\":true,\"colour\":\"rgb(162, 69, 42)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed line",
+  "ok": true,
+  "detail": "\"1 passed, 0 no reply\" · 1 passed rows · 0 no-reply rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 twenty bars, this week's in rust and no other",
+  "ok": true,
+  "detail": "20 bars · last #a2452a · 0 other rust"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 none: its faces and its \"+N\" are its figure",
+  "ok": true,
+  "detail": "7 faces + 24 · figure 31"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 none: one row of faces",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 none: face colours",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgb(42, 58, 82)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 none: face size",
+  "ok": true,
+  "detail": "26 wide · step 21"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 live: its faces and its \"+N\" are its figure",
+  "ok": true,
+  "detail": "5 faces + 0 · figure 5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 live: one row of faces",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 live: face colours",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 live: face size",
+  "ok": true,
+  "detail": "26 wide · step 21"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed: its faces and its \"+N\" are its figure",
+  "ok": true,
+  "detail": "1 faces + 0 · figure 1"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed: one row of faces",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed: face colours",
+  "ok": true,
+  "detail": "rgb(179, 172, 165) · rgb(43, 38, 34)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed: face size",
+  "ok": true,
+  "detail": "26 wide · step null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 a group overflows its faces",
+  "ok": true,
+  "detail": "none +24 · live +0 · closed +0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 one white box, radius 14",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":288.953125,\"y\":501.640625,\"w\":942.09375,\"h\":223.78125,\"b\":725.421875,\"r\":1231.046875},\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"14px\",\"cols\":4}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 equal cells in one row",
+  "ok": true,
+  "detail": "235.5 · 235.5 · 235.5 · 235.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 on the column",
+  "ok": true,
+  "detail": "289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 heading row",
+  "ok": true,
+  "detail": "At a glance 25 · \"Where your agents stand\" · \"Choose a card to filter the list\""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 34 under the panel, the box 14 under the heading",
+  "ok": true,
+  "detail": "34.0 · 14.0"
+ }
+]

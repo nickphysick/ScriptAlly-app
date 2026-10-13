@@ -240,7 +240,9 @@ async function readHero(page: Page, h: (typeof HERO)[keyof typeof HERO]) {
     };
   }, h);
 }
-test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the Contact list has no desk and its header is the title panel. Held now by
+   CL16 A1 (the panel and its buttons) and B1 (the strip). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ page }) => {
   const key = process.env.HP2_MUTATE;
   const L = new Ledger(key && /^A[1-6]$/.test(key) ? key : "A1-A6");
   await prepare(page);
@@ -270,7 +272,9 @@ test("A1 A2 A3 A4 A5 A6 · the Query Centre and Contact list panels", async ({ p
 });
 
 /* ───────────────────────── C1 · the opaque badge ───────────────────────── */
-test("C1 · every badge is a solid white disc, and nothing paints over it", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the Contact list has no desk and its header is the title panel. Held now by
+   CL16 A1 (the panel and its buttons) and B1 (the strip). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("C1 · every badge is a solid white disc, and nothing paints over it", async ({ page }) => {
   const L = new Ledger("C1");
   await prepare(page);
   for (const vp of SIZES) /* RE-POINTED (v136): the Query Centre has no badges */ for (const [route, sel] of [["/agents", '[data-cdb="badge"]']] as const) {
@@ -334,7 +338,9 @@ async function readCards(page: Page, kind: "qc" | "cl") {
     });
   }, kind);
 }
-test("D1 D2 D3 D4 D8 · the Contact list's badge cards", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the Contact list has no desk and its header is the title panel. Held now by
+   CL16 A1 (the panel and its buttons) and B1 (the strip). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("D1 D2 D3 D4 D8 · the Contact list's badge cards", async ({ page }) => {
   const key = process.env.HP2_MUTATE;
   const L = new Ledger(key && /^D[12348]$/.test(key) ? key : "D1-D8");
   await prepare(page);
@@ -383,7 +389,9 @@ test("D1 D2 D3 D4 D8 · the Contact list's badge cards", async ({ page }) => {
 });
 
 /* ───────────────────────── D5 · the presses ───────────────────────── */
-test("D5 · Queried sets the list to Queried, Profiles opens Housekeeping, the week card does nothing", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the Contact list has no desk and its header is the title panel. Held now by
+   CL16 A1 (the panel and its buttons) and B1 (the strip). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("D5 · Queried sets the list to Queried, Profiles opens Housekeeping, the week card does nothing", async ({ page }) => {
   const L = new Ledger("D5");
   await prepare(page);
   const vp = SIZES[0];
@@ -410,7 +418,9 @@ test("D5 · Queried sets the list to Queried, Profiles opens Housekeeping, the w
 });
 
 /* ───────────────────────── D6 · the art slot ───────────────────────── */
-test("D6 · the placeholder, and a filled slot in the same box", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the Contact list has no desk and its header is the title panel. Held now by
+   CL16 A1 (the panel and its buttons) and B1 (the strip). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("D6 · the placeholder, and a filled slot in the same box", async ({ page }) => {
   const L = new Ledger("D6");
   await prepare(page);
   const vp = SIZES[0];
@@ -427,7 +437,9 @@ test("D6 · the placeholder, and a filled slot in the same box", async ({ page }
 });
 
 /* ───────────────────────── D7 · no jump ───────────────────────── */
-test("D7 · the desk is the same boxes loading and loaded", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the Contact list has no desk and its header is the title panel. Held now by
+   CL16 A1 (the panel and its buttons) and B1 (the strip). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("D7 · the desk is the same boxes loading and loaded", async ({ page }) => {
   const L = new Ledger("D7");
   await prepare(page, { hold: true });
   await open(page, "/dashboard", SIZES[0]);
@@ -455,7 +467,8 @@ test("D7 · the desk is the same boxes loading and loaded", async ({ page }) => 
 
 test("floor · the run wrote the readings it claims", async () => {
   if (process.env.HP2_MUTATE || process.env.HP2_CAPTURE || process.env.HP2_NO_FLOOR) return;
-  const names = ["P1-P7", "P7-390", "P2", "P6", "P8", "P9", "A1-A6", "C1", "D1-D8", "D5", "D6", "D7"];
+  /* RE-POINTED (Contact list v16): the A, C and D ledgers are retired with their cases */
+  const names = ["P1-P7", "P7-390", "P2", "P6", "P8", "P9"];
   const counts = names.map((n) => (existsSync(`${DIR}/ledger/${n}.json`) ? (JSON.parse(readFileSync(`${DIR}/ledger/${n}.json`, "utf8")) as unknown[]).length : 0));
   const total = counts.reduce((s, v) => s + v, 0);
   writeFileSync(`${DIR}/ledger/_totals.json`, JSON.stringify(Object.fromEntries(names.map((n, i) => [n, counts[i]]).concat([["total", total]])), null, 1));
@@ -464,5 +477,6 @@ test("floor · the run wrote the readings it claims", async () => {
      first run without it, where 600 was the floor with it */
   /* RE-POINTED (header v3): A1, A2, A3, A5 and the no-stamp sweep are retired, taking 34 readings — 472 written on the
      first run without them */
-  expect(total).toBeGreaterThanOrEqual(450);
+  /* RE-POINTED (Contact list v16): 327 written by the six P ledgers on the first run without the desk */
+  expect(total).toBeGreaterThanOrEqual(320);
 });

@@ -1,0 +1,230 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 panel",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 panel border",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.14)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 at the column edges",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 28 under the sheet's top",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 padding",
+  "ok": false,
+  "detail": "28px 32px 34px 36px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title",
+  "ok": false,
+  "detail": "\"37 agents on file\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title size",
+  "ok": false,
+  "detail": "34 · \"Special Elite\", \"Courie · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title is two lines, cream",
+  "ok": false,
+  "detail": "3 lines · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 no hero number, stamp or faces",
+  "ok": false,
+  "detail": "3 number, stamp or faces elements"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 subline",
+  "ok": false,
+  "detail": "\"Your agent data underpins everything. Collate and manage it here.\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 subline size and gap",
+  "ok": false,
+  "detail": "22px · -63.2 under the title"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the book's title is in the typewriter face",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 buttons under the subline",
+  "ok": false,
+  "detail": "26.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 primary",
+  "ok": true,
+  "detail": "{\"text\":\"+ Add an agent\",\"bg\":\"rgb(243, 238, 230)\",\"fg\":\"rgb(27, 36, 51)\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 secondary",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 disc",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the hawk is 118% of the disc, shifted 6% left",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the hawk is centred in the disc's height",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the disc is vertically centred, 12 inside the padding",
+  "ok": false,
+  "detail": "centre off by ? · undefined from the panel's right"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 panel",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 panel border",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.14)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 at the column edges",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 28 under the sheet's top",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 padding",
+  "ok": false,
+  "detail": "28px 32px 34px 36px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title",
+  "ok": false,
+  "detail": "\"37 agents on file\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title size",
+  "ok": false,
+  "detail": "34 · \"Special Elite\", \"Courie · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title is two lines, cream",
+  "ok": false,
+  "detail": "3 lines · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no hero number, stamp or faces",
+  "ok": false,
+  "detail": "3 number, stamp or faces elements"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 subline",
+  "ok": false,
+  "detail": "\"Your agent data underpins everything. Collate and manage it here.\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 subline size and gap",
+  "ok": false,
+  "detail": "22px · -63.2 under the title"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the book's title is in the typewriter face",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 buttons under the subline",
+  "ok": false,
+  "detail": "26.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 primary",
+  "ok": true,
+  "detail": "{\"text\":\"+ Add an agent\",\"bg\":\"rgb(243, 238, 230)\",\"fg\":\"rgb(27, 36, 51)\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 secondary",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 disc",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the hawk is 118% of the disc, shifted 6% left",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the hawk is centred in the disc's height",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the disc is vertically centred, 12 inside the padding",
+  "ok": false,
+  "detail": "centre off by ? · undefined from the panel's right"
+ }
+]

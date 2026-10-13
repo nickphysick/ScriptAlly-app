@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 at rest: off, the sidebar open, the button at the bar's right",
+  "ok": true,
+  "detail": "{\"text\":\"Full screen\",\"pressed\":\"false\",\"h\":36,\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(244, 238, 229)\",\"ring\":\"rgba(244, 238, 229, 0.55) 0px 0px 0px 1.5px inset\",\"right\":28} · shut false"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the button is transparent with a cream ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · rgb(244, 238, 229) · rgba(244, 238, 229, 0.55) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the page is scrolled before it starts",
+  "ok": true,
+  "detail": "900"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 F turns it on, and it is stored",
+  "ok": true,
+  "detail": "on true · stored 1 · Exit full screen"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the pressed button is cream with ink text",
+  "ok": true,
+  "detail": "rgb(244, 238, 229) · rgb(31, 42, 60)"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the sidebar is in its icon state, and the writer's own setting is untouched",
+  "ok": true,
+  "detail": "shut true · 68 wide · stored null (was null)"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the panel, the strip, the heading and the footer are hidden",
+  "ok": true,
+  "detail": "0 · 0 · 0 · 0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the list is at the top, already pinned",
+  "ok": true,
+  "detail": "pinned true · bar 12.0 · scrollTop 0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the list fills the wider sheet",
+  "ok": true,
+  "detail": "list 1388.0 · sheet 1436.0 (was 1256.0)"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 three count chips stand in for \"Showing\" and Summary",
+  "ok": true,
+  "detail": "32 not queried · 5 querying · 1 closed"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the chips are 30 pinned, #f3efe8, none pressed",
+  "ok": true,
+  "detail": "30 rgb(243, 239, 232) false · 30 rgb(243, 239, 232) false · 30 rgb(243, 239, 232) false"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 a chip filters to its group: navy with cream text",
+  "ok": true,
+  "detail": "{\"k\":\"live\",\"text\":\"5 querying\",\"pressed\":\"true\",\"h\":30,\"bg\":\"rgb(45, 58, 80)\",\"fg\":\"rgb(244, 238, 229)\"} · 5 rows · 5 querying"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 pressing it again clears it",
+  "ok": true,
+  "detail": "38 rows (was 38)"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 a reload keeps it on",
+  "ok": true,
+  "detail": "on true · shut true · header 0 · pinned true"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 Escape turns it off, and it is forgotten",
+  "ok": true,
+  "detail": "on false · stored null"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 everything comes back, the sidebar as it was",
+  "ok": true,
+  "detail": "shut false · side 248 (was 248) · 1111"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 F again turns it off",
+  "ok": true,
+  "detail": "mid true · after false"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the page returns to the scroll position it had",
+  "ok": true,
+  "detail": "900 → 0 → 900"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 at rest: off, the sidebar open, the button at the bar's right",
+  "ok": true,
+  "detail": "{\"text\":\"Full screen\",\"pressed\":\"false\",\"h\":36,\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(244, 238, 229)\",\"ring\":\"rgba(244, 238, 229, 0.55) 0px 0px 0px 1.5px inset\",\"right\":28} · shut false"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the button is transparent with a cream ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · rgb(244, 238, 229) · rgba(244, 238, 229, 0.55) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the page is scrolled before it starts",
+  "ok": true,
+  "detail": "900"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 F turns it on, and it is stored",
+  "ok": true,
+  "detail": "on true · stored 1 · Exit full screen"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the pressed button is cream with ink text",
+  "ok": true,
+  "detail": "rgb(244, 238, 229) · rgb(31, 42, 60)"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the sidebar is in its icon state, and the writer's own setting is untouched",
+  "ok": true,
+  "detail": "shut true · 68 wide · stored null (was null)"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the panel, the strip, the heading and the footer are hidden",
+  "ok": true,
+  "detail": "0 · 0 · 0 · 0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the list is at the top, already pinned",
+  "ok": true,
+  "detail": "pinned true · bar 12.0 · scrollTop 0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the list fills the wider sheet",
+  "ok": true,
+  "detail": "list 1156.0 · sheet 1204.0 (was 1024.0)"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 three count chips stand in for \"Showing\" and Summary",
+  "ok": true,
+  "detail": "31 not queried · 5 querying · 1 closed"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the chips are 30 pinned, #f3efe8, none pressed",
+  "ok": true,
+  "detail": "30 rgb(243, 239, 232) false · 30 rgb(243, 239, 232) false · 30 rgb(243, 239, 232) false"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 a chip filters to its group: navy with cream text",
+  "ok": true,
+  "detail": "{\"k\":\"live\",\"text\":\"5 querying\",\"pressed\":\"true\",\"h\":30,\"bg\":\"rgb(45, 58, 80)\",\"fg\":\"rgb(244, 238, 229)\"} · 5 rows · 5 querying"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 pressing it again clears it",
+  "ok": true,
+  "detail": "37 rows (was 37)"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 a reload keeps it on",
+  "ok": true,
+  "detail": "on true · shut true · header 0 · pinned true"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 Escape turns it off, and it is forgotten",
+  "ok": true,
+  "detail": "on false · stored null"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 everything comes back, the sidebar as it was",
+  "ok": true,
+  "detail": "shut false · side 248 (was 248) · 1111"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 F again turns it off",
+  "ok": true,
+  "detail": "mid true · after false"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the page returns to the scroll position it had",
+  "ok": true,
+  "detail": "900 → 0 → 900"
+ }
+]
