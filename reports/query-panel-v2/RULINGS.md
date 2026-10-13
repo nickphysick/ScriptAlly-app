@@ -1,7 +1,7 @@
 # Query panel v2 — the rulings of 12 Oct
 
 On `query-panel-v2`, one commit each. Ruling 3 was held in the first pass, built in the second apart from
-"Set a send-by date", and finished in the third. See "Third pass" at the foot.
+"Set a send-by date", and finished in the third. The fourth pass is at the foot.
 
 ## False premises
 
@@ -278,5 +278,132 @@ Two things from the runs:
   behind, so the lock's click un-ticked a box it expected to tick. It failed the same way on my branch build,
   which had passed it two hours earlier. I removed the marks from those seven (dev harness account only) and
   the suite passed 15 of 15. I do not know which run left them; D6's own undo is meant to.
+
+The next session to deploy to dev should base its integration on that branch.
+
+## Fourth pass (12 Oct, late)
+
+| Item | Commit | Result |
+| --- | --- | --- |
+| 1 · send-by date from the ··· menu | `823d0f20` | On the correction form, after date and note, for the request the query is waiting on |
+| 2 · the Next move column | `88be26ac` | Reads `silenceWords` in `lib/queryActions/entry.ts`, beside the tray's and the panel's predicate |
+| 3 · journey locks put everything back | `e1132a84` | `tests/e2e/journeyGuard.ts`; three suites changed |
+| 4 · V12 and P7 to P8 steadied | `b334e322` | `tests/e2e/panelSteady.ts`; three full runs below |
+
+### 1 · False premise: the ··· menu does not open the edit journey
+
+It opens the correction desk ("I'm correcting a mistake" → its own "The details" form, then "What changes").
+The edit journey is a different surface. So the send-by fields are on that form, through the slot it already
+uses for a send's materials:
+
+- **Where:** after date and note, on the request the query is waiting on: the entry's status is the query's,
+  the writer still owes the material, and no later entry has a status. An older request, already answered by a
+  send, does not carry it. Every other entry shows no such step.
+- **What:** "When you'll send it by", the response journey's chips and reminder choices. It opens unanswered:
+  a recorded date shows as "As recorded", and nothing is written for a field you do not touch.
+- **Save and Undo:** the two fields are saved with the rest of the form, and the form's one Undo puts both back.
+- **"No date given"** here removes a recorded send-by date and sets the three-working-day reminder. In the
+  one-step link it leaves a recorded date alone, as the response journey does.
+- **One rule, two readers:** `lib/queryActions/sendBy.ts` is read by the edit journey's one-step variant (the
+  stand card's link) and by this form.
+- **Not shown on the "What changes" sheet.** A change to the send-by date alone saves without that sheet, as a
+  note-only change does. Say if the sheet should list it.
+
+### 2 · The Next move column
+
+For a query a year with the agent, the column says "Consider closing" where Close leads and "Waiting" once
+you keep tracking, whatever card the board holds. Before, it could say "Nudge" beside a tray button saying
+"Record a response".
+
+Read literally, "for each row state the column matches the tray's first button and the panel's primary" does
+not hold for rows under a year, and I have not made it hold: there the tray's button is the board card's act,
+as it always was. V13 reads two such rows on the account every run and prints them:
+
+- `seed-query-19`: tray "Close query", panel "Record a response";
+- `seed-cal-passed20-q`: tray "Nudge", panel "Record a response".
+
+On every row it opens, V13 asserts the column's words are the tray button's. On the year-silent query it
+asserts all three agree before Keep tracking, after it, and after "Suggest closing again". Say if the tray
+should lead with the panel's primary on every row; that changes the tray for most waiting queries.
+
+### 3 · Journey locks
+
+`journeyGuard.ts` reads every document a query journey can touch before the save (the query, its log, its
+feed rows, its flags and tasks). At the end it writes back any that differ and deletes any that were added.
+Whole documents, so a field the save added goes too. On a clean run it writes nothing.
+
+Changed:
+
+| Suite | Leak | Fix |
+| --- | --- | --- |
+| `qaJourneys` (D1 to D7) | The Undo was only pressed if the toast arrived and nothing threw before it. D6 writes "told" marks on every other live query of the book | `saveAndUndo` records the documents first; an `afterEach` restores them, pass or fail |
+| `qaLocks` D7 (delete query) | No restore at all if the toast or the poll failed: the query stayed deleted | Restore in a `finally` |
+| `qaV11` (delete a history entry) | The Undo was in a `finally`, but nothing put the entry back if the Undo itself failed | Restore after it, in a `finally` |
+
+Not changed, because each writes only to documents it seeds and removes itself: `rowJourneys`,
+`packagesJourney`, `packagesPartB`, `deleteEntry`, `agentCardV1`, `recordCleanup`, QP1 P13, QP2 V13.
+
+Proof: with `QA_SKIP_UNDO=1` D6 "still deciding" skips the Undo. The case fails, the guard restores 19 queries,
+and no query is left carrying a told mark.
+
+Seen while checking: `rj-dupe`, `rj-send` and `rj-nudge` are on the account. They are `rowJourneys`' own
+fixtures, which its `--clean` should remove. I left them.
+
+### 4 · V12 and P7 to P8
+
+Each press now waits for what it produces: a door for its step, Next for the step to change, back for the card
+to return and the dim to lift, close for the panel to go; then for the panel and its scrim to be at rest. No
+press is repeated. A press that produces nothing fails in seconds with its name, where P7 used to wait ten
+minutes.
+
+Leaving a step is by its ✕, not Escape. Escape parks a step that holds answers, and a parked step stays
+mounted, so there was no state to wait on.
+
+What they read is unchanged. Both still go red under their own mutations (V12 48 of 134; P7 to P8 69 of 93).
+Each takes about 40 seconds, down from 70.
+
+### V13
+
+100 of 100 green. Added in this pass:
+
+| Reading | Mutation | Red |
+| --- | --- | --- |
+| The request's correction form shows the step on the recorded date; saving moves both fields; Undo restores them; the sent entry and the account's other entry kinds show none | The form offers it to no request | "the request shows the step … chip on: """ |
+| Column, tray and panel agree on the year-silent query in all three states; the column's words are the tray button's on every row read | The column ignores the predicate | "column "Nudge" · tray "Record a response" · panel "Record a response"" |
+
+### Three full runs, and the deploy (fourth pass)
+
+**Three clean runs**, one after another, on the integration build (`…-comps27-1-qp2c`, bundle
+`index-BrHHIXM8.js`), 13 Oct:
+
+| Run | Start | End | Result |
+| --- | --- | --- | --- |
+| 1 | 00:05 | 00:35 | all eight suites passed |
+| 2 | 00:36 | 01:06 | all eight suites passed |
+| 3 | 01:08 | 01:37 | all eight suites passed |
+
+The suite is the set every pass has run: qcMove (4), QP2 V1 to V13 (10), QP1 P1 to P14 (11), QC137 (13), feed
+drawer v2 (4), delete entry (8), the journeys (15), QC132 (10, with 6 skipped as before). No sign-in was
+refused in any of the three.
+
+It took three false starts to get there, and each found something:
+
+| What went wrong | Cause | Fix |
+| --- | --- | --- |
+| `auth/quota-exceeded` in delete entry, then in two journey cases | Firebase's quota for verifying passwords is shared by every session on the dev project, and two other sessions were running suites. My V13 was signing in thirteen times a run through the seeder's `--dump` | V13 reads on one cached sign-in (`b64fc47d`). `ensureSignedIn` waits out a refused sign-in and presses again, four tries over about three minutes (`59e542a3`) |
+| V13: "send by … (+15)" for a date two weeks out | The run started at 23:54. V13 took "today" from the UTC clock, a day behind the app's local day for the hour after midnight in British Summer Time | "Today" is the local day (`544cd2d4`) |
+| V13: "changed: nothing" straight after a save | Read in-process, the read reached the server before the write did | Each read after a save waits for the document to change |
+
+Not in the suite, and red before this pass (checked against the files as they were):
+
+- `qaLocks` H9 ("no request row on the dashboard's to-do card") and D7 (it cannot find its row: it opens the
+  query the pre-panel way). My change to D7 adds the restore only.
+- `qaV11`'s picker case (it presses a row in a picker the panel replaced). Its other five cases pass.
+
+**Deploy.** Dev had moved again: the Corkboard session deployed `…-qp2c-corkboard1` at `b2e1a737`
+(`index-rhbmgLAi.js`), built on my third-pass integration. I merged onto it as
+**`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1-qp2d`**, no conflicts.
+On that build: tsc and both builds clean; Vitest 8,725 passed, 3 skipped, the same one file failing to load.
+A fourth full run there, 01:39 to 02:09: all eight suites passed. Deployed. **Dev serves `index-B4cESNDW.js`.**
 
 The next session to deploy to dev should base its integration on that branch.
