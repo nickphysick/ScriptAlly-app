@@ -19,6 +19,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { openRoute } from "./measure";
+import { closePanel, openRowById, pressDoor, stepBack } from "./panelSteady";
 
 const DIR = "reports/query-panel-v1";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -232,6 +233,8 @@ test.describe("Query panel v1", () => {
 
   test("P7 P8 · one surface, and the next move is the primary", async ({ page }) => {
     test.setTimeout(600_000);
+    /* a press that produces nothing fails in seconds, with its name — never a ten-minute wait */
+    page.setDefaultTimeout(15_000);
     const L = new Ledger("P7-P8");
     const want: Record<string, { primary: RegExp; title: (f: string) => string }> = {
       agent: { primary: /^Record a response$/, title: (f) => `What did ${f} say?` },
@@ -262,17 +265,14 @@ test.describe("Query panel v1", () => {
       for (const [kind, id] of Object.entries(pick)) {
         if (!id) { console.log(`  P8 ${w}: no ${kind} query on the account`); continue; }
         seen[kind] = (seen[kind] ?? 0) + 1;
-        await page.locator(`${ROW}[data-qid="${id}"]`).evaluate((e) => e.scrollIntoView({ block: "center" }));
-        await page.waitForTimeout(250);
-        await clickRow(page, id);
+        /* ⚠️ EVERY PRESS WAITS FOR WHAT IT PRODUCES (panelSteady), not for a pause */
+        await openRowById(page, ROW, id);
         const card = await page.evaluate(() => { const p = document.querySelector<HTMLElement>('[data-qp="panel"]')!; return { name: p.querySelector(".qcv-open-nm")?.textContent ?? "", primary: p.querySelector<HTMLElement>('[data-qcv="open-action"]')?.textContent ?? "", doors: [...p.querySelectorAll<HTMLElement>("[data-door]")].map((d) => d.dataset.door!) }; });
         const first = card.name.trim().split(/\s+/)[0];
         L.check("P8", `${w} ${kind}: the primary`, want[kind].primary.test(card.primary), `"${card.primary}" (${card.name})`);
         /* P7: every footer button in turn */
         for (let i = 0; i < card.doors.length; i++) {
-          await page.locator(`${PANEL} [data-door]`).nth(i).click();
-          await expect(page.locator(`${PANEL} [data-qp-step]`), `${kind} door ${card.doors[i]}`).toBeVisible({ timeout: 8000 });
-          await page.waitForTimeout(450);
+          await pressDoor(page, i);
           const s = await page.evaluate((bar) => {
             const p = document.querySelector<HTMLElement>('[data-qp="panel"]')!;
             const vis = (e: Element) => { const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none"; };
@@ -304,12 +304,9 @@ test.describe("Query panel v1", () => {
           L.check("P7", `${w} ${kind} ${card.doors[i]}: nothing stacked outside the panel`, s.over.length === 0, s.over.slice(0, 3).join(" · ") || "none");
           L.check("P7", `${w} ${kind} ${card.doors[i]}: the step replaced the card, with a way back`, s.back && s.ownHidden, `back ${s.back} · card hidden ${s.ownHidden}`);
           if (i === 0) L.check("P8", `${w} ${kind}: the step's title`, s.title === want[kind].title(first), `"${s.title}"`);
-          await page.locator(`${PANEL} [data-qp="step-back"]`).click();
-          await expect(page.locator(`${PANEL} [data-qp-step]`)).toHaveCount(0, { timeout: 8000 });
-          await page.waitForTimeout(350);
+          await stepBack(page);
         }
-        await page.locator(`${PANEL} [data-qcv="open-close"]`).click();
-        await page.waitForTimeout(350);
+        await closePanel(page);
       }
     }
     console.log(`  P8 branches entered: ${JSON.stringify(seen)}`);

@@ -9,6 +9,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { collection, getDocs } from "firebase/firestore";
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
+import { rawSet, restoreSet } from "./journeyGuard";
 
 let asserted = 0;
 const ok = (c: unknown, m: string) => { asserted++; expect(c, m).toBeTruthy(); };
@@ -181,6 +182,9 @@ test("D7 — Delete query: the confirm, the delete, and an Undo that brings ever
   const id = await row.getAttribute("data-id");
   ok(!!id, "a row with an id");
   const before = await read(id!);
+  /* the delete is put back at the end, pass or fail: the Undo below is the claim, not the account's safety */
+  const raw = await rawSet([id!]);
+  try {
   await row.click();
   await page.locator('[data-qcv="open-del"]').click();
   await expect(page.locator('[data-qcv="open-delc"]')).toBeVisible();
@@ -191,4 +195,8 @@ test("D7 — Delete query: the confirm, the delete, and an Undo that brings ever
   await expect(page.locator('[data-qad-toast="done"]')).toBeVisible({ timeout: 20_000 });
   await expect.poll(async () => read(id!), { timeout: 20_000, message: "Undo did not bring the query back exactly" }).toBe(before);
   asserted++;
+  } finally {
+    const fixed = await restoreSet(raw, [id!]);
+    if (fixed.length) console.log(`[journeyGuard] D7 left the account changed; restored directly:\n  ${fixed.join("\n  ")}`);
+  }
 });

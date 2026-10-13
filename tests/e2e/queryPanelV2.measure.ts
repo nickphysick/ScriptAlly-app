@@ -23,6 +23,9 @@ import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { collection, getDocs } from "firebase/firestore";
+import { harnessDb } from "./harnessDocs";
+import { atRest, leaveStep as leaveStepSteady, pressDoor, pressNext } from "./panelSteady";
 
 const DIR = "reports/query-panel-v2";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -365,24 +368,27 @@ test.describe("Query panel v2", () => {
         await openRow(page, sel);
         const who = (await page.locator(`${PANEL} .qcv-open`).getAttribute("data-status")) ?? sel;
         const doors = await page.locator(`${PANEL} [data-door]`).evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.door!));
+        /* ⚠️ EVERY PRESS WAITS FOR WHAT IT PRODUCES (panelSteady): the door's step, the next step, the card's
+           return. A fixed pause let a press land while the panel was still changing, and the press was lost. */
         for (const d of doors) {
-          await page.locator(`${PANEL} [data-door="${d}"]`).click(); await page.waitForTimeout(600);
+          await pressDoor(page, d);
           for (let i = 0; i < 6; i++) {
             await read(`${who} · ${d} · step ${i + 1}`);
-            /* read in one go: the foot re-renders between steps, and a locator held across that can go stale */
-            const nx = await page.evaluate(() => { const b = document.querySelector<HTMLButtonElement>('[data-qp="panel"] [data-qad-primary]'); return b && !b.disabled && /^Next/.test((b.textContent ?? "").trim()); });
-            if (!nx) break;
-            await page.locator(`${PANEL} [data-qad-primary]`).click(); await page.waitForTimeout(450);
+            if (!(await pressNext(page))) break;
           }
-          await leaveStep(page);
+          await leaveStepSteady(page);
         }
       }
       /* the correction's two steps */
       await openRow(page, `${ROW}[data-qid="seed-query-10"]`);
-      await page.locator(`${PANEL} .qlg-fix`).first().click({ force: true }); await page.waitForTimeout(500);
-      await page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first().click(); await page.waitForTimeout(500);
+      await page.locator(`${PANEL} .qlg-fix`).first().click();
+      const mistake = page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first();
+      await expect(mistake, "the correction fork did not open").toBeVisible();
+      await mistake.click();
+      await expect(page.locator(`${PANEL} .cor-ta`), "the correction's details did not open").toBeVisible();
+      await atRest(page);
       await read("the correction · the details");
-      await leaveStep(page); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      await leaveStepSteady(page);
       L.check("V12", `${w} the walk met steppers`, steps >= 8, `${steps} stepper states read`);
     }
     L.done(40);
@@ -395,7 +401,24 @@ test.describe("Query panel v2", () => {
     test.setTimeout(420_000);
     page.setDefaultTimeout(10_000);
     const L = new Ledger("V13");
-    const dump = () => JSON.parse(execSync("node tests/e2e/seedQp2Links.mjs --dump", { encoding: "utf8" }).trim().split("\n").pop()!) as { docs: Record<string, Record<string, unknown>>; log: Record<string, string[]>; feed: string[]; queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
+    /* ⚠️ READ IN THIS PROCESS, ON ONE SIGN-IN (`harnessDb` caches it). It was the seeder's `--dump`, which signs in
+       with the password on every call: thirteen sign-ins a run, and Firebase's quota for verifying passwords is
+       shared by every session on the project. A full run went red on "auth/quota-exceeded" twice on 12 Oct. */
+    const plain = (v: unknown): unknown => (v && typeof v === "object" ? (typeof (v as { toDate?: unknown }).toDate === "function" ? (v as { toDate: () => Date }).toDate().toISOString() : Array.isArray(v) ? v.map(plain) : Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, plain(x)]))) : v);
+    type Dump = { docs: Record<string, Record<string, unknown>>; log: Record<string, string[]>; feed: string[]; queries: Record<string, { dateSent: string | null; keep: boolean | null; expected: string | null }>; tasks: { text: string; queryId: string; done: boolean }[] };
+    const dump = async (): Promise<Dump> => {
+      const { db, uid } = await harnessDb();
+      const mine = (id: string, d: Record<string, unknown>) => id.includes("qp2l-") || String(d.queryId ?? "").startsWith("qp2l-") || String(d.relatedRecordId ?? "").startsWith("qp2l-");
+      const qs = (await getDocs(collection(db, "users", uid, "queries"))).docs.filter((d) => d.id.includes("qp2l-"));
+      const log: Record<string, string[]> = {};
+      for (const d of qs) log[d.id] = (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs.map((a) => a.id).sort();
+      const feed = (await getDocs(collection(db, "users", uid, "activities"))).docs.filter((d) => mine(d.id, d.data())).map((d) => d.id).sort();
+      const tasks = (await getDocs(collection(db, "users", uid, "tasks"))).docs.filter((d) => mine(d.id, d.data())).map((d) => ({ text: String(d.data().text ?? ""), queryId: String(d.data().queryId ?? ""), done: !!d.data().done }));
+      return {
+        docs: Object.fromEntries(qs.map((d) => [d.id, plain(d.data()) as Record<string, unknown>])), log, feed, tasks,
+        queries: Object.fromEntries(qs.map((d) => [d.id, { dateSent: (d.data().dateSent as string) ?? null, keep: (d.data().closureOfferDismissed as boolean) ?? null, expected: (d.data().writerExpectedDate as string) ?? null }])),
+      };
+    };
     const card = () => page.evaluate(() => {
       const p = document.querySelector<HTMLElement>('[data-qp="panel"]');
       if (!p) return null;
@@ -415,6 +438,17 @@ test.describe("Query panel v2", () => {
     });
     /* the list tray's first button for a row, read from the row itself (the tray is drawn, and shown on hover) */
     const tray = (id: string) => page.evaluate((sel) => { const r = document.querySelector<HTMLElement>(sel); const b = r?.querySelector<HTMLElement>('[data-qcv="row-tray"] button'); return b ? `${(b.textContent ?? "").trim()}|${b.dataset.qcv}` : "(no tray button)"; }, `${ROW}[data-qid="${id}"]`);
+    /* the row's "Next move" words */
+    const verb = (id: string) => page.evaluate((sel) => (document.querySelector<HTMLElement>(`${sel} [data-qcv="row-verb"]`)?.textContent ?? "").trim(), `${ROW}[data-qid="${id}"]`);
+    /* ONE DECISION SAID THREE WAYS: the column's words for each button the tray can lead with */
+    const WORDS: Record<string, string[]> = {
+      "Close query": ["Consider closing"], "Record a response": ["Waiting"], "Nudge": ["Nudge"],
+      "Mark partial sent": ["Send partial"], "Mark full sent": ["Send full"], "Mark revision sent": ["Send revision"],
+      "Record your answer": ["Decide on offer"], "Record what you sent": ["Record what you sent"],
+    };
+    const triple = async (id: string) => { const t = (await tray(id)).split("|"); const c = await card(); return { column: await verb(id), tray: t[1] === "row-act" ? t[0] : "", panel: c?.lead ?? "" }; };
+    /* a write the page shows at once still has to reach the server: wait for the document, not for a pause */
+    const landed = (what: string, pred: (d: Dump) => boolean) => expect.poll(async () => pred(await dump()), { timeout: 15_000, message: `${what} never reached the server` }).toBe(true);
     const openId = async (id: string) => { await openRow(page, `${ROW}[data-qid="${id}"]`); await tab(page, "Tracking"); };
     const LINK = (k: string) => `${PANEL} [data-qp="stand-link"][data-link="${k}"]`;
     const STYLE = "Source Serif 4 15px rgb(42, 58, 82) 1px solid";
@@ -424,6 +458,7 @@ test.describe("Query panel v2", () => {
       execSync("node tests/e2e/seedQp2Links.mjs", { stdio: "inherit" });
       await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); } catch { /* */ } });
       const seen: Record<string, number> = {};
+      const agree: Record<string, number> = {}; const apart: string[] = [];
       for (const vp of SIZES) {
         const w = `${vp.width}`;
         await openQC(page, vp, "none");
@@ -434,6 +469,8 @@ test.describe("Query panel v2", () => {
           L.check("V13", `${w} ${id} · exactly its links`, JSON.stringify(c?.links) === JSON.stringify(want), `${JSON.stringify(c?.links)} (wants ${JSON.stringify(want)})`);
           L.check("V13", `${w} ${id} · quiet links: Source Serif 15, navy, an underline rule, under the paragraph`, c?.style === STYLE && c.under, `${c?.style} · under the paragraph ${c?.under}`);
           for (const l of c?.links ?? []) seen[l] = (seen[l] ?? 0) + 1;
+          const t = await triple(id);
+          if (t.tray) { agree[`${t.column} · ${t.tray}`] = (agree[`${t.column} · ${t.tray}`] ?? 0) + 1; L.check("V13", `${w} ${id} · the column's words are the tray button's`, (WORDS[t.tray] ?? []).includes(t.column), `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
         }
         /* the other states: a request, a closed query, and a query with the agent inside its dated wait */
         for (const court of ["you", "closed", "agent"]) {
@@ -450,6 +487,12 @@ test.describe("Query panel v2", () => {
             const stray = (c?.links ?? []).filter((l) => !earned.includes(l));
             L.check("V13", `${w} ${court} row ${n} (${c?.id}) · no link outside its state`, c != null && stray.length === 0, stray.length ? `stray: ${stray.join(", ")}` : `${c?.links.length} link(s), ${earned.length ? "earned" : "none earned"}`);
             if (c && earned.length === 0) seen[`none:${court}`] = (seen[`none:${court}`] ?? 0) + 1;
+            const t = c ? await triple(c.id) : null;
+            if (t?.tray) {
+              agree[`${t.column} · ${t.tray}`] = (agree[`${t.column} · ${t.tray}`] ?? 0) + 1;
+              L.check("V13", `${w} ${court} row ${n} (${c!.id}) · the column's words are the tray button's`, (WORDS[t.tray] ?? []).includes(t.column), `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`);
+              if (t.tray !== t.panel) apart.push(`${c!.id}: tray "${t.tray}", panel "${t.panel}"`);
+            }
             read++;
           }
           L.check("V13", `${w} ${court} · rows were read`, read > 0, `${read} row(s)`);
@@ -457,6 +500,9 @@ test.describe("Query panel v2", () => {
       }
       /* each state was entered, and so was "no links" for a request and a closed query */
       console.log(`[V13] states seen: ${JSON.stringify(seen)}`);
+      console.log(`[V13] column · tray pairs read: ${JSON.stringify(agree)}`);
+      console.log(`[V13] rows under a year whose tray is their board card's act, not the panel's primary: ${[...new Set(apart)].join("; ") || "none"}`);
+      L.check("V13", "the tally · more than one column and tray pair was read", Object.keys(agree).length >= 2, Object.keys(agree).join(" | "));
       /* "no links" on a request is read below, on this lock's own request once it has a date */
       for (const k of ["Add the date you sent it", "Set a date", "Remind me later", "Keep tracking", "Set a send-by date", "none:closed"]) L.check("V13", `the tally · ${k}`, (seen[k] ?? 0) > 0, `${seen[k] ?? 0}`);
 
@@ -472,7 +518,7 @@ test.describe("Query panel v2", () => {
       const top = await field.evaluate((e) => { const r = e.getBoundingClientRect(); return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === e; });
       L.check("V13", "Add the date you sent it · opens the sent-date editor, above the panel", top, top ? "the field is what is under its own centre" : "something covers the field");
       await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-      L.check("V13", "Add the date you sent it · leaving the editor writes nothing", dump().queries["qp2l-nosent"]?.dateSent === null, JSON.stringify(dump().queries["qp2l-nosent"]));
+      L.check("V13", "Add the date you sent it · leaving the editor writes nothing", (await dump()).queries["qp2l-nosent"]?.dateSent === null, JSON.stringify((await dump()).queries["qp2l-nosent"]));
 
       /* Set a date → the slider in the card; Cancel puts the link back and writes nothing */
       if (!(await page.locator(PANEL).count())) await openQC(page, SIZES[0], "none");
@@ -484,7 +530,7 @@ test.describe("Query panel v2", () => {
       L.check("V13", "Set a date · opens the weeks slider in the card, and the link stands down", during?.links.length === 0, JSON.stringify(during?.links));
       await page.locator(`${PANEL} [data-qp="stand-setdate"] .tl-setwin-cancel`).click(); await page.waitForTimeout(300);
       const after = await card();
-      L.check("V13", "Set a date · Cancel puts the link back and writes nothing", JSON.stringify(after?.links) === '["Set a date"]' && dump().queries["qp2l-nowin"]?.expected === null, `${JSON.stringify(after?.links)} · ${JSON.stringify(dump().queries["qp2l-nowin"])}`);
+      L.check("V13", "Set a date · Cancel puts the link back and writes nothing", JSON.stringify(after?.links) === '["Set a date"]' && (await dump()).queries["qp2l-nowin"]?.expected === null, `${JSON.stringify(after?.links)} · ${JSON.stringify((await dump()).queries["qp2l-nowin"])}`);
 
       /* Set a send-by date → the edit journey's one step, in the panel; saving changes two fields and nothing else */
       await openId("qp2l-request");
@@ -497,8 +543,8 @@ test.describe("Query panel v2", () => {
       const missing = chips.filter((c) => !stepText.includes(c));
       L.check("V13", "Set a send-by date · the response journey's chips and reminder choices, in the panel", missing.length === 0 && /When you.ll send it by/.test(stepText) && (await scrim(page)).opacity > 0, missing.length ? `missing: ${missing.join(", ")}` : `all 8 choices · scrim opacity ${(await scrim(page)).opacity}`);
       /* the account at rest: the app settles its own documents after a load, and that is not this save */
-      let before = dump();
-      for (let i = 0; i < 6; i++) { await page.waitForTimeout(1500); const again = dump(); if (JSON.stringify(again) === JSON.stringify(before)) break; before = again; }
+      let before = await dump();
+      for (let i = 0; i < 6; i++) { await page.waitForTimeout(1500); const again = await dump(); if (JSON.stringify(again) === JSON.stringify(before)) break; before = again; }
       for (let i = 0; i < 4; i++) {
         const b = page.locator(`${PANEL} [data-qad-primary]`);
         const label = await b.innerText();
@@ -507,8 +553,9 @@ test.describe("Query panel v2", () => {
         await page.waitForTimeout(450);
       }
       await expect.poll(async () => (await card())?.links.length ?? -1, { timeout: 15_000 }).toBe(0);
-      await page.waitForTimeout(800);
-      const afterSave = dump();
+      /* the link goes on the app's own optimistic write; the read below is the SERVER's, so wait for it to land */
+      await expect.poll(async () => !!(await dump()).docs["qp2l-request"]?.expectedSendDate, { timeout: 15_000, message: "the send-by date never reached the server" }).toBe(true);
+      const afterSave = (await dump());
       const d0 = before.docs["qp2l-request"] ?? {}; const d1 = afterSave.docs["qp2l-request"] ?? {};
       const changed = [...new Set([...Object.keys(d0), ...Object.keys(d1)])].filter((k) => JSON.stringify(d0[k]) !== JSON.stringify(d1[k])).sort();
       L.check("V13", "Set a send-by date · only the send-by date and its reminder changed on the query", JSON.stringify(changed) === '["expectedSendDate","sendReminderDate"]', `changed: ${changed.join(", ") || "nothing"}`);
@@ -516,19 +563,77 @@ test.describe("Query panel v2", () => {
       const others = Object.keys(before.docs).filter((k) => k !== "qp2l-request" && keysOf(k).length > 0).map((k) => `${k} (${keysOf(k).join(", ")})`);
       L.check("V13", "Set a send-by date · no entry, feed row or other query changed", JSON.stringify(before.log) === JSON.stringify(afterSave.log) && JSON.stringify(before.feed) === JSON.stringify(afterSave.feed) && others.length === 0, `log ${JSON.stringify(afterSave.log["qp2l-request"])} · feed ${afterSave.feed.length} (was ${before.feed.length}) · other queries changed: ${others.join(", ") || "none"}`);
       const due = String(d1.expectedSendDate ?? "").slice(0, 10); const rem = String(d1.sendReminderDate ?? "").slice(0, 10);
-      const days = (iso: string) => Math.round((new Date(iso).getTime() - new Date(new Date().toISOString().slice(0, 10)).getTime()) / 86_400_000);
+      /* ⚠️ "TODAY" IS THE LOCAL DAY, AS THE APP'S IS. Taken from the UTC clock it was one day behind for the hour
+         after midnight in British Summer Time, and a correct "two weeks out" read as fifteen days (a run that
+         started at 23:54 on 12 Oct found it). The stored date is the local calendar day at UTC midnight. */
+      const days = (iso: string) => { const n = new Date(); return Math.round((new Date(iso.slice(0, 10)).getTime() - Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())) / 86_400_000); };
       L.check("V13", "Set a send-by date · the defaults saved: two weeks out, reminded the day before", days(due) === 14 && days(rem) === 13, `send by ${due} (+${days(due)}) · reminder ${rem} (+${days(rem)})`);
       const sc = await card();
       L.check("V13", "Set a send-by date · a request with a date offers no link, and the card counts to it", sc?.links.length === 0 && /expecting it by/.test(sc?.text ?? ""), `"${sc?.text}" · ${JSON.stringify(sc?.links)}`);
 
+      /* ··· → "I'm correcting a mistake" on the REQUEST carries the send-by date; on any other entry it does not */
+      const openFix = async (n: number) => {
+        await page.locator(`${PANEL} .qlg-fix`).nth(n).click();
+        await page.locator(`${PANEL} .cor-branch`, { hasText: /correcting a mistake/ }).first().click();
+        await expect(page.locator(`${PANEL} .cor-ta`), "the correction form did not open").toBeVisible();
+      };
+      const closeFix = async () => { await leaveStep(page); await expect(page.locator(`${PANEL} .cor-ta`)).toHaveCount(0); };
+      const SB = `${PANEL} [data-qp="send-by"]`;
+      await expect(page.locator(`${PANEL} .qlg-fix`)).toHaveCount(2);
+      await openFix(0);
+      L.check("V13", "··· edit · the sent entry of the same query shows no send-by step", (await page.locator(SB).count()) === 0, `${await page.locator(SB).count()} section(s)`);
+      await closeFix();
+      await openFix(1);
+      const recorded = (await page.locator(`${SB} .qad-chip.on`).allInnerTexts()).join("|").replace(/\s+/g, " ");
+      L.check("V13", "··· edit · the request shows the step after date and note, on the recorded date", (await page.locator(SB).count()) === 1 && /^As recorded/.test(recorded)
+        && await page.evaluate((sel) => { const sb = document.querySelector(sel)!; const ta = document.querySelector('[data-qp="panel"] .cor-ta')!; return !!(ta.compareDocumentPosition(sb) & Node.DOCUMENT_POSITION_FOLLOWING); }, SB), `chip on: "${recorded}"`);
+      const e0 = (await dump());
+      await page.locator(`${SB} [data-qad-chip="4w"]`).click();
+      await page.locator(`${SB} [data-qad-chip="0"]`).click();
+      await page.locator(`${PANEL} .cor-save`).click();
+      const undo = page.locator(".sa-toast-undo");
+      await expect(undo, "no Undo after the correction saved").toBeVisible({ timeout: 15_000 });
+      await expect.poll(async () => String((await dump()).docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).not.toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
+      const e1 = (await dump()).docs["qp2l-request"] ?? {};
+      const due2 = String(e1.expectedSendDate ?? "").slice(0, 10); const rem2 = String(e1.sendReminderDate ?? "").slice(0, 10);
+      L.check("V13", "··· edit · saving changes the send-by date and its reminder with the rest", days(due2) === 28 && days(rem2) === 28, `send by ${due2} (+${days(due2)}) · reminder ${rem2} (+${days(rem2)})`);
+      await undo.click();
+      await expect.poll(async () => String((await dump()).docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10), { timeout: 15_000 }).toBe(String(e0.docs["qp2l-request"]?.expectedSendDate ?? "").slice(0, 10));
+      const e2 = (await dump()).docs["qp2l-request"] ?? {};
+      L.check("V13", "··· edit · Undo puts both back", e2.expectedSendDate === e0.docs["qp2l-request"]?.expectedSendDate && e2.sendReminderDate === e0.docs["qp2l-request"]?.sendReminderDate, `send by ${String(e2.expectedSendDate).slice(0, 10)} · reminder ${String(e2.sendReminderDate).slice(0, 10)}`);
+      /* every other entry type the account holds: no step */
+      const kinds: Record<string, number> = {};
+      for (const court of ["agent", "closed", "you"]) {
+        const sel = court === "closed" ? rowOf(court) : `${ROW}[data-court="${court}"]:not([data-qid^="qp2l-"])`;
+        for (let n = 0; n < 2; n++) {
+          if (!(await page.locator(sel).nth(n).count())) break;
+          await openRow(page, `${sel} >> nth=${n}`); await tab(page, "Tracking");
+          const fixes = await page.locator(`${PANEL} .qlg-fix`).count();
+          const status = (await page.locator(`${PANEL} .qcv-open`).getAttribute("data-status")) ?? "";
+          for (let i = 0; i < fixes; i++) {
+            await openFix(i);
+            const subject = ((await page.locator(`${PANEL} .cor-subj`).first().innerText().catch(() => "")) || `entry ${i}`).replace(/\s+/g, " ").split(" · ")[0].slice(0, 40);
+            const has = (await page.locator(SB).count()) > 0;
+            /* the one entry that may carry it: the LAST entry of a query that still owes material */
+            const live = court === "you" && i === fixes - 1;
+            if (!live) { kinds[subject] = (kinds[subject] ?? 0) + 1; L.check("V13", `··· edit · ${status} · "${subject}" shows no send-by step`, !has, has ? "it shows one" : "none"); }
+            await closeFix();
+          }
+        }
+      }
+      console.log(`[V13] entry kinds read without the step: ${JSON.stringify(kinds)}`);
+      L.check("V13", "··· edit · several kinds of entry were read", Object.keys(kinds).length >= 3, Object.keys(kinds).join(" | "));
+
       /* over a year: Close leads; Remind me later hides itself; Keep tracking swaps the lead; the menu undoes it */
       await openId("qp2l-year");
       const y0 = await card();
+      { const t = await triple("qp2l-year"); L.check("V13", "over a year · column, tray and panel agree", t.tray === t.panel && (WORDS[t.panel] ?? []).includes(t.column) && t.column === "Consider closing", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "over a year · the tray's first button is the panel's primary", (await tray("qp2l-year")) === `${y0?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y0?.lead}"`);
       L.check("V13", "over a year · Close leads the footer, Record a response beside it", y0?.lead === "Close query" && !!y0.doors.includes("Record a response"), `lead "${y0?.lead}" · ${y0?.doors.join(", ")}`);
       await page.locator(LINK("remindLater")).click();
       await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
-      const tasks = dump().tasks.filter((t) => t.queryId === "qp2l-year" && !t.done);
+      await landed("the reminder", (d) => d.tasks.some((t) => t.queryId === "qp2l-year" && !t.done));
+      const tasks = (await dump()).tasks.filter((t) => t.queryId === "qp2l-year" && !t.done);
       L.check("V13", "Remind me later · adds one open \"Nudge {agent}\" to-do, and hides while it stands", tasks.length === 1 && /^Nudge /.test(tasks[0].text), JSON.stringify(tasks));
       await page.locator(LINK("keepTracking")).click();
       /* wait on the card, not on the footer: the footer's lead is the claim, and is read below by name */
@@ -536,9 +641,11 @@ test.describe("Query panel v2", () => {
       await page.waitForTimeout(400);
       const y1 = await card();
       L.check("V13", "Keep tracking · Record a response leads instead of Close", y1?.lead === "Record a response" && !!y1.doors.includes("Close query"), `lead "${y1?.lead}" · ${y1?.doors.join(", ")}`);
+      { const t = await triple("qp2l-year"); L.check("V13", "Keep tracking · column, tray and panel agree, on different words than before", t.tray === t.panel && (WORDS[t.panel] ?? []).includes(t.column) && t.column === "Waiting", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "Keep tracking · the tray's first button follows the panel's primary", (await tray("qp2l-year")) === `${y1?.lead}|row-act` && y1?.lead !== y0?.lead, `tray "${await tray("qp2l-year")}" · panel "${y1?.lead}" (was "${y0?.lead}")`);
       L.check("V13", "Keep tracking · the closing sentence and its links are gone", y1?.links.length === 0 && !/Closing it keeps/.test(y1?.text ?? "") && (y1?.text ?? "").length > 0, `${JSON.stringify(y1?.links)} · "${y1?.text}"`);
-      L.check("V13", "Keep tracking · sets the existing flag", dump().queries["qp2l-year"]?.keep === true, JSON.stringify(dump().queries["qp2l-year"]));
+      await landed("the flag", (d) => d.queries["qp2l-year"]?.keep === true);
+      L.check("V13", "Keep tracking · sets the existing flag", (await dump()).queries["qp2l-year"]?.keep === true, JSON.stringify((await dump()).queries["qp2l-year"]));
       /* for good: it holds across a reload */
       await openQC(page, SIZES[0], "none"); await openId("qp2l-year");
       const y2 = await card();
@@ -550,7 +657,9 @@ test.describe("Query panel v2", () => {
       await expect.poll(async () => (await card())?.links.join("|"), { timeout: 10_000 }).toBe("Keep tracking");
       await page.waitForTimeout(400);
       const y3 = await card();
-      L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && dump().queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify(dump().queries["qp2l-year"])}`);
+      await landed("the cleared flag", (d) => d.queries["qp2l-year"]?.keep === null);
+      L.check("V13", "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back", /Closing it keeps/.test(y3?.text ?? "") && !!y3?.links.includes("Keep tracking") && y3.lead === "Close query" && (await dump()).queries["qp2l-year"]?.keep === null, `lead "${y3?.lead}" · ${JSON.stringify(y3?.links)} · ${JSON.stringify((await dump()).queries["qp2l-year"])}`);
+      { const t = await triple("qp2l-year"); L.check("V13", "Suggest closing again · column, tray and panel agree again", t.tray === t.panel && t.column === "Consider closing", `column "${t.column}" · tray "${t.tray}" · panel "${t.panel}"`); }
       L.check("V13", "Suggest closing again · the tray's first button is the panel's primary again", (await tray("qp2l-year")) === `${y3?.lead}|row-act`, `tray "${await tray("qp2l-year")}" · panel "${y3?.lead}"`);
       await page.locator(`${PANEL} [data-qcv="open-more"]`).click(); await page.waitForTimeout(300);
       const offered = await page.getByText("Suggest closing again", { exact: true }).count();
@@ -560,7 +669,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(51);
+    L.done(66);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {

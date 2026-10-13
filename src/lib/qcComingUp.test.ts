@@ -7,7 +7,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { comingUp, cardsByQuery, COMING_VERB, COMING_ACTION, SEND_VERB, trayLabel, trayOpen, trayRequest } from "./qcComingUp";
-import { leadDoors, silenceLead } from "./queryActions/entry";
+import { leadDoors, silenceLead, silenceWords, SILENCE_WORDS } from "./queryActions/entry";
+import { nextLine } from "./qcRowLines";
 import { cardBucket, taskDeed, BUCKET_ORDER, type Bucket } from "./todoBuckets";
 import type { BoardCard } from "./todoBoard";
 import type { QcRow } from "./qcSummary";
@@ -206,5 +207,20 @@ describe("one predicate for the panel's primary and the tray's first action (rul
     for (const r of [mk(S2.Q, "agent", 365), mk(S2.Q, "agent", 90, true), mk(S2.PR, "you", 400), mk(S2.Q, "agent", null)]) expect(silenceLead(r)).toBeNull();
     expect(trayLabel("chase", mk(S2.Q, "agent", 90))).toBe("Nudge");
     expect(trayOpen("chase", mk(S2.Q, "agent", 90))).toEqual(trayRequest("chase", S2.Q as never, "q"));
+  });
+  it("the Next move column says that same door, whatever card the board holds", () => {
+    const row = (kept: boolean) => ({ id: "q", status: S2.Q, court: "agent", dayN: 400, sentMs: Date.now() - 400 * 86_400_000, expectedMs: Date.now() - 340 * 86_400_000, query: kept ? { closureOfferDismissed: true } : {} } as never);
+    const cards = [null, { bucket: "chase", verb: "Nudge" }, { bucket: "close", verb: "Consider closing" }, { bucket: "fix", verb: "Record what you sent" }] as never[];
+    const seen = new Set<string>();
+    for (const kept of [false, true]) for (const c of cards) {
+      const r = row(kept);
+      const primary = leadDoors(r).find((d) => d.primary)!;
+      expect(nextLine(r, c, Date.now()).phrase, `kept=${kept}`).toBe(SILENCE_WORDS[primary.mode]);
+      expect(silenceWords(r)).toBe(SILENCE_WORDS[primary.mode]);
+      seen.add(nextLine(r, c, Date.now()).phrase);
+    }
+    expect([...seen].sort()).toEqual(["Consider closing", "Waiting"]);
+    /* under a year the column keeps its own reading of the dates and the card */
+    expect(silenceWords({ status: S2.Q, court: "agent", dayN: 200 } as never)).toBeNull();
   });
 });

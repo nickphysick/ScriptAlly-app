@@ -1,0 +1,9 @@
+[V13] states seen: {"Add the date you sent it":2,"Set a date":2,"Remind me later":2,"Keep tracking":2,"Set a send-by date":2,"none:closed":2,"none:agent":6}
+[V13] column · tray pairs read: {"Consider closing · Close query":4,"Send partial · Mark partial sent":2,"Send full · Mark full sent":6,"Nudge · Nudge":2}
+[V13] rows under a year whose tray is their board card's act, not the panel's primary: seed-query-19: tray "Close query", panel "Record a response"; seed-cal-passed20-q: tray "Nudge", panel "Record a response"
+[V13] entry kinds read without the step: {"YOU SENT THE QUERY":4,"THEY PASSED":1,"THEY ASKED FOR THE FULL MANUSCRIPT":1,"YOU SENT THE FULL MANUSCRIPT":1}
+  ✗ V13 · Keep tracking · column, tray and panel agree, on different words than before — column "Nudge" · tray "Record a response" · panel "Record a response"
+  ✗ V13 · Suggest closing again · column, tray and panel agree again — column "Nudge" · tray "Close query" · panel "Close query"
+[V13] 98/100 green
+  1 failed
+  1 passed (2.2m)

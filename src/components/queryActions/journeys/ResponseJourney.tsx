@@ -12,6 +12,7 @@
  * closure entry first so Analytics counts the reply (ruling: the ending is REPLACED, not appended to).
  */
 import { QueryPicker } from "./QueryPicker";
+import { REMIND } from "../../../lib/queryActions/sendBy";
 import React, { useMemo, useState } from "react";
 import { collection, deleteDoc, deleteField, doc, getDocs, query as fsQuery, where } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
@@ -34,8 +35,6 @@ const RL: Record<RType, string> = { partial: "Partial requested", full: "Full re
 const SAVED_LABEL: Record<RType, string> = { partial: "Partial requested", full: "Full requested", rr: "Revise & resubmit", pass: "Passed", offer: "Offer" };
 const DOT: Record<RType, string> = { partial: "var(--qad-rose)", full: "var(--qad-rose)", rr: "var(--qad-rose)", pass: "var(--qad-stone)", offer: "var(--qad-offer)" };
 const KEY: Record<RType, EventKey> = { partial: "partial_requested", full: "full_requested", rr: "rr_requested", pass: "pass", offer: "offer" };
-/* exported: the edit journey's send-by step offers the same reminder choices (Query panel v2, ruling 3) */
-export const REMIND: [string, string, number | null][] = [["2d", "Two days before", -2], ["1d", "The day before", -1], ["0", "On the day", 0], ["no", "No reminder", null]];
 
 /**
  * v1.1 — opened with no query at all (the sidebar's "Record a response"), the first step is

@@ -55,6 +55,12 @@
  },
  {
   "lock": "V13",
+  "where": "1512 qp2l-year · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Close query\""
+ },
+ {
+  "lock": "V13",
   "where": "1512 qp2l-request · the panel shows this query, with one stand card",
   "ok": true,
   "detail": "qp2l-request · 1 card(s)"
@@ -73,9 +79,21 @@
  },
  {
   "lock": "V13",
+  "where": "1512 qp2l-request · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send partial\" · tray \"Mark partial sent\" · panel \"Mark partial sent\""
+ },
+ {
+  "lock": "V13",
   "where": "1512 you row 0 (rj-dupe) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you row 0 (rj-dupe) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
@@ -85,9 +103,21 @@
  },
  {
   "lock": "V13",
+  "where": "1512 you row 1 (seed-cal-passed865-q) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
+ },
+ {
+  "lock": "V13",
   "where": "1512 you row 2 (rj-send) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 you row 2 (rj-send) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
@@ -115,6 +145,12 @@
  },
  {
   "lock": "V13",
+  "where": "1512 agent row 0 (seed-query-19) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Record a response\""
+ },
+ {
+  "lock": "V13",
   "where": "1512 agent row 1 (seed-query-6) · no link outside its state",
   "ok": true,
   "detail": "0 link(s), none earned"
@@ -124,6 +160,12 @@
   "where": "1512 agent row 2 (seed-cal-passed20-q) · no link outside its state",
   "ok": true,
   "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 agent row 2 (seed-cal-passed20-q) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Record a response\""
  },
  {
   "lock": "V13",
@@ -187,6 +229,12 @@
  },
  {
   "lock": "V13",
+  "where": "1280 qp2l-year · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Close query\""
+ },
+ {
+  "lock": "V13",
   "where": "1280 qp2l-request · the panel shows this query, with one stand card",
   "ok": true,
   "detail": "qp2l-request · 1 card(s)"
@@ -205,9 +253,21 @@
  },
  {
   "lock": "V13",
+  "where": "1280 qp2l-request · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send partial\" · tray \"Mark partial sent\" · panel \"Mark partial sent\""
+ },
+ {
+  "lock": "V13",
   "where": "1280 you row 0 (rj-dupe) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you row 0 (rj-dupe) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
@@ -217,9 +277,21 @@
  },
  {
   "lock": "V13",
+  "where": "1280 you row 1 (seed-cal-passed865-q) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
+ },
+ {
+  "lock": "V13",
   "where": "1280 you row 2 (rj-send) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 you row 2 (rj-send) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
@@ -247,6 +319,12 @@
  },
  {
   "lock": "V13",
+  "where": "1280 agent row 0 (seed-query-19) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Record a response\""
+ },
+ {
+  "lock": "V13",
   "where": "1280 agent row 1 (seed-query-6) · no link outside its state",
   "ok": true,
   "detail": "0 link(s), none earned"
@@ -259,9 +337,21 @@
  },
  {
   "lock": "V13",
+  "where": "1280 agent row 2 (seed-cal-passed20-q) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Record a response\""
+ },
+ {
+  "lock": "V13",
   "where": "1280 agent · rows were read",
   "ok": true,
   "detail": "3 row(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "the tally · more than one column and tray pair was read",
+  "ok": true,
+  "detail": "Consider closing · Close query | Send partial · Mark partial sent | Send full · Mark full sent | Nudge · Nudge"
  },
  {
   "lock": "V13",
@@ -355,6 +445,84 @@
  },
  {
   "lock": "V13",
+  "where": "··· edit · the sent entry of the same query shows no send-by step",
+  "ok": true,
+  "detail": "0 section(s)"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · the request shows the step after date and note, on the recorded date",
+  "ok": true,
+  "detail": "chip on: \"As recorded 26 Oct\""
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · saving changes the send-by date and its reminder with the rest",
+  "ok": true,
+  "detail": "send by 2026-11-09 (+28) · reminder 2026-11-09 (+28)"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Undo puts both back",
+  "ok": true,
+  "detail": "send by 2026-10-26 · reminder 2026-10-25"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Queried · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Queried · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Rejected · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Rejected · \"THEY PASSED\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Full Requested · \"THEY ASKED FOR THE FULL MANUSCRIPT\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Full Requested · \"YOU SENT THE FULL MANUSCRIPT\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · Full Requested · \"YOU SENT THE QUERY\" shows no send-by step",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
+  "where": "··· edit · several kinds of entry were read",
+  "ok": true,
+  "detail": "YOU SENT THE QUERY | THEY PASSED | THEY ASKED FOR THE FULL MANUSCRIPT | YOU SENT THE FULL MANUSCRIPT"
+ },
+ {
+  "lock": "V13",
+  "where": "over a year · column, tray and panel agree",
+  "ok": true,
+  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Close query\""
+ },
+ {
+  "lock": "V13",
   "where": "over a year · the tray's first button is the panel's primary",
   "ok": true,
   "detail": "tray \"Close query|row-act\" · panel \"Close query\""
@@ -376,6 +544,12 @@
   "where": "Keep tracking · Record a response leads instead of Close",
   "ok": true,
   "detail": "lead \"Record a response\" · Nudge, Close query"
+ },
+ {
+  "lock": "V13",
+  "where": "Keep tracking · column, tray and panel agree, on different words than before",
+  "ok": true,
+  "detail": "column \"Waiting\" · tray \"Record a response\" · panel \"Record a response\""
  },
  {
   "lock": "V13",
@@ -406,6 +580,12 @@
   "where": "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back",
   "ok": true,
   "detail": "lead \"Close query\" · [\"Keep tracking\"] · {\"dateSent\":\"2025-09-07T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
+ },
+ {
+  "lock": "V13",
+  "where": "Suggest closing again · column, tray and panel agree again",
+  "ok": true,
+  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Close query\""
  },
  {
   "lock": "V13",

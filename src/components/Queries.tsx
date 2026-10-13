@@ -181,6 +181,9 @@ import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
 import { Who } from "./queryActions/controls";
 import { agentName as journeyAgentName, whoLine } from "./queryActions/journeys/common";
 import { StandCard } from "./queries/panel/StandCard";
+import { SendByFields, SEND_BY_BLANK, type SendByDraft } from "./queries/panel/SendByFields";
+import { sendByAnswer, sendByFields } from "../lib/queryActions/sendBy";
+import { toDay as dayOf } from "../lib/queryActions/dates";
 import { standCard } from "../lib/standCard";
 import { ensureAppSerifItalic } from "../lib/appItalic";
 /** "CORRECTED 28 SEP · WAS…" → a sentence: the ledger says nothing in capitals. */
@@ -1533,6 +1536,10 @@ export const Queries: React.FC<{
 
   /* ruling 2 — the send rung's materials, editing INSIDE the fork's mistake branch. Seeded from
      the query when the edit step opens on the send entry; null everywhere else. */
+  /* the live request's send-by date, on the same form (ruling, 12 Oct): unanswered each time the step opens */
+  const [deskSendBy, setDeskSendBy] = useState<SendByDraft>(SEND_BY_BLANK);
+  const deskEditId = correcting?.step === "edit" ? correcting.entry.activityId : null;
+  useEffect(() => { setDeskSendBy(SEND_BY_BLANK); }, [deskEditId]);
   const [deskMats, setDeskMats] = useState<MaterialRow[] | null>(null);
   const sentActivityId = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED)?.id ?? null;
   const editingSend = correcting?.step === "edit" && !!sentActivityId && correcting.entry.activityId === sentActivityId;
@@ -6509,6 +6516,17 @@ export const Queries: React.FC<{
                 const me = evts.find((e) => e.activityId === correcting.entry.activityId);
                 /* the root may be edited and never removed — removal routes to deleting the query */
                 const root = me ? rootGuard(me, evts) : { kind: "allow" as const };
+                /* ── the request the query is waiting on carries its send-by date here ──
+                   Only that entry: its status is the query's, the writer still owes the material, and nothing
+                   with a status came after it. An older request was answered by a send. */
+                const OWED_NOW: readonly string[] = [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT];
+                const liveRequest = !!me && OWED_NOW.includes(me.status) && activeQuery.status === me.status
+                  && !evts.some((x) => x.timeMs > me.timeMs && (Object.values(QueryStatus) as string[]).includes(x.status));
+                const sbToday = new Date(); sbToday.setHours(12, 0, 0, 0);
+                const sbWas = { due: activeQuery.expectedSendDate ?? null, reminder: activeQuery.sendReminderDate ?? null };
+                const sbAnswer = sendByAnswer(sbToday, deskSendBy.mode, deskSendBy.custom, deskSendBy.remind);
+                const sbWrite = liveRequest && deskSendBy.mode ? sendByFields(sbAnswer, { due: sbWas.due != null, reminder: sbWas.reminder != null }) : {};
+                const sbChanged = Object.keys(sbWrite).length > 0;
                 return (
                   <>
                   {/* the fork, collapsed to one line — "change" reopens it */}
@@ -6529,8 +6547,10 @@ export const Queries: React.FC<{
                        previewed commit, and the undo restores both halves together. */
                     extraFields={editingSend && deskMats ? (
                       <MaterialsFields rows={deskMats} onChange={setDeskMats} />
+                    ) : liveRequest ? (
+                      <SendByFields today={sbToday} recorded={dayOf(sbWas.due)} draft={deskSendBy} onChange={setDeskSendBy} resubmit={me!.status === QueryStatus.REVISE_RESUBMIT} />
                     ) : undefined}
-                    extraDirty={!!(editingSend && deskMats && activeQuery
+                    extraDirty={sbChanged || !!(editingSend && deskMats && activeQuery
                       && JSON.stringify(draftMaterialsToQuery(deskMats)) !== JSON.stringify((activeQuery.materialsWanted ?? [])))}
                     /**
                      * ⚠️ THE PREVIEW IS COMPUTED ON SAVE, NOT ON KEYSTROKE — a date mid-typing reads
@@ -6574,6 +6594,8 @@ export const Queries: React.FC<{
                           details: d.note,
                         });
                         if (matsChanged) await updateQuery(activeQuery.id, { materialsWanted: nextMats } as never);
+                        /* the send-by date and its reminder, saved with the rest and undone with it */
+                        if (sbChanged) await updateQuery(activeQuery.id, sbWrite as never);
                         await finishCorrection(
                           `${correcting.entry.label} corrected`,
                           async () => {
@@ -6581,6 +6603,7 @@ export const Queries: React.FC<{
                             /* both halves travel together — a one-sided undo would leave the
                                record and the strip disagreeing about one send */
                             if (matsChanged) await updateQuery(activeQuery.id, { materialsWanted: wasMats } as never);
+                            if (sbChanged) await updateQuery(activeQuery.id, Object.fromEntries(Object.keys(sbWrite).map((k) => [k, (k === "expectedSendDate" ? sbWas.due : sbWas.reminder) ?? deleteField()])) as never);
                           },
                           activeQuery.id,
                         );

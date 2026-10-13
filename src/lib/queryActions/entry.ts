@@ -93,6 +93,17 @@ export function leadDoors(row: LeadRow): Door[] {
 export function silenceLead(row: LeadRow): Door | null {
   return longSilence(row) ? leadDoors(row).find((d) => d.primary) ?? null : null;
 }
+/**
+ * What the list's "Next move" column says for that same door — the column's own vocabulary, held beside the
+ * predicate so the column, the tray's button and the panel's primary are one decision said three ways:
+ *   Close query        ↔ "Consider closing"
+ *   Record a response  ↔ "Waiting"   (the writer chose to keep tracking: nothing is suggested)
+ */
+export const SILENCE_WORDS: Partial<Record<DrawerMode, string>> = { close: "Consider closing", resp: "Waiting" };
+export function silenceWords(row: LeadRow): string | null {
+  const lead = silenceLead(row);
+  return lead ? SILENCE_WORDS[lead.mode] ?? lead.label : null;
+}
 /** The step's title in the query's panel, said for this query ("What did Eleanor say?"). */
 export function panelStepWords(mode: DrawerMode, status: QueryStatus | string | undefined, first: string): { title: string } {
   const who = first || "the agent";
