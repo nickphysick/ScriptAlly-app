@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "F7",
+  "where": "precondition: the two documents the test agent is copied from are on the account",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) before: the row says the reply is due at the send date plus six weeks",
+  "ok": true,
+  "detail": "\"QueriedReply by 10 Nov · in 28d\" · want 10 Nov"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) the editor previews the move, from the six-week date to the seven-week one",
+  "ok": true,
+  "detail": "previewed \"10 Nov → 17 Nov\" · want 10 Nov → 17 Nov"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) the agent's reply time reached the store",
+  "ok": true,
+  "detail": "6 → 7"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) the query's expected-reply date moved to the date the editor previewed",
+  "ok": true,
+  "detail": "\"QueriedReply by 10 Nov · in 28d\" → \"QueriedReply by 17 Nov · in 35d\" · previewed 17 Nov"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) back on the agent, and the stand card's figure has moved with it",
+  "ok": true,
+  "detail": "\"28 days to go\" → \"35 days to go\" (seven days more)"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) the save offers its Undo",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) Undo puts the reply time back in the store",
+  "ok": true,
+  "detail": "6 weeks"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) and the query's expected-reply date back where it was",
+  "ok": true,
+  "detail": "\"QueriedReply by 10 Nov · in 28d\" (was \"QueriedReply by 10 Nov · in 28d\")"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) and the stand card's figure is what it was",
+  "ok": true,
+  "detail": "\"28 days to go\" (was \"28 days to go\")"
+ },
+ {
+  "lock": "F7",
+  "where": "cl16-f7-agent (6 → 7 weeks) the test agent and its query are removed",
+  "ok": true,
+  "detail": "gone true"
+ },
+ {
+  "lock": "F7",
+  "where": "the save ran",
+  "ok": true,
+  "detail": "true"
+ }
+]

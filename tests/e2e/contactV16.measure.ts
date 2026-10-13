@@ -13,6 +13,8 @@
  *    measured sizes with the sidebar open the sheet is under 1440, so the page is compact at both.
  */
 import { test, type Page } from "@playwright/test";
+import { harnessDb } from "./harnessDocs";
+import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { LIB16, Ledger, MUT16, SIZES16, near, openContacts16, mutate16, setScroll16 } from "./cl16Lib";
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
@@ -1058,5 +1060,91 @@ test.describe("Contact list v16", () => {
       }
     }
     L.done(20);
+  });
+
+  /* ── F7 · the reply window, saved through the panel ─────────────────────────────────────────────────────── */
+  /* ⚠️ THIS LOCK WRITES TO THE SHARED ACCOUNT AND PUTS IT BACK: through the save's own Undo first (that is the
+     claim), and then, whatever happened, by writing the two documents back from what was read before the save.
+     Its red is a BUILD mutation ("skip the fan-out": `extras = []` in lib/agentCardSave), because nothing in the
+     page can stop a batched write; reports/contact-list-v16/REPORT.md records the run. */
+  test("F7 · reply window: a reply time saved through Edit profile moves the query's expected-reply date by the editor's own preview, and Undo puts both back", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("F7");
+    const { db, uid } = await harnessDb();
+    /* ⚠️ THE EXPECTED-REPLY DATE IS DERIVED, NOT STORED. `responseDeadline` is retired: nothing writes it on create, a
+       one-time migration deletes it on every load (db.tsx, the provenance pack), and the date a reader sees is the
+       last send plus the agent's reply time, worked out at read time. So "the query's date moves" is read where it
+       is shown (the row's "Reply by", the stand card), and the fan-out (`computeAgentDeadlineWrites`) has nothing to
+       move: skipping it changes no reading here (run, and recorded in the v16 report). The lock's own red is the
+       save not carrying the reply time.
+       The lock brings its own test agent with ONE open query: copies of two documents the rules already accept,
+       re-dated, with no writer's date. Both are deleted in `finally`. */
+    const AID = "cl16-f7-agent", QID = "cl16-f7-q";
+    const aRef = doc(db, "users", uid, "agents", AID), qRef = doc(db, "users", uid, "queries", QID);
+    const srcA = (await getDoc(doc(db, "users", uid, "agents", "msv12-agent-1"))).data();
+    const srcQ = (await getDoc(doc(db, "users", uid, "queries", "msv12-q-1"))).data();
+    L.check("F7", "precondition: the two documents the test agent is copied from are on the account", !!srcA && !!srcQ, `${!!srcA} · ${!!srcQ}`);
+    if (!srcA || !srcQ) { L.done(1); return; }
+    const sent = new Date(); sent.setDate(sent.getDate() - 14); sent.setHours(12, 0, 0, 0);
+    const before = { weeks: 6, sent: sent.toISOString() };
+    const due = (weeks: number) => { const d = new Date(sent); d.setDate(d.getDate() + weeks * 7); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Europe/London" }); };
+    const { writerExpectedDate: _w, responseDeadline: _r, ...cleanQ } = srcQ as Record<string, unknown>; void _w; void _r;
+    await deleteDoc(qRef).catch(() => {}); await deleteDoc(aRef).catch(() => {});
+    await setDoc(aRef, { ...srcA, id: AID, name: "Zelda Fanout", agency: "CL16 Lock Agency", responseTimeWeeks: 6 });
+    await setDoc(qRef, { ...cleanQ, id: QID, agentId: AID, status: "Queried", dateSent: before.sent });
+    /** the row's own line for the query: "Reply by 24 Nov · in 28d" */
+    const rowLine = () => page.evaluate((id) => { const r = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv="row"][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0); return (r?.querySelector(".clv-rq")?.textContent ?? "").replace(/\s+/g, " ").trim(); }, AID);
+    const w = `${AID} (6 → 7 weeks)`;
+    let ran = false;
+    try {
+      await openContacts16(page, SIZES16[0]);
+      const row = page.locator(`.aglist [data-clv="row"][data-agent-card="${AID}"]`).filter({ visible: true }).first();
+      await row.waitFor({ timeout: 20_000 });
+      await row.scrollIntoViewIfNeeded(); await row.click({ position: { x: 150, y: 28 } });
+      await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(400);
+      const stand0 = (await readPanel(page)).stand; const line0 = await rowLine();
+      L.check("F7", `${w} before: the row says the reply is due at the send date plus six weeks`, new RegExp(`reply by ${due(6)}`, "i").test(line0), `"${line0}" · want ${due(6)}`);
+      await page.locator(`${PANEL} button[data-ap="edit"]`).click();
+      await page.locator(`${PANEL} [data-ae-mode="edit"]`).waitFor({ timeout: 8000 });
+      await page.locator(`${PANEL} [data-ae="tabs"] [data-tab="work"]`).click(); await page.waitForTimeout(250);
+      await page.locator(`${PANEL} [data-ae="weeks"] [data-d="1"]`).click(); await page.waitForTimeout(300);
+      const also = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ae="also-work"]') as HTMLElement | null)?.textContent ?? "");
+      const m = also.match(/(\d{1,2} [A-Z][a-z]{2}|no date) → (\d{1,2} [A-Z][a-z]{2}|no date)/) ?? ["", "", ""];
+      ran = true;
+      L.check("F7", `${w} the editor previews the move, from the six-week date to the seven-week one`, m[1] === due(6) && m[2] === due(7), `previewed "${m[1]} → ${m[2]}" · want ${due(6)} → ${due(7)}`);
+      await page.locator(`${PANEL} [data-ae="save"]`).click();
+      await page.locator(`${PANEL} [data-ae-mode="edit"]`).waitFor({ state: "detached", timeout: 15_000 });
+      /* ⚠️ THE ACCOUNT IS NOW CHANGED: the restore is in `finally` */
+      let afterWeeks = NaN;
+      for (let i = 0; i < 20 && afterWeeks !== 7; i++) { afterWeeks = Number((await getDoc(aRef)).data()?.responseTimeWeeks); if (afterWeeks !== 7) await page.waitForTimeout(500); }
+      L.check("F7", `${w} the agent's reply time reached the store`, afterWeeks === 7, `6 → ${afterWeeks}`);
+      await page.waitForTimeout(800);
+      const line1 = await rowLine();
+      L.check("F7", `${w} the query's expected-reply date moved to the date the editor previewed`, new RegExp(`reply by ${m[2]}`, "i").test(line1) && m[2] === due(7), `"${line0}" → "${line1}" · previewed ${m[2]}`);
+      await page.waitForTimeout(600);
+      const p1 = await readPanel(page);
+      L.check("F7", `${w} back on the agent, and the stand card's figure has moved with it`, p1.acting === null && !!p1.stand && !!stand0 && Number(p1.stand.figure?.match(/\d+/)?.[0]) === Number(stand0.figure?.match(/\d+/)?.[0]) + 7, `"${stand0?.figure}" → "${p1.stand?.figure}" (seven days more)`);
+      /* the existing undo: the list's notice carries the card's own snapshot Undo */
+      const undo = page.locator(".aglist .agl-notice button.act", { hasText: /^Undo$/ }).filter({ visible: true }).first();
+      const offered = await undo.count();
+      L.check("F7", `${w} the save offers its Undo`, offered === 1, `${offered}`);
+      if (offered) await undo.evaluate((b) => (b as HTMLElement).click());
+      let backWeeks = NaN;
+      for (let i = 0; i < 20 && backWeeks !== 6; i++) { backWeeks = Number((await getDoc(aRef)).data()?.responseTimeWeeks); if (backWeeks !== 6) await page.waitForTimeout(500); }
+      await page.waitForTimeout(800);
+      const line2 = await rowLine();
+      L.check("F7", `${w} Undo puts the reply time back in the store`, backWeeks === 6, `${backWeeks} weeks`);
+      L.check("F7", `${w} and the query's expected-reply date back where it was`, line2 === line0, `"${line2}" (was "${line0}")`);
+      await page.waitForTimeout(500);
+      const p2 = await readPanel(page);
+      L.check("F7", `${w} and the stand card's figure is what it was`, !!p2.stand && p2.stand.figure === stand0?.figure, `"${p2.stand?.figure}" (was "${stand0?.figure}")`);
+    } finally {
+      /* whatever happened above, the two test documents go */
+      await deleteDoc(qRef).catch(() => {}); await deleteDoc(aRef).catch(() => {});
+      const gone = !(await getDoc(aRef)).exists() && !(await getDoc(qRef)).exists();
+      L.check("F7", `${w} the test agent and its query are removed`, gone, `gone ${gone}`);
+    }
+    L.check("F7", "the save ran", ran, `${ran}`);
+    L.done(10);
   });
 });
