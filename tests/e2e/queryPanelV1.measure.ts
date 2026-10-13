@@ -237,7 +237,11 @@ test.describe("Query panel v1", () => {
     page.setDefaultTimeout(15_000);
     const L = new Ledger("P7-P8");
     const want: Record<string, { primary: RegExp; title: (f: string) => string }> = {
+      /* RE-POINTED (ruling, 13 Oct — one next move for every row): with the agent the primary is Record a response
+         only while the reply date has not gone; past it, inside the year, Nudge leads. The row says which
+         (`data-next` on its tray button), so each kind is found by the move the list itself states. */
       agent: { primary: /^Record a response$/, title: (f) => `What did ${f} say?` },
+      past: { primary: /^Nudge$/, title: (f) => `A nudge to ${f}` },
       silent: { primary: /^Close query$/, title: (f) => `Close ${f}\u2019s query?` },
       you: { primary: /^Mark (partial|full|revision) sent$/, title: (f) => `What went to ${f}?` },
       offer: { primary: /^Record your answer$/, title: (f) => `Your answer to ${f}` },
@@ -254,8 +258,10 @@ test.describe("Query panel v1", () => {
         const rows = [...document.querySelectorAll<HTMLElement>(rowSel)].filter((r) => r.getBoundingClientRect().height > 0);
         const day = (r: HTMLElement) => { const m = /DAY\s+(\d+)/i.exec(r.textContent ?? ""); return m ? Number(m[1]) : null; };
         const f = (p: (r: HTMLElement) => boolean) => rows.find(p)?.dataset.qid ?? null;
+        const next = (r: HTMLElement) => r.querySelector<HTMLElement>('[data-qcv="row-act"]')?.dataset.next ?? "";
         return {
-          agent: f((r) => r.dataset.court === "agent" && (day(r) ?? 999) <= 365),
+          agent: f((r) => r.dataset.court === "agent" && next(r) === "resp" && (day(r) ?? 999) <= 365),
+          past: f((r) => r.dataset.court === "agent" && next(r) === "nudge"),
           silent: f((r) => r.dataset.court === "agent" && (day(r) ?? 0) > 365),
           you: f((r) => r.dataset.court === "you" && /Partial Requested|Full Requested/.test(r.dataset.status ?? "")),
           offer: f((r) => r.dataset.status === "Offer"),
@@ -310,7 +316,7 @@ test.describe("Query panel v1", () => {
       }
     }
     console.log(`  P8 branches entered: ${JSON.stringify(seen)}`);
-    L.check("P8", "population: the table's rows found on the account", (seen.agent ?? 0) > 0 && (seen.you ?? 0) > 0 && (seen.closed ?? 0) > 0, JSON.stringify(seen));
+    L.check("P8", "population: the table's rows found on the account", (seen.agent ?? 0) > 0 && (seen.past ?? 0) > 0 && (seen.you ?? 0) > 0 && (seen.closed ?? 0) > 0, JSON.stringify(seen));
     L.done(30);
   });
 
