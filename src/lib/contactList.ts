@@ -424,8 +424,10 @@ export function dropOptions(
 }
 
 /* ── grouping (v14 §4) — a PARTITION of the already-sorted list ── */
-export type GroupKey = "letter" | "status" | "action" | "country";
+/* v16 §C: "none" is the default — one list, A to Z by surname, no dividers */
+export type GroupKey = "none" | "letter" | "status" | "action" | "country";
 export const GROUP_OPTIONS: { key: GroupKey; label: string; line?: string }[] = [
+  { key: "none", label: "No grouping", line: "One list, in the order you sort it" },
   { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z index" },
   { key: "status", label: "Status", line: "Furthest along first; closed last" },
   { key: "action", label: "Action required", line: "What each agent needs from you" },
@@ -499,6 +501,8 @@ export function contactGroups(
   const buckets = new Map<string, string[]>();
   const put = (k: string, id: string) => { const l = buckets.get(k); if (l) l.push(id); else buckets.set(k, [id]); };
   const takes = ctx.takes ?? (() => false);
+  /* no grouping: the ordered list as one group with no label (an empty list has no group at all) */
+  if (key === "none") return ordered.length ? [{ label: "", key: "all", ids: ordered.map((x) => x.agent.id) }] : [];
   for (const x of ordered) {
     if (key === "letter") put(surnameInitial(x.agent), x.agent.id);
     else if (key === "status") put(x.status14, x.agent.id);

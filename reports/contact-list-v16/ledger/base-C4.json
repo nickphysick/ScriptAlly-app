@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C4",
+  "where": "1512 26 letters, and a letter is disabled exactly when it has no agent",
+  "ok": false,
+  "detail": "26 tabs · 9 off · wrong: ABCDEFHKLMNOPQRVW"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 the tabs are not sticky",
+  "ok": true,
+  "detail": "static,static"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 a letter to pick",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 26 letters, and a letter is disabled exactly when it has no agent",
+  "ok": false,
+  "detail": "26 tabs · 9 off · wrong: ABCDEFHKLMNOPQRVW"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 the tabs are not sticky",
+  "ok": true,
+  "detail": "static,static"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 a letter to pick",
+  "ok": false,
+  "detail": "none"
+ }
+]

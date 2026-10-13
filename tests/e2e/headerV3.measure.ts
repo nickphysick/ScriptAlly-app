@@ -30,8 +30,10 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /* Comparable titles v25 §B: /manuscripts/comps is a TITLE page now ("Comparable titles" since v27), so H2, H3 and H7 no
    longer read it (tests/e2e/RETIRED-comps-v25.md); CV25 B1 holds its header. */
 /* Corkboard v1 §B: /todo/corkboard (the Noteboard renamed) is a NUMBER page — "8 notes pinned to your corkboard". */
-export const NUMBER = ["/agents", "/manuscripts/packages", "/todo", "/todo/corkboard"] as const;
-export const TITLE = ["/queries", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
+/* RE-POINTED (Contact list v16, 12 Oct): the Contact list is a TITLE page now ("Every agent, in one place"), as the
+   Query Centre became in v137. Its number, its hidden counts sentence and H3's sum went with the number. */
+export const NUMBER = ["/manuscripts/packages", "/todo", "/todo/corkboard"] as const;
+export const TITLE = ["/queries", "/agents", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
@@ -175,7 +177,8 @@ test("H1–H7 · the panel on every workspace route", async ({ page }) => {
     /* H5 */
     L.check("H5 no stamp", at, r.stamps === 0, `${r.stamps}`);
     L.check("H5 no faces row", at, r.faces === 0, `${r.faces}`);
-    if (route === "/agents") L.check("H5 the hidden sentence carries the three counts", at, r.saidHidden && (r.said.match(/\d+ [a-z ]+/g) ?? []).length >= 2 && /active|closed|not queried/.test(r.said), `"${r.said}" hidden ${r.saidHidden}`);
+    /* RETIRED (Contact list v16): the hidden counts sentence left with the number; the strip states the counts (CL16 B1) */
+    if ((route as string) === "/agents-retired") L.check("H5 the hidden sentence carries the three counts", at, r.saidHidden && (r.said.match(/\d+ [a-z ]+/g) ?? []).length >= 2 && /active|closed|not queried/.test(r.said), `"${r.said}" hidden ${r.saidHidden}`);
     /* H6 */
     if (r.art && r.any) {
       withArt++; const a = r.art, h = r.any;
@@ -185,7 +188,8 @@ test("H1–H7 · the panel on every workspace route", async ({ page }) => {
     }
   }
   L.check("H6 population: several routes carry a drawing", "all", withArt >= 8, `${withArt} readings`);
-  L.check("H2 population: several number pages carry a subline", "all", withSub >= 6, `${withSub} sublines`);
+  /* RE-POINTED (Contact list v16): three number pages are left, so six readings at most; four is the floor */
+  L.check("H2 population: several number pages carry a subline", "all", withSub >= 4, `${withSub} sublines`);
   L.done(SIZES.length * ALL.length * 7);
 });
 

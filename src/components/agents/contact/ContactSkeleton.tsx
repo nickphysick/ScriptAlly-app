@@ -7,7 +7,7 @@
  * the perched art, the pills, the tabs and the Housekeeping tab appear only with data.
  *
  * ⚠️ NOTHING JUMPS WHEN THE DATA ARRIVES BECAUSE THESE ARE THE PAGE'S OWN COMPONENTS (lock 12). Each
- * placeholder IS its real counterpart — the same `ContactDesk`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
+ * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
  * `ContactRows` — drawn over a handful of
  * PLACEHOLDER agents through the page's own derivations, in the same parents, with their text made
  * transparent and a shimmer painted on (contactV13.css, `[data-loading]`). A box drawn by hand to
@@ -20,14 +20,9 @@
 import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
 import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
-import { deskModel } from "../../../lib/contactDesk";
-import { ContactDesk } from "./ContactDesk";
-import { CONTACT_BANNER_LINE } from "./ContactOpenHeader";
-import { YourAgentsBar } from "./YourAgentsBar";
+import { BLANK_GLANCE, ContactListHeading, ContactStrip } from "./ContactStrip";
 import { ContactIndexStrip } from "./ContactIndexStrip";
 import { ContactRows } from "./ContactRows";
-import { ContactNextStep } from "./ContactNextStep";
-import { nextStep } from "../../../lib/contactNextStep";
 import type { CardPrimary } from "../../../lib/agentCard";
 
 /* ONE line, so a placeholder row sits at the row's own 80 floor at every width (a two-line wishlist
@@ -50,49 +45,31 @@ const noop = () => {};
 const PRIMARY = { act: "log", label: "Log a query" } as unknown as CardPrimary;
 
 export const ContactSkeleton: React.FC<{
-  /** the banner's sentence names the book, as the page's own does */
-  msTitle: string | null;
-  msGenre: string | null;
-  /** the banner's controls, the page's own (drawn invisible: the pills appear only with data) */
+  /** the bar's controls, the page's own (drawn invisible until there is data) */
   controls: React.ReactNode;
-  perch: { src: string; width: number; height: number };
-}> = ({ msTitle, msGenre, controls, perch }) => {
+}> = ({ controls }) => {
   const nowMs = useMemo(() => Date.now(), []);
-  /* v15 §3 — the desk over the same placeholders: three cards at their loaded size, painted over */
-  const desk = useMemo(() => deskModel({ agents: PLACEHOLDERS, queries: [], msId: null, now: new Date(nowMs), hk: { complete: 0, total: PLACEHOLDERS.length, gaps: 0, gapAgents: 0 } }), [nowMs]);
   const facts = useMemo(() => sortFacts(PLACEHOLDERS.map((a) => agentFacts(a, [], null)), "surname"), []);
   const byId = useMemo(() => new Map(facts.map((x) => [x.agent.id, x])), [facts]);
-  const groups = useMemo(() => contactGroups("letter", facts), [facts]);
+  /* v16 §C: the list loads as it opens — ungrouped */
+  const groups = useMemo(() => contactGroups("none", facts), [facts]);
   const counts = useMemo(() => letterCounts(facts), [facts]);
 
   return (
     <>
-      <ContactDesk model={desk} onQueried={noop} onProfiles={noop} />
-      {/* v15 §4 — the next-step section over the placeholders: they are open, take the genre and are unqueried,
-          so it draws its Ready state, the shape the page settles into most often. Over TWO of them, so the card
-          sets the section's height and the list beside it never does: how many agents are ready is the writer's
-          data, and a longer placeholder list held the section 31px taller than it loaded (measured, CL13-12). */}
-      <ContactNextStep
-        step={nextStep({ agents: PLACEHOLDERS.slice(0, 2), queries: [], msId: null, book: ["Thriller"], todayIso: "2000-01-01" })}
-        hasBook bookTitle={msTitle} genres="thrillers" factsById={byId} qFor={() => null} genreHit={() => false} todayIso="2000-01-01"
-        reminded={() => false} discoverLive={false} discover={[]} notifyDiscover={false} onNotifyDiscover={noop}
-        onOpen={noop} onAct={noop} onAdd={noop} onSeeAll={noop} onNewAgent={noop} onDiscover={noop}
-        onRemind={noop} onRemindAll={noop} onAddDiscover={noop}
-      />
-      {/* v15.2 §4 — the banner holds its place while the page loads (its words wait for data): without it every row
-          below sat 212 (176) higher than it loads (measured, CL13-12) */}
-      <section className="cl15-ban" aria-hidden="true"><p>{CONTACT_BANNER_LINE}</p></section>
+      {/* v16 §B — the strip, every figure a blank of its box */}
+      <ContactStrip model={BLANK_GLANCE} onGroup={noop} onAll={noop} loading />
+      <ContactListHeading />
       <div className="clv-main">
-        <section className="cl14-ws" aria-hidden="true">
-          <YourAgentsBar shown={0} total={0} book={msTitle} you={0} ready={0} youOn={false} readyOn={false}
-            onYou={noop} onReady={noop} art={perch} controls={controls} />
-          {/* the strip's one line, held at its loaded height (34 + its 18 below); the controls wait for data */}
-          <div className="cl14-frow"><div className="cl14-fbar" aria-hidden="true"><span className="cl14-fp" style={{ width: 420, visibility: "hidden" }} /></div></div>
+        <section className="cl14-ws cl16-list" aria-hidden="true">
+          <div className="cl14-bar cl16-bar">{controls}</div>
+          {/* the filter row's one line, held at its loaded height; the chips and the count wait for data */}
+          <div className="cl14-frow cl16-frow"><div className="cl14-fwrap"><div className="cl14-fbar" aria-hidden="true"><span className="cl14-fp" style={{ width: 420, visibility: "hidden" }} /></div></div></div>
           <div className="cl14-list">
           <ContactIndexStrip total={facts.length} counts={counts} marked={null} onPick={noop} />
           <div>
             <ContactRows
-              groups={groups} totals={null} byId={byId} nowMs={nowMs} genreHit={() => false}
+              groups={groups} totals={null} byId={byId} nowMs={nowMs} genreHit={() => false} ungrouped byLetter={false}
               openId={null} newId={null} onOpen={noop} onAddGenres={noop} onAddWishlist={noop}
               trayFor={() => PRIMARY} onAct={noop}
             />

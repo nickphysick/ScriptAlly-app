@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "F4",
+  "where": "1512 the Queries tab lists the agent's queries, and counts them",
+  "ok": true,
+  "detail": "1 entries · tab \"Queries · 1\" · 7 Sep"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 an entry is a white card: the book in the typewriter, the stage in italics, a court chip, \"Open the query ›\"",
+  "ok": true,
+  "detail": "{\"title\":\"Harbour of Glass\",\"titleFace\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"stage\":\"Full requested · 19 Sep\",\"stageStyle\":\"italic\",\"chip\":\"With you\",\"open\":\"Open the query ›\",\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"12px\",\"query\":\"msv12-q-4\"}"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 \"Open the query\" shows it in ONE panel: the query panel's own view",
+  "ok": false,
+  "detail": "2 panels · agent panel false · msv12-q-4 · from agent"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 \"← Back to {first}\", and no Agent tab",
+  "ok": true,
+  "detail": "\"← Back to Theo\" · Tracking|Notes"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 the address still names the agent",
+  "ok": true,
+  "detail": "?agent=msv12-agent-4"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Back returns to the agent, on the Queries tab",
+  "ok": false,
+  "detail": "2 panels · msv12-agent-4 · tab queries"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Escape in the query view steps back to the agent",
+  "ok": false,
+  "detail": "2 panels · msv12-agent-4 · tab queries"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 an agent with no query for any book is on the account",
+  "ok": true,
+  "detail": "tabs read: Queries · 1 | Queries · 3 | Queries · 5 | Queries · 2 | Queries · 8 | Queries"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 no queries: one sentence",
+  "ok": true,
+  "detail": "\"You haven’t queried Tomas yet.\""
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Notes: the composer replaces the footer",
+  "ok": true,
+  "detail": "{\"foot\":false,\"doors\":false,\"area\":1,\"notes\":0,\"pin\":0}"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Notes: a note is added",
+  "ok": true,
+  "detail": "1 notes with the stamp"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Notes: the tab counts it",
+  "ok": true,
+  "detail": "\"Notes · 1\""
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Notes: Edit and Delete on a note; no Pin (no such write exists)",
+  "ok": true,
+  "detail": "Edit|Delete"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Notes: the note is edited",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 Notes: the note is deleted, and the account is as it was",
+  "ok": true,
+  "detail": "0 left"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 the Queries tab lists the agent's queries, and counts them",
+  "ok": true,
+  "detail": "1 entries · tab \"Queries · 1\" · 7 Sep"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 an entry is a white card: the book in the typewriter, the stage in italics, a court chip, \"Open the query ›\"",
+  "ok": true,
+  "detail": "{\"title\":\"Harbour of Glass\",\"titleFace\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"stage\":\"Full requested · 19 Sep\",\"stageStyle\":\"italic\",\"chip\":\"With you\",\"open\":\"Open the query ›\",\"bg\":\"rgb(255, 255, 255)\",\"radius\":\"12px\",\"query\":\"msv12-q-4\"}"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 \"Open the query\" shows it in ONE panel: the query panel's own view",
+  "ok": false,
+  "detail": "2 panels · agent panel false · msv12-q-4 · from agent"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 \"← Back to {first}\", and no Agent tab",
+  "ok": true,
+  "detail": "\"← Back to Theo\" · Tracking|Notes"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 the address still names the agent",
+  "ok": true,
+  "detail": "?agent=msv12-agent-4"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Back returns to the agent, on the Queries tab",
+  "ok": false,
+  "detail": "2 panels · msv12-agent-4 · tab queries"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Escape in the query view steps back to the agent",
+  "ok": false,
+  "detail": "2 panels · msv12-agent-4 · tab queries"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 an agent with no query for any book is on the account",
+  "ok": true,
+  "detail": "tabs read: Queries · 1 | Queries · 3 | Queries · 5 | Queries · 2 | Queries · 8 | Queries"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 no queries: one sentence",
+  "ok": true,
+  "detail": "\"You haven’t queried Tomas yet.\""
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Notes: the composer replaces the footer",
+  "ok": true,
+  "detail": "{\"foot\":false,\"doors\":false,\"area\":1,\"notes\":0,\"pin\":0}"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Notes: a note is added",
+  "ok": true,
+  "detail": "1 notes with the stamp"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Notes: the tab counts it",
+  "ok": true,
+  "detail": "\"Notes · 1\""
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Notes: Edit and Delete on a note; no Pin (no such write exists)",
+  "ok": true,
+  "detail": "Edit|Delete"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Notes: the note is edited",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 Notes: the note is deleted, and the account is as it was",
+  "ok": true,
+  "detail": "0 left"
+ }
+]

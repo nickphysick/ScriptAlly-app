@@ -183,7 +183,8 @@ async function bandChecks(page: Page, L: Ledger, w: string, narrow: boolean, sta
 }
 
 /* ── B1–B2 · the band, in the Ready state ── */
-test("CL15.1-B · band, ready", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step band is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15.1-B · band, ready", async ({ page }) => {
   const L = new Ledger("cl151-band-ready");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -194,7 +195,8 @@ test("CL15.1-B · band, ready", async ({ page }) => {
 });
 
 /* ── B1–B2 · the band, in the All-queried state (its own manuscript, seeded and removed in this run) ── */
-test("CL15.1-B · band, all queried", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step band is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15.1-B · band, all queried", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("cl151-band-done");
   const MS = "aqfx-ms";

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512 strip",
+  "ok": false,
+  "detail": "0 cells: no strip to press"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 strip",
+  "ok": false,
+  "detail": "0 cells: no strip to press"
+ }
+]

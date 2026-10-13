@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "F6",
+  "where": "1512 not queried, open: Log a query",
+  "ok": true,
+  "detail": "\"Log a query\" · Edit profile beside it true · status \"Not queried yet\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 not queried, open: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Not queried yet\" · \"Ready when you are\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 request to send: Mark partial/full sent",
+  "ok": true,
+  "detail": "\"Mark full sent\" · Edit profile beside it true · status \"Full requested\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 request to send: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Full requested\" · \"null\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 with the agent: Record a response",
+  "ok": true,
+  "detail": "\"Record a response\" · Edit profile beside it true · status \"Full sent\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 with the agent: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Full sent\" · \"null\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 past the reply date: Record a response",
+  "ok": true,
+  "detail": "\"Record a response\" · Edit profile beside it true · status \"Queried\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 past the reply date: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Queried\" · \"Expected 1 Jan · 285d over\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 closed: Edit profile, alone",
+  "ok": true,
+  "detail": "\"Edit profile\" · Edit profile beside it false · status \"Passed\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 closed: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Passed\" · \"Passed · 3 Mar\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 closed to queries: Edit profile, alone",
+  "ok": true,
+  "detail": "\"Edit profile\" · Edit profile beside it false · status \"Closed to queries\""
+ },
+ {
+  "lock": "F6",
+  "where": "1512 closed to queries: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Closed to queries\" · \"null\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 not queried, open: Log a query",
+  "ok": true,
+  "detail": "\"Log a query\" · Edit profile beside it true · status \"Not queried yet\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 not queried, open: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Not queried yet\" · \"Ready when you are\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 request to send: Mark partial/full sent",
+  "ok": true,
+  "detail": "\"Mark full sent\" · Edit profile beside it true · status \"Full requested\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 request to send: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Full requested\" · \"null\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 with the agent: Record a response",
+  "ok": true,
+  "detail": "\"Record a response\" · Edit profile beside it true · status \"Full sent\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 with the agent: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Full sent\" · \"null\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 past the reply date: Record a response",
+  "ok": true,
+  "detail": "\"Record a response\" · Edit profile beside it true · status \"Queried\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 past the reply date: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Queried\" · \"Expected 1 Jan · 285d over\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 closed: Edit profile, alone",
+  "ok": true,
+  "detail": "\"Edit profile\" · Edit profile beside it false · status \"Passed\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 closed: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Passed\" · \"Passed · 3 Mar\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 closed to queries: Edit profile, alone",
+  "ok": true,
+  "detail": "\"Edit profile\" · Edit profile beside it false · status \"Closed to queries\""
+ },
+ {
+  "lock": "F6",
+  "where": "1280 closed to queries: the status is one line, with ⋯ beside it",
+  "ok": true,
+  "detail": "1 lines · \"Closed to queries\" · \"null\""
+ },
+ {
+  "lock": "F6",
+  "where": "at least four of the table's positions were read, a closed one among them",
+  "ok": true,
+  "detail": "{\"not queried, open\":2,\"request to send\":2,\"with the agent\":2,\"past the reply date\":2,\"closed\":2,\"closed to queries\":2}"
+ }
+]

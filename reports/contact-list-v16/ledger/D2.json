@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 starts unpinned, pins past the line",
+  "ok": true,
+  "detail": "start false · past true"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 exactly two changes",
+  "ok": true,
+  "detail": "2 changes over 122 steps around 679"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 scrollTop is what was set",
+  "ok": true,
+  "detail": "worst drift 0.0"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 starts unpinned, pins past the line",
+  "ok": true,
+  "detail": "start false · past true"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 exactly two changes",
+  "ok": true,
+  "detail": "2 changes over 122 steps around 699"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 scrollTop is what was set",
+  "ok": true,
+  "detail": "worst drift 0.0"
+ }
+]

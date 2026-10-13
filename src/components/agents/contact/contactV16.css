@@ -1,0 +1,180 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v16 (design-refs/contact-list-v16/contact-list-v16.html) — the list is the page, as Query Centre
+ * v137. One authoritative block per part; values read off the rendered oracle at 1512 × 900 and 1280 × 800.
+ *
+ * ⚠️ "FULL (COMPACT)" IS THE PAGE SHEET'S WIDTH, AS v137 BUILT IT: the base rules are the compact values and
+ *    `.ws-app.sheet-wide` (the sheet is wider than 1440) restates the full ones. The oracle switches on the
+ *    WINDOW's width, so at a 1512 window with the sidebar open the oracle is full and the app is compact.
+ */
+
+/* ── §A · THE TITLE PANEL. The shared panel's box (shell/headerPanel.css `.hp3`); this states the padding, the
+   subline and the disc, which are this page's own. ── */
+.clv-group > .cl16-hd.hp3.hp3 { padding: 28px 32px 30px 36px; }
+.ws-app.sheet-wide .clv-group > .cl16-hd.hp3.hp3 { padding: 34px 44px 36px 48px; }
+.cl16-hd .hp3-txt .hp3-sub { margin-top: 14px; max-width: 520px; color: rgba(244, 238, 229, 0.86); }
+/* THE SUBLINE HOLDS TWO LINES, ALWAYS. It names the book, the book arrives after the first paint, and with a title
+   of ordinary length the sentence is two lines: a one-line sentence while loading made the panel 31px shorter than
+   it settles (measured, header panel v2's P6). A short title leaves the second line empty rather than moving the page. */
+.cl16-hd .hp3-txt .hp3-sub { min-height: 2.8em; }
+.ws-app.sheet-wide .cl16-hd .hp3-txt .hp3-sub { margin-top: 16px; }
+/* ⚠️ brand.tsx names bare spans as the body sans at runtime, injected last: the title's and the subline's inner
+   spans take their parent's face back (the Query Centre's own reset does this for its header; this page has none) */
+.cl16-hd .hp3-title span, .cl16-hd .hp3-sub span { font-family: inherit !important; }
+/* the book's title in the typewriter face, upright (brand.tsx names bare `i`: two classes and !important) */
+/* line-height 1: Special Elite's metrics make its inline box taller than the line it sits on, which grew each line
+   it appears on by 3px and the panel by 6 once the book's name arrived (measured: 292 loading, 298 loaded). */
+.cl16-hd .hp3-sub .cl16-ms { font-family: var(--sp-type) !important; font-style: normal; line-height: 1; }
+/* the disc: the panel's art slot holds it at the slot's own height, 12 from the panel's padding */
+.cl16-hd .hp3-art { margin-right: 12px; width: 196px; }
+.ws-app.sheet-wide .cl16-hd .hp3-art { width: 236px; }
+.cl16-hd .hp3-art .cl16-disc {
+  display: flex; align-items: center; box-sizing: border-box; width: 100%; height: 100%;
+  border-radius: 50%; background: #f4f1ec; overflow: hidden;
+}
+/* 0-3-1, over the slot's own `img { height: 100% }` */
+.cl16-hd .hp3-art .cl16-disc > img { display: block; flex: none; width: 118%; height: auto; max-width: none; margin-left: -6%; }
+
+/* ── §B · "AT A GLANCE". The strip wears v137's own classes (`.qcs-*`, queries/centre/qcvStrip137.css): the box,
+   the cells, the type, the cue, the pressed state, the blanks and the folds are those rules. This states only its
+   place in this page's group and its faces' colours.
+   ⚠️ brand.tsx names bare spans as the body sans at runtime: this page has no font reset of its own (the Query
+      Centre's `.qcv-own` does that job there), so the strip's spans state their faces at 0-3-0. ── */
+.clv-group > .qcs.cl16-gl { grid-column: 1 / -1; grid-row: 2; min-width: 0; margin-top: 34px; container: qcs / inline-size; }
+.ws-app.sheet-wide .clv-group > .qcs.cl16-gl { margin-top: 40px; }
+.cl16-gl.qcs .qcs-head .qcs-k, .cl16-gl.qcs .qcs-cell .qcs-lb, .cl16-gl.qcs .qcs-cell .qcs-cue { font-family: var(--font-mono) !important; }
+.cl16-gl.qcs .qcs-cell .qcs-line, .cl16-gl.qcs .qcs-faces .qcs-more { font-family: var(--sp-serif) !important; }
+.cl16-gl.qcs .qcs-faces .qcs-fc { font-family: var(--font-mono) !important; }
+/* the faces: not queried is white with an ink ring; querying is ink with cream initials; closed is grey */
+.cl16-gl.qcs .qcs-faces .cl16-fc--none { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 2px #fff; }
+.cl16-gl.qcs .qcs-faces .cl16-fc--live { background: #2a3a52; color: #f4eee5; }
+.cl16-gl.qcs .qcs-faces .cl16-fc--closed { background: #b3aca5; color: #2b2622; }
+
+/* ── §C · THE LIST IS THE PAGE. The group's rows are header · strip · "The full list" · list · footer. The heading
+   stays on the column; the list breaks out to 24px from the page sheet's edges, capped at 1600 and centred.
+   ⚠️ THE SHEET'S WIDTH IS `--hsheet-w` (shell/headerSheet.css, from the shell's published sheet edges), never a
+      container unit: making the scroller a size container would contain its fixed descendants.
+   ⚠️ `.clv-main` IS STILL THE ROWS' SIZE CONTAINER (`col`), so every narrow rule follows the LIST's width. ── */
+.clv-group > .qcs.cl16-flh { grid-row: 3; margin-top: 48px; container: none; }
+.ws-app.sheet-wide .clv-group > .qcs.cl16-flh { margin-top: 56px; }
+.cl16-flh.qcs .qcs-head { margin: 0; }
+@media (min-width: 768px) {
+  .clv-group > .clv-main {
+    grid-row: 4; justify-self: start; box-sizing: border-box; max-width: none;
+    --cl16-w: min(1600px, calc(var(--hsheet-w) - 48px));
+    width: var(--cl16-w);
+    margin: 16px 0 0 calc(50% - var(--cl16-w) / 2);
+  }
+}
+@media (max-width: 767.98px) { .clv-group > .clv-main { grid-row: 4; margin-top: 16px; } }
+/* the list's box: v14's white panel, no longer 20px wider than its column (the breakout is the column's) */
+.cl16-list.cl14-ws { margin: 0 0 20px; }
+/* the ink control bar: the list's first row */
+.cl16-bar.cl14-bar { background: #1f2a3c; border-radius: 16px 16px 0 0; padding: 18px 28px; }
+/* the filter row: white, the chips left and the count right, on one line */
+.cl16-frow.cl14-frow {
+  display: flex; align-items: center; gap: 12px; padding: 18px 28px;
+  background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.07);
+}
+.cl16-frow .cl14-fwrap { flex: 1 1 0; min-width: 0; }
+.cl16-frow .cl14-fbar { margin: 0; }
+.cl16-frow .cl16-showing { flex: none; white-space: nowrap; font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl16-frow .cl16-showing b, .cl16-frow .cl16-showing span { font-family: var(--sp-serif) !important; }
+.cl16-frow .cl16-showing b { font-weight: 600; color: #1c130f; }
+/* "for {title}" goes when the list is narrower than it is at a 1440 window (1144): the row is one line at 1280 */
+@container col (max-width: 1143.98px) { .cl16-frow .cl16-showing .cl16-for { display: none; } }
+
+/* the letter tabs (the oracle's `#idx`): card-file tabs on an ink line, under the filter row. Never sticky. */
+.cl16-list .clv-idxwrap { margin: 0 0 10px; position: static; }
+.cl16-list .clv-idx {
+  grid-template-columns: 72px repeat(26, minmax(0, 1fr)); gap: 3px; align-items: end;
+  padding: 0 18px; background: none; border-radius: 0; overflow: visible; box-shadow: none;
+  border-bottom: 2px solid #1f2a3c;
+}
+.cl16-list .clv-ixtab {
+  height: 40px; border-left: 0; border-radius: 9px 9px 0 0; background: none;
+  font: 400 17px/1 var(--sp-type); color: rgba(28, 19, 15, 0.22);
+}
+.cl16-list .clv-ixtab.has { background: #efe9df; color: #1c130f; }
+.cl16-list .clv-ixtab.has:hover { background: #e6dfd3; }
+.cl16-list .clv-ixtab.has i { font: 400 7.5px/1.3 var(--font-mono); font-style: normal; color: rgba(28, 19, 15, 0.5); margin-top: 3px; }
+.cl16-list .clv-ixtab.on { background: #1f2a3c; color: #f4eee5; }
+.cl16-list .clv-ixtab.on i { color: rgba(244, 238, 229, 0.7); }
+.cl16-list .clv-ixtab.clv-ixall { background: #e6dfd3; font: 500 12px/1 var(--sp-serif); color: #1c130f; }
+.cl16-list .clv-ixtab:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+/* a letter's landing: the row it scrolled to, washed for 1.4s (the page removes the mark) */
+.cl16-list .clv-row[data-wash] { background: #fbf6ea; }
+
+/* ── §D · THE LIST'S CONTROLS PIN (as Query Centre v137 §D). Three layers, each sticky inside the list so they
+   release at its end, each under the one before it from heights `useContactPins` measures (`--cl16-bar-h`,
+   `--cl16-frow-h`): the ink bar 12 under the scroller's top (under the shell's lip), the filter row, then the
+   column headings. The letter tabs are not among them: they scroll away.
+   ⚠️ `overflow-anchor: none` ON THE SCROLLER AND THE LIST: the bar and the filter row are shorter pinned, and the
+      browser would answer that by moving scrollTop, re-crossing the pin line from underneath. ── */
+.cl16-sum { display: none; }
+@media (min-width: 768px) {
+  .agl-wpg .wpg-scroll, .cl16-list { overflow-anchor: none; }
+  .cl16-list .cl16-sentinel { display: block; height: 0; }
+  .cl16-list .cl16-barpin { position: sticky; top: 12px; z-index: 9; }
+  .cl16-list .cl16-frow.cl14-frow { position: sticky; top: calc(12px + var(--cl16-bar-h, 0px)); z-index: 8; }
+  /* the headings: under the two rows; a group's own header first where the list is grouped, its headings under it */
+  .cl16-list .lt-labels { top: calc(12px + var(--cl16-bar-h, 0px) + var(--cl16-frow-h, 0px) + var(--lt-stick, 0px)); z-index: 7; transition: none; }
+  .cl16-list .lt-labels.is-stuck { box-shadow: none; }
+  .cl16-list .lt-gh { top: calc(12px + var(--cl16-bar-h, 0px) + var(--cl16-frow-h, 0px)); z-index: 7; }
+  /* grouped by letter: a letter's divider sticks under the FULL stack, the headings included — never behind it */
+  .cl16-list .lt-div { top: calc(12px + var(--cl16-bar-h, 0px) + var(--cl16-frow-h, 0px) + var(--lt-stick, 0px) + 40px); z-index: 6; }
+
+  /* pinned: tighter. The bar's wrapper paints the page's colour, so nothing shows past the bar's rounded corners. */
+  .cl16-list[data-pinned="true"] .cl16-barpin { background: var(--ink-tab, var(--ws-page)); }
+  .cl16-list[data-pinned="true"] .cl16-bar.cl14-bar { padding-top: 10px; padding-bottom: 10px; }
+  .cl16-list[data-pinned="true"] .cl16-bar :is(.cl13-find, .lp, .cl16-fsb) { height: 36px; }
+  .cl16-list[data-pinned="true"] .cl16-frow.cl14-frow { padding-top: 10px; padding-bottom: 10px; }
+  .cl16-list[data-pinned="true"] .cl16-frow :is(.cl14-fp, .cl14-fclear) { height: 30px; }
+  .cl16-list[data-pinned="true"] .cl16-frow .cl14-gtok { min-height: 30px; padding-top: 1px; padding-bottom: 1px; }
+  .cl16-list[data-pinned="true"] .lt-labels { box-shadow: 0 10px 18px -14px rgba(28, 19, 15, 0.35); }
+  .cl16-list[data-pinned="true"] .clv-grp .lt-labels { box-shadow: none; }
+  /* "↑ Summary": only while pinned, at the filter row's end */
+  .cl16-list[data-pinned="true"] .cl16-frow .cl16-sum {
+    display: inline-flex; align-items: center; gap: 6px; flex: none; box-sizing: border-box; height: 34px; padding: 0 14px;
+    border: 0; border-radius: 17px; background: transparent; cursor: pointer; white-space: nowrap;
+    box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.4);
+    font: 500 14px/1 var(--sp-serif) !important; color: #1c130f;
+  }
+  .cl16-list[data-pinned="true"] .cl16-frow .cl16-sum span { font-family: inherit !important; }
+  .cl16-list[data-pinned="true"] .cl16-frow .cl16-sum:hover { background: rgba(28, 19, 15, 0.05); }
+  .cl16-list .cl16-sum:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+}
+
+/* ── §E · FULL SCREEN. The bar's button; and, while on, the header panel, the strip, "The full list" and the
+   footer are put away, the list sits at the top already pinned (its sentinel at the pin line), and three count
+   chips stand where "Showing…" and "↑ Summary" were. The sidebar's icon state is the shell's own (a hold on it);
+   the list's width follows the sheet through `--hsheet-w`, which the shell republishes frame by frame as the
+   sidebar moves, so there is no half-width frame. ── */
+.cl16-bar .cl16-fsb {
+  display: inline-flex; align-items: center; gap: 7px; flex: none; box-sizing: border-box; height: 40px; padding: 0 14px;
+  margin-left: 8px; border: 0; border-radius: 20px; background: transparent; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55);
+  font: 500 14px/1 var(--sp-serif) !important; color: #f4eee5;
+}
+.cl16-bar .cl16-fsb svg { display: block; flex: none; }
+.cl16-bar .cl16-fsb:hover, .cl16-bar .cl16-fsb[aria-pressed="true"] { background: #f4eee5; color: #1f2a3c; box-shadow: none; }
+.cl16-bar .cl16-fsb:focus-visible { outline: 2px solid #e0a188; outline-offset: 2px; }
+@media (max-width: 767.98px) { .cl16-bar .cl16-fsb { display: none; } }
+@media (min-width: 768px) {
+  .clv-group[data-full] > :is(.cl16-gl, .af) { display: none; }
+  /* the panel's own box rule is four classes (shell/headerPanel.css): this one out-ranks it honestly */
+  .clv-group[data-full] > .cl16-hd.hpanel.hpanel--hero.hp3.hp3 { display: none; }
+  .clv-group[data-full] > .clv-main { margin-top: 12px; }
+}
+.cl16-frow .cl16-fchips { display: flex; align-items: center; gap: 6px; flex: none; }
+.cl16-frow .cl16-fchip {
+  box-sizing: border-box; height: 32px; padding: 0 13px; border: 0; border-radius: 16px; background: #f3efe8; cursor: pointer; white-space: nowrap;
+  font: 400 14px/1 var(--sp-serif) !important; color: #1c130f;
+}
+.cl16-frow .cl16-fchip b { font-family: inherit !important; font-weight: 600; }
+.cl16-frow .cl16-fchip:hover { background: #ebe5db; }
+.cl16-frow .cl16-fchip[aria-pressed="true"] { background: #2d3a50; color: #f4eee5; }
+.cl16-frow .cl16-fchip:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+.cl16-list[data-pinned="true"] .cl16-frow .cl16-fchip { height: 30px; }

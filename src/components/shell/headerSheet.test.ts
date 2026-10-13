@@ -80,7 +80,9 @@ describe("bands and banners read the tokens", () => {
     }
   });
   it("each banner's tint layer is the page sheet's width, clipped to the flap, with no shadow of its own", () => {
-    for (const [f, sel] of [[files[1], ".cl15-ban::before"], [files[2], ".qc134-ban::before"], [files[3], ".ms21-ban::before"]] as const) {
+    /* the Contact list's banner was retired with v16 (the list is the page): its rule is gone, and stays gone */
+    expect(decls(read(files[1])), files[1]).not.toMatch(/\.cl15-ban\b/);
+    for (const [f, sel] of [[files[2], ".qc134-ban::before"], [files[3], ".ms21-ban::before"]] as const) {
       const s = decls(read(f)); const i = s.indexOf(`${sel} {`);
       expect(i, `${f}: ${sel}`).toBeGreaterThan(-1);
       const rule = s.slice(i, s.indexOf("}", i));

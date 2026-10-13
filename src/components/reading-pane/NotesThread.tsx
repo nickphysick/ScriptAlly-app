@@ -44,7 +44,8 @@ export interface NotesThreadProps {
   onAdd: (text: string) => void | Promise<void>;
   onEdit: (id: string, text: string) => void | Promise<void>;
   onDelete: (note: ThreadNote) => void;
-  onPin: (id: string, pinned: boolean) => void | Promise<void>;
+  /** absent: these notes cannot be pinned (an agent's notes, Contact list v16 §F) — no Pin control and no pinned strip */
+  onPin?: (id: string, pinned: boolean) => void | Promise<void>;
   /** Resets every piece of local state when the reader moves to another query. */
   resetKey?: string;
 }
@@ -157,7 +158,7 @@ export const NotesThread: React.FC<NotesThreadProps> = ({ notes, onAdd, onEdit, 
         * everything written since. Held here it keeps its place while the thread scrolls, and it
         * unpins from its own control rather than from a menu somewhere else.
         */}
-      {pinned && (
+      {pinned && onPin && (
         <div className="qn-pinned">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z" /></svg>
           <span className="qn-pinnedtx">{pinned.entryText}</span>
@@ -212,7 +213,7 @@ export const NotesThread: React.FC<NotesThreadProps> = ({ notes, onAdd, onEdit, 
                         <span>{hhmm(ms)}</span>
                         <span className="qn-acts">
                           <button type="button" onClick={() => { setEditingId(n.id); setEditText(n.entryText); }}>Edit</button>
-                          <button type="button" onClick={() => onPin(n.id, !n.pinned)}>{n.pinned ? "Unpin" : "Pin"}</button>
+                          {onPin ? <button type="button" onClick={() => onPin(n.id, !n.pinned)}>{n.pinned ? "Unpin" : "Pin"}</button> : null}
                           <button type="button" onClick={() => onDelete(n)}>Delete</button>
                         </span>
                       </div>

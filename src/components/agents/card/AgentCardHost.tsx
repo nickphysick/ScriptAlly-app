@@ -27,14 +27,13 @@
  * cannot be read means NO Undo is offered: an Undo that restores nothing is worse.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useAgentNotes } from "./useAgentNotes";
 import { useLocation, useNavigate } from "react-router-dom";
-import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
-import { db, handleFirestoreError, OperationType } from "../../../lib/firebase";
+import { db } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
 import { Agent, SubmissionMethod, SubmissionStatus } from "../../../types";
-import {
-  AgentNote, committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft,
-} from "../../../lib/agentNotes";
+import { committedNotes, effectiveNotes, emptyNotesDraft } from "../../../lib/agentNotes";
 import {
   AgentCardField, AgentCardOptions, AgentCardTab, closeAgentCard, currentAgentCard, emitAgentCardEvent,
   openAgentCard, openNewAgentCard, stepAgentCard, useAgentCardRequest,
@@ -171,9 +170,29 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
 
   /* the editor a door asked for opens straight away, with its carried answers; otherwise the
      quick view. The carried answers belong to THAT opening — the pencil later starts clean. */
-  const [editing, setEditing] = useState<EditTarget | null>(
-    req?.tab ? { tab: req.tab, focus: req.focus, prefill: req.prefill } : null,
+  /* Contact list v16 §F — hosted in the agent's side panel there is no quick view: the editor is all there is */
+  const inPanel = req?.host === "panel" && req.agentId !== null;
+  const [editing, setEditingRaw] = useState<EditTarget | null>(
+    req?.tab || inPanel ? { tab: req?.tab ?? "who", focus: req?.focus, prefill: req?.prefill } : null,
   );
+  /** leaving the editor: back to the quick view — or, in the panel, the session is over */
+  const setEditing = useCallback((t: EditTarget | null) => {
+    if (t === null && inPanel) { closeAgentCard(); return; }
+    setEditingRaw(t);
+  }, [inPanel]);
+  /* the panel's act slot, looked up once the panel has drawn it (the panel hears the same store a frame later) */
+  const [panelSlot, setPanelSlot] = useState<Element | null>(null);
+  useLayoutEffect(() => {
+    if (!inPanel) return undefined;
+    let raf = 0, tries = 0;
+    const find = () => {
+      const el = document.querySelector("[data-ap-act-slot]");
+      if (el) { setPanelSlot(el); return; }
+      if (tries++ < 30) raf = requestAnimationFrame(find);
+    };
+    find();
+    return () => cancelAnimationFrame(raf);
+  }, [inPanel]);
   /* what a save hands back to the quick view: its foot (with the Undo) and the parts to pulse */
   const [handover, setHandover] = useState<{ foot: QuickFoot; pulse: SavedPulse[] } | null>(null);
   const [slide, setSlide] = useState<"l" | "r" | null>(null);
@@ -192,34 +211,15 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     if (!d && pulseOnReturn.current) { pulseOnReturn.current = false; setQueryPulse((n) => n + 1); }
   }, []);
 
-  /* ONE notes listener, for the open agent only — never one per row. */
-  const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
-  useEffect(() => {
-    setStoredNotes([]);
-    if (!agentId || !currentUser) return;
-    const ref = collection(db, "users", currentUser.id, "agents", agentId, "notes");
-    const unsub = onSnapshot(
-      ref,
-      (snap) => {
-        const list: AgentNote[] = [];
-        snap.forEach((d) => {
-          const data = d.data() as { text?: string; createdAt?: { toDate?: () => Date } | string };
-          list.push({
-            id: d.id,
-            text: String(data.text ?? ""),
-            createdAt:
-              typeof data.createdAt === "object" && data.createdAt?.toDate
-                ? data.createdAt.toDate().toISOString()
-                : String(data.createdAt ?? ""),
-          });
-        });
-        setStoredNotes(list);
-      },
-      (e) => handleFirestoreError(e, OperationType.LIST, `users/${currentUser.id}/agents/${agentId}/notes`),
-    );
-    return () => unsub();
-  }, [agentId, currentUser?.id]);
-
+  /** THE writer. Never through `updateAgent` (see the header): no activity, so an undo appends none. */
+  const writeAgent: AgentWriter = useCallback(async (id, patch) => {
+    if (sandbox?.writeAgent) return sandbox.writeAgent(id, patch);
+    if (!currentUser) return { ok: false, error: "Not signed in." };
+    return commitAgentEdits(db, currentUser.id, id, patch);
+  }, [sandbox, currentUser]);
+  /* ONE notes listener, for the open agent only — never one per row; and the three note writers. Shared with the
+     agent's side panel (Contact list v16 §F) through the one hook, so there is one way a note is written. */
+  const { storedNotes, onAddNote, onEditNote, onDeleteNote } = useAgentNotes(agent, currentUser?.id ?? null, writeAgent);
   /* the quick view's notes: committed only, with the flat legacy note riding as the oldest bubble
      exactly as the old drawer showed it */
   const profileNotes = useMemo(
@@ -230,12 +230,6 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     [storedNotes, agent],
   );
 
-  /** THE writer. Never through `updateAgent` (see the header): no activity, so an undo appends none. */
-  const writeAgent: AgentWriter = useCallback(async (id, patch) => {
-    if (sandbox?.writeAgent) return sandbox.writeAgent(id, patch);
-    if (!currentUser) return { ok: false, error: "Not signed in." };
-    return commitAgentEdits(db, currentUser.id, id, patch);
-  }, [sandbox, currentUser]);
   const write = useCallback(async (patch: AgentEditPatch) => {
     if (!agentId) return false;
     return (await writeAgent(agentId, patch)).ok;
@@ -359,47 +353,6 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     return "reason" in r ? { ok: false as const, reason: r.reason } : { ok: true as const, label: r.label };
   }, [scoped, genrePool, personalLabels, addPersonalGenre]);
 
-  /* ── the notes subcollection: a note saves as it is written, outside Save changes ─────────── */
-
-  /** The documented card cache, kept in step with the notes as they now stand. */
-  const keepPreview = useCallback(async (orig: Agent, list: AgentNote[]) => {
-    const after = committedNotes(effectiveNotes(list, emptyNotesDraft(), { flatNote: orig.notes, dateAdded: orig.dateAdded }));
-    const preview = computeNotePreview(after, orig.pinnedNoteId);
-    if ((orig.notePreview ?? "") !== preview) await writeAgent(orig.id, { notePreview: preview });
-  }, [writeAgent]);
-
-  /** A note write, its preview, and the house error handling — resolving to whether it landed, so
-   *  the composer keeps the words when it did not. */
-  const noteWrite = useCallback(async (
-    op: OperationType,
-    run: (uid: string, orig: Agent) => Promise<AgentNote[]>,
-  ): Promise<boolean> => {
-    if (!agent || !currentUser) return false;
-    try {
-      await keepPreview(agent, await run(currentUser.id, agent));
-      return true;
-    } catch (e) {
-      /* the handler logs and THROWS (its callers' control flow); here the flow is the boolean */
-      try { handleFirestoreError(e, op, `users/${currentUser.id}/agents/${agent.id}/notes`); } catch { /* logged */ }
-      return false;
-    }
-  }, [agent, currentUser, keepPreview]);
-
-  const onAddNote = useCallback((text: string) => noteWrite(OperationType.WRITE, async (uid, orig) => {
-    const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
-    const createdAt = new Date().toISOString();
-    await setDoc(doc(collection(db, "users", uid, "agents", orig.id, "notes"), noteId), { text, createdAt });
-    return [...storedNotes, { id: noteId, text, createdAt }];
-  }), [noteWrite, storedNotes]);
-  const onEditNote = useCallback((id: string, text: string) => noteWrite(OperationType.UPDATE, async (uid, orig) => {
-    await updateDoc(doc(db, "users", uid, "agents", orig.id, "notes", id), { text });
-    return storedNotes.map((n) => (n.id === id ? { ...n, text } : n));
-  }), [noteWrite, storedNotes]);
-  const onDeleteNote = useCallback((n: AgentNote) => noteWrite(OperationType.DELETE, async (uid, orig) => {
-    await deleteDoc(doc(db, "users", uid, "agents", orig.id, "notes", n.id));
-    return storedNotes.filter((x) => x.id !== n.id);
-  }), [noteWrite, storedNotes]);
-
   /* ── moving and leaving ──────────────────────────────────────────────────────────────────── */
 
   /** ✕, Escape and the backdrop on the quick view, and a new card left: shrink back into the row
@@ -517,6 +470,22 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   if (inEditor) {
     const target: EditTarget = isNew ? { tab: "who", focus: "name", prefill: req.prefill } : editing!;
     const name = isNew ? "New agent" : `Editing ${(agent!.name ?? "").trim() || agent!.agency}`;
+    if (inPanel) {
+      if (!panelSlot || !panelSlot.isConnected) return null;
+      return createPortal(
+        <div className="ac apn-edit" data-ap="edit">
+          <AgentCardEditor
+            variant="panel"
+            mode="edit" agent={agent} prefill={target.prefill} personal={personal} tab={target.tab} focus={target.focus}
+            agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
+            isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor} notes={storedNotes} earlierNote={agent?.notes ?? ""}
+            onSave={onEditorSave} onLeave={() => closeAgentCard()} onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
+            onNewGenre={onNewGenre} onAddNote={onAddNote} onEditNote={onEditNote} onDeleteNote={onDeleteNote} bindLeave={editorLeave}
+          />
+        </div>,
+        panelSlot,
+      );
+    }
     return (
       <AgentCardFrame
         ref={frameRef}

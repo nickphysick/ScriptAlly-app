@@ -2,8 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v14 §8 / v15 (v13 §8's mechanism) — the page guide's four steps, verbatim from the packs, each with the subject it
- * scrolls to and rings. The shared `PageGuide` draws them; the page key is `contacts`
+ * Contact list v16 §G (v13 §8's mechanism) — the page guide's four steps, each with the subject it scrolls to and rings.
+ * Steps 1 to 3 were re-pointed by v16 at the strip, the header's buttons and the list; their words are this build's, not a
+ * pack's (the v16 pack gave none), and are listed for Nick in the v16 report. The shared `PageGuide` draws them; the page key is `contacts`
  * (`sa.guide.contacts`).
  */
 import type { GuideStep } from "../../shell/PageGuide";
@@ -13,23 +14,25 @@ export const CONTACT_GUIDE_PAGE = "contacts";
 export const CONTACT_GUIDE: readonly GuideStep[] = [
   {
     title: "Your list in numbers",
-    /* v15 §3 (ruling 7): the desk replaced the strip — its words and its ring follow */
-    body: ["How many agents you have on file, how many you’ve queried for this book, and how complete their profiles are."],
-    subject: '[data-cl15="desk"]',
+    /* v16 §G: the strip replaced the desk — its ring follows; the words lose the Profiles card and gain the filter */
+    body: ["How many agents you have on file, how many you\u2019ve queried for this book, and how many of those queries are closed. Choose a card to filter the list."],
+    subject: '[data-cl16="strip"]',
   },
   {
-    title: "Your next step",
-    body: ["The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, or where the book has been."],
-    subject: '[data-cl14="next"]',
+    title: "Add agents",
+    /* v16 §G: the next-step section is gone; the header's two buttons are where a next agent comes from */
+    body: ["Add an agent you already know of, or find more in Discover."],
+    subject: '[data-cl16="header"] [data-hp3-part="acts"]',
   },
   {
-    title: "Agents on file",
-    body: ["Every agent on your list. Search, filter, group and sort it your way, or jump by letter. Click an agent to open their card."],
-    subject: '[data-cl14="ws"]',
+    title: "The full list",
+    /* v16 §G: the list is the page; an agent opens in a side panel, and the column headings sort */
+    body: ["Every agent on your list. Search, filter and group it your way, sort it from its column headings, or jump by letter. Click an agent to open them."],
+    subject: '[data-cl16="list"]',
   },
   {
     title: "Housekeeping",
-    body: ["The details missing from your agents’ profiles, and why each one helps. Fill them in here, a few at a time."],
+    body: ["The details missing from your agents\u2019 profiles, and why each one helps. Fill them in here, a few at a time."],
     subject: '[data-ftab="housekeeping"]',
   },
 ];

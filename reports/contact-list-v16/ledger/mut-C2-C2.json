@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 the list is the sheet less 48, at most 1600",
+  "ok": false,
+  "detail": "1159.3 · sheet 1256.0 · want 1208.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 24 from the sheet's edges",
+  "ok": false,
+  "detail": "48.4 · 48.4 · list 1159.3"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 centred in the sheet",
+  "ok": true,
+  "detail": "876.0 · sheet 876.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 the panel and the strip stay on the column",
+  "ok": false,
+  "detail": "column 1159.3 · panel 1159.3 · strip 1159.3 · list 1159.3"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 no sideways scroll, and the rows are inside the list",
+  "ok": true,
+  "detail": "over 0 · 6 rows"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 the list is the sheet less 48, at most 1600",
+  "ok": false,
+  "detail": "942.1 · sheet 1024.0 · want 976.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 24 from the sheet's edges",
+  "ok": false,
+  "detail": "41.0 · 41.0 · list 942.1"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 centred in the sheet",
+  "ok": true,
+  "detail": "760.0 · sheet 760.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 the panel and the strip stay on the column",
+  "ok": false,
+  "detail": "column 942.1 · panel 942.1 · strip 942.1 · list 942.1"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 no sideways scroll, and the rows are inside the list",
+  "ok": true,
+  "detail": "over 0 · 6 rows"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 the list is the sheet less 48, at most 1600",
+  "ok": false,
+  "detail": "1256.0 · sheet 1664.0 · want 1600.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 24 from the sheet's edges",
+  "ok": true,
+  "detail": "204.0 · 204.0 · list 1256.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 the list is 1600 wide",
+  "ok": false,
+  "detail": "1256.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 centred in the sheet",
+  "ok": true,
+  "detail": "1080.0 · sheet 1080.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 the panel and the strip stay on the column",
+  "ok": false,
+  "detail": "column 1256.0 · panel 1256.0 · strip 1256.0 · list 1256.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1920 no sideways scroll, and the rows are inside the list",
+  "ok": true,
+  "detail": "over 0 · 6 rows"
+ }
+]

@@ -18,7 +18,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 /* ── lock 1 · order and rhythm: the hero card, the strip, the next-step section, the workspace; no carousel ── */
-test("CL14-1 · order", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the page's order is v16's: header, strip, heading, list (CL16 C1). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL14-1 · order", async ({ page }) => {
   const L = new Ledger("cl14-1");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -56,7 +57,8 @@ test("CL14-1 · order", async ({ page }) => {
    tests/e2e/RETIRED-contact-list-v15.md. */
 
 /* ── lock 3 · the next-step section: Ready on the fixture, the card is the agent card, no space under it ── */
-test("CL14-3 · next step", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL14-3 · next step", async ({ page }) => {
   const L = new Ledger("cl14-3");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -122,7 +124,8 @@ test("CL14-3 · next step", async ({ page }) => {
 });
 
 /* ── lock 5 · the workspace: 20 wider than the strip each side, the ink bar, the hawk above it, the controls white ── */
-test("CL14-5 · workspace", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the "Your agents" panel and its title bar are gone; the list's frame is CL16 C1 and C2. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL14-5 · workspace", async ({ page }) => {
   const L = new Ledger("cl14-5");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -158,7 +161,8 @@ test("CL14-5 · workspace", async ({ page }) => {
 });
 
 /* ── lock 6 · the pills: each pill's number equals the rows it produces (rows read, not the counter) ── */
-test("CL14-6 · pills", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the bar's two pills went with the title bar; the strip filters (CL16 B2). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL14-6 · pills", async ({ page }) => {
   const L = new Ledger("cl14-6");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -194,6 +198,12 @@ const rowCount = (page: P) => page.locator(`.aglist ${LOADED_ROW}`).filter({ vis
 /** a pill's words — textContent, because below 1440 the lead-ins hide */
 const pillWords = (page: P, k: string) => v14(page, `[data-cl13-ctl="banner"] [data-lp="${k}"]`)
   .evaluate((e) => [...e.childNodes].map((n) => n.textContent ?? "").join(" ").replace(/\s+/g, " ").trim()).catch(() => "");
+/** RE-POINTED (Contact list v16): the sort pill is gone; the column headings sort, and the active one says so */
+const sortWords = (page: P) => page.evaluate(() => {
+  const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
+  const h = root?.querySelector<HTMLElement>(".lt-labels [aria-sort]");
+  return h ? `${h.getAttribute("data-lt-col")} ${h.getAttribute("aria-sort")}` : "";
+});
 const pops = (page: P) => page.locator(".lpop").count();
 const settle = (page: P, ms = 700) => page.waitForTimeout(ms);
 /** the group headings, in order */
@@ -261,7 +271,9 @@ test("CL14-7 · filter strip", async ({ page }) => {
     await checkOverflow(page, L, w);
   }
   /* the fold is MEASURED: at 1280 the row cannot hold every control and folds; at 1512 it holds them */
-  L.check("CL14-7 'More filters' at 1280, not at 1512", "both", folded["1280"] === true && folded["1512"] === false, JSON.stringify(folded));
+  /* RE-POINTED (Contact list v16): the filter row carries "Showing n of N" and Summary now, so it folds at 1512 as well,
+     as the v16 reference draws it (screens/03-pinned-1512) */
+  L.check("CL14-7 'More filters' at 1280 and at 1512", "both", folded["1280"] === true && folded["1512"] === true, JSON.stringify(folded));
   L.done(17);
 });
 
@@ -281,20 +293,22 @@ test("CL14-8 · grouping", async ({ page }) => {
     await openContacts(page, vp);
     const w = `${vp.width}`;
     const total = await rowCount(page);
-    L.check("CL14-8 at rest: 'Grouped: Letter', 'Sort: Surname, A to Z'", w,
-      (await pillWords(page, "group")).includes("Letter") && (await pillWords(page, "sort")).includes("Surname, A to Z"), `${await pillWords(page, "group")} | ${await pillWords(page, "sort")}`);
+    /* RE-POINTED (Contact list v16): the list opens ungrouped and the Agent heading carries the sort */
+    L.check("CL14-8 at rest: 'Grouped: No grouping', the Agent heading ascending", w,
+      (await pillWords(page, "group")).includes("No grouping") && (await sortWords(page)) === "Agent ascending", `${await pillWords(page, "group")} | ${await sortWords(page)}`);
+    await pickGroup(page, "letter");
     const ymLetter = await page.locator('.aglist [data-clv="ym"]').filter({ visible: true }).count();
     L.check("CL14-8 under Letter the YOUR MOVE tag shows (population)", w, ymLetter > 0, `${ymLetter}`);
     /* one popover at a time, and Escape / an outside press close only the popover */
+    /* RE-POINTED (Contact list v16): the second popover is a filter's (the sort pill is gone) */
     await v14(page, '[data-cl13-ctl="banner"] [data-lp="group"]').click({ timeout: 5000 }).catch(() => {});
-    await v14(page, '[data-cl13-ctl="banner"] [data-lp="sort"]').click({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(150);
-    L.check("CL14-8 one popover at a time", w, (await pops(page)) === 1 && (await page.locator('[data-lpop="sort"]').count()) === 1, `${await pops(page)}`);
+    L.check("CL14-8 one popover at a time", w, (await pops(page)) === 1 && (await page.locator('[data-lpop="group"]').count()) === 1, `${await pops(page)}`);
     await page.keyboard.press("Escape");
     await page.waitForTimeout(150);
     L.check("CL14-8 Escape closes only the popover", w, (await pops(page)) === 0 && (await page.locator('[data-ac="overlay"]').count()) === 0 && (await rowCount(page)) === total, "");
     await v14(page, '[data-cl13-ctl="banner"] [data-lp="group"]').click({ timeout: 5000 }).catch(() => {});
-    await page.locator(".aglist .cl14-bar-t h2").filter({ visible: true }).first().dispatchEvent("pointerdown", { bubbles: true });
+    await page.locator('.aglist [data-cl16="showing"]').filter({ visible: true }).first().dispatchEvent("pointerdown", { bubbles: true });
     await page.waitForTimeout(150);
     L.check("CL14-8 an outside press closes it", w, (await pops(page)) === 0, "");
     for (const [k, order, word] of [["status", STATUS_ORDER, "Status"], ["action", ACTION_ORDER, "Action required"]] as const) {
@@ -304,7 +318,9 @@ test("CL14-8 · grouping", async ({ page }) => {
       L.check(`CL14-8 ${word}: the pill names it`, w, (await pillWords(page, "group")).includes(word), await pillWords(page, "group"));
       L.check(`CL14-8 ${word}: YOUR MOVE absent — the heading already says it`, w, (await page.locator('.aglist [data-clv="ym"]').filter({ visible: true }).count()) === 0, "");
       L.check(`CL14-8 ${word}: a partition — nobody lost`, w, (await rowCount(page)) === total, `${await rowCount(page)} of ${total}`);
-      L.check(`CL14-8 ${word}: no A–Z tabs (Letter only)`, w, (await page.locator('.aglist [data-clv="idxwrap"]').filter({ visible: true }).count()) === 0, "");
+      /* RE-POINTED (Contact list v16): the letter tabs are drawn under every grouping now (a pick returns the list to
+         letters), where v14 drew them under Letter only */
+      L.check(`CL14-8 ${word}: the A–Z tabs are still drawn`, w, (await page.locator('.aglist [data-clv="idxwrap"]').filter({ visible: true }).count()) === 1, "");
       /* §5 — the powder band: #e9f1f8, 54 tall, 12px corners; the art circle white, the count pill white on #2f5f86 */
       const band = await page.evaluate(() => {
         const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0);
@@ -324,14 +340,14 @@ test("CL14-8 · grouping", async ({ page }) => {
     const named = c.filter((x) => x !== "Not recorded");
     L.check("CL14-8 Country: by name A–Z, 'Not recorded' last, no guessed nation", w,
       c.length >= 1 && JSON.stringify(named) === JSON.stringify([...named].sort((a, b) => a.localeCompare(b))) && (!c.includes("Not recorded") || c[c.length - 1] === "Not recorded") && !c.some((x) => /England|Scotland|Wales|Northern Ireland/.test(x)), JSON.stringify(c));
-    /* the sort and its direction */
-    await v14(page, '[data-cl13-ctl="banner"] [data-lp="sort"]').click({ timeout: 5000 }).catch(() => {});
-    await page.locator('[data-lpop="sort"] [data-opt="sort:reply"]').click({ timeout: 4000 }).catch(() => page.keyboard.press("Escape"));
+    /* the sort and its direction. RE-POINTED (Contact list v16): the Replies heading sorts; pressing it again reverses */
+    const rep = v14(page, '.lt-labels [data-lt-col="Replies"]');
+    await rep.click({ timeout: 5000 }).catch(() => {});
     await settle(page, 300);
-    const dir = await v14(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label");
-    L.check("CL14-8 'Sort: Response time'; the direction says 'Fastest first'", w, (await pillWords(page, "sort")).includes("Response time") && dir === "Sort order: Fastest first", `${await pillWords(page, "sort")} ${dir}`);
-    await v14(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').click({ timeout: 5000 }).catch(() => {});
-    L.check("CL14-8 the toggle names the reversed order", w, (await v14(page, '[data-cl13-ctl="banner"] [data-lp="dir"]').getAttribute("aria-label")) === "Sort order: Slowest first", "");
+    L.check("CL14-8 the Replies heading sorts, ascending", w, (await sortWords(page)) === "Replies ascending", await sortWords(page));
+    await rep.click({ timeout: 5000 }).catch(() => {});
+    await settle(page, 300);
+    L.check("CL14-8 pressed again, it is descending", w, (await sortWords(page)) === "Replies descending", await sortWords(page));
     await checkOverflow(page, L, w);
   }
   L.done(46);
@@ -339,7 +355,7 @@ test("CL14-8 · grouping", async ({ page }) => {
 
 /* ── lock 9 · remembered settings: versioned and validated — stale state reads as the defaults ── */
 const seedMemory = async (page: P, value: unknown) => {
-  await page.evaluate((v) => sessionStorage.setItem("sa.contactList.v3", JSON.stringify(v)), value);
+  await page.evaluate((v) => sessionStorage.setItem("sa.contactList.v4", JSON.stringify(v)), value);
   await page.reload();
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
@@ -351,25 +367,24 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   await openContacts(page, vp);
   const total = await rowCount(page);
   /* a good state restores (v15 moved the key to v3 with the ready-only mode) */
-  const good = { v: 3, filters: { status: [], action: true, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" }, search: "", group: "status", sort: "reply", reversed: false, density: "comfortable", readyOnly: false };
+  const good = { v: 4, filters: { status: [], action: true, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" }, search: "", group: "status", sort: "reply", reversed: false, density: "comfortable", glance: null };
   await seedMemory(page, good);
   L.check("CL14-9 a good state restores: Grouped: Status, Sort: Response time, Action required on", w,
-    (await pillWords(page, "group")).includes("Status") && (await pillWords(page, "sort")).includes("Response time")
-    && (await v14(page, '[data-cl14-chip="action"]').getAttribute("aria-pressed").catch(() => null)) === "true", `${await pillWords(page, "group")} | ${await pillWords(page, "sort")}`);
+    (await pillWords(page, "group")).includes("Status") && (await sortWords(page)) === "Replies ascending"
+    && (await page.locator('.aglist [data-cl14-chip="action"], .lpop [data-cl14-chip="action"]').first().getAttribute("aria-pressed").catch(() => null)) !== "false", `${await pillWords(page, "group")} | ${await sortWords(page)}`);
   /* a stale state — a grouping, a sort and a status that no longer exist, and v13's facets — reads as the defaults, and the page still renders */
-  await seedMemory(page, { v: 3, readyOnly: "yes", filters: { status: ["Offer"], stand: ["you"], fit: ["takes"], open: ["open"], genres: [7] }, search: 3, group: "agency", sort: "due", reversed: "yes", density: "huge" });
-  const stale = { group: await pillWords(page, "group"), sort: await pillWords(page, "sort"), rows: await rowCount(page), clear: await page.locator('.aglist [data-cl14="clear-all"]').filter({ visible: true }).count(), boundary: await page.getByText(/Something went wrong/i).count() };
-  L.check("CL14-9 stale state: Letter, Surname A to Z, nothing on, every row, no error", w,
-    stale.group.includes("Letter") && stale.sort.includes("Surname, A to Z") && stale.rows === total && stale.clear === 0 && stale.boundary === 0, JSON.stringify(stale));
-  /* the PILL falls back to "Letter" by itself for a key it does not know, so it cannot prove the restore was
-     refused — the LIST must be grouped by letter: the A–Z tabs shown and every heading a single letter */
+  await seedMemory(page, { v: 4, glance: "everyone", filters: { status: ["Offer"], stand: ["you"], fit: ["takes"], open: ["open"], genres: [7] }, search: 3, group: "agency", sort: "due", reversed: "yes", density: "huge" });
+  const stale = { group: await pillWords(page, "group"), sort: await sortWords(page), rows: await rowCount(page), clear: await page.locator('.aglist [data-cl14="clear-all"]').filter({ visible: true }).count(), boundary: await page.getByText(/Something went wrong/i).count() };
+  L.check("CL14-9 stale state: No grouping, the Agent heading ascending, nothing on, every row, no error", w,
+    stale.group.includes("No grouping") && stale.sort === "Agent ascending" && stale.rows === total && stale.clear === 0 && stale.boundary === 0, JSON.stringify(stale));
+  /* the PILL falls back by itself for a key it does not know, so it cannot prove the restore was refused — the LIST
+     must be ungrouped (v16's default): no heading at all */
   const heads = await headings(page);
-  const idx = await page.locator('.aglist [data-clv="idxwrap"]').filter({ visible: true }).count();
-  L.check("CL14-9 stale state: the list itself is grouped by letter (A–Z tabs, letter headings)", w,
-    idx === 1 && heads.length > 1 && heads.every((h) => /^[A-Z#]$/.test(h)), `idx ${idx} ${JSON.stringify(heads.slice(0, 6))}`);
+  L.check("CL14-9 stale state: the list itself is ungrouped (no headings)", w, heads.length === 0, JSON.stringify(heads.slice(0, 6)));
   /* v13's unversioned key is read by nothing */
   await page.evaluate(() => {
-    sessionStorage.removeItem("sa.contactList.v3");
+    sessionStorage.removeItem("sa.contactList.v4");
+    sessionStorage.setItem("sa.contactList.v3", JSON.stringify({ v: 3, filters: {}, group: "status", sort: "reply", readyOnly: true }));
     sessionStorage.setItem("sa.contactList", JSON.stringify({ filters: { stand: ["you"] }, group: "agency", sort: "due" }));
     /* v14's key too: a v2 value is an older shape, refused whole */
     sessionStorage.setItem("sa.contactList.v2", JSON.stringify({ v: 2, filters: {}, group: "status", sort: "reply", readyOnly: true }));
@@ -377,17 +392,17 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
   await page.reload();
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
-  L.check("CL14-9 v13's unversioned key and v14's v2 key are ignored", w, (await pillWords(page, "group")).includes("Letter") && (await rowCount(page)) === total, await pillWords(page, "group"));
-  await page.evaluate(() => { sessionStorage.removeItem("sa.contactList"); sessionStorage.removeItem("sa.contactList.v2"); });
+  L.check("CL14-9 v13's unversioned key and the v2 and v3 keys are ignored", w, (await pillWords(page, "group")).includes("No grouping") && (await rowCount(page)) === total, await pillWords(page, "group"));
+  await page.evaluate(() => { sessionStorage.removeItem("sa.contactList"); sessionStorage.removeItem("sa.contactList.v2"); sessionStorage.removeItem("sa.contactList.v3"); });
   /* a fresh session restores nothing */
   await seedMemory(page, good);
   const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
   const p2 = await ctx.newPage();
   await p2.addInitScript(() => { try { localStorage.setItem("sa.guide.contacts", "1"); } catch { /* private mode */ } });
   await openContacts(p2, vp, { keep: true });
-  L.check("CL14-9 a fresh session restores nothing", w, (await pillWords(p2, "group")).includes("Letter"), await pillWords(p2, "group"));
+  L.check("CL14-9 a fresh session restores nothing", w, (await pillWords(p2, "group")).includes("No grouping"), await pillWords(p2, "group"));
   await ctx.close();
-  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v3"));
+  await page.evaluate(() => sessionStorage.removeItem("sa.contactList.v4"));
   L.done(5);
 });
 
@@ -498,9 +513,11 @@ test("CL14-11 · rows", async ({ page }) => {
       };
     });
     if (!r) { L.check("CL14-11 the list renders", w, false, "no list"); continue; }
-    L.check("CL14-11 Letter: one panel", w, r.panels === 1, `${r.panels}`);
-    L.check("CL14-11 the labels: sticky at 0, 40 tall", w, !!r.lbl && r.lbl.pos === "sticky" && r.lbl.top === "0px" && near(r.lbl.h, 40, 0.5), JSON.stringify(r.lbl));
-    L.check("CL14-11 the letter divider: sticky at 40, 38 tall", w, !!r.div && r.div.pos === "sticky" && r.div.top === "40px" && near(r.div.h, 38, 0.5), JSON.stringify(r.div));
+    L.check("CL14-11 one panel", w, r.panels === 1, `${r.panels}`);
+    /* RE-POINTED (Contact list v16): the headings pin UNDER the bar and the filter row (CL16 D1 measures the stack), so
+       their sticky top is those two's height, not 0; and the ungrouped default draws no letter divider (CL16 D2) */
+    L.check("CL14-11 the labels: sticky below the pinned bar and filter row, 40 tall", w, !!r.lbl && r.lbl.pos === "sticky" && parseFloat(r.lbl.top) > 100 && near(r.lbl.h, 40, 0.5), JSON.stringify(r.lbl));
+    L.check("CL14-11 ungrouped: no letter divider", w, r.div === null, JSON.stringify(r.div));
     L.check("CL14-11 a row is at least 80 tall", w, r.rowMin >= 79.5, `${r.rowMin}`);
     L.check("CL14-11 no row carries a coloured edge", w, r.edges === 0, `${r.edges}`);
     L.check("CL14-11 the disc: 38, #2a3a52", w, !!r.disc && r.disc[0] === "rgb(42, 58, 82)" && near(Number(r.disc[1]), 38, 0.5), JSON.stringify(r.disc));
@@ -521,8 +538,8 @@ test("CL14-11 · rows", async ({ page }) => {
       await new Promise((res) => setTimeout(res, 400));
       return { before, after: lbl.classList.contains("is-stuck"), shadow: getComputedStyle(lbl).boxShadow, gap: lbl.getBoundingClientRect().top - sc.getBoundingClientRect().top };
     });
-    L.check("CL14-11 the labels pin at the scroller's top and lift (a shadow) once pinned", w,
-      !stuck.before && stuck.after && stuck.shadow !== "none" && near(stuck.gap, 0, 1), JSON.stringify(stuck));
+    L.check("CL14-11 the labels pin under the bar and filter row and lift (a shadow) once pinned", w,
+      !stuck.before && stuck.after && stuck.shadow !== "none" && stuck.gap > 100 /* v16: under the pinned bar and filter row */, JSON.stringify(stuck));
     /* the marquee: a wishlist too long for its line scrolls on row hover (the Web Animations API) */
     const mq = await page.evaluate(() => {
       const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -557,7 +574,8 @@ const scrollList = (page: P, by: number) => page.evaluate((by) => {
 }, by);
 
 /* lock 11 · the A–Z rail */
-test("CL14-12 · rail", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the A to Z rail is gone; the letter tabs are in the list and never pin (CL16 D2). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL14-12 · rail", async ({ page }) => {
   const L = new Ledger("cl14-12");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -705,7 +723,9 @@ test("CL14-15 · reduced motion", async ({ page }) => {
   const L = new Ledger("cl14-15");
   const probe = async (w: string, rm: boolean) => {
     await page.emulateMedia({ reducedMotion: rm ? "reduce" : "no-preference" });
-    await openContacts(page, { width: 1512, height: 900 }, { motion: true });
+    /* RE-POINTED (Contact list v16): at 1512 the "Always responds" chip is folded into More filters now, so this probe
+       runs at 1920, where the chip is on the row */
+    await openContacts(page, { width: 1920, height: 1000 }, { motion: true });
     const tag = rm ? "reduced" : "full";
     /* the count and the reflow: toggle a filter and read inside the first ~120ms */
     await v14(page, '[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
@@ -753,13 +773,13 @@ test("CL14-15 · reduced motion", async ({ page }) => {
    strip, the next-step section, the workspace, the Housekeeping tab — and a steered step brings its subject
    into view. (A fresh context: this file's beforeEach marks the guide seen on every navigation.) ── */
 const GUIDE14 = [
-  /* v15 §3 (ruling 7): step 1 rings the desk, in Nick's words */
-  { title: "Your list in numbers", sel: '[data-cl15="desk"]',
-    body: "How many agents you have on file, how many you’ve queried for this book, and how complete their profiles are." },
-  { title: "Your next step", sel: '[data-cl14="next"]',
-    body: "The agents to query next for this book, and the next one up. When there’s no one left to query, this tells you who reopens soon, or where the book has been." },
-  { title: "Agents on file", sel: '[data-cl14="ws"]',
-    body: "Every agent on your list. Search, filter, group and sort it your way, or jump by letter. Click an agent to open their card." },
+  /* RE-POINTED (Contact list v16 §G): steps 1 to 3 ring the strip, the header's buttons and the list, in the build's words */
+  { title: "Your list in numbers", sel: '[data-cl16="strip"]',
+    body: "How many agents you have on file, how many you’ve queried for this book, and how many of those queries are closed. Choose a card to filter the list." },
+  { title: "Add agents", sel: '[data-cl16="header"] [data-hp3-part="acts"]',
+    body: "Add an agent you already know of, or find more in Discover." },
+  { title: "The full list", sel: '[data-cl16="list"]',
+    body: "Every agent on your list. Search, filter and group it your way, sort it from its column headings, or jump by letter. Click an agent to open them." },
   { title: "Housekeeping", sel: '[data-ftab="housekeeping"]',
     body: "The details missing from your agents’ profiles, and why each one helps. Fill them in here, a few at a time." },
 ] as const;

@@ -408,30 +408,7 @@
 }
 /* below 1440 the ⌨ hides (the row's room goes to Find) */
 @media (max-width: 1439.5px) { .cl14-kbh { display: none; } }
-/* §7.4 — the A–Z rail: frosted white at the sheet's right edge, vertically centred */
-.cl14-azr {
-  position: fixed; right: calc(var(--ink-sheet-r, 0px) + 20px); top: 50%; transform: translate(8px, -46%); z-index: 54;
-  display: flex; flex-direction: column; align-items: center; box-sizing: border-box; width: 26px; padding: 8px 3px; border-radius: 14px;
-  background: rgba(255, 255, 255, 0.75); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 10px 24px -16px rgba(28, 19, 15, 0.35);
-  opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.25s; touch-action: none; user-select: none;
-}
-.cl14-azr.show { opacity: 1; pointer-events: auto; transform: translate(0, -46%); }
-.cl14-azr button {
-  width: 20px; height: 15px; border: 0; background: none; padding: 0; border-radius: 4px; cursor: pointer;
-  font: 600 9.5px/15px var(--sp-mono); color: var(--clv-slate-ink);
-}
-.cl14-azr button.off, .cl14-azr button:disabled { color: rgba(63, 86, 107, 0.25); cursor: default; }
-.cl14-azr button:not(.off):not(:disabled):hover { background: #e3ebf1; }
-.cl14-azr button.on { background: var(--clv-slate-ink); color: #fff; }
-.cl14-azb {
-  position: absolute; right: 34px; width: 46px; height: 46px; margin-top: -23px; border-radius: 50% 50% 8px 50%;
-  display: flex; align-items: center; justify-content: center;
-  transform: rotate(-45deg) scale(0.6); background: var(--clv-slate-ink); opacity: 0; pointer-events: none; transition: opacity 0.12s, transform 0.12s;
-}
-.cl14-azb.on { opacity: 1; transform: rotate(-45deg) scale(1); }
-.cl14-azb span { transform: rotate(45deg); font: 400 22px var(--clv-type); color: #fff; }
-@media (prefers-reduced-motion: reduce) { .cl14-azr, .cl14-azb { transition: none; } }
+/* ⚠️ RETIRED (Contact list v16 baked decision 6): the A–Z rail and its rules. The letter tabs do not pin and there is no rail. */
 /* §7.8 — the helpful dead end */
 .cl14-none {
   display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 44px 20px 40px; text-align: center;

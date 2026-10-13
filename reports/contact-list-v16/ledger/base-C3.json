@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512 one panel, no group labels",
+  "ok": false,
+  "detail": "17 bands · 1 panels · 37 rows"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 \"Grouped: No grouping\"",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C3",
+  "where": "1512 rows are A to Z by surname",
+  "ok": false,
+  "detail": "agency · london · london · london · london · london · london · london"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 the order is not a single letter (the claim has something to order)",
+  "ok": false,
+  "detail": "1 initials"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 no sort pill in the bar",
+  "ok": true,
+  "detail": "0 sort controls"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Agent, Replies and Query status sort; What they want does not",
+  "ok": true,
+  "detail": "Agent:BUTTON · What they want:SPAN · Replies:BUTTON · Query status:BUTTON"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 the active heading states the order",
+  "ok": false,
+  "detail": "Agent:null:Agent ↓ · What they want:null:What they want · Replies:null:Replies · Query status:null:Query status"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Replies sorts by reply time, fastest first, unknown last",
+  "ok": false,
+  "detail": "8,,4,8,12,16,8,8,4,8,8,8"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 aria-sort moves to Replies",
+  "ok": false,
+  "detail": "Agent:null · What they want:null · Replies:null · Query status:null"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 pressing it again reverses",
+  "ok": false,
+  "detail": "8,,12,8,4,16,8,8,8,4,8,8"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 one panel, no group labels",
+  "ok": false,
+  "detail": "17 bands · 1 panels · 37 rows"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 \"Grouped: No grouping\"",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C3",
+  "where": "1280 rows are A to Z by surname",
+  "ok": false,
+  "detail": "agency · london · london · london · london · london · london · london"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 the order is not a single letter (the claim has something to order)",
+  "ok": false,
+  "detail": "1 initials"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 no sort pill in the bar",
+  "ok": true,
+  "detail": "0 sort controls"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Agent, Replies and Query status sort; What they want does not",
+  "ok": true,
+  "detail": "Agent:BUTTON · What they want:SPAN · Replies:BUTTON · Query status:BUTTON"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 the active heading states the order",
+  "ok": false,
+  "detail": "Agent:null:Agent ↓ · What they want:null:What they want · Replies:null:Replies · Query status:null:Query status"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Replies sorts by reply time, fastest first, unknown last",
+  "ok": false,
+  "detail": "8,,4,8,12,16,8,8,4,8,8,8"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 aria-sort moves to Replies",
+  "ok": false,
+  "detail": "Agent:null · What they want:null · Replies:null · Query status:null"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 pressing it again reverses",
+  "ok": false,
+  "detail": "8,,12,8,4,16,8,8,8,4,8,8"
+ }
+]

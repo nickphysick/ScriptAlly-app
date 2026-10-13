@@ -1,0 +1,440 @@
+[
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: \"← Back to Sun-hee\"",
+  "ok": true,
+  "detail": "\"← Back to Sun-hee\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: eyebrow and title",
+  "ok": true,
+  "detail": "\"EDIT AGENT\" · \"Edit Sun-hee’s profile\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: the agent's card with its tags, and three sections in place of the stepper",
+  "ok": true,
+  "detail": "who 1 · stepper 0 · Details|What they want|How to query"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · msv12-agent-5 · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Edit profile: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: \"← Back to Wren\"",
+  "ok": true,
+  "detail": "\"← Back to Wren\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: eyebrow and title",
+  "ok": true,
+  "detail": "\"LOG A QUERY\" · \"Query Wren\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: the journey's stepper",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · seed-cal-near · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Log a query: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: \"← Back to Theo\"",
+  "ok": true,
+  "detail": "\"← Back to Theo\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: eyebrow and title",
+  "ok": true,
+  "detail": "\"SENT WHAT THEY ASKED FOR\" · \"What went to Theo?\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: the journey's stepper",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · msv12-agent-4 · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Mark sent: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: \"← Back to Sun-hee\"",
+  "ok": true,
+  "detail": "\"← Back to Sun-hee\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: eyebrow and title",
+  "ok": true,
+  "detail": "\"RECORD A RESPONSE\" · \"What did Sun-hee say?\""
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: the journey's stepper",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · msv12-agent-5 · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 Record a response: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: \"← Back to Sun-hee\"",
+  "ok": true,
+  "detail": "\"← Back to Sun-hee\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: eyebrow and title",
+  "ok": true,
+  "detail": "\"EDIT AGENT\" · \"Edit Sun-hee’s profile\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: the agent's card with its tags, and three sections in place of the stepper",
+  "ok": true,
+  "detail": "who 1 · stepper 0 · Details|What they want|How to query"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · msv12-agent-5 · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Edit profile: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: \"← Back to Wren\"",
+  "ok": true,
+  "detail": "\"← Back to Wren\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: eyebrow and title",
+  "ok": true,
+  "detail": "\"LOG A QUERY\" · \"Query Wren\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: the journey's stepper",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · seed-cal-near · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Log a query: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: \"← Back to Theo\"",
+  "ok": true,
+  "detail": "\"← Back to Theo\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: eyebrow and title",
+  "ok": true,
+  "detail": "\"SENT WHAT THEY ASKED FOR\" · \"What went to Theo?\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: the journey's stepper",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · msv12-agent-4 · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Mark sent: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: within 250ms the page is dimmed at 0.45",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"opacity\":1,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"auto\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: the action drawer's head, with the quill",
+  "ok": true,
+  "detail": "1 heads · 1 quills"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: exactly one dialog and one panel",
+  "ok": true,
+  "detail": "1 dialogs · 1 panels · card 0 · dock 0"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: \"← Back to Sun-hee\"",
+  "ok": true,
+  "detail": "\"← Back to Sun-hee\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: eyebrow and title",
+  "ok": true,
+  "detail": "\"RECORD A RESPONSE\" · \"What did Sun-hee say?\""
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: the journey's stepper",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: ↓ does not walk the list while acting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: Escape returns to the agent, on the same tab",
+  "ok": true,
+  "detail": "acting null · msv12-agent-5 · tab profile"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 Record a response: the dim is gone within 250ms",
+  "ok": true,
+  "detail": "{\"on\":null,\"opacity\":0,\"bg\":\"rgba(28, 19, 15, 0.45)\",\"events\":\"none\"}"
+ },
+ {
+  "lock": "F5",
+  "where": "Edit profile, Log a query and Record a response all ran",
+  "ok": true,
+  "detail": "{\"Edit profile\":2,\"Log a query\":2,\"Mark sent\":2,\"Record a response\":2}"
+ }
+]

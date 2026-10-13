@@ -56,14 +56,17 @@ export async function openContacts(page: Page, vp: { width: number; height: numb
      case is the one measuring the memory (`keep`). A stored value that IS the defaults needs no reload. */
   if (!opts.keep) {
     const had = await page.evaluate(() => {
-      const KEY = "sa.contactList.v3";
+      /* v16: the key is `.v4`, the list opens ungrouped, and full screen is remembered per device. */
+      const KEY = "sa.contactList.v4";
       const v = sessionStorage.getItem(KEY);
       sessionStorage.removeItem(KEY);
-      if (v === null) return false;
+      const full = localStorage.getItem("sa.contactsFull") !== null;
+      localStorage.removeItem("sa.contactsFull");
+      if (v === null) return full;
       try {
         const o = JSON.parse(v);
         const empty = { status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" };
-        return !(o.group === "letter" && o.sort === "surname" && o.reversed === false && !o.search && o.density === "comfortable" && o.readyOnly !== true
+        return full || !(o.group === "none" && o.sort === "surname" && o.reversed === false && !o.search && o.density === "comfortable" && !o.glance
           && JSON.stringify(o.filters) === JSON.stringify(empty));
       } catch { return true; }
     });

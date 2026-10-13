@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 panel",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 panel border",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.14)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 at the column edges",
+  "ok": true,
+  "detail": "panel 296.4–1455.6 · column 296.4–1455.6"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 28 under the sheet's top",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 padding",
+  "ok": true,
+  "detail": "28px 32px 30px 36px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title",
+  "ok": true,
+  "detail": "\"Every agent, in one place\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title size",
+  "ok": true,
+  "detail": "50 · \"Special Elite\", \"Courie · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title is two lines, cream",
+  "ok": true,
+  "detail": "2 lines · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 no hero number, stamp or faces",
+  "ok": true,
+  "detail": "0 number, stamp or faces elements"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 subline",
+  "ok": true,
+  "detail": "\"Find, compare and keep track of the agents for Harbour of Glass.\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 subline size and gap",
+  "ok": true,
+  "detail": "18px · 14.0 under the title"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the subline is set in the serif",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the book's title is in the typewriter face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 buttons under the subline",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 primary",
+  "ok": true,
+  "detail": "{\"text\":\"+ Add an agent\",\"bg\":\"rgb(243, 238, 230)\",\"fg\":\"rgb(27, 36, 51)\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 secondary",
+  "ok": true,
+  "detail": "{\"text\":\"Discover agents\",\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(244, 238, 229)\",\"ring\":\"rgba(244, 238, 229, 0.7) 0px 0px 0px 1.5px inset\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 disc",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":1214.625,\"y\":180.9375,\"w\":196,\"h\":196,\"b\":376.9375,\"r\":1410.625},\"bg\":\"rgb(244, 241, 236)\",\"clip\":\"hidden\",\"radius\":\"50%\",\"hidden\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the hawk is 118% of the disc, shifted 6% left",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":1202.875,\"y\":202.046875,\"w\":231.265625,\"h\":153.765625,\"b\":355.8125,\"r\":1434.140625},\"src\":\"/images/contact/contact-disc-hawk.webp?v=1\",\"ok\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the hawk is centred in the disc's height",
+  "ok": true,
+  "detail": "-0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the disc is vertically centred, 12 inside the padding",
+  "ok": true,
+  "detail": "centre off by -1.0 · 45.0 from the panel's right"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 panel",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · 14px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 panel border",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.14)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 at the column edges",
+  "ok": true,
+  "detail": "panel 289.0–1231.0 · column 289.0–1231.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 28 under the sheet's top",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 padding",
+  "ok": true,
+  "detail": "28px 32px 30px 36px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title",
+  "ok": true,
+  "detail": "\"Every agent, in one place\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title size",
+  "ok": true,
+  "detail": "50 · \"Special Elite\", \"Courie · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title is two lines, cream",
+  "ok": true,
+  "detail": "2 lines · rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no hero number, stamp or faces",
+  "ok": true,
+  "detail": "0 number, stamp or faces elements"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 subline",
+  "ok": true,
+  "detail": "\"Find, compare and keep track of the agents for Harbour of Glass.\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 subline size and gap",
+  "ok": true,
+  "detail": "18px · 14.0 under the title"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the subline is set in the serif",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the book's title is in the typewriter face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 buttons under the subline",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 primary",
+  "ok": true,
+  "detail": "{\"text\":\"+ Add an agent\",\"bg\":\"rgb(243, 238, 230)\",\"fg\":\"rgb(27, 36, 51)\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 secondary",
+  "ok": true,
+  "detail": "{\"text\":\"Discover agents\",\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(244, 238, 229)\",\"ring\":\"rgba(244, 238, 229, 0.7) 0px 0px 0px 1.5px inset\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 disc",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":990.046875,\"y\":180.9375,\"w\":196,\"h\":196,\"b\":376.9375,\"r\":1186.046875},\"bg\":\"rgb(244, 241, 236)\",\"clip\":\"hidden\",\"radius\":\"50%\",\"hidden\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the hawk is 118% of the disc, shifted 6% left",
+  "ok": true,
+  "detail": "{\"box\":{\"x\":978.296875,\"y\":202.046875,\"w\":231.265625,\"h\":153.765625,\"b\":355.8125,\"r\":1209.5625},\"src\":\"/images/contact/contact-disc-hawk.webp?v=1\",\"ok\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the hawk is centred in the disc's height",
+  "ok": true,
+  "detail": "-0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the disc is vertically centred, 12 inside the padding",
+  "ok": true,
+  "detail": "centre off by -1.0 · 45.0 from the panel's right"
+ }
+]

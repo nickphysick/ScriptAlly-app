@@ -1,0 +1,365 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v16 §F — THE AGENT PANEL (ref design-refs/contact-list-v16/contact-list-v16.html `#ap`). An agent
+ * opens in the query panel's own container (`shell/SidePanel`, the `.qsp` dress) and masthead: browsing is light,
+ * acting dims the page and wears the action drawer.
+ *
+ * ⚠️ ONE CONTAINER, NOT A COPY OF IT. The panel is `SidePanel` with the query panel's class (`qsp`) and the query
+ *    card's own class names (`qcv-open-*`), so the box, the masthead, the tabs, the scrolling body and the footer
+ *    are Query panel v2's rules. This file states only what is the agent's: the door's colour on the top edge,
+ *    the links, the Profile tab's two cards, and the Queries tab's entries.
+ * ⚠️ THE TOP EDGE FOLLOWS THE AGENT, NOT A QUERY: sage when they are open to queries, grey when closed,
+ *    #d8cfc2 when it is not known. The stand card says where the writer's query stands.
+ * ⚠️ EVERY ACTION RUNS IN THIS PANEL. A query journey steps into the panel's slot (the drawer's own mechanism,
+ *    `req.panel`); Edit profile is the agent card's editor, hosted here (`host: "panel"`), so what it writes and
+ *    how is the card's own. While either runs the page is dimmed and ↑ ↓ stand down.
+ * ⚠️ ONE PANEL AT A TIME: it claims the right-hand panel as "agent" and closes when the feed, the Birds-eye view
+ *    or another page's query panel claims it. A query opened FROM this panel is the same box changing hands, so
+ *    that claim is not a reason to close.
+ */
+import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import type { Agent, QueryStatus } from "../../../types";
+import type { AgentFacts } from "../../../lib/contactList";
+import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
+import { agentInitials } from "../../../lib/agentDisplay";
+import {
+  INDEX_ADD, INDEX_EDIT, discGrey, firstNameOf, panelDoor, panelFoot, panelIndex, panelLinks, panelStand,
+  type IndexKey, type PanelAct,
+} from "../../../lib/agentPanel";
+import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
+import { claimRightPanel, currentQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
+import { askDrawerToLeave, currentDrawerRequest, subscribeDrawer } from "../../../lib/queryActions/drawerStore";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
+import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
+import { formatDate } from "../../../lib/dates";
+import type { AgentEditPatch, SaveAgentResult } from "../../../lib/saveAgentEdits";
+import { SidePanel } from "../../shell/SidePanel";
+import { StatusDot } from "../../StatusDot";
+import { StandCard } from "../../queries/panel/StandCard";
+import type { StandCardView } from "../../../lib/standCard";
+import { NotesThread } from "../../reading-pane/NotesThread";
+import { QadHead } from "../../queryActions/QadHead";
+import { Who } from "../../queryActions/controls";
+import { useAgentNotes } from "../card/useAgentNotes";
+import { useToast } from "../../toast/ToastProvider";
+import "../../queries/queryPanelHost.css";
+import "./agentPanel.css";
+
+export type AgentPanelTab = "profile" | "queries" | "notes";
+
+export interface AgentPanelProps {
+  agent: Agent;
+  facts: AgentFacts;
+  /** the card's own query for the book in scope, or null */
+  q: QcRow | null;
+  /** every query to this agent, across all manuscripts */
+  rows: readonly QcRow[];
+  msTitle: string | null;
+  titleOf: (manuscriptId: string) => string | null;
+  /** the agent's genres as labels, with whether each is one of the book's */
+  genres: { label: string; hit: boolean }[];
+  nowMs: number;
+  uid: string | null;
+  writeAgent: (agentId: string, patch: AgentEditPatch) => Promise<SaveAgentResult>;
+  tab: AgentPanelTab;
+  onTab: (t: AgentPanelTab) => void;
+  /** the editor is open on this agent, in this panel */
+  editing: boolean;
+  onClose: () => void;
+  /** ↑ ↓ J K: the previous or next visible row */
+  onWalk: (dir: 1 | -1) => void;
+  onEdit: (tab?: AgentCardTab, focus?: AgentCardField) => void;
+  onAct: (act: PanelAct) => void;
+  onOpenQuery: (queryId: string) => void;
+  /** ⋯: what the agent's menu offers here */
+  menu: { key: string; label: string; run: () => void; danger?: boolean }[];
+  /** ⋯ → Delete agent…: the facts for its confirmation, and the act */
+  deleteFacts: { queries: number; history: number } | null;
+  onDelete: () => Promise<void>;
+}
+
+const dateOf = (ms: number, nowMs: number) => ({
+  day: formatDate(new Date(ms), { day: "numeric", month: "short" }),
+  year: new Date(ms).getFullYear() === new Date(nowMs).getFullYear() ? null : String(new Date(ms).getFullYear()),
+});
+const COURT_WORD: Record<string, string> = { you: "With you", offer: "With you", agent: "With the agent", closed: "Closed" };
+
+export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
+  const { agent, facts, q, rows, msTitle, nowMs, tab, editing } = p;
+  const first = firstNameOf(agent);
+  const name = (agent.name ?? "").trim() || (agent.agency ?? "").trim();
+  const place = [(agent.name ?? "").trim() ? (agent.agency ?? "").trim() : "", (agent.city ?? "").trim()].filter(Boolean).join(" · ");
+  const door = panelDoor(agent, nowMs);
+  const links = panelLinks(agent);
+  const fitGenre = p.genres.find((g) => g.hit)?.label ?? null;
+  const stand = panelStand({ agent, facts, q, title: msTitle, fitGenre, nowMs });
+  const ordered = [...rows].sort((a, b) => (b.sentMs ?? b.lastMs) - (a.sentMs ?? a.lastMs));
+  const queried = [...new Set(ordered.map((r) => p.titleOf(r.manuscriptId)).filter((t): t is string => !!t))];
+  const index = panelIndex({ agent, genres: p.genres, queried, nowMs });
+  const foot = panelFoot(agent, facts, q, nowMs);
+
+  const { showConfirm, showToast } = useToast();
+  const { storedNotes, onAddNote, onEditNote, onDeleteNote } = useAgentNotes(agent, p.uid, p.writeAgent);
+  const notes = [...storedNotes].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  /* a query journey stepped into this panel (the drawer's request carries `panel`) */
+  const drawerReq = useSyncExternalStore(subscribeDrawer, currentDrawerRequest, currentDrawerRequest);
+  const stepping = !!drawerReq?.panel;
+  const acting = stepping || editing;
+
+  /* Escape: the journey and the editor take it first (their own layers are above this one); browsing, it closes */
+  const closeRef = useRef(p.onClose);
+  closeRef.current = p.onClose;
+  useEscapeLayer(!acting, () => closeRef.current(), ESC_LEVEL.pageDrawer);
+
+  /* one right-hand panel at a time */
+  useEffect(() => {
+    claimRightPanel("agent");
+    const off = subscribeRightPanel((o) => {
+      if (!o || o === "agent") return;
+      /* this panel's own query view taking the box is not another panel opening */
+      if (o === "query" && currentQueryPanel()?.from === "agent") return;
+      closeRef.current();
+    });
+    return () => { off(); releaseRightPanel("agent"); if (currentDrawerRequest()?.panel) askDrawerToLeave(); };
+  }, []);
+  /* a journey belongs to the agent it was opened on: another row asks it to leave (parked with answers, else cancelled) */
+  const firstAgent = useRef(true);
+  useEffect(() => {
+    if (firstAgent.current) { firstAgent.current = false; return; }
+    if (currentDrawerRequest()?.panel) askDrawerToLeave();
+  }, [agent.id]);
+
+  /* ↑ ↓ J K walk the list's visible rows; not while acting, in a field, or under a menu */
+  const walk = useRef({ acting, onWalk: p.onWalk });
+  walk.current = { acting, onWalk: p.onWalk };
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      const down = matchesShortcut(SHORTCUTS.contactsDown, e), up = matchesShortcut(SHORTCUTS.contactsUp, e);
+      if ((!down && !up) || walk.current.acting || isEditableTarget(e.target)) return;
+      if (e.target instanceof HTMLElement && e.target.closest('[role="menu"], [role="tablist"]')) return;
+      e.preventDefault();
+      walk.current.onWalk(down ? 1 : -1);
+    };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
+
+  /* focus arrives on the agent's name, and returns to their row when the panel closes */
+  const nameRef = useRef<HTMLHeadingElement>(null);
+  const idRef = useRef(agent.id);
+  idRef.current = agent.id;
+  useEffect(() => {
+    const t = window.setTimeout(() => nameRef.current?.focus({ preventScroll: true }), 0);
+    return () => {
+      window.clearTimeout(t);
+      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${idRef.current}"]`)].find((e) => e.getBoundingClientRect().height > 0);
+      row?.focus({ preventScroll: true });
+    };
+  }, []);
+
+  /* the panel starts under the shell's bar: its bottom edge, measured (Query panel v2 §A). A zero rect is refused. */
+  const [top, setTop] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const read = () => {
+      const bar = [...document.querySelectorAll<HTMLElement>(".ws-pagebar")].find((b) => b.getBoundingClientRect().height > 0);
+      const b = bar?.getBoundingClientRect().bottom ?? 0;
+      if (b > 0) setTop(Math.round(b * 10) / 10);
+    };
+    read();
+    window.addEventListener("resize", read);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(read) : null;
+    const bar = document.querySelector(".ws-pagebar");
+    if (ro && bar) ro.observe(bar);
+    return () => { window.removeEventListener("resize", read); ro?.disconnect(); };
+  }, []);
+
+  /* ⋯ and its Delete confirmation */
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setMenuOpen(false); setConfirmDel(false); setTyped(""); }, [agent.id]);
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const away = (e: PointerEvent) => { const t = e.target as Node; if (!menuRef.current?.contains(t) && !moreRef.current?.contains(t)) setMenuOpen(false); };
+    document.addEventListener("pointerdown", away, true);
+    return () => document.removeEventListener("pointerdown", away, true);
+  }, [menuOpen]);
+  useEscapeLayer(menuOpen || confirmDel, () => { if (menuOpen) setMenuOpen(false); else setConfirmDel(false); }, ESC_LEVEL.pageModal);
+  const heavy = !!p.deleteFacts && p.deleteFacts.queries > 0;
+  const delReady = !heavy || typed.trim().toLowerCase() === name.toLowerCase();
+  const menu = [...p.menu, { key: "delete", label: "Delete agent…", run: () => setConfirmDel(true), danger: true }];
+
+  const tabs: { key: AgentPanelTab; label: React.ReactNode }[] = [
+    { key: "profile", label: "Profile" },
+    { key: "queries", label: rows.length > 0 ? <>Queries <i className="qcv-open-tabn">{"·"} {rows.length}</i></> : "Queries" },
+    { key: "notes", label: notes.length > 0 ? <>Notes <i className="qcv-open-tabn">{"·"} {notes.length}</i></> : "Notes" },
+  ];
+  const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+  const stageTag = q ? (STAGE_NAME[q.status as QueryStatus] ?? String(q.status)) : null;
+
+  return (
+    <SidePanel label={`${name}, agent`} step={stepping} dim={acting} className="qsp apn"
+      style={{ ...(top != null ? { "--qsp-top": `${top}px` } : {}), "--ap-edge": door.edge } as React.CSSProperties}
+      attrs={{ "data-ap": "panel", "data-ap-id": agent.id, "data-ap-acting": acting ? (editing ? "edit" : drawerReq?.mode ?? "step") : undefined }}>
+      {editing ? (
+        /* ── acting: Edit profile, in the action drawer's look. The editor itself is the agent card's, portalled
+           into the slot below by its own host. ── */
+        <div className="qad-root qad-root--panel is-open apn-actroot" data-ap="act" data-ap-act="edit">
+          <div className="qad-drawer qad-drawer--panel" role="group" aria-label={`Edit ${first}’s profile`}>
+            <QadHead from={`Back to ${first}`} onFrom={escape} eyebrow="EDIT AGENT" title={`Edit ${first}’s profile`} onClose={escape} back
+              who={<Who name={name} sub={place.toUpperCase()} extra={<>
+                <span className="qad-tag dark" data-ap="tag-door">{door.label.toUpperCase()}</span>
+                {stageTag ? <span className="qad-tag" data-ap="tag-stage">{stageTag.toUpperCase()}</span> : null}
+              </>} />} />
+            <div className="apn-actslot" data-ap-act-slot="" />
+          </div>
+        </div>
+      ) : (
+        <aside className="qcv-open qcv-own apn-card" data-ap="card" data-door={door.kind} data-tab={tab} data-over={foot.hot ? "true" : undefined} aria-label={name}>
+          <div className="qcv-open-fr">
+            <header className="qcv-open-mast" data-ap="mast">
+              <div className="qcv-open-who">
+                <span className={`qcv-open-ini apn-ini${discGrey(facts) ? " is-grey" : ""}`} data-ap="disc" aria-hidden="true">{agentInitials(agent).slice(0, 2)}</span>
+                <div className="qcv-open-whotx">
+                  <h2 className="qcv-open-nm" data-ap="name" ref={nameRef} tabIndex={-1}>{name}</h2>
+                  {place ? <span className="qcv-open-ag" data-ap="place">{place}</span> : null}
+                </div>
+                <button type="button" className="qcv-open-x" data-ap="close" aria-label="Close this agent" onClick={p.onClose}><span aria-hidden="true">{"×"}</span></button>
+              </div>
+              <p className="qcv-open-line apn-line">
+                <span className="qcv-open-pill apn-door" data-ap="door" data-door={door.kind}><i className="apn-dot" style={{ background: door.dot }} aria-hidden="true" />{door.label}</span>
+                {links.length > 0 && (
+                  <span className="apn-links" data-ap="links">
+                    {links.map((l) => (l.key === "email"
+                      ? <button key={l.key} type="button" className="apn-link" data-ap-link={l.key} onClick={() => { const said = (ok: boolean) => showToast({ message: ok ? "Email address copied." : "Couldn\u2019t copy the address." }); if (!navigator.clipboard) { said(false); return; } void navigator.clipboard.writeText(l.email).then(() => said(true), () => said(false)); }}>{l.label}</button>
+                      : <a key={l.key} className="apn-link" data-ap-link={l.key} href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>))}
+                  </span>
+                )}
+              </p>
+              <div className="qcv-open-tabs" role="tablist" aria-label="Agent detail">
+                {tabs.map((t) => (
+                  <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} data-ap-tab={t.key} onClick={() => p.onTab(t.key)}>{t.label}</button>
+                ))}
+              </div>
+            </header>
+
+            <div className="qcv-open-body">
+              <div className="qcv-open-tab" role="tabpanel" data-ap="body">
+                {tab === "profile" ? (
+                  <>
+                    <div className="apn-stand" data-ap="stand" data-state={stand.state}>
+                      <StandCard view={stand as unknown as StandCardView} />
+                    </div>
+                    <dl className="apn-index" data-ap="index">
+                      {index.map((r) => (
+                        <div key={r.key} className="apn-ir" data-ap-row={r.key} data-missing={r.answer === null ? "true" : undefined}>
+                          <dt>{r.label}</dt>
+                          <dd>
+                            {r.answer === null ? (
+                              <button type="button" className="apn-add" data-ap-add={r.key}
+                                onClick={() => { const e = INDEX_EDIT[r.key as Exclude<IndexKey, "queries">]; p.onEdit(e.tab, e.focus); }}>
+                                {INDEX_ADD[r.key as Exclude<IndexKey, "queries">]}
+                              </button>
+                            ) : r.key === "genres" && r.chips ? (
+                              <span className="apn-chips">{r.chips.map((g) => <span key={g.label} className={`apn-chip${g.hit ? " is-hit" : ""}`} data-hit={g.hit ? "true" : undefined}>{g.hit ? "✓ " : ""}{g.label}</span>)}</span>
+                            ) : r.key === "wishlist" ? (
+                              <i className="apn-wish">{r.answer}</i>
+                            ) : r.answer}
+                            {r.answer !== null && r.note ? <small className="apn-note">{r.note}</small> : null}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </>
+                ) : tab === "queries" ? (
+                  ordered.length === 0 ? (
+                    <p className="apn-none" data-ap="queries-none">You haven{"’"}t queried {first} yet.</p>
+                  ) : (
+                    <div className="qlg apn-ledger" data-ap="ledger">
+                      {ordered.map((r) => {
+                        const d = dateOf(r.sentMs ?? r.lastMs, nowMs);
+                        const stageAt = r.stageStartMs != null ? dateOf(r.stageStartMs, nowMs) : null;
+                        return (
+                          <React.Fragment key={r.id}>
+                            <div className="qlg-d" data-ap="ledger-date">{d.day}{d.year ? <small>{d.year}</small> : null}</div>
+                            <div className="qlg-g"><StatusDot status={r.status as QueryStatus} overrideSize={16} decorative /></div>
+                            <div className="qlg-c">
+                              <button type="button" className="apn-qc" data-ap="ledger-entry" data-query={r.id} data-court={r.court} onClick={() => p.onOpenQuery(r.id)}>
+                                <b className="apn-qt">{p.titleOf(r.manuscriptId) ?? "A manuscript no longer on file"}</b>
+                                <i className="apn-qs">{STAGE_NAME[r.status as QueryStatus] ?? String(r.status)}{stageAt ? ` · ${stageAt.day}${stageAt.year ? ` ${stageAt.year}` : ""}` : ""}</i>
+                                <span className="apn-qf">
+                                  <span className="apn-qchip" data-court={r.court}>{COURT_WORD[r.court] ?? "With the agent"}</span>
+                                  <span className="apn-qo">Open the query {"›"}</span>
+                                </span>
+                              </button>
+                            </div>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  )
+                ) : (
+                  <NotesThread
+                    resetKey={agent.id}
+                    notes={notes.map((n) => ({ id: n.id, entryText: n.text, createdAt: n.createdAt }))}
+                    onAdd={async (text) => { await onAddNote(text); }}
+                    onEdit={async (id, text) => { await onEditNote(id, text); }}
+                    onDelete={(n) => showConfirm({
+                      title: "Delete this note?", danger: true, confirmLabel: "Delete", cancelLabel: "Keep it",
+                      body: <p style={{ margin: 0 }}>This note will be removed from {first}{"\u2019"}s record.</p>,
+                      onConfirm: () => { const note = storedNotes.find((x) => x.id === n.id); if (note) void onDeleteNote(note); },
+                    })}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* on the Notes tab the composer is the foot (the notes thread draws it) */}
+            {tab === "notes" ? null : confirmDel ? (
+              <div className="qcv-open-doors apn-del" data-ap="delete-confirm" role="alertdialog" aria-label={`Delete ${name}?`}>
+                <p>
+                  {heavy
+                    ? <>Delete <b>{name}</b>? Their {p.deleteFacts!.queries} quer{p.deleteFacts!.queries === 1 ? "y" : "ies"} and {p.deleteFacts!.history} history entr{p.deleteFacts!.history === 1 ? "y" : "ies"} go too. Type their name to confirm.</>
+                    : <>Delete <b>{name}</b> from your Contact list? No queries go with them.</>}
+                </p>
+                {heavy ? <input className="apn-delin" aria-label="Type the agent's name" value={typed} onChange={(e) => setTyped(e.target.value)} autoFocus /> : null}
+                <span className="apn-delacts">
+                  <button type="button" className="qcv-open-cb" onClick={() => { setConfirmDel(false); setTyped(""); }}>Keep</button>
+                  <button type="button" className="qcv-open-act apn-delgo" data-ap="delete-go" disabled={!delReady || deleting}
+                    onClick={async () => { if (!delReady) return; setDeleting(true); await p.onDelete(); }}>Delete</button>
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="qcv-open-ft" data-ap="foot">
+                  <p className="qcv-open-stand apn-status"><b data-ap="status">{foot.status}</b>{foot.detail ? <span data-ap="status-detail">{foot.detail}</span> : null}</p>
+                  <button ref={moreRef} type="button" className="qcv-open-more" aria-haspopup="menu" aria-expanded={menuOpen} aria-label={`More for ${name}`} data-ap="more" onClick={() => setMenuOpen((o) => !o)}>
+                    <i aria-hidden="true">···</i>
+                  </button>
+                  {menuOpen && (
+                    <div ref={menuRef} className="apn-menu" role="menu" data-ap="menu">
+                      {menu.map((m) => (
+                        <button key={m.key} type="button" role="menuitem" className={m.danger ? "is-danger" : undefined} data-ap-menu={m.key} onClick={() => { setMenuOpen(false); m.run(); }}>{m.label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="qcv-open-doors" data-ap="doors">
+                  {foot.editSecondary ? <button type="button" className="qcv-open-cb" data-ap="edit" onClick={() => p.onEdit()}>Edit profile</button> : null}
+                  <button type="button" className="qcv-open-act" data-ap="primary" data-act={foot.primary.act.kind === "edit" ? "edit" : foot.primary.act.mode}
+                    onClick={() => (foot.primary.act.kind === "edit" ? p.onEdit() : p.onAct(foot.primary.act))}>{foot.primary.label}</button>
+                </div>
+              </>
+            )}
+          </div>
+        </aside>
+      )}
+    </SidePanel>
+  );
+};

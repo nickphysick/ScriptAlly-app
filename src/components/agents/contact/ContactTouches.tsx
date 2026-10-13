@@ -9,7 +9,6 @@
  * ⚠️ EVERY MOTION HERE IS OFF UNDER REDUCED MOTION, read at the moment it would run, never cached.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { SHORTCUTS, isMac, keycaps } from "../../../lib/shortcuts";
 import type { Density } from "../../../lib/contactListMemory";
 
@@ -43,107 +42,7 @@ export const CountTo: React.FC<{ value: number }> = ({ value }) => {
   return <span className={ticking ? "cl14-ticking" : undefined} data-cl14-count={value}>{shown}</span>;
 };
 
-/**
- * §7.4 — THE A–Z RAIL: 26 wide, fixed at the sheet's right edge, vertically centred, frosted white. It shows only
- * while the list's letter panel fills the middle of the scroller and Grouping is Letter; the current letter is
- * filled ink and letters with no agents are faint. Clicking or dragging along it jumps; a teardrop bubble names the
- * letter while dragging.
- * ⚠️ PORTALLED TO <body>, SO IT IS GATED ON THE ROUTE BEING ON SCREEN — a portal outlives its page under the
- * display-toggling shell (the house law). Its state is DERIVED from the boxes on every scroll, never an observer.
- */
-const AZ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-export const ContactAzRail: React.FC<{
-  active: boolean;
-  byLetter: boolean;
-  /** the list column — the rail reads its panel and dividers */
-  listRef: React.RefObject<HTMLElement | null>;
-  letters: ReadonlySet<string>;
-}> = ({ active, byLetter, listRef, letters }) => {
-  const [show, setShow] = useState(false);
-  const [cur, setCur] = useState<string | null>(null);
-  const [bubble, setBubble] = useState<{ l: string; y: number } | null>(null);
-  const railRef = useRef<HTMLElement>(null);
-  const scrub = useRef(false);
-
-  useEffect(() => {
-    if (!active || !byLetter) { setShow(false); return undefined; }
-    const sc = listRef.current?.closest<HTMLElement>(".wpg-scroll");
-    if (!sc) return undefined;
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      const panel = listRef.current?.querySelector<HTMLElement>(".lt-panel");
-      const h = sc.getBoundingClientRect();
-      if (!panel || h.height === 0) { setShow(false); return; }
-      const r = panel.getBoundingClientRect();
-      setShow(r.top < h.top + h.height * 0.45 && r.bottom > h.top + h.height * 0.55);
-      let l: string | null = null;
-      for (const d of panel.querySelectorAll<HTMLElement>('[data-clv="band"][data-letter]')) {
-        if (d.getBoundingClientRect().top - h.top <= 110) l = d.dataset.letter ?? null; else break;
-      }
-      setCur((c) => (c === l ? c : l));
-    };
-    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
-    sc.addEventListener("scroll", on, { passive: true });
-    window.addEventListener("resize", on);
-    read();
-    return () => { sc.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
-  }, [active, byLetter, listRef, letters]);
-
-  const jump = (l: string) => {
-    const d = listRef.current?.querySelector<HTMLElement>(`[data-clv="band"][data-letter="${l}"]`);
-    /* the divider's own scroll-margin lands it just under the pinned labels (shell/listTable) */
-    d?.scrollIntoView({ block: "start", behavior: "auto" });
-  };
-  const hit = (clientY: number): { l: string; y: number } | null => {
-    const rail = railRef.current;
-    if (!rail) return null;
-    const r = rail.getBoundingClientRect();
-    const el = document.elementFromPoint(r.left + r.width / 2, clientY) as HTMLElement | null;
-    const l = el?.dataset?.azl;
-    if (!el || !l || !letters.has(l)) return null;
-    return { l, y: el.offsetTop + el.offsetHeight / 2 };
-  };
-
-  if (!active || typeof document === "undefined") return null;
-  return createPortal(
-    <nav
-      ref={railRef} className={`cl14-azr${show ? " show" : ""}`} data-cl14="rail" aria-label="Jump to letter"
-      aria-hidden={!show || undefined} inert={!show || undefined}
-      onPointerDown={(e) => {
-        const h = hit(e.clientY);
-        if (!h) return;
-        scrub.current = true;
-        e.currentTarget.setPointerCapture?.(e.pointerId);
-        setBubble(h);
-        jump(h.l);
-        e.preventDefault();
-      }}
-      onPointerMove={(e) => {
-        if (!scrub.current) return;
-        const h = hit(e.clientY);
-        if (h) { setBubble(h); jump(h.l); }
-      }}
-      onPointerUp={() => { scrub.current = false; setBubble(null); }}
-      onPointerCancel={() => { scrub.current = false; setBubble(null); }}
-    >
-      <span className={`cl14-azb${bubble ? " on" : ""}`} style={bubble ? { top: bubble.y } : undefined} aria-hidden="true">
-        <span>{bubble?.l}</span>
-      </span>
-      {AZ.map((l) => (
-        <button
-          key={l} type="button" data-azl={l} tabIndex={show && letters.has(l) ? 0 : -1}
-          className={`${letters.has(l) ? "" : "off"}${l === cur ? " on" : ""}`.trim() || undefined}
-          aria-label={letters.has(l) ? `Jump to ${l}` : `No agents under ${l}`} disabled={!letters.has(l)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); jump(l); } }}
-        >
-          {l}
-        </button>
-      ))}
-    </nav>,
-    document.body,
-  );
-};
+/* ⚠️ RETIRED (Contact list v16 baked decision 6): `ContactAzRail`, the A–Z rail down the sheet's right edge. */
 
 /** The keyboard, drawn (a control whose meaning is its glyph is drawn, never typed — U+2328 is in none of our faces). */
 const KeyboardMark: React.FC = () => (

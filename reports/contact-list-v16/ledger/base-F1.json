@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 panel",
+  "ok": false,
+  "detail": "a row click opened no agent panel"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 panel",
+  "ok": false,
+  "detail": "a row click opened no agent panel"
+ }
+]

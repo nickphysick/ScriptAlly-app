@@ -64,7 +64,15 @@ export interface OpenRequest {
    * Query panel v1 — opened from the query's side panel: the journey's form steps INTO that panel (its slot),
    * with "← Back to query", instead of opening as a drawer of its own. Carries what the step's frame names.
    */
-  panel?: { name: string; agency: string; first: string; /** false: there is no query behind the step to go back to (the picker opened with nothing open) */ back?: boolean };
+  panel?: {
+    name: string; agency: string; first: string;
+    /** false: there is no query behind the step to go back to (the picker opened with nothing open) */
+    back?: boolean;
+    /** Contact list v16 §F — the back link's words when the panel behind the step is not a query's ("Back to Clara") */
+    backLabel?: string;
+    /** Contact list v16 §F — the head's title, in place of the query panel's own words for the mode ("Query Clara") */
+    title?: string;
+  };
   /** Query panel v2 §E — the picker lists this query first, under "The query you had open". */
   hadOpen?: string;
   /**

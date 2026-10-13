@@ -86,7 +86,8 @@ test.skip("CL15-1 · header", async ({ page }) => {
    weekly bars, the striped progress bar, the stamps and their inner rule, the two-row lists, "no row repeats its stamp"
    and "On file's figure is the header's count". The desk is three icon cards now: CL15.2 K1–K4
    (tests/e2e/contactV152.measure.ts). ── */
-test("CL15-3 · desk presses", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the desk is gone; the strip filters (CL16 B1, B2). tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15-3 · desk presses", async ({ page }) => {
   const L = new Ledger("cl15-3");
   await openContacts(page, WIDTHS15[0]);
   const seen = await page.evaluate(() => { const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0); return root?.querySelectorAll('[data-cl15="desk"] [data-dk]').length ?? 0; });
@@ -150,7 +151,8 @@ const listState = (page: P15) => page.evaluate((rowSel) => {
 
 /* ── lock 5 · pill = section = rows: one ready rule everywhere. After the pill, the rows shown, the pill's number and
    the section's number are equal; ✕ or any filter leaves the mode; the mode is remembered for the visit. ── */
-test("CL15-5 · pill = section = rows", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section and its pill are gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15-5 · pill = section = rows", async ({ page }) => {
   const L = new Ledger("cl15-5");
   /* ⚠️ THE "OR UNKNOWN" HALF HAS NO SUBJECT ON THE SHARED ACCOUNT (every ready agent there fits): `seedReadyUnknown.mjs`
      adds one open, unqueried agent with no genres, and this case removes it in the same run. */
@@ -238,7 +240,8 @@ test("CL15-5 · pill = section = rows", async ({ page }) => {
    pickable list. The gaps are to the PANEL (66 / 58; 56 / 50 below 1440); the card overlaps it by 150 (130). ── */
 /* ⚠️ RETIRED BY v15.1 (8 Oct): "the desk-to-panel gap is 66 (56)" and "the panel-to-workspace gap is 58 (50)". The
    section sits on a band now and its gaps are the band's — CL15.1 B2. */
-test("CL15-5a · layout", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15-5a · layout", async ({ page }) => {
   const L = new Ledger("cl15-5a");
   /* three ready agents, so there is a third row to pick (the shared account holds two; see CL15-5) */
   execSync("node tests/e2e/seedReadyUnknown.mjs", { stdio: "inherit" });
@@ -323,7 +326,8 @@ test("CL15-5a · layout", async ({ page }) => {
 
 /* ── lock 5b · load state: a fresh load shows all N agents. Counting the pill's number must not leave the ready-only
    mode switched on, and an older remembered shape cannot switch it on either. ── */
-test("CL15-5b · load state", async ({ page, browser }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section is gone; the page's load state is CL16 L1. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15-5b · load state", async ({ page, browser }) => {
   const L = new Ledger("cl15-5b");
   for (const vp of WIDTHS15) {
     const ctx = await browser.newContext({ storageState: "tests/e2e/.auth/state.json", viewport: vp });
@@ -353,7 +357,8 @@ test("CL15-5b · load state", async ({ page, browser }) => {
    don't take {genres}." In both: queried + mismatches + closed = N, the split line's parts sum to queried, the desk's
    Queried figure is the sentence's, the panel is ≤ 350 tall at 1512, the Add card is solid white, and "Tell me when
    it's ready" survives a reload. ── */
-test("CL15-6 · all queried", async ({ page }) => {
+/* RETIRED (Contact list v16, 12 Oct): the next-step section is gone. tests/e2e/RETIRED-contact-list-v16.md */
+test.skip("CL15-6 · all queried", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("cl15-6");
   const MS = "aqfx-ms";

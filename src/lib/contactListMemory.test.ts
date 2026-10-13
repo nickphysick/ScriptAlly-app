@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * contactListMemory — v14 §4 (lock 9), v15 §4 (the ready-only mode is remembered and validated like the rest): the key is versioned and a stored value is validated on read,
+ * contactListMemory — v14 §4 (lock 9), v15 §4 (the ready-only mode is remembered and validated like the rest), v16 §B (so is the "At a glance" group): the key is versioned and a stored value is validated on read,
  * so a retired grouping, an unknown status, a wrong type or an older shape reads as the default —
  * never as a state nobody can see or clear.
  */
@@ -12,39 +12,40 @@ import { emptyContactFilters } from "./contactList";
 
 describe("sanitiseListMemory", () => {
   it("the key carries the shape's version", () => {
-    expect(LIST_MEMORY_KEY).toBe("sa.contactList.v3");
-    expect(LIST_MEMORY_VERSION).toBe(3);
+    expect(LIST_MEMORY_KEY).toBe("sa.contactList.v4");
+    expect(LIST_MEMORY_VERSION).toBe(4);
   });
   it("a good value round-trips", () => {
     const m = {
       filters: { ...emptyContactFilters(), status: ["queried", "pr"], action: true, open: "open", queried: "no", mats: true, always: true, genres: ["thriller", "crime"], genreMode: "all" },
-      search: "ell", group: "action", sort: "reply", reversed: true, density: "compact", readyOnly: true,
+      search: "ell", group: "action", sort: "reply", reversed: true, density: "compact", glance: "live",
     };
-    expect(sanitiseListMemory(JSON.parse(JSON.stringify({ v: 3, ...m })))).toEqual(m);
+    expect(sanitiseListMemory(JSON.parse(JSON.stringify({ v: 4, ...m })))).toEqual(m);
   });
-  it("an older shape (no version, v13's, or v14's) is refused whole", () => {
+  it("an older shape (no version, v13's, v14's or v15's) is refused whole", () => {
+    expect(sanitiseListMemory({ v: 3, filters: {}, group: "letter", readyOnly: true })).toBeNull();
     expect(sanitiseListMemory({ filters: {}, group: "letter" })).toBeNull();
     expect(sanitiseListMemory({ v: 1, filters: {}, group: "letter" })).toBeNull();
     expect(sanitiseListMemory({ v: 2, filters: {}, group: "letter", readyOnly: true })).toBeNull();
   });
-  it("junk reads as the default, field by field — a grouping that no longer exists is Letter", () => {
+  it("junk reads as the default, field by field — a grouping that no longer exists is No grouping", () => {
     const r = sanitiseListMemory({
-      v: 3, readyOnly: "yes",
+      v: 4, glance: "queried",
       filters: { status: ["queried", "Offer", 3, "queried"], action: "yes", open: ["open"], queried: "maybe", stand: ["you"], genres: [1, "crime", ""], genreMode: "most" },
       search: 7, group: "agency", sort: "due", reversed: "yes", density: "huge",
     })!;
     expect(r.filters).toEqual({ ...emptyContactFilters(), status: ["queried"], genres: ["crime"] });
     expect(r.search).toBe("");
-    expect(r.group).toBe("letter");
+    expect(r.group).toBe("none");
     expect(r.sort).toBe("surname");
     expect(r.reversed).toBe(false);
     expect(r.density).toBe("comfortable");
-    /* the mode is on only for a stored `true` — anything else is the whole list */
-    expect(r.readyOnly).toBe(false);
+    /* v16: a group the strip does not have is no group */
+    expect(r.glance).toBeNull();
     expect(sanitiseListMemory(null)).toBeNull();
     expect(sanitiseListMemory("x")).toBeNull();
   });
-  it("the defaults are Letter and Surname, A to Z", () => {
-    expect(DEFAULT_LIST_MEMORY()).toEqual({ filters: emptyContactFilters(), search: "", group: "letter", sort: "surname", reversed: false, density: "comfortable", readyOnly: false });
+  it("the defaults are No grouping and Surname, A to Z (v16 §C)", () => {
+    expect(DEFAULT_LIST_MEMORY()).toEqual({ filters: emptyContactFilters(), search: "", group: "none", sort: "surname", reversed: false, density: "comfortable", glance: null });
   });
 });

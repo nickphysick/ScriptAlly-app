@@ -9,75 +9,8 @@
 /* the header is the group's first row, across both tracks (where the band's `.ph` sat) */
 .clv-group > .cl15-hd { grid-column: 1 / -1; grid-row: 1; }
 
-/* ── §2 · THE OPEN HEADER (v15.1): the text block centred against the drawing, which sits at the column's right edge
-   and hangs over the hairline. No top margin: the drawing's own drop is the headroom. The 56 (36) gap is a minimum. ── */
-/* ── HEADER PANEL v2 (9 Oct; ref design-refs/shell/header-panel-v2.html). The header is the shared panel
-   (`.hpanel.hpanel--hero`, shell/headerPanel.css): the box, the blue, the padding and the two-column grid are the panel's.
-   This sheet states what is the Contact list's own — the hero number, the faces, the buttons' sizes, the drawing — and
-   reads the panel's tokens for every colour. v135's centred pair and the header sheet are retired here. The subheader
-   and the faces' key are not drawn; the key's counts are a visually hidden sentence. ── */
-.cl15-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
-/* the title's row: the h1 and, after its words, the stamp — on the words' baseline (the stamp raises itself 6px) */
-.cl15-hd .cl15-trow { display: flex; align-items: baseline; gap: 22px; max-width: 100%; }
-/* ⚠️ brand.tsx forces `h1:not(.wsh-title)` (0-1-1) at runtime, injected last: 0-2-1 and !important win honestly */
-/* v15.3 §2 — THE HERO NUMBER: the count large, "agents on file" smaller beside it, on one baseline and one line.
-   The h1 itself carries the small size; the figure states its own. Both spans claw the face back from brand.tsx's
-   bare-span rule by inheriting. */
-.cl15-hd .cl15-txt h1.cl15-title {
-  margin: 0; white-space: nowrap; display: flex; align-items: baseline; gap: 18px;
-  font: 400 42px/1 var(--sp-type) !important; color: var(--hpanel-fg);
-}
-.cl15-hd .cl15-title .cl15-hn, .cl15-hd .cl15-title .cl15-ht { font-family: inherit; font-weight: 400; color: inherit; }
-.cl15-hd .cl15-title .cl15-hn { font-size: 124px; line-height: 0.8; letter-spacing: -0.03em; }
-.cl15-hd .cl15-title .cl15-ht { font-size: 42px; line-height: 1; }
-/* THE FACES: one row, 20 (16) under the title, 22 (20) above the buttons. Earlier discs sit on top; the halo is the
-   PANEL's colour (`--hpanel-bg`), so a disc reads as cut out of its neighbour. Active is #6a81a8 with cream initials —
-   the list's own ink disappears on the blue. No key (its counts are a hidden sentence) and no subheader. */
-.cl15-hd .cl15-faces { display: flex; align-items: center; gap: 12px; margin-top: 20px; height: 38px; white-space: nowrap; }
-.cl15-hd .cl15-fdiscs { display: flex; flex: none; }
-.cl15-hd .cl15-face {
-  box-sizing: border-box; position: relative; flex: none; width: 38px; height: 38px; border-radius: 50%;
-  display: grid; place-items: center; cursor: pointer;
-  font: 600 11px var(--font-mono); letter-spacing: 0.02em; line-height: 1;
-  box-shadow: 0 0 0 3px var(--hpanel-bg);
-}
-.cl15-hd .cl15-face + .cl15-face { margin-left: -7px; }
-.cl15-hd .cl15-face.is-active { background: #6a81a8; color: #f4eee5; }
-.cl15-hd .cl15-face.is-closed { background: #b3aca5; color: #2b2622; }
-.cl15-hd .cl15-face.is-none { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 3px var(--hpanel-bg); }
-.cl15-hd .cl15-face.is-ph { cursor: default; background: rgba(244, 238, 229, 0.16); }
-.cl15-hd .cl15-fmore { flex: none; font: 400 15px var(--clv-serif); color: var(--hpanel-muted); }
-.cl15-acts { display: flex; gap: 10px; margin-top: 22px; }
-.cl15-hd .cl15-b1, .cl15-hd .cl15-b2 {
-  box-sizing: border-box; height: 44px; padding: 0 22px; border-radius: 22px; border: 0; cursor: pointer;
-  font: 400 15.5px var(--sp-type); white-space: nowrap;
-}
-/* the buttons' colours, their disabled state and their focus ring are the panel's (`.hpanel-b1` / `.hpanel-b2`) */
-/* THE DRAWING: the hawk, bare (no disc), 214 (172) tall, in the right column, centred on the text and wholly inside the
-   panel. No drop, nothing crossing an edge. The height is stated in CSS pixels, so a later 2× file needs no change. */
-.cl15-art { justify-self: end; align-self: center; min-width: 0; display: flex; justify-content: flex-end; }
-.cl15-art img { display: block; flex: none; max-width: none; height: 214px; width: auto; }
-
-@media (max-width: 1439.5px) {
-  .cl15-hd .cl15-txt h1.cl15-title { font-size: 34px !important; gap: 14px; }
-  .cl15-hd .cl15-title .cl15-hn { font-size: 98px; }
-  .cl15-hd .cl15-title .cl15-ht { font-size: 34px; }
-  .cl15-hd .cl15-faces { height: 32px; margin-top: 16px; }
-  .cl15-acts { margin-top: 20px; }
-  .cl15-hd .cl15-trow { gap: 16px; }
-  .cl15-hd .cl15-face { width: 32px; height: 32px; font-size: 9.5px; }
-  .cl15-hd .cl15-face + .cl15-face { margin-left: -5px; }
-  .cl15-art img { height: 172px; }
-}
-
-/* loading: the same boxes, their text kept for its line box and painted over */
-/* the hero number is painted as one box, the h1's (its spans inherit the transparent ink) */
-.cl15-hd[data-loading] :is(.cl15-title, .cl15-b1, .cl15-b2) {
-  color: transparent !important; box-shadow: none; border-radius: 10px;
-  background: linear-gradient(90deg, rgba(244, 238, 229, 0.14), rgba(244, 238, 229, 0.24), rgba(244, 238, 229, 0.14)); background-size: 200% 100%;
-  animation: cl13Shim 1.6s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) { .cl15-hd[data-loading] * { animation: none !important; } }
+/* ⚠️ RETIRED (Contact list v16 §A, §G): the v15 header's own rules — the hero number, the faces row, the buttons' sizes
+   and the drawing. The header is the shared title panel now (contactV16.css §A). */
 
 /* ── §3 · THE DESK: the group's second row. Its CARDS start 72 (60) under the header panel; each card's number badge
    rises 26 (30) into that room. The cards and their loading paint are contactDeskBadge.css's (header panel v2, Part D). ── */
@@ -167,29 +100,4 @@
 }
 .cl14-ws .cl14-bar-k .cl15-ro button:hover { color: var(--cl14-cream); }
 
-/* ── v15.2 §4 · THE BANNER ABOVE THE LIST: a blush band the page sheet's full width, its bottom edge (v15.2) an arrow pointing
-   down at the list. The group's fourth row: 56 (48) of plain page above it (the next-step band's own bottom margin),
-   and the list's bar 76 (64) below.
-   ⚠️ APP SHELL v2 (9 Oct): THE ARROW IS RETIRED AND THE BOTTOM EDGE IS THE ENVELOPE FLAP — the header sheet's own shape
-      and depth (shell/headerSheet.css), in blush, with no shadow. `::before` is the page sheet's width and hangs 26px
-      below the band; the list's bar is 102 (90) below, the old 76 (64) plus the flap, so it keeps its distance from the point. */
-.clv-group > .cl15-ban {
-  grid-column: 1 / -1; grid-row: 4; position: relative; box-sizing: border-box;
-  display: flex; align-items: center; justify-content: center;
-  min-height: 136px; padding: 36px 0 34px; margin: 0 0 102px;
-}
-.cl15-ban::before {
-  content: ""; position: absolute; z-index: 0; top: 0; bottom: calc(-1 * var(--hsheet-flap));
-  left: 50%; width: var(--hsheet-w); transform: translateX(-50%);
-  background: #f3ddd2; clip-path: var(--hsheet-clip);
-}
-.clv-group > .cl15-ban p {
-  position: relative; z-index: 1; margin: 0; text-align: center;
-  font: 400 38px/1.15 var(--sp-type); letter-spacing: -0.005em; color: #5b2a1f;
-}
-@media (max-width: 1439.5px) {
-  .clv-group > .cl15-ban { min-height: 112px; padding: 28px 0 26px; margin: 0 0 90px; }
-  .clv-group > .cl15-ban p { font-size: 29px; }
-}
-/* loading: the band holds its size; its words appear with the data */
-.clv-group[data-loading] .cl15-ban p { visibility: hidden; }
+/* ⚠️ RETIRED (Contact list v16 §C, §G): the blush banner above the list, and its rules. */
