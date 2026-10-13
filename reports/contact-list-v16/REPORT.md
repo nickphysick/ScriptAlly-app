@@ -290,3 +290,18 @@ takes focus on load. I have not found a mechanism, and I am not treating it as n
 **To deploy**, from a clean checkout of the integration branch:
 `npm run build:dev && firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`,
 after re-checking what dev serves.
+
+## 12. Deployed to dev (14 Oct), after the ruling "option 1, with conditions"
+
+- **Merged** the `-qp2d` tip `30104c2f` (Query panel v2's fifth pass) into the integration branch: no conflicts.
+- **Gates:** `tsc` 0; both builds exit 0; Vitest 8,758 passed, 3 skipped, the same one file failing to load.
+- **CL16:** all 19 locks pass.
+- **Regression set:** the older Contact list suites and Comparable titles v25 pass (62 with CL16, 0 failed).
+  Query Centre v137, query panel v1 and v2, feed drawer v2 and header v3 pass. Header panel v2 has one red, **P7 at
+  390px on `/manuscripts/comps`** ("inner overflow 2 · furthest child 363" against a panel ending at 362). It is the
+  same red, with the same reading, on dev's own branch at `30104c2f` without v16, so it is not v16's; it belongs to
+  the Comparable titles header.
+- **Header v3's no-jump lock, three runs on every route: pass, pass, pass** (and a fourth pass inside the
+  regression batch). Submission packages was green 3 of 3, so the 10px jump recorded in §11 is **closed as not
+  reproduced**. For the record, across both days on builds carrying v16: 3 failures in 17 runs, all on
+  Packages or Comparable titles, none captured by the nine diagnostic runs.
