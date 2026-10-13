@@ -26,7 +26,7 @@ import type { SubmissionPackage } from "../../../types";
 import type { ListGroup, GroupBy } from "../../../lib/qcCalView";
 import type { QcRow, QcSort } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
-import { silenceLead } from "../../../lib/queryActions/entry";
+import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell, standLine } from "../../../lib/qcRowLines";
 import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import { QC_INKWELL } from "./qcArt";
@@ -187,6 +187,7 @@ export const QcList132: React.FC<{
     const on = r.id === selectedId;
     const next = coming?.get(r.id) ?? null;
     const nx = nextLine(r, next, nowMs);
+    const move = nextDoor(r);
     const closed = r.court === "closed";
     const pkgId = r.query.sentPackageId || r.query.packageId || null;
     const pkg = pkgId ? packageOf?.(pkgId) ?? null : null;
@@ -216,11 +217,10 @@ export const QcList132: React.FC<{
           <div className="qcw-nxt" data-qcv="row-verb">{nx.phrase}</div>
           <div className={`qcw-sub${nx.hot ? " hot" : ""}`} data-qcv="row-nextline" data-hot={nx.hot || undefined}>{nx.line}</div>
           <span className="qcw-tray" data-qcv="row-tray">
-            {/* a query a year silent leads with the panel's primary even when the board holds no card for it
-                (`silenceLead`, the panel footer's own predicate): after "Keep tracking" its close card is gone */}
-            {(next || silenceLead(r)) && !closed && (
-              <button type="button" className="qcw-pillbtn" data-qcv="row-act"
-                onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next?.bucket ?? null); }}>{next?.action ?? silenceLead(r)!.label}</button>
+            {/* THE ROW'S ONE NEXT MOVE (`nextDoor`): the panel's primary, on every open row, card or no card */}
+            {move && !closed && (
+              <button type="button" className="qcw-pillbtn" data-qcv="row-act" data-next={move.mode}
+                onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next?.bucket ?? null); }}>{move.label}</button>
             )}
             <button type="button" className="qcw-ghost" data-qcv="row-edit"
               onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }} aria-label={`Edit the query to ${r.agentName}`}><span className="qcw-gw">Edit</span>{ICON.pen}</button>

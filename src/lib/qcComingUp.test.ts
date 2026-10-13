@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { comingUp, cardsByQuery, COMING_VERB, COMING_ACTION, SEND_VERB, trayLabel, trayOpen, trayRequest } from "./qcComingUp";
-import { leadDoors, silenceLead, silenceWords, SILENCE_WORDS } from "./queryActions/entry";
+import { leadDoors, nextDoor, nextWords, NEXT_WORDS } from "./queryActions/entry";
 import { nextLine } from "./qcRowLines";
 import { cardBucket, taskDeed, BUCKET_ORDER, type Bucket } from "./todoBuckets";
 import type { BoardCard } from "./todoBoard";
@@ -132,22 +132,20 @@ describe("v126 §7 · the tray's action is one drawer door per bucket", () => {
   });
 });
 
+/* RE-POINTED (ruling, 13 Oct): the Birds-eye pill is the row's one next move, card or no card. The board card's
+   bucket no longer chooses the journey; `trayRequest` still maps a bucket to its journey for the surfaces that
+   are a board card (the To-do page). Held in "one next move for every row" below. */
 describe("v126.2 · the Birds-eye row's one next move", () => {
-  it("is the tray's own act where something is coming up, else the card's primary door", async () => {
-    const { nextMove, trayRequest } = await import("./qcComingUp");
+  it("is the row's own next move, whatever card is raised", async () => {
+    const { nextMove } = await import("./qcComingUp");
     const { QueryStatus: S } = await import("../types");
-    const r = (status: string, id = "q1") => ({ id, status, expectedMs: NOW - 10 * DAY } as unknown as QcRow);
-    /* a raised card: the tray's label and the tray's journey, from the one derivation */
-    for (const [b, t] of Object.entries(TYPE_FOR) as [Exclude<Bucket, "note">, string][]) {
-      const st = b === "decide" ? S.OFFER : b === "send" ? S.FULL_REQUESTED : S.QUERIED;
-      const m = nextMove(card(t), r(st), NOW);
-      /* RE-POINTED (Query panel v1): the label is the PANEL's button for the same journey (`trayLabel`) */
-      expect(m?.label, b).toBe(trayLabel(b, r(st)));
-      expect(m?.request, b).toEqual(trayRequest(b, st, "q1"));
+    const r = (status: string, court: string, o: object = {}) => ({ id: "q1", status, court, dayN: 30, ...o } as unknown as QcRow);
+    for (const t of Object.values(TYPE_FOR)) {
+      expect(nextMove(card(t), r(S.QUERIED, "agent"), NOW)).toEqual({ label: "Record a response", request: { mode: "resp", queryId: "q1" } });
+      expect(nextMove(card(t), r(S.QUERIED, "agent", { pastExpected: true }), NOW)).toEqual({ label: "Nudge", request: { mode: "nudge", queryId: "q1" } });
+      expect(nextMove(card(t), r(S.FULL_REQUESTED, "you"), NOW)?.request.mode).toBe("sent");
     }
-    /* nothing raised: the card's own primary door */
-    expect(nextMove(undefined, r(S.QUERIED), NOW)).toEqual({ label: "Record a response", request: { mode: "resp", queryId: "q1" } });
-    expect(nextMove(undefined, r(S.FULL_REQUESTED), NOW)?.request.mode).toBe("sent");
+    expect(nextMove(undefined, r(S.OFFER, "offer"), NOW)?.request.mode).toBe("offer");
   });
 });
 
@@ -163,64 +161,82 @@ describe("v126.2.1 · an overdue send reads '<Stage> N days over', without the v
   });
 });
 
-describe("Query panel v1 · the tray's label is the panel's button for the same journey", () => {
+/* RE-POINTED (ruling, 13 Oct): the tray's label is the panel's PRIMARY, not the panel's button for the bucket's
+   journey; and no bucket keeps words of its own ("Fill it in" for the fix bucket is gone from the tray). */
+describe("Query panel v1 · the tray's label is the panel's primary", () => {
   it("one label for one act, from the panel's own table", async () => {
     const { QueryStatus: S } = await import("../types");
     const { panelDoors } = await import("./queryActions/entry");
-    const row = (status: string, court = "you", dayN: number | null = 10) => ({ status, court, dayN } as never);
+    const row = (status: string, court = "you", dayN: number | null = 10, pastExpected = false) => ({ status, court, dayN, pastExpected } as never);
     expect(trayLabel("send", row(S.FULL_REQUESTED))).toBe("Mark full sent");
     expect(trayLabel("send", row(S.PARTIAL_REQUESTED))).toBe("Mark partial sent");
-    expect(trayLabel("decide", row(S.OFFER))).toBe("Record your answer");
-    expect(trayLabel("chase", row(S.QUERIED, "agent"))).toBe("Nudge");
+    expect(trayLabel("decide", row(S.OFFER, "offer"))).toBe("Record your answer");
+    expect(trayLabel("chase", row(S.QUERIED, "agent", 60, true))).toBe("Nudge");
+    expect(trayLabel("chase", row(S.QUERIED, "agent", 10))).toBe("Record a response");
     expect(trayLabel("close", row(S.QUERIED, "agent", 400))).toBe("Close query");
-    /* derived against the panel's table, never a second list: every bucket whose journey the panel offers */
-    for (const [b, st] of [["send", S.FULL_REQUESTED], ["chase", S.QUERIED], ["close", S.QUERIED], ["decide", S.OFFER]] as const) {
-      const mode = trayRequest(b, st as never, "x")!.mode;
-      expect(panelDoors(st, 10).find((d) => d.mode === mode)?.label, b).toBe(trayLabel(b, row(st, b === "send" || b === "decide" ? "you" : "agent")));
-    }
-  });
-  it("an act the panel has no button for keeps the tray's own words", () => {
-    expect(trayLabel("fix", { status: "Queried", court: "agent", dayN: 3 } as never)).toBe(COMING_ACTION.fix);
+    expect(trayLabel("fix", row(S.QUERIED, "agent", 3))).toBe("Record a response");
+    /* derived against the panel's table, never a second list */
+    expect(trayLabel("chase", row(S.QUERIED, "agent", 60, true))).toBe(panelDoors(S.QUERIED, 60, true).find((d) => d.primary)!.label);
+    expect(COMING_ACTION.fix.length).toBeGreaterThan(0);
   });
 });
 
-describe("one predicate for the panel's primary and the tray's first action (ruling, 12 Oct)", () => {
-  const S2 = { Q: "Queried", FS: "Full Sent", PR: "Partial Requested" };
-  const mk = (status: string, court: string, dayN: number | null, kept = false) => ({ id: "q", status, court, dayN, query: kept ? { closureOfferDismissed: true } : {} } as never);
-  const buckets = ["chase", "close", "fix"] as const;
-  it("a year silent: every bucket's tray button is the panel's primary, label and journey, before and after Keep tracking", () => {
-    const tally = { close: 0, resp: 0 };
-    for (const status of [S2.Q, S2.FS]) for (const kept of [false, true]) for (const b of buckets) {
-      const r = mk(status, "agent", 400, kept);
+describe("one next move for every row (ruling, 13 Oct)", () => {
+  const NOW2 = Date.now();
+  const mk = (status: string, court: string, dayN: number | null, o: { past?: boolean; kept?: boolean } = {}) =>
+    ({ id: "q", status, court, dayN, pastExpected: !!o.past, sentMs: dayN != null ? NOW2 - dayN * 86_400_000 : null, expectedMs: o.past ? NOW2 - 5 * 86_400_000 : NOW2 + 30 * 86_400_000, query: o.kept ? { closureOfferDismissed: true } : {} } as never);
+  /* every state the rule names, and what leads in it */
+  const STATES: [string, never, string, string][] = [
+    ["waiting, inside the date", mk("Queried", "agent", 20), "Record a response", "Waiting"],
+    ["past the reply date, inside the year", mk("Queried", "agent", 90, { past: true }), "Nudge", "Nudge"],
+    ["past the date, kept, inside the year", mk("Full Sent", "agent", 200, { past: true, kept: true }), "Nudge", "Nudge"],
+    ["over a year", mk("Queried", "agent", 400, { past: true }), "Close query", "Consider closing"],
+    ["over a year, no date ever", mk("Partial Sent", "agent", 400), "Close query", "Consider closing"],
+    ["over a year, kept", mk("Queried", "agent", 400, { past: true, kept: true }), "Record a response", "Waiting"],
+    ["exactly a year", mk("Queried", "agent", 365, { past: true }), "Nudge", "Nudge"],
+    ["a partial owed", mk("Partial Requested", "you", 400), "Mark partial sent", "Send partial"],
+    ["a full owed", mk("Full Requested", "you", 10), "Mark full sent", "Send full"],
+    ["a revision owed", mk("Revise & Resubmit", "you", 10), "Mark revision sent", "Send revision"],
+    ["an offer", mk("Offer", "offer", 10), "Record your answer", "Decide on offer"],
+  ];
+  const cards = [null, { bucket: "chase", verb: "Nudge" }, { bucket: "close", verb: "Consider closing" }, { bucket: "fix", verb: "Record what you sent" }, { bucket: "send", verb: "Send full" }] as never[];
+  it("the panel's primary, the tray's button and journey, the column and the Birds-eye pill are that one move — whatever card the board holds", async () => {
+    const { nextMove } = await import("./qcComingUp");
+    const leads = new Set<string>();
+    for (const [name, r, lead, words] of STATES) {
       const primary = leadDoors(r).find((d) => d.primary)!;
-      expect(trayLabel(b, r), `${status} ${b} kept=${kept}`).toBe(primary.label);
-      expect(trayOpen(b, r)?.mode, `${status} ${b} kept=${kept}`).toBe(primary.mode);
-      tally[primary.mode as "close" | "resp"]++;
+      expect(primary.label, name).toBe(lead);
+      expect(nextDoor(r)?.label, name).toBe(lead);
+      expect(nextWords(r), name).toBe(words);
+      expect(NEXT_WORDS[lead], name).toBe(words);
+      for (const c of cards) {
+        for (const b of ["chase", "close", "fix", "send", "decide"] as const) {
+          expect(trayLabel(b, r), `${name} · bucket ${b}`).toBe(lead);
+          expect(trayOpen(b, r)?.mode, `${name} · bucket ${b}`).toBe(primary.mode);
+        }
+        expect(trayOpen(null, r)?.mode, name).toBe(primary.mode);
+        expect(nextMove(c, r, NOW2), name).toEqual({ label: lead, request: trayOpen(null, r) });
+        expect(nextLine(r, c, NOW2).phrase, `${name} · the column`).toBe(words);
+      }
+      leads.add(lead);
     }
-    /* both branches were entered: Close leads before, Record a response after */
-    expect(tally).toEqual({ close: 6, resp: 6 });
+    /* every branch of the rule was entered */
+    expect([...leads].sort()).toEqual(["Close query", "Mark full sent", "Mark partial sent", "Mark revision sent", "Nudge", "Record a response", "Record your answer"]);
   });
-  it("Close as the tray's lead keeps the no-reply reason the close card's tray gave", () => {
-    expect(trayOpen("chase", mk(S2.Q, "agent", 400))).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
-  });
-  it("under a year, or not with the agent, nothing overrides the board card's own act", () => {
-    for (const r of [mk(S2.Q, "agent", 365), mk(S2.Q, "agent", 90, true), mk(S2.PR, "you", 400), mk(S2.Q, "agent", null)]) expect(silenceLead(r)).toBeNull();
-    expect(trayLabel("chase", mk(S2.Q, "agent", 90))).toBe("Nudge");
-    expect(trayOpen("chase", mk(S2.Q, "agent", 90))).toEqual(trayRequest("chase", S2.Q as never, "q"));
-  });
-  it("the Next move column says that same door, whatever card the board holds", () => {
-    const row = (kept: boolean) => ({ id: "q", status: S2.Q, court: "agent", dayN: 400, sentMs: Date.now() - 400 * 86_400_000, expectedMs: Date.now() - 340 * 86_400_000, query: kept ? { closureOfferDismissed: true } : {} } as never);
-    const cards = [null, { bucket: "chase", verb: "Nudge" }, { bucket: "close", verb: "Consider closing" }, { bucket: "fix", verb: "Record what you sent" }] as never[];
-    const seen = new Set<string>();
-    for (const kept of [false, true]) for (const c of cards) {
-      const r = row(kept);
-      const primary = leadDoors(r).find((d) => d.primary)!;
-      expect(nextLine(r, c, Date.now()).phrase, `kept=${kept}`).toBe(SILENCE_WORDS[primary.mode]);
-      expect(silenceWords(r)).toBe(SILENCE_WORDS[primary.mode]);
-      seen.add(nextLine(r, c, Date.now()).phrase);
+  it("Record a response is a secondary door wherever it does not lead", () => {
+    for (const [name, r, lead] of STATES) {
+      if (lead === "Record a response" || lead === "Record your answer") continue;
+      expect(leadDoors(r).filter((d) => !d.primary).map((d) => d.label), name).toContain("Record a response");
     }
-    expect([...seen].sort()).toEqual(["Consider closing", "Waiting"]);
-    /* under a year the column keeps its own reading of the dates and the card */
-    expect(silenceWords({ status: S2.Q, court: "agent", dayN: 200 } as never)).toBeNull();
+  });
+  it("Close as the lead carries the no-reply reason; a closed query's move is a late reply", () => {
+    expect(trayOpen("chase", mk("Queried", "agent", 400))).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
+    expect(nextDoor(mk("Rejected", "closed", 400))?.label).toBe("Record a late reply");
+    expect(nextDoor(mk("Signed", "closed", 10))).toBeNull();
+  });
+  it("inside the last week of the wait the column names it \"Reply due\": the move is still Record a response", () => {
+    const r = { ...(mk("Queried", "agent", 50) as object), expectedMs: NOW2 + 3 * 86_400_000 } as never;
+    expect(nextDoor(r)?.label).toBe("Record a response");
+    expect(nextLine(r, null, NOW2).phrase).toBe("Reply due");
   });
 });

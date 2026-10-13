@@ -237,6 +237,7 @@ const SURFACE_LABEL: Record<SurfaceChange["surface"], string> = {
   chapters: "Chapters",
   anchor: "Waiting",
   window: "Window",
+  sendBy: "Send by",
 };
 
 /**
