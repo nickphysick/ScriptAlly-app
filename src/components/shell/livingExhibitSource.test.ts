@@ -32,11 +32,12 @@ describe("LH6 · the exhibition reads nothing but its constant (source)", () => 
     const qc = src("src/components/Queries.tsx");
     const cl = src("src/components/agents/AgentList.tsx");
     expect(qc.split("<QcExhibit").length - 1).toBe(1);
-    expect(cl.split("<ContactExhibit").length - 1).toBe(1);
+    /* RE-POINTED (Contact list v17 §F): the Contact list's empty page shows one labelled example agent, not an exhibition
+       of the populated page, so `ContactExhibit` is mounted nowhere */
+    expect(cl.split("<ContactExhibit").length - 1).toBe(0);
     expect(qc.slice(qc.indexOf("<QcEmpty"), qc.indexOf("<QcExhibit"))).not.toContain("</QcEmpty>");
-    expect(cl.slice(cl.indexOf("<ContactEmpty"), cl.indexOf("<ContactExhibit"))).not.toContain("</ContactEmpty>");
     expect(qc.indexOf("<QcEmpty")).toBeGreaterThan(-1);
-    expect(cl.indexOf("<ContactEmpty")).toBeGreaterThan(-1);
+    expect(cl.indexOf("<ContactEmptyPage")).toBeGreaterThan(-1);
   });
 
   /* living headers v3: the four new exhibits — each mounted exactly once, by its page, and only in

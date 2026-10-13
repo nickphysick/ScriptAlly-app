@@ -26,8 +26,7 @@ import { reopenReminder } from "../../lib/agentCard";
 import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
-import { ContactEmpty } from "./contact/ContactEmpty";
-import { ContactExhibit } from "./contact/ContactExhibit";
+import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
@@ -998,20 +997,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             a blank account's pitch and the settling beat are single-column, and a grid with an
             absent second child would hold a 340px hole open for nothing. */}
         {showEmpty ? (
-          <ContactEmpty
+          <ContactEmptyPage
             manuscriptTitle={scoped?.title?.trim() || null}
-            genre={scoped?.genre ?? null}
             addRef={addBtnRef}
-            /* v12: the quick-add drop and the paste pill are retired — the one door is the card
-               (its link mode survives INSIDE the card), and the secondary is Discover, matching
-               the populated header (LH7's same-shape claim) */
+            /* the header's primary and the third way: the page's own add door (the centred new-agent card) */
             onAdd={openAdd}
-            /* the ways' recommended tile — the same bridge the rail's Import entry takes */
+            /* "Import your list" and Smart import: the same bridge the sidebar's Import entry takes */
             onImport={() => onNavigate?.("import")}
-            /* the bridge App.tsx already maps to `/agents/discover`; OMITTED when it cannot be taken */
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
-            /* §4 — the page's own components over a sample constant, mounted ONLY on the empty page */
-            exhibition={<ContactExhibit />}
           />
         ) : (
         <>

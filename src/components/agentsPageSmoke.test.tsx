@@ -35,14 +35,15 @@ describe("/agents renders", () => {
     const html = renderPage(list(), "/agents");
     /* ⚠️ RETARGETED (living headers §3): the feature-led page is retired for the shared header's
        empty state. Same two jobs — the opening, and a block only a whole render reaches. */
-    expect(html).toContain("No agents on your list yet");
+    /* RE-POINTED (Contact list v17 §F): the empty page is the navy header, "How it works" and "Ways to get started" */
+    expect(html).toContain("Every agent, in one place");
     /* ⚠️ RETARGETED (empty-states pack, Phase 3). The six-row "What makes a strong agent record?"
        band is retired; the ref's "Fill the gaps." row replaces it. The second assertion's job here
        is unchanged — prove the page is the WHOLE empty state and not a hero that lost its body —
        so it names the LAST block, which is what a truncated render loses first.
 
        ⚠️ AND A SMOKE PINS THE MINIMUM, NOT THE APPEARANCE. Two strings: the opening and the close. */
-    expect(html).toContain("+ Add an agent");
+    expect(html).toContain("Ways to get started");
   });
 
   it("…and that state suppresses the toolbar, which has nothing to act on", () => {
@@ -50,9 +51,12 @@ describe("/agents renders", () => {
     /* ⚠️ RETARGETED (living headers §4): the empty page now EXHIBITS the populated page — its own
        controls among them, inert and aria-hidden, over a sample. The law is about the LIVE page: no
        toolbar outside the band, and the band present to hold the picture. */
-    const band = html.indexOf('data-lh="exhibition"');
-    expect(band).toBeGreaterThan(-1);
-    expect(html.slice(0, band)).not.toContain("Filter");
+    /* RE-POINTED (Contact list v17 §F): the empty page exhibits nothing of the populated page any more — it shows one
+       labelled example agent instead. The law is unchanged: no list, no filter row and no pinned row to act on nothing. */
+    expect(html).toContain('data-cl17="empty"');
+    expect(html).not.toContain('data-cl17="filter-row"');
+    expect(html).not.toContain('data-cl16="list"');
+    expect(html).not.toContain('data-cl17="pinned"');
   });
 
   /**
