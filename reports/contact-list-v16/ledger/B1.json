@@ -15,25 +15,25 @@
   "lock": "B1",
   "where": "1512 the list is unfiltered and has rows",
   "ok": true,
-  "detail": "37 rows · showing 37"
+  "detail": "39 rows · showing 39"
  },
  {
   "lock": "B1",
   "where": "1512 cell 1 is every agent",
   "ok": true,
-  "detail": "37 · 37 rows"
+  "detail": "39 · 39 rows"
  },
  {
   "lock": "B1",
   "where": "1512 cell 1 = cells 2 + 3 + 4",
   "ok": true,
-  "detail": "37 · 31 + 5 + 1"
+  "detail": "39 · 33 + 5 + 1"
  },
  {
   "lock": "B1",
   "where": "1512 not queried is the list's own",
   "ok": true,
-  "detail": "31 · 31 rows"
+  "detail": "33 · 33 rows"
  },
  {
   "lock": "B1",
@@ -87,7 +87,7 @@
   "lock": "B1",
   "where": "1512 none: its faces and its \"+N\" are its figure",
   "ok": true,
-  "detail": "7 faces + 24 · figure 31"
+  "detail": "7 faces + 26 · figure 33"
  },
  {
   "lock": "B1",
@@ -159,7 +159,7 @@
   "lock": "B1",
   "where": "1512 a group overflows its faces",
   "ok": true,
-  "detail": "none +24 · live +0 · closed +0"
+  "detail": "none +26 · live +0 · closed +0"
  },
  {
   "lock": "B1",

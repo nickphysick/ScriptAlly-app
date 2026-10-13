@@ -45,7 +45,7 @@
   "lock": "F6",
   "where": "1512 past the reply date: the status is one line, with ⋯ beside it",
   "ok": true,
-  "detail": "1 lines · \"Queried\" · \"Expected 1 Jan · 285d over\""
+  "detail": "1 lines · \"Queried\" · \"Expected 1 Jan · 286d over\""
  },
  {
   "lock": "F6",
@@ -117,7 +117,7 @@
   "lock": "F6",
   "where": "1280 past the reply date: the status is one line, with ⋯ beside it",
   "ok": true,
-  "detail": "1 lines · \"Queried\" · \"Expected 1 Jan · 285d over\""
+  "detail": "1 lines · \"Queried\" · \"Expected 1 Jan · 286d over\""
  },
  {
   "lock": "F6",

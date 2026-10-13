@@ -6,59 +6,73 @@ Seven parts, one commit each (A to G), then one commit for the no-regression pas
 
 ## 1. False premises, and things for Nick to rule on
 
-**Two things I stopped on and need an answer to.**
+**Ruled on 13 Oct, and built as ruled.**
 
-1. **An agent note cannot be pinned.** The brief's Notes tab pins a note. An agent note is `{ text, createdAt }`;
-   the rules allow an update of `text` only; `Agent.pinnedNoteId` is on the type and is read for the list's preview,
-   but nothing writes it and the rules do not allow it. §0.9 says to report and ask, not work round it, so the Notes
-   tab ships with add, edit and delete and no Pin. Building Pin needs a new field and a rules change.
-2. **"+ Add an agent" still opens the centred new-agent card.** Part G says nothing on `/agents` opens the centred
-   agent card. The header's button, the empty state and `sa:contact-add` all add a NEW agent, and there is no agent
-   to show in a panel yet, so they keep the card (the brief also says the header's handlers stay as built). Every
-   door to an EXISTING agent on the page opens the panel. Say if the add should move into the panel too.
+1. **An agent note cannot be pinned, and v16 ships without Pin.** An agent note is `{ text, createdAt }`; the rules
+   allow an update of `text` only; nothing writes `Agent.pinnedNoteId`. The Notes tab has add, edit and delete.
+   Pinning needs a pinned field and a rules change (a prod deploy), as its own pack. CLAUDE.md says so.
+2. **"+ Add an agent" stays on the centred new-agent card for this run.** The header's button, the empty state and
+   `sa:contact-add` add a NEW agent through the card. Every door to an EXISTING agent on the page opens the panel.
+   Moving add into the panel is its own pack. **Open.**
+3. **Full screen is the shared hook.** On the integration branch the Contact list calls `shell/useFullScreenList`
+   (Comparable titles v25's, with its `sidebarForce` hold); v16's own state, hold, scroll restore and its
+   `sa.contactFull` key are deleted. See §11.
+
+**A false premise in the F7 ruling: there is no fan-out to skip.** The ruling asks for F7 to go red under "skip the
+fan-out". The query's reply-by date is not stored. `responseDeadline` is retired: nothing writes it when a query is
+created, a one-time migration in `db.tsx` deletes it on every load, and the date a reader sees is the last send
+plus the agent's reply time, worked out when it is read. `computeAgentDeadlineWrites` only recomputes a date that
+is already stored, so on any current data it writes nothing. I ran F7 with the fan-out skipped and it stayed
+green, 12 of 12 (`ledger/mut-F7-fanout-F7.json`). F7's real red is the save not carrying the reply time
+(`ledger/mut-F7-nosave-F7.json`, 9 of 12). The fan-out and `agentCardSnapshot`'s query half look like dead weight
+now; I left them alone.
+
+**"Responses RS1" does not exist in this repository.** No file, branch or commit names it (searched `tests`, `src`,
+`reports`, every remote branch and the log). I could not run it. If it lives on a branch that is not pushed, tell
+me which.
 
 **Premises in the brief that the code does not match.**
 
-3. **"Compact" is not "window at or under 1440".** Since Query Centre v137 the app's full and compact sizes follow
+4. **"Compact" is not "window at or under 1440".** Since Query Centre v137 the app's full and compact sizes follow
    the sheet's width (`.ws-app.sheet-wide`, sheet wider than 1440), not the window's. With the sidebar open the
    page is compact at both 1512 and 1280. The mock is full at 1512 because its sidebar is 240 where the app's is
    248. The lock table's "196 (compact)" disc agrees with the app. The locks assert the app's rule.
-4. **The list is 1208 wide at 1512, not 1216.** Same cause: the app's sidebar is 8px wider than the mock's. The
+5. **The list is 1208 wide at 1512, not 1216.** Same cause: the app's sidebar is 8px wider than the mock's. The
    lock asserts "24 from the sheet's edges, at most 1600, centred", which is what the brief means.
-5. **The base header already had no stamp and no faces.** Header v3 removed them; only a hidden counts sentence
+6. **The base header already had no stamp and no faces.** Header v3 removed them; only a hidden counts sentence
    was left. Part A removed the number and that sentence.
-6. **There were two status derivations.** The desk's Queried card took an agent's status from the latest
+7. **There were two status derivations.** The desk's Queried card took an agent's status from the latest
    `dateSent`; the list's column uses `contactStanding`. The strip uses the column's, so a cell and the rows it
    shows cannot disagree.
-7. **The desk's "this month" was the browser's month, not London's.** The strip's weeks and its "this month" are
+8. **The desk's "this month" was the browser's month, not London's.** The strip's weeks and its "this month" are
    London's.
-8. **`QcStrip` cannot take cells as props** (it derives them inside), so `ContactStrip` is built beside it and
+9. **`QcStrip` cannot take cells as props** (it derives them inside), so `ContactStrip` is built beside it and
    wears its `.qcs-*` classes. A shared strip is a lift, listed in §8.
-9. **The column headings already sorted** (v14). Part C removed the sort pill and added `aria-sort`.
-10. **The list remembers per visit, not per user** (`sessionStorage`, key now `sa.contactList.v4`). Full screen is
-    remembered per device (`localStorage["sa.contactFull"]`).
-11. **The sidebar's collapsed state had no shared store.** Full screen holds it in its icon state through a new
-    `holdSidebarCollapsed`, without writing the reader's own stored choice.
-12. **The strip's faces are not doors.** They sit inside the cell's button and are `aria-hidden`, so "faces in the
+10. **The column headings already sorted** (v14). Part C removed the sort pill and added `aria-sort`.
+11. **The list remembers per visit, not per user** (`sessionStorage`, key now `sa.contactList.v4`). Full screen is
+    the shared hook's `?full=1` on the integration branch (§11).
+12. **The sidebar's collapsed state had no shared store.** Full screen holds it in its icon state through a new
+    `holdSidebarCollapsed`, without writing the reader's own stored choice. (On the integration branch this is Comparable titles' `sidebarForce`, §11.)
+13. **The strip's faces are not doors.** They sit inside the cell's button and are `aria-hidden`, so "faces in the
     strip open the panel" (Part G) has no subject.
-13. **An agent has no submission-form address**, so the masthead never draws "Submission form". It draws Website,
+14. **An agent has no submission-form address**, so the masthead never draws "Submission form". It draws Website,
     Email and MSWL when the agent has them.
-14. **"{first} is late"** is the brief's stand-card wording for a reply past its date. The house rule elsewhere
+15. **"{first} is late"** is the brief's stand-card wording for a reply past its date. The house rule elsewhere
     forbids "late" and "overdue" for an agent. Built as the brief says; flagged.
-15. **The send journey's eyebrow is "SENT WHAT THEY ASKED FOR"**, not the brief's "LOG THE SEND". The journeys'
+16. **The send journey's eyebrow is "SENT WHAT THEY ASKED FOR"**, not the brief's "LOG THE SEND". The journeys'
     copy is on the do-not-touch list, so it stays as built.
-16. **"Matches what {first} asks for" in Log a query is not built.** The journey has no such check and its fields
+17. **"Matches what {first} asks for" in Log a query is not built.** The journey has no such check and its fields
     and logic are on the do-not-touch list.
 
 **Things I changed that the brief did not ask for, found by the older locks.**
 
-17. **The header was 31px shorter while loading than loaded** (header panel v2's P6 caught it). The subline names
+18. **The header was 31px shorter while loading than loaded** (header panel v2's P6 caught it). The subline names
     the book, the book arrives after first paint, and the sentence then wraps to two lines. The subline now holds
     two lines always, and the book's name no longer inflates its line (Special Elite's metrics added 6px).
-18. **With letter grouping on, a picked letter was not the marked one.** v16 lands a letter under the pinned
+19. **With letter grouping on, a picked letter was not the marked one.** v16 lands a letter under the pinned
     headings, and the marker still read the old landing line. It reads the headings' bottom now; "All" holds its
     own meaning at the list's top.
-19. **The page guide's steps 2 and 3 are renamed** "Add agents" and "The full list", and steps 1 to 3 have new
+20. **The page guide's steps 2 and 3 are renamed** "Add agents" and "The full list", and steps 1 to 3 have new
     words (the pack gave none). They are in §9 for Nick to edit.
 
 ## 2. Base and gates
@@ -125,8 +139,18 @@ the page (`CL16_MUTATE=<lock>`). Ledgers are in `ledger/`.
 | F5 acting | 73/73 | no panel (F1) | no dim within 250ms |
 | F6 primary | 25/25 | no panel (F1) | the primary reads "Edit profile" for a not-queried agent |
 | G1 nothing else | 20/20 | no panel (F1) | a centred card opened |
+| F7 reply window | 12/12 | no panel (F1) | the save drops the reply time: 9/12, "6 → 6", the row still "Reply by 10 Nov" where 17 Nov was previewed |
 
 Unit: `contactGlance.test.ts` 11, `agentPanel.test.ts` 22.
+
+**F7** seeds its own test agent ("Zelda Fanout") with one open query, changes the reply time from six weeks to seven
+through the panel's Edit profile, and reads: the editor's preview (10 Nov → 17 Nov on the day it ran), the agent's
+reply time in Firestore, the row's "Reply by" line, and the stand card's figure (28 days to go → 35). It then presses
+the save's own Undo (the list's notice) and reads all three back. Both test documents are deleted in `finally`.
+
+**E1 and E2 were re-proved on the shared hook** (integration branch): E1 36/36 and E2 8/8 green; E1 red under its
+mutation ("900 → 0 → 0", the scroll not restored) and E2 red under its ("list 1208.0 · want 1388.0"). E1 reads
+`?full=1` where it read the old localStorage key; everything else it asserts is unchanged.
 
 **What the shared account could not show.** F2 saw open and closed doors and no "not known" door; the unit suite
 holds that colour. F3 saw the stand states send, none, shut, late, waiting and closed; no agent had an open offer,
@@ -205,26 +229,64 @@ that field): the wishlist, for most agents; the reply time, for several; MSWL an
 
 In `shots/`, each beside the `design-refs/contact-list-v16/screens/` file of the same number.
 
-## 11. Deploy: STOPPED, not deployed
+## 11. The integration branch and the deploy
 
-Dev serves `dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1` at `b2e1a737`
-(bundle `index-rhbmgLAi.js`), checked 13 Oct. I made the integration branch `…-corkboard1-cl16` off it (worktree
-`~/ScriptAlly-cl16int`) and merged `contact-list-v16`. The merge conflicts in four files. Two are the allowed ones
-(`CLAUDE.md`, `design-refs/.refhashes.json`). Two are not, so the merge is aborted and nothing is deployed:
+**Not deployed.** The header no-jump lock failed in two of the three ruled runs, and the ruling is not to deploy
+over a red.
 
-1. **`src/components/shell/useSidebarCollapsed.ts`.** Comparable titles v25 (on dev, not on `query-panel-v2`)
-   already built a sidebar hold, `shell/sidebarForce.ts`, and a shared `shell/useFullScreenList.ts` whose header
-   says "Shared, so the Contact list can adopt it". v16's Part E built the same thing a second time
-   (`holdSidebarCollapsed` inside `useSidebarCollapsed`, and the full-screen state in `AgentList`). The two differ:
-   the shared hook keeps full screen in the URL (`?full=1`, Back leaves it) and leaves on Escape at its own
-   `ESC_LEVEL.pageMode`; v16's keeps it in `localStorage["sa.contactFull"]` only.
-2. **`tests/e2e/headerV3.measure.ts`.** Both sides edited the NUMBER and TITLE route tables (dev moved
-   `/manuscripts/comps` to TITLE and renamed the Noteboard route to `/todo/corkboard`; v16 moved `/agents` to
-   TITLE). The resolution is mechanical: take dev's tables and move `/agents`.
+**The branch.** Dev moved between my first report and the ruling: on 13 Oct it served
+`dev/…-qp2c-corkboard1-qp2d` (bundle `index-B4cESNDW.js`), which contains `b2e1a737` plus Query panel v2's fourth
+pass. Cutting from `b2e1a737` as ruled would have taken that pass off dev, so the integration branch is cut from the
+`-qp2d` tip, `11877de6`: **`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1-qp2d-cl16`**,
+worktree `~/ScriptAlly-cl16int`. Its dev build is `index-wq0THQO_.js`.
 
-**The question for Nick:** on the integration branch, should the Contact list drop its own full-screen code and
-adopt `useFullScreenList` and `sidebarForce` (one implementation; full screen gains `?full=1`; CL16 E1 and E2
-need re-proving), or should the integration keep v16's as built beside the shared hook? I recommend adopting the
-shared hook. Either way the deploy waits for the answer.
+**The merge.** Four conflicts, resolved as ruled: `useSidebarCollapsed.ts` is dev's (the `sidebarForce` hold);
+`headerV3.measure.ts` has both sides' route tables; `CLAUDE.md` and `.refhashes.json` have both sides. In the same
+commit the Contact list drops its own full-screen state, sidebar hold and scroll restore and calls
+`useFullScreenList`. The state is `?full=1`. The hook also needs a device key (it puts `?full=1` back on arrival);
+this page's is `sa.contactsFull`, as Comparable titles' is `sa.compsFull`. v16's `sa.contactFull` is gone.
+One side effect: with a row held by the keyboard, Escape now leaves full screen first (the hook's layer takes the
+key); before, it let go of the row first.
 
-`contact-list-v16` is pushed at its tip. The integration branch exists locally, unmerged and clean.
+**Gates on the integration branch.** `tsc` 0; both builds exit 0, no warning beyond the chunk-size note; Vitest
+8,759 passed, 3 skipped, the same one file failing to load (`functions/src/email.test.ts`).
+
+**Locks on the integration build.**
+
+| Suite | Result |
+|---|---|
+| contactV16 (A1 to G1 and F7) | 19 passed |
+| compsV25 (its full-screen locks included), V26, V27, V271 | all passed (58 with contactV16, 0 failed) |
+| qcV137 | all passed |
+| contactV11, V13, V14 | all passed |
+| queryPanelV2 | V4–V5 and V13 red inside the run; both green alone straight after (540/540 and 98/98). V4–V5 could not find its seeded row; V13 timed out on a click. Both read a fixture another session shares. |
+| Responses RS1 | not run: it is not in this repository (§1) |
+| headerV3 H8, three runs | pass, **fail, fail** |
+
+**The header no-jump failures.**
+
+| Run | Route | Width | First seen | Settled | Jump |
+|---|---|---|---|---|---|
+| 2 | `/manuscripts/packages` | 1280 | top 134, 942 × 260, loading | top 124, 942 × 260 | 10px up |
+| 3 | `/manuscripts/packages` | 1512 | top 134, 1159 × 260, loading | top 124, 1159 × 260 | 10px up |
+
+The header keeps its size and moves up 10px. At the first reading the page header carried `data-loading` (the
+Packages page's own load state; the only loading element in the sheet), the shell's bar was 64 tall at 41.75 and
+the sheet's top was 105.75, with no font still loading. The same lock on the earlier v16-only build failed once
+the same way, on Packages and Comparable titles.
+
+What I could not establish is the cause:
+- I added readings to a copy of the lock (what is scrolled, the shell above the header, focus, fonts) and ran it
+  nine more times on the same build. It passed all nine, so nothing was captured at a failure.
+- Visiting the page directly, in the lock's order and with its motion freeze, the header stayed at 134 on all 34
+  visits, for ten seconds each.
+- On dev's branch without v16 (`11877de6`, built fresh) the lock passed three times out of three.
+
+So on builds with v16 it is 3 failures in 13 runs, and on builds without it 0 in 4. That leans towards v16 but
+does not show it: v16 does not touch the Packages page, and the failures came close together in time (two in
+consecutive runs, straight after a 30-minute run on the shared account). Nothing on the Packages page scrolls or
+takes focus on load. I have not found a mechanism, and I am not treating it as noise.
+
+**To deploy**, from a clean checkout of the integration branch:
+`npm run build:dev && firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`,
+after re-checking what dev serves.

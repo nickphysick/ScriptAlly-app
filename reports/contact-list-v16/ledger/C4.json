@@ -15,13 +15,13 @@
   "lock": "C4",
   "where": "1512 \"V\" travelled",
   "ok": true,
-  "detail": "scrollTop 3305"
+  "detail": "scrollTop 3225"
  },
  {
   "lock": "C4",
   "where": "1512 its first agent's row is within 4px under the pinned stack",
   "ok": true,
-  "detail": "row top 268.6 · headings' bottom 268.8 · stack 268.8 · scrollTop 3305/3633"
+  "detail": "row top 268.6 · headings' bottom 268.8 · stack 268.8 · scrollTop 3225/3553"
  },
  {
   "lock": "C4",
@@ -57,13 +57,13 @@
   "lock": "C4",
   "where": "1280 \"V\" travelled",
   "ok": true,
-  "detail": "scrollTop 3332"
+  "detail": "scrollTop 3252"
  },
  {
   "lock": "C4",
   "where": "1280 its first agent's row is within 4px under the pinned stack",
   "ok": true,
-  "detail": "row top 269.1 · headings' bottom 268.8 · stack 268.8 · scrollTop 3332/3761"
+  "detail": "row top 269.1 · headings' bottom 268.8 · stack 268.8 · scrollTop 3252/3681"
  },
  {
   "lock": "C4",

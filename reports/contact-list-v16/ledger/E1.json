@@ -165,7 +165,7 @@
   "lock": "E1",
   "where": "1280 three count chips stand in for \"Showing\" and Summary",
   "ok": true,
-  "detail": "31 not queried · 5 querying · 1 closed"
+  "detail": "33 not queried · 5 querying · 1 closed"
  },
  {
   "lock": "E1",
@@ -183,7 +183,7 @@
   "lock": "E1",
   "where": "1280 pressing it again clears it",
   "ok": true,
-  "detail": "37 rows (was 37)"
+  "detail": "39 rows (was 39)"
  },
  {
   "lock": "E1",

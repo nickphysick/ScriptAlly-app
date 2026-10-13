@@ -81,13 +81,13 @@
   "lock": "D1",
   "where": "1512 the stack releases at the list's end",
   "ok": true,
-  "detail": "stack 117.8–268.8 · list -2836.4–438.6"
+  "detail": "stack 117.8–268.8 · list -2756.4–438.6"
  },
  {
   "lock": "D1",
   "where": "1512 Summary returns to the top and focuses the heading",
   "ok": true,
-  "detail": "scrollTop 0 · focus true · pinned false · path 1576,770,294,127,43,7,0,0,0"
+  "detail": "scrollTop 0 · focus true · pinned false · path 1576,771,336,128,44,7,0,0,0"
  },
  {
   "lock": "D1",
@@ -171,12 +171,12 @@
   "lock": "D1",
   "where": "1280 the stack releases at the list's end",
   "ok": true,
-  "detail": "stack 117.8–268.8 · list -2944.1–338.1"
+  "detail": "stack 117.8–268.8 · list -2864.1–338.1"
  },
  {
   "lock": "D1",
   "where": "1280 Summary returns to the top and focuses the heading",
   "ok": true,
-  "detail": "scrollTop 0 · focus true · pinned false · path 1694,962,412,187,63,14,0,0,0"
+  "detail": "scrollTop 0 · focus true · pinned false · path 1698,979,417,190,75,14,0,0,0"
  }
 ]
