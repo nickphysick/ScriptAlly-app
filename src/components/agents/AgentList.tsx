@@ -72,7 +72,7 @@ import "./contact/contactV13.css";
 import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
-import { useContactPins } from "./contact/useContactPins";
+import { ContactPinnedRow, useContactPinned } from "./contact/ContactPinned";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
 import { firstNameOf } from "../../lib/agentPanel";
@@ -455,22 +455,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (groupKey !== "letter") { setGroupKey("letter"); window.setTimeout(toBand, 0); } else toBand();
   }, [groupKey, landUnder]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
-  /* v16 §D — "↑ Summary": the page's top, and focus on its heading. No smooth scroll under reduced motion. */
-  const toSummary = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const sc = e.currentTarget.closest<HTMLElement>(".wpg-scroll");
-    const h1 = e.currentTarget.closest<HTMLElement>(".clv-group")?.querySelector<HTMLElement>("h1[data-page-title]");
-    sc?.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
-  }, []);
-
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
    * never restated here. See `contactListState` for why there are three of them and why the
    * unsaved stub is one of its inputs.
    */
   /* v16 §D — the list's controls pin (the hook re-binds when the list mounts or its grouping changes its layers) */
-  const [pinsOn, setPinsOn] = useState(false);
-  useContactPins(wsRef, pinsOn, groupKey);
   /* v13 §8, lock 12 — the dev-only hold (gated HERE, at the call site, so production never reaches
      the module): it holds the settling beat so the placeholders can be measured against the page */
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -492,9 +482,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
   const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
   const showList = pageState === "list" && !showEmpty;
-  useEffect(() => { setPinsOn(showList); }, [showList]);
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
+  /* v17 §C — the pinned row is shown once the header's foot has passed under the sheet's top (and always in full
+     screen, where the header is hidden). Its box is the sheet's own; this is the only thing JS decides about it. */
+  const pinned = useContactPinned(mainColRef, active && showList, fullOn);
+  const toTop = useCallback(() => {
+    const group = mainColRef.current?.closest<HTMLElement>(".clv-group");
+    group?.closest<HTMLElement>(".wpg-scroll")?.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    group?.querySelector<HTMLElement>("h1[data-page-title]")?.focus({ preventScroll: true });
+  }, []);
   /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
      are the only sticky element in the list. */
 
@@ -867,9 +864,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       if (fullK) { k.setFull(!k.full); return; }
       if (hk) { setHkOpen(true); return; }
       /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
-      const input = [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
+      /* v17 §C: while the pinned row is shown its search box takes the key (it mirrors the header's); otherwise the
+         header's own, brought into view */
+      const pinnedInput = document.querySelector<HTMLInputElement>('[data-cl17="pinned"][data-on] [data-cl17="pinned-find"] input');
+      const input = pinnedInput ?? [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
       if (!input) return;
-      wsRef.current?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      if (!pinnedInput) input.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" });
       input.focus({ preventScroll: true });
     };
     window.addEventListener("keydown", on);
@@ -998,6 +998,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §5 — THE STICKY SLIM BAR, outside the group's grid so it sticks to the scroller's top
             across the whole page: "Every agent", the count, the mini A–Z (1441px and wider) and the
             same controls as the banner's, sharing their state. */}
+        {/* v17 §C — the pinned row, a child of the page sheet (portalled while this page is on screen) */}
+        <ContactPinnedRow anchor={mainColRef} on={active && showList} shown={pinned}
+          total={factsAll.length} showing={visibleFacts.length} filtered={anyActive}
+          model={glanceM} active={glance} onGroup={(k) => setGlance((g) => (g === k ? null : k))} onClear={clearFilters}
+          find={search} onFind={setSearch} onAdd={openAdd} onTop={toTop} />
         {/* v13 §6 — HOUSEKEEPING: the floating tab in the window's corner and the half-screen drawer it
             opens (both portalled; the tab only while this is the page on screen) */}
         {showList && (
@@ -1061,6 +1066,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 </div>
               ) : null}
             </div>
+            {/* v17 §C — the pin line: the header's foot */}
+            <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
           </ContactLightHeader>
         )}
         {pageState === "settling" && (
@@ -1079,8 +1086,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
         <section className="cl14-ws cl16-list" data-cl14="ws" data-cl16="list" ref={wsRef} aria-label="The full list">
-          {/* v16 §D — the pin line's sentinel: zero height, above everything in the list that changes size */}
-          <i className="cl16-sentinel" data-cl16="pin-sentinel" aria-hidden="true" />
           {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
               control bar is gone: search and the filters are in the header. */}
           <div className="cl17-sv" data-cl17="sheet-row">
