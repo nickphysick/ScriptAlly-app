@@ -1,0 +1,9 @@
+  ✗ V13 · every row · 91 rows: the column, the tray's first button, the panel's primary and the Birds-eye pill are one move — cv25-q-09 (Full Requested): column "Send full" · tray "Mark full sent" · panel "Mark full sent" · pill "I've sent it" · doors Record a response, Close query ‖ rj-dupe (Full Requested): column "Send full" · tray "Mark full sent" · panel "Mark full sent" · pill "I've sent it" · doors Record a response, Close query ‖ seed-cal-passed865-q (Full Requested): column "Send full" · tray "Mark full sent" · panel "Mark full sent" · pill "I've sent it" · doors Record a response, Close query ‖ rj-send (Full Requested): column "Send full" · tray "Mark full 
+  ✗ V13 · Keep tracking · column, tray and panel agree, on different words than before — column "Waiting" · tray "" · panel "Record a response"
+  ✗ V13 · Keep tracking · the tray's first button follows the panel's primary — tray "Edit|row-edit" · panel "Record a response" (was "Close query")
+  ✗ V13 · Suggest closing again · column, tray and panel agree again — column "Consider closing" · tray "" · panel "Close query"
+  ✗ V13 · Suggest closing again · the tray's first button is the panel's primary again — tray "Edit|row-edit" · panel "Close query"
+[V13] 100/105 green
+    +   "V13 · every row · 91 rows: the column, the tray's first button, the panel's primary and the Birds-eye pill are one move — cv25-q-09 (Full Requested): column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\" · pill \"I've sent it\" · doors Record a response, Close query ‖ rj-dupe (Full Requested): column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\" · pill \"I've sent it\" · doors Record a response, Close query ‖ seed-cal-passed865-q (Full Requested): column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\" · pill \"I've sent it\" · doors Record a response, Close query ‖ rj-send (Full Requested): column \"Se
+  1 failed
+  1 passed (2.3m)

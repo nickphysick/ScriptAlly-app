@@ -55,12 +55,16 @@ describe("Next move — the phrase and its line", () => {
   it("an offer: the weekday, the days left", () => {
     expect(nextLine(row(QueryStatus.OFFER, { expectedMs: NOW + 1 * DAY }), null, NOW)).toEqual({ phrase: "Decide on offer", line: "BY FRI 9 OCT · 1 DAY LEFT", hot: true });
   });
+  /* RE-POINTED (ruling, 13 Oct): the phrase is the row's one next move (lib/queryActions/entry), read from the row's
+     own facts — past its reply date, and over a year with the agent — not re-derived from the dates here. */
   it("with the agent: waiting, reply due this week, nudge, consider closing — never rust", () => {
-    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW + 46 * DAY }), null, NOW)).toEqual({ phrase: "Waiting", line: "REPLY BY 23 NOV", hot: false });
-    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW + 1 * DAY }), null, NOW)).toEqual({ phrase: "Reply due", line: "BY FRI 9 OCT", hot: false });
-    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: Date.parse("2026-06-11T12:00:00Z") }), null, NOW)).toEqual({ phrase: "Nudge", line: "OVERDUE SINCE 11 JUN", hot: false });
-    const old = nextLine(row(QueryStatus.QUERIED, { sentMs: NOW - 913 * DAY, expectedMs: NOW - 800 * DAY }), null, NOW);
+    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW + 46 * DAY, dayN: 10 }), null, NOW)).toEqual({ phrase: "Waiting", line: "REPLY BY 23 NOV", hot: false });
+    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW + 1 * DAY, dayN: 55 }), null, NOW)).toEqual({ phrase: "Reply due", line: "BY FRI 9 OCT", hot: false });
+    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: Date.parse("2026-06-11T12:00:00Z"), pastExpected: true, dayN: 170 }), null, NOW)).toEqual({ phrase: "Nudge", line: "OVERDUE SINCE 11 JUN", hot: false });
+    const old = nextLine(row(QueryStatus.QUERIED, { sentMs: NOW - 913 * DAY, expectedMs: NOW - 800 * DAY, pastExpected: true, dayN: 913 }), null, NOW);
     expect(old).toEqual({ phrase: "Consider closing", line: "NO REPLY · 2.5 YEARS", hot: false });
+    const kept = nextLine(row(QueryStatus.QUERIED, { sentMs: NOW - 913 * DAY, expectedMs: NOW - 800 * DAY, pastExpected: true, dayN: 913, q: { closureOfferDismissed: true } }), null, NOW);
+    expect(kept).toEqual({ phrase: "Waiting", line: "NO REPLY · 2.5 YEARS", hot: false });
   });
   it("closed: the outcome and when", () => {
     expect(nextLine(row(QueryStatus.REJECTED), null, NOW)).toEqual({ phrase: "Passed", line: "PASSED 28 SEP", hot: false });

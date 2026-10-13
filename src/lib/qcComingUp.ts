@@ -27,7 +27,7 @@ import type { BoardCard } from "./todoBoard";
 import { elapsedPhrase } from "./elapsed";
 import type { QcRow } from "./qcSummary";
 import type { QueryStatus } from "../types";
-import { leadDoors, primaryDoor, silenceLead } from "./queryActions/entry";
+import { DRAWER_LIVE, nextDoor, primaryDoor } from "./queryActions/entry";
 import type { OpenRequest } from "./queryActions/drawerStore";
 
 const DAY = 86_400_000;
@@ -71,13 +71,9 @@ export const COMING_ACTION: Record<Exclude<Bucket, "note">, string> = {
  * send"). So the words come from the panel's own table (`panelDoors`), by the journey the bucket opens;
  * `COMING_ACTION` is only the fallback for an act the panel has no button for (the "fix" bucket's edit).
  */
-export function trayLabel(bucket: Exclude<Bucket, "note">, row: Pick<QcRow, "status" | "court" | "dayN"> & { query?: object | null }): string {
-  /* a year silent: the panel's primary leads the tray too, whatever the board's card says (`silenceLead`) */
-  const lead = silenceLead(row);
-  if (lead) return lead.label;
-  const mode = trayRequest(bucket, row.status, "")?.mode;
-  const door = mode ? leadDoors(row).find((d) => d.mode === mode) : undefined;
-  return door?.label ?? COMING_ACTION[bucket];
+export function trayLabel(bucket: Exclude<Bucket, "note">, row: Pick<QcRow, "status" | "court" | "dayN"> & { pastExpected?: boolean; query?: object | null }): string {
+  /* the row's one next move (`nextDoor`); the bucket's own word is only for a row with no door at all */
+  return nextDoor(row)?.label ?? COMING_ACTION[bucket];
 }
 
 export interface ComingUp {
@@ -176,11 +172,11 @@ export function trayRequest(bucket: Exclude<Bucket, "note">, status: QueryStatus
  * What the tray's button OPENS for this row: the panel's primary for a query a year silent (the same door
  * `trayLabel` names), and otherwise the journey its bucket names. Label and journey come from one place.
  */
-export function trayOpen(bucket: Exclude<Bucket, "note"> | null, row: Pick<QcRow, "id" | "status" | "court" | "dayN"> & { query?: object | null }): OpenRequest | null {
-  const lead = silenceLead(row);
-  if (lead) return { mode: lead.mode, queryId: row.id, ...(lead.mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) };
-  /* no board card and no year of silence: the tray draws no button, so there is nothing to open */
-  return bucket ? trayRequest(bucket, row.status, row.id) : null;
+export function trayOpen(bucket: Exclude<Bucket, "note"> | null, row: Pick<QcRow, "id" | "status" | "court" | "dayN"> & { pastExpected?: boolean; query?: object | null }): OpenRequest | null {
+  void bucket; /* the board's card no longer chooses: the row's next move does */
+  const d = nextDoor(row);
+  if (!d || !DRAWER_LIVE[d.mode]) return null;
+  return { mode: d.mode, queryId: row.id, ...(d.mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) };
 }
 
 /**
@@ -193,13 +189,10 @@ export function trayOpen(bucket: Exclude<Bucket, "note"> | null, row: Pick<QcRow
  */
 export interface NextMove { label: string; request: OpenRequest }
 export function nextMove(card: BoardCard | undefined | null, row: QcRow, nowMs: number): NextMove | null {
-  const c = comingUp(card, row, nowMs);
-  if (c) {
-    const request = trayOpen(c.bucket, row);
-    if (request) return { label: c.action, request };
-  }
-  const door = primaryDoor(row.status);
-  return door ? { label: door.label, request: { mode: door.mode, queryId: row.id } } : null;
+  void card; void nowMs; /* one next move for every row, card or no card (`nextDoor`) */
+  const d = nextDoor(row);
+  const request = trayOpen(null, row);
+  return d && request ? { label: d.label, request } : null;
 }
 
 /**

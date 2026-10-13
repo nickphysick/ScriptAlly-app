@@ -25,7 +25,7 @@ import { execSync } from "node:child_process";
 import { openRoute, liftMotionSuppression } from "./measure";
 import { collection, getDocs } from "firebase/firestore";
 import { harnessDb } from "./harnessDocs";
-import { atRest, leaveStep as leaveStepSteady, pressDoor, pressNext } from "./panelSteady";
+import { atRest, leaveStep as leaveStepSteady, openRowById, pressDoor, pressNext } from "./panelSteady";
 
 const DIR = "reports/query-panel-v2";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -442,7 +442,7 @@ test.describe("Query panel v2", () => {
     const verb = (id: string) => page.evaluate((sel) => (document.querySelector<HTMLElement>(`${sel} [data-qcv="row-verb"]`)?.textContent ?? "").trim(), `${ROW}[data-qid="${id}"]`);
     /* ONE DECISION SAID THREE WAYS: the column's words for each button the tray can lead with */
     const WORDS: Record<string, string[]> = {
-      "Close query": ["Consider closing"], "Record a response": ["Waiting"], "Nudge": ["Nudge"],
+      "Close query": ["Consider closing"], "Record a response": ["Waiting", "Reply due"], "Nudge": ["Nudge"],
       "Mark partial sent": ["Send partial"], "Mark full sent": ["Send full"], "Mark revision sent": ["Send revision"],
       "Record your answer": ["Decide on offer"], "Record what you sent": ["Record what you sent"],
     };
@@ -501,10 +501,45 @@ test.describe("Query panel v2", () => {
       /* each state was entered, and so was "no links" for a request and a closed query */
       console.log(`[V13] states seen: ${JSON.stringify(seen)}`);
       console.log(`[V13] column · tray pairs read: ${JSON.stringify(agree)}`);
-      console.log(`[V13] rows under a year whose tray is their board card's act, not the panel's primary: ${[...new Set(apart)].join("; ") || "none"}`);
+      L.check("V13", "no row's tray differs from its panel's primary", apart.length === 0, [...new Set(apart)].join("; ") || "none");
       L.check("V13", "the tally · more than one column and tray pair was read", Object.keys(agree).length >= 2, Object.keys(agree).join(" | "));
       /* "no links" on a request is read below, on this lock's own request once it has a date */
       for (const k of ["Add the date you sent it", "Set a date", "Remind me later", "Keep tracking", "Set a send-by date", "none:closed"]) L.check("V13", `the tally · ${k}`, (seen[k] ?? 0) > 0, `${seen[k] ?? 0}`);
+
+      /* ── ONE NEXT MOVE FOR EVERY ROW ON THE ACCOUNT (ruling, 13 Oct), at 1512: the column's words, the tray's
+            first button, the panel's primary and the Birds-eye pill, read row by row ── */
+      await openQC(page, SIZES[0], "none");
+      const listed = await page.evaluate((sel) => [...document.querySelectorAll<HTMLElement>(sel)].filter((r) => r.getBoundingClientRect().height > 0).map((r) => {
+        const b = r.querySelector<HTMLElement>('[data-qcv="row-tray"] button');
+        return { id: r.dataset.qid!, court: r.dataset.court!, status: r.dataset.status!, column: (r.querySelector('[data-qcv="row-verb"]')?.textContent ?? "").trim(), tray: b?.dataset.qcv === "row-act" ? (b.textContent ?? "").trim() : "" };
+      }), ROW);
+      await page.keyboard.press("b");
+      await expect(page.locator('[data-qcv="bvd"].is-in'), "the Birds-eye drawer did not open").toBeVisible();
+      const pills = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qcv="bvd"] [data-qid]')].map((r) => [r.dataset.qid!, (r.querySelector('[data-qcv="bvd-act"]')?.textContent ?? "").trim()])));
+      await page.locator('[data-qcv="bvd-close"]').click();
+      await expect(page.locator('[data-qcv="bvd"].is-in')).toHaveCount(0);
+      const moves: Record<string, number> = {}; let pillsRead = 0; const off: string[] = [];
+      for (const r of listed) {
+        await openRowById(page, ROW, r.id);
+        const lead = (await page.locator(`${PANEL} [data-qcv="open-action"]`).first().textContent().catch(() => "") ?? "").trim();
+        const doors = await page.locator(`${PANEL} [data-qcv="open-door"]`).allTextContents();
+        const pill = pills[r.id];
+        if (pill !== undefined) pillsRead++;
+        if (r.court === "closed") {
+          /* a closed query: the list offers no move, and the panel's is a late reply */
+          if (r.tray !== "" || lead !== "Record a late reply") off.push(`${r.id} (closed): tray "${r.tray}" · panel "${lead}"`);
+          moves["closed"] = (moves["closed"] ?? 0) + 1;
+          continue;
+        }
+        const ok = r.tray === lead && (WORDS[lead] ?? []).includes(r.column) && (pill === undefined || pill === lead) && (lead === "Record a response" || lead === "Record your answer" || doors.includes("Record a response"));
+        if (!ok) off.push(`${r.id} (${r.status}): column "${r.column}" · tray "${r.tray}" · panel "${lead}" · pill "${pill ?? "(not drawn)"}" · doors ${doors.join(", ")}`);
+        moves[lead] = (moves[lead] ?? 0) + 1;
+      }
+      console.log(`[V13] every row's next move: ${JSON.stringify(moves)} · Birds-eye pills read: ${pillsRead}`);
+      L.check("V13", `every row · ${listed.length} rows: the column, the tray's first button, the panel's primary and the Birds-eye pill are one move`, listed.length >= 20 && off.length === 0, off.length ? off.slice(0, 6).join(" ‖ ") : JSON.stringify(moves));
+      L.check("V13", "every row · the Birds-eye pills were read", pillsRead >= 10, `${pillsRead} pills`);
+      for (const k of ["Record a response", "Nudge", "Close query", "closed"]) L.check("V13", `every row · the tally · ${k}`, (moves[k] ?? 0) > 0, `${moves[k] ?? 0}`);
+      L.check("V13", "every row · a request and an offer were read", Object.keys(moves).some((k) => /^Mark /.test(k)) && (moves["Record your answer"] ?? 0) > 0, Object.keys(moves).join(" | "));
 
       /* ── pressing them, at 1512 ── a step that cannot be taken is a red reading, not a thrown run: the
          readings above it still print */
@@ -669,7 +704,7 @@ test.describe("Query panel v2", () => {
     } finally {
       execSync("node tests/e2e/seedQp2Links.mjs --clean", { stdio: "inherit" });
     }
-    L.done(66);
+    L.done(74);
   });
 
   test("V11 · italics: an italic span in the stand card is set in a loaded italic face, not a slanted upright", async ({ page }) => {

@@ -53,7 +53,12 @@ export function cardDoors(status: QueryStatus | string): Door[] {
  *    reopens a query is the reply that arrived, and the response journey records it.
  */
 export const LONG_SILENCE_DAYS = 365;
-export function panelDoors(status: QueryStatus | string, daysWaiting: number | null): Door[] {
+/**
+ * @param daysWaiting  days with the agent, or null where a year of silence must not lead with Close (not with
+ *                     the agent, or the writer pressed "Keep tracking")
+ * @param pastDate     the expected-reply date has gone, inside the first year: Nudge leads
+ */
+export function panelDoors(status: QueryStatus | string, daysWaiting: number | null, pastDate = false): Door[] {
   if (ENDED.has(status)) return [{ mode: "resp", label: "Record a late reply", primary: true }];
   if (status === QueryStatus.SIGNED) return [];
   if (status === QueryStatus.OFFER) return [{ mode: "offer", label: "Record your answer", primary: true }, { mode: "close", label: "Close query" }];
@@ -67,6 +72,11 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
     { mode: "resp", label: "Record a response" },
     { mode: "nudge", label: "Nudge" },
   ];
+  if (pastDate) return [
+    { mode: "nudge", label: "Nudge", primary: true },
+    { mode: "resp", label: "Record a response" },
+    { mode: "close", label: "Close query" },
+  ];
   return [
     { mode: "resp", label: "Record a response", primary: true },
     { mode: "nudge", label: "Nudge" },
@@ -75,34 +85,43 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
 }
 
 /**
- * ONE PREDICATE FOR THE PANEL'S FOOTER AND THE LIST'S TRAY (ruling, 12 Oct). Both ask the same row the same
- * two questions — has it been with the agent for over a year, and did the writer press "Keep tracking"
- * (`closureOfferDismissed`) — so the tray's first action and the panel's primary cannot disagree about it.
+ * ⚠️ ONE "NEXT MOVE" FOR EVERY ROW (ruling, 13 Oct). The panel's primary, the list tray's first button, the
+ *    "Next move" column and the Birds-eye pill all read THIS, and nothing else: no board card overrides it.
+ *
+ *      a request the writer owes          → Mark partial / full / revision sent
+ *      an offer                           → Record your answer
+ *      with the agent, over 365 days      → Close query          (Record a response, once "Keep tracking" is set)
+ *      with the agent, past the reply date, inside the year → Nudge
+ *      with the agent, otherwise          → Record a response
+ *      closed                             → Record a late reply   (signed: nothing)
+ *
+ *    It reads four facts of the row: its status, whose court it is in, how long it has waited, whether its
+ *    expected-reply date has gone — and the writer's "Keep tracking" (`closureOfferDismissed`). Record a response
+ *    stays as a secondary door wherever it does not lead.
  */
-export interface LeadRow { status: QueryStatus | string; court: string; dayN: number | null; query?: object | null }
+export interface LeadRow { status: QueryStatus | string; court: string; dayN: number | null; pastExpected?: boolean; query?: object | null }
 export const keptTracking = (row: LeadRow): boolean => (row.query as { closureOfferDismissed?: boolean } | null | undefined)?.closureOfferDismissed === true;
 export const longSilence = (row: LeadRow): boolean => row.court === "agent" && row.dayN != null && row.dayN > LONG_SILENCE_DAYS;
-/** The panel's doors for this row: a year of silence leads with Close, unless the writer chose to keep tracking. */
+/** The row's doors, the next move first. */
 export function leadDoors(row: LeadRow): Door[] {
-  return panelDoors(row.status, row.court === "agent" && !keptTracking(row) ? row.dayN : null);
+  const agent = row.court === "agent";
+  return panelDoors(row.status, agent && !keptTracking(row) ? row.dayN : null, agent && !!row.pastExpected && !longSilence(row));
+}
+/** The row's next move: the door that leads. Null only where there is none (a signed query). */
+export function nextDoor(row: LeadRow): Door | null {
+  return leadDoors(row).find((d) => d.primary) ?? null;
 }
 /**
- * The door that leads a query a year silent, WHATEVER card the board holds for it: Close, or Record a response
- * once the writer keeps tracking. Null for every other row — there the tray's act is its board card's.
+ * The "Next move" column's words for each door — the column's own vocabulary, held beside the predicate so the
+ * column, the tray's button and the panel's primary are one decision said three ways.
  */
-export function silenceLead(row: LeadRow): Door | null {
-  return longSilence(row) ? leadDoors(row).find((d) => d.primary) ?? null : null;
-}
-/**
- * What the list's "Next move" column says for that same door — the column's own vocabulary, held beside the
- * predicate so the column, the tray's button and the panel's primary are one decision said three ways:
- *   Close query        ↔ "Consider closing"
- *   Record a response  ↔ "Waiting"   (the writer chose to keep tracking: nothing is suggested)
- */
-export const SILENCE_WORDS: Partial<Record<DrawerMode, string>> = { close: "Consider closing", resp: "Waiting" };
-export function silenceWords(row: LeadRow): string | null {
-  const lead = silenceLead(row);
-  return lead ? SILENCE_WORDS[lead.mode] ?? lead.label : null;
+export const NEXT_WORDS: Record<string, string> = {
+  "Mark partial sent": "Send partial", "Mark full sent": "Send full", "Mark revision sent": "Send revision",
+  "Record your answer": "Decide on offer", "Nudge": "Nudge", "Close query": "Consider closing", "Record a response": "Waiting",
+};
+export function nextWords(row: LeadRow): string | null {
+  const d = nextDoor(row);
+  return d ? NEXT_WORDS[d.label] ?? d.label : null;
 }
 /** The step's title in the query's panel, said for this query ("What did Eleanor say?"). */
 export function panelStepWords(mode: DrawerMode, status: QueryStatus | string | undefined, first: string): { title: string } {

@@ -19,6 +19,12 @@
  },
  {
   "lock": "V13",
+  "where": "1512 qp2l-nosent · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Waiting\" · tray \"Record a response\" · panel \"Record a response\""
+ },
+ {
+  "lock": "V13",
   "where": "1512 qp2l-nowin · the panel shows this query, with one stand card",
   "ok": true,
   "detail": "qp2l-nowin · 1 card(s)"
@@ -34,6 +40,12 @@
   "where": "1512 qp2l-nowin · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
   "ok": true,
   "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 qp2l-nowin · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Waiting\" · tray \"Record a response\" · panel \"Record a response\""
  },
  {
   "lock": "V13",
@@ -85,37 +97,37 @@
  },
  {
   "lock": "V13",
-  "where": "1512 you row 0 (rj-dupe) · no link outside its state",
+  "where": "1512 you row 0 (cv25-q-09) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
-  "where": "1512 you row 0 (rj-dupe) · the column's words are the tray button's",
+  "where": "1512 you row 0 (cv25-q-09) · the column's words are the tray button's",
   "ok": true,
   "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
-  "where": "1512 you row 1 (seed-cal-passed865-q) · no link outside its state",
+  "where": "1512 you row 1 (rj-dupe) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
-  "where": "1512 you row 1 (seed-cal-passed865-q) · the column's words are the tray button's",
+  "where": "1512 you row 1 (rj-dupe) · the column's words are the tray button's",
   "ok": true,
   "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
-  "where": "1512 you row 2 (rj-send) · no link outside its state",
+  "where": "1512 you row 2 (seed-cal-passed865-q) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
-  "where": "1512 you row 2 (rj-send) · the column's words are the tray button's",
+  "where": "1512 you row 2 (seed-cal-passed865-q) · the column's words are the tray button's",
   "ok": true,
   "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
@@ -147,13 +159,19 @@
   "lock": "V13",
   "where": "1512 agent row 0 (seed-query-19) · the column's words are the tray button's",
   "ok": true,
-  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Record a response\""
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Nudge\""
  },
  {
   "lock": "V13",
   "where": "1512 agent row 1 (seed-query-6) · no link outside its state",
   "ok": true,
   "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1512 agent row 1 (seed-query-6) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Nudge\""
  },
  {
   "lock": "V13",
@@ -165,7 +183,7 @@
   "lock": "V13",
   "where": "1512 agent row 2 (seed-cal-passed20-q) · the column's words are the tray button's",
   "ok": true,
-  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Record a response\""
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Nudge\""
  },
  {
   "lock": "V13",
@@ -193,6 +211,12 @@
  },
  {
   "lock": "V13",
+  "where": "1280 qp2l-nosent · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Waiting\" · tray \"Record a response\" · panel \"Record a response\""
+ },
+ {
+  "lock": "V13",
   "where": "1280 qp2l-nowin · the panel shows this query, with one stand card",
   "ok": true,
   "detail": "qp2l-nowin · 1 card(s)"
@@ -208,6 +232,12 @@
   "where": "1280 qp2l-nowin · quiet links: Source Serif 15, navy, an underline rule, under the paragraph",
   "ok": true,
   "detail": "Source Serif 4 15px rgb(42, 58, 82) 1px solid · under the paragraph true"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 qp2l-nowin · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Waiting\" · tray \"Record a response\" · panel \"Record a response\""
  },
  {
   "lock": "V13",
@@ -259,37 +289,37 @@
  },
  {
   "lock": "V13",
-  "where": "1280 you row 0 (rj-dupe) · no link outside its state",
+  "where": "1280 you row 0 (cv25-q-09) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
-  "where": "1280 you row 0 (rj-dupe) · the column's words are the tray button's",
+  "where": "1280 you row 0 (cv25-q-09) · the column's words are the tray button's",
   "ok": true,
   "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
-  "where": "1280 you row 1 (seed-cal-passed865-q) · no link outside its state",
+  "where": "1280 you row 1 (rj-dupe) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
-  "where": "1280 you row 1 (seed-cal-passed865-q) · the column's words are the tray button's",
+  "where": "1280 you row 1 (rj-dupe) · the column's words are the tray button's",
   "ok": true,
   "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
  {
   "lock": "V13",
-  "where": "1280 you row 2 (rj-send) · no link outside its state",
+  "where": "1280 you row 2 (seed-cal-passed865-q) · no link outside its state",
   "ok": true,
   "detail": "1 link(s), earned"
  },
  {
   "lock": "V13",
-  "where": "1280 you row 2 (rj-send) · the column's words are the tray button's",
+  "where": "1280 you row 2 (seed-cal-passed865-q) · the column's words are the tray button's",
   "ok": true,
   "detail": "column \"Send full\" · tray \"Mark full sent\" · panel \"Mark full sent\""
  },
@@ -321,13 +351,19 @@
   "lock": "V13",
   "where": "1280 agent row 0 (seed-query-19) · the column's words are the tray button's",
   "ok": true,
-  "detail": "column \"Consider closing\" · tray \"Close query\" · panel \"Record a response\""
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Nudge\""
  },
  {
   "lock": "V13",
   "where": "1280 agent row 1 (seed-query-6) · no link outside its state",
   "ok": true,
   "detail": "0 link(s), none earned"
+ },
+ {
+  "lock": "V13",
+  "where": "1280 agent row 1 (seed-query-6) · the column's words are the tray button's",
+  "ok": true,
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Nudge\""
  },
  {
   "lock": "V13",
@@ -339,7 +375,7 @@
   "lock": "V13",
   "where": "1280 agent row 2 (seed-cal-passed20-q) · the column's words are the tray button's",
   "ok": true,
-  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Record a response\""
+  "detail": "column \"Nudge\" · tray \"Nudge\" · panel \"Nudge\""
  },
  {
   "lock": "V13",
@@ -349,9 +385,15 @@
  },
  {
   "lock": "V13",
+  "where": "no row's tray differs from its panel's primary",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "V13",
   "where": "the tally · more than one column and tray pair was read",
   "ok": true,
-  "detail": "Consider closing · Close query | Send partial · Mark partial sent | Send full · Mark full sent | Nudge · Nudge"
+  "detail": "Waiting · Record a response | Consider closing · Close query | Send partial · Mark partial sent | Send full · Mark full sent | Nudge · Nudge"
  },
  {
   "lock": "V13",
@@ -391,6 +433,48 @@
  },
  {
   "lock": "V13",
+  "where": "every row · 91 rows: the column, the tray's first button, the panel's primary and the Birds-eye pill are one move",
+  "ok": true,
+  "detail": "{\"Mark full sent\":7,\"Mark partial sent\":8,\"Mark revision sent\":1,\"Record your answer\":2,\"Nudge\":30,\"Close query\":2,\"Record a response\":24,\"closed\":17}"
+ },
+ {
+  "lock": "V13",
+  "where": "every row · the Birds-eye pills were read",
+  "ok": true,
+  "detail": "74 pills"
+ },
+ {
+  "lock": "V13",
+  "where": "every row · the tally · Record a response",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "V13",
+  "where": "every row · the tally · Nudge",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "V13",
+  "where": "every row · the tally · Close query",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "V13",
+  "where": "every row · the tally · closed",
+  "ok": true,
+  "detail": "17"
+ },
+ {
+  "lock": "V13",
+  "where": "every row · a request and an offer were read",
+  "ok": true,
+  "detail": "Mark full sent | Mark partial sent | Mark revision sent | Record your answer | Nudge | Close query | Record a response | closed"
+ },
+ {
+  "lock": "V13",
   "where": "Add the date you sent it · opens the sent-date editor, above the panel",
   "ok": true,
   "detail": "the field is what is under its own centre"
@@ -411,7 +495,7 @@
   "lock": "V13",
   "where": "Set a date · Cancel puts the link back and writes nothing",
   "ok": true,
-  "detail": "[\"Set a date\"] · {\"dateSent\":\"2026-08-28T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
+  "detail": "[\"Set a date\"] · {\"dateSent\":\"2026-08-29T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
  },
  {
   "lock": "V13",
@@ -435,13 +519,13 @@
   "lock": "V13",
   "where": "Set a send-by date · the defaults saved: two weeks out, reminded the day before",
   "ok": true,
-  "detail": "send by 2026-10-26 (+14) · reminder 2026-10-25 (+13)"
+  "detail": "send by 2026-10-27 (+14) · reminder 2026-10-26 (+13)"
  },
  {
   "lock": "V13",
   "where": "Set a send-by date · a request with a date offers no link, and the card counts to it",
   "ok": true,
-  "detail": "\"They’re expecting it by 26 Oct. Mark it sent once it’s gone.\" · []"
+  "detail": "\"They’re expecting it by 27 Oct. Mark it sent once it’s gone.\" · []"
  },
  {
   "lock": "V13",
@@ -453,19 +537,19 @@
   "lock": "V13",
   "where": "··· edit · the request shows the step after date and note, on the recorded date",
   "ok": true,
-  "detail": "chip on: \"As recorded 26 Oct\""
+  "detail": "chip on: \"As recorded 27 Oct\""
  },
  {
   "lock": "V13",
   "where": "··· edit · saving changes the send-by date and its reminder with the rest",
   "ok": true,
-  "detail": "send by 2026-11-09 (+28) · reminder 2026-11-09 (+28)"
+  "detail": "send by 2026-11-10 (+28) · reminder 2026-11-10 (+28)"
  },
  {
   "lock": "V13",
   "where": "··· edit · Undo puts both back",
   "ok": true,
-  "detail": "send by 2026-10-26 · reminder 2026-10-25"
+  "detail": "send by 2026-10-27 · reminder 2026-10-26"
  },
  {
   "lock": "V13",
@@ -500,12 +584,6 @@
  {
   "lock": "V13",
   "where": "··· edit · Full Requested · \"YOU SENT THE FULL MANUSCRIPT\" shows no send-by step",
-  "ok": true,
-  "detail": "none"
- },
- {
-  "lock": "V13",
-  "where": "··· edit · Full Requested · \"YOU SENT THE QUERY\" shows no send-by step",
   "ok": true,
   "detail": "none"
  },
@@ -567,7 +645,7 @@
   "lock": "V13",
   "where": "Keep tracking · sets the existing flag",
   "ok": true,
-  "detail": "{\"dateSent\":\"2025-09-07T11:00:00.000Z\",\"keep\":true,\"expected\":null}"
+  "detail": "{\"dateSent\":\"2025-09-08T11:00:00.000Z\",\"keep\":true,\"expected\":null}"
  },
  {
   "lock": "V13",
@@ -579,7 +657,7 @@
   "lock": "V13",
   "where": "Suggest closing again · clears the flag: the sentence, Keep tracking and Close's lead are back",
   "ok": true,
-  "detail": "lead \"Close query\" · [\"Keep tracking\"] · {\"dateSent\":\"2025-09-07T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
+  "detail": "lead \"Close query\" · [\"Keep tracking\"] · {\"dateSent\":\"2025-09-08T11:00:00.000Z\",\"keep\":null,\"expected\":null}"
  },
  {
   "lock": "V13",
