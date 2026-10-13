@@ -907,6 +907,26 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     });
   }, [setPanelParam]);
   /** a query journey, stepped into the panel in the action drawer's look */
+  /* v17 §D — "+ Log a query" on a row: the agent's panel opens and steps straight to the Log a query journey with
+     the agent chosen (v16 Part F's act look). The journey is portalled into the panel, so it starts once the panel
+     for THAT agent is on the page. */
+  const pendingLog = useRef<string | null>(null);
+  const logInPanel = useCallback((agentId: string) => {
+    pendingLog.current = agentId;
+    openPanel(agentId);
+  }, [openPanel]);
+  useEffect(() => {
+    const a = panelAgent;
+    if (!a || pendingLog.current !== a.id) return undefined;
+    pendingLog.current = null;
+    const first = firstNameOf(a);
+    const nm = (a.name || a.agency || "The agent").trim();
+    const id = requestAnimationFrame(() => openQueryDrawer({
+      mode: "log", agentId: a.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}),
+      panel: { name: nm, agency: (a.name ? a.agency ?? "" : "").trim(), first, backLabel: `Back to ${first}`, title: `Query ${first}` },
+    }));
+    return () => cancelAnimationFrame(id);
+  }, [panelAgent, scoped]);
   const actInPanel = useCallback((act: PanelAct) => {
     const a = panelAgent;
     if (!a || act.kind !== "journey") return;
@@ -1147,7 +1167,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               onOpen={onOpen}
               onAddGenres={(id) => openCard(id, { tab: "want", focus: "genres", from: "slip" })}
               onAddWishlist={(id) => openCard(id, { tab: "want", focus: "wishlist", from: "slip" })}
-              trayFor={trayFor}
+              trayFor={trayFor} onLog={logInPanel}
               onAct={actWithoutCard}
             />
           )}

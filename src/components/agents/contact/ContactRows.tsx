@@ -11,6 +11,7 @@
  * card's own next step (Log a query, Remind me, a send, a nudge…) beside Open card.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { STAGE_TRACK, discTone, stageTrack } from "../../../lib/contactStage";
 import { ListDivider, ListGroupHeader, ListPanel, type ListColumn } from "../../shell/listTable/ListTable";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -121,7 +122,13 @@ const Row: React.FC<{
   onAddWishlist: () => void;
   tray: CardPrimary;
   onAct: (act: CardAct) => void;
-}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct }) => {
+  /** v17 §D — the surname letter this row opens, shown in the margin; null on every other row */
+  letter?: string | null;
+  /** v17 §D — "+ Log a query": opens the agent panel at the Log a query journey, with this agent chosen */
+  onLog?: () => void;
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog }) => {
+  const track = stageTrack(x);
+  const tone = discTone(x);
   const a = x.agent;
   const yourMove = x.stand === "you" && !hideYourMove;
   const line = x.q ? rowDateLine(x.q, nowMs) : null;
@@ -168,6 +175,8 @@ const Row: React.FC<{
       data-agent-card={a.id}
       /* v16 §C: the surname's initial — what a letter tab scrolls to in the ungrouped list */
       data-initial={surnameInitial(a)}
+      data-cl17-letter={letter ?? undefined}
+      data-disc={tone}
       data-shut={shut || undefined}
       data-stand={x.stand}
       data-door={x.door}
@@ -184,8 +193,10 @@ const Row: React.FC<{
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(e.currentTarget.getBoundingClientRect()); }
       }}
     >
+      {/* v17 §D — the surname letter, in the margin of the first row of each letter (the ungrouped A to Z list) */}
+      {letter ? <span className="cl17-ml" data-cl17="margin-letter" aria-hidden="true">{letter}</span> : null}
       <span className="clv-rwho">
-        <span className="clv-ini" aria-hidden="true">{agentInitials(a)}</span>
+        <span className="clv-ini" data-cl17="disc" aria-hidden="true">{agentInitials(a)}</span>
         <span className="clv-rwn">
           <b><Marked text={agentPrimary(a)} q={highlight} /></b>
           {whoBits.length > 0 && <i className="clv-ragy"><Marked text={whoBits.join(" · ")} q={highlight} /></i>}
@@ -215,17 +226,31 @@ const Row: React.FC<{
           ? <small data-clv="door-unknown" title="Whether they are open to queries is not known">{DOOR_NOT_KNOWN}</small>
           : <small>{x.door === "open" ? "Open to queries" : reopens ? `Closed till ${reopens}` : "Closed to queries"}</small>}
       </span>
-      <span className="clv-rq">
+      {/* v17 §D — QUERY STATUS. A queried agent: the stage, a four-bar track of how far it got, then the date. An
+          agent not queried yet: "+ Log a query" (the panel's journey), or why not if they are closed to queries. */}
+      <span className="clv-rq cl17-rq" data-cl17="status">
         {x.standing.kind === "none" ? (
-          <span className="clv-ql clv-ql--none">Not queried yet</span>
+          x.door === "closed" ? (
+            <span className="cl17-shut" data-cl17="status-shut">{reopens ? `Closed till ${reopens}` : "Closed to queries"}</span>
+          ) : (
+            <button type="button" className="cl17-log" data-cl17="log" onClick={(e) => { e.stopPropagation(); onLog?.(); }}
+              onKeyDown={(e) => e.stopPropagation()}>+ Log a query</button>
+          )
         ) : (
           <>
-            <span className="clv-ql">
+            <span className="clv-ql" data-cl17="stage">
               {x.q && <StatusDot status={x.q.status as QueryStatus} overrideSize={11} />}
               {x.q ? STAGE_NAME[x.q.status as keyof typeof STAGE_NAME] ?? String(x.q.status) : ""}
-              {yourMove && <span className="clv-ym" data-clv="ym">Your move</span>}
             </span>
-            <Line2 line={line} />
+            {track ? (
+              <span className="cl17-track" data-cl17="track" data-closed={track.closed || undefined} aria-hidden="true">
+                {STAGE_TRACK.map((name, i) => <i key={name} title={name} data-on={!track.closed && i < track.filled ? "" : undefined} />)}
+              </span>
+            ) : null}
+            <span className="cl17-dl" data-cl17="date-line">
+              {yourMove && <span className="clv-ym" data-clv="ym">Your move</span>}
+              <Line2 line={line} />
+            </span>
           </>
         )}
       </span>
@@ -258,9 +283,11 @@ export interface ContactSortControl { key: SortKey; reversed: boolean; onSort: (
 
 export const ContactRows: React.FC<ContactRowsProps & {
   byLetter?: boolean; ungrouped?: boolean; sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
+  /** v17 §D — "+ Log a query" on a row */
+  onLog?: (agentId: string) => void;
 }> = ({
   groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
-  byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false,
+  byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false, onLog,
 }) => {
   const col = (label: string, k: SortKey | null, align?: "end"): ListColumn => ({
     label, align,
@@ -271,20 +298,28 @@ export const ContactRows: React.FC<ContactRowsProps & {
   });
   const columns = [col("Agent", "surname"), col("What they want", null), col("Replies", "reply"), col("Query status", "status", "end")];
   const countOf = (g: ContactGroup) => (totals ? `${g.ids.length} of ${totals.get(g.label) ?? g.ids.length}` : `${g.ids.length} ${g.ids.length === 1 ? "agent" : "agents"}`);
+  /* v17 §D — the margin letters: in the UNGROUPED list in surname order, the first row of each letter carries it.
+     Grouped by letter the dividers do that job; in any other order the letters would be scattered. */
+  const margin = ungrouped && (!sort || sort.key === "surname");
+  let lastLetter: string | null = null;
   const rowsOf = (g: ContactGroup) => g.ids.map((id) => {
     const x = byId.get(id);
     if (!x) return null;
+    const initial = surnameInitial(x.agent);
+    const letter = margin && initial !== lastLetter ? initial : null;
+    lastLetter = initial;
     return (
       <Row
         key={id} x={x} nowMs={nowMs} genreHit={genreHit} current={openId === id} fresh={newId === id} hideYourMove={hideYourMove}
         focused={focusId === id} highlight={highlight}
         onOpen={(from) => onOpen(id, from)} tray={trayFor(x)} onAct={(act) => onAct(id, act)}
         onAddGenres={() => onAddGenres(id)} onAddWishlist={() => onAddWishlist(id)}
+        letter={letter} onLog={onLog ? () => onLog(id) : undefined}
       />
     );
   });
   return (
-    <div className={`clv-list${compact ? " clv-list--compact" : ""}`} data-clv="list" data-density={compact ? "compact" : "comfortable"}>
+    <div className={`clv-list${compact ? " clv-list--compact" : ""}${margin ? " cl17-margin" : ""}`} data-clv="list" data-cl17-margin={margin ? "" : undefined} data-density={compact ? "compact" : "comfortable"}>
       {ungrouped ? (
         /* v16 §C — no grouping: ONE panel, the labels and then every row, no dividers */
         <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
