@@ -10,6 +10,8 @@ import { collection, getDocs } from "firebase/firestore";
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
 import { rawSet, restoreSet } from "./journeyGuard";
+import { PANEL, closePanel, leaveStep, openRowById, pressDoor } from "./panelSteady";
+const QROW = '.qcw-list [data-qcv="row"]';
 
 let asserted = 0;
 const ok = (c: unknown, m: string) => { asserted++; expect(c, m).toBeTruthy(); };
@@ -34,21 +36,31 @@ async function agents() {
   return { qs, ags };
 }
 
-test("H9 — ticking a query task on the dashboard opens the drawer and writes NOTHING", async ({ page }) => {
+/* RE-POINTED (Query panel v2, 13 Oct). H9 ticked a request row on the dashboard's to-do card
+   (`[data-probe="todo-row"]`), and the dashboard draws no such row any more, so the lock found nothing to tick.
+   Its claim is unchanged and is asked of the surface that opens a query's action now, the query's panel:
+   opening an action writes nothing, and leaving it writes nothing. Only saving may write.
+   RETIRED BY NAME: "the tick opens `[data-qad-drawer]`" — the old pop-up drawer. The action steps into the panel. */
+test("H9 — opening a query's action in the panel writes NOTHING, and so does leaving it", async ({ page }) => {
   test.setTimeout(240_000);
+  page.setDefaultTimeout(15_000);
   await ensureSignedIn(page);
-  await openRoute(page, "/dashboard", { width: 1440, height: 900 });
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
   await liftMotionSuppression(page);
-  const reqRow = page.locator('[data-probe="todo-row"][data-category="req"]').first();
-  await expect(reqRow, "no request row on the dashboard's to-do card").toBeVisible({ timeout: 20_000 });
+  const { qs } = await agents();
+  const owed = qs.find((q) => q.status === "Partial Requested" || q.status === "Full Requested");
+  ok(!!owed, "a request the writer owes, on the harness account");
+  await openRowById(page, QROW, String(owed!.id));
   const before = await accountFingerprint();
-  await reqRow.locator('[data-probe="todo-tick"]').click();
-  await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
-  await page.waitForTimeout(1500);
-  ok((await accountFingerprint()) === before, "the tick wrote something — only the drawer may write");
-  await page.keyboard.press("Escape");
-  await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
-  ok((await accountFingerprint()) === before, "cancelling the drawer wrote something");
+  await pressDoor(page, "sent");
+  await expect(page.locator(`${PANEL} [data-qp-step]`)).toBeVisible();
+  ok((await accountFingerprint()) === before, "opening the action wrote something — only saving may write");
+  /* answer something, so leaving has answers to throw away */
+  await page.locator(`${PANEL} [data-qad-primary]`).click();
+  await leaveStep(page);
+  await expect(page.locator(`${PANEL} [data-qp-step]`)).toHaveCount(0);
+  ok((await accountFingerprint()) === before, "leaving the action wrote something");
+  await closePanel(page);
 });
 
 test("H2 — a block stops Next and turns the review rust; a check stops nothing; a block's dot is not rust before it is reached", async ({ page }) => {
@@ -177,16 +189,17 @@ test("D7 — Delete query: the confirm, the delete, and an Undo that brings ever
     for (const name of ["activities", "taskFlags"]) (await gd(fq(col(db, "users", uid, name), wh("queryId", "==", id)))).forEach((d) => out.push(`${d.ref.path}=${JSON.stringify(d.data(), Object.keys(d.data()).sort())}`));
     return out.sort().join("\n");
   };
-  const row = page.locator('.qcv-page [data-qcv="row"]').first();
+  /* RE-POINTED (Query panel v2): the query opens in the side panel; "Delete query" is at the panel's foot */
+  const row = page.locator(QROW).first();
   await expect(row).toBeVisible({ timeout: 20_000 });
-  const id = await row.getAttribute("data-id");
+  const id = await row.getAttribute("data-qid");
   ok(!!id, "a row with an id");
   const before = await read(id!);
   /* the delete is put back at the end, pass or fail: the Undo below is the claim, not the account's safety */
   const raw = await rawSet([id!]);
   try {
-  await row.click();
-  await page.locator('[data-qcv="open-del"]').click();
+  await openRowById(page, QROW, id!);
+  await page.locator(`${PANEL} [data-qcv="open-del"]`).click();
   await expect(page.locator('[data-qcv="open-delc"]')).toBeVisible();
   await page.locator('[data-qcv="open-del-go"]').click();
   await expect(page.locator('[data-qad-toast="on"]')).toBeVisible({ timeout: 20_000 });

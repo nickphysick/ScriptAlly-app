@@ -23,6 +23,7 @@ import { collection, doc, getDoc, getDocs, query as fsQuery, where } from "fireb
 import { ensureSignedIn, openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
 import { rawSet, restoreSet } from "./journeyGuard";
+import { closePanel, leaveStep } from "./panelSteady";
 import { openQueryById, openTab } from "./openQuery";
 
 const TERMINAL = new Set(["Rejected", "Withdrawn", "No Response", "Signed"]);
@@ -139,16 +140,23 @@ test.describe("v1.1 — deleting a history entry", () => {
 
 test.describe("v1.1 — Record a response with no query", () => {
   test.setTimeout(240_000);
-  test("the drawer opens on a picker of LIVE queries; a pick starts the response journey", async ({ page }) => {
+  /* RE-POINTED (Query panel v2, 13 Oct): "Record a response" with no query is the top bar's menu item now, and
+     its picker opens in the query's side panel ("Who replied?"), not in a drawer of its own.
+     RETIRED BY NAME: "the picker is in `[data-qad-drawer]`" and "the header's `.ph-secondary` button opens it" —
+     both describe the old pop-up. QP2 V9 holds the panel's picker; this case keeps what it claimed about the
+     LIST: live queries only, no Pro upsell on a free plan, narrowing by name, and a pick starts the journey. */
+  test("Record a response with no query: the panel's picker lists LIVE queries; a pick starts the response journey", async ({ page }) => {
+    page.setDefaultTimeout(15_000);
     await ensureSignedIn(page);
     await openRoute(page, "/queries", { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const { qs, ags } = await all();
     const live = new Set(qs.filter((q) => !TERMINAL.has(String(q.status))).map((q) => q.id));
-    await page.locator(".ph-secondary", { hasText: "Record a response" }).first().click();
-    await expect(page.locator("[data-qad-drawer]")).toBeVisible({ timeout: 10_000 });
-    await expect(page.locator("[data-qad-qpick]")).toBeVisible();
-    const listed = await page.locator("[data-qad-query]").evaluateAll((els) => els.map((e) => e.getAttribute("data-qad-query")));
+    await page.locator(".ws-pagebar .ws-capr").filter({ visible: true }).first().click();
+    await page.locator(".ws-capi", { hasText: /^Record a response/ }).first().click();
+    const P = '[data-qp="panel"]';
+    await expect(page.locator(`${P} [data-qad-qpick]`), "the picker did not open in the panel").toBeVisible();
+    const listed = await page.locator(`${P} [data-qad-query]`).evaluateAll((els) => els.map((e) => e.getAttribute("data-qad-query")));
     expect(listed.length, "the picker listed no queries").toBeGreaterThan(0);
     for (const q of listed) expect(live.has(String(q)), `a closed query was offered: ${q}`).toBe(true);
     /* the harness account is on the free plan: the Pro paste link is absent, never an upsell */
@@ -156,16 +164,14 @@ test.describe("v1.1 — Record a response with no query", () => {
     /* narrow by an agent's name and pick */
     const pick = qs.find((q) => live.has(q.id) && ags.some((a) => a.id === q.agentId && a.name));
     const agent = ags.find((a) => a.id === pick!.agentId)!;
-    await page.locator("[data-qad-query-input]").fill(String(agent.name).split(" ")[0]);
-    const narrowed = await page.locator("[data-qad-query]").evaluateAll((els) => els.map((e) => e.textContent || ""));
-    for (const t of narrowed) expect(t.toLowerCase()).toContain(String(agent.name).split(" ")[0].toLowerCase());
-    await page.locator(`[data-qad-query="${pick!.id}"]`).click();
-    await expect(page.locator("[data-qad-qpick]")).toHaveCount(0);
-    await expect(page.locator('[data-qad-step="0"]')).toContainText(/response/i);
-    await page.keyboard.press("Escape");
-    const d = page.getByRole("button", { name: "Discard" });
-    if (await d.count()) await d.click();
-    await expect(page.locator("[data-qad-drawer]")).toHaveCount(0, { timeout: 5_000 });
+    await page.locator(`${P} [data-qad-query-input]`).fill(String(agent.name).split(" ")[0]);
+    await expect.poll(async () => (await page.locator(`${P} [data-qad-query]`).evaluateAll((els) => els.map((e) => (e.textContent || "").toLowerCase()))).every((t) => t.includes(String(agent.name).split(" ")[0].toLowerCase()))).toBe(true);
+    await page.locator(`${P} [data-qad-query="${pick!.id}"]`).click();
+    await expect(page.locator(`${P} [data-qad-qpick]`)).toHaveCount(0);
+    await expect(page.locator(`${P}[data-qp-id="${pick!.id}"] [data-qp-step]`), "the pick did not start the response journey in that query's panel").toBeVisible();
+    await expect(page.locator(`${P} [data-qp="step-title"]`)).toContainText(/say\?/i);
+    await leaveStep(page);
+    await closePanel(page);
   });
 });
 
