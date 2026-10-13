@@ -1,7 +1,7 @@
 # Query panel v2 — the rulings of 12 Oct
 
 On `query-panel-v2`, one commit each. Ruling 3 was held in the first pass, built in the second apart from
-"Set a send-by date", and finished in the third. The fourth pass is at the foot.
+"Set a send-by date", and finished in the third. The fourth and fifth (last) passes are at the foot.
 
 ## False premises
 
@@ -407,3 +407,132 @@ On that build: tsc and both builds clean; Vitest 8,725 passed, 3 skipped, the sa
 A fourth full run there, 01:39 to 02:09: all eight suites passed. Deployed. **Dev serves `index-B4cESNDW.js`.**
 
 The next session to deploy to dev should base its integration on that branch.
+
+## Fifth and last pass (13 Oct)
+
+| Item | Commit | Result |
+| --- | --- | --- |
+| 1 · one next move for every row | `a7a85f9e` | One predicate, `nextDoor(row)`, in `lib/queryActions/entry.ts` |
+| 2 · the "What changes" sheet | `25ded27d` | Lists a send-by change when shown for other changes |
+| 3 · re-points | `6e4b1e61` | `qaLocks` H9 and D7, `qaV11`'s picker, at the panel |
+
+### 1 · One next move
+
+| The row | Next move |
+| --- | --- |
+| A request you owe | Mark partial / full / revision sent |
+| An offer | Record your answer |
+| With the agent, over 365 days | Close query (Record a response once Keep tracking is set) |
+| With the agent, past the expected-reply date, inside the year | Nudge |
+| With the agent, otherwise | Record a response |
+| Closed | Record a late reply (signed: none) |
+
+The panel's primary, the tray's first button and the journey it opens, the Next move column and the
+Birds-eye pill all read it. No board card overrides it. Record a response is a secondary button wherever it
+does not lead. The tray now draws the move on every open row, card or no card.
+
+**Which rows changed.** 45 of the 73 rows on the harness account. Full list by id:
+`reports/query-panel-v2/next-move-changes.md`. Each line below is column · tray · panel.
+
+| Rows | Before | After |
+| --- | --- | --- |
+| 12 | Nudge · (none) · Record a response | Nudge · Nudge · Nudge |
+| 12 | Consider closing · Close query · Record a response | Nudge · Nudge · Nudge |
+| 10 | Waiting · (none) · Record a response | Waiting · Record a response · Record a response |
+| 6 | Nudge · Nudge · Record a response | Nudge · Nudge · Nudge |
+| 2 | Waiting · Nudge · Record a response | Waiting · Record a response · Record a response |
+| 2 | Reply due · Nudge · Record a response | Reply due · Record a response · Record a response |
+| 1 | Reply due · (none) · Record a response | Reply due · Record a response · Record a response |
+
+Unchanged: the 12 requests, the offer, the one query over a year, and the 14 closed rows.
+
+Things to know:
+
+- **Twelve queries lost "Consider closing".** They are past their date with nudges unanswered, inside the
+  year. The board suggested closing; under the ruling they read Nudge until day 365.
+- **Four queries inside their reply date lost a "Nudge" tray button** the board had raised. They read
+  Record a response.
+- **"Record what you sent" is gone from the tray and the column.** It was the board's "fix" card. The panel's
+  "Add what you sent" link still opens that step.
+- **"Reply due"** stays as the column's word in the last week of the wait. The move is still Record a response.
+- **Closed rows:** the list offers no move, as before; the panel's is "Record a late reply". V13 asserts
+  exactly that for them.
+- **The Birds-eye pill for a request** now says "Mark full sent", the panel's words. It said "I've sent it".
+
+### 2 · The sheet
+
+When a correction raises the sheet for its other changes, a send-by change made on the same form is a line on
+it: "Send by 27 Oct → 20 Oct", with "none" on either side where there is no date. A send-by change alone still
+saves without the sheet.
+
+Found on the way: moving a request's date by three days raises no sheet, because nothing a writer can see
+changes. V13's case moves the request ahead of its send, which re-orders the record.
+
+### 3 · Re-points
+
+| Lock | Was | Now |
+| --- | --- | --- |
+| `qaLocks` H9 | Ticked a request row on the dashboard's to-do card. **The dashboard draws no such row any more**, so it was not the panel that broke it | Opening a query's action in the panel writes nothing; leaving it with an answer given writes nothing |
+| `qaLocks` D7 | Opened the first row the pre-panel way | Opens it in the panel and deletes from its foot; the confirm, the delete and the exact Undo are unchanged |
+| `qaV11` picker | Pressed a header button that no longer exists | The top bar's "Record a response"; the picker is in the panel. Keeps: live queries only, no Pro upsell on a free plan, narrowing by name, a pick starts the journey |
+
+Retired by name, as assertions about the old pop-up itself:
+
+- H9: "the tick opens `[data-qad-drawer]`".
+- `qaV11`: "the picker is in `[data-qad-drawer]`" and "the header's `.ph-secondary` button opens it".
+
+### V13
+
+116 of 116 green. Added in this pass:
+
+| Reading | Mutation | Red |
+| --- | --- | --- |
+| Every row on the account (91 on the run): column, tray, panel and Birds-eye pill are one move; Record a response is a secondary where it does not lead; closed rows offer none | The board card decides again | 5 readings, such as "pill "I've sent it"" and "tray "" · panel "Record a response"" |
+| The sheet lists the send-by change; nothing is saved until it is answered | The line is left off | "the sheet lists the send-by change beside the others" |
+
+### Deploy (fifth pass)
+
+Dev still served my fourth-pass integration, so I merged onto the same branch,
+`dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1-qp2d`, and deployed it.
+No conflicts. **Dev serves `index-jKEK1j_Q.js`.**
+
+On that build: tsc and both builds clean; Vitest 8,724 passed, 3 skipped, the same one file failing to load
+(`functions/src/email.test.ts`, as on main). One full run, 19:16 to 19:53, ten suites: qcMove 3, QC137 13,
+feed drawer v2 4, delete entry 8, the journeys 15, `qaLocks` 6 (H9 and D7 included), `qaV11` 6 (the picker
+included) and QC132 10 all passed. Two cases did not, and both passed on a second run on the same build:
+
+- **QP1 P8** expected Record a response for a query past its reply date. That is the ruling changing the
+  answer. P8's table now has both rows, each found by the move the list states (`778b6f01`). 115 of 115.
+- **QP2 V13** lost its own fixture row part-way ("no row … qp2l-year"). Another session was running suites
+  on the shared account at the time. 116 of 116 on the re-run. I do not know what removed the row.
+
+The next session to deploy to dev should base its integration on that branch.
+
+## Not built: the list
+
+This was the last pass on the panel. Things seen and left:
+
+1. **The dashboard has no to-do rows to tick.** H9's original subject is gone; nothing on the dashboard holds
+   "a tick opens the action and writes nothing" now.
+2. **Fixture leftovers on the account.** `rj-dupe`, `rj-send` and `rj-nudge` (`rowJourneys`' own
+   fixtures) are still there; its `--clean` should remove them.
+3. **Other writing locks sign in through seeders.** `deleteEntry`, QP1 P13 and QP2 V10 still call a seeder's
+   `--dump` or re-seed through `execSync`, one password sign-in each. They held in the clean runs; they are the
+   next thing to go if the sign-in quota bites again.
+4. **The old list (`QcList`, the phone's v126 page) and the carousel** still take their action from the board
+   card or the status's old primary (`primaryDoor`). The desktop page does not draw them. They do not read
+   `nextDoor`.
+5. **`trayRequest` and the `COMING_*` tables** are still exported and unit-tested, and the desktop list no
+   longer reads them for its button.
+6. **The To-do page and the dashboard's task surfaces** still take their move from the board card. Only the
+   Query Centre reads the one predicate.
+7. **Editing an older request** (one already answered by a send) shows no send-by step. That was a choice;
+   say if it should.
+8. **The one-step "Set a send-by date" link and the correction form treat "No date given" differently**: the
+   link leaves a recorded date, the form removes it.
+9. **`.pkgw-strip`, the stale `ShellSidebar` and `useTodoCounts` comments, and `StatusDotDemo`** from
+   CLAUDE.md's own lists were not touched.
+10. **CLAUDE.md has no Query panel section.** Five passes of rulings live in `reports/query-panel-v2/` and the
+    code comments only. It should be written when the branch merges.
+11. **The branch is five integrations deep.** `query-panel-v2` has never been merged to main; each deploy has
+    been a merge onto whatever dev served.

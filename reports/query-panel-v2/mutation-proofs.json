@@ -90,7 +90,7 @@
  },
  "V13": {
   "lock": "V13",
-  "green": "100/100",
+  "green": "116/116",
   "mutations": [
    {
     "name": "every link drawn in every state (source: StandCard ignores the view's links)",
@@ -121,6 +121,16 @@
     "name": "the Next move column does not read the predicate (source: nextLine ignores silenceWords)",
     "red": "2 readings: 'Keep tracking \u00b7 column, tray and panel agree \u2014 column \"Nudge\" \u00b7 tray \"Record a response\" \u00b7 panel \"Record a response\"', and 'Suggest closing again \u2026 column \"Nudge\" \u00b7 tray \"Close query\"'",
     "log": "mutation-runs/V13-column.txt"
+   },
+   {
+    "name": "the board card decides again (source: the tray draws its button only where a card is raised, and the Birds-eye pill reads the status's old primary)",
+    "red": "5 readings: 'every row \u00b7 91 rows \u2026 pill \"I've sent it\"' and four on the year-silent query ('tray \"\" \u00b7 panel \"Record a response\"')",
+    "log": "mutation-runs/V13-card.txt"
+   },
+   {
+    "name": "the \"What changes\" sheet leaves the send-by change out (source: the line is not added)",
+    "red": "1 reading: 'What changes \u00b7 the sheet lists the send-by change beside the others'",
+    "log": "mutation-runs/V13-sheet.txt"
    }
   ],
   "patch": "mutation-runs/V13.patch (both source mutations)"

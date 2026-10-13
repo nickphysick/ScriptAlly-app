@@ -20,7 +20,7 @@ import { MATERIAL_SLOTS } from "./queryCardFacts";
 import { MATERIAL_ROW_NAMES, type MaterialKind } from "./agentMaterials";
 import { tileCourt, STAGE_NAME, type QcRow } from "./qcSummary";
 import type { ComingUp } from "./qcComingUp";
-import { silenceWords } from "./queryActions/entry";
+import { keptTracking, longSilence, nextDoor, nextWords } from "./queryActions/entry";
 
 const DAY = 86_400_000;
 const WEEKDAY = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -83,21 +83,12 @@ export interface NextLine {
   hot: boolean;
 }
 
-/** A year of silence past the date: the reference's own threshold for "Consider closing". */
-export const CLOSE_AFTER_DAYS = 365;
-
-const sendPhrase = (r: QcRow, c: ComingUp | null): string => {
-  if (c && /partial/i.test(c.verb)) return "Send partial";
-  if (c && /full/i.test(c.verb)) return "Send full";
-  return r.status === QueryStatus.PARTIAL_REQUESTED ? "Send partial" : r.status === QueryStatus.FULL_REQUESTED ? "Send full" : "Send revision";
-};
-
 /**
- * ⚠️ THE PHRASE IS THE APP'S OWN NEXT STEP — `comingUp` where the board has a card for the query, and
- * the same vocabulary read from the status and the query's own expected date where it has none, so a
- * query with nothing raised still says what is next.
+ * ⚠️ THE PHRASE IS THE ROW'S ONE NEXT MOVE, from `lib/queryActions/entry` (ruling, 13 Oct) — never the board's
+ * card, and never a second reading of the dates. `c` is still passed by the list and is no longer read here.
  */
 export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine {
+  void c;
   const court = tileCourt(r.status);
   const exp = r.expectedMs;
   const left = exp != null ? whole(nowMs, exp) : null;
@@ -108,34 +99,30 @@ export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine 
     return { phrase: STAGE_NAME[r.status], line: `${STAND_VERB[r.status].toUpperCase()}${when}`, hot: false };
   }
 
+  /* ⚠️ THE PHRASE IS THE ROW'S ONE NEXT MOVE (`nextWords`, lib/queryActions/entry) — the same decision the tray's
+     button and the panel's primary state. The board's card no longer chooses it. The second line is the dates. */
+  const move = nextDoor(r);
+  const phrase = nextWords(r) ?? STAGE_NAME[r.status];
+
   if (court === "you") {
     const hot = left != null && (over || left <= 2);
     if (r.status === QueryStatus.OFFER) {
       const line = exp == null ? "NO DATE SET" : over ? `WAS DUE ${upWeekDate(exp)}` : `BY ${upWeekDate(exp)} · ${plural(left!, "DAY", "DAYS")} LEFT`;
-      return { phrase: "Decide on offer", line, hot };
+      return { phrase, line, hot };
     }
-    const phrase = sendPhrase(r, c);
     const line = exp == null ? "NO DATE SET" : over ? plural(-left!, "DAY OVER", "DAYS OVER") : `BY ${upDate(exp, nowMs)} · ${plural(left!, "DAY", "DAYS")}`;
     return { phrase, line, hot };
   }
 
   /* with the agent */
-  /* ⚠️ A YEAR SILENT: THE COLUMN SAYS WHAT THE TRAY'S BUTTON AND THE PANEL'S PRIMARY DO (`silenceWords`, the
-     one predicate in lib/queryActions/entry). Whatever card the board holds, the words are "Consider closing"
-     — or "Waiting", once the writer has pressed "Keep tracking". */
-  const silent = silenceWords(r);
-  if (silent) {
+  if (longSilence(r) && (move?.mode === "close" || keptTracking(r))) {
     const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
-    return { phrase: silent, line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
+    return { phrase, line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
   }
-  if (c?.bucket === "fix") return { phrase: c.verb, line: exp != null ? `REPLY BY ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
-  if (over && (c?.bucket === "close" || -left! > CLOSE_AFTER_DAYS)) {
-    const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
-    return { phrase: "Consider closing", line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
-  }
-  if (over) return { phrase: "Nudge", line: `OVERDUE SINCE ${upDate(exp!, nowMs)}`, hot: false };
-  if (left != null && left <= 6) return { phrase: "Reply due", line: `BY ${upWeekDate(exp!)}`, hot: false };
-  return { phrase: "Waiting", line: exp != null ? `REPLY BY ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
+  if (move?.mode === "nudge") return { phrase, line: `OVERDUE SINCE ${upDate(exp!, nowMs)}`, hot: false };
+  /* Record a response leads: nothing to do but wait. Inside the last week the wait is named "Reply due". */
+  if (left != null && left >= 0 && left <= 6) return { phrase: "Reply due", line: `BY ${upWeekDate(exp!)}`, hot: false };
+  return { phrase, line: exp != null ? `REPLY BY ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
 }
 
 /* ── "What you sent" ───────────────────────────────────────────────────────────────────────────── */
