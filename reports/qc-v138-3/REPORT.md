@@ -67,4 +67,4 @@ One, out of all 73 rows (`glyph-census.json`):
 
 ## Integration and dev
 
-(appended at deploy)
+Dev served `index-IhaXnpGa.js`, from `dev/…-qc1381-qc1382` at `fb6ce96c`. This branch contains that branch, so the integration branch **`dev/…-qc1381-qc1382-qc1383`** is a fast-forward to `08b0bf83`: the same commit the gates and locks above ran on. It was built from a clean detached worktree and deployed hosting-only to `scriptally-dev`, after checking the served hash immediately before. **Dev now serves `index--dbyiy4q.js`**, the gated build's own hash. Not merged to main; prod untouched.
