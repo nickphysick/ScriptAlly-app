@@ -32,18 +32,20 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /* Corkboard v1 §B: /todo/corkboard (the Noteboard renamed) is a NUMBER page — "8 notes pinned to your corkboard". */
 /* RE-POINTED (Contact list v16, 12 Oct): the Contact list is a TITLE page now ("Every agent, in one place"), as the
    Query Centre became in v137. Its number, its hidden counts sentence and H3's sum went with the number. */
-export const NUMBER = ["/manuscripts/packages", "/todo", "/todo/corkboard"] as const;
+/* RETIRED (Submission packages v4, 14 Oct): /manuscripts/packages left the number panel for the centred light header
+   ("{n} packages in use", page-local, OWN_HEADER_ROUTES); PK4 A1 holds it. Its WORDS and ROWS entries went with it. */
+export const NUMBER = ["/todo", "/todo/corkboard"] as const;
 export const TITLE = ["/queries", "/agents", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
 const WORDS: Record<string, RegExp> = {
   "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/,
-  "/manuscripts/packages": /^packages?$/, "/todo": /^things? to do$/,
+  "/todo": /^things? to do$/,
   "/todo/corkboard": /^notes? pinned to your corkboard$/,
 };
 /** what each page's own body counts, for H3: a selector whose visible matches are the count, or a reader */
-const ROWS: Record<string, string> = { "/manuscripts/packages": '[data-ppv="pkg"]', "/todo/corkboard": "[data-note]" };
+const ROWS: Record<string, string> = { "/todo/corkboard": "[data-note]" };
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* restore v136's open header on /queries: no surface, a ruled corner */

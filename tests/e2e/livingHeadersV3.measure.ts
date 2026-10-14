@@ -47,7 +47,9 @@ const PAGES: Pg[] = [
      tests/e2e/contactV15.measure.ts CL15-1/CL15-2 instead. Its EMPTY state still draws the shared living header; that page
      is held by contactV13 CL13-14. Four pages here now. */
   { route: "/todo", key: "td", name: "To-do list", section: "TASKS", empty: "Nothing to do yet", tile: ".tdv2-tile:not(.tdv2-tile--sk)", num: ".tdv2-num", row: '[data-todo-v2="row"]', rail: ".tdv2-group > .tdv2-rail", exPart: '[data-todo-v2="row"]' },
-  { route: "/manuscripts/packages", key: "sp", name: "Submission packages", section: "MATERIALS", empty: "No packages yet", tile: null, num: null, row: '[data-ppv="pkg"]', rail: '[data-ppv="rail"]', exPart: '[data-ppv="pkg"]' },
+  /* SUBMISSION PACKAGES LEFT ON 14 OCT (packages v4): its populated header is the page-local centred light header
+     (OWN_HEADER_ROUTES), with no living sentence, and its empty page is a navy panel of its own; PK4 A1 and F1 hold
+     both (tests/e2e/pk4.measure.ts). */
   /* COMPARABLE TITLES LEFT ON 12 OCT (comps v25 §B): its populated header is the v137 title panel, page-local
      (OWN_HEADER_ROUTES), with no living sentence, and is locked by tests/e2e/compsV25.measure.ts CV25 B1. Its empty state
      keeps the exhibit under that panel. */
