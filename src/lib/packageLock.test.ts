@@ -252,7 +252,9 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
     expect(dup, "no Duplicate entry point").toContain("dupFrom: p.packageName");
     expect(dup, "a duplicate opens as an EDIT").not.toContain("editId");
     expect(dup).toContain("duplicateName(p.packageName");
-    expect(model).toMatch(/if \(d\.editId\) \{[\s\S]{0,400}updatePackage\(d\.editId/);
+    /* 800, not 400: the edit branch states which version key it sends before it writes (v4's fix for a sent package
+       with no version); the claim — an edit writes through updatePackage, keyed on editId — is unchanged */
+    expect(model).toMatch(/if \(d\.editId\) \{[\s\S]{0,800}updatePackage\(d\.editId/);
   });
 
   it("the two modes are mutually exclusive at every entry point", () => {

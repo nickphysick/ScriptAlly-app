@@ -135,9 +135,16 @@ export function usePackagesModel() {
     if (d.editId) {
       const prev = msPkgs.find((p) => p.id === d.editId);
       const starts = prev ? editionWarning(prev, { queryLetterVersionId: d.letter, synopsisVersionId: d.synopsis, bookVersionId: d.version, otherMaterials: d.other }) : null;
+      /* ⚠️ THE VERSION KEY IS SENT ONLY WHEN IT SAYS SOMETHING. updatePackage's edition check reads the fields as strings
+         (`contentsOf` trims them), so a `deleteField()` there throws on a STAMPED package and the save fails with no word
+         to the writer — the v2 page did exactly that for every sent package without a version. Unset and unchanged →
+         no key; a new version → the id; cleared on an unsent package → deleteField(). A sent package's version cannot be
+         cleared (the form does not offer it): the rules refuse "" and the check cannot take the sentinel. */
+      const bv = d.version
+        ? { bookVersionId: d.version }
+        : prev?.bookVersionId && !prev.firstSentAt ? { bookVersionId: deleteField() as unknown as string } : {};
       const err = await updatePackage(d.editId, {
-        packageName: name, queryLetterVersionId: d.letter, synopsisVersionId: d.synopsis,
-        bookVersionId: (d.version || deleteField()) as unknown as string, otherMaterials: d.other,
+        packageName: name, queryLetterVersionId: d.letter, synopsisVersionId: d.synopsis, ...bv, otherMaterials: d.other,
       });
       if (err) { showToast({ message: err }); return null; }
       /* ⚠️ AN EDIT THAT STARTED AN EDITION IS UNDONE EXACTLY (revertPackageEdition), never by writing the old
@@ -152,7 +159,8 @@ export function usePackagesModel() {
           message: `Saved ${name}.`,
           undo: prev ? async () => { await updatePackage(prev.id, {
             packageName: prev.packageName, queryLetterVersionId: prev.queryLetterVersionId, synopsisVersionId: prev.synopsisVersionId,
-            bookVersionId: (prev.bookVersionId || deleteField()) as unknown as string, otherMaterials: prev.otherMaterials ?? "",
+            ...(prev.bookVersionId ? { bookVersionId: prev.bookVersionId } : prev.firstSentAt ? {} : { bookVersionId: deleteField() as unknown as string }),
+            otherMaterials: prev.otherMaterials ?? "",
           }); } : undefined,
         });
       }

@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import type { SubmissionPackage } from "../../../types";
 import { QueryStatus } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { editionNumber, editionWarning, editionsOf, ordinal } from "../../../lib/packageEditions";
+import { editionNumber, editionsOf, ordinal } from "../../../lib/packageEditions";
 import { OTHER_MAX } from "../../../lib/packageMetrics";
 import { suggestPackageName, type MatKind } from "../../../lib/packagesPage";
 import { qualifies, pct, MIN_SENDS_FOR_CLAIM, ranked, type Split } from "../../../lib/packageReplies";
@@ -338,7 +338,6 @@ const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDra
     if (id) go({ m: "pkg", id, tab: "inside" });
   };
   const park = (kind: MatKind) => go({ m: "matform", d: { kind, name: "", note: "", text: "" }, parked: d });
-  const warn = prev ? editionWarning(prev, { queryLetterVersionId: d.letter, synopsisVersionId: d.synopsis, bookVersionId: d.version, otherMaterials: d.other }) : null;
   const prevCount = prev ? model.creditedQueries(prev).length : 0;
   const title = d.editId ? `Edit ${prev?.packageName ?? "package"}` : model.msPkgs.length ? "New package" : "Build your first package";
   const onKey = (e: React.KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); void save(); } };
@@ -363,7 +362,6 @@ const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDra
         {prev && prevStamped ? (
           <div className="pk4-info pk4-info--fix" data-pk4="edition-notice">
             {prev.packageName} has gone out with {qs(prevCount)}. Changing what's in it starts its {ordinal(editionNumber(prev) + 1)} edition, and those {qs(prevCount)} stay with the {ordinal(editionNumber(prev))}. Renaming it doesn't.
-            {warn ? <span className="pk4-vh"> {warn}</span> : null}
           </div>
         ) : null}
         <section className="pk4-sec"><SecHead n={1} title="Name it" />
@@ -389,7 +387,8 @@ const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDra
           <span className="pk4-lab">Manuscript version {versionRequired ? <b>*</b> : null}</span>
           <div className="pk4-pick" role="radiogroup" aria-label="Manuscript version" data-pk4="pick-version">
             {V.map((m) => <Opt key={m.id} on={d.version === m.id} name={m.name} note={model.matById("version", m.id)?.note} tag={tag(m)} onPick={() => pick("version", m.id)} />)}
-            {!versionRequired && d.version ? <Opt on={false} name="Not recorded" onPick={() => pick("version", "")} /> : null}
+            {/* clearing is offered only where it can be saved: never on a sent package (see savePackage) */}
+            {!versionRequired && d.version && !prevStamped ? <Opt on={false} name="Not recorded" onPick={() => pick("version", "")} /> : null}
           </div>
           <button type="button" className="pk4-newm" data-pk4="park-version" onClick={() => park("version")}>+ Add a new version</button>
           <span className="pk4-lab">Anything else it sends</span>
