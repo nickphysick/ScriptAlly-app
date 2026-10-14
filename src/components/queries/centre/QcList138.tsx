@@ -121,13 +121,16 @@ const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean;
   const c = DIAL.box / 2;
   return (
     <span className={`qc138-dial${over ? " over" : ""}${yours ? " you" : ""}`} data-qcv="row-dial" data-over={over ? "" : undefined} data-frac={frac.toFixed(3)} title={title}>
-      {over ? null : (
-        <svg viewBox={`0 0 ${DIAL.box} ${DIAL.box}`} aria-hidden="true">
-          <circle className="qc138-dial-tr" cx={c} cy={c} r={DIAL.r} fill="none" strokeWidth={DIAL.w} />
+      {/* v138.1 §E — past the date the ring stays and is COMPLETE (no dash), in rust on a rust track; never a fill */}
+      <svg viewBox={`0 0 ${DIAL.box} ${DIAL.box}`} aria-hidden="true">
+        <circle className="qc138-dial-tr" cx={c} cy={c} r={DIAL.r} fill="none" strokeWidth={DIAL.w} />
+        {over ? (
+          <circle className="qc138-dial-arc" data-qcv="row-dial-arc" cx={c} cy={c} r={DIAL.r} fill="none" strokeWidth={DIAL.w} />
+        ) : (
           <circle className="qc138-dial-arc" data-qcv="row-dial-arc" cx={c} cy={c} r={DIAL.r} fill="none" strokeWidth={DIAL.w} strokeLinecap="round"
             strokeDasharray={`${(frac * DIAL_C).toFixed(2)} ${DIAL_C.toFixed(2)}`} transform={`rotate(-90 ${c} ${c})`} />
-        </svg>
-      )}
+        )}
+      </svg>
       <b className="qc138-dial-d">{d.getDate()}</b>
       <i className="qc138-dial-m">{MON[d.getMonth()]}</i>
     </span>
