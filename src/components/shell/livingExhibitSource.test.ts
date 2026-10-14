@@ -16,6 +16,8 @@ const FILES = [
   "src/components/agents/contact/ContactExhibit.tsx",
   "src/components/todo/v2/TodoExhibit.tsx",
   "src/components/packages/PackagesExhibit.tsx",
+  /* Submission packages v4 F: the empty page's example package is fixed sample content, never a record */
+  "src/components/packages/v4/PkgEmpty4.tsx",
   "src/components/shell/LivingExhibition.tsx",
 ];
 const DATA_PATHS = [/useScriptAllyDb/, /from "[^"]*lib\/db"/, /firebase/, /\bfetch\(/, /onSnapshot/, /getDocs?\(/, /useContext\(/];
@@ -45,7 +47,7 @@ describe("LH6 · the exhibition reads nothing but its constant (source)", () => 
   it("the v3 exhibits are each mounted once, behind the page's empty branch", () => {
     const mounts: [string, string, string][] = [
       ["src/components/todo/ToDoPage.tsx", "<TodoExhibit", 'tdState === "nothing"'],
-      ["src/components/SubmissionPackages.tsx", "<PackagesExhibit", "exhibit ?"],
+      /* Submission packages v4 (14 Oct): the exhibit is retired with its living header; the empty page is PkgEmpty4 (PK4 F1) */
       /* Comparable titles' exhibit retired with comps v27: its empty page is the header and the steps card. */
       /* Analytics' exhibit retired with its living header (analytics v13, 3 Oct): its empty page is the
          feature container over example rows built from `exampleModel`, not a living-header exhibition. */
