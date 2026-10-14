@@ -53,4 +53,4 @@ Gates match the baseline: tsc clean; both builds clean; Vitest 8785 passed, and 
 
 ## Integration and dev
 
-(appended at deploy)
+Dev served `index-Dwlwm9M3.js`, from `dev/…-cl171-qc138` at `81544fd9`. This branch contains that branch, so the integration branch **`dev/…-cl171-qc138-qc1381`** is a fast-forward to `e3328ec5`: the same commit the gates and locks above ran on. It was built from a clean detached worktree of that tip and deployed hosting-only to `scriptally-dev`. The served hash was checked immediately before the deploy. **Dev now serves `index-CvdwJkYd.js`.** Not merged to main; prod untouched.
