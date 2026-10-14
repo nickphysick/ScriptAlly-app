@@ -242,17 +242,22 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
      `create()` writes through `updatePackage` ONLY when `editId` is set — so a duplicate is always an
      `addPackage`, and a sent package is never the write target. The same law as before, stated
      over the new page's two lines rather than the old builder's pair of setters. */
+  /* ⚠️ RETARGETED ONTO PACKAGES v4 (14 Oct): the drawer's form draft names its mode once — `editId` for an edit,
+     `dupFrom` for a duplicate — and both drafts are built in ONE place, the page model. `savePackage` writes
+     through `updatePackage` ONLY when `editId` is set, so a duplicate is always an `addPackage`. The law is
+     unchanged; it now reads the file the drafts moved to. */
   it("duplicating is a CREATE — the sent package is never the write target", () => {
-    const dup = page.slice(page.indexOf('case "dup":'), page.indexOf('case "retire":'));
-    expect(dup, "no Duplicate & edit entry point").toContain("openComp(");
-    expect(dup).toContain("dupFrom: p.packageName");
+    const model = decls(read("src/components/packages/v4/usePackagesModel.ts"));
+    const dup = model.slice(model.indexOf("const dupDraft"), model.indexOf("const editDraft"));
+    expect(dup, "no Duplicate entry point").toContain("dupFrom: p.packageName");
     expect(dup, "a duplicate opens as an EDIT").not.toContain("editId");
     expect(dup).toContain("duplicateName(p.packageName");
-    expect(page).toMatch(/if \(c\.editId\) \{[\s\S]{0,400}updatePackage\(c\.editId/);
+    expect(model).toMatch(/if \(d\.editId\) \{[\s\S]{0,400}updatePackage\(d\.editId/);
   });
 
   it("the two modes are mutually exclusive at every entry point", () => {
-    const edit = page.slice(page.indexOf('case "edit":'), page.indexOf('case "dup":'));
+    const model = decls(read("src/components/packages/v4/usePackagesModel.ts"));
+    const edit = model.slice(model.indexOf("const editDraft"), model.indexOf("/* ── material writes"));
     expect(edit).toContain("editId: p.id");
     expect(edit, "an edit also claims to be a duplicate").not.toContain("dupFrom");
     /* retargeted (Part B, 28 Sep): Edit is offered on EVERY live package now — on a sent one it
