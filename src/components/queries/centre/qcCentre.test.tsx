@@ -76,9 +76,11 @@ describe("one derived list, one control that narrows it", () => {
     expect(page).toContain("const sortedList = qcVisible.map((r) => r.query);");
     /* v137 §B re-point: the law is "one derived list, narrowed by the sentence's filter and Find, then sorted". The strip's
        court is a third narrowing of the SAME list on the desktop, so the claim is asserted in parts, not as one spelling. */
-    const vis = page.slice(page.indexOf("const qcVisible = sortRows("), page.indexOf("const sortedList = qcVisible.map"));
+    /* v138 §C re-point: the list is filtered once (`qcFiltered`) and then sorted — by the headings on the desk
+       (`sort138`), by the sentence's sort on the phone. Still one derived list; the anchor moved, the law did not. */
+    const vis = page.slice(page.indexOf("const qcFiltered = "), page.indexOf("const sortedList = qcVisible.map"));
     expect(vis.length).toBeGreaterThan(40);
-    for (const part of ["qcScoped.filter(", "matchesFilter(r, qcFilter)", "matchesFind(r, qcFind)", "tileCourt(r.status) === qcCourtOn", "qcSort)"]) expect(vis, part).toContain(part);
+    for (const part of ["qcScoped.filter(", "matchesFilter(r, qcFilter)", "matchesFind(r, qcFind)", "tileCourt(r.status) === qcCourtOn", "matches138(r, qcF138", "sort138(qcFiltered, qcSort138", "sortRows(qcFiltered, qcSort)"]) expect(vis, part).toContain(part);
     expect(page).toContain("const qcCourtOn = qcDesk ? qcCzCourt : null;");
     expect(page).toMatch(/const gridRows: GridCard\[\] = sortedList\.map\(/);
   });

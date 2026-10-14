@@ -175,3 +175,63 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
   if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
   return true;
 }
+
+/* ── Part C · THE HEADINGS SORT ────────────────────────────────────────────────────────────────────────────────
+ * ⚠️ THERE IS NO SORT CONTROL: each heading is the sort. Rows sort WITHIN each group, because the groups are cut
+ *    from an already-sorted list. A row with nothing to sort on goes LAST in either direction (the house rule),
+ *    so reversing a sort never floats the empties to the top.
+ */
+export type Qc138SortKey = "agent" | "first" | "stage" | "sent" | "next" | "due";
+export interface Qc138Sort { key: Qc138SortKey; reversed: boolean }
+export const DEFAULT_SORT_138: Qc138Sort = { key: "due", reversed: false };
+
+/** a heading press: the same key reverses, another key sorts by it ascending */
+export const pressHeading = (s: Qc138Sort, key: Qc138SortKey): Qc138Sort =>
+  s.key === key ? { key, reversed: !s.reversed } : { key, reversed: false };
+
+/** stage order: Queried, Partial requested, Partial sent, Full requested, Full sent, Offer, Passed, No reply */
+const STAGE_ORDER: Record<string, number> = {
+  [QueryStatus.QUERIED]: 0, [QueryStatus.PARTIAL_REQUESTED]: 1, [QueryStatus.PARTIAL_SENT]: 2,
+  [QueryStatus.FULL_REQUESTED]: 3, [QueryStatus.REVISE_RESUBMIT]: 3.5, [QueryStatus.FULL_SENT]: 4, [QueryStatus.RESUBMITTED]: 4.5,
+  [QueryStatus.OFFER]: 5, [QueryStatus.SIGNED]: 5.5, [QueryStatus.REJECTED]: 6, [QueryStatus.NO_RESPONSE]: 7, [QueryStatus.WITHDRAWN]: 8,
+};
+export const stageRank = (status: string): number => STAGE_ORDER[status] ?? 0;
+
+/** the surname: the last word of the name, lower-cased */
+export const surnameKey = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  return (parts[parts.length - 1] ?? "").toLowerCase();
+};
+
+export interface SortCtx<T> {
+  /** the row's package name, or null when none is recorded */
+  packageName: (r: T) => string | null;
+  /** the next move's label, or null */
+  nextLabel: (r: T) => string | null;
+}
+
+export function sort138<T extends Filterable & { id: string; agentName: string }>(rows: readonly T[], s: Qc138Sort, ctx: SortCtx<T>): T[] {
+  const val = (r: T): string | number | null => {
+    switch (s.key) {
+      case "agent": return surnameKey(r.agentName) || null;
+      case "first": return r.sentMs;
+      case "stage": return stageRank(r.status);
+      case "sent": return ctx.packageName(r)?.toLowerCase() ?? null;
+      case "next": return ctx.nextLabel(r)?.toLowerCase() ?? null;
+      case "due": return dueOf(r);
+    }
+  };
+  const dir = s.reversed ? -1 : 1;
+  return rows.map((r, i) => ({ r, i, v: val(r) })).sort((a, b) => {
+    if (a.v == null && b.v == null) return a.i - b.i;
+    if (a.v == null) return 1;
+    if (b.v == null) return -1;
+    const c = typeof a.v === "number" && typeof b.v === "number" ? a.v - b.v : String(a.v).localeCompare(String(b.v));
+    return c !== 0 ? c * dir : a.i - b.i;
+  }).map((x) => x.r);
+}
+
+export const HEADINGS: { key: Qc138SortKey; label: string }[] = [
+  { key: "agent", label: "Agent" }, { key: "first", label: "First queried" }, { key: "stage", label: "Where it stands" },
+  { key: "sent", label: "What you sent" }, { key: "next", label: "Next move" }, { key: "due", label: "Due" },
+];

@@ -209,9 +209,11 @@ export const QcCentre: React.FC<{
   v131?: boolean;
   /** v138 — the centred light header (desktop); replaces v133's open header */
   header138?: React.ReactNode;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138 }) => {
+  /** v138 §C — full screen: the header goes and the pinned row stays */
+  full?: boolean;
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138, full = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
-  usePinnedControls(groupRef, v131);
+  usePinnedControls(groupRef, v131 && !header138);
   /**
    * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
    * `DOCK_MIN_COLUMN` asks whether there is room for a ledger AND a card beside it, which was a
@@ -264,7 +266,7 @@ export const QcCentre: React.FC<{
      * the window's right edge, which is right while the page fills the window and strands it on a
      * wide screen once the content is centred at 1480. A grid track states the width once.
      */
-    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined} data-v138={v131 && header138 ? "" : undefined}>
+    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined} data-v138={v131 && header138 ? "" : undefined} data-full={v131 && header138 && full ? "" : undefined}>
       {/**
         * §2 (page header v2) — THE HEADER SPANS THE WHOLE COLUMN, both of the group's tracks, and the
         * Birds-eye rail starts in the row BELOW its rule. It used to sit inside `.qcv-page`, in the

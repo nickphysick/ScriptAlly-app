@@ -1,0 +1,291 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v138 §C — THE LIST SHEET (ref design-refs/query-centre-v138/query-centre-v138.html): one white
+ * sheet, radius 20. A navy top row ("Showing all {N} queries, grouped by {group}", the density control and full
+ * screen), then the mono headings strip, then the groups and their rows. No group cards.
+ *
+ * ⚠️ THERE IS NO SORT CONTROL: every heading is a button that sorts (`aria-sort`, Enter and Space), and rows sort
+ *    WITHIN each group because the groups are cut from an already-sorted list.
+ * ⚠️ ONE GRID FOR HEADINGS AND ROWS (`--qc138-cols`), so each heading sits over its column with no script offsets.
+ *    The Next move cell is a SUBGRID over the last two tracks: the action in track 5, the due figure in track 6.
+ * ⚠️ EVERY WORD A ROW SAYS COMES FROM `lib/qcRowLines` AND `lib/qc138`, and its next move from Query panel v2's
+ *    one predicate (`nextDoor`).
+ */
+import React, { useEffect, useRef, useState } from "react";
+import { StatusDot } from "../../StatusDot";
+import { Mark } from "../QueryCard";
+import type { SubmissionPackage } from "../../../types";
+import type { GroupBy, ListGroup } from "../../../lib/qcCalView";
+import { GROUP_BY_OPTIONS } from "../../../lib/qcCalView";
+import type { QcRow } from "../../../lib/qcSummary";
+import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
+import type { ComingUp } from "../../../lib/qcComingUp";
+import { nextDoor } from "../../../lib/queryActions/entry";
+import { nextLine, sentCell, standLine } from "../../../lib/qcRowLines";
+import { HEADINGS, dueOf, startOfDay, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
+import { useTip } from "./QcList132";
+import type { QcDensity } from "../../../lib/qcListMemory";
+import { MONTHS_SHORT } from "../../../lib/dates";
+import "./qcvList138.css";
+
+const MON = MONTHS_SHORT;
+const DAY_MS = 86_400_000;
+
+/** "14 Mar", with the year only when it is not this year ("14 Mar 2024") */
+export const firstQueried = (ms: number, nowMs: number): string => {
+  const d = new Date(ms);
+  const y = new Date(nowMs).getFullYear();
+  return `${d.getDate()} ${MON[d.getMonth()]}${d.getFullYear() === y ? "" : ` ${d.getFullYear()}`}`;
+};
+/** the compact due date: "30 Sep", or "30 Sep '25" in another year */
+export const dueText = (ms: number, nowMs: number): string => {
+  const d = new Date(ms);
+  const y = new Date(nowMs).getFullYear();
+  return `${d.getDate()} ${MON[d.getMonth()]}${d.getFullYear() === y ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
+};
+/** whole days from today to the due date: negative when it has passed */
+export const daysTo = (ms: number, nowMs: number): number => Math.round((startOfDay(ms) - startOfDay(nowMs)) / DAY_MS);
+export const dueTitle = (ms: number, nowMs: number): string => {
+  const d = daysTo(ms, nowMs);
+  if (d < 0) return `${-d} ${d === -1 ? "day" : "days"} over`;
+  return `${d} ${d === 1 ? "day" : "days"} left`;
+};
+
+const ICON = {
+  x: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 4l8 8M12 4l-8 8" /></svg>,
+  pen: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 2.5l3 3-7.5 7.5H3v-3z" /><path d="M9 4l3 3" /></svg>,
+  glass: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2h8M4 14h8M5 2c0 4 6 4 6 6s-6 2-6 6M11 2c0 4-6 4-6 6s6 2 6 6" /></svg>,
+  box: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><rect x="2" y="3" width="12" height="3" rx="1" /><path d="M3 6v7h10V6M6.5 9h3" /></svg>,
+  clock: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
+  pkg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 8l9-4 9 4-9 4z" /><path d="M3 8v8l9 4 9-4V8" /><path d="M12 12v8" /></svg>,
+  full: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9" /></svg>,
+  comfy: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3 4.5h10M3 8h10M3 11.5h10" /></svg>,
+  dense: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 3.5h10M3 6.5h10M3 9.5h10M3 12.5h10" /></svg>,
+};
+
+export type BandTone = "you" | "waiting" | "closed";
+const TONE_ICON: Record<BandTone, React.ReactNode> = { you: ICON.pen, waiting: ICON.glass, closed: ICON.box };
+
+/** "What you sent": a 92px package chip (or an empty 92px space), a rule, four 30px tiles */
+const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
+  const m = sentCell(row, pkg, nowMs);
+  return (
+    <div className="qc138-mats" data-qcv="sent" data-slot={m.slot.kind} data-known={m.known ? "true" : "false"}>
+      {m.slot.kind === "package" ? (
+        <button type="button" className="qc138-pkg qc138-pkg--on" data-qcv="row-pkg" data-tip={m.slot.title} data-tl={m.slot.line}
+          onClick={(e) => { e.stopPropagation(); onPackage(); }}>
+          {ICON.pkg}<span className="qc138-pkg-word">{m.slot.name}</span>
+        </button>
+      ) : m.slot.kind === "add" ? (
+        <button type="button" className="qc138-pkg qc138-pkg--add" data-qcv="row-add" data-tip={m.slot.title} data-tl={m.slot.line}
+          onClick={(e) => { e.stopPropagation(); onAdd(); }}>
+          <span className="qc138-pkg-plus" aria-hidden="true">+</span><span className="qc138-pkg-word">Add</span>
+        </button>
+      ) : (
+        <span className="qc138-pkg qc138-pkg--none" data-qcv="row-pkg-none" aria-hidden="true" />
+      )}
+      <i className="qc138-sep" aria-hidden="true" />
+      {m.tiles.map((t) => (
+        <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
+          tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
+          <Mark kind={t.kind} />
+        </span>
+      ))}
+    </div>
+  );
+};
+
+export interface QcList138Props {
+  groups: ListGroup[];
+  groupBy: GroupBy;
+  onGroup: (g: GroupBy) => void;
+  /** the band tone for each group key */
+  toneOf: (g: ListGroup) => BandTone;
+  /** every query in scope, and how many the filters leave */
+  total: number;
+  shown: number;
+  filtered: boolean;
+  onClearAll: () => void;
+  sort: Qc138Sort;
+  onHeading: (k: Qc138SortKey) => void;
+  density: QcDensity;
+  onDensity: (d: QcDensity) => void;
+  full: boolean;
+  onFull: () => void;
+  selectedId: string | null;
+  onOpen: (id: string) => void;
+  nowMs: number;
+  coming?: ReadonlyMap<string, ComingUp>;
+  packageOf?: (id: string) => SubmissionPackage | null;
+  onAct?: (id: string, bucket: ComingUp["bucket"] | null) => void;
+  onEdit?: (id: string) => void;
+  onClose?: (id: string) => void;
+  onAddSent?: (id: string) => void;
+  onOpenPackage?: (packageId: string | null) => void;
+  find?: string;
+  ringId?: string | null;
+  /** group keys folded at first sight (Part D: Closed) */
+  folded: ReadonlySet<string>;
+  onFold: (key: string) => void;
+}
+
+export const QcList138: React.FC<QcList138Props> = ({
+  groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold,
+}) => {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const tip = useTip(boxRef);
+  const [groupOpen, setGroupOpen] = useState(false);
+  const groupBtn = useRef<HTMLButtonElement>(null);
+  const rows = groups.flatMap((g) => g.rows);
+  const groupLabel = GROUP_BY_OPTIONS.find((o) => o.key === groupBy)?.label ?? "Urgency";
+  useEffect(() => {
+    if (!groupOpen) return undefined;
+    const down = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (groupBtn.current?.contains(t) || (t instanceof Element && t.closest('[data-qc138="group-menu"]'))) return;
+      setGroupOpen(false);
+    };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setGroupOpen(false); groupBtn.current?.focus(); } };
+    document.addEventListener("pointerdown", down, true);
+    document.addEventListener("keydown", key, true);
+    return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("keydown", key, true); };
+  }, [groupOpen]);
+
+  const hl = (text: string): React.ReactNode => {
+    const q = find.trim();
+    if (!q) return text;
+    const i = text.toLowerCase().indexOf(q.toLowerCase());
+    return i < 0 ? text : <>{text.slice(0, i)}<mark>{text.slice(i, i + q.length)}</mark>{text.slice(i + q.length)}</>;
+  };
+
+  const renderRow = (r: QcRow) => {
+    const on = r.id === selectedId;
+    const next = coming?.get(r.id) ?? null;
+    const nx = nextLine(r, next, nowMs);
+    const move = nextDoor(r);
+    const closed = r.court === "closed";
+    const pkgId = r.query.sentPackageId || r.query.packageId || null;
+    const pkg = pkgId ? packageOf?.(pkgId) ?? null : null;
+    const due = dueOf(r);
+    const dd = due != null ? daysTo(due, nowMs) : null;
+    const dueTone = dd == null ? "none" : dd < 0 ? "over" : dd <= 7 ? "soon" : "later";
+    return (
+      <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}`} data-ring={ringId === r.id || undefined}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-name={r.agentName}
+        role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
+        onClick={() => onOpen(r.id)}
+        onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(r.id); } }}>
+        <div className="qc138-ag" data-qcv="row-agent">
+          <span className={`qc138-disc${closed ? " qc138-disc--closed" : ""}`} data-qcv="row-chip" aria-hidden="true">{r.initials}</span>
+          <span className="qc138-agt">
+            <b data-qcv="row-name">{hl(r.agentName)}</b>
+            <small data-qcv="row-agency">{hl(r.agency)}</small>
+          </span>
+        </div>
+        <div className="qc138-fq" data-qcv="row-first">
+          <span className="qc138-fqd" data-qcv="row-first-date">{r.sentMs != null ? firstQueried(r.sentMs, nowMs) : ""}</span>
+        </div>
+        <div className="qc138-st" data-qcv="row-stand">
+          <div className="qc138-ws1"><StatusDot status={r.status} overrideSize={12} /><span>{STAGE_NAME[r.status]}</span></div>
+          <div className="qc138-sub" data-qcv="row-standline">{standLine(r, nowMs)}</div>
+        </div>
+        <div className="qc138-snt" data-qcv="row-sent">
+          <SentCell138 row={r} pkg={pkg} nowMs={nowMs} onAdd={() => (onAddSent ?? onEdit)?.(r.id)} onPackage={() => onOpenPackage?.(pkgId)} />
+        </div>
+        <div className="qc138-nx" data-qcv="row-next">
+          <div className="qc138-nxm">
+            <div className="qc138-nxt" data-qcv="row-verb">{nx.phrase}</div>
+            <div className={`qc138-sub${nx.hot ? " hot" : ""}`} data-qcv="row-nextline" data-hot={nx.hot || undefined}>{nx.line}</div>
+          </div>
+          <div className="qc138-due" data-qcv="row-due" data-tone={dueTone} title={due != null && !closed ? dueTitle(due, nowMs) : undefined}>
+            {due != null && !closed ? <span className="qc138-dt" data-qcv="row-due-text">{dueText(due, nowMs)}</span> : null}
+          </div>
+          <span className="qc138-tray" data-qcv="row-tray">
+            {move && !closed && (
+              <button type="button" className="qc138-pillbtn" data-qcv="row-act" data-next={move.mode}
+                onClick={(e) => { e.stopPropagation(); onAct?.(r.id, next?.bucket ?? null); }}>{move.label}</button>
+            )}
+            <button type="button" className="qc138-ghost" data-qcv="row-edit"
+              onClick={(e) => { e.stopPropagation(); onEdit?.(r.id); }} aria-label={`Edit the query to ${r.agentName}`}>{ICON.pen}</button>
+            {!closed && (
+              <button type="button" className="qc138-ghost" data-qcv="row-close"
+                onClick={(e) => { e.stopPropagation(); onClose?.(r.id); }} aria-label={`Close the query to ${r.agentName}`}>{ICON.x}</button>
+            )}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="qc138-sheet" data-qc138="sheet" data-density={density} ref={boxRef} {...tip.handlers}>
+      <div className="qc138-top" data-qc138="top" data-qcv="ws-head">
+        <p className="qc138-say" data-qc138="showing" data-qcv="ws-title">
+          {filtered
+            ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b>,</>
+            : <>Showing all <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>}
+          {" "}<span className="qc138-gb">grouped by</span>{" "}
+          <button type="button" ref={groupBtn} className="qc138-grp" data-qc138="group" aria-haspopup="menu" aria-expanded={groupOpen}
+            onClick={() => setGroupOpen((o) => !o)}>{groupLabel}</button>
+          {filtered ? <button type="button" className="qc138-clear" data-qc138="clear-all" onClick={onClearAll}>Clear all</button> : null}
+          {groupOpen ? (
+            <span className="qc138-gmenu" role="menu" data-qc138="group-menu">
+              {GROUP_BY_OPTIONS.map((o) => (
+                <button key={o.key} type="button" role="menuitemradio" aria-checked={groupBy === o.key} data-g={o.key}
+                  onClick={() => { onGroup(o.key); setGroupOpen(false); groupBtn.current?.focus(); }}>{o.label}</button>
+              ))}
+            </span>
+          ) : null}
+        </p>
+        <span className="qc138-tools">
+          <span className="qc138-dens" role="group" aria-label="Row density" data-qcv="ws-density">
+            <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>
+            <button type="button" aria-pressed={density === "compact"} data-d="compact" title="Compact rows" aria-label="Compact rows" onClick={() => onDensity("compact")}>{ICON.dense}</button>
+          </span>
+          <button type="button" className="qc138-fs" data-qc138="full" aria-pressed={full} title={full ? "Leave full screen" : "Full screen"} aria-label={full ? "Leave full screen" : "Full screen"} onClick={onFull}>{ICON.full}</button>
+        </span>
+      </div>
+      <div className="qc138-heads" data-qc138="headings" role="row">
+        {HEADINGS.map((h) => {
+          const on = sort.key === h.key;
+          return (
+            <div key={h.key} role="columnheader" className={`qc138-h${on ? " on" : ""}`} data-k={h.key} data-qc138="heading"
+              aria-sort={on ? (sort.reversed ? "descending" : "ascending") : "none"}>
+              <button type="button" onClick={() => onHeading(h.key)}>
+                <span>{h.label}</span><i aria-hidden="true">{on && sort.reversed ? "↑" : "↓"}</i>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <div className="qc138-body" data-qcv="list">
+        {groups.map((g) => {
+          const tone = toneOf(g);
+          const shut = folded.has(g.key);
+          const label = g.label || "All queries";
+          return (
+            <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
+              <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone}
+                aria-expanded={!shut} onClick={() => onFold(g.key)}>
+                <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
+                <b className="qc138-gt" data-qcv="gband-t">{label}</b>
+                <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
+                {g.hint ? <span className="qc138-gh" data-qcv="gband-h">{g.hint}</span> : <span className="qc138-gh" />}
+                <span className="qc138-chev" aria-hidden="true">▾</span>
+              </button>
+              {!shut && (
+                <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">
+                  {g.rows.map(renderRow)}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {tip.node}
+    </div>
+  );
+};

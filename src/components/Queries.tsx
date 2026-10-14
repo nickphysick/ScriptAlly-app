@@ -99,8 +99,9 @@ import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
-import { SENT_NONE, dueThisWeek, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
+import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { QcList138, type BandTone } from "./queries/centre/QcList138";
 import { usePopover } from "./shell/ListPills";
 import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
@@ -209,7 +210,7 @@ import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
 import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
-import { DRAWER_LIVE, primaryDoor } from "../lib/queryActions/entry";
+import { DRAWER_LIVE, nextDoor, primaryDoor } from "../lib/queryActions/entry";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
@@ -2443,6 +2444,10 @@ export const Queries: React.FC<{
   const qcStages = qcF138.stages;
   const pickGlyph = (k: GlyphKey) => setQcF138((f) => ({ ...f, stages: pressGlyph(f.stages, k) }));
   const qc138Pop = usePopover<Qc138Pop>();
+  /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
+  const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
+  const [qcFull, setQcFull] = useState(false);
+  const [qcFolded, setQcFolded] = useState<ReadonlySet<string>>(() => new Set());
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
@@ -3764,9 +3769,21 @@ export const Queries: React.FC<{
      phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
   const qcCourtOn = qcDesk ? qcCzCourt : null;
   const qcNow138 = Date.now();
-  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138))), qcSort);
+  const qcFiltered = qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
+  /* v138 §C — on the desk the headings sort; the phone keeps the v126 sort */
+  const qcVisible = qcDesk
+    ? sort138(qcFiltered, qcSort138, {
+        packageName: (r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; },
+        nextLabel: (r) => nextDoor(r)?.label ?? null,
+      })
+    : sortRows(qcFiltered, qcSort);
   /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
   const qcGlyphCounts = glyphCounts(qcScoped);
+  /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
+  const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
+  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
+  /* v138 §C — a band's tint from its group (Part D settles the groups themselves) */
+  const qc138Tone = (g: { key: string }): BandTone => (g.key === "you" ? "you" : g.key === "closed" ? "closed" : "waiting");
   /* v138 §B — the filter row's counts, over the manuscript-scoped set (as v17's are over the whole list) */
   const qc138Counts = (() => {
     const stage = new Map<string, number>();
@@ -5117,7 +5134,7 @@ export const Queries: React.FC<{
       <QcPinned138
         anchor={qc138Ref}
         on={routeActive && qcDesk && !showGridSkeleton}
-        shown={qc138Pinned}
+        shown={qc138Pinned || qcFull}
         total={qcScoped.length}
         counts={qcGlyphCounts}
         stages={qcStages}
@@ -6837,6 +6854,7 @@ export const Queries: React.FC<{
             */}
           <QcCentre
             header138={qc138Header}
+            full={qcDesk && qcFull}
             v131={qcDesk}
             loading={qcLoad.loading}
             blank={qcLoad.blank}
@@ -6855,33 +6873,8 @@ export const Queries: React.FC<{
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
             logDisabled={creating}
             logRef={logTriggerRef}
-            sentence={qcDesk ? (
-              /* v132 §2 — "Your queries": the ink bar, the pills, the controls and the strip. One filter
-                 value (`qcFilter`), set by every pill and chip; "your move" is the desk's own court. */
-              <QcWorkspaceHead
-                shown={qcVisible.length}
-                total={qcScoped.length}
-                book={qcLineTitle}
-                filter={qcFilter}
-                onFilter={pickQcFilter}
-                options={filterOptions(qcScoped)}
-                countOf={(f) => qcScoped.filter((r) => matchesFilter(r, f)).length}
-                find={qcFind}
-                onFind={setQcFind}
-                group={qcGroup}
-                onGroup={setQcGroup}
-                sort={qcSort}
-                onSort={setQcSort}
-                density={qcDensity}
-                onDensity={setQcDensity}
-                scope={qcScopeMenu}
-                /* v138 §B — "/" focuses the header's search now */
-                loading={showGridSkeleton}
-                /* v137 §B — the strip's court counts as a filter that is on, and "Clear all" clears it too */
-                courtOn={!!qcCzCourt || qc138FilterCount(qcF138) > 0}
-                onClearCourt={() => { setQcCzCourt(null); setQcF138(emptyQc138Filters()); }}
-              />
-            ) : (
+            /* v138 §C — on the desk the list sheet carries its own top row; v137's ink head is retired */
+            sentence={qcDesk ? null : (
               <QcSentence
                 find={qcFind}
                 onFind={setQcFind}
@@ -7026,7 +7019,7 @@ export const Queries: React.FC<{
                 /* v132 §4 — the desktop dead end: the inkwell and one way back (a search before a filter) */
                 <QcDeadEnd find={qcFind} book={qcLineTitle}
                   onClearFind={() => setQcFind("")}
-                  onClearFilters={() => { clearQcFilter(); setQcScope(null); setQcCzCourt(null); }} />
+                  onClearFilters={() => { qc138ClearAll(); setQcScope(null); }} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -7046,29 +7039,33 @@ export const Queries: React.FC<{
                 </p>
               ) : (
                 qcDesk ? (
-                <QcList132
+                <QcList138
                   groupBy={qcGroup}
+                  onGroup={setQcGroup}
+                  toneOf={qc138Tone}
+                  total={qcScoped.length}
+                  shown={qcVisible.length}
+                  filtered={qc138Filtered}
+                  onClearAll={qc138ClearAll}
+                  sort={qcSort138}
+                  onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
+                  density={qcDensity}
+                  onDensity={setQcDensity}
+                  full={qcFull}
+                  onFull={() => setQcFull((f) => !f)}
+                  folded={qcFolded}
+                  onFold={(k) => setQcFolded((f) => { const n = new Set(f); if (n.has(k)) n.delete(k); else n.add(k); return n; })}
                   /* the chip opens the packages page; "+ Add" opens the edit journey (the "Record what you sent" route) */
                   onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
                   packageOf={qcPackageOf}
-                  density={qcDensity}
                   find={qcFind}
                   ringId={qcKeys.ringId}
-                  sort={qcSort}
-                  onSort={setQcSort}
-                  /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
-                     sort applies WITHIN each group for free (§2). A grouping that re-ordered would
-                     be a second ordering pass disagreeing with the sort control. */
+                  /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
+                     applies WITHIN each group for free */
                   groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
                   selectedId={selectedQueryId} onOpen={(id) => { cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
                   coming={qcComing}
-                  /* ⚠️ THE TRAY'S PRIMARY IS THE PAGE'S OWN ACTION ENGINE, never a second write
-                     path: it opens the query and offers its verb, exactly as pressing the row and
-                     then the card's primary does. Nothing in the tray is destructive in one click —
-                     `Close it` opens the close journey, which is what `onOpenQuery` reaches. */
-                  /* v126 §7 — THE TRAY'S ACTION OPENS THE ONE DRAWER in the journey its bucket names
-                     (`trayRequest`); nothing here opens its own modal for an action any more. */
-                  /* Query panel v1 — …and on this page that journey steps INTO the row's panel (`stepRow`) */
+                  /* Query panel v1 — the tray's journey steps INTO the row's panel (`stepRow`) */
                   onAct={(id, bucket) => {
                     const r = qcById.get(id);
                     const req = r ? trayOpen(bucket, r) : null;
