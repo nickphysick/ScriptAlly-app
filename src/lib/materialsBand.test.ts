@@ -64,25 +64,24 @@ describe("the materials band replaces the rail's register (D1)", () => {
     }
   });
 
-  /* ⚠️ RETARGETED ONTO PACKAGES v2 (27 Sep). The Builder's rail, the working bands and the archive
-     drawer are all retired with the tabs; the page's ONE materials surface is `PkgMaterials` in the
-     shared `PageRail`, and the put-away route survives inside it. The laws are unchanged: one
-     materials surface, and a put-away material always has a way back. */
-  it("⚠️ ONE materials surface — the v2 rail — and none of the retired ones", () => {
+  /* ⚠️ RETARGETED ONTO PACKAGES v4 (14 Oct). The Materials rail is retired; the page's ONE materials surface is the
+     materials sheet (`MaterialsSheet`, three columns), and a put-away material keeps its way back: each column's
+     "Show put away" lists them, and a put-away one's drawer offers Restore. The laws are unchanged: one materials
+     surface, and a put-away material always has a way back. */
+  it("⚠️ ONE materials surface — the v4 materials sheet — and none of the retired ones", () => {
     const d = decls(page);
-    expect(d.match(/<PkgMaterials\b/g) ?? [], "the rail is mounted exactly once").toHaveLength(1);
-    for (const gone of ["MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
+    expect(d.match(/<MaterialsSheet\b/g) ?? [], "the materials sheet is mounted exactly once").toHaveLength(1);
+    for (const gone of ["PkgMaterials", "PageRail", "MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
       expect(d, `${gone} is back on the page`).not.toMatch(new RegExp(`<${gone}\\b`));
     }
   });
 
   it("⚠️ AND A PUT-AWAY MATERIAL STILL HAS A WAY BACK", () => {
-    expect(decls(page)).toMatch(/putAway=\{putAway\}[\s\S]{0,120}restoreVersion\(m\.id\)/);
-    /* v2.1 (28 Sep): the section is the mock's open list, not a collapsible, and every row carries its
-       own Restore — the law (a way back) is unchanged, only the hook moved */
-    const rail = decls(read("../components/packages/PkgMaterials.tsx"));
-    expect(rail).toContain('data-ppv="putaway"');
-    expect(rail).toMatch(/data-ppv="restore-mat" onClick=\{\(\) => onRestore\?\.\(m\)\}/);
+    const sheet = decls(read("../components/packages/v4/PkgSheets4.tsx"));
+    expect(sheet).toContain('data-pk4="show-away"');
+    expect(sheet).toMatch(/\{open \? <div className="pk4-awaylist">\{away\.map\(row\)\}<\/div> : null\}/);
+    const drawer = decls(read("../components/packages/v4/PkgDrawer4.tsx"));
+    expect(drawer).toMatch(/m\.retired \? \([\s\S]{0,200}data-pk4="restore" onClick=\{\(\) => void model\.restoreMat\(m\)\}/);
   });
 });
 
@@ -100,7 +99,8 @@ describe("every entry point names its type (D3)", () => {
     expect(rail).toContain("data-add={k} onClick={(e) => onAdd(k, e.currentTarget)}");
     /* retargeted (Part B, 28 Sep): the key also carries the material being EDITED, so opening Edit on
        a second letter remounts the modal with that letter's text — the law (keyed on its kind) holds */
-    expect(decls(page)).toContain("<PkgMaterialModal key={`${modal.kind}${modal.edit?.id ?? \"\"}`} kind={modal.kind}");
+    /* v4 (14 Oct): the material form is the drawer's, keyed on its kind and the material it edits */
+    expect(decls(read("../components/packages/v4/PkgDrawer4.tsx"))).toContain("key={`mf:${view.d.editId ?? view.d.kind}");
   });
 });
 

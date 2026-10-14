@@ -32,7 +32,9 @@ export const BAND_ROUTES: readonly string[] = ["/queries/analytics"];
  * the Archivist in the flow at the column's right edge. Its geometry belongs to `manuscriptsV21` H1/H2.
  */
 /* /manuscripts/comps joined with Comparable titles v25 (12 Oct): its title panel is page-local (`data-own-header`), CV25 B1 holds it. */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps"];
+/* /manuscripts/packages joined with Submission packages v4 (14 Oct): the centred light header is page-local (`data-own-header`),
+   and its empty page's navy panel too; PK4 A1 and F1 hold them. */
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The
