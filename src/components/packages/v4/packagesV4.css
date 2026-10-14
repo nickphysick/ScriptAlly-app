@@ -308,3 +308,9 @@ button.pk4-sr:hover { background: var(--pk4-oat); }
 /* "100%" is the one figure three digits wide: it steps down so it stays inside the ring (the mock never draws it) */
 .pk4-card .pk4-rg .pk4-pc-fig[data-wide] { font-size: 20px !important; }
 .ws-app.sheet-wide .pk4-card .pk4-rg .pk4-pc-fig[data-wide] { font-size: 25px !important; }
+
+/* ═════ Part B · the filter row: 26 under the header, a 1px ink-14% rule, 18 of padding; v17's pills (by class) ═════ */
+.pk4-hd .pk4-fr { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--pk4-i14); }
+.pk4-hd .pk4-fbar.cl17-fbar.cl14-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; margin: 0; }
+@container pk4hd (max-width: 899.98px) { .pk4-hd .pk4-fbar.cl17-fbar.cl14-fbar { flex-wrap: wrap; } }
+.pk4-psw { display: block; box-sizing: border-box; width: 12px; height: 12px; border-radius: 3px; }

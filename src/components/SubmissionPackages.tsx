@@ -56,6 +56,8 @@ import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
 import "./packages/v4/packagesV4.css";
 import { PkgHeader4, PkgSummaryCard, type StatusKey } from "./packages/v4/PkgHeader4";
 import { overall } from "../lib/packageReplies";
+import { PkgFilters4, emptyPkgFilters, pkgMatches, type PkgFilters, type PkgPop } from "./packages/v4/PkgFilters4";
+import { usePopover } from "./shell/ListPills";
 import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
@@ -168,10 +170,16 @@ export const SubmissionPackages: React.FC = () => {
   const counts: Record<StatusKey, number> = {
     sent: live.filter((p) => model.goneOut(p)).length, new: live.filter((p) => !model.goneOut(p)).length, ret: retired.length,
   };
-  const [status, setStatus] = useState<Set<StatusKey>>(new Set());
+  /* Part B · the filters; Status is ONE state with the card's rows */
+  const [filters, setFilters] = useState<PkgFilters>(emptyPkgFilters);
+  const status = useMemo(() => new Set(filters.status), [filters.status]);
   /* a row press shows only that row; pressed again it clears. It never scrolls (A2). */
-  const pressStatus = (k: StatusKey) => setStatus((cur) => (cur.size === 1 && cur.has(k) ? new Set() : new Set([k])));
-  const statusMatch = (p: SubmissionPackage) => !status.size || (p.status === "Retired" ? status.has("ret") : status.has(model.goneOut(p) ? "sent" : "new"));
+  const pressStatus = (k: StatusKey) => setFilters((f) => ({ ...f, status: f.status.length === 1 && f.status[0] === k ? [] : [k] }));
+  const keyOf = (p: SubmissionPackage): StatusKey => (p.status === "Retired" ? "ret" : model.goneOut(p) ? "sent" : "new");
+  const statusMatch = (p: SubmissionPackage) => pkgMatches(p, keyOf(p), filters);
+  const pop = usePopover<PkgPop>();
+  const inPackages = (kind: "letter" | "synopsis" | "version", id: string) => msPkgs.filter((p) =>
+    (kind === "letter" ? p.queryLetterVersionId : kind === "synopsis" ? p.synopsisVersionId || "" : p.bookVersionId || "") === id).length;
   const overallSplit = useMemo(() => overall(msPkgs, msQueries, rowsById), [msPkgs, msQueries, rowsById]);
   const goReplies = () => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -214,7 +222,10 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         ) : <PkgHeader4 loading={!collectionsReady && !activeMs} live={collectionsReady || activeMs ? live.length : null} msTitle={activeMs?.title ?? null}
           onNew={() => openNew()} onAddMaterial={() => setView({ m: "matform", d: { kind: "letter", name: "", note: "", text: "" } })}
-          card={<PkgSummaryCard counts={counts} active={status} onStatus={pressStatus} overall={overallSplit} onRate={goReplies} loading={!collectionsReady && !activeMs} />} />}
+          card={<PkgSummaryCard counts={counts} active={status} onStatus={pressStatus} overall={overallSplit} onRate={goReplies} loading={!collectionsReady && !activeMs} />}>
+          <PkgFilters4 filters={filters} onFilters={setFilters} pop={pop} statusCounts={counts} letters={allMats.letter} synopses={allMats.synopsis}
+            versions={allMats.version} inPackages={inPackages} showing={msPkgs.filter(statusMatch).length} />
+        </PkgHeader4>}
         <div className="ppv-group">
           <div className="ppv-main" data-ppv="main">
             {noneLive ? (
