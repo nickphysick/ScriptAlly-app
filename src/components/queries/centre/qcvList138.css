@@ -535,3 +535,20 @@
   .qc138-sheet .qc138-t4l[title], .qc138-sheet .qc138-mk[title] { cursor: help; }
   .qc138-sheet .qc138-t4l .qc138-t4n { margin-top: 1px; }
 }
+
+/* ── v138.4 §D · TYPEWRITER ANNOTATIONS ─────────────────────────────────────────────────────────────────────────
+   Every piece of text inside the timeline is Special Elite (`--sp-type`), at the sizes lib/qcTl4's TL4_FONTS measures
+   with — the two must agree or a label is placed for a width it does not have. The summary keeps v138.2's faces. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-t4l b { font: 400 13.5px/1.25 var(--sp-type) !important; color: #1c130f; }
+  .qc138-sheet .qc138-t4l.past b { color: rgba(28, 19, 15, 0.72); }
+  .qc138-sheet .qc138-t4l.was b { color: #a2452a; }
+  .qc138-sheet .qc138-t4l small { font: 400 12px/1.25 var(--sp-type) !important; color: rgba(28, 19, 15, 0.5); }
+  .qc138-sheet .qc138-t4l.today b { font: 400 12px/1.25 var(--sp-type) !important; letter-spacing: 0.08em; color: #a2452a; }
+  .qc138-sheet .qc138-t4l.today small.ov { font: 400 12.5px/1.25 var(--sp-type) !important; color: #a2452a; }
+  .qc138-sheet .qc138-t4d { font: 400 11.5px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, 0.45); }
+  .qc138-sheet .qc138-t4d.live.agt { color: #2d3a50; }
+  .qc138-sheet .qc138-t4d.live.you { color: #8f4529; }
+  .qc138-sheet .qc138-t4a { font: 400 10.5px/1.2 var(--sp-type) !important; letter-spacing: 0.02em; color: rgba(28, 19, 15, 0.38); }
+  .qc138-sheet .qc138-t4a.yr { font-weight: 600 !important; color: rgba(28, 19, 15, 0.6); }
+}
