@@ -15,6 +15,7 @@
  *    exactly its own statuses, and pressing it again empties the set.
  */
 import { QueryStatus } from "../types";
+import { MONTHS_SHORT } from "./dates";
 
 export type GlyphKey = "q" | "pr" | "ps" | "fr" | "fs" | "of" | "cl";
 
@@ -235,3 +236,62 @@ export const HEADINGS: { key: Qc138SortKey; label: string }[] = [
   { key: "agent", label: "Agent" }, { key: "first", label: "First queried" }, { key: "stage", label: "Where it stands" },
   { key: "sent", label: "What you sent" }, { key: "next", label: "Next move" }, { key: "due", label: "Due" },
 ];
+
+/* ── Part E · THE ROWS ─────────────────────────────────────────────────────────────────────────────────────────
+ * ⚠️ NO MONO CAPITALS IN ANY DETAIL LINE: row detail is serif in normal case. The shared row lines
+ *    (`lib/qcRowLines`) are written in capitals for the v132 list, so they are re-cased here rather than forked.
+ */
+const MONTH_CAP = new Set(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
+/** "OVERDUE SINCE 11 JUN" → "Overdue since 11 Jun" */
+export const sentenceCase = (s: string): string =>
+  s.toLowerCase().replace(/[a-z]+/g, (w) => (MONTH_CAP.has(w) ? w[0].toUpperCase() + w.slice(1) : w)).replace(/^[a-z]/, (c) => c.toUpperCase());
+
+const MON138 = MONTHS_SHORT;
+const dayMonYear = (ms: number, nowMs: number): string => {
+  const d = new Date(ms);
+  return `${d.getDate()} ${MON138[d.getMonth()]}${d.getFullYear() === new Date(nowMs).getFullYear() ? "" : ` ${d.getFullYear()}`}`;
+};
+const DETAIL_VERB: Record<string, string> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "Requested", [QueryStatus.FULL_REQUESTED]: "Requested", [QueryStatus.REVISE_RESUBMIT]: "Requested",
+  [QueryStatus.PARTIAL_SENT]: "Sent", [QueryStatus.FULL_SENT]: "Sent", [QueryStatus.RESUBMITTED]: "Sent",
+  [QueryStatus.OFFER]: "Offered", [QueryStatus.SIGNED]: "Signed", [QueryStatus.REJECTED]: "Passed",
+  [QueryStatus.NO_RESPONSE]: "Closed", [QueryStatus.WITHDRAWN]: "Withdrawn",
+};
+
+/**
+ * The stage's detail line: "Requested 2 Sep". None at Queried (the date is in First queried) and never "· day n".
+ * `hot` (rust, upright, 600) when the row is the writer's to send and its send-by date has gone.
+ */
+export function stageDetail(r: Filterable & { stageStartMs: number | null }, nowMs: number): { text: string; hot: boolean } | null {
+  if (r.status === QueryStatus.QUERIED) return null;
+  const verb = DETAIL_VERB[r.status] ?? "Since";
+  const text = r.stageStartMs != null ? `${verb} ${dayMonYear(r.stageStartMs, nowMs)}` : `${verb}, not dated`;
+  const due = dueOf(r);
+  return { text, hot: r.court === "you" && due != null && due < startOfDay(nowMs) };
+}
+
+/** the track's four stops */
+export const TRACK_STOPS = ["Queried", "Partial", "Full", "Offer"] as const;
+/** how far along the track a row has come: 0 queried, 1 partial, 2 full, 3 offer (its furthest, open or closed) */
+export function trackLevel(r: { status: string; furthest: "query" | "partial" | "full" }): number {
+  if (r.status === QueryStatus.OFFER || r.status === QueryStatus.SIGNED) return 3;
+  if (r.furthest === "full" || [QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED].includes(r.status as QueryStatus)) return 2;
+  if (r.furthest === "partial" || [QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT].includes(r.status as QueryStatus)) return 1;
+  return 0;
+}
+
+/**
+ * The due dial's arc: the share of the wait gone, from the last change to the due date, with a 4% minimum.
+ * `over` when the date has passed (a solid disc then, no ring). Null for a closed or undated row.
+ */
+export const DIAL = { box: 52, r: 22, w: 3.5 } as const;
+export const DIAL_C = 2 * Math.PI * DIAL.r;
+export function dialOf(r: Filterable & { stageStartMs: number | null; lastMs: number }, nowMs: number): { frac: number; over: boolean; due: number } | null {
+  const due = dueOf(r);
+  if (due == null) return null;
+  if (due < startOfDay(nowMs)) return { frac: 1, over: true, due };
+  const from = r.stageStartMs ?? r.lastMs;
+  const span = due - from;
+  const gone = span > 0 ? (nowMs - from) / span : 1;
+  return { frac: Math.min(1, Math.max(0.04, gone)), over: false, due };
+}

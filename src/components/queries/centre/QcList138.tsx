@@ -23,8 +23,10 @@ import type { QcRow } from "../../../lib/qcSummary";
 import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
-import { nextLine, sentCell, standLine } from "../../../lib/qcRowLines";
-import { HEADINGS, dueOf, startOfDay, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
+import { nextLine, sentCell } from "../../../lib/qcRowLines";
+import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
+import { isYourMoveRow } from "../../../lib/queryCentreGroups";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
@@ -98,6 +100,37 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
   }, [box, sig]);
 }
 const TONE_ICON: Record<BandTone, React.ReactNode> = { you: ICON.pen, waiting: ICON.glass, closed: ICON.box };
+
+/** Where it stands: four 9px dots (Queried · Partial · Full · Offer), 15 apart, joined by 11×2 lines */
+const Track: React.FC<{ level: number; yours: boolean; closed: boolean }> = ({ level, yours, closed }) => (
+  <span className={`qc138-trk${yours ? " qc138-trk--you" : ""}${closed ? " qc138-trk--closed" : ""}`} data-qcv="row-track" data-level={level} aria-hidden="true">
+    {TRACK_STOPS.map((stop, i) => (
+      <React.Fragment key={stop}>
+        {i > 0 ? <i className={`qc138-tl${i <= level ? " on" : ""}`} /> : null}
+        <b className={`qc138-td${i <= level ? " on" : ""}${i === level && yours && !closed ? " last" : ""}`} title={i <= level ? `${stop}: reached` : `${stop}: not yet`} />
+      </React.Fragment>
+    ))}
+  </span>
+);
+
+/** Due, comfortable: a 52px dial. The arc is the share of the wait gone; past the date it is a solid rust disc. */
+const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean; title: string }> = ({ frac, over, due, yours, title }) => {
+  const d = new Date(due);
+  const c = DIAL.box / 2;
+  return (
+    <span className={`qc138-dial${over ? " over" : ""}${yours ? " you" : ""}`} data-qcv="row-dial" data-over={over ? "" : undefined} data-frac={frac.toFixed(3)} title={title}>
+      {over ? null : (
+        <svg viewBox={`0 0 ${DIAL.box} ${DIAL.box}`} aria-hidden="true">
+          <circle className="qc138-dial-tr" cx={c} cy={c} r={DIAL.r} fill="none" strokeWidth={DIAL.w} />
+          <circle className="qc138-dial-arc" data-qcv="row-dial-arc" cx={c} cy={c} r={DIAL.r} fill="none" strokeWidth={DIAL.w} strokeLinecap="round"
+            strokeDasharray={`${(frac * DIAL_C).toFixed(2)} ${DIAL_C.toFixed(2)}`} transform={`rotate(-90 ${c} ${c})`} />
+        </svg>
+      )}
+      <b className="qc138-dial-d">{d.getDate()}</b>
+      <i className="qc138-dial-m">{MON[d.getMonth()]}</i>
+    </span>
+  );
+};
 
 /** "What you sent": a 92px package chip (or an empty 92px space), a rule, four 30px tiles */
 const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
@@ -204,25 +237,30 @@ export const QcList138: React.FC<QcList138Props> = ({
     const due = dueOf(r);
     const dd = due != null ? daysTo(due, nowMs) : null;
     const dueTone = dd == null ? "none" : dd < 0 ? "over" : dd <= 7 ? "soon" : "later";
+    const yours = isYourMoveRow(r);
+    const detail = stageDetail(r, nowMs);
+    const dial = dialOf(r, nowMs);
     return (
       <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}`} data-ring={ringId === r.id || undefined}
-        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-name={r.agentName}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
         onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(r.id); } }}>
         <div className="qc138-ag" data-qcv="row-agent">
-          <span className={`qc138-disc${closed ? " qc138-disc--closed" : ""}`} data-qcv="row-chip" aria-hidden="true">{r.initials}</span>
+          <AgentDisc initials={r.initials} standing={closed ? "closed" : "querying"} size={density === "compact" ? 26 : 40} className="qc138-disc" attrs={{ "data-qcv": "row-chip" }} />
           <span className="qc138-agt">
             <b data-qcv="row-name">{hl(r.agentName)}</b>
             <small data-qcv="row-agency">{hl(r.agency)}</small>
           </span>
         </div>
         <div className="qc138-fq" data-qcv="row-first">
-          <span className="qc138-fqd" data-qcv="row-first-date">{r.sentMs != null ? firstQueried(r.sentMs, nowMs) : ""}</span>
+          <span className="qc138-fqd" data-qcv="row-first-date">{r.sentMs != null ? firstQueried(r.sentMs, nowMs) : "Not dated"}</span>
+          {r.dayN != null ? <span className="qc138-fqn" data-qcv="row-day">day {r.dayN}</span> : null}
         </div>
         <div className="qc138-st" data-qcv="row-stand">
           <div className="qc138-ws1"><StatusDot status={r.status} overrideSize={12} /><span>{STAGE_NAME[r.status]}</span></div>
-          <div className="qc138-sub" data-qcv="row-standline">{standLine(r, nowMs)}</div>
+          <Track level={trackLevel(r)} yours={yours} closed={closed} />
+          {detail ? <div className={`qc138-sub${detail.hot ? " hot" : ""}`} data-qcv="row-standline" data-hot={detail.hot || undefined}>{detail.text}</div> : null}
         </div>
         <div className="qc138-snt" data-qcv="row-sent">
           <SentCell138 row={r} pkg={pkg} nowMs={nowMs} onAdd={() => (onAddSent ?? onEdit)?.(r.id)} onPackage={() => onOpenPackage?.(pkgId)} />
@@ -230,10 +268,12 @@ export const QcList138: React.FC<QcList138Props> = ({
         <div className="qc138-nx" data-qcv="row-next">
           <div className="qc138-nxm">
             <div className="qc138-nxt" data-qcv="row-verb">{nx.phrase}</div>
-            <div className={`qc138-sub${nx.hot ? " hot" : ""}`} data-qcv="row-nextline" data-hot={nx.hot || undefined}>{nx.line}</div>
+            <div className={`qc138-sub${nx.hot ? " hot" : ""}`} data-qcv="row-nextline" data-hot={nx.hot || undefined}>{sentenceCase(nx.line)}</div>
           </div>
           <div className="qc138-due" data-qcv="row-due" data-tone={dueTone} title={due != null && !closed ? dueTitle(due, nowMs) : undefined}>
-            {due != null && !closed ? <span className="qc138-dt" data-qcv="row-due-text">{dueText(due, nowMs)}</span> : null}
+            {due == null || closed ? null : density === "compact" || !dial
+              ? <span className="qc138-dt" data-qcv="row-due-text">{dueText(due, nowMs)}</span>
+              : <Dial frac={dial.frac} over={dial.over} due={dial.due} yours={yours} title={dueTitle(due, nowMs)} />}
           </div>
           <span className="qc138-tray" data-qcv="row-tray">
             {move && !closed && (

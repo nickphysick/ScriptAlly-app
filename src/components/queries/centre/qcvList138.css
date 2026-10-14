@@ -141,16 +141,34 @@
   .qc138-sheet .qc138-row:focus-visible { outline: none; box-shadow: inset 3px 0 0 #2d3a50; background: #f6f9fc; }
   .qc138-sheet .qc138-row.kf { box-shadow: inset 3px 0 0 #2d3a50; }
   .qc138-sheet .qc138-ag { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .qc138-sheet .qc138-disc {
-    flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-    background: #2a3a52; color: #f4eee5; font: 700 11px/1 var(--font-mono) !important; letter-spacing: 0.04em;
-  }
-  .qc138-sheet .qc138-disc--closed { background: #b3aca5; color: #2b2622; }
+  /* the circle is AgentDisc's (shared/agentDisc.css); this sheet only scales it on hover (Part F) */
   .qc138-sheet .qc138-agt { display: block; min-width: 0; }
   .qc138-sheet .qc138-agt b { display: block; font: 600 17px/1.3 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-agt small { display: block; font: italic 400 14px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-fq { min-width: 0; }
   .qc138-sheet .qc138-fqd { display: block; font: 400 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
+  .qc138-sheet .qc138-fqn { display: block; margin-top: 2px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+  /* the track: four 9px dots 15 apart, joined by 11×2 lines */
+  .qc138-sheet .qc138-trk { display: flex; align-items: center; gap: 0; margin-top: 6px; height: 12px; }
+  .qc138-sheet .qc138-trk .qc138-td { display: block; flex: none; box-sizing: border-box; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.32); }
+  .qc138-sheet .qc138-trk .qc138-td.on { background: #2a3a52; box-shadow: none; }
+  .qc138-sheet .qc138-trk .qc138-tl { display: block; flex: none; width: 11px; height: 2px; margin: 0 2px; background: rgba(42, 58, 82, 0.22); }
+  .qc138-sheet .qc138-trk .qc138-tl.on { background: #2a3a52; }
+  .qc138-sheet .qc138-trk--you .qc138-td.on, .qc138-sheet .qc138-trk--you .qc138-tl.on { background: #b0603e; }
+  .qc138-sheet .qc138-trk--you .qc138-td.last { box-shadow: 0 0 0 3px rgba(176, 96, 62, 0.22); }
+  .qc138-sheet .qc138-trk--closed .qc138-td, .qc138-sheet .qc138-trk--closed .qc138-td.on { background: #cfc9c2; box-shadow: none; }
+  .qc138-sheet .qc138-trk--closed .qc138-tl, .qc138-sheet .qc138-trk--closed .qc138-tl.on { background: #cfc9c2; }
+  /* the due dial: 52px, a ring of r 22 and stroke 3.5; past the date a solid rust disc */
+  .qc138-sheet .qc138-dial { position: relative; display: inline-grid; place-items: center; align-content: center; width: 52px; height: 52px; border-radius: 50%; }
+  .qc138-sheet .qc138-dial svg { position: absolute; inset: 0; width: 52px; height: 52px; }
+  .qc138-sheet .qc138-dial .qc138-dial-tr { stroke: rgba(42, 58, 82, 0.13); }
+  .qc138-sheet .qc138-dial .qc138-dial-arc { stroke: #2a3a52; }
+  .qc138-sheet .qc138-dial.you .qc138-dial-tr { stroke: rgba(176, 96, 62, 0.18); }
+  .qc138-sheet .qc138-dial.you .qc138-dial-arc { stroke: #b0603e; }
+  .qc138-sheet .qc138-dial .qc138-dial-d { position: relative; display: block; font: 400 19px/1 var(--sp-type) !important; color: #1c130f; }
+  .qc138-sheet .qc138-dial .qc138-dial-m { position: relative; display: block; margin-top: 3px; font: 600 7.5px/1 var(--font-mono) !important; font-style: normal; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+  .qc138-sheet .qc138-dial.over { background: #a2452a; }
+  .qc138-sheet .qc138-dial.over .qc138-dial-d, .qc138-sheet .qc138-dial.over .qc138-dial-m { color: #f4eee5; }
   .qc138-sheet .qc138-st { min-width: 0; }
   .qc138-sheet .qc138-ws1 { display: flex; align-items: center; gap: 8px; font: 400 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
   .qc138-sheet .qc138-ws1 > span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
@@ -202,8 +220,23 @@
   .qc138-sheet .qc138-ghost svg { width: 14px; height: 14px; }
   .qc138-sheet mark { background: #fbe7a8; color: inherit; border-radius: 2px; }
 
-  /* compact: tighter rows */
+  /* compact: ~40px rows; the circle 26 with 8.5px initials; name and agency on one line; no day line, track,
+     detail line or dial month; text dates, never dials */
   .qc138-sheet[data-density="compact"] .qc138-row { padding: 6px 22px; }
+  .qc138-sheet[data-density="compact"] { --qc138-ind: 36px; }
+  .qc138-sheet[data-density="compact"] .qc138-ag { gap: 10px; }
+  .qc138-sheet[data-density="compact"] .qc138-agt { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .qc138-sheet[data-density="compact"] .qc138-agt b { flex: none; max-width: 60%; font-size: 15.5px !important; }
+  .qc138-sheet[data-density="compact"] .qc138-agt small { flex: 1 1 0; min-width: 0; font-size: 13px !important; }
+  .qc138-sheet[data-density="compact"] .qc138-fqn, .qc138-sheet[data-density="compact"] .qc138-trk,
+  .qc138-sheet[data-density="compact"] .qc138-sub, .qc138-sheet[data-density="compact"] .qc138-dial-m { display: none; }
+  .qc138-sheet[data-density="compact"] .qc138-ws1 { font-size: 14.5px !important; gap: 6px; }
+  .qc138-sheet[data-density="compact"] .qc138-ws1 svg { width: 11px; height: 11px; }
+  .qc138-sheet[data-density="compact"] .qc138-pkg { height: 26px; }
+  .qc138-sheet[data-density="compact"] .qc138-tile { width: 24px; height: 24px; border-radius: 7px; }
+  .qc138-sheet[data-density="compact"] .qc138-tile svg { width: 15px; height: 15px; }
+  .qc138-sheet[data-density="compact"] .qc138-nxt { font-size: 14.5px !important; }
+  .qc138-sheet[data-density="compact"] .qc138-fqd { font-size: 14.5px !important; }
 
   /* below 1180px of sheet: the narrow grid; What you sent shows only the package chip */
   @container qc138sheet (max-width: 1179.98px) {
