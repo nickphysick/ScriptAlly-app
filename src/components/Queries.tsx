@@ -101,6 +101,7 @@ import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
 import { usePopover } from "./shell/ListPills";
@@ -2491,6 +2492,8 @@ export const Queries: React.FC<{
      and one entrance when the data lands. "Ready" includes the ACTIVITY FEED — every gauge and every
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
   const qcLoad = useQcLoad(collectionsReady && activitiesReady);
+  /* v138 §H — one staggered entrance on the first mount, once the data is ready */
+  const qc138In = useEntrance138(routeActive && qcDesk && collectionsReady && activitiesReady && !qcLoad.loading);
   /* LIVING HEADERS — a DEV-ONLY review aid (lib/livingHeaderReview): render the hero as if the page
      held n queries. Gated on the build mode HERE so a production build folds the branch away and never
      reaches the module; the condition is a build-time constant, so the hook order cannot vary. */
@@ -5142,6 +5145,7 @@ export const Queries: React.FC<{
       counts={qcGlyphCounts}
       stages={qcStages}
       onGlyph={pickGlyph}
+      entering={qc138In !== "done"}
       onLog={() => onNavigate?.("queries", "Log a query")}
       onRecord={() => onNavigate?.("queries", "Record a response")}
       logDisabled={creating}
@@ -6898,6 +6902,7 @@ export const Queries: React.FC<{
           <QcCentre
             header138={qc138Header}
             full={qcDesk && qcFull}
+            enter138={qcDesk && qc138In === "run"}
             v131={qcDesk}
             loading={qcLoad.loading}
             blank={qcLoad.blank}
@@ -7104,6 +7109,7 @@ export const Queries: React.FC<{
                     const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
                     return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number }));
                   }}
+                  entering={qc138In === "run"}
                   selected={qcPicked}
                   onPick={pickQc138}
                   folded={qcFolded}

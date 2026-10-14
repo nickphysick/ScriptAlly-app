@@ -269,3 +269,24 @@
 @media (min-width: 768px) {
   .qcv-group[data-v138] .qcw .qcw-strip, .qcv-group[data-v138] .qcw .qcw-find { display: none; }
 }
+
+/* ── §H · THE PAGE-LOAD ENTRANCE (`data-enter138` on the group for 1.7s, once per mount; never on a filter, sort or
+   group change). All easing cubic-bezier(.2,.8,.2,1); ends by about 1.5s. Reduced motion: no attribute at all. ── */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .qcv-group[data-enter138] .qc138-tb { animation: qc138-rise12 0.5s cubic-bezier(.2,.8,.2,1) both; }
+  .qcv-group[data-enter138] .qc138-by::after { transform-origin: left center; animation: qc138-drawx 0.5s cubic-bezier(.2,.8,.2,1) 0.15s both; }
+  .qcv-group[data-enter138] .qc138-sg { animation: qc138-glyph 0.45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(140ms + var(--gi, 0) * 55ms); }
+  .qcv-group[data-enter138] .qc138-key { animation: qc138-fade 0.45s cubic-bezier(.2,.8,.2,1) 0.5s both; }
+  .qcv-group[data-enter138] .qc138-fr { animation: qc138-rise12 0.45s cubic-bezier(.2,.8,.2,1) 0.38s both; }
+  .qcv-group[data-enter138] .qc138-sheet { animation: qc138-rise26 0.6s cubic-bezier(.2,.8,.2,1) 0.48s both; }
+  .qcv-group[data-enter138] .qc138-band { animation: qc138-slide 0.4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(760ms + var(--qi, 0) * 40ms); }
+  .qcv-group[data-enter138] .qc138-row { animation: qc138-rise8 0.4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(760ms + var(--qi, 0) * 40ms); }
+  .qcv-group[data-enter138] .qc138-row .qc138-tl.on { transform-origin: left center; animation: qc138-drawx 0.3s linear both; animation-delay: calc(960ms + var(--qi, 0) * 40ms); }
+}
+@keyframes qc138-rise12 { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes qc138-rise26 { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+@keyframes qc138-rise8 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes qc138-slide { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+@keyframes qc138-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes qc138-drawx { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes qc138-glyph { 0% { opacity: 0; transform: scale(0.55); } 60% { opacity: 1; transform: scale(1.08); } 100% { transform: scale(1); } }

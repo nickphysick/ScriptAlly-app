@@ -221,6 +221,8 @@ export interface QcList138Props {
   onOpenPackage?: (packageId: string | null) => void;
   find?: string;
   ringId?: string | null;
+  /** v138 §H — the page-load entrance is running: bands and the first 16 rows land in list order */
+  entering?: boolean;
   /** v138 §G — the rows ticked for a bulk action */
   selected?: ReadonlySet<string>;
   onPick?: (id: string) => void;
@@ -233,8 +235,11 @@ export interface QcList138Props {
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold, loadPeek, selected, onPick,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold, loadPeek, selected, onPick, entering = false,
 }) => {
+  /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
+  let seq = 0;
+  const nextSeq = () => Math.min(16, seq++);
   /* §F — the peek opens after 450ms of continuous hover; the events are fetched from the first moment */
   const [peekId, setPeekId] = useState<string | null>(null);
   const [, setLoaded] = useState(0);
@@ -255,6 +260,18 @@ export const QcList138: React.FC<QcList138Props> = ({
     }
   };
   const leave = () => { window.clearTimeout(peekTimer.current); setPeekId(null); };
+  /* §H — as each of the first 16 rows lands, its dial sweeps (Web Animations: a var() in a keyframe fails here) */
+  useEffect(() => {
+    if (!entering) return;
+    boxRef.current?.querySelectorAll<HTMLElement>(".qc138-row").forEach((row) => {
+      const i = Number(row.style.getPropertyValue("--qi")) || 0;
+      const arc = row.querySelector<SVGCircleElement>(".qc138-dial-arc");
+      const to = arc?.getAttribute("stroke-dasharray");
+      if (arc && to && typeof arc.animate === "function") {
+        arc.animate([{ strokeDasharray: `0 ${DIAL_C.toFixed(2)}` }, { strokeDasharray: to }], { duration: 700, delay: 960 + i * 40, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+      }
+    });
+  }, [entering]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => window.clearTimeout(peekTimer.current), []);
   const boxRef = useRef<HTMLDivElement>(null);
   const tip = useTip(boxRef);
@@ -304,6 +321,7 @@ export const QcList138: React.FC<QcList138Props> = ({
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
         onMouseEnter={(e) => enter(r.id, e.currentTarget)} onMouseLeave={leave}
+        style={{ ["--qi" as string]: nextSeq() }}
         onKeyDown={(e) => {
           if (e.target !== e.currentTarget) return;
           if (e.key === "Enter") { e.preventDefault(); onOpen(r.id); }
@@ -414,7 +432,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           const label = g.label || "All queries";
           return (
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
-              <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone}
+              <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
                 <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
                 <b className="qc138-gt" data-qcv="gband-t">{label}</b>

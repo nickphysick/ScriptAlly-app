@@ -211,7 +211,9 @@ export const QcCentre: React.FC<{
   header138?: React.ReactNode;
   /** v138 §C — full screen: the header goes and the pinned row stays */
   full?: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138, full = false }) => {
+  /** v138 §H — the page-load entrance is running */
+  enter138?: boolean;
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138, full = false, enter138 = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   usePinnedControls(groupRef, v131 && !header138);
   /**
@@ -266,7 +268,7 @@ export const QcCentre: React.FC<{
      * the window's right edge, which is right while the page fills the window and strands it on a
      * wide screen once the content is centred at 1480. A grid track states the width once.
      */
-    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined} data-v138={v131 && header138 ? "" : undefined} data-full={v131 && header138 && full ? "" : undefined}>
+    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined} data-v138={v131 && header138 ? "" : undefined} data-full={v131 && header138 && full ? "" : undefined} data-enter138={enter138 ? "" : undefined}>
       {/**
         * §2 (page header v2) — THE HEADER SPANS THE WHOLE COLUMN, both of the group's tracks, and the
         * Birds-eye rail starts in the row BELOW its rule. It used to sit inside `.qcv-page`, in the
@@ -311,7 +313,7 @@ export const QcCentre: React.FC<{
     {/* v137 §C — THE LIST IS THE PAGE: the "View the full list" link (v136 §C), "Recently updated" and the banner
         (v134 §3) are no longer drawn on the populated page. `viewFullList` and `QC_BANNER_LINES` are kept. */}
     {carousel}
-    <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
+    <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering && !header138 ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-ws={v131 ? "true" : undefined}>
 
       {/* v126 §4 — THE OPEN BANNER: the list's head, re-housed. No fill, no container; the controls
