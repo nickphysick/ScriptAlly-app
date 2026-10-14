@@ -75,3 +75,103 @@ export const inStages = (set: StageSet, status: string): boolean =>
 
 /** "27 queries sent" / "1 query sent" */
 export const sentWords138 = (n: number): string => (n === 1 ? "query sent" : "queries sent");
+
+/* ── Part B · THE FILTERS ─────────────────────────────────────────────────────────────────────────────────────
+ * ⚠️ ONE STATE, EVERY CONTROL READS IT: the glyph row, the Stage pill, the two toggles, What you sent and the More
+ *    filters switches all read and write this one value, so no control can show a copy of another's. Facets are
+ *    ANDed; ticks inside the Stage and What you sent facets are alternatives.
+ */
+export const SENT_NONE = "__none__";
+
+export interface Qc138Filters {
+  stages: StageSet;
+  dueWeek: boolean;
+  offers: boolean;
+  /** package ids, and/or SENT_NONE for "Nothing recorded" */
+  sent: readonly string[];
+  past: boolean;
+  missing: boolean;
+  overYear: boolean;
+}
+export const emptyQc138Filters = (): Qc138Filters => ({ stages: [], dueWeek: false, offers: false, sent: [], past: false, missing: false, overYear: false });
+/** how many facets are on (the glyph row's stage counts as one) */
+export const qc138FilterCount = (f: Qc138Filters): number =>
+  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
+export const moreCount = (f: Qc138Filters): number => (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
+
+export const MORE_SWITCHES: { key: "past" | "missing" | "overYear"; label: string; line: string }[] = [
+  { key: "past", label: "Past their reply date", line: "Quiet past the date you expected" },
+  { key: "missing", label: "Missing materials", line: "What you sent isn’t recorded" },
+  { key: "overYear", label: "Over a year", line: "Queried more than a year ago" },
+];
+
+/** the Stage pill's panel: every status the app has, grouped by whose court it is in */
+export const STAGE_GROUPS: { title: string; statuses: { s: QueryStatus; label: string }[] }[] = [
+  { title: "With you", statuses: [
+    { s: QueryStatus.PARTIAL_REQUESTED, label: "Partial requested" }, { s: QueryStatus.FULL_REQUESTED, label: "Full requested" },
+    { s: QueryStatus.REVISE_RESUBMIT, label: "Revise & resubmit" }, { s: QueryStatus.OFFER, label: "Offer" },
+  ] },
+  { title: "With agents", statuses: [
+    { s: QueryStatus.QUERIED, label: "Queried" }, { s: QueryStatus.PARTIAL_SENT, label: "Partial sent" },
+    { s: QueryStatus.FULL_SENT, label: "Full sent" }, { s: QueryStatus.RESUBMITTED, label: "Resubmitted" },
+  ] },
+  { title: "Closed", statuses: [
+    { s: QueryStatus.REJECTED, label: "Passed" }, { s: QueryStatus.NO_RESPONSE, label: "No reply" },
+    { s: QueryStatus.WITHDRAWN, label: "Withdrawn" }, { s: QueryStatus.SIGNED, label: "Signed" },
+  ] },
+];
+const STAGE_LABEL = new Map<string, string>(STAGE_GROUPS.flatMap((g) => g.statuses.map((x) => [x.s as string, x.label] as const)));
+
+/** the Stage pill's words: the glyph's name when the set is a glyph's, one status's label, or "{n} stages" */
+export function stagePillLabel(set: StageSet): string {
+  if (set.length === 0) return "Stage";
+  const g = pressedGlyph(set);
+  if (g) return glyphDef(g).name;
+  if (set.length === 1) return STAGE_LABEL.get(set[0]) ?? "Stage";
+  return `${set.length} stages`;
+}
+
+const DAY_MS = 86_400_000;
+export const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+
+/** the minimum a row needs for the filters: QcRow carries all of it */
+export interface Filterable {
+  status: string;
+  expectedMs: number | null;
+  court: string;
+  pastExpected: boolean;
+  sentMs: number | null;
+  materialsRecorded: boolean;
+  query: { sentPackageId?: string | null; packageId?: string | null };
+}
+
+/** the package a row's send names, or null */
+export const pkgKeyOf = (r: Filterable): string | null => r.query.sentPackageId || r.query.packageId || null;
+/** "Nothing recorded": no package and no pieces ticked */
+export const nothingRecorded = (r: Filterable): boolean => !pkgKeyOf(r) && !r.materialsRecorded;
+/** the next action's date: the expected date for a live query, nothing for a closed one */
+export const dueOf = (r: Filterable): number | null => (r.court === "closed" ? null : r.expectedMs);
+/** due in the next seven days, today included, and not yet past */
+export const dueThisWeek = (r: Filterable, now: number): boolean => {
+  const d = dueOf(r);
+  if (d == null) return false;
+  const t0 = startOfDay(now);
+  return d >= t0 && d < t0 + 7 * DAY_MS;
+};
+export const overAYear = (r: Filterable, now: number): boolean => r.sentMs != null && r.sentMs < now - 365 * DAY_MS;
+
+/** one facet's test; `skip` leaves that facet out, for the counts beside each control */
+export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: keyof Qc138Filters): boolean {
+  if (skip !== "stages" && !inStages(f.stages, r.status)) return false;
+  if (skip !== "dueWeek" && f.dueWeek && !dueThisWeek(r, now)) return false;
+  if (skip !== "offers" && f.offers && r.status !== QueryStatus.OFFER) return false;
+  if (skip !== "sent" && f.sent.length) {
+    const k = pkgKeyOf(r);
+    const ok = (k && f.sent.includes(k)) || (f.sent.includes(SENT_NONE) && nothingRecorded(r));
+    if (!ok) return false;
+  }
+  if (skip !== "past" && f.past && !r.pastExpected) return false;
+  if (skip !== "missing" && f.missing && !nothingRecorded(r)) return false;
+  if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
+  return true;
+}

@@ -264,7 +264,7 @@ export const QcCentre: React.FC<{
      * the window's right edge, which is right while the page fills the window and strands it on a
      * wide screen once the content is centred at 1480. A grid track states the width once.
      */
-    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined}>
+    <div ref={groupRef} className={`qcv-group qcv-group--one qcv-own${v131 ? " qc13" : ""}`} data-qcv="group" data-v={v131 ? "131" : undefined} data-v138={v131 && header138 ? "" : undefined}>
       {/**
         * §2 (page header v2) — THE HEADER SPANS THE WHOLE COLUMN, both of the group's tracks, and the
         * Birds-eye rail starts in the row BELOW its rule. It used to sit inside `.qcv-page`, in the
