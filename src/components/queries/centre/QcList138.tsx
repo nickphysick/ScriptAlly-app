@@ -215,6 +215,20 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
   );
 };
 
+/**
+ * v138.2 §B — THE DRAWER: a grid on the row's own column template (`--qc138-cols`, the row's gap), under a 1px dashed
+ * rule in the tone's colour. The summary sits under Agent, from the name's left; the timeline runs across First
+ * queried to Due, and the scale is computed within that span. No background, box or bar of its own: the row's tint
+ * (§A) is the drawer's ground.
+ * ⚠️ NOT `aria-hidden`: the summary's link is focusable while the peek is open. The chain itself stays hidden.
+ */
+const PeekDrawer: React.FC<{ summary: React.ReactNode; children: React.ReactNode }> = ({ summary, children }) => (
+  <div className="qc138-drw" data-qcv="peek-drawer">
+    <div className="qc138-sum" data-qcv="peek-summary">{summary}</div>
+    <div className="qc138-tlw" data-qcv="peek-span">{children}</div>
+  </div>
+);
+
 interface LabCase { events: PeekEvent[]; due: number | null; closed?: boolean; yours?: boolean }
 const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
   const cases = typeof window !== "undefined" ? (window as unknown as { __SA_QC138_PEEK_LAB?: LabCase[] }).__SA_QC138_PEEK_LAB : undefined;
@@ -223,7 +237,7 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
     <div className="qc138-peeklab" data-qc138="peek-lab">
       {cases.map((c, i) => (
         <div key={i} className="qc138-peekw" data-open="" data-qc138="peek-case">
-          <div className="qc138-peeki"><Peek events={c.events} due={c.due} nowMs={nowMs} closed={!!c.closed} yours={!!c.yours} /></div>
+          <div className="qc138-peeki"><PeekDrawer summary={null}><Peek events={c.events} due={c.due} nowMs={nowMs} closed={!!c.closed} yours={!!c.yours} /></PeekDrawer></div>
         </div>
       ))}
     </div>
@@ -450,9 +464,13 @@ export const QcList138: React.FC<QcList138Props> = ({
             )}
           </span>
         </div>
-        <div className="qc138-peekw" data-open={peekId === r.id ? "" : undefined} aria-hidden="true">
+        <div className="qc138-peekw" data-open={peekOpen ? "" : undefined}>
           <div className="qc138-peeki">
-            {peekId === r.id ? <Peek events={peekCache.current.get(r.id) ?? null} due={closed ? null : due} nowMs={nowMs} closed={closed} yours={yours} /> : null}
+            {peekOpen ? (
+              <PeekDrawer summary={null}>
+                <Peek events={peekCache.current.get(r.id) ?? null} due={closed ? null : due} nowMs={nowMs} closed={closed} yours={yours} />
+              </PeekDrawer>
+            ) : null}
           </div>
         </div>
       </div>

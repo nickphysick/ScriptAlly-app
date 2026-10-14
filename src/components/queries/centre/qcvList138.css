@@ -268,13 +268,13 @@
   /* below 1180px of sheet: the narrow grid; What you sent shows only the package chip */
   @container qc138sheet (max-width: 1179.98px) {
     /* ⚠️ ON THE CHILDREN: a container query cannot restyle the container itself */
-    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) 100px minmax(140px, 0.85fr) 56px; }
+    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) 100px minmax(140px, 0.85fr) 56px; }
     .qc138-sheet .qc138-sep, .qc138-sheet .qc138-tile { display: none; }
   }
   /* below 900px of sheet (a 1024 window with the sidebar open) What you sent goes, with its heading: at five
      columns the headings would run into each other */
   @container qc138sheet (max-width: 899.98px) {
-    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) minmax(130px, 0.85fr) 56px; }
+    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) minmax(130px, 0.85fr) 56px; }
     .qc138-sheet .qc138-snt, .qc138-sheet .qc138-h[data-k="sent"] { display: none; }
   }
 }
@@ -320,7 +320,7 @@
   .qc138-sheet .qc138-peeki { min-height: 0; overflow: hidden; }
   /* v138.1 §D — no container: the cards sit on the row's white, from the name's left */
   .qc138-sheet .qc138-peek {
-    position: relative; box-sizing: border-box; margin: 0 0 0 var(--qc138-ind); padding: 18px 4px 26px 0; background: none;
+    position: relative; box-sizing: border-box; margin: 0; padding: 12px 0 24px; background: none;
   }
   .qc138-sheet .qc138-peek--wait { min-height: 76px; }
   .qc138-sheet .qc138-chain { display: flex; align-items: center; min-width: 0; }
@@ -366,7 +366,7 @@
   .qc138-sheet .qc138-seg--over .qc138-ticks i { background: rgba(162, 69, 42, 0.45); }
   .qc138-sheet .qc138-seg--ahead .qc138-ticks i { background: rgba(42, 58, 82, 0.2); }
   /* the key, bottom right */
-  .qc138-sheet .qc138-peek-key { position: absolute; right: 4px; bottom: 4px; display: flex; align-items: center; gap: 6px; font: italic 400 11.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+  .qc138-sheet .qc138-peek-key { position: absolute; right: 0; bottom: 4px; display: flex; align-items: center; gap: 6px; font: italic 400 11.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
   .qc138-sheet .qc138-peek-key i { display: block; width: 6px; height: 5px; background: linear-gradient(90deg, rgba(42, 58, 82, 0.35) 0 1px, transparent 1px 5px, rgba(42, 58, 82, 0.35) 5px 6px); }
   .qc138-sheet .qc138-peek-key span { font: inherit !important; }
 }
@@ -426,4 +426,18 @@
   .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fcf3ee; --qc138-rule: rgba(162, 69, 42, 0.25); }
   .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #f5f3f0; --qc138-rule: rgba(28, 19, 15, 0.15); }
   .qc138-sheet .qc138-peekw, .qc138-sheet .qc138-peeki { background: none; }
+}
+
+/* ── v138.2 §B · THE DRAWER ON THE ROW'S OWN GRID ──────────────────────────────────────────────────────────────
+   One grid on `--qc138-cols` with the row's gap: a 1px dashed rule in the tone's colour, 16px above it and 16px below;
+   the summary in column 1 from the name's left (`--qc138-ind`, 52 / 36 compact), vertically centred on the cards
+   (it carries the timeline's own 12 / 24 padding); the timeline across columns 2 to 6. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-drw {
+    display: grid; grid-template-columns: var(--qc138-cols); column-gap: var(--qc138-gap); align-items: center;
+    margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--qc138-rule, rgba(45, 58, 80, 0.2));
+  }
+  .qc138-sheet .qc138-sum { grid-column: 1; min-width: 0; box-sizing: border-box; padding: 12px 0 24px var(--qc138-ind); }
+  .qc138-sheet .qc138-tlw { grid-column: 2 / -1; min-width: 0; }
+  .qc138-sheet .qc138-peeklab .qc138-peekw { padding: 0 22px; }
 }
