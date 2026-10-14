@@ -7,20 +7,20 @@
  },
  {
   "lock": "D1",
-  "where": "every stop a card",
+  "where": "every stop a marker, no card",
   "ok": true,
   "detail": "3/3"
  },
  {
   "lock": "D1",
-  "where": "today a navy pill, no date",
+  "where": "today a rust tick, no date",
   "ok": true,
-  "detail": "rgb(45, 58, 80) · date false"
+  "detail": "rgb(162, 69, 42) · date false"
  },
  {
   "lock": "D1",
-  "where": "was due blush",
+  "where": "was due a rust dot",
   "ok": true,
-  "detail": "rgb(251, 239, 232)"
+  "detail": "rgb(162, 69, 42)"
  }
 ]

@@ -1,0 +1,19 @@
+{
+  "build": "query-centre-v138-3 (dev build, vite preview 127.0.0.1:4470), 1512x900 and 1280x800 with the shell",
+  "method": "QC1383_MUTATE=<lock> applies the named break in the page",
+  "proofs": [
+    { "lock": "A1", "mutation": "give gaps equal widths (flex-grow 1)", "red": "widths off the day ratio by up to 99.3% over 12 pairs, both widths" },
+    { "lock": "B1", "mutation": "draw every event as a navy dot", "red": "Partial requested / Full sent / Offer draw no glyph (null)" },
+    { "lock": "C1", "mutation": "restore the '1 tick = 1 week' key", "red": "'1 tick =' present at both widths" },
+    { "lock": "D1", "mutation": "restore v138.2's tint (and its dashed rule)", "red": "overdue wash rgb(252, 243, 238), no outline, rule dashed" },
+    { "lock": "E1", "mutation": "leave the Next move text visible under the tray", "red": "next move opacity 1 on every hovered row" },
+    { "lock": "F1", "mutation": "keep the pencil (hide the art, show the white circle)", "red": "talon not shown, white circle visible, hourglass not shown" }
+  ],
+  "green": {
+    "qcV1383": "6 passed (A1–F1)",
+    "qcV1382": "3 passed (A1 retired; B1's rule edited to solid)",
+    "qcV1381": "6 passed (D1, D2 edited)",
+    "qcV138": "16 passed",
+    "shots": "2 passed (UNMAPPED 1)"
+  }
+}

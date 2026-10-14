@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 over wash",
+  "ok": true,
+  "detail": "rgb(253, 248, 245)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 over outline",
+  "ok": true,
+  "detail": "rgba(162, 69, 42, 0.5) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 14px 28px -18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 over solid rule",
+  "ok": true,
+  "detail": "solid"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 wait wash",
+  "ok": true,
+  "detail": "rgb(249, 250, 252)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 wait outline",
+  "ok": true,
+  "detail": "rgba(45, 58, 80, 0.45) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 14px 28px -18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 wait solid rule",
+  "ok": true,
+  "detail": "solid"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 over wash",
+  "ok": true,
+  "detail": "rgb(253, 248, 245)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 over outline",
+  "ok": true,
+  "detail": "rgba(162, 69, 42, 0.5) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 14px 28px -18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 over solid rule",
+  "ok": true,
+  "detail": "solid"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 wait wash",
+  "ok": true,
+  "detail": "rgb(249, 250, 252)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 wait outline",
+  "ok": true,
+  "detail": "rgba(45, 58, 80, 0.45) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 14px 28px -18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 wait solid rule",
+  "ok": true,
+  "detail": "solid"
+ }
+]

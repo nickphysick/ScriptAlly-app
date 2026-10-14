@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 over wash",
+  "ok": false,
+  "detail": "rgb(252, 243, 238)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 over outline",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 over solid rule",
+  "ok": false,
+  "detail": "dashed"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 wait wash",
+  "ok": false,
+  "detail": "rgb(243, 245, 249)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 wait outline",
+  "ok": true,
+  "detail": "rgba(45, 58, 80, 0.45) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 14px 28px -18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 wait solid rule",
+  "ok": false,
+  "detail": "dashed"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 over wash",
+  "ok": false,
+  "detail": "rgb(252, 243, 238)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 over outline",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 over solid rule",
+  "ok": false,
+  "detail": "dashed"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 wait wash",
+  "ok": false,
+  "detail": "rgb(243, 245, 249)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 wait outline",
+  "ok": true,
+  "detail": "rgba(45, 58, 80, 0.45) 0px 0px 0px 1px, rgba(28, 19, 15, 0.45) 0px 14px 28px -18px"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 wait solid rule",
+  "ok": false,
+  "detail": "dashed"
+ }
+]

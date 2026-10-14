@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 Partial requested draws the pr glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Full sent draws the fs glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Offer draws the of glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Partial sent draws the ps glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Queried draws the q glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Passed draws the cl glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 only your-move events are dashed",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Today is a 3 ±1px tick",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 an overdue Today reads '{d} over'",
+  "ok": true,
+  "detail": "2 weeks over"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no overdue gap has a label",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Partial requested draws the pr glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Full sent draws the fs glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Offer draws the of glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Partial sent draws the ps glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Queried draws the q glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Passed draws the cl glyph",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 only your-move events are dashed",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Today is a 3 ±1px tick",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 an overdue Today reads '{d} over'",
+  "ok": true,
+  "detail": "2 weeks over"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no overdue gap has a label",
+  "ok": true,
+  "detail": ""
+ }
+]

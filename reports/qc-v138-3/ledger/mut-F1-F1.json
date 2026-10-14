@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 Your move: the talon, 46 ±1",
+  "ok": false,
+  "detail": "false 0 your-move-talon.webp"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Your move: no white circle",
+  "ok": false,
+  "detail": "visible"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Waiting: the hourglass, 54 ±1",
+  "ok": false,
+  "detail": "false 0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 both move",
+  "ok": true,
+  "detail": "qc138-jab qc138-wobble"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 none in the pinned row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 compact: no art",
+  "ok": true,
+  "detail": "false false"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Your move: the talon, 46 ±1",
+  "ok": false,
+  "detail": "false 0 your-move-talon.webp"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Your move: no white circle",
+  "ok": false,
+  "detail": "visible"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Waiting: the hourglass, 54 ±1",
+  "ok": false,
+  "detail": "false 0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 both move",
+  "ok": true,
+  "detail": "qc138-jab qc138-wobble"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 none in the pinned row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 compact: no art",
+  "ok": true,
+  "detail": "false false"
+ },
+ {
+  "lock": "F1",
+  "where": "reduced motion: no animation",
+  "ok": true,
+  "detail": "none none"
+ }
+]

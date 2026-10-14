@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 no '1 tick ='",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 Aug under Clara's first gap",
+  "ok": true,
+  "detail": "[{\"lab\":\"Aug\",\"c\":206.34375}]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 precondition: labels drawn",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no two labels within 34px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 none within 52px of its gap's start",
+  "ok": true,
+  "detail": "[206,58,227,113,223,334,472,242,722,124,83,185,266]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no '1 tick ='",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 Aug under Clara's first gap",
+  "ok": true,
+  "detail": "[{\"lab\":\"Aug\",\"c\":140.28125}]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 precondition: labels drawn",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no two labels within 34px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 none within 52px of its gap's start",
+  "ok": true,
+  "detail": "[140,157,78,154,230,324,185,61,135,194]"
+ }
+]

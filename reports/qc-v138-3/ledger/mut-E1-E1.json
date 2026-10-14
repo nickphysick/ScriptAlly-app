@@ -1,0 +1,206 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 rows",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 thin-q-close next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 thin-q-close tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1252.2 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 msv12-q-1 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 msv12-q-1 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 msv12-q-7 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 msv12-q-7 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 seed-query-22 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 seed-query-22 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 seed-query-4 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 seed-query-4 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 seed-query-19 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 seed-query-19 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 thin-q-cohort-2 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 thin-q-cohort-2 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 thin-q-cohort-1 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 thin-q-cohort-1 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1291.0 vs sent 1170.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 rows",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 thin-q-close next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 thin-q-close tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1020.2 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 msv12-q-1 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 msv12-q-1 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 msv12-q-7 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 msv12-q-7 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 seed-query-22 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 seed-query-22 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 seed-query-4 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 seed-query-4 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 seed-query-19 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 seed-query-19 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 thin-q-cohort-2 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 thin-q-cohort-2 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 thin-q-cohort-1 next move hidden",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 thin-q-cohort-1 tray clear of What you sent",
+  "ok": true,
+  "detail": "tray 1059.0 vs sent 956.7"
+ }
+]

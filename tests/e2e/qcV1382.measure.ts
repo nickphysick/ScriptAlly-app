@@ -5,7 +5,7 @@
  * Query Centre v138.2 (design-refs/query-centre-v138-2/query-centre-v138-2.html) — the QC138.2 locks, on the rendered
  * page at 1512 × 900 and 1280 × 800 with the shell.
  *
- * A1 tint · B1 grid · C1 summary · D1 motion.
+ * B1 grid · C1 summary · D1 motion. (A1 tint retired by v138.3: QC138.3 D1.)
  *
  * Each was run with its named mutation before its green was believed: `QC1382_MUTATE=<lock>` applies the in-page
  * mutation below (C1's is a script that re-wires the link's click to bubble).
@@ -19,14 +19,8 @@ const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as co
 type VP = { width: number; height: number };
 const MUT = process.env.QC1382_MUTATE ?? "";
 const near = (a: unknown, b: number, t: number) => typeof a === "number" && Number.isFinite(a) && Math.abs(a - b) <= t;
-/** a computed colour as "r,g,b,a" — Chromium reports a colour mid-transition as rgba(…, 1), the same colour */
-const rgba = (c: string | null): string => {
-  const m = c?.match(/rgba?\(([^)]+)\)/); if (!m) return `${c}`;
-  const p = m[1].split(",").map((x) => parseFloat(x)); return `${p[0]},${p[1]},${p[2]},${p.length > 3 ? p[3] : 1}`;
-};
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
-  A1: { css: `.qc138-sheet .qc138-drw { background: #ffffff !important; }` },
   B1: { css: `.qc138-sheet .qc138-tlw { padding-left: 24px !important; }` },
   /* the link's own click stops propagation; this re-dispatches a plain click on the row after it, as a bubbling link would */
   C1: { js: `document.addEventListener("click", (e) => { const a = e.target && e.target.closest && e.target.closest('[data-qcv="peek-link"]'); if (a) { const row = a.closest('[data-qcv="row"]'); setTimeout(() => row && row.click(), 0); } }, true)` },
@@ -91,30 +85,10 @@ async function hoverRow(page: Page, row: Locator) {
 const bg = (row: Locator) => row.evaluate((el) => getComputedStyle(el).backgroundColor);
 
 test.describe("Query Centre v138.2", () => {
-  test("A1 · tint: an open peek tints the whole row by tone; white before it opens; the drawer paints nothing", async ({ page }) => {
-    test.setTimeout(300_000);
-    const L = new Ledger("A1");
-    const WANT = { over: "rgb(252, 243, 238)", wait: "rgb(243, 245, 249)", closed: "rgb(245, 243, 240)" } as const;
-    for (const vp of SIZES) {
-      await openQC(page, vp, "A1");
-      await liftMotionSuppression(page);
-      for (const tone of ["over", "wait", "closed"] as const) {
-        const row = await rowOf(page, tone);
-        await hoverRow(page, row);
-        await page.waitForTimeout(200);
-        const early = await bg(row);
-        await page.waitForTimeout(700);
-        const late = await bg(row);
-        const drw = await row.evaluate((el) => { const d = el.querySelector<HTMLElement>('[data-qcv="peek-drawer"]'); return d ? getComputedStyle(d).backgroundColor : null; });
-        L.check("A1", `${vp.width} ${tone} at 200ms white`, rgba(early) === "255,255,255,1", early);
-        L.check("A1", `${vp.width} ${tone} at 900ms`, rgba(late) === rgba(WANT[tone]), late);
-        L.check("A1", `${vp.width} ${tone} drawer transparent`, rgba(drw).endsWith(",0"), `${drw}`);
-      }
-    }
-    L.done(18);
-  });
+  /* A1 · tint — RETIRED by v138.3: the open row is an outline and a faint wash now, and QC138.3 D1 holds it
+     (tests/e2e/qcV1383.measure.ts). Recoverable from 80fb8366. */
 
-  test("B1 · grid: summary under the name, the timeline from First queried to Due, a dashed rule", async ({ page }) => {
+  test("B1 · grid: summary under the name, the timeline from First queried to Due, a rule (solid since v138.3)", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("B1");
     for (const vp of SIZES) {
@@ -144,7 +118,8 @@ test.describe("Query Centre v138.2", () => {
         L.check("B1", `${w} summary under the name`, near(r.sum, r.name, 1), `${r.sum.toFixed(1)} vs ${r.name.toFixed(1)}`);
         L.check("B1", `${w} first card at First queried`, near(r.c0, r.first, 2), `${r.c0.toFixed(1)} vs ${r.first.toFixed(1)}`);
         L.check("B1", `${w} last card at Due`, near(r.cN, r.due, 2), `${r.cN.toFixed(1)} vs ${r.due.toFixed(1)}`);
-        L.check("B1", `${w} dashed rule`, r.rule === "1px dashed", r.rule);
+        /* EDITED v138.3 (not in its edit list, but forced by its §D): the rule between the row and its drawer is SOLID now */
+        L.check("B1", `${w} solid rule`, r.rule === "1px solid", r.rule);
       }
     }
     L.done(20);

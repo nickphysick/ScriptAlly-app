@@ -25,9 +25,9 @@
  },
  {
   "lock": "B1",
-  "where": "1512 over dashed rule",
+  "where": "1512 over solid rule",
   "ok": true,
-  "detail": "1px dashed"
+  "detail": "1px solid"
  },
  {
   "lock": "B1",
@@ -55,9 +55,9 @@
  },
  {
   "lock": "B1",
-  "where": "1512 wait dashed rule",
+  "where": "1512 wait solid rule",
   "ok": true,
-  "detail": "1px dashed"
+  "detail": "1px solid"
  },
  {
   "lock": "B1",
@@ -85,9 +85,9 @@
  },
  {
   "lock": "B1",
-  "where": "1280 over dashed rule",
+  "where": "1280 over solid rule",
   "ok": true,
-  "detail": "1px dashed"
+  "detail": "1px solid"
  },
  {
   "lock": "B1",
@@ -115,8 +115,8 @@
  },
  {
   "lock": "B1",
-  "where": "1280 wait dashed rule",
+  "where": "1280 wait solid rule",
   "ok": true,
-  "detail": "1px dashed"
+  "detail": "1px solid"
  }
 ]

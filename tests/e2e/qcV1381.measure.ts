@@ -95,7 +95,7 @@ test.describe("Query Centre v138.1", () => {
     L.done(4);
   });
 
-  test("D1 · cards: no container, each stop a card, Today a navy pill with no date, Was due a blush card", async ({ page }) => {
+  test("D1 · markers (EDITED v138.3): no container, each stop a marker, Today a tick with no date, Was due a rust dot", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("D1");
     await openQC(page, SIZES[0], "D1");
@@ -108,25 +108,29 @@ test.describe("Query Centre v138.1", () => {
       const pk = el.querySelector<HTMLElement>('[data-qcv="peek"]')!;
       const drw = el.querySelector<HTMLElement>('[data-qcv="peek-drawer"]');
       const stops = [...pk.querySelectorAll<HTMLElement>('[data-qcv="peek-stop"]')];
-      const today = stops.find((s) => s.dataset.kind === "today" && s.classList.contains("qc138-today"));
+      const today = stops.find((s) => s.dataset.kind === "today");
       const was = stops.find((s) => s.dataset.kind === "wasdue");
+      const tick = today?.querySelector<HTMLElement>(".qc138-mk-tick");
+      const dot = was?.querySelector<HTMLElement>(".qc138-mk-dot");
       return {
         bg: getComputedStyle(pk).backgroundColor, drawerBg: drw ? getComputedStyle(drw).backgroundColor : null, n: stops.length,
-        cards: stops.filter((s) => s.classList.contains("qc138-card") || s.classList.contains("qc138-today")).length,
-        todayBg: today ? getComputedStyle(today).backgroundColor : null, todayDate: today ? !!today.querySelector('[data-qcv="peek-date"]') : null,
-        wasBg: was ? getComputedStyle(was).backgroundColor : null,
+        cards: stops.filter((s) => s.classList.contains("qc138-mk") && !s.classList.contains("qc138-card")).length,
+        todayBg: tick ? getComputedStyle(tick).backgroundColor : null, todayDate: today ? !!today.querySelector('[data-qcv="peek-date"]') : null,
+        wasBg: dot ? getComputedStyle(dot).backgroundColor : null,
       };
     });
     /* EDITED v138.2: "no container background" now means the DRAWER itself (and the peek inside it); the row's tint
        while the peek is open is QC138.2 A1's, so this no longer asks what the row behind them paints */
     L.check("D1", "no container", r.bg === "rgba(0, 0, 0, 0)" && r.drawerBg === "rgba(0, 0, 0, 0)", `${r.bg} · drawer ${r.drawerBg}`);
-    L.check("D1", "every stop a card", r.n > 1 && r.cards === r.n, `${r.cards}/${r.n}`);
-    L.check("D1", "today a navy pill, no date", r.todayBg === "rgb(45, 58, 80)" && r.todayDate === false, `${r.todayBg} · date ${r.todayDate}`);
-    L.check("D1", "was due blush", r.wasBg === "rgb(251, 239, 232)", `${r.wasBg}`);
+    /* EDITED v138.3: the cards are gone. Every stop is a marker on the bars; Today is a rust tick with no date; Was due
+       is a rust dot. (Bar widths moved to QC138.3 A1.) */
+    L.check("D1", "every stop a marker, no card", r.n > 1 && r.cards === r.n, `${r.cards}/${r.n}`);
+    L.check("D1", "today a rust tick, no date", r.todayBg === "rgb(162, 69, 42)" && r.todayDate === false, `${r.todayBg} · date ${r.todayDate}`);
+    L.check("D1", "was due a rust dot", r.wasBg === "rgb(162, 69, 42)", `${r.wasBg}`);
     L.done(4);
   });
 
-  test("D2 · scale: widths follow days, nothing overlaps, labels in their gaps, a key and ticks ≥ 4px", async ({ page }) => {
+  test("D2 · scale (EDITED v138.3): nothing overlaps, labels in their gaps, no tick key, ticks ≥ 4px", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("D2");
     const D = 86_400_000, now = Date.now(), t = (d: number) => now + d * D;
@@ -144,13 +148,14 @@ test.describe("Query Centre v138.1", () => {
       await page.waitForTimeout(400);
       const r = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qc138="peek-case"]')].filter((c) => c.getBoundingClientRect().height > 0).map((c) => {
         const pk = c.querySelector<HTMLElement>('[data-qcv="peek"]')!;
-        const segs = [...pk.querySelectorAll<HTMLElement>('[data-qcv="peek-seg"]')].map((s) => ({ w: s.getBoundingClientRect().width, d: Number(s.dataset.days), floor: Number(s.dataset.floor ?? "44"), l: s.querySelector<HTMLElement>('[data-qcv="peek-seg-label"]')!.getBoundingClientRect(), b: s.getBoundingClientRect(), step: Number(s.querySelector<HTMLElement>('[data-qcv="peek-ticks"]')?.dataset.step ?? "0") }));
+        const segs = [...pk.querySelectorAll<HTMLElement>('[data-qcv="peek-seg"]')].map((s) => ({ w: s.getBoundingClientRect().width, d: Number(s.dataset.days), floor: Number(s.dataset.floor ?? "44"), l: s.querySelector<HTMLElement>('[data-qcv="peek-seg-label"]')?.getBoundingClientRect() ?? null, b: s.getBoundingClientRect(), step: Number(s.querySelector<HTMLElement>('[data-qcv="peek-ticks"]')?.dataset.step ?? "0") }));
         const cards = [...pk.querySelectorAll<HTMLElement>('[data-qcv="peek-stop"]')].map((s) => s.getBoundingClientRect());
         let overlap = false;
         for (let i = 0; i < cards.length; i += 1) for (let j = i + 1; j < cards.length; j += 1) if (cards[i].left < cards[j].right - 0.5 && cards[j].left < cards[i].right - 0.5 && cards[i].top < cards[j].bottom && cards[j].top < cards[i].bottom) overlap = true;
         const row = pk.getBoundingClientRect();
         return {
-          segs: segs.map((s) => ({ w: s.w, d: s.d, floor: s.floor, inside: s.l.left >= s.b.left - 0.5 && s.l.right <= s.b.right + 0.5, step: s.step })),
+          /* EDITED v138.3: the overdue bar carries no label, so only labelled gaps are asked */
+          segs: segs.map((s) => ({ w: s.w, d: s.d, floor: s.floor, inside: !s.l || (s.l.left >= s.b.left - 0.5 && s.l.right <= s.b.right + 0.5), step: s.step })),
           overlap, out: [...pk.querySelectorAll<HTMLElement>("*")].filter((e) => !e.classList.contains("qc138-seg-probe")).some((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.left < row.left - 0.5 || b.right > row.right + 0.5); }),
           key: pk.querySelector('[data-qcv="peek-key"]')?.textContent ?? "",
         };
@@ -158,22 +163,17 @@ test.describe("Query Centre v138.1", () => {
       const w = `${vp.width}`;
       L.check("D2", `${w} five cases`, r.length === 5, `${r.length}`);
       r.forEach((c, i) => {
-        /* EDITED v138.2: a gap is FREE when it is wider than its own floor — 44px, or its short label where that is
-           wider (the drawer's narrower span can squeeze a "7d over" gap to its label) — never a flat 44 */
-        const free = c.segs.filter((s) => s.w > s.floor + 0.5 && s.d > 0);
-        let worst = 0;
-        for (let a = 0; a < free.length; a += 1) for (let b = a + 1; b < free.length; b += 1) worst = Math.max(worst, Math.abs((free[a].w / free[b].w) / (free[a].d / free[b].d) - 1));
-        L.check("D2", `${w} case ${i + 1} widths follow days`, worst <= 0.08, `worst ${(worst * 100).toFixed(1)}% over ${free.length} free gaps`);
+        /* EDITED v138.3: the width-follows-days check moved to QC138.3 A1 (bars at true scale); the overlap checks below
+           now apply to the markers */
         L.check("D2", `${w} case ${i + 1} no overlap`, !c.overlap, `${c.overlap}`);
         L.check("D2", `${w} case ${i + 1} labels in gaps`, c.segs.every((s) => s.inside), JSON.stringify(c.segs.filter((s) => !s.inside)));
         L.check("D2", `${w} case ${i + 1} nothing leaves the row`, !c.out, `${c.out}`);
-        L.check("D2", `${w} case ${i + 1} key`, /^1 tick = 1 (week|month|quarter|year)$/.test(c.key.trim()), `"${c.key}"`);
+        /* EDITED v138.3: the dated axis replaced the "1 tick = 1 {unit}" key */
+        L.check("D2", `${w} case ${i + 1} no tick key`, c.key === "", `"${c.key}"`);
         L.check("D2", `${w} case ${i + 1} ticks ≥ 4px`, c.segs.every((s) => s.step === 0 || s.step >= 4), c.segs.map((s) => s.step.toFixed(1)).join(","));
       });
-      const anyFree = r.some((c) => c.segs.filter((s) => s.w > s.floor + 0.5 && s.d > 0).length >= 2);
-      L.check("D2", `${w} precondition: a case with two free gaps`, anyFree, `${anyFree}`);
     }
-    L.done(60);
+    L.done(52);
   });
 
   test("E1 · ring: an overdue dial is a complete rust ring on white that breathes; still under reduced motion", async ({ page }) => {
