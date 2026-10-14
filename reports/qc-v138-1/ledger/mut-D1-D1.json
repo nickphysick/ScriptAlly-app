@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "D1",
+  "where": "no container",
+  "ok": false,
+  "detail": "rgb(238, 241, 246)"
+ },
+ {
+  "lock": "D1",
+  "where": "every stop a card",
+  "ok": true,
+  "detail": "3/3"
+ },
+ {
+  "lock": "D1",
+  "where": "today a navy pill, no date",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · date false"
+ },
+ {
+  "lock": "D1",
+  "where": "was due blush",
+  "ok": true,
+  "detail": "rgb(251, 239, 232)"
+ }
+]

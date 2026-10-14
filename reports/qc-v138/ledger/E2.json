@@ -7,9 +7,9 @@
  },
  {
   "lock": "E2",
-  "where": "overdue: solid rust, no ring",
+  "where": "overdue: a ring on white, no fill",
   "ok": true,
-  "detail": "[{\"bg\":\"rgb(162, 69, 42)\",\"ring\":0},{\"bg\":\"rgb(162, 69, 42)\",\"ring\":0}]"
+  "detail": "[{\"bg\":\"rgb(255, 255, 255)\",\"ring\":1},{\"bg\":\"rgb(255, 255, 255)\",\"ring\":1}]"
  },
  {
   "lock": "E2",

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "E1",
+  "where": "overdue dials exist",
+  "ok": true,
+  "detail": "32"
+ },
+ {
+  "lock": "E1",
+  "where": "white",
+  "ok": false,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "E1",
+  "where": "complete rust arc",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(162, 69, 42)\",\"stroke\":\"rgb(162, 69, 42)\",\"full\":true,\"anim\":\"qc138-breathe\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "breathes",
+  "ok": true,
+  "detail": "qc138-breathe"
+ },
+ {
+  "lock": "E1",
+  "where": "reduced motion: still",
+  "ok": true,
+  "detail": "none"
+ }
+]

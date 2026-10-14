@@ -3,13 +3,13 @@
   "lock": "B1",
   "where": "1512 present",
   "ok": true,
-  "detail": "stage,dueWeek,offers,sent,more · \"Find a query by agent or agency\""
+  "detail": "stage,dueWeek,offers,sent,more · \"Find an agent or agency\""
  },
  {
   "lock": "B1",
   "where": "1512 one line",
   "ok": true,
-  "detail": "tops 354 · right 1186.5 / 1480.0"
+  "detail": "tops 354 · right 958.5 / 1480.0"
  },
  {
   "lock": "B1",
@@ -27,13 +27,13 @@
   "lock": "B1",
   "where": "1280 present",
   "ok": true,
-  "detail": "stage,dueWeek,offers,sent,more · \"Find a query by agent or agency\""
+  "detail": "stage,dueWeek,offers,sent,more · \"Find an agent or agency\""
  },
  {
   "lock": "B1",
   "where": "1280 one line",
   "ok": true,
-  "detail": "tops 354 · right 1186.5 / 1248.0"
+  "detail": "tops 354 · right 958.5 / 1248.0"
  },
  {
   "lock": "B1",

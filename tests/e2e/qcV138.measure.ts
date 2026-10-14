@@ -212,14 +212,15 @@ test.describe("Query Centre v138", () => {
       const r = await page.evaluate(() => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
         const f = g.querySelector<HTMLElement>('[data-qc138="filters"]')!;
-        const parts = [f.querySelector('[data-qc138="find"]'), ...f.querySelectorAll('[data-qc138="pill"]')].filter(Boolean) as HTMLElement[];
+        /* EDITED (v138.1 §F): the search lives in the sheet's navy row, so the filter row is the pills alone */
+        const parts = [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')];
         const hd = g.querySelector<HTMLElement>('[data-qc138="header"]')!.getBoundingClientRect();
         return {
-          keys: [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')].map((e) => e.dataset.k), find: (f.querySelector("input") as HTMLInputElement)?.placeholder,
+          keys: [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')].map((e) => e.dataset.k), find: (g.querySelector('[data-qc138="top"] [data-qc138="search"] input') as HTMLInputElement)?.placeholder,
           tops: [...new Set(parts.map((e) => Math.round(e.getBoundingClientRect().top)))], right: Math.max(...parts.map((e) => e.getBoundingClientRect().right)), hdR: hd.right,
         };
       });
-      L.check("B1", `${w} present`, JSON.stringify(r.keys) === JSON.stringify(["stage", "dueWeek", "offers", "sent", "more"]) && r.find === "Find a query by agent or agency", `${r.keys.join(",")} · "${r.find}"`);
+      L.check("B1", `${w} present`, JSON.stringify(r.keys) === JSON.stringify(["stage", "dueWeek", "offers", "sent", "more"]) && r.find === "Find an agent or agency", `${r.keys.join(",")} · "${r.find}"`);
       L.check("B1", `${w} one line`, r.tops.length === 1 && r.right <= r.hdR + 0.5, `tops ${r.tops.join(",")} · right ${r.right.toFixed(1)} / ${r.hdR.toFixed(1)}`);
       await page.locator('.qcv-group[data-v138] [data-qc138="pill"][data-k="more"] .qc138-fp').click();
       await page.waitForTimeout(250);
@@ -425,7 +426,7 @@ test.describe("Query Centre v138", () => {
       const now = Date.now();
       const rows = [...g.querySelectorAll<HTMLElement>('[data-qcv="row"]')].filter((r) => r.dataset.due && r.dataset.court !== "closed");
       const day = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
-      const over = rows.filter((r) => day(Number(r.dataset.due)) < t0.getTime()).map((r) => { const d = r.querySelector<HTMLElement>(".qc138-dial")!; return { bg: getComputedStyle(d).backgroundColor, ring: d.querySelectorAll("svg").length }; });
+      const over = rows.filter((r) => day(Number(r.dataset.due)) < t0.getTime()).map((r) => { const d = r.querySelector<HTMLElement>(".qc138-dial")!; return { bg: getComputedStyle(d).backgroundColor, ring: d.querySelectorAll("svg").length }; }); /* EDITED (v138.1 §E): an overdue dial is a ring on white, never a fill (qcV1381 E1 holds the ring) */
       const ahead = rows.filter((r) => day(Number(r.dataset.due)) >= t0.getTime()).map((r) => {
         const due = Number(r.dataset.due), from = Number(r.dataset.from);
         const want = Math.min(1, Math.max(0.04, due - from > 0 ? (now - from) / (due - from) : 1));
@@ -436,7 +437,7 @@ test.describe("Query Centre v138", () => {
       return { over, ahead };
     });
     L.check("E2", "overdue dials exist", r.over.length > 0, `${r.over.length}`);
-    L.check("E2", "overdue: solid rust, no ring", r.over.every((o) => o.bg === "rgb(162, 69, 42)" && o.ring === 0), JSON.stringify(r.over.slice(0, 2)));
+    L.check("E2", "overdue: a ring on white, no fill", r.over.every((o) => o.bg === "rgb(255, 255, 255)" && o.ring === 1), JSON.stringify(r.over.slice(0, 2)));
     L.check("E2", "waiting dials exist", r.ahead.length > 0, `${r.ahead.length}`);
     L.check("E2", "arc in proportion", r.ahead.every((a) => Math.abs(a.got - a.want) <= 0.02), JSON.stringify(r.ahead.filter((a) => Math.abs(a.got - a.want) > 0.02).slice(0, 3)));
     await page.locator('.qcv-group[data-v138] [data-d="compact"]').click();
@@ -568,7 +569,8 @@ test.describe("Query Centre v138", () => {
         L.check("F2", `${w} case ${i + 1} no overlap`, !c.overlap, `${c.overlap}`);
         L.check("F2", `${w} case ${i + 1} no overflow`, !c.overflow, `${c.overflow}`);
         L.check("F2", `${w} case ${i + 1} labels in segments`, !c.segOut, `${c.segOut}`);
-        L.check("F2", `${w} case ${i + 1} tint`, c.bg === (c.over ? "rgb(251, 239, 232)" : "rgb(238, 241, 246)"), `${c.bg} · over ${c.over}`);
+        /* EDITED (v138.1 §D): the peek has no container; its colours are qcV1381 D1's (a blush Was due card) */
+        L.check("F2", `${w} case ${i + 1} no container`, c.bg === "rgba(0, 0, 0, 0)", `${c.bg} · over ${c.over}`);
       });
       L.check("F2", `${w} same-day merges`, r[2]?.stops === 1, `case 3 has ${r[2]?.stops} stops`);
     }

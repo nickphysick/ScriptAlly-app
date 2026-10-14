@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 header read",
+  "ok": true,
+  "detail": "248 chars"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no key",
+  "ok": false,
+  "detail": "the key line is there"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 header read",
+  "ok": true,
+  "detail": "248 chars"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no key",
+  "ok": false,
+  "detail": "the key line is there"
+ }
+]

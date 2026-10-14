@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 none in the filter row",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 one in the navy row",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 rest width",
+  "ok": true,
+  "detail": "220 · wide false"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 / focuses it",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 focus width",
+  "ok": true,
+  "detail": "260"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 filters",
+  "ok": true,
+  "detail": "59 → 3"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 mirrors the pinned search",
+  "ok": true,
+  "detail": "\"Reed\""
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Esc clears",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "F1",
+  "where": "1280 none in the filter row",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 one in the navy row",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 rest width",
+  "ok": true,
+  "detail": "220 · wide false"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 / focuses it",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 focus width",
+  "ok": true,
+  "detail": "260"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 filters",
+  "ok": true,
+  "detail": "59 → 3"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 mirrors the pinned search",
+  "ok": true,
+  "detail": "\"Reed\""
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Esc clears",
+  "ok": true,
+  "detail": "\"\""
+ }
+]

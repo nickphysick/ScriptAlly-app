@@ -1,0 +1,22 @@
+{
+  "build": "query-centre-v138-1 (dev build, vite preview 127.0.0.1:4470), 1512x900 and 1280x800",
+  "method": "QC1381_MUTATE=<lock> applies the named break in the page; D2 and the F1 width are source mutations, restored from a path-derived backup and rebuilt",
+  "proofs": [
+    { "lock": "A1", "mutation": "pinned row inner padding-top: 8px", "red": "qc138-pin-t / -c / -s each 4.00px off the bar's centre (limit 1)" },
+    { "lock": "B1", "mutation": "inject a key line under the glyph row", "red": "1512 and 1280: the key line is there" },
+    { "lock": "D1", "mutation": "tint the peek's container", "red": "container rgb(238, 241, 246), not transparent" },
+    { "lock": "D2", "mutation": "source: gaps grow by log2(days) as v138 did", "red": "widths off by up to 90.8% (case 1), 85.1% (case 2), 3104.6% (case 3)" },
+    { "lock": "E1", "mutation": "fill the overdue dial rust", "red": "background rgb(162, 69, 42), not white" },
+    { "lock": "F1", "mutation": "inject an input into the filter row", "red": "1512 and 1280: 1 input in the filter row" },
+    { "lock": "F1", "mutation": "source: the 220px compact width applied at every sheet width (the first build's actual fault)", "red": "1512 rest width 220 against a 1208px sheet; focus width 260" }
+  ],
+  "green": {
+    "qcV1381": "6 passed (plus the shots file, 2 passed)",
+    "qcV138": "16 passed (B1, E2, F2 edited)",
+    "queryPanelV2": "9 passed, 1 skipped",
+    "contactV17": "13 passed",
+    "contactV171": "6 passed",
+    "todoV2": "18 passed"
+  },
+  "notBuilt": { "lock": "C1", "reason": "Part C stopped on its own condition; see REPORT.md" }
+}

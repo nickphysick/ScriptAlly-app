@@ -1172,6 +1172,10 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - 'Your move' is `isYourMove`: a request or offer, or a waiting query past its reply date. Groups: Your move, Waiting, Closed (folded). `queryBucket` still means status only.
 - Initials circles are `AgentDisc` everywhere: not queried cream ring, querying navy, closed stone. They never show whose turn it is.
 - Due: a dial in comfortable, a coloured text date in compact. Hover: lift, sweep, slide-in tray, and after 450ms a peek timeline: a chain of at most five stops with labelled gaps, pale navy (blush if overdue), never a scaled axis.
+- **v138.1 (14 Oct; ref design-refs/query-centre-v138-1/; report reports/qc-v138-1/REPORT.md; branch `query-centre-v138-1`; locks `tests/e2e/qcV1381.measure.ts`) AMENDS the line above:**
+- Peek timeline (v138.1): date cards on a line drawn to scale. Gaps grow linearly with days, with a 44px minimum. A tick ruler (week, month, quarter or year, chosen so ticks sit ≥ 6px apart) and a '1 tick = 1 unit' key. Today is a navy pill; Was due is a blush card. No container.
+- Overdue due dial: a complete rust ring with a soft breathing halo; never a fill. Package chips are lavender and size to their name. Search lives in the list sheet's navy row.
+- **⚠️ The package-chip half of that line is NOT built: Part C stopped on its own condition** (the seed's longest package name renders 446px against a ~153px slot). The chip is still v138's 92px truncating chip until Nick rules.
 - **`SheetLip` is a 12px sticky lip, first child of the page-sheet scroller on every desktop page**, in the folder tab's colour (`--ink-tab`). It takes no space (a -12px bottom margin). It is mounted in the workspace grid's scroller and the shell's own; Account settings scrolls elsewhere and has none.
 
 ## Query Centre — v133, the open header (8 Oct; ref = design-refs/query-centre/query-centre-v133.html + design-refs/qc-v133/*.png; report reports/qc-v133/REPORT.md; merged to `main` 9 Oct)
