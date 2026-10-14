@@ -53,9 +53,11 @@ export const QcPinned138: React.FC<{
   onGlyph: (k: GlyphKey) => void;
   find: string;
   onFind: (v: string) => void;
+  /** v138.1 §F — "/" focuses this field while the row is pinned */
+  findRef?: React.Ref<HTMLInputElement>;
   onLog: () => void;
   onTop: () => void;
-}> = ({ anchor, on, shown, total, counts, stages, onGlyph, find, onFind, onLog, onTop }) => {
+}> = ({ anchor, on, shown, total, counts, stages, onGlyph, find, onFind, findRef, onLog, onTop }) => {
   const [host, setHost] = useState<HTMLElement | null>(null);
   useEffect(() => { setHost(on ? anchor.current?.closest<HTMLElement>(".ws-window") ?? null : null); }, [anchor, on]);
   if (!on || !host) return null;
@@ -82,7 +84,7 @@ export const QcPinned138: React.FC<{
           <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
           </svg>
-          <input value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find a query" aria-label="Find a query" autoComplete="off" />
+          <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find a query" aria-label="Find a query" autoComplete="off" />
         </label>
         <button type="button" className="qc138-pin-a" data-qc138="pinned-log" onClick={onLog}>+ Log a query</button>
         <button type="button" className="qc138-pin-u" data-qc138="pinned-top" title="Back to the top" aria-label="Back to the top" onClick={onTop}>

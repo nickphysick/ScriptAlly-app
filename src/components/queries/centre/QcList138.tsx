@@ -287,9 +287,14 @@ export interface QcList138Props {
   onAddSent?: (id: string) => void;
   onOpenPackage?: (packageId: string | null) => void;
   find?: string;
+  /** v138.1 §F — the search, in the navy row */
+  onFind?: (v: string) => void;
+  findRef?: React.Ref<HTMLInputElement>;
   ringId?: string | null;
   /** v138 §H — the page-load entrance is running: bands and the first 16 rows land in list order */
   entering?: boolean;
+  /** v138.1 §F — shown inside the sheet when nothing matches */
+  deadEnd?: React.ReactNode;
   /** v138 §G — the rows ticked for a bulk action */
   selected?: ReadonlySet<string>;
   onPick?: (id: string) => void;
@@ -302,7 +307,7 @@ export interface QcList138Props {
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold, loadPeek, selected, onPick, entering = false,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, selected, onPick, entering = false, deadEnd = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -472,6 +477,13 @@ export const QcList138: React.FC<QcList138Props> = ({
             </span>
           ) : null}
         </p>
+        {onFind ? (
+          <label className="qc138-tsearch" data-qc138="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
+            <kbd aria-hidden="true">/</kbd>
+          </label>
+        ) : null}
         <span className="qc138-tools">
           <span className="qc138-dens" role="group" aria-label="Row density" data-qcv="ws-density">
             <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>
@@ -497,6 +509,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           builds drop the branch, since MODE is replaced at build time */}
       {import.meta.env.MODE !== "production" ? <PeekLab nowMs={nowMs} /> : null}
       <div className="qc138-body" data-qcv="list">
+        {groups.length === 0 && deadEnd ? deadEnd : null}
         {groups.map((g) => {
           const tone = toneOf(g);
           const shut = folded.has(g.key);

@@ -81,9 +81,6 @@ export const QcFilters138: React.FC<{
   filters: Qc138Filters;
   onFilters: (f: Qc138Filters) => void;
   pop: PopoverState<Qc138Pop>;
-  find: string;
-  onFind: (v: string) => void;
-  findRef?: React.Ref<HTMLInputElement>;
   /** per status, over the manuscript's queries */
   stageCounts: ReadonlyMap<string, number>;
   dueWeekN: number;
@@ -94,7 +91,7 @@ export const QcFilters138: React.FC<{
   showing: number;
   msTitle: string | null;
   disabled?: boolean;
-}> = ({ filters: f, onFilters, pop, find, onFind, findRef, stageCounts, dueWeekN, offersN, sentOptions, moreN, showing, msTitle, disabled = false }) => {
+}> = ({ filters: f, onFilters, pop, stageCounts, dueWeekN, offersN, sentOptions, moreN, showing, msTitle, disabled = false }) => {
   const uid = useId();
   const set = (patch: Partial<Qc138Filters>) => onFilters({ ...f, ...patch });
   const mine = (k: Qc138Pop) => pop.open === k && pop.anchor?.closest('[data-qc138="fbar"]') != null;
@@ -123,11 +120,7 @@ export const QcFilters138: React.FC<{
   const toggleSent = (k: string) => set({ sent: f.sent.includes(k) ? f.sent.filter((x) => x !== k) : [...f.sent, k] });
   return (
     <div className="qc138-fr" data-qc138="filters">
-      <label className="qc138-find" data-qc138="find">
-        <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-        <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find a query by agent or agency" aria-label="Find a query by agent or agency" autoComplete="off" disabled={disabled} />
-        <kbd className="qc138-kbd" aria-hidden="true">/</kbd>
-      </label>
+      {/* v138.1 §F — the search moved into the list sheet's navy row; the pills start at the row's left */}
       <div className="qc138-fbar" data-qc138="fbar">
         {dd("stage", stagePillLabel(f.stages), f.stages.length > 0, () => set({ stages: [] }))}
         {toggle("dueWeek", "Due this week", dueWeekN)}

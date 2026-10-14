@@ -2434,7 +2434,14 @@ export const Queries: React.FC<{
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
   const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
   const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ ...readQcListMemory(), density: d }); }, []);
-  const qcFindRef = useRef<HTMLInputElement>(null);
+  /* v138.1 §F — the search lives in the list sheet's navy row, mirrored by the pinned row's. "/" (useQcListKeys)
+     focuses whichever is the one on screen: this ref answers with the pinned row's field while the row is pinned. */
+  const qcSheetFindRef = useRef<HTMLInputElement>(null);
+  const qcPinFindRef = useRef<HTMLInputElement>(null);
+  const qcPinnedNow = useRef(false);
+  const qcFindRef = useMemo(() => ({
+    get current() { return (qcPinnedNow.current && qcPinFindRef.current) || qcSheetFindRef.current; },
+  }) as React.RefObject<HTMLInputElement | null>, []);
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /**
@@ -2475,6 +2482,7 @@ export const Queries: React.FC<{
   const qcDesk = useDeskWidth();
   /* v138 §A — the pinned row shows once the header's foot has scrolled under the sheet's top (desktop, on screen) */
   const qc138Pinned = useQcPinned(qc138Ref, routeActive && qcDesk);
+  qcPinnedNow.current = qc138Pinned;
   /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
      ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
      const is a temporal-dead-zone throw. */
@@ -5157,9 +5165,6 @@ export const Queries: React.FC<{
         filters={qcF138}
         onFilters={setQcF138}
         pop={qc138Pop}
-        find={qcFind}
-        onFind={setQcFind}
-        findRef={qcFindRef}
         stageCounts={qc138Counts.stage}
         dueWeekN={qc138Counts.dueWeek}
         offersN={qc138Counts.offers}
@@ -5189,6 +5194,7 @@ export const Queries: React.FC<{
         onGlyph={pickGlyph}
         find={qcFind}
         onFind={setQcFind}
+        findRef={qcPinFindRef}
         onLog={() => onNavigate?.("queries", "Log a query")}
         onTop={() => {
           const sc = qc138Ref.current?.closest<HTMLElement>(".wpg-scroll");
@@ -7075,12 +7081,7 @@ export const Queries: React.FC<{
             body={
               showGridSkeleton ? (
                 qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
-              ) : qcDesk && (emptyKind === "filtered" || emptyKind === "nomatch" || qcVisible.length === 0) ? (
-                /* v132 §4 — the desktop dead end: the inkwell and one way back (a search before a filter) */
-                <QcDeadEnd find={qcFind} book={qcLineTitle}
-                  onClearFind={() => setQcFind("")}
-                  onClearFilters={() => { qc138ClearAll(); setQcScope(null); }} />
-              ) : emptyKind === "filtered" ? (
+              ) : !qcDesk && emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
                    menu counts, so its number IS the menu's "With the agent". */
@@ -7090,7 +7091,7 @@ export const Queries: React.FC<{
                   onSeeWaiting={emptyWaiting && emptyWaiting.withAgents > 0 ? seeWaiting : null}
                   onClear={clearQcFilter}
                 />
-              ) : emptyKind === "nomatch" ? (
+              ) : !qcDesk && emptyKind === "nomatch" ? (
                 /* ⚠️ THE NO-MATCH STATE, NOT THE NO-QUERIES STATE — the page's own empty branch owns
                    that one. Also what shows wherever "Nothing needs you right now" would be false. */
                 <p className="qcv-none">
@@ -7122,6 +7123,12 @@ export const Queries: React.FC<{
                     return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number }));
                   }}
                   entering={qc138In === "run"}
+                  /* v138.1 §F — nothing matches: the dead end sits INSIDE the sheet, so the navy row and its search stay */
+                  deadEnd={qcVisible.length === 0 ? (
+                    <QcDeadEnd find={qcFind} book={qcLineTitle}
+                      onClearFind={() => setQcFind("")}
+                      onClearFilters={() => { qc138ClearAll(); setQcScope(null); }} />
+                  ) : null}
                   selected={qcPicked}
                   onPick={pickQc138}
                   folded={qcFolded}
@@ -7130,6 +7137,8 @@ export const Queries: React.FC<{
                   onOpenPackage={() => onNavigate?.("manuscripts", "Submission packages")}
                   packageOf={qcPackageOf}
                   find={qcFind}
+                  onFind={setQcFind}
+                  findRef={qcSheetFindRef}
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */

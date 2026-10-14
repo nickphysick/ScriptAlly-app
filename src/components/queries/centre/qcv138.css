@@ -167,23 +167,6 @@
   margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(28, 19, 15, 0.14);
 }
 .ws-app.sheet-wide .qc138-hd .qc138-fr { gap: 10px; }
-.qc138-hd .qc138-find {
-  display: flex; align-items: center; gap: 10px; flex: 0 0 220px; width: 220px; min-width: 0; box-sizing: border-box; height: 40px;
-  padding: 0 10px 0 14px; border-radius: 20px; background: #fff; color: rgba(28, 19, 15, 0.5);
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14), 0 1px 2px rgba(28, 19, 15, 0.05);
-}
-.ws-app.sheet-wide .qc138-hd .qc138-find { flex: 0 1 360px; width: 360px; min-width: 104px; }
-.qc138-hd .qc138-find:focus-within { box-shadow: inset 0 0 0 1.5px #2d3a50; }
-.qc138-hd .qc138-find svg { flex: none; }
-.qc138-hd .qc138-find input {
-  flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; color: #1c130f; font: 400 15.5px/1.2 var(--sp-serif) !important;
-  text-overflow: ellipsis;
-}
-.qc138-hd .qc138-find input::placeholder { color: rgba(28, 19, 15, 0.5); }
-.qc138-hd .qc138-find .qc138-kbd {
-  flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 22px; height: 22px; border-radius: 6px;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.25); font: 500 11px/1 var(--font-mono) !important; color: rgba(28, 19, 15, 0.6);
-}
 .qc138-hd .qc138-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; flex: 0 0 auto; min-width: 0; margin: 0; }
 .qc138-fbar .qc138-fpw { position: relative; display: inline-flex; flex: none; }
 .qc138-fbar .qc138-fp {
@@ -211,7 +194,6 @@
 .qc138-fbar .qc138-fp:disabled { cursor: default; }
 @container qc138hd (max-width: 899.98px) {
   .qc138-hd .qc138-fr { flex-wrap: wrap; }
-  .qc138-hd .qc138-find, .ws-app.sheet-wide .qc138-hd .qc138-find { flex: 1 1 100%; width: auto; }
   .qc138-hd .qc138-fbar { flex-wrap: wrap; }
 }
 
@@ -271,7 +253,6 @@
   .qcv-group[data-enter138] .qc138-tb { animation: qc138-rise12 0.5s cubic-bezier(.2,.8,.2,1) both; }
   .qcv-group[data-enter138] .qc138-by::after { transform-origin: left center; animation: qc138-drawx 0.5s cubic-bezier(.2,.8,.2,1) 0.15s both; }
   .qcv-group[data-enter138] .qc138-sg { animation: qc138-glyph 0.45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(140ms + var(--gi, 0) * 55ms); }
-  .qcv-group[data-enter138] .qc138-key { animation: qc138-fade 0.45s cubic-bezier(.2,.8,.2,1) 0.5s both; }
   .qcv-group[data-enter138] .qc138-fr { animation: qc138-rise12 0.45s cubic-bezier(.2,.8,.2,1) 0.38s both; }
   .qcv-group[data-enter138] .qc138-sheet { animation: qc138-rise26 0.6s cubic-bezier(.2,.8,.2,1) 0.48s both; }
   .qcv-group[data-enter138] .qc138-band { animation: qc138-slide 0.4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(760ms + var(--qi, 0) * 40ms); }

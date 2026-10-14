@@ -20,7 +20,9 @@ import { useEffect, useState } from "react";
 import { SHORTCUTS, matchesShortcut, isEditableTarget, modalOpen } from "../../../lib/shortcuts";
 import { escapeDepth } from "../../../lib/escapeStack";
 
-const ROWS = '.qcw-list [data-qcv="row"]';
+/* v138.1: the v138 list sheet's rows too. v138 renamed the list and this selector was missed, so every list key
+   (/, J, K, Enter, L, Esc) had stopped answering on the desktop; found by v138.1 F1. */
+const ROWS = '.qcw-list [data-qcv="row"], .qc138-sheet [data-qcv="row"]';
 const visibleRows = (): HTMLElement[] => [...document.querySelectorAll<HTMLElement>(ROWS)].filter((r) => r.getBoundingClientRect().height > 0);
 
 export function useQcListKeys(opts: {
