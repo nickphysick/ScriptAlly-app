@@ -295,3 +295,89 @@ export function dialOf(r: Filterable & { stageStartMs: number | null; lastMs: nu
   const gone = span > 0 ? (nowMs - from) / span : 1;
   return { frac: Math.min(1, Math.max(0.04, gone)), over: false, due };
 }
+
+/* ── Part F · THE PEEK TIMELINE ───────────────────────────────────────────────────────────────────────────────
+ * ⚠️ A CHAIN, NOT A SCALE: nothing is placed by date. Stops come from the query's dated events (the panel's own
+ *    source: its activity log through `buildTimelineRows`), then the due and today stops. A segment's length is
+ *    `log2(days + 2)` of flex, so a long gap is longer but can never crowd anything out.
+ * ⚠️ AT MOST FIVE STOPS: the first event, the latest change and the due/today stops always show; any changes
+ *    between fold into one "+{n} more" stop.
+ * ⚠️ SAME-DAY EVENTS MERGE into one stop; a stop on today's day takes the rust ring and there is no separate Today.
+ */
+export interface PeekEvent { name: string; ms: number }
+export type StopKind = "event" | "more" | "due" | "wasdue" | "today";
+export interface PeekStop { kind: StopKind; name: string; date: string; ms: number; today: boolean }
+export type SegKind = "done" | "ahead" | "over";
+export interface PeekSeg { days: number; label: string; kind: SegKind; grow: number }
+export interface PeekChain { stops: PeekStop[]; segs: PeekSeg[]; overdue: boolean }
+
+const dayKey = (ms: number): number => startOfDay(ms);
+const dDays = (a: number, b: number): number => Math.max(0, Math.round((dayKey(b) - dayKey(a)) / DAY_MS));
+
+/** "same day", "{n} days" (under 14), "{n} weeks" (under 60), "{n} months" (under 365), "{y} yrs {m} mo" */
+export function gapWords(days: number): string {
+  if (days <= 0) return "same day";
+  if (days < 14) return `${days} ${days === 1 ? "day" : "days"}`;
+  if (days < 60) { const w = Math.round(days / 7); return `${w} ${w === 1 ? "week" : "weeks"}`; }
+  if (days < 365) { const m = Math.max(2, Math.round(days / 30.44)); return `${m} months`; }
+  const y = Math.floor(days / 365), m = Math.round((days - y * 365) / 30.44);
+  return m > 0 && m < 12 ? `${y} ${y === 1 ? "yr" : "yrs"} ${m} mo` : `${m >= 12 ? y + 1 : y} ${(m >= 12 ? y + 1 : y) === 1 ? "yr" : "yrs"}`;
+}
+
+export function peekChain(
+  events: readonly PeekEvent[],
+  opts: { due: number | null; now: number; closed: boolean; yours: boolean },
+): PeekChain {
+  const { due, now, closed, yours } = opts;
+  const fmt = (ms: number) => dayMonYear(ms, now);
+  const evs = [...events].filter((e) => Number.isFinite(e.ms)).sort((a, b) => a.ms - b.ms);
+  /* the end stops */
+  const tail: PeekStop[] = [];
+  const t0 = startOfDay(now);
+  let overdue = false;
+  if (!closed) {
+    const todayStop: PeekStop = { kind: "today", name: "Today", date: fmt(now), ms: now, today: true };
+    if (due != null && dayKey(due) < t0) { overdue = true; tail.push({ kind: "wasdue", name: "Was due", date: fmt(due), ms: due, today: false }, todayStop); }
+    else if (due != null && dayKey(due) === t0) tail.push({ kind: "today", name: "Due today", date: fmt(now), ms: now, today: true });
+    else { tail.push(todayStop); if (due != null) tail.push({ kind: "due", name: yours ? "Send by" : "Reply due", date: fmt(due), ms: due, today: false }); }
+  }
+  /* events, same day merged */
+  const merged: PeekStop[] = [];
+  for (const e of evs) {
+    const last = merged[merged.length - 1];
+    if (last && dayKey(last.ms) === dayKey(e.ms)) { if (!last.name.split(" · ").includes(e.name)) last.name = `${last.name} · ${e.name}`; continue; }
+    merged.push({ kind: "event", name: e.name, date: fmt(e.ms), ms: e.ms, today: false });
+  }
+  /* an event on today's day takes the Today stop's place and its ring */
+  if (tail.length && tail[0].kind !== "wasdue" && merged.length && dayKey(merged[merged.length - 1].ms) === t0) {
+    const last = merged[merged.length - 1];
+    const t = tail.shift()!;
+    last.today = true;
+    if (t.name === "Due today") last.name = `${last.name} · Due today`;
+  } else if (tail.length > 1 && tail[0].kind === "wasdue" && merged.length && dayKey(merged[merged.length - 1].ms) === t0) {
+    /* overdue, and something happened today: it follows "Was due" and takes Today's place */
+    const last = merged.pop()!;
+    tail[1] = { ...last, today: true };
+  }
+  /* at most five stops */
+  const room = Math.max(2, 5 - tail.length);
+  let body = merged;
+  if (merged.length > room) {
+    const keepHead = merged[0], keepTail = merged[merged.length - 1];
+    const folded = merged.slice(1, -1);
+    const extra = room - 3; /* stops beyond first, "+n more" and latest */
+    const shown = extra > 0 ? folded.slice(folded.length - extra) : [];
+    const hidden = folded.slice(0, folded.length - shown.length);
+    body = [keepHead, { kind: "more", name: `+${hidden.length} more`, date: "", ms: hidden[hidden.length - 1].ms, today: false }, ...shown, keepTail];
+  }
+  const stops = [...body, ...tail];
+  const segs: PeekSeg[] = [];
+  for (let i = 1; i < stops.length; i += 1) {
+    const a = stops[i - 1], b = stops[i];
+    const days = dDays(a.ms, b.ms);
+    const kind: SegKind = a.kind === "wasdue" ? "over" : (b.kind === "due" || (b.ms > now && !b.today)) ? "ahead" : "done";
+    const words = gapWords(days);
+    segs.push({ days, kind, label: kind === "over" ? `${words} over` : words, grow: Math.log2(days + 2) });
+  }
+  return { stops, segs, overdue };
+}

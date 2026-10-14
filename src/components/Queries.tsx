@@ -7058,6 +7058,14 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={() => setQcFull((f) => !f)}
+                  /* §F — the peek reads the query's activity log through the panel's own builder */
+                  loadPeek={async (id) => {
+                    const q0 = qcById.get(id)?.query;
+                    if (!q0) return [];
+                    const docs = await readQueryActivity(id);
+                    const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
+                    return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number }));
+                  }}
                   folded={qcFolded}
                   onFold={(k) => setQcFolded((f) => { const n = new Set(f); if (n.has(k)) n.delete(k); else n.add(k); return n; })}
                   /* the chip opens the packages page; "+ Add" opens the edit journey (the "Record what you sent" route) */

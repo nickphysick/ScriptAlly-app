@@ -24,6 +24,7 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
+import { peekChain, type PeekEvent } from "../../../lib/qc138";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -132,6 +133,35 @@ const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean;
   );
 };
 
+/**
+ * v138 §F — THE PEEK: a chain of at most five stops with labelled gaps, never a scaled axis. Pale navy, or blush
+ * with a rust bar when the query is overdue. `aria-hidden`: the panel is the accessible route to the same history.
+ */
+const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; nowMs: number; closed: boolean; yours: boolean }> = ({ events, due, nowMs, closed, yours }) => {
+  if (!events) return <div className="qc138-peek qc138-peek--wait" data-qcv="peek" aria-hidden="true" />;
+  const ch = peekChain(events, { due, now: nowMs, closed, yours });
+  return (
+    <div className={`qc138-peek${ch.overdue ? " over" : ""}${yours ? " you" : ""}`} data-qcv="peek" data-over={ch.overdue ? "" : undefined} aria-hidden="true">
+      <div className="qc138-chain" data-qcv="peek-chain">
+        {ch.stops.map((st, i) => (
+          <React.Fragment key={`${st.kind}-${i}`}>
+            {i > 0 ? (
+              <span className={`qc138-seg qc138-seg--${ch.segs[i - 1].kind}`} data-qcv="peek-seg" style={{ flexGrow: ch.segs[i - 1].grow }}>
+                <em data-qcv="peek-seg-label">{ch.segs[i - 1].label}</em><i className="qc138-seg-ln" /><i className="qc138-seg-strut" />
+              </span>
+            ) : null}
+            <span className={`qc138-stop qc138-stop--${st.kind}${st.today ? " is-today" : ""}${i === 0 ? " first" : ""}${i === ch.stops.length - 1 ? " last" : ""}`} data-qcv="peek-stop" data-kind={st.kind}>
+              <i className="qc138-sd" />
+              <b data-qcv="peek-name">{st.name}</b>
+              {st.date ? <small data-qcv="peek-date">{st.date}</small> : null}
+            </span>
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /** "What you sent": a 92px package chip (or an empty 92px space), a rule, four 30px tiles */
 const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
   const m = sentCell(row, pkg, nowMs);
@@ -190,6 +220,8 @@ export interface QcList138Props {
   onOpenPackage?: (packageId: string | null) => void;
   find?: string;
   ringId?: string | null;
+  /** v138 §F — the query's dated events, from its activity log (the panel's own source) */
+  loadPeek?: (id: string) => Promise<PeekEvent[]>;
   /** group keys folded at first sight (Part D: Closed) */
   folded: ReadonlySet<string>;
   onFold: (key: string) => void;
@@ -197,8 +229,29 @@ export interface QcList138Props {
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold, loadPeek,
 }) => {
+  /* §F — the peek opens after 450ms of continuous hover; the events are fetched from the first moment */
+  const [peekId, setPeekId] = useState<string | null>(null);
+  const [, setLoaded] = useState(0);
+  const peekCache = useRef(new Map<string, PeekEvent[]>());
+  const peekTimer = useRef<number | undefined>(undefined);
+  const calm = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const enter = (id: string, el: HTMLElement) => {
+    if (loadPeek && !peekCache.current.has(id)) {
+      loadPeek(id).then((ev) => { peekCache.current.set(id, ev); setLoaded((n) => n + 1); }).catch(() => { peekCache.current.set(id, []); setLoaded((n) => n + 1); });
+    }
+    window.clearTimeout(peekTimer.current);
+    peekTimer.current = window.setTimeout(() => setPeekId(id), 450);
+    /* §F2 — the dial's arc sweeps from empty to its value (Web Animations: a var() in a keyframe fails here) */
+    if (!calm()) {
+      const arc = el.querySelector<SVGCircleElement>(".qc138-dial-arc");
+      const to = arc?.getAttribute("stroke-dasharray");
+      if (arc && to && typeof arc.animate === "function") arc.animate([{ strokeDasharray: `0 ${DIAL_C.toFixed(2)}` }, { strokeDasharray: to }], { duration: 700, easing: "cubic-bezier(.2,.8,.2,1)" });
+    }
+  };
+  const leave = () => { window.clearTimeout(peekTimer.current); setPeekId(null); };
+  useEffect(() => () => window.clearTimeout(peekTimer.current), []);
   const boxRef = useRef<HTMLDivElement>(null);
   const tip = useTip(boxRef);
   const [groupOpen, setGroupOpen] = useState(false);
@@ -245,6 +298,7 @@ export const QcList138: React.FC<QcList138Props> = ({
         data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
+        onMouseEnter={(e) => enter(r.id, e.currentTarget)} onMouseLeave={leave}
         onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(r.id); } }}>
         <div className="qc138-ag" data-qcv="row-agent">
           <AgentDisc initials={r.initials} standing={closed ? "closed" : "querying"} size={density === "compact" ? 26 : 40} className="qc138-disc" attrs={{ "data-qcv": "row-chip" }} />
@@ -287,6 +341,11 @@ export const QcList138: React.FC<QcList138Props> = ({
                 onClick={(e) => { e.stopPropagation(); onClose?.(r.id); }} aria-label={`Close the query to ${r.agentName}`}>{ICON.x}</button>
             )}
           </span>
+        </div>
+        <div className="qc138-peekw" data-open={peekId === r.id ? "" : undefined} aria-hidden="true">
+          <div className="qc138-peeki">
+            {peekId === r.id ? <Peek events={peekCache.current.get(r.id) ?? null} due={closed ? null : due} nowMs={nowMs} closed={closed} yours={yours} /> : null}
+          </div>
         </div>
       </div>
     );
