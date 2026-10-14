@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A4",
+  "where": "header present @1512",
+  "ok": true,
+  "detail": "hd true · title block true · card true"
+ },
+ {
+  "lock": "A4",
+  "where": "title block's left = header's left + inset (±1) @1512",
+  "ok": true,
+  "detail": "426.0 vs 426.0 (inset 154.0, compact)"
+ },
+ {
+  "lock": "A4",
+  "where": "card's right = header's right − inset (±1) @1512",
+  "ok": true,
+  "detail": "1326.0 vs 1326.0"
+ },
+ {
+  "lock": "A4",
+  "where": "filter row's left = the list's left (±1) @1512",
+  "ok": true,
+  "detail": "272.0 vs 272.0"
+ },
+ {
+  "lock": "A4",
+  "where": "no contact-disc-hawk image in the header @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "the shadow at opacity 0.15 (±0.01) @1512",
+  "ok": true,
+  "detail": "0.15"
+ },
+ {
+  "lock": "A4",
+  "where": "header present @1280",
+  "ok": true,
+  "detail": "hd true · title block true · card true"
+ },
+ {
+  "lock": "A4",
+  "where": "title block's left = header's left + inset (±1) @1280",
+  "ok": true,
+  "detail": "312.0 vs 312.0 (inset 40.0, compact)"
+ },
+ {
+  "lock": "A4",
+  "where": "card's right = header's right − inset (±1) @1280",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "A4",
+  "where": "filter row's left = the list's left (±1) @1280",
+  "ok": true,
+  "detail": "272.0 vs 272.0"
+ },
+ {
+  "lock": "A4",
+  "where": "no contact-disc-hawk image in the header @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "the shadow at opacity 0.15 (±0.01) @1280",
+  "ok": true,
+  "detail": "0.15"
+ }
+]

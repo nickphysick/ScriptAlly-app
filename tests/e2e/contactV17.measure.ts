@@ -101,7 +101,7 @@ test.describe("Contact list v17", () => {
           rows: g.querySelectorAll('[data-clv="row"]').length, text: (h1?.textContent ?? "").replace(/\s+/g, " ").trim(), label: h1?.getAttribute("aria-label") ?? "",
           size: hs ? parseFloat(hs.fontSize) : null, lines: h1 && hs ? Math.round(h1.getBoundingClientRect().height / parseFloat(hs.fontSize)) : null, face,
           eyebrow: ey ? { text: ey.textContent, color: getComputedStyle(ey).color } : null,
-          title: b(one('[data-cl17="title-block"]')), art: b(one('[data-cl17="art"]')), card: b(one('[data-cl17="card"]')),
+          title: b(one('[data-cl17="title-block"]')), card: b(one('[data-cl17="card"]')),
           shadow: sh ? { op: parseFloat(getComputedStyle(sh).opacity), loaded: (sh as HTMLImageElement).naturalWidth > 0 } : null,
           wide: !!document.querySelector(".ws-app.sheet-wide"),
         };
@@ -110,10 +110,11 @@ test.describe("Contact list v17", () => {
       L.check(`${w} the h1 reads "{N} agents on file", N the rows on the page`, new RegExp(`^${r.rows} agents? on file$`).test(r.text) && r.label === r.text, `"${r.text}" · label "${r.label}" · ${r.rows} rows`);
       L.check(`${w} the title is Special Elite ${r.wide ? 50 : 44} (±1), on one line`, /Special Elite/.test(r.face) && near(r.size, r.wide ? 50 : 44, 1) && r.lines === 1, `${r.face.slice(0, 24)} · ${r.size} · ${r.lines} line(s)`);
       L.check(`${w} the eyebrow reads "— CONTACT LIST —" in rust`, r.eyebrow?.text === "— CONTACT LIST —" && r.eyebrow.color === "rgb(162, 69, 42)", JSON.stringify(r.eyebrow));
-      L.check(`${w} the hawk is ${r.wide ? 280 : 200} wide (±2), between the title block and the card`, !!r.art && !!r.title && !!r.card && near(r.art.w, r.wide ? 280 : 200, 2) && r.art.l >= r.title.r - 1 && r.art.r <= r.card.l + 12, `hawk ${r.art?.l.toFixed(0)}–${r.art?.r.toFixed(0)} (${r.art?.w.toFixed(1)}) · title ends ${r.title?.r.toFixed(0)} · card starts ${r.card?.l.toFixed(0)}`);
+      /* RETIRED (v17.1, 14 Oct): "the hawk is 280 (200) wide, between the title block and the card". The populated
+         header has no hawk now; contactV171 A4 holds the header (its inset, no hawk image, the shadow). */
       L.check(`${w} the shadow image is there at opacity 0.15 (±0.01)`, !!r.shadow && r.shadow.loaded && near(r.shadow.op, 0.15, 0.01), JSON.stringify(r.shadow));
     }
-    L.done(12);
+    L.done(10);
   });
 
   test("A2 · card: three rows that add up, a bar in proportion, and a press that filters without scrolling", async ({ page }) => {

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "gaps > 0, no dismissal: the tab is visible @1512",
+  "ok": true,
+  "detail": "{\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "the tab is ink @1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "its × is there @1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "gaps > 0, no dismissal: the tab is visible @1280",
+  "ok": true,
+  "detail": "{\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "the tab is ink @1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "its × is there @1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "0 gaps: the tab is not rendered @1512",
+  "ok": false,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"0 gaps · 1 of 1 filled in\"} · card true"
+ },
+ {
+  "lock": "D1",
+  "where": "0 gaps: the tab is not rendered @1280",
+  "ok": false,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"0 gaps · 1 of 1 filled in\"} · card true"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "B4",
+  "where": "precondition: the list is not empty @1512",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "lock": "B4",
+  "where": "solid ink: the arc is the whole circle, no rust, no joins @1512",
+  "ok": false,
+  "detail": "ink undefined of 263.89 · rust false · joins 0"
+ },
+ {
+  "lock": "B4",
+  "where": "reads 100% @1512",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "B4",
+  "where": "reads All filled in, ink 60%, not underlined @1512",
+  "ok": false,
+  "detail": "\"\" null"
+ },
+ {
+  "lock": "B4",
+  "where": "its label @1512",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "B4",
+  "where": "no tab @1512",
+  "ok": false,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"} · × false"
+ },
+ {
+  "lock": "B4",
+  "where": "precondition: the list is not empty @1280",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "lock": "B4",
+  "where": "solid ink: the arc is the whole circle, no rust, no joins @1280",
+  "ok": false,
+  "detail": "ink undefined of 263.89 · rust false · joins 0"
+ },
+ {
+  "lock": "B4",
+  "where": "reads 100% @1280",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "B4",
+  "where": "reads All filled in, ink 60%, not underlined @1280",
+  "ok": false,
+  "detail": "\"\" null"
+ },
+ {
+  "lock": "B4",
+  "where": "its label @1280",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "B4",
+  "where": "no tab @1280",
+  "ok": false,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"} · × false"
+ }
+]

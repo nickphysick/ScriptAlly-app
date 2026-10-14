@@ -30,6 +30,7 @@ import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
+import { hkAllFilled } from "../../lib/hkReviewAid";
 import { dismissPath, dismissedAtGaps, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
 import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
@@ -713,7 +714,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [agents, qcRows, queries, scoped, book, hkReopenTaskById]);
   const hkCtxOf = useCallback((a: Agent): HkAgentCtx => hkCtxById.get(a.id)
     ?? { live: false, fits: false, queried: false, passedOn: false, hasReopenTask: false }, [hkCtxById]);
-  const hk = useMemo(() => hkModel(agents, hkCtxOf, hkPrefs), [agents, hkCtxOf, hkPrefs]);
+  const hkAll = useMemo(() => hkModel(agents, hkCtxOf, hkPrefs), [agents, hkCtxOf, hkPrefs]);
+  /* dev only: the review aid that shows an all-filled list (lib/hkReviewAid); production reads `hkAll` */
+  const hkAllFilledAid = import.meta.env.MODE !== "production" && hkAllFilled();
+  const hk = useMemo(() => (hkAllFilledAid
+    ? hkModel(agents.filter((a) => (hkAll.gapsById.get(a.id)?.length ?? 0) === 0), hkCtxOf, hkPrefs)
+    : hkAll), [hkAllFilledAid, hkAll, agents, hkCtxOf, hkPrefs]);
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);

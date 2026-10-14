@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D2",
+  "where": "precondition: the tab is shown, with gaps",
+  "ok": true,
+  "detail": "{\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"}"
+ },
+ {
+  "lock": "D2",
+  "where": "precondition: nothing is put off with Later",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D2",
+  "where": "× hides the tab",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "D2",
+  "where": "the note shows, with Undo",
+  "ok": true,
+  "detail": "\"Hidden. List health at the top of the page opens Housekeeping, and the tab comes back when something new is missing. Undo\""
+ },
+ {
+  "lock": "D2",
+  "where": "H still opens the drawer while dismissed",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "D2",
+  "where": "after a reload, still hidden",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "D2",
+  "where": "one gap fewer and reloaded: still hidden",
+  "ok": true,
+  "detail": "tab null · \"48 gaps to fill\""
+ },
+ {
+  "lock": "D2",
+  "where": "a new gap: the tab returns",
+  "ok": true,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"} · \"49 gaps to fill\""
+ },
+ {
+  "lock": "D2",
+  "where": "the stored value was cleared: one gap fewer again and the tab stays",
+  "ok": true,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"48 gaps · 1 of 37 filled in\"} · \"48 gaps to fill\""
+ },
+ {
+  "lock": "D2",
+  "where": "restored: nothing put off",
+  "ok": true,
+  "detail": "show-all gone"
+ },
+ {
+  "lock": "D2",
+  "where": "Undo brings the tab back at once",
+  "ok": true,
+  "detail": "tab {\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"} · note null"
+ },
+ {
+  "lock": "D2",
+  "where": "restored: no dismissal stored (the tab is there after a reload)",
+  "ok": true,
+  "detail": "{\"shown\":true,\"bg\":\"rgb(42, 58, 82)\",\"counts\":\"49 gaps · 1 of 37 filled in\"}"
+ }
+]

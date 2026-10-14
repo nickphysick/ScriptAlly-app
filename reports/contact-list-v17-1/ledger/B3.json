@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "B3",
+  "where": "precondition: the tab states Housekeeping's figures @1512",
+  "ok": true,
+  "detail": "\"49 gaps · 1 of 37 filled in\""
+ },
+ {
+  "lock": "B3",
+  "where": "one card holds both panels @1512",
+  "ok": true,
+  "detail": "1 cards · counts true · health true"
+ },
+ {
+  "lock": "B3",
+  "where": "counts panel 210 (±1), no detail text @1512",
+  "ok": true,
+  "detail": "210 · 0 detail · \"31Not queried5Querying1Closed\""
+ },
+ {
+  "lock": "B3",
+  "where": "ring 76 (±1) @1512",
+  "ok": true,
+  "detail": "76×76"
+ },
+ {
+  "lock": "B3",
+  "where": "figure = Housekeeping's filled share @1512",
+  "ok": true,
+  "detail": "\"3%\" vs 3% (1 of 37)"
+ },
+ {
+  "lock": "B3",
+  "where": "ink arc in proportion to pct (±1%) @1512",
+  "ok": true,
+  "detail": "7.92 vs 7.92"
+ },
+ {
+  "lock": "B3",
+  "where": "gap line \"49 gaps to fill\" @1512",
+  "ok": true,
+  "detail": "\"49 gaps to fill\""
+ },
+ {
+  "lock": "B3",
+  "where": "its label @1512",
+  "ok": true,
+  "detail": "\"List health 3%. 49 gaps to fill. Open Housekeeping\""
+ },
+ {
+  "lock": "B3",
+  "where": "a press opens Housekeeping @1512",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "B3",
+  "where": "Enter on it opens Housekeeping @1512",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "B3",
+  "where": "A2: the press filters and marks its row @1512",
+  "ok": true,
+  "detail": "{\"k\":\"live\",\"p\":\"true\",\"o\":\"1\",\"u\":\"underline\"}"
+ },
+ {
+  "lock": "B3",
+  "where": "A2: the others fade to 0.32 @1512",
+  "ok": true,
+  "detail": "[{\"k\":\"none\",\"p\":\"false\",\"o\":\"0.32\",\"u\":\"none\"},{\"k\":\"closed\",\"p\":\"false\",\"o\":\"0.32\",\"u\":\"none\"}]"
+ },
+ {
+  "lock": "B3",
+  "where": "A2: nothing scrolls @1512",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "lock": "B3",
+  "where": "precondition: the tab states Housekeeping's figures @1280",
+  "ok": true,
+  "detail": "\"49 gaps · 1 of 37 filled in\""
+ },
+ {
+  "lock": "B3",
+  "where": "one card holds both panels @1280",
+  "ok": true,
+  "detail": "1 cards · counts true · health true"
+ },
+ {
+  "lock": "B3",
+  "where": "counts panel 210 (±1), no detail text @1280",
+  "ok": true,
+  "detail": "210 · 0 detail · \"31Not queried5Querying1Closed\""
+ },
+ {
+  "lock": "B3",
+  "where": "ring 76 (±1) @1280",
+  "ok": true,
+  "detail": "76×76"
+ },
+ {
+  "lock": "B3",
+  "where": "figure = Housekeeping's filled share @1280",
+  "ok": true,
+  "detail": "\"3%\" vs 3% (1 of 37)"
+ },
+ {
+  "lock": "B3",
+  "where": "ink arc in proportion to pct (±1%) @1280",
+  "ok": true,
+  "detail": "7.92 vs 7.92"
+ },
+ {
+  "lock": "B3",
+  "where": "gap line \"49 gaps to fill\" @1280",
+  "ok": true,
+  "detail": "\"49 gaps to fill\""
+ },
+ {
+  "lock": "B3",
+  "where": "its label @1280",
+  "ok": true,
+  "detail": "\"List health 3%. 49 gaps to fill. Open Housekeeping\""
+ },
+ {
+  "lock": "B3",
+  "where": "a press opens Housekeeping @1280",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "B3",
+  "where": "Enter on it opens Housekeeping @1280",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "B3",
+  "where": "A2: the press filters and marks its row @1280",
+  "ok": true,
+  "detail": "{\"k\":\"live\",\"p\":\"true\",\"o\":\"1\",\"u\":\"underline\"}"
+ },
+ {
+  "lock": "B3",
+  "where": "A2: the others fade to 0.32 @1280",
+  "ok": true,
+  "detail": "[{\"k\":\"none\",\"p\":\"false\",\"o\":\"0.32\",\"u\":\"none\"},{\"k\":\"closed\",\"p\":\"false\",\"o\":\"0.32\",\"u\":\"none\"}]"
+ },
+ {
+  "lock": "B3",
+  "where": "A2: nothing scrolls @1280",
+  "ok": true,
+  "detail": "0 → 0"
+ }
+]

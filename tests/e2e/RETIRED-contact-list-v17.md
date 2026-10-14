@@ -42,3 +42,11 @@ is `test.skip` in place with a one-line note, or re-pointed with a comment at th
 `headerPanelV2` P1/P4/P5/P7 and `headerV3` H1–H7 walk every workspace route and expect the navy title panel.
 `/agents` no longer has one. Both skip it by name (`LIGHT_HEADER` in `hp2Lib.ts`) and check it shows its own
 header; `contactV17` A1 and A3 hold that header.
+
+## v17.1 (the amendment, 14 Oct)
+
+| Lock | What changed | Why |
+|---|---|---|
+| CL17 A1, "the hawk is 280 (200) wide, between the title block and the card" | Retired; A1 keeps its other five readings per size (floor 12 → 10) | The populated header has no hawk image. `contactV171` A4 holds the header: its inset, no `contact-disc-hawk` image, the shadow at 0.15. |
+| CL17 A2 | Unchanged | It never asserted the card's width or its detail lines; `contactV171` B3 holds both (230/210, no detail text) and re-runs A2's press behaviour in the new card. |
+| v17's compact search width | Nothing to retire | No v17 lock pinned it; `contactV171` C2 asserts the 220. |

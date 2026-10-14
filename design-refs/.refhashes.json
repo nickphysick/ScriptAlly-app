@@ -294,7 +294,15 @@
     "design-refs/corkboard-v4/screens/01-board-1280.png": "cf030cb5ec209e9536668e9d66f455d3da8433d510ab6b87014c2fccb1342a4e",
     "design-refs/corkboard-v4/screens/02-tidy-1512.png": "c2f58d4cbd62e9dba045e5ccdb27ccb733696c30f61a58524175535798e87081",
     "design-refs/contact-list-v16/contact-list-v16.html": "2bdbd96502b1652446e896abae69ac7ea74b7b0d282e3bb97f88babd89bc2bea",
-    "design-refs/contact-list-v17/contact-list-v17.html": "8ea136987cf8c44d5091a1de361a0cd8b64022729b6814cb094786cc5bf5775e"
+    "design-refs/contact-list-v17/contact-list-v17.html": "8ea136987cf8c44d5091a1de361a0cd8b64022729b6814cb094786cc5bf5775e",
+    "design-refs/contact-list-v17-amend/contact-list-v17-amend.html": "8f9b182635424dab37dd5e2c0bf2c09217bf21969218aa17e5c5932f7280635d",
+    "design-refs/contact-list-v17-amend/screens/01-top-1280@2x.png": "3b91024e39ddbde493f0a35f20b5b28dfd8312c2162ac5bc52f2c6cd0d2b7c9e",
+    "design-refs/contact-list-v17-amend/screens/01-top-1512@2x.png": "bef7440276f424743223d517598d6a14825b7eb69b011714df443e34b3ee5cc9",
+    "design-refs/contact-list-v17-amend/screens/02-card-and-health-1512@2x.png": "169dae027117deafb0f039d147d0092602729ed5553e0972ce43a1f7c0c2fa42",
+    "design-refs/contact-list-v17-amend/screens/03-tab-1512@2x.png": "14621f5ed5ca0dfe3bc2eaa32d17fca270c77ff97dedd396259c1d591e6d1efb",
+    "design-refs/contact-list-v17-amend/screens/04-tab-dismissed-1512@2x.png": "62011114c5bd55ce3eaf1b3f30c8f6e53af07c503adb42e03a98dd4e5c823729",
+    "design-refs/contact-list-v17-amend/screens/05-nothing-to-do-1512@2x.png": "5662f92fcde8af93db0ada3f0cfa217e4dd773a23127c396dcb368184756aa79",
+    "design-refs/contact-list-v17-amend/screens/06-pinned-1512@2x.png": "2744b23e5356c98a292c4497844ae0d7d35483856b80075291fa2a6a8fb974ff"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

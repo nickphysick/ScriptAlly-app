@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "B4",
+  "where": "precondition: the list is not empty @1512",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "lock": "B4",
+  "where": "solid ink: the arc is the whole circle, no rust, no joins @1512",
+  "ok": false,
+  "detail": "ink 263.89 of 263.89 · rust true · joins 0"
+ },
+ {
+  "lock": "B4",
+  "where": "reads 100% @1512",
+  "ok": true,
+  "detail": "\"100%\""
+ },
+ {
+  "lock": "B4",
+  "where": "reads All filled in, ink 60%, not underlined @1512",
+  "ok": true,
+  "detail": "\"All filled in\" {\"color\":\"rgba(28, 19, 15, 0.6)\",\"deco\":\"none\"}"
+ },
+ {
+  "lock": "B4",
+  "where": "its label @1512",
+  "ok": true,
+  "detail": "\"List health 100%. All filled in. Open Housekeeping\""
+ },
+ {
+  "lock": "B4",
+  "where": "no tab @1512",
+  "ok": true,
+  "detail": "tab null · × false"
+ },
+ {
+  "lock": "B4",
+  "where": "precondition: the list is not empty @1280",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "lock": "B4",
+  "where": "solid ink: the arc is the whole circle, no rust, no joins @1280",
+  "ok": false,
+  "detail": "ink 263.89 of 263.89 · rust true · joins 0"
+ },
+ {
+  "lock": "B4",
+  "where": "reads 100% @1280",
+  "ok": true,
+  "detail": "\"100%\""
+ },
+ {
+  "lock": "B4",
+  "where": "reads All filled in, ink 60%, not underlined @1280",
+  "ok": true,
+  "detail": "\"All filled in\" {\"color\":\"rgba(28, 19, 15, 0.6)\",\"deco\":\"none\"}"
+ },
+ {
+  "lock": "B4",
+  "where": "its label @1280",
+  "ok": true,
+  "detail": "\"List health 100%. All filled in. Open Housekeeping\""
+ },
+ {
+  "lock": "B4",
+  "where": "no tab @1280",
+  "ok": true,
+  "detail": "tab null · × false"
+ }
+]

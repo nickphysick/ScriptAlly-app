@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C2",
+  "where": "scrollWidth = clientWidth @1512",
+  "ok": true,
+  "detail": "1208 / 1208"
+ },
+ {
+  "lock": "C2",
+  "where": "the Genre field's right edge is inside the row @1512",
+  "ok": true,
+  "detail": "1310.5 vs 1480.0"
+ },
+ {
+  "lock": "C2",
+  "where": "the search box is 220 (±1) @1280",
+  "ok": false,
+  "detail": "237.5"
+ },
+ {
+  "lock": "C2",
+  "where": "scrollWidth = clientWidth @1280",
+  "ok": true,
+  "detail": "976 / 976"
+ },
+ {
+  "lock": "C2",
+  "where": "the Genre field's right edge is inside the row @1280",
+  "ok": true,
+  "detail": "1248.0 vs 1248.0"
+ }
+]

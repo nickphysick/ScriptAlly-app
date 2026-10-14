@@ -35,7 +35,10 @@ export const HealthRing: React.FC<{ pct: number | null }> = ({ pct }) => {
   return (
     <span className="cl17-rg" data-cl17="ring">
       <svg viewBox={`0 0 ${RING.box} ${RING.box}`} aria-hidden="true">
-        <circle data-cl17="ring-gaps" cx={c} cy={c} r={RING.r} fill="none" stroke="#a2452a" strokeOpacity={pct === null ? 0.12 : 0.85} strokeWidth={RING.w} />
+        {/* the gaps, in rust, underneath — not drawn at 100, where its antialiased edge would show round the ink */}
+        {pct === 100 ? null : (
+          <circle data-cl17="ring-gaps" cx={c} cy={c} r={RING.r} fill="none" stroke="#a2452a" strokeOpacity={pct === null ? 0.12 : 0.85} strokeWidth={RING.w} />
+        )}
         {pct !== null && arc.ink > 0 ? (
           <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="butt"
             strokeDasharray={`${arc.ink} ${RING_C}`} transform={rot} />
