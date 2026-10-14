@@ -415,3 +415,15 @@
 @keyframes qc138-breathe { 0%, 100% { box-shadow: 0 0 0 0 rgba(162, 69, 42, 0.14); } 50% { box-shadow: 0 0 0 6px rgba(162, 69, 42, 0.14); } }
 @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc138-dial.over { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc138-tsearch { transition: none; } }
+
+/* ── v138.2 §A · THE OPEN PEEK TINTS THE WHOLE ROW ─────────────────────────────────────────────────────────────
+   The row and its drawer together take the tone's background while the peek is open; Lift's raise, shadow and
+   radius stand, and before the peek opens the row is Lift's white. The drawer paints nothing of its own.
+   ⚠️ 0-4-0 AND LAST IN THE SHEET: it has to beat `.qc138-row.picked:hover` (0-4-0, earlier). `--qc138-rule` is the
+   dashed rule's colour for the same tone (§B). */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f3f5f9; --qc138-rule: rgba(45, 58, 80, 0.2); }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fcf3ee; --qc138-rule: rgba(162, 69, 42, 0.25); }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #f5f3f0; --qc138-rule: rgba(28, 19, 15, 0.15); }
+  .qc138-sheet .qc138-peekw, .qc138-sheet .qc138-peeki { background: none; }
+}

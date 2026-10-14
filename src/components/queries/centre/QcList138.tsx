@@ -25,7 +25,7 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
-import { peekChain, tickPlan, type PeekEvent } from "../../../lib/qc138";
+import { peekChain, peekTone, tickPlan, type PeekEvent } from "../../../lib/qc138";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -387,8 +387,10 @@ export const QcList138: React.FC<QcList138Props> = ({
     const detail = stageDetail(r, nowMs);
     const dial = dialOf(r, nowMs);
     const picked = !!selected?.has(r.id);
+    /* v138.2 §A — while its peek is open the whole row takes the tone's tint; before (the 450ms wait) it is Lift's white */
+    const peekOpen = peekId === r.id;
     return (
-      <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}${picked ? " picked" : ""}`} data-picked={picked ? "" : undefined} data-ring={ringId === r.id || undefined}
+      <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}${picked ? " picked" : ""}`} data-picked={picked ? "" : undefined} data-ring={ringId === r.id || undefined} data-peek={peekOpen ? peekTone(due, nowMs, closed) : undefined}
         data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"}
         data-due={due ?? undefined} data-first={r.sentMs ?? undefined} data-from={r.stageStartMs ?? r.lastMs} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}

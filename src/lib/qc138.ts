@@ -355,6 +355,14 @@ export function tickPlan(gaps: readonly { days: number; px: number }[]): { unit:
   return { unit, ticks };
 }
 
+/**
+ * v138.2 §A — the open peek's tone, which tints the whole row: "over" when the due date has gone (the same day test
+ * the chain's "Was due" stop and the due dial use), "closed" for a closed query, else "wait".
+ */
+export type PeekTone = "wait" | "over" | "closed";
+export const peekLate = (due: number | null, now: number): boolean => due != null && startOfDay(due) < startOfDay(now);
+export const peekTone = (due: number | null, now: number, closed: boolean): PeekTone => (closed ? "closed" : peekLate(due, now) ? "over" : "wait");
+
 export function peekChain(
   events: readonly PeekEvent[],
   opts: { due: number | null; now: number; closed: boolean; yours: boolean },
@@ -368,7 +376,7 @@ export function peekChain(
   let overdue = false;
   if (!closed) {
     const todayStop: PeekStop = { kind: "today", name: "Today", date: fmt(now), ms: now, today: true };
-    if (due != null && dayKey(due) < t0) { overdue = true; tail.push({ kind: "wasdue", name: "Was due", date: fmt(due), ms: due, today: false }, todayStop); }
+    if (peekLate(due, now)) { overdue = true; tail.push({ kind: "wasdue", name: "Was due", date: fmt(due), ms: due, today: false }, todayStop); }
     else if (due != null && dayKey(due) === t0) tail.push({ kind: "today", name: "Due today", date: fmt(now), ms: now, today: true });
     else { tail.push(todayStop); if (due != null) tail.push({ kind: "due", name: yours ? "Send by" : "Reply due", date: fmt(due), ms: due, today: false }); }
   }
