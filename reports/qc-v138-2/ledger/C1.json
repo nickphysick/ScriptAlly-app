@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 over line 1",
+  "ok": true,
+  "detail": "Out 1 yr 2 mo"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 over line 1 face",
+  "ok": true,
+  "detail": "\"Special Elite\" 18"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 over line 2",
+  "ok": true,
+  "detail": "1 yr 1 mo past the date"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 over overdue rust, upright",
+  "ok": true,
+  "detail": "rgb(162, 69, 42) normal"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 wait line 1",
+  "ok": true,
+  "detail": "Out 2 months"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 wait line 1 face",
+  "ok": true,
+  "detail": "\"Special Elite\" 18"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 wait line 2",
+  "ok": true,
+  "detail": "1 day until their reply date"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 closed line 1",
+  "ok": true,
+  "detail": "Closed"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 closed line 1 face",
+  "ok": true,
+  "detail": "\"Special Elite\" 18"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 closed line 2",
+  "ok": true,
+  "detail": "closed 2 months after you queried"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 over line 1",
+  "ok": true,
+  "detail": "Out 1 yr 2 mo"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 over line 1 face",
+  "ok": true,
+  "detail": "\"Special Elite\" 18"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 over line 2",
+  "ok": true,
+  "detail": "1 yr 1 mo past the date"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 over overdue rust, upright",
+  "ok": true,
+  "detail": "rgb(162, 69, 42) normal"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 wait line 1",
+  "ok": true,
+  "detail": "Out 2 months"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 wait line 1 face",
+  "ok": true,
+  "detail": "\"Special Elite\" 18"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 wait line 2",
+  "ok": true,
+  "detail": "1 day until their reply date"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 closed line 1",
+  "ok": true,
+  "detail": "Closed"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 closed line 1 face",
+  "ok": true,
+  "detail": "\"Special Elite\" 18"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 closed line 2",
+  "ok": true,
+  "detail": "closed 2 months after you queried"
+ },
+ {
+  "lock": "C1",
+  "where": "link wait focusable while open",
+  "ok": true,
+  "detail": "focused true · tabIndex 0"
+ },
+ {
+  "lock": "C1",
+  "where": "link wait opens the panel",
+  "ok": true,
+  "detail": "thin-q-gap-solo vs thin-q-gap-solo"
+ },
+ {
+  "lock": "C1",
+  "where": "link wait on the timeline tab",
+  "ok": true,
+  "detail": "tracking"
+ },
+ {
+  "lock": "C1",
+  "where": "link wait does not open the row",
+  "ok": true,
+  "detail": "0 row click(s)"
+ },
+ {
+  "lock": "C1",
+  "where": "link over focusable while open",
+  "ok": true,
+  "detail": "focused true · tabIndex 0"
+ },
+ {
+  "lock": "C1",
+  "where": "link over opens the panel",
+  "ok": true,
+  "detail": "thin-q-close vs thin-q-close"
+ },
+ {
+  "lock": "C1",
+  "where": "link over on the timeline tab",
+  "ok": true,
+  "detail": "tracking"
+ },
+ {
+  "lock": "C1",
+  "where": "link over does not open the row",
+  "ok": true,
+  "detail": "0 row click(s)"
+ }
+]

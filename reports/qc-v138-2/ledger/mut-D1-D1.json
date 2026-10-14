@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 stops",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 first card < 1 at 101ms",
+  "ok": true,
+  "detail": "0.21 0.21 0.21"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 last card lower at 101ms",
+  "ok": false,
+  "detail": "0.21 0.21 0.21"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 all 1 by 901ms",
+  "ok": true,
+  "detail": "1.00 1.00 1.00"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 stops",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 first card < 1 at 100ms",
+  "ok": true,
+  "detail": "0.41 0.41 0.41"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 last card lower at 100ms",
+  "ok": false,
+  "detail": "0.41 0.41 0.41"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 all 1 by 901ms",
+  "ok": true,
+  "detail": "1.00 1.00 1.00"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 reduced: all 1 at 0ms",
+  "ok": true,
+  "detail": "1.00 1.00 1.00"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 reduced: all 1 at 0ms",
+  "ok": true,
+  "detail": "1.00 1.00 1.00"
+ }
+]

@@ -1,0 +1,19 @@
+{
+  "build": "query-centre-v138-2 (dev build, vite preview 127.0.0.1:4470), 1512x900 and 1280x800 with the shell",
+  "method": "QC1382_MUTATE=<lock> applies the named break in the page; C1 was also proved against the real fault in source (the link's stopPropagation deleted), restored from a path-derived backup and rebuilt",
+  "proofs": [
+    { "lock": "A1", "mutation": "give the drawer a background (#fff)", "red": "every tone at both widths: drawer rgb(255, 255, 255), not transparent" },
+    { "lock": "B1", "mutation": "pad the timeline 24px from the left edge", "red": "first card 606.9 vs First queried 583.0 (1512); 566.1 vs 542.1 (1280)" },
+    { "lock": "C1", "mutation": "let the link's click reach the row (in-page re-dispatch)", "red": "1 row click for both links" },
+    { "lock": "C1", "mutation": "source: the link's e.stopPropagation() deleted", "red": "1 row click for both links" },
+    { "lock": "D1", "mutation": "animate all cards together (animation-delay 0)", "red": "1512 at 101ms: 0.21 0.21 0.21 (the last not lower); 1280 at 100ms: 0.41 0.41 0.41" },
+    { "lock": "QC138.1 D2 (edited)", "mutation": "source: log2 growth, as v138 had it", "red": "widths off by up to 90.8% / 85.1% / 3104.6% / 250.0% / 82.8% across the five cases" },
+    { "lock": "qcCentre.test 'the tab memory is one key for both houses' (edited)", "mutation": "source: the drawer's PANEL_TAB_EVENT listener deleted", "red": "1 failed | 34 passed" }
+  ],
+  "green": {
+    "qcV1382": "4 passed (A1, B1, C1, D1)",
+    "qcV1381": "6 passed (D1 and D2 edited)",
+    "qcV138": "16 passed",
+    "shots": "1 passed (TIGHT 1280: 22, 1512: 0)"
+  }
+}

@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 over stops",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 over summary under the name",
+  "ok": true,
+  "detail": "364.0 vs 364.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 over first card at First queried",
+  "ok": false,
+  "detail": "606.9 vs 583.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 over last card at Due",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 over dashed rule",
+  "ok": true,
+  "detail": "1px dashed"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 wait stops",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 wait summary under the name",
+  "ok": true,
+  "detail": "364.0 vs 364.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 wait first card at First queried",
+  "ok": false,
+  "detail": "606.9 vs 583.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 wait last card at Due",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 wait dashed rule",
+  "ok": true,
+  "detail": "1px dashed"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 over stops",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 over summary under the name",
+  "ok": true,
+  "detail": "364.0 vs 364.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 over first card at First queried",
+  "ok": false,
+  "detail": "566.1 vs 542.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 over last card at Due",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 over dashed rule",
+  "ok": true,
+  "detail": "1px dashed"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 wait stops",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 wait summary under the name",
+  "ok": true,
+  "detail": "364.0 vs 364.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 wait first card at First queried",
+  "ok": false,
+  "detail": "566.1 vs 542.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 wait last card at Due",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 wait dashed rule",
+  "ok": true,
+  "detail": "1px dashed"
+ }
+]

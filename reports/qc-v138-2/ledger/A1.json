@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 over at 200ms white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 over at 900ms",
+  "ok": true,
+  "detail": "rgb(252, 243, 238)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 over drawer transparent",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 wait at 200ms white",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 1)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 wait at 900ms",
+  "ok": true,
+  "detail": "rgb(243, 245, 249)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 wait drawer transparent",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 closed at 200ms white",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 1)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 closed at 900ms",
+  "ok": true,
+  "detail": "rgb(245, 243, 240)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 closed drawer transparent",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 over at 200ms white",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 1)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 over at 900ms",
+  "ok": true,
+  "detail": "rgb(252, 243, 238)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 over drawer transparent",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 wait at 200ms white",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 1)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 wait at 900ms",
+  "ok": true,
+  "detail": "rgb(243, 245, 249)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 wait drawer transparent",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 closed at 200ms white",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 1)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 closed at 900ms",
+  "ok": true,
+  "detail": "rgb(245, 243, 240)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 closed drawer transparent",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ }
+]

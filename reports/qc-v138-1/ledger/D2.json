@@ -9,7 +9,7 @@
   "lock": "D2",
   "where": "1512 case 1 widths follow days",
   "ok": true,
-  "detail": "worst 0.0% over 2 free gaps"
+  "detail": "worst 0.0% over 1 free gaps"
  },
  {
   "lock": "D2",
@@ -39,7 +39,7 @@
   "lock": "D2",
   "where": "1512 case 1 ticks ≥ 4px",
   "ok": true,
-  "detail": "25.4,25.4,44.0"
+  "detail": "15.0,20.5,44.0"
  },
  {
   "lock": "D2",
@@ -75,7 +75,7 @@
   "lock": "D2",
   "where": "1512 case 2 ticks ≥ 4px",
   "ok": true,
-  "detail": "71.2,71.2,0.0"
+  "detail": "43.5,43.5,0.0"
  },
  {
   "lock": "D2",
@@ -105,13 +105,13 @@
   "lock": "D2",
   "where": "1512 case 3 key",
   "ok": true,
-  "detail": "\"1 tick = 1 month\""
+  "detail": "\"1 tick = 1 quarter\""
  },
  {
   "lock": "D2",
   "where": "1512 case 3 ticks ≥ 4px",
   "ok": true,
-  "detail": "22.3,6.5"
+  "detail": "0.0,12.9"
  },
  {
   "lock": "D2",
@@ -147,7 +147,7 @@
   "lock": "D2",
   "where": "1512 case 4 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,0.0,568.2"
+  "detail": "0.0,0.0,353.4"
  },
  {
   "lock": "D2",
@@ -177,13 +177,13 @@
   "lock": "D2",
   "where": "1512 case 5 key",
   "ok": true,
-  "detail": "\"1 tick = 1 month\""
+  "detail": "\"1 tick = 1 quarter\""
  },
  {
   "lock": "D2",
   "where": "1512 case 5 ticks ≥ 4px",
   "ok": true,
-  "detail": "7.0,0.0,6.9"
+  "detail": "12.8,0.0,12.8"
  },
  {
   "lock": "D2",
@@ -231,7 +231,7 @@
   "lock": "D2",
   "where": "1100 case 1 ticks ≥ 4px",
   "ok": true,
-  "detail": "9.7,20.5,44.0"
+  "detail": "8.2,20.5,44.0"
  },
  {
   "lock": "D2",
@@ -267,7 +267,7 @@
   "lock": "D2",
   "where": "1100 case 2 ticks ≥ 4px",
   "ok": true,
-  "detail": "30.0,30.0,0.0"
+  "detail": "26.0,26.0,0.0"
  },
  {
   "lock": "D2",
@@ -303,7 +303,7 @@
   "lock": "D2",
   "where": "1100 case 3 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,9.7"
+  "detail": "0.0,8.7"
  },
  {
   "lock": "D2",
@@ -339,7 +339,7 @@
   "lock": "D2",
   "where": "1100 case 4 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,0.0,230.6"
+  "detail": "0.0,0.0,190.6"
  },
  {
   "lock": "D2",
@@ -375,7 +375,7 @@
   "lock": "D2",
   "where": "1100 case 5 ticks ≥ 4px",
   "ok": true,
-  "detail": "8.5,0.0,11.3"
+  "detail": "7.2,0.0,11.3"
  },
  {
   "lock": "D2",
