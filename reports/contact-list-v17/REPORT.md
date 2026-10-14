@@ -172,4 +172,12 @@ and 1024.
 
 ## 10. Integration and deploy
 
-DEPLOY_SECTION
+Before deploying, dev served `index-6EFumRez.js`, the v16 integration branch `dev/…-qp2d-cl16` at `da94b2f0`,
+which had not moved. v17 was cut from that tip, so the merge into the new integration branch
+**`dev/…-qp2c-corkboard1-qp2d-cl16-cl17`** is a fast-forward: no conflicts anywhere, and the tree is the one the
+gates and the locks in §2 and §5 ran on.
+
+Built from a clean checkout of the pushed tip with `npm run build:dev` and deployed with
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. **Dev serves
+`index-CMyvjAYL.js`** (stylesheet `index-cVRcvqvw.css`, which contains `cl17-hd`). Not merged to `main`; prod
+untouched; no rules or functions changed.
