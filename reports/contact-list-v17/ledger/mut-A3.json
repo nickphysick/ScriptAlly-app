@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A3",
+  "where": "1920 the document, the sheet's scroller and the app frame do not overflow sideways",
+  "ok": false,
+  "detail": "doc 1920/1920 · scroller 2065/1664 · app 1920/1920"
+ },
+ {
+  "lock": "A3",
+  "where": "1920 the header's left is the list's (±1)",
+  "ok": true,
+  "detail": "280 vs 280"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 the document, the sheet's scroller and the app frame do not overflow sideways",
+  "ok": false,
+  "detail": "doc 1512/1512 · scroller 1663/1256 · app 1512/1512"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 the header's left is the list's (±1)",
+  "ok": true,
+  "detail": "272 vs 272"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 the document, the sheet's scroller and the app frame do not overflow sideways",
+  "ok": false,
+  "detail": "doc 1280/1280 · scroller 1431/1024 · app 1280/1280"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 the header's left is the list's (±1)",
+  "ok": true,
+  "detail": "272 vs 272"
+ },
+ {
+  "lock": "A3",
+  "where": "1180 the document, the sheet's scroller and the app frame do not overflow sideways",
+  "ok": false,
+  "detail": "doc 1180/1180 · scroller 1331/924 · app 1180/1180"
+ },
+ {
+  "lock": "A3",
+  "where": "1180 the header's left is the list's (±1)",
+  "ok": true,
+  "detail": "272 vs 272"
+ },
+ {
+  "lock": "A3",
+  "where": "1024 the document, the sheet's scroller and the app frame do not overflow sideways",
+  "ok": false,
+  "detail": "doc 1024/1024 · scroller 1175/768 · app 1024/1024"
+ },
+ {
+  "lock": "A3",
+  "where": "1024 the header's left is the list's (±1)",
+  "ok": true,
+  "detail": "272 vs 272"
+ }
+]

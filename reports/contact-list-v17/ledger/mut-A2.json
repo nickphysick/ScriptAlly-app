@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 three rows: Not queried, Querying, Closed",
+  "ok": true,
+  "detail": "Not queried|Querying|Closed"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 the counts are the list's own groups and sum to N",
+  "ok": true,
+  "detail": "31 + 5 + 1 vs 37 · rows {\"none\":31,\"live\":5,\"closed\":1}"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 the bar's segments are in proportion to the counts (±2)",
+  "ok": true,
+  "detail": "249.7 · 40.3 · 8.0 · want 249.7 · 40.3 · 8.1"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 pressing Querying filters the list to that group",
+  "ok": true,
+  "detail": "5 rows · want 5 · pressed false,true,false"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 the other rows fade to 0.32 (±0.02)",
+  "ok": true,
+  "detail": "0.32 · 1 · 0.32"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 a press does not scroll (the largest group, from 30px down)",
+  "ok": false,
+  "detail": "30 → 250 (none)"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 pressing it again clears it",
+  "ok": true,
+  "detail": "37 rows (was 37)"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 three rows: Not queried, Querying, Closed",
+  "ok": true,
+  "detail": "Not queried|Querying|Closed"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 the counts are the list's own groups and sum to N",
+  "ok": true,
+  "detail": "31 + 5 + 1 vs 37 · rows {\"none\":31,\"live\":5,\"closed\":1}"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 the bar's segments are in proportion to the counts (±2)",
+  "ok": true,
+  "detail": "249.7 · 40.3 · 8.0 · want 249.7 · 40.3 · 8.1"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 pressing Querying filters the list to that group",
+  "ok": true,
+  "detail": "5 rows · want 5 · pressed false,true,false"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 the other rows fade to 0.32 (±0.02)",
+  "ok": true,
+  "detail": "0.32 · 1 · 0.32"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 a press does not scroll (the largest group, from 30px down)",
+  "ok": false,
+  "detail": "30 → 250 (none)"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 pressing it again clears it",
+  "ok": true,
+  "detail": "37 rows (was 37)"
+ }
+]

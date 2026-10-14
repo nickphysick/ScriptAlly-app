@@ -243,8 +243,11 @@
   .clv-group .cl16-list .lt-labels.is-stuck { box-shadow: 0 10px 16px -14px rgba(28, 19, 15, 0.3); }
   .clv-group .cl16-list .lt-gh { top: var(--cl17-pin-h); z-index: 7; }
   .clv-group .cl16-list .lt-div { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px) + 40px); z-index: 6; }
-  /* a row brought into view by the keyboard lands below the row and the headings, not under them */
-  .agl-wpg .wpg-scroll { --wpg-scroll-pad: 124px; }
+  /* a row brought into view by the keyboard lands below the row and the headings, not under them.
+     ⚠️ ONLY WHILE THE ROW IS SHOWN. Stated always, this padding made the browser scroll the page to the top whenever a
+        control near the scroller's top took focus: a press on a summary card row at scrollTop 60 landed at 0 (measured,
+        lock A2), because a focused element inside the scroll padding is "not in view". */
+  .ws-window:has(> .cl17-pin[data-on]) .agl-wpg .wpg-scroll { --wpg-scroll-pad: 124px; }
   /* full screen: the header is hidden and the row is always shown, so the list starts under it */
   .clv-group[data-full] > .clv-main { margin-top: calc(var(--cl17-pin-h) + 16px); }
 }
@@ -448,3 +451,27 @@
   .cl17-empty .cl17-way { min-height: 0; }
 }
 @media (max-width: 900px) { .cl17-empty .cl17-eh { grid-template-columns: minmax(0, 1fr); } .cl17-empty .cl17-eh-art { display: none; } }
+
+/* ── the filter row at the compact size: it stays on ONE line and inside the header. The four pills keep their
+   words; the search box and the Genre field are what give (the reference lets Genre run off the sheet's edge at
+   1280: measured, 51px past it with every part at its drawn size). ── */
+.cl17-hd .cl17-fr .cl17-find.cl13-find { flex: 0 1 300px; min-width: 104px; }
+.cl17-hd .cl17-fr { gap: 8px; }
+.ws-app.sheet-wide .cl17-hd .cl17-fr { gap: 10px; }
+.ws-app.sheet-wide .cl17-hd .cl17-fr .cl17-find.cl13-find { flex-basis: 360px; }
+/* the pills' row is as wide as its pills, so it is the SEARCH BOX that gives: a row that flexed would keep the
+   search at full width and spill its own last pill instead (measured: 37px past the sheet with the box at 300) */
+.cl17-hd .cl17-fr .cl17-pills.cl14-frow { flex: 0 0 auto; }
+.cl17-hd .cl17-fbar .cl14-gtok:not(.has) { flex: none; width: 96px; }
+.ws-app.sheet-wide .cl17-hd .cl17-fbar .cl14-gtok:not(.has) { width: 150px; }
+.cl17-hd .cl17-fbar .cl14-gtok:not(.has) input { min-width: 0; width: 100%; }
+
+/* ⚠️ THE HOVER TRAY WOULD COVER "+ Log a query". The tray slides over the Query status column on hover, and on a row
+   that has not been queried its first button is also "Log a query" (the plain drawer's): the link under it could
+   never be pressed with a pointer (measured: lock D2 waited out its whole timeout on a covered link). On those rows
+   the link IS the action, so the pointer's tray stands down; the keyboard's (`.kf`, the L key) is unchanged. */
+.cl16-list .clv-row:has(.cl17-log):not(.kf) .clv-rtray { display: none; }
+
+/* the hover tray covers the whole Query status cell: the cell is three lines tall now (stage, track, date), and a
+   tray centred on one line let the stage and the "Your move" chip show above and below it */
+.cl16-list .clv-row .clv-rtray { top: 3px; bottom: 3px; transform: none; }

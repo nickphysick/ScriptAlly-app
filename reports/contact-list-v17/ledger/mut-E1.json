@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 at rest: \"Status\", white, 40 tall, no ×",
+  "ok": true,
+  "detail": "{\"label\":\"Status\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(28, 19, 15)\",\"x\":0,\"h\":40,\"pops\":0}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 one status: navy, reading \"Queried\", with a ×",
+  "ok": false,
+  "detail": "{\"label\":\"Status\",\"bg\":\"rgb(45, 58, 80)\",\"fg\":\"rgb(244, 238, 229)\",\"x\":1,\"h\":40,\"pops\":1}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 a second status reads \"2 statuses\"",
+  "ok": false,
+  "detail": "Status"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the × clears it without opening the menu",
+  "ok": true,
+  "detail": "{\"label\":\"Status\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(28, 19, 15)\",\"x\":0,\"h\":40,\"pops\":0} · 37 of 37 rows"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 at rest: \"Status\", white, 40 tall, no ×",
+  "ok": true,
+  "detail": "{\"label\":\"Status\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(28, 19, 15)\",\"x\":0,\"h\":40,\"pops\":0}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 one status: navy, reading \"Queried\", with a ×",
+  "ok": false,
+  "detail": "{\"label\":\"Status\",\"bg\":\"rgb(45, 58, 80)\",\"fg\":\"rgb(244, 238, 229)\",\"x\":1,\"h\":40,\"pops\":1}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 a second status reads \"2 statuses\"",
+  "ok": false,
+  "detail": "Status"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the × clears it without opening the menu",
+  "ok": true,
+  "detail": "{\"label\":\"Status\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(28, 19, 15)\",\"x\":0,\"h\":40,\"pops\":0} · 37 of 37 rows"
+ }
+]

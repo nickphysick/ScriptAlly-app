@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 no navy panel, strip, heading or ink bar",
+  "ok": true,
+  "detail": "0 v16 parts · 0 navy headers"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the h1 reads \"{N} agents on file\", N the rows on the page",
+  "ok": true,
+  "detail": "\"37 agents on file\" · label \"37 agents on file\" · 37 rows"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the title is Special Elite 44 (±1), on one line",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courie · 44 · 1 line(s)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the eyebrow reads \"— CONTACT LIST —\" in rust",
+  "ok": true,
+  "detail": "{\"text\":\"— CONTACT LIST —\",\"color\":\"rgb(162, 69, 42)\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the hawk is 200 wide (±2), between the title block and the card",
+  "ok": true,
+  "detail": "hawk 668–868 (200.0) · title ends 654 · card starts 1140"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the shadow image is there at opacity 0.15 (±0.01)",
+  "ok": true,
+  "detail": "{\"op\":0.15,\"loaded\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no navy panel, strip, heading or ink bar",
+  "ok": true,
+  "detail": "0 v16 parts · 0 navy headers"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the h1 reads \"{N} agents on file\", N the rows on the page",
+  "ok": true,
+  "detail": "\"37 agents on file\" · label \"37 agents on file\" · 37 rows"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the title is Special Elite 44 (±1), on one line",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courie · 44 · 1 line(s)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the eyebrow reads \"— CONTACT LIST —\" in rust",
+  "ok": true,
+  "detail": "{\"text\":\"— CONTACT LIST —\",\"color\":\"rgb(162, 69, 42)\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the hawk is 200 wide (±2), between the title block and the card",
+  "ok": true,
+  "detail": "hawk 668–868 (200.0) · title ends 654 · card starts 908"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the shadow image is there at opacity 0.15 (±0.01)",
+  "ok": true,
+  "detail": "{\"op\":0.15,\"loaded\":true}"
+ }
+]

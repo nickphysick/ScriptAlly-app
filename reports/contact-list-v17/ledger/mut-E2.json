@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "E2",
+  "where": "1512 status: 10 (±2) under its pill, 300 or wider, \"Where they stand\" and its note",
+  "ok": true,
+  "detail": "gap 10.0 · 300 wide · \"Where they stand\" / \"Pick any number\" · expanded true controls true"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 status: three group headings, a dot per option, and counts",
+  "ok": true,
+  "detail": "Not queried|Querying|Closed · 11 options · 0 without a dot"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 status: the option's count is the list it gives, and \"Show {n} agents\" says so",
+  "ok": false,
+  "detail": "count 2 · 2 rows · \"Show agents\""
+ },
+ {
+  "lock": "E2",
+  "where": "1512 status: the button closes the menu",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 open: 10 (±2) under its pill, 300 or wider, \"Taking queries?\" and its note",
+  "ok": true,
+  "detail": "gap 10.0 · 300 wide · \"Taking queries?\" / \"From their profile\" · expanded true controls true"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 open: every choice has its one-line description",
+  "ok": true,
+  "detail": "Everyone on file | Open to new queries now | Closed, or reopening later | Their profile doesn’t say"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 open: Escape closes it and returns focus to the pill",
+  "ok": true,
+  "detail": "{\"pops\":0,\"focus\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 queried: 10 (±2) under its pill, 300 or wider, \"Queried for this book?\" and its note",
+  "ok": true,
+  "detail": "gap 10.0 · 345 wide · \"Queried for this book?\" / \"Harbour of Glass\" · expanded true controls true"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 queried: every choice has its one-line description",
+  "ok": true,
+  "detail": "Everyone on file | At least one query sent | Never queried with this book"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 queried: Escape closes it and returns focus to the pill",
+  "ok": true,
+  "detail": "{\"pops\":0,\"focus\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 the list is whole again",
+  "ok": true,
+  "detail": "37 of 37"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 status: 10 (±2) under its pill, 300 or wider, \"Where they stand\" and its note",
+  "ok": true,
+  "detail": "gap 10.0 · 300 wide · \"Where they stand\" / \"Pick any number\" · expanded true controls true"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 status: three group headings, a dot per option, and counts",
+  "ok": true,
+  "detail": "Not queried|Querying|Closed · 11 options · 0 without a dot"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 status: the option's count is the list it gives, and \"Show {n} agents\" says so",
+  "ok": false,
+  "detail": "count 2 · 2 rows · \"Show agents\""
+ },
+ {
+  "lock": "E2",
+  "where": "1280 status: the button closes the menu",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 open: 10 (±2) under its pill, 300 or wider, \"Taking queries?\" and its note",
+  "ok": true,
+  "detail": "gap 10.0 · 300 wide · \"Taking queries?\" / \"From their profile\" · expanded true controls true"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 open: every choice has its one-line description",
+  "ok": true,
+  "detail": "Everyone on file | Open to new queries now | Closed, or reopening later | Their profile doesn’t say"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 open: Escape closes it and returns focus to the pill",
+  "ok": true,
+  "detail": "{\"pops\":0,\"focus\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 queried: 10 (±2) under its pill, 300 or wider, \"Queried for this book?\" and its note",
+  "ok": true,
+  "detail": "gap 10.0 · 345 wide · \"Queried for this book?\" / \"Harbour of Glass\" · expanded true controls true"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 queried: every choice has its one-line description",
+  "ok": true,
+  "detail": "Everyone on file | At least one query sent | Never queried with this book"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 queried: Escape closes it and returns focus to the pill",
+  "ok": true,
+  "detail": "{\"pops\":0,\"focus\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 the list is whole again",
+  "ok": true,
+  "detail": "37 of 37"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "E3",
+  "where": "1512 exactly one More filters control, its chip reading \"3\"",
+  "ok": true,
+  "detail": "1 controls · chip \"3\" · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 its panel holds three rows, all off",
+  "ok": true,
+  "detail": "{\"checked\":\"false\",\"on\":false,\"knob\":\"none\",\"n\":22}"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 Always responds on: the list is filtered to its count",
+  "ok": true,
+  "detail": "22 rows · count 22 · of 37"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 the switch shows on, and the pill is navy with \"1 on\"",
+  "ok": false,
+  "detail": "{\"checked\":\"true\",\"on\":false,\"knob\":\"none\",\"n\":22} · chip \"1 on\" · rgb(45, 58, 80)"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 it is still on after the menu is closed and reopened and the list re-rendered",
+  "ok": false,
+  "detail": "{\"checked\":\"true\",\"on\":false,\"knob\":\"none\",\"n\":22} · 22 rows"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 switching it off restores all",
+  "ok": true,
+  "detail": "{\"checked\":\"false\",\"on\":false,\"knob\":\"none\",\"n\":22} · chip \"3\" · 37 of 37"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 exactly one More filters control, its chip reading \"3\"",
+  "ok": true,
+  "detail": "1 controls · chip \"3\" · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 its panel holds three rows, all off",
+  "ok": true,
+  "detail": "{\"checked\":\"false\",\"on\":false,\"knob\":\"none\",\"n\":22}"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 Always responds on: the list is filtered to its count",
+  "ok": true,
+  "detail": "22 rows · count 22 · of 37"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 the switch shows on, and the pill is navy with \"1 on\"",
+  "ok": false,
+  "detail": "{\"checked\":\"true\",\"on\":false,\"knob\":\"none\",\"n\":22} · chip \"1 on\" · rgb(45, 58, 80)"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 it is still on after the menu is closed and reopened and the list re-rendered",
+  "ok": false,
+  "detail": "{\"checked\":\"true\",\"on\":false,\"knob\":\"none\",\"n\":22} · 22 rows"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 switching it off restores all",
+  "ok": true,
+  "detail": "{\"checked\":\"false\",\"on\":false,\"knob\":\"none\",\"n\":22} · chip \"3\" · 37 of 37"
+ }
+]

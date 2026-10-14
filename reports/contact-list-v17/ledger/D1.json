@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 a not-queried disc is #f4eee5 with ink initials",
+  "ok": true,
+  "detail": "rgb(244, 238, 229) rgb(28, 19, 15)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 a querying disc is #2a3a52 with cream initials",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) rgb(244, 238, 229)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 a closed disc is #b3aca5 with #2b2622 initials",
+  "ok": true,
+  "detail": "rgb(179, 172, 165) rgb(43, 38, 34)"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 ungrouped: each letter's first row shows its letter and no other row does",
+  "ok": true,
+  "detail": "ABCDEFHKLMNOPQRVW vs ABCDEFHKLMNOPQRVW · wrong  · 37 rows"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 grouped by letter: no margin letters, and the dividers are there",
+  "ok": true,
+  "detail": "0 letters · 17 dividers"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 a not-queried disc is #f4eee5 with ink initials",
+  "ok": true,
+  "detail": "rgb(244, 238, 229) rgb(28, 19, 15)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 a querying disc is #2a3a52 with cream initials",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) rgb(244, 238, 229)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 a closed disc is #b3aca5 with #2b2622 initials",
+  "ok": true,
+  "detail": "rgb(179, 172, 165) rgb(43, 38, 34)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 ungrouped: each letter's first row shows its letter and no other row does",
+  "ok": true,
+  "detail": "ABCDEFHKLMNOPQRVW vs ABCDEFHKLMNOPQRVW · wrong  · 37 rows"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 grouped by letter: no margin letters, and the dividers are there",
+  "ok": true,
+  "detail": "0 letters · 17 dividers"
+ }
+]

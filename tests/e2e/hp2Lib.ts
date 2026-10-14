@@ -16,6 +16,12 @@ export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }
 /** Query Centre v136: `/queries` left the panel for its own open, ruled-corner header (QC136 A1). It is a workspace route
     with no panel; every panel lock skips it by this register, and one check per size holds that it draws none. */
 export const OPEN_HEADER = ["/queries"] as const;
+/**
+ * Contact list v17 (14 Oct): `/agents` left the shared title panel for its own light header (no panel, no border),
+ * held by `contactV17` A1. The panel claims skip it BY NAME and check that what they skipped shows that header.
+ */
+export const LIGHT_HEADER: readonly string[] = ["/agents"];
+export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"]';
 export const WORKSPACE = ["/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"] as const;
 /** routes that must not change */
 export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)

@@ -58,7 +58,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
 const open = async (page: Page, vp: { width: number; height: number }, lock: string) => { await openContacts16(page, vp); await mutate16(page, lock, MUTATIONS); };
 
 test.describe("Contact list v16", () => {
-  test("A1 · header: the navy title panel, no hero number, stamp or faces", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): the navy title panel is gone from the populated page; CL17 A1 holds the light header. tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("A1 · header: the navy title panel, no hero number, stamp or faces", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("A1");
     for (const vp of SIZES16) {
@@ -165,7 +166,8 @@ test.describe("Contact list v16", () => {
     };
   });
 
-  test("B1 · strip: four cells, figures that are the list's own groups, bars and faces", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): the At a glance strip is gone; the summary card carries its figures (CL17 A2). tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("B1 · strip: four cells, figures that are the list's own groups, bars and faces", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("B1");
     for (const vp of SIZES16) {
@@ -208,7 +210,8 @@ test.describe("Contact list v16", () => {
     L.done(50);
   });
 
-  test("B2 · filter: a cell filters the list, combines with a chip, clears, and never scrolls", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): the strip is gone; the summary card filters (CL17 A2). tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("B2 · filter: a cell filters the list, combines with a chip, clears, and never scrolls", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("B2");
     const cell = (k: string) => page.locator(`.aglist [data-cl16="strip-cell"][data-k="${k}"]`).filter({ visible: true }).first();
@@ -272,7 +275,8 @@ test.describe("Contact list v16", () => {
     L.done(30);
   });
 
-  test("C1 · removed: no desk, next step, banner or title bar; the heading leads into the list", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): "The full list" heading and the ink bar are gone (CL17 A1, B1). tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("C1 · removed: no desk, next step, banner or title bar; the heading leads into the list", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("C1");
     for (const vp of SIZES16) {
@@ -334,10 +338,10 @@ test.describe("Contact list v16", () => {
       L.check("C2", `${w} 24 from the sheet's edges`, vp.width === 1920 || (near(r.list.x - r.sheet.x, 24, 1) && near(r.sheet.r - r.list.r, 24, 1)), `${(r.list.x - r.sheet.x).toFixed(1)} · ${(r.sheet.r - r.list.r).toFixed(1)} · list ${r.list.w.toFixed(1)}`);
       if (vp.width === 1920) L.check("C2", `1920 the list is 1600 wide`, near(r.list.w, 1600, 2), `${r.list.w.toFixed(1)}`);
       L.check("C2", `${w} centred in the sheet`, near((r.list.x + r.list.r) / 2, (r.sheet.x + r.sheet.r) / 2, 1), `${((r.list.x + r.list.r) / 2).toFixed(1)} · sheet ${((r.sheet.x + r.sheet.r) / 2).toFixed(1)}`);
-      L.check("C2", `${w} the panel and the strip stay on the column`, !!r.hd && !!r.strip && near(r.hd.x, r.group.x, 1) && near(r.hd.r, r.group.r, 1) && near(r.strip.x, r.group.x, 1) && near(r.strip.r, r.group.r, 1) && r.list.w > r.group.w + 20, `column ${r.group.w.toFixed(1)} · panel ${r.hd?.w.toFixed(1)} · strip ${r.strip?.w.toFixed(1)} · list ${r.list.w.toFixed(1)}`);
+      /* RETIRED (Contact list v17): "the panel and the strip stay on the column" — both are gone; the header is the list's width (CL17 A3) */
       L.check("C2", `${w} no sideways scroll, and the rows are inside the list`, r.over <= 0 && r.rows.length > 0 && r.rows.every((b) => b.x >= r.list!.x - 0.5 && b.r <= r.list!.r + 0.5), `over ${r.over} · ${r.rows.length} rows`);
     }
-    L.done(15);
+    L.done(13) /* 16 less the three retired readings */;
   });
 
   /** the list's rows in the order drawn, with what the order claims are about */
@@ -353,7 +357,7 @@ test.describe("Contact list v16", () => {
       panels: [...g.querySelectorAll<HTMLElement>('[data-clv="panel"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
       labs: labs.map((l) => ({ col: l.dataset.ltCol ?? "", tag: l.tagName, sort: l.getAttribute("aria-sort"), text: (l.textContent ?? "").trim() })),
       sortPill: [...g.querySelectorAll('[data-cl16="bar"] :is([data-lp="sort"], [data-lp="dir"], .lp-join)')].length,
-      group: (g.querySelector('[data-cl16="bar"] [data-lp="group"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      /* v17: the Grouped pill is on the list sheet's top row */ group: (g.querySelector('[data-cl17="sheet-row"] [data-lp="group"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
     };
   });
   /** the last word of a name: the page's own surname rule, in the test's words */
@@ -468,7 +472,8 @@ test.describe("Contact list v16", () => {
     };
   });
 
-  test("D1 · pins: the bar, the filter row and the headings pin in a stack; the letter tabs scroll away", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): the three pinned layers are one pinned row (CL17 C1). tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("D1 · pins: the bar, the filter row and the headings pin in a stack; the letter tabs scroll away", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("D1");
     for (const vp of SIZES16) {
@@ -515,7 +520,8 @@ test.describe("Contact list v16", () => {
     L.done(28);
   });
 
-  test("D2 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): the pin line is the header's foot now (CL17 C2). tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("D2 · no jitter: 1px steps across the pin line change the state exactly twice, and scrollTop is what was set", async ({ page }) => {
     test.setTimeout(400_000);
     const L = new Ledger("D2");
     for (const vp of SIZES16) {
@@ -572,7 +578,8 @@ test.describe("Contact list v16", () => {
     };
   });
 
-  test("E1 · full screen: F gives the content area to the list; leaving puts everything back, the scroll included", async ({ page }) => {
+  /* RETIRED (Contact list v17, 14 Oct): it read the ink bar's button and its count chips; CL17 FS1 holds full screen against the pinned row. tests/e2e/RETIRED-contact-list-v17.md */
+  test.skip("E1 · full screen: F gives the content area to the list; leaving puts everything back, the scroll included", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("E1");
     for (const vp of SIZES16) {

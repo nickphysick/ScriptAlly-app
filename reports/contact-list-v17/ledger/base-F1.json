@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 empty",
+  "ok": false,
+  "detail": "the page is not the v17 empty page"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 empty",
+  "ok": false,
+  "detail": "the page is not the v17 empty page"
+ }
+]

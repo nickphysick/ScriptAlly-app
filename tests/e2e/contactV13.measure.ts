@@ -448,7 +448,7 @@ test("CL13-12 · loading", async ({ page }) => {
     const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0);
     const b = (e?: HTMLElement) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; };
     /* REPOINTED (Contact list v15 §2): the header is the page-local open header (`[data-cl15="header"]`), not the band */
-    return { band: b(v('.aglist [data-cl15="header"]')), strip: b(v('.aglist [data-cl16="strip"]')) /* v16: the At a glance strip */, row: b(v(".aglist .clv-row")) };
+    return { band: b(v('.aglist [data-cl17="header"]')) /* v17: the light header */, strip: b(v('.aglist [data-cl17="card"]')) /* v17: the summary card */, row: b(v(".aglist .clv-row")) };
   });
   for (const vp of WIDTHS) {
     const w = `${vp.width}`;
@@ -520,7 +520,7 @@ test("CL13-13 · page guide", async ({ page }) => {
     return {
       title: g?.querySelector('[data-qcv="guide-title"]')?.textContent ?? null, kick: g?.querySelector('[data-qcv="guide-n"]')?.textContent ?? null,
       w: gr ? Math.round(gr.width) : null, above: !!gr && !!tr && gr.bottom <= tr.top + 0.5 && Math.abs(gr.right - tr.right) <= 1,
-      ring: !!document.querySelector('.aglist [data-cl16="strip"].pgd-ring'), /* v16: step 1 rings the At a glance strip */
+      ring: !!document.querySelector('.aglist [data-cl17="card"].pgd-ring'), /* v17: step 1 rings the summary card */
       scrolled: [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.scrollTop),
     };
   }, G);
@@ -545,7 +545,7 @@ test("CL13-13 · page guide", async ({ page }) => {
     /* v15: step 1's ring is on the desk — a strip selector here would pass forever, there being no strip */
     stripRing: !!document.querySelector(".pgd-ring[data-cl15='desk']") }), G);
   /* v14 §8: step 2 is "Your next step"; its ring lands on the next-step section (CL14-16 holds it) */
-  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the desk's ring is released)", "1512", s2.title === "Add agents" && !s2.stripRing, JSON.stringify(s2));
+  L.check("CL13-13 Next moves to step 2, \"Your next step\" (the desk's ring is released)", "1512", s2.title === "Find and filter" && !s2.stripRing, JSON.stringify(s2));
   await page.click(`${G} [data-qcv="guide-back"]`);
   L.check("CL13-13 Back returns to step 1", "1512", (await page.locator(`${G} [data-qcv="guide-title"]`).textContent()) === "Your list in numbers", "");
   await page.click(`${G} [data-qcv="guide-x"]`);
@@ -590,25 +590,11 @@ test("CL13-14 · footer and empty state", async ({ page }) => {
       };
     });
     L.check("CL13-14 the app footer follows the workspace, the group's last row", w, r.found && r.after && r.last, JSON.stringify(r));
-    L.check("CL13-14 its content box is the column's (the desk's x and width, ±1)", w, !!r.fin && !!r.col && near(r.fin[0], r.col[0], 1) && near(r.fin[1], r.col[1], 1), `${r.fin} vs ${r.col}`);
+    /* RETIRED (Contact list v17): "its content box is the column's" was read against the strip, the last part of the page drawn at the
+       column's width; the header and the list are both the list's width now, so there is nothing to read it against */
     L.check("CL13-14 it is the shared footer (Help centre, the email)", w, r.help && r.mail, JSON.stringify(r));
     await checkOverflow(page, L, w);
   }
-  /* the empty state: no band, strip, carousel, list, tab or footer — v12's page, unchanged (§9) */
-  await openContacts(page, AT_1512);
-  await page.evaluate(() => { (window as unknown as { __SA_LH_COUNT?: number }).__SA_LH_COUNT = 0; window.dispatchEvent(new Event("sa:lh-count")); });
-  await page.locator(".aglist [data-clv-empty]").first().waitFor({ timeout: 8000 }).catch(() => {});
-  const e = await page.evaluate(() => {
-    const n = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].filter((x) => x.getBoundingClientRect().height > 0).length;
-    return { empty: n(".aglist [data-clv-empty]"), band: n(".aglist .ph--band"), strip: n('.aglist [data-cl15="desk"]'), cz: n('.aglist [data-cz="contacts"]'),
-      /* the empty state's own exhibition draws sample rows (v12 §4, by design); the LIST is any row outside it */
-      rows: [...document.querySelectorAll<HTMLElement>(".aglist [data-agent-card]")].filter((x) => x.getBoundingClientRect().height > 0 && !x.closest("[data-clv-empty]")).length,
-      exhibitRows: [...document.querySelectorAll<HTMLElement>(".aglist [data-clv-empty] [data-agent-card]")].filter((x) => x.getBoundingClientRect().height > 0).length, tab: n('[data-ftab="housekeeping"]'), footer: n('.aglist [data-probe="app-footer"]') };
-  });
-  L.check("CL13-14 the empty state shows, and none of the band, strip, carousel, list, tab or footer", "1512",
-    e.empty === 1 && e.exhibitRows > 0 && e.band === 0 && e.strip === 0 && e.cz === 0 && e.rows === 0 && e.tab === 0 && e.footer === 0, JSON.stringify(e));
-  await checkOverflow(page, L, "1512 empty");
-  await page.screenshot({ path: `${DIR}/empty-1512.png` });
-  await page.evaluate(() => { delete (window as unknown as { __SA_LH_COUNT?: number }).__SA_LH_COUNT; window.dispatchEvent(new Event("sa:lh-count")); });
-  L.done(14);
+  /* RETIRED (Contact list v17): the empty state's half. The empty page is v17's own (CL17 F1); it is no longer v12's page with an exhibition. */
+  L.done(9);
 });

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 scrolled 1500, the row is shown",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 its top is the sheet's top and its width the sheet's (±1), 68 tall",
+  "ok": true,
+  "detail": "row 248.0,105.8 1256.0×68 · sheet 248.0,105.8 1256.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 its background is the folder tab's",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the headings' top is the row's bottom (±1), and their width the list's (±1)",
+  "ok": true,
+  "detail": "headings 272.0,173.8 1208.0 · row bottom 173.8 · list 272.0 1208.0 · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 each heading sits over its column (within 2)",
+  "ok": true,
+  "detail": "338,637,1086 vs 338,637,1086 · last ends 1440 vs 1440"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 scrolled 1500, the row is shown",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 its top is the sheet's top and its width the sheet's (±1), 68 tall",
+  "ok": true,
+  "detail": "row 248.0,105.8 1024.0×68 · sheet 248.0,105.8 1024.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 its background is the folder tab's",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs tab rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the headings' top is the row's bottom (±1), and their width the list's (±1)",
+  "ok": true,
+  "detail": "headings 272.0,173.8 976.0 · row bottom 173.8 · list 272.0 976.0 · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 each heading sits over its column (within 2)",
+  "ok": true,
+  "detail": "338,563,898 vs 338,563,898 · last ends 1208 vs 1208"
+ }
+]

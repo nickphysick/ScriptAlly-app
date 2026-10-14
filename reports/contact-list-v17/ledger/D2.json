@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 population: queried agents at two or more stages, and a closed one",
+  "ok": true,
+  "detail": "{\"Full requested\":1,\"Queried\":2,\"Full sent\":1,\"Partial requested\":1} · closed 1"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 every queried agent fills the bars its stage has reached (Queried 1, Partial 2, Full 3, Offer 4)",
+  "ok": true,
+  "detail": "5 rows"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 a closed agent's four bars are rgb(214, 209, 203)",
+  "ok": true,
+  "detail": "4 grey, 0 filled"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the bars are 26 × 6 and each names its stage",
+  "ok": true,
+  "detail": "26×6 · Queried|Partial|Full|Offer"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 a not-queried, open agent offers \"+ Log a query\"",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 it opens that agent's panel at Log a query, with the page dimmed, and no card",
+  "ok": true,
+  "detail": "panel seed-cal-near (want seed-cal-near, Wren Ashcombe) · journey true · head \"← Back to WrenLOG A QUERYQuery Wren×\" · scrim 1 · ?agent=seed-cal-near · cards 0"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 population: queried agents at two or more stages, and a closed one",
+  "ok": true,
+  "detail": "{\"Full requested\":1,\"Queried\":2,\"Full sent\":1,\"Partial requested\":1} · closed 1"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 every queried agent fills the bars its stage has reached (Queried 1, Partial 2, Full 3, Offer 4)",
+  "ok": true,
+  "detail": "5 rows"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 a closed agent's four bars are rgb(214, 209, 203)",
+  "ok": true,
+  "detail": "4 grey, 0 filled"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 the bars are 26 × 6 and each names its stage",
+  "ok": true,
+  "detail": "26×6 · Queried|Partial|Full|Offer"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 a not-queried, open agent offers \"+ Log a query\"",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 it opens that agent's panel at Log a query, with the page dimmed, and no card",
+  "ok": true,
+  "detail": "panel seed-cal-near (want seed-cal-near, Wren Ashcombe) · journey true · head \"← Back to WrenLOG A QUERYQuery Wren×\" · scrim 1 · ?agent=seed-cal-near · cards 0"
+ }
+]

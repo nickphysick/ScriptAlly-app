@@ -160,6 +160,7 @@ const Panel: React.FC<{
   showing?: number; onClear?: () => void; onClose: () => void; children: React.ReactNode;
 }> = ({ k, anchor, id, title, note, align = "left", showing, onClear, onClose, children }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const held = useRef(false);
   const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
   useLayoutEffect(() => {
     if (!anchor) return;
@@ -173,7 +174,9 @@ const Panel: React.FC<{
     if (!pos) return undefined;
     const el = ref.current;
     el?.querySelector<HTMLElement>("[data-opt]")?.focus({ preventScroll: true });
-    return () => { if (el && el.contains(document.activeElement) && anchor?.isConnected) anchor.focus({ preventScroll: true }); };
+    /* ⚠️ by the time this cleanup runs the panel has left the document and focus is already on <body>, so "was
+       focus inside?" is remembered while it is true (`held`), never asked afterwards */
+    return () => { if (held.current && anchor?.isConnected) anchor.focus({ preventScroll: true }); };
   }, [pos, anchor]);
   if (!anchor || !pos) return null;
   const onKey = (e: React.KeyboardEvent) => {
@@ -186,7 +189,11 @@ const Panel: React.FC<{
   };
   return createPortal(
     <div className="lpop cl17-pop" data-lpop={k} data-cl17="panel" id={id} role="dialog" aria-label={title} ref={ref} onKeyDown={onKey}
-      style={{ top: pos.top, left: pos.left, right: pos.right }}>
+      onFocusCapture={() => { held.current = true; }}
+      onBlurCapture={(e) => { if (!(e.relatedTarget instanceof Node) || !e.currentTarget.contains(e.relatedTarget)) held.current = e.relatedTarget === null ? held.current : false; }}
+      /* the pack's max height, and never past the window's foot: the header sits lower in the app than in the mock, so
+         at a 900px window the stated `100vh − 220px` put the footer and its button 75px below the fold (measured, lock E2) */
+      style={{ top: pos.top, left: pos.left, right: pos.right, maxHeight: `min(560px, calc(100vh - 220px), calc(100vh - ${Math.round(pos.top) + 16}px))` }}>
       <div className="cl17-pop-h" data-cl17="panel-head"><b>{title}</b><span>{note}</span></div>
       <div className="cl17-pop-b">{children}</div>
       <div className="cl17-pop-f" data-cl17="panel-foot">

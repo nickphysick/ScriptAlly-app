@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 no list, filters, summary card or pinned row",
+  "ok": true,
+  "detail": "0 list parts or agent rows · 0 pinned rows"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the navy header: \"Every agent, in one place\" and its two buttons",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · \"Every agent, in one place\" · + Add your first agent|Import your list"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 \"How it works\", with \"AN EXAMPLE AGENT\" and three notes",
+  "ok": true,
+  "detail": "How it works · \"An example agent\" · Does it fit your book?|How to query them|Where you stand"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 \"Ways to get started\": three cards, Smart import navy",
+  "ok": true,
+  "detail": "import:rgb(45, 58, 80) · template:rgb(255, 255, 255) · add:rgb(255, 255, 255)"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 nothing overflows sideways",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 with agents on file the page is the populated layout, without a reload, and the example is not in it",
+  "ok": true,
+  "detail": "{\"list\":37,\"empty\":0,\"nav\":1,\"example\":0}"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 no list, filters, summary card or pinned row",
+  "ok": true,
+  "detail": "0 list parts or agent rows · 0 pinned rows"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the navy header: \"Every agent, in one place\" and its two buttons",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) · \"Every agent, in one place\" · + Add your first agent|Import your list"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 \"How it works\", with \"AN EXAMPLE AGENT\" and three notes",
+  "ok": true,
+  "detail": "How it works · \"An example agent\" · Does it fit your book?|How to query them|Where you stand"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 \"Ways to get started\": three cards, Smart import navy",
+  "ok": true,
+  "detail": "import:rgb(45, 58, 80) · template:rgb(255, 255, 255) · add:rgb(255, 255, 255)"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 nothing overflows sideways",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 with agents on file the page is the populated layout, without a reload, and the example is not in it",
+  "ok": true,
+  "detail": "{\"list\":37,\"empty\":0,\"nav\":1,\"example\":0}"
+ }
+]

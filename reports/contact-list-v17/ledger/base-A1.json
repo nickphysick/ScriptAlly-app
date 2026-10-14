@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 no navy panel, strip, heading or ink bar",
+  "ok": false,
+  "detail": "4 v16 parts · 1 navy headers"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the h1 reads \"{N} agents on file\", N the rows on the page",
+  "ok": false,
+  "detail": "\"Every agent,in one place\" · label \"\" · 37 rows"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the title is Special Elite 44 (±1), on one line",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courie · 50 · 2 line(s)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the eyebrow reads \"— CONTACT LIST —\" in rust",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the hawk is 200 wide (±2), between the title block and the card",
+  "ok": false,
+  "detail": "hawk undefined–undefined (undefined) · title ends undefined · card starts undefined"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the shadow image is there at opacity 0.15 (±0.01)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no navy panel, strip, heading or ink bar",
+  "ok": false,
+  "detail": "4 v16 parts · 1 navy headers"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the h1 reads \"{N} agents on file\", N the rows on the page",
+  "ok": false,
+  "detail": "\"Every agent,in one place\" · label \"\" · 37 rows"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the title is Special Elite 44 (±1), on one line",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courie · 50 · 2 line(s)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the eyebrow reads \"— CONTACT LIST —\" in rust",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the hawk is 200 wide (±2), between the title block and the card",
+  "ok": false,
+  "detail": "hawk undefined–undefined (undefined) · title ends undefined · card starts undefined"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the shadow image is there at opacity 0.15 (±0.01)",
+  "ok": false,
+  "detail": "null"
+ }
+]

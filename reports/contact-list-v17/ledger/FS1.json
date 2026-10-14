@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "FS1",
+  "where": "1512 at rest: off, the header on the page, the sheet's button reads \"Full screen\"",
+  "ok": true,
+  "detail": "{\"on\":false,\"url\":null,\"header\":1,\"btn\":{\"text\":\"Full screen\",\"pressed\":\"false\"}}"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 F turns it on, and the URL carries it",
+  "ok": true,
+  "detail": "on true · ?full=1"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 the header and the footer are hidden",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 the pinned row is shown on the sheet's top edge at its full width",
+  "ok": true,
+  "detail": "shown true · top 0.0 · width off by 0.0"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 its three pills carry the summary card's figures",
+  "ok": true,
+  "detail": "none:31,live:5,closed:1 vs none:31,live:5,closed:1"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 the list starts under the row, at the top, and fills the wider sheet",
+  "ok": true,
+  "detail": "scrollTop 0 · list 16.0 under the row · 1388.0 of sheet 1436.0 (was 1256.0)"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 the sidebar is at its icons, and the writer's own setting is untouched",
+  "ok": true,
+  "detail": "68 wide · stored null (was null)"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 the sheet's button reads \"Exit full screen\"",
+  "ok": true,
+  "detail": "{\"text\":\"Exit full screen\",\"pressed\":\"true\"}"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 Escape leaves: the header is back, the URL lets go, the sidebar is as it was",
+  "ok": true,
+  "detail": "on false · ?full=null · header 1 · side 248 (was 248)"
+ },
+ {
+  "lock": "FS1",
+  "where": "1512 the page returns to the scroll position it had",
+  "ok": true,
+  "detail": "700 → 0 → 700"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 at rest: off, the header on the page, the sheet's button reads \"Full screen\"",
+  "ok": true,
+  "detail": "{\"on\":false,\"url\":null,\"header\":1,\"btn\":{\"text\":\"Full screen\",\"pressed\":\"false\"}}"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 F turns it on, and the URL carries it",
+  "ok": true,
+  "detail": "on true · ?full=1"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 the header and the footer are hidden",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 the pinned row is shown on the sheet's top edge at its full width",
+  "ok": true,
+  "detail": "shown true · top 0.0 · width off by 0.0"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 its three pills carry the summary card's figures",
+  "ok": true,
+  "detail": "none:31,live:5,closed:1 vs none:31,live:5,closed:1"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 the list starts under the row, at the top, and fills the wider sheet",
+  "ok": true,
+  "detail": "scrollTop 0 · list 16.0 under the row · 1156.0 of sheet 1204.0 (was 1024.0)"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 the sidebar is at its icons, and the writer's own setting is untouched",
+  "ok": true,
+  "detail": "68 wide · stored null (was null)"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 the sheet's button reads \"Exit full screen\"",
+  "ok": true,
+  "detail": "{\"text\":\"Exit full screen\",\"pressed\":\"true\"}"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 Escape leaves: the header is back, the URL lets go, the sidebar is as it was",
+  "ok": true,
+  "detail": "on false · ?full=null · header 1 · side 248 (was 248)"
+ },
+ {
+  "lock": "FS1",
+  "where": "1280 the page returns to the scroll position it had",
+  "ok": true,
+  "detail": "700 → 0 → 700"
+ }
+]

@@ -18,7 +18,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { KILL, SIZES, near, open } from "./hp2Lib";
+import { KILL, SIZES, near, open, LIGHT_HEADER, LIGHT_HEADER_SEL } from "./hp2Lib";
 import { stripOffset, stripShown, underStrip, applyShift } from "./betaStrip";
 
 const DIR = "reports/header-v3";
@@ -144,6 +144,7 @@ test("H1–H7 · the panel on every workspace route", async ({ page }) => {
   let withArt = 0, withSub = 0;
   for (const vp of SIZES) for (const route of ALL) {
     await open(page, route, vp);
+    if (LIGHT_HEADER.includes(route)) { L.check("H1 a light-header route shows its own header (contactV17 A1 holds it)", `${route} @${vp.width}`, await page.locator(LIGHT_HEADER_SEL).filter({ visible: true }).count() === 1, "its own header"); continue; }
     const r = await read(page, ROWS[route] ?? null); const at = `${route} @${vp.width}`; const isNum = (NUMBER as readonly string[]).includes(route);
     /* H1 */
     L.check("H1 the header is the shared panel", at, !!r.hd && r.kind === (isNum ? "number" : "title"), `kind ${r.kind} · ${SHOW(r.any)}`);

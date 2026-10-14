@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 off before the line, on past it, off again",
+  "ok": true,
+  "detail": "false → true → false (line at 276)"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 the state flips exactly twice",
+  "ok": true,
+  "detail": "2 flips"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 scrollTop is what was set (±1)",
+  "ok": true,
+  "detail": "worst drift 0"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 the row's box takes exactly one value while pinned",
+  "ok": false,
+  "detail": "2 boxes: 248.00,105.75,1256.00,68.00 | 248.00,108.75,1256.00,68.00"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 off before the line, on past it, off again",
+  "ok": true,
+  "detail": "false → true → false (line at 276)"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 the state flips exactly twice",
+  "ok": true,
+  "detail": "2 flips"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 scrollTop is what was set (±1)",
+  "ok": true,
+  "detail": "worst drift 0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 the row's box takes exactly one value while pinned",
+  "ok": false,
+  "detail": "2 boxes: 248.00,105.75,1024.00,68.00 | 248.00,108.75,1024.00,68.00"
+ }
+]

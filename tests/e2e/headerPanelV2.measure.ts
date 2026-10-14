@@ -13,7 +13,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { DIR, Ledger, OUT_OF_SCOPE, PANEL_BG, SIZES, WORKSPACE, contrast, near, open, parseRgb, pixel, prepare, readPanel } from "./hp2Lib";
+import { DIR, Ledger, OUT_OF_SCOPE, PANEL_BG, SIZES, WORKSPACE, contrast, near, open, parseRgb, pixel, prepare, readPanel, LIGHT_HEADER, LIGHT_HEADER_SEL } from "./hp2Lib";
 import { stripOffset, stripShown, underStrip, applyShift } from "./betaStrip";
 
 const BASELINE = "tests/e2e/fixtures/hp2-outofscope.json";
@@ -26,6 +26,7 @@ test("P1 P4 P5 P7 · the panel on every workspace route", async ({ page }) => {
   let withArt = 0, withIntro = 0;
   for (const vp of SIZES) for (const route of WORKSPACE) {
     await open(page, route, vp);
+    if (LIGHT_HEADER.includes(route)) { L.check("P1 a light-header route shows its own header (contactV17 A1 holds it)", `${route} @${vp.width}`, await page.locator(LIGHT_HEADER_SEL).filter({ visible: true }).count() === 1, "its own header"); continue; }
     const r = await readPanel(page); const w = `${route} @${vp.width}`;
     L.check("P1 the header is the panel", w, !!r.hd, r.hd ? SHOW(r.hd) : `no [data-hpanel] on screen (header ${SHOW(r.any)})`);
     L.check("P1 background, radius 14, 1px border", w, r.bg === PANEL_BG && r.radius === "14px" && r.border === "1px solid", `${r.bg} · ${r.radius} · ${r.border}`);
@@ -67,6 +68,7 @@ test("P7 · no horizontal overflow at 390", async ({ page }) => {
   await open(page, "/dashboard", SIZES[0]);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of WORKSPACE) {
+    if (LIGHT_HEADER.includes(route)) continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow)
     await page.goto(route); await page.waitForTimeout(2600);
     const r = await page.evaluate(() => {
       const vis = (e: Element) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().height > 0;

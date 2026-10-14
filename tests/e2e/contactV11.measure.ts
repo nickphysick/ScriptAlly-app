@@ -515,7 +515,8 @@ test.skip("§11.7's third leg — saving a window that crosses today MOVES the r
 
 /* ═════════════ Query actions v1 follow-through — the log doors open the drawer IN PLACE ═════════════ */
 
-test("Log query opens the query drawer on this page — no navigation, the agent carried (both doors)", async ({ page }) => {
+/* RETIRED (Contact list v17, 14 Oct): its first door was the hover tray on a never-queried row; that row shows "+ Log a query" now and the pointer's tray stands down there. CL17 D2 holds the link opening the panel's journey. tests/e2e/RETIRED-contact-list-v17.md */
+test.skip("Log query opens the query drawer on this page — no navigation, the agent carried (both doors)", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   /* door 1: the row's hover tray on a never-queried, open-door agent (v13 P4: the v11 mini retired
@@ -776,7 +777,8 @@ test("v12 §10.5 — the dossier row: four tracks, one italic line, the one-line
 
 /* ══════════════════════════ v12 P5 — the empty state: the ways, the banner, the previews (§10.7) ══════════════════════════ */
 
-test("v12 §10.7 — the three ways in, the anthracite banner, and the two live previews", async ({ page }) => {
+/* RETIRED (Contact list v17, 14 Oct): the empty page is v17's (navy header, How it works, Ways to get started): CL17 F1. tests/e2e/RETIRED-contact-list-v17.md */
+test.skip("v12 §10.7 — the three ways in, the anthracite banner, and the two live previews", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   const scope = await visiblePage(page, ".agl-wpg");
   /* the harness account has agents — the LH review aid holds the COUNT at 0, the page's own

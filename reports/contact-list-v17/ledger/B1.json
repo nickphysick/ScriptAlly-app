@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 the filter row holds search and four pills, and no Grouped, density or Full screen",
+  "ok": true,
+  "detail": "{\"find\":1,\"pills\":4,\"group\":0,\"dens\":0,\"full\":0}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 the sheet's first row holds \"Showing…\", Grouped, density and Full screen",
+  "ok": true,
+  "detail": "{\"showing\":\"Showing all 37\",\"group\":1,\"dens\":1,\"full\":1}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no ink bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 nothing in the filter row wraps or runs past it",
+  "ok": true,
+  "detail": "centres 0px apart · overflow 0 · past the edge -169.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 the filter row holds search and four pills, and no Grouped, density or Full screen",
+  "ok": true,
+  "detail": "{\"find\":1,\"pills\":4,\"group\":0,\"dens\":0,\"full\":0}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 the sheet's first row holds \"Showing…\", Grouped, density and Full screen",
+  "ok": true,
+  "detail": "{\"showing\":\"Showing all 37\",\"group\":1,\"dens\":1,\"full\":1}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no ink bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 nothing in the filter row wraps or runs past it",
+  "ok": true,
+  "detail": "centres 0px apart · overflow 0 · past the edge 0.0"
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 steady",
+  "ok": false,
+  "detail": "no pinned row or sentinel"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 steady",
+  "ok": false,
+  "detail": "no pinned row or sentinel"
+ }
+]
