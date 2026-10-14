@@ -304,10 +304,19 @@ export function dialOf(r: Filterable & { stageStartMs: number | null; lastMs: nu
  *    between fold into one "+{n} more" stop.
  * ⚠️ SAME-DAY EVENTS MERGE into one stop; a stop on today's day takes the rust ring and there is no separate Today.
  */
-export interface PeekEvent { name: string; ms: number }
+/**
+ * v138.3 — `status` is the event's stage from the activity source itself (the panel's `RowSpec.status`), never parsed
+ * from its label; null for an event that is not a status (a nudge, a holding reply), which draws no stage glyph.
+ */
+export interface PeekEvent { name: string; ms: number; status?: string | null }
 export type StopKind = "event" | "more" | "due" | "wasdue" | "today";
-export interface PeekStop { kind: StopKind; name: string; date: string; ms: number; today: boolean }
-export type SegKind = "done" | "ahead" | "over";
+export interface PeekStop { kind: StopKind; name: string; date: string; ms: number; today: boolean; status?: string | null }
+/** v138.3 — "you": a stretch opened by a request or an offer (the writer's turn), drawn rust; "done" is navy */
+export type SegKind = "done" | "you" | "ahead" | "over";
+/** the stages whose stretch is the writer's turn, and whose marker carries the dashed ring (v138.3 A/B) */
+export const YOUR_MOVE_STATUSES: readonly string[] = [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER];
+/** an event's stage glyph, strictly: null when the event is not a status or the status is unknown (no fallback) */
+export const peekGlyph = (status: string | null | undefined): GlyphKey | null => (status ? BY_STATUS.get(status) ?? null : null);
 export interface PeekSeg { days: number; label: string; short: string; kind: SegKind; grow: number }
 export interface PeekChain { stops: PeekStop[]; segs: PeekSeg[]; overdue: boolean }
 
@@ -337,7 +346,7 @@ export const TICK_UNITS: { name: "week" | "month" | "quarter" | "year"; days: nu
   { name: "week", days: 7 }, { name: "month", days: 30.4375 }, { name: "quarter", days: 91.3125 }, { name: "year", days: 365.25 },
 ];
 /**
- * The ruler's unit: the smallest whose ticks sit at least 6px apart on the most-stretched (widest) gap;
+ * The ruler's unit: the smallest whose ticks sit at least 8px apart (v138.3; 6 before) on the most-stretched (widest) gap;
  * per gap, one tick per whole unit of its real length, spaced by its own px per unit, and none where that spacing
  * would fall under 4px or the gap is shorter than one unit.
  */
@@ -346,7 +355,7 @@ export function tickPlan(gaps: readonly { days: number; px: number }[]): { unit:
      says nothing about the scale (the reference's own ten-year and seven-year cases tick in months) */
   const wide = gaps.filter((g) => g.days > 0).reduce<{ days: number; px: number } | null>((a, g) => (!a || g.px > a.px ? g : a), null);
   const pxd = wide ? wide.px / wide.days : 0;
-  const unit = pxd > 0 ? TICK_UNITS.find((u) => u.days * pxd >= 6) ?? null : null;
+  const unit = pxd > 0 ? TICK_UNITS.find((u) => u.days * pxd >= 8) ?? null : null;
   const ticks = gaps.map((g) => {
     if (!unit || g.days < unit.days || g.days <= 0) return { n: 0, step: 0 };
     const step = (unit.days * g.px) / g.days;
@@ -407,8 +416,9 @@ export function peekChain(
   const merged: PeekStop[] = [];
   for (const e of evs) {
     const last = merged[merged.length - 1];
-    if (last && dayKey(last.ms) === dayKey(e.ms)) { if (!last.name.split(" · ").includes(e.name)) last.name = `${last.name} · ${e.name}`; continue; }
-    merged.push({ kind: "event", name: e.name, date: fmt(e.ms), ms: e.ms, today: false });
+    /* same day: one stop, named for both, showing the LATER event's stage (where the day ended) */
+    if (last && dayKey(last.ms) === dayKey(e.ms)) { if (!last.name.split(" · ").includes(e.name)) last.name = `${last.name} · ${e.name}`; if (e.status !== undefined) last.status = e.status; continue; }
+    merged.push({ kind: "event", name: e.name, date: fmt(e.ms), ms: e.ms, today: false, status: e.status });
   }
   /* an event on today's day takes the Today stop's place and its ring */
   if (tail.length && tail[0].kind !== "wasdue" && merged.length && dayKey(merged[merged.length - 1].ms) === t0) {
@@ -437,7 +447,9 @@ export function peekChain(
   for (let i = 1; i < stops.length; i += 1) {
     const a = stops[i - 1], b = stops[i];
     const days = dDays(a.ms, b.ms);
-    const kind: SegKind = a.kind === "wasdue" ? "over" : (b.kind === "due" || (b.ms > now && !b.today)) ? "ahead" : "done";
+    const base: SegKind = a.kind === "wasdue" ? "over" : (b.kind === "due" || (b.ms > now && !b.today)) ? "ahead" : "done";
+    /* v138.3 — a stretch that happened is coloured by whose turn it was, from the stop that opens it */
+    const kind: SegKind = base === "done" && a.kind === "event" && !!a.status && YOUR_MOVE_STATUSES.includes(a.status) ? "you" : base;
     const words = gapWords(days);
     /* v138.1 §D — DRAWN TO SCALE: a gap grows linearly with its length in days (floor 0.35), replacing log2 */
     segs.push({ days, kind, label: kind === "over" ? `${words} over` : words, short: kind === "over" ? `${days}d over` : gapShort(days), grow: Math.max(0.35, days) });

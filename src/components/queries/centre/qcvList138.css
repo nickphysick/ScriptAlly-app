@@ -318,55 +318,44 @@
   .qc138-sheet .qc138-peekw { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.26s cubic-bezier(.2,.8,.2,1); }
   .qc138-sheet .qc138-peekw[data-open] { grid-template-rows: 1fr; }
   .qc138-sheet .qc138-peeki { min-height: 0; overflow: hidden; }
-  /* v138.1 §D — no container: the cards sit on the row's white, from the name's left */
-  .qc138-sheet .qc138-peek {
-    position: relative; box-sizing: border-box; margin: 0; padding: 12px 0 24px; background: none;
-  }
+  /* ── v138.3 §A · THE PEEK AS BARS (replaces v138.1's cards; one authoritative block) ──
+     No container. A marker is a column: its glyph on the bars, its name and date under it, 150px at most; the first
+     marker's text starts at its left edge, the last's ends at its right. A gap is 16px of flow holding a 10px bar
+     (3px down, radius 5), so the bar's centre is the glyph's (8px); bars run 2px under each marker. The length sits
+     17px above the gap with no pill; the ticks 3px under the bar; the dated axis (§C) 18px under it. */
+  .qc138-sheet .qc138-peek { position: relative; box-sizing: border-box; margin: 0; padding: 18px 0 16px; background: none; }
   .qc138-sheet .qc138-peek--wait { min-height: 76px; }
-  .qc138-sheet .qc138-chain { display: flex; align-items: center; min-width: 0; }
-  /* a stop is a card */
-  .qc138-sheet .qc138-card {
-    flex: 0 1 auto; display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; min-width: 0; max-width: 182px;
-    padding: 7px 11px 7px 9px; border-radius: 10px; background: #fff;
-    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 4px 10px -8px rgba(28, 19, 15, 0.4);
+  .qc138-sheet .qc138-chain { display: flex; align-items: flex-start; min-width: 0; }
+  .qc138-sheet .qc138-mk {
+    position: relative; z-index: 1; flex: 0 1 auto; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
+    min-width: 0; max-width: 150px; text-align: center;
   }
-  .qc138-sheet .qc138-card .qc138-sd { flex: none; display: block; box-sizing: border-box; width: 11px; height: 11px; border-radius: 50%; background: #2a3a52; }
-  .qc138-sheet .qc138-card--due .qc138-sd, .qc138-sheet .qc138-card--today .qc138-sd { background: #fff; box-shadow: inset 0 0 0 2px #2a3a52; }
-  .qc138-sheet .qc138-card--more .qc138-sd { background: #fff; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
-  .qc138-sheet .qc138-card.is-today .qc138-sd { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #e7a184; }
-  .qc138-sheet .qc138-card-t { display: flex; flex-direction: column; min-width: 0; max-width: 150px; text-align: left; }
-  .qc138-sheet .qc138-card-t b, .qc138-sheet .qc138-card-t small { display: block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .qc138-sheet .qc138-card-t b { font: 600 12.5px/1.3 var(--sp-serif) !important; color: #1c130f; }
-  .qc138-sheet .qc138-card-t small { font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); }
-  /* was due: a blush card, a rust dot, the name in rust */
-  .qc138-sheet .qc138-card--wasdue { background: #fbefe8; box-shadow: 0 0 0 1px rgba(162, 69, 42, 0.3); }
-  .qc138-sheet .qc138-card--wasdue .qc138-sd { background: #a2452a; }
-  .qc138-sheet .qc138-card--wasdue .qc138-card-t b { color: #a2452a; }
-  /* today: a navy pill, a white dot in a peach ring, TODAY in mono, no date */
-  .qc138-sheet .qc138-today {
-    flex: none; display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: 30px; padding: 0 12px 0 10px;
-    border-radius: 15px; background: #2d3a50;
-  }
-  .qc138-sheet .qc138-today .qc138-sd { display: block; box-sizing: border-box; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2.5px #e7a184; }
-  .qc138-sheet .qc138-today b { font: 600 9.5px/1 var(--font-mono) !important; letter-spacing: 0.12em; text-transform: uppercase; color: #f4eee5; }
-  /* the gap: drawn to scale (flex-grow = days), 44px at least, a 2px line centred on the cards */
-  .qc138-sheet .qc138-seg { position: relative; flex: 1 1 0; align-self: center; min-width: 44px; height: 2px; margin: 0 4px; }
-  .qc138-sheet .qc138-seg .qc138-seg-ln { position: absolute; inset: 0; display: block; background: #2a3a52; }
-  .qc138-sheet .qc138-seg--ahead .qc138-seg-ln { background: rgba(42, 58, 82, 0.18); }
-  .qc138-sheet .qc138-seg--over .qc138-seg-ln { background: repeating-linear-gradient(90deg, #a2452a 0 6px, transparent 6px 10px); }
+  .qc138-sheet .qc138-chain > .qc138-mk:first-child { align-items: flex-start; text-align: left; }
+  .qc138-sheet .qc138-chain > .qc138-mk:last-child { align-items: flex-end; text-align: right; }
+  .qc138-sheet .qc138-mk-g { flex: none; display: grid; place-items: center; width: 16px; height: 16px; }
+  .qc138-sheet .qc138-mk-dot { display: block; box-sizing: border-box; width: 16px; height: 16px; border-radius: 50%; background: #3d5070; box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff); }
+  .qc138-sheet .qc138-mk-t { display: flex; flex-direction: column; align-items: inherit; min-width: 0; max-width: 150px; margin-top: 9px; }
+  .qc138-sheet .qc138-mk-t b, .qc138-sheet .qc138-mk-t small { display: block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc138-sheet .qc138-mk-t b { font: 600 12.5px/1.3 var(--sp-serif) !important; color: #1c130f; }
+  .qc138-sheet .qc138-mk-t small { font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); }
+  /* the gap */
+  .qc138-sheet .qc138-seg { position: relative; flex: 1 1 0; align-self: flex-start; min-width: 64px; height: 16px; margin: 0 -2px; }
+  .qc138-sheet .qc138-seg .qc138-seg-ln { position: absolute; left: 0; right: 0; top: 3px; height: 10px; display: block; border-radius: 5px; background: #3d5070; }
+  .qc138-sheet .qc138-seg--you .qc138-seg-ln { background: #b0603e; }
+  .qc138-sheet .qc138-seg--ahead .qc138-seg-ln { background: rgba(42, 58, 82, 0.14); }
+  .qc138-sheet .qc138-seg--over .qc138-seg-ln { background: repeating-linear-gradient(135deg, #c86a4a 0 3px, #fbe3d6 3px 7px); box-shadow: inset 0 0 0 1.5px #a2452a; }
   .qc138-sheet .qc138-seg em {
-    position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); padding: 1px 6px; border-radius: 8px; background: #fff; white-space: nowrap;
-    font: 500 9.5px/12px var(--font-mono) !important; font-style: normal; letter-spacing: 0.06em; color: rgba(28, 19, 15, 0.5);
+    position: absolute; left: 50%; bottom: 17px; transform: translateX(-50%); white-space: nowrap;
+    font: 500 10px/12px var(--font-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.55);
   }
-  .qc138-sheet .qc138-seg--over em { color: #a2452a; }
   .qc138-sheet .qc138-seg .qc138-seg-probe { visibility: hidden; pointer-events: none; }
-  /* the tick ruler: 4px below the line's centre, 5px tall, 1px wide */
-  .qc138-sheet .qc138-ticks { position: absolute; left: 0; right: 0; top: 5px; height: 5px; overflow: hidden; pointer-events: none; }
+  /* the tick ruler: 3px under the bar, 5px tall, 1px wide */
+  .qc138-sheet .qc138-ticks { position: absolute; left: 2px; right: 2px; top: 16px; height: 5px; overflow: hidden; pointer-events: none; }
   .qc138-sheet .qc138-ticks i { position: absolute; top: 0; width: 1px; height: 5px; background: rgba(42, 58, 82, 0.35); }
   .qc138-sheet .qc138-seg--over .qc138-ticks i { background: rgba(162, 69, 42, 0.45); }
   .qc138-sheet .qc138-seg--ahead .qc138-ticks i { background: rgba(42, 58, 82, 0.2); }
-  /* the key, bottom right */
-  .qc138-sheet .qc138-peek-key { position: absolute; right: 0; bottom: 4px; display: flex; align-items: center; gap: 6px; font: italic 400 11.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+  /* the key, bottom right (retired by §C) */
+  .qc138-sheet .qc138-peek-key { position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 6px; font: italic 400 11.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
   .qc138-sheet .qc138-peek-key i { display: block; width: 6px; height: 5px; background: linear-gradient(90deg, rgba(42, 58, 82, 0.35) 0 1px, transparent 1px 5px, rgba(42, 58, 82, 0.35) 5px 6px); }
   .qc138-sheet .qc138-peek-key span { font: inherit !important; }
 }
@@ -422,9 +411,9 @@
    ⚠️ 0-4-0 AND LAST IN THE SHEET: it has to beat `.qc138-row.picked:hover` (0-4-0, earlier). `--qc138-rule` is the
    dashed rule's colour for the same tone (§B). */
 @media (min-width: 768px) {
-  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f3f5f9; --qc138-rule: rgba(45, 58, 80, 0.2); }
-  .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fcf3ee; --qc138-rule: rgba(162, 69, 42, 0.25); }
-  .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #f5f3f0; --qc138-rule: rgba(28, 19, 15, 0.15); }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f3f5f9; --qc138-rule: rgba(45, 58, 80, 0.2); --qc138-pkbg: #f3f5f9; }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fcf3ee; --qc138-rule: rgba(162, 69, 42, 0.25); --qc138-pkbg: #fcf3ee; }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #f5f3f0; --qc138-rule: rgba(28, 19, 15, 0.15); --qc138-pkbg: #f5f3f0; }
   .qc138-sheet .qc138-peekw, .qc138-sheet .qc138-peeki { background: none; }
 }
 
@@ -460,7 +449,7 @@
   .qc138-sheet .qc138-sum-a:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 2px; }
   .qc138-sheet .qc138-sum-a[hidden] { display: none; }
   /* the narrower span (§B) squeezed a short "+n more" card to "+…": it keeps its own width */
-  .qc138-sheet .qc138-drw .qc138-card--more { flex: none; }
+  .qc138-sheet .qc138-drw .qc138-mk--more { flex: none; }
 }
 
 /* ── v138.2 §D · MOTION ─────────────────────────────────────────────────────────────────────────────────────────
@@ -468,14 +457,14 @@
    stop's index) and each gap's line draws left to right (scaleX 0 → 1, 500ms, after 100ms). The tick ruler and its
    key come with their gap and are not animated on their own. Under reduced motion the peek is simply there. */
 @media (min-width: 768px) {
-  .qc138-sheet .qc138-drw .qc138-card, .qc138-sheet .qc138-drw .qc138-today {
+  .qc138-sheet .qc138-drw .qc138-mk {
     animation: qc138-land 320ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 60ms);
   }
   .qc138-sheet .qc138-drw .qc138-seg-ln { transform-origin: left center; animation: qc138-draw 500ms cubic-bezier(.2,.8,.2,1) 100ms both; }
 }
 @keyframes qc138-land { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .qc138-sheet .qc138-drw .qc138-card, .qc138-sheet .qc138-drw .qc138-today, .qc138-sheet .qc138-drw .qc138-seg-ln { animation: none !important; }
+  .qc138-sheet .qc138-drw .qc138-mk, .qc138-sheet .qc138-drw .qc138-seg-ln { animation: none !important; }
 }
 
 /* ── v138.2 · BELOW 900px OF SHEET (a 1100 window with the sidebar open) the list has five columns and First queried

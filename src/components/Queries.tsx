@@ -7122,7 +7122,8 @@ export const Queries: React.FC<{
                     if (!q0) return [];
                     const docs = await readQueryActivity(id);
                     const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
-                    return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number }));
+                    /* v138.3 — the stage comes from the row itself (`status`); a nudge or a holding reply is not a status (`kind`) */
+                    return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number, status: r0.kind ? null : r0.status }));
                   }}
                   entering={qc138In === "run"}
                   /* v138.1 §F — nothing matches: the dead end sits INSIDE the sheet, so the navy row and its search stay */
