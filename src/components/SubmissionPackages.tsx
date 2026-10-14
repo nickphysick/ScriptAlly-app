@@ -56,8 +56,9 @@ import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
 import "./packages/v4/packagesV4.css";
 import { PkgHeader4, PkgSummaryCard, type StatusKey } from "./packages/v4/PkgHeader4";
 import { overall } from "../lib/packageReplies";
-import { PkgFilters4, emptyPkgFilters, pkgMatches, type PkgFilters, type PkgPop } from "./packages/v4/PkgFilters4";
+import { PkgFilters4, emptyPkgFilters, filterCount, pkgMatches, type PkgFilters, type PkgPop } from "./packages/v4/PkgFilters4";
 import { usePopover } from "./shell/ListPills";
+import { PackagesSheet, type CardData } from "./packages/v4/PkgSheets4";
 import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
@@ -180,6 +181,22 @@ export const SubmissionPackages: React.FC = () => {
   const pop = usePopover<PkgPop>();
   const inPackages = (kind: "letter" | "synopsis" | "version", id: string) => msPkgs.filter((p) =>
     (kind === "letter" ? p.queryLetterVersionId : kind === "synopsis" ? p.synopsisVersionId || "" : p.bookVersionId || "") === id).length;
+  /* Part C · the sheet's search: package names and the names of the materials each holds now */
+  const [find, setFind] = useState("");
+  const findMatch = (p: SubmissionPackage) => {
+    const t = find.trim().toLowerCase();
+    if (!t) return true;
+    return [p.packageName, matName("letter", p.queryLetterVersionId)?.name, matName("synopsis", p.synopsisVersionId)?.name, matName("version", p.bookVersionId)?.name]
+      .some((x) => (x ?? "").toLowerCase().includes(t));
+  };
+  const clearAll = () => { setFilters(emptyPkgFilters()); setFind(""); };
+  const cardOf = (p: SubmissionPackage): CardData => ({
+    pkg: p, sent: model.goneOut(p), forNew: active?.id === p.id, split: model.currentSplit(p),
+    slots: { letter: matName("letter", p.queryLetterVersionId)?.name ?? null, synopsis: matName("synopsis", p.synopsisVersionId)?.name ?? null, version: matName("version", p.bookVersionId)?.name ?? null },
+  });
+  /* In use: the package used for new queries first, then newest (msPkgs is newest first) */
+  const cardsLive = live.filter((p) => statusMatch(p) && findMatch(p)).sort((a, b) => Number(active?.id === b.id) - Number(active?.id === a.id)).map(cardOf);
+  const cardsRet = retired.filter((p) => statusMatch(p) && findMatch(p)).map(cardOf);
   const overallSplit = useMemo(() => overall(msPkgs, msQueries, rowsById), [msPkgs, msQueries, rowsById]);
   const goReplies = () => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -224,28 +241,17 @@ export const SubmissionPackages: React.FC = () => {
           onNew={() => openNew()} onAddMaterial={() => setView({ m: "matform", d: { kind: "letter", name: "", note: "", text: "" } })}
           card={<PkgSummaryCard counts={counts} active={status} onStatus={pressStatus} overall={overallSplit} onRate={goReplies} loading={!collectionsReady && !activeMs} />}>
           <PkgFilters4 filters={filters} onFilters={setFilters} pop={pop} statusCounts={counts} letters={allMats.letter} synopses={allMats.synopsis}
-            versions={allMats.version} inPackages={inPackages} showing={msPkgs.filter(statusMatch).length} />
+            versions={allMats.version} inPackages={inPackages} showing={msPkgs.filter((p) => statusMatch(p) && findMatch(p)).length} />
         </PkgHeader4>}
         <div className="ppv-group">
           <div className="ppv-main" data-ppv="main">
-            {noneLive ? (
-              <section className="ppv-nonelive" data-ppv="none-live" aria-label="Nothing in use">
-                <div><b>Nothing in use right now</b>
-                  <p>{retired.length === 1 ? "Your one package is" : `All ${retired.length} of your packages are`} retired, with their history kept. Start a new package, or restore one below to use it again.</p></div>
-                <button type="button" className="ppv-btn ppv-btn--dark" data-ppv="none-new" onClick={() => openNew()}>+ New package</button>
-              </section>
-            ) : null}
             {!activeMs ? null : exhibit ? (
               <PackagesExhibit />
             ) : (
               <>
-                {live.length ? (
-                  <section className="ppv-pksec">
-                    <PkgBand band="packages" title="Your packages" count={live.length}
-                      hint={active ? <><b>{active.packageName}</b> is used for new queries</> : "No package is used for new queries"} />
-                    <div className="ppv-list" data-ppv="list">{live.filter(statusMatch).map(card)}</div>
-                  </section>
-                ) : null}
+                <PackagesSheet live={cardsLive} retired={cardsRet} total={msPkgs.length} filtered={filterCount(filters) > 0 || !!find.trim()}
+                  retiredForced={filters.status.includes("ret")} noneLive={noneLive} openId={view?.m === "pkg" ? view.id : null}
+                  find={find} onFind={setFind} onClearAll={clearAll} onOpen={(p) => setView({ m: "pkg", id: p.id, tab: "inside" })} onNew={() => openNew()} />
                 {sent.length >= 2 ? (
                   <>
                     <PkgBand band="sbs" title="Side by side" hint="Facts from your query log" ref={sbsRef} id="ppv-sbs" />
@@ -267,13 +273,6 @@ export const SubmissionPackages: React.FC = () => {
                       </table>
                       <div className="foot">Requests count partials and fulls. Typical reply is the median time to any reply.</div>
                     </div>
-                  </>
-                ) : null}
-                {retired.length ? (
-                  <>
-                    <PkgBandToggle band="retired" title="Retired" count={retired.length} hint={showRetired || noneLive ? "Hide" : "Show"}
-                      expanded={showRetired || noneLive} onToggle={() => setShowRetired((v) => !v)} />
-                    {showRetired || noneLive || status.has("ret") ? <div className="ppv-list" data-ppv="retired">{retired.filter(statusMatch).map(card)}</div> : null}
                   </>
                 ) : null}
               </>

@@ -314,3 +314,76 @@ button.pk4-sr:hover { background: var(--pk4-oat); }
 .pk4-hd .pk4-fbar.cl17-fbar.cl14-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; margin: 0; }
 @container pk4hd (max-width: 899.98px) { .pk4-hd .pk4-fbar.cl17-fbar.cl14-fbar { flex-wrap: wrap; } }
 .pk4-psw { display: block; box-sizing: border-box; width: 12px; height: 12px; border-radius: 3px; }
+
+/* ═════ Parts C–E · the white sheets (Query Centre v138's sheet, page-local) ═════ */
+.pk4-ws {
+  position: relative; box-sizing: border-box; margin-top: 22px; background: #fff; border-radius: 20px; container: pk4sheet / inline-size;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45);
+}
+.pk4-wsh {
+  position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 14px 18px; box-sizing: border-box; min-height: 76px;
+  padding: 20px 22px 20px 24px; background: var(--pk4-navy); border-radius: 20px 20px 0 0; color: var(--pk4-cream);
+}
+.pk4-wsh .pk4-say { flex: 1 1 auto; min-width: 240px; margin: 0; font: 400 17px/1.3 var(--pk4-type) !important; color: var(--pk4-cream); }
+.ws-app.sheet-wide .pk4-wsh .pk4-say { font-size: 20px !important; }
+.pk4-wsh .pk4-say b { font: inherit !important; color: var(--pk4-cream); }
+.pk4-wsh .pk4-say .pk4-dim { color: var(--pk4-c55); }
+.pk4-wsh .pk4-say .pk4-u { text-decoration: underline dotted var(--pk4-peach) 2px; text-underline-offset: 6px; color: var(--pk4-cream); }
+.pk4-wsh .pk4-clear { margin-left: 14px; color: var(--pk4-peach); font: italic 400 15px/1.2 var(--pk4-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
+.pk4-wsh :focus-visible { outline: 2px solid var(--pk4-peach); outline-offset: 3px; }
+.pk4-wsh .pk4-wsnote { color: var(--pk4-c55) !important; }
+/* v138.1's in-sheet search: 300 on a full sheet, 220 below 1180 of sheet */
+.pk4-search {
+  flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box; width: 300px; height: 40px; margin-left: auto; padding: 0 10px 0 14px;
+  border-radius: 12px; background: rgba(244, 238, 229, 0.1); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.18); color: rgba(244, 238, 229, 0.7);
+  transition: width 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.pk4-search svg { flex: none; }
+.pk4-search input { flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; color: var(--pk4-cream); font: 400 15.5px/1.2 var(--pk4-serif) !important; text-overflow: ellipsis; }
+.pk4-search input::placeholder { color: rgba(244, 238, 229, 0.55); }
+.pk4-search kbd {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 5px;
+  border: 1px solid rgba(244, 238, 229, 0.3); border-radius: 5px; font: 400 11px/1 var(--pk4-mono) !important; color: rgba(244, 238, 229, 0.6);
+}
+.pk4-search:focus-within { width: 360px; background: var(--pk4-cream); box-shadow: none; color: var(--pk4-navy); }
+.pk4-search:focus-within input { color: var(--pk4-ink); }
+.pk4-search:focus-within input::placeholder { color: rgba(28, 19, 15, 0.5); }
+.pk4-search:focus-within kbd { color: var(--pk4-ink); border-color: rgba(28, 19, 15, 0.3); }
+@container pk4sheet (max-width: 1179.98px) {
+  .pk4-search { width: 220px; }
+  .pk4-search:focus-within { width: 260px; }
+}
+@media (prefers-reduced-motion: reduce) { .pk4-search { transition: none; } }
+
+/* the bands: v138's, 56 tall, radius 12, a white 32px icon circle, a count pill and a mono note */
+.pk4-band {
+  display: flex; align-items: center; gap: 12px; box-sizing: border-box; width: calc(100% - 36px); height: 56px; margin: 10px 18px 0; padding: 0 18px 0 12px;
+  border-radius: 12px; text-align: left; color: var(--pk4-band-c); background: var(--pk4-band-bg);
+}
+button.pk4-band { cursor: pointer; user-select: none; }
+.pk4-band--use { --pk4-band-bg: var(--pk4-powder); --pk4-band-c: #3d5070; }
+.pk4-band--ret { --pk4-band-bg: var(--pk4-stone); --pk4-band-c: #7c7168; margin-top: 10px; }
+.pk4-band--flat { width: 100%; margin: 0; }
+.pk4-band .pk4-bic { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--pk4-band-c); }
+.pk4-band .pk4-bic svg { width: 16px; height: 16px; }
+.pk4-band .pk4-bt { font: 400 19px/1.2 var(--pk4-type) !important; color: var(--pk4-ink); }
+.pk4-band .pk4-bn { padding: 4px 9px; border-radius: 10px; background: rgba(255, 255, 255, 0.75); font: 500 10px/1 var(--pk4-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pk4-band-c); white-space: nowrap; }
+.pk4-band .pk4-bh { margin-left: auto; font: 500 10px/1 var(--pk4-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pk4-band-c); white-space: nowrap; }
+.pk4-band .pk4-chev { display: inline-block; font-style: normal; transition: transform 0.2s; }
+.pk4-band[aria-expanded="false"] .pk4-chev { transform: rotate(-90deg); }
+.pk4-band:focus-visible { outline: 2px solid var(--pk4-navy); outline-offset: 2px; }
+.pk4-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 16px 18px 22px; }
+.pk4-grid--ret { padding-top: 16px; }
+@container pk4sheet (max-width: 1099.98px) { .pk4-grid { grid-template-columns: minmax(0, 1fr); } }
+.pk4-wspad { height: 18px; }
+.pk4 .pk4-newc {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 220px; padding: 20px; box-sizing: border-box;
+  border: 2px dashed var(--pk4-i14); border-radius: 14px; text-align: center; color: var(--pk4-i72); font: 400 18px/1.2 var(--pk4-type) !important;
+}
+.pk4 .pk4-newc span { max-width: 270px; font: 400 14.5px/1.4 var(--pk4-serif) !important; color: var(--pk4-i55); }
+.pk4 .pk4-newc:hover { border-color: var(--pk4-i30); color: var(--pk4-ink); }
+.pk4-nomatch { grid-column: 1 / -1; margin: 6px 4px; font: italic 400 15px/1.4 var(--pk4-serif); color: var(--pk4-i60); }
+.pk4-nomatch button { text-decoration: underline; text-underline-offset: 3px; }
+.pk4-nonelive { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; margin: 10px 18px 0; padding: 0 0 18px; }
+.pk4-nonelive p { margin: 0 12px; font: 400 16px/1.45 var(--pk4-serif) !important; color: var(--pk4-i72); }
+.pk4-nonelive .pk4-btn { margin-left: 12px; }

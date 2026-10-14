@@ -60,7 +60,7 @@ export const PkgSummaryCard: React.FC<{
   const r = overall;
   const answered = r?.answered ?? 0;
   return (
-    <div className="pk4-card" data-pk4="card" data-on={on ? "" : undefined} data-loading={loading ? "" : undefined}>
+    <div className="pk4-card" data-pk4="summary" data-on={on ? "" : undefined} data-loading={loading ? "" : undefined}>
       <div className="pk4-cnt" data-pk4="counts" role="group" aria-label="Where your packages stand">
         <div className="pk4-bar" data-pk4="card-bar" aria-hidden="true">
           {STATUS_ORDER.map((k) => (
