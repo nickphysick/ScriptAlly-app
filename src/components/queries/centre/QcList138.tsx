@@ -196,9 +196,9 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
                 </span>
               ) : null}
               {word ? (
-                <span className="qc138-today" data-qcv="peek-stop" data-kind="today"><i className="qc138-sd" /><b data-qcv="peek-name">Today</b></span>
+                <span className="qc138-today" data-qcv="peek-stop" data-kind="today" style={{ ["--i" as string]: i }}><i className="qc138-sd" /><b data-qcv="peek-name">Today</b></span>
               ) : (
-                <span className={`qc138-card qc138-card--${st.kind}${st.today ? " is-today" : ""}`} data-qcv="peek-stop" data-kind={st.kind}>
+                <span className={`qc138-card qc138-card--${st.kind}${st.today ? " is-today" : ""}`} data-qcv="peek-stop" data-kind={st.kind} style={{ ["--i" as string]: i }}>
                   <i className="qc138-sd" />
                   <span className="qc138-card-t">
                     <b data-qcv="peek-name">{st.name}</b>

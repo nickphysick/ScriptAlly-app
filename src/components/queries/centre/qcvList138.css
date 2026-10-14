@@ -462,3 +462,18 @@
   /* the narrower span (§B) squeezed a short "+n more" card to "+…": it keeps its own width */
   .qc138-sheet .qc138-drw .qc138-card--more { flex: none; }
 }
+
+/* ── v138.2 §D · MOTION ─────────────────────────────────────────────────────────────────────────────────────────
+   When the peek opens the cards land one after another (fade in, rise 6px, 320ms, 60ms apart in order: `--i` is the
+   stop's index) and each gap's line draws left to right (scaleX 0 → 1, 500ms, after 100ms). The tick ruler and its
+   key come with their gap and are not animated on their own. Under reduced motion the peek is simply there. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-drw .qc138-card, .qc138-sheet .qc138-drw .qc138-today {
+    animation: qc138-land 320ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 60ms);
+  }
+  .qc138-sheet .qc138-drw .qc138-seg-ln { transform-origin: left center; animation: qc138-draw 500ms cubic-bezier(.2,.8,.2,1) 100ms both; }
+}
+@keyframes qc138-land { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .qc138-sheet .qc138-drw .qc138-card, .qc138-sheet .qc138-drw .qc138-today, .qc138-sheet .qc138-drw .qc138-seg-ln { animation: none !important; }
+}
