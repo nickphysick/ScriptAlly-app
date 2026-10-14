@@ -103,6 +103,15 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
   }, [box, sig]);
 }
 const TONE_ICON: Record<BandTone, React.ReactNode> = { you: ICON.pen, waiting: ICON.glass, closed: ICON.box };
+/**
+ * v138.3 §F — the group art: the pointing talon for Your move, the hawk-and-hourglass for Waiting, breaking out of the
+ * band. Served as WebP at 2× (the PNGs beside them are the source). Decorative: the band's title carries the meaning.
+ * Compact keeps the small icon in its circle (the art is too detailed below 40px); Closed keeps its icon.
+ */
+const TONE_ART: Partial<Record<BandTone, { src: string; w: number; h: number }>> = {
+  you: { src: "/images/query-centre/your-move-talon.webp", w: 46, h: 64 },
+  waiting: { src: "/images/query-centre/waiting-hourglass.webp", w: 54, h: 55.5 },
+};
 
 /** Where it stands: four 9px dots (Queried · Partial · Full · Offer), 15 apart, joined by 11×2 lines */
 const Track: React.FC<{ level: number; yours: boolean; closed: boolean }> = ({ level, yours, closed }) => (
@@ -609,6 +618,9 @@ export const QcList138: React.FC<QcList138Props> = ({
               <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
                 <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
+                {TONE_ART[tone] ? (
+                  <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
+                ) : null}
                 <b className="qc138-gt" data-qcv="gband-t">{label}</b>
                 <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
                 {g.hint ? <span className="qc138-gh" data-qcv="gband-h">{g.hint}</span> : <span className="qc138-gh" />}
