@@ -87,7 +87,7 @@ const Head: React.FC<{ icon: React.ReactNode; title: string; sub: React.ReactNod
 );
 
 const SecHead: React.FC<{ n?: number; title: string; tag?: string }> = ({ n, title, tag }) => (
-  <div className="pk4-sh">{n ? <span className="pk4-num">{n}</span> : null}<h3>{title}</h3>{tag ? <span className="pk4-mono">{tag}</span> : null}</div>
+  <div className="pk4-sh">{n ? <span className="pk4-secn">{n}</span> : null}<h3>{title}</h3>{tag ? <span className="pk4-mono">{tag}</span> : null}</div>
 );
 
 const Cells: React.FC<{ cells: { label: string; fig: React.ReactNode; sub?: string; probe?: string }[] }> = ({ cells }) => (

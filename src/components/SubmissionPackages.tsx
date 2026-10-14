@@ -53,7 +53,8 @@ import { PkgDrawer4, type DrawerView } from "./packages/v4/PkgDrawer4";
 import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
 import "./packages/v4/packagesV4.css";
 import { PkgHeader4, PkgSummaryCard, type StatusKey } from "./packages/v4/PkgHeader4";
-import { overall } from "../lib/packageReplies";
+import { materialPackageCount, materialSplit, overall } from "../lib/packageReplies";
+import { RepliesBanner, RepliesSheet, materialSub, packageSub, type ByKind, type ReplyRow } from "./packages/v4/PkgReplies4";
 import { PkgFilters4, emptyPkgFilters, filterCount, pkgMatches, type PkgFilters, type PkgPop } from "./packages/v4/PkgFilters4";
 import { usePopover } from "./shell/ListPills";
 import { MaterialsSheet, PackagesSheet, type CardData } from "./packages/v4/PkgSheets4";
@@ -90,8 +91,9 @@ export const SubmissionPackages: React.FC = () => {
     setView({ m: "pkgform", d: { ...EMPTY_PKG, letter: pre.letter ?? "", synopsis: pre.synopsis ?? "", version: pre.version ?? "" } });
   }, []);
   const [showRetired, setShowRetired] = useState(false);
-  const sbsRef = useRef<HTMLDivElement | null>(null);
-  const scrollerOf = () => sbsRef.current?.closest(".wpg-scroll") as HTMLElement | null;
+  /* the replies sheet: the ring's press and ?tab=tracking scroll to it */
+  const repliesRef = useRef<HTMLElement | null>(null);
+  const scrollerOf = () => [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.querySelector('[data-pk4="page"]')) ?? null;
 
   /* ── deep links, on every arrival: ?tab=builder · ?tab=tracking · ?tab=packages · ?pkg={id}[&view=replies] ── */
   const params = new URLSearchParams(location.search);
@@ -112,8 +114,8 @@ export const SubmissionPackages: React.FC = () => {
     setPendingPkg(null);
   }, [pendingPkg, msPkgs]);
   useLayoutEffect(() => {
-    if (!pendingTrack || !sbsRef.current) return;
-    sbsRef.current.scrollIntoView({ block: "start" });
+    if (!pendingTrack || !repliesRef.current) return;
+    repliesRef.current.scrollIntoView({ block: "start" });
     setPendingTrack(false);
   }, [pendingTrack, sent.length]);
   /* a different manuscript is a different page: the drawer closes */
@@ -187,7 +189,20 @@ export const SubmissionPackages: React.FC = () => {
   const overallSplit = useMemo(() => overall(msPkgs, msQueries, rowsById), [msPkgs, msQueries, rowsById]);
   const goReplies = () => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    sbsRef.current?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    repliesRef.current?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+  };
+  /* Part E · the table's rows, ALL editions (the card and the drawer cells read the current one) */
+  const rowsFor = (by: ByKind): ReplyRow[] => {
+    if (by === "package") return msPkgs.map((p) => { const sp = model.allSplit(p); return { id: p.id, kind: "package", name: p.packageName, s: sp, sub: packageSub(p, sp), pkg: p }; });
+    const list = allMats[by].filter((m) => !m.retired || model.matSplit(m).sent > 0).map((m): ReplyRow => {
+      const sp = model.matSplit(m);
+      return { id: m.id, kind: by, name: m.name, s: sp, sub: materialSub(materialPackageCount(m.id, by, msPkgs, msQueries), sp), mat: m };
+    });
+    if (by === "version") {
+      const nr = materialSplit(null, "version", msPkgs, msQueries, rowsById);
+      if (nr.sent) list.push({ id: null, kind: "version", name: "Not recorded", s: nr, sub: `in ${materialPackageCount(null, "version", msPkgs, msQueries)} package${materialPackageCount(null, "version", msPkgs, msQueries) === 1 ? "" : "s"}` });
+    }
+    return list;
   };
 
   /* ── the living header (living headers v3) ── */
@@ -207,9 +222,6 @@ export const SubmissionPackages: React.FC = () => {
     copy: (n) => packagesHeaderCopy(n, { lead, firstLiveName: (active && active.status !== "Retired" ? active : live[0])?.packageName ?? null }),
     empty: { heading: PACKAGES_EMPTY_HEADING, subline: [PACKAGES_EMPTY_SUBLINE] },
   } : !collectionsReady ? { count: null, copy: (n) => packagesHeaderCopy(n, { lead: null, firstLiveName: null }) } : undefined;
-  const rows = sideBySide(sent, queries);
-  const slotLine = (p: SubmissionPackage) =>
-    [matName("letter", p.queryLetterVersionId)?.name, matName("synopsis", p.synopsisVersionId)?.name, matName("version", p.bookVersionId)?.name].filter(Boolean).join(" · ");
   const card = (p: SubmissionPackage) => (
     <PkgCard key={p.id} pkg={p} active={active?.id === p.id} {...cardProps(p)} onAct={onAct(p)} onSaveNote={(n) => model.saveNote(p, n)}
       onOpenQuery={(id) => navigate(`/queries?q=${encodeURIComponent(id)}`)} />
@@ -243,31 +255,17 @@ export const SubmissionPackages: React.FC = () => {
                   goneOut={(m) => (m.kind === "version" ? model.matSplit(m).sent > 0 : model.materialGoneOut(m.id))}
                   onOpen={(m) => setView({ m: "mat", kind: m.kind, id: m.id })}
                   onAdd={(k) => setView({ m: "matform", d: { kind: k, name: "", note: "", text: "" } })} />
-                {sent.length >= 2 ? (
-                  <>
-                    <PkgBand band="sbs" title="Side by side" hint="Facts from your query log" ref={sbsRef} id="ppv-sbs" />
-                    <div className="ppv-cmp">
-                      <table data-ppv="sbs">
-                        <thead><tr><th scope="col">Package</th><th scope="col">Queries</th><th scope="col">Requests</th><th scope="col">Replies</th><th scope="col">Typical reply</th></tr></thead>
-                        <tbody>
-                          {rows.map((r) => {
-                            const p = sent.find((x) => x.id === r.id)!;
-                            return (
-                              <tr key={r.id} className={r.retired ? "is-retired" : undefined}>
-                                <td>{p.packageName}<span className="m">{slotLine(p)}</span></td>
-                                <td>{r.queries}</td><td>{r.requests} <span className="of">of {r.queries}</span></td>
-                                <td>{r.replies} <span className="of">of {r.queries}</span></td><td>{r.typical}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                      <div className="foot">Requests count partials and fulls. Typical reply is the median time to any reply.</div>
-                    </div>
-                  </>
-                ) : null}
               </>
             )}
+          {!activeMs || exhibit ? null : (
+            <>
+              <RepliesBanner />
+              <div className="pk4-col2">
+                <RepliesSheet ref={repliesRef} rowsFor={rowsFor} packageRows={rowsFor("package")} letterRows={rowsFor("letter")} overall={overallSplit}
+                  onOpen={(r) => (r.pkg ? setView({ m: "pkg", id: r.pkg.id, tab: "replies" }) : r.mat ? setView({ m: "mat", kind: r.mat.kind, id: r.mat.id }) : undefined)} />
+              </div>
+            </>
+          )}
         </div>
         </div>
         <PkgDrawer4 model={model} view={view} go={setView} />
