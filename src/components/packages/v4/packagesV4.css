@@ -306,8 +306,10 @@ button.pk4-sr:hover { background: var(--pk4-oat); }
 }
 @media (prefers-reduced-motion: reduce) { .pk4-card .pk4-row, .pk4-card .pk4-sg, .pk4-card .pk4-rg { transition: none; } }
 /* "100%" is the one figure three digits wide: it steps down so it stays inside the ring (the mock never draws it) */
-.pk4-card .pk4-rg .pk4-pc-fig[data-wide] { font-size: 20px !important; }
-.ws-app.sheet-wide .pk4-card .pk4-rg .pk4-pc-fig[data-wide] { font-size: 25px !important; }
+.pk4-card .pk4-rg .pk4-pc-fig[data-wide] { font-size: 18px !important; }
+.pk4-card .pk4-rg .pk4-pc-fig[data-wide] i { font-size: 11px !important; top: -4px; }
+.ws-app.sheet-wide .pk4-card .pk4-rg .pk4-pc-fig[data-wide] { font-size: 22px !important; }
+.ws-app.sheet-wide .pk4-card .pk4-rg .pk4-pc-fig[data-wide] i { font-size: 13px !important; top: -5px; }
 
 /* ═════ Part B · the filter row: 26 under the header, a 1px ink-14% rule, 18 of padding; v17's pills (by class) ═════ */
 .pk4-hd .pk4-fr { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--pk4-i14); }
