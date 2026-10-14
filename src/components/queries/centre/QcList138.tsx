@@ -25,7 +25,8 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
-import { peekChain, peekSummary, peekTone, tickPlan, type PeekEvent } from "../../../lib/qc138";
+import { gapWords, peekChain, peekGlyph, peekSummary, peekTone, tickPlan, YOUR_MOVE_STATUSES, type PeekEvent, type PeekStop } from "../../../lib/qc138";
+import { StageGlyph } from "./StageGlyph";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -203,19 +204,40 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
                   ) : null}
                 </span>
               ) : null}
-              <span className={`qc138-mk qc138-mk--${st.kind}${st.today ? " is-today" : ""}`} data-qcv="peek-stop" data-kind={st.kind} style={{ ["--i" as string]: i }}>
-                <span className="qc138-mk-g"><i className="qc138-mk-dot" /></span>
-                <span className="qc138-mk-t">
-                  <b data-qcv="peek-name">{st.name}</b>
-                  {st.date && st.kind !== "today" ? <small data-qcv="peek-date">{st.date}</small> : null}
-                </span>
-              </span>
+              <Marker st={st} i={i} over={st.kind === "today" && g?.kind === "over" ? `${gapWords(g.days)} over` : null} />
             </React.Fragment>
           );
         })}
       </div>
       {m.unit ? <div className="qc138-peek-key" data-qcv="peek-key"><i aria-hidden="true" /><span>1 tick = 1 {m.unit}</span></div> : null}
     </div>
+  );
+};
+
+/**
+ * v138.3 §B — A MARKER on the bars: an event draws its stage glyph (`StageGlyph`, from the event's own `status`, never
+ * its label) at 22px in ink, with the dashed ring on a your-move event; a future date is a white circle in a navy ring;
+ * "Was due" a rust dot; Today a rust tick, with "{d} over" under TODAY when overdue. An event on today's day keeps the
+ * rust halo and takes Today's place. An event whose stage cannot be mapped (a nudge, a holding reply) is a plain navy
+ * dot marked `data-unmapped`. Every glyph sits in a 2.5px ring of the row's ground, so the bar passes behind it.
+ */
+const Marker: React.FC<{ st: PeekStop; i: number; over: string | null }> = ({ st, i, over }) => {
+  const k = st.kind === "event" ? peekGlyph(st.status) : null;
+  const unmapped = st.kind === "event" && !k;
+  return (
+    <span className={`qc138-mk qc138-mk--${st.kind}${st.today ? " is-today" : ""}`} data-qcv="peek-stop" data-kind={st.kind} data-glyph={k ?? undefined}
+      data-unmapped={unmapped ? "" : undefined} style={{ ["--i" as string]: i }}>
+      <span className="qc138-mk-g" data-qcv="peek-mark">
+        {k ? <StageGlyph k={k} ring="peek" dashed={!!st.status && YOUR_MOVE_STATUSES.includes(st.status)} className="qc138-mk-svg" />
+          : st.kind === "today" ? <i className="qc138-mk-tick" />
+          : <i className="qc138-mk-dot" />}
+      </span>
+      <span className="qc138-mk-t">
+        <b data-qcv="peek-name">{st.name}</b>
+        {st.date && st.kind !== "today" ? <small data-qcv="peek-date">{st.date}</small> : null}
+        {over ? <small className="qc138-mk-ov" data-qcv="peek-over">{over}</small> : null}
+      </span>
+    </span>
   );
 };
 

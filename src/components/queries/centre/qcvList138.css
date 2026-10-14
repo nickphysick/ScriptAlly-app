@@ -478,3 +478,22 @@
     .qc138-sheet .qc138-tlw { grid-column: 1; padding-left: var(--qc138-ind); }
   }
 }
+
+/* ── v138.3 §B · MARKERS ────────────────────────────────────────────────────────────────────────────────────────
+   Each glyph sits in a 2.5px ring of the row's ground (`--qc138-pkbg`), so the bar appears to pass behind it. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-mk-svg { display: block; flex: none; width: 22px; height: 22px; margin: -3px; color: #1c130f; border-radius: 50%; background: var(--qc138-pkbg, #fff); box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff); }
+  /* a future date: a white circle in a navy ring */
+  .qc138-sheet .qc138-mk--due .qc138-mk-dot { background: #fff; box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff), inset 0 0 0 2.5px #2a3a52; }
+  /* folded events: a quiet ring */
+  .qc138-sheet .qc138-mk--more .qc138-mk-dot { background: #fff; box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff), inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
+  /* Was due: a rust dot, its name in rust */
+  .qc138-sheet .qc138-mk--wasdue .qc138-mk-dot { background: #a2452a; }
+  .qc138-sheet .qc138-mk--wasdue .qc138-mk-t b { color: #a2452a !important; }
+  /* Today: a 3 × 24 rust tick through the bar; TODAY in mono under it, and "{d} over" when overdue */
+  .qc138-sheet .qc138-mk-tick { display: block; flex: none; width: 3px; height: 24px; margin: -4px 0; border-radius: 1.5px; background: #a2452a; box-shadow: 0 0 0 2px var(--qc138-pkbg, #fff); }
+  .qc138-sheet .qc138-mk--today .qc138-mk-t b { font: 600 9.5px/1.3 var(--font-mono) !important; letter-spacing: 0.12em; text-transform: uppercase; color: #a2452a; margin-top: 4px; }
+  .qc138-sheet .qc138-mk-t .qc138-mk-ov { font: normal 600 12px/1.3 var(--sp-serif) !important; color: #a2452a; }
+  /* an event on today's day keeps v138.1's rust halo and takes Today's place */
+  .qc138-sheet .qc138-mk.is-today .qc138-mk-svg, .qc138-sheet .qc138-mk.is-today .qc138-mk-dot { box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff), 0 0 0 4px #a2452a; }
+}
