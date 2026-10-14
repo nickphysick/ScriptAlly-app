@@ -456,8 +456,9 @@ export function peekChain(
   const merged: PeekStop[] = [];
   for (const e of evs) {
     const last = merged[merged.length - 1];
-    /* same day: one stop, named for both, showing the LATER event's stage (where the day ended) */
-    if (last && dayKey(last.ms) === dayKey(e.ms)) { if (!last.name.split(" · ").includes(e.name)) last.name = `${last.name} · ${e.name}`; if (e.status !== undefined) last.status = e.status; continue; }
+    /* same day: one stop, named for both, showing the stage the day ENDED at — the later event's status, unless that
+       event is not a status (a nudge changes no stage, so "Full sent · Nudged" still draws Full sent) */
+    if (last && dayKey(last.ms) === dayKey(e.ms)) { if (!last.name.split(" · ").includes(e.name)) last.name = `${last.name} · ${e.name}`; if (e.status) last.status = e.status; continue; }
     merged.push({ kind: "event", name: e.name, date: fmt(e.ms), ms: e.ms, today: false, status: e.status });
   }
   /* an event on today's day takes the Today stop's place and its ring */

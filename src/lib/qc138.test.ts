@@ -150,3 +150,12 @@ describe("v138.3 · the dated axis", () => {
     expect(axisLabels(at(2026, 7, 2), 62, 199, week)).toEqual([]);
   });
 });
+
+describe("v138.3 · a same-day stop shows the stage the day ended at", () => {
+  it("a nudge on the same day as a send changes no stage", () => {
+    const now = new Date(2026, 9, 14, 12).getTime(), d = (n: number) => now + n * 86_400_000;
+    const ch = peekChain([{ name: "Queried", ms: d(-30), status: "Queried" }, { name: "Full sent", ms: d(-5), status: "Full Sent" }, { name: "Nudged", ms: d(-5) + 3_600_000, status: null }], { due: d(20), now, closed: false, yours: false });
+    expect(ch.stops[1].name).toBe("Full sent · Nudged");
+    expect(ch.stops[1].status).toBe("Full Sent");
+  });
+});
