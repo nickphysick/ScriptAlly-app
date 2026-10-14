@@ -148,7 +148,7 @@ const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean;
 const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; nowMs: number; closed: boolean; yours: boolean }> = ({ events, due, nowMs, closed, yours }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ch = events ? peekChain(events, { due, now: nowMs, closed, yours }) : null;
-  const [m, setM] = useState<{ unit: string | null; ticks: { n: number; step: number }[]; short: boolean[] }>({ unit: null, ticks: [], short: [] });
+  const [m, setM] = useState<{ unit: string | null; ticks: { n: number; step: number }[]; short: boolean[]; floor: number[] }>({ unit: null, ticks: [], short: [], floor: [] });
   const sig = ch ? ch.segs.map((g) => `${g.days}:${g.kind}`).join("|") : "";
   useLayoutEffect(() => {
     const el = ref.current;
@@ -164,7 +164,14 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
         const probe = g.querySelector<HTMLElement>(".qc138-seg-probe");
         return !!probe && probe.getBoundingClientRect().width > px[i] - 4;
       });
-      const next = { unit: plan.unit?.name ?? null, ticks: plan.ticks, short };
+      /* v138.2 — a gap's floor is 44px, or its SHORT label's width where that is wider ("7d over"): the drawer's span
+         is narrower than v138.1's, and a squeezed chain must not push a label out of its gap. The short label's width
+         never depends on the gap's, so this settles in one pass. */
+      const floor = gaps.map((g) => {
+        const probe = g.querySelector<HTMLElement>(".qc138-seg-probe--s");
+        return Math.max(44, Math.ceil(probe ? probe.getBoundingClientRect().width + 4 : 0));
+      });
+      const next = { unit: plan.unit?.name ?? null, ticks: plan.ticks, short, floor };
       setM((cur) => (JSON.stringify(cur) === JSON.stringify(next) ? cur : next));
     };
     read();
@@ -184,9 +191,11 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
           return (
             <React.Fragment key={`${st.kind}-${i}`}>
               {g ? (
-                <span className={`qc138-seg qc138-seg--${g.kind}`} data-qcv="peek-seg" data-days={g.days} style={{ flexGrow: g.grow }}>
+                <span className={`qc138-seg qc138-seg--${g.kind}`} data-qcv="peek-seg" data-days={g.days} data-floor={m.floor[i - 1] ?? 44}
+                  style={{ flexGrow: g.grow, minWidth: m.floor[i - 1] ? `${m.floor[i - 1]}px` : undefined }}>
                   <em data-qcv="peek-seg-label">{m.short[i - 1] ? g.short : g.label}</em>
                   <em className="qc138-seg-probe" aria-hidden="true">{g.label}</em>
+                  <em className="qc138-seg-probe qc138-seg-probe--s" aria-hidden="true">{g.short}</em>
                   <i className="qc138-seg-ln" />
                   {tk && tk.n > 0 ? (
                     <span className="qc138-ticks" data-qcv="peek-ticks" data-step={tk.step.toFixed(2)}>
