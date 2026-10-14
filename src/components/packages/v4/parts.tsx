@@ -62,16 +62,17 @@ export interface CardSlots { letter: string | null; synopsis: string | null; ver
  * preview. `split` is the CURRENT edition's (v3 B1).
  */
 export const PkgCard4: React.FC<{
-  pkg: Pick<SubmissionPackage, "id" | "packageName" | "status" | "otherMaterials"> & { firstSentAt?: string };
+  pkg: Pick<SubmissionPackage, "id" | "packageName" | "status" | "otherMaterials">;
+  /** gone out (the model's `goneOut`) */
+  sent: boolean;
   slots: CardSlots;
   split: Split | null;
   forNew: boolean;
   open?: boolean;
   preview?: boolean;
   onOpen?: () => void;
-}> = ({ pkg, slots, split, forNew, open, preview, onOpen }) => {
+}> = ({ pkg, sent, slots, split, forNew, open, preview, onOpen }) => {
   const retired = pkg.status === "Retired";
-  const sent = !!pkg.firstSentAt;
   const name = pkg.packageName.trim();
   const body = (
     <>

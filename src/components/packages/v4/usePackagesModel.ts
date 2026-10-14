@@ -121,6 +121,8 @@ export function usePackagesModel() {
   const creditedQueries = useCallback((p: SubmissionPackage) => msQueries
     .filter((q) => { const r = sentRecordOf(q); return r.how === "package" && r.packageId === p.id; })
     .sort((a, b) => (rowsById.get(b.id)?.sentMs ?? 0) - (rowsById.get(a.id)?.sentMs ?? 0)), [msQueries, rowsById]);
+  /** a package has gone out: its lock stamp, or any query credited to it (an older query predates the stamp) */
+  const goneOut = useCallback((p: SubmissionPackage) => isSent(p) || packageSplit(p, msQueries, rowsById).sent > 0, [msQueries, rowsById]);
   const materialGoneOut = useCallback((id: string) => isVersionSent(id, queries, packages), [queries, packages]);
 
   /* ── package writes ── */
@@ -286,7 +288,7 @@ export function usePackagesModel() {
 
   return {
     activeMs, msId, bookVersions, allMats: withNotes, mats, msPkgs, live, retired, active, msQueries, rowsById, collectionsReady,
-    currentUser, matById, currentSplit, allSplit, matSplit, packagesWith, creditedQueries, materialGoneOut, isSent,
+    currentUser, matById, goneOut, currentSplit, allSplit, matSplit, packagesWith, creditedQueries, materialGoneOut, isSent,
     savePackage, usePkg, retirePkg, restorePkg, deletePkg, saveNote, dupDraft, editDraft,
     saveMaterial, newVersionDraft, putAway, restoreMat, deleteMat, agents,
   };

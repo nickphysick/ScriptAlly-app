@@ -54,6 +54,8 @@ import { MatAct, PkgMaterials } from "./packages/PkgMaterials";
 import { PkgDrawer4, type DrawerView } from "./packages/v4/PkgDrawer4";
 import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
 import "./packages/v4/packagesV4.css";
+import { PkgHeader4, PkgSummaryCard, type StatusKey } from "./packages/v4/PkgHeader4";
+import { overall } from "../lib/packageReplies";
 import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
@@ -162,6 +164,20 @@ export const SubmissionPackages: React.FC = () => {
     setView({ m: "matform", d: { editId: m.id, kind: m.kind, name: m.name, note: full.note, text: full.text ?? "" } });
   };
 
+  /* ── Part A · the card's counts and the status filter (shared with the Status pill, Part B) ── */
+  const counts: Record<StatusKey, number> = {
+    sent: live.filter((p) => model.goneOut(p)).length, new: live.filter((p) => !model.goneOut(p)).length, ret: retired.length,
+  };
+  const [status, setStatus] = useState<Set<StatusKey>>(new Set());
+  /* a row press shows only that row; pressed again it clears. It never scrolls (A2). */
+  const pressStatus = (k: StatusKey) => setStatus((cur) => (cur.size === 1 && cur.has(k) ? new Set() : new Set([k])));
+  const statusMatch = (p: SubmissionPackage) => !status.size || (p.status === "Retired" ? status.has("ret") : status.has(model.goneOut(p) ? "sent" : "new"));
+  const overallSplit = useMemo(() => overall(msPkgs, msQueries, rowsById), [msPkgs, msQueries, rowsById]);
+  const goReplies = () => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    sbsRef.current?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+  };
+
   /* ── the living header (living headers v3) ── */
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
   const pkgCount = lhOverride != null && lhOverride >= 0 ? lhOverride : msPkgs.length;
@@ -190,13 +206,16 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <WorkspacePageGrid scrollLabel="Submission packages" masthead={null}>
       <div className="ppv-page" data-ppv="page">
-        <div className="ppv-group pk4">
-          <div className="ppv-head">
-            <PageHeader variant="full" panel title="Submission packages" description={activeMs ? undefined : "No manuscript yet."} living={living}
-              primary={activeMs && !noneLive ? { label: "+ New package", onClick: () => openNew() } : undefined}
-              secondary={sent.length >= 2 && !noneLive ? { label: "Side by side", onClick: () => sbsRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }) } : undefined}
+        <div className="pk4 pk4-col" data-pk4="page">
+        {exhibit ? (
+          <div className="ppv-head pk4-oldhead">
+            <PageHeader variant="full" panel title="Submission packages" living={living} primary={{ label: "+ New package", onClick: () => openNew() }}
               art={<img src={`${PACKAGES_HERO.src}?v=${PACKAGES_HERO.version}`} width={PACKAGES_HERO.width} height={PACKAGES_HERO.height} alt={PACKAGES_HERO.alt} />} />
           </div>
+        ) : <PkgHeader4 loading={!collectionsReady && !activeMs} live={collectionsReady || activeMs ? live.length : null} msTitle={activeMs?.title ?? null}
+          onNew={() => openNew()} onAddMaterial={() => setView({ m: "matform", d: { kind: "letter", name: "", note: "", text: "" } })}
+          card={<PkgSummaryCard counts={counts} active={status} onStatus={pressStatus} overall={overallSplit} onRate={goReplies} loading={!collectionsReady && !activeMs} />} />}
+        <div className="ppv-group">
           <div className="ppv-main" data-ppv="main">
             {noneLive ? (
               <section className="ppv-nonelive" data-ppv="none-live" aria-label="Nothing in use">
@@ -213,7 +232,7 @@ export const SubmissionPackages: React.FC = () => {
                   <section className="ppv-pksec">
                     <PkgBand band="packages" title="Your packages" count={live.length}
                       hint={active ? <><b>{active.packageName}</b> is used for new queries</> : "No package is used for new queries"} />
-                    <div className="ppv-list" data-ppv="list">{live.map(card)}</div>
+                    <div className="ppv-list" data-ppv="list">{live.filter(statusMatch).map(card)}</div>
                   </section>
                 ) : null}
                 {sent.length >= 2 ? (
@@ -243,7 +262,7 @@ export const SubmissionPackages: React.FC = () => {
                   <>
                     <PkgBandToggle band="retired" title="Retired" count={retired.length} hint={showRetired || noneLive ? "Hide" : "Show"}
                       expanded={showRetired || noneLive} onToggle={() => setShowRetired((v) => !v)} />
-                    {showRetired || noneLive ? <div className="ppv-list" data-ppv="retired">{retired.map(card)}</div> : null}
+                    {showRetired || noneLive || status.has("ret") ? <div className="ppv-list" data-ppv="retired">{retired.filter(statusMatch).map(card)}</div> : null}
                   </>
                 ) : null}
               </>
@@ -259,6 +278,7 @@ export const SubmissionPackages: React.FC = () => {
                 putAway={putAway} onRestore={(m) => void model.restoreMat(m)} />
             ) : null}
           </PageRail>
+        </div>
         </div>
         <PkgDrawer4 model={model} view={view} go={setView} />
       </div>

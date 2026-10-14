@@ -196,7 +196,10 @@ describe("/manuscripts/packages renders", () => {
   });
 
   it("…and produces its own chrome", () => {
-    expect(renderPage(<SubmissionPackages />, "/manuscripts/packages")).toContain('ph-title" data-probe="title" data-page-title="">Submission packages');
+    /* v4 Part A: the centred light header — its title keeps data-page-title and counts packages in use */
+    const html = renderPage(<SubmissionPackages />, "/manuscripts/packages");
+    expect(html).toContain('data-page-title="" data-pk4="title"');
+    expect(html).toContain("packages in use");
   });
 
   it("renders without throwing once a manuscript is active", () => {

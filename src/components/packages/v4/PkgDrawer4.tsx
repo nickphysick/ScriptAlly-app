@@ -151,7 +151,7 @@ const More: React.FC<{ items: { act: string; label: string; rust?: boolean; run:
 /* ═════════ D1 · a package ═════════ */
 const PackageView: React.FC<{ model: PackagesModel; p: SubmissionPackage; tab: "inside" | "replies"; go: (v: DrawerView | null) => void; onClose: () => void }> = ({ model, p, tab, go, onClose }) => {
   const navigate = useNavigate();
-  const sent = model.isSent(p);
+  const sent = model.goneOut(p);
   const retired = p.status === "Retired";
   const cur = model.currentSplit(p);
   const all = model.allSplit(p);
@@ -164,7 +164,7 @@ const PackageView: React.FC<{ model: PackagesModel; p: SubmissionPackage; tab: "
   const [confirmDel, setConfirmDel] = useState(false);
   useEffect(() => { setConfirmDel(false); }, [p.id]);
   const forNew = model.active?.id === p.id;
-  const sub = `${retired ? "Retired · " : ""}${sent || credited.length ? `${ordinal(ed)} edition · sent with ${qs(credited.length)}${lastMs != null ? `, last on ${dayMonth(lastMs)}` : ""}` : "Not sent yet"}`;
+  const sub = `${retired ? "Retired · " : ""}${sent ? `${ordinal(ed)} edition · sent with ${qs(credited.length)}${lastMs != null ? `, last on ${dayMonth(lastMs)}` : ""}` : "Not sent yet"}`;
   const tabs = (
     <div className="pk4-dtabs" role="tablist" aria-label="Package" onKeyDown={(e) => {
       if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
@@ -311,7 +311,7 @@ const Opt: React.FC<{ on: boolean; name: string; note?: string; tag?: string; on
 
 const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDraft) => void; go: (v: DrawerView | null) => void; onClose: () => void }> = ({ model, d, set, go, onClose }) => {
   const prev = d.editId ? model.msPkgs.find((p) => p.id === d.editId) ?? null : null;
-  const prevSent = !!prev && (model.isSent(prev) || model.allSplit(prev).sent > 0);
+  const prevSent = !!prev && model.goneOut(prev);
   /* required on a NEW package when the manuscript has a version; an existing package may stay without one */
   const versionRequired = !d.editId && model.allMats.version.length > 0;
   const valid = !!d.name.trim() && !!d.letter && (!versionRequired || !!d.version);
@@ -391,7 +391,7 @@ const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDra
         </section>
         <section className="pk4-sec"><SecHead n={3} title="How it'll look on the page" />
           <div data-pk4="preview">
-            <PkgCard4 preview pkg={{ id: d.editId ?? "draft", packageName: d.name, status: prev?.status ?? "Active", otherMaterials: d.other, firstSentAt: prev?.firstSentAt }}
+            <PkgCard4 preview pkg={{ id: d.editId ?? "draft", packageName: d.name, status: prev?.status ?? "Active", otherMaterials: d.other }} sent={prevSent}
               slots={{ letter: model.matById("letter", d.letter)?.name ?? null, synopsis: model.matById("synopsis", d.synopsis)?.name ?? null, version: model.matById("version", d.version)?.name ?? null }}
               split={prev ? model.currentSplit(prev) : null} forNew={!!prev && model.active?.id === prev.id} />
           </div>
@@ -461,7 +461,7 @@ const MaterialView: React.FC<{ model: PackagesModel; m: MaterialWithNote; go: (v
           <div className="pk4-box">
             {inPkgs.length ? inPkgs.map((p) => {
               const ps = model.allSplit(p);
-              const sent = model.isSent(p) || ps.sent > 0;
+              const sent = model.goneOut(p);
               return (
                 <button key={p.id} type="button" className="pk4-qrow" data-pk4="mat-pkg" onClick={() => go({ m: "pkg", id: p.id, tab: "inside" })}>
                   <span className="pk4-disc">{ICON.parcel}</span>
