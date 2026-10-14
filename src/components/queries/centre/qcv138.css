@@ -92,14 +92,6 @@
 .qc138-gr .qc138-sg:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .qc138-gr .qc138-sg:disabled { cursor: default; }
 .qc138-hd[data-loading] .qc138-sg b { border-radius: 6px; background: rgba(28, 19, 15, 0.07); width: 1.2em; }
-/* the key line, above a 1px ink 12% rule */
-.qc138-gr .qc138-key {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding-top: 12px;
-  border-top: 1px solid rgba(28, 19, 15, 0.12); font: italic 400 13.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6);
-}
-.qc138-gr .qc138-key span { display: inline-flex; align-items: center; gap: 8px; font: inherit !important; white-space: nowrap; }
-.qc138-gr .qc138-key .qc138-kk { width: 16px; height: 16px; color: #1c130f; }
-
 /* below 900px of header, everything stacks with no inset */
 @container qc138hd (max-width: 899.98px) {
   .qc138-hd { --qc138-inset: 0px; }

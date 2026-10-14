@@ -67,10 +67,7 @@ export const GlyphRow: React.FC<{
           </React.Fragment>
         ))}
       </div>
-      <div className="qc138-key" data-qc138="key">
-        <span><StageGlyph k="key" className="qc138-kk" /> Dashed ring: your move</span>
-        <span>Tap a glyph to filter</span>
-      </div>
+      {/* v138.1 §B — no key line: the buttons' own labels say what each is, and the empty page's key explains the ring */}
     </div>
   );
 };
