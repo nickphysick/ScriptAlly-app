@@ -61,4 +61,4 @@ The five acceptance cases at 1512, 1280 and 1100 (`cases-*.png`). At 1100 the dr
 
 ## Integration and dev
 
-(appended at deploy)
+Dev served `index--dbyiy4q.js`, from `dev/…-qc1382-qc1383` at `162e7f4a`. This branch contains that branch, so the integration branch **`dev/…-qc1382-qc1383-qc1384`** is a fast-forward to `109ca543`: the same commit the gates and locks above ran on. It was built from a clean detached worktree and deployed hosting-only to `scriptally-dev`, after checking the served hash immediately before. **Dev now serves `index-D0Dot8dT.js`**, the gated build's own hash. Not merged to main; prod untouched.
