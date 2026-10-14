@@ -86,6 +86,7 @@ import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpt
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcEmpty } from "./queries/centre/QcEmpty";
+import { QcEmpty138 } from "./queries/centre/QcEmpty138";
 import { QcExhibit } from "./queries/centre/QcExhibit";
 import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
@@ -6280,6 +6281,15 @@ export const Queries: React.FC<{
            * reachable (this repo's replacement rule).
            */
           <div data-qc-fade={fadeIn ? "in" : undefined}>
+            {qcDesk ? (
+              /* v138 §I — the desktop's empty page: the navy header, How it works, Ways to get started */
+              <QcEmpty138
+                logRef={logTriggerRef}
+                manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
+                onLog={() => openCreate()}
+                onImport={() => onNavigate?.("import")}
+              />
+            ) : (
             <QcEmpty
               logRef={logTriggerRef}
               manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
@@ -6289,6 +6299,7 @@ export const Queries: React.FC<{
               /* §4 — the page's own components over a sample constant, mounted ONLY here */
               exhibition={<QcExhibit />}
             />
+            )}
           </div>
         ) : (
         <>
