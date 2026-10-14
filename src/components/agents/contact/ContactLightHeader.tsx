@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Contact list v17 §A — THE ONE LIGHT HEADER, on the page colour: the eyebrow, "{N} agents on file", the byline
- * and two buttons; the cut-out hawk beside the title with its soft shadow behind the header's left; and a white
- * SUMMARY CARD on the right (a bar and three rows: Not queried, Querying, Closed) that filters the list.
+ * and two buttons, with a soft hawk shadow behind the title; and a white SUMMARY CARD on the right (a bar and
+ * three rows: Not queried, Querying, Closed) that filters the list. v17.1: the title row comes in from the sheet's
+ * edges (the inset is in contactV17.css) and the cut-out hawk is gone; the shadow stays.
  *
  * ⚠️ THE CARD'S FIGURES ARE v16's STRIP MODEL (`lib/contactGlance`), AND ITS FILTER IS THE STRIP'S OWN GROUP
  *    FILTER: the page's `glance` state, which "Clear all" already clears. Nothing is derived here.
@@ -16,7 +17,6 @@
 import React from "react";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
-import { CONTACT_DISC_HAWK } from "./ContactOpenHeader";
 import "./contactV17.css";
 
 export const CONTACT_EYEBROW = "— CONTACT LIST —";
@@ -94,12 +94,11 @@ export const ContactLightHeader: React.FC<{
         <div className="cl17-by" data-cl17="byline">
           {msTitle ? <span className="cl17-byt">for <i className="cl17-ms" data-cl17="ms">{msTitle}</i></span> : <span className="cl17-byt">for your book</span>}
         </div>
-        <div className="cl17-acts" data-cl17="acts">
-          <button type="button" className="cl17-b1" data-cl15="add" data-cl17="add" ref={addRef} disabled={loading} onClick={onAdd}>+ Add an agent</button>
-          {onDiscover ? <button type="button" className="cl17-b2" data-cl16="discover" data-cl17="discover" disabled={loading} onClick={onDiscover}>Discover agents</button> : null}
-        </div>
       </div>
-      <img className="cl17-art" data-cl17="art" alt="" aria-hidden="true" src={`${CONTACT_DISC_HAWK.src}?v=${CONTACT_DISC_HAWK.version}`} />
+      <div className="cl17-acts" data-cl17="acts">
+        <button type="button" className="cl17-b1" data-cl15="add" data-cl17="add" ref={addRef} disabled={loading} onClick={onAdd}>+ Add an agent</button>
+        {onDiscover ? <button type="button" className="cl17-b2" data-cl16="discover" data-cl17="discover" disabled={loading} onClick={onDiscover}>Discover agents</button> : null}
+      </div>
       <ContactSummaryCard model={model} active={active} onGroup={onGroup} loading={loading} />
     </div>
     {children}

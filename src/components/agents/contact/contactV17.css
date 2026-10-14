@@ -24,17 +24,23 @@
 @media (min-width: 768px) {
   .clv-group > .cl17-hd { width: var(--cl17-w); margin-left: calc(50% - var(--cl17-w) / 2); }
 }
+/* v17.1 §A · THE TITLE ROW COMES IN FROM THE SHEET'S EDGES: the inset is max(40px, (100% − 900px) / 2), full
+   max(64px, (100% − 1080px) / 2), against the header's width (the list's). The filter row under it stays at the
+   list's width. Title block over the buttons in column 1; the card spans both rows in column 3, centred. */
+.cl17-hd { --cl17-inset: max(40px, calc((100% - 900px) / 2)); --cl17-sh-x: -60px; }
+.ws-app.sheet-wide .cl17-hd { --cl17-inset: max(64px, calc((100% - 1080px) / 2)); --cl17-sh-x: -70px; }
 .cl17-hd .cl17-tr {
-  display: grid; grid-template-columns: max-content auto minmax(0, 1fr) 340px; column-gap: 14px; align-items: center;
+  display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto; grid-template-rows: auto auto;
+  row-gap: 24px; align-items: center; margin-inline: var(--cl17-inset);
 }
-.ws-app.sheet-wide .cl17-hd .cl17-tr { grid-template-columns: max-content auto minmax(0, 1fr) 480px; }
-.cl17-hd .cl17-tb { grid-column: 1; min-width: 0; }
-.cl17-hd .cl17-art { grid-column: 2; }
-.cl17-hd .cl17-card { grid-column: 4; }
+.ws-app.sheet-wide .cl17-hd .cl17-tr { row-gap: 40px; }
+.cl17-hd .cl17-tb { grid-column: 1; grid-row: 1; min-width: 0; }
+.cl17-hd .cl17-tr > .cl17-acts { grid-column: 1; grid-row: 2; }
+.cl17-hd .cl17-card { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
 
 /* the shadow: behind everything in the header, at its left. The page sheet clips it; it is never a scroll width. */
 .cl17-hd .cl17-shadow {
-  position: absolute; left: -4px; top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
+  position: absolute; left: calc(var(--cl17-inset) + var(--cl17-sh-x)); top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
   opacity: 0.15; transform: rotate(-4deg); filter: blur(1.5px); pointer-events: none; user-select: none;
 }
 .ws-app.sheet-wide .cl17-hd .cl17-shadow { width: 460px; }
@@ -54,7 +60,7 @@
 .cl17-hd .cl17-by::after { content: ""; flex: 1 1 0; max-width: 160px; height: 1px; background: rgba(28, 19, 15, 0.3); }
 .cl17-hd .cl17-by .cl17-byt { font: italic 400 20px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cl17-hd .cl17-by .cl17-ms { font: 400 20px/1 var(--sp-type) !important; font-style: normal !important; color: inherit; }
-.cl17-hd .cl17-acts { display: flex; gap: 12px; margin-top: 22px; }
+.cl17-hd .cl17-acts { display: flex; gap: 12px; }
 .cl17-hd .cl17-acts button {
   box-sizing: border-box; height: 46px; padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
   font: 400 17px/1 var(--sp-type) !important;
@@ -64,13 +70,6 @@
 .cl17-hd .cl17-acts .cl17-b2 { background: #fff; color: #1c130f; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
 .cl17-hd .cl17-acts button:focus-visible, .cl17-hd .cl17-row:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .cl17-hd .cl17-acts button:disabled { cursor: default; }
-
-/* the hawk, cut out: it overlaps the header's own room above and below without making the header taller */
-.cl17-hd .cl17-art {
-  display: block; box-sizing: border-box; width: 200px; height: auto; max-width: none; margin: -30px -10px -30px 0;
-  filter: drop-shadow(0 14px 18px rgba(28, 19, 15, 0.18)); pointer-events: none; user-select: none;
-}
-.ws-app.sheet-wide .cl17-hd .cl17-art { width: 280px; }
 
 /* ── the summary card ── */
 .cl17-hd .cl17-card {
@@ -108,14 +107,13 @@
 
 /* ── narrow: a container query on the header's own width ── */
 @container cl17hd (max-width: 899.98px) {
-  .cl17-hd .cl17-tr, .ws-app.sheet-wide .cl17-hd .cl17-tr { grid-template-columns: max-content auto minmax(0, 1fr); row-gap: 22px; }
-  .cl17-hd .cl17-card { grid-column: 1 / -1; grid-row: 2; }
-  .cl17-hd .cl17-art, .ws-app.sheet-wide .cl17-hd .cl17-art { width: 170px; }
-  .cl17-hd .cl17-card .cl17-row .cl17-d { display: block; }
+  .cl17-hd { --cl17-inset: 0px; }
+  .ws-app.sheet-wide .cl17-hd { --cl17-inset: 0px; }
+  .cl17-hd .cl17-tr, .ws-app.sheet-wide .cl17-hd .cl17-tr { grid-template-columns: minmax(0, 1fr); row-gap: 22px; }
+  .cl17-hd .cl17-card { grid-column: 1; grid-row: 3; justify-self: start; }
 }
 @container cl17hd (max-width: 639.98px) {
   .cl17-hd .cl17-tr, .ws-app.sheet-wide .cl17-hd .cl17-tr { grid-template-columns: minmax(0, 1fr); }
-  .cl17-hd .cl17-art { display: none; }
   .cl17-hd h1.cl17-title { white-space: normal; }
   .cl17-hd .cl17-acts { flex-wrap: wrap; }
   .cl17-hd .cl17-card .cl17-row .cl17-d { display: none; }
