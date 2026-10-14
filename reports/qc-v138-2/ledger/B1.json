@@ -13,13 +13,13 @@
  },
  {
   "lock": "B1",
-  "where": "1512 over first card at First queried",
+  "where": "1512 over timeline starts at First queried",
   "ok": true,
   "detail": "582.9 vs 583.0"
  },
  {
   "lock": "B1",
-  "where": "1512 over last card at Due",
+  "where": "1512 over timeline ends at Due",
   "ok": true,
   "detail": "1440.0 vs 1440.0"
  },
@@ -43,13 +43,13 @@
  },
  {
   "lock": "B1",
-  "where": "1512 wait first card at First queried",
+  "where": "1512 wait timeline starts at First queried",
   "ok": true,
   "detail": "582.9 vs 583.0"
  },
  {
   "lock": "B1",
-  "where": "1512 wait last card at Due",
+  "where": "1512 wait timeline ends at Due",
   "ok": true,
   "detail": "1440.0 vs 1440.0"
  },
@@ -73,13 +73,13 @@
  },
  {
   "lock": "B1",
-  "where": "1280 over first card at First queried",
+  "where": "1280 over timeline starts at First queried",
   "ok": true,
   "detail": "542.1 vs 542.1"
  },
  {
   "lock": "B1",
-  "where": "1280 over last card at Due",
+  "where": "1280 over timeline ends at Due",
   "ok": true,
   "detail": "1208.0 vs 1208.0"
  },
@@ -103,13 +103,13 @@
  },
  {
   "lock": "B1",
-  "where": "1280 wait first card at First queried",
+  "where": "1280 wait timeline starts at First queried",
   "ok": true,
   "detail": "542.1 vs 542.1"
  },
  {
   "lock": "B1",
-  "where": "1280 wait last card at Due",
+  "where": "1280 wait timeline ends at Due",
   "ok": true,
   "detail": "1208.0 vs 1208.0"
  },

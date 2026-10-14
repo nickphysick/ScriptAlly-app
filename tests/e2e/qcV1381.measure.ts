@@ -168,12 +168,11 @@ test.describe("Query Centre v138.1", () => {
         L.check("D2", `${w} case ${i + 1} no overlap`, !c.overlap, `${c.overlap}`);
         L.check("D2", `${w} case ${i + 1} labels in gaps`, c.segs.every((s) => s.inside), JSON.stringify(c.segs.filter((s) => !s.inside)));
         L.check("D2", `${w} case ${i + 1} nothing leaves the row`, !c.out, `${c.out}`);
-        /* EDITED v138.3: the dated axis replaced the "1 tick = 1 {unit}" key */
-        L.check("D2", `${w} case ${i + 1} no tick key`, c.key === "", `"${c.key}"`);
+        /* the tick-key check is RETIRED by v138.4 (there is no key and no ruler to key) */
         L.check("D2", `${w} case ${i + 1} ticks ≥ 4px`, c.segs.every((s) => s.step === 0 || s.step >= 4), c.segs.map((s) => s.step.toFixed(1)).join(","));
       });
     }
-    L.done(52);
+    L.done(42);
   });
 
   test("E1 · ring: an overdue dial is a complete rust ring on white that breathes; still under reduced motion", async ({ page }) => {

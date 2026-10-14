@@ -109,15 +109,17 @@ test.describe("Query Centre v138.2", () => {
           const drw = getComputedStyle(el.querySelector<HTMLElement>('[data-qcv="peek-drawer"]')!);
           return {
             name: name.left, sum: sumLeft, first: head("first").left, due: head("due").right,
-            c0: stops[0]?.getBoundingClientRect().left ?? NaN, cN: stops[stops.length - 1]?.getBoundingClientRect().right ?? NaN,
+            /* EDITED v138.4: the markers sit at their true dates 14px inside the track, so the claim "the timeline runs
+               from First queried to Due" is now read off the TIMELINE's own box, not the first and last stop */
+            c0: el.querySelector<HTMLElement>('[data-qcv="peek"]')?.getBoundingClientRect().left ?? NaN, cN: el.querySelector<HTMLElement>('[data-qcv="peek"]')?.getBoundingClientRect().right ?? NaN,
             rule: `${drw.borderTopWidth} ${drw.borderTopStyle}`, n: stops.length,
           };
         });
         const w = `${vp.width} ${tone}`;
         L.check("B1", `${w} stops`, r.n >= 2, `${r.n}`);
         L.check("B1", `${w} summary under the name`, near(r.sum, r.name, 1), `${r.sum.toFixed(1)} vs ${r.name.toFixed(1)}`);
-        L.check("B1", `${w} first card at First queried`, near(r.c0, r.first, 2), `${r.c0.toFixed(1)} vs ${r.first.toFixed(1)}`);
-        L.check("B1", `${w} last card at Due`, near(r.cN, r.due, 2), `${r.cN.toFixed(1)} vs ${r.due.toFixed(1)}`);
+        L.check("B1", `${w} timeline starts at First queried`, near(r.c0, r.first, 2), `${r.c0.toFixed(1)} vs ${r.first.toFixed(1)}`);
+        L.check("B1", `${w} timeline ends at Due`, near(r.cN, r.due, 2), `${r.cN.toFixed(1)} vs ${r.due.toFixed(1)}`);
         /* EDITED v138.3 (not in its edit list, but forced by its §D): the rule between the row and its drawer is SOLID now */
         L.check("B1", `${w} solid rule`, r.rule === "1px solid", r.rule);
       }

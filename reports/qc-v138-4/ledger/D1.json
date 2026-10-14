@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 names measured",
+  "ok": true,
+  "detail": "17"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\""
+ },
+ {
+  "lock": "D1",
+  "where": "1512 13.5 ±0.5 (TODAY 12)",
+  "ok": true,
+  "detail": "13.5,12"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 names measured",
+  "ok": true,
+  "detail": "17"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\""
+ },
+ {
+  "lock": "D1",
+  "where": "1280 13.5 ±0.5 (TODAY 12)",
+  "ok": true,
+  "detail": "13.5,12"
+ }
+]

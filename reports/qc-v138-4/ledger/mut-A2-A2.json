@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 sophie 120 ±1",
+  "ok": false,
+  "detail": "117.375"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 marcus 120 ±1",
+  "ok": false,
+  "detail": "92.25"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clara 120 ±1",
+  "ok": false,
+  "detail": "122.5625"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 tom 120 ±1",
+  "ok": false,
+  "detail": "134"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 george 120 ±1",
+  "ok": false,
+  "detail": "60.625"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 sophie 120 ±1",
+  "ok": false,
+  "detail": "117.375"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 marcus 120 ±1",
+  "ok": false,
+  "detail": "92.25"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clara 120 ±1",
+  "ok": false,
+  "detail": "122.5625"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 tom 120 ±1",
+  "ok": false,
+  "detail": "134"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 george 120 ±1",
+  "ok": false,
+  "detail": "60.625"
+ }
+]

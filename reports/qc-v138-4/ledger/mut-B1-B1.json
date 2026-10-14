@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 past bars measured",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no past bar is rust or hatched",
+  "ok": false,
+  "detail": "rgb(176, 96, 62)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 past glyphs slate",
+  "ok": false,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 latest glyph ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 past bars measured",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no past bar is rust or hatched",
+  "ok": false,
+  "detail": "rgb(176, 96, 62)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 past glyphs slate",
+  "ok": false,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 latest glyph ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ }
+]

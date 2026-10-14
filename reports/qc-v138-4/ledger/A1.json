@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sophie gaps 1/2 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sophie gaps 1/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sophie gaps 2/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 marcus gaps 1/2 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 clara gaps 1/2 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 clara gaps 1/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 clara gaps 2/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 precondition: true-scale pairs measured",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 Sophie: Today at its true proportion",
+  "ok": true,
+  "detail": "0.404 vs 0.405"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sophie gaps 1/2 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sophie gaps 1/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sophie gaps 2/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 marcus gaps 1/2 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 clara gaps 1/2 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 clara gaps 1/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 clara gaps 2/3 keep the date ratio",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 precondition: true-scale pairs measured",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 Sophie: Today at its true proportion",
+  "ok": true,
+  "detail": "0.404 vs 0.405"
+ }
+]

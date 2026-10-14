@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sophie gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "0.567"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sophie gaps 1/3 keep the date ratio",
+  "ok": false,
+  "detail": "0.835"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sophie gaps 2/3 keep the date ratio",
+  "ok": false,
+  "detail": "1.473"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 marcus gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "19.214"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 clara gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "0.452"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 clara gaps 1/3 keep the date ratio",
+  "ok": false,
+  "detail": "0.129"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 clara gaps 2/3 keep the date ratio",
+  "ok": false,
+  "detail": "0.286"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "0.053"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 1/3 keep the date ratio",
+  "ok": false,
+  "detail": "21.759"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 1/4 keep the date ratio",
+  "ok": false,
+  "detail": "0.369"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 1/5 keep the date ratio",
+  "ok": false,
+  "detail": "1.818"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 2/3 keep the date ratio",
+  "ok": false,
+  "detail": "412.962"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 2/4 keep the date ratio",
+  "ok": false,
+  "detail": "7.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 2/5 keep the date ratio",
+  "ok": false,
+  "detail": "34.497"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 3/4 keep the date ratio",
+  "ok": false,
+  "detail": "0.017"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 3/5 keep the date ratio",
+  "ok": false,
+  "detail": "0.084"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 tom gaps 4/5 keep the date ratio",
+  "ok": false,
+  "detail": "4.928"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 precondition: true-scale pairs measured",
+  "ok": true,
+  "detail": "17"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 Sophie: Today at its true proportion",
+  "ok": false,
+  "detail": "0.500 vs 0.405"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sophie gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "0.567"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sophie gaps 1/3 keep the date ratio",
+  "ok": false,
+  "detail": "0.835"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sophie gaps 2/3 keep the date ratio",
+  "ok": false,
+  "detail": "1.473"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 marcus gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "19.214"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 clara gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "0.452"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 clara gaps 1/3 keep the date ratio",
+  "ok": false,
+  "detail": "0.129"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 clara gaps 2/3 keep the date ratio",
+  "ok": false,
+  "detail": "0.286"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 1/2 keep the date ratio",
+  "ok": false,
+  "detail": "0.053"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 1/3 keep the date ratio",
+  "ok": false,
+  "detail": "21.761"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 1/4 keep the date ratio",
+  "ok": false,
+  "detail": "0.369"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 1/5 keep the date ratio",
+  "ok": false,
+  "detail": "1.818"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 2/3 keep the date ratio",
+  "ok": false,
+  "detail": "413.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 2/4 keep the date ratio",
+  "ok": false,
+  "detail": "7.000"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 2/5 keep the date ratio",
+  "ok": false,
+  "detail": "34.500"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 3/4 keep the date ratio",
+  "ok": false,
+  "detail": "0.017"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 3/5 keep the date ratio",
+  "ok": false,
+  "detail": "0.084"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 tom gaps 4/5 keep the date ratio",
+  "ok": false,
+  "detail": "4.929"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 precondition: true-scale pairs measured",
+  "ok": true,
+  "detail": "17"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 Sophie: Today at its true proportion",
+  "ok": false,
+  "detail": "0.500 vs 0.405"
+ }
+]

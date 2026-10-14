@@ -19,12 +19,6 @@
  },
  {
   "lock": "F2",
-  "where": "1512 case 1 ≤ 5 stops",
-  "ok": true,
-  "detail": "3"
- },
- {
-  "lock": "F2",
   "where": "1512 case 1 no overlap",
   "ok": true,
   "detail": "false"
@@ -46,12 +40,6 @@
   "where": "1512 case 1 no container",
   "ok": true,
   "detail": "rgba(0, 0, 0, 0) · over true"
- },
- {
-  "lock": "F2",
-  "where": "1512 case 2 ≤ 5 stops",
-  "ok": true,
-  "detail": "4"
  },
  {
   "lock": "F2",
@@ -79,12 +67,6 @@
  },
  {
   "lock": "F2",
-  "where": "1512 case 3 ≤ 5 stops",
-  "ok": true,
-  "detail": "1"
- },
- {
-  "lock": "F2",
   "where": "1512 case 3 no overlap",
   "ok": true,
   "detail": "false"
@@ -106,12 +88,6 @@
   "where": "1512 case 3 no container",
   "ok": true,
   "detail": "rgba(0, 0, 0, 0) · over false"
- },
- {
-  "lock": "F2",
-  "where": "1512 case 4 ≤ 5 stops",
-  "ok": true,
-  "detail": "4"
  },
  {
   "lock": "F2",
@@ -139,12 +115,6 @@
  },
  {
   "lock": "F2",
-  "where": "1512 case 5 ≤ 5 stops",
-  "ok": true,
-  "detail": "5"
- },
- {
-  "lock": "F2",
   "where": "1512 case 5 no overlap",
   "ok": true,
   "detail": "false"
@@ -169,21 +139,15 @@
  },
  {
   "lock": "F2",
-  "where": "1512 same-day merges",
+  "where": "1512 same-day: one event stop",
   "ok": true,
-  "detail": "case 3 has 1 stops"
+  "detail": "case 3 has 1 event stops"
  },
  {
   "lock": "F2",
   "where": "1100 five cases",
   "ok": true,
   "detail": "5"
- },
- {
-  "lock": "F2",
-  "where": "1100 case 1 ≤ 5 stops",
-  "ok": true,
-  "detail": "3"
  },
  {
   "lock": "F2",
@@ -211,12 +175,6 @@
  },
  {
   "lock": "F2",
-  "where": "1100 case 2 ≤ 5 stops",
-  "ok": true,
-  "detail": "4"
- },
- {
-  "lock": "F2",
   "where": "1100 case 2 no overlap",
   "ok": true,
   "detail": "false"
@@ -238,12 +196,6 @@
   "where": "1100 case 2 no container",
   "ok": true,
   "detail": "rgba(0, 0, 0, 0) · over true"
- },
- {
-  "lock": "F2",
-  "where": "1100 case 3 ≤ 5 stops",
-  "ok": true,
-  "detail": "1"
  },
  {
   "lock": "F2",
@@ -271,12 +223,6 @@
  },
  {
   "lock": "F2",
-  "where": "1100 case 4 ≤ 5 stops",
-  "ok": true,
-  "detail": "4"
- },
- {
-  "lock": "F2",
   "where": "1100 case 4 no overlap",
   "ok": true,
   "detail": "false"
@@ -298,12 +244,6 @@
   "where": "1100 case 4 no container",
   "ok": true,
   "detail": "rgba(0, 0, 0, 0) · over false"
- },
- {
-  "lock": "F2",
-  "where": "1100 case 5 ≤ 5 stops",
-  "ok": true,
-  "detail": "5"
  },
  {
   "lock": "F2",
@@ -331,8 +271,8 @@
  },
  {
   "lock": "F2",
-  "where": "1100 same-day merges",
+  "where": "1100 same-day: one event stop",
   "ok": true,
-  "detail": "case 3 has 1 stops"
+  "detail": "case 3 has 1 event stops"
  }
 ]

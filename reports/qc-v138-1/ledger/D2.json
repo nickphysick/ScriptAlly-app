@@ -25,15 +25,9 @@
  },
  {
   "lock": "D2",
-  "where": "1512 case 1 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1512 case 1 ticks ≥ 4px",
   "ok": true,
-  "detail": "21.0,29.9,64.0"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -55,15 +49,9 @@
  },
  {
   "lock": "D2",
-  "where": "1512 case 2 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1512 case 2 ticks ≥ 4px",
   "ok": true,
-  "detail": "60.9,60.9,0.0"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -85,15 +73,9 @@
  },
  {
   "lock": "D2",
-  "where": "1512 case 3 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1512 case 3 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,14.4"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -115,15 +97,9 @@
  },
  {
   "lock": "D2",
-  "where": "1512 case 4 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1512 case 4 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,0.0,479.6"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -145,15 +121,9 @@
  },
  {
   "lock": "D2",
-  "where": "1512 case 5 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1512 case 5 ticks ≥ 4px",
   "ok": true,
-  "detail": "17.9,0.0,17.9"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -181,15 +151,9 @@
  },
  {
   "lock": "D2",
-  "where": "1100 case 1 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1100 case 1 ticks ≥ 4px",
   "ok": true,
-  "detail": "14.2,29.9,64.0"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -211,15 +175,9 @@
  },
  {
   "lock": "D2",
-  "where": "1100 case 2 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1100 case 2 ticks ≥ 4px",
   "ok": true,
-  "detail": "43.4,43.4,0.0"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -241,15 +199,9 @@
  },
  {
   "lock": "D2",
-  "where": "1100 case 3 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1100 case 3 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,10.2"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -271,15 +223,9 @@
  },
  {
   "lock": "D2",
-  "where": "1100 case 4 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1100 case 4 ticks ≥ 4px",
   "ok": true,
-  "detail": "0.0,0.0,312.9"
+  "detail": ""
  },
  {
   "lock": "D2",
@@ -301,14 +247,8 @@
  },
  {
   "lock": "D2",
-  "where": "1100 case 5 no tick key",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "D2",
   "where": "1100 case 5 ticks ≥ 4px",
   "ok": true,
-  "detail": "12.3,0.0,16.5"
+  "detail": ""
  }
 ]

@@ -1,0 +1,20 @@
+{
+  "build": "query-centre-v138-4 (dev build, vite preview 127.0.0.1:4470), 1512x1000 and 1280x1000 with the shell (C1 also 1100 and 1024); the five acceptance cases forced through the peek lab against 8 Oct 2026",
+  "method": "QC1384_MUTATE=<lock> applies the named break in the page",
+  "proofs": [
+    { "lock": "A1", "mutation": "markers in a flex row (evenly spaced, whatever their dates)", "red": "Sophie's gap ratios 0.567 / 0.835 / 1.473 against the date ratio" },
+    { "lock": "A2", "mutation": "let labels add rows (height auto, labels static)", "red": "heights 117.4 / 92.3 / 122.6 against 120" },
+    { "lock": "B1", "mutation": "colour past bars by court (rust) and past glyphs ink", "red": "past bar rgb(176, 96, 62); past glyph rgb(28, 19, 15)" },
+    { "lock": "C1", "mutation": "remove the second lane (every upper label moved below)", "red": "Query sent × Was due (Marcus), Was due × TODAY (Clara), Offer × TODAY (Tom) overlap" },
+    { "lock": "D1", "mutation": "restore the serif", "red": "Source Serif 4 at 12.5px" },
+    { "lock": "qcTl4.test (lanes)", "mutation": "source: the 10px lane clearance removed", "red": "3 failed | 8 passed" }
+  ],
+  "green": {
+    "qcV1384": "5 passed",
+    "qcV1383 (D1–F1)": "3 passed",
+    "qcV1382": "3 passed (B1 edited: the timeline's own box spans First queried → Due)",
+    "qcV1381": "6 passed (D2's tick-key check retired)",
+    "qcV138": "16 passed (F2 edited: no stop cap; Today is its own stop)",
+    "shots + census": "2 passed (0 of 144 peeks fell back to a title)"
+  }
+}

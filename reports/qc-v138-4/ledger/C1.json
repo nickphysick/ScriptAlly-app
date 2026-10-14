@@ -1,0 +1,554 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 sophie no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 sophie inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 sophie above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 sophie nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 marcus no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 marcus inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 marcus above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 marcus nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 clara no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 clara inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 clara above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 clara nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 tom no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 tom inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 tom above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 tom nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 george no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 george inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 george above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 george nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 Tom: '+1 earlier'",
+  "ok": true,
+  "detail": "[[\"+1 earlier\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 Sophie: '+1 same day'",
+  "ok": true,
+  "detail": "[[\"+1 same day\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 sophie no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 sophie inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 sophie above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 sophie nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 marcus no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 marcus inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 marcus above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 marcus nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 clara no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 clara inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 clara above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 clara nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tom no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tom inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tom above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tom nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 george no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 george inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 george above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 george nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 Tom: '+1 earlier'",
+  "ok": true,
+  "detail": "[[\"+1 earlier\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 Sophie: '+1 same day'",
+  "ok": true,
+  "detail": "[[\"+1 same day\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1100 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C1",
+  "where": "1100 sophie no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 sophie inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 sophie above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 sophie nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 marcus no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 marcus inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 marcus above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 marcus nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 clara no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 clara inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 clara above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 clara nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 tom no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 tom inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 tom above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 tom nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 george no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 george inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 george above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 george nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1100 Tom: '+1 earlier'",
+  "ok": true,
+  "detail": "[[\"+1 earlier\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1100 Sophie: '+1 same day'",
+  "ok": true,
+  "detail": "[[\"+1 same day\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1024 five cases",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C1",
+  "where": "1024 sophie no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 sophie inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 sophie above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 sophie nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 marcus no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 marcus inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 marcus above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 marcus nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 clara no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 clara inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 clara above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 clara nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 tom no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 tom inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 tom above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 tom nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 george no overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 george inside the timeline",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 george above or below the track",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 george nothing cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1024 Tom: '+1 earlier'",
+  "ok": true,
+  "detail": "[[\"+1 earlier\"],[],[],[]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1024 Sophie: '+1 same day'",
+  "ok": true,
+  "detail": "[[\"+1 same day\"],[],[],[]]"
+ }
+]

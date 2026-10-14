@@ -9,13 +9,13 @@
   "lock": "D1",
   "where": "1512 first card < 1 at 117ms",
   "ok": true,
-  "detail": "0.58 0.00 0.00"
+  "detail": "0.21 0.00 0.00"
  },
  {
   "lock": "D1",
   "where": "1512 last card lower at 117ms",
   "ok": true,
-  "detail": "0.58 0.00 0.00"
+  "detail": "0.21 0.00 0.00"
  },
  {
   "lock": "D1",
@@ -33,17 +33,17 @@
   "lock": "D1",
   "where": "1280 first card < 1 at 117ms",
   "ok": true,
-  "detail": "0.58 0.00 0.00"
+  "detail": "0.42 0.00 0.00"
  },
  {
   "lock": "D1",
   "where": "1280 last card lower at 117ms",
   "ok": true,
-  "detail": "0.58 0.00 0.00"
+  "detail": "0.42 0.00 0.00"
  },
  {
   "lock": "D1",
-  "where": "1280 all 1 by 915ms",
+  "where": "1280 all 1 by 917ms",
   "ok": true,
   "detail": "1.00 1.00 1.00"
  },

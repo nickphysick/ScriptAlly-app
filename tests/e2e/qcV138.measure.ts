@@ -548,7 +548,7 @@ test.describe("Query Centre v138", () => {
       await openQC(page, vp, "F2");
       const w = `${vp.width}`;
       const r = await page.evaluate(() => {
-        const out: { stops: number; overlap: boolean; overflow: boolean; segOut: boolean; over: boolean; bg: string }[] = [];
+        const out: { stops: number; events: number; overlap: boolean; overflow: boolean; segOut: boolean; over: boolean; bg: string }[] = [];
         for (const c of document.querySelectorAll<HTMLElement>('[data-qc138="peek-case"]')) {
           if (c.getBoundingClientRect().height === 0) continue;
           const pk = c.querySelector<HTMLElement>('[data-qcv="peek"]')!;
@@ -559,22 +559,25 @@ test.describe("Query Centre v138", () => {
           const labels = [...pk.querySelectorAll<HTMLElement>('[data-qcv="peek-name"], [data-qcv="peek-date"], [data-qcv="peek-seg-label"]')];
           const overflow = labels.some((l) => { const b = l.getBoundingClientRect(); return b.left < box.left - 0.5 || b.right > box.right + 0.5 || l.scrollWidth > l.clientWidth + 1; });
           const segOut = [...pk.querySelectorAll<HTMLElement>('[data-qcv="peek-seg"]')].some((s) => { const sb = s.getBoundingClientRect(); const lb = s.querySelector("em")!.getBoundingClientRect(); return lb.left < sb.left - 0.5 || lb.right > sb.right + 0.5; });
-          out.push({ stops: stops.length, overlap, overflow, segOut, over: pk.hasAttribute("data-over"), bg: getComputedStyle(pk).backgroundColor });
+          out.push({ stops: stops.length, events: pk.querySelectorAll('[data-qcv="peek-stop"][data-kind="event"]').length, overlap, overflow, segOut, over: pk.hasAttribute("data-over"), bg: getComputedStyle(pk).backgroundColor });
         }
         return out;
       });
       L.check("F2", `${w} five cases`, r.length === 5, `${r.length}`);
       r.forEach((c, i) => {
-        L.check("F2", `${w} case ${i + 1} ≤ 5 stops`, c.stops <= 5, `${c.stops}`);
+        /* EDITED v138.4: the five-stop cap is gone — the track holds every stop at its date and the label lanes fold
+           what cannot be named into "+n earlier" (QC138.4 C1) — so a stop count is no longer a claim */
         L.check("F2", `${w} case ${i + 1} no overlap`, !c.overlap, `${c.overlap}`);
         L.check("F2", `${w} case ${i + 1} no overflow`, !c.overflow, `${c.overflow}`);
         L.check("F2", `${w} case ${i + 1} labels in segments`, !c.segOut, `${c.segOut}`);
         /* EDITED (v138.1 §D): the peek has no container; its colours are qcV1381 D1's (a blush Was due card) */
         L.check("F2", `${w} case ${i + 1} no container`, c.bg === "rgba(0, 0, 0, 0)", `${c.bg} · over ${c.over}`);
       });
-      L.check("F2", `${w} same-day merges`, r[2]?.stops === 1, `case 3 has ${r[2]?.stops} stops`);
+      /* EDITED v138.4: same-day EVENTS still merge (QC138.4 C1's "+1 same day"), but Today is its own stop now, as in
+         the reference, rather than an event on today's day taking its place: case 3 is one event, Today and its date */
+      L.check("F2", `${w} same-day: one event stop`, r[2]?.events === 1, `case 3 has ${r[2]?.events} event stops`);
     }
-    L.done(50);
+    L.done(40); /* EDITED v138.4: ten stop-count readings retired with the five-stop cap */
   });
 
   test("G1 · select: the circle ticks without opening; the bar counts; ✕ and a refilter clear", async ({ page }) => {
