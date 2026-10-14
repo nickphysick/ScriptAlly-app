@@ -101,7 +101,8 @@ import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
-import { QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
+import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
+import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
 import { usePopover } from "./shell/ListPills";
 import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
@@ -2447,6 +2448,19 @@ export const Queries: React.FC<{
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
   const [qcFull, setQcFull] = useState(false);
+  /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
+  const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());
+  const [qcBulk, setQcBulk] = useState<{ mode: "nudge" | "resp" | "close"; ids: string[] } | null>(null);
+  /* the ticked rows in list order; the queue starts on the next render once the panel is free */
+  const startBulk = (mode: "nudge" | "resp" | "close") => {
+    const ids = qcVisible.filter((r) => qcPicked.has(r.id)).map((r) => r.id);
+    setQcPicked(new Set());
+    if (ids.length) setQcBulk({ mode, ids });
+  };
+  const pickQc138 = (id: string) => setQcPicked((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  useEscapeLayer(qcPicked.size > 0, () => setQcPicked(new Set()), ESC_LEVEL.page);
+  /* v138 §G — the selection clears on a route change and on any refilter */
+  useEffect(() => { setQcPicked((p) => (p.size ? new Set() : p)); }, [routeActive, qcF138, qcFind, qcFilter, qcScope, qcCzCourt]);
   /* v138 §D — Closed starts folded; the fold is remembered for the session */
   const [qcFolded, setQcFolded] = useState<ReadonlySet<string>>(() => {
     try { const v = sessionStorage.getItem(QC138_FOLD_KEY); if (v) return new Set(JSON.parse(v) as string[]); } catch { /* a private window */ }
@@ -2844,6 +2858,20 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
+     `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
+  const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
+  /* true from a step until the panel has opened on it, so the queue never runs ahead of the panel */
+  const bulkWaitRef = useRef(false);
+  useEffect(() => {
+    if (cardQueryId) { bulkWaitRef.current = false; return; }
+    if (!qcBulk || bulkWaitRef.current) return;
+    if (!qcBulk.ids.length) { setQcBulk(null); return; }
+    const [next, ...rest] = qcBulk.ids;
+    bulkWaitRef.current = true;
+    setQcBulk({ mode: qcBulk.mode, ids: rest });
+    stepRowRef.current?.({ mode: qcBulk.mode, queryId: next });
+  }, [qcBulk, cardQueryId]);
   /* §E — what the picker's listeners read: the query open now, and how a pick opens the panel on it */
   openIdRef.current = cardQueryId ?? null;
   queriesRef.current = queries;
@@ -5136,6 +5164,15 @@ export const Queries: React.FC<{
         disabled={showGridSkeleton}
       />
       <i ref={qc138Ref} hidden />
+      <BulkBar138
+        anchor={qc138Ref}
+        on={routeActive && qcDesk}
+        count={qcPicked.size}
+        onNudge={() => startBulk("nudge")}
+        onRecord={() => startBulk("resp")}
+        onClose={() => startBulk("close")}
+        onClear={() => setQcPicked(new Set())}
+      />
       <QcPinned138
         anchor={qc138Ref}
         on={routeActive && qcDesk && !showGridSkeleton}
@@ -5563,6 +5600,7 @@ export const Queries: React.FC<{
     if (cardQueryId !== q.id || extPanel) { if (extPanel) closeQueryPanel(); onOpenQuery?.(q.id); }
     else bumpStep((n) => n + 1); /* already open on this row: a render, so the effect above sees the slot */
   };
+  stepRowRef.current = stepRow;
   /* Contact list v16 §F — the query view opened from an agent's panel. Escape and "← Back" return to the agent
      (the agent's panel is still the page's `?agent`, and redraws the moment this one closes); the × closes both. */
   const fromAgent = extPanel?.from === "agent" ? queryPanelBack() : null;
@@ -7066,6 +7104,8 @@ export const Queries: React.FC<{
                     const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
                     return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number }));
                   }}
+                  selected={qcPicked}
+                  onPick={pickQc138}
                   folded={qcFolded}
                   onFold={(k) => setQcFolded((f) => { const n = new Set(f); if (n.has(k)) n.delete(k); else n.add(k); return n; })}
                   /* the chip opens the packages page; "+ Add" opens the edit journey (the "Record what you sent" route) */

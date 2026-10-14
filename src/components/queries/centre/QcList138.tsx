@@ -14,6 +14,7 @@
  *    one predicate (`nextDoor`).
  */
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
 import type { SubmissionPackage } from "../../../types";
@@ -220,6 +221,9 @@ export interface QcList138Props {
   onOpenPackage?: (packageId: string | null) => void;
   find?: string;
   ringId?: string | null;
+  /** v138 §G — the rows ticked for a bulk action */
+  selected?: ReadonlySet<string>;
+  onPick?: (id: string) => void;
   /** v138 §F — the query's dated events, from its activity log (the panel's own source) */
   loadPeek?: (id: string) => Promise<PeekEvent[]>;
   /** group keys folded at first sight (Part D: Closed) */
@@ -229,7 +233,7 @@ export interface QcList138Props {
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold, loadPeek,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", ringId = null, folded, onFold, loadPeek, selected, onPick,
 }) => {
   /* §F — the peek opens after 450ms of continuous hover; the events are fetched from the first moment */
   const [peekId, setPeekId] = useState<string | null>(null);
@@ -293,15 +297,26 @@ export const QcList138: React.FC<QcList138Props> = ({
     const yours = isYourMoveRow(r);
     const detail = stageDetail(r, nowMs);
     const dial = dialOf(r, nowMs);
+    const picked = !!selected?.has(r.id);
     return (
-      <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}`} data-ring={ringId === r.id || undefined}
+      <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}${picked ? " picked" : ""}`} data-picked={picked ? "" : undefined} data-ring={ringId === r.id || undefined}
         data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
         onMouseEnter={(e) => enter(r.id, e.currentTarget)} onMouseLeave={leave}
-        onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(r.id); } }}>
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (e.key === "Enter") { e.preventDefault(); onOpen(r.id); }
+          /* §G — Space or x ticks the focused row */
+          else if (e.key === " " || e.key === "x" || e.key === "X") { e.preventDefault(); onPick?.(r.id); }
+        }}>
         <div className="qc138-ag" data-qcv="row-agent">
-          <AgentDisc initials={r.initials} standing={closed ? "closed" : "querying"} size={density === "compact" ? 26 : 40} className="qc138-disc" attrs={{ "data-qcv": "row-chip" }} />
+          {/* §G — the circle is the row's select box: clicking it ticks the row without opening it */}
+          <button type="button" className="qc138-pick" data-qcv="row-pick" aria-pressed={picked} aria-label={`${picked ? "Unselect" : "Select"} the query to ${r.agentName}`}
+            onClick={(e) => { e.stopPropagation(); onPick?.(r.id); }} onKeyDown={(e) => e.stopPropagation()}>
+            <AgentDisc initials={r.initials} standing={closed ? "closed" : "querying"} size={density === "compact" ? 26 : 40} selected={picked} className="qc138-disc" attrs={{ "data-qcv": "row-chip" }} />
+            {picked ? null : <span className="qc138-pickbox" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" /></svg></span>}
+          </button>
           <span className="qc138-agt">
             <b data-qcv="row-name">{hl(r.agentName)}</b>
             <small data-qcv="row-agency">{hl(r.agency)}</small>
@@ -418,5 +433,36 @@ export const QcList138: React.FC<QcList138Props> = ({
       </div>
       {tip.node}
     </div>
+  );
+};
+
+/**
+ * v138 §G — THE BULK BAR: with any rows ticked, an ink bar rises at the bottom centre of the page sheet, 22px up:
+ * "{n} selected" · Nudge · Record a response · Close · ✕. Each action runs the existing journey for each ticked
+ * query in turn, through the panel. Portalled into the sheet (`.ws-window`), so it centres on the sheet.
+ */
+export const BulkBar138: React.FC<{
+  anchor: React.RefObject<HTMLElement | null>;
+  on: boolean;
+  count: number;
+  onNudge: () => void;
+  onRecord: () => void;
+  onClose: () => void;
+  onClear: () => void;
+}> = ({ anchor, on, count, onNudge, onRecord, onClose, onClear }) => {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => { setHost(on ? anchor.current?.closest<HTMLElement>(".ws-window") ?? null : null); }, [anchor, on]);
+  if (!on || !host || count === 0) return null;
+  return createPortal(
+    <div className="qc138-bulk" role="toolbar" aria-label="Selected queries" data-qc138="bulk">
+      <span className="qc138-bulk-n" data-qc138="bulk-count" role="status">{count} selected</span>
+      <button type="button" className="qc138-bulk-p" data-qc138="bulk-nudge" onClick={onNudge}>Nudge</button>
+      <button type="button" data-qc138="bulk-record" onClick={onRecord}>Record a response</button>
+      <button type="button" data-qc138="bulk-close" onClick={onClose}>Close</button>
+      <button type="button" className="qc138-bulk-x" data-qc138="bulk-clear" aria-label="Clear the selection" onClick={onClear}>
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+      </button>
+    </div>,
+    host,
   );
 };
