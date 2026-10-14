@@ -21,9 +21,39 @@
 import { ElapsedSense, elapsedPhrase } from "./elapsed";
 import { Query, Agent, QueryStatus } from "../types";
 import { queryBucket } from "./queryAmbient";
-import { replyOverdue, replyDeadlineMs } from "./taskPrecedence";
+import { expectedFor } from "./qcSummary";
 
-export type ListGroup = "overdue" | "waiting" | "move" | "closed";
+/**
+ * Query Centre v138 §D — ONE ANSWER TO "WHOSE MOVE IS IT?". A request or an offer is the writer's move; so is a
+ * waiting query whose reply date has passed, because the next thing to happen is the writer's (nudge, or close).
+ * It used to sit in a group of its own, "No reply yet", while its row said "Nudge": two answers to one question.
+ *
+ * ⚠️ `queryBucket` IS UNCHANGED AND STILL MEANS STATUS ALONE. This composes it.
+ * ⚠️ AN OFFER IS YOUR MOVE, though `queryBucket` files it under "closed" (the pack's literal predicate would have
+ *    left every offer out of a band whose note reads "requests, offers and nudges").
+ * ⚠️ THE CLOCK IS THE ROW'S OWN EXPECTED DATE (`expectedFor`: the writer's date, or the agent's stated window from
+ *    the last send), never `replyOverdue`'s window from `dateSent`. It is the clock the row's Next move reads
+ *    (Query panel v2's `nextDoor`, through `pastExpected`), so a row in Your move always says Nudge and a row
+ *    that says Nudge is always in Your move. The two clocks disagreed on three queries of the harness account.
+ * ⚠️ NO WINDOW, NO DATE: a waiting query with no expected date stays in Waiting.
+ */
+export function isYourMove(query: Query, agent: Agent | null | undefined, now: number = Date.now()): boolean {
+  const status = query.status as QueryStatus;
+  if (status === QueryStatus.OFFER) return true;
+  const bucket = queryBucket(status);
+  if (bucket === "move") return true;
+  if (bucket !== "waiting") return false;
+  const exp = expectedFor(query, agent).ms;
+  /* the instant the date arrives counts as passed, as the row's figure ("today") does */
+  return exp != null && exp <= now;
+}
+
+/** The same answer from a built row (`QcRow` carries `court` and `pastExpected` from the same clock). */
+export const isYourMoveRow = (r: { court: string; pastExpected: boolean }): boolean =>
+  r.court === "you" || r.court === "offer" || (r.court === "agent" && r.pastExpected);
+
+/** v138 §D — "overdue" is retired: a waiting query past its date is the writer's move */
+export type ListGroup = "waiting" | "move" | "closed";
 
 /**
  * What the list renders as one section.
@@ -40,7 +70,7 @@ export type ListSection = ListGroup | "flat";
  * ⚠️ OVERDUE FIRST, CLOSED LAST — the order is the point of the section. The list is read top-down
  * by someone deciding what to do this morning, so what has lapsed is what they meet first.
  */
-export const GROUP_ORDER: readonly ListGroup[] = ["overdue", "waiting", "move", "closed"];
+export const GROUP_ORDER: readonly ListGroup[] = ["move", "waiting", "closed"];
 
 /**
  * ⚠️ `YOUR MOVE`, WHERE THE REF DRAWS `WITH THE AGENT` — a deliberate deviation, flagged.
@@ -60,7 +90,6 @@ export const GROUP_ORDER: readonly ListGroup[] = ["overdue", "waiting", "move", 
  * word is.
  */
 export const GROUP_LABEL: Record<ListGroup, string> = {
-  overdue: "NO REPLY YET",
   waiting: "WAITING",
   move: "YOUR MOVE",
   closed: "CLOSED",
@@ -85,10 +114,8 @@ const inputFor = (q: QueryLike, a: AgentLike, now: number) => ({
  * default window here would put a row in the chase group on the strength of a number nobody typed.
  */
 export function listGroupFor(query: QueryLike, agent: AgentLike, now: number = Date.now()): ListGroup {
-  const bucket = queryBucket(query.status as QueryStatus);
-  if (bucket === "closed") return "closed";
-  if (bucket === "move") return "move";
-  return replyOverdue(inputFor(query, agent, now)) ? "overdue" : "waiting";
+  if (isYourMove(query as Query, agent as Agent | null | undefined, now)) return "move";
+  return queryBucket(query.status as QueryStatus) === "waiting" ? "waiting" : "closed";
 }
 
 /**
@@ -108,7 +135,8 @@ export type RowFigure =
 export function rowFigure(query: QueryLike, agent: AgentLike, now: number = Date.now()): RowFigure {
   const bucket = queryBucket(query.status as QueryStatus);
   if (bucket !== "waiting") return { kind: "date" };
-  const deadline = replyDeadlineMs(inputFor(query, agent, now));
+  /* v138 §D — the group's own clock (`expectedFor`), so a row in Waiting never counts up */
+  const deadline = expectedFor(query as Query, agent as Agent | null | undefined).ms ?? NaN;
   /* an undated import, or an agent with no stated window: there is no position to state, so the row
      keeps the date it has always had rather than inventing one */
   if (Number.isNaN(deadline)) return { kind: "date" };

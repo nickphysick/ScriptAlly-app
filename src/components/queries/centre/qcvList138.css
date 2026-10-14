@@ -110,6 +110,13 @@
     cursor: pointer; user-select: none; text-align: left; background: var(--qc138-bg); color: var(--qc138-c);
   }
   .qc138-sheet .qc138-grp:first-child .qc138-band { margin-top: 10px; }
+  /* stuck: a shadow and square top corners */
+  .qc138-sheet .qc138-band[data-stuck] { border-radius: 0 0 12px 12px; box-shadow: 0 10px 16px -14px rgba(28, 19, 15, 0.35); }
+  /* compact: 44 tall, 12 above, a 26px icon circle and a 17px name */
+  .qc138-sheet[data-density="compact"] .qc138-band { height: 44px; margin-top: 12px; }
+  .qc138-sheet[data-density="compact"] .qc138-grp:first-child .qc138-band { margin-top: 10px; }
+  .qc138-sheet[data-density="compact"] .qc138-gart { width: 26px; height: 26px; }
+  .qc138-sheet[data-density="compact"] .qc138-band .qc138-gt { font-size: 17px !important; }
   .qc138-sheet .qc138-band--you { --qc138-bg: #f6e2d8; --qc138-c: #a2452a; }
   .qc138-sheet .qc138-band--waiting { --qc138-bg: #e2e7ef; --qc138-c: #3d5070; }
   .qc138-sheet .qc138-band--closed { --qc138-bg: #ece8e3; --qc138-c: #7c7168; }

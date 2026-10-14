@@ -101,7 +101,7 @@ import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
-import { QcList138, type BandTone } from "./queries/centre/QcList138";
+import { QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { usePopover } from "./shell/ListPills";
 import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
@@ -2447,7 +2447,12 @@ export const Queries: React.FC<{
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
   const [qcFull, setQcFull] = useState(false);
-  const [qcFolded, setQcFolded] = useState<ReadonlySet<string>>(() => new Set());
+  /* v138 §D — Closed starts folded; the fold is remembered for the session */
+  const [qcFolded, setQcFolded] = useState<ReadonlySet<string>>(() => {
+    try { const v = sessionStorage.getItem(QC138_FOLD_KEY); if (v) return new Set(JSON.parse(v) as string[]); } catch { /* a private window */ }
+    return new Set(["closed"]);
+  });
+  useEffect(() => { try { sessionStorage.setItem(QC138_FOLD_KEY, JSON.stringify([...qcFolded])); } catch { /* a private window */ } }, [qcFolded]);
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
@@ -7583,7 +7588,7 @@ export const Queries: React.FC<{
                    every row is not a grouping, and announcing one would tell a screen reader the
                    list is organised when it is not. */
                 <div className={g === "flat" ? "qc-grp qc-grp--flat" : "qc-grp"} {...(g === "flat" ? {} : { role: "group", "aria-label": `${GROUP_LABEL[g]}, ${items.length}` })} key={g}>
-                  {g !== "flat" && <div className={`qc-gh${g === "overdue" ? " qc-gh-od" : ""}${foldable ? " qc-gh-fold" : ""}`}
+                  {g !== "flat" && <div className={`qc-gh${foldable ? " qc-gh-fold" : ""}`}
                     {...(foldable ? { role: "button", tabIndex: 0, onClick: () => setClosedOpen((o) => !o),
                       onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setClosedOpen((o) => !o); } },
                       "aria-expanded": !shut } : { "aria-hidden": true })}>

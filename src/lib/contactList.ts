@@ -16,6 +16,7 @@
  */
 import type { Agent, Manuscript, Query, QueryStatus } from "../types";
 import type { QcRow } from "./qcSummary";
+import { isYourMoveRow } from "./queryCentreGroups";
 import { isDoorOpen, isDoorClosed, doorOf, DOOR_NOT_KNOWN, type DoorState } from "./agentList";
 import { bookGenres, genreKey, takesBook } from "./genreMatch";
 import { joinGenres } from "./genreNoun";
@@ -55,8 +56,7 @@ export function railHeight(top: number, innerHeight: number): number | null {
 /* ── where you stand, per agent, for the manuscript in scope ─────────────────────────────── */
 
 /** THE page-local union (ruling a): the writer's move on a query. */
-export const rowYourMove = (r: Pick<QcRow, "court" | "pastExpected">): boolean =>
-  r.court === "you" || r.court === "offer" || (r.court === "agent" && r.pastExpected);
+export const rowYourMove = (r: Pick<QcRow, "court" | "pastExpected">): boolean => isYourMoveRow(r);
 
 export type ContactStanding =
   | { kind: "none" }

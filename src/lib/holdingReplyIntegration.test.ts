@@ -45,7 +45,9 @@ describe("Phase 2 · the tracker re-bases; the list does not", () => {
   /** ⚠️ D2 — the list keeps measuring from the send. Both true, different questions. */
   it("the list's group is untouched by a reply", () => {
     const agent = { responseTimeWeeks: 8 };
-    expect(listGroupFor(q() as never, agent, NOW)).toBe("overdue");
+    /* v138 §D re-point: a lapsed waiting query is in Your move ("overdue" is retired); the law, that a reply does
+       not move it, is unchanged */
+    expect(listGroupFor(q() as never, agent, NOW)).toBe("move");
   });
 });
 

@@ -25,8 +25,9 @@ const q = (over: Partial<{ status: QueryStatus; dateSent: string; responseDeadli
   ({ status: QueryStatus.QUERIED, dateSent: daysAgo(10), ...over }) as never;
 
 describe("§5 · the four groups", () => {
-  it("overdue leads and closed trails — the order is what the section is for", () => {
-    expect([...GROUP_ORDER]).toEqual(["overdue", "waiting", "move", "closed"]);
+  /* v138 §D: "overdue" ("No reply yet") is retired — a lapsed waiting query is the writer's move — so Your move leads */
+  it("your move leads and closed trails — the order is what the section is for", () => {
+    expect([...GROUP_ORDER]).toEqual(["move", "waiting", "closed"]);
   });
 
   /**
@@ -45,10 +46,11 @@ describe("§5 · the four groups", () => {
 
   it("membership is the shared bucket, split only where the clock splits it", () => {
     expect(listGroupFor(q({ dateSent: daysAgo(10) }), agent(), NOW)).toBe("waiting");
-    expect(listGroupFor(q({ dateSent: daysAgo(60) }), agent(), NOW)).toBe("overdue");
+    expect(listGroupFor(q({ dateSent: daysAgo(60) }), agent(), NOW)).toBe("move");
     expect(listGroupFor(q({ status: QueryStatus.REJECTED }), agent(), NOW)).toBe("closed");
     expect(listGroupFor(q({ status: QueryStatus.NO_RESPONSE }), agent(), NOW)).toBe("closed");
-    expect(listGroupFor(q({ status: QueryStatus.OFFER }), agent(), NOW)).toBe("closed");
+    /* v138 §D: an offer is the writer's move (queryBucket files it under closed; isYourMove does not) */
+    expect(listGroupFor(q({ status: QueryStatus.OFFER }), agent(), NOW)).toBe("move");
   });
 
   /* ⚠️ NO STATED WINDOW → `waiting`, NEVER `overdue`. There is nothing for it to be late against;
@@ -98,7 +100,8 @@ describe("§5 · the figure is a position, and it agrees with the group", () => 
       const row = q({ dateSent: daysAgo(d) });
       const group = listGroupFor(row, agent(), NOW);
       const fig = rowFigure(row, agent(), NOW);
-      if (group === "overdue") expect(fig.kind, `day ${d}: an overdue row is counting down`).toBe("late");
+      /* v138 §D re-point: the lapsed waiting row is in Your move now ("overdue" is retired) */
+      if (group === "move") expect(fig.kind, `day ${d}: a lapsed row is counting down`).toBe("late");
       if (group === "waiting" && fig.kind !== "date") expect(fig.kind, `day ${d}: a waiting row is counting up`).toBe("left");
     }
   });
@@ -109,7 +112,7 @@ describe("§5 · the figure is a position, and it agrees with the group", () => 
       for (let d = 0; d <= 300; d += 1) {
         const row = q({ dateSent: daysAgo(d) });
         if (replyTaskFor(row, a, NOW) === "nudge") {
-          expect(listGroupFor(row, a, NOW), `day ${d}: Nudge lit on a row the list is not chasing`).toBe("overdue");
+          expect(listGroupFor(row, a, NOW), `day ${d}: Nudge lit on a row the list is not chasing`).toBe("move");
         }
       }
     }
@@ -170,7 +173,7 @@ describe("§1 · the list opens flat, and grouping moves behind the filter", () 
    * the flat list hides its absence.
    */
   it("⚠️ the grouping machinery is untouched — only whether it is drawn", () => {
-    expect(GROUP_ORDER).toEqual(["overdue", "waiting", "move", "closed"]);
+    expect(GROUP_ORDER).toEqual(["move", "waiting", "closed"]);
     expect(GROUP_ORDER.every((g) => typeof GROUP_LABEL[g] === "string" && GROUP_LABEL[g].length > 0)).toBe(true);
   });
 });

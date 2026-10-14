@@ -66,6 +66,37 @@ const ICON = {
 };
 
 export type BandTone = "you" | "waiting" | "closed";
+/** v138 §D — the session's folded bands */
+export const QC138_FOLD_KEY = "sa.qc138.folded";
+
+/**
+ * v138 §D — A BAND IS STUCK while it sits at its sticky top with its rows still under it. Derived from boxes on every
+ * scroll of the page's scroller (rAF-throttled), never an observer: a missed event would be permanent.
+ */
+function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): void {
+  useEffect(() => {
+    const root = box.current;
+    const sc = root?.closest<HTMLElement>(".wpg-scroll");
+    if (!root || !sc) return undefined;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      root.querySelectorAll<HTMLElement>(".qc138-band").forEach((b) => {
+        const top = parseFloat(getComputedStyle(b).top) || 0;
+        const r = b.getBoundingClientRect();
+        const grp = b.parentElement?.getBoundingClientRect();
+        const at = r.top - sc.getBoundingClientRect().top;
+        const stuck = Math.abs(at - top) < 1 && !!grp && grp.bottom > r.bottom + 1 && grp.top < r.top - 1;
+        if (stuck) b.setAttribute("data-stuck", ""); else b.removeAttribute("data-stuck");
+      });
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    sc.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => { sc.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
+  }, [box, sig]);
+}
 const TONE_ICON: Record<BandTone, React.ReactNode> = { you: ICON.pen, waiting: ICON.glass, closed: ICON.box };
 
 /** "What you sent": a 92px package chip (or an empty 92px space), a rule, four 30px tiles */
@@ -140,6 +171,7 @@ export const QcList138: React.FC<QcList138Props> = ({
   const [groupOpen, setGroupOpen] = useState(false);
   const groupBtn = useRef<HTMLButtonElement>(null);
   const rows = groups.flatMap((g) => g.rows);
+  useStuckBands(boxRef, `${groups.map((g) => `${g.key}:${g.rows.length}`).join("|")}|${[...folded].join(",")}|${density}`);
   const groupLabel = GROUP_BY_OPTIONS.find((o) => o.key === groupBy)?.label ?? "Urgency";
   useEffect(() => {
     if (!groupOpen) return undefined;

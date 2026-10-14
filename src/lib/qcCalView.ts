@@ -19,6 +19,7 @@
 import { QueryStatus } from "../types";
 import { ATTENTION_LABEL, ATTENTION_ORDER, eyeRows, type Attention, type EyeFocus, type EyeRow } from "./qcBirdsEye";
 import { STAGE_NAME, stageOrder, tileCourt, type QcRow } from "./qcSummary";
+import { isYourMoveRow } from "./queryCentreGroups";
 
 export type GroupBy = "attention" | "status" | "action" | "package" | "none";
 export type SortBy = "queried" | "changed" | "due";
@@ -434,22 +435,20 @@ export function attentionCounts(rows: readonly QcRow[], nowMs: number): Record<A
  * agents, not yet due" slightly overclaims, there being no date. A fourth live group would be inventing one the
  * reference does not have.
  */
-export type UrgencyKey = "you" | "waiting" | "quiet" | "closed";
+export type UrgencyKey = "you" | "waiting" | "closed";
 /**
- * v132 §3 — RELABELLED AND REORDERED, KEYS AND PREDICATE UNCHANGED: "Gone quiet" is "Past the date" and
- * comes second, "Waiting on agents" is "Waiting". The band shows the hint in mono caps.
+ * v138 §D — THREE GROUPS: Your move · Waiting · Closed. "Past the date" is retired: a waiting query past its
+ * reply date is the writer's move (`isYourMoveRow`, the one predicate), so it sits in Your move with the
+ * requests and offers. A waiting query with no window and no date stays in Waiting.
  */
 export const URGENCY_GROUPS: readonly { key: UrgencyKey; label: string; hint: string }[] = [
-  { key: "you", label: "Your move", hint: "offers and requests" },
-  { key: "quiet", label: "Past the date", hint: "replies overdue" },
+  { key: "you", label: "Your move", hint: "requests, offers and nudges" },
   { key: "waiting", label: "Waiting", hint: "with agents, not yet due" },
   { key: "closed", label: "Closed", hint: "passed or no response" },
 ];
 export function urgencyGroup(r: QcRow): UrgencyKey {
-  const c = tileCourt(r.status);
-  if (c === "you") return "you";
-  if (c === "agent") return r.pastExpected ? "quiet" : "waiting";
-  return "closed";
+  if (isYourMoveRow(r)) return "you";
+  return tileCourt(r.status) === "agent" ? "waiting" : "closed";
 }
 
 export interface ListGroup { key: string; label: string; hint?: string; rows: QcRow[] }
@@ -486,8 +485,8 @@ export function listGroups(
    */
   if (groupBy === "none") {
     if (!rows.length) return [];
-    const mine = rows.filter((r) => tileCourt(r.status) === "you");
-    const rest = rows.filter((r) => tileCourt(r.status) !== "you");
+    const mine = rows.filter((r) => isYourMoveRow(r));
+    const rest = rows.filter((r) => !isYourMoveRow(r));
     return [
       ...(mine.length ? [mk("you", "Your move", mine, "offers, requests and nudges")] : []),
       ...(rest.length ? [mk("rest", "Everything else", rest, "waiting on agents · closed")] : []),
