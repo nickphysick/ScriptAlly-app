@@ -30,6 +30,7 @@ import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
+import { listHealth } from "../../lib/contactHealth";
 import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
   contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
@@ -717,6 +718,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
   setHkOpenRef.current = setHkOpen;
+  /* v17.1 — THE ONE OPENER: the tab, the H key and List health in the header all call this */
+  const openHk = useCallback(() => setHkOpen(true), []);
+  const health = useMemo(() => listHealth(hk), [hk]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
@@ -861,7 +865,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       }
       e.preventDefault();
       if (fullK) { k.setFull(!k.full); return; }
-      if (hk) { setHkOpen(true); return; }
+      if (hk) { openHk(); return; }
       /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
       /* v17 §C: while the pinned row is shown its search box takes the key (it mirrors the header's); otherwise the
          header's own, brought into view */
@@ -1020,7 +1024,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {showList && (
           <Housekeeping
             model={hk} checkin={hkCheckin} every={hkPrefs.wishlistEvery} book={hkBook} today={hkToday} agents={agents}
-            open={hkOpen} onOpen={() => setHkOpen(true)} onClose={() => setHkOpen(false)}
+            open={hkOpen} onOpen={openHk} onClose={() => setHkOpen(false)}
             view={hkView} onView={setHkView} routeActive={active} keyHint={shortcutLabel("contactsHk")}
             onFix={onHkFix}
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
@@ -1067,6 +1071,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             msTitle={scoped?.title?.trim() || null} model={pageState === "list" ? glanceM : BLANK_GLANCE} active={glance}
             onGroup={(k) => setGlance((g) => (g === k ? null : k))}
             addRef={addBtnRef} onAdd={openAdd}
+            health={pageState === "list" ? health : null} onHealth={openHk}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
             {/* v17 §B — search and the filter pills, in the header, above its rule */}
             <div className="cl17-fr" data-cl17="filter-row">
