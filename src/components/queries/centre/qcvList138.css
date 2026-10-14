@@ -477,3 +477,15 @@
 @media (prefers-reduced-motion: reduce) {
   .qc138-sheet .qc138-drw .qc138-card, .qc138-sheet .qc138-drw .qc138-today, .qc138-sheet .qc138-drw .qc138-seg-ln { animation: none !important; }
 }
+
+/* ── v138.2 · BELOW 900px OF SHEET (a 1100 window with the sidebar open) the list has five columns and First queried
+   to Due is too narrow to hold a chain (five stops squeezed to their first letter, QC138 F2). The prompt names the
+   grid for the 1180 regime only; here the drawer stacks: the summary, then the timeline, both from the name's left
+   (v138.1's placement). ── */
+@media (min-width: 768px) {
+  @container qc138sheet (max-width: 899.98px) {
+    .qc138-sheet .qc138-drw { grid-template-columns: minmax(0, 1fr); }
+    .qc138-sheet .qc138-sum { grid-column: 1; padding: 0 0 0 var(--qc138-ind); }
+    .qc138-sheet .qc138-tlw { grid-column: 1; padding-left: var(--qc138-ind); }
+  }
+}
