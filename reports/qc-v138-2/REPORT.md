@@ -73,4 +73,4 @@ If the full line matters at 1280, the options are a shorter line-2 wording or a 
 
 ## Integration and dev
 
-(appended at deploy)
+Dev served `index-CvdwJkYd.js`, from `dev/…-cl171-qc138-qc1381` at `7b035a28`. This branch contains that branch, so the integration branch **`dev/…-cl171-qc138-qc1381-qc1382`** is a fast-forward to `80fb8366`: the same commit the gates and locks above ran on. It was built from a clean detached worktree and deployed hosting-only to `scriptally-dev`, after checking the served hash immediately before. **Dev now serves `index-IhaXnpGa.js`**, the gated build's own hash. Not merged to main; prod untouched.
