@@ -18,6 +18,7 @@ import React from "react";
 import { CONTACT_DISC_HAWK } from "./ContactOpenHeader";
 import { CONTACT_TEMPLATE_HREF } from "./ContactWays";
 import { CONTACT_EYEBROW } from "./ContactLightHeader";
+import { AgentDisc } from "../../shared/AgentDisc";
 import "../panel/agentPanel.css";
 import "./contactV17.css";
 
@@ -62,7 +63,7 @@ export const ContactEmptyPage: React.FC<{
         <div className="cl17-ex" data-cl17="example">
           <span className="cl17-ex-k" data-cl17="example-label">{EXAMPLE_LABEL}</span>
           <div className="cl17-ex-who">
-            <span className="cl17-ex-disc" aria-hidden="true">{EXAMPLE_AGENT.initials}</span>
+            <AgentDisc initials={EXAMPLE_AGENT.initials} standing="none" className="cl17-ex-disc" />
             <span className="cl17-ex-nm"><b>{EXAMPLE_AGENT.name}</b><i>{EXAMPLE_AGENT.place}</i></span>
             <span className="cl17-ex-door"><i aria-hidden="true" />{EXAMPLE_AGENT.door}</span>
           </div>

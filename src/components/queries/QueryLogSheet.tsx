@@ -20,6 +20,7 @@
  * brief's own phrase, and a portal is the only honest answer inside a scrolling column.
  */
 import React, { useMemo, useRef, useState } from "react";
+import { AgentDisc } from "../shared/AgentDisc";
 import { createPortal } from "react-dom";
 import "./queryLogSheet.css";
 import { useFixedMenu } from "../forms/useFixedMenu";
@@ -238,7 +239,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                     <button type="button" key={a.id} role="option" aria-selected={i === hi}
                       className={`qls-it${i === hi ? " qls-it--hi" : ""}`}
                       onMouseDown={(e) => { e.preventDefault(); pick(a); }}>
-                      <span className="qls-chip">{agentInitials(a)}</span>
+                      <AgentDisc initials={agentInitials(a)} standing="none" className="qls-chip" />
                       <span className="qls-ittx">
                         <span className="qls-itn">{agentPrimary(a)}</span>
                         <span className="qls-ita">{agentAgencyLine(a)}</span>
@@ -304,7 +305,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
           return (
             <div className="qls-agcard">
               <div className="qls-agtop">
-                <span className="qls-chip qls-chip--big">{agentInitials(agent)}</span>
+                <AgentDisc initials={agentInitials(agent)} standing="none" className="qls-chip qls-chip--big" />
                 <div className="qls-agtx">
                   <div className="qls-agnm">{agentPrimary(agent)}</div>
                   <div className="qls-agag">{agentAgencyLine(agent)}</div>

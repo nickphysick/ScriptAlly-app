@@ -18,11 +18,14 @@ import React from "react";
 import "./agentDisc.css";
 
 export type DiscStanding = "none" | "querying" | "closed";
+/** the Contact list's disc tone (`lib/contactStage.discTone`) in AgentDisc's words */
+export const standingOf = (tone: "none" | "live" | "closed"): DiscStanding => (tone === "live" ? "querying" : tone);
 
 export const AgentDisc: React.FC<{
   initials: string;
   standing: DiscStanding;
-  size: number;
+  /** the circle's diameter; omit it and the page's own rule sizes it */
+  size?: number;
   selected?: boolean;
   /** the import review's agency-only circle */
   tone?: "agency";
@@ -35,7 +38,7 @@ export const AgentDisc: React.FC<{
     className={`sa-disc${className ? ` ${className}` : ""}`}
     data-disc={standing} data-tone={tone} data-selected={selected ? "" : undefined}
     title={title} aria-hidden={title ? undefined : true}
-    style={{ width: size, height: size, fontSize: Math.max(8.5, Math.round(size * 0.31 * 2) / 2) }}
+    style={size ? { width: size, height: size, fontSize: Math.max(8.5, Math.round(size * 0.31 * 2) / 2) } : undefined}
     {...attrs}
   >
     {selected ? <svg className="sa-disc-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" /></svg> : initials}

@@ -17,7 +17,7 @@
 .qsp .qcv-open[data-court="closed"] { --qp-mid: #b5aca4; }
 .qsp .qcv-open-mast { flex: none; background: #2d3a50; color: #f4eee5; box-shadow: inset 0 5px 0 0 var(--qp-mid); }
 .qsp .qcv-open-who { display: grid; grid-template-columns: 48px minmax(0, 1fr) 34px; gap: 14px; align-items: center; padding: 28px 18px 0 26px; }
-.qsp .qcv-open-ini { width: 48px; height: 48px; border: 0; border-radius: 50%; background: var(--qp-mid); color: #1c130f; font-family: var(--sp-mono); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; }
+.qsp .qcv-open-ini { width: 48px; height: 48px; border-radius: 50%; font-family: var(--sp-mono); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; }
 .qsp .qcv-open .qcv-open-nm {
   margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 30px; line-height: 1.05; letter-spacing: 0; color: #f4eee5; outline: none;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;

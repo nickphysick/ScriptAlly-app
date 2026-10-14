@@ -15,8 +15,8 @@
 
 /* ── the masthead: the top edge and the active tab follow whether the agent is taking queries ── */
 .qsp.apn .qcv-open { --qp-mid: var(--ap-edge, #d8cfc2); }
-.qsp.apn .qcv-open-ini.apn-ini { background: #f4eee5; color: #1c130f; }
-.qsp.apn .qcv-open-ini.apn-ini.is-grey { background: #b3aca5; color: #2b2622; }
+.qsp.apn .qcv-open-ini.apn-ini { }
+.qsp.apn .qcv-open-ini.apn-ini.is-grey { }
 .qsp.apn .qcv-open .qcv-open-line.apn-line { justify-content: space-between; flex-wrap: nowrap; gap: 14px; }
 .qsp.apn .qcv-open .apn-door { flex: none; gap: 8px; }
 .qsp.apn .apn-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }

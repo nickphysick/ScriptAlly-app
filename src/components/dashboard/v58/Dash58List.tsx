@@ -10,6 +10,7 @@
  * ⚠️ THE TICK NEVER WRITES. It opens the flow, and only the flow writes.
  */
 import React from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { StatusDot } from "../../StatusDot";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { groupHeading, type ListAction, type ListGroup, type ListItem, type ListPlan, type ListTone } from "../../../lib/dashList";
@@ -51,7 +52,7 @@ const FocusCard: React.FC<{
     </div>
     <div className="d58-fbody">
       <div className="d58-fwho">
-        {item.date ? <DateTile date={item.date} /> : <span className={`d58-disc${item.group === "house" ? " d58-disc--house" : ""}`} aria-hidden="true">{item.initials}</span>}
+        {item.date ? <DateTile date={item.date} /> : <AgentDisc initials={item.initials} standing="querying" tone={item.group === "house" ? "agency" : undefined} className="d58-disc" />}
         <div>
           <h3 className="d58-fsay" data-d58="focus-say"><Say item={item} /></h3>
           <small className="d58-ffact">{item.fact}</small>
@@ -78,8 +79,8 @@ const FocusCard: React.FC<{
 
 const Row: React.FC<{ item: ListItem; onRun: (a: ListAction) => void }> = ({ item, onRun }) => {
   const style = { ["--d58-edge" as string]: EDGE[item.tone], ["--d58-tone" as string]: BAND[item.tone] } as React.CSSProperties;
-  const lead = item.group === "house" ? <span className="d58-rowdisc" aria-hidden="true">{item.initials}</span>
-    : item.group === "ready" ? <span className="d58-rowdisc d58-rowdisc--agent" aria-hidden="true">{item.initials}</span>
+  const lead = item.group === "house" ? <AgentDisc initials={item.initials} standing="querying" tone="agency" className="d58-rowdisc" />
+    : item.group === "ready" ? <AgentDisc initials={item.initials} standing="none" className="d58-rowdisc d58-rowdisc--agent" />
       : item.date ? <DateTile date={item.date} />
         : <button type="button" className="d58-tick" data-d58="tick" aria-label={`${item.pre}${item.who}${item.post}: open`} onClick={() => onRun(item.action)} />;
   return (

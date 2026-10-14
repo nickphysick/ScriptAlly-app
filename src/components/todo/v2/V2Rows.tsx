@@ -12,6 +12,7 @@
  * ⚠️ A STATUS IS DRAWN BY `StatusDot` AND NOTHING ELSE, imported, never redrawn.
  */
 import React from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { StatusDot } from "../../StatusDot";
 import { STATE_TOKEN, stateFor } from "../../../lib/queryCardFacts";
 import { STAGE_NAME } from "../../../lib/qcSummary";
@@ -63,7 +64,7 @@ export const V2RowCard: React.FC<{ r: V2Row; landed: boolean; onOpen: (r: V2Row)
           <div className="tdv2-deed">{r.deed}</div>
         </div>
         <div className="tdv2-agentcell">
-          <span className="tdv2-av" aria-hidden="true">{initials(r.who)}</span>
+          <AgentDisc initials={initials(r.who)} standing="querying" className="tdv2-av" />
           <span className="tdv2-agt"><b>{r.who}</b><span>{r.agency}</span></span>
         </div>
         <div className="tdv2-datecell">

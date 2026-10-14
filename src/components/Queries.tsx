@@ -86,6 +86,7 @@ import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpt
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcEmpty } from "./queries/centre/QcEmpty";
+import { AgentDisc } from "./shared/AgentDisc";
 import { QcEmpty138 } from "./queries/centre/QcEmpty138";
 import { QcExhibit } from "./queries/centre/QcExhibit";
 import { qcHeaderCopy } from "../lib/livingHeaders";
@@ -7732,7 +7733,7 @@ export const Queries: React.FC<{
                       * a readable size and the monogram gets the position that distinguishes two
                       * queries to the same agent.
                       */}
-                    <span className="f12-av f12-av--sm" aria-hidden="true">{agentInitials(agent)}</span>
+                    <AgentDisc initials={agentInitials(agent)} standing="querying" className="f12-av f12-av--sm" />
                     <span className="f12-mid">
                       <span className="f12-nm">{agentPrimary(agent)}</span>
                       <span className="f12-ag">{agentAgencyLine(agent)}</span>
@@ -7881,7 +7882,7 @@ export const Queries: React.FC<{
                               * the list rows use one column over — so the card confirms the row you
                               * clicked with the same mark.
                               */}
-                            <span className="qc-mav" aria-hidden="true">{agentInitials(activeAgent)}</span>
+                            <AgentDisc initials={agentInitials(activeAgent)} standing="querying" className="qc-mav" />
                             <div className="qc-mval">
                               {/* ⚠️ THE SIZE DIFFERENCE IS REMOVED (§4), REVERSING THE EARLIER
                                   PACK'S §2. Its argument was sound — the list row you clicked was

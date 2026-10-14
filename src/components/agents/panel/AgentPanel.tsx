@@ -24,6 +24,8 @@ import type { Agent, QueryStatus } from "../../../types";
 import type { AgentFacts } from "../../../lib/contactList";
 import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
 import { agentInitials } from "../../../lib/agentDisplay";
+import { AgentDisc, standingOf } from "../../shared/AgentDisc";
+import { discTone } from "../../../lib/contactStage";
 import {
   INDEX_ADD, INDEX_EDIT, discGrey, firstNameOf, panelDoor, panelFoot, panelIndex, panelLinks, panelStand,
   type IndexKey, type PanelAct,
@@ -225,7 +227,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
           <div className="qcv-open-fr">
             <header className="qcv-open-mast" data-ap="mast">
               <div className="qcv-open-who">
-                <span className={`qcv-open-ini apn-ini${discGrey(facts) ? " is-grey" : ""}`} data-ap="disc" aria-hidden="true">{agentInitials(agent).slice(0, 2)}</span>
+                <AgentDisc initials={agentInitials(agent).slice(0, 2)} standing={standingOf(discTone(facts))} className="qcv-open-ini apn-ini" attrs={{ "data-ap": "disc" }} />
                 <div className="qcv-open-whotx">
                   <h2 className="qcv-open-nm" data-ap="name" ref={nameRef} tabIndex={-1}>{name}</h2>
                   {place ? <span className="qcv-open-ag" data-ap="place">{place}</span> : null}

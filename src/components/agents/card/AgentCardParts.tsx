@@ -16,6 +16,7 @@ import React from "react";
 import type { Agent } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import type { MatChip } from "../../../lib/agentCard";
+import { AgentDisc, type DiscStanding } from "../../shared/AgentDisc";
 
 /**
  * The probe namespace a block's own markers carry. The quick view's are `data-ac` (the agent card's
@@ -49,9 +50,11 @@ export const Torn: React.FC<{ text: string; clv: string; onAdd: () => void; prob
  *  so the document never holds two of an id. */
 export const CardIdentity: React.FC<{
   agent: Agent; headingId?: string; className?: string; pulse?: boolean; probe?: Probe; children?: React.ReactNode;
-}> = ({ agent, headingId, className, pulse, probe = "ac", children }) => (
+  /** v138 §J — who the agent is to you (the Contact list's `discTone`) */
+  standing?: DiscStanding;
+}> = ({ agent, headingId, className, pulse, probe = "ac", children, standing = "none" }) => (
   <div className={`acq-head${className ? ` ${className}` : ""}${pulse ? " ac-pulse" : ""}`} {...mark(probe, "head")}>
-    <span className="acq-ini" aria-hidden="true">{agentInitials(agent)}</span>
+    <AgentDisc initials={agentInitials(agent)} standing={standing} className="acq-ini" />
     <div className="acq-id">
       <h3 id={headingId}>{agentPrimary(agent)}</h3>
       {children}

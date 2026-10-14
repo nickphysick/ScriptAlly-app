@@ -117,7 +117,6 @@
 }
 .qcv-tl-ini {
   flex: none; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  background: var(--sp-anthracite); color: #f5f1eb;
   font-family: var(--qcv-mono); font-weight: 700; font-size: 8.5px; line-height: 1; font-style: normal;
 }
 .qcv-tl-who { min-width: 0; display: flex; flex-direction: column; }

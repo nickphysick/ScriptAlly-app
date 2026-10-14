@@ -31,7 +31,7 @@
 .cl14-nxc .cl13-ac .cl13-acst { margin-left: auto; color: #fff; font-size: 12px; letter-spacing: 1px; opacity: 0.9; }
 .cl14-nxc .cl13-ac .cl13-acst span { opacity: 0.35; }
 .cl14-nxc .cl13-ac .acq-head.cl13-ach { grid-template-columns: 34px 1fr; gap: 12px; padding: 14px 16px 6px; align-items: center; }
-.cl14-nxc .cl13-ac .cl13-ach .acq-ini { width: 34px; height: 34px; font-size: 11px; background: var(--clv-btn); color: #f5f1eb; }
+.cl14-nxc .cl13-ac .cl13-ach .acq-ini { width: 34px; height: 34px; font-size: 11px; }
 .cl14-nxc .cl13-ac .cl13-ach h3 { font-size: 17px !important; line-height: 1.2 !important; }
 .cl14-nxc .cl13-ac .cl13-acsub {
   display: block; margin-top: 3px; font: 400 9px/1.3 var(--sp-mono); letter-spacing: 0.1em;

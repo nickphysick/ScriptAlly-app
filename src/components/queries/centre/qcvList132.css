@@ -67,10 +67,9 @@
   .qcw-list .qcw-row:focus-visible { outline: none; box-shadow: inset 3px 0 0 #2f5f86; background: #f6f9fc; }
   .qcw-list .qcw-ag { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .qcw-list .qcw-disc {
-    flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
-    background: #2a3a52; color: #f4eee5; font-family: var(--sp-mono); font-weight: 700; font-size: 11px; letter-spacing: 0.04em;
+    flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--sp-mono); font-weight: 700; font-size: 11px; letter-spacing: 0.04em;
   }
-  .qcw-list .qcw-disc--closed { background: #b9b0a8; }
+  .qcw-list .qcw-disc--closed { }
   .qcw-list .qcw-agt { display: block; min-width: 0; }
   .qcw-list .qcw-agt b { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 17.5px; line-height: 1.3; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qcw-list .qcw-agt small { display: block; font-family: var(--sp-serif); font-style: italic; font-weight: 400; font-size: 14px; line-height: 1.35; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

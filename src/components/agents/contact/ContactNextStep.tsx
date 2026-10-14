@@ -38,6 +38,7 @@ import type { QcRow } from "../../../lib/qcSummary";
 import type { CardAct } from "../../../lib/agentCard";
 import type { PersonalGenre } from "../../../lib/genres";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { formatDate } from "../../../lib/dates";
 import { daysUntil, dayOf, genresUnknown, type NextStep } from "../../../lib/contactNextStep";
 import { statedWeeks } from "../../../lib/contactStrip";
@@ -109,7 +110,8 @@ export const DISCOVER_FEATURES: readonly { title: string; line: string; icon: Re
 ];
 
 const Book: React.FC<{ t: string | null }> = ({ t }) => (t ? <i>{t}</i> : <>your book</>);
-const Disc: React.FC<{ a: Parameters<typeof agentInitials>[0] }> = ({ a }) => <span className="cl14-disc">{agentInitials(a)}</span>;
+/* v138 §J — the one initials circle; a next-step agent is not yet queried for this book */
+const Disc: React.FC<{ a: Parameters<typeof agentInitials>[0] }> = ({ a }) => <AgentDisc initials={agentInitials(a)} standing="none" className="cl14-disc" />;
 
 export const ContactNextStep: React.FC<ContactNextStepProps> = (p) => {
   const { step, bookTitle, genres } = p;

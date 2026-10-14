@@ -52,7 +52,8 @@ describe("lock 4 — one set of blocks, two dresses", () => {
     expect(card).toContain(genres);
     expect(card).toContain(wish);
     expect(card).toContain(mats);
-    expect(card).toContain('class="acq-ini"');
+    /* v138 §J re-point: the circle is the shared AgentDisc, still carrying the card's own `acq-ini` class */
+    expect(card).toContain('class="sa-disc acq-ini"');
     /* the root is an agent card (`.ac`), so the card sheet's `.ac .acq-*` rules dress it */
     expect(card).toMatch(/^<article class="ac cl13-ac"/);
     /* one card on a page carries the heading id; a carousel of them never does */

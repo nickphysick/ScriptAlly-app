@@ -6,6 +6,7 @@
  * stepper, a chip, an initials disc. Their dress is in importFlow.css.
  */
 import React from "react";
+import { AgentDisc } from "../shared/AgentDisc";
 import "./importFlow.css";
 import { ImportStepId, IMPORT_STEP_LABEL } from "../../lib/importSummary";
 
@@ -19,8 +20,10 @@ export const initialsOf = (name: string): string => {
   return ((p[0][0] ?? "") + (p.length > 1 ? p[p.length - 1][0] ?? "" : "")).toUpperCase();
 };
 
+/* v138 §J — the one initials circle; the agency-only circle (no agent name) keeps its own tone behind `tone` */
 export const Disc: React.FC<{ initials: string; tone?: "live" | "closed" | "none" | "agency" }> = ({ initials, tone = "live" }) => (
-  <span className={`im-disc${tone === "live" ? "" : ` im-disc--${tone}`}`} aria-hidden="true">{initials}</span>
+  <AgentDisc initials={initials} standing={tone === "live" || tone === "agency" ? "querying" : tone} tone={tone === "agency" ? "agency" : undefined}
+    className={`im-disc${tone === "live" ? "" : ` im-disc--${tone}`}`} />
 );
 
 const TICK = (

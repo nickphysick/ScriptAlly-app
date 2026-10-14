@@ -18,6 +18,7 @@
  * and a closed row gets Edit only.
  */
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
@@ -198,7 +199,7 @@ export const QcList132: React.FC<{
         onClick={() => onOpen(r.id)}
         onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(r.id); } }}>
         <div className="qcw-ag" data-qcv="row-agent">
-          <span className={`qcw-disc${closed ? " qcw-disc--closed" : ""}`} data-qcv="row-chip" aria-hidden="true">{r.initials}</span>
+          <AgentDisc initials={r.initials} standing={closed ? "closed" : "querying"} className="qcw-disc" attrs={{ "data-qcv": "row-chip" }} />
           <span className="qcw-agt">
             <b data-qcv="row-name">{hl(r.agentName)}</b>
             <small data-qcv="row-agency">{hl(r.agency)}</small>
@@ -278,7 +279,7 @@ export const QcList132Skeleton: React.FC = () => (
           <div key={i} className="qcw-row qcw-row--sk" data-qcv="sk-row">
             {/* ⚠️ THE REAL ELEMENTS, THEIR TEXT PAINTED OVER: the row's height is its line boxes', so a
                 placeholder with its own bars would be a different height from the row it stands for */}
-            <div className="qcw-ag"><span className="qcw-disc" /><span className="qcw-agt"><b><span className="qcv-sk qcw-skt">Agent name here</span></b><small><span className="qcv-sk qcw-skt">Agency name</span></small></span></div>
+            <div className="qcw-ag"><span className="qcw-disc qcw-disc--sk" /><span className="qcw-agt"><b><span className="qcv-sk qcw-skt">Agent name here</span></b><small><span className="qcv-sk qcw-skt">Agency name</span></small></span></div>
             <div className="qcw-st"><div className="qcw-ws1"><span className="qcv-sk qcw-skt">Status reached</span></div><div className="qcw-sub"><span className="qcv-sk qcw-skt">VERB 00 MON · DAY 00</span></div></div>
             <div className="qcw-snt"><div className="qcw-mats"><span className="qcw-pkg qcw-pkg--none" /><i className="qcw-sep" />{[0, 1, 2, 3].map((k) => <span key={k} className="qcw-tile" />)}</div></div>
             <div className="qcw-nx"><div className="qcw-nxt"><span className="qcv-sk qcw-skt">Next move</span></div><div className="qcw-sub"><span className="qcv-sk qcw-skt">BY 00 MON</span></div></div>

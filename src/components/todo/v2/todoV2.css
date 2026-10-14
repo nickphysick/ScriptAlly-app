@@ -302,7 +302,7 @@
 }
 .tdv2-agentcell { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .tdv2-av {
-  width: 30px; height: 30px; border-radius: 50%; flex: none; background: var(--tdv2-anthracite); color: var(--tdv2-on-dark);
+  width: 30px; height: 30px; border-radius: 50%; flex: none;
   display: grid; place-items: center; font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
 }
 .tdv2-agt { min-width: 0; display: block; }

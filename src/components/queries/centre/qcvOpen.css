@@ -31,7 +31,7 @@
 
 .qcv-open-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 18px 0; }
 .qcv-open-who { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
-.qcv-open-ini { box-sizing: border-box; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(95, 123, 147, 0.35); background: #e7eef2; color: #3f566a; display: flex; align-items: center; justify-content: center; font-family: var(--qcv-mono); font-size: 11px; letter-spacing: 0.04em; }
+.qcv-open-ini { box-sizing: border-box; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--qcv-mono); font-size: 11px; letter-spacing: 0.04em; }
 .qcv-open-whotx { min-width: 0; }
 /* the name may wrap to two lines; it is Playfair, so 1.3 — and nothing clips it */
 .qcv-page .qcv-open-nm, .qcv-open .qcv-open-nm { margin: 0; font-family: var(--qcv-serif) !important; font-weight: 600; font-size: 19px; line-height: 1.3; letter-spacing: 0; color: var(--qcv-ink); }

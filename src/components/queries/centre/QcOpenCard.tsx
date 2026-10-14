@@ -19,6 +19,7 @@
  * notes thread and the agent tab were written against brand.tsx's defaults.
  */
 import React, { useCallback, useRef, useState } from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { StatusDot } from "../../StatusDot";
 import { FramedCard } from "../../containers/FramedCard";
 import { queryVerbs } from "../../../lib/queryRowFacts";
@@ -121,7 +122,7 @@ export const QcOpenCard: React.FC<{
       <header className="qcv-open-mast" data-qcv="open-mast">
         {backTo ? <button type="button" className="qcv-open-back" data-qcv="open-back" onClick={backTo.onBack}>{"\u2190"} {backTo.label}</button> : null}
         <div className="qcv-open-who">
-          <span className="qcv-open-ini" aria-hidden="true">{row.initials}</span>
+          <AgentDisc initials={row.initials} standing={row.court === "closed" ? "closed" : "querying"} className="qcv-open-ini" />
           <div className="qcv-open-whotx">
             <h2 className="qcv-open-nm">{row.agentName}</h2>
             <span className="qcv-open-ag">{row.agency}</span>

@@ -24,6 +24,8 @@ import { type CardAct, materialChips, primaryFor, queryTone } from "../../../lib
 import { genreLabel, type PersonalGenre } from "../../../lib/genres";
 import { formatDate } from "../../../lib/dates";
 import { CardIdentity, GenresBlock, MaterialsBlock, WishlistBlock } from "./AgentCardParts";
+import { standingOf } from "../../shared/AgentDisc";
+import { discTone } from "../../../lib/contactStage";
 
 /** "1 Nov" — the reopening date as the band and the foot say it */
 const day = (iso: string) => {
@@ -93,7 +95,7 @@ export const AgentCarouselCard: React.FC<AgentCarouselCardProps> = ({ agent, fac
           {"★".repeat(rating)}<span aria-hidden="true">{"★".repeat(5 - rating)}</span>
         </span>
       </div>
-      <CardIdentity agent={agent} className="cl13-ach" probe="cl13">
+      <CardIdentity agent={agent} className="cl13-ach" probe="cl13" standing={standingOf(discTone(facts))}>
         {sub && <small className="cl13-acsub">{sub}</small>}
       </CardIdentity>
       <GenresBlock genres={genres} genreHit={genreHit} onAdd={() => onAdd(agent.id, "genres")} probe="cl13" />

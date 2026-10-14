@@ -27,6 +27,7 @@
  * a filter moved.
  */
 import React from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import type { CourtTile, TileCourt } from "../../../lib/qcSummary";
 import "./qcvCourts.css";
 
@@ -80,10 +81,10 @@ export const QcCourts: React.FC<{
                     <button key={d.name + d.initials} type="button" className="qcv-disc" data-qcv="court-disc"
                       aria-label={`Open the query to ${d.name}`} title={d.name}
                       onClick={(e) => { e.stopPropagation(); onOpenQuery!(d.queryId!); }}>
-                      <i aria-hidden="true">{d.initials}</i>
+                      <AgentDisc initials={d.initials} standing={t.key === "closed" ? "closed" : "querying"} className="qcv-face" />
                     </button>
                   )
-                  : <i key={d.name + d.initials} title={d.name} aria-hidden={discs ? "true" : undefined}>{d.initials}</i>)}
+                  : <AgentDisc key={d.name + d.initials} initials={d.initials} standing={t.key === "closed" ? "closed" : "querying"} className="qcv-face" title={d.name} />)}
                 {t.more > 0 && <i className="qcv-half-more" aria-hidden={discs ? "true" : undefined}>+{t.more}</i>}
               </span>
               {/* §5 (v96.1) — the clause always renders; an em dash is what a court with no date

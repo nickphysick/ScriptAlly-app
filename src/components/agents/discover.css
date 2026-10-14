@@ -363,9 +363,6 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
   height: 42px;
   border-radius: 99px;
   flex: none;
-  background: var(--dv-fill);
-  border: 1px solid var(--dv-line);
-  color: var(--dv-ink-body);
   display: grid;
   place-items: center;
   font-family: "JetBrains Mono", ui-monospace, monospace;

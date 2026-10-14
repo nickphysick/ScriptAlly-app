@@ -32,6 +32,7 @@
  * agent list does.
  */
 import React, { useMemo, useState } from "react";
+import { AgentDisc } from "./shared/AgentDisc";
 import { useScriptAllyDb } from "../lib/db";
 import { DISCOVER_LIVE, communityAgentFields } from "../lib/discoverShared";
 import { pickableManuscripts } from "../lib/lifecycle";
@@ -283,7 +284,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
         </div>
         <div className="bd">
           <div className="who">
-            <span className="av2" aria-hidden="true">{agentInitials(agent)}</span>
+            <AgentDisc initials={agentInitials(agent)} standing="none" className="av2" />
             <span style={{ minWidth: 0 }}>
               <span className="nm">{agentPrimary(agent)}</span>
               <span className="ag">{agentSecondary(agent)}</span>
@@ -760,7 +761,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                     </div>
                     <div className="bd">
                       <div className="who">
-                        <span className="av2">EW</span>
+                        <AgentDisc initials="EW" standing="none" className="av2" />
                         <span style={{ minWidth: 0 }}>
                           <span className="nm">Eleanor Whitcombe</span>
                           <span className="ag">Marsh &amp; Tide Literary</span>

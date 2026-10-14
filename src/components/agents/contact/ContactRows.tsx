@@ -12,6 +12,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { STAGE_TRACK, discTone, stageTrack } from "../../../lib/contactStage";
+import { AgentDisc, standingOf } from "../../shared/AgentDisc";
 import { ListDivider, ListGroupHeader, ListPanel, type ListColumn } from "../../shell/listTable/ListTable";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -196,7 +197,7 @@ const Row: React.FC<{
       {/* v17 §D — the surname letter, in the margin of the first row of each letter (the ungrouped A to Z list) */}
       {letter ? <span className="cl17-ml" data-cl17="margin-letter" aria-hidden="true">{letter}</span> : null}
       <span className="clv-rwho">
-        <span className="clv-ini" data-cl17="disc" aria-hidden="true">{agentInitials(a)}</span>
+        <AgentDisc initials={agentInitials(a)} standing={standingOf(tone)} className="clv-ini" attrs={{ "data-cl17": "disc" }} />
         <span className="clv-rwn">
           <b><Marked text={agentPrimary(a)} q={highlight} /></b>
           {whoBits.length > 0 && <i className="clv-ragy"><Marked text={whoBits.join(" · ")} q={highlight} /></i>}

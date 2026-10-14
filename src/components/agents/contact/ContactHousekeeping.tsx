@@ -19,6 +19,7 @@
  * foot says why.
  */
 import { bookGenreHit } from "../../../lib/genreMatch";
+import { AgentDisc } from "../../shared/AgentDisc";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { dayMonth } from "../../../lib/dates";
 import type { Agent } from "../../../types";
@@ -263,7 +264,7 @@ const Row: React.FC<RowProps> = ({ item, feat, open, leaving, onToggle, book, to
       data-hkv="row" data-key={item.key} data-gap={item.gap}>
       <div className="hkv-rh" data-hkv="rh" role="button" tabIndex={0} aria-expanded={open}
         onClick={onToggle} onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); onToggle(); } }}>
-        <span className="hkv-av" aria-hidden="true">{agentInitials(item.agent)}</span>
+        <AgentDisc initials={agentInitials(item.agent)} standing="none" className="hkv-av" />
         <span className="hkv-nm">
           <b data-hkv="title">{leaving ? "Done ✓" : cp.title}</b>
           <small>{(item.agent.agency ?? "").trim() || (item.agent.name ?? "").trim()}</small>

@@ -15,6 +15,7 @@
  * ⚠️ NO PANEL AROUND THE SECTION. The lede sits on the page; the card overlaps the panel by 150px.
  */
 import React, { useEffect, useState } from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { QueryCard, type QueryCardModel } from "../../dashboard/QueryCard";
 import { tileCourt, type QcRow, type TileCourt } from "../../../lib/qcSummary";
 import { ALSO_MOVED, moveDate, moveLine, movedAt, recentRows, recentSentence, sayRuns } from "../../../lib/qcRecent";
@@ -90,7 +91,7 @@ export const QcRecent: React.FC<{
                   <button type="button" className={`qcr-row qcr-row--${tileCourt(r.status) ?? "closed"}${on ? " on" : ""}`}
                     data-qcv="ru-row" data-qid={r.id} data-court={tileCourt(r.status) ?? "none"} data-moved={t ?? undefined} data-on={on || undefined} aria-pressed={on}
                     onClick={() => setFeatId(r.id)}>
-                    <span className="qcr-disc" aria-hidden="true">{r.initials}</span>
+                    <AgentDisc initials={r.initials} standing={tileCourt(r.status) ? "querying" : "closed"} className="qcr-disc" />
                     <span className="qcr-who"><b>{r.agentName}</b><small>{moveLine(r.status)}</small></span>
                     <em className="qcr-date">{t != null ? moveDate(t) : ""}</em>
                   </button>

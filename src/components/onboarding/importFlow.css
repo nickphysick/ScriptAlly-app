@@ -116,12 +116,11 @@
 .sf .im-chip--file { background: rgba(var(--im-text-rgb), .07); letter-spacing: .08em; text-transform: none; font-size: 11px; padding: 6px 10px 5px; }
 .sf .im-disc {
   width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
-  background: var(--sp-anthracite); color: var(--im-cream);
   font-family: var(--sp-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0;
 }
-.sf .im-disc--closed { background: #b3aca5; color: var(--ink-on-light); }
-.sf .im-disc--none { background: var(--fc-card); color: var(--ink-on-light); box-shadow: inset 0 0 0 1.5px rgba(var(--im-text-rgb), .3); }
-.sf .im-disc--agency { background: var(--im-stone); color: var(--ink-on-light); }
+.sf .im-disc--closed { }
+.sf .im-disc--none { }
+.sf .im-disc--agency { }
 
 /* the stepper: Duplicates · Agents · Queries · Import */
 .sf .im-steps { display: flex; align-items: flex-start; gap: 0; max-width: 560px; margin: 0; padding: 0; list-style: none; }
@@ -179,7 +178,7 @@
 .sf .im-prev { display: flex; flex-wrap: wrap; align-items: center; align-content: flex-start; gap: 8px 20px; margin-top: 18px; min-height: 74px; }
 .sf .im-faces { display: flex; align-items: center; }
 .sf .im-faces .im-disc { width: 34px; height: 34px; font-size: 10px; margin-left: -7px; box-shadow: 0 0 0 2px var(--fc-card); }
-.sf .im-faces .im-disc--none { box-shadow: 0 0 0 2px var(--fc-card), inset 0 0 0 1.5px rgba(var(--im-text-rgb), .3); }
+.sf .im-faces .im-disc--none { }
 .sf .im-faces .im-disc:first-child { margin-left: 0; }
 .sf .im-faces-more { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .06em; color: rgba(var(--im-text-rgb), .6); margin-left: 9px; }
 .sf .im-key { font-family: var(--sp-serif); font-size: 15.5px; color: var(--sf-ink72); margin: 0; }

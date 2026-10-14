@@ -75,7 +75,7 @@
 .hkv-row.out { transition: height 0.32s cubic-bezier(.22, .8, .3, 1), opacity 0.2s, margin 0.32s; opacity: 0; margin-bottom: 0; }
 .hkv-row.out .hkv-rh { background: #e0e5dd; }
 .hkv-rh { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; padding: 11px 14px; cursor: pointer; }
-.hkv-av { width: 30px; height: 30px; font-size: 9.5px; background: #eef1f4; color: #3f566b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono, "JetBrains Mono", monospace); }
+.hkv-av { width: 30px; height: 30px; font-size: 9.5px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono, "JetBrains Mono", monospace); }
 .hkv-nm b { display: inline; font-weight: 600; font-size: 15.5px; }
 .hkv-nm small { display: block; font-style: italic; font-size: 13px; color: rgba(28, 19, 15, 0.45); }
 .hkv-tag { display: inline-block; font: 500 7.5px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.12em; text-transform: uppercase; background: #f5e6df; color: #7c3a2a; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: 2px; }

@@ -296,10 +296,9 @@
 .d58-fwho { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .d58-disc {
   flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--d58-navy); color: var(--d58-cream);
   font-family: var(--d58-mono) !important; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
 }
-.d58-disc--house { background: #eef1f5; color: #5f6f86; }
+.d58-disc--house { }
 .d58-fsay { margin: 0; font-family: var(--d58-serif) !important; font-weight: 400; font-size: 20px; line-height: 24px; color: var(--d58-ink); }
 .d58-fsay b { font-weight: 600; }
 .d58-ffact { display: block; margin-top: 4px; font-family: var(--d58-mono) !important; font-size: 9.5px; letter-spacing: 0.15em; line-height: 13px; color: var(--d58-ink-42); }
@@ -364,10 +363,9 @@
 .d58-tick:hover { box-shadow: inset 0 0 0 1.5px var(--d58-navy); }
 .d58-tick:focus-visible, .d58-chip:focus-visible, .d58-fpos button:focus-visible, .d58-link:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
 .d58-rowdisc {
-  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
-  background: #eef1f5; color: #5f6f86; font-family: var(--d58-mono) !important; font-size: 10px; font-weight: 600;
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: var(--d58-mono) !important; font-size: 10px; font-weight: 600;
 }
-.d58-rowdisc--agent { background: var(--d58-navy); color: var(--d58-cream); }
+.d58-rowdisc--agent { }
 .d58-rowsay { margin: 0; font-family: var(--d58-serif) !important; font-size: 15.5px; line-height: 1.25; color: var(--d58-ink); }
 .d58-rowsay b { font-weight: 600; }
 .d58-rowmeta {

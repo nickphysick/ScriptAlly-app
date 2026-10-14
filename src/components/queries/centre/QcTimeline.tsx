@@ -26,6 +26,7 @@
  * the same pixel at every zoom.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { AgentDisc } from "../../shared/AgentDisc";
 import { TAB_KEY } from "../QueryPanel";
 import { whenOf, type BvdGroupOut } from "../../../lib/qcBirdsDrawer";
 import type { QcRow } from "../../../lib/qcSummary";
@@ -508,7 +509,7 @@ export const QcTimeline: React.FC<{
                       onClick={() => onOpen(r.id)}
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(r.id); } }}
                     >
-                      <i className="qcv-tl-ini" aria-hidden="true">{r.row.initials}</i>
+                      <AgentDisc initials={r.row.initials} standing={r.row.court === "closed" ? "closed" : "querying"} className="qcv-tl-ini" />
                       <span className="qcv-tl-who">
                         <b className="qcv-tl-nm" data-qcv="tl-name" title={r.row.agentName}>{r.row.agentName}</b>
                         <small className="qcv-tl-ag" data-qcv="tl-agency">{r.row.agency}</small>

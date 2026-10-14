@@ -2904,7 +2904,7 @@
 .f12-row .f12-av--sm { width: 32px; height: 32px; font-size: 10.5px; }
 /* ⚠️ THE DISC INVERTS ON THE SELECTED ROW — a pink disc on a pink ground is not a disc, and the
    inversion is the row's SECOND selection signal beside a fill that measures 1.24:1. */
-.f12-row.f12-sel .f12-av { background: var(--white); box-shadow: var(--sh-btn); }
+.f12-row.f12-sel .f12-av { box-shadow: var(--sh-btn); }
 .f12-row .f12-end { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 0; }
 /* ⚠️ THE CLOSED-AGENCY MONOGRAM VARIANTS ARE NOT RESTORED with the disc — they tinted it for an
    agency closed to submissions, which is a fact the Agent list carries and this row never explains.
@@ -4438,7 +4438,6 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
   grid-column: 1; grid-row: 1 / span 3; align-self: center;
   width: 46px; height: 46px; border-radius: 50%; flex: none;
   display: flex; align-items: center; justify-content: center;
-  background: var(--qc-row-sel); color: var(--ink);
   font-family: var(--f12-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
 }
 /* ⚠️ THE AGENCY IS ITS OWN ROW NOW — small mono uppercase under the name, as the ref draws it. */

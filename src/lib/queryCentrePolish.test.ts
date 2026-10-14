@@ -608,7 +608,9 @@ describe("fix pack 7 §4 · the discs", () => {
    */
   it("the row's disc returns, and the closed-agency variant does not", () => {
     expect(rule(".f12-row .f12-av"), "the monogram has no rule").not.toBe("");
-    expect(declValue(rule(".f12-row.f12-sel .f12-av"), "background"), "the selected disc no longer inverts").toBe("var(--white)");
+    /* v138 §J — RETIRED, WITH A REASON: the selected row's disc inverted to white by a page rule, and no stylesheet
+       but AgentDisc's may paint an initials circle now. The circle is the one AgentDisc in every state. */
+    expect(declValue(rule(".f12-row.f12-sel .f12-av"), "background"), "a page rule paints the disc again").toBe("");
     expect(rule(".f12-row.f12-shut .f12-av"), "the closed-agency tint came back with it").toBe("");
     expect(code, "the row stopped computing its initials").toContain("agentInitials(agent)");
   });

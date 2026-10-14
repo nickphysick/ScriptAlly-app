@@ -39,6 +39,8 @@ import {
 } from "../../../lib/agentCard";
 import { canDestroy } from "../../../lib/cascade";
 import { CardIdentity, GenresBlock, ICO, MaterialsBlock, WishlistBlock } from "./AgentCardParts";
+import { standingOf } from "../../shared/AgentDisc";
+import { discTone } from "../../../lib/contactStage";
 
 const dmy = (ms: number) => formatDate(new Date(ms), { day: "numeric", month: "short" });
 /** "1 Nov", with the year only when it is not this year's */
@@ -310,7 +312,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
 
       <div key={agent.id} className={`ac-body${slide ? ` slide-${slide}` : ""}`} data-ac="body">
         {/* the identity and the three blocks are AgentCardParts' — the carousel's card renders the same */}
-        <CardIdentity agent={agent} headingId="ac-name" pulse={pulse?.includes("head")}>
+        <CardIdentity agent={agent} headingId="ac-name" pulse={pulse?.includes("head")} standing={standingOf(discTone(facts))}>
             {showAgency && <div className="acq-agy">{agent.agency.trim()}</div>}
             <div className="acq-mt" data-ac="where">
               {where.flag && <span className={where.flag} aria-hidden="true" />}
