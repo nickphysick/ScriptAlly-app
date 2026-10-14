@@ -312,6 +312,9 @@ const Opt: React.FC<{ on: boolean; name: string; note?: string; tag?: string; on
 const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDraft) => void; go: (v: DrawerView | null) => void; onClose: () => void }> = ({ model, d, set, go, onClose }) => {
   const prev = d.editId ? model.msPkgs.find((p) => p.id === d.editId) ?? null : null;
   const prevSent = !!prev && model.goneOut(prev);
+  /* ⚠️ THE EDITION NOTICE FOLLOWS THE LOCK STAMP, which is what updatePackage reads: a package whose queries predate
+     the stamp is shown as sent, but changing it starts no edition, and the form must not say it will */
+  const prevStamped = !!prev?.firstSentAt;
   /* required on a NEW package when the manuscript has a version; an existing package may stay without one */
   const versionRequired = !d.editId && model.allMats.version.length > 0;
   const valid = !!d.name.trim() && !!d.letter && (!versionRequired || !!d.version);
@@ -339,18 +342,25 @@ const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDra
   const prevCount = prev ? model.creditedQueries(prev).length : 0;
   const title = d.editId ? `Edit ${prev?.packageName ?? "package"}` : model.msPkgs.length ? "New package" : "Build your first package";
   const onKey = (e: React.KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); void save(); } };
-  const L = model.mats.letter, S = model.mats.synopsis, V = model.mats.version;
+  /* the form offers what is not put away — plus the one this package holds now, if that one is put away (the
+     archive model: a put-away letter stays chosen on the packages that hold it, and must show as chosen) */
+  const withHeld = (k: MatKind, held: string) => {
+    const offered = model.mats[k];
+    const extra = held && !offered.some((m) => m.id === held) ? model.allMats[k].filter((m) => m.id === held) : [];
+    return [...offered, ...extra];
+  };
+  const L = withHeld("letter", d.letter), S = withHeld("synopsis", d.synopsis), V = model.mats.version;
   return (
     <Shell modal label={title} onClose={onClose} bodyKey={`pkgform:${d.editId ?? "new"}`}
       head={<Head icon={ICON.parcel} title={title} sub="A query letter, a synopsis and a version of your manuscript." ring={!d.editId} onClose={onClose} />}
       foot={<>
-        <span className="pk4-note" data-pk4="form-note">{!valid ? (versionRequired ? "Needs a name, a query letter and a version." : "Needs a name and a query letter.") : prevSent ? "Renaming it keeps the same edition." : "You can change it freely until a query goes out with it."}</span>
+        <span className="pk4-note" data-pk4="form-note">{!valid ? (versionRequired ? "Needs a name, a query letter and a version." : "Needs a name and a query letter.") : prevStamped ? "Renaming it keeps the same edition." : "You can change it freely until a query goes out with it."}</span>
         <button type="button" className="pk4-btn pk4-btn--ghost" data-pk4="cancel" onClick={onClose}>Cancel</button>
         <button type="button" className="pk4-btn pk4-btn--dark" data-pk4="save" disabled={!valid || busy} onClick={() => void save()}>{d.editId ? "Save changes" : "Create package"}</button>
       </>}>
       <div className="pk4-form" onKeyDown={onKey} data-pk4="pkgform">
         {d.dupFrom ? <div className="pk4-info pk4-info--fix" data-pk4="dup-notice">A copy of <b>{d.dupFrom}</b>. The original stays as it is.</div> : null}
-        {prev && prevSent ? (
+        {prev && prevStamped ? (
           <div className="pk4-info pk4-info--fix" data-pk4="edition-notice">
             {prev.packageName} has gone out with {qs(prevCount)}. Changing what's in it starts its {ordinal(editionNumber(prev) + 1)} edition, and those {qs(prevCount)} stay with the {ordinal(editionNumber(prev))}. Renaming it doesn't.
             {warn ? <span className="pk4-vh"> {warn}</span> : null}
@@ -367,12 +377,12 @@ const PackageForm: React.FC<{ model: PackagesModel; d: PkgDraft; set: (d: PkgDra
         <section className="pk4-sec"><SecHead n={2} title="What goes in it" tag="Choose one of each" />
           <span className="pk4-lab">Query letter <b>*</b></span>
           <div className="pk4-pick" role="radiogroup" aria-label="Query letter" data-pk4="pick-letter">
-            {L.map((m) => <Opt key={m.id} on={d.letter === m.id} name={m.name} note={model.matById("letter", m.id)?.note} tag={tag(m)} onPick={() => pick("letter", m.id)} />)}
+            {L.map((m) => <Opt key={m.id} on={d.letter === m.id} name={m.name} note={m.retired ? "Put away" : model.matById("letter", m.id)?.note} tag={tag(m)} onPick={() => pick("letter", m.id)} />)}
           </div>
           <button type="button" className="pk4-newm" data-pk4="park-letter" onClick={() => park("letter")}>+ Add a new query letter</button>
           <span className="pk4-lab">Synopsis</span>
           <div className="pk4-pick" role="radiogroup" aria-label="Synopsis" data-pk4="pick-synopsis">
-            {S.map((m) => <Opt key={m.id} on={d.synopsis === m.id} name={m.name} note={model.matById("synopsis", m.id)?.note} tag={tag(m)} onPick={() => pick("synopsis", m.id)} />)}
+            {S.map((m) => <Opt key={m.id} on={d.synopsis === m.id} name={m.name} note={m.retired ? "Put away" : model.matById("synopsis", m.id)?.note} tag={tag(m)} onPick={() => pick("synopsis", m.id)} />)}
             <Opt on={!d.synopsis} name="No synopsis" note="For agents who ask for a letter and pages only." onPick={() => pick("synopsis", "")} probe="opt-nosyn" />
           </div>
           <button type="button" className="pk4-newm" data-pk4="park-synopsis" onClick={() => park("synopsis")}>+ Add a new synopsis</button>

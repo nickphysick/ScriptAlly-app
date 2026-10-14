@@ -19,12 +19,12 @@
  *    `?pkg={id}` opens that package's drawer (`&view=replies` its second tab).
  * ⚠️ OPEN TO ALL (D7). Nothing on this page reads the plan; the one gate is `addPackage`'s.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type { SubmissionPackage } from "../types";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePopover } from "./shell/ListPills";
-import type { MatKind } from "../lib/packagesPage";
+import { suggestPackageName, type MatKind } from "../lib/packagesPage";
 import { materialPackageCount, materialSplit, overall } from "../lib/packageReplies";
 import { PkgDrawer4, type DrawerView } from "./packages/v4/PkgDrawer4";
 import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
@@ -44,9 +44,12 @@ export const SubmissionPackages: React.FC = () => {
 
   /* ── the drawer (v3 Part D): every create and edit happens there ── */
   const [view, setView] = useState<DrawerView | null>(null);
-  const openNew = useCallback((pre: { letter?: string; synopsis?: string; version?: string } = {}) => {
-    setView({ m: "pkgform", d: { ...EMPTY_PKG, letter: pre.letter ?? "", synopsis: pre.synopsis ?? "", version: pre.version ?? "" } });
-  }, []);
+  /* a letter (or synopsis) chosen on the way in fills the name suggestion, as picking one in the form does */
+  const openNew = (pre: { letter?: string; synopsis?: string; version?: string } = {}) => {
+    const letter = pre.letter ?? "", synopsis = pre.synopsis ?? "";
+    const name = letter || synopsis ? suggestPackageName(model.matById("letter", letter)?.name ?? null, model.matById("synopsis", synopsis)?.name ?? null) : "";
+    setView({ m: "pkgform", d: { ...EMPTY_PKG, letter, synopsis, version: pre.version ?? "", name } });
+  };
   /* the replies sheet: the ring's press and ?tab=tracking scroll to it */
   const repliesRef = useRef<HTMLElement | null>(null);
   const scrollerOf = () => [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.querySelector('[data-pk4="page"]')) ?? null;
