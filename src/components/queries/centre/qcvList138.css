@@ -526,3 +526,12 @@
   .qc138-sheet .qc138-mk--wasdue .qc138-mk-dot { width: 14px; height: 14px; margin: -7px; background: #a2452a; }
   .qc138-sheet .qc138-mk-tick { background: #a2452a; }
 }
+
+/* ── v138.4 §C · TWO LABEL LANES ────────────────────────────────────────────────────────────────────────────────
+   Placement is lib/qcTl4's (priority, full then name only, preferred lane then the other, 10px clear). A label that
+   fell back to its name carries its date in a `title`, as does a date marker that could not be labelled: both take
+   the pointer, so the title is reachable. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-t4l[title], .qc138-sheet .qc138-mk[title] { cursor: help; }
+  .qc138-sheet .qc138-t4l .qc138-t4n { margin-top: 1px; }
+}

@@ -65,3 +65,30 @@ describe("v138.4 · one positioned track", () => {
     expect(S[1].glyph).toBe("cl");
   });
 });
+
+describe("v138.4 · two label lanes", () => {
+  const wide = (t: string) => t.length * 7.5;
+  it("places Today first, in the upper lane; events prefer below", () => {
+    const L = tl4Layout(sophie(), 900, wide, NOW).labels;
+    expect(L.find((l) => l.tone === "today")!.lane).toBe("up");
+    expect(L.find((l) => l.tone === "last")!.lane).toBe("dn");
+  });
+  it("keeps 10px clear between labels in a lane", () => {
+    for (const w of [480, 640, 900]) {
+      const L = tl4Layout(tom(), w, wide, NOW).labels;
+      for (const a of L) for (const b of L) if (a !== b && a.lane === b.lane) expect(a.R + 10 <= b.L || b.R + 10 <= a.L).toBe(true);
+    }
+  });
+  it("falls back to name only with the date in a title, then to a title on the marker", () => {
+    /* a narrow track: dates cannot all be labelled */
+    const lay = tl4Layout(tom(), 300, (t) => t.length * 9, NOW);
+    const was = lay.marks.find((m) => m.kind === "was")!;
+    const lab = lay.labels.find((l) => l.i === was.i);
+    expect(!!lab || !!was.title).toBe(true);
+    if (!lab) expect(was.title).toMatch(/^Was due /);
+    for (const l of lay.labels) if (l.date === null && l.tone !== "today") expect(l.title).toMatch(/\d/);
+  });
+  it("never a third line: every label is in one of the two lanes", () => {
+    for (const w of [300, 520, 900]) for (const S of [sophie(), tom()]) for (const l of tl4Layout(S, w, wide, NOW).labels) expect(["up", "dn"]).toContain(l.lane);
+  });
+});
