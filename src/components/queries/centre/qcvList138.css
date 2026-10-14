@@ -552,3 +552,12 @@
   .qc138-sheet .qc138-t4a { font: 400 10.5px/1.2 var(--sp-type) !important; letter-spacing: 0.02em; color: rgba(28, 19, 15, 0.38); }
   .qc138-sheet .qc138-t4a.yr { font-weight: 600 !important; color: rgba(28, 19, 15, 0.6); }
 }
+
+/* ── v138.4 §C (follow-up) · THREE LINES MUST FIT A LANE ────────────────────────────────────────────────────────
+   A lane is 42px either side of the track (120 tall, centre at 58, 16px clear of it). A label of name, date and a
+   note at line-height 1.25 is ~47px and ran past the drawer's foot (measured: to 127); at 1.15 / 1.15 / 1.1 with 1px
+   gaps it is ~41.8px, so a lower label ends by ~116 and an upper one starts at ~0.2. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-t4l b, .qc138-sheet .qc138-t4l small { line-height: 1.15 !important; }
+  .qc138-sheet .qc138-t4l .qc138-t4n { line-height: 1.1 !important; margin-top: 0; }
+}
