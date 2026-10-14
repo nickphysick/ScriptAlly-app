@@ -127,7 +127,13 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
     expect(page).not.toContain("qcDocked === false && (");
   });
   it("the tab memory is one key for both houses", () => {
-    expect(read("src/components/queries/centre/QcOpenCard.tsx")).toContain('import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";');
+    /* the claim, not the spelling (v138.2 added PANEL_TAB_EVENT to this import): the card reads the drawer's own
+       key and reader, and both houses hear a tab request ("Open the full timeline →") the same way */
+    const card = read("src/components/queries/centre/QcOpenCard.tsx");
+    const imp = card.match(/import \{([^}]*)\} from "\.\.\/QueryPanel";/);
+    expect(imp, "QcOpenCard imports from ../QueryPanel").not.toBeNull();
+    for (const name of ["TAB_KEY", "readTab", "PANEL_TAB_EVENT"]) expect(imp![1]).toMatch(new RegExp(`\\b${name}\\b`));
+    for (const f of ["src/components/queries/centre/QcOpenCard.tsx", "src/components/queries/QueryPanel.tsx"]) expect(read(f)).toContain("window.addEventListener(PANEL_TAB_EVENT, on)");
   });
 });
 
