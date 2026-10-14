@@ -120,12 +120,15 @@
   opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s ease, visibility 0s linear 0.12s;
 }
 .qc138-pin[data-on] { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.12s ease; }
+/* v138.1 §A — ONE flex row filling the bar, every child centred on the bar's own height: no top padding, no child
+   margin (the count's old 8px right margin is the gap's job now) */
 .qc138-pin .qc138-pin-in {
-  display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: 100%; min-width: 0;
+  display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: 100%; min-width: 0; padding: 0;
   width: min(1600px, calc(100% - 48px)); margin: 0 auto;
 }
+.qc138-pin .qc138-pin-in > * { margin-top: 0; margin-bottom: 0; align-self: center; }
 .qc138-pin .qc138-pin-t {
-  flex: none; padding: 0; margin-right: 8px; border: 0; background: none; cursor: pointer; white-space: nowrap;
+  flex: none; padding: 0 8px 0 0; margin: 0; border: 0; background: none; cursor: pointer; white-space: nowrap;
   font: 400 20px/1 var(--sp-type) !important; color: #1c130f;
 }
 .qc138-pin .qc138-pin-c {
