@@ -484,10 +484,16 @@
 /* ── the filter row at the compact size: it stays on ONE line and inside the header. The four pills keep their
    words; the search box and the Genre field are what give (the reference lets Genre run off the sheet's edge at
    1280: measured, 51px past it with every part at its drawn size). ── */
-.cl17-hd .cl17-fr .cl17-find.cl13-find { flex: 0 1 300px; min-width: 104px; }
+/* v17.1 §C: at compact widths the search box is a fixed 220 and does not shrink, so nothing sits under the row's
+   fade (v17's "300 compact" overflowed by 34px at 1280, the Genre field under the fade) */
+.cl17-hd .cl17-fr .cl17-find.cl13-find { flex: 0 0 220px; width: 220px; min-width: 0; }
 .cl17-hd .cl17-fr { gap: 8px; }
 .ws-app.sheet-wide .cl17-hd .cl17-fr { gap: 10px; }
-.ws-app.sheet-wide .cl17-hd .cl17-fr .cl17-find.cl13-find { flex-basis: 360px; }
+.ws-app.sheet-wide .cl17-hd .cl17-fr .cl17-find.cl13-find { flex: 0 1 360px; width: 360px; min-width: 104px; }
+/* the narrow header still gives the search a line of its own (restated: the rules above come later than §B's) */
+@container cl17hd (max-width: 899.98px) {
+  .cl17-hd .cl17-fr .cl17-find.cl13-find, .ws-app.sheet-wide .cl17-hd .cl17-fr .cl17-find.cl13-find { flex: 1 1 100%; width: auto; }
+}
 /* the pills' row is as wide as its pills, so it is the SEARCH BOX that gives: a row that flexed would keep the
    search at full width and spill its own last pill instead (measured: 37px past the sheet with the box at 300) */
 .cl17-hd .cl17-fr .cl17-pills.cl14-frow { flex: 0 0 auto; }
