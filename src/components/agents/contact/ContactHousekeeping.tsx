@@ -35,6 +35,9 @@ import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { MaterialsField, Stepper } from "../card/cardInputs";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { FloatingTab, TabRing } from "../../shell/FloatingTab";
+import { useWindowCorner } from "../../shell/useWindowCorner";
+import { floatInset } from "../../shell/inkTokens";
+import { createPortal } from "react-dom";
 import "./housekeeping.css";
 
 /** the head's art — the Birds-eye hawk, as the tab and the drawer share it (Contact list v13 §0) */
@@ -76,6 +79,11 @@ export interface HousekeepingProps extends HkHandlers {
   /** every agent — for the reply fix's colleagues and the genre chips' pool */
   agents: readonly Agent[];
   open: boolean;
+  /** v17.1 — the floating tab shows only with gaps and while no dismissal stands (lib/contactHealth) */
+  tabShown: boolean;
+  onDismissTab: () => void;
+  /** v17.1 — the 6s note left in the tab's place after a dismissal, with Undo; null when not showing */
+  tabNote: { onUndo: () => void } | null;
   onOpen: () => void;
   onClose: () => void;
   view: HkView;
@@ -382,6 +390,20 @@ const SessionModal: React.FC<{
 
 /* ── the whole ──────────────────────────────────────────────────────────────────────────────── */
 
+/** v17.1 — the note left in the tab's place for 6s after it is hidden. */
+const TabNote: React.FC<{ onUndo: () => void }> = ({ onUndo }) => {
+  const place = useWindowCorner(floatInset());
+  if (typeof document === "undefined" || !place) return null;
+  return createPortal(
+    <div className="hkv-tnote" data-hkv="tab-note" role="status" style={{ right: place.right, bottom: place.bottom }}>
+      Hidden. <b>List health</b> at the top of the page opens Housekeeping, and the tab comes back when something new
+      is missing.{" "}
+      <button type="button" className="hkv-tnote-u" data-hkv="tab-undo" onClick={onUndo}>Undo</button>
+    </div>,
+    document.body,
+  );
+};
+
 export const Housekeeping: React.FC<HousekeepingProps> = (p) => {
   const { model, checkin, every, book, today, agents, open, view } = p;
   const [openKey, setOpenKey] = useState<string | null>(null);
@@ -595,15 +617,19 @@ export const Housekeeping: React.FC<HousekeepingProps> = (p) => {
 
   return (
     <>
+      {p.tabShown ? (
       <FloatingTab probe="housekeeping" hidden={open} routeActive={p.routeActive} onOpen={p.onOpen}
+        dismiss={{ label: "Hide the Housekeeping tab", onDismiss: p.onDismissTab }}
         label={`Housekeeping: ${tabCounts(model)}. Press H to open.`}>
         <span className="hkv-hh" aria-hidden="true"><img src={`${HK_HAWK.src}?v=${HK_HAWK.version}`} alt="" /></span>
         <span className="hkv-tt">
           <b>Housekeeping{p.keyHint && <kbd className="hkv-kbd" data-hkv="key">{p.keyHint}</kbd>}</b>
           <small data-hkv="tab-counts">{tabCounts(model)}</small>
         </span>
-        <span key={bump} className={bump ? "hkv-bump" : undefined}><TabRing share={model.share} /></span>
+        <span key={bump} className={bump ? "hkv-bump" : undefined}><TabRing share={model.share} tone="gaps" /></span>
       </FloatingTab>
+      ) : null}
+      {p.tabNote && p.routeActive ? <TabNote onUndo={p.tabNote.onUndo} /> : null}
       <HalfDrawer probe="housekeeping" open={open} onClose={p.onClose} label="Housekeeping" width="min(780px, 56vw)"
         head={head} foot={footNode}
         over={ses ? (

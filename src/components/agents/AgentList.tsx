@@ -30,7 +30,7 @@ import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
-import { listHealth } from "../../lib/contactHealth";
+import { dismissPath, dismissedAtGaps, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
 import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
   contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
@@ -721,6 +721,38 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v17.1 — THE ONE OPENER: the tab, the H key and List health in the header all call this */
   const openHk = useCallback(() => setHkOpen(true), []);
   const health = useMemo(() => listHealth(hk), [hk]);
+  /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
+     when the tab was hidden. `pendingDismiss` holds the value from the press until the user doc agrees, so the
+     tab does not flash back while the write is in flight. */
+  const storedDismiss = dismissedAtGaps(currentUser);
+  const [pendingDismiss, setPendingDismiss] = useState<number | null | undefined>(undefined);
+  useEffect(() => { if (pendingDismiss !== undefined && pendingDismiss === storedDismiss) setPendingDismiss(undefined); }, [pendingDismiss, storedDismiss]);
+  const dismissNow = pendingDismiss !== undefined ? pendingDismiss : storedDismiss;
+  const hkTabShown = tabShown(health.gaps, dismissNow);
+  const [tabNote, setTabNote] = useState(false);
+  const tabNoteTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(tabNoteTimer.current), []);
+  const dismissTab = useCallback(() => {
+    setPendingDismiss(health.gaps);
+    void updateUserPaths(dismissPath(health.gaps));
+    setTabNote(true);
+    window.clearTimeout(tabNoteTimer.current);
+    tabNoteTimer.current = window.setTimeout(() => setTabNote(false), 6000);
+  }, [health.gaps, updateUserPaths]);
+  const undoDismiss = useCallback(() => {
+    setPendingDismiss(null);
+    void updateUserPaths(dismissPath(null));
+    setTabNote(false);
+    window.clearTimeout(tabNoteTimer.current);
+  }, [updateUserPaths]);
+  /* the stored value follows the count only once EVERY collection has answered: a gap count read before the
+     queries arrive is not the writer's, and a transient rise would lift a dismissal nobody asked to lift */
+  const dismissReady = collectionsReady && pageState === "list" && pendingDismiss === undefined;
+  useEffect(() => {
+    if (!dismissReady) return;
+    const next = nextDismissed(health.gaps, storedDismiss);
+    if (next !== undefined) void updateUserPaths(dismissPath(next));
+  }, [dismissReady, health.gaps, storedDismiss, updateUserPaths]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
   /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
@@ -1024,6 +1056,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {showList && (
           <Housekeeping
             model={hk} checkin={hkCheckin} every={hkPrefs.wishlistEvery} book={hkBook} today={hkToday} agents={agents}
+            tabShown={hkTabShown} onDismissTab={dismissTab} tabNote={tabNote ? { onUndo: undoDismiss } : null}
             open={hkOpen} onOpen={openHk} onClose={() => setHkOpen(false)}
             view={hkView} onView={setHkView} routeActive={active} keyHint={shortcutLabel("contactsHk")}
             onFix={onHkFix}
