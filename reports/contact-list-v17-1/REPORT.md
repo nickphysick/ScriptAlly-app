@@ -112,7 +112,14 @@ aid, and a shot taken with the aid would show a list of one agent.
 
 ## 8. Integration and deploy
 
-DEPLOY_SECTION
+Before deploying, dev served `index-CMyvjAYL.js`, the v17 integration branch at `f4b26c99`, which had not moved.
+v17.1 was cut from that tip, so the merge into the new integration branch
+**`dev/…-qp2c-corkboard1-qp2d-cl16-cl17-cl171`** is a fast-forward: no conflicts, and the tree is the one the gates and
+locks in §2 and §5 ran on.
+
+Built from a clean checkout of the pushed tip with `npm run build:dev` and deployed with
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. **Dev serves `index-Cd9X7Zdi.js`**
+(stylesheet `index-DDuHf8su.css`). Not merged to `main`; prod untouched; no rules or functions changed.
 
 ## 9. For Nick
 
