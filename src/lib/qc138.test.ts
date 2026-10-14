@@ -7,9 +7,10 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
-  GLYPHS, glyphCounts, glyphFor, gapWords, peekChain, pressGlyph, pressedGlyph, pressHeading, sort138, stagePillLabel,
-  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, gapShort, tickPlan, peekSummary, peekTone, axisLabels, TICK_UNITS,
+  GLYPHS, glyphCounts, glyphFor, gapWords, pressGlyph, pressedGlyph, pressHeading, sort138, stagePillLabel,
+  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, peekSummary, peekTone,
 } from "./qc138";
+import { tl4Stops } from "./qcTl4";
 
 const ALL = Object.values(QueryStatus);
 
@@ -70,46 +71,6 @@ describe("E · rows", () => {
   });
 });
 
-describe("F · the peek is a chain, never a scale", () => {
-  const now = Date.parse("2026-10-14T12:00:00");
-  const D = 86_400_000;
-  it("never more than five stops; the first, the latest and the end stops always show", () => {
-    const events = Array.from({ length: 9 }, (_, i) => ({ name: `E${i}`, ms: now - (40 - i * 4) * D }));
-    const ch = peekChain(events, { due: now - 2 * D, now, closed: false, yours: false });
-    expect(ch.stops.length).toBeLessThanOrEqual(5);
-    expect(ch.stops[0].name).toBe("E0");
-    expect(ch.stops.map((s) => s.kind)).toEqual(["event", "more", "event", "wasdue", "today"]);
-    expect(ch.stops[2].name).toBe("E8");
-    expect(ch.segs[2].kind).toBe("done");
-    expect(ch.segs[3]).toMatchObject({ kind: "over", label: "2 days over" });
-  });
-  it("same-day events merge, and an event today takes the Today ring", () => {
-    const ch = peekChain([{ name: "Queried", ms: now - 3_600_000 }], { due: now, now, closed: false, yours: false });
-    expect(ch.stops).toHaveLength(1);
-    expect(ch.stops[0]).toMatchObject({ name: "Queried · Due today", today: true });
-  });
-  it("a closed query ends at its closing event, with no Today", () => {
-    const ch = peekChain([{ name: "Queried", ms: now - 90 * D }, { name: "Passed", ms: now - 10 * D }], { due: null, now, closed: true, yours: false });
-    expect(ch.stops.map((s) => s.kind)).toEqual(["event", "event"]);
-  });
-  /* v138.1 §D re-point: drawn to scale, a gap grows linearly with its days (floor 0.35), no longer log2 */
-  it("a segment's flex is its length in days, floored at 0.35, and the gap words follow the pack", () => {
-    const ch = peekChain([{ name: "Queried", ms: now - 30 * D }], { due: now + 20 * D, now, closed: false, yours: false });
-    expect(ch.segs[0].grow).toBe(30);
-    expect(peekChain([{ name: "A", ms: now - 3_600_000 }, { name: "B", ms: now - 1_800_000 }], { due: null, now, closed: true, yours: false }).stops.length).toBe(1);
-    expect([gapShort(3), gapShort(20), gapShort(100), gapShort(3846)]).toEqual(["3d", "3w", "3mo", "10y"]);
-    expect([gapWords(0), gapWords(3), gapWords(20), gapWords(100), gapWords(3846)]).toEqual(["same day", "3 days", "3 weeks", "3 months", "10 yrs 6 mo"]);
-  });
-  it("the ruler: the smallest unit whose ticks sit 6px apart on the widest gap; none under 4px or under one unit", () => {
-    const p = tickPlan([{ days: 60, px: 44 }, { days: 3846, px: 1380 }]);
-    expect(p.unit?.name).toBe("month");
-    expect(p.ticks[1].n).toBe(126);
-    expect(p.ticks[0].step).toBeCloseTo((30.4375 * 44) / 60);
-    expect(tickPlan([{ days: 5, px: 500 }]).ticks[0]).toEqual({ n: 0, step: 0 });
-    expect(tickPlan([{ days: 2777, px: 300 }, { days: 2, px: 44 }]).unit?.name).toBe("quarter");
-  });
-});
-
 describe("v138.2 · the summary reads the peek's own dates", () => {
   const now = new Date(2026, 9, 8, 14).getTime();
   const d = (n: number) => now + n * 86_400_000;
@@ -121,41 +82,23 @@ describe("v138.2 · the summary reads the peek's own dates", () => {
     expect(peekSummary({ sent: d(-49), due: null, closedAt: d(-3), closed: true, yours: false, now })).toEqual({ head: "Closed", line: "closed 7 weeks after you queried", hot: false });
     expect(peekSummary({ sent: d(-10), due: null, closedAt: null, closed: false, yours: false, now }).line).toBe("No date set");
   });
-  it("its overdue test is the tint's and the chain's", () => {
+  it("its overdue test is the tint's and the track's", () => {
     for (const n of [-30, -1, 0, 1, 30]) {
       const s0 = peekSummary({ sent: d(-60), due: d(n), closedAt: null, closed: false, yours: false, now });
       const tone = peekTone(d(n), now, false);
-      const chain = peekChain([{ name: "Queried", ms: d(-60) }], { due: d(n), now, closed: false, yours: false });
+      const chain = { overdue: tl4Stops([{ name: "Queried", ms: d(-60) }], { due: d(n), now, closed: false, yours: false }).some((x) => x.kind === "was") };
       expect(s0.hot).toBe(tone === "over");
       expect(chain.overdue).toBe(tone === "over");
     }
   });
 });
 
-describe("v138.3 · the dated axis", () => {
-  const week = TICK_UNITS[0], month = TICK_UNITS[1];
-  const at = (y: number, m: number, d: number) => new Date(y, m - 1, d, 12).getTime();
-  it("labels the ticks with real dates from the gap's start: Aug under 2 Jul → 2 Sep", () => {
-    const l = axisLabels(at(2026, 7, 2), 62, 650, week);
-    expect(l.map((x) => x.lab)).toEqual(["Aug"]);
-  });
-  it("puts a year where a year starts, months every third when tight, and keeps its distances", () => {
-    const l = axisLabels(at(2024, 3, 14), 941, 900, month);
-    expect(l.some((x) => x.yr && x.lab === "2025")).toBe(true);
-    for (let i = 1; i < l.length; i += 1) expect(l[i].x - l[i - 1].x).toBeGreaterThanOrEqual(34);
-    for (const x of l) { expect(x.x).toBeGreaterThanOrEqual(52); expect(x.x).toBeLessThanOrEqual(900 - 64); }
-    expect(l.filter((x) => !x.yr).every((x) => ["Jan", "Apr", "Jul", "Oct"].includes(x.lab))).toBe(true);
-  });
-  it("draws nothing under a gap narrower than 200px", () => {
-    expect(axisLabels(at(2026, 7, 2), 62, 199, week)).toEqual([]);
-  });
-});
-
 describe("v138.3 · a same-day stop shows the stage the day ended at", () => {
   it("a nudge on the same day as a send changes no stage", () => {
     const now = new Date(2026, 9, 14, 12).getTime(), d = (n: number) => now + n * 86_400_000;
-    const ch = peekChain([{ name: "Queried", ms: d(-30), status: "Queried" }, { name: "Full sent", ms: d(-5), status: "Full Sent" }, { name: "Nudged", ms: d(-5) + 3_600_000, status: null }], { due: d(20), now, closed: false, yours: false });
-    expect(ch.stops[1].name).toBe("Full sent · Nudged");
-    expect(ch.stops[1].status).toBe("Full Sent");
+    const S = tl4Stops([{ name: "Queried", ms: d(-30), status: "Queried" }, { name: "Full sent", ms: d(-5), status: "Full Sent" }, { name: "Nudged", ms: d(-5) + 3_600_000, status: null }], { due: d(20), now, closed: false, yours: false });
+    expect(S[1].names).toEqual(["Full sent", "Nudged"]);
+    expect(S[1].status).toBe("Full Sent");
+    expect(S[1].glyph).toBe("fs");
   });
 });

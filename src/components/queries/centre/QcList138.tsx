@@ -25,7 +25,8 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
-import { axisLabels, gapWords, peekChain, peekGlyph, peekSummary, peekTone, tickPlan, YOUR_MOVE_STATUSES, type AxisLabel, type PeekEvent, type PeekStop } from "../../../lib/qc138";
+import { peekSummary, peekTone, YOUR_MOVE_STATUSES, type PeekEvent } from "../../../lib/qc138";
+import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } from "../../../lib/qcTl4";
 import { StageGlyph } from "./StageGlyph";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
@@ -147,112 +148,88 @@ const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean;
   );
 };
 
+/* canvas text measure for the timeline's labels — the faces are TL4_FONTS, the stylesheet's own */
+let tl4Ctx: CanvasRenderingContext2D | null = null;
+/* a canvas font cannot read var(): each token is resolved from :root once and kept */
+const tl4Fams = new Map<string, string>();
+const tl4Font = (spec: string): string => spec.replace(/var\((--[\w-]+)\)/g, (_, v: string) => {
+  if (!tl4Fams.has(v)) tl4Fams.set(v, getComputedStyle(document.documentElement).getPropertyValue(v).trim() || "serif");
+  return tl4Fams.get(v)!;
+});
+const tl4Measure: Tl4Measure = (text, font) => {
+  if (typeof document === "undefined") return text.length * 7;
+  tl4Ctx = tl4Ctx ?? document.createElement("canvas").getContext("2d");
+  if (!tl4Ctx) return text.length * 7;
+  tl4Ctx.font = tl4Font(TL4_FONTS[font]);
+  return tl4Ctx.measureText(text).width;
+};
+const MARK_KIND: Record<Tl4Kind, string> = { ev: "event", was: "wasdue", today: "today", due: "due" };
+
 /**
- * v138.3 §A — THE PEEK AS BARS, AT TRUE SCALE. Each gap grows with its days (floor 0.35), 64px at least or its short
- * label's width; a 10px bar coloured by whose turn it was (rust a request or offer, navy the agent's, a rust hatch
- * overdue, pale still ahead), its length in mono above it (none on the overdue bar), a tick ruler beneath. The
- * markers sit on the bars with their name and date under them. `aria-hidden`: the panel is the accessible route.
+ * v138.4 — THE PEEK AS ONE POSITIONED TRACK (lib/qcTl4 does the layout; this renders it). 120px tall, the track's
+ * centre at 58: bars between the markers, markers at their true dates, labels in two lanes, durations above the bars,
+ * a month axis under them. `aria-hidden`: the panel is the accessible route.
  *
- * ⚠️ ONE WRITER: the unit, the short labels and the floors are measured in one layout effect, on open and on resize
- *    (a ResizeObserver on the peek itself), never polled.
+ * ⚠️ ONE WRITER: the width, read by a ResizeObserver on open and on resize; the layout is derived from it. Labels are
+ *    measured with the real faces, so the layout is re-derived once `document.fonts` has settled.
  */
 const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; nowMs: number; closed: boolean; yours: boolean }> = ({ events, due, nowMs, closed, yours }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const ch = events ? peekChain(events, { due, now: nowMs, closed, yours }) : null;
-  const [m, setM] = useState<{ unit: string | null; ticks: { n: number; step: number }[]; short: boolean[]; floor: number[]; axis: AxisLabel[][] }>({ unit: null, ticks: [], short: [], floor: [], axis: [] });
-  const sig = ch ? ch.segs.map((g) => `${g.days}:${g.kind}`).join("|") : "";
+  const [W, setW] = useState(0);
+  const [fonts, setFonts] = useState(0);
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el || !ch) return undefined;
-    const read = () => {
-      const gaps = [...el.querySelectorAll<HTMLElement>('[data-qcv="peek-seg"]')];
-      if (!gaps.length) return;
-      const px = gaps.map((g) => g.getBoundingClientRect().width);
-      if (px.every((w) => w === 0)) return;
-      const plan = tickPlan(ch.segs.map((g, i) => ({ days: g.days, px: px[i] })));
-      /* a label that does not fit its bar shortens: measured on the long form, held in a hidden probe */
-      const short = gaps.map((g, i) => {
-        const probe = g.querySelector<HTMLElement>(".qc138-seg-probe");
-        return !!probe && probe.getBoundingClientRect().width + 8 > px[i];
-      });
-      /* a gap's floor is 64px, or its short label's width where that is wider; the short label's width never depends
-         on the gap's, so this settles in one pass */
-      const floor = gaps.map((g) => {
-        const probe = g.querySelector<HTMLElement>(".qc138-seg-probe--s");
-        return Math.max(64, Math.ceil(probe ? probe.getBoundingClientRect().width + 8 : 0));
-      });
-      /* §C — the dated axis under each gap at least 200px wide, from the gap's start date (the stop that opens it) */
-      const axis = ch.segs.map((g, i) => axisLabels(ch.stops[i].ms, g.days, px[i], plan.unit));
-      const next = { unit: plan.unit?.name ?? null, ticks: plan.ticks, short, floor, axis };
-      setM((cur) => (JSON.stringify(cur) === JSON.stringify(next) ? cur : next));
-    };
+    if (!el) return undefined;
+    const read = () => { const w = el.clientWidth; if (w > 0) setW((cur) => (Math.abs(cur - w) < 0.5 ? cur : w)); };
     read();
-    if (typeof ResizeObserver === "undefined") return undefined;
+    let live = true;
+    document.fonts?.ready?.then(() => { if (live) setFonts((n) => n + 1); });
+    if (typeof ResizeObserver === "undefined") return () => { live = false; };
     const ro = new ResizeObserver(read);
     ro.observe(el);
-    return () => ro.disconnect();
-  }, [sig]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!ch) return <div className="qc138-peek qc138-peek--wait" data-qcv="peek" aria-hidden="true" />;
+    return () => { live = false; ro.disconnect(); };
+  }, []);
+  const S = events ? tl4Stops(events, { due, now: nowMs, closed, yours }) : null;
+  const lay = S && W ? tl4Layout(S, W, tl4Measure, nowMs) : null;
+  void fonts;
+  const over = !!S?.some((s) => s.kind === "was");
+  const { TY, H, LANE } = TL4;
   return (
-    <div ref={ref} className={`qc138-peek${ch.overdue ? " over" : ""}${yours ? " you" : ""}`} data-qcv="peek" data-over={ch.overdue ? "" : undefined} data-unit={m.unit ?? undefined} aria-hidden="true">
-      <div className="qc138-chain" data-qcv="peek-chain">
-        {ch.stops.map((st, i) => {
-          const g = i > 0 ? ch.segs[i - 1] : null;
-          const tk = i > 0 ? m.ticks[i - 1] : undefined;
-          return (
-            <React.Fragment key={`${st.kind}-${i}`}>
-              {g ? (
-                <span className={`qc138-seg qc138-seg--${g.kind}`} data-qcv="peek-seg" data-days={g.days} data-kind={g.kind} data-floor={m.floor[i - 1] ?? 64}
-                  style={{ flexGrow: g.grow, minWidth: m.floor[i - 1] ? `${m.floor[i - 1]}px` : undefined }}>
-                  {g.kind === "over" ? null : <em data-qcv="peek-seg-label">{m.short[i - 1] ? g.short : g.label}</em>}
-                  <em className="qc138-seg-probe" aria-hidden="true">{g.label}</em>
-                  <em className="qc138-seg-probe qc138-seg-probe--s" aria-hidden="true">{g.short}</em>
-                  <i className="qc138-seg-ln" />
-                  {tk && tk.n > 0 ? (
-                    <span className="qc138-ticks" data-qcv="peek-ticks" data-step={tk.step.toFixed(2)}>
-                      {Array.from({ length: tk.n + 1 }, (_, k) => <i key={k} style={{ left: `${k * tk.step}px` }} />)}
-                    </span>
-                  ) : null}
-                  {m.axis[i - 1]?.length ? (
-                    <span className="qc138-ax" data-qcv="peek-axis">
-                      {m.axis[i - 1].map((a) => <b key={`${a.lab}-${a.x}`} className={a.yr ? "yr" : undefined} data-x={a.x.toFixed(1)} style={{ left: `${a.x}px` }}>{a.lab}</b>)}
-                    </span>
-                  ) : null}
-                </span>
-              ) : null}
-              <Marker st={st} i={i} over={st.kind === "today" && g?.kind === "over" ? `${gapWords(g.days)} over` : null} />
-            </React.Fragment>
-          );
-        })}
-      </div>
+    <div ref={ref} className={`qc138-peek qc138-tl4${S ? "" : " qc138-peek--wait"}`} data-qcv="peek" data-over={over ? "" : undefined} aria-hidden="true">
+      {S && lay ? (
+        <div className="qc138-chain" data-qcv="peek-chain">
+          {lay.bars.map((b, k) => (
+            <span key={`b${k}`} className={`qc138-t4b ${b.cls}${b.court ? ` ${b.court}` : ""}`} data-qcv="peek-bar" data-cls={b.cls} data-court={b.court || undefined} data-days={b.days}
+              style={{ left: `${b.a}px`, width: `${b.b - b.a}px` }} />
+          ))}
+          {lay.axis.ticks.map((x, k) => <span key={`k${k}`} className="qc138-t4k" style={{ left: `${x}px` }} />)}
+          {lay.axis.labels.map((a) => <span key={`a${a.x}`} className={`qc138-t4a${a.yr ? " yr" : ""}`} data-qcv="peek-axis" style={{ left: `${a.x}px` }}>{a.text}</span>)}
+          {lay.durs.map((d, k) => (
+            <span key={`d${k}`} className={`qc138-t4d ${d.cls}${d.court ? ` ${d.court}` : ""}`} data-qcv="peek-dur" style={{ left: `${d.x}px` }}>{d.text}</span>
+          ))}
+          {lay.marks.map((m) => {
+            const st = S[m.i];
+            const unmapped = st.kind === "ev" && !st.glyph;
+            return (
+              <span key={`m${m.i}`} className={`qc138-mk qc138-mk--${MARK_KIND[st.kind]}${m.tone ? ` ${m.tone}` : ""}`} data-qcv="peek-stop" data-kind={MARK_KIND[st.kind]}
+                data-glyph={st.glyph ?? undefined} data-unmapped={unmapped ? "" : undefined} title={m.title} style={{ left: `${m.x}px`, ["--i" as string]: m.i }}>
+                {st.glyph ? <StageGlyph k={st.glyph} ring="peek" dashed={!!st.status && YOUR_MOVE_STATUSES.includes(st.status)} className="qc138-mk-svg" />
+                  : st.kind === "today" ? <i className="qc138-mk-tick" />
+                  : <i className="qc138-mk-dot" />}
+              </span>
+            );
+          })}
+          {lay.labels.map((l) => (
+            <span key={`l${l.i}`} className={`qc138-t4l ${l.al} ${l.lane} ${l.tone}`} data-qcv="peek-label" data-lane={l.lane} data-stop={l.i} title={l.title}
+              style={{ left: `${l.L}px`, width: `${l.R - l.L}px`, ...(l.lane === "up" ? { bottom: `${H - TY + LANE}px` } : { top: `${TY + LANE}px` }) }}>
+              <b data-qcv="peek-name">{l.name}</b>
+              {l.date ? <small className={l.tone === "today" ? "ov" : undefined} data-qcv={l.tone === "today" ? "peek-over" : "peek-date"}>{l.date}</small> : null}
+              {l.notes.map((t) => <span key={t} className="qc138-t4n" data-qcv="peek-note">{t}</span>)}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
-  );
-};
-
-/**
- * v138.3 §B — A MARKER on the bars: an event draws its stage glyph (`StageGlyph`, from the event's own `status`, never
- * its label) at 22px in ink, with the dashed ring on a your-move event; a future date is a white circle in a navy ring;
- * "Was due" a rust dot; Today a rust tick, with "{d} over" under TODAY when overdue. An event on today's day keeps the
- * rust halo and takes Today's place. An event whose stage cannot be mapped (a nudge, a holding reply) is a plain navy
- * dot marked `data-unmapped`. Every glyph sits in a 2.5px ring of the row's ground, so the bar passes behind it.
- */
-const Marker: React.FC<{ st: PeekStop; i: number; over: string | null }> = ({ st, i, over }) => {
-  const k = st.kind === "event" ? peekGlyph(st.status) : null;
-  const unmapped = st.kind === "event" && !k;
-  return (
-    <span className={`qc138-mk qc138-mk--${st.kind}${st.today ? " is-today" : ""}`} data-qcv="peek-stop" data-kind={st.kind} data-glyph={k ?? undefined}
-      data-unmapped={unmapped ? "" : undefined} style={{ ["--i" as string]: i }}>
-      <span className="qc138-mk-g" data-qcv="peek-mark">
-        {k ? <StageGlyph k={k} ring="peek" dashed={!!st.status && YOUR_MOVE_STATUSES.includes(st.status)} className="qc138-mk-svg" />
-          : st.kind === "today" ? <i className="qc138-mk-tick" />
-          : <i className="qc138-mk-dot" />}
-      </span>
-      <span className="qc138-mk-t">
-        <b data-qcv="peek-name">{st.name}</b>
-        {st.date && st.kind !== "today" ? <small data-qcv="peek-date">{st.date}</small> : null}
-        {over ? <small className="qc138-mk-ov" data-qcv="peek-over">{over}</small> : null}
-      </span>
-    </span>
   );
 };
 
@@ -305,7 +282,8 @@ const PeekSum: React.FC<{ s: ReturnType<typeof peekSummary>; onTimeline?: () => 
   );
 };
 
-interface LabCase { events: PeekEvent[]; due: number | null; closed?: boolean; yours?: boolean }
+/* `now`: a forced today for the case (the v138.4 acceptance cases are dated against 8 Oct) */
+interface LabCase { events: PeekEvent[]; due: number | null; closed?: boolean; yours?: boolean; now?: number }
 const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
   const cases = typeof window !== "undefined" ? (window as unknown as { __SA_QC138_PEEK_LAB?: LabCase[] }).__SA_QC138_PEEK_LAB : undefined;
   if (!cases?.length) return null;
@@ -313,7 +291,7 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
     <div className="qc138-peeklab" data-qc138="peek-lab">
       {cases.map((c, i) => (
         <div key={i} className="qc138-peekw" data-open="" data-qc138="peek-case">
-          <div className="qc138-peeki"><PeekDrawer summary={<PeekSum s={peekSummary({ sent: c.events[0]?.ms ?? null, due: c.due, closedAt: c.closed ? c.events[c.events.length - 1]?.ms ?? null : null, closed: !!c.closed, yours: !!c.yours, now: nowMs })} onTimeline={() => {}} />}><Peek events={c.events} due={c.due} nowMs={nowMs} closed={!!c.closed} yours={!!c.yours} /></PeekDrawer></div>
+          <div className="qc138-peeki"><PeekDrawer summary={<PeekSum s={peekSummary({ sent: c.events[0]?.ms ?? null, due: c.due, closedAt: c.closed ? c.events[c.events.length - 1]?.ms ?? null : null, closed: !!c.closed, yours: !!c.yours, now: c.now ?? nowMs })} onTimeline={() => {}} />}><Peek events={c.events} due={c.due} nowMs={c.now ?? nowMs} closed={!!c.closed} yours={!!c.yours} /></PeekDrawer></div>
         </div>
       ))}
     </div>

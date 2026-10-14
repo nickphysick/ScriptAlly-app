@@ -247,7 +247,7 @@ export const sentenceCase = (s: string): string =>
   s.toLowerCase().replace(/[a-z]+/g, (w) => (MONTH_CAP.has(w) ? w[0].toUpperCase() + w.slice(1) : w)).replace(/^[a-z]/, (c) => c.toUpperCase());
 
 const MON138 = MONTHS_SHORT;
-const dayMonYear = (ms: number, nowMs: number): string => {
+export const dayMonYear = (ms: number, nowMs: number): string => {
   const d = new Date(ms);
   return `${d.getDate()} ${MON138[d.getMonth()]}${d.getFullYear() === new Date(nowMs).getFullYear() ? "" : ` ${d.getFullYear()}`}`;
 };
@@ -296,32 +296,22 @@ export function dialOf(r: Filterable & { stageStartMs: number | null; lastMs: nu
   return { frac: Math.min(1, Math.max(0.04, gone)), over: false, due };
 }
 
-/* ── Part F · THE PEEK TIMELINE ───────────────────────────────────────────────────────────────────────────────
- * ⚠️ A CHAIN, NOT A SCALE: nothing is placed by date. Stops come from the query's dated events (the panel's own
- *    source: its activity log through `buildTimelineRows`), then the due and today stops. A segment's length is
- *    `log2(days + 2)` of flex, so a long gap is longer but can never crowd anything out.
- * ⚠️ AT MOST FIVE STOPS: the first event, the latest change and the due/today stops always show; any changes
- *    between fold into one "+{n} more" stop.
- * ⚠️ SAME-DAY EVENTS MERGE into one stop; a stop on today's day takes the rust ring and there is no separate Today.
+/* ── THE PEEK'S EVENTS AND WORDS ───────────────────────────────────────────────────────────────────────────────
+ * The timeline itself is lib/qcTl4 (v138.4: one positioned track at true scale). What stays here is what it and the
+ * summary share: the event type, the your-move stages, the strict glyph map, whole-day counting and the gap wording.
  */
 /**
  * v138.3 — `status` is the event's stage from the activity source itself (the panel's `RowSpec.status`), never parsed
  * from its label; null for an event that is not a status (a nudge, a holding reply), which draws no stage glyph.
  */
 export interface PeekEvent { name: string; ms: number; status?: string | null }
-export type StopKind = "event" | "more" | "due" | "wasdue" | "today";
-export interface PeekStop { kind: StopKind; name: string; date: string; ms: number; today: boolean; status?: string | null }
-/** v138.3 — "you": a stretch opened by a request or an offer (the writer's turn), drawn rust; "done" is navy */
-export type SegKind = "done" | "you" | "ahead" | "over";
 /** the stages whose stretch is the writer's turn, and whose marker carries the dashed ring (v138.3 A/B) */
 export const YOUR_MOVE_STATUSES: readonly string[] = [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER];
 /** an event's stage glyph, strictly: null when the event is not a status or the status is unknown (no fallback) */
 export const peekGlyph = (status: string | null | undefined): GlyphKey | null => (status ? BY_STATUS.get(status) ?? null : null);
-export interface PeekSeg { days: number; label: string; short: string; kind: SegKind; grow: number }
-export interface PeekChain { stops: PeekStop[]; segs: PeekSeg[]; overdue: boolean }
 
 const dayKey = (ms: number): number => startOfDay(ms);
-const dDays = (a: number, b: number): number => Math.max(0, Math.round((dayKey(b) - dayKey(a)) / DAY_MS));
+export const dDays = (a: number, b: number): number => Math.max(0, Math.round((dayKey(b) - dayKey(a)) / DAY_MS));
 
 /** "same day", "{n} days" (under 14), "{n} weeks" (under 60), "{n} months" (under 365), "{y} yrs {m} mo" */
 export function gapWords(days: number): string {
@@ -331,37 +321,6 @@ export function gapWords(days: number): string {
   if (days < 365) { const m = Math.max(2, Math.round(days / 30.44)); return `${m} months`; }
   const y = Math.floor(days / 365), m = Math.round((days - y * 365) / 30.44);
   return m > 0 && m < 12 ? `${y} ${y === 1 ? "yr" : "yrs"} ${m} mo` : `${m >= 12 ? y + 1 : y} ${(m >= 12 ? y + 1 : y) === 1 ? "yr" : "yrs"}`;
-}
-
-/** the short label when the long one does not fit its gap: "{n}d", "{n}w", "{n}mo", "{y}y" */
-export function gapShort(days: number): string {
-  if (days < 14) return `${days}d`;
-  if (days < 60) return `${Math.round(days / 7)}w`;
-  if (days < 365) return `${Math.max(2, Math.round(days / 30.44))}mo`;
-  return `${Math.floor(days / 365)}y`;
-}
-
-/** v138.1 §D — the tick ruler's units, smallest first */
-export const TICK_UNITS: { name: "week" | "month" | "quarter" | "year"; days: number }[] = [
-  { name: "week", days: 7 }, { name: "month", days: 30.4375 }, { name: "quarter", days: 91.3125 }, { name: "year", days: 365.25 },
-];
-/**
- * The ruler's unit: the smallest whose ticks sit at least 8px apart (v138.3; 6 before) on the most-stretched (widest) gap;
- * per gap, one tick per whole unit of its real length, spaced by its own px per unit, and none where that spacing
- * would fall under 4px or the gap is shorter than one unit.
- */
-export function tickPlan(gaps: readonly { days: number; px: number }[]): { unit: (typeof TICK_UNITS)[number] | null; ticks: { n: number; step: number }[] } {
-  /* the most-stretched gap is the WIDEST one: a short gap held at the 44px minimum has an inflated px per day that
-     says nothing about the scale (the reference's own ten-year and seven-year cases tick in months) */
-  const wide = gaps.filter((g) => g.days > 0).reduce<{ days: number; px: number } | null>((a, g) => (!a || g.px > a.px ? g : a), null);
-  const pxd = wide ? wide.px / wide.days : 0;
-  const unit = pxd > 0 ? TICK_UNITS.find((u) => u.days * pxd >= 8) ?? null : null;
-  const ticks = gaps.map((g) => {
-    if (!unit || g.days < unit.days || g.days <= 0) return { n: 0, step: 0 };
-    const step = (unit.days * g.px) / g.days;
-    return step < 4 ? { n: 0, step: 0 } : { n: Math.floor(g.days / unit.days), step };
-  });
-  return { unit, ticks };
 }
 
 /**
@@ -395,105 +354,3 @@ export function peekSummary(o: { sent: number | null; due: number | null; closed
   return { head: out, line: `${gapWords(left)} until ${yours ? "your send-by date" : "their reply date"}`, hot: false };
 }
 
-/**
- * v138.3 §C — THE DATED AXIS under one gap: the ticks' real dates, from the gap's START date (true calendar dates, never
- * counts). A year label on the tick where a new year starts; a month label on the tick where a new month starts — every
- * month when months are at least 34px apart on this gap, every third when at least 12px, none otherwise (week and
- * month rulers only). Years are placed first; any label within 34px of one already placed is dropped, and none within
- * 52px of the gap's start or 64px of its end. Only for a gap at least 200px wide. `x` is the tick's offset in px.
- */
-export function tickDate(start: number, j: number, unit: (typeof TICK_UNITS)[number]["name"]): Date {
-  const d = new Date(start);
-  if (unit === "week") d.setDate(d.getDate() + 7 * j);
-  else if (unit === "month") d.setMonth(d.getMonth() + j);
-  else if (unit === "quarter") d.setMonth(d.getMonth() + 3 * j);
-  else d.setFullYear(d.getFullYear() + j);
-  return d;
-}
-export interface AxisLabel { x: number; lab: string; yr: boolean }
-export function axisLabels(start: number, days: number, w: number, unit: (typeof TICK_UNITS)[number] | null): AxisLabel[] {
-  if (!unit || w < 200 || days <= 0) return [];
-  const n = Math.floor(days / unit.days);
-  const step = (unit.days * w) / days;
-  if (n < 1 || step < 4) return [];
-  const mpx = (w / days) * 30.4375;
-  const every = mpx >= 34 ? 1 : mpx >= 12 ? 3 : 0;
-  const months = unit.name === "week" || unit.name === "month";
-  const cand: AxisLabel[] = [];
-  let prev = new Date(start);
-  for (let j = 1; j <= n; j += 1) {
-    const d = tickDate(start, j, unit.name);
-    const x = j * step;
-    if (d.getFullYear() !== prev.getFullYear()) cand.push({ x, lab: String(d.getFullYear()), yr: true });
-    else if (months && every && d.getMonth() !== prev.getMonth() && d.getMonth() % every === 0) cand.push({ x, lab: MONTHS_SHORT[d.getMonth()], yr: false });
-    prev = d;
-  }
-  const placed: AxisLabel[] = [];
-  const ok = (x: number) => x >= 52 && x <= w - 64 && placed.every((p) => Math.abs(p.x - x) >= 34);
-  for (const c of cand.filter((c) => c.yr)) if (ok(c.x)) placed.push(c);
-  for (const c of cand.filter((c) => !c.yr)) if (ok(c.x)) placed.push(c);
-  return placed.sort((a, b) => a.x - b.x);
-}
-
-export function peekChain(
-  events: readonly PeekEvent[],
-  opts: { due: number | null; now: number; closed: boolean; yours: boolean },
-): PeekChain {
-  const { due, now, closed, yours } = opts;
-  const fmt = (ms: number) => dayMonYear(ms, now);
-  const evs = [...events].filter((e) => Number.isFinite(e.ms)).sort((a, b) => a.ms - b.ms);
-  /* the end stops */
-  const tail: PeekStop[] = [];
-  const t0 = startOfDay(now);
-  let overdue = false;
-  if (!closed) {
-    const todayStop: PeekStop = { kind: "today", name: "Today", date: fmt(now), ms: now, today: true };
-    if (peekLate(due, now)) { overdue = true; tail.push({ kind: "wasdue", name: "Was due", date: fmt(due), ms: due, today: false }, todayStop); }
-    else if (due != null && dayKey(due) === t0) tail.push({ kind: "today", name: "Due today", date: fmt(now), ms: now, today: true });
-    else { tail.push(todayStop); if (due != null) tail.push({ kind: "due", name: yours ? "Send by" : "Reply due", date: fmt(due), ms: due, today: false }); }
-  }
-  /* events, same day merged */
-  const merged: PeekStop[] = [];
-  for (const e of evs) {
-    const last = merged[merged.length - 1];
-    /* same day: one stop, named for both, showing the stage the day ENDED at — the later event's status, unless that
-       event is not a status (a nudge changes no stage, so "Full sent · Nudged" still draws Full sent) */
-    if (last && dayKey(last.ms) === dayKey(e.ms)) { if (!last.name.split(" · ").includes(e.name)) last.name = `${last.name} · ${e.name}`; if (e.status) last.status = e.status; continue; }
-    merged.push({ kind: "event", name: e.name, date: fmt(e.ms), ms: e.ms, today: false, status: e.status });
-  }
-  /* an event on today's day takes the Today stop's place and its ring */
-  if (tail.length && tail[0].kind !== "wasdue" && merged.length && dayKey(merged[merged.length - 1].ms) === t0) {
-    const last = merged[merged.length - 1];
-    const t = tail.shift()!;
-    last.today = true;
-    if (t.name === "Due today") last.name = `${last.name} · Due today`;
-  } else if (tail.length > 1 && tail[0].kind === "wasdue" && merged.length && dayKey(merged[merged.length - 1].ms) === t0) {
-    /* overdue, and something happened today: it follows "Was due" and takes Today's place */
-    const last = merged.pop()!;
-    tail[1] = { ...last, today: true };
-  }
-  /* at most five stops */
-  const room = Math.max(2, 5 - tail.length);
-  let body = merged;
-  if (merged.length > room) {
-    const keepHead = merged[0], keepTail = merged[merged.length - 1];
-    const folded = merged.slice(1, -1);
-    const extra = room - 3; /* stops beyond first, "+n more" and latest */
-    const shown = extra > 0 ? folded.slice(folded.length - extra) : [];
-    const hidden = folded.slice(0, folded.length - shown.length);
-    body = [keepHead, { kind: "more", name: `+${hidden.length} more`, date: "", ms: hidden[hidden.length - 1].ms, today: false }, ...shown, keepTail];
-  }
-  const stops = [...body, ...tail];
-  const segs: PeekSeg[] = [];
-  for (let i = 1; i < stops.length; i += 1) {
-    const a = stops[i - 1], b = stops[i];
-    const days = dDays(a.ms, b.ms);
-    const base: SegKind = a.kind === "wasdue" ? "over" : (b.kind === "due" || (b.ms > now && !b.today)) ? "ahead" : "done";
-    /* v138.3 — a stretch that happened is coloured by whose turn it was, from the stop that opens it */
-    const kind: SegKind = base === "done" && a.kind === "event" && !!a.status && YOUR_MOVE_STATUSES.includes(a.status) ? "you" : base;
-    const words = gapWords(days);
-    /* v138.1 §D — DRAWN TO SCALE: a gap grows linearly with its length in days (floor 0.35), replacing log2 */
-    segs.push({ days, kind, label: kind === "over" ? `${words} over` : words, short: kind === "over" ? `${days}d over` : gapShort(days), grow: Math.max(0.35, days) });
-  }
-  return { stops, segs, overdue };
-}
