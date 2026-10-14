@@ -33,7 +33,6 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { packagesHeaderCopy, type PackageLead } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
 import { PackagesExhibit } from "./packages/PackagesExhibit";
-import { PageRail } from "./containers/PageRail";
 import { appendBookVersion, bookVersionsOf, newBookVersionId, renameBookVersion } from "../lib/bookVersions";
 import { countWords, createPayload } from "../lib/materialDraft";
 import { isVersionSent, lockedEditLine, nextVersionName } from "../lib/versionLock";
@@ -50,7 +49,6 @@ import { packageResults } from "../lib/packageResults";
 import { editionNumber, editionWarning, editionsOf, ordinal, summaryFrom } from "../lib/packageEditions";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import type { CompState } from "./packages/PkgComposer";
-import { MatAct, PkgMaterials } from "./packages/PkgMaterials";
 import { PkgDrawer4, type DrawerView } from "./packages/v4/PkgDrawer4";
 import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
 import "./packages/v4/packagesV4.css";
@@ -58,7 +56,7 @@ import { PkgHeader4, PkgSummaryCard, type StatusKey } from "./packages/v4/PkgHea
 import { overall } from "../lib/packageReplies";
 import { PkgFilters4, emptyPkgFilters, filterCount, pkgMatches, type PkgFilters, type PkgPop } from "./packages/v4/PkgFilters4";
 import { usePopover } from "./shell/ListPills";
-import { PackagesSheet, type CardData } from "./packages/v4/PkgSheets4";
+import { MaterialsSheet, PackagesSheet, type CardData } from "./packages/v4/PkgSheets4";
 import { PkgBand, PkgBandToggle } from "./packages/PkgBand";
 import "./packages/packagesV2.css";
 
@@ -156,17 +154,6 @@ export const SubmissionPackages: React.FC = () => {
     }
   };
 
-  /* ── the rail: a chip starts a package with it chosen; the ⋯ menu opens the material's drawer ── */
-  const putAway = useMemo(() => [...allMats.letter, ...allMats.synopsis].filter((m) => m.retired), [allMats]);
-  const onMenu = (act: MatAct, m: MaterialItem) => {
-    const full = model.matById(m.kind, m.id);
-    if (!full) return;
-    if (act === "away") { void model.putAway(m); return; }
-    if (act === "open") { setView({ m: "mat", kind: m.kind, id: m.id }); return; }
-    if (m.kind !== "version" && model.materialGoneOut(m.id)) { setView({ m: "matform", d: model.newVersionDraft(full) }); return; }
-    setView({ m: "matform", d: { editId: m.id, kind: m.kind, name: m.name, note: full.note, text: full.text ?? "" } });
-  };
-
   /* ── Part A · the card's counts and the status filter (shared with the Status pill, Part B) ── */
   const counts: Record<StatusKey, number> = {
     sent: live.filter((p) => model.goneOut(p)).length, new: live.filter((p) => !model.goneOut(p)).length, ret: retired.length,
@@ -243,8 +230,7 @@ export const SubmissionPackages: React.FC = () => {
           <PkgFilters4 filters={filters} onFilters={setFilters} pop={pop} statusCounts={counts} letters={allMats.letter} synopses={allMats.synopsis}
             versions={allMats.version} inPackages={inPackages} showing={msPkgs.filter((p) => statusMatch(p) && findMatch(p)).length} />
         </PkgHeader4>}
-        <div className="ppv-group">
-          <div className="ppv-main" data-ppv="main">
+        <div className="pk4-body" data-ppv="main">
             {!activeMs ? null : exhibit ? (
               <PackagesExhibit />
             ) : (
@@ -252,6 +238,11 @@ export const SubmissionPackages: React.FC = () => {
                 <PackagesSheet live={cardsLive} retired={cardsRet} total={msPkgs.length} filtered={filterCount(filters) > 0 || !!find.trim()}
                   retiredForced={filters.status.includes("ret")} noneLive={noneLive} openId={view?.m === "pkg" ? view.id : null}
                   find={find} onFind={setFind} onClearAll={clearAll} onOpen={(p) => setView({ m: "pkg", id: p.id, tab: "inside" })} onNew={() => openNew()} />
+                <MaterialsSheet mats={allMats} openId={view?.m === "mat" ? view.id : null}
+                  use={(m) => ({ packages: model.packagesWith(m).length, sent: model.matSplit(m).sent })}
+                  goneOut={(m) => (m.kind === "version" ? model.matSplit(m).sent > 0 : model.materialGoneOut(m.id))}
+                  onOpen={(m) => setView({ m: "mat", kind: m.kind, id: m.id })}
+                  onAdd={(k) => setView({ m: "matform", d: { kind: k, name: "", note: "", text: "" } })} />
                 {sent.length >= 2 ? (
                   <>
                     <PkgBand band="sbs" title="Side by side" hint="Facts from your query log" ref={sbsRef} id="ppv-sbs" />
@@ -277,17 +268,6 @@ export const SubmissionPackages: React.FC = () => {
                 ) : null}
               </>
             )}
-          </div>
-          <PageRail label="Materials" className="ppv-rail" dataAttrs={{ "data-ppv": "rail" }} trayClassName="ppv-tray"
-            tray={<><h2>Materials</h2><img className="ppv-pile" data-ppv="pile" src={`${MATERIALS_PILE.src}?v=${MATERIALS_PILE.version}`} width={MATERIALS_PILE.width} height={MATERIALS_PILE.height} alt="" aria-hidden="true" /></>}>
-            {activeMs ? (
-              <PkgMaterials mats={mats} metaOf={metaOf} composing={false} inPkg={() => false} onChip={(m) => openNew({ [m.kind]: m.id } as Partial<CompState>)}
-                onDragStart={() => {}} onDragEnd={() => {}}
-                onAdd={(k) => setView({ m: "matform", d: { kind: k, name: "", note: "", text: "" } })}
-                onMenu={onMenu}
-                putAway={putAway} onRestore={(m) => void model.restoreMat(m)} />
-            ) : null}
-          </PageRail>
         </div>
         </div>
         <PkgDrawer4 model={model} view={view} go={setView} />

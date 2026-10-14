@@ -387,3 +387,35 @@ button.pk4-band { cursor: pointer; user-select: none; }
 .pk4-nonelive { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; margin: 10px 18px 0; padding: 0 0 18px; }
 .pk4-nonelive p { margin: 0 12px; font: 400 16px/1.45 var(--pk4-serif) !important; color: var(--pk4-i72); }
 .pk4-nonelive .pk4-btn { margin-left: 12px; }
+
+/* the page's body: the sheets, one column at the list's width */
+.pk4-body { display: flex; flex-direction: column; min-width: 0; }
+
+/* ═════ Part D · the materials sheet: three columns split by 1px rules, each opening on v138's heading strip ═════ */
+.pk4-mats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: 0 0 20px 20px; overflow: hidden; }
+.pk4-mcol { min-width: 0; border-left: 1px solid var(--pk4-i08); display: flex; flex-direction: column; }
+.pk4-mcol:first-child { border-left: 0; }
+@container pk4sheet (max-width: 1099.98px) {
+  .pk4-mats { grid-template-columns: minmax(0, 1fr); }
+  .pk4-mcol { border-left: 0; border-top: 1px solid var(--pk4-i08); }
+  .pk4-mcol:first-child { border-top: 0; }
+}
+.pk4-hdstrip { display: flex; align-items: center; gap: 8px; box-sizing: border-box; padding: 12px 22px 13px; background: var(--pk4-head); border-bottom: 1.5px solid rgba(45, 58, 80, 0.28); }
+.pk4-hdstrip .pk4-hdi { display: inline-flex; color: rgba(45, 58, 80, 0.62); }
+.pk4-hdstrip .pk4-hdi svg { width: 14px; height: 14px; }
+.pk4 .pk4-hdstrip :is(.pk4-hdt, .pk4-hdn) { font: 600 10.5px/1.3 var(--pk4-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62); }
+.pk4-hdstrip .pk4-hdn { margin-left: auto; }
+.pk4 .pk4-mr { display: block; width: 100%; box-sizing: border-box; padding: 13px 22px; border-top: 1px solid var(--pk4-i08); text-align: left; }
+.pk4 .pk4-hdstrip + .pk4-mr { border-top: 0; }
+.pk4 .pk4-mr:hover, .pk4 .pk4-mr[data-open] { background: #f6f3ee; }
+.pk4 .pk4-mr[data-away] { opacity: 0.72; }
+.pk4 .pk4-mr strong { display: flex; align-items: center; gap: 7px; font: 600 16px/1.3 var(--pk4-serif) !important; overflow-wrap: anywhere; }
+.pk4 .pk4-mr .pk4-mlock { display: inline-flex; color: var(--pk4-i55); }
+.pk4 .pk4-mr .pk4-mlock svg { width: 11px; height: 11px; }
+.pk4 .pk4-mr i { display: block; margin: 1px 0 5px; font: italic 400 14px/1.35 var(--pk4-serif) !important; color: var(--pk4-i55); }
+.pk4 .pk4-mr .pk4-mono { display: block; font-size: 9px !important; margin-top: 3px; }
+.pk4-mnone { padding: 14px 22px; font: italic 400 15px/1.4 var(--pk4-serif); color: var(--pk4-i45); }
+.pk4 .pk4-madd { display: block; width: 100%; box-sizing: border-box; margin-top: auto; padding: 12px 22px; border-top: 1px dashed var(--pk4-i14); text-align: left; font: 400 14.5px/1.3 var(--pk4-type) !important; color: var(--pk4-i72); }
+.pk4 .pk4-madd:hover { color: var(--pk4-ink); background: #f6f3ee; }
+.pk4 .pk4-maway { display: block; margin: 8px 22px; font: italic 400 14px/1.3 var(--pk4-serif) !important; color: var(--pk4-i60); text-decoration: underline; text-underline-offset: 3px; text-align: left; }
+.pk4-awaylist { display: block; }
