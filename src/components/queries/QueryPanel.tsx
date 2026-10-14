@@ -35,6 +35,15 @@ import type { QueryStatus } from "../../types";
 export type PanelTab = "tracking" | "agent" | "notes";
 /* exported so the DOCKED card (v11) remembers the same tab the drawer does — one memory, two houses */
 export const TAB_KEY = "sa.qpnTab";
+/**
+ * v138.2 §C — open the panel on a given tab from outside it ("Open the full timeline →"). The stored tab covers a
+ * panel about to mount; the event covers one already open, whose tab is state read once at mount.
+ */
+export const PANEL_TAB_EVENT = "sa:qpn-tab";
+export function requestPanelTab(t: PanelTab): void {
+  try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is Tracking anyway */ }
+  window.dispatchEvent(new CustomEvent<PanelTab>(PANEL_TAB_EVENT, { detail: t }));
+}
 export const readTab = (): PanelTab => {
   try {
     const v = sessionStorage.getItem(TAB_KEY);
@@ -160,6 +169,11 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<PanelTab>(readTab);
+  useEffect(() => {
+    const on = (e: Event) => setTab((e as CustomEvent<PanelTab>).detail);
+    window.addEventListener(PANEL_TAB_EVENT, on);
+    return () => window.removeEventListener(PANEL_TAB_EVENT, on);
+  }, []);
   const pickTab = (t: PanelTab) => {
     setTab(t);
     try { sessionStorage.setItem(TAB_KEY, t); } catch { /* private windows: the default is fine */ }

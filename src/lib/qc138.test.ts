@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
   GLYPHS, glyphCounts, glyphFor, gapWords, peekChain, pressGlyph, pressedGlyph, pressHeading, sort138, stagePillLabel,
-  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, gapShort, tickPlan,
+  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, gapShort, tickPlan, peekSummary, peekTone,
 } from "./qc138";
 
 const ALL = Object.values(QueryStatus);
@@ -107,5 +107,27 @@ describe("F · the peek is a chain, never a scale", () => {
     expect(p.ticks[0].step).toBeCloseTo((30.4375 * 44) / 60);
     expect(tickPlan([{ days: 5, px: 500 }]).ticks[0]).toEqual({ n: 0, step: 0 });
     expect(tickPlan([{ days: 2777, px: 300 }, { days: 2, px: 44 }]).unit?.name).toBe("quarter");
+  });
+});
+
+describe("v138.2 · the summary reads the peek's own dates", () => {
+  const now = new Date(2026, 9, 8, 14).getTime();
+  const d = (n: number) => now + n * 86_400_000;
+  it("says how long it has been out and where it stands, in the chain's own words", () => {
+    expect(peekSummary({ sent: d(-98), due: d(-8), closedAt: null, closed: false, yours: true, now })).toEqual({ head: "Out 3 months", line: "8 days past the date", hot: true });
+    expect(peekSummary({ sent: d(-70), due: d(2), closedAt: null, closed: false, yours: false, now })).toEqual({ head: `Out ${gapWords(70)}`, line: "2 days until their reply date", hot: false });
+    expect(peekSummary({ sent: d(-20), due: d(9), closedAt: null, closed: false, yours: true, now }).line).toBe("9 days until your send-by date");
+    expect(peekSummary({ sent: d(-938), due: d(-882), closedAt: null, closed: false, yours: true, now })).toEqual({ head: "Out 2 yrs 7 mo", line: `${gapWords(882)} past the date`, hot: true });
+    expect(peekSummary({ sent: d(-49), due: null, closedAt: d(-3), closed: true, yours: false, now })).toEqual({ head: "Closed", line: "closed 7 weeks after you queried", hot: false });
+    expect(peekSummary({ sent: d(-10), due: null, closedAt: null, closed: false, yours: false, now }).line).toBe("No date set");
+  });
+  it("its overdue test is the tint's and the chain's", () => {
+    for (const n of [-30, -1, 0, 1, 30]) {
+      const s0 = peekSummary({ sent: d(-60), due: d(n), closedAt: null, closed: false, yours: false, now });
+      const tone = peekTone(d(n), now, false);
+      const chain = peekChain([{ name: "Queried", ms: d(-60) }], { due: d(n), now, closed: false, yours: false });
+      expect(s0.hot).toBe(tone === "over");
+      expect(chain.overdue).toBe(tone === "over");
+    }
   });
 });

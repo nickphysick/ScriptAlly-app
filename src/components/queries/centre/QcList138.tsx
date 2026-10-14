@@ -25,7 +25,7 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
-import { peekChain, peekTone, tickPlan, type PeekEvent } from "../../../lib/qc138";
+import { peekChain, peekSummary, peekTone, tickPlan, type PeekEvent } from "../../../lib/qc138";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -229,6 +229,41 @@ const PeekDrawer: React.FC<{ summary: React.ReactNode; children: React.ReactNode
   </div>
 );
 
+/**
+ * v138.2 §C — THE SUMMARY: three lines, 3px apart. If a line would wrap (the narrow grid), the link hides and the
+ * text truncates with an ellipsis — measured on open and on resize, `data-tight` saying which.
+ * ⚠️ THE LINK STOPS THE ROW'S OWN CLICK, so it opens the panel on its timeline tab and nothing else.
+ */
+const PeekSum: React.FC<{ s: ReturnType<typeof peekSummary>; onTimeline?: () => void; href?: string }> = ({ s, onTimeline, href }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [tight, setTight] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const read = () => {
+      const lines = [...el.querySelectorAll<HTMLElement>("[data-qcv='peek-sum-head'], [data-qcv='peek-sum-line']")];
+      if (lines.every((l) => l.clientWidth === 0)) return;
+      setTight(lines.some((l) => l.scrollWidth > l.clientWidth + 0.5));
+    };
+    read();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [s.head, s.line]);
+  return (
+    <div ref={ref} className="qc138-sumc" data-tight={tight ? "" : undefined}>
+      <div className="qc138-sum-h" data-qcv="peek-sum-head">{s.head}</div>
+      <div className={`qc138-sum-l${s.hot ? " hot" : ""}`} data-qcv="peek-sum-line" data-hot={s.hot || undefined}>{s.line}</div>
+      {onTimeline ? (
+        <a className="qc138-sum-a" data-qcv="peek-link" href={href ?? "#"} hidden={tight}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onTimeline(); }}
+          onKeyDown={(e) => e.stopPropagation()}>Open the full timeline {"\u2192"}</a>
+      ) : null}
+    </div>
+  );
+};
+
 interface LabCase { events: PeekEvent[]; due: number | null; closed?: boolean; yours?: boolean }
 const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
   const cases = typeof window !== "undefined" ? (window as unknown as { __SA_QC138_PEEK_LAB?: LabCase[] }).__SA_QC138_PEEK_LAB : undefined;
@@ -237,7 +272,7 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
     <div className="qc138-peeklab" data-qc138="peek-lab">
       {cases.map((c, i) => (
         <div key={i} className="qc138-peekw" data-open="" data-qc138="peek-case">
-          <div className="qc138-peeki"><PeekDrawer summary={null}><Peek events={c.events} due={c.due} nowMs={nowMs} closed={!!c.closed} yours={!!c.yours} /></PeekDrawer></div>
+          <div className="qc138-peeki"><PeekDrawer summary={<PeekSum s={peekSummary({ sent: c.events[0]?.ms ?? null, due: c.due, closedAt: c.closed ? c.events[c.events.length - 1]?.ms ?? null : null, closed: !!c.closed, yours: !!c.yours, now: nowMs })} onTimeline={() => {}} />}><Peek events={c.events} due={c.due} nowMs={nowMs} closed={!!c.closed} yours={!!c.yours} /></PeekDrawer></div>
         </div>
       ))}
     </div>
@@ -314,6 +349,8 @@ export interface QcList138Props {
   onPick?: (id: string) => void;
   /** v138 §F — the query's dated events, from its activity log (the panel's own source) */
   loadPeek?: (id: string) => Promise<PeekEvent[]>;
+  /** v138.2 §C — "Open the full timeline →": open the query's panel on its timeline (Tracking) tab */
+  onTimeline?: (id: string) => void;
   /** group keys folded at first sight (Part D: Closed) */
   folded: ReadonlySet<string>;
   onFold: (key: string) => void;
@@ -321,7 +358,7 @@ export interface QcList138Props {
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, selected, onPick, entering = false, deadEnd = null,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -467,7 +504,8 @@ export const QcList138: React.FC<QcList138Props> = ({
         <div className="qc138-peekw" data-open={peekOpen ? "" : undefined}>
           <div className="qc138-peeki">
             {peekOpen ? (
-              <PeekDrawer summary={null}>
+              <PeekDrawer summary={<PeekSum href={`/queries?q=${encodeURIComponent(r.id)}`} onTimeline={onTimeline ? () => onTimeline(r.id) : undefined}
+                s={peekSummary({ sent: r.sentMs, due: closed ? null : due, closedAt: closed ? r.stageStartMs ?? r.lastMs : null, closed, yours, now: nowMs })} />}>
                 <Peek events={peekCache.current.get(r.id) ?? null} due={closed ? null : due} nowMs={nowMs} closed={closed} yours={yours} />
               </PeekDrawer>
             ) : null}

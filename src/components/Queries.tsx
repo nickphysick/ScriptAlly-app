@@ -184,7 +184,7 @@ import { turnWordFor, STATE_TOKEN} from "../lib/queryCardFacts";
 import { windowDays, shiftWindow } from "../lib/todoTimeline";
 import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
-import { QueryPanel } from "./queries/QueryPanel";
+import { QueryPanel, requestPanelTab } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { SentChip, sentView, ordinal } from "./queryActions/SentHow";
 import { QueryLedger, LedgerSlip } from "./queries/panel/QueryLedger";
@@ -7114,6 +7114,8 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={() => setQcFull((f) => !f)}
+                  /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
+                  onTimeline={(id) => { requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
                   loadPeek={async (id) => {
                     const q0 = qcById.get(id)?.query;

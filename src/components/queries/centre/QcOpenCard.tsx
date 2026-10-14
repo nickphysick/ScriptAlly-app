@@ -18,14 +18,14 @@
  * ⚠️ THE TAB BODIES SIT INSIDE `.qcv-legacy`, where the page's font reset stops: the timeline, the
  * notes thread and the agent tab were written against brand.tsx's defaults.
  */
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { StatusDot } from "../../StatusDot";
 import { FramedCard } from "../../containers/FramedCard";
 import { queryVerbs } from "../../../lib/queryRowFacts";
 import { turnFor } from "../../../lib/queryCardFacts";
 import { STAGE_NAME, factLine, primaryActionLabel, standLine, tileCourt, type QcRow } from "../../../lib/qcSummary";
-import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";
+import { TAB_KEY, readTab, PANEL_TAB_EVENT, type PanelTab } from "../QueryPanel";
 import { QcMenu } from "./QcMenu";
 import { keptTracking, leadDoors } from "../../../lib/queryActions/entry";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
@@ -81,6 +81,12 @@ export const QcOpenCard: React.FC<{
 }> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none", backTo = null }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
+  /* v138.2 §C — "Open the full timeline →" asks for Tracking even when this card is already open */
+  useEffect(() => {
+    const on = (e: Event) => setTab((e as CustomEvent<PanelTab>).detail);
+    window.addEventListener(PANEL_TAB_EVENT, on);
+    return () => window.removeEventListener(PANEL_TAB_EVENT, on);
+  }, []);
   /* opened from the agent's panel there is no Agent tab: a remembered "agent" reads as Tracking there */
   const shownTab: PanelTab = backTo && tab === "agent" ? "tracking" : tab;
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };

@@ -363,6 +363,29 @@ export type PeekTone = "wait" | "over" | "closed";
 export const peekLate = (due: number | null, now: number): boolean => due != null && startOfDay(due) < startOfDay(now);
 export const peekTone = (due: number | null, now: number, closed: boolean): PeekTone => (closed ? "closed" : peekLate(due, now) ? "over" : "wait");
 
+/**
+ * v138.2 §C — THE SUMMARY under Agent: how long the query has been out, and where it stands against its date.
+ * ⚠️ THE SAME DATES AS THE PEEK AND THE DIAL: the date queried, the row's due date (`dueOf`) and today, counted in
+ *    whole days by the chain's own start-of-day `dDays`, worded by the chain's own `gapWords`. Never re-derived.
+ * Line 1: "Out {d}" ("Closed" when closed). Line 2: "{d} past the date" (hot) · "{d} until their reply date" ·
+ * "{d} until your send-by date" · "closed {d} after you queried" · "No date set". Same-day forms are said plainly.
+ */
+export interface PeekSummary { head: string; line: string; hot: boolean }
+export function peekSummary(o: { sent: number | null; due: number | null; closedAt: number | null; closed: boolean; yours: boolean; now: number }): PeekSummary {
+  const { sent, due, closedAt, closed, yours, now } = o;
+  if (closed) {
+    if (sent == null || closedAt == null) return { head: "Closed", line: "closed, not dated", hot: false };
+    const d = dDays(sent, closedAt);
+    return { head: "Closed", line: d === 0 ? "closed the day you queried" : `closed ${gapWords(d)} after you queried`, hot: false };
+  }
+  const out = sent == null ? "Out, not dated" : dDays(sent, now) === 0 ? "Out today" : `Out ${gapWords(dDays(sent, now))}`;
+  if (due == null) return { head: out, line: "No date set", hot: false };
+  if (peekLate(due, now)) return { head: out, line: `${gapWords(dDays(due, now))} past the date`, hot: true };
+  const left = dDays(now, due);
+  if (left === 0) return { head: out, line: yours ? "your send-by date is today" : "their reply date is today", hot: false };
+  return { head: out, line: `${gapWords(left)} until ${yours ? "your send-by date" : "their reply date"}`, hot: false };
+}
+
 export function peekChain(
   events: readonly PeekEvent[],
   opts: { due: number | null; now: number; closed: boolean; yours: boolean },
