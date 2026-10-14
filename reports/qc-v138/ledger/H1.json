@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "H1",
+  "where": "rising at 600ms",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "landed by 2000ms",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "H1",
+  "where": "no row animation at 3000ms",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "a sort does not replay",
+  "ok": true,
+  "detail": "0 rows animating"
+ },
+ {
+  "lock": "H1",
+  "where": "reduced motion: there at once",
+  "ok": true,
+  "detail": "1 · entrance false"
+ }
+]

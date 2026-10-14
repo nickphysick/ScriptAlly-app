@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 no illustration",
+  "ok": true,
+  "detail": "0 images besides the shadow"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title",
+  "ok": true,
+  "detail": "\"73 queries sent\" (glyphs sum 73)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title size",
+  "ok": true,
+  "detail": "44 · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 one line",
+  "ok": true,
+  "detail": "44 tall at 44 a line"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title at the inset",
+  "ok": true,
+  "detail": "154.0 against 154"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 glyphs at the inset",
+  "ok": true,
+  "detail": "154.0 against 154"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 shadow",
+  "ok": true,
+  "detail": "0.15"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no illustration",
+  "ok": true,
+  "detail": "0 images besides the shadow"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title",
+  "ok": true,
+  "detail": "\"73 queries sent\" (glyphs sum 73)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title size",
+  "ok": true,
+  "detail": "44 · wide false"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 one line",
+  "ok": true,
+  "detail": "44 tall at 44 a line"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title at the inset",
+  "ok": true,
+  "detail": "40.0 against 40"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 glyphs at the inset",
+  "ok": true,
+  "detail": "40.0 against 40"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 shadow",
+  "ok": true,
+  "detail": "0.15"
+ }
+]

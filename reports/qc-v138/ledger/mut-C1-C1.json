@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 centred",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no sort control",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 headings",
+  "ok": true,
+  "detail": "rgb(233, 237, 243) · \"JetBrains Mono\", monospace · uppercase"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading agent",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading first",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading stage",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading sent",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading next",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 heading due",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 centred",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no sort control",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 headings",
+  "ok": true,
+  "detail": "rgb(233, 237, 243) · \"JetBrains Mono\", monospace · uppercase"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading agent",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading first",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading stage",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading sent",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading next",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 heading due",
+  "ok": true,
+  "detail": "0.0"
+ }
+]

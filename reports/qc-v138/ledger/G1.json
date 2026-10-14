@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "G1",
+  "where": "no panel",
+  "ok": true,
+  "detail": "panel false · http://127.0.0.1:4470/queries"
+ },
+ {
+  "lock": "G1",
+  "where": "two selected",
+  "ok": true,
+  "detail": "\"2 selected\""
+ },
+ {
+  "lock": "G1",
+  "where": "✕ clears",
+  "ok": true,
+  "detail": "clicked true"
+ },
+ {
+  "lock": "G1",
+  "where": "a refilter clears",
+  "ok": true,
+  "detail": "picked true · filtered true"
+ }
+]

@@ -1,0 +1,149 @@
+[
+ {
+  "lock": "A1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "A1 \u00b7 1512 no illustration \u2014 1 images besides the shadow",
+   "A1 \u00b7 1280 no illustration \u2014 1 images besides the shadow"
+  ]
+ },
+ {
+  "lock": "A2",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "A2 \u00b7 1512 dashed \u2014 q:1 pr:1 ps:1 fr:1 fs:1 of:1 cl:1",
+   "A2 \u00b7 1280 dashed \u2014 q:1 pr:1 ps:1 fr:1 fs:1 of:1 cl:1"
+  ]
+ },
+ {
+  "lock": "B1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "B1 \u00b7 1512 switch reads the filter \u2014 aria-checked false \u00b7 data-on false \u00b7 pill on true",
+   "B1 \u00b7 1280 switch reads the filter \u2014 aria-checked false \u00b7 data-on false \u00b7 pill on true"
+  ]
+ },
+ {
+  "lock": "C1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "C1 \u00b7 1512 no sort control \u2014 1",
+   "C1 \u00b7 1280 no sort control \u2014 1"
+  ]
+ },
+ {
+  "lock": "C2",
+  "mutation": "source: list grouped from an activity-sorted list (sort across groups)",
+  "result": "1 failed",
+  "red": [
+   "C2 \u00b7 default due ascending \u2014 due ascending",
+   "C2 \u00b7 agent first press \u2014 ascending",
+   "C2 \u00b7 agent second press \u2014 descending",
+   "C2 \u00b7 first first press \u2014 ascending"
+  ]
+ },
+ {
+  "lock": "D1",
+  "mutation": "source: urgencyGroup files a lapsed waiting query by court alone (the live list's equivalent of listGroupFor returning \"overdue\")",
+  "result": "1 failed",
+  "red": [
+   "D1 \u00b7 lapsed waiting rows are in Your move \u2014 waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting,waiting"
+  ]
+ },
+ {
+  "lock": "D2",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "D2 \u00b7 1512 sticky \u2014 -154.4 against 213.8",
+   "D2 \u00b7 1280 sticky \u2014 -154.4 against 213.8"
+  ]
+ },
+ {
+  "lock": "E1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "E1 \u00b7 1512 open circles navy \u2014 rgb(176, 96, 62),rgb(42, 58, 82)",
+   "E1 \u00b7 1280 open circles navy \u2014 rgb(176, 96, 62),rgb(42, 58, 82)"
+  ]
+ },
+ {
+  "lock": "E2",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "E2 \u00b7 compact: no dial \u2014 59"
+  ]
+ },
+ {
+  "lock": "E3",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "E3 \u00b7 1512 height \u2014 50.5625",
+   "E3 \u00b7 1512 no track \u2014 59",
+   "E3 \u00b7 1280 height \u2014 50.5625",
+   "E3 \u00b7 1280 no track \u2014 59"
+  ]
+ },
+ {
+  "lock": "F1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "F1 \u00b7 1512 lift \u2014 0",
+   "F1 \u00b7 1280 lift \u2014 0"
+  ]
+ },
+ {
+  "lock": "F2",
+  "mutation": "source: peek stops placed by date (absolute left by time)",
+  "result": "1 failed",
+  "red": [
+   "F2 \u00b7 1512 case 1 no overlap \u2014 true",
+   "F2 \u00b7 1512 case 1 no overflow \u2014 true",
+   "F2 \u00b7 1512 case 2 no overflow \u2014 true",
+   "F2 \u00b7 1512 case 3 no overflow \u2014 true"
+  ]
+ },
+ {
+  "lock": "G1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "G1 \u00b7 no panel \u2014 panel true \u00b7 http://127.0.0.1:4470/queries?q=msv12-q-1",
+   "G1 \u00b7 \u2715 clears \u2014 clicked false"
+  ],
+  "note": "re-run after G1 was made to reach its verdict (it had died on a timeout)"
+ },
+ {
+  "lock": "H1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "H1 \u00b7 a sort does not replay \u2014 59 rows animating"
+  ]
+ },
+ {
+  "lock": "I1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "I1 \u00b7 1512 'Your move' \u2014 With the agent,With you,With the agent,With you,With the agent,With you",
+   "I1 \u00b7 1280 'Your move' \u2014 With the agent,With you,With the agent,With you,With the agent,With you"
+  ]
+ },
+ {
+  "lock": "J1",
+  "mutation": "in-page (QC138_MUTATE)",
+  "result": "1 failed",
+  "red": [
+   "J1 \u00b7 /queries paint \u2014 [{\"s\":\"closed\",\"bg\":\"rgb(185, 176, 168)\"},{\"s\":\"closed\",\"bg\":\"rgb(185, 176, 168)\"},{\"s\":\"closed\",\"bg\":\"rgb(185, 176, 168)\"}]"
+  ]
+ }
+]

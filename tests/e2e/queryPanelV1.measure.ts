@@ -26,7 +26,8 @@ const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as co
 type VP = { width: number; height: number };
 const MUT = process.env.QP1_MUTATE ?? "";
 const near = (a: unknown, b: number, t: number) => typeof a === "number" && Number.isFinite(a) && Math.abs(a - b) <= t;
-const ROW = '.qcw-list [data-qcv="row"]';
+/* v138 re-point: the list is the v138 sheet; a row keeps data-qcv="row" (RETIRED-query-centre-v138.md) */
+const ROW = '.qcv-group.qc13 [data-qcv="row"]';
 const PANEL = '[data-qp="panel"]';
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
@@ -95,13 +96,13 @@ async function openQC(page: Page, vp: VP, lock: string, route = "/queries") {
 }
 /** ids of the rows on screen, clear of the pinned controls and of where the panel will be */
 const visibleRows = (page: Page, court?: string) => page.evaluate((c) => {
-  const labs = document.querySelector<HTMLElement>(".qcw-list .lt-labels")!.getBoundingClientRect().bottom;
-  return [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')].filter((r) => { const b = r.getBoundingClientRect(); return b.top > labs + 4 && b.bottom < window.innerHeight - 20 && (!c || r.dataset.court === c); }).map((r) => r.dataset.qid!);
+  const labs = document.querySelector<HTMLElement>('[data-qc138="headings"]')!.getBoundingClientRect().bottom;
+  return [...document.querySelectorAll<HTMLElement>('.qcv-group.qc13 [data-qcv="row"]')].filter((r) => { const b = r.getBoundingClientRect(); return b.top > labs + 4 && b.bottom < window.innerHeight - 20 && (!c || r.dataset.court === c); }).map((r) => r.dataset.qid!);
 }, court ?? null);
 /** bring the first rows of one court into view under the pinned controls, and return the ids on screen */
 const courtRows = async (page: Page, court: string): Promise<string[]> => {
   await page.evaluate((c) => {
-    const row = [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')].filter((r) => r.dataset.court === c && r.getBoundingClientRect().height > 0)[1];
+    const row = [...document.querySelectorAll<HTMLElement>('.qcv-group.qc13 [data-qcv="row"]')].filter((r) => r.dataset.court === c && r.getBoundingClientRect().height > 0)[1];
     row?.scrollIntoView({ block: "center" });
   }, court);
   await page.waitForTimeout(350);
@@ -115,7 +116,7 @@ const courtRows = async (page: Page, court: string): Promise<string[]> => {
 const clickRow = async (page: Page, id: string) => {
   /* the page is dimmed for a moment after a step is left (Query panel v2 §D): a row under the scrim cannot be pressed */
   await page.waitForFunction(() => !document.querySelector('[data-side-scrim][data-on="true"]'), null, { timeout: 10_000 }).catch(() => {});
-  await page.locator(`${ROW}[data-qid="${id}"] .qcw-agt`).click({ timeout: 15_000 });
+  await page.locator(`${ROW}[data-qid="${id}"] .qc138-agt`).click({ timeout: 15_000 });
   await expect(page.locator(`${PANEL}[data-qp-id="${id}"]`), `the panel did not become ${id}'s`).toBeVisible({ timeout: 10_000 });
   await page.waitForTimeout(300);
 };
@@ -400,7 +401,7 @@ test.describe("Query panel v1", () => {
     await expect(page.locator(ROW).first()).toBeVisible({ timeout: 30_000 });
     await page.waitForTimeout(600);
     const id = await page.locator(ROW).first().getAttribute("data-qid");
-    await page.locator(`${ROW}[data-qid="${id}"] .qcw-agt`).click();
+    await page.locator(`${ROW}[data-qid="${id}"] .qc138-agt`).click();
     await expect(page.locator(PANEL)).toBeVisible({ timeout: 8000 });
     await mutate(page, "P12");
     await page.waitForTimeout(400);
@@ -431,7 +432,7 @@ test.describe("Query panel v1", () => {
         await mutate(page, "P13");
         const order = () => page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].filter((r) => r.getBoundingClientRect().height > 0).map((r) => r.dataset.qid!), ROW);
         const at0 = (await order()).indexOf(QID);
-        await page.locator(`${R} .qcw-agt`).click();
+        await page.locator(`${R} .qc138-agt`).click();
         await expect(page.locator(PANEL)).toBeVisible({ timeout: 8000 });
         /* RE-POINTED (Query panel v2 §B): the ledger says what happened as a sentence */
         const tl0 = (await page.locator(`${PANEL} .tl-ev`).allInnerTexts()).filter((t) => /^They asked for the full manuscript/.test(t.trim())).length;

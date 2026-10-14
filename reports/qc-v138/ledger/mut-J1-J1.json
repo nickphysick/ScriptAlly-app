@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "J1",
+  "where": "/dashboard has discs",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "J1",
+  "where": "/dashboard paint",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "J1",
+  "where": "/dashboard no stray circle",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "J1",
+  "where": "/queries has discs",
+  "ok": true,
+  "detail": "73"
+ },
+ {
+  "lock": "J1",
+  "where": "/queries paint",
+  "ok": false,
+  "detail": "[{\"s\":\"closed\",\"bg\":\"rgb(185, 176, 168)\"},{\"s\":\"closed\",\"bg\":\"rgb(185, 176, 168)\"},{\"s\":\"closed\",\"bg\":\"rgb(185, 176, 168)\"}]"
+ },
+ {
+  "lock": "J1",
+  "where": "/queries no stray circle",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "J1",
+  "where": "/agents has discs",
+  "ok": true,
+  "detail": "37"
+ },
+ {
+  "lock": "J1",
+  "where": "/agents paint",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "J1",
+  "where": "/agents no stray circle",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "J1",
+  "where": "/agents/discover has discs",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "J1",
+  "where": "/agents/discover paint",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "J1",
+  "where": "/agents/discover no stray circle",
+  "ok": true,
+  "detail": "0"
+ }
+]

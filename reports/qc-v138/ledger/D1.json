@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D1",
+  "where": "lapsed waiting rows exist",
+  "ok": true,
+  "detail": "31"
+ },
+ {
+  "lock": "D1",
+  "where": "lapsed waiting rows are in Your move",
+  "ok": true,
+  "detail": "you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you,you"
+ },
+ {
+  "lock": "D1",
+  "where": "no-window rows exist",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "D1",
+  "where": "no-window rows are in Waiting",
+  "ok": true,
+  "detail": "waiting,waiting,waiting,waiting,waiting"
+ },
+ {
+  "lock": "D1",
+  "where": "no 'No reply yet' group",
+  "ok": true,
+  "detail": "Your move44 queriesrequests, offers and nudges▾ | Waiting15 querieswith agents, not yet due▾ | Closed14 queriespassed or no response▾"
+ }
+]

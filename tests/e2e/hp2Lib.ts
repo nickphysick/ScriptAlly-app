@@ -20,8 +20,9 @@ export const OPEN_HEADER = ["/queries"] as const;
  * Contact list v17 (14 Oct): `/agents` left the shared title panel for its own light header (no panel, no border),
  * held by `contactV17` A1. The panel claims skip it BY NAME and check that what they skipped shows that header.
  */
-export const LIGHT_HEADER: readonly string[] = ["/agents"];
-export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"]';
+/* v138 (14 Oct): /queries joins — its centred light header is held by qcV138 A1 */
+export const LIGHT_HEADER: readonly string[] = ["/agents", "/queries"];
+export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"], [data-qc138="header"], [data-qc138="empty-header"]';
 export const WORKSPACE = ["/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"] as const;
 /** routes that must not change */
 export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)

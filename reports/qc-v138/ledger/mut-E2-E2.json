@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E2",
+  "where": "overdue dials exist",
+  "ok": true,
+  "detail": "32"
+ },
+ {
+  "lock": "E2",
+  "where": "overdue: solid rust, no ring",
+  "ok": true,
+  "detail": "[{\"bg\":\"rgb(162, 69, 42)\",\"ring\":0},{\"bg\":\"rgb(162, 69, 42)\",\"ring\":0}]"
+ },
+ {
+  "lock": "E2",
+  "where": "waiting dials exist",
+  "ok": true,
+  "detail": "11"
+ },
+ {
+  "lock": "E2",
+  "where": "arc in proportion",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "E2",
+  "where": "compact: no dial",
+  "ok": false,
+  "detail": "59"
+ },
+ {
+  "lock": "E2",
+  "where": "compact: coloured text",
+  "ok": true,
+  "detail": "0 wrong of 43"
+ }
+]

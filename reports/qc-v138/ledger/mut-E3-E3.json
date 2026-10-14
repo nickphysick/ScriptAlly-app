@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E3",
+  "where": "1512 height",
+  "ok": false,
+  "detail": "50.5625"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 no track",
+  "ok": false,
+  "detail": "59"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 no detail",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 height",
+  "ok": false,
+  "detail": "50.5625"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 no track",
+  "ok": false,
+  "detail": "59"
+ },
+ {
+  "lock": "E3",
+  "where": "1280 no detail",
+  "ok": true,
+  "detail": "0"
+ }
+]

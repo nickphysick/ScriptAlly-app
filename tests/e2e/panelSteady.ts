@@ -97,7 +97,7 @@ export async function openRowById(page: Page, rowSel: string, id: string) {
   const r = page.locator(`${rowSel}[data-qid="${id}"]`).first();
   await expect(r, `no row for ${id}`).toBeVisible({ timeout: T });
   await r.evaluate((e) => e.scrollIntoView({ block: "center" }));
-  await r.locator('[data-qcv="row-agent"], .qcw-agt').first().click({ timeout: T });
+  await r.locator('.qc138-agt, [data-qcv="row-agent"]').first().click({ timeout: T });
   await expect(page.locator(`${PANEL}[data-qp-id="${id}"]`), `the panel did not become ${id}'s`).toBeVisible({ timeout: T });
   await atRest(page);
 }

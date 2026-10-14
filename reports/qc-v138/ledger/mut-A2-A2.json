@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 labels",
+  "ok": true,
+  "detail": "Queried|Partialrequested|Partialsent|Fullrequested|Fullsent|Offer|Closed"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 sum",
+  "ok": true,
+  "detail": "73 against \"73 queries sent\""
+ },
+ {
+  "lock": "A2",
+  "where": "1512 dashed",
+  "ok": false,
+  "detail": "q:1 pr:1 ps:1 fr:1 fs:1 of:1 cl:1"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 aria",
+  "ok": true,
+  "detail": "Queried, 35 | Partial requested, 5 | Partial sent, 5 | Full requested, 7 | Full sent, 6 | Offer, 1 | Closed, 14"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 others fade",
+  "ok": true,
+  "detail": "0.3,0.3,0.3,0.3,0.3,0.3"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 pill",
+  "ok": true,
+  "detail": "\"Full requested\""
+ },
+ {
+  "lock": "A2",
+  "where": "1512 filters",
+  "ok": true,
+  "detail": "Revise & Resubmit,Full Requested · 7 rows / 7"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clears",
+  "ok": true,
+  "detail": "Stage · 0 pressed"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 closed",
+  "ok": true,
+  "detail": "Rejected,No Response,Withdrawn"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 labels",
+  "ok": true,
+  "detail": "Queried|Partialrequested|Partialsent|Fullrequested|Fullsent|Offer|Closed"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 sum",
+  "ok": true,
+  "detail": "73 against \"73 queries sent\""
+ },
+ {
+  "lock": "A2",
+  "where": "1280 dashed",
+  "ok": false,
+  "detail": "q:1 pr:1 ps:1 fr:1 fs:1 of:1 cl:1"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 aria",
+  "ok": true,
+  "detail": "Queried, 35 | Partial requested, 5 | Partial sent, 5 | Full requested, 7 | Full sent, 6 | Offer, 1 | Closed, 14"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 others fade",
+  "ok": true,
+  "detail": "0.3,0.3,0.3,0.3,0.3,0.3"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 pill",
+  "ok": true,
+  "detail": "\"Full requested\""
+ },
+ {
+  "lock": "A2",
+  "where": "1280 filters",
+  "ok": true,
+  "detail": "Revise & Resubmit,Full Requested · 7 rows / 7"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clears",
+  "ok": true,
+  "detail": "Stage · 0 pressed"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 closed",
+  "ok": true,
+  "detail": "Rejected,No Response,Withdrawn"
+ }
+]

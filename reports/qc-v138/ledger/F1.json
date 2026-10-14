@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 lift",
+  "ok": true,
+  "detail": "-2"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 shadow",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.45) 0px 14px 28px -18px, rgba(28, 19, 15,"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 circle",
+  "ok": true,
+  "detail": "1.08"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 tray",
+  "ok": true,
+  "detail": "1,1,1"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 due fades",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 lift",
+  "ok": true,
+  "detail": "-2"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 shadow",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.45) 0px 14px 28px -18px, rgba(28, 19, 15,"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 circle",
+  "ok": true,
+  "detail": "1.08"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 tray",
+  "ok": true,
+  "detail": "1,1,1"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 due fades",
+  "ok": true,
+  "detail": "0"
+ }
+]

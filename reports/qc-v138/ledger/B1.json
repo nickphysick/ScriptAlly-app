@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 present",
+  "ok": true,
+  "detail": "stage,dueWeek,offers,sent,more · \"Find a query by agent or agency\""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 one line",
+  "ok": true,
+  "detail": "tops 354 · right 1186.5 / 1480.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 switch reads the filter",
+  "ok": true,
+  "detail": "aria-checked true · data-on true · pill on true"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 switch filters",
+  "ok": true,
+  "detail": "31 rows against its count 31"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 present",
+  "ok": true,
+  "detail": "stage,dueWeek,offers,sent,more · \"Find a query by agent or agency\""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 one line",
+  "ok": true,
+  "detail": "tops 354 · right 1186.5 / 1248.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 switch reads the filter",
+  "ok": true,
+  "detail": "aria-checked true · data-on true · pill on true"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 switch filters",
+  "ok": true,
+  "detail": "31 rows against its count 31"
+ }
+]

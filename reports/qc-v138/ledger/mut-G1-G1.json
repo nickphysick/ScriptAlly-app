@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "G1",
+  "where": "no panel",
+  "ok": false,
+  "detail": "panel true · http://127.0.0.1:4470/queries?q=msv12-q-1"
+ },
+ {
+  "lock": "G1",
+  "where": "two selected",
+  "ok": true,
+  "detail": "\"2 selected\""
+ },
+ {
+  "lock": "G1",
+  "where": "✕ clears",
+  "ok": false,
+  "detail": "clicked false"
+ },
+ {
+  "lock": "G1",
+  "where": "a refilter clears",
+  "ok": true,
+  "detail": "picked true · filtered true"
+ }
+]

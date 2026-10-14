@@ -32,7 +32,8 @@ const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as co
 type VP = { width: number; height: number };
 const MUT = process.env.QP2_MUTATE ?? "";
 const near = (a: unknown, b: number, t: number) => typeof a === "number" && Number.isFinite(a) && Math.abs(a - b) <= t;
-const ROW = '.qcw-list [data-qcv="row"]';
+/* v138 re-point: the list is the v138 sheet; a row keeps data-qcv="row" (RETIRED-query-centre-v138.md) */
+const ROW = '.qcv-group.qc13 [data-qcv="row"]';
 const PANEL = '[data-qp="panel"]';
 const MID: Record<string, string> = { you: "rgb(217, 150, 122)", agent: "rgb(139, 155, 179)", closed: "rgb(181, 172, 164)" };
 const TINT: Record<string, string> = { you: "rgb(246, 226, 216)", agent: "rgb(226, 231, 239)", closed: "rgb(236, 232, 227)" };
@@ -86,7 +87,8 @@ async function mutate(page: Page, lock: string) {
   if (m.js) await page.evaluate(m.js);
 }
 async function openQC(page: Page, vp: VP, lock: string, motion = false) {
-  await page.addInitScript(() => { try { for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ } });
+  /* v138: Closed starts folded; these suites reach closed rows too, so every band opens */
+  await page.addInitScript(() => { try { for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); sessionStorage.setItem("sa.qc138.folded", "[]"); } catch { /* */ } });
   await openRoute(page, "/queries", vp);
   await expect(page.locator(ROW).first()).toBeVisible({ timeout: 30_000 });
   await page.waitForTimeout(600);
@@ -98,7 +100,7 @@ const openRow = async (page: Page, sel: string) => {
   await expect(r, `no row ${sel}`).toBeVisible({ timeout: 10_000 });
   await r.evaluate((e) => e.scrollIntoView({ block: "center" }));
   await page.waitForTimeout(250);
-  await r.locator('[data-qcv="row-agent"], .qcw-agt').first().click();
+  await r.locator('.qc138-agt, [data-qcv="row-agent"]').first().click();
   await expect(page.locator(PANEL)).toBeVisible({ timeout: 8000 });
   await page.waitForTimeout(500);
 };
@@ -768,9 +770,9 @@ test.describe("Query panel v2", () => {
       const s0 = await scrim(page);
       L.check("V6", `${w} browsing: nothing outside the panel is dimmed`, s0.opacity < 0.02 && s0.pe === "none", `scrim opacity ${s0.opacity} · pointer-events ${s0.pe}`);
       const id0 = (await surfaces(page)).id;
-      const other = await page.evaluate((cur) => { const labs = document.querySelector<HTMLElement>(".qcw-list .lt-labels")!.getBoundingClientRect().bottom; const r = [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"]')].find((x) => { const b = x.getBoundingClientRect(); return b.top > labs + 6 && b.bottom < window.innerHeight - 20 && x.dataset.qid !== cur; }); return r?.dataset.qid ?? null; }, id0);
+      const other = await page.evaluate((cur) => { const labs = document.querySelector<HTMLElement>('[data-qc138="headings"]')!.getBoundingClientRect().bottom; const r = [...document.querySelectorAll<HTMLElement>('.qcv-group.qc13 [data-qcv="row"]')].find((x) => { const b = x.getBoundingClientRect(); return b.top > labs + 6 && b.bottom < window.innerHeight - 20 && x.dataset.qid !== cur; }); return r?.dataset.qid ?? null; }, id0);
       expect(other, "another row on screen").not.toBeNull();
-      await page.locator(`${ROW}[data-qid="${other}"] .qcw-agt`).click({ timeout: 4000 }).catch(() => {});
+      await page.locator(`${ROW}[data-qid="${other}"] .qc138-agt`).click({ timeout: 4000 }).catch(() => {});
       await page.waitForTimeout(500);
       L.check("V6", `${w} browsing: a row click swaps the query`, (await surfaces(page)).id === other, `${id0} → ${(await surfaces(page)).id} (clicked ${other})`);
       /* under V6's own mutation the page cannot be pressed at all: its two readings are the verdict */
@@ -845,7 +847,7 @@ test.describe("Query panel v2", () => {
       if (MUT === "V9") { for (let i = 0; i < 3; i++) { await page.keyboard.press("Escape"); await page.waitForTimeout(350); } }
       await leaveStep(page);
       if (oid && MUT !== "V9") {
-        const after = await page.evaluate(() => ({ id: document.querySelector<HTMLElement>('[data-qp="panel"]')?.dataset.qpId ?? "", sel: [...document.querySelectorAll<HTMLElement>('.qcw-list [data-qcv="row"][aria-selected="true"]')].map((r) => r.dataset.qid) }));
+        const after = await page.evaluate(() => ({ id: document.querySelector<HTMLElement>('[data-qp="panel"]')?.dataset.qpId ?? "", sel: [...document.querySelectorAll<HTMLElement>('.qcv-group.qc13 [data-qcv="row"][aria-selected="true"]')].map((r) => r.dataset.qid) }));
         L.check("V9", `${w} back at the query: its ledger, and its row selected`, after.id === oid && after.sel.length === 1 && after.sel[0] === oid, `${after.id} · selected ${after.sel.join()}`);
       }
     }
