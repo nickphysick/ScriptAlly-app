@@ -499,3 +499,17 @@
   /* an event on today's day keeps v138.1's rust halo and takes Today's place */
   .qc138-sheet .qc138-mk.is-today .qc138-mk-svg, .qc138-sheet .qc138-mk.is-today .qc138-mk-dot { box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff), 0 0 0 4px #a2452a; }
 }
+
+/* ── v138.3 §E · THE ACTION TRAY ────────────────────────────────────────────────────────────────────────────────
+   The overlap on dev: v138 gave the Next move text (`.qc138-nxm`) an opacity TRANSITION but no rule ever set its
+   opacity, so only the Due figure faded and the tray sat over live text. While the tray shows, both fade (150ms);
+   the tray takes the row's current ground (Lift's white, a picked row's oat, the open row's wash) so nothing shows
+   through; and it is capped at its own cell (Next move + Due), so it never reaches What you sent — a pill that would
+   not fit truncates, the edit and close buttons being icon-only already. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-row:hover .qc138-nxm, .qc138-sheet .qc138-row:focus-within .qc138-nxm, .qc138-sheet .qc138-row.kf .qc138-nxm { opacity: 0; }
+  .qc138-sheet .qc138-tray { max-width: 100%; box-sizing: border-box; padding: 4px 0 4px 10px; border-radius: 18px; background: var(--qc138-pkbg, #fff); }
+  .qc138-sheet .qc138-tray .qc138-pillbtn { display: block; flex: 0 1 auto; min-width: 0; line-height: 30px !important; overflow: hidden; text-overflow: ellipsis; } /* a flex container cannot ellipsise its text */
+  .qc138-sheet .qc138-tray .qc138-ghost { flex: none; }
+  .qc138-sheet .qc138-row.picked { --qc138-pkbg: #f3efe8; }
+}
