@@ -405,15 +405,17 @@
 @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc138-dial.over { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc138-tsearch { transition: none; } }
 
-/* ── v138.2 §A · THE OPEN PEEK TINTS THE WHOLE ROW ─────────────────────────────────────────────────────────────
-   The row and its drawer together take the tone's background while the peek is open; Lift's raise, shadow and
-   radius stand, and before the peek opens the row is Lift's white. The drawer paints nothing of its own.
-   ⚠️ 0-4-0 AND LAST IN THE SHEET: it has to beat `.qc138-row.picked:hover` (0-4-0, earlier). `--qc138-rule` is the
-   dashed rule's colour for the same tone (§B). */
+/* ── THE OPEN ROW (v138.2 §A, restyled by v138.3 §D) ──────────────────────────────────────────────────────────
+   The row and its drawer together take the tone's treatment while the peek is open; Lift's raise and radius stand,
+   and before the peek opens the row is Lift's white. The drawer paints nothing of its own. `--qc138-pkbg` is the
+   ground the markers' rings are drawn in.
+   ⚠️ 0-4-0 AND LATER IN THE SHEET: it has to beat `.qc138-row.picked:hover` (0-4-0, earlier). */
 @media (min-width: 768px) {
-  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f3f5f9; --qc138-rule: rgba(45, 58, 80, 0.2); --qc138-pkbg: #f3f5f9; }
-  .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fcf3ee; --qc138-rule: rgba(162, 69, 42, 0.25); --qc138-pkbg: #fcf3ee; }
-  .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #f5f3f0; --qc138-rule: rgba(28, 19, 15, 0.15); --qc138-pkbg: #f5f3f0; }
+  /* v138.3 §D — OUTLINE + WASH replaces v138.2's full tint: a faint wash, a 1px outline in the state's colour, then
+     Lift's shadow; the rule between the row and its drawer is solid (§D below) */
+  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f9fafc; box-shadow: 0 0 0 1px rgba(45, 58, 80, 0.45), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #f9fafc; }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fdf8f5; box-shadow: 0 0 0 1px rgba(162, 69, 42, 0.5), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #fdf8f5; }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #faf9f7; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.2), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #faf9f7; }
   .qc138-sheet .qc138-peekw, .qc138-sheet .qc138-peeki { background: none; }
 }
 
@@ -424,7 +426,7 @@
 @media (min-width: 768px) {
   .qc138-sheet .qc138-drw {
     display: grid; grid-template-columns: var(--qc138-cols); column-gap: var(--qc138-gap); align-items: center;
-    margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--qc138-rule, rgba(45, 58, 80, 0.2));
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(28, 19, 15, 0.1); /* v138.3 §D: solid, not v138.2's dashed */
   }
   .qc138-sheet .qc138-sum { grid-column: 1; min-width: 0; box-sizing: border-box; padding: 12px 0 24px var(--qc138-ind); }
   .qc138-sheet .qc138-tlw { grid-column: 2 / -1; min-width: 0; }
