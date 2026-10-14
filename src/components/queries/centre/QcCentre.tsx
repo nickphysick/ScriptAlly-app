@@ -207,7 +207,9 @@ export const QcCentre: React.FC<{
    * drawn — the group headers pin instead. Below 768px the v126 page is unchanged.
    */
   v131?: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false }) => {
+  /** v138 — the centred light header (desktop); replaces v133's open header */
+  header138?: React.ReactNode;
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138 }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   usePinnedControls(groupRef, v131);
   /**
@@ -273,7 +275,7 @@ export const QcCentre: React.FC<{
         * full header draws for every page that has one, so the page states its content and nothing
         * about its arrangement. The facts line becomes the intro; the art is unchanged.
         */}
-      {v131 ? (
+      {v131 && header138 ? header138 : v131 ? (
         /* v133 — THE OPEN HEADER on the desktop: no band, no card, no disc, and the fixed line in
            place of the living facts sentence (the desk carries those facts). */
         <QcOpenHeader msTitle={msTitle} loading={loading} onLog={onLog} onRecord={onRecord} logDisabled={logDisabled} logRef={logRef} />

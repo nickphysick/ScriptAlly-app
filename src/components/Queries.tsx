@@ -97,6 +97,9 @@ import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
+import { QcHeader138 } from "./queries/centre/QcHeader138";
+import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
+import { glyphCounts, inStages, pressGlyph, type GlyphKey, type StageSet } from "../lib/qc138";
 import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
@@ -2433,8 +2436,14 @@ export const Queries: React.FC<{
    * retired; the carousel deals every query in the chosen court instead.
    */
   const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
+  /** v138 §A — the stage filter: a set of statuses, shared by the glyph row and the Stage pill. Empty = every stage. */
+  const [qcStages, setQcStages] = useState<StageSet>([]);
+  const pickGlyph = (k: GlyphKey) => setQcStages((set) => pressGlyph(set, k));
+  const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  /* v138 §A — the pinned row shows once the header's foot has scrolled under the sheet's top (desktop, on screen) */
+  const qc138Pinned = useQcPinned(qc138Ref, routeActive && qcDesk);
   /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
      ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
      const is a temporal-dead-zone throw. */
@@ -3750,7 +3759,9 @@ export const Queries: React.FC<{
      strip's membership (`tileCourt`), so a cell's figure is the number of rows it leaves. Desktop only: on the
      phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
   const qcCourtOn = qcDesk ? qcCzCourt : null;
-  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn)), qcSort);
+  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || inStages(qcStages, r.status))), qcSort);
+  /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
+  const qcGlyphCounts = glyphCounts(qcScoped);
   /** §3 · what is next on each VISIBLE query — the board's card, turned into the column's words. */
   const qcComing = useMemo(() => {
     const now = Date.now();
@@ -6752,6 +6763,39 @@ export const Queries: React.FC<{
             * the tiles' and the pills' job; the shell's search still narrows the list.
             */}
           <QcCentre
+            header138={qcDesk ? (
+              <QcHeader138
+                loading={showGridSkeleton}
+                total={showGridSkeleton ? null : qcScoped.length}
+                msTitle={qcLineTitle}
+                counts={qcGlyphCounts}
+                stages={qcStages}
+                onGlyph={pickGlyph}
+                onLog={() => onNavigate?.("queries", "Log a query")}
+                onRecord={() => onNavigate?.("queries", "Record a response")}
+                logDisabled={creating}
+                logRef={logTriggerRef}
+              >
+                <i ref={qc138Ref} hidden />
+                <QcPinned138
+                  anchor={qc138Ref}
+                  on={routeActive && qcDesk && !showGridSkeleton}
+                  shown={qc138Pinned}
+                  total={qcScoped.length}
+                  counts={qcGlyphCounts}
+                  stages={qcStages}
+                  onGlyph={pickGlyph}
+                  find={qcFind}
+                  onFind={setQcFind}
+                  onLog={() => onNavigate?.("queries", "Log a query")}
+                  onTop={() => {
+                    const sc = qc138Ref.current?.closest<HTMLElement>(".wpg-scroll");
+                    sc?.scrollTo({ top: 0 });
+                    qc138Ref.current?.closest<HTMLElement>(".qc138-hd")?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
+                  }}
+                />
+              </QcHeader138>
+            ) : undefined}
             v131={qcDesk}
             loading={qcLoad.loading}
             blank={qcLoad.blank}
@@ -6793,8 +6837,8 @@ export const Queries: React.FC<{
                 findRef={qcFindRef}
                 loading={showGridSkeleton}
                 /* v137 §B — the strip's court counts as a filter that is on, and "Clear all" clears it too */
-                courtOn={!!qcCzCourt}
-                onClearCourt={() => setQcCzCourt(null)}
+                courtOn={!!qcCzCourt || qcStages.length > 0}
+                onClearCourt={() => { setQcCzCourt(null); setQcStages([]); }}
               />
             ) : (
               <QcSentence
@@ -6842,21 +6886,8 @@ export const Queries: React.FC<{
                 needYou={rowsForTile(qcScoped, "you").length}
               />
             )}
-            courts={qcDesk ? (
-              /* v131 §2 (desktop) — the headerless desk; the skeleton is the same component over no rows */
-              <QcStrip
-                sections={deskSections(showGridSkeleton ? [] : qcScoped, Date.now())}
-                sent={stripSent(showGridSkeleton ? [] : qcScoped, Date.now())}
-                /* F1: every query in scope, the list's own unfiltered count */
-                total={qcScoped.length}
-                faces={showGridSkeleton ? [] : facesFor(qcScoped, Date.now(), { you: 16, agent: 16, closed: 16 }).faces}
-                active={qcCzCourt}
-                /* a cell filters the list (and never scrolls); cell 1, or the pressed cell again, clears it */
-                onCourt={pickCourt}
-                onAll={() => setQcCzCourt(null)}
-                loading={showGridSkeleton}
-              />
-            ) : showGridSkeleton ? <QcCourtsSkeleton /> : (
+            /* v138 §A — the glyph row in the header replaces v137's "At a glance" strip on the desk */
+            courts={qcDesk ? null : showGridSkeleton ? <QcCourtsSkeleton /> : (
               <QcCourts
                 tiles={courtTiles(qcScoped, Date.now())}
                 /* ⚠️ THE COUNTS READ `qcScoped`, THE MANUSCRIPT-SCOPED SET, AND NEVER `qcVisible`
