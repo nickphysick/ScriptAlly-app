@@ -308,7 +308,7 @@ export interface PeekEvent { name: string; ms: number }
 export type StopKind = "event" | "more" | "due" | "wasdue" | "today";
 export interface PeekStop { kind: StopKind; name: string; date: string; ms: number; today: boolean }
 export type SegKind = "done" | "ahead" | "over";
-export interface PeekSeg { days: number; label: string; kind: SegKind; grow: number }
+export interface PeekSeg { days: number; label: string; short: string; kind: SegKind; grow: number }
 export interface PeekChain { stops: PeekStop[]; segs: PeekSeg[]; overdue: boolean }
 
 const dayKey = (ms: number): number => startOfDay(ms);
@@ -322,6 +322,37 @@ export function gapWords(days: number): string {
   if (days < 365) { const m = Math.max(2, Math.round(days / 30.44)); return `${m} months`; }
   const y = Math.floor(days / 365), m = Math.round((days - y * 365) / 30.44);
   return m > 0 && m < 12 ? `${y} ${y === 1 ? "yr" : "yrs"} ${m} mo` : `${m >= 12 ? y + 1 : y} ${(m >= 12 ? y + 1 : y) === 1 ? "yr" : "yrs"}`;
+}
+
+/** the short label when the long one does not fit its gap: "{n}d", "{n}w", "{n}mo", "{y}y" */
+export function gapShort(days: number): string {
+  if (days < 14) return `${days}d`;
+  if (days < 60) return `${Math.round(days / 7)}w`;
+  if (days < 365) return `${Math.max(2, Math.round(days / 30.44))}mo`;
+  return `${Math.floor(days / 365)}y`;
+}
+
+/** v138.1 §D — the tick ruler's units, smallest first */
+export const TICK_UNITS: { name: "week" | "month" | "quarter" | "year"; days: number }[] = [
+  { name: "week", days: 7 }, { name: "month", days: 30.4375 }, { name: "quarter", days: 91.3125 }, { name: "year", days: 365.25 },
+];
+/**
+ * The ruler's unit: the smallest whose ticks sit at least 6px apart on the most-stretched (widest) gap;
+ * per gap, one tick per whole unit of its real length, spaced by its own px per unit, and none where that spacing
+ * would fall under 4px or the gap is shorter than one unit.
+ */
+export function tickPlan(gaps: readonly { days: number; px: number }[]): { unit: (typeof TICK_UNITS)[number] | null; ticks: { n: number; step: number }[] } {
+  /* the most-stretched gap is the WIDEST one: a short gap held at the 44px minimum has an inflated px per day that
+     says nothing about the scale (the reference's own ten-year and seven-year cases tick in months) */
+  const wide = gaps.filter((g) => g.days > 0).reduce<{ days: number; px: number } | null>((a, g) => (!a || g.px > a.px ? g : a), null);
+  const pxd = wide ? wide.px / wide.days : 0;
+  const unit = pxd > 0 ? TICK_UNITS.find((u) => u.days * pxd >= 6) ?? null : null;
+  const ticks = gaps.map((g) => {
+    if (!unit || g.days < unit.days || g.days <= 0) return { n: 0, step: 0 };
+    const step = (unit.days * g.px) / g.days;
+    return step < 4 ? { n: 0, step: 0 } : { n: Math.floor(g.days / unit.days), step };
+  });
+  return { unit, ticks };
 }
 
 export function peekChain(
@@ -377,7 +408,8 @@ export function peekChain(
     const days = dDays(a.ms, b.ms);
     const kind: SegKind = a.kind === "wasdue" ? "over" : (b.kind === "due" || (b.ms > now && !b.today)) ? "ahead" : "done";
     const words = gapWords(days);
-    segs.push({ days, kind, label: kind === "over" ? `${words} over` : words, grow: Math.log2(days + 2) });
+    /* v138.1 §D — DRAWN TO SCALE: a gap grows linearly with its length in days (floor 0.35), replacing log2 */
+    segs.push({ days, kind, label: kind === "over" ? `${words} over` : words, short: kind === "over" ? `${days}d over` : gapShort(days), grow: Math.max(0.35, days) });
   }
   return { stops, segs, overdue };
 }

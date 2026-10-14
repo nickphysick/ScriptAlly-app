@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
   GLYPHS, glyphCounts, glyphFor, gapWords, peekChain, pressGlyph, pressedGlyph, pressHeading, sort138, stagePillLabel,
-  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf,
+  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, gapShort, tickPlan,
 } from "./qc138";
 
 const ALL = Object.values(QueryStatus);
@@ -92,9 +92,20 @@ describe("F · the peek is a chain, never a scale", () => {
     const ch = peekChain([{ name: "Queried", ms: now - 90 * D }, { name: "Passed", ms: now - 10 * D }], { due: null, now, closed: true, yours: false });
     expect(ch.stops.map((s) => s.kind)).toEqual(["event", "event"]);
   });
-  it("a segment's flex is log2(days + 2), and the gap words follow the pack", () => {
+  /* v138.1 §D re-point: drawn to scale, a gap grows linearly with its days (floor 0.35), no longer log2 */
+  it("a segment's flex is its length in days, floored at 0.35, and the gap words follow the pack", () => {
     const ch = peekChain([{ name: "Queried", ms: now - 30 * D }], { due: now + 20 * D, now, closed: false, yours: false });
-    expect(ch.segs[0].grow).toBeCloseTo(Math.log2(32));
+    expect(ch.segs[0].grow).toBe(30);
+    expect(peekChain([{ name: "A", ms: now - 3_600_000 }, { name: "B", ms: now - 1_800_000 }], { due: null, now, closed: true, yours: false }).stops.length).toBe(1);
+    expect([gapShort(3), gapShort(20), gapShort(100), gapShort(3846)]).toEqual(["3d", "3w", "3mo", "10y"]);
     expect([gapWords(0), gapWords(3), gapWords(20), gapWords(100), gapWords(3846)]).toEqual(["same day", "3 days", "3 weeks", "3 months", "10 yrs 6 mo"]);
+  });
+  it("the ruler: the smallest unit whose ticks sit 6px apart on the widest gap; none under 4px or under one unit", () => {
+    const p = tickPlan([{ days: 60, px: 44 }, { days: 3846, px: 1380 }]);
+    expect(p.unit?.name).toBe("month");
+    expect(p.ticks[1].n).toBe(126);
+    expect(p.ticks[0].step).toBeCloseTo((30.4375 * 44) / 60);
+    expect(tickPlan([{ days: 5, px: 500 }]).ticks[0]).toEqual({ n: 0, step: 0 });
+    expect(tickPlan([{ days: 2777, px: 300 }, { days: 2, px: 44 }]).unit?.name).toBe("quarter");
   });
 });

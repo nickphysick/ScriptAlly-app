@@ -13,7 +13,7 @@
  * ⚠️ EVERY WORD A ROW SAYS COMES FROM `lib/qcRowLines` AND `lib/qc138`, and its next move from Query panel v2's
  *    one predicate (`nextDoor`).
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
@@ -25,7 +25,7 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
-import { peekChain, type PeekEvent } from "../../../lib/qc138";
+import { peekChain, tickPlan, type PeekEvent } from "../../../lib/qc138";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -135,30 +135,79 @@ const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean;
 };
 
 /**
- * v138 §F — THE PEEK: a chain of at most five stops with labelled gaps, never a scaled axis. Pale navy, or blush
- * with a rust bar when the query is overdue. `aria-hidden`: the panel is the accessible route to the same history.
+ * v138.1 §D — THE PEEK: date cards on a line drawn to scale. Each gap grows linearly with its days (44px at least);
+ * a tick ruler under the line counts weeks, months, quarters or years, chosen so ticks sit at least 6px apart on the
+ * most-stretched gap, and a key says which. No container. `aria-hidden`: the panel is the accessible route.
+ *
+ * ⚠️ ONE WRITER: the scale, the unit and the short labels are measured in one layout effect, on open and on resize
+ *    (a ResizeObserver on the peek itself), never polled.
  */
 const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; nowMs: number; closed: boolean; yours: boolean }> = ({ events, due, nowMs, closed, yours }) => {
-  if (!events) return <div className="qc138-peek qc138-peek--wait" data-qcv="peek" aria-hidden="true" />;
-  const ch = peekChain(events, { due, now: nowMs, closed, yours });
+  const ref = useRef<HTMLDivElement>(null);
+  const ch = events ? peekChain(events, { due, now: nowMs, closed, yours }) : null;
+  const [m, setM] = useState<{ unit: string | null; ticks: { n: number; step: number }[]; short: boolean[] }>({ unit: null, ticks: [], short: [] });
+  const sig = ch ? ch.segs.map((g) => `${g.days}:${g.kind}`).join("|") : "";
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !ch) return undefined;
+    const read = () => {
+      const gaps = [...el.querySelectorAll<HTMLElement>('[data-qcv="peek-seg"]')];
+      if (!gaps.length) return;
+      const px = gaps.map((g) => g.getBoundingClientRect().width);
+      if (px.every((w) => w === 0)) return;
+      const plan = tickPlan(ch.segs.map((g, i) => ({ days: g.days, px: px[i] })));
+      /* a label that does not fit its gap shortens: measured on the long form, held in a hidden probe */
+      const short = gaps.map((g, i) => {
+        const probe = g.querySelector<HTMLElement>(".qc138-seg-probe");
+        return !!probe && probe.getBoundingClientRect().width > px[i] - 4;
+      });
+      const next = { unit: plan.unit?.name ?? null, ticks: plan.ticks, short };
+      setM((cur) => (JSON.stringify(cur) === JSON.stringify(next) ? cur : next));
+    };
+    read();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [sig]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!ch) return <div className="qc138-peek qc138-peek--wait" data-qcv="peek" aria-hidden="true" />;
   return (
-    <div className={`qc138-peek${ch.overdue ? " over" : ""}${yours ? " you" : ""}`} data-qcv="peek" data-over={ch.overdue ? "" : undefined} aria-hidden="true">
+    <div ref={ref} className={`qc138-peek${ch.overdue ? " over" : ""}${yours ? " you" : ""}`} data-qcv="peek" data-over={ch.overdue ? "" : undefined} data-unit={m.unit ?? undefined} aria-hidden="true">
       <div className="qc138-chain" data-qcv="peek-chain">
-        {ch.stops.map((st, i) => (
-          <React.Fragment key={`${st.kind}-${i}`}>
-            {i > 0 ? (
-              <span className={`qc138-seg qc138-seg--${ch.segs[i - 1].kind}`} data-qcv="peek-seg" style={{ flexGrow: ch.segs[i - 1].grow }}>
-                <em data-qcv="peek-seg-label">{ch.segs[i - 1].label}</em><i className="qc138-seg-ln" /><i className="qc138-seg-strut" />
-              </span>
-            ) : null}
-            <span className={`qc138-stop qc138-stop--${st.kind}${st.today ? " is-today" : ""}${st.name === "Today" ? " is-word" : ""}${i === 0 ? " first" : ""}${i === ch.stops.length - 1 ? " last" : ""}`} data-qcv="peek-stop" data-kind={st.kind}>
-              <i className="qc138-sd" />
-              <b data-qcv="peek-name">{st.name}</b>
-              {st.date ? <small data-qcv="peek-date">{st.date}</small> : null}
-            </span>
-          </React.Fragment>
-        ))}
+        {ch.stops.map((st, i) => {
+          const g = i > 0 ? ch.segs[i - 1] : null;
+          const tk = i > 0 ? m.ticks[i - 1] : undefined;
+          const word = st.name === "Today";
+          return (
+            <React.Fragment key={`${st.kind}-${i}`}>
+              {g ? (
+                <span className={`qc138-seg qc138-seg--${g.kind}`} data-qcv="peek-seg" data-days={g.days} style={{ flexGrow: g.grow }}>
+                  <em data-qcv="peek-seg-label">{m.short[i - 1] ? g.short : g.label}</em>
+                  <em className="qc138-seg-probe" aria-hidden="true">{g.label}</em>
+                  <i className="qc138-seg-ln" />
+                  {tk && tk.n > 0 ? (
+                    <span className="qc138-ticks" data-qcv="peek-ticks" data-step={tk.step.toFixed(2)}>
+                      {Array.from({ length: tk.n + 1 }, (_, k) => <i key={k} style={{ left: `${k * tk.step}px` }} />)}
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
+              {word ? (
+                <span className="qc138-today" data-qcv="peek-stop" data-kind="today"><i className="qc138-sd" /><b data-qcv="peek-name">Today</b></span>
+              ) : (
+                <span className={`qc138-card qc138-card--${st.kind}${st.today ? " is-today" : ""}`} data-qcv="peek-stop" data-kind={st.kind}>
+                  <i className="qc138-sd" />
+                  <span className="qc138-card-t">
+                    <b data-qcv="peek-name">{st.name}</b>
+                    {st.date ? <small data-qcv="peek-date">{st.date}</small> : null}
+                  </span>
+                </span>
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
+      {m.unit ? <div className="qc138-peek-key" data-qcv="peek-key"><i aria-hidden="true" /><span>1 tick = 1 {m.unit}</span></div> : null}
     </div>
   );
 };
