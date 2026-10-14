@@ -151,7 +151,7 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
                 <em data-qcv="peek-seg-label">{ch.segs[i - 1].label}</em><i className="qc138-seg-ln" /><i className="qc138-seg-strut" />
               </span>
             ) : null}
-            <span className={`qc138-stop qc138-stop--${st.kind}${st.today ? " is-today" : ""}${i === 0 ? " first" : ""}${i === ch.stops.length - 1 ? " last" : ""}`} data-qcv="peek-stop" data-kind={st.kind}>
+            <span className={`qc138-stop qc138-stop--${st.kind}${st.today ? " is-today" : ""}${st.name === "Today" ? " is-word" : ""}${i === 0 ? " first" : ""}${i === ch.stops.length - 1 ? " last" : ""}`} data-qcv="peek-stop" data-kind={st.kind}>
               <i className="qc138-sd" />
               <b data-qcv="peek-name">{st.name}</b>
               {st.date ? <small data-qcv="peek-date">{st.date}</small> : null}
@@ -159,6 +159,21 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
           </React.Fragment>
         ))}
       </div>
+    </div>
+  );
+};
+
+interface LabCase { events: PeekEvent[]; due: number | null; closed?: boolean; yours?: boolean }
+const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
+  const cases = typeof window !== "undefined" ? (window as unknown as { __SA_QC138_PEEK_LAB?: LabCase[] }).__SA_QC138_PEEK_LAB : undefined;
+  if (!cases?.length) return null;
+  return (
+    <div className="qc138-peeklab" data-qc138="peek-lab">
+      {cases.map((c, i) => (
+        <div key={i} className="qc138-peekw" data-open="" data-qc138="peek-case">
+          <div className="qc138-peeki"><Peek events={c.events} due={c.due} nowMs={nowMs} closed={!!c.closed} yours={!!c.yours} /></div>
+        </div>
+      ))}
     </div>
   );
 };
@@ -317,7 +332,8 @@ export const QcList138: React.FC<QcList138Props> = ({
     const picked = !!selected?.has(r.id);
     return (
       <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}${picked ? " picked" : ""}`} data-picked={picked ? "" : undefined} data-ring={ringId === r.id || undefined}
-        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"} data-name={r.agentName}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"}
+        data-due={due ?? undefined} data-first={r.sentMs ?? undefined} data-from={r.stageStartMs ?? r.lastMs} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
         onMouseEnter={(e) => enter(r.id, e.currentTarget)} onMouseLeave={leave}
@@ -425,6 +441,9 @@ export const QcList138: React.FC<QcList138Props> = ({
           );
         })}
       </div>
+      {/* a dev-only review aid: `window.__SA_QC138_PEEK_LAB` forces peek cases (the F2 edge-case sheet); production
+          builds drop the branch, since MODE is replaced at build time */}
+      {import.meta.env.MODE !== "production" ? <PeekLab nowMs={nowMs} /> : null}
       <div className="qc138-body" data-qcv="list">
         {groups.map((g) => {
           const tone = toneOf(g);
