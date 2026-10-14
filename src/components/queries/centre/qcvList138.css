@@ -561,3 +561,12 @@
   .qc138-sheet .qc138-t4l b, .qc138-sheet .qc138-t4l small { line-height: 1.15 !important; }
   .qc138-sheet .qc138-t4l .qc138-t4n { line-height: 1.1 !important; margin-top: 0; }
 }
+
+/* ── v138.4 §C (follow-up) · THE STACKED DRAWER (below 900px of sheet) ──────────────────────────────────────────
+   Stacked, the timeline sits directly under the summary, so a label in the upper lane (which reaches the timeline's
+   top edge) came within ~2px of "Open the full timeline". 10px of air between them. */
+@media (min-width: 768px) {
+  @container qc138sheet (max-width: 899.98px) {
+    .qc138-sheet .qc138-tlw { margin-top: 10px; }
+  }
+}
