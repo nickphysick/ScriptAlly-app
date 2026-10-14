@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
   GLYPHS, glyphCounts, glyphFor, gapWords, peekChain, pressGlyph, pressedGlyph, pressHeading, sort138, stagePillLabel,
-  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, gapShort, tickPlan, peekSummary, peekTone,
+  DEFAULT_SORT_138, sentenceCase, trackLevel, dialOf, gapShort, tickPlan, peekSummary, peekTone, axisLabels, TICK_UNITS,
 } from "./qc138";
 
 const ALL = Object.values(QueryStatus);
@@ -129,5 +129,24 @@ describe("v138.2 · the summary reads the peek's own dates", () => {
       expect(s0.hot).toBe(tone === "over");
       expect(chain.overdue).toBe(tone === "over");
     }
+  });
+});
+
+describe("v138.3 · the dated axis", () => {
+  const week = TICK_UNITS[0], month = TICK_UNITS[1];
+  const at = (y: number, m: number, d: number) => new Date(y, m - 1, d, 12).getTime();
+  it("labels the ticks with real dates from the gap's start: Aug under 2 Jul → 2 Sep", () => {
+    const l = axisLabels(at(2026, 7, 2), 62, 650, week);
+    expect(l.map((x) => x.lab)).toEqual(["Aug"]);
+  });
+  it("puts a year where a year starts, months every third when tight, and keeps its distances", () => {
+    const l = axisLabels(at(2024, 3, 14), 941, 900, month);
+    expect(l.some((x) => x.yr && x.lab === "2025")).toBe(true);
+    for (let i = 1; i < l.length; i += 1) expect(l[i].x - l[i - 1].x).toBeGreaterThanOrEqual(34);
+    for (const x of l) { expect(x.x).toBeGreaterThanOrEqual(52); expect(x.x).toBeLessThanOrEqual(900 - 64); }
+    expect(l.filter((x) => !x.yr).every((x) => ["Jan", "Apr", "Jul", "Oct"].includes(x.lab))).toBe(true);
+  });
+  it("draws nothing under a gap narrower than 200px", () => {
+    expect(axisLabels(at(2026, 7, 2), 62, 199, week)).toEqual([]);
   });
 });

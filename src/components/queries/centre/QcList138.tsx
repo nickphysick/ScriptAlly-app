@@ -25,7 +25,7 @@ import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
-import { gapWords, peekChain, peekGlyph, peekSummary, peekTone, tickPlan, YOUR_MOVE_STATUSES, type PeekEvent, type PeekStop } from "../../../lib/qc138";
+import { axisLabels, gapWords, peekChain, peekGlyph, peekSummary, peekTone, tickPlan, YOUR_MOVE_STATUSES, type AxisLabel, type PeekEvent, type PeekStop } from "../../../lib/qc138";
 import { StageGlyph } from "./StageGlyph";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
@@ -150,7 +150,7 @@ const Dial: React.FC<{ frac: number; over: boolean; due: number; yours: boolean;
 const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; nowMs: number; closed: boolean; yours: boolean }> = ({ events, due, nowMs, closed, yours }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ch = events ? peekChain(events, { due, now: nowMs, closed, yours }) : null;
-  const [m, setM] = useState<{ unit: string | null; ticks: { n: number; step: number }[]; short: boolean[]; floor: number[] }>({ unit: null, ticks: [], short: [], floor: [] });
+  const [m, setM] = useState<{ unit: string | null; ticks: { n: number; step: number }[]; short: boolean[]; floor: number[]; axis: AxisLabel[][] }>({ unit: null, ticks: [], short: [], floor: [], axis: [] });
   const sig = ch ? ch.segs.map((g) => `${g.days}:${g.kind}`).join("|") : "";
   useLayoutEffect(() => {
     const el = ref.current;
@@ -172,7 +172,9 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
         const probe = g.querySelector<HTMLElement>(".qc138-seg-probe--s");
         return Math.max(64, Math.ceil(probe ? probe.getBoundingClientRect().width + 8 : 0));
       });
-      const next = { unit: plan.unit?.name ?? null, ticks: plan.ticks, short, floor };
+      /* §C — the dated axis under each gap at least 200px wide, from the gap's start date (the stop that opens it) */
+      const axis = ch.segs.map((g, i) => axisLabels(ch.stops[i].ms, g.days, px[i], plan.unit));
+      const next = { unit: plan.unit?.name ?? null, ticks: plan.ticks, short, floor, axis };
       setM((cur) => (JSON.stringify(cur) === JSON.stringify(next) ? cur : next));
     };
     read();
@@ -202,6 +204,11 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
                       {Array.from({ length: tk.n + 1 }, (_, k) => <i key={k} style={{ left: `${k * tk.step}px` }} />)}
                     </span>
                   ) : null}
+                  {m.axis[i - 1]?.length ? (
+                    <span className="qc138-ax" data-qcv="peek-axis">
+                      {m.axis[i - 1].map((a) => <b key={`${a.lab}-${a.x}`} className={a.yr ? "yr" : undefined} data-x={a.x.toFixed(1)} style={{ left: `${a.x}px` }}>{a.lab}</b>)}
+                    </span>
+                  ) : null}
                 </span>
               ) : null}
               <Marker st={st} i={i} over={st.kind === "today" && g?.kind === "over" ? `${gapWords(g.days)} over` : null} />
@@ -209,7 +216,6 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
           );
         })}
       </div>
-      {m.unit ? <div className="qc138-peek-key" data-qcv="peek-key"><i aria-hidden="true" /><span>1 tick = 1 {m.unit}</span></div> : null}
     </div>
   );
 };

@@ -395,6 +395,46 @@ export function peekSummary(o: { sent: number | null; due: number | null; closed
   return { head: out, line: `${gapWords(left)} until ${yours ? "your send-by date" : "their reply date"}`, hot: false };
 }
 
+/**
+ * v138.3 §C — THE DATED AXIS under one gap: the ticks' real dates, from the gap's START date (true calendar dates, never
+ * counts). A year label on the tick where a new year starts; a month label on the tick where a new month starts — every
+ * month when months are at least 34px apart on this gap, every third when at least 12px, none otherwise (week and
+ * month rulers only). Years are placed first; any label within 34px of one already placed is dropped, and none within
+ * 52px of the gap's start or 64px of its end. Only for a gap at least 200px wide. `x` is the tick's offset in px.
+ */
+export function tickDate(start: number, j: number, unit: (typeof TICK_UNITS)[number]["name"]): Date {
+  const d = new Date(start);
+  if (unit === "week") d.setDate(d.getDate() + 7 * j);
+  else if (unit === "month") d.setMonth(d.getMonth() + j);
+  else if (unit === "quarter") d.setMonth(d.getMonth() + 3 * j);
+  else d.setFullYear(d.getFullYear() + j);
+  return d;
+}
+export interface AxisLabel { x: number; lab: string; yr: boolean }
+export function axisLabels(start: number, days: number, w: number, unit: (typeof TICK_UNITS)[number] | null): AxisLabel[] {
+  if (!unit || w < 200 || days <= 0) return [];
+  const n = Math.floor(days / unit.days);
+  const step = (unit.days * w) / days;
+  if (n < 1 || step < 4) return [];
+  const mpx = (w / days) * 30.4375;
+  const every = mpx >= 34 ? 1 : mpx >= 12 ? 3 : 0;
+  const months = unit.name === "week" || unit.name === "month";
+  const cand: AxisLabel[] = [];
+  let prev = new Date(start);
+  for (let j = 1; j <= n; j += 1) {
+    const d = tickDate(start, j, unit.name);
+    const x = j * step;
+    if (d.getFullYear() !== prev.getFullYear()) cand.push({ x, lab: String(d.getFullYear()), yr: true });
+    else if (months && every && d.getMonth() !== prev.getMonth() && d.getMonth() % every === 0) cand.push({ x, lab: MONTHS_SHORT[d.getMonth()], yr: false });
+    prev = d;
+  }
+  const placed: AxisLabel[] = [];
+  const ok = (x: number) => x >= 52 && x <= w - 64 && placed.every((p) => Math.abs(p.x - x) >= 34);
+  for (const c of cand.filter((c) => c.yr)) if (ok(c.x)) placed.push(c);
+  for (const c of cand.filter((c) => !c.yr)) if (ok(c.x)) placed.push(c);
+  return placed.sort((a, b) => a.x - b.x);
+}
+
 export function peekChain(
   events: readonly PeekEvent[],
   opts: { due: number | null; now: number; closed: boolean; yours: boolean },
