@@ -509,3 +509,20 @@
 @media (prefers-reduced-motion: reduce) {
   .qc138-sheet .qc138-gimg { animation: none !important; transition: none !important; }
 }
+
+/* ── v138.4 §B · COLOUR ONLY FOR NOW ────────────────────────────────────────────────────────────────────────────
+   Past stretches and past events are muted; only the current stretch, the overdue stretch, Was due and Today carry
+   colour. Rust appears only on the current your-move stretch, the overdue stretch, Was due and Today. Every marker
+   sits in a 2.5px ring of the row's ground. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-t4b.past { height: 6px; border-radius: 3px; background: #c6ccd6; }
+  .qc138-sheet .qc138-t4b.live.agt { height: 8px; border-radius: 4px; background: #3d5070; }
+  .qc138-sheet .qc138-t4b.live.you { height: 8px; border-radius: 4px; background: #b0603e; }
+  .qc138-sheet .qc138-t4b.over { height: 8px; border-radius: 4px; background: repeating-linear-gradient(135deg, #c86a4a 0 3px, #fbe3d6 3px 7px); box-shadow: inset 0 0 0 1.5px #a2452a; }
+  .qc138-sheet .qc138-t4b.ahead { height: 2px; border-radius: 0; background: repeating-linear-gradient(90deg, #c6ccd6 0 5px, transparent 5px 9px); }
+  .qc138-sheet .qc138-mk.past .qc138-mk-svg { color: #5d6878; }
+  .qc138-sheet .qc138-mk.last .qc138-mk-svg { color: #1c130f; }
+  .qc138-sheet .qc138-mk--due .qc138-mk-dot { width: 16px; height: 16px; margin: -8px; background: #fff; box-shadow: inset 0 0 0 2.5px #2a3a52, 0 0 0 2.5px var(--qc138-pkbg, #fff); }
+  .qc138-sheet .qc138-mk--wasdue .qc138-mk-dot { width: 14px; height: 14px; margin: -7px; background: #a2452a; }
+  .qc138-sheet .qc138-mk-tick { background: #a2452a; }
+}
