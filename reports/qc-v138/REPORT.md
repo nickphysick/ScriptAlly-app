@@ -132,7 +132,12 @@ edge-case sheet at 1512 and 1100; `/queries` at 1920 and 1024 (and the 1024 list
 
 ## Integration and dev
 
-See the end of this file (written after the deploy).
+Integration branch `dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1-qp2d-cl16-cl17-cl171-qc138`
+at `c9fbeb88`: dev was still serving the base (`index-Cd9X7Zdi.js`, `e66e981f`), which is an ancestor of this branch,
+so the integration is a fast-forward with no merge and the gates and locks above were run on its exact tree. Built
+from a clean detached checkout of the pushed tip: `index-Dwlwm9M3.js`, the same hash as the tested build. The served
+hash was checked again right before the deploy. **Dev serves `index-Dwlwm9M3.js` (14 Oct).** Not merged to `main`;
+prod untouched.
 
 ## For Nick
 
