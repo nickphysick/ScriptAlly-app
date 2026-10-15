@@ -207,6 +207,81 @@ const Panel: React.FC<{
   );
 };
 
+/* v18 §B — EACH MENU'S CONTENTS ARE ONE COMPONENT, drawn by its pill's panel AND by the one Filters panel: the
+   options, their counts and their state are the same objects in both places, never a copy. */
+type OptProps = { f: ContactFilters; set: (patch: Partial<ContactFilters>) => void; counts: Counts };
+const StatusOptions: React.FC<OptProps> = ({ f, set, counts }) => {
+  const toggleStatus = (k: StatusKey) => set({ status: f.status.includes(k) ? f.status.filter((x) => x !== k) : [...f.status, k] as StatusKey[] });
+  return (
+    <>
+          {STATUS_GROUPS.map((g) => (
+            <div className="cl17-pop-g" key={g.title} data-cl17="panel-group" data-lpop-sec={g.title}>
+              <h6>{g.title}</h6>
+              {g.keys.map((k) => {
+                const c = STATUS_CHOICES.find((x) => x.key === k);
+                if (!c) return null;
+                const on = f.status.includes(k), dot = STATUS_DOT[k];
+                return (
+                  <button key={k} type="button" className={`cl17-opt${on ? " on" : ""}${counts.status[k] === 0 ? " zero" : ""}`} data-opt={`status:${k}`}
+                    role="menuitemcheckbox" aria-checked={on} onClick={() => toggleStatus(k)}>
+                    <span className="cl17-bx" aria-hidden="true">{on ? "✓" : ""}</span>
+                    <span className="cl17-dot" aria-hidden="true">{dot ? <StatusDot status={dot} overrideSize={12} /> : <i className="cl17-dot-none" />}</span>
+                    <span className="cl17-ol">{c.label}</span>
+                    <small data-cl17="opt-count">{counts.status[k]}</small>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+    </>
+  );
+};
+
+const OpenOptions: React.FC<OptProps> = ({ f, set, counts }) => {
+  return (
+    <>
+          {OPEN_CHOICES.map((c) => (
+            <button key={c.key} type="button" className={`cl17-opt cl17-opt--2${f.open === c.key ? " on" : ""}`} data-opt={`open:${c.key}`}
+              role="menuitemradio" aria-checked={f.open === c.key} onClick={() => set({ open: c.key })}>
+              <span className="cl17-rd" aria-hidden="true" />
+              <span className="cl17-ol">{c.label}<i>{OPEN_LINE[c.key]}</i></span>
+              {c.key === "either" ? null : <small data-cl17="opt-count">{counts.open[c.key as Exclude<OpenChoice, "either">]}</small>}
+            </button>
+          ))}
+    </>
+  );
+};
+
+const QueriedOptions: React.FC<OptProps> = ({ f, set, counts }) => {
+  return (
+    <>
+          {QUERIED_CHOICES.map((c) => (
+            <button key={c.key} type="button" className={`cl17-opt cl17-opt--2${f.queried === c.key ? " on" : ""}`} data-opt={`queried:${c.key}`}
+              role="menuitemradio" aria-checked={f.queried === c.key} onClick={() => set({ queried: c.key })}>
+              <span className="cl17-rd" aria-hidden="true" />
+              <span className="cl17-ol">{c.label}<i>{QUERIED_LINE[c.key]}</i></span>
+              {c.key === "either" ? null : <small data-cl17="opt-count">{counts.queried[c.key as Exclude<QueriedChoice, "either">]}</small>}
+            </button>
+          ))}
+    </>
+  );
+};
+
+const MoreOptions: React.FC<OptProps> = ({ f, set, counts }) => {
+  return (
+    <>
+          {MORE_ROWS.map((r) => (
+            <button key={r.key} type="button" className={`cl17-opt cl17-opt--2 cl17-opt--sw${f[r.key] ? " on" : ""}`} data-opt={`more:${r.key}`} data-cl14-chip={r.key}
+              role="switch" aria-checked={f[r.key]} onClick={() => set({ [r.key]: !f[r.key] } as Partial<ContactFilters>)}>
+              <span className="cl17-ol">{r.label}<i>{r.line}</i></span>
+              <small data-cl17="opt-count">{counts[r.key]}</small>
+              <span className="cl17-sw" data-cl17="switch" data-on={f[r.key] ? "" : undefined} aria-hidden="true"><i /></span>
+            </button>
+          ))}
+    </>
+  );
+};
+
 const Row: React.FC<ContactFilterStripProps> = ({ filters, onFilters, counts, tallies, pop, extraOn = false, onClearAll, hideClear = false, showing, msTitle }) => {
   const f = filters;
   const uid = useId();
@@ -231,7 +306,6 @@ const Row: React.FC<ContactFilterStripProps> = ({ filters, onFilters, counts, ta
   const statusLabel = f.status.length === 0 ? "Status" : f.status.length === 1 ? (STATUS_CHOICES.find((c) => c.key === f.status[0])?.label ?? "Status") : `${f.status.length} statuses`;
   const openLabel = OPEN_CHOICES.find((c) => c.key === f.open)?.label ?? "Either";
   const queriedLabel = QUERIED_CHOICES.find((c) => c.key === f.queried)?.label ?? "Either";
-  const toggleStatus = (k: StatusKey) => set({ status: f.status.includes(k) ? f.status.filter((x) => x !== k) : [...f.status, k] as StatusKey[] });
   return (
     <>
       {pill("status", statusLabel, f.status.length > 0, () => set({ status: [] }))}
@@ -247,62 +321,23 @@ const Row: React.FC<ContactFilterStripProps> = ({ filters, onFilters, counts, ta
       {mine("status") && (
         <Panel k="status" id={pid("status")} anchor={pop.anchor} title="Where they stand" note="Pick any number" showing={showing}
           onClear={() => set({ status: [] })} onClose={pop.close}>
-          {STATUS_GROUPS.map((g) => (
-            <div className="cl17-pop-g" key={g.title} data-cl17="panel-group" data-lpop-sec={g.title}>
-              <h6>{g.title}</h6>
-              {g.keys.map((k) => {
-                const c = STATUS_CHOICES.find((x) => x.key === k);
-                if (!c) return null;
-                const on = f.status.includes(k), dot = STATUS_DOT[k];
-                return (
-                  <button key={k} type="button" className={`cl17-opt${on ? " on" : ""}${counts.status[k] === 0 ? " zero" : ""}`} data-opt={`status:${k}`}
-                    role="menuitemcheckbox" aria-checked={on} onClick={() => toggleStatus(k)}>
-                    <span className="cl17-bx" aria-hidden="true">{on ? "✓" : ""}</span>
-                    <span className="cl17-dot" aria-hidden="true">{dot ? <StatusDot status={dot} overrideSize={12} /> : <i className="cl17-dot-none" />}</span>
-                    <span className="cl17-ol">{c.label}</span>
-                    <small data-cl17="opt-count">{counts.status[k]}</small>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+          <StatusOptions f={f} set={set} counts={counts} />
         </Panel>
       )}
       {mine("open") && (
         <Panel k="open" id={pid("open")} anchor={pop.anchor} title="Taking queries?" note="From their profile" showing={showing} onClose={pop.close}>
-          {OPEN_CHOICES.map((c) => (
-            <button key={c.key} type="button" className={`cl17-opt cl17-opt--2${f.open === c.key ? " on" : ""}`} data-opt={`open:${c.key}`}
-              role="menuitemradio" aria-checked={f.open === c.key} onClick={() => set({ open: c.key })}>
-              <span className="cl17-rd" aria-hidden="true" />
-              <span className="cl17-ol">{c.label}<i>{OPEN_LINE[c.key]}</i></span>
-              {c.key === "either" ? null : <small data-cl17="opt-count">{counts.open[c.key as Exclude<OpenChoice, "either">]}</small>}
-            </button>
-          ))}
+          <OpenOptions f={f} set={set} counts={counts} />
         </Panel>
       )}
       {mine("queried") && (
         <Panel k="queried" id={pid("queried")} anchor={pop.anchor} title="Queried for this book?" note={msTitle?.trim() || "Your book"} showing={showing} onClose={pop.close}>
-          {QUERIED_CHOICES.map((c) => (
-            <button key={c.key} type="button" className={`cl17-opt cl17-opt--2${f.queried === c.key ? " on" : ""}`} data-opt={`queried:${c.key}`}
-              role="menuitemradio" aria-checked={f.queried === c.key} onClick={() => set({ queried: c.key })}>
-              <span className="cl17-rd" aria-hidden="true" />
-              <span className="cl17-ol">{c.label}<i>{QUERIED_LINE[c.key]}</i></span>
-              {c.key === "either" ? null : <small data-cl17="opt-count">{counts.queried[c.key as Exclude<QueriedChoice, "either">]}</small>}
-            </button>
-          ))}
+          <QueriedOptions f={f} set={set} counts={counts} />
         </Panel>
       )}
       {mine("more") && (
         <Panel k="more" id={pid("more")} anchor={pop.anchor} align="right" title="More filters" note="Switch on any you need" showing={showing}
           onClear={onMore ? () => set({ action: false, mats: false, always: false }) : undefined} onClose={pop.close}>
-          {MORE_ROWS.map((r) => (
-            <button key={r.key} type="button" className={`cl17-opt cl17-opt--2 cl17-opt--sw${f[r.key] ? " on" : ""}`} data-opt={`more:${r.key}`} data-cl14-chip={r.key}
-              role="switch" aria-checked={f[r.key]} onClick={() => set({ [r.key]: !f[r.key] } as Partial<ContactFilters>)}>
-              <span className="cl17-ol">{r.label}<i>{r.line}</i></span>
-              <small data-cl17="opt-count">{counts[r.key]}</small>
-              <span className="cl17-sw" data-cl17="switch" data-on={f[r.key] ? "" : undefined} aria-hidden="true"><i /></span>
-            </button>
-          ))}
+          <MoreOptions f={f} set={set} counts={counts} />
         </Panel>
       )}
     </>
@@ -317,3 +352,75 @@ export const ContactFilterStrip: React.FC<ContactFilterStripProps> = (props) => 
     </div>
   </div>
 );
+
+/* ── v18 §B · THE FILTERS BUTTON AND THE ONE FILTERS PANEL ─────────────────────────────────────────────────────── */
+
+const FUNNEL = (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2 3h12L9.5 8.5V13l-3 1.5v-6L2 3z" />
+  </svg>
+);
+
+/** The list header's one Filters button: cream-ringed at rest, cream-filled with a count chip once a filter is set. */
+export const ContactFiltersButton: React.FC<{ filters: ContactFilters; pop: PopoverState<ContactPop>; disabled?: boolean }> = ({ filters, pop, disabled }) => {
+  const n = contactFilterCount(filters);
+  const open = pop.open === "filters";
+  return (
+    <button type="button" className={`cl18-fb${n ? " on" : ""}`} data-cl18="filters" data-n={n} aria-haspopup="dialog" aria-expanded={open}
+      disabled={disabled} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
+      {FUNNEL}<span>Filters</span>{n ? <em data-cl18="filters-n">{n}</em> : null}
+    </button>
+  );
+};
+
+/**
+ * The one Filters panel, over the same filter state as v17's pills: five sections whose contents are the pills'
+ * own option components. Anchored to the button's right edge, 10 under it; Escape and a click outside close it
+ * through the shared popover state, and focus returns to the button.
+ */
+export const ContactFiltersPanel: React.FC<{
+  filters: ContactFilters; onFilters: (f: ContactFilters) => void; counts: Counts; tallies: ReadonlyMap<string, number>;
+  pop: PopoverState<ContactPop>; showing: number; msTitle?: string | null;
+}> = ({ filters, onFilters, counts, tallies, pop, showing, msTitle }) => {
+  const anchor = pop.open === "filters" ? pop.anchor : null;
+  const ref = useRef<HTMLDivElement>(null);
+  const held = useRef(false);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!anchor) { setPos(null); return; }
+    const r = anchor.getBoundingClientRect();
+    setPos({ top: r.bottom + 10, right: Math.max(16, window.innerWidth - r.right) });
+  }, [anchor]);
+  useEffect(() => {
+    if (!pos) return undefined;
+    ref.current?.querySelector<HTMLElement>("[data-opt]")?.focus({ preventScroll: true });
+    return () => { if (held.current && anchor?.isConnected) anchor.focus({ preventScroll: true }); };
+  }, [pos, anchor]);
+  if (!anchor || !pos) return null;
+  const f = filters;
+  const set = (patch: Partial<ContactFilters>) => onFilters({ ...f, ...patch });
+  const sec = (k: string, title: string, body: React.ReactNode) => (
+    <section className="cl18-fs" data-cl18="filters-sec" data-k={k}><h6>{title}</h6>{body}</section>
+  );
+  return createPortal(
+    <div className="lpop cl17-pop cl18-fp" data-lpop="filters" data-cl18="filters-panel" role="dialog" aria-label="Filter the list" ref={ref}
+      onFocusCapture={() => { held.current = true; }}
+      style={{ top: pos.top, right: pos.right, maxHeight: `calc(100vh - ${Math.round(pos.top) + 16}px)` }}>
+      <div className="cl18-fp-h"><b>Filter the list</b></div>
+      <div className="cl18-fp-b">
+        {sec("status", "Where they stand", <StatusOptions f={f} set={set} counts={counts} />)}
+        {sec("open", "Taking queries?", <OpenOptions f={f} set={set} counts={counts} />)}
+        {sec("queried", `Queried for ${msTitle?.trim() ? msTitle.trim() : "this book"}?`, <QueriedOptions f={f} set={set} counts={counts} />)}
+        {sec("genre", "Genre", <GenreField filters={f} onFilters={onFilters} tallies={tallies} />)}
+        {sec("more", "More", <MoreOptions f={f} set={set} counts={counts} />)}
+      </div>
+      <div className="cl17-pop-f cl18-fp-f" data-cl18="filters-foot">
+        <button type="button" className="cl17-pop-clear" data-cl18="filters-clear" onClick={() => onFilters(emptyContactFilters())}>Clear all</button>
+        <button type="button" className="cl17-pop-show" data-cl18="filters-show" onClick={() => { anchor.focus({ preventScroll: true }); pop.close(); }}>
+          Show {showing} {showing === 1 ? "agent" : "agents"}
+        </button>
+      </div>
+    </div>,
+    document.body,
+  );
+};

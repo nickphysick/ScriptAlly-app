@@ -54,3 +54,83 @@
 .ws-app.sheet-wide .cl17-pin .cl17-pin-a .cl18-pa-w { display: inline; }
 .ws-app.sheet-wide .cl17-pin .cl17-pin-a .cl18-pa-p { display: none; }
 @media (prefers-reduced-motion: reduce) { .cl18-tabs button { transition: none; } }
+
+/* ── §B · THE LIST HEADER: the top of the list sheet, slate. One sentence left; search, Filters, density and full
+   screen right, gap 10, on one line. ── */
+.cl16-list .cl18-lh {
+  display: flex; align-items: center; gap: 16px; box-sizing: border-box; min-width: 0; min-height: 68px;
+  padding: 16px 32px 16px 40px; border-radius: 20px 20px 0 0; background: #3e5170; color: #f4eee5;
+}
+.ws-app.sheet-wide .cl16-list .cl18-lh { min-height: 76px; padding: 18px 36px 18px 44px; }
+.cl18-lh .cl18-says {
+  flex: 1 1 auto; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font: 400 19px/1.3 var(--sp-type) !important; color: #f4eee5;
+}
+.ws-app.sheet-wide .cl18-lh .cl18-says { font-size: 22px !important; }
+.cl18-lh .cl18-says b, .cl18-lh .cl18-says b span { font: inherit !important; color: inherit; }
+.cl18-lh .cl18-says .cl18-dim { font: inherit !important; color: rgba(244, 238, 229, 0.55); }
+.cl18-lh .cl18-gn {
+  margin: 0; padding: 0; border: 0; background: none; color: #f4eee5; cursor: pointer; font: inherit !important;
+  text-decoration: underline dotted #e7a184; text-decoration-thickness: 2px; text-underline-offset: 6px;
+}
+.cl18-lh .cl18-gn:focus-visible, .cl18-lh .cl18-clear:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 3px; }
+.cl18-lh .cl18-clear {
+  margin: 0 0 0 14px; padding: 0; border: 0; background: none; cursor: pointer; vertical-align: 2px;
+  font: italic 400 15px/1 var(--sp-serif) !important; color: #e7a184; text-decoration: underline; text-underline-offset: 3px;
+}
+.cl18-lh .cl18-lt { display: flex; align-items: center; gap: 10px; flex: none; }
+.cl18-lh .cl18-lt .cl17-find.cl13-find {
+  flex: none; box-sizing: border-box; width: 200px; height: 38px; padding: 0 12px 0 14px; border-radius: 19px;
+  background: #fff; color: rgba(28, 19, 15, 0.55); box-shadow: none;
+}
+.ws-app.sheet-wide .cl18-lh .cl18-lt .cl17-find.cl13-find { width: 260px; }
+.cl18-lh .cl18-lt .cl17-find.cl13-find:focus-within { box-shadow: 0 0 0 2px #e7a184; }
+.cl18-lh .cl18-fb {
+  display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: 38px; padding: 0 16px; border: 0;
+  border-radius: 19px; background: transparent; color: #f4eee5; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35);
+  font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
+}
+.cl18-lh .cl18-fb span { font: inherit !important; }
+.cl18-lh .cl18-fb.on { background: #f4eee5; color: #2d3a50; box-shadow: none; }
+.cl18-lh .cl18-fb em {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box;
+  border-radius: 10px; background: #2d3a50; color: #f4eee5; font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important;
+}
+.cl18-lh .cl18-fb:focus-visible, .cl18-lh .cl18-dens button:focus-visible, .cl18-lh .cl18-fsb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+.cl18-lh .cl18-dens { display: inline-flex; gap: 2px; padding: 4px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25); }
+.cl18-lh .cl18-dens button {
+  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 28px; padding: 0; border: 0; border-radius: 8px;
+  background: none; color: rgba(244, 238, 229, 0.75); cursor: pointer;
+}
+.cl18-lh .cl18-dens button.on { background: #fff; color: #2d3a50; }
+.cl18-lh .cl18-fsb.cl16-fsb {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 38px; height: 38px; padding: 0; border: 0;
+  border-radius: 50%; background: none; color: #f4eee5; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35); font-size: 0 !important;
+}
+.cl18-lh button:disabled { cursor: default; opacity: 0.6; }
+
+/* ── §B · THE FILTERS PANEL: under the button's right edge, white, five sections of the pills' own options ── */
+.lpop.cl18-fp {
+  position: fixed; z-index: 60; box-sizing: border-box; width: min(640px, 70vw); display: flex; flex-direction: column;
+  padding: 14px 16px 16px; border-radius: 16px; background: #fff; overflow: hidden;
+}
+.cl18-fp .cl18-fp-h b { font: 400 17px/1.2 var(--sp-type) !important; color: #1c130f; }
+.cl18-fp .cl18-fp-b { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 8px -4px 0; padding: 0 4px; }
+.cl18-fp .cl18-fs { padding: 10px 0; border-top: 1px solid rgba(28, 19, 15, 0.08); }
+.cl18-fp .cl18-fs:first-child { border-top: 0; }
+.cl18-fp .cl18-fs h6 { margin: 0 0 6px; font: 400 13px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, 0.5); }
+.cl18-fp .cl18-fs[data-k="status"] { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+.cl18-fp .cl18-fs[data-k="status"] h6 { grid-column: 1 / -1; }
+.cl18-fp .cl18-fs[data-k="genre"] .cl14-gtok { width: 100%; }
+.cl18-fp .cl18-fp-f { margin-top: 6px; }
+
+/* ── §B · THE COLUMN HEADINGS: the Query Centre's strip, at the sheet's full width ── */
+.clv-group .cl16-list .lt-labels {
+  height: auto; padding-top: 12px; padding-bottom: 13px; background: #e9edf3; border-bottom: 1.5px solid rgba(45, 58, 80, 0.28);
+}
+.clv-group .cl16-list .lt-labels .lt-lab {
+  font: 600 10.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62);
+}
+.clv-group .cl16-list .lt-labels .lt-lab.on { color: #2d3a50; }
+.clv-group .cl16-list .lt-labels .lt-lab i { color: #a2452a; }
+.clv-group .cl16-list .lt-labels button.lt-lab:not(.on):hover::after { content: " ↓"; opacity: 0.35; }

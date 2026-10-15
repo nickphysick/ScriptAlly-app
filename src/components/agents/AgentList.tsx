@@ -44,7 +44,7 @@ import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { contactFilterCount, agentRows } from "../../lib/contactList";
+import { contactFilterCount, agentRows, GROUP_OPTIONS } from "../../lib/contactList";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
@@ -59,9 +59,9 @@ import {
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { ContactFind, ContactListControls, type ContactPop } from "./contact/ContactListControls";
-import { ContactFilterStrip } from "./contact/ContactFilterStrip";
-import { ContactBarExtras, CountTo, useReflow } from "./contact/ContactTouches";
+import { ContactFind, GroupMenu, type ContactPop } from "./contact/ContactListControls";
+import { ContactFiltersButton, ContactFiltersPanel } from "./contact/ContactFilterStrip";
+import { CountTo, useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
 import { usePopover } from "../shell/ListPills";
 import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
@@ -336,24 +336,31 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
   /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
-  const controls = (
-    <ContactListControls
-      find={search} onFind={setSearch} noFind
-      groupKey={groupKey} onGroup={setGroupKey}
-      pop={pop}
-      /* §7.6–7.7 — Comfortable / Compact and the key sheet, at the controls row's right */
-      extra={<>
-        <ContactBarExtras density={density} onDensity={setDensity} />
-        {/* v16 §E — Full screen, at the bar's right */}
-        <button type="button" className="cl16-fsb" data-cl16="full" aria-pressed={full} title={`${full ? "Exit full screen" : "Full-screen list"} (${shortcutLabel("contactsFull")})`}
-          onClick={() => setFull(!full)}>
-          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-            {full ? <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" /> : <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />}
-          </svg>
-          {full ? "Exit full screen" : "Full screen"}
-        </button>
-      </>}
-    />
+  /* v18 §B — THE LIST HEADER'S TOOLS, right of its sentence: search, the one Filters button, density, full screen. The
+     loading skeleton draws the same nodes, so the header holds its height while the page settles. */
+  const listTools = (loading: boolean) => (
+    <span className="cl18-lt" data-cl18="tools">
+      <ContactFind find={search} onFind={setSearch} disabled={loading}
+        findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>} />
+      <ContactFiltersButton filters={filters} pop={pop} disabled={loading} />
+      <span className="cl18-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
+        {(["comfortable", "compact"] as const).map((d) => (
+          <button key={d} type="button" className={density === d ? "on" : undefined} aria-pressed={density === d} data-cl14-dens={d}
+            aria-label={d === "comfortable" ? "Comfortable" : "Compact"} title={d === "comfortable" ? "Comfortable" : "Compact"} disabled={loading} onClick={() => setDensity(d)}>
+            <svg width="14" height="12" viewBox="0 0 14 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+              {d === "comfortable" ? <path d="M1 2h12M1 6h12M1 10h12" /> : <path d="M1 1.5h12M1 4.5h12M1 7.5h12M1 10.5h12" />}
+            </svg>
+          </button>
+        ))}
+      </span>
+      <button type="button" className="cl16-fsb cl18-fsb" data-cl16="full" aria-pressed={full} disabled={loading}
+        aria-label={full ? "Exit full screen" : "Full screen"} title={`${full ? "Exit full screen" : "Full-screen list"} (${shortcutLabel("contactsFull")})`}
+        onClick={() => setFull(!full)}>
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+          {full ? <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" /> : <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />}
+        </svg>
+      </button>
+    </span>
   );
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
   const wsRef = useRef<HTMLElement | null>(null);
@@ -389,7 +396,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       if (!col || !rows.length) { setMarkedLetter((m) => (m === null ? m : null)); return; }
       const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
       const scroller = col.closest<HTMLElement>(".wpg-scroll");
-      const line = (labels ? labels.getBoundingClientRect().bottom : (scroller?.getBoundingClientRect().top ?? 0)) + 2;
+      if (!scroller) return;
+      /* the line is where the headings sit once STUCK (their sticky top + their height), the place a pick lands a
+         row: read against their current bottom, the first row always touched it and "A" was marked at the top */
+      const line = scroller.getBoundingClientRect().top + (labels ? (parseFloat(getComputedStyle(labels).top) || 0) + labels.offsetHeight : 12) + 2;
       let cur: HTMLElement | null = null;
       for (const r of rows) {
         if (r.getBoundingClientRect().top <= line) cur = r;
@@ -1124,23 +1134,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             health={pageState === "list" ? health : null} onHealth={openHk}
             letters={<LetterTabs variant="top" counts={stripCounts} current={markedLetter} onPick={pickLetter} loading={pageState !== "list"} />}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v17 §B — search and the filter pills, in the header, above its rule */}
-            <div className="cl17-fr" data-cl17="filter-row">
-              <ContactFind find={search} onFind={setSearch} disabled={pageState !== "list"}
-                findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>} />
-              {pageState === "list" ? (
-                <div className="cl14-frow cl17-pills" data-cl14="frow" data-cl17="pills">
-                  <ContactFilterStrip filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop} hideClear
-                    showing={visibleFacts.length} msTitle={scoped?.title?.trim() || null} />
-                </div>
-              ) : null}
-            </div>
             {/* v17 §C — the pin line: the header's foot */}
             <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
           </ContactLightHeader>
         )}
         {pageState === "settling" && (
-          <ContactSkeleton controls={controls} />
+          <ContactSkeleton controls={listTools(true)} />
         )}
         <div className="clv-main" ref={mainColRef}>
 
@@ -1157,17 +1156,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <section className="cl14-ws cl16-list" data-cl14="ws" data-cl16="list" ref={wsRef} aria-label="The full list">
           {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
               control bar is gone: search and the filters are in the header. */}
-          <div className="cl17-sv" data-cl17="sheet-row">
-            <span className="cl17-showing" data-cl16="showing" data-cl17="showing" role="status">
+          {/* v18 §B — THE LIST HEADER: the top of the list sheet, slate. One sentence, left (the group name opens the
+              grouping menu); search, Filters, density and full screen, right. */}
+          <div className="cl18-lh" data-cl18="list-header" data-cl17="sheet-row">
+            <p className="cl18-says" data-cl18="sentence" data-cl16="showing" data-cl17="showing" role="status">
               {visibleFacts.length === factsAll.length && !anyActive ? (
-                <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b></>
+                <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> {factsAll.length === 1 ? "agent" : "agents"}</>
               ) : (
-                <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b>
-                  <span aria-hidden="true"> · </span>
-                  <button type="button" className="cl17-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button></>
+                <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b></>
               )}
-            </span>
-            {controls}
+              <span className="cl18-dim">{groupKey === "none" ? ", " : ", grouped by "}</span>
+              <button type="button" className="cl18-gn" data-cl18="group" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
+                onClick={(e) => pop.toggle("group", e.currentTarget)}>
+                {groupKey === "none" ? "A to Z" : (GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? "A to Z")}
+              </button>
+              {visibleFacts.length === factsAll.length && !anyActive ? null : (
+                <button type="button" className="cl18-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button>
+              )}
+            </p>
+            {listTools(false)}
+            <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
+            <ContactFiltersPanel filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
+              showing={visibleFacts.length} msTitle={scoped?.title?.trim() || null} />
           </div>
           <div className="cl14-list" data-cl14="list">
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
