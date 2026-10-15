@@ -80,7 +80,7 @@ export interface DeskCardProps {
 export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase }) => {
   const g = item.group;
   return (
-    <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? "" : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}>
+    <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}>
       <div className="td5-chead" data-td5="desk-head" style={{ background: g.tint, color: g.ink }}>
         <img src={g.art.src} alt="" aria-hidden="true" style={{ width: g.art.w + 6, left: g.art.l + 4, top: g.art.t - 2 }} />
         <span className="td5-cn">{g.name}</span>

@@ -25,6 +25,7 @@ import { agentPrimary } from "./agentDisplay";
 import { dayMonth, formatDate } from "./dates";
 import { expectedFor } from "./qcSummary";
 import { isSweepCard } from "./todoColumns";
+import type { HkGroup } from "./todoHousekeeping";
 
 /* ── groups and counts ────────────────────────────────────────────────────────────────────────── */
 
@@ -95,7 +96,21 @@ export interface TrayDb extends TaskData {
   packages: SubmissionPackage[];
   taskFlags: TaskFlag[];
   manuscripts: Manuscript[];
+  /** the board's housekeeping groups, which a sweep card stands for (assembleBoardColumns' `hkGroups`) */
+  hkGroups?: HkGroup[];
 }
+
+/* ⚠️ A PROFILE GAP NEVER REACHES THE TRAY AS ITS OWN CARD. `groupHousekeeping` folds every `data_quality_poor` card
+   into one sweep card per NEED ("3 reply times"), so the desk reads a sweep by its rule: the deed is the act, the
+   agents are its members, and with exactly one member the door is that agent's card at that field. */
+export const SWEEP_DEED: Record<string, string> = {
+  dq_responseTime: "Add their reply time", dq_materials: "Add what they want sent", dq_mswl: "Add their wishlist",
+};
+export const SWEEP_NEED: Record<string, "responseTime" | "materials" | "mswl"> = {
+  dq_responseTime: "responseTime", dq_materials: "materials", dq_mswl: "mswl",
+};
+export const groupFor = (c: BoardCard, db: Pick<TrayDb, "hkGroups">): HkGroup | undefined =>
+  isSweepCard(c) ? db.hkGroups?.find((g) => g.rule === c.sweepRule) : undefined;
 
 const DAY = 86400000;
 const ymdMs = (ymd: string | null | undefined): number => {
@@ -188,7 +203,10 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
   const bucket = cardBucket(card);
   const query = card.relatedRecordId ? db.queries.find((q) => q.id === card.relatedRecordId) : undefined;
   const userTask = card.userTaskId ? db.userTasks.find((t) => t.id === card.userTaskId) : undefined;
-  const agentId = query?.agentId ?? card.agentId ?? userTask?.agentId ?? (card.taskType === "data_quality_poor" ? card.relatedRecordId : undefined);
+  const sweepGroup = groupFor(card, db);
+  const agentId = query?.agentId ?? card.agentId ?? userTask?.agentId
+    ?? (sweepGroup && sweepGroup.members.length === 1 ? sweepGroup.members[0].agentId : undefined)
+    ?? (card.taskType === "data_quality_poor" && !isSweepCard(card) ? card.relatedRecordId : undefined);
   const agent = agentId ? db.agents.find((a) => a.id === agentId) : undefined;
   const inp = listRowInputs(card, db);
   const due = dueFor(card, db, db.taskFlags);
@@ -206,16 +224,23 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
     whoSub = agent ? `With ${agentPrimary(agent)}` : onBoard ? "Pinned to your corkboard" : "Added by you";
     sub = onBoard ? "Pinned to your corkboard" : agent ? `With ${agentPrimary(agent)}` : "Your own task";
   } else if (isSweepCard(card)) {
-    who = card.title; whoSub = ""; sub = card.subtitle || card.record || "";
+    const m = sweepGroup?.members ?? [];
+    const names = m.map((x) => x.agentName);
+    if (m.length === 1) { who = names[0]; whoSub = m[0].agency ?? ""; sub = [names[0], m[0].agency].filter(Boolean).join(" · "); }
+    else {
+      who = `${m.length || card.sweepOf} agents`;
+      whoSub = names.slice(0, 3).join(", ") + (names.length > 3 ? ` and ${names.length - 3} more` : "");
+      sub = whoSub || card.record || "";
+    }
   } else if (!sub) {
     sub = card.record || card.subtitle || "";
   }
   const today = localYmd(now);
   const dueKey: TrayItem["due"] = !dial.ymd ? "none" : dial.ymd < today ? "past" : dial.ymd <= weekEndYmd(now) ? "week" : "later";
-  const deed = trayDeed(card);
+  const deed = isSweepCard(card) && SWEEP_DEED[card.sweepRule] ? SWEEP_DEED[card.sweepRule] : trayDeed(card);
   return {
     card, key: card.key, group: groupOf(card), kind: kindOf(card), bucket, deed, query, agent, userTask, sub,
-    initials: own ? null : initialsOf(name || agency || card.title),
+    initials: own ? null : initialsOf(name || agency || (isSweepCard(card) ? `${card.sweepOf} ` : card.title)),
     who, whoSub, dial, anchorMs: Number.isFinite(anchorMs) ? anchorMs : (userTask?.createdAt ? Date.parse(userTask.createdAt) : now),
     hay: `${deed} ${name} ${agency} ${card.title}`.toLowerCase(), due: dueKey, sweep: isSweepCard(card),
   };
@@ -352,6 +377,11 @@ export function deskFacts(i: TrayItem, db: TrayDb, now: number): Fact[] {
       return [first, second, { label: "No reply means no", value: n === true ? "Yes" : n === false ? "No" : "Not stated", muted: n === undefined }];
     }
     case "fix": {
+      const g = groupFor(i.card, db);
+      if (g && SWEEP_NEED[g.rule]) {
+        return [{ label: "Missing", value: NEED_WORDS[SWEEP_NEED[g.rule]] }, { label: g.members.length === 1 ? "Agent" : "Agents", value: g.members.length === 1 ? g.members[0].agentName : String(g.members.length) },
+          { label: "Queried", value: String(g.members.filter((m) => m.queried).length) }];
+      }
       const needs = profileNeeds(i.agent);
       if (i.card.taskType === "data_quality_poor" && needs.length) {
         return [{ label: "Missing", value: needs.map((n) => NEED_WORDS[n]).join(", ") }, { label: "Agent", value: i.agent ? agentPrimary(i.agent) : "—" }, first];
@@ -414,6 +444,14 @@ export function lede(i: TrayItem, db: TrayDb, now: number): string {
       return i.agent?.noResponseMeansNo ? `${s1} ${agency} says no reply means no.` : s1;
     }
     case "fix": {
+      const g = groupFor(i.card, db);
+      if (g && SWEEP_NEED[g.rule]) {
+        const need = NEED_WORDS[SWEEP_NEED[g.rule]].toLowerCase();
+        const n = g.members.length;
+        const queried = g.members.filter((m) => m.queried).length;
+        const s1 = n === 1 ? `${g.members[0].agentName}’s profile has no ${need} on record.` : `${n} agents’ profiles have no ${need} on record.`;
+        return queried ? `${s1} ${n === 1 ? "You have queried this agent." : `You have queried ${queried} of them.`}` : s1;
+      }
       if (i.card.taskType === "data_quality_poor") {
         const needs = profileNeeds(i.agent).map((n) => NEED_WORDS[n].toLowerCase());
         if (!needs.length) return "";
@@ -483,7 +521,8 @@ export function actionWords(i: TrayItem): string {
     case "chase": return "Record a nudge";
     case "close": return "Decide what to do";
     case "fix":
-      if (i.card.taskType === "data_quality_poor" && !i.sweep) return "Add it to their profile";
+      if (i.card.taskType === "data_quality_poor" && (!i.sweep || (isSweepCard(i.card) && i.card.sweepOf === 1))) return "Add it to their profile";
+      if (i.sweep && SWEEP_DEED[(i.card as BoardCard & { sweepRule?: string }).sweepRule ?? ""]) return "Fill them in";
       if (i.card.taskType === "offer_send_full") return "Mark the full sent";
       if (i.sweep || (i.card.taskType ?? "").startsWith("materials_unrecorded")) return "Fill it in";
       return "Open it";

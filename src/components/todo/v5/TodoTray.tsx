@@ -29,7 +29,7 @@ import { assembleBoardColumns, boardFigures } from "../../../lib/todoColumns";
 import { localYMD, resolveScopedManuscript } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
-  NO_FILTERS, SORT_LABEL, TRAY_GROUPS, actionWords, comingUp, deskFacts, filtersOn, kindCounts, lede, localYmd, matches,
+  NO_FILTERS, SORT_LABEL, SWEEP_NEED, TRAY_GROUPS, actionWords, comingUp, deskFacts, filtersOn, kindCounts, lede, localYmd, matches,
   trayItem, trayOrder, whereItStands, type TrayDb, type TrayFilters, type TrayGroupId, type TrayItem, type TrayKind, type TraySort,
 } from "../../../lib/todoTray";
 import { clearedThisWeek, clearedToday, type ClearedAct } from "../../../lib/todoCleared";
@@ -115,8 +115,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const aid = import.meta.env.MODE === "production" ? null : trayReviewState();
   const live: BoardCard[] = useMemo(() => (aid ? [] : [...cols.todo, ...cols.today]), [cols, aid]);
   const n = aid ? 0 : boardFigures(cols).cards;
-  const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags }),
-    [queries, agents, manuscripts, userTasks, activities, packages, taskFlags]);
+  const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups }),
+    [queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups]);
   const items = useMemo(() => live.map((c) => trayItem(c, trayDb, now)), [live, trayDb, now]);
   const counts = useMemo(() => kindCounts(live), [live]);
 
@@ -259,7 +259,13 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const c = i.card;
     if (i.sweep) {
       const group = hkGroups.find((g) => g.rule === (c as BoardCard & { sweepRule?: string }).sweepRule);
-      if (group) { setPending({ key: i.key, at: Date.now() }); setFlow({ items: [{ kind: "group", group }] }); }
+      if (!group) return;
+      setPending({ key: i.key, at: Date.now() });
+      /* one agent: that agent's card, at the field (the agent card is the only agent editor); several: today's sweep */
+      const need = SWEEP_NEED[group.rule];
+      const only = group.members.length === 1 ? group.members[0].agentId : undefined;
+      if (only && need) { openAgentCard(only, { ...(dataNeedTarget([need]) ?? {}), from: "task" }); return; }
+      setFlow({ items: [{ kind: "group", group }] });
       return;
     }
     if (c.userTaskId) {
@@ -452,6 +458,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       const leaving = ghost?.item.key === i.key;
       return (
         <button key={i.key} type="button" className="td5-row2" data-td5-row={i.key} data-td5="row" data-group={i.group.id} data-bucket={i.bucket}
+          data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
           data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
           onClick={() => { setSelKey(i.key); }}>
           <Disc item={i} />

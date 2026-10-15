@@ -114,3 +114,23 @@ describe("TD5 G1 (unit) — Coming up", () => {
     for (const u of up) expect(u.ymd > "2026-10-15").toBe(true);
   });
 });
+
+describe("TD5 E1 (unit) — a profile gap reaches the tray as a sweep, read by its rule", () => {
+  const sweep = (n: number) => ({ ...card("sweep-dq_responseTime", { taskType: "data_quality_poor", hk: true, stream: "hk" }), sweepOf: n, sweepRule: "dq_responseTime" }) as unknown as BoardCard;
+  const member = (id: string, name: string) => ({ card: card(id, {}), agentName: name, agentId: id, agency: "X", queried: true });
+  it("one agent: that agent, the agent card's words", () => {
+    const g = [{ rule: "dq_responseTime", meta: {}, members: [member("a2", "Iris Callahan")] }];
+    const i = trayItem(sweep(1), { ...db, hkGroups: g as never }, NOW);
+    expect(i.deed).toBe("Add their reply time");
+    expect(i.agent?.id).toBe("a2");
+    expect(actionWords(i)).toBe("Add it to their profile");
+    expect(lede(i, { ...db, hkGroups: g as never }, NOW)).toBe("Iris Callahan’s profile has no usual reply time on record. You have queried this agent.");
+  });
+  it("several agents: no single agent, the sweep's words", () => {
+    const g = [{ rule: "dq_responseTime", meta: {}, members: [member("a1", "Greg Panetta"), member("a2", "Iris Callahan")] }];
+    const i = trayItem(sweep(2), { ...db, hkGroups: g as never }, NOW);
+    expect(i.agent).toBeUndefined();
+    expect(i.who).toBe("2 agents");
+    expect(actionWords(i)).toBe("Fill them in");
+  });
+});
