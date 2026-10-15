@@ -14,6 +14,7 @@
  *    the agent's first name or the agency. A fact the record does not hold is left out of the
  *    sentence, never guessed into it. `LEDE_FORBIDDEN` is what the lock sweeps for.
  */
+import { MUTED_UNTIL } from "./taskFlags";
 import type { Agent, Manuscript, Query, SubmissionPackage, TaskFlag, UserTask, Activity } from "../types";
 import { QueryStatus } from "../types";
 import type { BoardCard } from "./todoBoard";
@@ -505,9 +506,24 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
       out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q) });
     }
   }
+  /* v5.1 §I.6 — an own dated task lands on the day it SURFACES (its due day less its surface offset), not its due day */
   for (const t of db.userTasks) {
-    if (t.done || !t.dueDate || t.dueDate <= today) continue;
-    out.push({ ms: ymdMs(t.dueDate), ymd: t.dueDate, name: t.text || "Your task", line: "Your own task.", anchorMs: Date.parse(t.createdAt || "") });
+    if (t.done || !t.dueDate) continue;
+    const lead = t.surfaceOffset === "week-before" ? 7 : t.surfaceOffset === "day-before" ? 1 : 0;
+    const d = new Date(ymdMs(t.dueDate)); d.setDate(d.getDate() - lead);
+    const joins = localYmd(d.getTime());
+    if (joins <= today) continue;
+    out.push({ ms: ymdMs(joins), ymd: joins, name: t.text || "Your task", line: lead ? "Your own task joins your tray." : "Your own task is due.", anchorMs: Date.parse(t.createdAt || "") });
+  }
+  /* v5.1 §G — a snooze coming back on its day */
+  for (const f of db.taskFlags) {
+    if (!f.snoozedUntil || f.snoozedUntil === MUTED_UNTIL || f.skippedAt || f.taskType === "offer_received") continue;
+    const ms = Date.parse(f.snoozedUntil);
+    if (!Number.isFinite(ms) || localYmd(ms) <= today) continue;
+    const q = f.queryId ? db.queries.find((x) => x.id === f.queryId) : undefined;
+    const a = db.agents.find((x) => x.id === (q ? q.agentId : f.agentId));
+    const own = f.taskType === "user_task" ? db.userTasks.find((t) => t.id === f.queryId) : undefined;
+    out.push({ ms, ymd: localYmd(ms), name: own ? own.text || "Your task" : a ? agentPrimary(a) : "A task", line: "A snooze comes back.", anchorMs: NaN });
   }
   return out.sort((a, b) => a.ms - b.ms).slice(0, limit);
 }

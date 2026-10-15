@@ -496,7 +496,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const openOwn = aid !== "nothing" && userTasks.some((t) => !t.done && !!t.dueDate);
   const loading = !collectionsReady;
   const state: "loading" | "nothing" | "caught" | "list" = loading ? "loading"
-    : live.length > 0 ? "list" : ((aid === "nothing" ? 0 : queries.length) === 0 && !openOwn) ? "nothing" : "caught";
+    /* v5.1 §G — with the compose card open (from the empty page's "Add a task yourself", or "+ Add a task" on a clear
+       desk) the page is the populated layout around an empty tray; cancelling with nothing saved goes back */
+    : live.length > 0 || compose ? "list" : ((aid === "nothing" ? 0 : queries.length) === 0 && !openOwn) ? "nothing" : "caught";
   const kindActive: TrayKind | null = filters.type === "you" || filters.type === "chase" || filters.type === "tidy" ? filters.type : null;
   const holding = queries.filter((q) => courtOf(q.status as QueryStatus) === "agent").length;
   const pastReply = queries.filter((q) => {
@@ -981,7 +983,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                             {shut[gd.id] ? null : <div className="td5-rows">{renderRows(g)}</div>}
                           </div>
                         );
-                      }) : loading ? null : <div className="td5-none">Nothing matches. Clear the filter to see the rest of your tray.</div>}
+                      }) : loading ? null : <div className="td5-none">{items.length ? "Nothing matches. Clear the filter to see the rest of your tray." : "Nothing in your tray yet."}</div>}
                       {loading ? null : <button type="button" className="td5-addrow" data-td5="add-row" onClick={() => openCompose()}>+ Add a task<kbd>N</kbd></button>}
                       </>}
                     </div>
