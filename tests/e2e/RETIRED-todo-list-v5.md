@@ -44,3 +44,10 @@ v5.1 moved the journeys onto the desk, the composer into the desk, the sheet ont
 **Unit locks retargeted with their law unchanged** (each says so at the assertion): `sidebarCapture.test.tsx` SB9 (`n` is two pages' own adds), `noteboardTask.test.ts` (the desk papers a dateless note only), `todoActions.test.ts` + `tasksCarryover.test.tsx` (the clamp also takes the deadline), `tasksAuditBoundary.test.tsx` (the engine hands the boundary the query's newest change), `todoColumns.test.ts` (the partition fixture uses surfaced tasks), `boardSettings.test.tsx` (the ONE list is `setAsideItems`; the restore path is REWRITTEN — each kind restores through its own field).
 
 **`hiddenItems` is DELETED** (`lib/taskSettings.ts`), replaced by `setAsideItems`; its three unit cases are rewritten as TD5 I4 (unit).
+
+**Two other pages' locks re-pointed by v5.1** (law unchanged; each says so at the assertion):
+
+| Lock | Was | Now |
+|---|---|---|
+| `corkboardV1` CB1 B2 | the header's Task opens the v2 composer in the "Add a task" half drawer, in Task mode | it opens the **compose card on the desk** (`[data-td5="compose"]`) in Task mode; nothing is written |
+| `headerPanelV2` P8 | the header's Set aside opens a popover, and the popover is above the header | the header's Set aside **switches the tray to its Set aside tab** (Part I.5): the tab is chosen, its centre is on screen and nothing covers it |
