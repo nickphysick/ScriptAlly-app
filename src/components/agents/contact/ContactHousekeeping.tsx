@@ -288,11 +288,11 @@ const Row: React.FC<RowProps> = ({ item, feat, open, leaving, onToggle, book, to
 
 /* ── the one-at-a-time session, and the wishlist check-in (§6, §7) ───────────────────────────── */
 
-type Session =
+export type Session =
   | { mode: "gaps"; list: HkItem[]; i: number; done: number }
   | { mode: "wl"; list: Agent[]; i: number; done: number };
 
-const SessionModal: React.FC<{
+export const SessionModal: React.FC<{
   ses: Session;
   onClose: () => void;
   onNext: (filled: boolean) => void;
@@ -392,7 +392,7 @@ const SessionModal: React.FC<{
 /* ── the whole ──────────────────────────────────────────────────────────────────────────────── */
 
 /** v17.1 — the note left in the tab's place for 6s after it is hidden. */
-const TabNote: React.FC<{ onUndo: () => void }> = ({ onUndo }) => {
+export const TabNote: React.FC<{ onUndo: () => void }> = ({ onUndo }) => {
   const place = useWindowCorner(floatInset());
   if (typeof document === "undefined" || !place) return null;
   return createPortal(
@@ -405,253 +405,8 @@ const TabNote: React.FC<{ onUndo: () => void }> = ({ onUndo }) => {
   );
 };
 
-export const Housekeeping: React.FC<HousekeepingProps> = (p) => {
-  const { model, checkin, every, book, today, agents, open, view } = p;
-  const [openKey, setOpenKey] = useState<string | null>(null);
-  const [shut, setShut] = useState<Set<GroupKey>>(new Set());
-  const [leaving, setLeaving] = useState<Set<string>>(new Set());
-  const [busy, setBusy] = useState(false);
-  const [foot, setFoot] = useState<{ text: string; undo?: () => Promise<boolean> } | null>(null);
-  const footTimer = useRef<number | undefined>(undefined);
-  const [ses, setSes] = useState<Session | null>(null);
-  const [bump, setBump] = useState(0);
-  const prevComplete = useRef(model.complete);
-  useEffect(() => {
-    if (model.complete > prevComplete.current) setBump((b) => b + 1);
-    prevComplete.current = model.complete;
-  }, [model.complete]);
-  /* a closed drawer forgets the open row and the session; the foot's 7s line goes with it */
-  useEffect(() => { if (!open) { setOpenKey(null); setSes(null); } }, [open]);
-  useEffect(() => () => window.clearTimeout(footTimer.current), []);
-
-  const sayFoot = (text: string, undo?: () => Promise<boolean>) => {
-    window.clearTimeout(footTimer.current);
-    setFoot({ text, undo });
-    footTimer.current = window.setTimeout(() => setFoot(null), 7000);
-  };
-
-  const saveFix = async (item: HkItem, fix: HkFix): Promise<boolean> => {
-    const r = await p.onFix(item, fix);
-    if ("error" in r) { sayFoot(`Couldn’t save that: ${r.error}`); return false; }
-    sayFoot(r.line, r.undo);
-    return true;
-  };
-
-  const onRowSave = async (item: HkItem, fix: HkFix) => {
-    if (busy) return;
-    setBusy(true);
-    setLeaving((s) => new Set(s).add(item.key));
-    await new Promise((res) => window.setTimeout(res, 320));
-    const ok = await saveFix(item, fix);
-    setLeaving((s) => { const n = new Set(s); n.delete(item.key); return n; });
-    if (ok) setOpenKey(null);
-    setBusy(false);
-  };
-  const onRowLater = async (item: HkItem) => {
-    if (busy) return;
-    setBusy(true);
-    setLeaving((s) => new Set(s).add(item.key));
-    await new Promise((res) => window.setTimeout(res, 320));
-    try {
-      await p.onLater(item);
-      const until = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
-      sayFoot(`Hidden until ${dayMonth(until)}. It comes back on its own then.`);
-    } finally {
-      setLeaving((s) => { const n = new Set(s); n.delete(item.key); return n; });
-      setOpenKey(null);
-      setBusy(false);
-    }
-  };
-
-  const rowProps = (it: HkItem, feat = false) => ({
-    item: it, feat, open: openKey === it.key, leaving: leaving.has(it.key),
-    onToggle: () => setOpenKey((k) => (k === it.key ? null : it.key)),
-    book, today, agents, h: p, onSave: onRowSave, onLater: onRowLater, busy,
-  });
-
-  const items = model.items;
-  const first = items[0];
-  const start = bestPlaceToStart(items, book);
-  const grouped = new Map<GroupKey, HkItem[]>();
-  for (const it of items.slice(1)) grouped.set(it.group, [...(grouped.get(it.group) ?? []), it]);
-
-  const checkinCard = checkin.show ? (
-    <div className="hkv-ci" data-hkv="checkin">
-      <div>
-        <b>Time for a wishlist check-in</b>
-        <p>Agents update what they’re looking for a few times a year. {checkin.due.length} of the agents you might query haven’t been looked at in over {every} months.</p>
-      </div>
-      <div className="hkv-ci-a">
-        <button type="button" className="hkv-sv" data-hkv="checkin-go" onClick={() => setSes({ mode: "wl", list: checkin.due, i: 0, done: 0 })}>Check {checkin.due.length} wishlist{checkin.due.length === 1 ? "" : "s"}</button>
-        <button type="button" className="hkv-ln" data-hkv="checkin-next" onClick={() => void p.onCheckinNext()}>Next time</button>
-      </div>
-      <div className="hkv-ci-f">Remind me every
-        <span className="hkv-seg" role="radiogroup" aria-label="How often">
-          {([3, 6, 12] as WishlistEvery[]).map((m) => (
-            <button key={m} type="button" role="radio" aria-checked={every === m} data-hkv="every" data-every={m} onClick={() => void p.onCheckinEvery(m)}>{m} months</button>
-          ))}
-        </span>
-      </div>
-    </div>
-  ) : checkin.nextOn ? (
-    <div className="hkv-ci quiet" data-hkv="checkin-quiet"><span>Next wishlist check-in: <b>{longDayLabel(checkin.nextOn)}</b></span></div>
-  ) : null;
-
-  const detailBody = items.length ? (
-    <>
-      {start && (
-        <div className="hkv-start" data-hkv="start">
-          <span className="hkv-star" aria-hidden="true">★</span>
-          <div><em>Best place to start</em><p><RunsText runs={start} /></p></div>
-        </div>
-      )}
-      <div className="hkv-lab" data-hkv="start-label">Start here</div>
-      <Row {...rowProps(first, true)} />
-      {GROUP_ORDER.filter((g) => grouped.get(g)?.length).map((g) => {
-        const list = grouped.get(g)!;
-        const isShut = shut.has(g);
-        return (
-          <div key={g} className={`hkv-grp${isShut ? " shut" : ""}`} data-hkv="group" data-group={g}>
-            <button type="button" className="hkv-gh" data-hkv="group-head" aria-expanded={!isShut}
-              onClick={() => setShut((s) => { const n = new Set(s); if (n.has(g)) n.delete(g); else n.add(g); return n; })}>
-              <b>{GROUP_COPY[g].heading}<i className="hkv-chev" aria-hidden="true">▾</i></b><em>{list.length}</em>
-            </button>
-            <p className="hkv-gx"><RunsText runs={GROUP_COPY[g].explainer(book)} /></p>
-            {!isShut && list.map((it) => <Row key={it.key} {...rowProps(it)} />)}
-          </div>
-        );
-      })}
-    </>
-  ) : (
-    <div className="hkv-done" data-hkv="empty"><p><RunsText runs={HK_EMPTY(book)} /></p></div>
-  );
-
-  const agentBody = model.byAgent.length ? (
-    <>
-      <div className="hkv-lab" data-hkv="agent-label">{model.byAgent.length} agent{model.byAgent.length === 1 ? "" : "s"} · most useful first</div>
-      {model.byAgent.map((r) => {
-        const all = model.gapsById.get(r.agent.id)?.length ?? r.items.length;
-        const done = 5 - all;
-        const R = 2 * Math.PI * 17;
-        const key = `ag:${r.agent.id}`;
-        const isOpen = openKey === key;
-        const top = r.items[0];
-        return (
-          <div key={r.agent.id} className={`hkv-ag${isOpen ? " open" : ""}`} data-hkv="agent-row" data-agent={r.agent.id}>
-            <div className="hkv-ar" role="button" tabIndex={0} aria-expanded={isOpen}
-              onClick={() => setOpenKey((k) => (k === key ? null : key))}
-              onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); setOpenKey((k) => (k === key ? null : key)); } }}>
-              <span className="hkv-mr" data-hkv="agent-ring" data-done={done}>
-                <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
-                  <circle cx="22" cy="22" r="17" fill="none" stroke="#e7e1d9" strokeWidth="3.5" />
-                  <circle cx="22" cy="22" r="17" fill="none" stroke="#2a3a52" strokeWidth="3.5" strokeLinecap="round"
-                    strokeDasharray={R} strokeDashoffset={R * (1 - done / 5)} transform="rotate(-90 22 22)" />
-                </svg>
-                <span>{agentInitials(r.agent)}</span>
-              </span>
-              <span className="hkv-nm">
-                <b>{(r.agent.name ?? "").trim() || (r.agent.agency ?? "").trim()}</b>
-                <span className="hkv-tags">{r.items.map((it) => <span key={it.gap} data-hkv="agent-tag">{GAP_LABEL[it.gap as GapKey]}</span>)}</span>
-              </span>
-              <span className="hkv-add">Finish</span>
-            </div>
-            {isOpen && (
-              <div className="hkv-ab" data-hkv="agent-body">
-                {r.items.map((it) => <Row key={it.key} {...rowProps(it)} />)}
-                <button type="button" className="hkv-card" data-hkv="agent-card" onClick={() => p.onAgentCard(r.agent.id, GAP_TARGET[top.gap].tab)}>
-                  {PENCIL}Open {firstNameOf(r.agent)}’s card
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </>
-  ) : (
-    <div className="hkv-done" data-hkv="empty"><p><RunsText runs={HK_EMPTY(book)} /></p></div>
-  );
-
-  const head = (
-    <div className="hkv-dh" data-hkv="head">
-      <img className="hkv-hawk" src={`${HK_HAWK.src}?v=${HK_HAWK.version}`} alt="" aria-hidden="true" />
-      <div className="hkv-r1" data-hkv="r1">
-        <h3 className="hkv-title" data-hkv="title-h">Housekeeping</h3>
-        <button type="button" className="hkv-x" data-hkv="close" aria-label="Close Housekeeping" onClick={p.onClose}>✕</button>
-      </div>
-      <div className="hkv-r2" data-hkv="r2">
-        <span className="hkv-dsg" role="radiogroup" aria-label="Show">
-          <button type="button" role="radio" aria-checked={view === "detail"} data-hkv="view" data-v="detail" onClick={() => p.onView("detail")}>By missing detail</button>
-          <button type="button" role="radio" aria-checked={view === "agent"} data-hkv="view" data-v="agent" onClick={() => p.onView("agent")}>By agent</button>
-        </span>
-        {items.length > 0 && (
-          <button type="button" className="hkv-dp" data-hkv="session-go" title={sessionLine(items.length)}
-            onClick={() => setSes({ mode: "gaps", list: items, i: 0, done: 0 })}>Fill in the gaps, one at a time →</button>
-        )}
-      </div>
-      <div className="hkv-r3" data-hkv="r3">
-        <span><b>{model.complete} of {model.total}</b> agent profiles filled in</span>
-        <span className="hkv-pbar"><i style={{ width: `${Math.round(model.share * 100)}%` }} /></span>
-        <span>{items.length} gap{items.length === 1 ? "" : "s"} · {model.gapAgents} agent{model.gapAgents === 1 ? "" : "s"}</span>
-      </div>
-    </div>
-  );
-
-  const footNode = foot ? (
-    <div className="hkv-foot" data-hkv="foot"><span data-hkv="foot-text">{foot.text}</span><span className="hkv-sp" />
-      {foot.undo && (
-        <button type="button" data-hkv="undo" onClick={async () => {
-          const u = foot.undo!;
-          setFoot(null);
-          window.clearTimeout(footTimer.current);
-          const ok = await u();
-          if (!ok) sayFoot("Couldn’t undo that.");
-        }}>Undo</button>
-      )}
-    </div>
-  ) : model.hidden.length ? (
-    <div className="hkv-foot" data-hkv="foot"><span data-hkv="foot-text">{model.hidden.length} put off until {model.laterUntil ? longDayLabel(model.laterUntil).replace(/ \d{4}$/, "") : "later"}</span>
-      <span className="hkv-sp" /><button type="button" data-hkv="show-all" onClick={() => void p.onShowAll()}>Show them now</button>
-    </div>
-  ) : (
-    <div className="hkv-foot" data-hkv="foot"><span data-hkv="foot-text">{HK_FOOT}</span></div>
-  );
-
-  return (
-    <>
-      {p.tabShown ? (
-      <FloatingTab probe="housekeeping" hidden={open} routeActive={p.routeActive} onOpen={p.onOpen}
-        dismiss={{ label: "Hide the Housekeeping tab", onDismiss: p.onDismissTab }}
-        label={`Housekeeping: ${tabCounts(model)}. Press H to open.`}>
-        <span className="hkv-hh" aria-hidden="true"><img src={`${HK_HAWK.src}?v=${HK_HAWK.version}`} alt="" /></span>
-        <span className="hkv-tt">
-          <b>Housekeeping{p.keyHint && <kbd className="hkv-kbd" data-hkv="key">{p.keyHint}</kbd>}</b>
-          <small data-hkv="tab-counts">{tabCounts(model)}</small>
-        </span>
-        <span key={bump} className={bump ? "hkv-bump" : undefined}><TabRing share={model.share} tone="gaps" /></span>
-      </FloatingTab>
-      ) : null}
-      {p.tabNote && p.routeActive ? <TabNote onUndo={p.tabNote.onUndo} /> : null}
-      <HalfDrawer probe="housekeeping" open={open} onClose={p.onClose} label="Housekeeping" width="min(780px, 56vw)"
-        head={head} foot={footNode}
-        over={ses ? (
-          <SessionModal ses={ses} onClose={() => setSes(null)} model={model} book={book} today={today} agents={agents} h={p}
-            nextOn={checkin.nextOn}
-            saveFix={saveFix} later={p.onLater}
-            onNext={(filled) => setSes((s) => {
-              if (!s) return s;
-              const n = { ...s, i: s.i + 1, done: s.done + (filled ? 1 : 0) } as Session;
-              if (s.mode === "wl" && n.i >= n.list.length) void p.onCheckinNext();
-              return n;
-            })} />
-        ) : null}>
-        <div className="hkv-db" data-hkv="body-wrap" data-view={view}>
-          {view === "detail" ? detailBody : agentBody}
-          {checkinCard}
-        </div>
-      </HalfDrawer>
-    </>
-  );
-};
+/* ⚠️ RETIRED (Contact list v18 §F): the old drawer — its list views, "Start here" and the segmented toggle. The drawer
+   is `HousekeepingDrawer`; the fix controls, the session (the wishlist check-in) and the tab note stay here. */
 
 /** The drawer's body alone, for the empty state's exhibit (a picture of the list, never live). */
 export const HousekeepingPreview: React.FC<{ model: HkModel; book: HkBook }> = ({ model, book }) => {

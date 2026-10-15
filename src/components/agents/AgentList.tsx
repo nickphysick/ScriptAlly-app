@@ -31,13 +31,15 @@ import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { hkAllFilled } from "../../lib/hkReviewAid";
-import { dismissPath, dismissedAtGaps, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
+import { INTRO_PATH_V18, dismissPath, dismissedAtGaps, introSeenOf, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
 import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
   contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
   writeHkView, type HkView, type WishlistEvery,
 } from "../../lib/contactPrefs";
-import { Housekeeping, type FixResult, type HkFix } from "./contact/ContactHousekeeping";
+import { type FixResult, type HkFix } from "./contact/ContactHousekeeping";
+import { HousekeepingDrawer } from "./contact/HousekeepingDrawer";
+import { health as healthOf } from "../../lib/listHealth";
 import { applyPatch, cardPatch, draftOf, inversePatch, toContactDraft, type CardDraft } from "../../lib/cardDraft";
 import { alsoChanges } from "../../lib/contactEdit";
 import { commitCardSave } from "../../lib/agentCardSave";
@@ -747,7 +749,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   setHkOpenRef.current = setHkOpen;
   /* v17.1 — THE ONE OPENER: the tab, the H key and List health in the header all call this */
   const openHk = useCallback(() => setHkOpen(true), []);
-  const health = useMemo(() => listHealth(hk), [hk]);
+  const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
+  const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
+  /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
+  const hkIntroSeen = introSeenOf(currentUser);
+  const markIntroSeen = useCallback(() => { if (!hkIntroSeen) void updateUserPaths(INTRO_PATH_V18); }, [hkIntroSeen, updateUserPaths]);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
      when the tab was hidden. `pendingDismiss` holds the value from the press until the user doc agrees, so the
      tab does not flash back while the write is in flight. */
@@ -1081,9 +1088,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §6 — HOUSEKEEPING: the floating tab in the window's corner and the half-screen drawer it
             opens (both portalled; the tab only while this is the page on screen) */}
         {showList && (
-          <Housekeeping
+          <HousekeepingDrawer
             model={hk} checkin={hkCheckin} every={hkPrefs.wishlistEvery} book={hkBook} today={hkToday} agents={agents}
             tabShown={hkTabShown} onDismissTab={dismissTab} tabNote={tabNote ? { onUndo: undoDismiss } : null}
+            health={listH} introSeen={hkIntroSeen} onIntroSeen={markIntroSeen}
             open={hkOpen} onOpen={openHk} onClose={() => setHkOpen(false)}
             view={hkView} onView={setHkView} routeActive={active} keyHint={shortcutLabel("contactsHk")}
             onFix={onHkFix}

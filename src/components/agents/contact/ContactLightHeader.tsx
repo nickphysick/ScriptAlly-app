@@ -94,13 +94,13 @@ export const ContactSummaryCard: React.FC<{
       ))}
     </div>
     {health !== undefined ? (
-      <button type="button" className="cl17-hl" data-cl17="health" data-full={health && health.gaps <= 0 ? "" : undefined}
+      <button type="button" className="cl17-hl" data-cl17="health" data-full={health && health.gaps <= 0 && health.pct === 100 ? "" : undefined}
         disabled={loading || !health || !onHealth} onClick={onHealth}
         aria-label={health ? healthLabel(health) : "List health"}>
-        <HealthRing pct={health ? (health.gaps <= 0 ? 100 : health.pct) : null} />
+        <HealthRing pct={health ? health.pct : null} />
         <span className="cl17-ht">
           <b data-cl17="health-title">List health</b>
-          <em data-cl17="health-gaps">{health ? gapLine(health.gaps) : ""}</em>
+          <em data-cl17="health-gaps">{health ? (health.gaps > 0 || health.pct === 100 ? gapLine(health.gaps) : "Some put off for later") : ""}</em>
         </span>
       </button>
     ) : null}

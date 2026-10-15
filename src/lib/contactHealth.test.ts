@@ -9,8 +9,10 @@ const items = (n: number) => Array.from({ length: n }, () => ({})) as never[];
 
 describe("List health", () => {
   it("reads Housekeeping's share and gap count, rounded", () => {
-    expect(listHealth({ share: 31 / 41, items: items(14) })).toEqual({ pct: 76, gaps: 14 });
-    expect(listHealth({ share: 1, items: items(0) })).toEqual({ pct: 100, gaps: 0 });
+    /* v18: the points share over the agents (lib/listHealth), the gap count Housekeeping's own */
+    const a = [{ id: "a", submissionStatus: "Open" }, { id: "b", submissionStatus: "Open" }] as never[];
+    expect(listHealth(a, { gapsById: new Map([["a", ["reply"]]]) as never, items: items(1) })).toEqual({ pct: Math.round((100 * 30) / 36), gaps: 1 });
+    expect(listHealth(a, { gapsById: new Map() as never, items: items(0) })).toEqual({ pct: 100, gaps: 0 });
   });
   it("words", () => {
     expect(gapLine(14)).toBe("14 gaps to fill");
