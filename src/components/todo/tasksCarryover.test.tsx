@@ -104,7 +104,11 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
        a choke point inside the file about to be rebuilt is a coincidence, not a guarantee. It
        is `clampSnooze` in lib/todoActions now, unit-tested away from any component, and this
        asserts the page reaches it. */
-    const fn = sliceBetween(listPage, "function snoozeCard", "function snoozeGroup");
+    /* ⚠️ RELOCATED, LAW UNCHANGED (to-do list v5): the writes are `snoozeCardWrites` in snoozeWrites.ts, which the
+       page's `snoozeCard` and the desktop desk both call — still one choke point, and it still clamps. */
+    expect(listPage).toContain("snoozeCardWrites({ upsertTaskFlag, dismissTask }, c, days, when)");
+    const writes = readFileSync(join(here, "snoozeWrites.ts"), "utf8");
+    const fn = sliceBetween(writes, "export function snoozeCardWrites", "export function snoozeGroupWrites");
     expect(fn).toContain("({ days, when } = clampSnooze(c, days, when))");
     expect(fn).not.toContain('c.taskType === "offer_received" && days > 1');
   });
