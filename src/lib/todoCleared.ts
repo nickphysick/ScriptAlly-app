@@ -21,7 +21,11 @@
  *    `resolvedAt`, and nothing here reads `snoozedUntil`.
  * ⚠️ AN ACTIVITY'S `date` IS THE DAY THE WRITER GAVE FOR THE EVENT. There is no "recorded at" field on
  *    the feed, so a send recorded today and dated last week is last week's. Stated, not corrected.
- * ⚠️ THE WEEK IS LONDON'S: Monday 00:00 Europe/London to now, across the clock changes.
+ * ⚠️ THE WEEK IS LONDON'S: Monday 00:00 Europe/London to the end of today, across the clock changes.
+ * ⚠️ AND "TODAY" RUNS TO TONIGHT, NOT TO NOW. The drawer dates an act by its DAY, stored as local noon (`dayIso`), so a
+ *    send recorded "today" at 10am carries a time two hours ahead. Bounding the window at `now` dropped it from the
+ *    ring and from Done today until lunchtime (measured, TD5 D2's first run). Such an act is `timed: false`: it holds a
+ *    day, not a time, and a slip says "Today" rather than printing 12:00 as if it were the moment.
  */
 import type { Activity, Agent, Query, TaskFlag, UserTask } from "../types";
 import { agentPrimary } from "./agentDisplay";
@@ -38,6 +42,8 @@ export interface ClearedAct {
   /** what it did, in words: "Now Partial sent" */
   consequence: string;
   at: number;
+  /** false where the record holds a day and not a time (a drawer-written activity) */
+  timed: boolean;
   queryId?: string;
   agentId?: string;
   taskId?: string;
@@ -125,14 +131,22 @@ export interface ClearedData {
 
 const MATERIAL: Record<string, string> = { partial_sent: "Partial", full_sent: "Full", resubmitted: "Revision" };
 
+/** the instant London's today ends (its next midnight) */
+export function londonDayEnd(nowMs: number): number {
+  const start = londonDayStart(nowMs);
+  return londonDayStart(start + 36 * 3600 * 1000);
+}
+
 /**
- * Every act that took a task off the board at or after `sinceMs` (and not after `nowMs`), newest first.
+ * Every act that took a task off the board at or after `sinceMs` and before the end of `nowMs`'s London day, newest
+ * first.
  * Each record is counted once: an activity by its id, a flag by its id, a task by its id.
  */
 export function clearedSince(data: ClearedData, sinceMs: number, nowMs: number = Date.now()): ClearedAct[] {
   const out: ClearedAct[] = [];
   const seen = new Set<string>();
-  const inWindow = (t: number) => Number.isFinite(t) && t >= sinceMs && t <= nowMs;
+  const until = londonDayEnd(nowMs);
+  const inWindow = (t: number) => Number.isFinite(t) && t >= sinceMs && t < until;
   const agentOfQuery = (qid: string | undefined) => {
     const q = qid ? data.queries.find((x) => x.id === qid) : undefined;
     const a = q?.agentId ? data.agents.find((x) => x.id === q.agentId) : undefined;
@@ -170,7 +184,7 @@ export function clearedSince(data: ClearedData, sinceMs: number, nowMs: number =
         break;
       default: break;
     }
-    out.push({ kind, stamp: STAMP[kind], label, consequence, at: t, queryId: act.queryId || undefined, agentId: a?.id, id });
+    out.push({ kind, stamp: STAMP[kind], label, consequence, at: t, timed: false, queryId: act.queryId || undefined, agentId: a?.id, id });
   }
 
   for (const f of data.taskFlags) {
@@ -183,7 +197,7 @@ export function clearedSince(data: ClearedData, sinceMs: number, nowMs: number =
     const a = f.agentId ? data.agents.find((x) => x.id === f.agentId) : undefined;
     out.push({
       kind: "filled", stamp: "SAVED", label: a ? `Profile for ${agentPrimary(a)}` : "An agent’s profile",
-      consequence: "On their profile", at: t, agentId: f.agentId, id,
+      consequence: "On their profile", at: t, timed: true, agentId: f.agentId, id,
     });
   }
 
@@ -194,15 +208,15 @@ export function clearedSince(data: ClearedData, sinceMs: number, nowMs: number =
     const id = `task:${u.id}`;
     if (seen.has(id)) continue;
     seen.add(id);
-    out.push({ kind: "ticked", stamp: "DONE", label: u.text || "Your task", consequence: "Off your list", at: t, taskId: u.id, id });
+    out.push({ kind: "ticked", stamp: "DONE", label: u.text || "Your task", consequence: "Off your list", at: t, timed: true, taskId: u.id, id });
   }
 
   return out.sort((x, y) => y.at - x.at);
 }
 
-/** this week's acts (Monday 00:00 London to now) */
+/** this week's acts (Monday 00:00 London to the end of today) */
 export const clearedThisWeek = (data: ClearedData, nowMs: number = Date.now()): ClearedAct[] =>
   clearedSince(data, londonWeekStart(nowMs), nowMs);
-/** today's acts (00:00 London to now) */
+/** today's acts (00:00 London to the end of today) */
 export const clearedToday = (data: ClearedData, nowMs: number = Date.now()): ClearedAct[] =>
   clearedSince(data, londonDayStart(nowMs), nowMs);

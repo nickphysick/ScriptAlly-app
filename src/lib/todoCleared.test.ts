@@ -89,6 +89,14 @@ describe("TD5 B1 — clearedSince", () => {
     expect(s.stamp).toBe("SENT");
     expect(got.find((a) => a.kind === "filled")!.stamp).toBe("SAVED");
   });
+  it("an act dated later TODAY (the drawer's local-noon day stamp) counts, and carries no clock time", () => {
+    const noon = act("noon", "full_sent", NOW + 3 * 3600e3); // 17:00 BST today, after NOW
+    const got2 = clearedToday(data({ activities: [noon], taskFlags: [], userTasks: [] }), NOW);
+    expect(got2.map((a) => a.id)).toEqual(["act:noon"]);
+    expect(got2[0].timed).toBe(false);
+    const tomorrow = act("tmw", "full_sent", NOW + 12 * 3600e3); // 01:00 BST tomorrow
+    expect(clearedToday(data({ activities: [tomorrow], taskFlags: [], userTasks: [] }), NOW)).toEqual([]);
+  });
   it("today is a narrower window of the same derivation", () => {
     const t = clearedToday(data(), NOW).map((a) => a.id).sort();
     expect(t).toEqual(["act:o1", "act:r1", "act:s1", "flag:f1", "task:t1"]);

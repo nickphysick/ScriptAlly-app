@@ -205,7 +205,9 @@
 }
 .td5-sheet .td5-nav {
   position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; box-sizing: border-box; min-height: var(--td5-navh);
-  padding: 20px 22px 20px 24px; background: var(--td5-navy); border-radius: 24px 24px 0 0; color: var(--td5-cr);
+  /* ⚠️ 19, NOT v138's 20: the row holds a 38px button, and 38 + 2 × 20 is 78 — two pixels taller than the --td5-navh the
+     strip and the bands stick under (measured, TD5 C1's first run: the strip sat 2px inside the row). 38 + 2 × 19 = 76. */
+  padding: 19px 22px 19px 24px; background: var(--td5-navy); border-radius: 24px 24px 0 0; color: var(--td5-cr);
 }
 .td5-sheet .td5-nav[data-stuck] { border-radius: 0; }
 .td5-sheet .td5-say { position: relative; flex: 0 1 auto; min-width: 0; margin: 0; font: 400 17px/1.3 var(--sp-type) !important; color: rgba(244, 238, 229, 0.66); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
