@@ -22,11 +22,13 @@ import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { respCounts, respItems, type NoKind } from "../../lib/responses";
+import { carouselOrder, respCounts, respItems, stillOut, type NoKind, type RespItem } from "../../lib/responses";
+import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { RspHeader, RspSummaryCard } from "./RspHeader";
+import { RspCarousel, cardAct } from "./RspCarousel";
 import "./responses.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -50,11 +52,18 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     const own = ms ? queries.filter((q) => q.manuscriptId === ms.id) : [];
     const rows = buildQcRows(own, agents, activities, nowMs);
     const items = respItems(rows);
-    return { nowMs, rows, items, counts: respCounts(items) };
+    return { nowMs, rows, items, counts: respCounts(items), more: carouselOrder(items), out: stillOut(rows) };
     /* location.key: a switch of book re-opens the route, and the book is read from storage */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries, activities, agents, ms?.id, location.key]);
-  const { counts } = model;
+  const { counts, nowMs } = model;
+  const msTitle = ms?.title?.trim() || null;
+
+  /* the answer open in the side panel (Part D) */
+  const [openId, setOpenId] = useState<string | null>(null);
+  const openAnswer = useCallback((i: RespItem<QcRow>) => setOpenId(i.id), []);
+  /* a card's own button runs its journey (Part D runs it in the panel) */
+  const act = useCallback((i: RespItem<QcRow>) => { openQueryDrawer({ mode: cardAct(i).mode, queryId: i.id }); }, []);
 
   /* Passed / No reply: ONE state with the list's segmented control (Part C). Pressing it again clears it. */
   const [kind, setKind] = useState<NoKind | null>(null);
@@ -71,11 +80,15 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
           list width, as packages v4's `.ppv-page > .pk4-col` does */}
       <div className="rsp-page">
       <div className="rsp rsp-col" data-rsp="page">
-        <RspHeader loading={!ready} answered={ready ? counts.answered : null} msTitle={ms?.title?.trim() || null}
+        <RspHeader loading={!ready} answered={ready ? counts.answered : null} msTitle={msTitle}
           hasNos={ready && counts.passed + counts.noReply > 0}
           onRecord={openRecordPicker} onShare={() => scrollTo(shareRef.current, "center")}
           card={<RspSummaryCard counts={counts} kind={kind} loading={!ready}
             onMore={() => scrollTo(moreRef.current, "start")} onKind={pressKind} />} />
+        {ready && counts.answered > 0 ? (
+          <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
+            selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
+        ) : null}
       </div>
       </div>
     </WorkspacePageGrid>
