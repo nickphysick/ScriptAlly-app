@@ -103,7 +103,12 @@ export function QueryDrawer() {
    * its chip on another page), the journey opens as the drawer it always was.
    */
   const [slot, setSlot] = useState<Element | null>(null);
-  useLayoutEffect(() => { setSlot(req?.panel ? document.querySelector(req.panel.slot ?? SIDE_SLOT) : null); }, [req]);
+  /* To-do list v5.1 §E — THE HOST HOOK, both halves: the slot is named by the request (`panel.slot`, else the side
+     panel's), and it is resolved for the LIVE PARKED journey too. A parked journey stays mounted, hidden; were its
+     portal moved to document.body when `req` went null, React would remount it — and Resume would hand back the preset
+     step with every answer gone (measured: TD5 E3, a nudge parked on "Where it stands" resumed on "The nudge"). */
+  const hostReq = req ?? (parked?.live ? parked.req : null);
+  useLayoutEffect(() => { setSlot(hostReq?.panel ? document.querySelector(hostReq.panel.slot ?? SIDE_SLOT) : null); }, [hostReq]);
 
   useEffect(() => subscribeDrawer((r) => {
     setReq(r);
@@ -291,7 +296,7 @@ export function QueryDrawer() {
   const J = JOURNEYS[active.mode];
   if (!J) return chip;
 
-  const inPanel = !!req?.panel && !!slot && slot.isConnected;
+  const inPanel = !!active?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
   /* §E — a picked query names the head: its agent's first name, whatever the request opened with */
   const pa = pq ? db.agents.find((a) => a.id === pq.agentId) : undefined;

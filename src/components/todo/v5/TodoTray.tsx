@@ -58,7 +58,7 @@ import { SET_ASIDE_EMPTY } from "../SetAsidePanel";
 import { SetAsidePop, type PopMode } from "./SetAsidePop";
 import { backFact, daysBetween, setAsideRules } from "../../../lib/todoSetAside";
 import { dismissedCards, flagForCard, snoozedCards } from "../../../lib/todoColumns";
-import { dismissalHolds, flagDismissed, flagKeyForTask, subjectChange } from "../../../lib/taskFlags";
+import { dismissalHolds, flagDismissed, flagKeyForTask, subjectChange, taskFlagId } from "../../../lib/taskFlags";
 import { taskSurvivesMute, visibleAgentNeeds } from "../../../lib/todoHousekeeping";
 import { BLANK_DRAFT, ComposeCard, dayLabel, dueOf, surfaceDay, type ComposeDraft } from "./ComposeCard";
 import { useTagWrites } from "../useTagWrites";
@@ -70,7 +70,7 @@ import { DeskCard, Disc, DoneToday, DueDial } from "./TrayDesk";
 import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
 import { dayMonth, MONTHS_SHORT } from "../../../lib/dates";
 import { trayReviewState } from "../../../lib/todoReviewAid";
-import { QueryStatus, type UserTask } from "../../../types";
+import { QueryStatus, type TaskFlag, type UserTask } from "../../../types";
 import "../v2/todoV2.css";
 import "./todoV5.css";
 
@@ -111,7 +111,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const db = useScriptAllyDb();
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, collectionsReady,
-    addUserTask, updateUserTask, deleteUserTask, restoreUserTask, setUserTaskColour, upsertTaskFlag, dismissTask, updateUserProfile, tasksIgnoringMutes,
+    addUserTask, updateUserTask, deleteUserTask, restoreUserTask, setUserTaskColour, upsertTaskFlag, dismissTask, updateUserProfile, tasksIgnoringMutes, restoreTaskFlag,
   } = db;
   const { toast, flash, dismiss: dismissToast, pause: pauseToast, resume: resumeToast, remember: rememberUndo } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
@@ -649,13 +649,19 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const toBack = (i: TrayItem) => () => { setTrayView("tray"); setSelKey(i.key); scrollRowIntoView(i.key); };
   const UNDO_MS = 7000;
 
+  /** ⚠️ EVERY SET-ASIDE UNDO PUTS BACK WHAT WAS THERE (§I.4): the flags as they were — whole, or absent — never an
+   *  inverse through the same writer, which always leaves a document behind */
+  const captureFlags = (keys: { taskType: string; queryId?: string; agentId?: string }[]) =>
+    keys.map((k) => { const id = taskFlagId(k); return { id, was: taskFlags.find((f) => f.id === id) ?? null }; });
+  const putBack = (cap: { id: string; was: TaskFlag | null }[]) => Promise.all(cap.map((c) => restoreTaskFlag(c.id, c.was)));
   const doSnooze = async (i: TrayItem, days: number, ymd: string) => {
     setPop(null);
     if (i.card.userTaskId && i.userTask) {
-      /* an own task is MOVED, not snoozed: its due date changes and it stays on the Corkboard */
-      const t = i.userTask, old = t.dueDate ?? null;
+      /* an own task is MOVED, not snoozed: its due date changes and it stays on the Corkboard; Undo writes the task
+         back verbatim (restoreUserTask), so not even its updatedAt moves */
+      const t = i.userTask;
       await updateUserTask(t.id, { dueDate: ymd });
-      flash(`Moved to ${dayLabel(ymd)}`, { label: "Undo", fn: async () => { await updateUserTask(t.id, { dueDate: old }); toBack(i)(); } }, UNDO_MS);
+      flash(`Moved to ${dayLabel(ymd)}`, { label: "Undo", fn: async () => { await restoreUserTask(t); toBack(i)(); } }, UNDO_MS);
       return;
     }
     const r = rulesFor(i);
@@ -665,11 +671,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const next = nextAfter(i);
     await fly();
     const g = groupOf(i);
+    const cap = captureFlags(flagKeysFor(i));
     const daysToDeadline = r?.deadline && !r.deadline.passed ? daysBetween(todayYmd, r.deadline.ymd) : undefined;
     const w = g ? snoozeGroupWrites({ upsertTaskFlag, dismissTask }, g, capped) : snoozeCardWrites({ upsertTaskFlag, dismissTask }, i.card, capped, `until ${dayLabel(until)}`, daysToDeadline);
     if (!w) return;
     setSelKey(next); setBumpTab((b) => b + 1);
-    flash(`Snoozed until ${dayLabel(until)}`, { label: "Undo", fn: async () => { await w.undo(); toBack(i)(); } }, UNDO_MS);
+    flash(`Snoozed until ${dayLabel(until)}`, { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
   };
   const flagKeysFor = (i: TrayItem) => {
     const g = groupOf(i);
@@ -681,13 +688,14 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const keys = flagKeysFor(i);
     if (!keys.length) return;
     const next = nextAfter(i);
+    const cap = captureFlags(keys);
     await fly();
     const at = new Date().toISOString();
     await Promise.all(keys.map((k) => upsertTaskFlag(k, { skippedAt: at })));
     setSelKey(next); setBumpTab((b) => b + 1);
     const dated = !!i.query && !i.sweep && i.bucket !== "fix";
     flash(`Dismissed · back ${dated ? "if anything changes" : "when you bring it back"}`,
-      { label: "Undo", fn: async () => { await Promise.all(keys.map((k) => upsertTaskFlag(k, { skippedAt: null }))); toBack(i)(); } }, UNDO_MS);
+      { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
   };
   const doRule = async (i: TrayItem) => {
     setPop(null);
@@ -869,7 +877,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       return (
         <button key={i.key} type="button" className="td5-row2" data-td5-row={i.key} data-td5="row" data-group={i.group.id} data-bucket={i.bucket}
           data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
-          data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
+          data-query={i.query?.id} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
           onClick={() => selectRow(i.key)}>
           <Disc item={i} />
           <span className="td5-tx"><b>{i.deed}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small>{i.sub}</small></span>

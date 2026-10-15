@@ -261,6 +261,8 @@ interface DbContextType {
   tasks: Task[];
   /** v5.1 §I.5 — `tasks` before the rule mutes (`mutedTaskRules`) are applied: what a switched-off rule would raise */
   tasksIgnoringMutes: Task[];
+  /** v5.1 §I.4 — a flag put back exactly as it was (whole, or absent) */
+  restoreTaskFlag: (id: string, flag: TaskFlag | null) => Promise<void>;
   login: (email: string, password?: string) => Promise<boolean>;
   signup: (name: string, email: string, password?: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<void>;
@@ -3714,6 +3716,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/taskFlags/${id}`);
     }
   };
+  /**
+   * To-do list v5.1 §I.4 — THE UNDO'S WRITE for a set-aside choice: the flag as it was BEFORE, written back whole, or
+   * deleted where there was none. An inverse through `upsertTaskFlag` cannot do this — it always writes a document,
+   * so undoing a first snooze left a stanceless flag behind (the same fault Agent card v1 records for "strip the field").
+   */
+  const restoreTaskFlag = async (id: string, flag: TaskFlag | null): Promise<void> => {
+    if (!currentUser) return;
+    try {
+      if (flag) await setDoc(doc(db, "users", currentUser.id, "taskFlags", id), flag);
+      else await deleteDoc(doc(db, "users", currentUser.id, "taskFlags", id));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/taskFlags/${id}`);
+    }
+  };
   const snoozeTaskFlag = (key: TaskFlagKey, days: number) =>
     upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * DAY_MS).toISOString(), bumpSnooze: true });
   const resolveTaskFlag = (key: TaskFlagKey) => upsertTaskFlag(key, { resolvedAt: new Date().toISOString() });
@@ -3938,6 +3954,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         migrateDismissedTasks,
         tasks,
         tasksIgnoringMutes,
+        restoreTaskFlag,
         login,
         signup,
         resetPassword,

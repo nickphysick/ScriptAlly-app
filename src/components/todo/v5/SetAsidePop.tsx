@@ -70,7 +70,9 @@ export const SetAsidePop: React.FC<SetAsidePopProps> = ({ mode, focus, todayYmd,
   /* focus the section the key asked for, without moving the page */
   useEffect(() => {
     const p = ref.current;
-    const f = p?.querySelector<HTMLElement>(focus === "dismiss" ? "[data-dis]" : "[data-snz]:not(:disabled)") ?? p?.querySelector<HTMLElement>("button");
+    /* D focuses the Dismiss section's first control — its "Dismiss this task", or the door that replaces it (an offer, a
+       request); S the first snooze it allows, else the section's door */
+    const f = p?.querySelector<HTMLElement>(focus === "dismiss" ? '[data-td5="pop-dismiss"] button' : '[data-td5="pop-snooze"] button:not(:disabled)') ?? p?.querySelector<HTMLElement>("button");
     f?.focus({ preventScroll: true });
   }, [focus]);
   /* a press outside closes it; the opener is not outside */
