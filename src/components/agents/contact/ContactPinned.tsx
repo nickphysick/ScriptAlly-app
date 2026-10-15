@@ -18,8 +18,7 @@
  */
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { PinnedRow } from "../../shell/PinnedRow";
-import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
-import { GLANCE_LABEL } from "../../../lib/contactGlance";
+import { LetterTabs } from "./ContactLetters";
 
 /** shown at or under this many px between the sentinel and the scroller's top; hidden again above `PIN_OFF` */
 export const PIN_ON = 12;
@@ -55,8 +54,6 @@ export function useContactPinned(anchor: React.RefObject<HTMLElement | null>, on
   return pinned;
 }
 
-const SW: Record<GlanceKey, string> = { none: "n", live: "a", closed: "c" };
-
 export const ContactPinnedRow: React.FC<{
   /** any element inside the page: the row is portalled into its page sheet */
   anchor: React.RefObject<HTMLElement | null>;
@@ -66,28 +63,24 @@ export const ContactPinnedRow: React.FC<{
   total: number;
   showing: number;
   filtered: boolean;
-  model: GlanceModel;
-  active: GlanceKey | null;
-  onGroup: (k: GlanceKey) => void;
+  /** v18 §A — the list's letter counts, the current letter and the one pick */
+  letterCounts: ReadonlyMap<string, number>;
+  current: string | null;
+  onLetter: (letter: string) => void;
   onClear: () => void;
   find: string;
   onFind: (v: string) => void;
   onAdd: () => void;
   onTop: () => void;
-}> = ({ anchor, on, shown, total, showing, filtered, model, active, onGroup, onClear, find, onFind, onAdd, onTop }) => {
+}> = ({ anchor, on, shown, total, showing, filtered, letterCounts, current, onLetter, onClear, find, onFind, onAdd, onTop }) => {
   /* the frame (box, height, cover, content row) is the shell's PinnedRow; this page styles only its contents */
   return (
     <PinnedRow anchor={anchor} on={on} shown={shown} className="cl17-pin" innerClassName="cl17-pin-in" attrs={{ "data-cl17": "pinned" }} innerAttrs={{ "data-cl17": "pinned-in" }}>
         <button type="button" className="cl17-pin-t" data-cl17="pinned-count" data-pin-text="" title="Back to the top" onClick={onTop}>
           {total} {total === 1 ? "agent" : "agents"}
         </button>
-        <span className="cl17-pin-c" role="group" aria-label="Show a group" data-cl17="pinned-pills">
-          {model.cells.map((c) => (
-            <button key={c.key} type="button" data-cl17="pinned-pill" data-k={c.key} aria-pressed={active === c.key} onClick={() => onGroup(c.key)}>
-              <i className={`cl17-sg--${SW[c.key]}`} aria-hidden="true" /><b>{c.n}</b>{GLANCE_LABEL[c.key]}
-            </button>
-          ))}
-        </span>
+        {/* v18 §A — the compact letters take the group pills' place */}
+        <LetterTabs variant="pin" counts={letterCounts} current={current} onPick={onLetter} />
         {filtered ? (
           <span className="cl17-pin-f" data-cl17="pinned-showing" role="status">
             <b>{showing}</b> of <b>{total}</b><span aria-hidden="true"> · </span>
@@ -101,7 +94,9 @@ export const ContactPinnedRow: React.FC<{
           </svg>
           <input value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" autoComplete="off" />
         </label>
-        <button type="button" className="cl17-pin-a" data-cl17="pinned-add" onClick={onAdd}>+ Add an agent</button>
+        <button type="button" className="cl17-pin-a" data-cl17="pinned-add" aria-label="Add an agent" onClick={onAdd}>
+          <span className="cl18-pa-w" aria-hidden="true">+ Add an agent</span><span className="cl18-pa-p" aria-hidden="true">+</span>
+        </button>
         <button type="button" className="cl17-pin-u" data-cl17="pinned-top" title="Back to the top" aria-label="Back to the top" onClick={onTop}>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" /></svg>
         </button>

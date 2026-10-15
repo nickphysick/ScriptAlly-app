@@ -1,0 +1,56 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18 (design-refs/contact-list-v18/contact-list-v18.html). The base rules are the compact values and
+ * `.ws-app.sheet-wide` restates the full ones, as v17 does. Every face is stated with two classes and `!important`
+ * (brand.tsx names headings and bare spans at runtime).
+ */
+
+/* ── §A · THE LETTER TABS at the top of the page: the header's first thing, 14 under the sheet's top edge, inset
+   with the header, 34 above the title block. 26 columns over a 2px navy rule; the strip holds the tallest tab's
+   height (52) so a hover or a pick never moves the title. ── */
+.clv-group > .cl17-hd { margin-top: 14px; }
+.cl17-hd .cl18-tabs {
+  display: grid; grid-template-columns: repeat(26, minmax(0, 1fr)); column-gap: 3px; align-items: end;
+  height: 52px; margin: 0 var(--cl17-inset) 34px; border-bottom: 2px solid #2a3a52; box-sizing: content-box;
+}
+.ws-app.sheet-wide .cl17-hd .cl18-tabs { column-gap: 4px; }
+.cl18-tabs button {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-sizing: border-box;
+  min-width: 0; height: 40px; margin: 0; padding: 0; border: 0; border-radius: 10px 10px 0 0; background: #e9e1d4;
+  color: #1c130f; cursor: pointer; transition: height 0.14s ease, background-color 0.14s ease;
+}
+.ws-app.sheet-wide .cl18-tabs button { height: 44px; }
+.cl18-tabs button b { font: 400 16px/1 var(--sp-type) !important; }
+.ws-app.sheet-wide .cl18-tabs button b { font-size: 19px !important; }
+.cl18-tabs button span { font: 400 7.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.5); min-height: 1em; }
+.ws-app.sheet-wide .cl18-tabs button span { font-size: 8.5px !important; }
+.cl18-tabs button:not(:disabled):hover, .ws-app.sheet-wide .cl18-tabs button:not(:disabled):hover { height: 50px; background: #e1d6c5; }
+.cl18-tabs button[aria-current="true"], .cl18-tabs button[aria-current="true"]:hover { height: 46px; background: #2a3a52; color: #f4eee5; }
+.ws-app.sheet-wide .cl18-tabs button[aria-current="true"], .ws-app.sheet-wide .cl18-tabs button[aria-current="true"]:hover { height: 52px; }
+.cl18-tabs button[aria-current="true"] span { color: rgba(244, 238, 229, 0.7); }
+.cl18-tabs button:disabled { background: #efe9df; color: rgba(28, 19, 15, 0.22); cursor: default; }
+.cl18-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── §A · THE COMPACT LETTERS in the pinned row, where the group pills were: 26 buttons sharing up to 760px ── */
+.cl17-pin .cl18-pl { display: flex; gap: 2px; flex: 1 1 760px; max-width: 760px; min-width: 0; }
+.cl18-pl button {
+  flex: 1 1 0; min-width: 0; box-sizing: border-box; height: 30px; margin: 0; padding: 0; border: 0; border-radius: 8px;
+  background: none; color: #1c130f; cursor: pointer; font: 400 14px/1 var(--sp-type) !important;
+}
+.ws-app.sheet-wide .cl18-pl button { height: 34px; font-size: 16px !important; }
+.cl18-pl button b { font: inherit !important; }
+.cl18-pl button:not(:disabled):hover { background: rgba(42, 58, 82, 0.08); }
+.cl18-pl button[aria-current="true"], .cl18-pl button[aria-current="true"]:hover { background: #2a3a52; color: #f4eee5; }
+.cl18-pl button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
+.cl18-pl button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+/* with the letters in place the pinned search is 150 (200), and at compact widths "+ Add an agent" is a round "+" */
+.cl17-pin .cl17-pin-s { flex: 0 0 150px; width: 150px; min-width: 0; }
+.ws-app.sheet-wide .cl17-pin .cl17-pin-s { flex-basis: 200px; width: 200px; }
+.cl17-pin .cl17-pin-a .cl18-pa-w { display: none; }
+.cl17-pin .cl17-pin-a { width: 38px; padding: 0; font-size: 22px !important; }
+.ws-app.sheet-wide .cl17-pin .cl17-pin-a { width: auto; padding: 0 18px; font-size: 16px !important; }
+.ws-app.sheet-wide .cl17-pin .cl17-pin-a .cl18-pa-w { display: inline; }
+.ws-app.sheet-wide .cl17-pin .cl17-pin-a .cl18-pa-p { display: none; }
+@media (prefers-reduced-motion: reduce) { .cl18-tabs button { transition: none; } }

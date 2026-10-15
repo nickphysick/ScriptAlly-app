@@ -56,7 +56,6 @@ import {
   contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
   letterCounts, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
-import { ContactIndexStrip } from "./contact/ContactIndexStrip";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -73,6 +72,7 @@ import "./contact/contactV13.css";
 import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
+import { LetterTabs } from "./contact/ContactLetters";
 import { ContactPinnedRow, useContactPinned } from "./contact/ContactPinned";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
@@ -374,41 +374,38 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * shell's, not this component's to name. Letters only: under any other grouping nothing marks.
    * ⚠️ THE LINE IS READ, NOT RESTATED: the bottom of the list's pinned headings, which is where `landUnder` puts a
    * picked divider, so a picked letter is always the marked one. */
+  /* v18 §A — THE CURRENT LETTER: the letter of the row at the line under the pinned row and the column headings (the
+     last row whose top is at or above that line; none while the first row is still below it). ONE reader, scheduled once
+     per animation frame on scroll; it writes the current letter for both strips and nothing else. Capture-phase on
+     document because scroll does not bubble. */
   const [markedLetter, setMarkedLetter] = useState<string | null>(null);
-  /** the scroll position "All" left the list at, while the reader is still there; else null */
-  const allAt = useRef<number | null>(null);
   useEffect(() => {
-    if (!active || groupKey !== "letter") { setMarkedLetter(null); return; }
+    if (!active) { setMarkedLetter(null); return; }
     let raf = 0;
     const read = () => {
       raf = 0;
       const col = mainColRef.current;
-      const scroller = col?.closest<HTMLElement>(".wpg-scroll");
-      const bands = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-clv="band"][data-letter]')) : [];
-      if (!col || !scroller || !bands.length) return;
-      /* v16: a pick lands its divider just under the PINNED headings (`landUnder`), so that is the line read here
-         too: read against the old scroll margin, the picked letter sat below the line and the one before it was marked */
-      const labels = bands[0].closest(".lt-panel")?.querySelector<HTMLElement>(":scope > .lt-labels");
-      const line = (labels ? labels.getBoundingClientRect().bottom : scroller.getBoundingClientRect().top + 12) + 2;
-      let cur: string | null = null;
-      /* "All" puts the list's top where the first letter's pick would: the same place, two meanings. The press says
-         which, and holds until the reader scrolls away from it. */
-      if (allAt.current !== null && Math.abs(scroller.scrollTop - allAt.current) < 4) { setMarkedLetter(null); return; }
-      allAt.current = null;
-      for (const band of bands) {
-        if (band.getBoundingClientRect().top <= line) cur = band.dataset.letter ?? null;
+      const rows = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-clv="row"][data-initial]')) : [];
+      if (!col || !rows.length) { setMarkedLetter((m) => (m === null ? m : null)); return; }
+      const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
+      const scroller = col.closest<HTMLElement>(".wpg-scroll");
+      const line = (labels ? labels.getBoundingClientRect().bottom : (scroller?.getBoundingClientRect().top ?? 0)) + 2;
+      let cur: HTMLElement | null = null;
+      for (const r of rows) {
+        if (r.getBoundingClientRect().top <= line) cur = r;
         else break;
       }
-      setMarkedLetter((m) => (m === cur ? m : cur));
+      const L = cur?.dataset.initial ?? null;
+      setMarkedLetter((m) => (m === L ? m : L));
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    read();
+    raf = requestAnimationFrame(read);
     document.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => {
       document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [active, groupKey, visibleFacts]);
+  }, [active, groupKey, sortKey, reversed, visibleFacts]);
 
   /* v16 §C — A LETTER TAB. In the ungrouped list it scrolls to the first agent whose surname starts with the
      letter, lands that row just under the pinned controls and washes it for 1.4s. Grouped by letter it scrolls to
@@ -432,29 +429,43 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     };
     pass();
   }, []);
-  const pickLetter = useCallback((letter: string | null) => {
+  /* v18 §A — A LETTER PICK always lands on a sorted A to Z list: grouped, or sorted by another column, it switches to
+     A to Z, ungrouped, first (the jump then waits for that list to render). The jump is smooth, to the row's
+     measured place under the stuck headings, then `landUnder` corrects it once the scroll has ended. */
+  const pendingLetter = useRef<string | null>(null);
+  const jumpToLetter = useCallback((letter: string) => {
     const col = mainColRef.current;
     const sc = col?.closest<HTMLElement>(".wpg-scroll");
-    if (!col || !sc) return;
-    if (letter === null) {
-      setMarkedLetter(null);
-      sc.scrollTo({ top: Math.max(0, sc.scrollTop + col.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12), behavior: "instant" as ScrollBehavior });
-      allAt.current = sc.scrollTop;
+    const row = col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-clv="row"][data-initial="${letter}"]`)).find((r) => r.getBoundingClientRect().height > 0) : null;
+    if (!col || !sc || !row) return;
+    const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
+    const stickTop = labels ? parseFloat(getComputedStyle(labels).top) || 0 : 12;
+    const under = sc.getBoundingClientRect().top + stickTop + (labels?.offsetHeight ?? 0);
+    const top = Math.max(0, sc.scrollTop + row.getBoundingClientRect().top - under);
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let done = false;
+    const settle = () => { if (done) return; done = true; sc.removeEventListener("scrollend", settle); landUnder(row); };
+    sc.addEventListener("scrollend", settle, { once: true });
+    window.setTimeout(settle, reduce ? 0 : 900);
+    sc.scrollTo({ top, behavior: reduce ? ("instant" as ScrollBehavior) : "smooth" });
+    row.setAttribute("data-wash", "");
+    window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
+  }, [landUnder]);
+  const pickLetter = useCallback((letter: string) => {
+    if (groupKey !== "none" || sortKey !== "surname" || reversed) {
+      pendingLetter.current = letter;
+      setGroupKey("none"); setSortKeyRaw("surname"); setReversed(false);
       return;
     }
-    const toBand = () => { const b = col.querySelector<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`); if (b) landUnder(b); };
-    if (groupKey === "none") {
-      const row = col.querySelector<HTMLElement>(`[data-clv="row"][data-initial="${letter}"]`);
-      if (!row) return;
-      landUnder(row);
-      row.setAttribute("data-wash", "");
-      window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
-      return;
-    }
-    allAt.current = null;
-    setMarkedLetter(letter);
-    if (groupKey !== "letter") { setGroupKey("letter"); window.setTimeout(toBand, 0); } else toBand();
-  }, [groupKey, landUnder]);
+    jumpToLetter(letter);
+  }, [groupKey, sortKey, reversed, jumpToLetter]);
+  useEffect(() => {
+    const L = pendingLetter.current;
+    if (!L || groupKey !== "none" || sortKey !== "surname" || reversed) return;
+    pendingLetter.current = null;
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => jumpToLetter(L)));
+    return () => cancelAnimationFrame(raf);
+  }, [groupKey, sortKey, reversed, jumpToLetter]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
@@ -1055,7 +1066,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v17 §C — the pinned row, a child of the page sheet (portalled while this page is on screen) */}
         <ContactPinnedRow anchor={mainColRef} on={active && showList} shown={pinned}
           total={factsAll.length} showing={visibleFacts.length} filtered={anyActive}
-          model={glanceM} active={glance} onGroup={(k) => setGlance((g) => (g === k ? null : k))} onClear={clearFilters}
+          letterCounts={stripCounts} current={markedLetter} onLetter={pickLetter} onClear={clearFilters}
           find={search} onFind={setSearch} onAdd={openAdd} onTop={toTop} />
         {/* v13 §6 — HOUSEKEEPING: the floating tab in the window's corner and the half-screen drawer it
             opens (both portalled; the tab only while this is the page on screen) */}
@@ -1111,6 +1122,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onGroup={(k) => setGlance((g) => (g === k ? null : k))}
             addRef={addBtnRef} onAdd={openAdd}
             health={pageState === "list" ? health : null} onHealth={openHk}
+            letters={<LetterTabs variant="top" counts={stripCounts} current={markedLetter} onPick={pickLetter} loading={pageState !== "list"} />}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
             {/* v17 §B — search and the filter pills, in the header, above its rule */}
             <div className="cl17-fr" data-cl17="filter-row">
@@ -1158,8 +1170,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             {controls}
           </div>
           <div className="cl14-list" data-cl14="list">
-          {/* the letter tabs, under every grouping: they scroll away with the list and never pin */}
-          <ContactIndexStrip total={visibleFacts.length} counts={stripCounts} marked={groupKey === "letter" ? markedLetter : null} onPick={pickLetter} />
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
             default selector, so a filter change still animates the reflow. */}
