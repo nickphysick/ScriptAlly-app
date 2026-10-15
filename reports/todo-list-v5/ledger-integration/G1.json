@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "G1",
+  "where": "1512 caught title",
+  "ok": true,
+  "detail": "Your tray is empty"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 ring full",
+  "ok": true,
+  "detail": "{\"title\":\"Your tray is empty\",\"left\":false,\"ink\":true,\"ups\":[\"2026-10-16\",\"2026-10-16\",\"2026-10-17\"],\"counts\":[\"0\",\"0\",\"0\"]}"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 counts 0",
+  "ok": true,
+  "detail": "0,0,0"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 Coming up ≤ 3, future, in order",
+  "ok": true,
+  "detail": "2026-10-16,2026-10-16,2026-10-17"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 caught title",
+  "ok": true,
+  "detail": "Your tray is empty"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 ring full",
+  "ok": true,
+  "detail": "{\"title\":\"Your tray is empty\",\"left\":false,\"ink\":true,\"ups\":[\"2026-10-16\",\"2026-10-16\",\"2026-10-17\"],\"counts\":[\"0\",\"0\",\"0\"]}"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 counts 0",
+  "ok": true,
+  "detail": "0,0,0"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 Coming up ≤ 3, future, in order",
+  "ok": true,
+  "detail": "2026-10-16,2026-10-16,2026-10-17"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 nothing: the three sections",
+  "ok": true,
+  "detail": "{\"panel\":true,\"how\":true,\"ways\":true,\"rows\":0,\"card\":false}"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 the example is not a task",
+  "ok": true,
+  "detail": "0 rows"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 nothing: the three sections",
+  "ok": true,
+  "detail": "{\"panel\":true,\"how\":true,\"ways\":true,\"rows\":0,\"card\":false}"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 the example is not a task",
+  "ok": true,
+  "detail": "0 rows"
+ },
+ {
+  "lock": "G1",
+  "where": "nothing → populated without a reload",
+  "ok": true,
+  "detail": ""
+ }
+]

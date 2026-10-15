@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 J ×2",
+  "ok": true,
+  "detail": "0 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the desk follows",
+  "ok": true,
+  "detail": "task-full-seed-query-9 vs task-full-seed-query-9"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 j in Find moves nothing",
+  "ok": false,
+  "detail": "task-full-seed-query-9 → task-partial-seed-query-20"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 E opens the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1512 Escape closed the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1512 …and only the drawer",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 → task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 J ×2",
+  "ok": true,
+  "detail": "0 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the desk follows",
+  "ok": true,
+  "detail": "task-full-seed-query-9 vs task-full-seed-query-9"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 j in Find moves nothing",
+  "ok": false,
+  "detail": "task-full-seed-query-9 → task-partial-seed-query-20"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 E opens the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1280 Escape closed the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1280 …and only the drawer",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 → task-full-seed-pkgq-3"
+ }
+]

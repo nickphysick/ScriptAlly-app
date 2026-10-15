@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 arc ∝ cleared",
+  "ok": false,
+  "detail": "0.5000 vs 0.0000"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ink drawn only when something was cleared",
+  "ok": false,
+  "detail": "cleared 0, arc 0.5000117795470378"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 label",
+  "ok": true,
+  "detail": "Cleared this week: 0. 45 still to do."
+ },
+ {
+  "lock": "B1",
+  "where": "1280 arc ∝ cleared",
+  "ok": false,
+  "detail": "0.5000 vs 0.0000"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ink drawn only when something was cleared",
+  "ok": false,
+  "detail": "cleared 0, arc 0.5000117795470378"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 label",
+  "ok": true,
+  "detail": "Cleared this week: 0. 45 still to do."
+ }
+]

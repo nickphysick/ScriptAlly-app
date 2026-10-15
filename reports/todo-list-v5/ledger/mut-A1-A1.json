@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 images",
+  "ok": true,
+  "detail": "[{\"cls\":\"td5-shadow\",\"op\":0.15}]"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title words",
+  "ok": true,
+  "detail": "79 tasks in your tray"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 n = sidebar badge",
+  "ok": false,
+  "detail": "title 79 badge 45"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 size",
+  "ok": true,
+  "detail": "44 (wide false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 one line",
+  "ok": true,
+  "detail": "h 44 lh 44"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 title left = header left + inset",
+  "ok": true,
+  "detail": "426 vs 426"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card right = header right − inset",
+  "ok": true,
+  "detail": "1326 vs 1326"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 images",
+  "ok": true,
+  "detail": "[{\"cls\":\"td5-shadow\",\"op\":0.15}]"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title words",
+  "ok": true,
+  "detail": "79 tasks in your tray"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 n = sidebar badge",
+  "ok": false,
+  "detail": "title 79 badge 45"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 size",
+  "ok": true,
+  "detail": "44 (wide false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 one line",
+  "ok": true,
+  "detail": "h 44 lh 44"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 title left = header left + inset",
+  "ok": true,
+  "detail": "312 vs 312"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card right = header right − inset",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "E1",
+  "where": "send → the sent journey",
+  "ok": true,
+  "detail": "sent"
+ },
+ {
+  "lock": "E1",
+  "where": "decide (offer_received) → its journey",
+  "ok": true,
+  "detail": "offer"
+ },
+ {
+  "lock": "E1",
+  "where": "decide (revise_resubmit) → its journey",
+  "ok": true,
+  "detail": "sent"
+ },
+ {
+  "lock": "E1",
+  "where": "chase → the nudge journey",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "E1",
+  "where": "close → the close journey",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "E1",
+  "where": "fix (materials_unrecorded_bulk) → its own door",
+  "ok": true,
+  "detail": "sweep 1 drawer null"
+ },
+ {
+  "lock": "E1",
+  "where": "fix → the agent card (not the drawer)",
+  "ok": false,
+  "detail": "card 0 drawer 0"
+ },
+ {
+  "lock": "E1",
+  "where": "fix (data_quality_poor, grouped) → its own door",
+  "ok": true,
+  "detail": "sweep 1 drawer null"
+ },
+ {
+  "lock": "E1",
+  "where": "note → the own-task tick (completedAt stamped)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "note → its undo restores it",
+  "ok": true,
+  "detail": "{\"done\":false}"
+ },
+ {
+  "lock": "E1",
+  "where": "buckets entered",
+  "ok": true,
+  "detail": "send,decide,chase,close,fix,note"
+ },
+ {
+  "lock": "E1",
+  "where": "the agent-card door was entered",
+  "ok": true,
+  "detail": "send → the sent journey | decide (offer_received) → its journey | decide (revise_resubmit) → its journey | chase → the nudge journey | close → the close journey | fix (materials_unrecorded_bulk) → its own door | fix → the agent card (not the drawer) | fix (data_quality_poor, grouped) → its own door | note → the own-task tick (completedAt stamped) | note → its undo restores it | buckets entered"
+ }
+]

@@ -1,0 +1,70 @@
+
+Running 13 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.1s)
+[A1] 16/16 green
+  ✓   2 [measure] › tests/e2e/todoV5.measure.ts:29:1 › TD5 A1 — header: shadow only, the title's n is the badge, the inset (9.6s)
+[A2] 24/24 green
+  ✓   3 [measure] › tests/e2e/todoV5.measure.ts:65:1 › TD5 A2 — card: the rows sum to n, the bar is in proportion, a press filters and never scrolls (10.7s)
+[B1] 1512: cleared this week 0, in the tray 47
+[B1] 1280: cleared this week 0, in the tray 45
+[B1] 4/4 green
+  ✓   4 [measure] › tests/e2e/todoV5.measure.ts:115:1 › TD5 B1 — the ring's arc is cleared ÷ (cleared + n) (9.3s)
+[C1] 10/10 green
+  ✓   5 [measure] › tests/e2e/todoV5.measure.ts:139:1 › TD5 C1 — the navy row sticks and squares off; the strip and a band stick beneath it (10.7s)
+[C2] 20/20 green
+  ✓   6 [measure] › tests/e2e/todoV5.measure.ts:174:1 › TD5 C2 — the tray: table order, art breaking out, a row click selects and writes nothing (11.1s)
+[C3] 228/228 green
+  ✓   7 [measure] › tests/e2e/todoV5.measure.ts:212:1 › TD5 C3 — the desk: the deed's size, Today inside the card, the real StatusDot, ledes state facts (12.2s)
+  ✗ D1 · 1512 Escape closed the drawer — 
+[D1] 11/12 green
+  ✘   8 [measure] › tests/e2e/todoV5.measure.ts:258:1 › TD5 D1 — J moves, j in Find does not, E opens the door, Escape in the drawer closes only the drawer (13.2s)
+[D2] 18/18 green
+  ✓   9 [measure] › tests/e2e/todoV5.measure.ts:398:1 › TD5 D2 — a save from the desk: stamp, the row leaves, the next rises, a slip, cleared +1; Undo is exact (25.0s)
+[E1] bucket send
+[E1] bucket decide
+[E1] bucket chase
+[E1] bucket close
+[E1] bucket fix
+[E1] bucket note
+[E1] 8/8 green
+  ✓  10 [measure] › tests/e2e/todoV5.measure.ts:416:1 › TD5 E1 — each bucket's action opens its door (25.5s)
+[F1] probe tasks removed: 1
+[F1] 6/6 green
+  ✓  11 [measure] › tests/e2e/todoV5.measure.ts:469:1 › TD5 F1 — Add a task opens the composer in a dimming drawer; the task lands under Your tasks, selected (8.8s)
+[G1] 13/13 green
+  ✓  12 [measure] › tests/e2e/todoV5.measure.ts:504:1 › TD5 G1 — all caught up, and nothing yet (19.5s)
+[L1] 15/15 green
+  ✓  13 [measure] › tests/e2e/todoV5.measure.ts:541:1 › TD5 L1 — no horizontal overflow at five widths (21.2s)
+
+
+  1) [measure] › tests/e2e/todoV5.measure.ts:258:1 › TD5 D1 — J moves, j in Find does not, E opens the door, Escape in the drawer closes only the drawer 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "D1 · 1512 Escape closed the drawer — ",
+    + ]
+
+       at td5Lib.ts:37
+
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      36 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 37 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      38 |   }
+      39 | }
+      40 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-todov5/tests/e2e/td5Lib.ts:37:95)
+        at /Users/nickphysick/ScriptAlly-todov5/tests/e2e/todoV5.measure.ts:301:5
+
+    Error Context: test-results/todoV5.measure.ts-TD5-D1-—-1a15f-awer-closes-only-the-drawer-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/todoV5.measure.ts:258:1 › TD5 D1 — J moves, j in Find does not, E opens the door, Escape in the drawer closes only the drawer 
+  12 passed (3.3m)
+exit=1

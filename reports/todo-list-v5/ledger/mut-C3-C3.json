@@ -1,0 +1,1370 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512 deed size",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-full-seed-pkgq-3",
+  "ok": false,
+  "detail": "Marcus asked for your full manuscript on 20 June. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-full-seed-pkgq-3",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-full-seed-pkgq-3",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-partial-seed-pkgq-4",
+  "ok": false,
+  "detail": "Priya asked for a partial on 3 August. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-partial-seed-pkgq-4",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-partial-seed-pkgq-4",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-full-seed-query-9",
+  "ok": false,
+  "detail": "Ana asked for your full manuscript on 19 August. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-full-seed-query-9",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-full-seed-query-9",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-partial-seed-query-20",
+  "ok": false,
+  "detail": "David asked for a partial on 19 August. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-partial-seed-query-20",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-partial-seed-query-20",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-partial-seed-query-7",
+  "ok": false,
+  "detail": "Rachel asked for a partial on 19 August. Your send-by date is 4 October. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-partial-seed-query-7",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-partial-seed-query-7",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-full-rj-dupe",
+  "ok": false,
+  "detail": "Tobias asked for your full manuscript on 9 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-full-rj-dupe",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-full-rj-dupe",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-partial-msv12-q-3",
+  "ok": false,
+  "detail": "Edda asked for a partial on 12 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-partial-msv12-q-3",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-partial-msv12-q-3",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-full-rj-send",
+  "ok": false,
+  "detail": "Imogen asked for your full manuscript on 12 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-full-rj-send",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-full-rj-send",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-full-msv12-q-4",
+  "ok": false,
+  "detail": "Theo asked for your full manuscript on 19 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-full-msv12-q-4",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-full-msv12-q-4",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-offer-seed-query-12",
+  "ok": false,
+  "detail": "Noah offered representation on 19 August. 4 other agents hold your full. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-offer-seed-query-12",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-offer-seed-query-12",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-full-seed-cal-passed865-q",
+  "ok": false,
+  "detail": "Ottoline asked for your full manuscript. It hasn’t gone yet. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-full-seed-cal-passed865-q",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-full-seed-cal-passed865-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-partial-cor-move-a",
+  "ok": false,
+  "detail": "Marcus asked for a partial. It hasn’t gone yet. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-partial-cor-move-a",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-partial-cor-move-a",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-rr-seed-query-11",
+  "ok": false,
+  "detail": "Iris asked for a revision. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-rr-seed-query-11",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-rr-seed-query-11",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-thin-q-chase",
+  "ok": false,
+  "detail": "12 weeks since your query went to Tobias. Quint Literary’s stated window is 4 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-thin-q-chase",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-thin-q-chase",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-query-5",
+  "ok": false,
+  "detail": "11 weeks since your query went to Joan. Whitfield Agency’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-query-5",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-query-5",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-pkgq-9",
+  "ok": false,
+  "detail": "12 weeks since your full went to Ana. Duarte Words’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-pkgq-9",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-pkgq-9",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-thin-q-remind",
+  "ok": false,
+  "detail": "7 weeks since your query went to Imogen. Farr & Boyd’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-thin-q-remind",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-thin-q-remind",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-query-8",
+  "ok": false,
+  "detail": "7 weeks since your partial went to David. Marsh & Co’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-query-8",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-query-8",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-pkgq-2",
+  "ok": false,
+  "detail": "11 weeks since your query went to Tom. Curtis Vane’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-pkgq-2",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-pkgq-2",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-cor-undo",
+  "ok": false,
+  "detail": "14 weeks since your full went to Sam. Okoro Bell’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-cor-undo",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-cor-undo",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-cal-passed20-q",
+  "ok": false,
+  "detail": "9 weeks since your query went to Cormac. Bligh & Sons’s stated window is 4 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-cal-passed20-q",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-cal-passed20-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-cal-bang-q",
+  "ok": false,
+  "detail": "8 weeks since your query went to Alasdair. Crewe Literary’s stated window is 16 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-cal-bang-q",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-cal-bang-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-nudge-seed-cal-soon-q",
+  "ok": false,
+  "detail": "5 weeks since your query went to Hester. Blaine & Vole’s stated window is 12 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-nudge-seed-cal-soon-q",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-nudge-seed-cal-soon-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-thin-q-close",
+  "ok": false,
+  "detail": "No reply since 16 August. Vale & Marchetti says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-thin-q-close",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-thin-q-close",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-thin-q-cohort-2",
+  "ok": false,
+  "detail": "No reply since 13 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-thin-q-cohort-2",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-thin-q-cohort-2",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-msv12-q-7",
+  "ok": false,
+  "detail": "No reply since 10 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-msv12-q-7",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-msv12-q-7",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-thin-q-cohort-3",
+  "ok": false,
+  "detail": "No reply since 22 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-thin-q-cohort-3",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-thin-q-cohort-3",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-thin-q-cohort-4",
+  "ok": false,
+  "detail": "No reply since 31 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-thin-q-cohort-4",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-thin-q-cohort-4",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-seed-query-21",
+  "ok": false,
+  "detail": "No reply since 22 July. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-seed-query-21",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-seed-query-21",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-seed-query-ms2-a",
+  "ok": false,
+  "detail": "No reply since 1 June. Cavendish & Roe says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-seed-query-ms2-a",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-seed-query-ms2-a",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-seed-query-ms2-b",
+  "ok": false,
+  "detail": "No reply since 1 June. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-seed-query-ms2-b",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-seed-query-ms2-b",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-rj-nudge",
+  "ok": false,
+  "detail": "No reply since 29 June. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-rj-nudge",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-rj-nudge",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-seed-pkgq-10",
+  "ok": false,
+  "detail": "No reply since 24 July. Vance Associates says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-seed-pkgq-10",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-seed-pkgq-10",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-seed-pkgq-1",
+  "ok": false,
+  "detail": "No reply since 25 July. Cavendish & Roe says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-seed-pkgq-1",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-seed-pkgq-1",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-cor-move-b",
+  "ok": false,
+  "detail": "No reply since 3 August. Northbank Literary says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-cor-move-b",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-cor-move-b",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-no-res-close-seed-pkgq-7",
+  "ok": false,
+  "detail": "No reply since 4 August. Lin Literary says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Today inside task-no-res-close-seed-pkgq-7",
+  "ok": true,
+  "detail": "1412 vs 1450"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 StatusDot task-no-res-close-seed-pkgq-7",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 lede task-materials-bulk",
+  "ok": false,
+  "detail": "Across your sent queries It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1512 every task walked",
+  "ok": true,
+  "detail": "45 of 45"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 ledes swept",
+  "ok": true,
+  "detail": "37 of 45"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 a Today tick seen",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 a StatusDot seen",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 deed size",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-full-seed-pkgq-3",
+  "ok": false,
+  "detail": "Marcus asked for your full manuscript on 20 June. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-full-seed-pkgq-3",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-full-seed-pkgq-3",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-partial-seed-pkgq-4",
+  "ok": false,
+  "detail": "Priya asked for a partial on 3 August. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-partial-seed-pkgq-4",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-partial-seed-pkgq-4",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-full-seed-query-9",
+  "ok": false,
+  "detail": "Ana asked for your full manuscript on 19 August. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-full-seed-query-9",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-full-seed-query-9",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-partial-seed-query-20",
+  "ok": false,
+  "detail": "David asked for a partial on 19 August. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-partial-seed-query-20",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-partial-seed-query-20",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-partial-seed-query-7",
+  "ok": false,
+  "detail": "Rachel asked for a partial on 19 August. Your send-by date is 4 October. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-partial-seed-query-7",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-partial-seed-query-7",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-full-rj-dupe",
+  "ok": false,
+  "detail": "Tobias asked for your full manuscript on 9 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-full-rj-dupe",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-full-rj-dupe",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-partial-msv12-q-3",
+  "ok": false,
+  "detail": "Edda asked for a partial on 12 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-partial-msv12-q-3",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-partial-msv12-q-3",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-full-rj-send",
+  "ok": false,
+  "detail": "Imogen asked for your full manuscript on 12 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-full-rj-send",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-full-rj-send",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-full-msv12-q-4",
+  "ok": false,
+  "detail": "Theo asked for your full manuscript on 19 September. No date was agreed. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-full-msv12-q-4",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-full-msv12-q-4",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-offer-seed-query-12",
+  "ok": false,
+  "detail": "Noah offered representation on 19 August. 4 other agents hold your full. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-offer-seed-query-12",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-offer-seed-query-12",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-full-seed-cal-passed865-q",
+  "ok": false,
+  "detail": "Ottoline asked for your full manuscript. It hasn’t gone yet. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-full-seed-cal-passed865-q",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-full-seed-cal-passed865-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-partial-cor-move-a",
+  "ok": false,
+  "detail": "Marcus asked for a partial. It hasn’t gone yet. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-partial-cor-move-a",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-partial-cor-move-a",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-rr-seed-query-11",
+  "ok": false,
+  "detail": "Iris asked for a revision. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-rr-seed-query-11",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-rr-seed-query-11",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-thin-q-chase",
+  "ok": false,
+  "detail": "12 weeks since your query went to Tobias. Quint Literary’s stated window is 4 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-thin-q-chase",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-thin-q-chase",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-query-5",
+  "ok": false,
+  "detail": "11 weeks since your query went to Joan. Whitfield Agency’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-query-5",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-query-5",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-pkgq-9",
+  "ok": false,
+  "detail": "12 weeks since your full went to Ana. Duarte Words’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-pkgq-9",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-pkgq-9",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-thin-q-remind",
+  "ok": false,
+  "detail": "7 weeks since your query went to Imogen. Farr & Boyd’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-thin-q-remind",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-thin-q-remind",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-query-8",
+  "ok": false,
+  "detail": "7 weeks since your partial went to David. Marsh & Co’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-query-8",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-query-8",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-pkgq-2",
+  "ok": false,
+  "detail": "11 weeks since your query went to Tom. Curtis Vane’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-pkgq-2",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-pkgq-2",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-cor-undo",
+  "ok": false,
+  "detail": "14 weeks since your full went to Sam. Okoro Bell’s stated window is 8 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-cor-undo",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-cor-undo",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-cal-passed20-q",
+  "ok": false,
+  "detail": "9 weeks since your query went to Cormac. Bligh & Sons’s stated window is 4 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-cal-passed20-q",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-cal-passed20-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-cal-bang-q",
+  "ok": false,
+  "detail": "8 weeks since your query went to Alasdair. Crewe Literary’s stated window is 16 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-cal-bang-q",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-cal-bang-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-nudge-seed-cal-soon-q",
+  "ok": false,
+  "detail": "5 weeks since your query went to Hester. Blaine & Vole’s stated window is 12 weeks. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-nudge-seed-cal-soon-q",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-nudge-seed-cal-soon-q",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-thin-q-close",
+  "ok": false,
+  "detail": "No reply since 16 August. Vale & Marchetti says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-thin-q-close",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-thin-q-close",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-thin-q-cohort-2",
+  "ok": false,
+  "detail": "No reply since 13 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-thin-q-cohort-2",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-thin-q-cohort-2",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-msv12-q-7",
+  "ok": false,
+  "detail": "No reply since 10 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-msv12-q-7",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-msv12-q-7",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-thin-q-cohort-3",
+  "ok": false,
+  "detail": "No reply since 22 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-thin-q-cohort-3",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-thin-q-cohort-3",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-thin-q-cohort-4",
+  "ok": false,
+  "detail": "No reply since 31 March. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-thin-q-cohort-4",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-thin-q-cohort-4",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-seed-query-21",
+  "ok": false,
+  "detail": "No reply since 22 July. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-seed-query-21",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-seed-query-21",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-seed-query-ms2-a",
+  "ok": false,
+  "detail": "No reply since 1 June. Cavendish & Roe says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-seed-query-ms2-a",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-seed-query-ms2-a",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-seed-query-ms2-b",
+  "ok": false,
+  "detail": "No reply since 1 June. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-seed-query-ms2-b",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-seed-query-ms2-b",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-rj-nudge",
+  "ok": false,
+  "detail": "No reply since 29 June. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-rj-nudge",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-rj-nudge",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-seed-pkgq-10",
+  "ok": false,
+  "detail": "No reply since 24 July. Vance Associates says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-seed-pkgq-10",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-seed-pkgq-10",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-seed-pkgq-1",
+  "ok": false,
+  "detail": "No reply since 25 July. Cavendish & Roe says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-seed-pkgq-1",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-seed-pkgq-1",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-cor-move-b",
+  "ok": false,
+  "detail": "No reply since 3 August. Northbank Literary says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-cor-move-b",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-cor-move-b",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-no-res-close-seed-pkgq-7",
+  "ok": false,
+  "detail": "No reply since 4 August. Lin Literary says no reply means no. It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Today inside task-no-res-close-seed-pkgq-7",
+  "ok": true,
+  "detail": "1180 vs 1218"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 StatusDot task-no-res-close-seed-pkgq-7",
+  "ok": true,
+  "detail": "0 0 24 24"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 lede task-materials-bulk",
+  "ok": false,
+  "detail": "Across your sent queries It is overdue."
+ },
+ {
+  "lock": "C3",
+  "where": "1280 every task walked",
+  "ok": true,
+  "detail": "45 of 45"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 ledes swept",
+  "ok": true,
+  "detail": "37 of 45"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 a Today tick seen",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 a StatusDot seen",
+  "ok": true,
+  "detail": "36"
+ }
+]
