@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C4",
+  "where": "1024",
+  "ok": true,
+  "detail": "document 1024,1024"
+ },
+ {
+  "lock": "C4",
+  "where": "1024",
+  "ok": true,
+  "detail": "scroller 768,768"
+ },
+ {
+  "lock": "C4",
+  "where": "1024",
+  "ok": true,
+  "detail": "headings overlap: "
+ },
+ {
+  "lock": "C4",
+  "where": "1024",
+  "ok": true,
+  "detail": "Queried none"
+ },
+ {
+  "lock": "C4",
+  "where": "390",
+  "ok": true,
+  "detail": "document 390,390"
+ },
+ {
+  "lock": "C4",
+  "where": "390",
+  "ok": true,
+  "detail": "scroller 390,390"
+ },
+ {
+  "lock": "C4",
+  "where": "390",
+  "ok": true,
+  "detail": "headings overlap: "
+ },
+ {
+  "lock": "C4",
+  "where": "390",
+  "ok": true,
+  "detail": "Queried none"
+ }
+]

@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "top 105.796875 vs bar 105.75"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "right 8.0 bottom 8.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "width 560 vs 560"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "scrim opacity 0 while browsing"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses?answer=rs2-q-send"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "edge rgb(176, 96, 62) for more"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 card rs2-q-send",
+  "ok": true,
+  "detail": "THEIR FEEDBACK cards 0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "top 105.796875 vs bar 105.75"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "right 8.0 bottom 8.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "width 560 vs 560"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "scrim opacity 0 while browsing"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses?answer=rs2-q-note"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "edge rgb(124, 113, 104) for passed"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-note",
+  "ok": true,
+  "detail": "THEIR FEEDBACK cards 1"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "top 105.796875 vs bar 105.75"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "right 8.0 bottom 8.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "width 560 vs 560"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "scrim opacity 0 while browsing"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses?answer=rs2-q-form"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "edge rgb(124, 113, 104) for passed"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 row rs2-q-form",
+  "ok": true,
+  "detail": "THEIR FEEDBACK cards 0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "top 105.796875 vs bar 105.75"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "right 8.0 bottom 8.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "width 520 vs 520"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "scrim opacity 0 while browsing"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses?answer=rs2-q-send"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "edge rgb(176, 96, 62) for more"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 card rs2-q-send",
+  "ok": true,
+  "detail": "THEIR FEEDBACK cards 0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "top 105.796875 vs bar 105.75"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "right 8.0 bottom 8.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "width 520 vs 520"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "scrim opacity 0 while browsing"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses?answer=rs2-q-note"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "edge rgb(124, 113, 104) for passed"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-note",
+  "ok": true,
+  "detail": "THEIR FEEDBACK cards 1"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "top 105.796875 vs bar 105.75"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "right 8.0 bottom 8.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "width 520 vs 520"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "scrim opacity 0 while browsing"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses?answer=rs2-q-form"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "edge rgb(124, 113, 104) for passed"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 row rs2-q-form",
+  "ok": true,
+  "detail": "THEIR FEEDBACK cards 0"
+ }
+]

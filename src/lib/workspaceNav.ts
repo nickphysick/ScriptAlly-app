@@ -87,6 +87,8 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       children: [
         { id: "q-centre", label: "Query Centre", path: "/queries", icon: "send" },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
+        /* Responses v2 (15 Oct): the third Queries tab — every agent answer for the book in scope */
+        { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },
       ],
     },
     {

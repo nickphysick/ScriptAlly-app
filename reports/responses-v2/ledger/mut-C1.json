@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 2",
+  "ok": false,
+  "detail": "gates [2,2]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 2",
+  "ok": true,
+  "detail": "ghosts 14, hint true"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 2",
+  "ok": true,
+  "detail": "\"ONE MARK FOR EACH NO, SINCE AUGUST 2026\" (the earliest sent date of the nos is 50 days ago)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 34",
+  "ok": false,
+  "detail": "gates [5,5,5,5,5,5,4,5,5]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 34",
+  "ok": true,
+  "detail": "hint false"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 2",
+  "ok": false,
+  "detail": "gates [2,2]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 2",
+  "ok": true,
+  "detail": "ghosts 11, hint true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 2",
+  "ok": true,
+  "detail": "\"ONE MARK FOR EACH NO, SINCE AUGUST 2026\" (the earliest sent date of the nos is 50 days ago)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 34",
+  "ok": false,
+  "detail": "gates [5,5,5,5,5,5,4,5,5]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 34",
+  "ok": true,
+  "detail": "hint false"
+ }
+]

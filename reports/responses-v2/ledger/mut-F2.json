@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "F2",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"zero\":1,\"h\":\"Rejections are part of querying\",\"tags\":0,\"tally\":1,\"list\":0,\"share\":0,\"toShare\":0}"
+ },
+ {
+  "lock": "F2",
+  "where": "1512",
+  "ok": true,
+  "detail": "tags in the sheet 0"
+ },
+ {
+  "lock": "F2",
+  "where": "1512",
+  "ok": false,
+  "detail": "{\"zero\":1,\"h\":\"Rejections are part of querying\",\"tags\":0,\"tally\":1,\"list\":0,\"share\":0,\"toShare\":0}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"zero\":1,\"h\":\"Rejections are part of querying\",\"tags\":0,\"tally\":1,\"list\":0,\"share\":0,\"toShare\":0}"
+ },
+ {
+  "lock": "F2",
+  "where": "1280",
+  "ok": true,
+  "detail": "tags in the sheet 0"
+ },
+ {
+  "lock": "F2",
+  "where": "1280",
+  "ok": false,
+  "detail": "{\"zero\":1,\"h\":\"Rejections are part of querying\",\"tags\":0,\"tally\":1,\"list\":0,\"share\":0,\"toShare\":0}"
+ }
+]

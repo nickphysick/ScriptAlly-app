@@ -141,8 +141,9 @@ describe("The IA renders what exists — and nothing else", () => {
      they made the nav a second control surface for a page that already had one, so the two could
      disagree about what you were looking at — and they forced counts into a navigation column,
      which is how a nav becomes a dashboard. Two real destinations now. */
-  it("Queries carries exactly Query Centre and Analytics", () => {
-    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Analytics"]);
+  it("Queries carries exactly Query Centre, Analytics and Responses", () => {
+    /* Responses v2 (15 Oct) is a routed page with its own slot, so it is a destination, not a filter */
+    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Analytics", "Responses"]);
   });
 
   it("no filter child survives in the nav", () => {

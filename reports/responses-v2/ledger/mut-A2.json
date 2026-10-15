@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "counts {\"more\":19,\"passed\":10,\"noReply\":1} sum 30 vs title 30"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "bar more 152.5 vs 152.5 (min-width 4 and 3px gaps allowed)"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "bar passed 80.3 vs 80.3 (min-width 4 and 3px gaps allowed)"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "bar noReply 8.0 vs 8.0 (min-width 4 and 3px gaps allowed)"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "arc 0.9666768091129166 vs rate 0.967"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "rust strokes 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "ring reads 97%"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": false,
+  "detail": "scrollTop 0 → 180 on Passed"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "segment Passed aria-pressed true"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "rows after Passed: passed"
+ },
+ {
+  "lock": "A2",
+  "where": "1512",
+  "ok": true,
+  "detail": "carousel top 139.6 in a 786 scroller after scrolling 130"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "counts {\"more\":19,\"passed\":10,\"noReply\":1} sum 30 vs title 30"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "bar more 152.5 vs 152.5 (min-width 4 and 3px gaps allowed)"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "bar passed 80.3 vs 80.3 (min-width 4 and 3px gaps allowed)"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "bar noReply 8.0 vs 8.0 (min-width 4 and 3px gaps allowed)"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "arc 0.9666768091129166 vs rate 0.967"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "rust strokes 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "ring reads 97%"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": false,
+  "detail": "scrollTop 0 → 360 on Passed"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "segment Passed aria-pressed true"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "rows after Passed: passed"
+ },
+ {
+  "lock": "A2",
+  "where": "1280",
+  "ok": true,
+  "detail": "carousel top 139.6 in a 686 scroller after scrolling 331"
+ }
+]

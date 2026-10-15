@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": false,
+  "detail": "navy row -1400.4 from the sheet top"
+ },
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": true,
+  "detail": "headings -1234.6 directly under the row -1234.6"
+ },
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": false,
+  "detail": "month band under the stack: [] vs -1195.0"
+ },
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": true,
+  "detail": "pinned true, ↑ Summary 1"
+ },
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": true,
+  "detail": "↑ Summary returns to the top"
+ },
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": true,
+  "detail": "past the list: stack bottom -12076.0 vs sheet top 105.8, pinned null"
+ },
+ {
+  "lock": "C3",
+  "where": "1512",
+  "ok": true,
+  "detail": "1px walk from 1128: 2 flips, drift 0"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": false,
+  "detail": "navy row -1400.4 from the sheet top"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": true,
+  "detail": "headings -1234.6 directly under the row -1234.6"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": false,
+  "detail": "month band under the stack: [] vs -1195.0"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": true,
+  "detail": "pinned true, ↑ Summary 1"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": true,
+  "detail": "↑ Summary returns to the top"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": true,
+  "detail": "past the list: stack bottom -12176.0 vs sheet top 105.8, pinned null"
+ },
+ {
+  "lock": "C3",
+  "where": "1280",
+  "ok": true,
+  "detail": "1px walk from 1438: 2 flips, drift 0"
+ }
+]

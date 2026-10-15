@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B4",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"none\":1,\"line\":\"Agents often take six to twelve weeks to reply. You have 1 query out with agents.\",\"arrows\":0,\"dots\":0,\"cards\":0}"
+ },
+ {
+  "lock": "B4",
+  "where": "1512",
+  "ok": true,
+  "detail": "line \"Agents often take six to twelve weeks to reply. You have 1 query out with agents.\""
+ },
+ {
+  "lock": "B4",
+  "where": "1512",
+  "ok": true,
+  "detail": "arrows 0, dots 0"
+ },
+ {
+  "lock": "B4",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"none\":1,\"line\":\"Agents often take six to twelve weeks to reply. You have 1 query out with agents.\",\"arrows\":0,\"dots\":0,\"cards\":0}"
+ },
+ {
+  "lock": "B4",
+  "where": "1280",
+  "ok": true,
+  "detail": "line \"Agents often take six to twelve weeks to reply. You have 1 query out with agents.\""
+ },
+ {
+  "lock": "B4",
+  "where": "1280",
+  "ok": true,
+  "detail": "arrows 0, dots 0"
+ }
+]

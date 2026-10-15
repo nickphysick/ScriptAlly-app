@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "card widths 340.0 vs 340"
+ },
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "the track scrolls (true) and 16 card(s) lie past its right edge"
+ },
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "at the start: prev disabled true, active dot 0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "Next moved 362.0 (one card 362)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "active dot after Next 1"
+ },
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "Right Arrow moved 362.0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512",
+  "ok": true,
+  "detail": "Next disabled at the end"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "card widths 340.0 vs 340"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "the track scrolls (true) and 17 card(s) lie past its right edge"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "at the start: prev disabled true, active dot 0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "Next moved 362.0 (one card 362)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "active dot after Next 1"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "Right Arrow moved 362.0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280",
+  "ok": true,
+  "detail": "Next disabled at the end"
+ }
+]

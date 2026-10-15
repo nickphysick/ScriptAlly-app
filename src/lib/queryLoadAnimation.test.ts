@@ -16,8 +16,10 @@ const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
 describe("it runs on ROUTE ENTRY, not on every render", () => {
   it("the page is told when it is the visible route", () => {
-    // Amendment 1 (H3) added a sibling route under the same routeKey, so the flag now excludes it.
-    expect(app).toContain('routeActive={routeKey === "queries" && !queriesAnalytics}');
+    // Amendment 1 (H3) added a sibling route under the same routeKey, so the flag now excludes it; Responses v2
+    // (15 Oct) added a second, excluded the same way. The law is unchanged: the Query Centre is told it is the
+    // visible route only when neither sibling is on screen.
+    expect(app).toContain('routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses}');
     expect(queries).toContain("routeActive");
   });
 
