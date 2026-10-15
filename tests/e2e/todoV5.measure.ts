@@ -363,18 +363,18 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
   await expect(page.locator('[data-qad-drawer="sent"]')).toBeVisible({ timeout: 10_000 });
   for (let i = 0; i < 8 && !(await page.locator("[data-qad-review]").count()); i++) await page.locator("[data-qad-primary]").click();
   await page.locator("[data-qad-primary]").click();
-  const stamp = page.locator('[data-todo-v5] [data-td5="stamp"]');
-  /* under reduced motion the sequence runs with no durations, so the stamp may never be on screen to read: the claim
-     there is the END STATE below, and that nothing animated if it was */
-  const stamped = await stamp.waitFor({ state: "attached", timeout: reduced ? 4_000 : 30_000 }).then(() => true).catch(() => false);
+  /* ⚠️ THE STAMP IS ON SCREEN FOR UNDER A SECOND, so it is detected and read in ONE in-page call: a wait followed by a
+     separate read lost the race once under load (the stamp had already left), on the integration branch. */
+  const on = await page.waitForFunction(() => {
+    const s = document.querySelector('[data-todo-v5] [data-td5="stamp"]');
+    if (!s) return null;
+    return { key: s.closest('[data-td5="desk-card"]')?.getAttribute("data-key") ?? null, anim: getComputedStyle(s).animationName, word: s.textContent };
+  }, null, { timeout: reduced ? 4_000 : 30_000, polling: "raf" }).then((h) => h.jsonValue()).catch(() => null);
+  const stamped = !!on;
   if (!reduced) L.check("D2", `${at} a stamp comes down`, stamped, "");
   else await page.locator("[data-qad-drawer]").waitFor({ state: "detached", timeout: 30_000 }).catch(() => {});
   if (stamped && !reduced && process.env.TD5_SHOTS === "1") await page.screenshot({ path: "reports/todo-list-v5/shots/04-stamp-1512.png" });
-  if (stamped) {
-    const on = await page.evaluate(() => {
-      const s = document.querySelector('[data-todo-v5] [data-td5="stamp"]')!;
-      return { key: s.closest('[data-td5="desk-card"]')?.getAttribute("data-key"), anim: getComputedStyle(s).animationName, word: s.textContent };
-    });
+  if (on) {
     L.check("D2", `${at} on the saved card`, on.key === key, `${on.key} vs ${key}`);
     L.check("D2", `${at} the word`, on.word === "SENT", String(on.word));
     L.check("D2", `${at} motion ${reduced ? "off" : "on"}`, reduced ? on.anim === "none" : on.anim !== "none", on.anim);
