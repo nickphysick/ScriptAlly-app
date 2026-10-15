@@ -78,7 +78,7 @@ export const ContactPinnedRow: React.FC<{
   /* the frame (box, height, cover, content row) is the shell's PinnedRow; this page styles only its contents */
   return (
     <PinnedRow anchor={anchor} on={on} shown={shown} className="cl17-pin" innerClassName="cl17-pin-in" attrs={{ "data-cl17": "pinned" }} innerAttrs={{ "data-cl17": "pinned-in" }}>
-        <button type="button" className="cl17-pin-t" data-cl17="pinned-count" title="Back to the top" onClick={onTop}>
+        <button type="button" className="cl17-pin-t" data-cl17="pinned-count" data-pin-text="" title="Back to the top" onClick={onTop}>
           {total} {total === 1 ? "agent" : "agents"}
         </button>
         <span className="cl17-pin-c" role="group" aria-label="Show a group" data-cl17="pinned-pills">

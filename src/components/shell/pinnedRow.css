@@ -22,3 +22,13 @@
 .pin-row > .pin-row-in > * { margin-top: 0; margin-bottom: 0; align-self: center; }
 @media (max-width: 767.98px) { .pin-row { display: none; } }
 @media (prefers-reduced-motion: reduce) { .pin-row, .pin-row[data-on] { transition: none; } }
+
+/* ── Part C · OPTICAL CENTRING ──────────────────────────────────────────────────────────────────────────────────
+   A text-only child (marked `data-pin-text`: a page's "{N} queries" / "{N} agents" title) is centred by its INK, cap
+   height to baseline, not by its line box: Special Elite sits high in its line, and at 20px/1 the ink's centre measured
+   2.9px above the content row's centre on both pages. One shared nudge, in the type's own em so it scales with the
+   size (2.9 / 20 = 0.145), moves the ink down by that difference; `translate`, so no box around it moves. Lock P1
+   measures the ink centre of these children against the visible area, so a different face or size that drifts by
+   more than 1px goes red. */
+.pin-row { --pin-ink-nudge: 0.145em; }
+.pin-row > .pin-row-in > [data-pin-text] { translate: 0 var(--pin-ink-nudge); }

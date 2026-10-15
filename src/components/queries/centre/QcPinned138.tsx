@@ -63,7 +63,7 @@ export const QcPinned138: React.FC<{
   /* the frame (box, height, cover, content row) is the shell's PinnedRow; this page styles only its contents */
   return (
     <PinnedRow anchor={anchor} on={on} shown={shown} className="qc138-pin" innerClassName="qc138-pin-in" attrs={{ "data-qc138": "pinned" }}>
-        <button type="button" className="qc138-pin-t" data-qc138="pinned-count" title="Back to the top" onClick={onTop}>
+        <button type="button" className="qc138-pin-t" data-qc138="pinned-count" data-pin-text="" title="Back to the top" onClick={onTop}>
           {total} {total === 1 ? "query" : "queries"}
         </button>
         <span className="qc138-pin-c" role="group" aria-label="Filter by stage" data-qc138="pinned-glyphs">
