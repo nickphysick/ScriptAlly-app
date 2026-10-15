@@ -98,6 +98,7 @@ test("TD5 A2 — card: the rows sum to n, the bar is in proportion, a press filt
         pressed: q('[data-td5="card-row"][data-k="chase"]')!.getAttribute("aria-pressed"),
         others: qa('[data-td5="card-row"]').filter((b) => b.dataset.k !== "chase").map((b) => Number(getComputedStyle(b).opacity)),
         pill: { on: q('[data-td5-pill="type"]')!.classList.contains("on"), text: (q('[data-td5-pill="type"] .td5-fp')!.textContent || "").trim() },
+        sayH: q('[data-td5="say"]')!.getBoundingClientRect().height, sayLh: parseFloat(getComputedStyle(q('[data-td5="say"]')!).lineHeight),
       };
     });
     L.check("A2", `${at} only chase and quiet rows`, p.n > 0 && p.groups.every((g) => g === "chase" || g === "quiet"), JSON.stringify(p.groups));
@@ -106,9 +107,11 @@ test("TD5 A2 — card: the rows sum to n, the bar is in proportion, a press filt
     L.check("A2", `${at} aria-pressed`, p.pressed === "true", String(p.pressed));
     L.check("A2", `${at} Task type pill`, p.pill.on && p.pill.text === "To chase", JSON.stringify(p.pill));
     L.check("A2", `${at} no scroll`, p.top === before, `${before} → ${p.top}`);
+    /* filtered, the row reads "Showing n of N  Clear all" on ONE line (a class collision once made the link a grid block) */
+    L.check("A2", `${at} the filtered sentence is one line`, p.sayH < p.sayLh * 1.5, `height ${p.sayH} against a ${p.sayLh}px line`);
     await page.locator('[data-todo-v5] [data-td5="card-row"][data-k="chase"]').click();
   }
-  L.done(20);
+  L.done(22);
 });
 
 /* ── B1 · the ring, rendered ─────────────────────────────────────────────────────────────────── */

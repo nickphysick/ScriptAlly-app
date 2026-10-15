@@ -512,7 +512,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                   ) : (
                     <div className="td5-say" data-td5="say" style={{ position: "relative", overflow: "visible" }}>
                       {filtersOn(filters) ? (
-                        <>Showing <b>{visible.length}</b> of <b>{items.length}</b><button type="button" className="td5-clear" onClick={() => setFilters(NO_FILTERS)}>Clear all</button></>
+                        <>Showing <b>{visible.length}</b> of <b>{items.length}</b><button type="button" className="td5-clr" data-td5="clear-all" onClick={() => setFilters(NO_FILTERS)}>Clear all</button></>
                       ) : (
                         <>Working through <b>{visible.length} {visible.length === 1 ? "task" : "tasks"}</b>,{" "}
                           <button type="button" className="td5-sortb" data-td5="sort" aria-haspopup="menu" aria-expanded={sortOpen} onClick={() => setSortOpen((o) => !o)}>{SORT_LABEL[sort]}</button>
