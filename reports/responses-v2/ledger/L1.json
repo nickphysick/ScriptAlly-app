@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "L1",
+  "where": "1920",
+  "ok": true,
+  "detail": "document 1920,1920"
+ },
+ {
+  "lock": "L1",
+  "where": "1920",
+  "ok": true,
+  "detail": "sheet scroller 1664,1664"
+ },
+ {
+  "lock": "L1",
+  "where": "1920",
+  "ok": true,
+  "detail": "app frame 1920,1920"
+ },
+ {
+  "lock": "L1",
+  "where": "1512",
+  "ok": true,
+  "detail": "document 1512,1512"
+ },
+ {
+  "lock": "L1",
+  "where": "1512",
+  "ok": true,
+  "detail": "sheet scroller 1256,1256"
+ },
+ {
+  "lock": "L1",
+  "where": "1512",
+  "ok": true,
+  "detail": "app frame 1512,1512"
+ },
+ {
+  "lock": "L1",
+  "where": "1280",
+  "ok": true,
+  "detail": "document 1280,1280"
+ },
+ {
+  "lock": "L1",
+  "where": "1280",
+  "ok": true,
+  "detail": "sheet scroller 1024,1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1280",
+  "ok": true,
+  "detail": "app frame 1280,1280"
+ },
+ {
+  "lock": "L1",
+  "where": "1180",
+  "ok": true,
+  "detail": "document 1180,1180"
+ },
+ {
+  "lock": "L1",
+  "where": "1180",
+  "ok": true,
+  "detail": "sheet scroller 924,924"
+ },
+ {
+  "lock": "L1",
+  "where": "1180",
+  "ok": true,
+  "detail": "app frame 1180,1180"
+ },
+ {
+  "lock": "L1",
+  "where": "1024",
+  "ok": true,
+  "detail": "document 1024,1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1024",
+  "ok": true,
+  "detail": "sheet scroller 768,768"
+ },
+ {
+  "lock": "L1",
+  "where": "1024",
+  "ok": true,
+  "detail": "app frame 1024,1024"
+ }
+]

@@ -211,6 +211,7 @@ export const RspList: React.FC<{
     const said = saidLine(i);
     return (
       <button key={i.id} type="button" className="rsp-row rsp-gr" data-rsp="row" data-id={i.id} data-kind={i.group}
+        data-ans={i.answerMs ?? undefined} data-wait={i.waitDays ?? undefined} data-surname={i.row.agentName.trim().split(/\s+/).pop()?.toLowerCase()}
         aria-current={selectedId === i.id ? "true" : undefined} onClick={() => onOpen(i)}
         aria-label={`${i.row.agentName}, ${i.group === "passed" ? "passed" : "no reply"}${i.answerMs != null ? `, ${respDate(i.answerMs, nowMs)}` : ""}. Open.`}>
         <span className="rsp-ag">

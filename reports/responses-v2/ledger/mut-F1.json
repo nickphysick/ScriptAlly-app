@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512",
+  "ok": false,
+  "detail": "populated parts on the empty page: {\"card\":1,\"carousel\":0,\"banner\":0,\"tally\":0,\"list\":0,\"share\":0,\"panel\":1,\"art\":1,\"example\":1,\"ways\":1}"
+ },
+ {
+  "lock": "F1",
+  "where": "1512",
+  "ok": true,
+  "detail": "empty parts: {\"card\":1,\"carousel\":0,\"banner\":0,\"tally\":0,\"list\":0,\"share\":0,\"panel\":1,\"art\":1,\"example\":1,\"ways\":1}"
+ },
+ {
+  "lock": "F1",
+  "where": "1512",
+  "ok": true,
+  "detail": "the hawk is shown (block)"
+ },
+ {
+  "lock": "F1",
+  "where": "1512",
+  "ok": true,
+  "detail": "the out count is the fixture's three"
+ },
+ {
+  "lock": "F1",
+  "where": "1280",
+  "ok": false,
+  "detail": "populated parts on the empty page: {\"card\":1,\"carousel\":0,\"banner\":0,\"tally\":0,\"list\":0,\"share\":0,\"panel\":1,\"art\":1,\"example\":1,\"ways\":1}"
+ },
+ {
+  "lock": "F1",
+  "where": "1280",
+  "ok": true,
+  "detail": "empty parts: {\"card\":1,\"carousel\":0,\"banner\":0,\"tally\":0,\"list\":0,\"share\":0,\"panel\":1,\"art\":1,\"example\":1,\"ways\":1}"
+ },
+ {
+  "lock": "F1",
+  "where": "1280",
+  "ok": true,
+  "detail": "the hawk is shown (block)"
+ },
+ {
+  "lock": "F1",
+  "where": "1280",
+  "ok": true,
+  "detail": "the out count is the fixture's three"
+ },
+ {
+  "lock": "F1",
+  "where": "first answer",
+  "ok": true,
+  "detail": "no reload"
+ },
+ {
+  "lock": "F1",
+  "where": "first answer",
+  "ok": true,
+  "detail": "the empty page has gone"
+ }
+]

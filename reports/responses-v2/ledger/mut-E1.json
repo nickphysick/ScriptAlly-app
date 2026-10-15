@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "E1",
+  "where": "square",
+  "ok": true,
+  "detail": "preview 1080,1080"
+ },
+ {
+  "lock": "E1",
+  "where": "names",
+  "ok": false,
+  "detail": "Agent names starts on"
+ },
+ {
+  "lock": "E1",
+  "where": "names",
+  "ok": false,
+  "detail": "full names on the canvas: [\"Joan Whitfield\",\"Tom Ellery\",\"Imogen Rackham\",\"Elinor Hale\",\"Tom Ellery\",\"Marcus Reed\",\"Priya Nair\",\"Sam Okoro\",\"David Marsh\",\"Sam Okoro\",\"Joan Whitfield\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "story",
+  "ok": true,
+  "detail": "story 1080,1920"
+ },
+ {
+  "lock": "E1",
+  "where": "save",
+  "ok": true,
+  "detail": "file queryhawk-wall-of-no.png"
+ },
+ {
+  "lock": "E1",
+  "where": "save",
+  "ok": true,
+  "detail": "requests during save: []"
+ },
+ {
+  "lock": "E1",
+  "where": "no nos",
+  "ok": true,
+  "detail": "the share sheet is hidden with no nos"
+ }
+]

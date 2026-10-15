@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-send",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-send",
+  "ok": true,
+  "detail": "strip \"YOUR MOVE\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-send",
+  "ok": true,
+  "detail": "what \"WANTS TO READThe full manuscriptAsked 9 Oct, after the partial\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-send",
+  "ok": true,
+  "detail": "foot \"SEND BY\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-send",
+  "ok": true,
+  "detail": "button \"Mark full sent\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-send",
+  "ok": true,
+  "detail": "quote false (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-sent",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-sent",
+  "ok": true,
+  "detail": "strip \"WITH THE AGENT\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-sent",
+  "ok": true,
+  "detail": "what \"IS READINGA partialAsked 5 Sep, after the query\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-sent",
+  "ok": true,
+  "detail": "foot \"REPLY EXPECTED BY\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-sent",
+  "ok": true,
+  "detail": "button \"Record a response\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-sent",
+  "ok": true,
+  "detail": "quote false (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-offer",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-offer",
+  "ok": true,
+  "detail": "strip \"YOUR MOVE\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-offer",
+  "ok": true,
+  "detail": "what \"HAS MADEAn offerOffered 11 Oct\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-offer",
+  "ok": true,
+  "detail": "foot \"ANSWER BY\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-offer",
+  "ok": true,
+  "detail": "button \"Record your answer\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-offer",
+  "ok": true,
+  "detail": "quote false (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-rr",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-rr",
+  "ok": true,
+  "detail": "strip \"YOUR MOVE\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-rr",
+  "ok": true,
+  "detail": "what \"WANTS TO READA revisionAsked 6 Oct\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-rr",
+  "ok": true,
+  "detail": "foot \"ASKED\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-rr",
+  "ok": true,
+  "detail": "button \"Record a response\""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 rs2-q-rr",
+  "ok": true,
+  "detail": "quote true (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1512",
+  "ok": true,
+  "detail": "your move first: YOUR MOVE, YOUR MOVE, YOUR MOVE, WITH THE AGENT"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-send",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-send",
+  "ok": true,
+  "detail": "strip \"YOUR MOVE\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-send",
+  "ok": true,
+  "detail": "what \"WANTS TO READThe full manuscriptAsked 9 Oct, after the partial\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-send",
+  "ok": true,
+  "detail": "foot \"SEND BY\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-send",
+  "ok": true,
+  "detail": "button \"Mark full sent\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-send",
+  "ok": true,
+  "detail": "quote false (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-sent",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-sent",
+  "ok": true,
+  "detail": "strip \"WITH THE AGENT\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-sent",
+  "ok": true,
+  "detail": "what \"IS READINGA partialAsked 5 Sep, after the query\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-sent",
+  "ok": true,
+  "detail": "foot \"REPLY EXPECTED BY\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-sent",
+  "ok": true,
+  "detail": "button \"Record a response\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-sent",
+  "ok": true,
+  "detail": "quote false (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-offer",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-offer",
+  "ok": true,
+  "detail": "strip \"YOUR MOVE\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-offer",
+  "ok": true,
+  "detail": "what \"HAS MADEAn offerOffered 11 Oct\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-offer",
+  "ok": true,
+  "detail": "foot \"ANSWER BY\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-offer",
+  "ok": true,
+  "detail": "button \"Record your answer\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-offer",
+  "ok": true,
+  "detail": "quote false (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-rr",
+  "ok": true,
+  "detail": "card present"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-rr",
+  "ok": true,
+  "detail": "strip \"YOUR MOVE\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-rr",
+  "ok": true,
+  "detail": "what \"WANTS TO READA revisionAsked 6 Oct\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-rr",
+  "ok": true,
+  "detail": "foot \"ASKED\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-rr",
+  "ok": true,
+  "detail": "button \"Record a response\""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 rs2-q-rr",
+  "ok": true,
+  "detail": "quote true (a quote only where a note is recorded)"
+ },
+ {
+  "lock": "B3",
+  "where": "1280",
+  "ok": true,
+  "detail": "your move first: YOUR MOVE, YOUR MOVE, YOUR MOVE, WITH THE AGENT"
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512",
+  "ok": false,
+  "detail": "heading label 272.0 vs h1 426.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512",
+  "ok": false,
+  "detail": "heading 272.0 vs h1 426.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512",
+  "ok": false,
+  "detail": "first card 272.0 vs h1 426.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280",
+  "ok": false,
+  "detail": "heading label 272.0 vs h1 312.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280",
+  "ok": false,
+  "detail": "heading 272.0 vs h1 312.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280",
+  "ok": false,
+  "detail": "first card 272.0 vs h1 312.0"
+ }
+]

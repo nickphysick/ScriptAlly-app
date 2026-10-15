@@ -1,1 +1,18 @@
 {"lock":"D1 data","mutation":"Place by first answer (the first answer in the stage history, not the current status)","red":"3 failed | 9 passed (12)","green":"12 passed (12)","where":"src/lib/responses.test.ts"}
+{"lock":"A1","mutation":"RS2_MUTATE=A1","verdict":"red","reading":"[A1] 14/16 green","first":"  ✗ A1 · 1512 — header images [\"shadow\",\"http://127.0.0.1:4621/images/responses/responses-wall-hawk.webp\"]"}
+{"lock":"A2","mutation":"RS2_MUTATE=A2","verdict":"red","reading":"[A2] 20/22 green","first":"  ✗ A2 · 1512 — scrollTop 0 → 180 on Passed"}
+{"lock":"B1","mutation":"RS2_MUTATE=B1","verdict":"red","reading":"[B1] 0/6 green","first":"  ✗ B1 · 1512 — heading label 272.0 vs h1 426.0"}
+{"lock":"B2","mutation":"RS2_MUTATE=B2","verdict":"red","reading":"[B2] 2/14 green","first":"  ✗ B2 · 1512 — card widths 11.7 vs 340"}
+{"lock":"B3","mutation":"RS2_MUTATE=B3","verdict":"red","reading":"[B3] 44/50 green","first":"  ✗ B3 · 1512 rs2-q-send — quote true (a quote only where a note is recorded)"}
+{"lock":"B4","mutation":"RS2_MUTATE=B4","verdict":"red","reading":"[B4] 4/6 green","first":"  ✗ B4 · 1512 — arrows 1, dots 0"}
+{"lock":"C1","mutation":"RS2_MUTATE=C1","verdict":"red","reading":"[C1] 6/10 green","first":"  ✗ C1 · 1512 2 — gates [2,2]"}
+{"lock":"C2","mutation":"RS2_MUTATE=C2","verdict":"red","reading":"[C2] 20/22 green","first":"  ✗ C2 · 1512 — no dividers on Wait (1)"}
+{"lock":"C3","mutation":"RS2_MUTATE=C3","verdict":"red","reading":"[C3] 10/14 green","first":"  ✗ C3 · 1512 — navy row -1400.4 from the sheet top"}
+{"lock":"C4","mutation":"RS2_MUTATE=C4","verdict":"red","reading":"[C4] 6/8 green","first":"  ✗ C4 · 1024 — scroller 1073,768"}
+{"lock":"D1","mutation":"RS2_MUTATE=D1","verdict":"red","reading":"[D1] 36/42 green","first":"  ✗ D1 · 1512 card rs2-q-send — edge rgb(139, 155, 179) for more"}
+{"lock":"E1","mutation":"RS2_MUTATE=E1","verdict":"red","reading":"[E1] 5/7 green","first":"  ✗ E1 · names — Agent names starts on"}
+{"lock":"F1","mutation":"RS2_MUTATE=F1","verdict":"red","reading":"[F1] 8/10 green","first":"  ✗ F1 · 1512 — populated parts on the empty page: {\"card\":1,\"carousel\":0,\"banner\":0,\"tally\":0,\"list\":0,\"share\":0,\"panel\":1,\"art\":1,\"example\":1,\"ways\":1}"}
+{"lock":"F2","mutation":"RS2_MUTATE=F2","verdict":"red","reading":"[F2] 4/6 green","first":"  ✗ F2 · 1512 — {\"zero\":1,\"h\":\"Rejections are part of querying\",\"tags\":0,\"tally\":1,\"list\":0,\"share\":0,\"toShare\":0}"}
+{"lock":"L1","mutation":"RS2_MUTATE=L1","verdict":"red","reading":"[L1] 10/15 green","first":"  ✗ L1 · 1920 — sheet scroller 8038,1664"}
+{"lock":"B2one","mutation":"RS2_MUTATE=B2one","verdict":"red","reading":"[B2one] 0/1 green","first":"  ✗ B2one · 1512 — {\"cards\":1,\"arrows\":1,\"dots\":0}"}
+{"lock":"D2","mutation":"RS2_MUTATE=D2","verdict":"red","reading":"[D2] 16/19 green","first":"  ✗ D2 · card button — scrim alpha 0.000 within 250ms"}

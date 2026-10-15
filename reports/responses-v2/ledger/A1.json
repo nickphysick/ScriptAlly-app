@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses"
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "folder tab current \"Responses\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "sidebar current \"Responses\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "h1 \"30 answers from agents\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "h1 face \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "h1 44px (sheet compact)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "h1 one line: 44 tall at line-height 44"
+ },
+ {
+  "lock": "A1",
+  "where": "1512",
+  "ok": true,
+  "detail": "header images [\"shadow\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "url http://127.0.0.1:4621/queries/responses"
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "folder tab current \"Responses\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "sidebar current \"Responses\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "h1 \"30 answers from agents\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "h1 face \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "h1 44px (sheet compact)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "h1 one line: 44 tall at line-height 44"
+ },
+ {
+  "lock": "A1",
+  "where": "1280",
+  "ok": true,
+  "detail": "header images [\"shadow\"]"
+ }
+]

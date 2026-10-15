@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "rows 34, card nos 34"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "newest answer first"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "month dividers 14"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "Wait carries aria-sort descending"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "longest wait first"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": false,
+  "detail": "no dividers on Wait (1)"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "again reverses"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "Agent sorts by surname, A to Z"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "card No reply presses the segment"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "segment All releases the card's row"
+ },
+ {
+  "lock": "C2",
+  "where": "1512",
+  "ok": true,
+  "detail": "search \"achebe\": 2 rows, 4 marks"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "rows 34, card nos 34"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "newest answer first"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "month dividers 14"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "Wait carries aria-sort descending"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "longest wait first"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": false,
+  "detail": "no dividers on Wait (1)"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "again reverses"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "Agent sorts by surname, A to Z"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "card No reply presses the segment"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "segment All releases the card's row"
+ },
+ {
+  "lock": "C2",
+  "where": "1280",
+  "ok": true,
+  "detail": "search \"achebe\": 2 rows, 4 marks"
+ }
+]
