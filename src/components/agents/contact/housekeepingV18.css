@@ -215,3 +215,68 @@
   .hk8-card, .hk8-card.is-leaving, .hk8-ring.is-bump, .hk8-pips i[data-pulse] { animation: none; }
   .hk8-pop { display: none; }
 }
+
+/* ── v18.1 §A · "What to send": the app's MaterialsField, dressed for the focus card ───────────────────────────────
+   ⚠️ NEVER FORKED: the four rows, the steppers and the segment are cardInputs.tsx's own markup. Its dress lives in
+      agentCard.css under `:is(.ac, .hkv-fx)` and does not reach this card (v18 wrapped it in `.hk8-field`, so it
+      rendered bare); this wrapper is the focus card's dress and nothing else's. Every selector names `.hk8-field
+      .hk81-mats` so it outranks `.hk8-field .ae-step`, which is the reply question's stepper, and states its fonts
+      `!important` because those do. */
+.hk8-field.hk81-matsf { display: block; }
+.hk8-field .hk81-mats { box-sizing: border-box; width: 100%; }
+.hk8-field .hk81-mats .ae-mt { box-sizing: border-box; width: 100%; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.13); overflow: hidden; }
+.hk8-field .hk81-mats .ae-mtr {
+  box-sizing: border-box; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; column-gap: 12px; row-gap: 6px;
+  min-height: 46px; padding: 5px 14px; border-bottom: 1px solid rgba(28, 19, 15, 0.08);
+}
+.hk8-field .hk81-mats .ae-mtr:last-child { border-bottom: 0; }
+.hk8-field .hk81-mats .ae-mtr > span:not(.ae-mtx) { font: 400 16.5px/1.25 var(--sp-serif) !important; color: #1c130f; }
+.hk8-field .hk81-mats .ae-mtr.off > span:not(.ae-mtx) { color: rgba(28, 19, 15, 0.62); }
+/* the tick */
+.hk8-field .hk81-mats .ae-bx {
+  position: relative; box-sizing: border-box; width: 22px; height: 22px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: #fff; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(45, 58, 80, 0.45);
+}
+.hk8-field .hk81-mats .ae-bx:hover { box-shadow: inset 0 0 0 1.5px rgba(45, 58, 80, 0.9); }
+.hk8-field .hk81-mats .ae-bx.on { background: #2d3a50; box-shadow: none; }
+.hk8-field .hk81-mats .ae-bx.on::after {
+  content: ""; position: absolute; left: 7.5px; top: 4.5px; width: 5px; height: 9.5px;
+  border: solid #f4eee5; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+/* what sits on the right of a row: Synopsis's stepper only when ticked, Other's field always */
+.hk8-field .hk81-mats .ae-mtx { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.hk8-field .hk81-mats .ae-mtr.off[data-mt-row="syn"] .ae-mtx { display: none; }
+/* Opening sample: its controls take a line of their own, indented to the label; hidden entirely when unticked */
+.hk8-field .hk81-mats .ae-mtr[data-mt-row="smp"] .ae-mtx { grid-column: 2 / -1; grid-row: 2; justify-content: flex-start; padding-bottom: 4px; }
+.hk8-field .hk81-mats .ae-mtr.off[data-mt-row="smp"] .ae-mtx { display: none; }
+/* the steppers */
+.hk8-field .hk81-mats .ae-step {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 0; height: 34px; border-radius: 17px; background: #fff;
+  box-shadow: inset 0 0 0 1.2px rgba(45, 58, 80, 0.35);
+}
+.hk8-field .hk81-mats .ae-step button {
+  box-sizing: border-box; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; cursor: pointer;
+  color: #2d3a50; font: 400 18px/1 var(--sp-serif) !important; opacity: 1;
+}
+.hk8-field .hk81-mats .ae-step button:hover:not(:disabled) { background: #eef1f6; }
+.hk8-field .hk81-mats .ae-step button:disabled { color: rgba(28, 19, 15, 0.25); cursor: default; }
+.hk8-field .hk81-mats .ae-step b { min-width: 86px; text-align: center; color: #1c130f; font: 400 14.5px/1 var(--sp-type) !important; }
+/* the unit segment */
+.hk8-field .hk81-mats .ae-seg { box-sizing: border-box; display: inline-flex; gap: 0; padding: 3px; border-radius: 19px; background: #eef1f6; }
+.hk8-field .hk81-mats .ae-seg button {
+  box-sizing: border-box; height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: transparent; cursor: pointer;
+  color: #2d3a50; font: 400 13.5px/1 var(--sp-serif) !important; white-space: nowrap;
+}
+.hk8-field .hk81-mats .ae-seg button.on { background: #2d3a50; color: #f4eee5; }
+/* Other's field: an underline, always visible */
+.hk8-field .hk81-mats .ae-mto {
+  box-sizing: border-box; width: 220px; height: 30px; padding: 0 2px; border: 0; border-radius: 0; background: transparent; box-shadow: none; outline: 0;
+  border-bottom: 1.2px solid rgba(45, 58, 80, 0.4); color: #1c130f; font: 400 15px/1 var(--sp-serif) !important;
+}
+.hk8-field .hk81-mats .ae-mtr.off .ae-mto { border-bottom-color: rgba(45, 58, 80, 0.18); }
+.hk8-field .hk81-mats .ae-mto:focus { border-bottom-color: #2d3a50; }
+.hk8-field .hk81-mats .ae-mto::placeholder { color: rgba(28, 19, 15, 0.4); }
+/* under the box */
+.hk81-oncard { margin: 10px 2px 0; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.hk81-oncard b { font: normal 400 13.5px/1.4 var(--sp-serif) !important; color: #1c130f; }
+.hk81-refuse { margin: 8px 2px 0; font: 400 13.5px/1.4 var(--sp-serif) !important; color: #a2452a; }

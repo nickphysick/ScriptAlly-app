@@ -150,14 +150,18 @@ export function emptyCardDraft(): CardDraft {
 /* ── the materials, back to storage ──────────────────────────────────────────────────────── */
 
 /** Encoded through the one encoder (`materialsWantedFromRows` → `buildAgentMaterials`). */
-export function encodeMats(m: CardMats): string[] {
-  const rows: MaterialRow[] = [
+/** The four rows the card's materials state stands for — what the encoder encodes and the validator checks. */
+export function matsRows(m: CardMats): MaterialRow[] {
+  return [
     { key: "queryLetter", kind: "binary", name: MATERIAL_ROW_NAMES.queryLetter, on: m.ql },
     { key: "synopsis", kind: "binary", name: MATERIAL_ROW_NAMES.synopsis, on: m.syn.on, pages: m.syn.len ? String(m.syn.len) : "" },
     { key: "sample", kind: "qty", name: MATERIAL_ROW_NAMES.sample, on: m.smp.on, unit: m.smp.unit, amount: String(m.smp.qty) },
     { key: "other", kind: "text", name: MATERIAL_ROW_NAMES.other, on: m.oth.on, text: m.oth.text },
   ];
-  return materialsWantedFromRows(rows);
+}
+
+export function encodeMats(m: CardMats): string[] {
+  return materialsWantedFromRows(matsRows(m));
 }
 
 /* ── what changed ────────────────────────────────────────────────────────────────────────── */

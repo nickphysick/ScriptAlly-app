@@ -24,7 +24,8 @@ import {
 import type { WishlistEvery } from "../../../lib/contactPrefs";
 import { POINTS, POINTS_LINE, POINTS_ORDER, agentPct, appliesTo, minutesFor, type Health } from "../../../lib/listHealth";
 import { bookGenreHit } from "../../../lib/genreMatch";
-import { matsOf, type CardMats } from "../../../lib/cardDraft";
+import { encodeMats, matsOf, matsRows, type CardMats } from "../../../lib/cardDraft";
+import { materialRowsFromAgent, summaryFromRows, validateMaterials } from "../../../lib/agentMaterials";
 import { agentInitials } from "../../../lib/agentDisplay";
 import { isDoorClosed } from "../../../lib/agentList";
 import { MaterialsField, Stepper } from "../card/cardInputs";
@@ -169,12 +170,22 @@ const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: re
             onClick={() => { setWeeks(-1); onAnswer({ kind: "settled" }); }}>{weeks === -1 ? "✓ " : ""}They don’t say</button>
         </div>
       );
-    case "materials":
+    case "materials": {
+      /* v18.1 §A — the app's own MaterialsField, dressed for the focus card by `.hk81-mats` (housekeepingV18.css);
+         its state, steppers, names and save path are the agent card's. "On the card:" is the card's own summary of
+         what would be stored; a refusal is the card's own validator's. */
+      const refusal = validateMaterials(matsRows(mats))?.msg ?? null;
+      const onCard = summaryFromRows(materialRowsFromAgent(encodeMats(mats)));
+      const set = (m: CardMats) => { setMats(m); onAnswer(matsOk(m) && !validateMaterials(matsRows(m)) ? { kind: "mats", mats: m } : null); };
       return (
-        <div className="hk8-field" data-hk8="field" data-gap="materials">
-          <MaterialsField mats={mats} onMats={(m) => { setMats(m); onAnswer(matsOk(m) ? { kind: "mats", mats: m } : null); }} />
+        <div className="hk8-field hk81-matsf" data-hk8="field" data-gap="materials"
+          onFocusCapture={(e) => { if ((e.target as HTMLElement).dataset?.ae === "other" && !mats.oth.on) set({ ...mats, oth: { ...mats.oth, on: true } }); }}>
+          <div className="hk81-mats" data-hk81="mats"><MaterialsField mats={mats} onMats={set} /></div>
+          {onCard ? <p className="hk81-oncard" data-hk81="oncard">On the card: <b>{onCard}</b></p> : null}
+          {refusal ? <p className="hk81-refuse" data-hk81="refusal" role="alert">{refusal}</p> : null}
         </div>
       );
+    }
     case "genres": {
       const hit = bookGenreHit(book.genres.length ? book.genres : book.genre ? [book.genre] : []);
       return (

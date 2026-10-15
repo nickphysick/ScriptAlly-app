@@ -331,7 +331,21 @@
     "design-refs/contact-list-v18/screens/09-hk-focus-run-1512@2x.png": "3814a2b41ffa60bd3647b2279e180d26acb246200ef7246652d1557dd7711d72",
     "design-refs/contact-list-v18/screens/10-hk-plus-points-1512@2x.png": "21bb75a605803e275f8422cb3ca6b891c68213bda5a79525b6405acd6c0b6227",
     "design-refs/contact-list-v18/screens/11-hk-complete-1512@2x.png": "55edb9c56bb49ac3abcce612e0e53e18186d9068e970299c188aa4a4961e348c",
-    "design-refs/todo-list-v5-1/todo-list-v5-1.html": "59d8e1beb070bd144262633be02c14dce6dd33ec284153a8e5cd4848ed3e5037"
+    "design-refs/todo-list-v5-1/todo-list-v5-1.html": "59d8e1beb070bd144262633be02c14dce6dd33ec284153a8e5cd4848ed3e5037",
+    "design-refs/contact-list-v18-1/contact-list-v18-1.html": "71b7d543800b01a90088070406dad5e731535f29e9e9dbab5823852690579769",
+    "design-refs/contact-list-v18-1/screens/01-send-empty-1512@2x.png": "f8722ec1756e3cc25ec8989ae2253f0990f65372422a9f2e8ef85ec48e94506a",
+    "design-refs/contact-list-v18-1/screens/02-send-ticked-1512@2x.png": "66662e7bc9a45d9b4bb1b4d6e3e3c4d52cb2ba83c0803c34c5e38dabe9f54d06",
+    "design-refs/contact-list-v18-1/screens/03-send-pages-other-1512@2x.png": "5561f5eba03b60737d4f84cadee60daa5cfe85f113e1488a6782e6b6d60cec00",
+    "design-refs/contact-list-v18-1/screens/04-send-empty-1280@2x.png": "839cbbcf972547fb8e8c1f1ae1b9633896816f3dc049d8cabd682f282a1a397e",
+    "design-refs/contact-list-v18-1/screens/05-send-ticked-1280@2x.png": "7d1ec1c04dd93b87e4f838c817ad4e9fc41ac1f13850f455267b791c277540cb",
+    "design-refs/contact-list-v18-1/screens/06-panel-your-move-1512@2x.png": "2862178c06384c1b1132ae0c42fa61564a7387a9f1383462714f8937280daa9d",
+    "design-refs/contact-list-v18-1/screens/07-panel-waiting-1512@2x.png": "cacc7f5ecfdaa194c5daf10f59af261b02cd1879074b919ba19335008dfdd2c1",
+    "design-refs/contact-list-v18-1/screens/08-panel-not-queried-1512@2x.png": "1afc1010d54c503fd2336207bd8f8f74c03a9b578b4932dd816e1dad440a1deb",
+    "design-refs/contact-list-v18-1/screens/09-panel-closed-1512@2x.png": "efb0b9c9272bf15ff0a3af82259f09e0b058eb8178c640b74c3c5c84f5bd4d97",
+    "design-refs/contact-list-v18-1/screens/10-panel-gaps-1512@2x.png": "1eb672eb1c231534299614bbf15e453e1bec6f7a49af0f2d2f8154575df41296",
+    "design-refs/contact-list-v18-1/screens/11-panel-queries-1512@2x.png": "d76eda250799249b7aa64ff0acd2c6178d4d918e448c56aa7b9f21a571419d55",
+    "design-refs/contact-list-v18-1/screens/12-panel-your-move-1280@2x.png": "af2b1aba32506dd78abba0a5dca626157e62798a34d17901ac3bb9c74f87b4c2",
+    "design-refs/contact-list-v18-1/screens/13-panel-not-queried-1280@2x.png": "38ef8ce7aef5a230f94eafe4b724e9c8e30a12bc1ae42fa6d4ae400aa97794eb"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
