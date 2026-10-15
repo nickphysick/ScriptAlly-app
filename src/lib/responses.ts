@@ -261,3 +261,94 @@ export const nextPinned = (was: boolean, sentinelTop: number, listBottom: number
   if (sentinelTop > UNPIN_ABOVE) return false;
   return was;
 };
+
+/* ── the side panel's words (Part D). Every clause comes from a recorded fact; a missing one is dropped. ── */
+export interface Part { text: string; em?: boolean }
+export interface AnswerStand { heading: string; figure: string | null; hot: boolean; paragraph: Part[] }
+const reqWord = (a: RespAnswer): string => (a === "full" ? "full" : a === "rr" ? "revision" : "partial");
+
+export function answerStand(i: RespItem, title: string | null, nowMs: number): AnswerStand {
+  const first = firstNameOf(i.row.agentName);
+  const book: Part = { text: title || "your book", em: !!title };
+  const d = (ms: number | null) => (ms == null ? null : respDate(ms, nowMs));
+  const P = (...xs: (Part | string | null | false)[]): Part[] => xs.filter((x): x is Part | string => !!x).map((x) => (typeof x === "string" ? { text: x } : x));
+  const due = i.dueMs != null ? daysLeft(i.dueMs, nowMs) : null;
+  const dueFig = (w: "left" | "to go") => (due ? (due.over ? `${plural(due.n, "day", "days")} over` : `${plural(due.n, "day", "days")} ${w}`) : null);
+  if (i.state === "toSend") {
+    return {
+      heading: `Send ${first} the ${reqWord(i.answer)}`, figure: dueFig("left"), hot: !!due,
+      paragraph: P(d(i.answerMs) ? `${first} asked for the ${reqWord(i.answer)} of ` : null, d(i.answerMs) ? book : null, d(i.answerMs) ? ` on ${d(i.answerMs)}.` : null,
+        due ? `${d(i.answerMs) ? " " : ""}They're expecting it by ${d(i.dueMs)}.` : null),
+    };
+  }
+  if (i.state === "sent") {
+    return {
+      heading: `Waiting on ${first}`, figure: dueFig("to go"), hot: !!due?.over,
+      paragraph: P(d(i.pagesSentMs) ? `You sent the ${reqWord(i.answer)} on ${d(i.pagesSentMs)}.` : null,
+        due ? `${d(i.pagesSentMs) ? " " : ""}You expect a reply by ${d(i.dueMs)}.` : null),
+    };
+  }
+  if (i.state === "offer") {
+    return {
+      heading: `Answer ${first}'s offer`, figure: dueFig("left"), hot: !!due,
+      paragraph: P(`${first} offered to represent `, book, d(i.answerMs) ? ` on ${d(i.answerMs)}.` : ".",
+        due ? ` You said you'd answer by ${d(i.dueMs)}.` : null),
+    };
+  }
+  if (i.state === "rr") {
+    return { heading: `Revise for ${first}`, figure: null, hot: false,
+      paragraph: P(`${first} asked you to revise `, book, d(i.answerMs) ? ` and send it again, on ${d(i.answerMs)}.` : " and send it again.") };
+  }
+  if (i.group === "passed") {
+    return {
+      heading: `${first} passed`, figure: d(i.answerMs), hot: false,
+      paragraph: P(`${first} answered your query for `, book, i.waitDays != null ? ` after ${plural(i.waitDays, "day", "days")}` : "",
+        i.personal ? ", with a personal note." : ".", ` You can query ${first} again with your next book.`),
+    };
+  }
+  return {
+    heading: "Closed, no reply", figure: d(i.answerMs), hot: false,
+    paragraph: P(`You queried ${first} with `, book, d(i.queriedMs) ? ` on ${d(i.queriedMs)}` : "",
+      i.waitDays != null ? ` and closed it after ${plural(i.waitDays, "day", "days")}.` : " and closed it.", ` You can query ${first} again with your next book.`),
+  };
+}
+
+/** the index card's rows; a row whose fact is missing is dropped */
+export function answerIndex(i: RespItem, nowMs: number, theySaw: string | null): { key: string; label: string; answer: string }[] {
+  const out: { key: string; label: string; answer: string }[] = [];
+  if (i.queriedMs != null) out.push({ key: "queried", label: "Queried", answer: respDate(i.queriedMs, nowMs) });
+  if (i.answerMs != null) {
+    out.push({ key: "answered", label: i.group === "noReply" ? "Closed" : "Answered",
+      answer: `${respDate(i.answerMs, nowMs)}${i.waitDays != null ? `, after ${plural(i.waitDays, "day", "days")}` : ""}` });
+  }
+  if (theySaw) out.push({ key: "saw", label: "They saw", answer: theySaw });
+  const reply = i.group === "noReply" ? "None. You closed it after the wait."
+    : i.group === "passed" ? (i.personal ? "A personal note" : "A form reply")
+    : i.answer === "offer" ? "An offer"
+    : i.answer === "rr" ? "A request for a revision"
+    : i.answer === "full" ? "A request for the full manuscript" : "A request for a partial";
+  out.push({ key: "reply", label: "Reply", answer: reply });
+  return out;
+}
+
+/** the footer: the status, its detail, and the primary (with the journey it runs) */
+export type AnswerAct = "sent" | "resp" | "offer" | "edit";
+export function answerFoot(i: RespItem, nowMs: number): { status: string; detail: string | null; hot: boolean; label: string; act: AnswerAct } {
+  const cap = (a: RespAnswer) => (a === "full" ? "Full" : "Partial");
+  const due = i.dueMs != null ? daysLeft(i.dueMs, nowMs) : null;
+  if (i.state === "toSend") {
+    return { status: `${cap(i.answer)} requested`, detail: due ? `Send by ${respDate(i.dueMs!, nowMs)} · ${due.over ? `${due.n}d over` : `${due.n}d left`}` : null, hot: !!due,
+      label: `Mark ${i.answer === "full" ? "full" : "partial"} sent`, act: "sent" };
+  }
+  if (i.state === "sent") {
+    return { status: i.answer === "rr" ? "Revision sent" : `${cap(i.answer)} sent`, detail: i.dueMs != null ? `Reply expected by ${respDate(i.dueMs, nowMs)}` : null, hot: !!due?.over,
+      label: "Record a response", act: "resp" };
+  }
+  if (i.state === "offer") return { status: "Offer", detail: due ? `Answer by ${respDate(i.dueMs!, nowMs)}` : null, hot: !!due, label: "Record your answer", act: "offer" };
+  if (i.state === "rr") return { status: "Revise & resubmit", detail: i.answerMs != null ? `Asked ${respDate(i.answerMs, nowMs)}` : null, hot: false, label: "Record a response", act: "resp" };
+  return {
+    status: i.group === "passed" ? "Rejected" : "No reply",
+    detail: i.answerMs != null ? `Closed ${respDate(i.answerMs, nowMs)}${i.waitDays != null ? ` · ${plural(i.waitDays, "day", "days")}` : ""}` : null,
+    hot: false, label: "Edit the response", act: "edit",
+  };
+}

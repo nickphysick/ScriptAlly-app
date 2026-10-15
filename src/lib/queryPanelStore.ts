@@ -69,7 +69,8 @@ export const responsePickerHosted = (): boolean => pickerSubs.size > 0;
  * ONE RIGHT-HAND PANEL AT A TIME. The query panel, the activity feed drawer and the Birds-eye drawer share
  * the window's right edge; whoever opens says so here, and the others close themselves.
  */
-export type RightPanelOwner = "query" | "feed" | "birds" | "agent";
+/* "answer": Responses v2 §D — an answer opened on the Responses page, in the same container */
+export type RightPanelOwner = "query" | "feed" | "birds" | "agent" | "answer";
 let owner: RightPanelOwner | null = null;
 const ownerSubs = new Set<(o: RightPanelOwner | null) => void>();
 export const rightPanelOwner = (): RightPanelOwner | null => owner;

@@ -17,18 +17,19 @@
  * ⚠️ THE BOOK IN SCOPE is the shell's (`scriptally_active_manuscript_id`, through `resolveScopedManuscript`), read on
  *    every render; a switch re-opens the route, so the memo keys on `location.key`.
  */
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { carouselOrder, respCounts, respItems, stillOut, type NoKind, type RespItem } from "../../lib/responses";
+import { answerFoot, carouselOrder, firstNameOf, respCounts, respItems, stillOut, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { RspHeader, RspSummaryCard } from "./RspHeader";
-import { RspCarousel, cardAct } from "./RspCarousel";
+import { RspCarousel } from "./RspCarousel";
+import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
 import "./responses.css";
 
@@ -41,7 +42,8 @@ export function openRecordPicker(): void {
 }
 
 export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = ({ routeActive }) => {
-  const { queries, activities, agents, manuscripts, collectionsReady, activitiesReady } = useScriptAllyDb();
+  const { queries, activities, agents, manuscripts, collectionsReady, activitiesReady, readQueryActivity } = useScriptAllyDb();
+  const navigate = useNavigate();
   const location = useLocation();
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
   const ms = resolveScopedManuscript(manuscripts, storedMs);
@@ -60,11 +62,33 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   const { counts, nowMs } = model;
   const msTitle = ms?.title?.trim() || null;
 
-  /* the answer open in the side panel (Part D) */
-  const [openId, setOpenId] = useState<string | null>(null);
-  const openAnswer = useCallback((i: RespItem<QcRow>) => setOpenId(i.id), []);
-  /* a card's own button runs its journey (Part D runs it in the panel) */
-  const act = useCallback((i: RespItem<QcRow>) => { openQueryDrawer({ mode: cardAct(i).mode, queryId: i.id }); }, []);
+  /* ── Part D · the answer open in the side panel: `?answer={queryId}`, so browser Back works ── */
+  const answerParam = new URLSearchParams(location.search).get("answer");
+  const openItem = ready && answerParam ? model.items.find((i) => i.id === answerParam) ?? null : null;
+  const openId = openItem?.id ?? null;
+  const [tab, setTab] = useState<AnswerTab>("answer");
+  const go = useCallback((id: string | null, replace = false) => {
+    navigate({ pathname: "/queries/responses", search: id ? `?answer=${encodeURIComponent(id)}` : "" }, { replace });
+  }, [navigate]);
+  const openAnswer = useCallback((i: RespItem<QcRow>) => { setTab("answer"); go(i.id, !!answerParam); }, [go, answerParam]);
+  const closeAnswer = useCallback(() => go(null), [go]);
+  /* the list's rows as shown (↑ ↓ walk them); a carousel card has no neighbours */
+  const [visible, setVisible] = useState<string[]>([]);
+  const at = openId ? visible.indexOf(openId) : -1;
+  const walk = {
+    prev: at > 0 ? () => go(visible[at - 1], true) : null,
+    next: at >= 0 && at < visible.length - 1 ? () => go(visible[at + 1], true) : null,
+  };
+  /* a card's own button runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
+  const [pending, setPending] = useState<string | null>(null);
+  const act = useCallback((i: RespItem<QcRow>) => { setPending(i.id); openAnswer(i); }, [openAnswer]);
+  useEffect(() => {
+    if (!pending || openId !== pending || !openItem) return;
+    setPending(null);
+    const r = openItem.row, first = firstNameOf(r.agentName);
+    const mode = answerFoot(openItem, model.nowMs).act;
+    if (mode !== "edit") openQueryDrawer({ mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
+  }, [pending, openId, openItem, model.nowMs]);
 
   /* Passed / No reply: ONE state with the list's segmented control (Part C). Pressing it again clears it. */
   const [kind, setKind] = useState<NoKind | null>(null);
@@ -94,11 +118,16 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
           <>
             <RspBanner />
             <RspTally items={model.items} />
-            <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} />
+            <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} onVisible={setVisible} />
           </>
         ) : null}
       </div>
       </div>
+      {openItem && routeActive ? (
+        <RspPanel item={openItem} agent={agents.find((a) => a.id === openItem.row.query.agentId) ?? null} nowMs={nowMs} msTitle={msTitle}
+          tab={tab} onTab={setTab} onClose={closeAnswer} walk={walk} readLog={readQueryActivity}
+          onOpenInQc={() => navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(openItem.id)}` })} />
+      ) : null}
     </WorkspacePageGrid>
   );
 };
