@@ -11,7 +11,7 @@ import { QueryStatus, SubmissionMethod, SubmissionStatus } from "../types";
 import { agentFacts } from "./contactList";
 import { buildQcRows } from "./qcSummary";
 import { cardQuery, cardRows } from "./agentCard";
-import { DOOR_EDGE, discGrey, panelDoor, panelFoot, panelIndex, panelLinks, panelStand, type StandState } from "./agentPanel";
+import { DOOR_EDGE, SLIP_BAND, SLIP_KIND, discGrey, onFileSince, panelDoor, panelFoot, panelIndex, panelLinks, panelSlip, panelStand, standingWords, type StandState } from "./agentPanel";
 
 const NOW = Date.parse("2026-10-12T12:00:00Z");
 const DAY = 86_400_000;
@@ -177,5 +177,45 @@ describe("the index card", () => {
     const by = Object.fromEntries(rows.map((r) => [r.key, r]));
     expect(by.queries.answer).toBe("Two, for A and B");
     expect(by.reply.answer).toBeNull();
+  });
+});
+
+/* ── v18.1 §B — the stand slip and the band: v16's stand, the footer's primary, and whose move it is ── */
+describe("the stand slip (v18.1)", () => {
+  const cases: { name: string; agent: Agent; queries: Query[]; fit?: string; kind: string; band: string; chip: string; act: string | null }[] = [
+    { name: "a partial requested", agent: mk("a"), queries: [qy("a", QueryStatus.PARTIAL_REQUESTED, 10)], kind: "you", band: "you", chip: "Partial requested", act: "sent" },
+    { name: "an offer", agent: mk("a"), queries: [qy("a", QueryStatus.OFFER, 4)], kind: "you", band: "you", chip: "Offer", act: "offer" },
+    { name: "a query past its reply date (due a nudge)", agent: mk("a"), queries: [qy("a", QueryStatus.QUERIED, 80)], kind: "you", band: "you", chip: "Queried", act: "resp" },
+    { name: "a query inside its window", agent: mk("a"), queries: [qy("a", QueryStatus.QUERIED, 5)], kind: "waiting", band: "querying", chip: "Queried", act: "resp" },
+    { name: "a pass", agent: mk("a"), queries: [qy("a", QueryStatus.REJECTED, 40)], kind: "closed", band: "closed", chip: "Passed", act: null },
+    { name: "not queried, a fit", agent: mk("a"), queries: [], fit: "Thriller", kind: "notq", band: "none", chip: "Not yet queried", act: "log" },
+    { name: "not queried, no fit", agent: mk("a"), queries: [], kind: "notq", band: "none", chip: "Not yet queried", act: "log" },
+    { name: "closed to queries, not queried", agent: mk("a", { submissionStatus: SubmissionStatus.CLOSED }), queries: [], kind: "shut", band: "closed", chip: "Closed to queries", act: null },
+  ];
+  for (const c of cases) {
+    it(`${c.name}: kind ${c.kind}, band ${c.band}, chip "${c.chip}"`, () => {
+      const v = view(c.agent, c.queries, { fit: c.fit ?? null });
+      const s = panelSlip(v.stand, v.foot);
+      expect(s.kind).toBe(c.kind);
+      expect(SLIP_BAND[s.kind]).toBe(c.band);
+      expect(standingWords(v.stand, v.q)).toBe(c.chip);
+      /* the slip IS v16's stand: the same object, nothing rephrased */
+      expect(s.stand).toBe(v.stand);
+      /* and its button is the footer table's primary, or none where that is Edit profile */
+      expect(s.primary?.act.kind === "journey" ? s.primary.act.mode : null).toBe(c.act);
+      if (s.primary) expect(s.primary).toBe(v.foot.primary);
+      else expect(v.foot.primary.act.kind).toBe("edit");
+    });
+  }
+  it("every stand state has a kind, and the three your-move states are rust", () => {
+    const states: StandState[] = ["send", "offer", "waiting", "late", "closed", "fit", "none", "shut"];
+    expect(states.every((s) => !!SLIP_KIND[s])).toBe(true);
+    expect(states.filter((s) => SLIP_KIND[s] === "you").sort()).toEqual(["late", "offer", "send"]);
+  });
+  it("\"On file since\": the month, the year only when it is not this year, nothing without a date", () => {
+    expect(onFileSince(new Date(Date.parse("2026-03-04T12:00:00Z")).toISOString(), NOW)).toBe("On file since Mar");
+    expect(onFileSince("2025-07-01T12:00:00Z", NOW)).toBe("On file since Jul 2025");
+    expect(onFileSince(undefined, NOW)).toBeNull();
+    expect(onFileSince("not a date", NOW)).toBeNull();
   });
 });

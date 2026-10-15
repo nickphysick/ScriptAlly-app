@@ -18,7 +18,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { createPortal } from "react-dom";
 import type { Agent } from "../../../types";
 import {
-  GAP_LABEL, firstNameOf, gapCopy, genreChips, longDayLabel, reopenChips, wishlistCheckin,
+  GAP_DETAIL, GAP_LABEL, firstNameOf, gapCopy, genreChips, longDayLabel, reopenChips, wishlistCheckin,
   type GapKey, type HkBook, type HkItem, type HkModel, type Run,
 } from "../../../lib/contactHousekeeping";
 import type { WishlistEvery } from "../../../lib/contactPrefs";
@@ -58,6 +58,9 @@ export interface HousekeepingDrawerProps extends HkHandlers {
   /** v18 §F.3 — the intro's flag, saved to the account */
   introSeen: boolean;
   onIntroSeen: () => void;
+  /** v18.1 §B.4 — the agent panel's "Fill in": open in focus on a run of this agent's tasks only. `seq` makes a
+      second ask for the same agent a new ask. */
+  runAgent?: { id: string; seq: number } | null;
 }
 
 /* ── words ──────────────────────────────────────────────────────────────────────────────────── */
@@ -76,7 +79,7 @@ export const UNLOCK: Record<GapKey, string> = {
   wishlist: "Their own words, to judge fit and tailor your letter.",
   reopen: "A reminder on your to-do list when a closed agent reopens.",
 };
-const DETAIL_NAME: Record<GapKey, string> = { reply: "Reply time", materials: "What to send", genres: "Genres", wishlist: "Wishlist", reopen: "Reopening" };
+const DETAIL_NAME = GAP_DETAIL;
 export const HK_FOOT_V18 = "We only ask for details that make QueryHawk more useful to you.";
 const nameOf = (a: Agent) => (a.name ?? "").trim() || (a.agency ?? "").trim();
 
@@ -283,6 +286,14 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     setRun({ keys: ordered, name, total: ordered.length });
     setMode("focus");
   };
+  /* v18.1 §B.4 — a run over one agent, asked for from the agent panel; after the open effect, so it wins over home */
+  useEffect(() => {
+    const ask = p.runAgent;
+    if (!open || !ask) return;
+    const row = model.byAgent.find((r) => r.agent.id === ask.id);
+    if (!row || row.items.length === 0) return;
+    startFocus(row.items.map((i) => i.key), `${firstNameOf(row.agent)}’s profile`);
+  }, [open, p.runAgent?.seq]); // eslint-disable-line react-hooks/exhaustive-deps
   const wholeQueue = (first?: string) => startFocus(items.map((i) => i.key), null, first);
   const skip = () => { if (!run || !cur) return; setRun({ ...run, keys: [...run.keys.filter((k) => k !== cur.key), cur.key] }); };
 

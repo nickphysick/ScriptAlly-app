@@ -266,6 +266,20 @@ export function hkModel(agents: readonly Agent[], ctxOf: (a: Agent) => HkAgentCt
   };
 }
 
+/** each gap's name as Housekeeping says it ("Reply time", "What to send") — the drawer's detail cards and the agent
+    panel's gap line read this one table */
+export const GAP_DETAIL: Record<GapKey, string> = { reply: "Reply time", materials: "What to send", genres: "Genres", wishlist: "Wishlist", reopen: "Reopening" };
+
+/**
+ * Contact list v18.1 §B.4 — the agent panel's gap line: this agent's VISIBLE Housekeeping items, in Housekeeping's
+ * order, so the line and the drawer's run over the agent always agree. Null when the agent has none.
+ */
+export function agentGapLine(model: Pick<HkModel, "byAgent">, agentId: string): { n: number; keys: string[]; words: string[] } | null {
+  const row = model.byAgent.find((r) => r.agent.id === agentId);
+  if (!row || row.items.length === 0) return null;
+  return { n: row.items.length, keys: row.items.map((i) => i.key), words: row.items.map((i) => GAP_DETAIL[i.gap].toLowerCase()) };
+}
+
 /** "Best place to start" (Contact list v13 §2 order), or null when there are no gaps. */
 export function bestPlaceToStart(items: readonly HkItem[], book: HkBook): Run[] | null {
   if (!items.length) return null;

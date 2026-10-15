@@ -32,7 +32,7 @@ import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { hkAllFilled } from "../../lib/hkReviewAid";
 import { INTRO_PATH_V18, dismissPath, dismissedAtGaps, introSeenOf, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
-import { hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
+import { agentGapLine, hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
   contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
   writeHkView, type HkView, type WishlistEvery,
@@ -749,6 +749,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   setHkOpenRef.current = setHkOpen;
   /* v17.1 — THE ONE OPENER: the tab, the H key and List health in the header all call this */
   const openHk = useCallback(() => setHkOpen(true), []);
+  /* v18.1 §B.4 — the agent panel's "Fill in": a run over that agent's tasks only */
+  const [hkRun, setHkRun] = useState<{ id: string; seq: number } | null>(null);
   const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
@@ -1092,7 +1094,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             model={hk} checkin={hkCheckin} every={hkPrefs.wishlistEvery} book={hkBook} today={hkToday} agents={agents}
             tabShown={hkTabShown} onDismissTab={dismissTab} tabNote={tabNote ? { onUndo: undoDismiss } : null}
             health={listH} introSeen={hkIntroSeen} onIntroSeen={markIntroSeen}
-            open={hkOpen} onOpen={openHk} onClose={() => setHkOpen(false)}
+            open={hkOpen} onOpen={openHk} onClose={() => { setHkOpen(false); setHkRun(null); }} runAgent={hkRun}
             view={hkView} onView={setHkView} routeActive={active} keyHint={shortcutLabel("contactsHk")}
             onFix={onHkFix}
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
@@ -1119,6 +1121,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onAct={actInPanel}
             onOpenQuery={(queryId) => openQueryPanelFromAgent(queryId, { agentId: panelAgent.id, first: firstNameOf(panelAgent) })}
             menu={panelMenu} deleteFacts={panelDeleteFacts} onDelete={deletePanelAgent}
+            gaps={agentGapLine(hk, panelAgent.id)}
+            onFillIn={() => { const id = panelAgent.id; closePanel(); setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
           />
         )}
         {showList && active && guideCorner && tabH > 0 && (

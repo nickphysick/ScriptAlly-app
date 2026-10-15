@@ -24,12 +24,12 @@ import type { Agent, QueryStatus } from "../../../types";
 import type { AgentFacts } from "../../../lib/contactList";
 import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
 import { agentInitials } from "../../../lib/agentDisplay";
-import { AgentDisc, standingOf } from "../../shared/AgentDisc";
-import { discTone } from "../../../lib/contactStage";
 import {
-  discGrey, firstNameOf, materialWords, methodAnswer, panelDoor, panelFoot, panelLinks,
+  SLIP_BAND, firstNameOf, materialWords, onFileSince, panelDoor, panelFoot, panelLinks, panelSlip, panelStand, standingWords,
   type PanelAct,
 } from "../../../lib/agentPanel";
+import { methodOf } from "../../../lib/cardDraft";
+import { viaLabel } from "../../queryActions/journeys/common";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { claimRightPanel, currentQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
 import { askDrawerToLeave, currentDrawerRequest, subscribeDrawer } from "../../../lib/queryActions/drawerStore";
@@ -39,7 +39,7 @@ import { formatDate } from "../../../lib/dates";
 import type { AgentEditPatch, SaveAgentResult } from "../../../lib/saveAgentEdits";
 import { SidePanel } from "../../shell/SidePanel";
 import { StatusDot } from "../../StatusDot";
-import { AgentPaperCard, PAPER_STATUS_COLOUR, type PaperAddKey, type PaperCardData, type PaperStatus } from "../../shared/AgentPaperCard";
+import { AgentPaperCard, PaperIcon, type PaperCardData, type PaperStatus } from "../../shared/AgentPaperCard";
 import { materialRowsFromAgent } from "../../../lib/agentMaterials";
 import { NotesThread } from "../../reading-pane/NotesThread";
 import { QadHead } from "../../queryActions/QadHead";
@@ -80,7 +80,14 @@ export interface AgentPanelProps {
   /** ⋯ → Delete agent…: the facts for its confirmation, and the act */
   deleteFacts: { queries: number; history: number } | null;
   onDelete: () => Promise<void>;
+  /** v18.1 §B.4 — this agent's Housekeeping gaps (Housekeeping's own items), or null */
+  gaps: { n: number; words: string[] } | null;
+  /** "Fill in": closes the panel and opens Housekeeping on a run over this agent */
+  onFillIn: () => void;
 }
+
+/** a missing value, said quietly: never a dashed "+ Add" pill in the panel (v18.1 §B.3) */
+const Missing: React.FC<{ word?: string }> = ({ word = "Not recorded" }) => <i className="apn-miss" data-apc="missing">{word}</i>;
 
 const dateOf = (ms: number, nowMs: number) => ({
   day: formatDate(new Date(ms), { day: "numeric", month: "short" }),
@@ -94,20 +101,24 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   const name = (agent.name ?? "").trim() || (agent.agency ?? "").trim();
   const place = [(agent.name ?? "").trim() ? (agent.agency ?? "").trim() : "", (agent.city ?? "").trim()].filter(Boolean).join(" · ");
   const door = panelDoor(agent, nowMs);
-  const links = panelLinks(agent);
   const ordered = [...rows].sort((a, b) => (b.sentMs ?? b.lastMs) - (a.sentMs ?? a.lastMs));
   const queried = [...new Set(ordered.map((r) => p.titleOf(r.manuscriptId)).filter((t): t is string => !!t))];
   const stageTag = q ? (STAGE_NAME[q.status as QueryStatus] ?? String(q.status)) : null;
   const foot = panelFoot(agent, facts, q, nowMs);
-  /* v18 §E — the panel mirrors the landing-page card: its status colour (slate, ink, grey), and its Profile tab is the
-     card's `plain` variant. Querying = any live query; closed = every query closed, or closed to queries. */
-  const tone = discTone(facts);
-  const paperStatus: PaperStatus = door.kind === "closed" || tone === "closed" ? "closed" : tone === "live" ? "querying" : "none";
-  const statusLabel = paperStatus === "querying" ? (stageTag ?? "Querying")
-    : paperStatus === "closed" ? (door.kind === "closed" ? door.label : (stageTag ?? "Closed"))
-    : "Not yet queried";
+  /* v18.1 §B — where you stand, from v16's derivation; the footer table's primary is its button */
+  const stand = panelStand({ agent, facts, q, title: msTitle, fitGenre: p.genres.find((g) => g.hit)?.label ?? null, nowMs });
+  const slip = panelSlip(stand, foot);
+  const headLinks = panelLinks(agent).filter((l) => l.key !== "mswl");
+  const wishText = (agent.mswlNotes ?? "").trim() || null;
+  const method = methodOf(agent.submissionMethod);
+  const sendBy = method ? viaLabel(method) : null;
+  const silence = agent.noResponseMeansNo === true ? "Means no" : agent.noResponseMeansNo === false ? "They reply" : null;
+  const since = onFileSince(agent.dateAdded, nowMs);
+  /* v18.1 — the panel IS the landing card: the band says whose move it is (rust · ink · slate · grey), from the slip;
+     its chip says the standing */
+  const paperStatus: PaperStatus = SLIP_BAND[slip.kind];
+  const statusLabel = standingWords(stand, q);
   const weeksOn = typeof agent.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0 ? agent.responseTimeWeeks : null;
-  const metaLine = [(agent.city ?? "").trim(), weeksOn ? `Replies in about ${weeksOn} week${weeksOn === 1 ? "" : "s"}` : null].filter(Boolean).join(" · ");
   const NUMW = ["None", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
   const paper: PaperCardData = {
     status: paperStatus, statusLabel, stars: agent.starRating ?? null, initials: agentInitials(agent).slice(0, 2), name,
@@ -115,9 +126,6 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
     genres: p.genres,
     wishlist: (agent.mswlNotes ?? "").trim() || null,
     materials: materialRowsFromAgent(agent.materialsWanted).filter((r) => r.on).map((r) => ({ label: materialWords(r), kind: r.key === "sample" ? "pages" as const : "doc" as const })),
-    takes: methodAnswer(agent.submissionMethod),
-    replies: weeksOn ? `In about ${weeksOn} week${weeksOn === 1 ? "" : "s"}` : null,
-    policy: weeksOn ? (agent.noResponseMeansNo === true ? "No reply means no" : agent.noResponseMeansNo === false ? "They reply to every query" : null) : null,
     queries: queried.length === 0 ? "None yet" : (
       <>
         {NUMW[queried.length] ?? String(queried.length)}, for {queried.map((t, i) => <React.Fragment key={t}>{i ? ", " : ""}<i className="apc-t">{t}</i></React.Fragment>)}
@@ -125,10 +133,6 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
         {facts.stand === "you" ? <> · <i className="apc-ym" data-ap="your-move">your move</i></> : null}
       </>
     ),
-  };
-  const PAPER_EDIT: Record<PaperAddKey, { tab: AgentCardTab; focus: AgentCardField }> = {
-    website: { tab: "who", focus: "website" }, email: { tab: "who", focus: "email" }, genres: { tab: "want", focus: "genres" },
-    wishlist: { tab: "want", focus: "wishlist" }, materials: { tab: "want", focus: "materials" }, takes: { tab: "work", focus: "method" }, replies: { tab: "work", focus: "reply" },
   };
 
   const { showConfirm, showToast } = useToast();
@@ -228,8 +232,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
 
   const tabs: { key: AgentPanelTab; label: React.ReactNode }[] = [
     { key: "profile", label: "Profile" },
-    { key: "queries", label: rows.length > 0 ? <>Queries <i className="qcv-open-tabn">{"·"} {rows.length}</i></> : "Queries" },
-    { key: "notes", label: notes.length > 0 ? <>Notes <i className="qcv-open-tabn">{"·"} {notes.length}</i></> : "Notes" },
+    { key: "queries", label: rows.length > 0 ? <>Queries <i className="apn-tabn">{rows.length}</i></> : "Queries" },
+    { key: "notes", label: notes.length > 0 ? <>Notes <i className="apn-tabn">{notes.length}</i></> : "Notes" },
   ];
   const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
 
@@ -251,44 +255,88 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
           </div>
         </div>
       ) : (
-        <aside className="qcv-open qcv-own apn-card" data-ap="card" data-door={door.kind} data-ap-status={paperStatus} data-tab={tab} data-over={foot.hot ? "true" : undefined} aria-label={name}
-          style={{ "--ap-mast": PAPER_STATUS_COLOUR[paperStatus] } as React.CSSProperties}>
-          <div className="qcv-open-fr">
-            <header className="qcv-open-mast" data-ap="mast">
-              <div className="qcv-open-who">
-                <AgentDisc initials={agentInitials(agent).slice(0, 2)} standing={standingOf(discTone(facts))} className="qcv-open-ini apn-ini" attrs={{ "data-ap": "disc" }} />
-                <div className="qcv-open-whotx">
-                  <h2 className="qcv-open-nm" data-ap="name" ref={nameRef} tabIndex={-1}>{name}</h2>
-                  {place ? <span className="qcv-open-ag" data-ap="place">{place}</span> : null}
-                  {agent.starRating ? <span className="apn-stars" data-ap="stars" aria-label={`${agent.starRating} of 5 stars`}>{[1, 2, 3, 4, 5].map((i) => <i key={i} data-on={i <= (agent.starRating ?? 0) ? "" : undefined} aria-hidden="true">★</i>)}</span> : null}
-                  {metaLine ? <span className="apn-meta" data-ap="meta">{metaLine}</span> : null}
-                </div>
-                <button type="button" className="qcv-open-x" data-ap="close" aria-label="Close this agent" onClick={p.onClose}><span aria-hidden="true">{"×"}</span></button>
-              </div>
-              <p className="qcv-open-line apn-line">
-                <span className="qcv-open-pill apn-door apn-chip-st" data-ap="door" data-door={door.kind} data-ap-chip="">{statusLabel}</span>
-                {links.length > 0 && (
-                  <span className="apn-links" data-ap="links">
-                    {links.map((l) => (l.key === "email"
-                      ? <button key={l.key} type="button" className="apn-link" data-ap-link={l.key} onClick={() => { const said = (ok: boolean) => showToast({ message: ok ? "Email address copied." : "Couldn\u2019t copy the address." }); if (!navigator.clipboard) { said(false); return; } void navigator.clipboard.writeText(l.email).then(() => said(true), () => said(false)); }}>{l.label}</button>
-                      : <a key={l.key} className="apn-link" data-ap-link={l.key} href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>))}
-                  </span>
-                )}
-              </p>
-              <div className="qcv-open-tabs" role="tablist" aria-label="Agent detail">
+        <aside className="qcv-own apn-card" data-ap="card" data-door={door.kind} data-ap-status={paperStatus} data-slip={slip.kind} data-tab={tab} data-over={foot.hot ? "true" : undefined} aria-label={name}>
+          {/* v18.1 §B — the panel IS the landing card: one frame holding the band (chip, stars, ✕), the head, the tabs,
+              the body and the footer. The band and the footer stay put; the head, tabs and body scroll together. */}
+          <AgentPaperCard variant="panel" data={paper} className="apn-paper2" panel={{
+            onClose: p.onClose, closeLabel: "Close this agent", nameRef,
+            scrollAttrs: { "data-tab": tab },
+            links: headLinks.length > 0 ? (
+              <span className="apc-links apn-links2" data-ap="links">
+                {headLinks.map((l) => (l.key === "email"
+                  ? <button key={l.key} type="button" className="apn-link2" data-ap-link={l.key} onClick={() => { const said = (ok: boolean) => showToast({ message: ok ? "Email address copied." : "Couldn\u2019t copy the address." }); if (!navigator.clipboard) { said(false); return; } void navigator.clipboard.writeText(l.email).then(() => said(true), () => said(false)); }}><PaperIcon kind="mail" />Copy email</button>
+                  : <a key={l.key} className="apn-link2" data-ap-link={l.key} href={l.href} target="_blank" rel="noopener noreferrer"><PaperIcon kind="web" />Website</a>))}
+              </span>
+            ) : null,
+            tabs: (
+              <div className="apn-tabs2" role="tablist" aria-label="Agent detail">
                 {tabs.map((t) => (
                   <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} data-ap-tab={t.key} onClick={() => p.onTab(t.key)}>{t.label}</button>
                 ))}
               </div>
-            </header>
-
-            <div className="qcv-open-body">
-              <div className="qcv-open-tab" role="tabpanel" data-ap="body">
+            ),
+            body: (
+              <div className="qcv-open-tab apn-body2" role="tabpanel" data-ap="body">
                 {tab === "profile" ? (
                   <>
-                    {/* v18 §E — the landing-page card, plain: it replaces the stand card and the index card. The fit is carried
-                        by the ✓ genre chip. */}
-                    <AgentPaperCard variant="plain" data={paper} className="apn-paper" onAdd={(k) => { const e = PAPER_EDIT[k]; p.onEdit(e.tab, e.focus); }} />
+                    <div className="apn-slip" data-ap="slip" data-kind={slip.kind} data-state={stand.state}>
+                      <div className="apn-sliptop">
+                        <span className="apn-sliplab" data-ap="slip-label">{slip.label}</span>
+                        {stand.figure ? <span className="apn-slipfig" data-ap="slip-figure">{stand.figure}</span> : null}
+                      </div>
+                      <p className="apn-sliph" data-ap="slip-heading">{stand.heading}</p>
+                      <p className="apn-slipt" data-ap="slip-text">{stand.paragraph.map((part, i) => (part.em ? <i key={i}>{part.text}</i> : <React.Fragment key={i}>{part.text}</React.Fragment>))}</p>
+                      {stand.bar ? (
+                        <div className="apn-slipbar" data-ap="slip-bar" data-hot={stand.bar.hot ? "true" : undefined}>
+                          <span className="apn-sliptrack"><i style={{ width: `${Math.max(0, Math.min(100, stand.bar.pct))}%` }} /></span>
+                          <span className="apn-sliplabs"><span>{stand.bar.left}</span><span>{stand.bar.right}</span></span>
+                        </div>
+                      ) : null}
+                      {slip.primary ? (
+                        <button type="button" className="apn-slipgo" data-ap="slip-go" data-act={slip.primary.act.kind === "edit" ? "edit" : slip.primary.act.mode}
+                          onClick={() => { const a = slip.primary!.act; if (a.kind === "edit") p.onEdit(); else p.onAct(a); }}>{slip.primary.label}</button>
+                      ) : null}
+                    </div>
+                    <div className="apn-secs" data-ap="sections">
+                      <section className="apn-sec" data-ap-sec="genres">
+                        <h5>Genres sought</h5>
+                        {p.genres.length ? (
+                          <span className="apc-chips" data-apc="genres">
+                            {p.genres.map((g) => <span key={g.label} className={`apc-chip${g.hit ? " is-hit" : ""}`} data-hit={g.hit ? "true" : undefined}>{g.hit ? "✓ " : ""}{g.label}</span>)}
+                          </span>
+                        ) : <Missing />}
+                      </section>
+                      <section className="apn-sec" data-ap-sec="wishlist">
+                        <h5>Manuscript wishlist</h5>
+                        {wishText ? <p className="apn-wish2" data-apc="wishlist">{wishText}</p> : <Missing />}
+                      </section>
+                      <section className="apn-sec" data-ap-sec="how">
+                        <h5>How to query {first}</h5>
+                        <div className="apn-how" data-ap="how">
+                          <div data-ap-how="send"><span>Send by</span>{sendBy ? <b>{sendBy}</b> : <Missing />}</div>
+                          <div data-ap-how="replies"><span>Replies</span>{weeksOn ? <b>In about {weeksOn} week{weeksOn === 1 ? "" : "s"}</b> : <Missing word="Not stated" />}</div>
+                          <div data-ap-how="silence"><span>Silence</span>{silence ? <b>{silence}</b> : <Missing word="Not stated" />}</div>
+                        </div>
+                      </section>
+                      <section className="apn-sec" data-ap-sec="send">
+                        <h5>Send them</h5>
+                        {paper.materials.length ? (
+                          <span className="apc-chips" data-apc="materials">
+                            {paper.materials.map((m) => <span key={m.label} className="apc-mat"><PaperIcon kind={m.kind} />{m.label}</span>)}
+                          </span>
+                        ) : <Missing />}
+                      </section>
+                      <section className="apn-sec" data-ap-sec="queries">
+                        <h5>Your queries</h5>
+                        <p className="apc-v" data-apc="queries">{paper.queries}</p>
+                      </section>
+                    </div>
+                    {p.gaps ? (
+                      <div className="apn-gaps" data-ap="gaps" data-n={p.gaps.n}>
+                        <span data-ap="gaps-text">{p.gaps.n} detail{p.gaps.n === 1 ? "" : "s"} missing {"\u2014"} {p.gaps.words.join(", ")}</span>
+                        <button type="button" className="apn-gapsgo" data-ap="gaps-fill" onClick={p.onFillIn}>Fill in</button>
+                      </div>
+                    ) : null}
                   </>
                 ) : tab === "queries" ? (
                   ordered.length === 0 ? (
@@ -331,10 +379,28 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                   />
                 )}
               </div>
-            </div>
-
-            {/* on the Notes tab the composer is the foot (the notes thread draws it) */}
-            {tab === "notes" ? null : confirmDel ? (
+            ),
+            foot: tab === "notes" ? null : tab === "profile" && !confirmDel ? (
+              <div className="apn-foot2" data-ap="foot">
+                {since ? <span className="apn-since" data-ap="since">{since}</span> : <span />}
+                <span className="apn-footr">
+                  <button ref={moreRef} type="button" className="apn-more2" aria-haspopup="menu" aria-expanded={menuOpen} aria-label={`More for ${name}`} data-ap="more" onClick={() => setMenuOpen((o) => !o)}>
+                    <i aria-hidden="true">···</i>
+                  </button>
+                  <button type="button" className="apn-edit2" data-ap="edit" onClick={() => p.onEdit()}>Edit profile</button>
+                </span>
+                {menuOpen && (
+                  <div ref={menuRef} className="apn-menu" role="menu" data-ap="menu">
+                    {menu.map((m) => (
+                      <button key={m.key} type="button" role="menuitem" className={m.danger ? "is-danger" : undefined} data-ap-menu={m.key} onClick={() => { setMenuOpen(false); m.run(); }}>{m.label}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="apn-oldfoot">
+            {/* on the Notes tab the composer is the foot (the notes thread draws it): the frame draws no foot there */}
+            {confirmDel ? (
               <div className="qcv-open-doors apn-del" data-ap="delete-confirm" role="alertdialog" aria-label={`Delete ${name}?`}>
                 <p>
                   {heavy
@@ -370,7 +436,9 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                 </div>
               </>
             )}
-          </div>
+              </div>
+            ),
+          }} />
         </aside>
       )}
     </SidePanel>

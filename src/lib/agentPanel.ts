@@ -273,3 +273,50 @@ export function panelFoot(agent: Agent, facts: Pick<AgentFacts, "standing" | "do
   }
   return { status, detail, hot: q.pastExpected, primary: { label: "Record a response", act: { kind: "journey", mode: "resp" } }, editSecondary: true };
 }
+
+/* ── Contact list v18.1 §B · the stand slip and the band ─────────────────────────────────────────────────────── */
+
+/**
+ * Whose move it is, from v16's stand (`panelStand`) and nothing else: a request, an offer or a reply that is due a
+ * nudge is the writer's; a live query inside its window is the agent's; a closed query is closed; no query for the
+ * book is "not queried", or "shut" when they are closed to queries.
+ */
+export type SlipKind = "you" | "waiting" | "closed" | "notq" | "shut";
+export const SLIP_KIND: Record<StandState, SlipKind> = {
+  send: "you", offer: "you", late: "you", waiting: "waiting", closed: "closed", fit: "notq", none: "notq", shut: "shut",
+};
+export const SLIP_LABEL: Record<SlipKind, string> = { you: "Your move", waiting: "Waiting", closed: "Closed", notq: "Not queried", shut: "Closed to queries" };
+/** the band's status, for the landing card's colours (rust · ink · slate · grey) */
+export const SLIP_BAND: Record<SlipKind, "you" | "querying" | "none" | "closed"> = { you: "you", waiting: "querying", notq: "none", closed: "closed", shut: "closed" };
+
+export interface PanelSlip {
+  kind: SlipKind;
+  label: string;
+  /** v16's stand: the headline, the text, the figure and its bar (none, as v16 drew) */
+  stand: PanelStand;
+  /** the footer table's primary, or null where it is Edit profile (Edit profile stays in the footer) */
+  primary: PanelFoot["primary"] | null;
+}
+
+export function panelSlip(stand: PanelStand, foot: PanelFoot): PanelSlip {
+  const kind = SLIP_KIND[stand.state];
+  return { kind, label: SLIP_LABEL[kind], stand, primary: foot.primary.act.kind === "edit" ? null : foot.primary };
+}
+
+/** the band chip's words: the agent's standing for the book in scope */
+export function standingWords(stand: PanelStand, q: QcRow | null): string {
+  const kind = SLIP_KIND[stand.state];
+  if (kind === "shut") return "Closed to queries";
+  if (kind === "notq" || !q) return "Not yet queried";
+  if (q.court === "closed" && q.closedHow === "passed") return "Passed";
+  return STAGE_NAME[q.status as QueryStatus] ?? String(q.status);
+}
+
+/** "On file since Mar" — with the year when it is not this year; null with no date */
+export function onFileSince(dateAdded: string | undefined | null, nowMs: number): string | null {
+  const t = dateAdded ? Date.parse(dateAdded) : NaN;
+  if (!Number.isFinite(t)) return null;
+  const d = new Date(t);
+  const sameYear = d.getFullYear() === new Date(nowMs).getFullYear();
+  return `On file since ${formatDate(d, sameYear ? { month: "short" } : { month: "short", year: "numeric" })}`;
+}
