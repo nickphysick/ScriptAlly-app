@@ -23,7 +23,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
-import { HalfDrawer } from "../../shell/HalfDrawer";
 import { useScriptAllyDb } from "../../../lib/db";
 import { assembleBoardColumns, boardFigures } from "../../../lib/todoColumns";
 import { localYMD, resolveScopedManuscript } from "../../../lib/shellSidebar";
@@ -56,7 +55,9 @@ import { HousekeepingSweep, type SweepItem } from "../HousekeepingSweep";
 import { AnchoredPanel } from "../AnchoredPanel";
 import { SnoozePanel } from "../TodoFrameMenus";
 import { SetAsidePanel } from "../SetAsidePanel";
-import { V2Composer } from "../v2/V2Composer";
+import { BLANK_DRAFT, ComposeCard, dayLabel, dueOf, surfaceDay, type ComposeDraft } from "./ComposeCard";
+import { useTagWrites } from "../useTagWrites";
+import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
 import { TrayHeader } from "./TrayHeader";
 import { TrayFilterRow } from "./TrayFilters";
@@ -64,13 +65,14 @@ import { DeskCard, Disc, DoneToday, DueDial } from "./TrayDesk";
 import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
 import { dayMonth } from "../../../lib/dates";
 import { trayReviewState } from "../../../lib/todoReviewAid";
-import { QueryStatus } from "../../../types";
+import { QueryStatus, type UserTask } from "../../../types";
 import "../v2/todoV2.css";
 import "./todoV5.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const SORT_KEY = "sa.todoTray.sort";
 const SHUT_KEY = "sa.todoTray.shut";
+const DRAFT_KEY = "sa.todoTray.draft";
 const DAY = 86400000;
 const STAMP_MS = 420, LEAVE_MS = 360, RISE_MS = 420, OUT_MS = 280;
 
@@ -102,7 +104,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const db = useScriptAllyDb();
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, collectionsReady,
-    addUserTask, upsertTaskFlag, dismissTask,
+    addUserTask, updateUserTask, deleteUserTask, setUserTaskColour, upsertTaskFlag, dismissTask,
   } = db;
   const { toast, flash, dismiss: dismissToast, pause: pauseToast, resume: resumeToast, remember: rememberUndo } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
@@ -373,32 +375,28 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (r) flash(r.message, { label: "Undo", fn: async () => { await r.undo(); flash("Restored"); } });
   };
 
-  /* ── the composer ── */
-  const [composing, setComposing] = useState(false);
+  /* ── the compose card (v5.1 §F) ── */
+  const [compose, setCompose] = useState<{ draft: ComposeDraft; edit: UserTask | null; prevKey: string | null } | null>(null);
+  const [composeStamp, setComposeStamp] = useState<string | null>(null);
+  /* the N key's door, filled once the doors below exist (a ref: the key handler is bound once) */
+  const openComposeRef = useRef<() => void>(() => {});
+  /** a draft cancelled with words in it is kept for the session, and "+ Add a task" opens it again */
+  const keptDraft = (): ComposeDraft | null => readSession<ComposeDraft | null>(DRAFT_KEY, null, (v): v is ComposeDraft => !!v && typeof v === "object" && typeof (v as ComposeDraft).text === "string");
+  const keepDraft = (d: ComposeDraft | null) => { try { if (d) writeSession(DRAFT_KEY, d); else sessionStorage.removeItem(DRAFT_KEY); } catch { /* private mode */ } };
+  /* arrival: the Calendar's and the Corkboard's "New task" / "New note" door opens the compose card */
   useEffect(() => {
     if (location.pathname !== "/todo") return;
     let want: string | null = null;
     try { want = sessionStorage.getItem("sa.todoCompose"); } catch { /* private mode */ }
     if (want !== "task" && want !== "note") return;
     try { sessionStorage.removeItem("sa.todoCompose"); } catch { /* private mode */ }
-    if (want === "note") { navigate("/todo/corkboard"); return; }
-    setComposing(true);
-  }, [location.pathname, navigate]);
-  const addTask = async (f: { text: string; dueDate: string; agentId?: string }): Promise<boolean> => {
-    const id = "task-" + Math.random().toString(36).slice(2, 11);
-    const got = await addUserTask({ id, text: f.text, dueDate: f.dueDate, ...(f.agentId ? { agentId: f.agentId } : {}) });
-    if (!got) return false;
-    setComposing(false);
-    setFilters(NO_FILTERS);
-    setSelKey(got);
-    scrollRowIntoView(got);
-    return true;
-  };
-  const addNote = async (f: { text: string }): Promise<boolean> => !!(await addUserTask({ text: f.text }));
+    setCompose({ draft: { ...(keptDraft() ?? BLANK_DRAFT), mode: want }, edit: null, prevKey: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   /* ── keys ── */
-  const stateRef = useRef({ walk, sel, act });
-  stateRef.current = { walk, sel, act };
+  const stateRef = useRef({ walk, sel, act, add: () => {} });
+  stateRef.current = { walk, sel, act, add: () => openComposeRef.current() };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (location.pathname !== "/todo") return;
@@ -418,6 +416,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         return;
       }
       if (matchesShortcut(SHORTCUTS.todoAct, e)) { if (s) { e.preventDefault(); a(s); } return; }
+      if (matchesShortcut(SHORTCUTS.todoAdd, e)) { e.preventDefault(); stateRef.current.add(); return; }
       if (e.key === "Escape") {
         if (filters.find) { setFilters((f) => ({ ...f, find: "" })); return; }
         setSelKey(null);
@@ -487,9 +486,91 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const selectRow = (key: string) => {
     if (working && deskItem?.key === key) return;
     leaveWork();
+    if (compose) closeCompose();
     if (clash && clash.key !== key) setClash(null);
     setSelKey(key);
   };
+  /* ── the compose card's doors and its save (v5.1 §F) ── */
+  const todayYmd = localYMD(now);
+  const draftFromTask = (t: UserTask): ComposeDraft => {
+    const q = t.queryId ? queries.find((x) => x.id === t.queryId) : undefined;
+    const qa = q ? agents.find((a) => a.id === q.agentId) : undefined;
+    const a = t.agentId ? agents.find((x) => x.id === t.agentId) : undefined;
+    const m = t.manuscriptId ? manuscripts.find((x) => x.id === t.manuscriptId) : undefined;
+    const link = q ? { kind: "query" as const, id: q.id, label: (qa?.name || qa?.agency || "A query").trim(), sub: [qa?.agency, String(q.status)].filter(Boolean).join(" · ") }
+      : a ? { kind: "agent" as const, id: a.id, label: (a.name || a.agency || "An agent").trim(), sub: [a.agency, "Agent"].filter(Boolean).join(" · ") }
+      : m ? { kind: "manuscript" as const, id: m.id, label: m.title || "A manuscript", sub: "Manuscript" } : null;
+    return { mode: t.dueDate ? "task" : "note", text: t.text, detail: t.detail ?? "", when: t.dueDate ? "pick" : null, date: t.dueDate ?? null,
+      surface: t.surfaceOffset ?? "on-day", link, tags: t.tags ?? [], paper: t.colour ?? "yellow" };
+  };
+  /** "+ Add a task", the tray's add row, N, and an own task's Edit: the current journey parks first (§E) */
+  const openCompose = (edit: UserTask | null = null) => {
+    leaveWork();
+    setClash(null);
+    setComposeStamp(null);
+    setCompose({ draft: edit ? draftFromTask(edit) : (keptDraft() ?? BLANK_DRAFT), edit, prevKey: deskItem?.key ?? null });
+  };
+  /** Cancel and Escape ask nothing: words typed are kept for the session; an edit is simply dropped */
+  function closeCompose() {
+    setCompose((c) => {
+      if (c && !c.edit) keepDraft(c.draft.text.trim() || c.draft.detail.trim() ? c.draft : null);
+      return null;
+    });
+  }
+  const saveCompose = async (): Promise<boolean> => {
+    const c = compose;
+    if (!c) return false;
+    const d = c.draft;
+    const isTask = d.mode === "task";
+    const due = isTask ? dueOf(d, todayYmd) : null;
+    const text = d.text.trim();
+    if (!text || (isTask && !due)) return false;
+    let id = c.edit?.id ?? "";
+    try {
+      if (c.edit) {
+        await updateUserTask(c.edit.id, {
+          text, detail: d.detail.trim() || null, dueDate: isTask ? due : null,
+          surfaceOffset: isTask && d.surface !== "on-day" ? d.surface : null, tags: d.tags.length ? d.tags : null,
+        });
+      } else {
+        id = "task-" + Math.random().toString(36).slice(2, 11);
+        const link = d.link ? (d.link.kind === "query" ? { queryId: d.link.id } : d.link.kind === "agent" ? { agentId: d.link.id } : { manuscriptId: d.link.id }) : {};
+        const got = await addUserTask({
+          id, text, ...(d.detail.trim() ? { detail: d.detail.trim() } : {}), ...(isTask ? { dueDate: due!, surfaceOffset: d.surface } : {}),
+          ...link, ...(d.tags.length ? { tags: d.tags } : {}),
+        });
+        if (!got) return false;
+        /* a note's paper is its own write, never part of the create (the rules' allowlist: db.setUserTaskColour) */
+        if (!isTask && d.paper !== "yellow") await setUserTaskColour(id, d.paper);
+      }
+    } catch {
+      return false;
+    }
+    keepDraft(null);
+    const surfaced = isTask && taskSurfaced(due!, d.surface, todayYmd);
+    setComposeStamp(c.edit ? "SAVED" : isTask ? "ADDED" : "PINNED");
+    later(() => {
+      setComposeStamp(null);
+      setCompose(null);
+      if (surfaced) {
+        setFilters(NO_FILTERS);
+        setSelKey(id);
+        scrollRowIntoView(id);
+        if (!c.edit) flash(`Added to Your tasks · due by ${dayLabel(due!)}`, { label: "Undo", fn: async () => { await deleteUserTask(id); } });
+      } else if (isTask) {
+        if (c.prevKey) setSelKey(c.prevKey);
+        flash(`${c.edit ? "Saved" : "Added"} · due ${dayLabel(due!)}. It joins your tray on ${dayLabel(surfaceDay(due!, d.surface))}.`,
+          c.edit ? undefined : { label: "Undo", fn: async () => { await deleteUserTask(id); } });
+      } else {
+        if (c.prevKey) setSelKey(c.prevKey);
+        flash("Pinned to your corkboard", c.edit ? undefined : { label: "Undo", fn: async () => { await deleteUserTask(id); } });
+      }
+    }, 620);
+    return true;
+  };
+  const { createTagDef } = useTagWrites((m) => flash(m));
+  openComposeRef.current = () => openCompose();
+
   /* the slot node goes where the journey is: into the working card's host, else back to its holder (deskSlot.ts) */
   useLayoutEffect(() => { placeDeskSlot(working ? hostEl : null, holderRef.current); });
   /* a journey parked from a task in this tray shows as that row's "Started", so the corner chip would say it twice */
@@ -518,7 +599,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       counts={counts} active={kindActive} onKind={(k) => setFilters((f) => ({ ...f, type: f.type === k ? null : k }))}
       cleared={week.length} ringTitle={undated}
       onRing={() => sheetRef.current?.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" })}
-      onAdd={() => setComposing(true)} asideN={asideN} asideRef={asideRef} onAside={() => setAsideOpen((o) => !o)}
+      onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => setAsideOpen((o) => !o)}
     >
       {state === "list" || state === "loading" ? (
         <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading} />
@@ -554,7 +635,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       <WorkspacePageGrid className="td5-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="td5-group" data-td5="group">
           {state === "nothing" ? (
-            <TrayNothingYet msTitle={msTitle} onLog={() => openQueryDrawer({ mode: "log" })} onImport={() => navigate("/import")} onAdd={() => setComposing(true)} />
+            <TrayNothingYet msTitle={msTitle} onLog={() => openQueryDrawer({ mode: "log" })} onImport={() => navigate("/import")} onAdd={() => openCompose()} />
           ) : (
             <>
               {header}
@@ -612,10 +693,18 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                           </div>
                         );
                       }) : loading ? null : <div className="td5-none">Nothing matches. Clear the filter to see the rest of your tray.</div>}
+                      {loading ? null : <button type="button" className="td5-addrow" data-td5="add-row" onClick={() => openCompose()}>+ Add a task<kbd>N</kbd></button>}
                     </div>
                     <div className="td5-deskcol" data-td5="deskcol">
                       <div className="td5-desk" data-td5="desk">
-                        {deskItem ? (
+                        {compose ? (
+                          <div className="td5-stackwrap">
+                            <div className="td5-stack" aria-hidden="true"><i /><i /></div>
+                            <ComposeCard todayYmd={todayYmd} draft={compose.draft} setDraft={(d) => setCompose((c) => (c ? { ...c, draft: d } : c))} edit={compose.edit}
+                              queries={queries} agents={agents} manuscripts={manuscripts} userTags={currentUser?.tags ?? []} onCreateTag={(t) => void createTagDef(t)}
+                              onSave={saveCompose} onCancel={closeCompose} stamp={composeStamp} />
+                          </div>
+                        ) : deskItem ? (
                           <>
                             <div className="td5-pos" data-td5="pos">
                               <span>{deskIndex + 1} of {deskList.length}</span>
@@ -645,6 +734,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                 })() : null}
                                 asideRef={deskAsideRef} onAside={ghost ? null : () => setSnoozeFor(deskItem)}
                                 onOpenQuery={deskItem.query && !deskItem.card.userTaskId ? () => openQueryPanel(deskItem.query!.id, "other") : null}
+                                onEdit={deskItem.userTask ? () => openCompose(deskItem.userTask!) : null}
                                 stamp={ghost && ghost.phase !== "hold" ? stampFor(ghost.item) : null}
                                 phase={ghost ? (ghost.phase === "hold" ? "rest" : ghost.phase) : rise === deskItem.key ? "rise" : "rest"}
                               />
@@ -674,12 +764,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           <SnoozePanel deed={snoozeFor.deed} onCancel={() => setSnoozeFor(null)} onConfirm={(days, when) => { runSnooze(snoozeFor, days, when); setSnoozeFor(null); }} />
         </AnchoredPanel>
       ) : null}
-      <HalfDrawer probe="todo-compose" open={composing} onClose={() => setComposing(false)} label="Add a task" width="min(560px, 46vw)"
-        head={<div className="td5-drh"><b>Add a task</b><button type="button" aria-label="Close" onClick={() => setComposing(false)}>✕</button></div>}>
-        <div className="td5-drb td5-root" data-td5="composer">
-          {composing ? <V2Composer today={localYMD(now)} agents={agents} onAddTask={addTask} onAddNote={addNote} onNote={() => { setComposing(false); navigate("/todo/corkboard"); }} autoFocus /> : null}
-        </div>
-      </HalfDrawer>
       {flow ? <HousekeepingSweep items={flow.items} onClose={() => { setFlow(null); }} onNavigate={onNavigate} onToast={flash} /> : null}
       {confirmAskNode}
       {toast && (
