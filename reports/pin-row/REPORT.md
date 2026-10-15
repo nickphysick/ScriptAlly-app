@@ -86,4 +86,4 @@ Neither is caused by this change. The base was built in a separate worktree and 
 
 ## Integration and dev
 
-(appended at deploy)
+Dev served `index-BOw0IoMj.js`, from `dev/…-qc1384-pkg4-pkg41` at `954a9413`. This branch contains that branch, so the integration branch **`dev/…-qc1384-pkg4-pkg41-pinfix`** is a fast-forward to `61ed4ec9`: the same commit the gates and locks above ran on. It was built from a clean detached worktree and deployed hosting-only to `scriptally-dev`, after checking the served hash immediately before. **Dev now serves `index-XJ-N_guT.js`**, the gated build's own hash. Not merged to main; prod untouched.
