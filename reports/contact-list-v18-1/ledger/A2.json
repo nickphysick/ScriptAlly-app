@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "A2",
+  "where": "the task's agent is on the account",
+  "ok": true,
+  "detail": "thin-ag-gap"
+ },
+ {
+  "lock": "A2",
+  "where": "Save is disabled with no row ticked",
+  "ok": true,
+  "detail": "disabled"
+ },
+ {
+  "lock": "A2",
+  "where": "focusing Other ticks it",
+  "ok": true,
+  "detail": "ticked"
+ },
+ {
+  "lock": "A2",
+  "where": "an empty Other is refused in the validator's words, and Save is disabled",
+  "ok": true,
+  "detail": "Explain what 'Other' materials are requested."
+ },
+ {
+  "lock": "A2",
+  "where": "'On the card:' equals summaryFromRows before saving",
+  "ok": true,
+  "detail": "\"Covering letter · Synopsis · 2 pages · Opening sample (10 pages)\" vs \"Covering letter  ·  Synopsis · 2 pages  ·  Opening sample (10 pages)\""
+ },
+ {
+  "lock": "A2",
+  "where": "Save is enabled once rows are ticked",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "lock": "A2",
+  "where": "the stored array is the agent card's encoder's for those rows",
+  "ok": true,
+  "detail": "[\"Query letter\",\"Synopsis (2 pages)\",\"First 10 pages\"] vs [\"Query letter\",\"Synopsis (2 pages)\",\"First 10 pages\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "an Undo is offered",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A2",
+  "where": "Undo restores the agent exactly",
+  "ok": true,
+  "detail": "identical"
+ }
+]

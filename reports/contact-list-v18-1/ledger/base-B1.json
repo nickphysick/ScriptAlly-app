@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for you",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for waiting",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for notq",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for closed",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for you",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for waiting",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for notq",
+  "ok": false,
+  "detail": "none on the account"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for closed",
+  "ok": false,
+  "detail": "none on the account"
+ }
+]

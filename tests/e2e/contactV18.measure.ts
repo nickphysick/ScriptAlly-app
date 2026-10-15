@@ -305,7 +305,11 @@ test("D1 · peek: none at 300ms, open by 900ms; Copy never opens the row; Space 
 });
 
 /* ───────────────────────── E1 · card ───────────────────────── */
-test("E1 · card: the framed card's frame holds the band; the panel's plain card has neither; the masthead's three colours", async ({ page }) => {
+/* ⚠️ RETIRED BY CONTACT LIST v18.1 §B (tests/e2e/RETIRED-contact-list-v18-1.md): "the panel's plain card has no frame and no
+   band" and "the panel masthead takes the three status colours" describe a panel that is gone. The panel is the card's
+   panel variant now, with one frame and a band coloured by whose move it is: CL181 B1 holds both. The framed card's
+   frame-holds-the-band reading is held by CL181 B1's frame readings on the same component. */
+test.skip("E1 · card: the framed card's frame holds the band; the panel's plain card has neither; the masthead's three colours", async ({ page }) => {
   const L = new Ledger("E1");
   flags(true);
   await open(page, SIZES[0], "E1");

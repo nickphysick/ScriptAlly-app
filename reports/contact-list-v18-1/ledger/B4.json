@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "B4",
+  "where": "Housekeeping lists the bare agent's gaps, without the one put off (the fixture took)",
+  "ok": true,
+  "detail": "clv181-bare:reply,clv181-bare:materials,clv181-bare:genres"
+ },
+ {
+  "lock": "B4",
+  "where": "the gap line's n is Housekeeping's count for the agent",
+  "ok": true,
+  "detail": "3 vs 3"
+ },
+ {
+  "lock": "B4",
+  "where": "its words are Housekeeping's, in Housekeeping's order",
+  "ok": true,
+  "detail": "3 details missing — reply time, what to send, genres"
+ },
+ {
+  "lock": "B4",
+  "where": "Fill in closes the panel",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B4",
+  "where": "Housekeeping opens in focus with a counter \"1 of 3\"",
+  "ok": true,
+  "detail": "1 of 3"
+ },
+ {
+  "lock": "B4",
+  "where": "the run is over that agent only",
+  "ok": true,
+  "detail": "clv181-bare:reply · clv181-bare:materials,clv181-bare:genres"
+ },
+ {
+  "lock": "B4",
+  "where": "an agent with no gaps is on the list",
+  "ok": true,
+  "detail": "clv-fx-stale"
+ },
+ {
+  "lock": "B4",
+  "where": "its panel draws no gap line",
+  "ok": true,
+  "detail": "clv-fx-stale"
+ }
+]

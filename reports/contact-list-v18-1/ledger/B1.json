@@ -1,0 +1,338 @@
+[
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for you",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 you: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 you: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 you: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 you: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 you: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 you: the band is rgb(162, 69, 42)",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for waiting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 waiting: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 waiting: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 waiting: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 waiting: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 waiting: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 waiting: the band is rgb(45, 58, 80)",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for notq",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 notq: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 notq: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 notq: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 notq: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 notq: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 notq: the band is rgb(94, 113, 137)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 a fixture agent for closed",
+  "ok": true,
+  "detail": "msv12-agent-6"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 closed: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 closed: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 closed: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 closed: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 closed: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 closed: the band is rgb(169, 163, 156)",
+  "ok": true,
+  "detail": "rgb(169, 163, 156)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for you",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 you: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 you: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 you: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 you: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 you: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 you: the band is rgb(162, 69, 42)",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for waiting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 waiting: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 waiting: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 waiting: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 waiting: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 waiting: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 waiting: the band is rgb(45, 58, 80)",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for notq",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 notq: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 notq: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 notq: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 notq: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 notq: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 notq: the band is rgb(94, 113, 137)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 a fixture agent for closed",
+  "ok": true,
+  "detail": "msv12-agent-6"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 closed: one element carries the 1px rgb(165, 131, 123) border",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 closed: its radius is 13",
+  "ok": true,
+  "detail": "13px"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 closed: it holds the band, head, tabs, body and footer",
+  "ok": true,
+  "detail": "{\"band\":true,\"head\":true,\"tabs\":true,\"body\":true,\"foot\":true}"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 closed: the band is 50 (±1) tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 closed: there is no navy masthead",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 closed: the band is rgb(169, 163, 156)",
+  "ok": true,
+  "detail": "rgb(169, 163, 156)"
+ }
+]

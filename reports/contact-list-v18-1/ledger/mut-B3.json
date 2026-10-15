@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B3",
+  "where": "@1512 the sections are Genres sought, Manuscript wishlist, How to query, Send them, Your queries",
+  "ok": true,
+  "detail": "genres,wishlist,how,send,queries"
+ },
+ {
+  "lock": "B3",
+  "where": "@1512 there are no dashed \"+ Add\" pills in the panel",
+  "ok": false,
+  "detail": "5"
+ },
+ {
+  "lock": "B3",
+  "where": "@1512 no genres reads \"Not recorded\"",
+  "ok": true,
+  "detail": "Not recorded"
+ },
+ {
+  "lock": "B3",
+  "where": "@1512 no wishlist reads \"Not recorded\"",
+  "ok": true,
+  "detail": "Not recorded"
+ },
+ {
+  "lock": "B3",
+  "where": "@1512 no materials reads \"Not recorded\"",
+  "ok": true,
+  "detail": "Not recorded"
+ },
+ {
+  "lock": "B3",
+  "where": "@1512 no reply time and no silence policy read \"Not stated\"",
+  "ok": true,
+  "detail": "Not stated|Not stated"
+ },
+ {
+  "lock": "B3",
+  "where": "@1512 with no website and no email, no link is drawn",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 the sections are Genres sought, Manuscript wishlist, How to query, Send them, Your queries",
+  "ok": true,
+  "detail": "genres,wishlist,how,send,queries"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 there are no dashed \"+ Add\" pills in the panel",
+  "ok": false,
+  "detail": "5"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 no genres reads \"Not recorded\"",
+  "ok": true,
+  "detail": "Not recorded"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 no wishlist reads \"Not recorded\"",
+  "ok": true,
+  "detail": "Not recorded"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 no materials reads \"Not recorded\"",
+  "ok": true,
+  "detail": "Not recorded"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 no reply time and no silence policy read \"Not stated\"",
+  "ok": true,
+  "detail": "Not stated|Not stated"
+ },
+ {
+  "lock": "B3",
+  "where": "@1280 with no website and no email, no link is drawn",
+  "ok": true,
+  "detail": "none"
+ }
+]
