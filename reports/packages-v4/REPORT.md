@@ -1,3 +1,41 @@
+# v4.1 — the sheets keep their columns at 1280 (15 Oct)
+
+## False premises
+
+1. **The sheet at 1280 is 976px, not "~1000".** Measured (D1C3 ledger). The conclusion stands: below 1100 every sheet
+   collapsed there.
+2. **"At a sheet width of 740 each is one column" does not hold for the lead row.** Below the step the lead row is
+   2 × 2, by its own rule since v4 (`repeat(2, …)`), and the brief's change only moves that rule's breakpoint. I made
+   the change as instructed and locked what it produces: at 740 the packages grid and the materials sheet are one
+   column, the lead row 2 × 2. Making the lead row one column there is one more line if you want it.
+
+## The change
+
+In `packagesV4.css`, the three `@container pk4sheet (max-width: 1099.98px)` steps (packages grid, materials sheet, lead
+row) are now `759.98px`. The 1179.98px steps (the replies grid and the in-sheet search) and the replies rows' 899.98px
+step are unchanged. The empty page's own 1100 step (`pk4empty`, the page's width rather than the sheet's) is unchanged:
+the brief named only `pk4sheet`. CLAUDE.md's line is corrected.
+
+## Lock D1C3 (the D1/C3 addendum): red, then green
+
+`tests/e2e/pk4.measure.ts`, `D1C3 columns 1280` and `1044`. A 1044 × 800 window gives a sheet of exactly **740.0px**
+(measured, asserted under 760); 1280 × 800 gives **976.0px**. D1's own column rule moved from 1100 to 760 with it.
+
+| Run | 1280 (sheet 976) | 1044 (sheet 740) |
+|---|---|---|
+| v4 build, before the change | grid **1**, materials **1**, lead **2 × 2** — red | grid 1, materials 1, lead 2 × 2 |
+| after the change (green) | grid **2**, materials **3**, lead **4 in one row** | grid 1, materials 1, lead 2 × 2 |
+| mutation `D1C3`: restore 1099.98 | grid 1, materials 1, lead 2 × 2 — red | as green |
+| mutation `D1C3n`: no step at all | as green | grid 2, materials 3, lead 4 × 1 — red |
+
+The named mutation (restore 1099.98) can only redden the 1280 half, since 1100 also collapses at 740; `D1C3n` proves
+the 740 half. Ledgers: `v4-1/red-before`, `v4-1/green`, `v4-1/mutation`, `v4-1/mutation-narrow`. The whole PK4 file on
+the branch after the change: **39 passed** (38 tests and sign-in). Shots at 1280 are refreshed in `shots/`.
+
+DEPLOY41_PLACEHOLDER
+
+---
+
 # Submission packages v4 — report (14–15 Oct, overnight)
 
 Branch `packages-v4` in worktree `../ScriptAlly-pkg4`, off the branch dev served when the run began:
@@ -192,10 +230,7 @@ the fixtures seeded, so "The Smoke Test" shows the "Two editions" fixture (which
 
 ## For Nick
 
-- **At 1280 the packages and materials sheets are one column**, as the prompt's "one below 1100 of sheet width" says:
-  the sheet is ~976 wide there. The mock (whose breakpoints are the viewport's) draws two. The lead row is two columns
-  and the search 220. Nothing overflows (L1 at 1920, 1512, 1280, 1180 and 1024). If two columns of cards are wanted at
-  1280, the breakpoint is one number.
+- **(Superseded by v4.1, above.)** At 1280 the packages and materials sheets were one column under v4's 1100 step.
 - **Reply rate on the harness account:** "Harbour of Glass" **100% (4 of 4 answered)**; "The Smoke Test" **100% (7 of 7)**.
   Both are honest and both look odd: every answered query there drew a reply.
 - **"Not recorded" versions:** 7 credited queries on "The Smoke Test" (its packages without a version), 1 on "Harbour of

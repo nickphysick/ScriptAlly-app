@@ -59,6 +59,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   C2: { js: `(() => { let done = false; const go = () => { const b = document.querySelector('[data-pk4="band-ret"][aria-expanded="false"]'); if (b && !done) { done = true; b.click(); } }; new MutationObserver(go).observe(document.body, { subtree: true, childList: true }); go(); })()` },
   /* let the foot wrap */
   C3: { css: `.pk4-pcf { grid-template-columns: 1fr !important; }` },
+  /* v4.1: restore the 1100 one-column step (the sheet's own breakpoint, as v4 shipped it) */
+  "D1C3": { css: `@container pk4sheet (max-width: 1099.98px) { .pk4-grid { grid-template-columns: minmax(0, 1fr) !important; } .pk4-mats { grid-template-columns: minmax(0, 1fr) !important; } .pk4-lead { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }` },
+  /* v4.1 (the narrow half): no step at all — the sheets keep their columns at any width */
+  "D1C3n": { css: `.pk4-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .pk4-mats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } .pk4-lead { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }` },
   /* drop the heading strip */
   D1: { css: `.pk4-hdstrip { background: transparent !important; }` },
   /* render the example as a real package */
@@ -317,7 +321,7 @@ for (const size of SIZES) {
       L.check("three", r.cols.length === 3, r.cols.map((c) => c.t).join("|"));
       r.cols.forEach((c, i) => L.check(`strip ${i}`, c.bg === "rgb(233, 237, 243)", c.bg));
       const lefts = new Set(r.cols.map((c) => Math.round(c.left))).size;
-      L.check("columns", r.w >= 1100 ? lefts === 3 : lefts === 1, `${lefts} column positions on a ${r.w.toFixed(0)} sheet`);
+      L.check("columns", r.w >= 760 ? lefts === 3 : lefts === 1, `${lefts} column positions on a ${r.w.toFixed(0)} sheet`);
     }
     L.done(5);
   });
@@ -596,5 +600,36 @@ for (const size of SIZES) {
       L.check(`${w} app`, r.app[0] === r.app[1], r.app.join("/"));
     }
     L.done(3);
+  });
+}
+
+/* ── v4.1 · the D1/C3 addendum: the sheets keep their columns down to 760 of sheet width ──
+   At 1280 × 800 with the shell: the packages grid 2 columns, the materials sheet 3, the lead row 4 cells in one row.
+   At a sheet narrower than 760 (a 1044 window: the sheet is measured, never assumed) the grid and the materials are one
+   column and the lead row is 2 × 2. */
+const COLS = `(() => {
+  const sheet = document.querySelector('[data-pk4="pkg-sheet"]');
+  const tops = (els) => els.map((e) => Math.round(e.getBoundingClientRect().top));
+  const lefts = (els) => new Set(els.map((e) => Math.round(e.getBoundingClientRect().left))).size;
+  const cards = [...document.querySelectorAll('[data-pk4="grid-use"] > *')];
+  const cols = [...document.querySelectorAll('[data-pk4="mat-col"]')];
+  const lead = [...document.querySelectorAll('[data-pk4="lead"] > div')];
+  return { sheet: sheet ? sheet.getBoundingClientRect().width : 0, grid: lefts(cards), gridN: cards.length, mats: lefts(cols), leadCols: lefts(lead), leadRows: new Set(tops(lead)).size, leadN: lead.length };
+})()`;
+for (const size of [{ width: 1280, height: 800 }, { width: 1044, height: 800 }]) {
+  test(`D1C3 columns ${size.width}`, async ({ page }) => {
+    test.setTimeout(180_000);
+    const L = new Ledger(`D1C3-${size.width}`);
+    await open(page, POP, size, MUT === "D1C3n" ? "D1C3n" : "D1C3");
+    const r = await ev<{ sheet: number; grid: number; gridN: number; mats: number; leadCols: number; leadRows: number; leadN: number }>(page, COLS);
+    const wide = size.width === 1280;
+    L.check("sheet", wide ? r.sheet >= 760 : r.sheet > 0 && r.sheet < 760, `sheet ${r.sheet.toFixed(1)} wide at ${size.width}`);
+    L.check("population", r.gridN >= 2 && r.leadN === 4, `${r.gridN} items in In use, ${r.leadN} lead cells`);
+    L.check("packages grid", r.grid === (wide ? 2 : 1), `${r.grid} column(s)`);
+    L.check("materials", r.mats === (wide ? 3 : 1), `${r.mats} column(s)`);
+    /* below the step the lead row is 2 × 2 (its own rule since v4, which v4.1 only moves) — not one column */
+    L.check("lead", wide ? r.leadCols === 4 && r.leadRows === 1 : r.leadCols === 2 && r.leadRows === 2, `${r.leadCols} column(s) over ${r.leadRows} row(s)`);
+    console.log(`  D1C3 ${size.width}: ${JSON.stringify(r)}`);
+    L.done(5);
   });
 }

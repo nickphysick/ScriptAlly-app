@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D1C3-1280",
+  "where": "sheet",
+  "ok": true,
+  "detail": "sheet 976.0 wide at 1280"
+ },
+ {
+  "lock": "D1C3-1280",
+  "where": "population",
+  "ok": true,
+  "detail": "5 items in In use, 4 lead cells"
+ },
+ {
+  "lock": "D1C3-1280",
+  "where": "packages grid",
+  "ok": false,
+  "detail": "1 column(s)"
+ },
+ {
+  "lock": "D1C3-1280",
+  "where": "materials",
+  "ok": false,
+  "detail": "1 column(s)"
+ },
+ {
+  "lock": "D1C3-1280",
+  "where": "lead",
+  "ok": false,
+  "detail": "2 column(s) over 2 row(s)"
+ }
+]
