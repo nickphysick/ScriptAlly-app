@@ -29,6 +29,7 @@ import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelSt
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { RspHeader, RspSummaryCard } from "./RspHeader";
 import { RspCarousel, cardAct } from "./RspCarousel";
+import { RspBanner, RspList, RspTally } from "./RspNos";
 import "./responses.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -39,7 +40,7 @@ export function openRecordPicker(): void {
   if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" });
 }
 
-export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = () => {
+export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = ({ routeActive }) => {
   const { queries, activities, agents, manuscripts, collectionsReady, activitiesReady } = useScriptAllyDb();
   const location = useLocation();
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
@@ -88,6 +89,13 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
         {ready && counts.answered > 0 ? (
           <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
             selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
+        ) : null}
+        {ready && counts.passed + counts.noReply > 0 ? (
+          <>
+            <RspBanner />
+            <RspTally items={model.items} />
+            <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} />
+          </>
         ) : null}
       </div>
       </div>

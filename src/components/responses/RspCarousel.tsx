@@ -103,7 +103,7 @@ const ReqCard: React.FC<{ i: Item; nowMs: number; selected: boolean; onOpen: () 
           {foot.date ? (
             <>
               <span className="rsp-mono">{foot.label}</span>
-              <b data-rsp="pcard-date">{foot.date}</b>
+              <b data-rsp="pcard-date">{foot.date}</b>{" "}
               {foot.days ? <small className={foot.hot ? "is-hot" : undefined} data-rsp="pcard-days">{foot.days}</small> : null}
             </>
           ) : null}
