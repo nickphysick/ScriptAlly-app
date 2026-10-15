@@ -35,8 +35,8 @@ import {
 import { clearedThisWeek, clearedToday, type ClearedAct } from "../../../lib/todoCleared";
 import { stageHistory } from "../../../lib/qcStages";
 import { drawerDoorForTask } from "../../../lib/queryActions/entry";
-import { openQueryDrawer, type SavedResult } from "../../../lib/queryActions/drawerStore";
-import { openAgentCard, dataNeedTarget } from "../../../lib/agentCardStore";
+import { currentDrawerRequest, openQueryDrawer, subscribeDrawer, type SavedResult } from "../../../lib/queryActions/drawerStore";
+import { currentAgentCard, dataNeedTarget, openAgentCard, subscribeAgentCard } from "../../../lib/agentCardStore";
 import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { escapeDepth } from "../../../lib/escapeStack";
@@ -187,9 +187,14 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     scrollRowIntoView(id);
   }, [location.pathname]);
 
+  /* the sweep the desk opened (declared above the sequence, which waits for it to close: the TDZ order rule) */
+  const [flow, setFlow] = useState<{ items: SweepItem[] } | null>(null);
   /* ── the commit sequence ── */
   const [pending, setPending] = useState<{ key: string; at: number } | null>(null);
-  const [ghost, setGhost] = useState<{ item: TrayItem; index: number; phase: "stamp" | "leave" } | null>(null);
+  /* ⚠️ "hold" FIRST: the board drops the card the instant the save lands (the local snapshot), while the drawer, the
+     agent card or the sweep is still on screen over the desk. The stamp waits until that surface has gone, or the writer
+     never sees it (measured: the first stamp screenshot showed it playing under the closing drawer). */
+  const [ghost, setGhost] = useState<{ item: TrayItem; index: number; next: string | null; phase: "hold" | "stamp" | "leave" } | null>(null);
   const [rise, setRise] = useState<string | null>(null);
   const [freshSlip, setFreshSlip] = useState<string | null>(null);
   const orderRef = useRef<TrayItem[]>([]);
@@ -208,15 +213,36 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (!item) return;
     const next = before.slice(idx + 1).find((i) => ordered.some((o) => o.key === i.key))
       ?? [...before.slice(0, idx)].reverse().find((i) => ordered.some((o) => o.key === i.key)) ?? null;
-    setGhost({ item, index: idx, phase: "stamp" });
-    later(() => setGhost((g) => (g ? { ...g, phase: "leave" } : g)), STAMP_MS);
-    later(() => {
-      setGhost(null);
-      setSelKey(next ? next.key : null);
-      if (next) { setRise(next.key); scrollRowIntoView(next.key); }
-      later(() => setRise(null), RISE_MS);
-    }, STAMP_MS + LEAVE_MS);
+    setGhost({ item, index: idx, next: next ? next.key : null, phase: "hold" });
   }, [ordered, pending]);
+  /* the surface that took the action: the query drawer, the agent card, or the sweep */
+  const [surfaceOpen, setSurfaceOpen] = useState(false);
+  useEffect(() => {
+    const read = () => setSurfaceOpen(!!currentDrawerRequest() || !!currentAgentCard());
+    read();
+    const a = subscribeDrawer(read), b = subscribeAgentCard(read);
+    return () => { a(); b(); };
+  }, []);
+  const ghostPhase = ghost?.phase;
+  useEffect(() => {
+    if (ghostPhase !== "hold" || surfaceOpen || flow) return undefined;
+    /* the surface has gone: give its exit a beat, then the stamp, the leave, and the next task */
+    const t = window.setTimeout(() => {
+      setGhost((g) => (g ? { ...g, phase: "stamp" } : g));
+      later(() => setGhost((g) => (g ? { ...g, phase: "leave" } : g)), STAMP_MS);
+      later(() => {
+        setGhost((g) => {
+          const next = g?.next ?? null;
+          setSelKey(next);
+          if (next) { setRise(next); scrollRowIntoView(next); }
+          return null;
+        });
+        later(() => setRise(null), RISE_MS);
+      }, STAMP_MS + LEAVE_MS);
+    }, reduced() ? 0 : 200);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ghostPhase, surfaceOpen, flow]);
   /* a door left open without a save lets go after a while */
   useEffect(() => {
     if (!pending) return undefined;
@@ -254,7 +280,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   });
 
   /* ── the doors ── */
-  const [flow, setFlow] = useState<{ items: SweepItem[] } | null>(null);
   const act = useCallback((i: TrayItem) => {
     const c = i.card;
     if (i.sweep) {
@@ -552,8 +577,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                 action={actionWords(deskItem)} onAct={() => act(deskItem)}
                                 asideRef={deskAsideRef} onAside={ghost ? null : () => setSnoozeFor(deskItem)}
                                 onOpenQuery={deskItem.query && !deskItem.card.userTaskId ? () => openQueryPanel(deskItem.query!.id, "other") : null}
-                                stamp={ghost ? stampFor(ghost.item) : null}
-                                phase={ghost ? ghost.phase : rise === deskItem.key ? "rise" : "rest"}
+                                stamp={ghost && ghost.phase !== "hold" ? stampFor(ghost.item) : null}
+                                phase={ghost ? (ghost.phase === "hold" ? "rest" : ghost.phase) : rise === deskItem.key ? "rise" : "rest"}
                               />
                             </div>
                           </>

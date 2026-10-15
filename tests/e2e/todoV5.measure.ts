@@ -368,7 +368,8 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
   const on = await page.waitForFunction(() => {
     const s = document.querySelector('[data-todo-v5] [data-td5="stamp"]');
     if (!s) return null;
-    return { key: s.closest('[data-td5="desk-card"]')?.getAttribute("data-key") ?? null, anim: getComputedStyle(s).animationName, word: s.textContent };
+    const d = [...document.querySelectorAll("[data-qad-drawer]")].some((e) => e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility !== "hidden");
+    return { key: s.closest('[data-td5="desk-card"]')?.getAttribute("data-key") ?? null, anim: getComputedStyle(s).animationName, word: s.textContent, drawer: d };
   }, null, { timeout: reduced ? 4_000 : 30_000, polling: "raf" }).then((h) => h.jsonValue()).catch(() => null);
   const stamped = !!on;
   if (!reduced) L.check("D2", `${at} a stamp comes down`, stamped, "");
@@ -377,6 +378,7 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
   if (on) {
     L.check("D2", `${at} on the saved card`, on.key === key, `${on.key} vs ${key}`);
     L.check("D2", `${at} the word`, on.word === "SENT", String(on.word));
+    L.check("D2", `${at} the stamp comes down once the drawer has gone`, !on.drawer, on.drawer ? "the drawer was still on screen over the desk" : "");
     L.check("D2", `${at} motion ${reduced ? "off" : "on"}`, reduced ? on.anim === "none" : on.anim !== "none", on.anim);
   }
   await page.waitForTimeout(1600);
