@@ -31,6 +31,7 @@ import { RspHeader, RspSummaryCard } from "./RspHeader";
 import { RspCarousel } from "./RspCarousel";
 import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
+import { RspShare } from "./RspShare";
 import "./responses.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -119,6 +120,7 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
             <RspBanner />
             <RspTally items={model.items} />
             <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} onVisible={setVisible} />
+            <RspShare ref={shareRef} nos={model.items.filter((i) => i.group !== "more")} title={msTitle} />
           </>
         ) : null}
       </div>

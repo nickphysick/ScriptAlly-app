@@ -18,6 +18,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
+import { MONTHS_SHORT } from "../../lib/dates";
 import { daysLeft, plural, respDate, WHAT_WANTS, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 
@@ -35,7 +36,7 @@ const STEP_WORD: Partial<Record<QueryStatus, string>> = {
   [QueryStatus.RESUBMITTED]: "Revision sent",
   [QueryStatus.OFFER]: "Offer",
 };
-const SHORT_DATE = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][d.getMonth()]}`; };
+const SHORT_DATE = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()].toUpperCase()}`; };
 
 /** the button a card's foot carries, and the journey it runs */
 export function cardAct(i: Item): { label: string; mode: "sent" | "resp" | "offer"; navy: boolean } {
