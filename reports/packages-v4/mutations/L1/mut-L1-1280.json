@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L1-1280",
+  "where": "1280 document",
+  "ok": true,
+  "detail": "1280/1280"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "1280 scroller",
+  "ok": false,
+  "detail": "3296/1024"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "1280 app",
+  "ok": true,
+  "detail": "1280/1280"
+ }
+]

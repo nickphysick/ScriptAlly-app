@@ -1,0 +1,8 @@
+[
+ {
+  "lock": "A1-1512",
+  "where": "header",
+  "ok": false,
+  "detail": "the v4 header is on the page"
+ }
+]

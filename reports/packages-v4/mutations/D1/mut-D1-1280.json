@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1-1280",
+  "where": "sheet",
+  "ok": true,
+  "detail": "the materials sheet is on the page"
+ },
+ {
+  "lock": "D1-1280",
+  "where": "three",
+  "ok": true,
+  "detail": "Query letters3|Synopses1|Manuscript versions3"
+ },
+ {
+  "lock": "D1-1280",
+  "where": "strip 0",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "D1-1280",
+  "where": "strip 1",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "D1-1280",
+  "where": "strip 2",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "D1-1280",
+  "where": "columns",
+  "ok": true,
+  "detail": "1 column positions on a 976 sheet"
+ }
+]

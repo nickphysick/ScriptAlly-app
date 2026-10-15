@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "V3-D1-1280",
+  "where": "new package drawer",
+  "ok": true,
+  "detail": "new package opens the drawer"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "new package inset",
+  "ok": true,
+  "detail": "inset 8.0/8.0/8.0"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "new package radius",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "new package no dialog",
+  "ok": true,
+  "detail": "0 other dialogs"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "add material drawer",
+  "ok": true,
+  "detail": "add material opens the drawer"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "add material inset",
+  "ok": true,
+  "detail": "inset 8.0/8.0/8.0"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "add material radius",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "add material no dialog",
+  "ok": true,
+  "detail": "0 other dialogs"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "edit package drawer",
+  "ok": true,
+  "detail": "edit package opens the drawer"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "edit package inset",
+  "ok": true,
+  "detail": "inset 8.0/8.0/8.0"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "edit package radius",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "edit package no dialog",
+  "ok": false,
+  "detail": "1 other dialogs"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "material edit drawer",
+  "ok": true,
+  "detail": "material edit opens the drawer"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "material edit inset",
+  "ok": true,
+  "detail": "inset 8.0/8.0/8.0"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "material edit radius",
+  "ok": true,
+  "detail": "12px"
+ },
+ {
+  "lock": "V3-D1-1280",
+  "where": "material edit no dialog",
+  "ok": false,
+  "detail": "2 other dialogs"
+ }
+]

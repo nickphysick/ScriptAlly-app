@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "V3-D5-1512",
+  "where": "1st",
+  "ok": true,
+  "detail": "1st edition · sent with 2 queries, last on 24 Jul"
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "notice",
+  "ok": true,
+  "detail": "the edition notice is shown"
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "rename keeps",
+  "ok": true,
+  "detail": "1st edition · sent with 2 queries, last on 24 Jul"
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "rename undone",
+  "ok": true,
+  "detail": "the name is back"
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "letter starts 2nd",
+  "ok": true,
+  "detail": "2nd edition · sent with 2 queries, last on 24 Jul"
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "edition undone",
+  "ok": true,
+  "detail": "1st edition · sent with 2 queries, last on 24 Jul"
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "no-version rename saves",
+  "ok": true,
+  "detail": "title \"The Complete Autumn Submission Bundle for Literary Agents x\""
+ },
+ {
+  "lock": "V3-D5-1512",
+  "where": "no-version rename keeps",
+  "ok": true,
+  "detail": "1st edition · sent with 5 queries, last on 25 Jul"
+ }
+]

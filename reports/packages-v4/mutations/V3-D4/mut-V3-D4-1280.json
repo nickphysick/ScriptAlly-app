@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "V3-D4-1280",
+  "where": "parked",
+  "ok": true,
+  "detail": "the material form replaced the package form"
+ },
+ {
+  "lock": "V3-D4-1280",
+  "where": "escape back",
+  "ok": true,
+  "detail": "Escape went back to the package form, name kept"
+ },
+ {
+  "lock": "V3-D4-1280",
+  "where": "returns",
+  "ok": false,
+  "detail": "the package form is back"
+ },
+ {
+  "lock": "V3-D4-1280",
+  "where": "name kept",
+  "ok": false,
+  "detail": "name \"\""
+ },
+ {
+  "lock": "V3-D4-1280",
+  "where": "letter chosen",
+  "ok": false,
+  "detail": "chosen \"\""
+ }
+]

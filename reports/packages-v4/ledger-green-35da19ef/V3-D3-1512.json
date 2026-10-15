@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "V3-D3-1512",
+  "where": "two tabs",
+  "ok": true,
+  "detail": "two tabs in the drawer"
+ },
+ {
+  "lock": "V3-D3-1512",
+  "where": "requests agree",
+  "ok": true,
+  "detail": "drawer 2, card foot 2 (both the current edition)"
+ },
+ {
+  "lock": "V3-D3-1512",
+  "where": "replies agree",
+  "ok": true,
+  "detail": "\"4 of 4 no longer waiting\" against 4 replies"
+ },
+ {
+  "lock": "V3-D3-1512",
+  "where": "own row",
+  "ok": true,
+  "detail": "own row is a DIV"
+ },
+ {
+  "lock": "V3-D3-1512",
+  "where": "other rows",
+  "ok": true,
+  "detail": "4 other rows are buttons"
+ }
+]

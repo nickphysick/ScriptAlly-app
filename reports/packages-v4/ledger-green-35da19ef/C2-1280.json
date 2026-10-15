@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C2-1280",
+  "where": "bands",
+  "ok": true,
+  "detail": "both bands are on the page"
+ },
+ {
+  "lock": "C2-1280",
+  "where": "in use open",
+  "ok": true,
+  "detail": "In use is drawn"
+ },
+ {
+  "lock": "C2-1280",
+  "where": "retired folded",
+  "ok": true,
+  "detail": "Retired aria-expanded false, grid false"
+ },
+ {
+  "lock": "C2-1280",
+  "where": "retired cards",
+  "ok": true,
+  "detail": "opacities 0.7"
+ },
+ {
+  "lock": "C2-1280",
+  "where": "nothing in use",
+  "ok": true,
+  "detail": "In use0 PACKAGESNothing in use right now. Start a new package, or restore one fr"
+ },
+ {
+  "lock": "C2-1280",
+  "where": "retired open",
+  "ok": true,
+  "detail": "2 retired cards shown"
+ }
+]

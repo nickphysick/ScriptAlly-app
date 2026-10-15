@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "V3-D2-1512",
+  "where": "viewing no scrim",
+  "ok": false,
+  "detail": "1 scrims"
+ },
+ {
+  "lock": "V3-D2-1512",
+  "where": "viewing not modal",
+  "ok": true,
+  "detail": "aria-modal false"
+ },
+ {
+  "lock": "V3-D2-1512",
+  "where": "page scrolls",
+  "ok": false,
+  "detail": "scrollTop 0 → 0"
+ },
+ {
+  "lock": "V3-D2-1512",
+  "where": "form scrim",
+  "ok": true,
+  "detail": "1 scrims"
+ },
+ {
+  "lock": "V3-D2-1512",
+  "where": "form modal",
+  "ok": true,
+  "detail": "aria-modal true"
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "V3-E2E3-1280",
+  "where": "lead 2",
+  "ok": false,
+  "detail": "\"\" against qualifying none"
+ },
+ {
+  "lock": "V3-E2E3-1280",
+  "where": "lead 3",
+  "ok": false,
+  "detail": "\"\" against qualifying none"
+ },
+ {
+  "lock": "V3-E2E3-1280",
+  "where": "E3 under-4 last",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "V3-E2E3-1280",
+  "where": "E3 by requests",
+  "ok": true,
+  "detail": ""
+ }
+]
