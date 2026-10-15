@@ -134,3 +134,10 @@
 .clv-group .cl16-list .lt-labels .lt-lab.on { color: #2d3a50; }
 .clv-group .cl16-list .lt-labels .lt-lab i { color: #a2452a; }
 .clv-group .cl16-list .lt-labels button.lt-lab:not(.on):hover::after { content: " ↓"; opacity: 0.35; }
+
+/* ── §C · THE NOT-QUERIED DISC in the list's rows: a dotted navy ring with navy initials, no fill (white on the row's
+   hover). Scoped to the rows: `AgentDisc` is shared, and its own default (the cream disc) stays everywhere else. ── */
+.cl16-list .clv-row .sa-disc.clv-ini[data-disc="none"] {
+  box-sizing: border-box; background: transparent; color: #2a3a52; box-shadow: none; border: 1.6px dotted #2a3a52;
+}
+.cl16-list .clv-row:hover .sa-disc.clv-ini[data-disc="none"] { background: #fff; }
