@@ -49,6 +49,8 @@ export const SHORTCUTS = {
   todoSnooze:       { chords: [k("s")], label: "Snooze the task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   todoDismiss:      { chords: [k("d")], label: "Dismiss the task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   todoClose:        { chords: [k("Escape")], label: "Close the open task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
+  /* To-do list v5 (desktop): the desk's action. j/k and / are the entries above, read by the same page. */
+  todoAct:          { chords: [k("e"), k("Enter")], label: "Act on the task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
   calBack:          { chords: [k("ArrowLeft")], label: "A week earlier", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   calForward:       { chords: [k("ArrowRight")], label: "A week later", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   calToday:         { chords: [k("t")], label: "Back to today", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },

@@ -971,8 +971,12 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        it. The law is unchanged: ONE add, and it writes through the existing `addUserTask`. */
     expect(page, "the header grew an Add back").not.toContain('primary={{ label: "Add a task"');
     expect((page.match(/<V2Desk[\s>]/g) ?? []).length, "a second desk").toBe(1);
+    /* ⚠️ RELOCATED, LAW UNCHANGED (to-do list v5): the composer moved out of V2Desk into V2Composer, which the desk
+       mounts once — so "one Add in the desk" is one composer in the desk, with one Add in it. */
     const desk = readFileSync(join(here, "v2", "V2Desk.tsx"), "utf8");
-    expect((desk.match(/data-todo-v2="add"/g) ?? []).length, "a second Add in the desk").toBe(1);
+    expect((desk.match(/<V2Composer[\s>]/g) ?? []).length, "a second composer in the desk").toBe(1);
+    const composer = readFileSync(join(here, "v2", "V2Composer.tsx"), "utf8");
+    expect((composer.match(/data-todo-v2="add"/g) ?? []).length, "a second Add in the composer").toBe(1);
   });
 
   it("⚠️ THE COUNTS ARE ONE LINE IN ONE PLACE, off the derivation the bands read", () => {

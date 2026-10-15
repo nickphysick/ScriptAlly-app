@@ -1,0 +1,6 @@
+   × TD5 B1 — clearedSince > counts each clearing record once 3ms
+   × TD5 B1 — clearedSince > never counts a snooze or a dismissal 0ms
+   × TD5 B1 — clearedSince > is newest first, with words for the slip 1ms
+   × TD5 B1 — clearedSince > today is a narrower window of the same derivation 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 6 passed (10)

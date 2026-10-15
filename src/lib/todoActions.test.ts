@@ -30,7 +30,10 @@ import { BoardCard } from "./todoBoard";
  * so a branch reappearing on EITHER side fails: the page must not grow one back.
  */
 const commit = readFileSync(join(__dirname, "..", "components", "todo", "useTaskCommit.tsx"), "utf8");
-const page = commit + readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
+/* ⚠️ RELOCATED, LAW UNCHANGED (to-do list v5): the snooze writes left ToDoPage for `snoozeWrites.ts`, which the phone
+   page and the desktop desk both call. Reading it beside the page keeps every claim below about the one path. */
+const page = commit + readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8")
+  + readFileSync(join(__dirname, "..", "components", "todo", "snoozeWrites.ts"), "utf8");
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
@@ -131,7 +134,8 @@ describe("⚠️ THE SNOOZE CEILING — one clamp, and every path reaches it", (
   });
 
   it("…and the page's receipts all go through it — no binary tier label survives", () => {
-    expect(page).toContain("flash(`Snoozed until ${snoozeDateLabel(days)}`,");
+    /* the receipt's words are built once, in snoozeWrites, and every caller flashes that message */
+    expect(page).toContain("message: `Snoozed until ${snoozeDateLabel(days)}`");
     expect(page).not.toContain('days === 1 ? "tomorrow" : "next week"');
     expect(page).not.toContain("flash(`Snoozed until next week`,");
   });

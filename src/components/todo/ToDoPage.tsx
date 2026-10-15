@@ -188,6 +188,7 @@ import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, isSnoozed,
 } from "../../lib/todoListPage";
 import { ToastAction, useTodoToast, WITH_UNDO_MS } from "./useTodoToast";
+import { snoozeCardWrites, snoozeGroupWrites } from "./snoozeWrites";
 import { formatDate } from "../../lib/dates";
 import "./todo.css";
 import "./todoGroups.css";
@@ -741,30 +742,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return () => document.removeEventListener("pointerdown", onDown);
   }, [laterKey]);
   // the Later snoozes — the EXISTING primitives, day-parameterised (undo everywhere)
+  /* ⚠️ THE SNOOZE WRITES LIVE IN `snoozeWrites` (To-do list v5): the desktop desk's "Set aside" and this
+     page write through ONE primitive. The clamp (`clampSnooze`) and the undo are unchanged. */
   function snoozeCard(c: BoardCard, days: number, when: string) {
-    /* ⚠️ THE CEILING IS APPLIED IN lib/todoActions, NOT HERE (tasks-consolidation, extraction).
-       It was an inline `if` in this function — which made this function the choke point, and a
-       choke point inside a 2,000-line component about to be rebuilt is a coincidence rather than
-       a guarantee. `clampSnooze` is the single clamp now; every path reaches it, and its ceilings
-       are unit-tested away from this file. */
-    ({ days, when } = clampSnooze(c, days, when));
-    if (snoozeVia(c) === "user-task-flag") {
-      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId! };
-      upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });
-      const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-      flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
-      return;
-    }
-    if (snoozeVia(c) !== "dismiss-task") return;
-    dismissTask(c.taskType!, c.relatedRecordId!, "fixed snooze", days);
-    const key = flagKeyForTask(c.taskType, c.relatedRecordId);
-    const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
+    const r = snoozeCardWrites({ upsertTaskFlag, dismissTask }, c, days, when);
+    if (r) flash(r.message, { label: "Undo", fn: async () => { await r.undo(); flash("Restored"); } });
   }
-  function snoozeGroup(g: HkGroup, days: number, when: string) {
-    g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", days));
-    const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
-    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
+  function snoozeGroup(g: HkGroup, days: number, _when: string) {
+    const r = snoozeGroupWrites({ upsertTaskFlag, dismissTask }, g, days);
+    flash(r.message, { label: "Undo", fn: async () => { await r.undo(); flash("Restored"); } });
   }
   // the per-type hide — the SAME single suppression point Task settings drives (restorable there)
   function hideType(c: BoardCard, ruleKey: string) {

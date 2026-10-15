@@ -68,7 +68,7 @@ test("P7 · no horizontal overflow at 390", async ({ page }) => {
   await open(page, "/dashboard", SIZES[0]);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of WORKSPACE) {
-    if (LIGHT_HEADER.includes(route)) continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow)
+    if (LIGHT_HEADER.includes(route) && route !== "/todo") continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow); /todo's phone page keeps its panel
     await page.goto(route); await page.waitForTimeout(2600);
     const r = await page.evaluate(() => {
       const vis = (e: Element) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().height > 0;
@@ -168,7 +168,8 @@ test("P8 · the Set aside popover is above the header", async ({ page }) => {
   await prepare(page);
   for (const vp of SIZES) {
     await open(page, "/todo", vp);
-    const btn = page.locator(".ws-window [data-hpanel] button:visible", { hasText: /^Set aside/ }).first();
+    /* RE-POINTED (To-do list v5): the Set aside door is the light header's own button now (TD5 A1's header) */
+    const btn = page.locator('.ws-window [data-td5="header"] [data-td5="aside"]:visible').first();
     L.check("P8 precondition: the header carries the Set aside door", `@${vp.width}`, (await btn.count()) === 1, `${await btn.count()}`);
     await btn.click({ timeout: 8000 }).catch(() => {}); await page.waitForTimeout(500);
     const r = await page.evaluate(() => {
