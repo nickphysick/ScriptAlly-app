@@ -1,0 +1,66 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * AgentPaperCard (Contact list v18 §E). Every face stated with two classes and `!important` (brand.tsx names bare
+ * spans and headings at runtime). The card portals nowhere, but its colours are literals so it reads the same on any
+ * page that mounts it.
+ */
+.apc { box-sizing: border-box; color: #1c130f; text-align: left; }
+/* framed and ghost: a white card with a frame inside it, the band inside the frame */
+.apc.apc--framed, .apc.apc--ghost {
+  padding: 10px; border-radius: 22px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 34px -22px rgba(28, 19, 15, 0.45);
+}
+.apc .apc-frame { border: 1px solid #a5837b; border-radius: 13px; overflow: hidden; }
+.apc.apc--ghost .apc-frame { border-color: rgba(165, 131, 123, 0.6); }
+.apc .apc-band { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 46px; padding: 0 14px 0 16px; box-sizing: border-box; }
+.apc .apc-st {
+  display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 7px; background: rgba(244, 238, 229, 0.22); color: #f4eee5;
+  font: 500 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+}
+.apc .apc-stars { display: inline-flex; gap: 2px; color: #f4eee5; font: 400 14px/1 var(--sp-serif) !important; }
+.apc .apc-stars i { font: inherit !important; font-style: normal !important; opacity: 0.35; }
+.apc .apc-stars i[data-on] { opacity: 1; }
+.apc .apc-head { display: flex; gap: 14px; align-items: flex-start; margin: 0 18px; padding: 18px 0 16px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+.apc .apc-disc {
+  flex: none; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%;
+  background: #d9e0e7; color: #3f5370; font: 400 14px/1 var(--font-mono, "JetBrains Mono", monospace) !important;
+}
+.apc .apc-who { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.apc .apc-nm { font: 600 22px/1.2 var(--sp-serif) !important; }
+.apc .apc-ag { font: 400 10.5px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.apc .apc-meta { font: 400 10.5px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.6); }
+.apc .apc-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 2px; }
+.apc .apc-links a { display: inline-flex; align-items: center; gap: 6px; color: #1c130f; font: 400 13px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.3); }
+.apc .apc-sec { margin: 0 18px; padding: 14px 0; border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.apc .apc-head + .apc-sec, .apc.apc--plain .apc-sec:first-child { border-top: 0; }
+.apc .apc-sec h5 { margin: 0 0 9px; font: 500 10px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.apc .apc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.apc .apc-chip {
+  display: inline-flex; align-items: center; padding: 7px 11px; border-radius: 7px; background: #f4f0eb;
+  font: 400 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.apc .apc-chip.is-hit { background: #fff; box-shadow: inset 0 0 0 1.2px #1c130f; }
+.apc .apc-wish { margin: 0; font: italic 400 16.5px/1.45 var(--sp-serif) !important; }
+.apc .apc-mat {
+  display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 7px; background: #f4f0eb;
+  font: 400 11.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.04em;
+}
+.apc .apc-v { margin: 0; font: 400 16px/1.4 var(--sp-serif) !important; }
+.apc .apc-v .apc-pol { display: block; font: italic 400 13px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); }
+.apc .apc-v .apc-ym { font: italic 400 16px/1.4 var(--sp-serif) !important; color: #a2452a; }
+.apc .apc-v .apc-t { font: italic 400 16px/1.4 var(--sp-serif) !important; }
+.apc .apc-add {
+  display: inline-flex; align-items: center; margin: 0; padding: 3px 12px; border: 1.2px dashed rgba(42, 58, 82, 0.45); border-radius: 14px;
+  background: none; color: #2a3a52; cursor: pointer; font: 400 14px/1.3 var(--sp-serif) !important;
+}
+.apc .apc-add:hover { background: rgba(42, 58, 82, 0.05); }
+.apc .apc-add:focus-visible, .apc a:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* plain: one white card, no frame, band or head */
+.apc.apc--plain { padding: 4px 0; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 10px 22px -16px rgba(28, 19, 15, 0.35); }
+/* ghost: every value a rounded bar */
+.apc .apc-bar { display: inline-block; border-radius: 6px; background: #dcd6cf; }
+.apc.apc--ghost .apc-disc { background: #dcd6cf; }
+.apc.apc--ghost .apc-who { gap: 8px; }
+.apc .apc-lines { display: flex; flex-direction: column; gap: 8px; }

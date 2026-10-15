@@ -27,8 +27,8 @@ import { agentInitials } from "../../../lib/agentDisplay";
 import { AgentDisc, standingOf } from "../../shared/AgentDisc";
 import { discTone } from "../../../lib/contactStage";
 import {
-  INDEX_ADD, INDEX_EDIT, discGrey, firstNameOf, panelDoor, panelFoot, panelIndex, panelLinks, panelStand,
-  type IndexKey, type PanelAct,
+  discGrey, firstNameOf, materialWords, methodAnswer, panelDoor, panelFoot, panelLinks,
+  type PanelAct,
 } from "../../../lib/agentPanel";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { claimRightPanel, currentQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
@@ -39,8 +39,8 @@ import { formatDate } from "../../../lib/dates";
 import type { AgentEditPatch, SaveAgentResult } from "../../../lib/saveAgentEdits";
 import { SidePanel } from "../../shell/SidePanel";
 import { StatusDot } from "../../StatusDot";
-import { StandCard } from "../../queries/panel/StandCard";
-import type { StandCardView } from "../../../lib/standCard";
+import { AgentPaperCard, PAPER_STATUS_COLOUR, type PaperAddKey, type PaperCardData, type PaperStatus } from "../../shared/AgentPaperCard";
+import { materialRowsFromAgent } from "../../../lib/agentMaterials";
 import { NotesThread } from "../../reading-pane/NotesThread";
 import { QadHead } from "../../queryActions/QadHead";
 import { Who } from "../../queryActions/controls";
@@ -95,12 +95,41 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   const place = [(agent.name ?? "").trim() ? (agent.agency ?? "").trim() : "", (agent.city ?? "").trim()].filter(Boolean).join(" · ");
   const door = panelDoor(agent, nowMs);
   const links = panelLinks(agent);
-  const fitGenre = p.genres.find((g) => g.hit)?.label ?? null;
-  const stand = panelStand({ agent, facts, q, title: msTitle, fitGenre, nowMs });
   const ordered = [...rows].sort((a, b) => (b.sentMs ?? b.lastMs) - (a.sentMs ?? a.lastMs));
   const queried = [...new Set(ordered.map((r) => p.titleOf(r.manuscriptId)).filter((t): t is string => !!t))];
-  const index = panelIndex({ agent, genres: p.genres, queried, nowMs });
+  const stageTag = q ? (STAGE_NAME[q.status as QueryStatus] ?? String(q.status)) : null;
   const foot = panelFoot(agent, facts, q, nowMs);
+  /* v18 §E — the panel mirrors the landing-page card: its status colour (slate, ink, grey), and its Profile tab is the
+     card's `plain` variant. Querying = any live query; closed = every query closed, or closed to queries. */
+  const tone = discTone(facts);
+  const paperStatus: PaperStatus = door.kind === "closed" || tone === "closed" ? "closed" : tone === "live" ? "querying" : "none";
+  const statusLabel = paperStatus === "querying" ? (stageTag ?? "Querying")
+    : paperStatus === "closed" ? (door.kind === "closed" ? door.label : (stageTag ?? "Closed"))
+    : "Not yet queried";
+  const weeksOn = typeof agent.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0 ? agent.responseTimeWeeks : null;
+  const metaLine = [(agent.city ?? "").trim(), weeksOn ? `Replies in about ${weeksOn} week${weeksOn === 1 ? "" : "s"}` : null].filter(Boolean).join(" · ");
+  const NUMW = ["None", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+  const paper: PaperCardData = {
+    status: paperStatus, statusLabel, stars: agent.starRating ?? null, initials: agentInitials(agent).slice(0, 2), name,
+    agency: (agent.agency ?? "").trim() || null, city: (agent.city ?? "").trim() || null, weeks: weeksOn,
+    genres: p.genres,
+    wishlist: (agent.mswlNotes ?? "").trim() || null,
+    materials: materialRowsFromAgent(agent.materialsWanted).filter((r) => r.on).map((r) => ({ label: materialWords(r), kind: r.key === "sample" ? "pages" as const : "doc" as const })),
+    takes: methodAnswer(agent.submissionMethod),
+    replies: weeksOn ? `In about ${weeksOn} week${weeksOn === 1 ? "" : "s"}` : null,
+    policy: weeksOn ? (agent.noResponseMeansNo === true ? "No reply means no" : agent.noResponseMeansNo === false ? "They reply to every query" : null) : null,
+    queries: queried.length === 0 ? "None yet" : (
+      <>
+        {NUMW[queried.length] ?? String(queried.length)}, for {queried.map((t, i) => <React.Fragment key={t}>{i ? ", " : ""}<i className="apc-t">{t}</i></React.Fragment>)}
+        {stageTag ? <> · {stageTag.toLowerCase()}</> : null}
+        {facts.stand === "you" ? <> · <i className="apc-ym" data-ap="your-move">your move</i></> : null}
+      </>
+    ),
+  };
+  const PAPER_EDIT: Record<PaperAddKey, { tab: AgentCardTab; focus: AgentCardField }> = {
+    website: { tab: "who", focus: "website" }, email: { tab: "who", focus: "email" }, genres: { tab: "want", focus: "genres" },
+    wishlist: { tab: "want", focus: "wishlist" }, materials: { tab: "want", focus: "materials" }, takes: { tab: "work", focus: "method" }, replies: { tab: "work", focus: "reply" },
+  };
 
   const { showConfirm, showToast } = useToast();
   const { storedNotes, onAddNote, onEditNote, onDeleteNote } = useAgentNotes(agent, p.uid, p.writeAgent);
@@ -203,7 +232,6 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
     { key: "notes", label: notes.length > 0 ? <>Notes <i className="qcv-open-tabn">{"·"} {notes.length}</i></> : "Notes" },
   ];
   const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
-  const stageTag = q ? (STAGE_NAME[q.status as QueryStatus] ?? String(q.status)) : null;
 
   return (
     <SidePanel label={`${name}, agent`} step={stepping} dim={acting} className="qsp apn"
@@ -223,7 +251,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
           </div>
         </div>
       ) : (
-        <aside className="qcv-open qcv-own apn-card" data-ap="card" data-door={door.kind} data-tab={tab} data-over={foot.hot ? "true" : undefined} aria-label={name}>
+        <aside className="qcv-open qcv-own apn-card" data-ap="card" data-door={door.kind} data-ap-status={paperStatus} data-tab={tab} data-over={foot.hot ? "true" : undefined} aria-label={name}
+          style={{ "--ap-mast": PAPER_STATUS_COLOUR[paperStatus] } as React.CSSProperties}>
           <div className="qcv-open-fr">
             <header className="qcv-open-mast" data-ap="mast">
               <div className="qcv-open-who">
@@ -231,11 +260,13 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                 <div className="qcv-open-whotx">
                   <h2 className="qcv-open-nm" data-ap="name" ref={nameRef} tabIndex={-1}>{name}</h2>
                   {place ? <span className="qcv-open-ag" data-ap="place">{place}</span> : null}
+                  {agent.starRating ? <span className="apn-stars" data-ap="stars" aria-label={`${agent.starRating} of 5 stars`}>{[1, 2, 3, 4, 5].map((i) => <i key={i} data-on={i <= (agent.starRating ?? 0) ? "" : undefined} aria-hidden="true">★</i>)}</span> : null}
+                  {metaLine ? <span className="apn-meta" data-ap="meta">{metaLine}</span> : null}
                 </div>
                 <button type="button" className="qcv-open-x" data-ap="close" aria-label="Close this agent" onClick={p.onClose}><span aria-hidden="true">{"×"}</span></button>
               </div>
               <p className="qcv-open-line apn-line">
-                <span className="qcv-open-pill apn-door" data-ap="door" data-door={door.kind}><i className="apn-dot" style={{ background: door.dot }} aria-hidden="true" />{door.label}</span>
+                <span className="qcv-open-pill apn-door apn-chip-st" data-ap="door" data-door={door.kind} data-ap-chip="">{statusLabel}</span>
                 {links.length > 0 && (
                   <span className="apn-links" data-ap="links">
                     {links.map((l) => (l.key === "email"
@@ -255,29 +286,9 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
               <div className="qcv-open-tab" role="tabpanel" data-ap="body">
                 {tab === "profile" ? (
                   <>
-                    <div className="apn-stand" data-ap="stand" data-state={stand.state}>
-                      <StandCard view={stand as unknown as StandCardView} />
-                    </div>
-                    <dl className="apn-index" data-ap="index">
-                      {index.map((r) => (
-                        <div key={r.key} className="apn-ir" data-ap-row={r.key} data-missing={r.answer === null ? "true" : undefined}>
-                          <dt>{r.label}</dt>
-                          <dd>
-                            {r.answer === null ? (
-                              <button type="button" className="apn-add" data-ap-add={r.key}
-                                onClick={() => { const e = INDEX_EDIT[r.key as Exclude<IndexKey, "queries">]; p.onEdit(e.tab, e.focus); }}>
-                                {INDEX_ADD[r.key as Exclude<IndexKey, "queries">]}
-                              </button>
-                            ) : r.key === "genres" && r.chips ? (
-                              <span className="apn-chips">{r.chips.map((g) => <span key={g.label} className={`apn-chip${g.hit ? " is-hit" : ""}`} data-hit={g.hit ? "true" : undefined}>{g.hit ? "✓ " : ""}{g.label}</span>)}</span>
-                            ) : r.key === "wishlist" ? (
-                              <i className="apn-wish">{r.answer}</i>
-                            ) : r.answer}
-                            {r.answer !== null && r.note ? <small className="apn-note">{r.note}</small> : null}
-                          </dd>
-                        </div>
-                      ))}
-                    </dl>
+                    {/* v18 §E — the landing-page card, plain: it replaces the stand card and the index card. The fit is carried
+                        by the ✓ genre chip. */}
+                    <AgentPaperCard variant="plain" data={paper} className="apn-paper" onAdd={(k) => { const e = PAPER_EDIT[k]; p.onEdit(e.tab, e.focus); }} />
                   </>
                 ) : tab === "queries" ? (
                   ordered.length === 0 ? (

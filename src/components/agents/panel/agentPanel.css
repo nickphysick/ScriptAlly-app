@@ -142,3 +142,32 @@
 /* the editor's foot is one row in the panel: the summary gives way, the buttons do not wrap */
 .apn .apn-edit > .ac-foot > div { flex-wrap: nowrap; }
 .apn .apn-edit > .ac-foot .msg { flex: 1 1 0; min-width: 0; }
+
+/* ── Contact list v18 §E · THE MASTHEAD TAKES THE STATUS COLOUR (slate #5e7189 not queried, ink #2d3a50 querying, grey
+   #a9a39c closed), with no top stripe; the disc is the landing card's; the name Source Serif 600 24 in cream; the
+   agency and city, the stars and the meta line in mono; the status pill becomes the card's mono chip. Scoped to the
+   agent panel (`.qsp.apn .apn-card`): the query panel's masthead is unchanged. ── */
+.qsp.apn .apn-card .qcv-open-mast { background: var(--ap-mast, #2d3a50); box-shadow: none; }
+.qsp.apn .apn-card .qcv-open-tabs button[aria-selected="true"] { border-bottom-color: #f4eee5; }
+.qsp.apn .apn-card .qcv-open-ini.apn-ini.sa-disc {
+  box-sizing: border-box; background: #d9e0e7; color: #3f5370; box-shadow: none; border: 0;
+  font: 400 14px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0;
+}
+.qsp.apn .apn-card.qcv-open .qcv-open-nm { font: 600 24px/1.2 var(--sp-serif) !important; color: #f4eee5; }
+.qsp.apn .apn-card.qcv-open .qcv-open-ag {
+  font: 400 10.5px/1.4 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal !important;
+  letter-spacing: 0.16em; text-transform: uppercase; color: rgba(244, 238, 229, 0.85);
+}
+.qsp.apn .apn-card .apn-stars { display: flex; gap: 2px; margin-top: 4px; color: #f4eee5; font: 400 12px/1 var(--sp-serif) !important; }
+.qsp.apn .apn-card .apn-stars i { font: inherit !important; font-style: normal !important; opacity: 0.35; }
+.qsp.apn .apn-card .apn-stars i[data-on] { opacity: 1; }
+.qsp.apn .apn-card .apn-meta {
+  display: block; margin-top: 4px; font: 400 10.5px/1.4 var(--font-mono, "JetBrains Mono", monospace) !important;
+  letter-spacing: 0.12em; text-transform: uppercase; color: rgba(244, 238, 229, 0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qsp.apn .apn-card.qcv-open .qcv-open-pill.apn-chip-st {
+  height: auto; padding: 6px 12px; border-radius: 7px; background: rgba(244, 238, 229, 0.22); color: #f4eee5;
+  font: 500 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+}
+/* the Profile tab: the plain card, 16px in from the panel's edges */
+.qsp.apn .apn-card .apc.apn-paper { margin: 16px; }
