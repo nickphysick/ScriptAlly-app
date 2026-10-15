@@ -127,10 +127,14 @@ describe("SB4 — the eyebrows are ruled (source half; rendered half in the meas
 });
 
 describe("SB9 — no key opens the menu", () => {
-  it("the registry has no entry for it, and `n` is still only Comparable titles' add", () => {
+  /* ⚠️ RETARGETED, LAW UNCHANGED (To-do list v5.1 §D): `n` is now ALSO the To-do desk's "Add a task", which the pack
+     asks for by name. The claim this half guards is that `n` is never a GLOBAL key (which would collide with the capture
+     menu's own reason for having none): it is two pages' own adds, each in its own scope, and neither is the shell. */
+  it("the registry has no entry for it, and `n` is only two pages' own adds — never the shell's", () => {
     for (const sc of Object.values(SHORTCUTS)) expect(sc.bound).not.toContain("SidebarCapture");
     const nBound = Object.values(SHORTCUTS).filter((sc) => sc.chords.some((c) => c.key.toLowerCase() === "n"));
-    expect(nBound.map((sc) => sc.bound)).toEqual(["src/components/manuscripts/ComparableTitlesPage.tsx"]);
+    expect(nBound.map((sc) => sc.bound).sort()).toEqual(["src/components/manuscripts/ComparableTitlesPage.tsx", "src/components/todo/v5/TodoTray.tsx"]);
+    expect(nBound.map((sc) => sc.scope).sort()).toEqual(["Comparable titles", "To-do list"]);
   });
   it("the component binds no global key and advertises none", () => {
     expect(SRC).not.toMatch(/aria-keyshortcuts|matchesShortcut|SHORTCUTS/);

@@ -75,12 +75,28 @@ export interface DeskCardProps {
   /** the commit sequence: the stamp's word while it plays */
   stamp: { word: string; navy: boolean } | null;
   phase: "rest" | "stamp" | "leave" | "rise";
+  /** v5.1 §E — a journey is open on this card: the body and foot give way to the journey's own (in `hostRef`) */
+  work?: boolean;
+  hostRef?: React.Ref<HTMLDivElement>;
+  /** v5.1 — "Set aside" or, for an own task, "Move it" (§I.3) */
+  asideLabel?: string;
+  /** v5.1 §F — an own task's "Edit" */
+  onEdit?: (() => void) | null;
+  /** v5.1 — a line above the who row: BACK (§I.5), SNOOZED/DISMISSED/SWITCHED OFF on the Set aside desk */
+  banner?: React.ReactNode;
+  /** v5.1 §I.5 — a set-aside card: its head band desaturated */
+  asided?: boolean;
+  /** v5.1 — the foot replaced (the Set aside desk's own buttons) */
+  foot?: React.ReactNode;
+  /** v5.1 — something that sits over the card above its foot: the set-aside popover, the clash */
+  over?: React.ReactNode;
 }
 
-export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase }) => {
+export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase, work = false, hostRef, asideLabel = "Set aside", onEdit = null, banner = null, asided = false, foot = null, over = null }) => {
   const g = item.group;
   return (
-    <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}>
+    <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}
+      data-work={work ? "" : undefined} data-asided={asided ? "" : undefined}>
       <div className="td5-chead" data-td5="desk-head" style={{ background: g.tint, color: g.ink }}>
         <img src={g.art.src} alt="" aria-hidden="true" style={{ width: g.art.w + 6, left: g.art.l + 4, top: g.art.t - 2 }} />
         <span className="td5-cn">{g.name}</span>
@@ -91,7 +107,11 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
         ) : null}
       </div>
       {stamp ? <div className="td5-stamp" data-td5="stamp" data-navy={stamp.navy ? "" : undefined} aria-hidden="true">{stamp.word}</div> : null}
-      <div className="td5-cbody">
+      {/* v5.1 §E — the journey's own head, steps, questions and foot are portalled in here (deskSlot.ts) */}
+      <div className="td5-jhost" data-td5="journey-host" ref={hostRef} hidden={!work} />
+      {work ? null : (<>
+      <div className="td5-cbody" data-td5="card-body">
+        {banner}
         <div className="td5-who">
           <Disc item={item} />
           <span className="td5-wn"><b>{item.who}</b>{item.whoSub ? <small>{item.whoSub}</small> : null}</span>
@@ -133,13 +153,18 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
           <div className="td5-pin" data-td5="pin"><p>{pin.text}</p><small>{pin.meta}</small></div>
         ) : null}
       </div>
-      <div className="td5-cfoot">
-        <button type="button" className="td5-b1" data-td5="act" onClick={onAct}>{action}</button>
-        {onAside ? <button type="button" className="td5-b2" data-td5="desk-aside" ref={asideRef} onClick={onAside}>Set aside</button> : null}
-        {onOpenQuery ? <button type="button" className="td5-lnk" data-td5="open-query" onClick={onOpenQuery}>Open the query</button> : null}
-        <span className="td5-sp" />
-        <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
-      </div>
+      {over}
+      {foot ?? (
+        <div className="td5-cfoot" data-td5="card-foot">
+          <button type="button" className="td5-b1" data-td5="act" onClick={onAct}>{action}</button>
+          {onAside ? <button type="button" className="td5-b2" data-td5="desk-aside" ref={asideRef} onClick={onAside}>{asideLabel}</button> : null}
+          {onOpenQuery ? <button type="button" className="td5-lnk" data-td5="open-query" onClick={onOpenQuery}>Open the query</button> : null}
+          {onEdit ? <button type="button" className="td5-lnk" data-td5="edit" onClick={onEdit}>Edit</button> : null}
+          <span className="td5-sp" />
+          <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
+        </div>
+      )}
+      </>)}
     </article>
   );
 };

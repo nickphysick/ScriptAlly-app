@@ -18,7 +18,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { collection, deleteDoc, doc, getDoc, getDocs, query as fsQuery, updateDoc, where, deleteField } from "firebase/firestore";
 import { harnessDb } from "./harnessDocs";
 import { rawSet, restoreSet, type Raw } from "./journeyGuard";
-import { BASE, Ledger, MUT, SIZES, mutate, near, openTodo, readBadge, scrollSheet, type VP } from "./td5Lib";
+import { BASE, Ledger, MUT, SIZES, diffSets, leaveDesk, mutate, near, openTodo, readBadge, readSet, type VP } from "./td5Lib";
 
 
 test.setTimeout(420_000);
@@ -140,7 +140,9 @@ test("TD5 B1 — the ring's arc is cleared ÷ (cleared + n)", async ({ page }) =
 });
 
 /* ── C1 · the sheet's sticky stack ───────────────────────────────────────────────────────────── */
-test("TD5 C1 — the navy row sticks and squares off; the strip and a band stick beneath it", async ({ page }) => {
+test("TD5 C1 — the navy row is the sheet's fixed top; the strip and a band stick beneath it inside the tray", async ({ page }) => {
+  /* v5.1 §J: the sheet is one screen, so the navy row no longer sticks to the page — it is the sheet's fixed top, and
+     the tray scrolls under it. The strip sticks at the tray's top (= the row's foot) and the bands under the strip. */
   const L = new Ledger("C1");
   for (const vp of SIZES) {
     await openTodo(page, vp);
@@ -148,29 +150,24 @@ test("TD5 C1 — the navy row sticks and squares off; the strip and a band stick
     const at = `${vp.width}`;
     const bg = await page.evaluate(() => getComputedStyle((window as unknown as W).__td5().q('[data-td5="nav"]')!).backgroundColor);
     L.check("C1", `${at} navy`, bg === "rgb(45, 58, 80)", bg);
-    await scrollSheet(page, 2);
-    await page.waitForTimeout(300);
-    await page.evaluate(() => { (window as unknown as W).__td5().sc.scrollTop += 420; });
+    await page.evaluate(() => { (window as unknown as W).__td5().q('[data-td5="tray"]')!.scrollTop += 420; });
     await page.waitForTimeout(400);
     const s = await page.evaluate(() => {
-      const w = window as unknown as W;
-      const { sc, q, qa } = w.__td5();
-      const nav = q('[data-td5="nav"]')!;
-      const strip = q('[data-td5="strip"]')!;
-      const scTop = sc.getBoundingClientRect().top;
+      const { q, qa } = (window as unknown as W).__td5();
+      const nav = q('[data-td5="nav"]')!, strip = q('[data-td5="strip"]')!, sheet = q('[data-td5="sheet"]')!, tray = q('[data-td5="tray"]')!;
       const sb = strip.getBoundingClientRect().bottom;
       const bands = qa('[data-td5="band"]').map((b) => b.getBoundingClientRect().top);
       return {
-        scTop, navTop: nav.getBoundingClientRect().top, navB: nav.getBoundingClientRect().bottom, radius: getComputedStyle(nav).borderTopLeftRadius,
+        scrolled: tray.scrollTop, sheetTop: sheet.getBoundingClientRect().top, navTop: nav.getBoundingClientRect().top, navB: nav.getBoundingClientRect().bottom,
         stripTop: strip.getBoundingClientRect().top, stripB: sb, stuckBand: bands.some((t) => Math.abs(t - sb) <= 1), bands,
       };
     });
-    L.check("C1", `${at} nav at the scroller's top`, near(s.navTop, s.scTop, 1), `${s.navTop} vs ${s.scTop}`);
-    L.check("C1", `${at} square once stuck`, s.radius === "0px", s.radius);
+    L.check("C1", `${at} the tray scrolled (the precondition)`, s.scrolled > 100, `${s.scrolled}`);
+    L.check("C1", `${at} the navy row is the sheet's top`, near(s.navTop, s.sheetTop, 1), `${s.navTop} vs ${s.sheetTop}`);
     L.check("C1", `${at} strip under the nav`, near(s.stripTop, s.navB, 1), `${s.stripTop} vs ${s.navB}`);
     L.check("C1", `${at} a band under the strip`, s.stuckBand, `strip ${s.stripB}, bands ${s.bands.map((b) => b.toFixed(0)).join(",")}`);
   }
-  L.done(8);
+  L.done(10);
 });
 
 /* ── C2 · the tray ───────────────────────────────────────────────────────────────────────────── */
@@ -259,10 +256,11 @@ test("TD5 C3 — the desk: the deed's size, Today inside the card, the real Stat
 });
 
 /* ── D1 · keys ───────────────────────────────────────────────────────────────────────────────── */
-test("TD5 D1 — J moves, j in Find does not, E opens the door, Escape in the drawer closes only the drawer", async ({ page }) => {
+test("TD5 D1 — J moves; j in Find or a journey moves nothing; E starts the journey on the desk; S and D open the popover; N composes", async ({ page }) => {
   const L = new Ledger("D1");
   for (const vp of SIZES) {
     await openTodo(page, vp);
+    await page.evaluate(() => sessionStorage.removeItem("sa.todoTray.draft"));
     await mutate(page, "D1");
     const at = `${vp.width}`;
     const read = () => page.evaluate(() => {
@@ -277,8 +275,8 @@ test("TD5 D1 — J moves, j in Find does not, E opens the door, Escape in the dr
     const b = await read();
     L.check("D1", `${at} J ×2`, b.cur === a.cur + 2, `${a.cur} → ${b.cur}`);
     L.check("D1", `${at} the desk follows`, b.desk === b.keys[b.cur], `${b.desk} vs ${b.keys[b.cur]}`);
-    /* ⚠️ "j" typed in Find FILTERS the tray, which can rightly change what the desk shows; the claim is that the key did
-       not MOVE the selection, so it is read once Find is cleared again: the same task must come back. */
+    /* "j" typed in Find FILTERS the tray, which can rightly change the desk; the claim is that it did not MOVE the
+       selection, so it is read once Find is cleared again */
     const find = page.locator('[data-todo-v5] [data-td5="find"] input');
     await find.click();
     await page.keyboard.type("j");
@@ -287,53 +285,46 @@ test("TD5 D1 — J moves, j in Find does not, E opens the door, Escape in the dr
     await page.waitForTimeout(300);
     const c = await read();
     L.check("D1", `${at} j in Find moves nothing`, c.desk === b.desk, `${b.desk} → ${c.desk}`);
-    await page.locator("[data-todo-v5] h1").click();
-    /* a query task on the desk, then E */
-    const qrow = page.locator('[data-todo-v5] [data-td5="row"][data-bucket="send"], [data-todo-v5] [data-td5="row"][data-bucket="chase"]').first();
-    await qrow.click();
+    /* a query task on the desk, then E: the journey starts INSIDE the desk card */
+    await page.locator('[data-todo-v5] [data-td5="row"][data-bucket="send"]').first().click();
+    await page.waitForTimeout(300);
     const before = await read();
     await page.locator("[data-todo-v5] h1").click();
     await page.keyboard.press("e");
-    const opened = await page.locator("[data-qad-drawer]").first().waitFor({ state: "visible", timeout: 8000 }).then(() => true).catch(() => false);
-    L.check("D1", `${at} E opens the drawer`, opened, "");
-    /* the drawer's Escape layer arrives with `open` (CLAUDE.md, agent card v1): wait for it before pressing */
-    await page.locator(".qad-root.is-open").first().waitFor({ timeout: 8000 }).catch(() => {});
+    const opened = await page.locator("[data-td5-slot] [data-qad-drawer]").first().waitFor({ state: "visible", timeout: 8000 }).then(() => true).catch(() => false);
+    L.check("D1", `${at} E starts the journey on the desk`, opened, "");
+    await page.locator("[data-td5-slot] .qad-h2").click().catch(() => {});
+    await page.keyboard.press("j");
+    await page.waitForTimeout(300);
+    const inJ = await read();
+    L.check("D1", `${at} j in a journey moves nothing`, inJ.desk === before.desk && (await page.locator("[data-td5-slot] [data-qad-drawer]:visible").count()) === 1, `${before.desk} → ${inJ.desk}`);
     await page.keyboard.press("Escape");
-    await page.locator("[data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+    await page.locator("[data-td5-slot] [data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
     const after = await read();
-    L.check("D1", `${at} Escape closed the drawer`, (await page.locator("[data-qad-drawer]:visible").count()) === 0, "");
-    L.check("D1", `${at} …and only the drawer`, after.desk === before.desk && after.cur >= 0, `${before.desk} → ${after.desk}`);
+    L.check("D1", `${at} Escape (no answers) leaves the journey, the task stays`, (await page.locator("[data-td5-slot] [data-qad-drawer]:visible").count()) === 0 && after.desk === before.desk, `${before.desk} → ${after.desk}`);
+    /* S and D: the popover, with the right section focused (a nudge, which may be dismissed) */
+    await page.locator('[data-todo-v5] [data-td5="row"][data-bucket="chase"]').first().click();
+    await page.waitForTimeout(300);
+    await page.locator("[data-todo-v5] h1").click();
+    for (const [key, sec] of [["s", "pop-snooze"], ["d", "pop-dismiss"]] as const) {
+      await page.keyboard.press(key);
+      const hit = await page.waitForFunction((sec) => {
+        const p = document.querySelector('[data-td5="aside-pop"]');
+        return p ? !!document.activeElement?.closest(`[data-td5="${sec}"]`) : null;
+      }, sec, { timeout: 4000 }).then((h) => h.jsonValue()).catch(() => false);
+      L.check("D1", `${at} ${key.toUpperCase()} opens the popover at ${sec}`, hit === true, String(hit));
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(250);
+    }
+    await page.keyboard.press("n");
+    L.check("D1", `${at} N opens the compose card`, await page.locator('[data-todo-v5] [data-td5="compose"]').waitFor({ timeout: 4000 }).then(() => true).catch(() => false), "");
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(250);
   }
-  L.done(12);
+  L.done(18);
 });
 
 /* ── D2 · the commit sequence ────────────────────────────────────────────────────────────────── */
-type Docs = Map<string, string>;
-function canon(v: unknown): string {
-  if (v === null || typeof v !== "object") return JSON.stringify(v);
-  const o = v as Record<string, unknown>;
-  if (typeof (o as { toMillis?: unknown }).toMillis === "function") return `ts:${(o as { toMillis: () => number }).toMillis()}`;
-  if (Array.isArray(v)) return `[${v.map(canon).join(",")}]`;
-  return `{${Object.keys(o).sort().map((k) => `${k}:${canon(o[k])}`).join(",")}}`;
-}
-async function readSet(ids: string[]): Promise<Docs> {
-  const { db, uid } = await harnessDb();
-  const out: Docs = new Map();
-  for (const id of ids) {
-    const q = await getDoc(doc(db, "users", uid, "queries", id));
-    if (q.exists()) out.set(q.ref.path, canon(q.data()));
-    (await getDocs(collection(db, "users", uid, "queries", id, "activity"))).forEach((d) => out.set(d.ref.path, canon(d.data())));
-    (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canon(d.data())));
-    for (const c of ["taskFlags", "tasks"]) (await getDocs(fsQuery(collection(db, "users", uid, c), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canon(d.data())));
-  }
-  return out;
-}
-const diffSets = (a: Docs, b: Docs) => {
-  const d: string[] = [];
-  for (const [k, v] of a) if (b.get(k) !== v) d.push(`changed/removed ${k}`);
-  for (const k of b.keys()) if (!a.has(k)) d.push(`added ${k}`);
-  return d;
-};
 /* ⚠️ THE GUARDS ACCUMULATE. A single slot let D2's second save overwrite the first's guard, so the first save — whose
    slip never offered Undo on the run that found the noon-date bug — was never put back (seed-pkgq-3, repaired by hand
    and recorded in the report). Every save adds its own; every one is restored after the case, pass or fail. */
@@ -363,9 +354,10 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
   const cleared0 = Number(await page.locator('[data-todo-v5] [data-td5="ring-n"]').textContent());
   const slips0 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
   await page.locator('[data-todo-v5] [data-td5="act"]').click();
-  await expect(page.locator('[data-qad-drawer="sent"]')).toBeVisible({ timeout: 10_000 });
-  for (let i = 0; i < 8 && !(await page.locator("[data-qad-review]").count()); i++) await page.locator("[data-qad-primary]").click();
-  await page.locator("[data-qad-primary]").click();
+  /* v5.1 §E — the journey runs in the desk card */
+  await expect(page.locator('[data-td5-slot] [data-qad-drawer="sent"]')).toBeVisible({ timeout: 10_000 });
+  for (let i = 0; i < 8 && !(await page.locator("[data-td5-slot] [data-qad-review]").count()); i++) await page.locator("[data-td5-slot] [data-qad-primary]").click();
+  await page.locator("[data-td5-slot] [data-qad-primary]").click();
   /* ⚠️ THE STAMP IS ON SCREEN FOR UNDER A SECOND, so it is detected and read in ONE in-page call: a wait followed by a
      separate read lost the race once under load (the stamp had already left), on the integration branch. */
   const on = await page.waitForFunction(() => {
@@ -377,7 +369,7 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
   const stamped = !!on;
   if (!reduced) L.check("D2", `${at} a stamp comes down`, stamped, "");
   else await page.locator("[data-qad-drawer]").waitFor({ state: "detached", timeout: 30_000 }).catch(() => {});
-  if (stamped && !reduced && process.env.TD5_SHOTS === "1") await page.screenshot({ path: "reports/todo-list-v5/shots/04-stamp-1512.png" });
+  if (stamped && !reduced && process.env.TD5_SHOTS === "1") await page.screenshot({ path: "reports/todo-list-v5-1/shots/04-stamp-1512.png" });
   if (on) {
     L.check("D2", `${at} on the saved card`, on.key === key, `${on.key} vs ${key}`);
     L.check("D2", `${at} the word`, on.word === "SENT", String(on.word));
@@ -426,17 +418,24 @@ test("TD5 D2 — a save from the desk: stamp, the row leaves, the next rises, a 
 
 /* ── E1 · the doors ──────────────────────────────────────────────────────────────────────────── */
 const DOOR: Record<string, string> = { send: "sent", chase: "nudge", close: "close" };
-/** the open drawer's journey, or null — BOUNDED: an attribute read on a locator that matches nothing waits out the test */
-const drawerMode = async (page: Page) => {
-  const d = page.locator("[data-qad-drawer]").first();
-  if (!(await d.waitFor({ state: "attached", timeout: 4000 }).then(() => true).catch(() => false))) return null;
+/** the journey open ON THE DESK, or null — BOUNDED: an attribute read on a locator that matches nothing waits out the test */
+const deskMode = async (page: Page) => {
+  const d = page.locator("[data-td5-slot] [data-qad-drawer]").first();
+  if (!(await d.waitFor({ state: "visible", timeout: 5000 }).then(() => true).catch(() => false))) return null;
   return d.getAttribute("data-qad-drawer", { timeout: 2000 }).catch(() => null);
 };
-test("TD5 E1 — each bucket's action opens its door", async ({ page }) => {
+/** nothing slides over the page: no drawer outside the desk's slot, no scrim */
+const nothingOver = (page: Page) => page.evaluate(() => {
+  const out = [...document.querySelectorAll("[data-qad-drawer]")].filter((e) => !e.closest("[data-td5-slot]") && e.getBoundingClientRect().width > 0).length;
+  const scrim = [...document.querySelectorAll("[data-qad-scrim]")].filter((e) => e.getBoundingClientRect().width > 0).length;
+  const inCard = !!document.querySelector('[data-td5="desk-card"][data-work] [data-td5-slot] [data-qad-drawer]');
+  return { out, scrim, inCard, step: document.querySelector('[data-td5-slot] [data-qad-step][aria-current="step"]')?.getAttribute("data-qad-step") ?? null };
+});
+test("TD5 E1 — each bucket's action opens its journey INSIDE the desk card; fix → the agent card; an own task ticks", async ({ page }) => {
   const L = new Ledger("E1");
   await openTodo(page, { width: 1512, height: 900 });
-  /* one row per DOOR KIND, not per bucket: Housekeeping holds three doors (an agent's own gaps → the agent card; a
-     grouped gap → the sweep; a gap with no journey → the sweep), and the first row of a bucket enters only one of them */
+  /* one row per DOOR KIND: Housekeeping holds three doors (an agent's own gaps → the agent card; a grouped gap → the
+     sweep; a gap with no journey → the sweep), and the first row of a bucket enters only one of them */
   const reps = await page.evaluate(() => {
     const out: { b: string; sel: string }[] = [];
     const seen = new Set<string>();
@@ -453,9 +452,8 @@ test("TD5 E1 — each bucket's action opens its door", async ({ page }) => {
   });
   const buckets = [...new Set(reps.map((r) => r.b))];
   for (const { b, sel } of reps) {
-    console.log(`[E1] ${b} ${sel}`);
     const row = page.locator(`[data-todo-v5] ${sel}`).first();
-    await row.click({ timeout: 15_000 }).catch(async (e) => { await page.screenshot({ path: `${"reports/todo-list-v5"}/e1-stuck-${b}.png` }); throw e; });
+    await row.click({ timeout: 15_000 });
     await page.waitForTimeout(250);
     const desk = await page.evaluate(() => { const c = (window as unknown as W).__td5().q('[data-td5="desk-card"]')!; return { type: c.dataset.taskType, sweep: c.hasAttribute("data-sweep"), members: Number(c.dataset.sweep || 0), key: c.dataset.key }; });
     if (b === "note") {
@@ -478,65 +476,137 @@ test("TD5 E1 — each bucket's action opens its door", async ({ page }) => {
     if (b === "fix" && desk.type === "data_quality_poor" && (!desk.sweep || desk.members === 1)) {
       const card = await page.locator('[data-ac="card"]:visible').count();
       const drawer = await page.locator("[data-qad-drawer]:visible").count();
-      L.check("E1", "fix → the agent card (not the drawer)", card > 0 && drawer === 0, `card ${card} drawer ${drawer}`);
+      L.check("E1", "fix → the agent card (not a journey)", card > 0 && drawer === 0, `card ${card} drawer ${drawer}`);
     } else if (b === "fix") {
       const sweep = await page.locator(".tdb-ff:visible").count();
-      const drawer = await drawerMode(page);
-      L.check("E1", `fix (${desk.type}${desk.sweep ? ", grouped" : ""}) → its own door`, sweep > 0 || !!drawer, `sweep ${sweep} drawer ${drawer}`);
-    } else if (b === "decide") {
-      const mode = await drawerMode(page);
-      L.check("E1", `decide (${desk.type}) → its journey`, mode === (desk.type === "offer_received" ? "offer" : "sent"), String(mode));
+      const mode = sweep ? null : await deskMode(page);
+      L.check("E1", `fix (${desk.type}${desk.sweep ? ", grouped" : ""}) → its own door`, sweep > 0 || !!mode, `sweep ${sweep} journey ${mode}`);
     } else {
-      const mode = await drawerMode(page);
-      L.check("E1", `${b} → the ${DOOR[b]} journey`, mode === DOOR[b], String(mode));
+      const want = b === "decide" ? (desk.type === "offer_received" ? "offer" : "sent") : DOOR[b];
+      const mode = await deskMode(page);
+      const o = await nothingOver(page);
+      L.check("E1", `${b}${b === "decide" ? ` (${desk.type})` : ""} → the ${want} journey on the desk, at step ${o.step}`, mode === want && o.inCard, `${mode} in card ${o.inCard}`);
+      L.check("E1", `${b} → no drawer over the page, no scrim`, o.out === 0 && o.scrim === 0, JSON.stringify(o));
+      await leaveDesk(page);
     }
     for (let i = 0; i < 3; i++) { await page.keyboard.press("Escape"); await page.waitForTimeout(300); }
-    /* the sweep's close is "Back to my desk"; dispatched on the element (a pointer click waited out the test on it) */
     if (await page.locator(".tdb-ff:visible").count()) await page.locator(".tdb-ffx").first().evaluate((e) => (e as HTMLElement).click()).catch(() => {});
     await page.locator(".tdb-ff:visible").waitFor({ state: "detached", timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(300);
   }
   L.check("E1", "buckets entered", buckets.length >= 4, buckets.join(","));
   L.check("E1", "the agent-card door was entered", L.rows.some((r) => r.where.startsWith("fix → the agent card")), L.rows.map((r) => r.where).join(" | "));
-  L.done(7);
+  L.done(9);
 });
 
-/* ── F1 · the composer ───────────────────────────────────────────────────────────────────────── */
-test("TD5 F1 — Add a task opens the composer in a dimming drawer; the task lands under Your tasks, selected", async ({ page }) => {
+/* ── F1 · the compose card ───────────────────────────────────────────────────────────────────── */
+const PROBE = "Zz td5 probe";
+const taskByText = async (text: string) => {
+  const { db, uid } = await harnessDb();
+  return (await getDocs(collection(db, "users", uid, "tasks"))).docs.find((d) => d.data().text === text)?.data() as Record<string, unknown> | undefined;
+};
+const nextSunday = (weeks: number) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + ((7 - d.getDay()) % 7) + 7 * weeks); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+test("TD5 F1 — Add a task opens the compose card on the desk and writes every field; a task surfacing today lands, selected", async ({ page }) => {
   const L = new Ledger("F1");
-  const text = `Zz td5 probe ${Date.now()}`;
-  await openTodo(page, { width: 1512, height: 900 });
-  await page.locator('[data-todo-v5] [data-td5="add"]').click();
-  const drawer = page.locator('[data-hdr="todo-compose"]');
-  const opened = await drawer.waitFor({ state: "visible", timeout: 5000 }).then(() => true).catch(() => false);
-  L.check("F1", "the drawer opens", opened, "");
-  L.check("F1", "it dims the page", await page.locator('[data-hdr="dim"][data-hdr-of="todo-compose"]').isVisible(), "");
-  L.check("F1", "the composer is in the drawer, not the page", (await page.locator('[data-todo-v5] .td5-group [data-todo-v2="composer"]').count()) === 0 && (await drawer.locator('[data-todo-v2="composer"]').count()) === 1, "");
-  /* no drawer: stop at the reading, rather than wait out the test filling a field that is not there */
-  if (!opened) { L.done(3); return; }
+  const ts = Date.now();
+  const A = `${PROBE} A ${ts}`, B = `${PROBE} B ${ts}`, C = `${PROBE} C ${ts}`, N = `${PROBE} note ${ts}`;
   try {
-    await drawer.locator('[data-todo-v2="capture"]').fill(text);
-    await drawer.locator('[data-todo-v2="add"]').click();
-    await expect(drawer).toHaveCount(0, { timeout: 10_000 });
+    await openTodo(page, { width: 1512, height: 900 });
+    await page.evaluate(() => sessionStorage.removeItem("sa.todoTray.draft"));
+    const doors: [string, () => Promise<void>][] = [
+      ["the header's + Add a task", () => page.locator('[data-todo-v5] [data-td5="add"]').click()],
+      ["the tray's add row", () => page.locator('[data-todo-v5] [data-td5="add-row"]').click()],
+      ["N", async () => { await page.locator("[data-todo-v5] h1").click(); await page.keyboard.press("n"); }],
+    ];
+    for (const [name, open] of doors) {
+      await open();
+      const ok = await page.locator('[data-todo-v5] [data-td5="compose"]').waitFor({ timeout: 5000 }).then(() => true).catch(() => false);
+      L.check("F1", `${name} opens the compose card on the desk (no drawer)`, ok && (await page.locator('[data-hdr="todo-compose"]').count()) === 0, "");
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(250);
+    }
+    /* every field, through addUserTask */
+    await page.locator('[data-todo-v5] [data-td5="add"]').click();
+    const card = page.locator('[data-todo-v5] [data-td5="compose"]');
+    await card.locator('[data-td5="compose-title"]').fill(A);
+    await card.locator('[data-td5="compose-detail"]').fill("A little more.");
+    await card.locator('[data-when="next"]').click();
+    await card.locator('[data-surf="day-before"]').click();
+    await card.locator('[data-td5="compose-addlink"]').click();
+    /* the find list shows queries first, so an agent is found as a writer finds one: by typing the name */
+    const { db: fdb, uid: fuid } = await harnessDb();
+    const anAgent = (await getDocs(collection(fdb, "users", fuid, "agents"))).docs.map((d) => String(d.data().name || "")).find((x) => x.length > 3) ?? "";
+    await card.locator('[data-td5="compose-find"] input').fill(anAgent);
+    const link = card.locator('[data-link^="agent:"]').first();
+    const agentId = (await link.getAttribute("data-link"))!.slice("agent:".length);
+    const agentName = (await link.locator("b").textContent())!.trim();
+    await link.click();
+    const tag = card.locator(".tgp-chip").first();
+    const hasTag = (await tag.count()) > 0;
+    if (hasTag) await tag.click();
+    await card.locator('[data-td5="compose-save"]').click();
+    await expect.poll(() => taskByText(A), { timeout: 10_000 }).toBeTruthy();
+    const a = (await taskByText(A))!;
+    L.check("F1", "text and detail", a.text === A && a.detail === "A little more.", JSON.stringify(a));
+    L.check("F1", "the due date (next week's Sunday)", a.dueDate === nextSunday(1), `${a.dueDate} vs ${nextSunday(1)}`);
+    L.check("F1", "surfaceOffset", a.surfaceOffset === "day-before", String(a.surfaceOffset));
+    L.check("F1", "one link: the agent", a.agentId === agentId && a.queryId === undefined && a.manuscriptId === undefined, JSON.stringify({ agentId: a.agentId, queryId: a.queryId }));
+    L.check("F1", "tags", !hasTag || (Array.isArray(a.tags) && (a.tags as unknown[]).length === 1), JSON.stringify(a.tags));
+    /* the same input through the v2 composer (the phone's page): the fields both write agree */
+    /* the phone's page has no sidebar for the shared opener to wait on: the viewport, then the route */
+    await page.setViewportSize({ width: 760, height: 900 });
+    await page.goto("/todo");
+    const v2 = page.locator('[data-todo-v2="composer"]:visible').first();
+    if (await v2.waitFor({ timeout: 20_000 }).then(() => true).catch(() => false)) {
+      await v2.locator('[data-todo-v2="capture"]').fill(B);
+      await v2.locator('[data-when="next"]').click();
+      await v2.locator('[data-todo-v2="attach"]').click();
+      await v2.locator(".tdv2-picker input").fill(agentName);
+      await v2.locator(".tdv2-pickrow").first().click();
+      await v2.locator('[data-todo-v2="add"]').click();
+      await expect.poll(() => taskByText(B), { timeout: 10_000 }).toBeTruthy();
+      const b = (await taskByText(B))!;
+      L.check("F1", "the v2 composer's write of the same input agrees (dueDate, agentId)", b.dueDate === a.dueDate && b.agentId === a.agentId, JSON.stringify({ v2: { dueDate: b.dueDate, agentId: b.agentId }, desk: { dueDate: a.dueDate, agentId: a.agentId } }));
+    } else L.check("F1", "the v2 composer's write of the same input agrees (dueDate, agentId)", false, "no v2 composer on the phone page");
+    /* a task surfacing today lands in Your tasks, selected */
+    await openTodo(page, { width: 1512, height: 900 });
+    await page.locator('[data-todo-v5] [data-td5="add"]').click();
+    await card.locator('[data-td5="compose-title"]').fill(C);
+    await card.locator('[data-when="pick"]').click();
+    await card.locator('[data-td5="calendar"] [data-today]').click();
+    await card.locator('[data-td5="compose-save"]').click();
+    const landed = await page.waitForFunction((C) => {
+      const r = [...document.querySelectorAll<HTMLElement>('[data-todo-v5] [data-td5="row"]')].find((x) => (x.textContent || "").includes(C));
+      /* the row lands with the board's snapshot; it is selected once the stamp has played (~620ms) */
+      return r && r.getAttribute("aria-current") === "true" ? { group: r.dataset.group, cur: r.getAttribute("aria-current") } : null;
+    }, C, { timeout: 15_000 }).then((h) => h.jsonValue()).catch(async () => page.evaluate((C) => {
+      const r = [...document.querySelectorAll<HTMLElement>('[data-todo-v5] [data-td5="row"]')].find((x) => (x.textContent || "").includes(C));
+      return r ? { group: r.dataset.group, cur: r.getAttribute("aria-current") } : null;
+    }, C));
+    L.check("F1", "a task due today lands under Your tasks", landed?.group === "mine", JSON.stringify(landed));
+    L.check("F1", "…selected", landed?.cur === "true", JSON.stringify(landed));
+    /* a note goes to the corkboard, with its paper, and does not join the tray */
+    await page.locator('[data-todo-v5] [data-td5="add"]').click();
+    await card.locator('[data-td5="mode-note"]').click();
+    await card.locator('[data-td5="compose-title"]').fill(N);
+    await card.locator('[data-paper="pink"]').click();
+    await card.locator('[data-td5="compose-save"]').click();
+    await expect.poll(async () => (await taskByText(N))?.colour, { timeout: 10_000 }).toBe("pink");
+    const n = (await taskByText(N))!;
     await page.waitForTimeout(800);
-    const r = await page.evaluate((text) => {
-      const { qa } = (window as unknown as W).__td5();
-      const row = qa('[data-td5="row"]').find((x) => (x.textContent || "").includes(text));
-      return { group: row?.dataset.group, cur: row?.getAttribute("aria-current") };
-    }, text);
-    L.check("F1", "under Your tasks", r.group === "mine", String(r.group));
-    L.check("F1", "selected", r.cur === "true", String(r.cur));
+    const inTray = await page.evaluate((N) => [...document.querySelectorAll('[data-todo-v5] [data-td5="row"]')].some((x) => (x.textContent || "").includes(N)), N);
+    L.check("F1", "a note: no date, its paper, not in the tray", !n.dueDate && n.colour === "pink" && !inTray, JSON.stringify({ dueDate: n.dueDate, colour: n.colour, inTray }));
     /* the Calendar's and Corkboard's door: sa.todoCompose */
     await page.evaluate(() => sessionStorage.setItem("sa.todoCompose", "task"));
     await page.goto("/todo");
-    L.check("F1", "sa.todoCompose opens it", await page.locator('[data-hdr="todo-compose"]').waitFor({ state: "visible", timeout: 30_000 }).then(() => true).catch(() => false), "");
+    L.check("F1", "sa.todoCompose opens the compose card", await page.locator('[data-todo-v5] [data-td5="compose"]').waitFor({ timeout: 30_000 }).then(() => true).catch(() => false), "");
   } finally {
     const { db, uid } = await harnessDb();
-    const hits = (await getDocs(collection(db, "users", uid, "tasks"))).docs.filter((d) => String(d.data().text || "").startsWith("Zz td5 probe"));
+    const hits = (await getDocs(collection(db, "users", uid, "tasks"))).docs.filter((d) => String(d.data().text || "").startsWith(PROBE));
     for (const d of hits) await deleteDoc(d.ref);
     console.log(`[F1] probe tasks removed: ${hits.length}`);
   }
-  L.done(6);
+  L.done(13);
 });
 
 /* ── G1 · the quiet states ───────────────────────────────────────────────────────────────────── */

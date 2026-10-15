@@ -81,7 +81,13 @@ describe("⚠️ ONE document, ONE row — the whole point of the collapse", () 
         const src = decls(readFileSync(p, "utf8"));
         if (src.includes("setUserTaskColour(")) {
           writers++;
-          if (!p.endsWith("TodoNoteboardPage.tsx") && !p.endsWith("db.tsx")) offenders.push(p);
+          /* ⚠️ RETARGETED, LAW UNCHANGED (To-do list v5.1 §F): the desk's compose card pins a NOTE to the Corkboard as
+             the Corkboard does — a plain create, then the paper's own write. It is allowed only because it papers a
+             DATELESS note, so "dated ∧ papered" still means Corkboard-made; the guard is asserted below. */
+          if (p.endsWith("v5/TodoTray.tsx")) {
+            expect(src, "the desk may paper a note only — never a dated task").toMatch(/if \(!isTask && d\.paper !== "yellow"\) await setUserTaskColour\(/);
+            expect(src.match(/setUserTaskColour\(/g)?.length, "one colour write on the desk").toBe(1);
+          } else if (!p.endsWith("TodoNoteboardPage.tsx") && !p.endsWith("db.tsx")) offenders.push(p);
         }
       }
     };

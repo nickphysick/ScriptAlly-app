@@ -162,27 +162,30 @@ test("P6 · no jump: the loading and loaded header boxes are equal", async ({ pa
   L.done(SIZES.length * WORKSPACE.length + 3);
 });
 
-/* ───────────────────────── P8 · the popover ───────────────────────── */
-test("P8 · the Set aside popover is above the header", async ({ page }) => {
+/* ───────────────────────── P8 · the Set aside door ───────────────────────── */
+/* RE-POINTED (To-do list v5.1, Part I.5): the header's Set aside no longer opens a popover over the header — it switches
+   the tray to its Set aside tab. The claim this lock kept is the same: pressing the door lands the writer on the set-aside
+   list, on screen, and nothing covers it. */
+test("P8 · the header's Set aside door opens the tray's Set aside tab, on screen", async ({ page }) => {
   const L = new Ledger("P8");
   await prepare(page);
   for (const vp of SIZES) {
     await open(page, "/todo", vp);
-    /* RE-POINTED (To-do list v5): the Set aside door is the light header's own button now (TD5 A1's header) */
     const btn = page.locator('.ws-window [data-td5="header"] [data-td5="aside"]:visible').first();
     L.check("P8 precondition: the header carries the Set aside door", `@${vp.width}`, (await btn.count()) === 1, `${await btn.count()}`);
     await btn.click({ timeout: 8000 }).catch(() => {}); await page.waitForTimeout(500);
     const r = await page.evaluate(() => {
-      const pop = [...document.querySelectorAll<HTMLElement>(".sap")].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      if (!pop) return null; const x = pop.getBoundingClientRect();
-      const pts = [[0.5, 0.5], [0.5, 0.12], [0.15, 0.5], [0.85, 0.85]].map(([fx, fy]) => { const px = x.left + x.width * fx, py = x.top + x.height * fy; const e = document.elementsFromPoint(px, py)[0]; return { on: px >= 0 && py >= 0 && px <= innerWidth && py <= innerHeight, in: !!e && pop.contains(e), top: e ? `${e.tagName.toLowerCase()}.${e.className.toString().split(" ")[0]}` : "nothing" }; });
-      return { box: { l: x.left, t: x.top, w: x.width, h: x.height }, pts };
+      const tab = [...document.querySelectorAll<HTMLElement>('.td5-root [data-td5="tab-aside"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      if (!tab) return null; const x = tab.getBoundingClientRect();
+      const px = x.left + x.width / 2, py = x.top + x.height / 2; const e = document.elementsFromPoint(px, py)[0];
+      return { sel: tab.getAttribute("aria-selected"), box: { l: x.left, t: x.top, w: x.width, h: x.height }, on: px >= 0 && py >= 0 && px <= innerWidth && py <= innerHeight, first: !!e && tab.contains(e), top: e ? `${e.tagName.toLowerCase()}.${e.className.toString().split(" ")[0]}` : "nothing" };
     });
-    L.check("P8 the popover opened and its centre is on screen", `@${vp.width}`, !!r && r.pts[0].on, r ? SHOW(r.box) : "no popover");
-    for (const [i, p] of (r?.pts ?? []).entries()) L.check("P8 the popover is first at the point", `@${vp.width} point ${i + 1}`, !p.on || p.in, `${p.top}${p.on ? "" : " (off screen, not read)"}`);
-    await page.keyboard.press("Escape");
+    L.check("P8 the Set aside tab is chosen", `@${vp.width}`, r?.sel === "true", r ? `aria-selected=${r.sel}` : "no tab");
+    L.check("P8 the tab's centre is on screen", `@${vp.width}`, !!r && r.on, r ? SHOW(r.box) : "no tab");
+    L.check("P8 the tab is first at its centre", `@${vp.width}`, !!r && r.first, r ? r.top : "no tab");
+    await page.locator('.td5-root [data-td5="tab-tray"]:visible').first().click({ timeout: 4000 }).catch(() => {});
   }
-  L.done(SIZES.length * 5);
+  L.done(SIZES.length * 4);
 });
 
 /* ───────────────────────── P9 · Analytics ───────────────────────── */

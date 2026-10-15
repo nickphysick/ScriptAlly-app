@@ -108,7 +108,7 @@ import {
 import { AnchoredPanel } from "./AnchoredPanel";
 import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
 import { SetAsidePanel } from "./SetAsidePanel";
-import { hiddenItems } from "../../lib/taskSettings";
+import { setAsideItems } from "../../lib/taskSettings";
 import { TaskDismissDialog } from "./TaskDismissDialog";
 import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
@@ -538,11 +538,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /* ⚠️ THE DOOR'S TRIGGER IS THE TOOLBAR'S NOW (corrections 2.1) — one ref, so the anchored panel
      hangs off the button the reader actually pressed rather than a control in the card below it. */
   const asideTrigRef = React.useRef<HTMLButtonElement | null>(null);
-  /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second tally.
+  /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `setAsideItems` THE PANEL RENDERS — never a second tally.
      A door that states a figure the surface behind it disagrees with is worse than one stating
      none. Hoisted beside the trigger so the toolbar button and the panel read one expression. */
-  const asideN = hiddenItems(
-    currentUser?.mutedTaskRules, taskFlags, agents, queries, Date.now()).length;
+  const asideN = setAsideItems(
+    currentUser, taskFlags, agents, queries, Date.now(), activities).length;
   /* v2 — the Query Centre's loading clock: nothing for 150ms, the cover for at least 400ms, one
      entrance. Called here, unconditionally, above every early exit. */
   const v2Load = useQcLoad(collectionsReady);
