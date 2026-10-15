@@ -141,3 +141,62 @@
   box-sizing: border-box; background: transparent; color: #2a3a52; box-shadow: none; border: 1.6px dotted #2a3a52;
 }
 .cl16-list .clv-row:hover .sa-disc.clv-ini[data-disc="none"] { background: #fff; }
+
+/* ── §D · THE ROW PEEK. The open row: radius 12, raised, tinted by status; its main line stays where it was (the
+   hover tray and the margin letter keep to that line, `--cl18-mh`, read before the row grew). ── */
+.cl16-list .clv-row[data-peek] {
+  z-index: 3; border-radius: 12px; padding-bottom: 14px;
+  box-shadow: 0 14px 28px -20px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.06);
+}
+.cl16-list .clv-row[data-peek][data-disc="none"] { background: #faf6ee; }
+.cl16-list .clv-row[data-peek][data-disc="live"] { background: #f3f5f9; }
+.cl16-list .clv-row[data-peek][data-disc="closed"] { background: #f5f3f0; }
+/* the card is the row's second grid row, so the main line keeps its own track and its centring */
+.cl16-list .clv-row[data-peek] .clv-rtray { bottom: auto; height: calc(var(--cl18-mh, 80px) - 6px); }
+.cl16-list .clv-row[data-peek] .cl17-ml { top: calc(var(--cl18-mh, 80px) / 2); }
+
+/* the card: one white card under the main line, spanning every column */
+.cl18-pk {
+  grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.35fr) 1px minmax(0, 1fr); column-gap: 20px;
+  margin-top: 4px; padding: 20px 24px 0; border-radius: 14px; background: #fff; cursor: default; text-align: left;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 10px 22px -16px rgba(28, 19, 15, 0.35);
+  animation: cl18pk 0.3s ease both;
+}
+.ws-app.sheet-wide .cl18-pk { column-gap: 28px; }
+@keyframes cl18pk { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.cl18-pk .cl18-pk-rule { display: block; width: 1px; background: rgba(28, 19, 15, 0.1); }
+.cl18-pk h4, .cl18-pk dt, .cl18-pk .cl18-pk-n b, .cl18-pk .cl18-pk-not b {
+  margin: 0; font: 400 13.5px/1.3 var(--sp-type) !important; color: rgba(28, 19, 15, 0.55);
+}
+.cl18-pk-l { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; padding-bottom: 16px; }
+.cl18-pk .cl18-pk-wish {
+  margin: 0; padding: 0 0 0 14px; border-left: 2px solid #a2452a; font: italic 400 15.5px/1.55 var(--sp-serif) !important; color: #1c130f;
+}
+.cl18-pk .cl18-pk-src { margin: -4px 0 0 16px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.cl18-pk .cl18-pk-g { flex-wrap: wrap; }
+.cl18-pk-r { display: grid; grid-template-columns: 84px minmax(0, 1fr); row-gap: 9px; column-gap: 12px; margin: 0; padding-bottom: 16px; align-content: start; }
+.ws-app.sheet-wide .cl18-pk-r { grid-template-columns: 96px minmax(0, 1fr); }
+.cl18-pk-r dd { margin: 0; min-width: 0; font: 400 14.5px/1.4 var(--sp-serif) !important; color: #1c130f; overflow-wrap: anywhere; }
+.cl18-pk-r dd a { color: #1c130f; text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px; }
+.cl18-pk-r dd .cl18-pk-pol { display: block; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl18-pk .cl18-copy {
+  margin-left: 8px; padding: 2px 7px; border: 0; border-radius: 6px; background: #fff; cursor: pointer; vertical-align: 1px;
+  font: 400 11px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+}
+.cl18-pk .cl18-add {
+  display: inline-flex; align-items: center; margin: 0; padding: 3px 12px; border: 1.2px dashed rgba(42, 58, 82, 0.45); border-radius: 14px;
+  background: none; color: #2a3a52; cursor: pointer; font: 400 14px/1.3 var(--sp-serif) !important;
+}
+.cl18-pk .cl18-add:hover { background: rgba(42, 58, 82, 0.05); }
+.cl18-pk-f {
+  grid-column: 1 / -1; display: flex; align-items: baseline; gap: 16px; padding: 12px 0 14px; border-top: 1px solid rgba(28, 19, 15, 0.08);
+}
+.cl18-pk-f .cl18-pk-n { flex: 1 1 auto; min-width: 0; display: flex; gap: 10px; align-items: baseline; }
+.cl18-pk-f .cl18-pk-n i { font: italic 400 14px/1.4 var(--sp-serif) !important; color: #1c130f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl18-pk-f .cl18-pk-n i.none { color: rgba(28, 19, 15, 0.5); }
+.cl18-pk-f .cl18-pk-open {
+  flex: none; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52;
+  font: 400 15px/1.3 var(--sp-type) !important; text-decoration: underline; text-underline-offset: 4px;
+}
+.cl18-pk button:focus-visible, .cl18-pk a:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .cl18-pk { animation: none; } }

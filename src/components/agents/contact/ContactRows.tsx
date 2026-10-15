@@ -22,6 +22,8 @@ import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { dayMonth } from "../../../lib/dates";
 import type { CardAct, CardPrimary } from "../../../lib/agentCard";
+import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
+import { ContactPeek } from "./ContactPeek";
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
@@ -127,7 +129,12 @@ const Row: React.FC<{
   letter?: string | null;
   /** v17 §D — "+ Log a query": opens the agent panel at the Log a query journey, with this agent chosen */
   onLog?: () => void;
-}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog }) => {
+  /** v18 §D — this row's peek is open (one row at a time: the list holds which) */
+  peek?: boolean;
+  onPeek?: (open: boolean) => void;
+  /** v18 §D — a "+ Add" pill in the peek opens Edit profile on that field */
+  onEdit?: (tab: AgentCardTab, focus?: AgentCardField) => void;
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog, peek = false, onPeek, onEdit }) => {
   const track = stageTrack(x);
   const tone = discTone(x);
   const a = x.agent;
@@ -147,6 +154,16 @@ const Row: React.FC<{
   const mq = useRef<Animation | null>(null);
   const stopMq = () => { mq.current?.cancel(); mq.current = null; };
   useEffect(() => stopMq, []);
+  /* v18 §D — the peek opens after 450ms of continuous hover and closes when the pointer leaves the row. The row's main
+     line height is read before it opens, so the hover tray stays on that line while the row grows. */
+  const rowRef = useRef<HTMLDivElement>(null);
+  const hoverT = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(hoverT.current), []);
+  const openPeek = (v: boolean) => {
+    if (v && rowRef.current && !peek) rowRef.current.style.setProperty("--cl18-mh", `${rowRef.current.offsetHeight}px`);
+    onPeek?.(v);
+  };
+  useEffect(() => { if (peek) stopMq(); }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
   /* the fade at the right edge says "there is more"; measured after layout and on resize */
   const [long, setLong] = useState(false);
   useLayoutEffect(() => {
@@ -168,8 +185,11 @@ const Row: React.FC<{
     /* ⚠️ A div WITH role=button, NOT A <button> (v13 P4): the row holds real controls — the add pills and the
        tray's two buttons — and a button may not contain another interactive element. */
     <div
+      ref={rowRef}
       role="button"
       tabIndex={0}
+      data-peek={peek ? "" : undefined}
+      aria-expanded={onPeek ? peek : undefined}
       className={`clv-row${fresh ? " clv-row--new" : ""}${focused ? " kf" : ""}`}
       data-clv="row"
       /* flip.ts's own default selector — the FLIP and the save-notice scroll both find rows by it */
@@ -187,10 +207,15 @@ const Row: React.FC<{
       data-genres={x.genres.join("|")}
       aria-current={current || undefined}
       onClick={(e) => onOpen(e.currentTarget.getBoundingClientRect())}
-      onMouseEnter={() => { stopMq(); mq.current = startMarquee(wishRef.current); }}
-      onMouseLeave={stopMq}
+      onMouseEnter={() => {
+        stopMq(); if (!peek) mq.current = startMarquee(wishRef.current);
+        window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true), 450);
+      }}
+      onMouseLeave={() => { stopMq(); window.clearTimeout(hoverT.current); if (peek) openPeek(false); }}
       onKeyDown={(e) => {
         if (e.target !== e.currentTarget) return; // a control inside the row answers its own keys
+        /* v18 §D: Space toggles the peek; Enter still opens the agent panel */
+        if (e.key === " " && onPeek) { e.preventDefault(); openPeek(!peek); return; }
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(e.currentTarget.getBoundingClientRect()); }
       }}
     >
@@ -262,6 +287,10 @@ const Row: React.FC<{
         )}
         <TrayBtn probe="tray-open" label="Open card" onPress={(r) => onOpen(r)} />
       </span>
+      {peek ? (
+        <ContactPeek agent={a} genres={genres.map((g) => ({ label: g, hit: genreHit(g) }))}
+          onEdit={(tab, focus) => onEdit?.(tab, focus)} onProfile={() => onOpen(rowRef.current?.getBoundingClientRect() ?? new DOMRect())} />
+      ) : null}
     </div>
   );
 };
@@ -286,10 +315,14 @@ export const ContactRows: React.FC<ContactRowsProps & {
   byLetter?: boolean; ungrouped?: boolean; sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
   /** v17 §D — "+ Log a query" on a row */
   onLog?: (agentId: string) => void;
+  /** v18 §D — a peek's "+ Add" pill: Edit profile on that field */
+  onEdit?: (agentId: string, tab: AgentCardTab, focus?: AgentCardField) => void;
 }> = ({
   groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
-  byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false, onLog,
+  byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false, onLog, onEdit,
 }) => {
+  /* v18 §D — one peek at a time */
+  const [peekId, setPeekId] = useState<string | null>(null);
   const col = (label: string, k: SortKey | null, align?: "end"): ListColumn => ({
     label, align,
     sort: k && sort ? {
@@ -316,6 +349,8 @@ export const ContactRows: React.FC<ContactRowsProps & {
         onOpen={(from) => onOpen(id, from)} tray={trayFor(x)} onAct={(act) => onAct(id, act)}
         onAddGenres={() => onAddGenres(id)} onAddWishlist={() => onAddWishlist(id)}
         letter={letter} onLog={onLog ? () => onLog(id) : undefined}
+        peek={peekId === id} onPeek={onEdit ? (v) => setPeekId((p) => (v ? id : p === id ? null : p)) : undefined}
+        onEdit={onEdit ? (tab, focus) => onEdit(id, tab, focus) : undefined}
       />
     );
   });

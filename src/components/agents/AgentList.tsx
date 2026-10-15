@@ -1224,6 +1224,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               onOpen={onOpen}
               onAddGenres={(id) => openCard(id, { tab: "want", focus: "genres", from: "slip" })}
               onAddWishlist={(id) => openCard(id, { tab: "want", focus: "wishlist", from: "slip" })}
+              onEdit={(id, tab, focus) => openCard(id, { tab, focus, from: "slip" })}
               trayFor={trayFor} onLog={logInPanel}
               onAct={actWithoutCard}
             />
