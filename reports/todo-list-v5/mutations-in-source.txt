@@ -1,0 +1,32 @@
+mutated A1
+=== A1
+  ✗ A1 · 1512 n = sidebar badge — title 79 badge 45
+  ✗ A1 · 1280 n = sidebar badge — title 79 badge 45
+[A1] 14/16 green
+  1 failed
+  1 passed (28.6s)
+mutated D2
+=== D2
+  ✗ D2 · 1512 a stamp comes down — 
+[D2] 16/17 green
+  1 failed
+  1 passed (1.2m)
+mutated E1
+=== E1
+  ✗ E1 · fix → the agent card (not the drawer) — card 0 drawer 0
+[E1] 11/12 green
+  1 failed
+  1 passed (53.3s)
+mutated F1
+=== F1
+  1 failed
+  1 passed (7.3m)
+  ✗ F1 · the drawer opens — 
+  ✗ F1 · it dims the page — 
+  ✗ F1 · the composer is in the drawer, not the page — 
+[F1] 0/3 green
+  1 failed
+  1 passed (28.9s)
+  ✗ D2 · 1512 a stamp comes down — 
+[D2] 16/17 green
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);

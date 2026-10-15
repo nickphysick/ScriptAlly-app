@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "F1",
+  "where": "the drawer opens",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "it dims the page",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "the composer is in the drawer, not the page",
+  "ok": false,
+  "detail": ""
+ }
+]

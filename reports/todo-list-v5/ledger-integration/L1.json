@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L1",
+  "where": "1920 doc",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 sc",
+  "ok": true,
+  "detail": "1664 vs 1664"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 app",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 the navy row's sentence clears its controls",
+  "ok": true,
+  "detail": "ink ends 758.7, next control at 1541.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 doc",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 sc",
+  "ok": true,
+  "detail": "1256 vs 1256"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 app",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 the navy row's sentence clears its controls",
+  "ok": true,
+  "detail": "ink ends 682.5, next control at 1141.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 doc",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 sc",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 app",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 the navy row's sentence clears its controls",
+  "ok": true,
+  "detail": "ink ends 682.5, next control at 909.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 doc",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 sc",
+  "ok": true,
+  "detail": "924 vs 924"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 app",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 the navy row's sentence clears its controls",
+  "ok": true,
+  "detail": "ink ends 682.5, next control at 974.2"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 doc",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 sc",
+  "ok": true,
+  "detail": "768 vs 768"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 app",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 the navy row's sentence clears its controls",
+  "ok": true,
+  "detail": "ink ends 682.5, next control at 818.2"
+ }
+]

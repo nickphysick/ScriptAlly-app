@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "F1",
+  "where": "the drawer opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "it dims the page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "the composer is in the drawer, not the page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "under Your tasks",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "F1",
+  "where": "selected",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F1",
+  "where": "sa.todoCompose opens it",
+  "ok": true,
+  "detail": ""
+ }
+]

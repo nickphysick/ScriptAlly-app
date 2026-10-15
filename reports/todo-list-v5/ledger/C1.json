@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 nav at the scroller's top",
+  "ok": true,
+  "detail": "105.75 vs 105.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 square once stuck",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 strip under the nav",
+  "ok": true,
+  "detail": "181.75 vs 181.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 a band under the strip",
+  "ok": true,
+  "detail": "strip 219.75, bands 220,966,1868,3022,3336"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 nav at the scroller's top",
+  "ok": true,
+  "detail": "105.75 vs 105.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 square once stuck",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 strip under the nav",
+  "ok": true,
+  "detail": "181.75 vs 181.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 a band under the strip",
+  "ok": true,
+  "detail": "strip 219.75, bands 220,966,1868,3022,3336"
+ }
+]

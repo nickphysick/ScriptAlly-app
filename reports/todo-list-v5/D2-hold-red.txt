@@ -1,0 +1,4 @@
+  ✗ D2 · 1512 the stamp comes down once the drawer has gone — the drawer was still on screen over the desk
+  ✗ D2 · 1512 reduced the stamp comes down once the drawer has gone — the drawer was still on screen over the desk
+[D2] 23/25 green
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);

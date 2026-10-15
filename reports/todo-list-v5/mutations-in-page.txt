@@ -1,0 +1,60 @@
+=== A2
+  ✗ A2 · 1512 no scroll — 0 → 240
+  ✗ A2 · 1280 no scroll — 0 → 240
+[A2] 22/24 green
+    Error: expect(received).toEqual(expected) // deep equality
+  1 failed
+=== B1
+[B1] 4/4 green
+  2 passed (27.8s)
+=== C1
+  ✗ C1 · 1512 a band under the strip — strip 219.75, bands 106,966,1868,3022,3336
+  ✗ C1 · 1280 a band under the strip — strip 219.75, bands 106,966,1868,3022,3336
+[C1] 8/10 green
+    Error: expect(received).toEqual(expected) // deep equality
+  1 failed
+=== C2
+  ✗ C2 · 1512 nothing opened — 1 surfaces
+  ✗ C2 · 1280 nothing opened — 1 surfaces
+[C2] 18/20 green
+    Error: expect(received).toEqual(expected) // deep equality
+  1 failed
+=== C3
+  ✗ C3 · 1512 lede task-full-seed-pkgq-3 — Marcus asked for your full manuscript on 20 June. No date was agreed. It is overdue.
+  ✗ C3 · 1512 lede task-partial-seed-pkgq-4 — Priya asked for a partial on 3 August. No date was agreed. It is overdue.
+  ✗ C3 · 1512 lede task-full-seed-query-9 — Ana asked for your full manuscript on 19 August. No date was agreed. It is overdue.
+  ✗ C3 · 1512 lede task-partial-seed-query-20 — David asked for a partial on 19 August. No date was agreed. It is overdue.
+  ✗ C3 · 1512 lede task-partial-seed-query-7 — Rachel asked for a partial on 19 August. Your send-by date is 4 October. It is overdue.
+=== D1
+  ✗ D1 · 1512 j in Find moves nothing — task-full-seed-query-9 → task-partial-seed-query-20
+  ✗ D1 · 1280 j in Find moves nothing — task-full-seed-query-9 → task-partial-seed-query-20
+[D1] 10/12 green
+    Error: expect(received).toEqual(expected) // deep equality
+  1 failed
+=== G1
+  ✗ G1 · 1512 the example is not a task — 3 rows
+  ✗ G1 · 1280 the example is not a task — 3 rows
+[G1] 11/13 green
+    Error: expect(received).toEqual(expected) // deep equality
+  1 failed
+=== L1
+  ✗ L1 · 1920 sc — 2306 vs 1664
+  ✗ L1 · 1512 sc — 2298 vs 1256
+  ✗ L1 · 1280 sc — 2298 vs 1024
+  ✗ L1 · 1180 sc — 2298 vs 924
+  ✗ L1 · 1024 sc — 2298 vs 768
+  ✗ B1 · 1512 arc ∝ cleared — 0.5000 vs 0.0000
+  ✗ B1 · 1512 ink drawn only when something was cleared — cleared 0, arc 0.5000117795470378
+  ✗ B1 · 1280 arc ∝ cleared — 0.5000 vs 0.0000
+  ✗ B1 · 1280 ink drawn only when something was cleared — cleared 0, arc 0.5000117795470378
+[B1] 2/6 green
+  ✗ B1 · 1512 arc ∝ cleared with cleared > 0 — {"cleared":1,"n":44,"arc":0.5000117795470378}
+[D2] 19/20 green
+    Error: expect(received).toEqual(expected) // deep equality
+    Error: expect(received).toEqual(expected) // deep equality
+  2 failed
+  1 passed (53.6s)
+  ✗ A2 · 1512 the filtered sentence is one line — height 40.09375 against a 22.1px line
+  ✗ A2 · 1280 the filtered sentence is one line — height 40.09375 against a 22.1px line
+[A2] 24/26 green
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);

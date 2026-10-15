@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "L1",
+  "where": "1920 doc",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 sc",
+  "ok": false,
+  "detail": "2306 vs 1664"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 app",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 doc",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 sc",
+  "ok": false,
+  "detail": "2298 vs 1256"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 app",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 doc",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 sc",
+  "ok": false,
+  "detail": "2298 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 app",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 doc",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 sc",
+  "ok": false,
+  "detail": "2298 vs 924"
+ },
+ {
+  "lock": "L1",
+  "where": "1180 app",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 doc",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 sc",
+  "ok": false,
+  "detail": "2298 vs 768"
+ },
+ {
+  "lock": "L1",
+  "where": "1024 app",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ }
+]

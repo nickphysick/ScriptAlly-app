@@ -1,0 +1,3 @@
+  ✗ L1 · 1024 the navy row's sentence clears its controls — ink ends 682.5, next control at 653.8
+[L1] 19/20 green
+      35 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
