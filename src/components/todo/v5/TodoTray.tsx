@@ -35,7 +35,12 @@ import {
 import { clearedThisWeek, clearedToday, type ClearedAct } from "../../../lib/todoCleared";
 import { stageHistory } from "../../../lib/qcStages";
 import { drawerDoorForTask } from "../../../lib/queryActions/entry";
-import { currentDrawerRequest, openQueryDrawer, subscribeDrawer, type SavedResult } from "../../../lib/queryActions/drawerStore";
+import {
+  askDrawerToLeave, currentDrawerRequest, currentParked, discardParked, openQueryDrawer, resumeQueryDrawer, subscribeDrawer, subscribeParked,
+  type OpenRequest, type ParkedJourney, type SavedResult,
+} from "../../../lib/queryActions/drawerStore";
+import { clashAsk, journeyDoing } from "../../../lib/queryActions/parking";
+import { DESK_SLOT, placeDeskSlot } from "./deskSlot";
 import { currentAgentCard, dataNeedTarget, openAgentCard, subscribeAgentCard } from "../../../lib/agentCardStore";
 import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
@@ -217,11 +222,20 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   }, [ordered, pending]);
   /* the surface that took the action: the query drawer, the agent card, or the sweep */
   const [surfaceOpen, setSurfaceOpen] = useState(false);
+  /* v5.1 §E — the journey open ON THE DESK (a request whose slot is the desk's), and the one parked from it */
+  const [deskReq, setDeskReq] = useState<OpenRequest | null>(null);
+  const [parked, setParked] = useState<ParkedJourney | null>(() => currentParked());
+  const [hostEl, setHostEl] = useState<HTMLDivElement | null>(null);
+  const holderRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const read = () => setSurfaceOpen(!!currentDrawerRequest() || !!currentAgentCard());
+    const read = () => {
+      const r = currentDrawerRequest();
+      setSurfaceOpen(!!r || !!currentAgentCard());
+      setDeskReq(r?.panel?.slot === DESK_SLOT ? r : null);
+    };
     read();
-    const a = subscribeDrawer(read), b = subscribeAgentCard(read);
-    return () => { a(); b(); };
+    const a = subscribeDrawer(read), b = subscribeAgentCard(read), c = subscribeParked((p) => setParked(p));
+    return () => { a(); b(); c(); };
   }, []);
   const ghostPhase = ghost?.phase;
   useEffect(() => {
@@ -280,6 +294,30 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   });
 
   /* ── the doors ── */
+  /** v5.1 §E — the journey for a task, stepped INTO the desk card: `drawerDoorForTask`'s door, hosted in the desk's slot */
+  const [workKey, setWorkKey] = useState<string | null>(null);
+  const [clash, setClash] = useState<{ key: string; req: OpenRequest } | null>(null);
+  const deskRequest = useCallback((i: TrayItem): OpenRequest | null => {
+    const c = i.card;
+    if (i.sweep || c.userTaskId || c.taskType === "data_quality_poor") return null;
+    const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
+    if (!door) return null;
+    const a = i.agent;
+    const name = (a?.name || a?.agency || "").trim();
+    return {
+      ...door, receipt: true,
+      panel: { name, agency: a?.agency ?? "", first: name.split(/\s+/)[0] ?? "", back: false, slot: DESK_SLOT },
+      onSaved: (r: SavedResult) => {
+        savedUndos.current.push({ queryId: r.queryId, mode: r.mode, undo: r.undo, used: false });
+        flash(r.message || "Recorded", { label: "Undo", fn: async () => {
+          const e = savedUndos.current.find((s) => s.undo === r.undo);
+          if (e) e.used = true;
+          await r.undo(); bump((x) => x + 1);
+        } });
+      },
+      onCancel: () => setPending(null),
+    };
+  }, [queries, flash]);
   const act = useCallback((i: TrayItem) => {
     const c = i.card;
     if (i.sweep) {
@@ -304,27 +342,24 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       openAgentCard(i.agent.id, { ...(target ?? {}), from: "task" });
       return;
     }
-    const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
-    if (door) {
+    const req = deskRequest(i);
+    if (req) {
+      /* ⚠️ ONE JOURNEY AT A TIME (decision 8). A journey parked from this desk for ANOTHER task is asked about on the
+         card — "Finish it" or "Discard and start" — never replaced in silence; the same task's journey resumes,
+         whichever of its journeys it was (a close that became a response is still this query's). */
+      const p = currentParked();
+      if (p && p.req.panel?.slot === DESK_SLOT && p.req.queryId !== req.queryId) { setClash({ key: i.key, req }); return; }
+      setClash(null);
+      setWorkKey(i.key);
       setPending({ key: i.key, at: Date.now() });
-      openQueryDrawer({
-        ...door, receipt: true,
-        onSaved: (r: SavedResult) => {
-          savedUndos.current.push({ queryId: r.queryId, mode: r.mode, undo: r.undo, used: false });
-          flash(r.message || "Recorded", { label: "Undo", fn: async () => {
-            const e = savedUndos.current.find((s) => s.undo === r.undo);
-            if (e) e.used = true;
-            await r.undo(); bump((x) => x + 1);
-          } });
-        },
-        onCancel: () => setPending(null),
-      });
+      if (p && p.req.queryId === req.queryId && p.req.panel?.slot === DESK_SLOT) resumeQueryDrawer(req);
+      else openQueryDrawer(req);
       return;
     }
     /* no door of its own: today's route for a card with no query journey (`openFlowCards`) */
     setPending({ key: i.key, at: Date.now() });
     setFlow({ items: [{ kind: "card", card: c }] });
-  }, [hkGroups, queries, quickDone, flash]);
+  }, [hkGroups, queries, quickDone, deskRequest]);
 
   /* ── set aside ── */
   const asideRef = useRef<HTMLButtonElement | null>(null);
@@ -443,6 +478,26 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
 
   /* the desk's card: the ghost while the sequence plays, else the selection */
   const deskItem = ghost?.item ?? sel;
+  /* v5.1 §E — working: a journey is open on the desk card for the task on it */
+  const working = !!deskReq && !!deskItem && workKey === deskItem.key;
+  const parkedHere = parked && parked.req.panel?.slot === DESK_SLOT ? parked : null;
+  const startedKey = parkedHere ? (items.find((i) => !i.sweep && !i.card.userTaskId && i.bucket !== "fix" && i.query?.id === parkedHere.req.queryId)?.key ?? null) : null;
+  /** leave the journey on the desk before looking at something else: parked with answers, closed without */
+  const leaveWork = () => { if (deskReq) askDrawerToLeave(); };
+  const selectRow = (key: string) => {
+    if (working && deskItem?.key === key) return;
+    leaveWork();
+    if (clash && clash.key !== key) setClash(null);
+    setSelKey(key);
+  };
+  /* the slot node goes where the journey is: into the working card's host, else back to its holder (deskSlot.ts) */
+  useLayoutEffect(() => { placeDeskSlot(working ? hostEl : null, holderRef.current); });
+  /* a journey parked from a task in this tray shows as that row's "Started", so the corner chip would say it twice */
+  const routeOn = location.pathname === "/todo";
+  useEffect(() => {
+    document.body.classList.toggle("td5-parked-here", routeOn && !!startedKey);
+    return () => { document.body.classList.remove("td5-parked-here"); };
+  }, [routeOn, startedKey]);
   const deskIndex = ghost ? ghost.index : sel ? ordered.findIndex((i) => i.key === sel.key) : -1;
   const deskList = ghost ? orderRef.current : ordered;
   const stopsFor = (i: TrayItem) => {
@@ -454,7 +509,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const step = (d: number) => {
     const at = sel ? walk.findIndex((x) => x.key === sel.key) : -1;
     const nx = walk[at + d];
-    if (nx) { setSelKey(nx.key); scrollRowIntoView(nx.key); }
+    if (nx) { selectRow(nx.key); scrollRowIntoView(nx.key); }
   };
 
   const header = (
@@ -485,9 +540,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         <button key={i.key} type="button" className="td5-row2" data-td5-row={i.key} data-td5="row" data-group={i.group.id} data-bucket={i.bucket}
           data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
           data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
-          onClick={() => { setSelKey(i.key); }}>
+          onClick={() => selectRow(i.key)}>
           <Disc item={i} />
-          <span className="td5-tx"><b>{i.deed}</b><small>{i.sub}</small></span>
+          <span className="td5-tx"><b>{i.deed}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}</b><small>{i.sub}</small></span>
           <DueDial dial={i.dial} size={52} />
         </button>
       );
@@ -574,7 +629,20 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                 key={deskItem.key}
                                 item={deskItem} facts={deskFacts(deskItem, trayDb, now)} lede={lede(deskItem, trayDb, now)}
                                 stops={stopsFor(deskItem)} pastDays={pastDaysFor(deskItem)} pin={pinFor(deskItem)}
-                                action={actionWords(deskItem)} onAct={() => act(deskItem)}
+                                action={startedKey === deskItem.key ? "Carry on" : actionWords(deskItem)} onAct={() => act(deskItem)}
+                                work={working} hostRef={setHostEl}
+                                over={clash && clash.key === deskItem.key && parkedHere ? (() => {
+                                  const q = queries.find((x) => x.id === clash.req.queryId);
+                                  const c = clashAsk(parkedHere, { doing: journeyDoing(clash.req.mode, q?.status), name: deskItem.who });
+                                  const back = items.find((x) => x.query?.id === parkedHere.req.queryId);
+                                  return (
+                                    <div className="td5-clash" role="alert" data-td5="clash">
+                                      <span><b>{c.head}</b>{c.sub}</span>
+                                      <button type="button" className="td5-b2" data-td5="clash-finish" onClick={() => { setClash(null); if (back) { setSelKey(back.key); scrollRowIntoView(back.key); setWorkKey(back.key); const r = deskRequest(back); if (r) { setPending({ key: back.key, at: Date.now() }); resumeQueryDrawer(r); } } }}>Finish it</button>
+                                      <button type="button" className="td5-b1" data-td5="clash-swap" onClick={() => { const r = clash.req; setClash(null); discardParked(); setWorkKey(deskItem.key); setPending({ key: deskItem.key, at: Date.now() }); openQueryDrawer(r); }}>Discard and start</button>
+                                    </div>
+                                  );
+                                })() : null}
                                 asideRef={deskAsideRef} onAside={ghost ? null : () => setSnoozeFor(deskItem)}
                                 onOpenQuery={deskItem.query && !deskItem.card.userTaskId ? () => openQueryPanel(deskItem.query!.id, "other") : null}
                                 stamp={ghost && ghost.phase !== "hold" ? stampFor(ghost.item) : null}
@@ -584,6 +652,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                           </>
                         ) : loading ? null : <div className="td5-noslips">Nothing in view. Clear the filter or the search.</div>}
                         <DoneToday acts={today} fresh={freshSlip} undoFor={undoFor} />
+                        {/* the desk's journey slot waits here, hidden, when no journey is on the card (deskSlot.ts) */}
+                        <div ref={holderRef} hidden data-td5="slot-holder" />
                       </div>
                     </div>
                   </div>

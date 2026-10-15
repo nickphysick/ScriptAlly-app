@@ -72,6 +72,12 @@ export interface OpenRequest {
     backLabel?: string;
     /** Contact list v16 §F — the head's title, in place of the query panel's own words for the mode ("Query Clara") */
     title?: string;
+    /**
+     * To-do list v5.1 §E — THE THIRD HOST. A selector for the slot the journey steps into, where it is not the query's
+     * side panel (`SIDE_SLOT`): the To-do desk passes its own card's slot. The journey, its steps, its review, its
+     * parking and its writes are the panel's exactly — this names WHERE, and nothing else.
+     */
+    slot?: string;
   };
   /** Query panel v2 §E — the picker lists this query first, under "The query you had open". */
   hadOpen?: string;

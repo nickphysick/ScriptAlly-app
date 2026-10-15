@@ -103,7 +103,7 @@ export function QueryDrawer() {
    * its chip on another page), the journey opens as the drawer it always was.
    */
   const [slot, setSlot] = useState<Element | null>(null);
-  useLayoutEffect(() => { setSlot(req?.panel ? document.querySelector(SIDE_SLOT) : null); }, [req]);
+  useLayoutEffect(() => { setSlot(req?.panel ? document.querySelector(req.panel.slot ?? SIDE_SLOT) : null); }, [req]);
 
   useEffect(() => subscribeDrawer((r) => {
     setReq(r);
