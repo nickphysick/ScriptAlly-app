@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "E1",
+  "where": "send → the sent journey on the desk, at step 0",
+  "ok": true,
+  "detail": "sent in card true"
+ },
+ {
+  "lock": "E1",
+  "where": "send → no drawer over the page, no scrim",
+  "ok": true,
+  "detail": "{\"out\":0,\"scrim\":0,\"inCard\":true,\"step\":\"0\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "decide (offer_received) → the offer journey on the desk, at step 1",
+  "ok": true,
+  "detail": "offer in card true"
+ },
+ {
+  "lock": "E1",
+  "where": "decide → no drawer over the page, no scrim",
+  "ok": true,
+  "detail": "{\"out\":0,\"scrim\":0,\"inCard\":true,\"step\":\"1\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "decide (revise_resubmit) → the sent journey on the desk, at step 0",
+  "ok": true,
+  "detail": "sent in card true"
+ },
+ {
+  "lock": "E1",
+  "where": "decide → no drawer over the page, no scrim",
+  "ok": true,
+  "detail": "{\"out\":0,\"scrim\":0,\"inCard\":true,\"step\":\"0\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "chase → the nudge journey on the desk, at step 1",
+  "ok": true,
+  "detail": "nudge in card true"
+ },
+ {
+  "lock": "E1",
+  "where": "chase → no drawer over the page, no scrim",
+  "ok": true,
+  "detail": "{\"out\":0,\"scrim\":0,\"inCard\":true,\"step\":\"1\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "close → the close journey on the desk, at step 0",
+  "ok": true,
+  "detail": "close in card true"
+ },
+ {
+  "lock": "E1",
+  "where": "close → no drawer over the page, no scrim",
+  "ok": true,
+  "detail": "{\"out\":0,\"scrim\":0,\"inCard\":true,\"step\":\"0\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "fix (materials_unrecorded_bulk) → its own door",
+  "ok": true,
+  "detail": "sweep 1 journey null"
+ },
+ {
+  "lock": "E1",
+  "where": "fix → the agent card (not a journey)",
+  "ok": true,
+  "detail": "card 1 drawer 0"
+ },
+ {
+  "lock": "E1",
+  "where": "fix (data_quality_poor, grouped) → its own door",
+  "ok": true,
+  "detail": "sweep 1 journey null"
+ },
+ {
+  "lock": "E1",
+  "where": "note → the own-task tick (completedAt stamped)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "note → its undo restores it",
+  "ok": true,
+  "detail": "{\"done\":false}"
+ },
+ {
+  "lock": "E1",
+  "where": "buckets entered",
+  "ok": true,
+  "detail": "send,decide,chase,close,fix,note"
+ },
+ {
+  "lock": "E1",
+  "where": "the agent-card door was entered",
+  "ok": true,
+  "detail": "send → the sent journey on the desk, at step 0 | send → no drawer over the page, no scrim | decide (offer_received) → the offer journey on the desk, at step 1 | decide → no drawer over the page, no scrim | decide (revise_resubmit) → the sent journey on the desk, at step 0 | decide → no drawer over the page, no scrim | chase → the nudge journey on the desk, at step 1 | chase → no drawer over the page, no scrim | close → the close journey on the desk, at step 0 | close → no drawer over the page, no scrim | fix (materials_unrecorded_bulk) → its own door | fix → the agent card (not a journey) | fix (data_quality_poor, grouped) → its own door | note → the own-task tick (completedAt stamped) | note → its undo restores it | buckets entered"
+ }
+]

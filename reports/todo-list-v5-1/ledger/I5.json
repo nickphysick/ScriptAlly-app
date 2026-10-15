@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "I5",
+  "where": "not in the tray today",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I5",
+  "where": "not in n (the badge's number)",
+  "ok": true,
+  "detail": "46 → 46"
+ },
+ {
+  "lock": "I5",
+  "where": "in Coming up, on the day it joins (day 3)",
+  "ok": true,
+  "detail": "[{\"ymd\":\"2026-10-16\",\"t\":\"16OctComp idea: the lighthouse keeper one. Check its publication yearYour own task is due.\"},{\"ymd\":\"2026-10-16\",\"t\":\"16OctImogen FarrQuery with the agent. The reply date passes.\"},{\"ymd\":\"2026-10-17\",\"t\":\"17OctDavid MarshPartial Sent with the agent. The reply date passes.\"}]"
+ }
+]

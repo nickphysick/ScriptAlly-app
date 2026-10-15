@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "F1",
+  "where": "the header's + Add a task opens the compose card on the desk (no drawer)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "the tray's add row opens the compose card on the desk (no drawer)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "N opens the compose card on the desk (no drawer)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "text and detail",
+  "ok": true,
+  "detail": "{\"tags\":[\"seed-tag-a\"],\"text\":\"Zz td5 probe A 1792095640348\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"surfaceOffset\":\"day-before\",\"updatedAt\":\"2026-10-15T20:20:46.847Z\",\"agentId\":\"clv-fx-never\",\"createdAt\":\"2026-10-15T20:20:46.847Z\",\"done\":false,\"id\":\"task-mp74qwsmp\",\"dueDate\":\"2026-10-25\",\"detail\":\"A little more.\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "the due date (next week's Sunday)",
+  "ok": true,
+  "detail": "2026-10-25 vs 2026-10-25"
+ },
+ {
+  "lock": "F1",
+  "where": "surfaceOffset",
+  "ok": true,
+  "detail": "day-before"
+ },
+ {
+  "lock": "F1",
+  "where": "one link: the agent",
+  "ok": true,
+  "detail": "{\"agentId\":\"clv-fx-never\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "tags",
+  "ok": true,
+  "detail": "[\"seed-tag-a\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "the v2 composer's write of the same input agrees (dueDate, agentId)",
+  "ok": true,
+  "detail": "{\"v2\":{\"dueDate\":\"2026-10-25\",\"agentId\":\"clv-fx-never\"},\"desk\":{\"dueDate\":\"2026-10-25\",\"agentId\":\"clv-fx-never\"}}"
+ },
+ {
+  "lock": "F1",
+  "where": "a task due today lands under Your tasks",
+  "ok": true,
+  "detail": "{\"group\":\"mine\",\"cur\":\"true\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "…selected",
+  "ok": true,
+  "detail": "{\"group\":\"mine\",\"cur\":\"true\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "a note: no date, its paper, not in the tray",
+  "ok": true,
+  "detail": "{\"colour\":\"pink\",\"inTray\":false}"
+ },
+ {
+  "lock": "F1",
+  "where": "sa.todoCompose opens the compose card",
+  "ok": true,
+  "detail": ""
+ }
+]

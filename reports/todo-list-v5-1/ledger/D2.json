@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 a send task to save",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 a stamp comes down",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 on the saved card",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 vs task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the word",
+  "ok": true,
+  "detail": "SENT"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the stamp comes down once the drawer has gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 motion on",
+  "ok": true,
+  "detail": "td-stamp"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the row leaves",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the next task is on the desk",
+  "ok": true,
+  "detail": "task-partial-seed-pkgq-4 vs task-partial-seed-pkgq-4"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 a slip lands",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 cleared +1",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the slip offers Undo",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 arc ∝ cleared with cleared > 0",
+  "ok": true,
+  "detail": "{\"cleared\":1,\"n\":45,\"arc\":0.021751175555892364}"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 Undo restores byte-for-byte",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced a send task to save",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced on the saved card",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 vs task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced the word",
+  "ok": true,
+  "detail": "SENT"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced the stamp comes down once the drawer has gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced motion off",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced the row leaves",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced the next task is on the desk",
+  "ok": true,
+  "detail": "task-partial-seed-pkgq-4 vs task-partial-seed-pkgq-4"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced a slip lands",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced cleared +1",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced the slip offers Undo",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 reduced arc ∝ cleared with cleared > 0",
+  "ok": true,
+  "detail": "{\"cleared\":1,\"n\":45,\"arc\":0.021751175555892364}"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 reduced Undo restores byte-for-byte",
+  "ok": true,
+  "detail": ""
+ }
+]
