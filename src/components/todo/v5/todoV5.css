@@ -241,6 +241,9 @@
 .ws-app.sheet-wide .td5-body { grid-template-columns: 432px minmax(0, 1fr); }
 .td5-sheet[data-focus] .td5-body { grid-template-columns: minmax(0, 1fr); }
 .td5-sheet[data-focus] .td5-tray { display: none; }
+/* a narrow sheet gives the navy row's sentence the room: the keys hint goes first (measured at 1024: the sentence ran
+   into it, with nothing overflowing — so L1 could not see it) */
+@container td5sheet (max-width: 959.98px) { .td5-sheet .td5-nav > .td5-keys { display: none; } }
 @container td5sheet (max-width: 899.98px) {
   .td5-body, .ws-app.sheet-wide .td5-body { grid-template-columns: minmax(0, 1fr); }
   .td5-tray { border-right: 0; }
