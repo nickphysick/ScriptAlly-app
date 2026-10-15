@@ -131,7 +131,7 @@ import { replyTask } from "./taskPrecedence";
    same predicate the tracker's ghost rung uses, and `elapsedPhrase` is the app's one scaled figure. */
 import { scheduledReminder } from "./nudgeState";
 import { elapsedPhrase, daysBetween } from "./elapsed";
-import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed, MUTED_UNTIL } from "./taskFlags";
+import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed, MUTED_UNTIL, subjectChange } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { queriesMissingMaterials, isBulkMaterialsGap, MATERIALS_BULK_RECORD_ID } from "./queryMaterialsGap";
@@ -259,6 +259,8 @@ interface DbContextType {
   resolveTaskFlag: (key: TaskFlagKey) => Promise<void>;
   migrateDismissedTasks: () => Promise<number>;
   tasks: Task[];
+  /** v5.1 §I.5 — `tasks` before the rule mutes (`mutedTaskRules`) are applied: what a switched-off rule would raise */
+  tasksIgnoringMutes: Task[];
   login: (email: string, password?: string) => Promise<boolean>;
   signup: (name: string, email: string, password?: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<void>;
@@ -573,6 +575,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
   const [taskFlags, setTaskFlags] = useState<TaskFlag[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasksIgnoringMutes, setTasksIgnoringMutes] = useState<Task[]>([]);
 
   // Temporary buffer to retain signup pen names
   const signupTempNameRef = useRef<string | null>(null);
@@ -1252,11 +1255,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // matching flag is snoozed into the future (a far-future snooze reads as an indefinite mute).
     const nowMs = now.getTime();
     const mutedRules = currentUser?.mutedTaskRules ?? [];
+    /* v5.1 §I.5 — the same list with the writer's STANCES applied but not the rule MUTES: what each switched-off rule
+       would raise if it were back on ("Would raise · n tasks"), derived here because this is where tasks are made */
+    const stanceKept = (t: Task) => {
+      const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
+      return !(flag && isFlagSuppressing(flag, nowMs, subjectChange(flag, activities)?.ms) && t.taskType !== "offer_received");
+    };
+    setTasksIgnoringMutes(calculatedTasks.filter(stanceKept));
     const activeTasks = calculatedTasks.filter(t => {
       const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
       // Offers are EXEMPT from snooze-HIDING (journey-logic P4): "I need time" renders the card
       // QUIETER, never hidden — the flag survives to the board, which derives quiet/wake.
-      if (flag && isFlagSuppressing(flag, nowMs) && t.taskType !== "offer_received") return false;
+      /* v5.1 §I.2 — a dismissal holds only while nothing newer is stored on its query (`subjectChange`) */
+      if (flag && isFlagSuppressing(flag, nowMs, subjectChange(flag, activities)?.ms) && t.taskType !== "offer_received") return false;
       // Rule-scope mute ("Stop asking → All of them"): silence the reminder everywhere from this one
       // point. data_quality_poor dies only when ALL its remaining gaps are muted (todoHousekeeping).
       const ag = t.taskType === "data_quality_poor" ? agents.find(a => a.id === t.relatedRecordId) : undefined;
@@ -3926,6 +3937,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         resolveTaskFlag,
         migrateDismissedTasks,
         tasks,
+        tasksIgnoringMutes,
         login,
         signup,
         resetPassword,

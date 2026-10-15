@@ -141,7 +141,8 @@ describe("⚠️ THE SNOOZE CEILING — one clamp, and every path reaches it", (
   });
 
   it("⚠️ THE PAGE CALLS THE CLAMP — it no longer carries the rule itself", () => {
-    expect(page).toContain("({ days, when } = clampSnooze(c, days, when))");
+    /* RETARGETED, LAW UNCHANGED (To-do list v5.1 §I.3): the clamp now also takes the task's own deadline */
+    expect(page).toContain("({ days, when } = clampSnooze(c, days, when, daysUntilDeadline))");
     // the old inline cap is GONE — a second copy is a second answer
     expect(page).not.toContain('c.taskType === "offer_received" && days > 1');
   });

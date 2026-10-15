@@ -82,7 +82,9 @@ describe("⚠️ the choke: day-level, one clock — yesterday / TODAY / tomorro
     expect(isFlagSuppressing({ ...flag("2026-08-06T09:00:00"), skippedAt: "2026-08-01T00:00:00.000Z" }, NOW)).toBe(true);
     expect(isFlagSuppressing({ ...flag("2026-08-06T09:00:00"), skippedAt: "" }, NOW)).toBe(false);
     // the engine keeps its OFFER exemption (quiet mode) — the column-side law is what changed
-    expect(db).toContain('isFlagSuppressing(flag, nowMs) && t.taskType !== "offer_received"');
+    /* RETARGETED, LAW UNCHANGED (To-do list v5.1 §I.2): the engine also hands the boundary the query's newest change,
+       so a dismissal outranked by something newer stops suppressing — still the one boundary, still the offer exemption */
+    expect(db).toContain('isFlagSuppressing(flag, nowMs, subjectChange(flag, activities)?.ms) && t.taskType !== "offer_received"');
   });
 });
 

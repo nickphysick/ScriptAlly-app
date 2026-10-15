@@ -68,8 +68,8 @@ export const surfaceDay = (dueYmd: string, s: SurfaceOffset) => plus(dueYmd, -(S
 const PAPERS: { v: NoteColour; label: string }[] = [{ v: "yellow", label: "Yellow" }, { v: "pink", label: "Pink" }, { v: "sage", label: "Sage" }];
 const PAPER_BG: Record<NoteColour, string> = { yellow: "#f8f0dc", pink: "#f6e2dc", sage: "#e3ebdf" };
 
-/** the inline month calendar: Monday first, past days disabled */
-const MonthCal: React.FC<{ todayYmd: string; value: string | null; onPick: (ymd: string) => void }> = ({ todayYmd, value, onPick }) => {
+/** the inline month calendar: Monday first, past days disabled — and, with `max`, every day after it (a snooze's cap) */
+export const MonthCal: React.FC<{ todayYmd: string; value: string | null; onPick: (ymd: string) => void; max?: string | null; min?: string }> = ({ todayYmd, value, onPick, max = null, min }) => {
   const [anchor, setAnchor] = useState(() => { const d = dayOf(value ?? todayYmd); return new Date(d.getFullYear(), d.getMonth(), 1, 12); });
   const first = (anchor.getDay() + 6) % 7;
   const days = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0).getDate();
@@ -91,7 +91,7 @@ const MonthCal: React.FC<{ todayYmd: string; value: string | null; onPick: (ymd:
         {Array.from({ length: days }, (_, i) => {
           const ymd = ymdOf(new Date(anchor.getFullYear(), anchor.getMonth(), i + 1, 12));
           return (
-            <button key={ymd} type="button" data-day={ymd} disabled={ymd < todayYmd} aria-pressed={value === ymd}
+            <button key={ymd} type="button" data-day={ymd} disabled={ymd < (min ?? todayYmd) || (!!max && ymd > max)} aria-pressed={value === ymd}
               data-today={ymd === todayYmd ? "" : undefined} onClick={() => onPick(ymd)}>{i + 1}</button>
           );
         })}
@@ -179,7 +179,7 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
         <span className="td5-why">{isTask ? "From you" : "For your corkboard"}</span>
         <span className="td5-sp" />
         {edit ? null : (
-          <span className="td5-seg" role="group" aria-label="Task or note">
+          <span className="td5-modeseg" role="group" aria-label="Task or note">
             <button type="button" data-td5="mode-task" aria-pressed={isTask} onClick={() => set({ mode: "task" })}>✓ Task</button>
             <button type="button" data-td5="mode-note" aria-pressed={!isTask} onClick={() => set({ mode: "note" })}>✎ Note</button>
           </span>
@@ -200,11 +200,11 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
               <div className="td5-qh"><b>When is it due?</b>{due ? <span className="td5-r">Due by {dayLabel(due)}</span> : null}</div>
               <div className="td5-opts">
                 {DUE_CHIPS.map((c) => (
-                  <button key={c.k} type="button" className="td5-opt" data-when={c.k} aria-pressed={d.when === c.k} onClick={() => { set({ when: c.k }); setCal(false); }}>
+                  <button key={c.k} type="button" className="td5-chp" data-when={c.k} aria-pressed={d.when === c.k} onClick={() => { set({ when: c.k }); setCal(false); }}>
                     {c.label}<small>by {dayLabel(plus(sundayOf(todayYmd), c.add))}</small>
                   </button>
                 ))}
-                <button type="button" className="td5-opt" data-when="pick" aria-pressed={d.when === "pick"} aria-expanded={cal} onClick={() => setCal((o) => !o)}>
+                <button type="button" className="td5-chp" data-when="pick" aria-pressed={d.when === "pick"} aria-expanded={cal} onClick={() => setCal((o) => !o)}>
                   {d.when === "pick" && d.date ? dayLabel(d.date) : "Pick a date"}
                 </button>
               </div>
@@ -213,7 +213,7 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
             <div className="td5-q" data-td5="compose-surface">
               <div className="td5-qh"><b>When should it come to the top of your tray?</b></div>
               <div className="td5-opts">
-                {SURFACE.map((x) => <button key={x.v} type="button" className="td5-opt" data-surf={x.v} aria-pressed={d.surface === x.v} onClick={() => set({ surface: x.v })}>{x.label}</button>)}
+                {SURFACE.map((x) => <button key={x.v} type="button" className="td5-chp" data-surf={x.v} aria-pressed={d.surface === x.v} onClick={() => set({ surface: x.v })}>{x.label}</button>)}
               </div>
             </div>
           </>
