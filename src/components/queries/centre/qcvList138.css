@@ -6,19 +6,19 @@
  * the groups. Headings and rows read ONE grid (`--qc138-cols`); below 1180px of sheet the narrow grid takes over.
  *
  * ⚠️ NEVER `overflow: hidden` ON THE SHEET: the headings and the bands are sticky inside it.
- * ⚠️ THE STICKY OFFSETS ARE STATED, NEVER READ: the pinned row is 68 (`--qc138-pin-h`) and the headings strip 40
- *    (`--qc138-heads-h`), so a band sticks at their sum. One writer, no polling.
+ * ⚠️ THE STICKY OFFSETS: the pinned row is the shell's `--pin-row-h` (its covered strip + 64, written by PinnedRow's
+ *    one writer on the sheet) and the headings strip a stated 40 (`--qc138-heads-h`), so a band sticks at their sum.
  * ⚠️ TWO CLASSES ON EVERY RULE THAT SETS A FACE (brand.tsx and the page's font reset).
  */
 @media (min-width: 768px) {
-  .qcv-group[data-v138] { --qc138-pin-h: 68px; --qc138-heads-h: 40px; }
+  .qcv-group[data-v138] { --qc138-pin-h: var(--pin-row-h); --qc138-heads-h: 40px; } /* the pinned row's height is the shell's (shell/pinnedRow.css) */
   /* the page box carries no paint of its own: the sheet is the white */
   .qcv-group[data-v138] > .qcv-page.qcw { background: transparent; box-shadow: none; border-radius: 0; }
   .qcv-group[data-v138] .qc13-work, .qcv-group[data-v138] .qcv-stage, .qcv-group[data-v138] .qcv-ledger { background: transparent; }
-  .wpg-scroll:has(> .qcv-group[data-v138]) { --wpg-scroll-pad: calc(var(--qc138-pin-h, 68px) + var(--qc138-heads-h, 40px) + 64px); }
+  .wpg-scroll:has(> .qcv-group[data-v138]) { --wpg-scroll-pad: calc(var(--qc138-pin-h) + var(--qc138-heads-h, 40px) + 64px); }
   /* full screen: the header goes, the pinned row stays */
   .qcv-group[data-v138][data-full] > .qc138-hd { display: none; }
-  .qcv-group[data-v138][data-full] > .qcv-page.qcw { margin-top: calc(var(--qc138-pin-h, 68px) + 16px); }
+  .qcv-group[data-v138][data-full] > .qcv-page.qcw { margin-top: calc(var(--qc138-pin-h) + 16px); }
 
   .qc138-sheet {
     --qc138-cols: minmax(0, 1.3fr) 108px minmax(0, 1fr) 246px minmax(170px, 0.85fr) 60px;
@@ -99,7 +99,7 @@
 
   /* ── the headings: one grid with the rows, sticky under the pinned row ── */
   .qc138-sheet .qc138-heads {
-    position: sticky; top: var(--qc138-pin-h, 68px); z-index: 8;
+    position: sticky; top: var(--qc138-pin-h); z-index: 8;
     display: grid; grid-template-columns: var(--qc138-cols); column-gap: var(--qc138-gap); align-items: center;
     box-sizing: border-box; height: var(--qc138-heads-h, 40px); padding: 12px 40px 13px;
     background: #e9edf3; border-bottom: 1.5px solid rgba(45, 58, 80, 0.28);
@@ -127,7 +127,7 @@
   /* ── the groups ── */
   .qc138-sheet .qc138-body { padding: 0 18px 18px; }
   .qc138-sheet .qc138-band {
-    position: sticky; top: calc(var(--qc138-pin-h, 68px) + var(--qc138-heads-h, 40px)); z-index: 6;
+    position: sticky; top: calc(var(--qc138-pin-h) + var(--qc138-heads-h, 40px)); z-index: 6;
     display: flex; align-items: center; gap: 12px; box-sizing: border-box; width: 100%;
     height: 56px; padding: 0 18px 0 12px; margin: 18px 0 0; border: 0; border-radius: 12px;
     cursor: pointer; user-select: none; text-align: left; background: var(--qc138-bg); color: var(--qc138-c);

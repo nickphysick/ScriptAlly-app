@@ -214,17 +214,10 @@
 /* ── §C · THE PINNED ROW. A child of the page sheet (`.ws-window`), so its left, top and width are the sheet's
    own and nothing writes them. 68 tall, on the page colour (the folder tab's token). Its contents sit on the
    list's left and right edges. ── */
-.clv-group { --cl17-pin-h: 68px; }
-.cl17-pin {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 12; box-sizing: border-box; height: 68px;
-  background: var(--ws-page); box-shadow: 0 1px 0 rgba(28, 19, 15, 0.1), 0 10px 18px -16px rgba(28, 19, 15, 0.45);
-  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s ease, visibility 0s linear 0.12s;
-}
-.cl17-pin[data-on] { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.12s ease; }
-.cl17-pin .cl17-pin-in {
-  display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: 100%; min-width: 0;
-  width: min(1600px, calc(100% - 48px)); margin: 0 auto;
-}
+/* the pinned row's height is the shell's (`--pin-row-h`: the covered strip + 64, shell/pinnedRow.css); the row's box
+   and content row are PinnedRow's, and this sheet styles only its contents */
+.clv-group { --cl17-pin-h: var(--pin-row-h); }
+.cl17-pin .cl17-pin-in { gap: 10px; width: min(1600px, calc(100% - 48px)); margin: 0 auto; }
 .cl17-pin .cl17-pin-t {
   flex: none; padding: 0; margin-right: 8px; border: 0; background: none; cursor: pointer; white-space: nowrap;
   font: 400 20px/1 var(--sp-type) !important; color: #1c130f;
@@ -259,8 +252,6 @@
 }
 .ws-app.sheet-wide .cl17-pin .cl17-pin-u { display: inline-flex; }
 .cl17-pin button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
-@media (max-width: 767.98px) { .cl17-pin { display: none; } }
-@media (prefers-reduced-motion: reduce) { .cl17-pin, .cl17-pin[data-on] { transition: none; } }
 
 /* the pin line's sentinel: the header's foot, zero height */
 .cl17-hd .cl17-sentinel { display: block; height: 0; }
@@ -276,7 +267,7 @@
      ⚠️ ONLY WHILE THE ROW IS SHOWN. Stated always, this padding made the browser scroll the page to the top whenever a
         control near the scroller's top took focus: a press on a summary card row at scrollTop 60 landed at 0 (measured,
         lock A2), because a focused element inside the scroll padding is "not in view". */
-  .ws-window:has(> .cl17-pin[data-on]) .agl-wpg .wpg-scroll { --wpg-scroll-pad: 124px; }
+  .ws-window:has(> .cl17-pin[data-on]) .agl-wpg .wpg-scroll { --wpg-scroll-pad: calc(var(--pin-row-h) + 56px); }
   /* full screen: the header is hidden and the row is always shown, so the list starts under it */
   .clv-group[data-full] > .clv-main { margin-top: calc(var(--cl17-pin-h) + 16px); }
 }

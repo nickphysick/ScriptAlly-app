@@ -105,20 +105,9 @@
   .qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw { margin-top: 22px; }
 }
 
-/* ── §A · THE PINNED ROW: a child of the page sheet, 68 tall, on the page colour ── */
-.qc138-pin {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 12; box-sizing: border-box; height: 68px;
-  background: var(--ws-page); box-shadow: 0 1px 0 rgba(28, 19, 15, 0.1), 0 10px 18px -16px rgba(28, 19, 15, 0.45);
-  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s ease, visibility 0s linear 0.12s;
-}
-.qc138-pin[data-on] { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.12s ease; }
-/* v138.1 §A — ONE flex row filling the bar, every child centred on the bar's own height: no top padding, no child
-   margin (the count's old 8px right margin is the gap's job now) */
-.qc138-pin .qc138-pin-in {
-  display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: 100%; min-width: 0; padding: 0;
-  width: min(1600px, calc(100% - 48px)); margin: 0 auto;
-}
-.qc138-pin .qc138-pin-in > * { margin-top: 0; margin-bottom: 0; align-self: center; }
+/* ── §A · THE PINNED ROW's CONTENTS. The row itself — its box, height, the covered strip and the 64px content row —
+   is the shell's PinnedRow (shell/pinnedRow.css); this sheet styles only what is in it. ── */
+.qc138-pin .qc138-pin-in { gap: 10px; width: min(1600px, calc(100% - 48px)); margin: 0 auto; }
 .qc138-pin .qc138-pin-t {
   flex: none; padding: 0 8px 0 0; margin: 0; border: 0; background: none; cursor: pointer; white-space: nowrap;
   font: 400 20px/1 var(--sp-type) !important; color: #1c130f;
@@ -154,9 +143,7 @@
 }
 .ws-app.sheet-wide .qc138-pin .qc138-pin-u { display: inline-flex; }
 .qc138-pin button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
-@media (max-width: 767.98px) { .qc138-pin { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .qc138-pin, .qc138-pin[data-on] { transition: none; }
   .qc138-gr .qc138-sg, .qc138-gr .qc138-sg svg { transition: none; }
 }
 

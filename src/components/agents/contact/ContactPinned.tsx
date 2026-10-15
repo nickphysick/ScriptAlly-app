@@ -7,20 +7,17 @@
  * summary card's own filter), what is showing, a search box that mirrors the header's, and "+ Add an agent".
  * The column headings stick directly under it, at the list's width (contactV17.css).
  *
- * ⚠️ ITS BOX IS THE SHEET'S, BY CONSTRUCTION, AND NOTHING WRITES IT. The row is a child of the page sheet
- *    (`.ws-window`: positioned, never scrolled, and it clips), laid out `top: 0; left: 0; right: 0` at a stated
- *    68px. So its left, top and width are the sheet's own at every window size, in full screen and while the
- *    sidebar moves, with no measurement, no resize handler and no timer; and the headings' sticky `top` is that
- *    same stated height (`--cl17-pin-h`), not a reading of it. The pack asked for `position: fixed` and one
- *    position writer; a fixed box would be contained by the page's size containers, and a writer is one more
- *    thing that can run late. There are none (lock C2 holds the box to one value while pinned).
+ * ⚠️ ITS FRAME IS THE SHELL'S `PinnedRow` (pinned-row fix, 15 Oct): a child of the page sheet at `top: 0; left: 0;
+ *    right: 0`, so its left, top and width are the sheet's own at every window size. Its height is the sheet lip's
+ *    covered strip + 64 (`--pin-row-h`, one writer in PinnedRow), and its contents are centred in the 64 a reader can
+ *    see; the headings' sticky `top` reads the same `--pin-row-h` (`--cl17-pin-h`).
  * ⚠️ THE ONE THING JS DECIDES IS WHETHER IT IS SHOWN: `useContactPinned`, a sentinel at the header's foot read
  *    on scroll with a hysteresis (on at 12px or less under the scroller's top, off above 48), so a 1px scroll
  *    across the line cannot flip it back and forth.
  * ⚠️ EVERY WORKSPACE PAGE STAYS MOUNTED: the row is portalled only while this page is the one on screen.
  */
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { PinnedRow } from "../../shell/PinnedRow";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 
@@ -78,12 +75,9 @@ export const ContactPinnedRow: React.FC<{
   onAdd: () => void;
   onTop: () => void;
 }> = ({ anchor, on, shown, total, showing, filtered, model, active, onGroup, onClear, find, onFind, onAdd, onTop }) => {
-  const [host, setHost] = useState<HTMLElement | null>(null);
-  useEffect(() => { setHost(on ? anchor.current?.closest<HTMLElement>(".ws-window") ?? null : null); }, [anchor, on]);
-  if (!on || !host) return null;
-  return createPortal(
-    <div className="cl17-pin" data-cl17="pinned" data-on={shown ? "" : undefined} aria-hidden={shown ? undefined : true} inert={shown ? undefined : true}>
-      <div className="cl17-pin-in" data-cl17="pinned-in">
+  /* the frame (box, height, cover, content row) is the shell's PinnedRow; this page styles only its contents */
+  return (
+    <PinnedRow anchor={anchor} on={on} shown={shown} className="cl17-pin" innerClassName="cl17-pin-in" attrs={{ "data-cl17": "pinned" }} innerAttrs={{ "data-cl17": "pinned-in" }}>
         <button type="button" className="cl17-pin-t" data-cl17="pinned-count" title="Back to the top" onClick={onTop}>
           {total} {total === 1 ? "agent" : "agents"}
         </button>
@@ -111,8 +105,6 @@ export const ContactPinnedRow: React.FC<{
         <button type="button" className="cl17-pin-u" data-cl17="pinned-top" title="Back to the top" aria-label="Back to the top" onClick={onTop}>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" /></svg>
         </button>
-      </div>
-    </div>,
-    host,
+    </PinnedRow>
   );
 };

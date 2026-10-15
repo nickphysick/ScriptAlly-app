@@ -6,13 +6,14 @@
  * the page sheet's top edge: the count (back to the top), the glyphs small in one white capsule (the header row's
  * own stage filter), a search box mirroring the header's, "+ Log a query" and ↑. Contact list v17's pattern.
  *
- * ⚠️ ITS BOX IS THE SHEET'S BY CONSTRUCTION: a child of `.ws-window` at `top: 0; left: 0; right: 0`, 68 tall.
+ * ⚠️ ITS FRAME IS THE SHELL'S `PinnedRow` (pinned-row fix, 15 Oct): a child of `.ws-window` at `top: 0`, the sheet
+ *    lip's covered strip + 64 tall, its contents centred in the 64 a reader can see.
  * ⚠️ JS DECIDES ONLY WHETHER IT SHOWS: a sentinel at the header's foot, read on scroll, with a hysteresis (on at
  *    12px under the scroller's top, off above 48), so a 1px scroll across the line cannot flip it.
  * ⚠️ EVERY WORKSPACE PAGE STAYS MOUNTED: portalled only while this page is the one on screen.
  */
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { PinnedRow } from "../../shell/PinnedRow";
 import { GLYPHS, pressedGlyph, type GlyphKey, type StageSet } from "../../../lib/qc138";
 import { StageGlyph } from "./StageGlyph";
 
@@ -58,13 +59,10 @@ export const QcPinned138: React.FC<{
   onLog: () => void;
   onTop: () => void;
 }> = ({ anchor, on, shown, total, counts, stages, onGlyph, find, onFind, findRef, onLog, onTop }) => {
-  const [host, setHost] = useState<HTMLElement | null>(null);
-  useEffect(() => { setHost(on ? anchor.current?.closest<HTMLElement>(".ws-window") ?? null : null); }, [anchor, on]);
-  if (!on || !host) return null;
   const pressed = pressedGlyph(stages);
-  return createPortal(
-    <div className="qc138-pin" data-qc138="pinned" data-on={shown ? "" : undefined} aria-hidden={shown ? undefined : true} inert={shown ? undefined : true}>
-      <div className="qc138-pin-in">
+  /* the frame (box, height, cover, content row) is the shell's PinnedRow; this page styles only its contents */
+  return (
+    <PinnedRow anchor={anchor} on={on} shown={shown} className="qc138-pin" innerClassName="qc138-pin-in" attrs={{ "data-qc138": "pinned" }}>
         <button type="button" className="qc138-pin-t" data-qc138="pinned-count" title="Back to the top" onClick={onTop}>
           {total} {total === 1 ? "query" : "queries"}
         </button>
@@ -90,8 +88,6 @@ export const QcPinned138: React.FC<{
         <button type="button" className="qc138-pin-u" data-qc138="pinned-top" title="Back to the top" aria-label="Back to the top" onClick={onTop}>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" /></svg>
         </button>
-      </div>
-    </div>,
-    host,
+    </PinnedRow>
   );
 };
