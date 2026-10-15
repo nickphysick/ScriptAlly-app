@@ -86,6 +86,22 @@ export interface AgentPanelProps {
   onFillIn: () => void;
 }
 
+/**
+ * v18.1 — the app's compact switch (`.ws-app.sheet-wide`, WorkspaceShell) read for a panel that portals out of it. ⚠️ NOT
+ * a `body:has(.ws-app.sheet-wide)` rule: a `:has()` keyed on body asks the browser to re-check style across the whole
+ * document on DOM changes, a cost every page would pay for one font size in one panel. (It was suspected of slowing the
+ * Query Centre's peek entrance, qcV1382 D1; sampling showed D1 is a frame-timing flake on both builds, so that was not
+ * the reason, and this is kept for the cost alone.)
+ */
+const readWide = () => !!document.querySelector(".ws-app.sheet-wide");
+const subscribeWide = (on: () => void) => {
+  const app = document.querySelector(".ws-app");
+  if (!app || typeof MutationObserver === "undefined") return () => {};
+  const mo = new MutationObserver(on);
+  mo.observe(app, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+};
+
 /** a missing value, said quietly: never a dashed "+ Add" pill in the panel (v18.1 §B.3) */
 const Missing: React.FC<{ word?: string }> = ({ word = "Not recorded" }) => <i className="apn-miss" data-apc="missing">{word}</i>;
 
@@ -141,6 +157,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
 
   /* a query journey stepped into this panel (the drawer's request carries `panel`) */
   const drawerReq = useSyncExternalStore(subscribeDrawer, currentDrawerRequest, currentDrawerRequest);
+  const wide = useSyncExternalStore(subscribeWide, readWide, () => false);
   const stepping = !!drawerReq?.panel;
   const acting = stepping || editing;
 
@@ -240,7 +257,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   return (
     <SidePanel label={`${name}, agent`} step={stepping} dim={acting} className="qsp apn"
       style={{ ...(top != null ? { "--qsp-top": `${top}px` } : {}), "--ap-edge": door.edge } as React.CSSProperties}
-      attrs={{ "data-ap": "panel", "data-ap-id": agent.id, "data-ap-acting": acting ? (editing ? "edit" : drawerReq?.mode ?? "step") : undefined }}>
+      attrs={{ "data-ap": "panel", "data-ap-id": agent.id, "data-wide": wide ? "" : undefined, "data-ap-acting": acting ? (editing ? "edit" : drawerReq?.mode ?? "step") : undefined }}>
       {editing ? (
         /* ── acting: Edit profile, in the action drawer's look. The editor itself is the agent card's, portalled
            into the slot below by its own host. ── */
