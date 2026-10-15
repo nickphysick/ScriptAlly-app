@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "no peek at 300ms, one by 900ms @1512",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "D1",
+  "where": "a click inside the card does not open the row @1512",
+  "ok": false,
+  "detail": "1 panel(s) · clicked the card"
+ },
+ {
+  "lock": "D1",
+  "where": "no \"Not for them\" and no query-via link (neither is stored) @1512",
+  "ok": true,
+  "detail": "{\"nft\":false,\"viaLink\":false,\"fields\":\"Email|Website|Social|Query via|Send them|Replies\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "Space toggles the peek on a focused row @1512",
+  "ok": true,
+  "detail": "1 → 0"
+ },
+ {
+  "lock": "D1",
+  "where": "no peek at 300ms, one by 900ms @1280",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "D1",
+  "where": "a click inside the card does not open the row @1280",
+  "ok": false,
+  "detail": "1 panel(s) · clicked the card"
+ },
+ {
+  "lock": "D1",
+  "where": "no \"Not for them\" and no query-via link (neither is stored) @1280",
+  "ok": true,
+  "detail": "{\"nft\":false,\"viaLink\":false,\"fields\":\"Email|Website|Social|Query via|Send them|Replies\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "Space toggles the peek on a focused row @1280",
+  "ok": true,
+  "detail": "1 → 0"
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "A3",
+  "where": "601 steps read @1512",
+  "ok": true,
+  "detail": "601"
+ },
+ {
+  "lock": "A3",
+  "where": "both strips' current letter is the row at the line at every step @1512",
+  "ok": true,
+  "detail": "0 misses: "
+ },
+ {
+  "lock": "A3",
+  "where": "the pinned row takes one box while pinned @1512",
+  "ok": true,
+  "detail": "1 boxes: 248.0,105.8,1256.0"
+ },
+ {
+  "lock": "A3",
+  "where": "601 steps read @1280",
+  "ok": true,
+  "detail": "601"
+ },
+ {
+  "lock": "A3",
+  "where": "both strips' current letter is the row at the line at every step @1280",
+  "ok": true,
+  "detail": "0 misses: "
+ },
+ {
+  "lock": "A3",
+  "where": "the pinned row takes one box while pinned @1280",
+  "ok": true,
+  "detail": "1 boxes: 248.0,105.8,1024.0"
+ }
+]

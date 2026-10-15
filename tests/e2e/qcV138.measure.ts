@@ -695,7 +695,10 @@ test.describe("Query Centre v138", () => {
         return { n: discs.length, bad, stray };
       });
       L.check("J1", `${route} has discs`, r.n > 0, `${r.n}`);
-      L.check("J1", `${route} paint`, r.bad.every((d) => ALLOWED[d.s] === d.bg), JSON.stringify(r.bad.filter((d) => ALLOWED[d.s] !== d.bg).slice(0, 3)));
+      /* EDITED (Contact list v18 §C): on /agents a not-queried disc in the list's rows is a dotted ring with no fill (CL18 C2
+         holds it); everywhere else, and every other state, the disc's own sheet paints it as before */
+      const allowedOn = (d: { s: string; bg: string }) => ALLOWED[d.s] === d.bg || (route === "/agents" && d.s === "none" && d.bg === "rgba(0, 0, 0, 0)");
+      L.check("J1", `${route} paint`, r.bad.every(allowedOn), JSON.stringify(r.bad.filter((d) => !allowedOn(d)).slice(0, 3)));
       L.check("J1", `${route} no stray circle`, r.stray === 0, `${r.stray}`);
     }
     L.done(12);

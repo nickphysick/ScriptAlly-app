@@ -41,7 +41,8 @@ async function openHk(page: import("@playwright/test").Page) {
   await page.waitForTimeout(250);
 }
 
-test("CL13-9 · housekeeping drawer", async ({ page }) => {
+/* RETIRED (Contact list v18): the old drawer's list views are retired; CL18 F3 and F4 hold the new drawer */
+test.skip("CL13-9 · housekeeping drawer", async ({ page }) => {
   const L = new Ledger("cl13-9");
   for (const vp of WIDTHS) {
     await openContacts(page, vp);
@@ -91,7 +92,8 @@ test("CL13-9 · housekeeping drawer", async ({ page }) => {
   L.done(24);
 });
 
-test("CL13-HK · start here, the copy, the fixes and the toggle", async ({ page }) => {
+/* RETIRED (Contact list v18): the old drawer's 'Start here', copy rows and toggle are retired; CL18 F3 holds home, F4 the questions */
+test.skip("CL13-HK · start here, the copy, the fixes and the toggle", async ({ page }) => {
   /* a missing subject must FAIL, named, in seconds — never wait out the 15-minute case timeout */
   page.setDefaultTimeout(15_000);
   const L = new Ledger("cl13-hk");
@@ -193,7 +195,8 @@ test("CL13-HK · start here, the copy, the fixes and the toggle", async ({ page 
 });
 
 /* ── HK v2 §9.5 / §9.8 / §9.10 · the writing cases: each restores the account in the same run ── */
-test("CL13-HKW · Later, Undo and the reminder chip, read back from Firestore", async ({ page }) => {
+/* RETIRED (Contact list v18): the old drawer's per-row Later is retired with its list views; CL18 F4 holds a save and its Undo */
+test.skip("CL13-HKW · Later, Undo and the reminder chip, read back from Firestore", async ({ page }) => {
   /* a missing subject must FAIL, named, in seconds — never wait out the 15-minute case timeout */
   page.setDefaultTimeout(15_000);
   const L = new Ledger("cl13-hkw");
@@ -472,7 +475,7 @@ test("CL13-12 · loading", async ({ page }) => {
     L.check("CL13-12 with the agents held, the placeholders render: five rows, shimmering, inert", w,
       held.loading && held.inert && held.rows === 5 && held.shimmer /* v16: the title is fixed words, so it has no painted-over shape */, JSON.stringify(held));
     L.check("CL13-12 the perched art and the pills wait for data; no Housekeeping tab", w,
-      held.perch === null /* v16: the perched hawk went with the title bar */ && held.ctl === "0" && !held.tab, JSON.stringify(held));
+      held.perch === null /* v16: the perched hawk went with the title bar */ && (held.ctl === "0" || held.ctl === null /* v18 §B: the bar's controls are the list header's tools, disabled while loading */) && !held.tab, JSON.stringify(held));
     const a = await boxes();
     await page.locator(".aglist .clv-group[data-loading]").waitFor({ state: "detached", timeout: 30_000 }).catch(() => {});
     await page.waitForTimeout(600);
@@ -504,7 +507,8 @@ test("CL13-12 · loading", async ({ page }) => {
 
 /* ── lock 13 · the page guide: first visit shows step 1; × sets sa.guide.contacts; a reload doesn't
    show it; "Show the page guide" does ── */
-test("CL13-13 · page guide", async ({ page }) => {
+/* RETIRED (Contact list v18): it steers the guide through the Grouped pill, which v18 removed; CL14-16 holds the guide's steps and subjects */
+test.skip("CL13-13 · page guide", async ({ page }) => {
   const L = new Ledger("cl13-13");
   page.setDefaultTimeout(15_000);
   const G = '[data-guide="contacts"]';

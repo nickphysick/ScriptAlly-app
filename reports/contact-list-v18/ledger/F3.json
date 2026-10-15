@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "F3",
+  "where": "it opens on home @1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "one card per applicable detail, in points order @1512",
+  "ok": true,
+  "detail": "reply,materials,genres,wishlist,reopen"
+ },
+ {
+  "lock": "F3",
+  "where": "their rows sum to the gap total @1512",
+  "ok": true,
+  "detail": "46 vs 46"
+ },
+ {
+  "lock": "F3",
+  "where": "Up next is the queue's first task @1512",
+  "ok": true,
+  "detail": "msv12-agent-5:reply vs msv12-agent-5:reply · \"1 of 46\""
+ },
+ {
+  "lock": "F3",
+  "where": "\"Fill in all\" starts a run counted within itself @1512",
+  "ok": true,
+  "detail": "\"1 of 5\" (run of 5)"
+ },
+ {
+  "lock": "F3",
+  "where": "it opens on home @1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "one card per applicable detail, in points order @1280",
+  "ok": true,
+  "detail": "reply,materials,genres,wishlist,reopen"
+ },
+ {
+  "lock": "F3",
+  "where": "their rows sum to the gap total @1280",
+  "ok": true,
+  "detail": "46 vs 46"
+ },
+ {
+  "lock": "F3",
+  "where": "Up next is the queue's first task @1280",
+  "ok": true,
+  "detail": "msv12-agent-5:reply vs msv12-agent-5:reply · \"1 of 46\""
+ },
+ {
+  "lock": "F3",
+  "where": "\"Fill in all\" starts a run counted within itself @1280",
+  "ok": true,
+  "detail": "\"1 of 5\" (run of 5)"
+ }
+]

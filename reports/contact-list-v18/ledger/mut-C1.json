@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C1",
+  "where": "the strip is rgb(233, 237, 243) @1512",
+  "ok": true,
+  "detail": "rgb(233, 237, 243)"
+ },
+ {
+  "lock": "C1",
+  "where": "at the sheet's full width (±1) @1512",
+  "ok": false,
+  "detail": "314.0–1438.0 vs 272.0–1480.0"
+ },
+ {
+  "lock": "C1",
+  "where": "each heading within 2px of its column @1512",
+  "ok": false,
+  "detail": "42.0 · 16.6 · -22.5 · -42.0"
+ },
+ {
+  "lock": "C1",
+  "where": "the strip is rgb(233, 237, 243) @1280",
+  "ok": true,
+  "detail": "rgb(233, 237, 243)"
+ },
+ {
+  "lock": "C1",
+  "where": "at the sheet's full width (±1) @1280",
+  "ok": false,
+  "detail": "314.0–1206.0 vs 272.0–1248.0"
+ },
+ {
+  "lock": "C1",
+  "where": "each heading within 2px of its column @1280",
+  "ok": false,
+  "detail": "42.0 · 37.2 · -42.0 · -42.0"
+ }
+]

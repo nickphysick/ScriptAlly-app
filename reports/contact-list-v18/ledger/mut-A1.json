@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A1",
+  "where": "no letter tabs inside the list sheet @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "26 tabs in the header, above the title @1512",
+  "ok": true,
+  "detail": "26 · above true"
+ },
+ {
+  "lock": "A1",
+  "where": "each count is the visible rows for its letter, a letter with none disabled @1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "filtered (20 rows): each count is still the visible rows @1512",
+  "ok": false,
+  "detail": "20 of 37 · B:3/1 E:1/0 F:2/1 H:3/1 K:4/2 O:2/1 P:2/1 Q:2/1 R:4/1 V:5/3 W:1/0"
+ },
+ {
+  "lock": "A1",
+  "where": "no letter tabs inside the list sheet @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "26 tabs in the header, above the title @1280",
+  "ok": true,
+  "detail": "26 · above true"
+ },
+ {
+  "lock": "A1",
+  "where": "each count is the visible rows for its letter, a letter with none disabled @1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "filtered (20 rows): each count is still the visible rows @1280",
+  "ok": false,
+  "detail": "20 of 37 · B:3/1 E:1/0 F:2/1 H:3/1 K:4/2 O:2/1 P:2/1 Q:2/1 R:4/1 V:5/3 W:1/0"
+ }
+]

@@ -177,7 +177,8 @@ test.describe("Contact list v17", () => {
     L.done(10);
   });
 
-  test("B1 · rows: search and pills in the filter row; Showing, Grouped, density and Full screen on the sheet", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §B: the filter row is gone from the page header; CL18 B1 holds the list header */
+  test.skip("B1 · rows: search and pills in the filter row; Showing, Grouped, density and Full screen on the sheet", async ({ page }) => {
     const L = new Ledger("B1");
     for (const vp of SIZES) {
       await open(page, vp, "B1"); const w = `${vp.width}`;
@@ -231,7 +232,7 @@ test.describe("Contact list v17", () => {
       const cover = await page.evaluate(() => parseFloat(getComputedStyle([...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().height > 0)!).getPropertyValue("--pin-cover")) || 0);
       L.check(`${w} its top is the sheet's top and its width the sheet's (±1), the cover + 64 tall`, near(r.pin.t, r.sheet.t, 1) && near(r.pin.w, r.sheet.w, 1) && near(r.pin.l, r.sheet.l, 1) && cover > 0 && near(r.pin.h, cover + 64, 0.5), `row ${r.pin.l.toFixed(1)},${r.pin.t.toFixed(1)} ${r.pin.w.toFixed(1)}×${r.pin.h} · sheet ${r.sheet.l.toFixed(1)},${r.sheet.t.toFixed(1)} ${r.sheet.w.toFixed(1)}`);
       L.check(`${w} its background is the folder tab's`, r.bg === r.tab && /^rgb\(/.test(r.bg), `${r.bg} vs tab ${r.tab}`);
-      L.check(`${w} the headings' top is the row's bottom (±1), and their width the list's (±1)`, near(r.labels.t, r.pin.b, 1) && near(r.labels.w, r.list.w, 1) && near(r.labels.l, r.list.l, 1) && r.labsBg === "rgb(255, 255, 255)", `headings ${r.labels.l.toFixed(1)},${r.labels.t.toFixed(1)} ${r.labels.w.toFixed(1)} · row bottom ${r.pin.b.toFixed(1)} · list ${r.list.l.toFixed(1)} ${r.list.w.toFixed(1)} · ${r.labsBg}`);
+      L.check(`${w} the headings' top is the row's bottom (±1), and their width the list's (±1)`, near(r.labels.t, r.pin.b, 1) && near(r.labels.w, r.list.w, 1) && near(r.labels.l, r.list.l, 1) && r.labsBg === "rgb(233, 237, 243)" /* RE-POINTED (v18 §B): the Query Centre strip */, `headings ${r.labels.l.toFixed(1)},${r.labels.t.toFixed(1)} ${r.labels.w.toFixed(1)} · row bottom ${r.pin.b.toFixed(1)} · list ${r.list.l.toFixed(1)} ${r.list.w.toFixed(1)} · ${r.labsBg}`);
       L.check(`${w} each heading sits over its column (within 2)`, r.heads.length === 3 && r.heads.every((x, i) => near(x, r.cols[i], 2)) && near(r.endHead, r.endCol, 2), `${r.heads.map((x) => x.toFixed(0)).join(",")} vs ${r.cols.map((x) => x.toFixed(0)).join(",")} · last ends ${r.endHead.toFixed(0)} vs ${r.endCol.toFixed(0)}`);
     }
     L.done(10);
@@ -287,17 +288,18 @@ test.describe("Contact list v17", () => {
         };
       });
       const r = await read();
-      L.check(`${w} a not-queried disc is #f4eee5 with ink initials`, r.none === "rgb(244, 238, 229) rgb(28, 19, 15)", `${r.none}`);
+      /* RETIRED (v18 §C): "a not-queried disc is #f4eee5": it is a dotted ring with no fill now (CL18 C2) */
+      L.check(`${w} a not-queried disc has no fill`, /^rgba\(0, 0, 0, 0\)/.test(r.none), `${r.none}`);
       L.check(`${w} a querying disc is #2a3a52 with cream initials`, r.live === "rgb(42, 58, 82) rgb(244, 238, 229)", `${r.live}`);
       L.check(`${w} a closed disc is #b3aca5 with #2b2622 initials`, r.closed === "rgb(179, 172, 165) rgb(43, 38, 34)", `${r.closed}`);
       L.check(`${w} ungrouped: each letter's first row shows its letter and no other row does`, r.wrong.length === 0 && r.letters.join("") === r.firsts.join("") && r.firsts.length > 4 && r.firsts.length < r.rows, `${r.letters.join("")} vs ${r.firsts.join("")} · wrong ${r.wrong.slice(0, 5).join(" ")} · ${r.rows} rows`);
       /* grouped by letter: the dividers do the job */
-      await page.locator('.aglist [data-lp="group"]').filter({ visible: true }).first().click(); await page.waitForTimeout(250);
+      await page.locator('.aglist [data-cl18="group"]').filter({ visible: true }).first().click(); /* RE-POINTED (v18 §B): the sentence's group name */ await page.waitForTimeout(250);
       await page.locator('[data-lpop="group"] [data-opt="group:letter"]').click(); await page.waitForTimeout(700);
       await page.evaluate(MUT === "D1" ? MUTATIONS.D1.js! : "0");
       const g = await read();
       L.check(`${w} grouped by letter: no margin letters, and the dividers are there`, g.letters.length === 0 && g.bands > 4, `${g.letters.length} letters · ${g.bands} dividers`);
-      await page.locator('.aglist [data-lp="group"]').filter({ visible: true }).first().click(); await page.waitForTimeout(250);
+      await page.locator('.aglist [data-cl18="group"]').filter({ visible: true }).first().click(); /* RE-POINTED (v18 §B): the sentence's group name */ await page.waitForTimeout(250);
       await page.locator('[data-lpop="group"] [data-opt="group:none"]').click(); await page.waitForTimeout(400);
     }
     L.done(10);
@@ -344,7 +346,8 @@ test.describe("Contact list v17", () => {
     L.done(12);
   });
 
-  test("E1 · pills: a set pill is navy, names its choice and carries a × that clears it without opening", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §B: the pills are not rendered on /agents; CL18 B2 holds the Filters panel over the same state */
+  test.skip("E1 · pills: a set pill is navy, names its choice and carries a × that clears it without opening", async ({ page }) => {
     const L = new Ledger("E1");
     for (const vp of SIZES) {
       await open(page, vp, "E1"); const w = `${vp.width}`;
@@ -367,7 +370,8 @@ test.describe("Contact list v17", () => {
     L.done(8);
   });
 
-  test("E2 · panels: each opens 10 under its pill with its heading and note; Show {n} agents is the list", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §B: the pills' own panels are not opened on /agents; CL18 B2 holds the one Filters panel */
+  test.skip("E2 · panels: each opens 10 under its pill with its heading and note; Show {n} agents is the list", async ({ page }) => {
     const L = new Ledger("E2");
     const HEAD: Record<string, [string, RegExp]> = { status: ["Where they stand", /^Pick any number$/], open: ["Taking queries?", /^From their profile$/], queried: ["Queried for this book?", /.+/] };
     for (const vp of SIZES) {
@@ -406,7 +410,8 @@ test.describe("Contact list v17", () => {
     L.done(20);
   });
 
-  test("E3 · more: one More filters control, with switches that read the filter", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §B: the More filters switches are a section of the one Filters panel; CL18 B2 holds its state */
+  test.skip("E3 · more: one More filters control, with switches that read the filter", async ({ page }) => {
     const L = new Ledger("E3");
     for (const vp of SIZES) {
       await open(page, vp, "E3"); const w = `${vp.width}`;
@@ -486,8 +491,8 @@ test.describe("Contact list v17", () => {
         return { on: g.hasAttribute("data-full"), url: new URLSearchParams(location.search).get("full"), header: vis('[data-cl17="header"]').length, footer: vis('[data-probe="app-footer"]').length,
           pin: !!pin?.hasAttribute("data-on"), pinTop: pin ? pin.getBoundingClientRect().top - sheet.getBoundingClientRect().top : NaN, pinW: pin ? pin.getBoundingClientRect().width - sheet.getBoundingClientRect().width : NaN,
           listTop: list && pin ? list.getBoundingClientRect().top - pin.getBoundingClientRect().bottom : NaN, listW: list?.getBoundingClientRect().width ?? NaN, sheetW: sheet.getBoundingClientRect().width,
-          btn: btn ? { text: (btn.textContent ?? "").trim(), pressed: btn.getAttribute("aria-pressed") } : null, sideW: side?.getBoundingClientRect().width ?? NaN, sideStored: localStorage.getItem("scriptally:sidebar-collapsed"), scrollTop: sc.scrollTop,
-          pills: [...document.querySelectorAll<HTMLElement>('[data-cl17="pinned-pill"]')].map((p) => `${p.dataset.k}:${(p.textContent ?? "").match(/\d+/)?.[0]}`), card: vis('[data-cl17="card-row"]').map((x) => `${x.dataset.k}:${(x.querySelector('[data-cl17="card-n"]')?.textContent ?? "").trim()}`) };
+          btn: btn ? { /* RE-POINTED (v18 §B): an icon button, named by its label */ text: (btn.getAttribute("aria-label") ?? btn.textContent ?? "").trim(), pressed: btn.getAttribute("aria-pressed") } : null, sideW: side?.getBoundingClientRect().width ?? NaN, sideStored: localStorage.getItem("scriptally:sidebar-collapsed"), scrollTop: sc.scrollTop,
+          pills: [...document.querySelectorAll<HTMLElement>('[data-cl18="pin-letter"]')].map((p) => p.dataset.l ?? ""), card: vis('[data-cl17="card-row"]').map((x) => `${x.dataset.k}:${(x.querySelector('[data-cl17="card-n"]')?.textContent ?? "").trim()}`) };
       });
       const at = await setScroll16(page, 700);
       const r0 = await read();
@@ -499,7 +504,8 @@ test.describe("Contact list v17", () => {
       L.check(`${w} F turns it on, and the URL carries it`, r1.on && r1.url === "1", `on ${r1.on} · ?full=${r1.url}`);
       L.check(`${w} the header and the footer are hidden`, r1.header === 0 && r1.footer === 0, `${r1.header} · ${r1.footer}`);
       L.check(`${w} the pinned row is shown on the sheet's top edge at its full width`, r1.pin && near(r1.pinTop, 0, 1) && near(r1.pinW, 0, 1), `shown ${r1.pin} · top ${r1.pinTop.toFixed(1)} · width off by ${r1.pinW.toFixed(1)}`);
-      L.check(`${w} its three pills carry the summary card's figures`, r1.pills.length === 3 && r1.pills.join() === r0.card.join(), `${r1.pills.join()} vs ${r0.card.join()}`);
+      /* RE-POINTED (v18 §A): the pinned row's three group pills became the 26 compact letters */
+      L.check(`${w} the pinned row carries the 26 letters`, r1.pills.length === 26 && r1.pills.join("") === "ABCDEFGHIJKLMNOPQRSTUVWXYZ", r1.pills.join(""));
       L.check(`${w} the list starts under the row, at the top, and fills the wider sheet`, r1.scrollTop === 0 && r1.listTop >= 0 && r1.listTop <= 24 && near(r1.listW, Math.min(1600, r1.sheetW - 48), 2) && r1.sheetW > r0.sheetW + 100, `scrollTop ${r1.scrollTop} · list ${r1.listTop.toFixed(1)} under the row · ${r1.listW.toFixed(1)} of sheet ${r1.sheetW.toFixed(1)} (was ${r0.sheetW.toFixed(1)})`);
       L.check(`${w} the sidebar is at its icons, and the writer's own setting is untouched`, near(r1.sideW, 68, 2) && r1.sideStored === r0.sideStored, `${r1.sideW} wide · stored ${r1.sideStored} (was ${r0.sideStored})`);
       L.check(`${w} the sheet's button reads "Exit full screen"`, r1.btn?.text === "Exit full screen" && r1.btn.pressed === "true", JSON.stringify(r1.btn));

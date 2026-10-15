@@ -20,9 +20,9 @@ export const CONTACT_GUIDE: readonly GuideStep[] = [
   },
   {
     title: "Find and filter",
-    /* v17 §F: search and the filter pills are in the header */
-    body: ["Search by name or agency, or narrow the list by status, who\u2019s open, and genre."],
-    subject: '[data-cl17="filter-row"]',
+    /* v18 §B: search and the one Filters button are in the list's slate header */
+    body: ["Search by name or agency, or open Filters to narrow the list by status, who\u2019s open, and genre."],
+    subject: '[data-cl18="list-header"]',
   },
   {
     title: "The full list",

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "B2",
+  "where": "the list shows only agents open to queries @1512",
+  "ok": false,
+  "detail": "33 of 37"
+ },
+ {
+  "lock": "B2",
+  "where": "the stored filter state says open (v17's own state) @1512",
+  "ok": false,
+  "detail": "either"
+ },
+ {
+  "lock": "B2",
+  "where": "\"Show {n} agents\" is the visible rows @1512",
+  "ok": true,
+  "detail": "\"Show 37 agents\""
+ },
+ {
+  "lock": "B2",
+  "where": "the Filters button counts one set filter @1512",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B2",
+  "where": "Escape closes it and returns focus to the button @1512",
+  "ok": true,
+  "detail": "filters"
+ },
+ {
+  "lock": "B2",
+  "where": "the list shows only agents open to queries @1280",
+  "ok": false,
+  "detail": "33 of 37"
+ },
+ {
+  "lock": "B2",
+  "where": "the stored filter state says open (v17's own state) @1280",
+  "ok": false,
+  "detail": "either"
+ },
+ {
+  "lock": "B2",
+  "where": "\"Show {n} agents\" is the visible rows @1280",
+  "ok": true,
+  "detail": "\"Show 37 agents\""
+ },
+ {
+  "lock": "B2",
+  "where": "the Filters button counts one set filter @1280",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "B2",
+  "where": "Escape closes it and returns focus to the button @1280",
+  "ok": true,
+  "detail": "filters"
+ }
+]

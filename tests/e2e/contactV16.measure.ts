@@ -357,7 +357,7 @@ test.describe("Contact list v16", () => {
       panels: [...g.querySelectorAll<HTMLElement>('[data-clv="panel"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
       labs: labs.map((l) => ({ col: l.dataset.ltCol ?? "", tag: l.tagName, sort: l.getAttribute("aria-sort"), text: (l.textContent ?? "").trim() })),
       sortPill: [...g.querySelectorAll('[data-cl16="bar"] :is([data-lp="sort"], [data-lp="dir"], .lp-join)')].length,
-      /* v17: the Grouped pill is on the list sheet's top row */ group: (g.querySelector('[data-cl17="sheet-row"] [data-lp="group"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      /* RE-POINTED (v18 §B): the grouping is named by the list header's sentence ("…, A to Z" ungrouped) */ group: (g.querySelector('[data-cl18="sentence"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
     };
   });
   /** the last word of a name: the page's own surname rule, in the test's words */
@@ -372,7 +372,7 @@ test.describe("Contact list v16", () => {
       const w = `${vp.width}`;
       const r = await readRows(page);
       L.check("C3", `${w} one panel, no group labels`, r.bands === 0 && r.panels === 1 && r.names.length > 5, `${r.bands} bands · ${r.panels} panels · ${r.names.length} rows`);
-      L.check("C3", `${w} "Grouped: No grouping"`, /No grouping/.test(r.group), `"${r.group}"`);
+      L.check("C3", `${w} ungrouped: the sentence ends ", A to Z"`, /, A to Z/.test(r.group), `"${r.group}"`);
       const sur = r.names.map(surname);
       L.check("C3", `${w} rows are A to Z by surname`, sur.every((x, i) => i === 0 || sur[i - 1].localeCompare(x) <= 0), sur.slice(0, 8).join(" · "));
       L.check("C3", `${w} the order is not a single letter (the claim has something to order)`, new Set(r.initials).size > 4, `${new Set(r.initials).size} initials`);
@@ -395,7 +395,8 @@ test.describe("Contact list v16", () => {
     L.done(20);
   });
 
-  test("C4 · letters: a tab lands its first agent just under the pinned controls; empty letters are disabled", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §A: the in-list letter tabs are gone; CL18 A1 and A2 hold the strip at the top and the jump */
+  test.skip("C4 · letters: a tab lands its first agent just under the pinned controls; empty letters are disabled", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("C4");
     for (const vp of SIZES16) {
@@ -750,7 +751,8 @@ test.describe("Contact list v16", () => {
     L.done(26);
   });
 
-  test("F2 · masthead: the top edge says whether they take queries; the name, the place and the links on record", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §E: the masthead takes the status colour with no top edge, the name in Source Serif 600 24, the agency in mono, the status as a mono chip and the card disc; CL18 E1 holds the colours */
+  test.skip("F2 · masthead: the top edge says whether they take queries; the name, the place and the links on record", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("F2");
     const seen: Record<string, number> = {};
@@ -778,7 +780,8 @@ test.describe("Contact list v16", () => {
     L.done(17);
   });
 
-  test("F3 · profile: one stand card in the agent's own state, and the index card", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §E: the Profile tab is the plain AgentPaperCard; the stand card and the index card are gone from it (CL18 E1) */
+  test.skip("F3 · profile: one stand card in the agent's own state, and the index card", async ({ page }) => {
     test.setTimeout(400_000);
     const L = new Ledger("F3");
     const seen: Record<string, number> = {};
@@ -1130,7 +1133,7 @@ test.describe("Contact list v16", () => {
       L.check("F7", `${w} the query's expected-reply date moved to the date the editor previewed`, new RegExp(`reply by ${m[2]}`, "i").test(line1) && m[2] === due(7), `"${line0}" → "${line1}" · previewed ${m[2]}`);
       await page.waitForTimeout(600);
       const p1 = await readPanel(page);
-      L.check("F7", `${w} back on the agent, and the stand card's figure has moved with it`, p1.acting === null && !!p1.stand && !!stand0 && Number(p1.stand.figure?.match(/\d+/)?.[0]) === Number(stand0.figure?.match(/\d+/)?.[0]) + 7, `"${stand0?.figure}" → "${p1.stand?.figure}" (seven days more)`);
+      /* RETIRED (v18 §E): this reading was the stand card's expected-reply figure; the Profile tab no longer has a stand card */
       /* the existing undo: the list's notice carries the card's own snapshot Undo */
       const undo = page.locator(".aglist .agl-notice button.act", { hasText: /^Undo$/ }).filter({ visible: true }).first();
       const offered = await undo.count();
@@ -1144,7 +1147,7 @@ test.describe("Contact list v16", () => {
       L.check("F7", `${w} and the query's expected-reply date back where it was`, line2 === line0, `"${line2}" (was "${line0}")`);
       await page.waitForTimeout(500);
       const p2 = await readPanel(page);
-      L.check("F7", `${w} and the stand card's figure is what it was`, !!p2.stand && p2.stand.figure === stand0?.figure, `"${p2.stand?.figure}" (was "${stand0?.figure}")`);
+      /* RETIRED (v18 §E): this reading was the stand card's expected-reply figure; the Profile tab no longer has a stand card */
     } finally {
       /* whatever happened above, the two test documents go */
       await deleteDoc(qRef).catch(() => {}); await deleteDoc(aRef).catch(() => {});

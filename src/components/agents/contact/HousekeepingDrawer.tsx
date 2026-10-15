@@ -297,7 +297,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     if ("error" in r) { sayFoot(`Couldn’t save that: ${r.error}`); return; }
     sayFoot(r.line, r.undo);
     pop(saveRef.current, n, false, 30);
-    pop(ringRef.current, n, true, 0);
+    pop(ringRef.current, n, true, 20);
     setBump((b) => b + 1);
     setPulse(item.key); later(() => setPulse((k) => (k === item.key ? null : k)), 600);
     setDone((d) => [...d, { key: item.key, label: `${DETAIL_NAME[item.gap]} for ${firstNameOf(item.agent)}`, n }]);

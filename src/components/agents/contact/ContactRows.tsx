@@ -206,7 +206,8 @@ const Row: React.FC<{
       data-loc={x.loc ?? ""}
       data-genres={x.genres.join("|")}
       aria-current={current || undefined}
-      onClick={(e) => onOpen(e.currentTarget.getBoundingClientRect())}
+      /* v18 §D: opening the agent closes this row's peek (and any peek still waiting to open) */
+      onClick={(e) => { window.clearTimeout(hoverT.current); if (peek) onPeek?.(false); onOpen(e.currentTarget.getBoundingClientRect()); }}
       onMouseEnter={() => {
         stopMq(); if (!peek) mq.current = startMarquee(wishRef.current);
         window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true), 450);

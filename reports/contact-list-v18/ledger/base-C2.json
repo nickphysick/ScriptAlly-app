@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "C2",
+  "where": "a transparent fill @1512",
+  "ok": false,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "C2",
+  "where": "a dotted border @1512",
+  "ok": false,
+  "detail": "solid 0px"
+ },
+ {
+  "lock": "C2",
+  "where": "a transparent fill @1280",
+  "ok": false,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "C2",
+  "where": "a dotted border @1280",
+  "ok": false,
+  "detail": "solid 0px"
+ }
+]

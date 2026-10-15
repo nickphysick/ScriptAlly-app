@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "F4",
+  "where": "Save is disabled until there is an answer",
+  "ok": true,
+  "detail": "disabled"
+ },
+ {
+  "lock": "F4",
+  "where": "Skip moves the task to the end of the queue",
+  "ok": true,
+  "detail": "msv12-agent-5:reply → msv12-agent-4:reply · run 5 · coming clv-fx-stub0:reply,clv-fx-never:reply,msv12-agent-6:reply,msv12-agent-5:reply"
+ },
+ {
+  "lock": "F4",
+  "where": "the counter does not move on a skip",
+  "ok": true,
+  "detail": "1 of 5"
+ },
+ {
+  "lock": "F4",
+  "where": "an answer enables Save",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "lock": "F4",
+  "where": "the save went through the page's save path (its saved line and Undo)",
+  "ok": true,
+  "detail": "\"Theo Abara replies in about 6 weeks. Your reply-due date is set.\""
+ },
+ {
+  "lock": "F4",
+  "where": "and the agent's row now shows the reply time",
+  "ok": true,
+  "detail": "Not stated → ~6 wks"
+ },
+ {
+  "lock": "F4",
+  "where": "Undo restores what the save wrote",
+  "ok": true,
+  "detail": "~6 wks → Not stated"
+ }
+]
