@@ -32,7 +32,12 @@ The named mutation (restore 1099.98) can only redden the 1280 half, since 1100 a
 the 740 half. Ledgers: `v4-1/red-before`, `v4-1/green`, `v4-1/mutation`, `v4-1/mutation-narrow`. The whole PK4 file on
 the branch after the change: **39 passed** (38 tests and sign-in). Shots at 1280 are refreshed in `shots/`.
 
-DEPLOY41_PLACEHOLDER
+## Deploy
+
+New integration branch `dev/…-qc1383-qc1384-pkg4-pkg41`, cut from what dev served (`…-pkg4`, `index-0P7A_QV6.js`) with
+`packages-v4` merged in, no conflicts. Gates there: tsc 0, both builds 0, Vitest 8,807 passed. The whole PK4 file there:
+**39 passed**. Deployed hosting only from a clean worktree at e9c6d2d2: **dev now serves `index-BOw0IoMj.js`** (checked
+before: `index-0P7A_QV6.js`). D1C3 re-run green against the deployed site at both sizes. Not merged to `main`.
 
 ---
 
