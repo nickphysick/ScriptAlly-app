@@ -32,6 +32,8 @@ import { RspCarousel } from "./RspCarousel";
 import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
 import { RspShare } from "./RspShare";
+import { RspEmpty, RspZeroNos } from "./RspEmpty";
+import { AppFooter } from "../shell/AppFooter";
 import "./responses.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -42,7 +44,7 @@ export function openRecordPicker(): void {
   if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" });
 }
 
-export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = ({ routeActive }) => {
+export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = ({ routeActive, onNavigate }) => {
   const { queries, activities, agents, manuscripts, collectionsReady, activitiesReady, readQueryActivity } = useScriptAllyDb();
   const navigate = useNavigate();
   const location = useLocation();
@@ -106,23 +108,35 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
           list width, as packages v4's `.ppv-page > .pk4-col` does */}
       <div className="rsp-page">
       <div className="rsp rsp-col" data-rsp="page">
-        <RspHeader loading={!ready} answered={ready ? counts.answered : null} msTitle={msTitle}
-          hasNos={ready && counts.passed + counts.noReply > 0}
-          onRecord={openRecordPicker} onShare={() => scrollTo(shareRef.current, "center")}
-          card={<RspSummaryCard counts={counts} kind={kind} loading={!ready}
-            onMore={() => scrollTo(moreRef.current, "start")} onKind={pressKind} />} />
-        {ready && counts.answered > 0 ? (
-          <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
-            selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
-        ) : null}
-        {ready && counts.passed + counts.noReply > 0 ? (
+        {/* Part F · nothing answered for this book: the empty page, and none of the populated page's parts. It
+            switches to the populated page the moment the first answer is recorded, with no reload. */}
+        {ready && counts.answered === 0 ? (
+          <RspEmpty msTitle={msTitle} stillOut={model.out} onRecord={openRecordPicker}
+            onQueryCentre={() => navigate("/queries")}
+            onPastReplyTime={() => navigate("/queries?status=attention")}
+            onImport={() => navigate("/import")} />
+        ) : (
           <>
-            <RspBanner />
-            <RspTally items={model.items} />
-            <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} onVisible={setVisible} />
-            <RspShare ref={shareRef} nos={model.items.filter((i) => i.group !== "more")} title={msTitle} />
+            <RspHeader loading={!ready} answered={ready ? counts.answered : null} msTitle={msTitle}
+              hasNos={ready && counts.passed + counts.noReply > 0}
+              onRecord={openRecordPicker} onShare={() => scrollTo(shareRef.current, "center")}
+              card={<RspSummaryCard counts={counts} kind={kind} loading={!ready}
+                onMore={() => scrollTo(moreRef.current, "start")} onKind={pressKind} />} />
+            {ready ? (
+              <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
+                selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
+            ) : null}
+            {ready ? <RspBanner /> : null}
+            {ready && counts.passed + counts.noReply > 0 ? (
+              <>
+                <RspTally items={model.items} />
+                <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} onVisible={setVisible} />
+                <RspShare ref={shareRef} nos={model.items.filter((i) => i.group !== "more")} title={msTitle} />
+              </>
+            ) : ready ? <RspZeroNos /> : null}
           </>
-        ) : null}
+        )}
+        {ready ? <div className="rsp-foot"><AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /></div> : null}
       </div>
       </div>
       {openItem && routeActive ? (
