@@ -268,8 +268,9 @@ test("TD5 I1 — a dismissal outranked by something newer is back, saying why; o
   L.check("I1", "a snooze back today is tagged BACK TODAY", backC === "Back today", String(backC));
   /* (c) holding: dismissed NOW — off the board, in Set aside */
   await setDoc(doc(db, "users", uid, "taskFlags", flagId("nudge_overdue", n.query)), { ...base, id: flagId("nudge_overdue", n.query), taskType: "nudge_overdue", queryId: n.query, skippedAt: new Date().toISOString() });
-  await page.waitForTimeout(1500);
-  L.check("I1", "a dismissal that holds is off the tray", (await page.locator(`[data-todo-v5] [data-td5-row="${n.key}"]`).count()) === 0, "");
+  /* polled, not a fixed wait: under a long run the snapshot can take longer than 1.5s to reach the tray */
+  const gone = await page.waitForFunction((k) => !document.querySelector(`[data-todo-v5] [data-td5-row="${k}"]`), n.key, { timeout: 10_000 }).then(() => true).catch(() => false);
+  L.check("I1", "a dismissal that holds is off the tray", gone, gone ? "" : "still on the tray after 10s");
   await page.locator('[data-todo-v5] [data-td5="tab-aside"]').click();
   const listed = await page.locator(`[data-todo-v5] [data-td5="aside-row"][data-aside="flag-${flagId("nudge_overdue", n.query)}"]`).count();
   L.check("I1", "…and listed in Set aside as dismissed", listed === 1, `${listed}`);
