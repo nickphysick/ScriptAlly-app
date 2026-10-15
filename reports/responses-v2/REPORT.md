@@ -177,6 +177,8 @@ On the integration branch:
 - Vitest: the same one failed file as the baseline (`functions/src/email.test.ts`), with 8821 tests passed;
 - RS2: 18 passed.
 
+Deployed to dev (hosting only) from a clean detached checkout of a768acf8. Dev serves `index-D4dKsROU.js`. Not merged to main, and not deployed to prod.
+
 ## For Nick
 - **Pinfix moved the Query Centre and the Contact list onto a shared `shell/PinnedRow`.** It arrived on dev after this branch was cut. The Responses list still pins with its own page-local copy. Moving it onto the shared row is a small follow-up.
 
