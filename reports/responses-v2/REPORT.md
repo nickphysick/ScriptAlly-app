@@ -117,13 +117,68 @@ One shared union gained a member: `RightPanelOwner` gained `"answer"`.
 
 ## Locks
 
-The table is filled from the consolidated run (see below).
+Readings are from the integration build (see Deploy). `tests/e2e/rs2.measure.ts`: **18 passed, 0 failed** (5.2 min, one worker). Unit locks: `src/lib/responses.test.ts`, 14 passed.
+
+Every lock was proved red with its named break (`tests/e2e/rs2Mutate.sh`, `reports/responses-v2/mutation-proofs.jsonl`). The unit lock D1 data was proved red by placing a query by its first answer instead of its latest (3 failed). Ledger: `reports/responses-v2/ledger/<lock>.json` and `mut-<lock>.json`.
+
+| Lock | Readings (all held) | Widths | Mutation (`RS2_MUTATE=<lock>`) | First failing reading under the mutation |
+|---|---|---|---|---|
+| A1 | 16 (yes) | 1280, 1512 | red | 1512: header images ["shadow","http://127.0.0.1:4621/images/responses/responses-wall-hawk.webp"] |
+| A2 | 22 (yes) | 1280, 1512 | red | 1512: scrollTop 0 → 180 on Passed |
+| B1 | 6 (yes) | 1280, 1512 | red | 1512: heading label 272.0 vs h1 426.0 |
+| B2 | 14 (yes) | 1280, 1512 | red | 1512: card widths 11.7 vs 340 |
+| B2one | 1 (yes) | 1512 | red | 1512: {"cards":1,"arrows":1,"dots":0} |
+| B3 | 50 (yes) | 1280, 1280 rs2-q-offer, 1280 rs2-q-rr, 1280 rs2-q-send, 1280 rs2-q-sent, 1512, 1512 rs2-q-offer, 1512 rs2-q-rr, 1512 rs2-q-send, 1512 rs2-q-sent | red | 1512 rs2-q-send: quote true (a quote only where a note is recorded) |
+| B4 | 6 (yes) | 1280, 1512 | red | 1512: arrows 1, dots 0 |
+| C1 | 10 (yes) | 1280 2, 1280 34, 1512 2, 1512 34 | red | 1512 2: gates [2,2] |
+| C2 | 22 (yes) | 1280, 1512 | red | 1512: no dividers on Wait (1) |
+| C3 | 14 (yes) | 1280, 1512 | red | 1512: navy row -1400.4 from the sheet top |
+| C4 | 8 (yes) | 1024, 390 | red | 1024: scroller 1073,768 |
+| D1 | 42 (yes) | 1280 card rs2-q-send, 1280 row rs2-q-form, 1280 row rs2-q-note, 1512 card rs2-q-send, 1512 row rs2-q-form, 1512 row rs2-q-note | red | 1512 card rs2-q-send: edge rgb(139, 155, 179) for more |
+| D2 | 19 (yes) | card button, header, record a no, row primary | red | card button: scrim alpha 0.000 within 250ms |
+| E1 | 7 (yes) | names, no nos, save, square, story | red | names: Agent names starts on |
+| F1 | 10 (yes) | 1280, 1512, first answer | red | 1512: populated parts on the empty page: {"card":1,"carousel":0,"banner":0,"tally":0,"list":0,"share":0,"panel |
+| F2 | 6 (yes) | 1280, 1512 | red | 1512: {"zero":1,"h":"Rejections are part of querying","tags":0,"tally":1,"list":0,"share":0,"toShare":0} |
+| L1 | 15 (yes) | 1024, 1180, 1280, 1512, 1920 | red | 1920: sheet scroller 8038,1664 |
+
+## L2 (the neighbouring pages)
+
+Each suite ran on this build and, where anything was red, on the unchanged base build (954a9413) as well.
+
+| Suite | This build | Base |
+|---|---|---|
+| qcV138 | 17 passed | — |
+| qcV1381 | 7 passed | — |
+| qcV1382 | D1 (motion) red | **D1 red** |
+| qcV1383 | 4 passed | — |
+| qcV1384 | 6 passed | — |
+| contactV17 | 14 passed | — |
+| contactV171 | 7 passed | — |
+| pk4 | 39 passed | — |
+| queryPanelV2 | V6 V7 V8 red; V10 red once, green re-run alone | **V6 V7 V8 red**; V10 passed |
+| inkShell | INK19, INK4 red | **INK19, INK4 red** |
+| shellV2 | B1, B2 B3, L1 red | **B1, B2 B3, L1 red** |
+
+Every red also fails on the base build, so none comes from this work. V10 reads the Notes tab on the shared account, whose data moved during that run.
 
 ## Shots
 
-`reports/responses-v2/shots/`, named after each `design-refs/responses-v4/screens/*` file: `{screen}-{width}.png`, plus `x-1920-*` and `x-1024-*`.
+`reports/responses-v2/shots/`, `{screen}-{width}.png`, named after each `design-refs/responses-v4/screens/*` file:
+- on The Smoke Test (`RS2_SET=base`): 01–13, plus `x-1920-*` and `x-1024-*`;
+- on the fixtures (`RS2_SET=fixtures`, seeded and removed by `seedRs2.mjs`): 140 nos (`11-top-140`, `12-pinned-140`), two nos (`14-*`), the personal-note panel (`06b`), the empty page (`15`, `16`) and 390 (`17`, `18`).
+
+## Deploy
+
+Dev served `…-pkg4-pkg41-pinfix` (91f70001, `index-XJ-N_guT.js`) by the time this was ready; another session deployed it at 11:14. The integration branch `dev/…-pkg4-pkg41-pinfix-resp2` is cut from it with `responses-v2` merged in. The merge did not conflict.
+
+On the integration branch:
+- tsc 0;
+- production build 0, no CSS warnings;
+- Vitest: the same one failed file as the baseline (`functions/src/email.test.ts`), with 8821 tests passed;
+- RS2: 18 passed.
 
 ## For Nick
+- **Pinfix moved the Query Centre and the Contact list onto a shared `shell/PinnedRow`.** It arrived on dev after this branch was cut. The Responses list still pins with its own page-local copy. Moving it onto the shared row is a small follow-up.
 
 - **Lines dropped for a missing fact** (`answerStand`, `answerIndex` and the card foot drop a clause rather than invent one):
   - On The Smoke Test, the third request card has no send-by date (`expectedSendDate` is unset), so its foot shows no date.
