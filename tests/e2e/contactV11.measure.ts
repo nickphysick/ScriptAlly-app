@@ -579,7 +579,8 @@ test("v12 P1 — + Add an agent opens the centred card directly; no quick-add ex
 
 /* ══════════════════════════ v12 P2 — the index strip (§10.2) and the re-dressed head (§10.3) ══════════════════════════ */
 
-test("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider on its margin, marked", async ({ page }) => {
+/* RETIRED (Contact list v18 §A): the letter strip inside the list is gone; CL18 A1 holds the strip at the top of the page */
+test.skip("v12 §10.2 — 27 cells; every cell's count IS its section's rows; a click lands the divider on its margin, marked", async ({ page }) => {
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   /* RE-POINTED (Contact list v16): the list opens ungrouped, so this case asks for the LETTER grouping first (the
      visit's memory, the same record the Grouped pill writes) and reloads. The census and the landing are unchanged. */

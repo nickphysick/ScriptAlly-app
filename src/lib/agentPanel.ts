@@ -228,7 +228,7 @@ export function panelIndex({ agent, genres, queried, nowMs }: IndexInput): Index
 }
 
 /** one material as the card says it: "Query letter", "Synopsis · 2 pages", "First 10 pages" */
-function materialWords(r: ReturnType<typeof materialRowsFromAgent>[number]): string {
+export function materialWords(r: ReturnType<typeof materialRowsFromAgent>[number]): string {
   if (r.key === "sample") {
     const n = parseInt(r.amount, 10);
     return Number.isFinite(n) && n > 0 ? `First ${r.amount} ${r.unit.toLowerCase()}` : "Opening sample";

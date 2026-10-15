@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "E1",
+  "where": "the framed card's 1px frame is rgb(165, 131, 123)",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)"
+ },
+ {
+  "lock": "E1",
+  "where": "and the band is inside the frame",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "E1",
+  "where": "none: the masthead is rgb(94, 113, 137)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137) (none)"
+ },
+ {
+  "lock": "E1",
+  "where": "none: the Profile tab is the plain card, no frame, band or head",
+  "ok": true,
+  "detail": "plain true · frame false"
+ },
+ {
+  "lock": "E1",
+  "where": "live: the masthead is rgb(45, 58, 80)",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) (querying)"
+ },
+ {
+  "lock": "E1",
+  "where": "live: the Profile tab is the plain card, no frame, band or head",
+  "ok": true,
+  "detail": "plain true · frame false"
+ },
+ {
+  "lock": "E1",
+  "where": "closed: the masthead is rgb(169, 163, 156)",
+  "ok": true,
+  "detail": "rgb(169, 163, 156) (closed)"
+ },
+ {
+  "lock": "E1",
+  "where": "closed: the Profile tab is the plain card, no frame, band or head",
+  "ok": true,
+  "detail": "plain true · frame false"
+ }
+]

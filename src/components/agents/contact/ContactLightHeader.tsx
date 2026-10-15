@@ -19,6 +19,7 @@ import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
 import "./contactV17.css";
+import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
 
 export const CONTACT_EYEBROW = "— CONTACT LIST —";
 export const CONTACT_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
@@ -93,13 +94,13 @@ export const ContactSummaryCard: React.FC<{
       ))}
     </div>
     {health !== undefined ? (
-      <button type="button" className="cl17-hl" data-cl17="health" data-full={health && health.gaps <= 0 ? "" : undefined}
+      <button type="button" className="cl17-hl" data-cl17="health" data-full={health && health.gaps <= 0 && health.pct === 100 ? "" : undefined}
         disabled={loading || !health || !onHealth} onClick={onHealth}
         aria-label={health ? healthLabel(health) : "List health"}>
-        <HealthRing pct={health ? (health.gaps <= 0 ? 100 : health.pct) : null} />
+        <HealthRing pct={health ? health.pct : null} />
         <span className="cl17-ht">
           <b data-cl17="health-title">List health</b>
-          <em data-cl17="health-gaps">{health ? gapLine(health.gaps) : ""}</em>
+          <em data-cl17="health-gaps">{health ? (health.gaps > 0 || health.pct === 100 ? gapLine(health.gaps) : "Some put off for later") : ""}</em>
         </span>
       </button>
     ) : null}
@@ -123,11 +124,14 @@ export const ContactLightHeader: React.FC<{
   /** v17.1 — List health (Housekeeping's figures; null while loading) and its opener */
   health?: ListHealth | null;
   onHealth?: () => void;
+  /** v18 §A — the letter tabs, the first thing in the header */
+  letters?: React.ReactNode;
   /** Part B — the search and filter row, under the header's rule */
   children?: React.ReactNode;
-}> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, children }) => (
+}> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, letters, children }) => (
   <header className="cl17-hd" data-cl17="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <img className="cl17-shadow" data-cl17="shadow" alt="" aria-hidden="true" src={`${CONTACT_SHADOW.src}?v=${CONTACT_SHADOW.version}`} />
+    {letters}
     <div className="cl17-tr" data-cl17="header-row">
       <div className="cl17-tb" data-cl17="title-block">
         <span className="cl17-ey" data-cl17="eyebrow">{CONTACT_EYEBROW}</span>

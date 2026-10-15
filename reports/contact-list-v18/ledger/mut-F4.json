@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "F4",
+  "where": "Save is disabled until there is an answer",
+  "ok": true,
+  "detail": "disabled"
+ },
+ {
+  "lock": "F4",
+  "where": "Skip moves the task to the end of the queue",
+  "ok": true,
+  "detail": "seed-agent-nowin-1:reply → msv12-agent-2:reply · coming seed-agent-nowin-2:reply,msv12-agent-5:reply,msv12-agent-4:reply,clv-fx-stub0:reply,clv-fx-never:reply"
+ },
+ {
+  "lock": "F4",
+  "where": "the counter does not move on a skip",
+  "ok": true,
+  "detail": "1 of 8"
+ },
+ {
+  "lock": "F4",
+  "where": "an answer enables Save",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "lock": "F4",
+  "where": "the save went through the page's save path (its saved line and Undo)",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "F4",
+  "where": "and the agent's row now shows the reply time",
+  "ok": false,
+  "detail": "Not stated → Not stated"
+ },
+ {
+  "lock": "F4",
+  "where": "Undo restores what the save wrote",
+  "ok": true,
+  "detail": "Not stated → Not stated"
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "F1",
+  "where": "the page ring, the tab and the drawer show one number",
+  "ok": true,
+  "detail": "77 · 77 · 77"
+ },
+ {
+  "lock": "F1",
+  "where": "the drawer states held of possible",
+  "ok": true,
+  "detail": "\"521 of 674 points · 46 gaps left · about 23 min\""
+ },
+ {
+  "lock": "F1",
+  "where": "saving a reply time adds exactly 6 to held",
+  "ok": true,
+  "detail": "521 → 527"
+ },
+ {
+  "lock": "F1",
+  "where": "the three still agree after the save",
+  "ok": true,
+  "detail": "78 · 78 · 78"
+ },
+ {
+  "lock": "F1",
+  "where": "Undo puts held back",
+  "ok": true,
+  "detail": "\"521 of 674 points · 46 gaps left · about 23 min\""
+ }
+]

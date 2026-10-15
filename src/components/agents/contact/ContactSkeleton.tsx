@@ -7,7 +7,7 @@
  * the perched art, the pills, the tabs and the Housekeeping tab appear only with data.
  *
  * ⚠️ NOTHING JUMPS WHEN THE DATA ARRIVES BECAUSE THESE ARE THE PAGE'S OWN COMPONENTS (lock 12). Each
- * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
+ * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, and
  * `ContactRows` — drawn over a handful of
  * PLACEHOLDER agents through the page's own derivations, in the same parents, with their text made
  * transparent and a shimmer painted on (contactV13.css, `[data-loading]`). A box drawn by hand to
@@ -19,8 +19,7 @@
  */
 import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
-import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
-import { ContactIndexStrip } from "./ContactIndexStrip";
+import { agentFacts, contactGroups, sortFacts } from "../../../lib/contactList";
 import { ContactRows } from "./ContactRows";
 import type { CardPrimary } from "../../../lib/agentCard";
 
@@ -52,16 +51,15 @@ export const ContactSkeleton: React.FC<{
   const byId = useMemo(() => new Map(facts.map((x) => [x.agent.id, x])), [facts]);
   /* v16 §C: the list loads as it opens — ungrouped */
   const groups = useMemo(() => contactGroups("none", facts), [facts]);
-  const counts = useMemo(() => letterCounts(facts), [facts]);
 
   return (
     <>
       <div className="clv-main">
         <section className="cl14-ws cl16-list" aria-hidden="true">
           {/* v17 §B — the sheet's top row at its loaded height; the count and the tools wait for data */}
-          <div className="cl17-sv"><span className="cl17-showing">{"\u00a0"}</span>{controls}</div>
+          {/* v18 §B — the list header at its loaded height; the sentence and the tools wait for data */}
+          <div className="cl18-lh" data-cl18="list-header-skel"><p className="cl18-says">{"\u00a0"}</p>{controls}</div>
           <div className="cl14-list">
-          <ContactIndexStrip total={facts.length} counts={counts} marked={null} onPick={noop} />
           <div>
             <ContactRows
               groups={groups} totals={null} byId={byId} nowMs={nowMs} genreHit={() => false} ungrouped byLetter={false}
