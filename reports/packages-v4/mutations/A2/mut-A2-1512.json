@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A2-1512",
+  "where": "card",
+  "ok": true,
+  "detail": "the summary card and the sheet's total are on the page"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "sum",
+  "ok": true,
+  "detail": "3+1+1 against 5 packages"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "segment 0",
+  "ok": true,
+  "detail": "102.0 against 102.0"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "segment 1",
+  "ok": true,
+  "detail": "34.0 against 34.0"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "segment 2",
+  "ok": true,
+  "detail": "34.0 against 34.0"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "branches",
+  "ok": true,
+  "detail": "every status has a package on the fixture: 3/1/1"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "pressed",
+  "ok": true,
+  "detail": "aria-pressed true"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "fade 0",
+  "ok": true,
+  "detail": "opacity 0.32"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "fade 1",
+  "ok": true,
+  "detail": "opacity 0.32"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "pill",
+  "ok": true,
+  "detail": "Status pill reads \"Sent\""
+ },
+ {
+  "lock": "A2-1512",
+  "where": "no scroll",
+  "ok": false,
+  "detail": "scrollTop 0 → 180"
+ },
+ {
+  "lock": "A2-1512",
+  "where": "filters",
+  "ok": true,
+  "detail": "3 cards shown against 3 sent"
+ }
+]

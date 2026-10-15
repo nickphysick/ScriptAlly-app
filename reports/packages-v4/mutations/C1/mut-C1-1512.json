@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "C1-1512",
+  "where": "top row",
+  "ok": true,
+  "detail": "the packages sheet's top row is on the page"
+ },
+ {
+  "lock": "C1-1512",
+  "where": "navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1-1512",
+  "where": "no controls",
+  "ok": false,
+  "detail": "buttons in the row: Sort ⌄"
+ },
+ {
+  "lock": "C1-1512",
+  "where": "search width",
+  "ok": true,
+  "detail": "search 300 on a 1208 sheet"
+ },
+ {
+  "lock": "C1-1512",
+  "where": "find \"Prologue\"",
+  "ok": true,
+  "detail": "1 cards, each holding \"Prologue\""
+ },
+ {
+  "lock": "C1-1512",
+  "where": "find \"One-page\"",
+  "ok": true,
+  "detail": "3 cards, each holding \"One-page\""
+ },
+ {
+  "lock": "C1-1512",
+  "where": "escape clears",
+  "ok": true,
+  "detail": "Escape cleared the search"
+ }
+]

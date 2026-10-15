@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A1-1512",
+  "where": "header",
+  "ok": true,
+  "detail": "the v4 header is on the page"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "images",
+  "ok": true,
+  "detail": "images in the header: shadow"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "shadow",
+  "ok": true,
+  "detail": "shadow opacity 0.15"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "title words",
+  "ok": true,
+  "detail": "\"4 packages in use\" against 4 live"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "title size",
+  "ok": true,
+  "detail": "font-size 44 (compact)"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "one line",
+  "ok": true,
+  "detail": "title 44.0 tall at 44"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "title inset",
+  "ok": true,
+  "detail": "title block at +154.0 against 154.0"
+ },
+ {
+  "lock": "A1-1512",
+  "where": "card inset",
+  "ok": true,
+  "detail": "card 154.0 from the right against 154.0"
+ }
+]

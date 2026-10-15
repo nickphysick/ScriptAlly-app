@@ -1,0 +1,164 @@
+[
+ {
+  "lock": "E1-1512",
+  "where": "banner gap",
+  "ok": true,
+  "detail": "banner to sheet 28"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "default sort",
+  "ok": true,
+  "detail": "Requests aria-sort descending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "by letter",
+  "ok": true,
+  "detail": "the table shows letter"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "by synopsis",
+  "ok": true,
+  "detail": "the table shows synopsis"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "by version",
+  "ok": true,
+  "detail": "the table shows version"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "by package",
+  "ok": true,
+  "detail": "the table shows package"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "rate 1 aria-sort",
+  "ok": true,
+  "detail": "rate aria-sort descending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "rate 1 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "by rate",
+  "ok": true,
+  "detail": "qualifying rates 100"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "rate 2 aria-sort",
+  "ok": true,
+  "detail": "rate aria-sort ascending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "rate 2 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "name 1 aria-sort",
+  "ok": true,
+  "detail": "name aria-sort ascending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "name 1 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "name 2 aria-sort",
+  "ok": true,
+  "detail": "name aria-sort descending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "name 2 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "sent 1 aria-sort",
+  "ok": true,
+  "detail": "sent aria-sort descending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "sent 1 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "sent 2 aria-sort",
+  "ok": true,
+  "detail": "sent aria-sort ascending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "sent 2 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "replies 1 aria-sort",
+  "ok": true,
+  "detail": "replies aria-sort descending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "replies 1 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "replies 2 aria-sort",
+  "ok": true,
+  "detail": "replies aria-sort ascending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "replies 2 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "requests 1 aria-sort",
+  "ok": true,
+  "detail": "requests aria-sort descending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "requests 1 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "requests 2 aria-sort",
+  "ok": true,
+  "detail": "requests aria-sort ascending"
+ },
+ {
+  "lock": "E1-1512",
+  "where": "requests 2 under-4 last",
+  "ok": true,
+  "detail": "flags Q----"
+ }
+]

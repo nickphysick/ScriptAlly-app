@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "V3-D4-1512",
+  "where": "parked",
+  "ok": true,
+  "detail": "the material form replaced the package form"
+ },
+ {
+  "lock": "V3-D4-1512",
+  "where": "escape back",
+  "ok": true,
+  "detail": "Escape went back to the package form, name kept"
+ },
+ {
+  "lock": "V3-D4-1512",
+  "where": "returns",
+  "ok": true,
+  "detail": "the package form is back"
+ },
+ {
+  "lock": "V3-D4-1512",
+  "where": "name kept",
+  "ok": true,
+  "detail": "name \"PK4 parking test\""
+ },
+ {
+  "lock": "V3-D4-1512",
+  "where": "letter chosen",
+  "ok": true,
+  "detail": "chosen \"PK4 parked letter 1512\""
+ }
+]

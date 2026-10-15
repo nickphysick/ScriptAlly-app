@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "V3-D6-1512",
+  "where": "notice",
+  "ok": true,
+  "detail": "the duplicate notice is shown"
+ },
+ {
+  "lock": "V3-D6-1512",
+  "where": "nothing written",
+  "ok": false,
+  "detail": "5 packages before, 6 with the duplicate open"
+ },
+ {
+  "lock": "V3-D6-1512",
+  "where": "cancelled",
+  "ok": false,
+  "detail": "still the same count after Cancel"
+ }
+]

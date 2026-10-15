@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "E3 default sort",
+  "ok": true,
+  "detail": "Requests aria-sort descending — the table opens sorted by requests, high to low"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "lead 2",
+  "ok": true,
+  "detail": "\"The Complete Autumn Submission Bundle for Literary Agents\" against qualifying The Complete Autumn Submission Bundle for Literary Agents"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "lead 3",
+  "ok": true,
+  "detail": "\"The Complete Autumn Submission Bundle for Literary Agents\" against qualifying The Complete Autumn Submission Bundle for Literary Agents"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "E3 under-4 last",
+  "ok": true,
+  "detail": "Q----"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "E3 by requests",
+  "ok": true,
+  "detail": "The Complete Autumn Submission Bundle for Literary Agents:2 Prologue-led:2 Comps-led variant:0 Two editions:0 Unattributed set:0"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "label The Complete Autumn Submission Bundle for Literary Agents",
+  "ok": true,
+  "detail": "2 requests, 2 other replies, 1 still waiting, 0 no reply"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "segments The Complete Autumn Submission Bundle for Literary Agents",
+  "ok": true,
+  "detail": "2,2,1 against 2,2,1,0"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "label Prologue-led",
+  "ok": true,
+  "detail": "2 requests, 0 other replies, 0 still waiting, 0 no reply"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "segments Prologue-led",
+  "ok": true,
+  "detail": "2 against 2,0,0,0"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "label Comps-led variant",
+  "ok": true,
+  "detail": "0 requests, 1 other reply, 1 still waiting, 0 no reply"
+ },
+ {
+  "lock": "V3-E2E3-1512",
+  "where": "segments Comps-led variant",
+  "ok": true,
+  "detail": "1,1 against 0,1,1,0"
+ }
+]

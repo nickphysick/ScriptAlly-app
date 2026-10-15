@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "B1-1512",
+  "where": "five",
+  "ok": true,
+  "detail": "Status|Query letter|Synopsis|Version|More filters"
+ },
+ {
+  "lock": "B1-1512",
+  "where": "one line",
+  "ok": true,
+  "detail": "tops 360,360,360,360,360"
+ },
+ {
+  "lock": "B1-1512",
+  "where": "option",
+  "ok": true,
+  "detail": "Comps-forward is offered"
+ },
+ {
+  "lock": "B1-1512",
+  "where": "current edition",
+  "ok": false,
+  "detail": "In use letters: Voice-led (Two editions' 1st edition held Comps-forward; its current is Voice-led)"
+ },
+ {
+  "lock": "B1-1512",
+  "where": "fixture",
+  "ok": false,
+  "detail": "Two editions is not shown for its old letter"
+ },
+ {
+  "lock": "B1-1512",
+  "where": "retired too",
+  "ok": true,
+  "detail": "retired letters (band folded)"
+ },
+ {
+  "lock": "B1-1512",
+  "where": "pill label",
+  "ok": true,
+  "detail": "pill reads \"Comps-forward\""
+ }
+]

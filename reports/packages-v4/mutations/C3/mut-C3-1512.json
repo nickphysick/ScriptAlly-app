@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C3-1512",
+  "where": "lift",
+  "ok": true,
+  "detail": "transform matrix(1, 0, 0, 1, 0, -2)"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "shadow",
+  "ok": true,
+  "detail": "box-shadow rgba(28, 19, 15, 0.45) 0px 14px 28px -18px, rgba(28, 19, 15, 0.1) 0px 0px 0px 1px"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "for new queries",
+  "ok": true,
+  "detail": "0 FOR NEW QUERIES tags"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "one tag",
+  "ok": true,
+  "detail": "1 tags, on seed-pkg-3"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "lavender",
+  "ok": true,
+  "detail": "rgb(236, 230, 246)"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "first",
+  "ok": true,
+  "detail": "the package used for new queries leads In use"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "foot 0",
+  "ok": false,
+  "detail": "738/783/827/872 h23/23/23"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "foot 1",
+  "ok": false,
+  "detail": "740/785/829/874 h23/23/23"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "foot 2",
+  "ok": false,
+  "detail": "1158/1202/1247/1291 h23/23/23"
+ },
+ {
+  "lock": "C3-1512",
+  "where": "foot 3",
+  "ok": false,
+  "detail": "1158/1202/1247/1291 h23/23/23"
+ }
+]

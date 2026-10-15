@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "A3-1280",
+  "where": "ring",
+  "ok": true,
+  "detail": "the ring is on the page"
+ },
+ {
+  "lock": "A3-1280",
+  "where": "size",
+  "ok": true,
+  "detail": "ring 76 (compact)"
+ },
+ {
+  "lock": "A3-1280",
+  "where": "answered",
+  "ok": true,
+  "detail": "sub \"7 of 7 answered\""
+ },
+ {
+  "lock": "A3-1280",
+  "where": "arc",
+  "ok": true,
+  "detail": "arc 100.0% against 100.0%"
+ },
+ {
+  "lock": "A3-1280",
+  "where": "no rust",
+  "ok": true,
+  "detail": "0 rust circles"
+ },
+ {
+  "lock": "A3-1280",
+  "where": "one line",
+  "ok": true,
+  "detail": "figure 189.5–209.5, % 187.0–200.0"
+ },
+ {
+  "lock": "A3-1280",
+  "where": "scrolls",
+  "ok": true,
+  "detail": "replies sheet at 117 after the press"
+ }
+]

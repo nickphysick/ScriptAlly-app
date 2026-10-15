@@ -1,0 +1,38 @@
+A1 |   2 failed   1 passed (34.9s)  |   ✗ A1-1512 · images — images in the header: shadow,other
+A2 |   2 failed   1 passed (36.0s)  |   ✗ A2-1512 · no scroll — scrollTop 0 → 180
+A3 |   2 failed   1 passed (37.2s)  |   ✗ A3-1512 · no rust — 1 rust circles
+C1 |   2 failed   1 passed (36.1s)  |   ✗ C1-1512 · no controls — buttons in the row: Sort ⌄
+C2 |   2 failed   1 passed (44.8s)  |   ✗ C2-1512 · retired folded — Retired aria-expanded true, grid true
+C3 |   2 failed   1 passed (43.0s)  |   ✗ C3-1512 · foot 0 — 738/783/827/872 h23/23/23
+D1 |   2 failed   1 passed (34.8s)  |   ✗ D1-1512 · strip 0 — rgba(0, 0, 0, 0)
+F1 |   2 failed   1 passed (51.9s)  |   ✗ F1-1512 · example — example true, package cards 1
+L1 |   2 failed   1 passed (53.4s)  |   ✗ L1-1512 · 1920 scroller — 3514/1664
+V3-D1 |   2 failed   1 passed (44.6s)  |   ✗ V3-D1-1512 · edit package no dialog — 1 other dialogs
+V3-D2 |   2 failed   1 passed (38.0s)  |   ✗ V3-D2-1512 · viewing no scrim — 1 scrims
+V3-D3 |   2 failed   1 passed (36.7s)  |   ✗ V3-D3-1512 · own row — own row is a BUTTON
+DONE
+B1 |   2 failed   1 passed (36.6s)  |   ✗ B1-1512 · current edition — In use letters: Voice-led (Two editions' 1st edition held Comps-forward; its current is Voice-led)
+E1 |   3 passed (34.3s)  | 
+V3-D4 |   2 failed   1 passed (47.5s)  |   ✗ V3-D4-1512 · returns — the package form is back
+V3-D5 |   2 failed   1 passed (50.8s)  | 
+V3-D6 |   2 failed   1 passed (41.5s)  |   ✗ V3-D6-1512 · nothing written — 5 packages before, 6 with the duplicate open
+V3-E2 |   3 passed (31.8s)  | 
+V3-E3 |   3 passed (31.7s)  | 
+removed 0
+ M src/components/packages/v4/PkgDrawer4.tsx
+SRCDONE
+--- rerun
+E1 |   2 failed   1 passed (41.3s)  |   ✗ E1-1512 · rate 2 under-4 last — flags --Q--
+V3-D5 |   2 failed   1 passed (50.5s)  | 
+V3-D5b |   2 failed   1 passed (51.1s)  | 
+V3-E3 |   2 failed   1 passed (35.1s)  |   ✗ V3-E2E3-1512 · E3 default sort — Requests aria-sort none — the table opens sorted by requests, high to low
+removed 0
+ M src/components/packages/v4/PkgDrawer4.tsx
+ M src/components/packages/v4/usePackagesModel.ts
+SRCDONE
+--- rerun D5b
+V3-D5b |   2 failed   1 passed (56.2s)  | 
+removed 0
+ M src/components/packages/v4/PkgDrawer4.tsx
+ M src/components/packages/v4/usePackagesModel.ts
+SRCDONE
