@@ -34,14 +34,15 @@ const PANEL_BG = "rgb(45, 58, 80)";
    Query Centre became in v137. Its number, its hidden counts sentence and H3's sum went with the number. */
 /* RETIRED (Submission packages v4, 14 Oct): /manuscripts/packages left the number panel for the centred light header
    ("{n} packages in use", page-local, OWN_HEADER_ROUTES); PK4 A1 holds it. Its WORDS and ROWS entries went with it. */
-export const NUMBER = ["/todo", "/todo/corkboard"] as const;
+/* To-do list v5 (15 Oct): /todo LEFT the NUMBER pages — its header is page-local ("{n} tasks in your tray", OWN_HEADER_ROUTES);
+   TD5 A1 holds it, n against the sidebar badge. Its WORDS entry and its tile check went with it. */
+export const NUMBER = ["/todo/corkboard"] as const;
 export const TITLE = ["/queries", "/agents", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
 const WORDS: Record<string, RegExp> = {
   "/queries": /^quer(y|ies) sent$/, "/agents": /^agents? on file$/,
-  "/todo": /^things? to do$/,
   "/todo/corkboard": /^notes? pinned to your corkboard$/,
 };
 /** what each page's own body counts, for H3: a selector whose visible matches are the count, or a reader */
@@ -167,7 +168,6 @@ test("H1–H7 · the panel on every workspace route", async ({ page }) => {
       const shown = Number(r.nText);
       if (route === "/queries") L.check("H3 N is active + inactive", at, r.glance.length === 2 && shown === r.glance[0] + r.glance[1], `${shown} vs ${r.glance.join(" + ")}`);
       else if (route === "/agents") { const parts = (r.said.match(/\d+/g) ?? []).map(Number); L.check("H3 N is the three kinds of agent added up", at, parts.length >= 1 && shown === parts.reduce((a, c) => a + c, 0), `${shown} vs ${parts.join(" + ")} ("${r.said}")`); }
-      else if (route === "/todo") L.check("H3 N is the page's tiles added up", at, r.tdTile.length > 0 && shown === r.tdTile.reduce((x, y) => x + y, 0), `${shown} vs tiles ${r.tdTile.join(" + ")}`);
       else L.check("H3 N is the number of cards the page draws", at, r.rows !== null && shown === r.rows, `${shown} vs ${r.rows} cards`);
       /* H7 */
       L.check(route === "/queries" ? "H7 the panel is 260 tall (±4)" : "H7 every number panel is 260 tall (±4)", at, near(r.any?.h, 260, 4), `${r.any?.h.toFixed(1)}`);
@@ -191,8 +191,10 @@ test("H1–H7 · the panel on every workspace route", async ({ page }) => {
     }
   }
   L.check("H6 population: several routes carry a drawing", "all", withArt >= 8, `${withArt} readings`);
-  /* RE-POINTED (Contact list v16): three number pages are left, so six readings at most; four is the floor */
-  L.check("H2 population: several number pages carry a subline", "all", withSub >= 4, `${withSub} sublines`);
+  /* RE-POINTED (Contact list v16): three number pages are left, so six readings at most; four is the floor.
+     RE-POINTED AGAIN (To-do list v5): /todo left NUMBER, so the floor is every number page at every size — derived from
+     the register, never restated. */
+  L.check("H2 population: every number page carries a subline", "all", withSub >= NUMBER.length * SIZES.length, `${withSub} sublines`);
   L.done(SIZES.length * ALL.length * 7);
 });
 
