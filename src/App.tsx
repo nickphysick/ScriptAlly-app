@@ -53,6 +53,7 @@ import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { QueryAnalytics } from "./components/QueryAnalytics";
+import { ResponsesPage } from "./components/responses/ResponsesPage";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -614,6 +615,8 @@ function AppContent() {
    */
   const queriesView: "cards" | "detail" = params.has("q") ? "detail" : "cards";
   const queriesAnalytics = path === "/queries/analytics";
+  /* Responses v2 — the third Queries tab; like Analytics it is its own slot, and the Query Centre stands aside */
+  const queriesResponses = path === "/queries/responses";
   const todoPage = todoPageForPath(path);
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
@@ -650,13 +653,13 @@ function AppContent() {
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
             its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
-        <StagePage active={routeKey === "queries" && !queriesAnalytics} layout="fill" clip>
+        <StagePage active={routeKey === "queries" && !queriesAnalytics && !queriesResponses} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
             statusFilter={queriesStatus} view={queriesView}
             onSelectView={() => { const n = new URLSearchParams(params); n.delete("view"); n.delete("q"); navigate({ pathname: "/queries", search: n.toString() ? `?${n.toString()}` : "" }); }}
             onOpenQuery={(id) => { const n = new URLSearchParams(params); n.set("q", id); n.delete("view"); navigate({ pathname: "/queries", search: `?${n.toString()}` }); }}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
-            routeActive={routeKey === "queries" && !queriesAnalytics} />
+            routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses} />
         </StagePage>
 
         {/* Amendment 1 (H3) — Analytics is a real destination so the nav carries no dead link.
@@ -679,6 +682,11 @@ function AppContent() {
             `.f12-body`; same tell — a page that scrolls where its spec says its rows do. */}
         <StagePage active={queriesAnalytics} layout="fill" clip>
           <QueryAnalytics onNavigate={handleNavigate} />
+        </StagePage>
+
+        {/* Responses v2 (15 Oct) — every agent answer for the book in scope. A flowing page in the shared grid. */}
+        <StagePage active={queriesResponses} layout="fill" clip>
+          <ResponsesPage onNavigate={handleNavigate} routeActive={queriesResponses} />
         </StagePage>
 
         {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).

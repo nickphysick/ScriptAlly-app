@@ -122,6 +122,7 @@ const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashb
    * is for; putting it in the section's `pages` would add a row to the rail nobody asked for.
    */
   "/queries/analytics": { section: "Querying", page: "Analytics", rail: "querying" },
+  "/queries/responses": { section: "Querying", page: "Responses", rail: "querying" },
   "/import": { section: "Shelf", page: "Import", rail: "shelf" },
   /* ⚠️ THE PAGE IS "Settings", NOT "Account" (settings-mode pack, Phase 1). The word had to agree
      with the rail heading the mode now puts in the panel; two names for one place, three inches

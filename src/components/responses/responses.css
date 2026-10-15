@@ -1,0 +1,137 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Responses v2 (`/queries/responses`; ref design-refs/responses-v4/responses-v4.html). Base rules are the compact
+ * values (a window 1440 or less); `.ws-app.sheet-wide` restates the full ones, the app's own switch, as Contact list
+ * v17, Query Centre v138 and Submission packages v4 do.
+ *
+ * ⚠️ PAGE-LOCAL COPIES FROM THE SAME VALUES. The light header and its card, the white sheet with its navy row, the
+ *    in-sheet search, the heading strip, the blush banner and the empty page are each page-local on their home pages
+ *    (packages v4's `packagesV4.css`, the Query Centre's `qcvList138.css`, the Contact list's `contactV17.css`).
+ *    These rules restate them under `rsp-`. Lift candidates, with the three home pages, into one shared sheet.
+ * ⚠️ EVERY CUSTOM PROPERTY IS `--rs-*`, declared on `.rsp` (the page) AND `.rsp-layer` (the panel, portalled to
+ *    `body`): a token declared on the page alone resolves to nothing in a portal.
+ * ⚠️ brand.tsx names h1–h3 as the brand serif and bare spans as the body sans at runtime: every face here is stated
+ *    with two classes and `!important`, and child spans inherit.
+ */
+.rsp, .rsp-layer {
+  --rs-ink: #1c130f; --rs-i72: rgba(28, 19, 15, 0.72); --rs-i60: rgba(28, 19, 15, 0.6); --rs-i55: rgba(28, 19, 15, 0.55);
+  --rs-i45: rgba(28, 19, 15, 0.45); --rs-i30: rgba(28, 19, 15, 0.3); --rs-i14: rgba(28, 19, 15, 0.14); --rs-i08: rgba(28, 19, 15, 0.08);
+  --rs-shell: #1b2433; --rs-navy: #2d3a50; --rs-disc: #2a3a52; --rs-cream: #f4eee5; --rs-c55: rgba(244, 238, 229, 0.55); --rs-c25: rgba(244, 238, 229, 0.25);
+  --rs-oat: #f2eee8; --rs-paper: #fbf9f5; --rs-head: #e9edf3; --rs-blush: #f6e2d8; --rs-stone: #ece8e3; --rs-grey: #b3aca5;
+  --rs-rust: #a2452a; --rs-you: #b0603e; --rs-peach: #e7a184; --rs-closed: #7c7168; --rs-closed-disc: #d9d3cc; --rs-sage: #e0e5dd; --rs-sage-c: #3f5a39;
+  --rs-type: var(--sp-type); --rs-serif: var(--sp-serif); --rs-mono: var(--font-mono);
+  color: var(--rs-ink);
+}
+.rsp :is(span, div, p, button, label, small, i, em, b, strong, u, a, section, header, footer, aside, li, dt, dd, q, blockquote, figure, mark),
+.rsp-layer :is(span, div, p, button, label, small, i, em, b, strong, u, a, section, header, footer, aside, li, dt, dd, q, blockquote, figure, mark) { font-family: inherit; }
+.rsp-layer { font-family: var(--rs-serif); }
+:where(.rsp, .rsp-layer) button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+.rsp :focus-visible, .rsp-layer :focus-visible { outline: 2px solid var(--rs-navy); outline-offset: 2px; }
+.rsp .rsp-mono, .rsp-layer .rsp-mono { font: 500 10px/1.3 var(--rs-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rs-i45); }
+
+/* ═════ the page column: the list width (24px from the sheet's edges, at most 1600, centred on the sheet) ═════ */
+.rsp-col {
+  --rs-w: min(1600px, calc(var(--hsheet-w, 100%) - 48px));
+  /* the header's inset (Part A) and the carousel's gutter (Part B) are ONE figure: the title's left edge */
+  --rs-inset: max(40px, calc((var(--rs-w) - 900px) / 2));
+  box-sizing: border-box; min-width: 0; padding-bottom: 8px; font-family: var(--rs-serif);
+}
+.ws-app.sheet-wide .rsp-col { --rs-inset: max(64px, calc((var(--rs-w) - 1080px) / 2)); }
+@media (min-width: 768px) { .rsp-col { width: var(--rs-w); margin-left: calc(50% - var(--rs-w) / 2); } }
+
+/* ═════ Part A · the light header (Contact list v17.1's and packages v4's values) ═════ */
+.rsp-hd { position: relative; isolation: isolate; box-sizing: border-box; min-width: 0; margin: 30px 0 0; padding: 0; container: rsphd / inline-size; --rs-sh-x: -60px; }
+.ws-app.sheet-wide .rsp-hd { --rs-sh-x: -70px; }
+/* ⚠️ A WRAPPING ROW, NOT packages v4's three-track grid: "30 answers from agents" and the card need ~932px together, and
+   the grid's symmetric insets leave 900 at the app's compact width, where the auto track squeezed the card to 247px
+   and the ring spilled out of it. The title block keeps the header's inset on the left; the card's right edge sits on
+   the column's edge (level with the sheets below), and it drops under the buttons only when the two cannot share a
+   line. */
+.rsp-hd .rsp-tr {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 22px 40px;
+  margin-left: var(--rs-inset); margin-right: 0;
+}
+.rsp-hd .rsp-left { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.ws-app.sheet-wide .rsp-hd .rsp-left { gap: 40px; }
+.rsp-hd .rsp-tb { min-width: 0; }
+.rsp-hd .rsp-card { flex: none; }
+.rsp-hd .rsp-shadow {
+  position: absolute; left: calc(var(--rs-inset) + var(--rs-sh-x)); top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
+  opacity: 0.15; transform: rotate(-4deg); filter: blur(1.5px); pointer-events: none; user-select: none;
+}
+.ws-app.sheet-wide .rsp-hd .rsp-shadow { width: 430px; }
+.rsp-hd .rsp-ey { display: block; margin: 0 0 15px; font: 500 12px/1 var(--rs-mono) !important; letter-spacing: 0.24em; color: var(--rs-rust); white-space: nowrap; }
+.rsp-hd h1.rsp-title { margin: 0; font: 400 44px/1 var(--rs-type) !important; letter-spacing: 0; color: var(--rs-ink); white-space: nowrap; outline: none; }
+.ws-app.sheet-wide .rsp-hd h1.rsp-title { font-size: 50px !important; }
+.rsp-hd h1.rsp-title span { font: inherit !important; }
+.rsp-hd .rsp-title .rsp-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
+.rsp-hd .rsp-by { display: flex; align-items: center; gap: 12px; margin-top: 12px; min-width: 0; }
+.rsp-hd .rsp-by::before { content: ""; flex: none; width: 40px; height: 1px; background: var(--rs-i30); }
+.rsp-hd .rsp-by::after { content: ""; flex: 1 1 0; min-width: 30px; max-width: 160px; height: 1px; background: var(--rs-i30); }
+.rsp-hd .rsp-by .rsp-byt { font: italic 400 20px/1.3 var(--rs-serif) !important; color: var(--rs-i60); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.rsp-hd .rsp-by .rsp-ms { font: 400 20px/1 var(--rs-type) !important; font-style: normal !important; color: var(--rs-ink); }
+.rsp-hd .rsp-acts { display: flex; gap: 10px; flex-wrap: wrap; }
+.rsp .rsp-btn { display: inline-flex; align-items: center; box-sizing: border-box; height: 46px; padding: 0 20px; border-radius: 12px; white-space: nowrap; font: 400 17px/1 var(--rs-type) !important; }
+.rsp .rsp-btn--navy, .rsp-layer .rsp-btn--navy { background: var(--rs-navy); color: var(--rs-cream); }
+.rsp .rsp-btn--navy:hover:not(:disabled) { background: var(--rs-ink); }
+.rsp .rsp-btn--wht { background: #fff; color: var(--rs-ink); box-shadow: 0 0 0 1px var(--rs-i14), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
+.rsp .rsp-btn--wht:hover:not(:disabled) { box-shadow: 0 0 0 1px var(--rs-i30), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
+.rsp .rsp-btn--sm { height: 38px; padding: 0 16px; border-radius: 10px; font-size: 14.5px !important; }
+.rsp .rsp-btn:disabled { cursor: default; opacity: 0.45; }
+
+/* the card: one white card, the counts left and the Reply rate right */
+.rsp-hd .rsp-card {
+  display: flex; align-items: stretch; box-sizing: border-box; border-radius: 16px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 14px 26px -22px rgba(28, 19, 15, 0.5);
+}
+.rsp-card .rsp-cnt { box-sizing: border-box; flex: none; width: 212px; padding: 16px 16px 8px 18px; }
+.ws-app.sheet-wide .rsp-card .rsp-cnt { width: 236px; }
+.rsp-card .rsp-bar { display: flex; gap: 3px; height: 10px; margin-bottom: 8px; }
+.rsp-card .rsp-sg { display: block; box-sizing: border-box; min-width: 4px; height: 100%; border-radius: 3px; transition: opacity 0.14s ease; }
+.rsp-card .rsp-bar .rsp-sg:first-child { border-radius: 7px 3px 3px 7px; }
+.rsp-card .rsp-bar .rsp-sg:last-child { border-radius: 3px 7px 7px 3px; }
+.rsp-card .rsp-bar .rsp-sg:only-child { border-radius: 7px; }
+.rsp-sw--more { background: var(--rs-you); }
+.rsp-sw--passed { background: var(--rs-grey); }
+.rsp-sw--noReply { background: #fff; box-shadow: inset 0 0 0 1.5px var(--rs-i45); }
+.rsp-card .rsp-row {
+  display: grid; grid-template-columns: 12px 34px auto; align-items: center; column-gap: 10px; box-sizing: border-box; width: 100%;
+  margin: 0; padding: 7px 2px; border-top: 1px solid var(--rs-i08); color: var(--rs-ink); text-align: left; transition: opacity 0.14s ease;
+}
+.rsp-card .rsp-bar + .rsp-row { border-top-color: transparent; }
+.rsp-card .rsp-row .rsp-sw { display: block; width: 12px; height: 12px; border-radius: 3px; min-width: 0; }
+.rsp-card .rsp-row .rsp-n { font: 400 22px/1.1 var(--rs-type) !important; text-align: right; min-height: 24px; }
+.rsp-card .rsp-row .rsp-lb { font: 400 16px/1.2 var(--rs-type) !important; white-space: nowrap; text-decoration: none; }
+.rsp-card .rsp-row:disabled { cursor: default; }
+.rsp-card[data-on] .rsp-row[aria-pressed="false"], .rsp-card[data-on] .rsp-row:not([aria-pressed]), .rsp-card[data-on] .rsp-sg:not([data-on]) { opacity: 0.32; }
+.rsp-card .rsp-row[aria-pressed="true"] .rsp-lb { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+.rsp-hd[data-loading] .rsp-card .rsp-n { border-radius: 6px; background: rgba(28, 19, 15, 0.07); }
+/* Reply rate: not interactive — a picture of the rate, a 1px rule to its left */
+.rsp-card .rsp-rate {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; min-width: 150px;
+  padding: 12px 22px; border-left: 1px solid var(--rs-i08); color: var(--rs-ink); text-align: center;
+}
+.rsp-card .rsp-rg { position: relative; display: block; width: 76px; height: 76px; }
+.ws-app.sheet-wide .rsp-card .rsp-rg { width: 92px; height: 92px; }
+.rsp-card .rsp-rg svg { display: block; width: 100%; height: 100%; }
+.rsp-card .rsp-rg .rsp-fig { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; font: 400 24px/1 var(--rs-type) !important; color: var(--rs-ink); }
+.ws-app.sheet-wide .rsp-card .rsp-rg .rsp-fig { font-size: 30px !important; }
+.rsp-card .rsp-rg .rsp-fig i { font: 400 13px/1 var(--rs-type) !important; font-style: normal !important; position: relative; top: -6px; }
+.ws-app.sheet-wide .rsp-card .rsp-rg .rsp-fig i { font-size: 16px !important; }
+.rsp-card .rsp-rg .rsp-fig[data-wide] { font-size: 18px !important; }
+.ws-app.sheet-wide .rsp-card .rsp-rg .rsp-fig[data-wide] { font-size: 22px !important; }
+.rsp-card .rsp-rate .rsp-rt { font: 400 15px/1.2 var(--rs-type) !important; white-space: nowrap; }
+.rsp-card .rsp-rate .rsp-rs { font: italic 400 13.5px/1.3 var(--rs-serif) !important; color: var(--rs-i60); white-space: nowrap; }
+@container rsphd (max-width: 899.98px) {
+  .rsp-hd .rsp-tr { margin-left: 0; }
+  .rsp-hd .rsp-shadow { display: none; }
+}
+@container rsphd (max-width: 639.98px) {
+  .rsp-hd h1.rsp-title { white-space: normal; font-size: 36px !important; }
+  .rsp-hd .rsp-card { flex-direction: column; width: 100%; }
+  .rsp-card .rsp-cnt, .ws-app.sheet-wide .rsp-card .rsp-cnt { width: auto; }
+  .rsp-card .rsp-rate { border-left: 0; border-top: 1px solid var(--rs-i08); }
+}
+@media (prefers-reduced-motion: reduce) { .rsp-card .rsp-row, .rsp-card .rsp-sg { transition: none; } }

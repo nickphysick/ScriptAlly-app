@@ -176,6 +176,13 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   dash: <LayoutGrid aria-hidden="true" />,
   send: <Send aria-hidden="true" />,
   chart: <LineChart aria-hidden="true" />,
+  /* Responses v2 — the reference's envelope with a reply arrow, drawn as the lucide set is (24 box, currentColor) */
+  replies: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="lucide">
+      <path d="M3 7h18v11H3z" /><path d="m3.5 8 8.5 6 8.5-6" /><path d="M9 3.5 6.5 5.5 9 7.5" />
+    </svg>
+  ),
   check: <ListChecks aria-hidden="true" />,
   sun: <Sun aria-hidden="true" />,
   calendar: <CalendarDays aria-hidden="true" />,

@@ -28,6 +28,7 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/dashboard",
   "/queries",
   "/queries/analytics",
+  "/queries/responses",
   "/todo",
   "/todo/calendar",
   "/todo/corkboard",

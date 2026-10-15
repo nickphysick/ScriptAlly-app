@@ -27,7 +27,7 @@ export const WORKSPACE_PATHS = new Set([
      clicking Analytics silently went home. Four surfaces agreed the page existed; this one set
      decided it did not, and it is the one the router asks. Found by the acceptance matrix, which
      reported "no visible .wpg" on a page that renders one. */
-  "/dashboard", "/queries", "/queries/analytics",
+  "/dashboard", "/queries", "/queries/analytics", "/queries/responses",
   // The To-do WORKSPACE — four pages, one section (workspace pack P1).
   "/todo", "/todo/calendar", "/todo/corkboard",
   "/agents", "/agents/discover",
