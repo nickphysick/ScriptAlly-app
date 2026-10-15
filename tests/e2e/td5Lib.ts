@@ -42,6 +42,8 @@ export class Ledger {
 export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* a press on a count row also scrolls the page */
   A2: { js: `document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-td5="card-row"]')) { const s = [...document.querySelectorAll("[data-todo-v5] .wpg-scroll")].find((x) => x.getBoundingClientRect().height > 0); if (s) s.scrollTop += 240; } }, true);` },
+  /* the Clear-all link made a block again (the class collision it once had) — A2's one-line reading */
+  A2w: { css: `[data-todo-v5] [data-td5="clear-all"] { display: grid !important; }` },
   /* the ring's ink drawn at a fixed half */
   B1: { js: `(() => { const C = 2 * Math.PI * 42; const half = (C / 2).toFixed(2) + " " + C.toFixed(2); const fix = () => { for (const svg of document.querySelectorAll('[data-td5="ring"] svg')) { let c = svg.querySelector('[data-td5="ring-ink"]'); if (!c) { c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); c.setAttribute("data-td5", "ring-ink"); for (const [k, v] of [["cx", "47.5"], ["cy", "47.5"], ["r", "42"], ["fill", "none"], ["stroke", "#2a3a52"], ["stroke-width", "9"]]) c.setAttribute(k, v); svg.appendChild(c); } if (c.getAttribute("stroke-dasharray") !== half) c.setAttribute("stroke-dasharray", half); } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, attributes: true }); fix(); })()` },
   /* the band loses its sticky offset */
@@ -58,7 +60,7 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L1: { css: `[data-todo-v5] .td5-wpg, [data-todo-v5] .wpg-scroll { overflow: visible !important; } [data-todo-v5] .td5-hd .td5-shadow { left: -400px !important; width: 2600px !important; }` },
 };
 export async function mutate(page: Page, lock: string) {
-  const m = MUT === lock ? MUTATIONS[lock] : null;
+  const m = MUT === lock || MUT === `${lock}w` ? MUTATIONS[MUT] : null;
   if (!m) return;
   if (m.css) await page.addStyleTag({ content: m.css });
   if (m.js) await page.evaluate(m.js);

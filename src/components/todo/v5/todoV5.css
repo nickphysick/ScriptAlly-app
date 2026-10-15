@@ -217,7 +217,9 @@
   padding: 0; margin: 0; border: 0; background: none; cursor: pointer; color: var(--td5-cr); font: inherit !important;
   text-decoration: underline dotted #e7a184 2px; text-underline-offset: 6px;
 }
-.td5-sheet .td5-say .td5-clear { margin-left: 14px; padding: 0; border: 0; background: none; cursor: pointer; color: #e7a184; font: italic 400 15px/1.2 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
+/* ⚠️ `.td5-clr`, NOT `.td5-clear`: that name is the All-caught-up grid, and sharing it made this button a grid block that
+   wrapped onto a second line (measured: display "grid") */
+.td5-sheet .td5-say .td5-clr { margin-left: 14px; padding: 0; border: 0; background: none; cursor: pointer; color: #e7a184; font: italic 400 15px/1.2 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
 .td5-sheet .td5-nav button:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
 .td5-sheet .td5-nav .td5-sp { flex: 1 1 auto; }
 .td5-root .td5-keys { display: flex; align-items: center; gap: 6px; font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.12em; color: rgba(244, 238, 229, 0.42); text-transform: uppercase; white-space: nowrap; }
