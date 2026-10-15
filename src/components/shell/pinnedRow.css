@@ -1,0 +1,24 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The pinned row's frame (PinnedRow.tsx), shared by every page with a pinned row. A page styles its own CONTENTS
+ * (width, gap, its controls); it never sets the row's height, padding-top or top — lock P3.
+ *
+ * ⚠️ THE CONTENT IS CENTRED BELOW THE COVER: the sheet lip is painted over the row's top `--pin-cover` px (measured by
+ *    `usePinCover`), so the row is that plus 64, padded down by it, and its content is one 64px flex row.
+ * ⚠️ `--pin-row-h` IS ON THE SHEET (`.ws-window`), so a page's sticky headings, which sit directly under the row, read
+ *    the same value the row is drawn at.
+ */
+.ws-window { --pin-row-h: calc(var(--pin-cover, 0px) + 64px); }
+.pin-row {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 12; box-sizing: border-box;
+  height: var(--pin-row-h); padding: var(--pin-cover, 0px) 0 0;
+  background: var(--ws-page); box-shadow: 0 1px 0 rgba(28, 19, 15, 0.1), 0 10px 18px -16px rgba(28, 19, 15, 0.45);
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s ease, visibility 0s linear 0.12s;
+}
+.pin-row[data-on] { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.12s ease; }
+.pin-row > .pin-row-in { display: flex; align-items: center; box-sizing: border-box; height: 64px; min-width: 0; padding-top: 0; padding-bottom: 0; }
+.pin-row > .pin-row-in > * { margin-top: 0; margin-bottom: 0; align-self: center; }
+@media (max-width: 767.98px) { .pin-row { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pin-row, .pin-row[data-on] { transition: none; } }
