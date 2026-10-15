@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 J ×2",
+  "ok": true,
+  "detail": "0 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the desk follows",
+  "ok": true,
+  "detail": "task-full-seed-query-9 vs task-full-seed-query-9"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 j in Find moves nothing",
+  "ok": true,
+  "detail": "task-full-seed-query-9 → task-full-seed-query-9"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 E starts the journey on the desk",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1512 j in a journey moves nothing",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 → task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 Escape (no answers) leaves the journey, the task stays",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 → task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 S opens the popover at pop-snooze",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 D opens the popover at pop-dismiss",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 N opens the compose card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1280 J ×2",
+  "ok": true,
+  "detail": "0 → 2"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the desk follows",
+  "ok": true,
+  "detail": "task-full-seed-query-9 vs task-full-seed-query-9"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 j in Find moves nothing",
+  "ok": true,
+  "detail": "task-full-seed-query-9 → task-full-seed-query-9"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 E starts the journey on the desk",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1280 j in a journey moves nothing",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 → task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 Escape (no answers) leaves the journey, the task stays",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 → task-full-seed-pkgq-3"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 S opens the popover at pop-snooze",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 D opens the popover at pop-dismiss",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 N opens the compose card",
+  "ok": true,
+  "detail": ""
+ }
+]

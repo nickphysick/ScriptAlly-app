@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the tray scrolled (the precondition)",
+  "ok": true,
+  "detail": "420"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the navy row is the sheet's top",
+  "ok": true,
+  "detail": "421.75 vs 421.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 strip under the nav",
+  "ok": true,
+  "detail": "497.75 vs 497.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 a band under the strip",
+  "ok": false,
+  "detail": "strip 535.75, bands 498,1284,2102,3256,3570"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the tray scrolled (the precondition)",
+  "ok": true,
+  "detail": "420"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the navy row is the sheet's top",
+  "ok": true,
+  "detail": "421.75 vs 421.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 strip under the nav",
+  "ok": true,
+  "detail": "497.75 vs 497.75"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 a band under the strip",
+  "ok": false,
+  "detail": "strip 535.75, bands 498,1284,2102,3256,3570"
+ }
+]

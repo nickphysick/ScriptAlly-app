@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E3",
+  "where": "the first row says Started",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "E3",
+  "where": "the corner chip is not shown twice",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E3",
+  "where": "coming back offers Carry on",
+  "ok": false,
+  "detail": "Record a nudge"
+ },
+ {
+  "lock": "E3",
+  "where": "it resumes at the same step with the answer",
+  "ok": false,
+  "detail": "{\"step\":\"1\"}"
+ },
+ {
+  "lock": "E3",
+  "where": "leaving with no answers parks nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E3",
+  "where": "Close → They said no lands in the response journey on the same card",
+  "ok": true,
+  "detail": "true task-no-res-close-thin-q-close vs task-no-res-close-thin-q-close"
+ }
+]

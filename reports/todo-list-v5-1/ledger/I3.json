@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "I3",
+  "where": "snooze: no confirm dialog",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I3",
+  "where": "snooze: a toast with Undo",
+  "ok": true,
+  "detail": "Snoozed until Fri 16 OctUndo"
+ },
+ {
+  "lock": "I3",
+  "where": "snooze: Undo restores the account byte-for-byte",
+  "ok": true,
+  "detail": "wrote true, exact true"
+ },
+ {
+  "lock": "I3",
+  "where": "snooze: …and reselects the task",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I3",
+  "where": "dismiss: no confirm dialog",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I3",
+  "where": "dismiss: a toast with Undo",
+  "ok": true,
+  "detail": "Dismissed · back if anything changesUndo"
+ },
+ {
+  "lock": "I3",
+  "where": "dismiss: Undo restores the account byte-for-byte",
+  "ok": true,
+  "detail": "wrote true, exact true"
+ },
+ {
+  "lock": "I3",
+  "where": "dismiss: …and reselects the task",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I3",
+  "where": "switch off: no confirm dialog",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I3",
+  "where": "switch off: a toast with Undo",
+  "ok": true,
+  "detail": "Missing reply times: switched off for every agentUndo"
+ },
+ {
+  "lock": "I3",
+  "where": "switch off: Undo restores the account byte-for-byte",
+  "ok": true,
+  "detail": "wrote true, exact true"
+ },
+ {
+  "lock": "I3",
+  "where": "switch off: …and reselects the task",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I3",
+  "where": "move: no confirm dialog",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I3",
+  "where": "move: a toast with Undo",
+  "ok": true,
+  "detail": "Moved to Thu 22 OctUndo"
+ },
+ {
+  "lock": "I3",
+  "where": "move: Undo restores the account byte-for-byte",
+  "ok": true,
+  "detail": "wrote true, exact true"
+ },
+ {
+  "lock": "I3",
+  "where": "move: …and reselects the task",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I3",
+  "where": "delete: no confirm dialog",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I3",
+  "where": "delete: a toast with Undo",
+  "ok": true,
+  "detail": "Deleted · Zz td51 probe task-zztd51i3mv9zkyi9Undo"
+ },
+ {
+  "lock": "I3",
+  "where": "delete: Undo restores the account byte-for-byte",
+  "ok": true,
+  "detail": "wrote true, exact true"
+ },
+ {
+  "lock": "I3",
+  "where": "delete: …and reselects the task",
+  "ok": true,
+  "detail": "true"
+ }
+]
