@@ -413,8 +413,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   /* ── keys ── */
   const stateRef = useRef({ walk, sel, act, add: () => {} });
   /* the Set aside tab's and the popover's key doors, filled below (a ref: the key handler is bound once) */
-  const asideKeys = useRef<{ view: "tray" | "aside"; list: SetAsideItem[]; sel: string | null; select: (id: string) => void; bring: () => void; pop: (f: "snooze" | "dismiss") => void }>({
-    view: "tray", list: [], sel: null, select: () => {}, bring: () => {}, pop: () => {},
+  const asideKeys = useRef<{ view: "tray" | "aside"; list: SetAsideItem[]; sel: string | null; select: (id: string) => void; bring: () => void; pop: (f: "snooze" | "dismiss") => void; toSheet: () => void }>({
+    view: "tray", list: [], sel: null, select: () => {}, bring: () => {}, pop: () => {}, toSheet: () => {},
   });
   stateRef.current = { walk, sel, act, add: () => openComposeRef.current() };
   useEffect(() => {
@@ -454,7 +454,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         const at = s ? w.findIndex((x) => x.key === s.key) : -1;
         const d = matchesShortcut(SHORTCUTS.todoDown, e) ? 1 : -1;
         const nx = w[Math.max(0, Math.min(w.length - 1, at < 0 ? 0 : at + d))];
-        if (nx) { setSelKey(nx.key); scrollRowIntoView(nx.key); }
+        if (nx) { setSelKey(nx.key); scrollRowIntoView(nx.key); x.toSheet(); }
         return;
       }
       if (matchesShortcut(SHORTCUTS.todoAct, e)) { if (s) { e.preventDefault(); a(s); } return; }
@@ -468,40 +468,29 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     return () => window.removeEventListener("keydown", onKey);
   }, [location.pathname, filters.find]);
 
-  /* ── the navy row squares off once it pins ── */
+  /* ── v5.1 §J · one screen: the sheet is the scrollport's height, published as --td5-port from the scroller's own
+     `clientHeight` (never 100vh — the scroller starts below the shell's bar) ── */
   const sheetRef = useRef<HTMLDivElement>(null);
-  const [stuck, setStuck] = useState(false);
-  useEffect(() => {
-    const sheet = sheetRef.current;
-    const sc = sheet?.closest(".wpg-scroll") as HTMLElement | null;
-    if (!sheet || !sc) return undefined;
-    let raf = 0;
-    const read = () => { raf = 0; const s = sc.getBoundingClientRect(); const r = sheet.getBoundingClientRect(); if (s.height > 0) setStuck(r.top <= s.top + 0.5); };
-    const ask = () => { if (!raf) raf = requestAnimationFrame(read); };
-    read();
-    sc.addEventListener("scroll", ask, { passive: true });
-    window.addEventListener("resize", ask);
-    return () => { sc.removeEventListener("scroll", ask); window.removeEventListener("resize", ask); if (raf) cancelAnimationFrame(raf); };
-  });
-
-  /* ── the desk's sticky top: under the navy row when it fits, by its bottom when it does not ── */
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scroller = () => (sheetRef.current?.closest(".wpg-scroll") ?? rootRef.current?.querySelector(".wpg-scroll")) as HTMLElement | null;
   useLayoutEffect(() => {
-    const sheet = sheetRef.current;
-    const desk = sheet?.querySelector<HTMLElement>(".td5-desk");
-    const sc = sheet?.closest(".wpg-scroll") as HTMLElement | null;
-    if (!sheet || !desk || !sc) return undefined;
-    const put = () => {
-      const port = sc.clientHeight, h = desk.offsetHeight;
-      if (!(port > 0) || !(h > 0)) return;
-      const nav = sheet.querySelector<HTMLElement>(".td5-nav")?.offsetHeight ?? 76;
-      const fit = nav + 22;
-      sheet.style.setProperty("--td5-desk-top", `${Math.min(fit, port - h - 16)}px`);
-    };
+    const root = rootRef.current;
+    const sc = root?.querySelector<HTMLElement>(".wpg-scroll");
+    if (!root || !sc) return undefined;
+    const put = () => { const h = sc.clientHeight; if (h > 0) root.style.setProperty("--td5-port", `${h}px`); };
     put();
     const ro = new ResizeObserver(put);
-    ro.observe(desk); ro.observe(sc);
-    return () => ro.disconnect();
-  });
+    ro.observe(sc);
+    window.addEventListener("resize", put);
+    return () => { ro.disconnect(); window.removeEventListener("resize", put); };
+  }, []);
+  /** starting work brings the sheet's top to the scroller's top (smoothly; at once under reduced motion) */
+  const toSheet = () => {
+    const sc = scroller(), sheet = sheetRef.current;
+    if (!sc || !sheet) return;
+    const top = sc.scrollTop + sheet.getBoundingClientRect().top - sc.getBoundingClientRect().top - 10;
+    if (Math.abs(top - sc.scrollTop) > 1) sc.scrollTo({ top, behavior: reduced() ? "auto" : "smooth" });
+  };
 
   /* ── the page's state ── */
   const openOwn = aid !== "nothing" && userTasks.some((t) => !t.done && !!t.dueDate);
@@ -531,6 +520,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (compose) closeCompose();
     setPop(null);
     setTrayView(v);
+    toSheet();
   };
   const selectRow = (key: string) => {
     if (working && deskItem?.key === key) return;
@@ -538,6 +528,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (compose) closeCompose();
     if (clash && clash.key !== key) setClash(null);
     setSelKey(key);
+    toSheet();
   };
   /* ── the compose card's doors and its save (v5.1 §F) ── */
   const todayYmd = localYMD(now);
@@ -558,6 +549,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     setClash(null);
     setComposeStamp(null);
     setCompose({ draft: edit ? draftFromTask(edit) : (keptDraft() ?? BLANK_DRAFT), edit, prevKey: deskItem?.key ?? null });
+    toSheet();
   };
   /** Cancel and Escape ask nothing: words typed are kept for the session; an edit is simply dropped */
   function closeCompose() {
@@ -784,6 +776,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     view: trayView, list: asideList, sel: asideDesk?.id ?? null, select: (id) => { setPop(null); setAsideSel(id); },
     bring: () => { if (asideDesk) void bringBack(asideDesk); },
     pop: (f) => { if (!deskItem || ghost) return; setPop({ mode: deskItem.userTask ? "move" : "aside", focus: f }); },
+    toSheet,
   };
   /* a brought-back task is selected the moment the board has it */
   useEffect(() => {
@@ -809,6 +802,21 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (i.card.returnedToday) return { tag: "Back today", line: "From a snooze." };
     return null;
   };
+
+  /* ── v5.1 §J — while a journey or the compose card is open the page scroller is LOCKED, with the sheet brought up
+     first, so the task fills one screen and only the tray and the card's body scroll. Leaving work unlocks it. ── */
+  const busyDesk = working || !!compose;
+  useEffect(() => {
+    if (!busyDesk) return undefined;
+    const sc = scroller();
+    if (!sc) return undefined;
+    toSheet();
+    const was = sc.style.overflowY;
+    sc.style.overflowY = "hidden";
+    sc.setAttribute("data-td5-locked", "");
+    return () => { sc.style.overflowY = was; sc.removeAttribute("data-td5-locked"); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busyDesk]);
 
   /* the slot node goes where the journey is: into the working card's host, else back to its holder (deskSlot.ts) */
   useLayoutEffect(() => { placeDeskSlot(working ? hostEl : null, holderRef.current); });
@@ -870,7 +878,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   };
 
   return (
-    <div className="td5-root" data-todo-v5="" data-state={state}>
+    <div className="td5-root" data-todo-v5="" data-state={state} ref={rootRef}>
       <WorkspacePageGrid className="td5-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="td5-group" data-td5="group">
           {state === "nothing" ? (
@@ -878,8 +886,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           ) : (
             <>
               {header}
-              <div className="td5-sheet" ref={sheetRef} data-td5="sheet" data-focus={focusMode ? "" : undefined}>
-                <div className="td5-nav" data-td5="nav" data-stuck={stuck ? "" : undefined}>
+              <div className="td5-sheet" ref={sheetRef} data-td5="sheet" data-focus={focusMode ? "" : undefined}
+                data-one={state === "list" || state === "loading" ? "" : undefined} data-working={busyDesk ? "" : undefined}>
+                <div className="td5-nav" data-td5="nav">
                   {state === "caught" ? (
                     <p className="td5-say" data-td5="say">
                       Nothing in your tray.{nextLand[0] ? <> The next task lands on <b>{dayMonth(nextLand[0].ms)}</b>.</> : null}
