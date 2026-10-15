@@ -14,6 +14,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { paintCovers, pinKids } from "./pinLib";
 
 const DIR = "reports/qc-v138-1";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -64,21 +65,22 @@ const scrollTo = (page: Page, y: number) => page.evaluate(async (top) => {
 }, y);
 
 test.describe("Query Centre v138.1", () => {
-  test("A1 · pinned centre: every child of the pinned row is centred on the bar", async ({ page }) => {
+  /* EDITED (pinned-row fix, 15 Oct): A1 measured each child against the pinned row's OWN box, and passed while the
+     contents sat 6px high — the sheet lip (pointer-events: none, z 19) is painted over the row's top 12px, so the box's
+     centre is not the centre of what a reader sees. It now measures as PIN1 P1 does (tests/e2e/pinRow.measure.ts):
+     against the VISIBLE area, found by paint, a text-only child by its ink. */
+  test("A1 · pinned centre: every child of the pinned row is centred on the visible area (as PIN1 P1)", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("A1");
     for (const vp of SIZES) {
       await openQC(page, vp, "A1");
       await scrollTo(page, 1500);
-      const r = await page.evaluate(() => {
-        const p = document.querySelector<HTMLElement>('[data-qc138="pinned"][data-on]');
-        if (!p) return null;
-        const b = p.getBoundingClientRect(); const c = (b.top + b.bottom) / 2;
-        const kids = [...(p.firstElementChild as HTMLElement).children].filter((k) => k.getBoundingClientRect().height > 0);
-        return kids.map((k) => { const kb = k.getBoundingClientRect(); return { k: k.className, d: (kb.top + kb.bottom) / 2 - c }; });
-      });
-      L.check("A1", `${vp.width} pinned`, !!r && r.length >= 4, `${r?.length ?? 0} children`);
-      for (const k of r ?? []) L.check("A1", `${vp.width} ${k.k}`, Math.abs(k.d) <= 1, `${k.d.toFixed(2)}`);
+      const rowSel = '[data-qc138="pinned"][data-on]';
+      const covers = await paintCovers(page, rowSel);
+      const r = await pinKids(page, rowSel);
+      const visC = (r.top + Math.max(0, ...covers.map((c) => c.coverPx)) + r.bottom) / 2;
+      L.check("A1", `${vp.width} pinned`, r.kids.length >= 4, `${r.kids.length} children`);
+      for (const k of r.kids) L.check("A1", `${vp.width} ${k.cls} (${k.how})`, Math.abs(k.c - visC) <= 1, `${(k.c - visC).toFixed(2)}`);
     }
     L.done(10);
   });

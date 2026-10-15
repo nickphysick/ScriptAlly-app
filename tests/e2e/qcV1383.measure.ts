@@ -68,9 +68,14 @@ const rowOf = async (page: Page, tone: "over" | "wait"): Promise<Locator> => {
   return page.locator(`.qcv-group[data-v138] [data-qcv="row"][data-qid="${id}"]`);
 };
 async function hoverRow(page: Page, row: Locator) {
-  await row.scrollIntoViewIfNeeded();
+  /* EDITED (pinned-row fix): move away FIRST, let any open peek fold, THEN centre the row and hover it. In the old order
+     (scroll, then move away) the previous row's peek folded after the target had been placed, the target slid up ~150px
+     and its hover point could land under the sticky stack (pinned row, headings, a group band) — which reaches 8px
+     lower since the pinned row gained its covered strip. Centred, the hover point is on the row whatever is pinned. */
   await page.mouse.move(2, 2);
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(400);
+  await row.evaluate((el) => { (el.closest<HTMLElement>(".wpg-scroll") ?? document.documentElement).style.scrollBehavior = "auto"; el.scrollIntoView({ block: "center" }); });
+  await page.waitForTimeout(250);
   const b = (await row.boundingBox())!;
   await page.mouse.move(b.x + 300, b.y + 18);
 }

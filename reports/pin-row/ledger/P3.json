@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "P3",
+  "where": "1512 queries renders through PinnedRow",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 queries no page rule sets the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P3",
+  "where": "1512 agents renders through PinnedRow",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P3",
+  "where": "1512 agents no page rule sets the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P3",
+  "where": "1280 queries renders through PinnedRow",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 queries no page rule sets the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P3",
+  "where": "1280 agents renders through PinnedRow",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P3",
+  "where": "1280 agents no page rule sets the frame",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -7,9 +7,9 @@
  },
  {
   "lock": "C1",
-  "where": "1512 its top is the sheet's top and its width the sheet's (±1), 68 tall",
+  "where": "1512 its top is the sheet's top and its width the sheet's (±1), the cover + 64 tall",
   "ok": true,
-  "detail": "row 248.0,105.8 1256.0×68 · sheet 248.0,105.8 1256.0"
+  "detail": "row 248.0,105.8 1256.0×76 · sheet 248.0,105.8 1256.0"
  },
  {
   "lock": "C1",
@@ -21,7 +21,7 @@
   "lock": "C1",
   "where": "1512 the headings' top is the row's bottom (±1), and their width the list's (±1)",
   "ok": true,
-  "detail": "headings 272.0,173.8 1208.0 · row bottom 173.8 · list 272.0 1208.0 · rgb(255, 255, 255)"
+  "detail": "headings 272.0,181.8 1208.0 · row bottom 181.8 · list 272.0 1208.0 · rgb(255, 255, 255)"
  },
  {
   "lock": "C1",
@@ -37,9 +37,9 @@
  },
  {
   "lock": "C1",
-  "where": "1280 its top is the sheet's top and its width the sheet's (±1), 68 tall",
+  "where": "1280 its top is the sheet's top and its width the sheet's (±1), the cover + 64 tall",
   "ok": true,
-  "detail": "row 248.0,105.8 1024.0×68 · sheet 248.0,105.8 1024.0"
+  "detail": "row 248.0,105.8 1024.0×76 · sheet 248.0,105.8 1024.0"
  },
  {
   "lock": "C1",
@@ -51,7 +51,7 @@
   "lock": "C1",
   "where": "1280 the headings' top is the row's bottom (±1), and their width the list's (±1)",
   "ok": true,
-  "detail": "headings 272.0,173.8 976.0 · row bottom 173.8 · list 272.0 976.0 · rgb(255, 255, 255)"
+  "detail": "headings 272.0,181.8 976.0 · row bottom 181.8 · list 272.0 976.0 · rgb(255, 255, 255)"
  },
  {
   "lock": "C1",

@@ -1,0 +1,166 @@
+{
+ "queries@1512": {
+  "top": 105.75,
+  "height": 76,
+  "bottom": 181.75,
+  "covers": [],
+  "visTop": 105.75,
+  "cover": 0,
+  "kids": [
+   {
+    "cls": "qc138-pin-t",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "qc138-pin-c",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "qc138-pin-s",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "qc138-pin-a",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   }
+  ],
+  "painted": [
+   {
+    "sel": "div.sheet-lip",
+    "coverPx": 12
+   }
+  ],
+  "paintedCover": 12
+ },
+ "agents@1512": {
+  "top": 105.75,
+  "height": 76,
+  "bottom": 181.75,
+  "covers": [],
+  "visTop": 105.75,
+  "cover": 0,
+  "kids": [
+   {
+    "cls": "cl17-pin-t",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "cl17-pin-c",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "cl17-pin-s",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "cl17-pin-a",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   }
+  ],
+  "painted": [
+   {
+    "sel": "div.sheet-lip",
+    "coverPx": 12
+   }
+  ],
+  "paintedCover": 12
+ },
+ "queries@1280": {
+  "top": 105.75,
+  "height": 76,
+  "bottom": 181.75,
+  "covers": [],
+  "visTop": 105.75,
+  "cover": 0,
+  "kids": [
+   {
+    "cls": "qc138-pin-t",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "qc138-pin-c",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "qc138-pin-s",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "qc138-pin-a",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   }
+  ],
+  "painted": [
+   {
+    "sel": "div.sheet-lip",
+    "coverPx": 12
+   }
+  ],
+  "paintedCover": 12
+ },
+ "agents@1280": {
+  "top": 105.75,
+  "height": 76,
+  "bottom": 181.75,
+  "covers": [],
+  "visTop": 105.75,
+  "cover": 0,
+  "kids": [
+   {
+    "cls": "cl17-pin-t",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "cl17-pin-c",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "cl17-pin-s",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   },
+   {
+    "cls": "cl17-pin-a",
+    "vsBox": 6,
+    "vsVisible": 6,
+    "vsPaintedVisible": 0
+   }
+  ],
+  "painted": [
+   {
+    "sel": "div.sheet-lip",
+    "coverPx": 12
+   }
+  ],
+  "paintedCover": 12
+ }
+}

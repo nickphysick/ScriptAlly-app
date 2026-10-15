@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "P2",
+  "where": "1512 queries the cover measured",
+  "ok": true,
+  "detail": "12px (div.sheet-lip)"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 queries the content row starts below the cover",
+  "ok": true,
+  "detail": "12.0 vs 12"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 queries no child under the cover",
+  "ok": true,
+  "detail": "qc138-pin-t 36.9, qc138-pin-c 24.0, qc138-pin-s 25.0, qc138-pin-a 25.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 agents the cover measured",
+  "ok": true,
+  "detail": "12px (div.sheet-lip)"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 agents the content row starts below the cover",
+  "ok": true,
+  "detail": "12.0 vs 12"
+ },
+ {
+  "lock": "P2",
+  "where": "1512 agents no child under the cover",
+  "ok": true,
+  "detail": "cl17-pin-t 36.9, cl17-pin-c 27.0, cl17-pin-s 25.0, cl17-pin-a 25.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 queries the cover measured",
+  "ok": true,
+  "detail": "12px (div.sheet-lip)"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 queries the content row starts below the cover",
+  "ok": true,
+  "detail": "12.0 vs 12"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 queries no child under the cover",
+  "ok": true,
+  "detail": "qc138-pin-t 36.9, qc138-pin-c 24.0, qc138-pin-s 25.0, qc138-pin-a 25.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 agents the cover measured",
+  "ok": true,
+  "detail": "12px (div.sheet-lip)"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 agents the content row starts below the cover",
+  "ok": true,
+  "detail": "12.0 vs 12"
+ },
+ {
+  "lock": "P2",
+  "where": "1280 agents no child under the cover",
+  "ok": true,
+  "detail": "cl17-pin-t 36.9, cl17-pin-c 27.0, cl17-pin-s 25.0, cl17-pin-a 25.0"
+ }
+]

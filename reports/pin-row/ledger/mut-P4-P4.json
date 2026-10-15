@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "P4",
+  "where": "1512 queries @1500 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 queries @1530 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 queries @1560 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 queries @1600 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 queries @1680 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 queries headings still while scrolling",
+  "ok": true,
+  "detail": "173.8,173.8,173.8,173.8,173.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 agents @1500 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 agents @1530 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 agents @1560 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 agents @1600 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 agents @1680 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1512 agents headings still while scrolling",
+  "ok": true,
+  "detail": "173.8,173.8,173.8,173.8,173.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 queries @1500 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 queries @1530 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 queries @1560 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 queries @1600 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 queries @1680 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 queries headings still while scrolling",
+  "ok": true,
+  "detail": "173.8,173.8,173.8,173.8,173.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 agents @1500 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 agents @1530 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 agents @1560 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 agents @1600 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 agents @1680 headings at the row's bottom",
+  "ok": false,
+  "detail": "173.8 vs 181.8"
+ },
+ {
+  "lock": "P4",
+  "where": "1280 agents headings still while scrolling",
+  "ok": true,
+  "detail": "173.8,173.8,173.8,173.8,173.8"
+ }
+]

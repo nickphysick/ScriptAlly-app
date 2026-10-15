@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "P1",
+  "where": "1512 queries children",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 queries qc138-pin-t (ink)",
+  "ok": true,
+  "detail": "0.01px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 queries qc138-pin-c (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 queries qc138-pin-s (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 queries qc138-pin-a (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 agents children",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 agents cl17-pin-t (ink)",
+  "ok": true,
+  "detail": "0.01px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 agents cl17-pin-c (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 agents cl17-pin-s (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512 agents cl17-pin-a (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 queries children",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 queries qc138-pin-t (ink)",
+  "ok": true,
+  "detail": "0.01px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 queries qc138-pin-c (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 queries qc138-pin-s (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 queries qc138-pin-a (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 agents children",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 agents cl17-pin-t (ink)",
+  "ok": true,
+  "detail": "0.01px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 agents cl17-pin-c (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 agents cl17-pin-s (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280 agents cl17-pin-a (box)",
+  "ok": true,
+  "detail": "0.00px from the visible centre"
+ }
+]

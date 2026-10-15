@@ -1,0 +1,10 @@
+{
+  "build": "fix-pinned-row-centre (dev build, vite preview 127.0.0.1:4470), 1512x900 and 1280x800 with the shell, scrolled 1500px, on the Query Centre and the Contact list",
+  "method": "PIN_MUTATE=<lock> applies the named break in the page",
+  "proofs": [
+    { "lock": "P1", "mutation": "set --pin-cover to 0", "red": "every child 6.00px above the visible centre (the title's ink 5.99)" },
+    { "lock": "P2", "mutation": "remove the padding-top", "red": "the content row starts 0.0px from the row's top against a 12px cover, on both pages at both widths" },
+    { "lock": "P3", "mutation": "give the Contact list its own padding-top: 0", "red": ".cl17-pin { padding-top } — a page rule setting the frame, at both widths" },
+    { "lock": "P4", "mutation": "the old fixed 68px heading offset", "red": "headings at 173.8 against the row's bottom at 181.8" }
+  ]
+}
