@@ -208,4 +208,13 @@ the fixtures seeded, so "The Smoke Test" shows the "Two editions" fixture (which
 - **The Query Centre's package chip could deep-link** with the new `?pkg={id}` (`Queries.tsx` 5484 and 7140).
 - **Prod rules: no change was needed.**
 
-DEPLOY_PLACEHOLDER
+## Deploy
+
+- **Integration branch:** `dev/query-panel-v1-onb9-tip-onb9-comps26-1-qp2-comps27-qp2b-comps27-1-qp2c-corkboard1-qp2d-cl16-cl17-cl171-qc138-qc1381-qc1382-qc1383-qc1384-pkg4`
+  — the branch dev served at deploy time (v138.4's, c0f59a6c, `index-D0Dot8dT.js`) with `packages-v4` merged in. The
+  only conflict was `design-refs/.refhashes.json` (the integration's copy kept, the two packages refs re-enrolled).
+  Gates on it: tsc 0, both builds 0, Vitest 8,807 passed.
+- **Dev build:** `index-0P7A_QV6.js`, built from caf0ee4e in a clean worktree, hosting only
+  (`--config firebase.dev.json --project scriptally-dev`). Served hash checked before (`D0Dot8dT`) and after
+  (`0P7A_QV6`). A1 and C1 re-run green against the deployed site.
+- Both branches are pushed. **Nothing is merged to `main`.** No rules or functions changed.
