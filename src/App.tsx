@@ -17,7 +17,7 @@ import { QueriesRail } from "./components/shell/QueriesRail";
 import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
-import { ToDoPage } from "./components/todo/ToDoPage";
+import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
@@ -685,7 +685,8 @@ function AppContent() {
             The list page owns its internal scroll like the Queries desk and stays mounted so its
             mode/filter/selection survive; the other three are ordinary flow pages. */}
         <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fillColumn" clip>
-          <ToDoPage onNavigate={handleNavigate} />
+          {/* To-do list v5: the tray and the desk on a desktop, the v2 page on a phone (TodoRoute chooses) */}
+          <TodoRoute onNavigate={handleNavigate} />
         </StagePage>
 
         {/* ⚠️ THE TASKS SLOTS ARE IDENTICAL — `layout="fillColumn" clip`, no contentVariant

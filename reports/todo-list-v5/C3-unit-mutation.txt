@@ -1,0 +1,3 @@
+   × TD5 C3 (unit) — a lede states facts and nothing else > no appraisal, no urgency word and no gendered pronoun, for every bucket 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 8 passed (9)
