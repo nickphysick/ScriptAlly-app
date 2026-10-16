@@ -40,8 +40,12 @@ import { Dash58Header } from "./Dash58Header";
 import { Dash58Closed } from "./Dash58Closed";
 import { Dash58List } from "./Dash58List";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
+import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
+import { openFeedback } from "../../../lib/feedbackStore";
+import type { Mood } from "../../../lib/weeklyPulse";
 import "../oneScreen.css";
 import "./dash58.css";
+import "../v59/dash59.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -191,6 +195,20 @@ export const Dash58: React.FC<Dash58Props> = ({
     else if (a.kind === "agent") openAgentCard(a.agentId, { tab: a.tab, focus: a.focus, from: "hk", sequence: a.sequence });
     else onNavigate(a.tab, a.sub);
   };
+  /* ⚠️ "VIEW TASK →" NEVER COMPLETES A TASK (v59). It opens the place where the task is done
+     properly: a query's task opens that query in the query panel (as the chart does), where the
+     task's step is offered with its fields; housekeeping opens the agent card's editor; a ready agent
+     opens the log flow prefilled; a first-run step opens its own flow or page. */
+  const viewTask = (a: ListAction) => {
+    const qid = a.kind === "drawer" && a.request.mode !== "log" ? a.request.queryId : undefined;
+    if (qid) openQueryPanel(qid, "dashboard");
+    else run(a);
+  };
+
+  /* ── the founding writer panel's weekly pulse ── */
+  const [pulseChosen, setPulseChosen] = useState<Mood | null>(null);
+  const [pulseState, setPulseState] = useState<PulseState>("idle");
+  const pulseHistory: (Mood | null)[] = [null, null, null, null, pulseState === "noted" ? pulseChosen : null];
 
   /* ── the page's own scrollport: the height the one screen fills ──
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
@@ -298,9 +316,21 @@ export const Dash58: React.FC<Dash58Props> = ({
               focus={focus}
               focusRef={focusRef}
               onStep={setStep}
+              onView={viewTask}
               onRun={run}
-              onAll={() => onNavigate(plan.all.tab, plan.all.sub)}
+              onAll={() => onNavigate("todo")}
               onAddAgent={() => onNavigate("agents", "Add an agent")}
+              panel={
+                <Dash59Panel
+                  loading={loading}
+                  history={pulseHistory}
+                  chosen={pulseChosen}
+                  state={pulseState}
+                  onChoose={(m) => { setPulseChosen(m); setPulseState("noted"); }}
+                  onChange={() => setPulseState("idle")}
+                  onFeedback={openFeedback}
+                />
+              }
             />
           </div>
         </div>

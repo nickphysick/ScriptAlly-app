@@ -105,6 +105,7 @@ describe("every dashboard container header carries one mark", () => {
     "List": "v58/Dash58List.tsx",
     "Feed": "v58/Dash58Feed.tsx",
     "Header": "v58/Dash58Header.tsx",
+    "Panel": "v59/Dash59Panel.tsx",
   };
   it("no card on the page carries one, and the component is still live elsewhere", () => {
     let total = 0;

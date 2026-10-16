@@ -45,8 +45,12 @@ describe("/dashboard renders", () => {
        own first getting-started deed is "Add your first manuscript". That row is addressed to an
        account with no manuscript — which is day one exactly — so gating the pack behind day-one's
        survival would leave row one permanently ticked and decorative. */
-    expect(html).toContain("Log your first query");
+    /* ⚠️ RETARGETED A FOURTH TIME (Dashboard v59). The right column is one focus card and the
+       founding writer panel; the rest of the getting-started plan lives on the To-do page behind
+       "All {n} →". So the first deed is the focus card, and the list's second line ("Log your first
+       query") is no longer on this page. */
     expect(html).toContain("Add your first manuscript");
+    expect(html).toContain("The early bird gets the worm.");
   });
 
   /**
