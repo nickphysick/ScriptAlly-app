@@ -14,6 +14,8 @@
  *    one predicate (`nextDoor`).
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { PinListButton } from "../../shell/PinListButton";
+import { useStickyStack } from "../../shell/stickyStack";
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
@@ -66,7 +68,6 @@ const ICON = {
   box: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><rect x="2" y="3" width="12" height="3" rx="1" /><path d="M3 6v7h10V6M6.5 9h3" /></svg>,
   clock: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
   pkg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 8l9-4 9 4-9 4z" /><path d="M3 8v8l9 4 9-4V8" /><path d="M12 12v8" /></svg>,
-  pin: <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4v2H6v-2l4-4z" /><path d="M12 15v6" /></svg>,
   comfy: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3 4.5h10M3 8h10M3 11.5h10" /></svg>,
   dense: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 3.5h10M3 6.5h10M3 9.5h10M3 12.5h10" /></svg>,
 };
@@ -337,6 +338,8 @@ export interface QcList138Props {
   total: number;
   shown: number;
   filtered: boolean;
+  /** v138.6 §B — the sticky stack's writer runs while this list is the page on screen */
+  stickyOn?: boolean;
   /** v138.5 §E — the Filters button and its panel (the panel holds the filters; "Clear all" lives there) */
   filtersSlot?: React.ReactNode;
   sort: Qc138Sort;
@@ -377,7 +380,7 @@ export interface QcList138Props {
 }
 
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, sort, onHeading, density, onDensity, full, onFull,
+  groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
   selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
@@ -417,6 +420,8 @@ export const QcList138: React.FC<QcList138Props> = ({
   }, [entering]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => window.clearTimeout(peekTimer.current), []);
   const boxRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  useStickyStack(topRef, stickyOn);
   const tip = useTip(boxRef);
   const [groupOpen, setGroupOpen] = useState(false);
   const groupBtn = useRef<HTMLButtonElement>(null);
@@ -537,7 +542,11 @@ export const QcList138: React.FC<QcList138Props> = ({
 
   return (
     <div className="qc138-sheet" data-qc138="sheet" data-density={density} ref={boxRef} {...tip.handlers}>
-      <div className="qc138-top" data-qc138="top" data-qcv="ws-head">
+      {/* v138.6 §B — THE STICKY ROW: the navy header, in a wrapper that sticks under the sheet's lip and fills the lip's
+          12px (and the header's rounded corners) with the sheet's colour, so no row shows through. Its height is the
+          one writer's (`useStickyStack`), read by the headings and the current group band beneath it. */}
+      <div className="qc138-topw" data-qc138="top-wrap">
+      <div className="qc138-top" data-qc138="top" data-qcv="ws-head" ref={topRef}>
         <p className="qc138-say" data-qc138="showing" data-qcv="ws-title">
           {filtered
             ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>
@@ -568,13 +577,10 @@ export const QcList138: React.FC<QcList138Props> = ({
             <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>
             <button type="button" aria-pressed={density === "compact"} data-d="compact" title="Compact rows" aria-label="Compact rows" onClick={() => onDensity("compact")}>{ICON.dense}</button>
           </span>
-          {/* v138.5 §G — the pin: it collapses the sidebar, hides the header and lets the list fill the sheet. Its label
-              ("Pin the list" / "Unpin") is drawn below it on hover, never a native title. */}
-          <button type="button" className="qc138-pinb" data-qc138="pin" aria-pressed={full} aria-label={full ? "Unpin" : "Pin the list"} onClick={onFull}>
-            {ICON.pin}
-            <span className="qc138-pinb-tip" data-qc138="pin-tip" aria-hidden="true">{full ? "Unpin" : "Pin the list"}</span>
-          </button>
+          {/* v138.6 §A — the shared pin button (both list pages); the pin itself is the shared hook's */}
+          <PinListButton pinned={full} onToggle={onFull} attrs={{ "data-qc138": "pin" }} />
         </span>
+      </div>
       </div>
       <div className="qc138-heads" data-qc138="headings" role="row">
         {HEADINGS.map((h) => {

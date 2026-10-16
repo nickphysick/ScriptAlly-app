@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A3",
+  "where": "queries loads pinned",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3",
+  "where": "queries the rail on every frame from the first (no sidebar transition)",
+  "ok": true,
+  "detail": "68 over 136 frames"
+ },
+ {
+  "lock": "A3",
+  "where": "queries no header flash",
+  "ok": true,
+  "detail": "0 frames with the header"
+ },
+ {
+  "lock": "A3",
+  "where": "queries pinned does not pin agents",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A3",
+  "where": "queries unpinned",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A3",
+  "where": "queries unpin, reload: unpinned",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A3",
+  "where": "agents loads pinned",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3",
+  "where": "agents the rail on every frame from the first (no sidebar transition)",
+  "ok": true,
+  "detail": "68 over 142 frames"
+ },
+ {
+  "lock": "A3",
+  "where": "agents no header flash",
+  "ok": true,
+  "detail": "0 frames with the header"
+ },
+ {
+  "lock": "A3",
+  "where": "agents pinned does not pin queries",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A3",
+  "where": "agents unpinned",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A3",
+  "where": "agents unpin, reload: unpinned",
+  "ok": true,
+  "detail": "false"
+ }
+]

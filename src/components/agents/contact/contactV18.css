@@ -33,8 +33,9 @@
 .cl18-tabs button:disabled { background: #efe9df; color: rgba(28, 19, 15, 0.22); cursor: default; }
 .cl18-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
-/* ── §A · THE COMPACT LETTERS in the pinned row, where the group pills were: 26 buttons sharing up to 760px ── */
-.cl17-pin .cl18-pl { display: flex; gap: 2px; flex: 1 1 760px; max-width: 760px; min-width: 0; }
+/* ── §A · THE COMPACT LETTERS (`LetterTabs variant="pin"`). v138.6 §C retired the pinned row that held them, so the
+   variant is mounted nowhere today; its rules stay with the component. ── */
+.cl18-pl { display: flex; gap: 2px; flex: 1 1 760px; max-width: 760px; min-width: 0; }
 .cl18-pl button {
   flex: 1 1 0; min-width: 0; box-sizing: border-box; height: 30px; margin: 0; padding: 0; border: 0; border-radius: 8px;
   background: none; color: #1c130f; cursor: pointer; font: 400 14px/1 var(--sp-type) !important;
@@ -45,14 +46,6 @@
 .cl18-pl button[aria-current="true"], .cl18-pl button[aria-current="true"]:hover { background: #2a3a52; color: #f4eee5; }
 .cl18-pl button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
 .cl18-pl button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
-/* with the letters in place the pinned search is 150 (200), and at compact widths "+ Add an agent" is a round "+" */
-.cl17-pin .cl17-pin-s { flex: 0 0 150px; width: 150px; min-width: 0; }
-.ws-app.sheet-wide .cl17-pin .cl17-pin-s { flex-basis: 200px; width: 200px; }
-.cl17-pin .cl17-pin-a .cl18-pa-w { display: none; }
-.cl17-pin .cl17-pin-a { width: 38px; padding: 0; font-size: 22px !important; }
-.ws-app.sheet-wide .cl17-pin .cl17-pin-a { width: auto; padding: 0 18px; font-size: 16px !important; }
-.ws-app.sheet-wide .cl17-pin .cl17-pin-a .cl18-pa-w { display: inline; }
-.ws-app.sheet-wide .cl17-pin .cl17-pin-a .cl18-pa-p { display: none; }
 @media (prefers-reduced-motion: reduce) { .cl18-tabs button { transition: none; } }
 
 /* ── §B · THE LIST HEADER: the top of the list sheet, slate. One sentence left; search, Filters, density and full

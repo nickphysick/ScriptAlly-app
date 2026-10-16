@@ -11,16 +11,19 @@
  * ⚠️ TWO CLASSES ON EVERY RULE THAT SETS A FACE (brand.tsx and the page's font reset).
  */
 @media (min-width: 768px) {
-  .qcv-group[data-v138] { --qc138-pin-h: var(--pin-row-h); --qc138-heads-h: 40px; } /* the pinned row's height is the shell's (shell/pinnedRow.css) */
+  /* v138.6 §B — the sticky stack: the lip's cover, then the navy header (measured by `useStickyStack`), then the
+     headings (a stated 40), then the current group band. `--qc138-pin-h` keeps its name: it is now the cover plus
+     the navy header, pinned or not. */
+  .qcv-group[data-v138] { --qc138-pin-h: calc(var(--pin-cover, 12px) + var(--stk-head-h, 84px)); --qc138-heads-h: 40px; }
   /* the page box carries no paint of its own: the sheet is the white */
   .qcv-group[data-v138] > .qcv-page.qcw { background: transparent; box-shadow: none; border-radius: 0; }
   .qcv-group[data-v138] .qc13-work, .qcv-group[data-v138] .qcv-stage, .qcv-group[data-v138] .qcv-ledger { background: transparent; }
-  .wpg-scroll:has(> .qcv-group[data-v138]) { --wpg-scroll-pad: calc(var(--qc138-pin-h) + var(--qc138-heads-h, 40px) + 64px); }
+  .wpg-scroll:has(> .qcv-group[data-v138]) { --wpg-scroll-pad: calc(var(--pin-cover, 12px) + var(--stk-head-h, 84px) + 40px + 64px); }
   /* v138.5 §G — pinned: the header goes and so does the old pinned bar (Queries.tsx), so nothing sits above the list:
      the navy header is 22 under the sheet's top, and the headings and bands stick from the sheet's top edge */
   .qcv-group[data-v138][data-full] > .qc138-hd { display: none; }
   .qcv-group[data-v138][data-full] > .qcv-page.qcw { margin-top: 22px; }
-  .qcv-group[data-v138][data-full] { --qc138-pin-h: var(--pin-cover, 0px); } /* clear of the sheet lip, the only thing above */
+  /* v138.6 §B — pinned uses the same sticky stack as unpinned; it simply starts with the header already hidden */
 
   .qc138-sheet {
     /* v138.5 §F — one template for headings, rows and the peek: the gap after "Where it stands" is gone (a fixed
@@ -35,6 +38,15 @@
     box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45);
   }
 
+  /* ── v138.6 §B · THE STICKY ROW: the wrapper sticks at the scroller's top and is padded down by the lip's cover,
+     so the navy header sits 12 under the sheet's top; its fill is the sheet's colour (behind the header's corners
+     and over the lip's strip). Nothing about the header changes when it sticks: the same height, padding and
+     controls. ── */
+  .qc138-sheet .qc138-topw {
+    position: sticky; top: 0; z-index: 9; box-sizing: border-box;
+    margin-top: calc(-1 * var(--pin-cover, 12px)); padding-top: var(--pin-cover, 12px);
+    background: var(--ink-sheet, var(--ws-page));
+  }
   /* ── the navy top row ── */
   .qc138-sheet .qc138-top {
     position: relative; display: flex; align-items: center; gap: 18px; box-sizing: border-box; min-height: 76px;
@@ -113,24 +125,7 @@
   }
   .qc138-sheet .qc138-dens button svg { width: 16px; height: 16px; }
   .qc138-sheet .qc138-dens button[aria-pressed="true"] { background: #fff; color: #2d3a50; box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.35); }
-  /* v138.5 §G — the pin: a 44px circle with a 1.5px cream line and a cream pushpin. Hover: a cream wash and its label
-     below. Pinned: cream with a navy pin turned −45°. */
-  .qc138-sheet .qc138-pinb {
-    position: relative; display: grid; place-items: center; box-sizing: border-box; width: 44px; height: 44px; padding: 0; margin: 0;
-    border: 1.5px solid rgba(244, 238, 229, 0.45); border-radius: 50%; background: transparent; color: #f4eee5; cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  }
-  .qc138-sheet .qc138-pinb svg { display: block; width: 19px; height: 19px; transition: rotate 0.2s ease; }
-  .qc138-sheet .qc138-pinb:hover { background: rgba(244, 238, 229, 0.1); }
-  .qc138-sheet .qc138-pinb[aria-pressed="true"], .qc138-sheet .qc138-pinb[aria-pressed="true"]:hover { background: #f4eee5; border-color: #f4eee5; color: #2a3a52; }
-  .qc138-sheet .qc138-pinb[aria-pressed="true"] svg { rotate: -45deg; }
-  .qc138-sheet .qc138-pinb-tip {
-    position: absolute; right: 0; top: calc(100% + 7px); z-index: 30; box-sizing: border-box; padding: 6px 10px; border-radius: 7px;
-    background: #1c130f; color: #f4eee5; white-space: nowrap; font: 400 12.5px/1.2 var(--sp-serif) !important;
-    pointer-events: none; opacity: 0; transition: opacity 140ms ease;
-  }
-  .qc138-sheet .qc138-pinb:hover .qc138-pinb-tip, .qc138-sheet .qc138-pinb:focus-visible .qc138-pinb-tip { opacity: 1; }
-  @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc138-pinb svg, .qc138-sheet .qc138-pinb-tip { transition: none; } }
+  /* v138.6 §A — the pin is the shared PinListButton (shell/pinListButton.css) */
 
   /* ── the headings: one grid with the rows, sticky under the pinned row ── */
   .qc138-sheet .qc138-heads {

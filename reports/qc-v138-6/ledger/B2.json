@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B2",
+  "where": "queries scrolled: no old bar in the DOM",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B2",
+  "where": "queries pinned scrolled: no old bar in the DOM",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B2",
+  "where": "agents scrolled: no old bar in the DOM",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B2",
+  "where": "agents pinned scrolled: no old bar in the DOM",
+  "ok": true,
+  "detail": "0"
+ }
+]

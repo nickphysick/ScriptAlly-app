@@ -219,7 +219,9 @@ test.describe("Contact list v17", () => {
     };
   });
 
-  test("C1 · pinned: the row on the sheet's top edge at its full width, the headings under it at the list's", async ({ page }) => {
+  /* RETIRED (Query Centre v138.6 §C): the v17 pinned row is deleted; the slate list header is the sticky row, with the
+     headings under it. QC138.6 B1–B3 (tests/e2e/qcV1386.measure.ts) own the sticky stack on both pages. */
+  test.skip("C1 · pinned: the row on the sheet's top edge at its full width, the headings under it at the list's", async ({ page }) => {
     const L = new Ledger("C1");
     for (const vp of SIZES) {
       await open(page, vp, "C1"); const w = `${vp.width}`;
@@ -238,7 +240,9 @@ test.describe("Contact list v17", () => {
     L.done(10);
   });
 
-  test("C2 · steady: 1px steps across the pin line flip the state twice, and the row's box takes one value", async ({ page }) => {
+  /* RETIRED (Query Centre v138.6 §C): the pinned row and its sentinel are deleted; QC138.6 B3 steps the sticky slate
+     header through its stick point instead. */
+  test.skip("C2 · steady: 1px steps across the pin line flip the state twice, and the row's box takes one value", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("C2");
     for (const vp of SIZES) {
