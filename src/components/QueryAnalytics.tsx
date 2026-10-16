@@ -29,13 +29,14 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { Caveats, Funnel, Lanes, OverTime, Records, ShareBars, TrainingLog } from "./analytics/A17Figures";
+import { Caveats, Funnel, OverTime, Records, ShareBars, TrainingLog } from "./analytics/A17Figures";
 import { A17Empty } from "./analytics/A17Empty";
 import { A21Header, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
 import { A21Window } from "./analytics/A21Window";
 import { A21Steps } from "./analytics/A21Steps";
 import { A21Records } from "./analytics/A21Records";
+import { A21Stand } from "./analytics/A21Stand";
 import { buildV21, windowLede } from "../lib/analyticsV21";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
@@ -120,7 +121,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
         <Section sec={5} banner={b[5]} tint
           desktop={<A21Records rec={v21.records} count={b[5].count} title={b[5].title} msTitle={manuscript.title || null} onOverTime={() => go(6)} />}><Records model={model} /></Section>
         <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
-        <Section sec={7} banner={b[7]} readings={v.lanes.readings} tint><Lanes model={model} /></Section>
+        <A21Stand model={model} v21={v21} banner={b[7]} />
         <Section sec={8} banner={b[8]} ws><Caveats model={model} /></Section>
       </>
     );

@@ -314,3 +314,32 @@
   .ws-app.sheet-wide .a17-page .a21-fpl i { font-size: 14px !important; }
   .a17-page .a21-fpv { font: 400 19px/1.2 var(--sp-type) !important; white-space: nowrap; }
 }
+
+/* ══════════════ G · how things stand: the workspace (desktop; the phone keeps v17's banner) ══════════════ */
+.a21-ws { display: none; }
+@media (min-width: 761px) {
+  .a17-page .a21-wsect .a17-ban { display: none; }
+  .a17-page .a21-wsect .a17-frame { overflow: visible; margin-top: 24px; }
+  .a21-ws { display: block; }
+  .a21-wkbar { display: flex; align-items: center; gap: 14px; background: #1f2b3a; border-radius: 24px 24px 0 0; padding: 22px 28px 18px 22px; position: relative; }
+  .a21-wkart { width: 138px; height: 70px; flex: none; position: relative; }
+  .a21-wkart > span { position: absolute; left: -18px; bottom: -8px; width: 164px; height: 118px; box-sizing: border-box; border-radius: 18px; border: 1.5px dashed rgba(244, 238, 229, 0.35); background: #24334a; overflow: hidden; }
+  .a21-wkart img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .a17-page .a21-wkt h2 { margin: 0; font: 400 28px/1.1 var(--sp-type) !important; color: #f4eee5; }
+  .ws-app.sheet-wide .a17-page .a21-wkt h2 { font-size: 32px !important; }
+  .a17-page .a21-wkt p { margin: 4px 0 0; font: 400 15.5px/1.4 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.7); }
+  .a21-sp { flex: 1; }
+  .a17-page .a21-wpl { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px; border-radius: 19px; font: 400 16px/1 var(--sp-serif) !important; white-space: nowrap; }
+  .a21-wpl i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .a21-wpl.r { background: #f5e2da; color: #8a4a3c; }
+  .a21-wpl.b { background: #dfeaf4; color: #2f5f86; }
+  .a17-page .a21-wpl b { font-weight: 600; }
+  .a21-wkstrip { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 16px 28px; background: #f7f6f4; border-bottom: 1px solid rgba(28, 19, 15, 0.08); }
+  .a17-page .a21-chip { height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 0 15px; border-radius: 17px; border: 0; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 15px/1 var(--sp-serif) !important; cursor: pointer; white-space: nowrap; color: var(--sp-ink); }
+  .a17-page .a21-chip em { font: 400 9px/1 var(--font-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.45); }
+  .a17-page .a21-chip[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+  .a17-page .a21-chip[aria-pressed="true"] em { color: rgba(244, 238, 229, 0.7); }
+  .a17-page .a21-chip:disabled { cursor: default; opacity: 0.5; }
+  .a17-page .a21-chip.ghost { font: 400 14px/1 var(--sp-type) !important; }
+  .a21-chip:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+}

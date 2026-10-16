@@ -100,7 +100,9 @@ export const Section: React.FC<{
   lede?: React.ReactNode;
   /** v21 §F — the desktop's own layout for the section; the banner and frame then show on the phone only */
   desktop?: React.ReactNode;
-}> = ({ sec, banner, perchSrc, readings, ws, children, tint, lede, desktop }) => {
+  /** v21 §G — the workspace's ink bar and chip strip, at the top of the frame; on the desktop it stands in for the banner */
+  wsBar?: React.ReactNode;
+}> = ({ sec, banner, perchSrc, readings, ws, children, tint, lede, desktop, wsBar }) => {
   const v17 = (
     <>
       <div className="a17-ban a17-rv" data-a17="ban">
@@ -113,6 +115,7 @@ export const Section: React.FC<{
       </div>
       {ws ? children : (
         <div className="a17-frame a17-rv d1" data-a17="frame">
+          {wsBar}
           <div className="a17-body">{children}</div>
           {readings ? <Readings items={readings} /> : null}
         </div>
@@ -120,7 +123,7 @@ export const Section: React.FC<{
     </>
   );
   return (
-    <section className={`a17-sect${tint ? " a21-tint" : ""}${desktop ? " a21-band" : ""}`} data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`} data-a21-tint={tint ? "" : undefined}>
+    <section className={`a17-sect${tint ? " a21-tint" : ""}${desktop ? " a21-band" : ""}${wsBar ? " a21-wsect" : ""}`} data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`} data-a21-tint={tint ? "" : undefined}>
       {/* a section with its own desktop layout keeps v17's banner and frame for the phone alone */}
       {desktop ? <><div className="a21-dk">{desktop}</div><div className="a21-mk">{v17}</div></> : v17}
     </section>

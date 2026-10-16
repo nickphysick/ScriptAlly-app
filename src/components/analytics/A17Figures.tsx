@@ -340,10 +340,21 @@ export const OverTime: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
 };
 
 /* ═════════════ 8 · every query against time ═════════════ */
-export const Lanes: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
+export const Lanes: React.FC<{
+  model: AnalyticsModel;
+  /** v21 §G — the How things stand chips: only these queries (null: all) */
+  only?: ReadonlySet<string> | null;
+  /** v21 §G — "Sort: Date sent" (the default) or "Latest activity", most recent first */
+  order?: "sent" | "activity";
+  activity?: Record<string, number>;
+}> = ({ model, only = null, order = "sent", activity }) => {
   const mark = useMark();
   const l = model.v17.lanes;
-  const rows = l.rows;
+  /* the time axis stays the whole campaign's, so a chip narrows the rows and never moves the months */
+  const kept = only ? l.rows.filter((q) => only.has(q.id)) : l.rows;
+  const rows = order === "activity" && activity
+    ? kept.slice().sort((a, b) => (activity[b.id] ?? b.sentMs ?? 0) - (activity[a.id] ?? a.sentMs ?? 0))
+    : kept;
   if (l.startMs === null) return <Fig k="lanes" title="Every query against time" note="up to today" population={0}><p className="a17-none">No dated query sent yet</p></Fig>;
   const start = l.startMs, span = Math.max(DAY, l.nowMs - start);
   const months = (every: number) => {
