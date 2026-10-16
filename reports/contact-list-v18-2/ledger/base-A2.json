@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A2",
+  "where": "@1512 the shadow's box overlaps the card's",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 its opacity is .1",
+  "ok": false,
+  "detail": "0.15"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 at rest the card is below the shadow",
+  "ok": false,
+  "detail": "card 0 · shadow -1"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 on hover the card is above the shadow",
+  "ok": true,
+  "detail": "card 0 · shadow -1"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 on hover it lifts 3px",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 the shadow's box overlaps the card's",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 its opacity is .1",
+  "ok": false,
+  "detail": "0.15"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 at rest the card is below the shadow",
+  "ok": false,
+  "detail": "card 0 · shadow -1"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 on hover the card is above the shadow",
+  "ok": true,
+  "detail": "card 0 · shadow -1"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 on hover it lifts 3px",
+  "ok": false,
+  "detail": "none"
+ }
+]

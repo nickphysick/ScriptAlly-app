@@ -269,13 +269,15 @@ test("B1 · shell: one #a5837b frame holds band, head, tabs, body and footer; th
       L.check(`${w} ${k}: it holds the band, head, tabs, body and footer`, Object.values(r.holds).every(Boolean), JSON.stringify(r.holds));
       L.check(`${w} ${k}: the band is 50 (±1) tall`, near(r.bandH, 50, 1), `${r.bandH}`);
       L.check(`${w} ${k}: there is no navy masthead`, !r.mast, `${r.mast}`);
-      L.check(`${w} ${k}: the band is ${COLOUR[k]}`, r.bandBg === COLOUR[k], `${r.bandBg}`);
+      /* RETIRED (v18.2 §B): the band no longer says whose move it is; it is always #3e5170 (CL182 B1 and B2 hold the
+         band and the slip's state colours) */
+      void COLOUR;
       const NAME: Record<string, Record<number, string>> = { you: { 1512: "06-panel-your-move-1512", 1280: "12-panel-your-move-1280" }, waiting: { 1512: "07-panel-waiting-1512" }, notq: { 1512: "08-panel-not-queried-1512", 1280: "13-panel-not-queried-1280" }, closed: { 1512: "09-panel-closed-1512" } };
       if (NAME[k]?.[vp.width]) await shot(page, NAME[k][vp.width]);
       await closePanel(page);
     }
   }
-  L.done(48);
+  L.done(40); /* v18.2: 8 band-colour readings retired */
 });
 
 /* ───────────────────────── B2 · the stand slip ───────────────────────── */
@@ -424,7 +426,9 @@ test("B5 · unchanged: the Queries and Notes bodies match the v18 build's; Escap
   for (const id of cap?.ids ?? []) {
     await openAgent(page, id);
     const q = await tabBody(page, "queries"), n = await tabBody(page, "notes");
-    L.check(`${id}: the Queries body is byte-identical`, q === cap!.out[id].queries, `${q?.length} vs ${cap!.out[id].queries?.length}`);
+    /* RETIRED (v18.2 §B): History replaces the Queries tab's body (CL182 B3); its Notes, Escape, ✕, docking and
+       ?agent= checks stand */
+    void q;
     L.check(`${id}: the Notes body is byte-identical`, n === cap!.out[id].notes, `${n?.length} vs ${cap!.out[id].notes?.length}`);
     await closePanel(page);
   }
@@ -448,5 +452,5 @@ test("B5 · unchanged: the Queries and Notes bodies match the v18 build's; Escap
   L.check("Edit profile docks the editor in the panel", (await page.locator('[data-ap="panel"][data-ap-acting="edit"]').count()) === 1, "");
   await page.keyboard.press("Escape"); await page.waitForTimeout(900);
   L.check("Escape from the editor returns to the card", (await page.locator('[data-ap="card"]').count()) === 1, "");
-  L.done(2 + 2 * (cap?.ids.length ?? 0) + 5);
+  L.done(2 + (cap?.ids.length ?? 0) + 5); /* v18.2: the Queries-body readings retired */
 });

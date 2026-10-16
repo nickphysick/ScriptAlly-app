@@ -112,7 +112,8 @@ test.describe("Contact list v17", () => {
       L.check(`${w} the eyebrow reads "— CONTACT LIST —" in rust`, r.eyebrow?.text === "— CONTACT LIST —" && r.eyebrow.color === "rgb(162, 69, 42)", JSON.stringify(r.eyebrow));
       /* RETIRED (v17.1, 14 Oct): "the hawk is 280 (200) wide, between the title block and the card". The populated
          header has no hawk now; contactV171 A4 holds the header (its inset, no hawk image, the shadow). */
-      L.check(`${w} the shadow image is there at opacity 0.15 (±0.01)`, !!r.shadow && r.shadow.loaded && near(r.shadow.op, 0.15, 0.01), JSON.stringify(r.shadow));
+      /* RE-POINTED (v18.2 §A): the shadow now falls over the List health card at .1 (CL182 A2 holds its place) */
+      L.check(`${w} the shadow image is there at opacity 0.1 (±0.01)`, !!r.shadow && r.shadow.loaded && near(r.shadow.op, 0.1, 0.01), JSON.stringify(r.shadow));
     }
     L.done(10);
   });

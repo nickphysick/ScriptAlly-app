@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C1",
+  "where": "@1512 the header is rgb(42, 58, 82)",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 the ring's height ≥ the bar's bottom − row 1's top",
+  "ok": true,
+  "detail": "110.0 vs 109.3"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 three tiles, each a button",
+  "ok": true,
+  "detail": "BUTTON,BUTTON,BUTTON"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 no tile label is cut",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 the points tile opens the key",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 the gaps tile brings All gaps into view",
+  "ok": true,
+  "detail": "[154.171875,154,848.109375]"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 the header is rgb(42, 58, 82)",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 the ring's height ≥ the bar's bottom − row 1's top",
+  "ok": true,
+  "detail": "110.0 vs 109.3"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 three tiles, each a button",
+  "ok": true,
+  "detail": "BUTTON,BUTTON,BUTTON"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 no tile label is cut",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 the points tile opens the key",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 the gaps tile brings All gaps into view",
+  "ok": true,
+  "detail": "[154.171875,154,748.109375]"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A3",
+  "where": "@1512 18 enabled tabs hovered",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 the strip's height never changes (0px)",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 nothing below the strip moves (0px)",
+  "ok": false,
+  "detail": "72 moves"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 a hovered tab is 42 tall",
+  "ok": true,
+  "detail": "42.0"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 18 enabled tabs hovered",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 the strip's height never changes (0px)",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 nothing below the strip moves (0px)",
+  "ok": false,
+  "detail": "72 moves"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 a hovered tab is 42 tall",
+  "ok": true,
+  "detail": "42.0"
+ }
+]

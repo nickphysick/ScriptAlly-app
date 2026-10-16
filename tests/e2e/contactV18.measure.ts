@@ -349,7 +349,8 @@ test("F1 · score: the page ring, the tab and the drawer show one number; a repl
     ring: (document.querySelector('.aglist [data-cl17="ring-pct"]')?.textContent ?? "").replace("%", ""),
     tab: (document.querySelector('[data-hkv="tab-counts"]')?.textContent ?? "").match(/(\d+)% list health/)?.[1] ?? null,
     drawer: (document.querySelector('[data-hk8="pct"]')?.textContent ?? "").replace("%", "") || null,
-    points: document.querySelector('[data-hk8="points"]')?.textContent ?? "",
+    /* RE-POINTED (v18.2 §C): the points line under the score is retired; "{held} of {possible} pts" is the points tile */
+    points: (() => { const t = document.querySelector('[data-hk8="tile"][data-k="points"]'); return t ? `${t.querySelector("b")?.textContent ?? ""} ${(t.querySelector("small")?.textContent ?? "").replace(/ pts$/, " points")}` : ""; })(),
   }));
   await page.keyboard.press("h"); await page.waitForTimeout(1000);
   if (await page.locator('[data-hk8="not-now"]').count()) { await page.locator('[data-hk8="not-now"]').click(); await page.waitForTimeout(500); await page.keyboard.press("h"); await page.waitForTimeout(900); }
@@ -395,7 +396,8 @@ test("F2 · intro: on the first open only (stored); Not now sets the flag; Start
   await page.reload(); await page.locator(".clv-group:not([data-loading]) .clv-row").first().waitFor({ timeout: 60_000 }); await page.waitForTimeout(800);
   await page.keyboard.press("h"); await page.waitForTimeout(900);
   await page.locator('[data-hk8="intro-start"]').click(); await page.waitForTimeout(700);
-  L.check("Start lands in Focus", (await page.locator('[data-hk8="focus"]').count()) === 1, "focus");
+  /* RE-POINTED (v18.2 §C): "Get started →" lands on home with the three ways, not in Focus (CL182 C4 owns the rest) */
+  L.check("Get started lands on home showing the ways card", (await page.locator('[data-hk8="home"] [data-hk8="ways"]').count()) === 1, "ways");
   await page.waitForTimeout(1000);
   L.check("and it set the flag too (left set, as before the run)", flags().hkIntroSeen === true, JSON.stringify(flags()));
   L.done(6);
@@ -470,7 +472,8 @@ test("F4 · focus: Save waits for an answer, writes through the save path, Skip 
 });
 
 /* ───────────────────────── F5 · pop ───────────────────────── */
-test("F5 · pop: '+n' is fixed in the top layer, rises above the drawer, unclipped, gone by 1.5s; none under reduced motion", async ({ page, browser }) => {
+/* RETIRED (v18.2 §D.4): v18's two rising pops are replaced by one flight to the ring, held by CL182 D4 */
+test.skip("F5 · pop: '+n' is fixed in the top layer, rises above the drawer, unclipped, gone by 1.5s; none under reduced motion", async ({ page, browser }) => {
   test.setTimeout(240_000);
   const L = new Ledger("F5");
   await open(page, SIZES[0], "F5", { motion: true });

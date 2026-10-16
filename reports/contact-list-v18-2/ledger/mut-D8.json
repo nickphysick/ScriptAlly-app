@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D8",
+  "where": "a reopening gap is on the account",
+  "ok": true,
+  "detail": "seed-agent-1:reopen"
+ },
+ {
+  "lock": "D8",
+  "where": "no chip is selected",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D8",
+  "where": "the date input's minimum is today",
+  "ok": true,
+  "detail": "2026-10-16"
+ },
+ {
+  "lock": "D8",
+  "where": "one reminder was made",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D8",
+  "where": "for the picked date",
+  "ok": false,
+  "detail": "2026-11-01"
+ },
+ {
+  "lock": "D8",
+  "where": "Undo takes the reminder away again",
+  "ok": true,
+  "detail": "0 vs 0"
+ }
+]

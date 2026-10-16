@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D2",
+  "where": "the run starts at '1 of k'",
+  "ok": true,
+  "detail": "1 of 50"
+ },
+ {
+  "lock": "D2",
+  "where": "after Save, '2 of 50'",
+  "ok": true,
+  "detail": "2 of 50"
+ },
+ {
+  "lock": "D2",
+  "where": "after Skip, still '2 of 50'",
+  "ok": true,
+  "detail": "2 of 50"
+ },
+ {
+  "lock": "D2",
+  "where": "after Undo, '1 of 50'",
+  "ok": true,
+  "detail": "1 of 50"
+ },
+ {
+  "lock": "D2",
+  "where": "Undo put the task back at the front",
+  "ok": true,
+  "detail": "front"
+ }
+]
