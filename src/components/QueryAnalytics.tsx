@@ -32,6 +32,7 @@ import { Glance, SectionTab, Skeleton, TipProvider, useReveal } from "./analytic
 import { A21Header, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
 import { Sx } from "./analytics/A24Frame";
+import { S1Body, s1Readings } from "./analytics/A24S1";
 import { A21Empty } from "./analytics/A21Empty";
 import { buildV21 } from "../lib/analyticsV21";
 import { buildV24, deskV24, heads, ringOf, QUESTIONS } from "../lib/analyticsV24";
@@ -115,7 +116,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       <>
         <Glance cells={v.glance} />
         <A21Desk cards={deskV24(model, v24, v24.nowMs)} onGo={go} />
-        <Sx sec={0} head={h[0]} />
+        <Sx sec={0} head={h[0]} readings={s1Readings(v24)}><S1Body v={v24} /></Sx>
         <Sx sec={1} head={h[1]} />
         <Sx sec={2} head={h[2]} />
         <Sx sec={3} head={h[3]} />

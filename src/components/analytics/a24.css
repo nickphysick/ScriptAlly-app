@@ -75,3 +75,31 @@
   .a24-r > div, .ws-app.sheet-wide .a24-r > div { border-left: 0; border-top: 1px solid rgba(28, 19, 15, 0.1); padding: 14px 16px; }
   .a24-r > div:first-child { border-top: 0; }
 }
+
+/* ══════════════ S1 · two pies ══════════════ */
+.a24-pies { display: grid; grid-template-columns: 1.15fr 1fr; padding: 26px 28px 22px; min-width: 0; }
+.ws-app.sheet-wide .a24-pies { padding: 30px 36px 26px; }
+.a24-pies > .a24-blk, .ws-app.sheet-wide .a24-pies > .a24-blk { padding: 0; margin: 0; border: 0; min-width: 0; }
+.a24-pies > .a24-blk + .a24-blk { border-left: 1px dashed rgba(28, 19, 15, 0.16); padding-left: 26px; margin-left: 26px; }
+.ws-app.sheet-wide .a24-pies > .a24-blk + .a24-blk { padding-left: 36px; margin-left: 36px; }
+.a24-pierow { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.ws-app.sheet-wide .a24-pierow { gap: 28px; }
+.a24-pie { flex: none; width: 170px; height: 170px; }
+.ws-app.sheet-wide .a24-pie { width: 210px; height: 210px; }
+.a24-pies > .a24-blk + .a24-blk .a24-pie { width: 130px; height: 130px; }
+.ws-app.sheet-wide .a24-pies > .a24-blk + .a24-blk .a24-pie { width: 150px; height: 150px; }
+.a17-page .a24-pie text { font: 400 22px/1 var(--sp-type) !important; }
+.a24-pl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.a24-pl li { display: grid; grid-template-columns: 14px 34px minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
+.a24-pl em { width: 14px; height: 14px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); align-self: center; }
+.a17-page .a24-pl b { font: 400 22px/1.1 var(--sp-type) !important; color: var(--sp-ink); }
+.a17-page .a24-pl span { font: 400 16px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.78); min-width: 0; }
+.a17-page .a24-pl small { display: block; font: 400 13px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.a17-page .a24-none { margin: 0; font: italic 400 16px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+@media (max-width: 760px) {
+  .a24-pies, .ws-app.sheet-wide .a24-pies { grid-template-columns: 1fr; padding: 18px 16px; gap: 22px; }
+  .a24-pies > .a24-blk + .a24-blk, .ws-app.sheet-wide .a24-pies > .a24-blk + .a24-blk {
+    border-left: 0; padding-left: 0; margin-left: 0; border-top: 1px dashed rgba(28, 19, 15, 0.16); padding-top: 22px;
+  }
+  .a24-pierow { flex-direction: column; align-items: flex-start; }
+}
