@@ -29,11 +29,12 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { Caveats, Endings, Funnel, Lanes, OverTime, Records, ShareBars, StageGaps, TrainingLog } from "./analytics/A17Figures";
+import { Caveats, Funnel, Lanes, OverTime, Records, ShareBars, TrainingLog } from "./analytics/A17Figures";
 import { A17Empty } from "./analytics/A17Empty";
 import { A21Header, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
 import { A21Window } from "./analytics/A21Window";
+import { A21Steps } from "./analytics/A21Steps";
 import { buildV21, windowLede } from "../lib/analyticsV21";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
@@ -114,7 +115,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
         <Section sec={1} banner={b[1]} readings={v.log.readings} tint><TrainingLog model={model} /></Section>
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
         <Section sec={3} banner={b3} readings={v.reply.readings} tint lede={<>{wl.lead}{wl.bold ? <b>{wl.bold}</b> : null}{wl.rest}</>}><A21Window w={v21.window} /></Section>
-        <Section sec={4} banner={b4} readings={v.waits.readings}><div className="a17-two"><StageGaps model={model} /><Endings model={model} /></div></Section>
+        <Section sec={4} banner={b4}><A21Steps steps={v21.steps} endings={v21.endings} /></Section>
         <Section sec={5} banner={b[5]} tint><Records model={model} /></Section>
         <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
         <Section sec={7} banner={b[7]} readings={v.lanes.readings} tint><Lanes model={model} /></Section>

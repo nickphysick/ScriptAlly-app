@@ -187,10 +187,12 @@
 .a17-page .a21-rwcol h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font: 400 19px/1.3 var(--sp-type) !important; padding-bottom: 12px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
 .a17-page .a21-rwn { min-width: 30px; height: 28px; padding: 0 8px; box-sizing: border-box; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font: 400 16px/1 var(--sp-type) !important; background: #dfeaf4; color: #2f5f86; }
 .a17-page .a21-rwn.o { background: #f6e4da; color: #a0633f; }
-.a21-rwcol ul { list-style: none; margin: 0; padding: 0; }
-.a21-rwcol li, .a21-rwax { display: grid; grid-template-columns: 132px minmax(0, 1fr) 132px; column-gap: 12px; align-items: center; }
-.ws-app.sheet-wide .a21-rwcol li, .ws-app.sheet-wide .a21-rwax { grid-template-columns: 150px minmax(0, 1fr) 150px; column-gap: 16px; }
-.a21-rwcol li { padding: 11px 0; border-bottom: 1px solid rgba(28, 19, 15, 0.06); }
+/* ⚠️ ONE GRID PER LIST, EACH ROW A SUBGRID: the right column is content-sized ("said 8 wks · 2 days over" does
+   not fit a fixed 132), and the axis row shares the track column, so its ticks stay under the bars */
+.a21-rwcol ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr) max-content; column-gap: 12px; }
+.ws-app.sheet-wide .a21-rwcol ul { grid-template-columns: 150px minmax(0, 1fr) max-content; column-gap: 16px; }
+.a21-rwcol ul > li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; }
+.a21-rwcol li.a21-rwli { padding: 11px 0; border-bottom: 1px solid rgba(28, 19, 15, 0.06); }
 .a21-rwwho { min-width: 0; }
 .a17-page .a21-rwwho b { display: block; font: 600 15px/1.35 var(--sp-serif) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .a17-page .a21-rwwho small { display: flex; align-items: center; gap: 6px; font: 400 12.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -204,7 +206,8 @@
 .a17-page .a21-rwlab b { display: block; font: 400 17px/1.3 var(--sp-type) !important; white-space: nowrap; }
 .a17-page .a21-rwlab span { display: block; font: 400 12.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
 .a17-page .a21-rwlab em { font-style: normal; color: #a0633f; }
-.a21-rwax { height: 20px; margin-top: 6px; }
+.a21-rwcol li.a21-rwax { height: 20px; margin-top: 6px; }
+.a21-rwlab b, .a21-rwlab span { min-width: 132px; }
 .a21-rwaxt { position: relative; height: 20px; }
 .a17-page .a21-rwaxt i { position: absolute; transform: translateX(-50%); white-space: nowrap; font: 400 9.5px/20px var(--font-mono) !important; font-style: normal; letter-spacing: 0.1em; color: rgba(28, 19, 15, 0.4); text-transform: uppercase; }
 .a21-rwnone { margin: 14px 0 0; font-size: 14.5px; color: rgba(28, 19, 15, 0.6); }
@@ -213,10 +216,49 @@
 @media (max-width: 760px) {
   .a21-rwcols, .ws-app.sheet-wide .a21-rwcols { grid-template-columns: minmax(0, 1fr); gap: 22px; }
   /* the label over the track, and the right cell under the track's right end */
-  .a21-rwcol li, .ws-app.sheet-wide .a21-rwcol li { grid-template-columns: minmax(0, 1fr); row-gap: 6px; }
+  .a21-rwcol ul, .ws-app.sheet-wide .a21-rwcol ul { grid-template-columns: minmax(0, 1fr); }
+  .a21-rwcol li.a21-rwli { row-gap: 6px; }
   .a21-rwcol li .a21-rwtrk { grid-row: 2; }
   .a21-rwcol li .a21-rwlab { grid-row: 3; justify-self: end; }
-  .a21-rwax, .ws-app.sheet-wide .a21-rwax { grid-template-columns: minmax(0, 1fr); }
-  .a21-rwax > span:not(.a21-rwaxt) { display: none; }
+  .a21-rwcol li.a21-rwax > span:not(.a21-rwaxt) { display: none; }
   .a21-rwkey { font-size: 13px; }
+}
+
+/* ══════════════ E · how long each step takes (both widths; the phone runs it down the page) ══════════════ */
+.a21-jrline { display: flex; align-items: flex-start; padding: 6px 0 4px; }
+.a21-jrnode { flex: none; width: 84px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; z-index: 1; }
+.ws-app.sheet-wide .a21-jrnode { width: 96px; }
+.a21-jrnode > :first-child { background: #fff; border-radius: 50%; }
+.a17-page .a21-jrnode b { font: 600 14.5px/1.25 var(--sp-serif) !important; }
+.a21-jrgap { min-width: 120px; flex-basis: 0; position: relative; padding: 0 6px; text-align: center; }
+.ws-app.sheet-wide .a21-jrgap { min-width: 150px; }
+.a21-jrbar { display: block; height: 6px; border-radius: 3px; background: #2a3a52; margin: 14px -42px 14px; position: relative; z-index: 0; }
+.ws-app.sheet-wide .a21-jrbar { margin-left: -48px; margin-right: -48px; }
+.a21-jrgap.you .a21-jrbar { background: #b4553f; }
+.a21-jrgap.thin .a21-jrbar { background: repeating-linear-gradient(90deg, #2a3a52 0 8px, transparent 8px 13px); }
+.a21-jrgap.thin.you .a21-jrbar { background: repeating-linear-gradient(90deg, #b4553f 0 8px, transparent 8px 13px); }
+.a17-page .a21-jrv { font: 400 15px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, 0.66); }
+.a17-page .a21-jrv b { font: 400 28px/1 var(--sp-type) !important; color: var(--sp-ink); }
+.ws-app.sheet-wide .a17-page .a21-jrv b { font-size: 34px !important; }
+.a17-page .a21-jrgap.you .a21-jrv b { color: #a0633f; }
+.a17-page .a21-jrgap.none .a21-jrv b { color: rgba(28, 19, 15, 0.4); }
+.a17-page .a21-jrwho { margin-top: 4px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.66); }
+.a17-page .a21-jrrng { margin-top: 2px; font: 400 9px/1.45 var(--font-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.42); }
+.a21-en { margin-top: 30px; padding-top: 24px; border-top: 1px dashed rgba(28, 19, 15, 0.22); }
+.a17-page .a21-en h4 { margin: 0 0 14px; font: 400 19px/1.3 var(--sp-type) !important; }
+.a21-enrow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.a21-enrow > div { background: #faf7f1; border-radius: 14px; padding: 16px 18px; }
+.a17-page .a21-enrow b { display: block; font: 400 30px/1.05 var(--sp-type) !important; }
+.a17-page .a21-enrow span { display: block; margin-top: 6px; font: 400 15px/1.4 var(--sp-serif) !important; color: var(--sp-ink); }
+.a17-page .a21-enrow small { display: block; margin-top: 6px; font: 400 9px/1.5 var(--font-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+@media (min-width: 761px) and (max-width: 1100px) { .a21-enrow { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) {
+  .a21-jrline { flex-direction: column; align-items: stretch; }
+  .a21-jrnode, .ws-app.sheet-wide .a21-jrnode { width: auto; flex-direction: row; gap: 12px; text-align: left; }
+  .a21-jrgap, .ws-app.sheet-wide .a21-jrgap { min-width: 0; text-align: left; padding: 4px 0 10px 42px; border-left: 3px solid #2a3a52; margin-left: 15px; flex-grow: 0 !important; flex-basis: auto; }
+  .a21-jrgap.you { border-left-color: #b4553f; }
+  .a21-jrgap.thin { border-left-style: dashed; }
+  .a21-jrbar { display: none; }
+  .a17-page .a21-jrv b, .ws-app.sheet-wide .a17-page .a21-jrv b { font-size: 26px !important; }
+  .a21-enrow { grid-template-columns: minmax(0, 1fr); }
 }

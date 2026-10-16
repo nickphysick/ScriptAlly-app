@@ -29,7 +29,7 @@ const Row: React.FC<{ r: WindowReply; scale: number }> = ({ r, scale }) => {
   const took = r.tookDays / 7;
   const tookEnd = Math.min(took, r.saidWeeks);
   return (
-    <li data-a21="rw-row" data-inside={r.inside ? "" : undefined}
+    <li className="a21-rwli" data-a21="rw-row" data-inside={r.inside ? "" : undefined}
       title={`${r.agency}: states ${r.saidWeeks} ${r.saidWeeks === 1 ? "week" : "weeks"}, replied after ${wksShort(r.tookDays).replace("wks", "weeks").replace("wk", "week")}. ${r.what}.`}>
       <div className="a21-rwwho"><b>{r.agency}</b><small><i style={{ background: STATE_FILL[r.bucket] }} aria-hidden="true" />{r.what}</small></div>
       <div className="a21-rwtrk" data-a21="rw-track">
@@ -54,8 +54,11 @@ const Col: React.FC<{ title: string; rows: WindowReply[]; tone: "b" | "o"; none:
       <h4><span className={`a21-rwn${tone === "o" ? " o" : ""}`} data-a21="rw-n">{rows.length === 0 ? "None" : rows.length}</span>{title}</h4>
       {rows.length === 0 ? <p className="a21-rwnone">{none}</p> : (
         <>
-          <ul>{rows.map((r) => <Row key={r.id} r={r} scale={scale} />)}</ul>
-          <div className="a21-rwax" aria-hidden="true"><span /><span className="a21-rwaxt">{ticks.map((w) => <i key={w} style={{ left: pc(w, scale) }}>{w} wks</i>)}</span><span /></div>
+          <ul>
+            {rows.map((r) => <Row key={r.id} r={r} scale={scale} />)}
+            {/* the axis is the list's last row, so its tick column IS the rows' track column (a subgrid) */}
+            <li className="a21-rwax" aria-hidden="true"><span /><span className="a21-rwaxt">{ticks.map((w, i) => <i key={w} style={{ left: pc(w, scale) }}>{i === ticks.length - 1 ? `${w} wks` : w}</i>)}</span><span /></li>
+          </ul>
         </>
       )}
     </div>
