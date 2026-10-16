@@ -30,11 +30,13 @@ import { agentInitials } from "../../../lib/agentDisplay";
 import { isDoorClosed } from "../../../lib/agentList";
 import { MaterialsField, Stepper } from "../card/cardInputs";
 import { HalfDrawer } from "../../shell/HalfDrawer";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FloatingTab, TabRing } from "../../shell/FloatingTab";
 import { AgentPaperCard, type PaperCardData } from "../../shared/AgentPaperCard";
 import { HK_HAWK, SessionModal, TabNote, type FixResult, type HkFix, type HkHandlers, type Session } from "./ContactHousekeeping";
 import "./housekeeping.css";
 import "./housekeepingV18.css";
+import "./housekeepingV182.css";
 
 export interface HousekeepingDrawerProps extends HkHandlers {
   model: HkModel;
@@ -245,8 +247,10 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   const [whereOpen, setWhereOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ key: string; label: string; n: number }[]>([]);
-  const [pips, setPips] = useState<string[]>([]);
-  const [pulse, setPulse] = useState<string | null>(null);
+  /* v18.2 §D.9 — this opening's tally: points and gaps filled since the drawer opened */
+  const [tally, setTally] = useState<{ pts: number; n: number }>({ pts: 0, n: 0 });
+  /* v18.2 §C — "3 ways to fill the gaps", shown once, straight after the intro's "Get started" */
+  const [ways, setWays] = useState(false);
   const [pops, setPops] = useState<Pop[]>([]);
   const [bump, setBump] = useState(0);
   const [banner, setBanner] = useState<string | null>(null);
@@ -259,15 +263,43 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
   const saveRef = useRef<HTMLButtonElement>(null);
   const ringRef = useRef<HTMLSpanElement>(null);
+  const howRef = useRef<HTMLButtonElement>(null);
+  const ptsRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  /* v18.2 §C — the points key closes on a click outside it (the link and the points tile are its own), and on Escape
+     WITHOUT closing the drawer: its layer is above the drawer's */
+  useEffect(() => {
+    if (!how) return undefined;
+    const away = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (popRef.current?.contains(t) || howRef.current?.contains(t) || ptsRef.current?.contains(t)) return;
+      setHow(false);
+    };
+    document.addEventListener("pointerdown", away, true);
+    return () => document.removeEventListener("pointerdown", away, true);
+  }, [how]);
+  useEscapeLayer(open && how, () => setHow(false), ESC_LEVEL.pageModal);
+  /* scroll a part of home into view once it has rendered (after a mode change) */
+  const scrollTo = (sel: string, then?: (el: HTMLElement) => void) => {
+    let tries = 0;
+    const go = () => {
+      const el = bodyRef.current?.querySelector<HTMLElement>(sel);
+      if (!el) { if (tries++ < 10) requestAnimationFrame(go); return; }
+      el.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" });
+      then?.(el);
+    };
+    requestAnimationFrame(go);
+  };
 
   /* on open: the intro once, with a gap; home every other time. The pips are the gaps at the time of opening. */
   const wasOpen = useRef(false);
   useLayoutEffect(() => {
     if (open && !wasOpen.current) {
       setMode(!p.introSeen && items.length > 0 ? "intro" : "home");
-      setRun(null); setDone([]); setPips(items.map((i) => i.key)); setFoot(null); setBanner(null);
+      setRun(null); setDone([]); setTally({ pts: 0, n: 0 }); setWays(false); setFoot(null); setBanner(null);
     }
-    if (!open && wasOpen.current) { setSes(null); setHow(false); }
+    if (!open && wasOpen.current) { setSes(null); setHow(false); setTally({ pts: 0, n: 0 }); setWays(false); }
     wasOpen.current = open;
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -295,6 +327,22 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     startFocus(row.items.map((i) => i.key), `${firstNameOf(row.agent)}’s profile`);
   }, [open, p.runAgent?.seq]); // eslint-disable-line react-hooks/exhaustive-deps
   const wholeQueue = (first?: string) => startFocus(items.map((i) => i.key), null, first);
+  /* v18.2 §C — the gaps tile: All gaps into view (home first, from focus); §D.11 the minutes tile: Up next into view,
+     with one rust ring flash (none under reduced motion) */
+  const goHome = () => { setRun(null); setMode("home"); setWays(false); setHow(false); };
+  const toAllGaps = () => { goHome(); scrollTo('[data-hk8="all-head"]'); };
+  const toUpNext = () => {
+    goHome();
+    scrollTo('[data-hk8="up-next"], [data-hk8="up-done"]', (el) => {
+      if (reduced() || typeof el.animate !== "function") return;
+      el.setAttribute("data-flash", "");
+      /* the ring is ADDED to the card's own shadow (read off the element), never painted over it */
+      const base = getComputedStyle(el).boxShadow;
+      const own = base && base !== "none" ? `${base}, ` : "";
+      el.animate([{ boxShadow: `${own}0 0 0 0 rgba(162, 69, 42, 0.55)` }, { boxShadow: `${own}0 0 0 14px rgba(162, 69, 42, 0)` }], { duration: 1100, easing: "ease-out" })
+        .finished.then(() => el.removeAttribute("data-flash"), () => el.removeAttribute("data-flash"));
+    });
+  };
   const skip = () => { if (!run || !cur) return; setRun({ ...run, keys: [...run.keys.filter((k) => k !== cur.key), cur.key] }); };
 
   const sayFoot = (text: string, undo?: () => Promise<boolean>) => {
@@ -321,50 +369,65 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     pop(saveRef.current, n, false, 30);
     pop(ringRef.current, n, true, 20);
     setBump((b) => b + 1);
-    setPulse(item.key); later(() => setPulse((k) => (k === item.key ? null : k)), 600);
     setDone((d) => [...d, { key: item.key, label: `${DETAIL_NAME[item.gap]} for ${firstNameOf(item.agent)}`, n }]);
     const others = (model.gapsById.get(item.agent.id) ?? []).filter((g) => g !== item.gap);
     if (others.length === 0) { const t = `✓ ${firstNameOf(item.agent)}’s profile is complete`; setBanner(t); later(() => setBanner((b) => (b === t ? null : b)), 2200); }
     if (!reduced()) { setLeaving(true); later(() => setLeaving(false), 320); }
   };
 
-  /* ── the header ── */
+  /* ── the header (v18.2 §C, layout B): on ink, the ring spanning its rows on the left; a title row (the score,
+     "List health", "How points work", ✕); three tiles that are buttons (points → the key, gaps → All gaps, minutes →
+     Up next); a 6px bar; and, after the first save, the session's tally. While the intro shows it steps down to its
+     first row. The points line, the pips and the "done today" chip are retired. ── */
   const gapsLeft = items.length;
+  const introing = mode === "intro";
   const head = (
-    <div className="hk8-head" data-hk8="head">
+    <div className="hk8-head hk82" data-hk8="head" data-introing={introing ? "" : undefined}>
       <HeadRing pct={pct} bump={bump} ringRef={ringRef} />
-      <div className="hk8-score" data-hk8="score">
-        <span className="hk8-lh">List health</span>
+      <div className="hk82-tr" data-hk8="title-row">
         <b className="hk8-n" data-hk8="pct">{health.pct === null ? "" : <>{pct}<i>%</i></>}</b>
-        <p className="hk8-pl" data-hk8="points">
-          {gapsLeft > 0
-            ? <><b>{held}</b> of {health.possible} points · <b>{gapsLeft}</b> {gapsLeft === 1 ? "gap" : "gaps"} left · about {minutesFor(gapsLeft)} min</>
-            : "every detail filled in"}
-        </p>
-        <button type="button" className="hk8-how" data-hk8="how" aria-expanded={how} onClick={() => setHow((v) => !v)}>How points work</button>
-        {how ? (
-          <div className="hk8-howpop" data-hk8="how-pop" role="dialog" aria-label="How points work">
-            <table><tbody>
-              {POINTS_ORDER.map((g) => <tr key={g}><td>{DETAIL_NAME[g]}{g === "reopen" ? " (closed agents)" : ""}</td><td>{POINTS[g]}</td></tr>)}
-            </tbody></table>
-            <p>{POINTS_LINE}</p>
-          </div>
-        ) : null}
+        <span className="hk82-lh" data-hk8="label">List health</span>
       </div>
-      {done.length ? <span className="hk8-today" data-hk8="today">{done.length} done today</span> : <span />}
+      <button type="button" className="hk8-how" data-hk8="how" ref={howRef} aria-expanded={how} aria-haspopup="dialog" onClick={() => setHow((v) => !v)}>How points work</button>
       <button type="button" className="hk8-x" data-hk8="close" aria-label="Close Housekeeping" onClick={p.onClose}>✕</button>
-      {pips.length ? (
-        <div className="hk8-pips" data-hk8="pips" aria-hidden="true">
-          {pips.map((k) => <i key={k} data-done={!byKey.has(k) || done.some((d) => d.key === k) ? "" : undefined} data-pulse={pulse === k ? "" : undefined} />)}
+      {!introing ? (
+        <>
+          <div className="hk82-tiles" data-hk8="tiles">
+            <button type="button" className="hk82-tile" data-hk8="tile" data-k="points" ref={ptsRef} aria-expanded={how} onClick={() => setHow((v) => !v)}>
+              <b>{held}</b><small>of {health.possible} pts</small>
+            </button>
+            <button type="button" className="hk82-tile" data-hk8="tile" data-k="gaps" onClick={toAllGaps}>
+              <b>{gapsLeft}</b><small>{gapsLeft === 1 ? "gap" : "gaps"}</small>
+            </button>
+            <button type="button" className="hk82-tile" data-hk8="tile" data-k="minutes" onClick={toUpNext}>
+              <b>~{minutesFor(gapsLeft)}</b><small>min to fill</small>
+            </button>
+          </div>
+          <span className="hk82-bar" data-hk8="bar" aria-hidden="true"><i style={{ width: `${health.possible > 0 ? Math.max(0, Math.min(100, (100 * held) / health.possible)) : 0}%` }} /></span>
+          {tally.n > 0 ? (
+            <p className="hk82-tally" data-hk8="tally"><b>+{tally.pts}</b> this session · {tally.n} filled</p>
+          ) : null}
+        </>
+      ) : null}
+      {how ? (
+        <div className="hk8-howpop hk82-key" data-hk8="how-pop" ref={popRef} role="dialog" aria-label="How points work">
+          <table><tbody>
+            {POINTS_ORDER.map((g) => <tr key={g}><td>{DETAIL_NAME[g]}{g === "reopen" ? " (closed agents)" : ""}</td><td>{POINTS[g]}</td></tr>)}
+          </tbody></table>
+          <p>{POINTS_LINE}</p>
         </div>
       ) : null}
     </div>
   );
 
-  /* ── intro ── */
+  /* ── intro (v18.2 §C): two set lines, left-aligned with the columns; the actions row is pinned to the drawer's foot,
+     so "Get started →" is in view without scrolling. It leads to the three ways, shown once. ── */
   const intro = (
-    <div className="hk8-intro" data-hk8="intro">
-      <h3 className="hk8-ih">In smart querying, <br />data is <em>everything.</em></h3>
+    <div className="hk8-intro hk82-intro" data-hk8="intro">
+      <h3 className="hk8-ih hk82-ih" data-hk8="intro-head">
+        <span className="hk82-ihl" data-hk8="intro-line">When it comes to smart querying,</span>
+        <span className="hk82-ihl" data-hk8="intro-line">data is <em>everything.</em></span>
+      </h3>
       <div className="hk8-icols">
         <div className="hk8-icol">
           <b className="hk8-ipct dim">33%</b>
@@ -377,10 +440,38 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
           <AgentPaperCard variant="framed" data={INTRO_AGENT} />
         </div>
       </div>
-      <div className="hk8-iacts">
+      <div className="hk8-iacts hk82-iacts" data-hk8="intro-acts">
         <button type="button" className="hk8-ln" data-hk8="not-now" onClick={() => { p.onIntroSeen(); p.onClose(); }}>Not now</button>
-        <button type="button" className="hk8-go" data-hk8="intro-start" onClick={() => { p.onIntroSeen(); wholeQueue(); }}>Start with the most useful gap →</button>
+        <button type="button" className="hk8-go" data-hk8="intro-start" onClick={() => { p.onIntroSeen(); setMode("home"); setWays(true); }}>Get started →</button>
       </div>
+    </div>
+  );
+
+  /* ── "3 ways to fill the gaps" (v18.2 §C): the home area to itself until a choice is made ── */
+  const WAY_ICON: Record<"run" | "detail" | "agent", React.ReactNode> = {
+    run: <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 4.5l11 6.5-11 6.5z" /></svg>,
+    detail: <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M4 6h14M4 11h14M4 16h9" /></svg>,
+    agent: <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="8" r="3.5" /><path d="M4.5 18c1-3.4 3.6-5 6.5-5s5.5 1.6 6.5 5" /></svg>,
+  };
+  const chooseView = (v: "detail" | "agent") => { setWays(false); p.onView(v); scrollTo('[data-hk8="all-head"]'); };
+  const waysCard = (
+    <div className="hk82-ways" data-hk8="ways" role="group" aria-labelledby="hk82-ways-h">
+      <div className="hk82-wh">
+        <b id="hk82-ways-h">3 ways to fill the gaps</b>
+        <small>Choose one. You can switch at any time.</small>
+      </div>
+      {([
+        { k: "run" as const, name: "One at a time", line: "We’ll ask the question worth the most points first, then the next.", act: "Start →", run: () => { setWays(false); wholeQueue(); } },
+        { k: "detail" as const, name: "By missing detail", line: "Every reply time, then every wishlist, and so on.", act: "See them ↓", run: () => chooseView("detail") },
+        { k: "agent" as const, name: "By agent", line: "Finish one agent’s profile before moving on.", act: "See them ↓", run: () => chooseView("agent") },
+      ]).map((w) => (
+        <button key={w.k} type="button" className="hk82-w" data-hk8="way" data-w={w.k} onClick={w.run}>
+          <span className="hk82-wi">{WAY_ICON[w.k]}</span>
+          <span className="hk82-wt"><b>{w.name}</b><small>{w.line}</small></span>
+          <i className="hk82-wa">{w.act}</i>
+        </button>
+      ))}
+      <button type="button" className="hk82-wx" data-hk8="ways-all" onClick={() => setWays(false)}>Just show me everything</button>
     </div>
   );
 
@@ -481,7 +572,9 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   })();
 
   const ci = p.checkin;
-  const home = (
+  const home = ways && items.length > 0 ? (
+    <div className="hk8-home hk82-choosing" data-hk8="home">{waysCard}</div>
+  ) : (
     <div className="hk8-home" data-hk8="home">
       {upNext}
       {ci.show ? (
@@ -500,7 +593,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
       ) : null}
       {items.length ? (
         <>
-          <div className="hk8-allh">
+          <div className="hk8-allh" data-hk8="all-head">
             <b>All gaps</b>
             <span className="hk8-seg" role="radiogroup" aria-label="Show">
               <button type="button" role="radio" aria-checked={p.view === "detail"} data-hkv="view" data-v="detail" onClick={() => p.onView("detail")}>By missing detail</button>
@@ -605,7 +698,8 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
           label={`Housekeeping: ${tabLine}. Press H to open.`}>
           <span className="hkv-hh" aria-hidden="true"><img src={`${HK_HAWK.src}?v=${HK_HAWK.version}`} alt="" /></span>
           <span className="hkv-tt">
-            <b>Housekeeping{p.keyHint && <kbd className="hkv-kbd" data-hkv="key">{p.keyHint}</kbd>}</b>
+            {/* v18.2 §C — no keycap: the H key still opens it */}
+            <b>Housekeeping</b>
             <small data-hkv="tab-counts">{tabLine}</small>
           </span>
           <TabRing share={(health.pct ?? 0) / 100} tone="gaps" />
@@ -626,7 +720,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
               return n;
             })} />
         ) : null}>
-        <div className="hk8-db" data-hkv="body-wrap" data-hk8-mode={mode}>{body}</div>
+        <div className="hk8-db" data-hkv="body-wrap" data-hk8-mode={mode} ref={bodyRef}>{body}</div>
       </HalfDrawer>
       <Pops pops={pops} />
     </>
