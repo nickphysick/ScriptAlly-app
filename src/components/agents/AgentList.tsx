@@ -75,6 +75,7 @@ import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { LetterTabs } from "./contact/ContactLetters";
+import { AgentPanelNew } from "./panel/AgentPanelNew";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
 import { firstNameOf } from "../../lib/agentPanel";
@@ -574,11 +575,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* kept under its old name for the doors that asked for the card's editor at a field */
   const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => openPanel(agentId, opts.tab || opts.focus || opts.prefill ? { tab: opts.tab, focus: opts.focus, prefill: opts.prefill } : undefined), [openPanel]);
 
-  /** "+ Add an agent" — the empty card, growing out of the button that asked for it. */
+  /** "+ Add an agent" — v18.3 §D: the agent panel's act view in a new-agent state (the centred card is no longer
+   *  opened from this page). An agent's panel open at the time closes first: one right-hand panel at a time. */
+  const addedInPanel = useRef<string | null>(null);
+  /* only an add STARTED here moves the panel (a centred add on another page emits "added" too) */
+  const addFromHere = useRef(false);
   const openAdd = useCallback(() => {
-    const r = addBtnRef.current?.getBoundingClientRect();
-    openNewAgentCard({ from: "button", originRect: r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null });
-  }, []);
+    addFromHere.current = true;
+    if (panelIdRef.current) setPanelParam(null, "replace");
+    setHkOpenRef.current(false);
+    openNewAgentCard({ from: "button", host: "panel" });
+  }, [setPanelParam]);
 
   /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
      Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
@@ -672,6 +679,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
       setNewId(e.agentId);
+      /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
+      if (addFromHere.current) addedInPanel.current = e.agentId;
+      addFromHere.current = false;
     } else if (e.type === "undone") {
       undoSave.current = null;
       setNotice((n) => (n && n.agentId === e.agentId && n.kind !== "failed" ? null : n));
@@ -692,6 +702,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
     }
   }), [beginSaveChoreography]);
+
+  /* the new-agent form left without an add: a later add elsewhere is not this page's */
+  useEffect(() => { if (!cardReq && !addedInPanel.current) addFromHere.current = false; }, [cardReq]);
+  /* v18.3 §D — the panel follows an add made in it */
+  useEffect(() => {
+    const id = addedInPanel.current;
+    if (!id || !agents.some((a) => a.id === id)) return;
+    addedInPanel.current = null;
+    openPanel(id);
+  }, [agents, openPanel]);
 
   /* §8.4: the new row into view, centred, once the store's own update has rendered it; the ring
      class rides `newId` and drops when the animation has had its 2.4s (reduced motion shows the
@@ -1118,6 +1138,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onFillIn={() => { const id = panelAgent.id; closePanel(); setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
           />
         )}
+        {active && cardReq?.host === "panel" && cardReq.agentId === null && <AgentPanelNew />}
         {showList && active && guideCorner && tabH > 0 && (
           <PageGuide page={CONTACT_GUIDE_PAGE} steps={CONTACT_GUIDE}
             dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",

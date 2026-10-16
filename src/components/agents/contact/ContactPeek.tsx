@@ -32,8 +32,6 @@ export function sendThem(a: Pick<Agent, "materialsWanted">): string | null {
   return rows.map(materialWords).join(" · ");
 }
 
-export const replyPolicy = (a: Pick<Agent, "noResponseMeansNo">): string | null =>
-  a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "replies to every query" : null;
 
 type Edit = (tab: AgentCardTab, focus?: AgentCardField) => void;
 
