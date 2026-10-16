@@ -289,8 +289,7 @@ const Row: React.FC<{
         <TrayBtn probe="tray-open" label="Open card" onPress={(r) => onOpen(r)} />
       </span>
       {peek ? (
-        <ContactPeek agent={a} genres={genres.map((g) => ({ label: g, hit: genreHit(g) }))}
-          onEdit={(tab, focus) => onEdit?.(tab, focus)} onProfile={() => onOpen(rowRef.current?.getBoundingClientRect() ?? new DOMRect())} />
+        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
       ) : null}
     </div>
   );

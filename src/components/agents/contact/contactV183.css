@@ -17,3 +17,38 @@
 .cl17-card .cl17-rg .cl17-pc, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc,
 .cl17-card .cl17-rg .cl17-pc.cl17-pc--full, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc.cl17-pc--full { font-size: 33px !important; }
 .cl17-card .cl17-rg .cl17-pc i, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc i { font-size: 15px !important; top: -7px; opacity: 0.85; }
+
+/* ── §C · THE ROW PEEK: how to reach the agent, nothing else. The open row keeps its own background: no tint, no lift,
+   no shadow, no radius change (v18's open-row dress is undone here). One line of three pills under the main line,
+   starting at the agent's name (the disc, 38 / 28 compact, plus the who cell's 11 gap), 2 under the main line and 14
+   above the row's foot, gap 12. ── */
+.cl16-list .clv-row[data-peek], .cl16-list .clv-row[data-peek][data-disc="none"], .cl16-list .clv-row[data-peek][data-disc="live"],
+.cl16-list .clv-row[data-peek][data-disc="closed"] {
+  z-index: auto; border-radius: 0; box-shadow: none; background: #fff; padding-bottom: 14px;
+}
+.cl183-pk {
+  grid-column: 1 / -1; display: flex; flex-wrap: nowrap; gap: 12px; min-width: 0; margin-top: 2px;
+  padding-left: calc(38px + 11px); cursor: default; text-align: left; animation: cl183pk 0.2s ease both;
+}
+.clv-list--compact .cl183-pk { padding-left: calc(28px + 11px); }
+@keyframes cl183pk { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cl183-pk { animation: none; } }
+.cl183-pk .cl183-pp {
+  display: inline-flex; align-items: center; gap: 9px; box-sizing: border-box; min-width: 0; max-width: 34%; height: 36px; margin: 0;
+  padding: 0 14px 0 5px; border: 0; border-radius: 20px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.13);
+  color: #1c130f; text-decoration: none; cursor: pointer; white-space: nowrap; font: 400 14px/1 var(--sp-serif) !important;
+}
+.ws-app.sheet-wide .cl183-pk .cl183-pp { height: 40px; font-size: 15px !important; }
+.cl183-pk .cl183-pp > span, .cl183-pk .cl183-pp > a, .cl183-pk .cl183-pt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: inherit !important; color: inherit; text-decoration: none; }
+.cl183-pk .cl183-pd {
+  flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #eef1f6; color: #2a3a52;
+}
+.ws-app.sheet-wide .cl183-pk .cl183-pd { width: 30px; height: 30px; }
+.cl183-pk .cl183-pd svg { width: 13px; height: 13px; }
+.ws-app.sheet-wide .cl183-pk .cl183-pd svg { width: 15px; height: 15px; }
+.cl183-pk a.cl183-pp:hover .cl183-dom { text-decoration: underline; text-underline-offset: 3px; }
+.cl183-pk .cl18-copy { flex: none; }
+/* a missing one: dashed, transparent, italic, ink 55%; the disc is a ring */
+.cl183-pk .cl183-pp.is-add { background: transparent; box-shadow: none; border: 1.2px dashed rgba(42, 58, 82, 0.4); color: rgba(28, 19, 15, 0.55); font-style: italic !important; }
+.cl183-pk .cl183-pp.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.4); }
+.cl183-pk .cl183-pp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
