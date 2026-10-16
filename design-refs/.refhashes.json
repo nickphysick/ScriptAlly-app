@@ -346,7 +346,8 @@
     "design-refs/contact-list-v18-1/screens/11-panel-queries-1512@2x.png": "d76eda250799249b7aa64ff0acd2c6178d4d918e448c56aa7b9f21a571419d55",
     "design-refs/contact-list-v18-1/screens/12-panel-your-move-1280@2x.png": "af2b1aba32506dd78abba0a5dca626157e62798a34d17901ac3bb9c74f87b4c2",
     "design-refs/contact-list-v18-1/screens/13-panel-not-queried-1280@2x.png": "38ef8ce7aef5a230f94eafe4b724e9c8e30a12bc1ae42fa6d4ae400aa97794eb",
-    "design-refs/query-centre-v138-5/query-centre-v138-5.html": "575bd24a45d720744c1b3f026a4bdc5a697e51dd7e03130ee71ed5e02a829afe"
+    "design-refs/query-centre-v138-5/query-centre-v138-5.html": "575bd24a45d720744c1b3f026a4bdc5a697e51dd7e03130ee71ed5e02a829afe",
+    "design-refs/query-centre-v138-6/query-centre-v138-6.html": "b9104f0d6ea46cd68c21fc7869128354c418dbfe0a77f14751aa8d0f5e2c40b3"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

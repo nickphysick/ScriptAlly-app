@@ -9,10 +9,12 @@
 import type { Page } from "@playwright/test";
 import { decode } from "fast-png";
 
-/** every page with a pinned row: its row, its content row, its page group, and the headings that sit under the row */
+/** every page with a pinned row: its row, its content row, its page group, and the headings that sit under the row.
+    v138.6 §B — the pinned rows are retired: the "row" is now each page's navy list header (the sticky row) and its
+    "content row" the header itself; `wrap` is the sticky wrapper that pads it under the lip. */
 export const PIN_PAGES = [
-  { key: "queries", route: "/queries", row: '[data-qc138="pinned"][data-on]', inner: ".qc138-pin-in", group: ".qcv-group[data-v138]", heads: '[data-qc138="headings"]' },
-  { key: "agents", route: "/agents", row: '.cl17-pin[data-on]', inner: ".cl17-pin-in", group: ".clv-group", heads: '.clv-group [data-lt="labels"]' },
+  { key: "queries", route: "/queries", row: '.qcv-group[data-v138] [data-qc138="top"]', inner: '.qcv-group[data-v138] [data-qc138="top"]', wrap: '.qcv-group[data-v138] [data-qc138="top-wrap"]', group: ".qcv-group[data-v138]", heads: '[data-qc138="headings"]' },
+  { key: "agents", route: "/agents", row: '.clv-group [data-cl18="list-header"]', inner: '.clv-group [data-cl18="list-header"]', wrap: '.clv-group [data-cl18="list-header-wrap"]', group: ".clv-group", heads: '.clv-group [data-lt="labels"]' },
 ] as const;
 
 export async function scrollPage(page: Page, group: string, y: number) {
