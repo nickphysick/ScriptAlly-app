@@ -156,3 +156,31 @@
   .a17-page .a24-bar b { font-size: 13px !important; min-height: 13px; }
   .a17-page .a24-bar span { font-size: 9px !important; letter-spacing: 0.04em; }
 }
+
+/* ══════════════ S4 · S5 · said against took ══════════════ */
+.a24-rows { list-style: none; margin: 0 0 18px; padding: 0; }
+.a24-rows > li {
+  display: grid; grid-template-columns: 190px minmax(0, 1fr) 130px; column-gap: 14px; align-items: center;
+  padding: 14px 0; border-top: 1px solid rgba(28, 19, 15, 0.07); min-width: 0;
+}
+.ws-app.sheet-wide .a24-rows > li { grid-template-columns: 230px minmax(0, 1fr) 150px; column-gap: 20px; }
+.a24-rows > li:first-child { border-top: 0; }
+.a24-who { min-width: 0; }
+.a17-page .a24-who b { display: block; font: 600 15.5px/1.3 var(--sp-serif) !important; color: var(--sp-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a17-page .a24-who small { display: block; font: 400 13px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.a24-pb { display: grid; gap: 7px; min-width: 0; }
+.a24-pbr { display: grid; grid-template-columns: 104px minmax(0, 1fr) 56px; align-items: center; column-gap: 12px; min-width: 0; }
+.ws-app.sheet-wide .a24-pbr { grid-template-columns: 110px minmax(0, 1fr) 64px; }
+.a17-page .a24-pbr > span { font: 400 10.5px/1.2 var(--font-mono) !important; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
+.a24-pbt { min-width: 0; }
+.a24-pbt i { display: block; height: 14px; border-radius: 7px; min-width: 3px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); }
+.a17-page .a24-pbr em { font: 400 15px/1 var(--sp-type) !important; font-style: normal; color: var(--sp-ink); white-space: nowrap; }
+.a24-val { text-align: right; min-width: 0; }
+.a17-page .a24-val b { display: block; font: 400 19px/1.2 var(--sp-type) !important; color: var(--sp-ink); }
+.a17-page .a24-val span { display: block; font: italic 400 13px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.a17-page .a24-val span.late { color: #a0452e; font-style: normal !important; }
+@media (max-width: 760px) {
+  .a24-rows > li, .ws-app.sheet-wide .a24-rows > li { grid-template-columns: 1fr; row-gap: 8px; }
+  .a24-pbr, .ws-app.sheet-wide .a24-pbr { grid-template-columns: 96px minmax(0, 1fr) 52px; }
+  .a24-val { text-align: left; }
+}

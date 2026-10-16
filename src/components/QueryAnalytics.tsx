@@ -35,6 +35,7 @@ import { Sx } from "./analytics/A24Frame";
 import { S1Body, s1Readings } from "./analytics/A24S1";
 import { S2Body, s2Readings } from "./analytics/A24S2";
 import { S3Body, s3Readings } from "./analytics/A24S3";
+import { S4Body, s4Readings } from "./analytics/A24S4";
 import { A21Empty } from "./analytics/A21Empty";
 import { buildV21 } from "../lib/analyticsV21";
 import { buildV24, deskV24, heads, ringOf, QUESTIONS } from "../lib/analyticsV24";
@@ -121,7 +122,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
         <Sx sec={0} head={h[0]} readings={s1Readings(v24)}><S1Body v={v24} /></Sx>
         <Sx sec={1} head={h[1]} readings={s2Readings(v24)}><S2Body v={v24} /></Sx>
         <Sx sec={2} head={h[2]} readings={s3Readings(v24)}><S3Body v={v24} /></Sx>
-        <Sx sec={3} head={h[3]} />
+        <Sx sec={3} head={h[3]} readings={s4Readings(v24)}><S4Body v={v24} /></Sx>
         <Sx sec={4} head={h[4]} />
         <Sx sec={5} head={h[5]} />
         <Sx sec={6} head={h[6]} />
