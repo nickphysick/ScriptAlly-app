@@ -38,10 +38,11 @@ import { A21Records } from "./analytics/A21Records";
 import { A21Stand } from "./analytics/A21Stand";
 import { A21Empty } from "./analytics/A21Empty";
 import { buildV21, windowLede } from "../lib/analyticsV21";
-import { buildV24, ringOf } from "../lib/analyticsV24";
+import { buildV24, deskV24, ringOf } from "../lib/analyticsV24";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
 import "./analytics/a21.css"; /* after a17: v21 restates its desktop rules */
+import "./analytics/a24.css"; /* after a21: v24 adds the seven sections and the steps card */
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
@@ -120,7 +121,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
     body = (
       <>
         <Glance cells={v.glance} />
-        <A21Desk cards={v21.desk} onGo={go} />
+        <A21Desk cards={deskV24(model, v24, v24.nowMs)} onGo={go} />
         <Section sec={0} banner={b[0]}><Funnel model={model} /></Section>
         <Section sec={1} banner={b[1]} readings={v.log.readings} tint><TrainingLog model={model} /></Section>
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>

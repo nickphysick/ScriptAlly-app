@@ -11,7 +11,7 @@ import { describe, it, expect } from "vitest";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../types";
 import { analyticsModel } from "./analyticsModel";
 import {
-  benchmark, buildV24, diffWords, expectedByNow, monthOf, monthlySends, moments, outcomes, perMonthWords, rateWords,
+  benchmark, buildV24, deskV24, ringOf, diffWords, expectedByNow, monthOf, monthlySends, moments, outcomes, perMonthWords, rateWords,
   replyKeeping, requestRate, span, spanParts, stillWaiting, verdictOf, BENCHMARKS_QUERYTRACKER,
 } from "./analyticsV24";
 
@@ -256,5 +256,36 @@ describe("benchmark — you against most writers", () => {
     expect(monthOf(NOW - 5 * DAY, NOW)).toBe(1);
     expect(monthOf(NOW - 420 * DAY, NOW)).toBe(14);
     expect(monthOf(null, NOW)).toBe(0);
+  });
+});
+
+describe("deskV24 — the three desk cards", () => {
+  const v = buildV24(m, NOW);
+  const d = deskV24(m, v, NOW);
+  it("Queries sent, Asked to read more, Your typical reply time — going to S3, S1, S4", () => {
+    expect(d.map((c) => [c.title, c.sec])).toEqual([["Queries sent", 2], ["Asked to read more", 0], ["Your typical reply time", 3]]);
+  });
+  it("card 1 rows: the last three months and still waiting", () => {
+    expect(d[0].rows.map((r) => [r.n, r.text])).toEqual([[v.monthly.lastThree, "in the last three months"], [13, "still waiting for a reply"]]);
+  });
+  it("card 2: 26%, 7 of 27; the whole book and the offer", () => {
+    expect([d[1].figure, d[1].unit]).toEqual(["26%", "7 of 27"]);
+    expect(d[1].rows.map((r) => [r.n, r.text])).toEqual([[2, "asked for the whole book"], [1, "offer so far"]]);
+  });
+  it("card 3: 7 weeks, 10 replies, quickest 2 wks, longest 13; a dot per reply", () => {
+    expect([d[2].figure, d[2].unit, d[2].stamp]).toEqual(["7", "weeks", "10 replies"]);
+    expect(d[2].rows.map((r) => [r.n, r.text, r.tone])).toEqual([[2, "wks, your quickest", "r"], [13, "wks, your longest", null]]);
+    expect(d[2].chart).toMatchObject({ kind: "dots", typical: 47 });
+    expect((d[2].chart as { dots: unknown[] }).dots.length).toBe(10);
+    expect(d[2].axis).toEqual(["0", "Your replies, in weeks", "13 wks"]);
+  });
+  it("no replies: words, no rows, no axis", () => {
+    const mm = run(sample.slice(0, 3), agents);
+    const c = deskV24(mm, buildV24(mm, NOW), NOW)[2];
+    expect([c.figure, c.unit, c.stamp, c.rows.length, c.axis.length]).toEqual(["No replies", null, null, 0, 0]);
+  });
+  it("the header ring: kept over placed, and nothing to say with none placed", () => {
+    expect(ringOf(v.keeping)).toMatchObject({ inside: 5, dated: 10, pct: 50 });
+    expect(ringOf(replyKeeping([]))).toEqual({ inside: 0, dated: 0, pct: null, share: 0 });
   });
 });

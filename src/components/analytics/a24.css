@@ -1,0 +1,26 @@
+/**
+ * Analytics v24 — the seven question sections, the desk's dot strip and the empty page's steps card
+ * (design-refs/analytics-v24/analytics-v24.html, read at 1512, 1280 and 390 in one browser). Loaded AFTER
+ * a17.css and a21.css.
+ *
+ * ⚠️ "COMPACT" IS THE APP'S SWITCH: base rules are the compact sheet's, `.ws-app.sheet-wide` restates the full ones.
+ * ⚠️ THE STATUS FILLS ARE NEVER OVERRIDDEN. Anthracite (#2a3a52) and rust (#a0633f / #b4553f) are structure and
+ *    emphasis only. No `color-mix()` and no `var()` in a keyframe: every tint is pre-computed.
+ */
+
+/* ══════════════ B · the desk's reply strip ══════════════ */
+@media (min-width: 761px) {
+  .a24-djstrip { position: relative; height: 40px; margin-top: 12px; border-bottom: 1px solid rgba(28, 19, 15, 0.12); }
+  .a24-djstrip i {
+    position: absolute; bottom: 6px; width: 13px; height: 13px; margin-left: -6.5px; border-radius: 50%;
+    background: var(--c); opacity: 0.85; box-shadow: 0 0 0 2px #fdfcfa;
+  }
+  .a24-djstrip u { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed rgba(28, 19, 15, 0.35); margin-left: -1px; text-decoration: none; }
+  .a17-page .a24-djstrip u span {
+    position: absolute; top: -2px; left: 6px; font: 400 9.5px/1.2 var(--font-mono) !important; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap;
+  }
+  /* the reply card's stamp is the full sheet's only: in the compact sheet the card has no room for it */
+  .a21-dj[data-key="wait"] .a21-djstamp { display: none; }
+  .ws-app.sheet-wide .a21-dj[data-key="wait"] .a21-djstamp { display: inline-block; }
+}

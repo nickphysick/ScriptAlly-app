@@ -16,9 +16,9 @@
  */
 import { QueryStatus } from "../types";
 import { DAY_MS, median } from "./analytics";
-import { gapDays, mondayOf, type AnalyticsModel, type Enriched, type StateBucket } from "./analyticsModel";
+import { THIN_SAMPLE, gapDays, mondayOf, type AnalyticsModel, type Enriched, type StateBucket } from "./analyticsModel";
 import { MONTHS_SHORT } from "./dates";
-import { replyWhat } from "./analyticsV21";
+import { desk, replyWhat, windowReplies, type DeskCard } from "./analyticsV21";
 import { say } from "./analyticsModel";
 
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -328,4 +328,55 @@ export function ringOf(k: ReplyKeeping): { inside: number; dated: number; pct: n
   if (k.placed === 0) return { inside: 0, dated: 0, pct: null, share: 0 };
   const share = k.kept.length / k.placed;
   return { inside: k.kept.length, dated: k.placed, pct: Math.round(share * 100), share };
+}
+
+/* ══════════════════════════════════ the desk ══════════════════════════════════ */
+
+/**
+ * v24 §B: the three desk cards. Card 1 keeps v21's construction (weekly bars, "+N this month") with v24's rows;
+ * card 2 is the request rate as `outcomes` counts it; card 3 is the typical reply as a dot strip.
+ * ⚠️ THE SECTION NUMBERS ARE THE PAGE'S: S1 = 0 (what happened), S3 = 2 (how many), S4 = 3 (reply times).
+ */
+export function deskV24(model: AnalyticsModel, v: V24, nowMs: number): DeskCard[] {
+  const [sent, rate] = desk(model, windowReplies(model.items), nowMs);
+  const o = v.outcomes, k = v.keeping;
+  const sentCard: DeskCard = {
+    ...sent, sec: 2,
+    rows: [
+      { n: v.monthly.lastThree, text: "in the last three months", tone: "b" },
+      { n: v.waiting.waiting.length, text: "still waiting for a reply", tone: null },
+    ],
+  };
+  const rateCard: DeskCard = {
+    ...rate, title: "Asked to read more", sec: 0,
+    figure: rateWords(v.rate),
+    unit: o.sent === 0 || v.rate.pct === null ? (o.sent === 0 ? null : "asked to read more") : `${o.asked} of ${o.sent}`,
+    population: o.sent > 0 ? o.sent : null,
+    rows: [
+      { n: o.full, text: "asked for the whole book", tone: "b" },
+      { n: o.of.offer, text: `${o.of.offer === 1 ? "offer" : "offers"} so far`, tone: null, zero: "No" },
+    ],
+  };
+  const dots = model.items
+    .filter((e) => e.replyDays !== null)
+    .map((e) => ({ at: e.replyDays as number, title: `${agencyOf(e)}: ${span(e.replyDays as number)}` }))
+    .sort((a, b) => a.at - b.at);
+  const t = k.typical === null ? null : spanParts(k.typical);
+  const q = k.quickest === null ? null : spanParts(k.quickest);
+  const l = k.longest === null ? null : spanParts(k.longest);
+  const longUnit = (p: { n: number; unit: string }) => (p.unit === "wk" ? "week" : p.unit === "wks" ? "weeks" : p.unit);
+  const waitCard: DeskCard = {
+    key: "wait", title: "Your typical reply time", sec: 3, colour: "#a0633f",
+    stamp: k.replies === 0 ? null : `${k.replies} ${k.replies === 1 ? "reply" : "replies"}`,
+    figure: t === null ? "No replies" : String(t.n),
+    unit: t === null ? null : `${longUnit(t)}${k.replies < THIN_SAMPLE ? `, from ${k.replies} ${k.replies === 1 ? "reply" : "replies"}` : ""}`,
+    population: t === null ? null : k.replies,
+    rows: q && l ? [
+      { n: q.n, text: `${q.unit}, your quickest`, tone: "r" },
+      { n: l.n, text: `${l.unit}, your longest`, tone: null },
+    ] : [],
+    chart: { kind: "dots", dots, typical: k.typical },
+    axis: l === null ? [] : ["0", "Your replies, in weeks", span(k.longest as number)],
+  };
+  return [sentCard, rateCard, waitCard];
 }
