@@ -29,6 +29,7 @@
    ⚠️ NOTHING HERE MAY CREATE A STACKING CONTEXT (no transform, no isolation, no z-index): the hawk shadow (§D)
       paints over the chart card at rest and under it on hover, and both are this grid's descendants. */
 .qc138-hd .qc138-hg {
+  position: relative; /* §D: the hawk shadow is laid out on it; no z-index, so no stacking context */
   display: grid; grid-template-columns: auto max-content minmax(20px, 1fr) minmax(260px, 420px);
   column-gap: 22px; align-items: center;
 }
@@ -95,7 +96,6 @@
       the title block and the hawk stay above it (z 3). On hover the card lifts IN FRONT of it (z 4, up 3px, a deeper
       shadow, 220ms). All four are in the header's one stacking context (`isolation: isolate` on `.qc138-hd`); the
       grid and the chart column must not make another, or the card could never rise above the shadow. ── */
-.qc138-hd .qc138-hg { position: relative; }
 .qc138-hd .qc138-shadow {
   position: absolute; right: -30px; top: -10px; z-index: 2; width: 560px; height: auto; max-width: none;
   opacity: 0.11; transform: rotate(-8deg) scaleX(-1); filter: blur(2px); mix-blend-mode: multiply;
