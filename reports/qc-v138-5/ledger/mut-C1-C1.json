@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 load",
+  "ok": false,
+  "detail": "150.0 vs 177.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 resize",
+  "ok": false,
+  "detail": "150.0 vs 177.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1422 (resized)",
+  "ok": false,
+  "detail": "150.0 vs 177.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 load",
+  "ok": false,
+  "detail": "150.0 vs 177.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 resize",
+  "ok": false,
+  "detail": "150.0 vs 177.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1190 (resized)",
+  "ok": false,
+  "detail": "150.0 vs 177.0"
+ }
+]

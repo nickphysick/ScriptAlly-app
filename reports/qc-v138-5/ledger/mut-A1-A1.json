@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 found",
+  "ok": true,
+  "detail": "{\"strip\":true,\"sr\":true,\"hg\":true,\"card\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 status row left = letter strip left",
+  "ok": false,
+  "detail": "392.0 vs 426.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 status row right = letter strip right",
+  "ok": false,
+  "detail": "1360.0 vs 1326.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 header grid left = letter strip left",
+  "ok": false,
+  "detail": "392.0 vs 426.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 header grid right = letter strip right",
+  "ok": false,
+  "detail": "1360.0 vs 1326.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card right = header grid right",
+  "ok": true,
+  "detail": "1360.0 vs 1360.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 found",
+  "ok": true,
+  "detail": "{\"strip\":true,\"sr\":true,\"hg\":true,\"card\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 status row left = letter strip left",
+  "ok": false,
+  "detail": "392.0 vs 312.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 status row right = letter strip right",
+  "ok": false,
+  "detail": "1128.0 vs 1208.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 header grid left = letter strip left",
+  "ok": false,
+  "detail": "392.0 vs 312.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 header grid right = letter strip right",
+  "ok": false,
+  "detail": "1128.0 vs 1208.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card right = header grid right",
+  "ok": false,
+  "detail": "1182.4 vs 1128.0"
+ }
+]

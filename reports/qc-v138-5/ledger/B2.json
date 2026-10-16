@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "B2",
+  "where": "glyph → the panel's Stage pill names it",
+  "ok": true,
+  "detail": "Partial requested"
+ },
+ {
+  "lock": "B2",
+  "where": "Stage in the panel → the glyph is selected",
+  "ok": true,
+  "detail": "[\"pr\"]"
+ }
+]

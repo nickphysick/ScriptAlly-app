@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C2",
+  "where": "every row read",
+  "ok": true,
+  "detail": "73 parsed of 73 rows, title says 73"
+ },
+ {
+  "lock": "C2",
+  "where": "twelve week buttons",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "C2",
+  "where": "the counts are the first-queried counts per Monday-start week",
+  "ok": true,
+  "detail": "[3,15,2,3,0,3,3,5,1,0,0,0] vs [3,15,2,3,0,3,3,5,1,0,0,0]"
+ },
+ {
+  "lock": "C2",
+  "where": "the population is not empty",
+  "ok": true,
+  "detail": "35 in the twelve weeks"
+ },
+ {
+  "lock": "C2",
+  "where": "on load the last week is pressed",
+  "ok": true,
+  "detail": "[\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"true\"]"
+ },
+ {
+  "lock": "C2",
+  "where": "on load the number is this week's",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "C2",
+  "where": "on load the eyebrow reads this week",
+  "ok": true,
+  "detail": "SENT · THIS WEEK"
+ },
+ {
+  "lock": "C2",
+  "where": "week 11: the number is its count",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "C2",
+  "where": "week 11: the eyebrow reads last week",
+  "ok": true,
+  "detail": "SENT · LAST WEEK"
+ }
+]

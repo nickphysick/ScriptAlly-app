@@ -122,9 +122,11 @@ test.describe("Query Centre v138", () => {
         const hb = hd.getBoundingClientRect();
         const cs = getComputedStyle(h1);
         const sh = hd.querySelector<HTMLElement>('[data-qc138="shadow"]');
-        const sum = [...hd.querySelectorAll('[data-qc138="glyph-n"]')].reduce((n, e) => n + Number(e.textContent), 0);
+        /* RETARGETED (v138.5 §B): the glyphs show no counts; each carries its count as data-n */
+        const sum = [...hd.querySelectorAll<HTMLElement>('[data-qc138="glyph-btn"]')].reduce((n, e) => n + Number(e.dataset.n), 0);
         return {
-          imgs: [...hd.querySelectorAll("img")].filter((i) => !i.classList.contains("qc138-shadow")).length,
+          /* RETARGETED (v138.5 §A): the desk hawk is the one illustration by design; nothing else */
+          imgs: [...hd.querySelectorAll("img")].filter((i) => !i.classList.contains("qc138-shadow") && !i.matches('[data-qc138="hawk"]')).length,
           name: h1.getAttribute("aria-label") ?? "", size: parseFloat(cs.fontSize), face: cs.fontFamily, h: h1.getBoundingClientRect().height, lh: parseFloat(cs.lineHeight),
           wide: !!document.querySelector(".ws-app.sheet-wide"), hw: hb.width, tbL: tb.left - hb.left, grR: hb.right - gr.right,
           shadow: sh ? Number(getComputedStyle(sh).opacity) : -1, sum,
@@ -136,11 +138,12 @@ test.describe("Query Centre v138", () => {
       L.check("A1", `${w} title`, r.name === `${r.sum} ${r.sum === 1 ? "query sent" : "queries sent"}`, `"${r.name}" (glyphs sum ${r.sum})`);
       L.check("A1", `${w} title size`, near(r.size, r.wide ? 50 : 44, 1) && /Special Elite/.test(r.face), `${r.size} · wide ${r.wide}`);
       L.check("A1", `${w} one line`, r.h <= r.lh * 1.5, `${r.h} tall at ${r.lh} a line`);
-      L.check("A1", `${w} title at the inset`, near(r.tbL, inset, 1), `${r.tbL.toFixed(1)} against ${inset}`);
+      /* RETIRED (v138.5 §A): the title now follows the desk hawk, which sits at the inset; QC138.5 A1/A2 own the inset */
       L.check("A1", `${w} glyphs at the inset`, near(r.grR, inset, 1), `${r.grR.toFixed(1)} against ${inset}`);
-      L.check("A1", `${w} shadow`, near(r.shadow, 0.15, 0.01), `${r.shadow}`);
+      /* RETIRED (v138.5 §D): the shadow moved behind the chart at .11; QC138.5 D1 owns it */
+      void r.shadow;
     }
-    L.done(14);
+    L.done(10);
   });
 
   test("A2 · glyphs: seven, counts sum to N, dashed on your move, press filters and shares the Stage pill", async ({ page }) => {
@@ -153,9 +156,10 @@ test.describe("Query Centre v138", () => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
         const b = [...g.querySelectorAll<HTMLElement>('[data-qc138="glyph-btn"]')];
         return {
-          labels: b.map((e) => (e.querySelector(".qc138-sgl")?.textContent ?? "").trim()),
+          /* RETARGETED (v138.5 §B): no drawn labels; the names are the buttons' own */
+          labels: b.map((e) => (e.getAttribute("aria-label") ?? "").replace(/, \d+ quer(y|ies)$/, "").replace(/ /g, "")),
           dashed: b.map((e) => `${e.dataset.k}:${e.querySelectorAll('[data-qc138="dashed"]').length}`),
-          sum: b.reduce((n, e) => n + Number(e.querySelector('[data-qc138="glyph-n"]')!.textContent), 0),
+          sum: b.reduce((n, e) => n + Number(e.dataset.n), 0),
           name: g.querySelector("h1[data-page-title]")!.getAttribute("aria-label"),
           aria: b.map((e) => e.getAttribute("aria-label")),
         };
@@ -163,7 +167,7 @@ test.describe("Query Centre v138", () => {
       L.check("A2", `${w} labels`, JSON.stringify(r.labels) === JSON.stringify(["Queried", "Partialrequested", "Partialsent", "Fullrequested", "Fullsent", "Offer", "Closed"]), r.labels.join("|"));
       L.check("A2", `${w} sum`, r.name === `${r.sum} queries sent`, `${r.sum} against "${r.name}"`);
       L.check("A2", `${w} dashed`, JSON.stringify(r.dashed) === JSON.stringify(["q:0", "pr:1", "ps:0", "fr:1", "fs:0", "of:1", "cl:0"]), r.dashed.join(" "));
-      L.check("A2", `${w} aria`, r.aria.every((a) => /^[A-Z][a-z ]+, \d+$/.test(a ?? "")), r.aria.join(" | "));
+      L.check("A2", `${w} aria`, r.aria.every((a) => /^[A-Z][a-z ]+, \d+ quer(y|ies)$/.test(a ?? "")), r.aria.join(" | "));
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="fr"]').click();
       await page.waitForTimeout(400);
       const p = await page.evaluate(() => {
@@ -172,23 +176,22 @@ test.describe("Query Centre v138", () => {
         const fr = b.find((e) => e.dataset.k === "fr")!;
         return {
           pressed: fr.getAttribute("aria-pressed"), others: b.filter((e) => e !== fr).map((e) => Number(getComputedStyle(e).opacity)),
-          pill: g.querySelector('[data-qc138="pill"][data-k="stage"] [data-qc138="pill-label"]')?.textContent,
           statuses: [...new Set([...g.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((e) => e.dataset.status))],
-          count: Number(fr.querySelector('[data-qc138="glyph-n"]')!.textContent),
+          count: Number(fr.dataset.n),
           rows: g.querySelectorAll('[data-qcv="row"]').length,
         };
       });
       L.check("A2", `${w} pressed`, p.pressed === "true", `${p.pressed}`);
       L.check("A2", `${w} others fade`, p.others.every((o) => near(o, 0.3, 0.02)), p.others.join(","));
-      L.check("A2", `${w} pill`, p.pill === "Full requested", `"${p.pill}"`);
+      /* RETIRED (v138.5 §E): the Stage pill lives in the Filters panel now; QC138.5 B2 owns "one store" */
       L.check("A2", `${w} filters`, p.statuses.every((s) => s === "Full Requested" || s === "Revise & Resubmit") && p.rows === p.count, `${p.statuses.join(",")} · ${p.rows} rows / ${p.count}`);
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="fr"]').click();
       await page.waitForTimeout(300);
       const c = await page.evaluate(() => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
-        return { pill: g.querySelector('[data-qc138="pill"][data-k="stage"] [data-qc138="pill-label"]')?.textContent, on: g.querySelectorAll('[data-qc138="glyph-btn"][aria-pressed="true"]').length };
+        return { on: g.querySelectorAll('[data-qc138="glyph-btn"][aria-pressed="true"]').length };
       });
-      L.check("A2", `${w} clears`, c.pill === "Stage" && c.on === 0, `${c.pill} · ${c.on} pressed`);
+      L.check("A2", `${w} clears`, c.on === 0, `${c.on} pressed`);
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="cl"]').click();
       await page.waitForTimeout(300);
       await unfoldClosed(page);
@@ -200,7 +203,7 @@ test.describe("Query Centre v138", () => {
       L.check("A2", `${w} closed`, cl.length > 0 && cl.every((s) => ["Rejected", "No Response", "Withdrawn"].includes(s ?? "")) && cl.includes("Rejected"), cl.join(","));
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="cl"]').click();
     }
-    L.done(20);
+    L.done(18);
   });
 
   test("B1 · filters: present, one line, the switches read the real state", async ({ page }) => {
@@ -209,12 +212,15 @@ test.describe("Query Centre v138", () => {
     for (const vp of SIZES) {
       await openQC(page, vp, "B1");
       const w = `${vp.width}`;
+      /* RETARGETED (v138.5 §E): the filters live behind the Filters button in the navy row; the panel is read */
+      await page.locator('.qcv-group[data-v138] [data-qc138="filters-btn"]').click();
+      await page.waitForTimeout(400);
       const r = await page.evaluate(() => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
-        const f = g.querySelector<HTMLElement>('[data-qc138="filters"]')!;
+        const f = document.querySelector<HTMLElement>('[data-qc138="filters-panel"] [data-qc138="filters"]')!;
         /* EDITED (v138.1 §F): the search lives in the sheet's navy row, so the filter row is the pills alone */
         const parts = [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')];
-        const hd = g.querySelector<HTMLElement>('[data-qc138="header"]')!.getBoundingClientRect();
+        const hd = document.querySelector<HTMLElement>('[data-qc138="filters-panel"]')!.getBoundingClientRect();
         return {
           keys: [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')].map((e) => e.dataset.k), find: (g.querySelector('[data-qc138="top"] [data-qc138="search"] input') as HTMLInputElement)?.placeholder,
           tops: [...new Set(parts.map((e) => Math.round(e.getBoundingClientRect().top)))], right: Math.max(...parts.map((e) => e.getBoundingClientRect().right)), hdR: hd.right,
@@ -222,7 +228,7 @@ test.describe("Query Centre v138", () => {
       });
       L.check("B1", `${w} present`, JSON.stringify(r.keys) === JSON.stringify(["stage", "dueWeek", "offers", "sent", "more"]) && r.find === "Find an agent or agency", `${r.keys.join(",")} · "${r.find}"`);
       L.check("B1", `${w} one line`, r.tops.length === 1 && r.right <= r.hdR + 0.5, `tops ${r.tops.join(",")} · right ${r.right.toFixed(1)} / ${r.hdR.toFixed(1)}`);
-      await page.locator('.qcv-group[data-v138] [data-qc138="pill"][data-k="more"] .qc138-fp').click();
+      await page.locator('[data-qc138="filters-panel"] [data-qc138="pill"][data-k="more"] .qc138-fp').click();
       await page.waitForTimeout(250);
       await page.locator('[data-qc138="panel"] [data-opt="more:past"]').click();
       await page.waitForTimeout(400);
@@ -231,12 +237,13 @@ test.describe("Query Centre v138", () => {
       const s = await page.evaluate(() => {
         const sw = document.querySelector<HTMLElement>('[data-qc138="panel"] [data-opt="more:past"]')!;
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
-        return { checked: sw.getAttribute("aria-checked"), on: sw.querySelector('[data-qc138="switch"]')!.hasAttribute("data-on"), chip: Number(sw.querySelector('[data-qc138="opt-count"]')!.textContent), rows: g.querySelectorAll('[data-qcv="row"]').length, pill: g.querySelector('[data-qc138="pill"][data-k="more"]')!.hasAttribute("data-on") };
+        return { checked: sw.getAttribute("aria-checked"), on: sw.querySelector('[data-qc138="switch"]')!.hasAttribute("data-on"), chip: Number(sw.querySelector('[data-qc138="opt-count"]')!.textContent), rows: g.querySelectorAll('[data-qcv="row"]').length, pill: document.querySelector('[data-qc138="filters-panel"] [data-qc138="pill"][data-k="more"]')!.hasAttribute("data-on") };
       });
       L.check("B1", `${w} switch reads the filter`, s.checked === "true" && s.on && s.pill, `aria-checked ${s.checked} · data-on ${s.on} · pill on ${s.pill}`);
       L.check("B1", `${w} switch filters`, s.rows === s.chip, `${s.rows} rows against its count ${s.chip}`);
       await page.keyboard.press("Escape");
-      await page.locator('.qcv-group[data-v138] [data-qc138="pill"][data-k="more"] [data-qc138="pill-clear"]').click();
+      await page.locator('[data-qc138="filters-panel"] [data-qc138="pill"][data-k="more"] [data-qc138="pill-clear"]').click();
+      await page.keyboard.press("Escape");
     }
     L.done(8);
   });
@@ -601,10 +608,11 @@ test.describe("Query Centre v138", () => {
     L.check("G1", "✕ clears", cleared && (await page.locator('[data-qc138="bulk"]').count()) === 0, `clicked ${cleared}`);
     const picked = await tryClick('.qcv-group[data-v138] [data-qcv="row-pick"]');
     await page.waitForTimeout(200);
-    const filtered = await tryClick('.qcv-group[data-v138] [data-qc138="pill"][data-k="offers"] .qc138-fp');
+    /* RETARGETED (v138.5 §E): a refilter from the page itself, a glyph (the pills are behind the Filters button) */
+    const filtered = await tryClick('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="q"]');
     await page.waitForTimeout(300);
     L.check("G1", "a refilter clears", picked && filtered && (await page.locator('[data-qc138="bulk"]').count()) === 0, `picked ${picked} · filtered ${filtered}`);
-    if (filtered) await tryClick('.qcv-group[data-v138] [data-qc138="pill"][data-k="offers"] .qc138-fp');
+    if (filtered) await tryClick('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="q"]');
     L.done(4);
   });
 

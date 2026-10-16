@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 rows found",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 headings and every row share one template",
+  "ok": true,
+  "detail": "59 of 59 · 291.969px 90px 148px 217.438px 224.578px 56px"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 chips found",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 no chip truncated that fits its column",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "1512 a truncated chip's tooltip has the full name",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the chips that fit (all but the over-long name) show in full",
+  "ok": true,
+  "detail": "11 whole, 3 truncated: The Complete Autumn Submission Bundle for Literary Agents"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the icons sit under the chip",
+  "ok": true,
+  "detail": "0 not below"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 Where it stands → chip ≤ 40 on every row",
+  "ok": true,
+  "detail": "max 16.1 over 59 rows (widest Where it stands 151.9)"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 rows found",
+  "ok": true,
+  "detail": "73"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 headings and every row share one template",
+  "ok": true,
+  "detail": "73 of 73 · 182px 90px 148px 180px 140px 56px"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 chips found",
+  "ok": true,
+  "detail": "18"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the icons sit under the chip",
+  "ok": true,
+  "detail": "0 not below"
+ }
+]
