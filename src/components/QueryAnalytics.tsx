@@ -32,6 +32,7 @@ import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useRevea
 import { Caveats, Endings, Funnel, Lanes, OverTime, Records, ReplyWindow, ShareBars, StageGaps, TrainingLog } from "./analytics/A17Figures";
 import { A17Empty } from "./analytics/A17Empty";
 import { A21Header, usePhone } from "./analytics/A21Header";
+import { A21Desk } from "./analytics/A21Desk";
 import { buildV21 } from "../lib/analyticsV21";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
@@ -103,6 +104,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
     body = (
       <>
         <Glance cells={v.glance} />
+        <A21Desk cards={v21.desk} onGo={go} />
         <Section sec={0} banner={b[0]}><Funnel model={model} /></Section>
         <Section sec={1} banner={b[1]} readings={v.log.readings}><TrainingLog model={model} /></Section>
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>

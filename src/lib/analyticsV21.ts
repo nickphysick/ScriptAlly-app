@@ -237,7 +237,7 @@ export function endings(items: Enriched[]): Endings {
 
 /* ══════════════════════════════════ the desk ══════════════════════════════════ */
 
-export interface DeskRow { n: number; text: string; tone: "b" | "r" | null }
+export interface DeskRow { n: number; text: string; tone: "b" | "r" | null; /** the chip's word at zero, where "None" would not read */ zero?: string }
 export interface DeskCard {
   key: "sent" | "rate" | "wait";
   title: string;
@@ -303,7 +303,7 @@ export function desk(model: AnalyticsModel, w: WindowReplies, nowMs: number): De
     population: model.sent > 0 ? model.sent : null,
     rows: [
       { n: model.fulls, text: "went on to the full", tone: "b" },
-      { n: model.offers, text: `${model.offers === 1 ? "offer" : "offers"} so far`, tone: null },
+      { n: model.offers, text: `${model.offers === 1 ? "offer" : "offers"} so far`, tone: null, zero: "No" },
     ],
     chart: { kind: "line", values: v.glance.find((g) => g.key === "rate")?.spark.values ?? [] },
     axis: since === null ? [] : [monthLabel(since, nowMs), "Now"],
@@ -318,7 +318,8 @@ export function desk(model: AnalyticsModel, w: WindowReplies, nowMs: number): De
     key: "wait", title: "Median wait", sec: 3, colour: "#a0633f",
     stamp: diff === 0 ? null : `${Math.abs(diff)} ${Math.abs(diff) === 1 ? "day" : "days"} ${diff > 0 ? "quicker" : "slower"}`,
     figure: all === null ? "No replies" : String(all),
-    unit: all === null ? null : all === 1 ? "day" : "days",
+    /* the thin-sample rule: under five, the figure names what it rests on */
+    unit: all === null ? null : `${all === 1 ? "day" : "days"}${model.replies < THIN_SAMPLE ? `, from ${plural(model.replies, "reply", "replies")}` : ""}`,
     population: all === null ? null : model.replies,
     rows: [
       { n: w.inside.length, text: "inside their window", tone: "r" },
