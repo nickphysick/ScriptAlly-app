@@ -208,8 +208,9 @@
 .cl17-sv .cl17-vt .cl16-fsb:hover, .cl17-sv .cl17-vt .cl16-fsb[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; box-shadow: none; }
 .cl17-sv .cl17-vt .cl16-fsb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 @media (max-width: 767.98px) { .cl17-sv .cl17-vt .cl16-fsb { display: none; } }
-/* the list follows 22px under the header's filter row */
-@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px; padding-top: 0; } }
+/* v18.3 §B — the list's navy header sits 54 under the title row: the Query Centre's own gap on the same build. (This
+   was 22, written for a v17 filter row under the title that v18 removed.) */
+@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 54px; padding-top: 0; } }
 /* full screen: the header is hidden; the list is the page */
 .clv-group[data-full] > .cl17-hd { display: none; }
 

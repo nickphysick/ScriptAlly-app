@@ -1,0 +1,19 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18.3 (design-refs/contact-list-v18-3/contact-list-v18-3.html) — the page header's second button and
+ * the List health ring. Imported after contactV182.css. Every face is stated with two classes and `!important`.
+ */
+
+/* §B.1 · "Fill in the gaps": v17's white secondary, with the open gap count in a blush pill */
+.cl17-hd .cl17-acts .cl183-fill { display: inline-flex; align-items: center; gap: 8px; }
+.cl17-hd .cl17-acts .cl183-fill .cl183-fn {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 24px; height: 24px; padding: 0 7px;
+  border-radius: 12px; background: #fbeee8; color: #a2452a; font: 400 12.5px/1 var(--sp-type) !important;
+}
+
+/* §B.3 · the ring reads as a percentage: the number at 33, "%" at 15 raised 7, at 85% */
+.cl17-card .cl17-rg .cl17-pc, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc,
+.cl17-card .cl17-rg .cl17-pc.cl17-pc--full, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc.cl17-pc--full { font-size: 33px !important; }
+.cl17-card .cl17-rg .cl17-pc i, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc i { font-size: 15px !important; top: -7px; opacity: 0.85; }

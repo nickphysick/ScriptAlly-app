@@ -37,7 +37,8 @@ export const healthLabel = (h: ListHealth): string =>
 
 /* ── the ring ─────────────────────────────────────────────────────────────────────────────────── */
 
-export const RING = { box: 95, r: 42, w: 9, join: 2.5 } as const;
+/* v18.3 §B — a 10 stroke with a round cap on the filled arc; r keeps the stroke inside the 95 box */
+export const RING = { box: 95, r: 42.5, w: 10, join: 2.5 } as const;
 export const RING_C = 2 * Math.PI * RING.r;
 
 /** the ink arc's length, and whether the two white joins are drawn (only when 0 < pct < 100) */

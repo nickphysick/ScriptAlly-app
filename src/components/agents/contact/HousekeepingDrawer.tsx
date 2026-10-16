@@ -33,9 +33,8 @@ import { dayKey } from "../../../lib/contactPrefs";
 import { MaterialsField, Stepper } from "../card/cardInputs";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { FloatingTab, TabRing } from "../../shell/FloatingTab";
 import { AgentPaperCard, type PaperCardData } from "../../shared/AgentPaperCard";
-import { HK_HAWK, SessionModal, TabNote, type FixResult, type HkFix, type HkHandlers, type Session } from "./ContactHousekeeping";
+import { HK_HAWK, SessionModal, type FixResult, type HkFix, type HkHandlers, type Session } from "./ContactHousekeeping";
 import "./housekeeping.css";
 import "./housekeepingV18.css";
 import "./housekeepingV182.css";
@@ -740,20 +739,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   const tabLine = `${gapsLeft} ${gapsLeft === 1 ? "gap" : "gaps"} · ${health.pct ?? 0}% list health`;
   return (
     <>
-      {p.tabShown ? (
-        <FloatingTab probe="housekeeping" hidden={open} routeActive={p.routeActive} onOpen={p.onOpen}
-          dismiss={{ label: "Hide the Housekeeping tab", onDismiss: p.onDismissTab }}
-          label={`Housekeeping: ${tabLine}. Press H to open.`}>
-          <span className="hkv-hh" aria-hidden="true"><img src={`${HK_HAWK.src}?v=${HK_HAWK.version}`} alt="" /></span>
-          <span className="hkv-tt">
-            {/* v18.2 §C — no keycap: the H key still opens it */}
-            <b>Housekeeping</b>
-            <small data-hkv="tab-counts">{tabLine}</small>
-          </span>
-          <TabRing share={(health.pct ?? 0) / 100} tone="gaps" />
-        </FloatingTab>
-      ) : null}
-      {p.tabNote && p.routeActive ? <TabNote onUndo={p.tabNote.onUndo} /> : null}
+      {/* v18.3 §B — the floating tab and its ✕ are gone: the List health card, "Fill in the gaps" and H open the drawer */}
       <HalfDrawer probe="housekeeping" open={open} onClose={p.onClose} label="Housekeeping" width="var(--hk8-w)"
         head={head} foot={footNode}
         over={ses ? (
