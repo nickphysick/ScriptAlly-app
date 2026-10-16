@@ -114,9 +114,20 @@ pinned and not.
 
 ## Deploy
 
-See the end of this file.
+Dev moved twice while this pack was being built: first to Analytics v21 (`index-DQqNyNdX.js`), then to Contact list
+v18.2 (`dev/main-cl18-todo51-cl181-qc1385-an21-cl182` 506ad105, `index-BboeA1eL.js`). v138.6 is merged onto the second
+as **`dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386` at d66841ac**. It was built from a clean detached checkout,
+the served hash was re-checked immediately before the deploy, and it was deployed to dev on 16 Oct: **`index-DalAPG6D.js`**.
+
+- **The merge's one real conflict:** v18.2 edited the Contact list's Full screen button (it dropped the shortcut from
+  the `title`), and Part C replaces that button with `PinListButton`. Part C's button was kept, and it has no `title`.
+- **On the merged build:** QC138.6 has 10 passed; CL18.2 has 22 passed and 1 failed. **CL18.2 C5 ("no keycaps on /agents")
+  is red because of the pin's tooltip:** v138.6 A5 asks for an "F" keycap in it on both pages, and v18.2 rules out every
+  keycap on the Contact list. The two packs conflict, so this is for Nick (below). Nothing else in CL18.2 is affected.
 
 ## For Nick
+
+- **The pin's "F" keycap on the Contact list:** keep it (v138.6 A5), or hide it there (v18.2 C5)? On dev now it shows.
 
 - **Should Comparable titles, Submission packages and Responses get the same pin and sticky header next?** Comparable
   titles already has the full-screen hook (unchanged here); the other two have neither.
