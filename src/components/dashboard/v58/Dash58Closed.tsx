@@ -6,6 +6,7 @@
  * and the latest line. The counts are `closedTile`'s (No Response and Rejected only — the Query
  * Centre's own closed court; Withdrawn and Signed are in neither).
  */
+import { CountUp, countable } from "../v59/CountUp";
 import React from "react";
 import type { Agent, Query } from "../../../types";
 import { CLOSED_BUCKETS, closedLatest, closedShare, type ClosedTile } from "../../../lib/dashClosed";
@@ -52,7 +53,7 @@ export const Dash58Closed: React.FC<{
       <div className="os-frame">
         <div className="os-band" data-d58="closed-band">
           <div className="os-bandrow">
-            <h3 className={`os-cardttl${loading ? " d58-sk" : ""}`} data-d58="closed-title">{loading ? "0 closed queries" : closedBandTitle(t ? t.total : null)}</h3>
+            <h3 className={`os-cardttl${loading ? " d58-sk" : ""}`} data-d58="closed-title">{loading ? "0 closed queries" : countable(closedBandTitle(t ? t.total : null))}</h3>
           </div>
         </div>
         <div className="d58-closedbody" data-d58="closed-body">
@@ -84,7 +85,7 @@ export const Dash58Closed: React.FC<{
                     <div className="d58-tile d58-sk" key={b.key}><b>0</b><span>{b.label}</span></div>
                   ) : (
                     <div className={`d58-tile${n === 0 ? " is-zero" : ""}`} key={b.key} data-d58="tile" data-bucket={b.key}>
-                      <b data-d58="tile-n">{n}</b>
+                      <b data-d58="tile-n"><CountUp n={n} /></b>
                       <span data-d58="tile-label">{b.label}</span>
                     </div>
                   );

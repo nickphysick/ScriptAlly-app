@@ -509,3 +509,46 @@
   .d59-sheet .d59-ftabup { transition: none; }
   .d59-ftab:hover .d59-ftabup { transform: none; }
 }
+
+/* ── the first paint (once per visit: `.d58[data-paint="1"]`, set by the page for PAINT_MS) ─────
+   ⚠️ `fill-mode: backwards`, NEVER `both`/`forwards`: an animation still in effect after it ends
+   keeps its transform's stacking context, and a column that is a stacking context traps its cards
+   beneath the hawk's shadow. Backwards holds the start only through each delay. */
+.d58[data-paint="1"] .d58-left { animation: d59Rise 420ms cubic-bezier(0.22, 0.8, 0.3, 1) backwards; }
+.d58[data-paint="1"] .d58-right { animation: d59Rise 420ms cubic-bezier(0.22, 0.8, 0.3, 1) 120ms backwards; }
+@keyframes d59Rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* the chart: the active line draws (the path carries pathLength="1"), the fill fades in under it, the
+   end dot pops in with a slight overshoot */
+.d58[data-paint="1"] .os-acline { stroke-dasharray: 1; animation: d59Draw 700ms cubic-bezier(0.4, 0, 0.2, 1) 250ms backwards; }
+@keyframes d59Draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.d58[data-paint="1"] [data-probe="chart-fill"] { animation: d59Fade 500ms ease 600ms backwards; }
+@keyframes d59Fade { from { opacity: 0; } to { opacity: 1; } }
+.d58[data-paint="1"] .os-aclast { transform-box: fill-box; transform-origin: center; animation: d59Pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) 900ms backwards; }
+@keyframes d59Pop { from { transform: scale(0); } to { transform: none; } }
+
+/* the figures count up from 0 over 650ms, ease-out cubic. The text underneath is always the true
+   figure (CountUp.tsx); the counter is drawn over it only while the paint runs. */
+@property --d59-n { syntax: "<integer>"; inherits: false; initial-value: 0; }
+.d59-n { --d59-n: var(--d59-to, 0); font: inherit; color: inherit; }
+.d58[data-paint="1"] .d59-n {
+  position: relative;
+  counter-reset: d59n var(--d59-n);
+  -webkit-text-fill-color: transparent;
+  animation: d59Count 650ms cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+.d58[data-paint="1"] .d59-n::after {
+  content: counter(d59n);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font: inherit;
+  -webkit-text-fill-color: currentcolor;
+}
+@keyframes d59Count { from { --d59-n: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .d58[data-paint="1"] :is(.d58-left, .d58-right, .os-acline, [data-probe="chart-fill"], .os-aclast, .d59-n) { animation: none; }
+  .d58[data-paint="1"] .d59-n { -webkit-text-fill-color: currentcolor; }
+  .d58[data-paint="1"] .d59-n::after { content: none; }
+}

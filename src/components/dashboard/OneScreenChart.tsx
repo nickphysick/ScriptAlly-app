@@ -32,6 +32,7 @@
  * ⚠️ EVERY SVG ID IS `useId`'S. Every workspace page stays mounted, and a hard-coded gradient id is a
  * duplicate the day a second chart exists — `url(#x)` resolves to the FIRST in the document.
  */
+import { countable } from "./v59/CountUp";
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Activity, Agent, Manuscript, Query } from "../../types";
 import { QueryStatus } from "../../types";
@@ -299,7 +300,7 @@ export const OneScreenChart: React.FC<{
 
   const title = (
     <div className="os-bandrow">
-      <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : activeTitle(empty ? 0 : activeCount, empty ? 0 : undatedCount)}</h3>
+      <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : countable(activeTitle(empty ? 0 : activeCount, empty ? 0 : undatedCount))}</h3>
       {!loading && !empty && stage === "short" && <span className="os-since" data-probe-text="chart-since">{sinceLabel(daily)}</span>}
       {/* ⚠️ THE RANGE CONTROL IS IN THE BAND (the v34 mockup, 19 Sep), after the title, and the row WRAPS:
           in a card of 470px or less it takes the full line beneath the title, still on the navy. In
@@ -393,7 +394,7 @@ export const OneScreenChart: React.FC<{
                     <g mask={carryTo !== null ? `url(#${uid}m)` : undefined} pointerEvents="none" data-probe="chart-fill">
                       <path d={fillPath(geo, carryTo)} fill={`url(#${uid}v)`} />
                     </g>
-                    <path className="os-acline" d={geo.line} fill="none" stroke={NAVY} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
+                    <path className="os-acline" pathLength={1} d={geo.line} fill="none" stroke={NAVY} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
 
                     {/* the hover furniture — under the hit layers, so it never takes the pointer */}
                     {focusPt && (

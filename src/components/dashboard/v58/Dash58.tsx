@@ -71,6 +71,9 @@ const NO_AID: DashAid = { drop: [], noClosed: false };
 /** The hawk's shadow, cast across the sheet (v59). The same versioned file the other pages place. */
 export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
 
+/** The first paint's whole length: the end dot finishes at 900 + 300 = 1200ms; a little after. */
+export const PAINT_MS = 1400;
+
 /** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
 const noticeDate = (iso: string | null): string => {
   const m = iso ? /^(\d{4})-(\d{2})-(\d{2})/.exec(iso) : null;
@@ -343,11 +346,28 @@ export const Dash58: React.FC<Dash58Props> = ({
   const [noticeListH, setNoticeListH] = useState(0);
   const dismissNotice = () => { clearImportNotice(uid); setNotice(null); setNoticeListH(0); };
 
+  /* ── the first paint (v59): once per mount, at the moment the data first finishes loading ──
+     Never on a refresh, a re-render, a resize, a drawer closing or a manuscript switch: the latch
+     is the first loading → loaded edge and nothing else. A LAYOUT effect, so the attribute is on the
+     page in the same frame the loaded content first paints. It comes off when the sequence is over,
+     because a transform held by `fill-mode` keeps a stacking context alive — and a column that is a
+     stacking context would trap its cards beneath the hawk's shadow on hover. */
+  const [paint, setPaint] = useState(false);
+  const painted = useRef(false);
+  useLayoutEffect(() => {
+    if (loading || painted.current) return undefined;
+    painted.current = true;
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
+    setPaint(true);
+    const t = window.setTimeout(() => setPaint(false), PAINT_MS);
+    return () => window.clearTimeout(t);
+  }, [loading]);
+
   const author = (currentUser?.name ?? "").trim();
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
-    <div ref={rootRef} className="os-root d58" style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
