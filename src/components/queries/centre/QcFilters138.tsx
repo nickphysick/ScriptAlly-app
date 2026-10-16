@@ -11,12 +11,13 @@
  * ⚠️ THE PANEL KEEPS THE `.lpop` CLASS: `usePopover`'s outside-press and scroll rules know a panel by it.
  * ⚠️ ONE LINE AT 1512 AND 1280: at compact widths the search is a fixed 220 (v17.1's fix).
  */
-import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { PopoverState } from "../../shell/ListPills";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import {
-  MORE_SWITCHES, SENT_NONE, STAGE_GROUPS, moreCount, stagePillLabel, type Qc138Filters,
+  MORE_SWITCHES, SENT_NONE, STAGE_GROUPS, moreCount, qc138FilterGroups, stagePillLabel, type Qc138Filters,
 } from "../../../lib/qc138";
 
 export type Qc138Pop = "stage" | "sent" | "more";
@@ -182,5 +183,79 @@ export const QcFilters138: React.FC<{
         </Panel>
       )}
     </div>
+  );
+};
+
+/**
+ * v138.5 §E — THE FILTERS BUTTON, in the navy list header, and its panel: the filter row that sat under the header,
+ * moved behind one button. The panel holds the same `QcFilters138` (the same pills, the same dropdowns, the one
+ * filter state), so nothing is copied.
+ *
+ * ⚠️ THE BADGE COUNTS GROUPS (`qc138FilterGroups`), not switches: More filters is one group however many are on.
+ * ⚠️ THE PANEL CLOSES ON AN OUTSIDE PRESS OR ESCAPE, AND FOCUS GOES BACK TO THE BUTTON. A pill's own dropdown is
+ *    portalled to the body, so a press inside it (`.lpop`) is not "outside". Escape is one stack: the dropdown,
+ *    opened later at the same level, takes the key first; the next Escape closes the panel.
+ * ⚠️ IT IS FIXED, 10 UNDER THE BUTTON AND RIGHT-ALIGNED TO IT, kept within the viewport; a page scroll closes it,
+ *    as it closes the pills' own dropdowns, because a fixed panel cannot follow its button.
+ */
+export const QcFiltersButton138: React.FC<{
+  filters: Qc138Filters;
+  onClearAll: () => void;
+  disabled?: boolean;
+  /** the pills: a `QcFilters138` */
+  children: React.ReactNode;
+}> = ({ filters, onClearAll, disabled = false, children }) => {
+  const [open, setOpen] = useState(false);
+  const btn = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const n = qc138FilterGroups(filters);
+  const close = useCallback((refocus = true) => {
+    setOpen(false);
+    if (refocus) btn.current?.focus({ preventScroll: true });
+  }, []);
+  useEscapeLayer(open, close, ESC_LEVEL.page);
+  useLayoutEffect(() => {
+    if (!open || !btn.current) { setPos(null); return; }
+    const r = btn.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 10, right: Math.max(16, window.innerWidth - r.right) });
+  }, [open]);
+  useEffect(() => {
+    if (!open) return undefined;
+    const down = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (btn.current?.contains(t) || panel.current?.contains(t)) return;
+      if (t instanceof Element && t.closest(".lpop")) return;
+      close(false);
+    };
+    const scroll = (e: Event) => {
+      const t = e.target as Node;
+      if (t instanceof Element && (t.closest(".lpop") || panel.current?.contains(t))) return;
+      close(false);
+    };
+    document.addEventListener("pointerdown", down, true);
+    document.addEventListener("scroll", scroll, true);
+    return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("scroll", scroll, true); };
+  }, [open, close]);
+  return (
+    <>
+      <button type="button" ref={btn} className="qc138-fb" data-qc138="filters-btn" aria-haspopup="dialog" aria-expanded={open}
+        disabled={disabled} onClick={() => (open ? close() : setOpen(true))}>
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4h12M4.5 8h7M7 12h2" /></svg>
+        <span>Filters</span>
+        {n > 0 ? <b className="qc138-fbn" data-qc138="filters-badge" aria-label={`${n} set`}>{n}</b> : null}
+      </button>
+      {open && pos ? createPortal(
+        <div className="qc138-fpanel" data-qc138="filters-panel" role="dialog" aria-label="Filter queries" ref={panel}
+          style={{ top: pos.top, right: pos.right }}>
+          <div className="qc138-fph">
+            <b>Filter queries</b>
+            <button type="button" className="qc138-fpc" data-qc138="filters-clear" onClick={onClearAll}>Clear all</button>
+          </div>
+          {children}
+        </div>,
+        document.body,
+      ) : null}
+    </>
   );
 };

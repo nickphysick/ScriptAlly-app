@@ -99,6 +99,10 @@ export const emptyQc138Filters = (): Qc138Filters => ({ stages: [], dueWeek: fal
 export const qc138FilterCount = (f: Qc138Filters): number =>
   (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
 export const moreCount = (f: Qc138Filters): number => (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
+/** v138.5 §E — the Filters button's badge: how many of the panel's five groups (Stage, Due this week, Offers, What
+    you sent, More filters) have something set. More filters counts once however many of its switches are on. */
+export const qc138FilterGroups = (f: Qc138Filters): number =>
+  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (moreCount(f) ? 1 : 0);
 
 export const MORE_SWITCHES: { key: "past" | "missing" | "overYear"; label: string; line: string }[] = [
   { key: "past", label: "Past their reply date", line: "Quiet past the date you expected" },

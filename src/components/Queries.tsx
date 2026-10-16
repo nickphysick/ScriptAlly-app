@@ -104,7 +104,7 @@ import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
-import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { QcFilters138, QcFiltersButton138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
@@ -5164,19 +5164,6 @@ export const Queries: React.FC<{
       logRef={logTriggerRef}
       chart={<QcWeekChart138 weeks={showGridSkeleton ? null : sentWeeks(qcScoped.map((r) => r.sentMs), qcNow138)} />}
     >
-      <QcFilters138
-        filters={qcF138}
-        onFilters={setQcF138}
-        pop={qc138Pop}
-        stageCounts={qc138Counts.stage}
-        dueWeekN={qc138Counts.dueWeek}
-        offersN={qc138Counts.offers}
-        sentOptions={qc138Counts.sent}
-        moreN={qc138Counts.more}
-        showing={qcVisible.length}
-        msTitle={qcLineTitle}
-        disabled={showGridSkeleton}
-      />
       <i ref={qc138Ref} hidden />
       <BulkBar138
         anchor={qc138Ref}
@@ -7110,7 +7097,24 @@ export const Queries: React.FC<{
                   total={qcScoped.length}
                   shown={qcVisible.length}
                   filtered={qc138Filtered}
-                  onClearAll={qc138ClearAll}
+                  filtersSlot={(
+                    <QcFiltersButton138 filters={qcF138} disabled={showGridSkeleton}
+                      onClearAll={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}>
+                      <QcFilters138
+                        filters={qcF138}
+                        onFilters={setQcF138}
+                        pop={qc138Pop}
+                        stageCounts={qc138Counts.stage}
+                        dueWeekN={qc138Counts.dueWeek}
+                        offersN={qc138Counts.offers}
+                        sentOptions={qc138Counts.sent}
+                        moreN={qc138Counts.more}
+                        showing={qcVisible.length}
+                        msTitle={qcLineTitle}
+                        disabled={showGridSkeleton}
+                      />
+                    </QcFiltersButton138>
+                  )}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
                   density={qcDensity}

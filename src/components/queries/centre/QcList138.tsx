@@ -337,7 +337,8 @@ export interface QcList138Props {
   total: number;
   shown: number;
   filtered: boolean;
-  onClearAll: () => void;
+  /** v138.5 §E — the Filters button and its panel (the panel holds the filters; "Clear all" lives there) */
+  filtersSlot?: React.ReactNode;
   sort: Qc138Sort;
   onHeading: (k: Qc138SortKey) => void;
   density: QcDensity;
@@ -376,7 +377,7 @@ export interface QcList138Props {
 }
 
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
+  groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, sort, onHeading, density, onDensity, full, onFull,
   selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
@@ -539,12 +540,11 @@ export const QcList138: React.FC<QcList138Props> = ({
       <div className="qc138-top" data-qc138="top" data-qcv="ws-head">
         <p className="qc138-say" data-qc138="showing" data-qcv="ws-title">
           {filtered
-            ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b>,</>
+            ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>
             : <>Showing all <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>}
           {" "}<span className="qc138-gb">grouped by</span>{" "}
           <button type="button" ref={groupBtn} className="qc138-grp" data-qc138="group" aria-haspopup="menu" aria-expanded={groupOpen}
             onClick={() => setGroupOpen((o) => !o)}>{groupLabel}</button>
-          {filtered ? <button type="button" className="qc138-clear" data-qc138="clear-all" onClick={onClearAll}>Clear all</button> : null}
           {groupOpen ? (
             <span className="qc138-gmenu" role="menu" data-qc138="group-menu">
               {GROUP_BY_OPTIONS.map((o) => (
@@ -561,6 +561,8 @@ export const QcList138: React.FC<QcList138Props> = ({
             <kbd aria-hidden="true">/</kbd>
           </label>
         ) : null}
+        {/* v138.5 §E — the Filters button and its panel, between the search and the density control */}
+        {filtersSlot}
         <span className="qc138-tools">
           <span className="qc138-dens" role="group" aria-label="Row density" data-qcv="ws-density">
             <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>

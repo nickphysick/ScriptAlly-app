@@ -169,7 +169,7 @@
 .qc138-hd .qc138-sentinel { display: block; height: 0; }
 /* the list follows under the header */
 @media (min-width: 768px) {
-  .qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw { margin-top: 22px; }
+  .qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw { margin-top: 54px; } /* v138.5: 54 from the header grid to the navy list header */
 }
 
 /* ── §A · THE PINNED ROW's CONTENTS. The row itself — its box, height, the covered strip and the 64px content row —
@@ -214,14 +214,8 @@
   .qc138-hd .qc138-sg { transition: none; }
 }
 
-/* ── §B · THE FILTER ROW, in the header: 22 under the title row, above a 1px ink 14% rule, 18 of padding over the
-   row, at the list's width. Search first, then the pills. ONE line at 1512 and 1280. ── */
-.qc138-hd .qc138-fr {
-  display: flex; align-items: center; gap: 8px; min-width: 0;
-  margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(28, 19, 15, 0.14);
-}
-.ws-app.sheet-wide .qc138-hd .qc138-fr { gap: 10px; }
-.qc138-hd .qc138-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; flex: 0 0 auto; min-width: 0; margin: 0; }
+/* ── §B · THE FILTER PILLS. v138.5 §E: they no longer sit in a row under the header; they live in the Filters
+   panel (below), opened from the navy list header. ── */
 .qc138-fbar .qc138-fpw { position: relative; display: inline-flex; flex: none; }
 .qc138-fbar .qc138-fp {
   display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: 40px; padding: 0 14px 0 16px; margin: 0; border: 0;
@@ -246,10 +240,22 @@
 .qc138-fbar .qc138-fpx:hover { background: rgba(244, 238, 229, 0.28); }
 .qc138-fbar .qc138-fp:focus-visible, .qc138-fbar .qc138-fpx:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .qc138-fbar .qc138-fp:disabled { cursor: default; }
-@container qc138hd (max-width: 899.98px) {
-  .qc138-hd .qc138-fr { flex-wrap: wrap; }
-  .qc138-hd .qc138-fbar { flex-wrap: wrap; }
+
+/* v138.5 §E — the Filters panel: portalled to the body like the pills' own dropdowns (which open over it, at 60),
+   cream, radius 16, 10 under the Filters button and right-aligned to it. The row of pills wraps under 1100px. */
+.qc138-fpanel {
+  position: fixed; z-index: 58; box-sizing: border-box; max-width: calc(100vw - 32px); padding: 16px 18px 18px; border-radius: 16px;
+  background: #f6f2ec; color: #1c130f;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 24px 40px -18px rgba(28, 19, 15, 0.45);
 }
+.qc138-fpanel .qc138-fph { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 0 2px 12px; }
+.qc138-fpanel .qc138-fph b { font: 400 17px/1.3 var(--sp-type) !important; color: #1c130f; }
+.qc138-fpanel .qc138-fpc { padding: 0; margin: 0; border: 0; background: none; cursor: pointer; color: #a2452a; font: italic 400 14px/1.5 var(--sp-serif) !important; }
+.qc138-fpanel .qc138-fpc:hover { text-decoration: underline; text-underline-offset: 3px; }
+.qc138-fpanel .qc138-fpc:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.qc138-fpanel .qc138-fr { display: block; min-width: 0; }
+.qc138-fpanel .qc138-fbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; }
+@media (max-width: 1099.98px) { .qc138-fpanel .qc138-fbar { flex-wrap: wrap; } }
 
 /* the panels: portalled to the body, so every value here is stated (no page token reaches them) */
 .lpop.qc138-pop {
@@ -307,7 +313,6 @@
   .qcv-group[data-enter138] .qc138-bt { animation: qc138-rise12 0.5s cubic-bezier(.2,.8,.2,1) both; }
   .qcv-group[data-enter138] .qc138-by::after { transform-origin: left center; animation: qc138-drawx 0.5s cubic-bezier(.2,.8,.2,1) 0.15s both; }
   .qcv-group[data-enter138] .qc138-sg { animation: qc138-glyph 0.45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(140ms + var(--gi, 0) * 55ms); }
-  .qcv-group[data-enter138] .qc138-fr { animation: qc138-rise12 0.45s cubic-bezier(.2,.8,.2,1) 0.38s both; }
   .qcv-group[data-enter138] .qc138-sheet { animation: qc138-rise26 0.6s cubic-bezier(.2,.8,.2,1) 0.48s both; }
   .qcv-group[data-enter138] .qc138-band { animation: qc138-slide 0.4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(760ms + var(--qi, 0) * 40ms); }
   .qcv-group[data-enter138] .qc138-row { animation: qc138-rise8 0.4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(760ms + var(--qi, 0) * 40ms); }
