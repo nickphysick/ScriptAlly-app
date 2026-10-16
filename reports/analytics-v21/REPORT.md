@@ -113,7 +113,11 @@ From looking at them, two fixes went into J: a desk figure in words ("No replies
 
 ## Integration and deploy
 
-DEPLOY_PLACEHOLDER
+- **Dev moved overnight.** At the start dev served `d3dd2a94` (`index-BFjZu6hN.js`); by the deploy it served `dev/main-cl18-todo51-cl181-qc1385` = `387a664a` (Query Centre v138.5, `index-OpIsaxaB.js`), which contains the base.
+- **Integration branch `dev/main-cl18-todo51-cl181-qc1385-an21`** = `387a664a` + `analytics-v21`, merge `504fe4ad`. Only `design-refs/.refhashes.json` conflicted (both packs enrolled refs; both kept, 368 refs check). CLAUDE.md auto-merged.
+- **Gates there:** tsc clean; production and dev builds clean; Vitest 593 files, 8,922 passed (the one file that first failed to load, `functions/src/email.test.ts`, was the new worktree missing `functions/node_modules`; linked, 9/9).
+- **Locks there** (its own `vite preview`): AN21 all green; QC v138.5's locks green; headerV3 green; AN17, headerPanelV2 and pageHeaderV2 red only on the base's own readings listed under L2.
+- **Deployed** hosting only, `--config firebase.dev.json --project scriptally-dev`, from the clean integration worktree, after re-checking dev still served `index-OpIsaxaB.js`. **Dev now serves `index-DQqNyNdX.js`.** AN21 run against the deployed site (`SA_E2E_BASE_URL=dev`): 11/11 green, 385 readings. No rules or functions changed. Not merged to main. `contact-list-v18-2` was pushed by another session during the run; dev did not serve it, so nothing of it was overwritten — and it is not in this deploy.
 
 ## For Nick
 
