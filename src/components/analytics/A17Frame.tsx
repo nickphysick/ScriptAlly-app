@@ -94,14 +94,18 @@ export const Readings: React.FC<{ items: V17Reading[] }> = ({ items }) => (
 /** One section: the open banner (perch · count · title · sentence), then the frame or the workspace. */
 export const Section: React.FC<{
   sec: number; banner: V17Banner; perchSrc?: string; readings?: V17Reading[]; ws?: boolean; children: React.ReactNode;
-}> = ({ sec, banner, perchSrc, readings, ws, children }) => (
-  <section className="a17-sect" data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`}>
+  /** v21 §C — a full-width tint band on the desktop (sections 2, 4, 6 and 8) */
+  tint?: boolean;
+  /** v21 — a lede with rich runs, in place of the banner's plain sentence */
+  lede?: React.ReactNode;
+}> = ({ sec, banner, perchSrc, readings, ws, children, tint, lede }) => (
+  <section className={`a17-sect${tint ? " a21-tint" : ""}`} data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`} data-a21-tint={tint ? "" : undefined}>
     <div className="a17-ban a17-rv" data-a17="ban">
       <Slot className="a17-perch" probe="perch" artSrc={perchSrc} />
       <div className="a17-bantxt">
         <div className="a17-cnt">{banner.count}</div>
         <h2 className="a17-tw" data-a17="ban-title">{banner.title}</h2>
-        <p>{banner.sentence}{banner.bold ? <><b>{banner.bold}</b>. Four things worth keeping in mind.</> : null}</p>
+        <p>{lede ?? <>{banner.sentence}{banner.bold ? <><b>{banner.bold}</b>. Four things worth keeping in mind.</> : null}</>}</p>
       </div>
     </div>
     {ws ? children : (
@@ -177,8 +181,8 @@ export const Glance: React.FC<{ cells: V17Glance[] }> = ({ cells }) => {
 };
 
 export const NAV_NAMES = (sent: number) => [
-  sent === 1 ? "Where the one query got to" : `Where the ${sent} queries got to`, "Queries sent", "Response rate", "Response window honesty",
-  "Wait times by stage", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers",
+  sent === 1 ? "Where the one query got to" : `Where the ${sent} queries got to`, "Queries sent", "Response rate", "Replies against the stated window",
+  "How long each step takes", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers",
 ];
 
 /**

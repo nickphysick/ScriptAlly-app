@@ -146,3 +146,31 @@
   .a17-page .a21-djax { display: flex; justify-content: space-between; margin-top: 3px; font: 400 11px/1.4 var(--sp-type) !important; color: rgba(28, 19, 15, 0.45); }
   .a17-page .a21-djax span { font: inherit !important; }
 }
+
+/* ══════════════ C · sections open on the page; tints alternate (desktop) ══════════════ */
+@media (min-width: 761px) {
+  .a17-page .a17-sect { margin-top: 0; padding-top: 80px; }
+  .ws-app.sheet-wide .a17-page .a17-sect { padding-top: 96px; }
+  .a17-page .a17-ban { display: block; padding: 0 0 26px; }
+  .a17-page .a17-ban .a17-perch { display: none; }
+  .a17-page .a17-ban .a17-cnt { font: 400 9.5px/1.5 var(--a17-mono) !important; letter-spacing: 0.18em; margin-bottom: 10px; }
+  .a17-page .a17-ban h2 { font-size: 40px; line-height: 1.04; letter-spacing: -0.01em; white-space: normal; }
+  .ws-app.sheet-wide .a17-page .a17-ban h2 { font-size: 46px; }
+  .a17-page .a17-ban p { font: 400 18px/1.5 var(--a17-serif); color: rgba(28, 19, 15, 0.66); margin: 12px 0 0; max-width: 62ch; }
+  .a17-page .a17-frame { background: #fff; border: 0; border-radius: 24px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45); }
+  .a17-page .a17-body { padding: 30px 34px 26px; }
+  .a17-page .a17-reads { border-top: 1px solid rgba(28, 19, 15, 0.08); }
+  .a17-page .a17-reads > div { padding: 20px 34px; }
+  .a17-page .a17-reads > div + div { border-left: 1px solid rgba(28, 19, 15, 0.08); }
+  .a17-page .a17-fh h3 { font-size: 19px; }
+
+  /* the tint band: a 100vmax spread shadow clipped to the band's own height — never a clip on the section's
+     contents, and never a width, so it paints edge to edge across the sheet without a scroll */
+  .a17-page .a17-sect.a21-tint { background: #e9e6e0; box-shadow: 0 0 0 100vmax #e9e6e0; clip-path: inset(0 -100vmax); margin-top: 80px; padding: 64px 0; }
+  .ws-app.sheet-wide .a17-page .a17-sect.a21-tint { margin-top: 96px; padding: 72px 0; }
+  .a17-page .a17-sect.a21-tint + .a17-sect { padding-top: 88px; }
+  .a17-page .a17-sect.a21-tint .a17-frame { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 24px 46px -30px rgba(28, 19, 15, 0.35); }
+
+  /* the section tab: an ink pill */
+  .a17-page .a17-tab { background: #1f2b3a; border-radius: 20px; }
+}

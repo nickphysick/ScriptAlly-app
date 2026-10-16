@@ -33,7 +33,7 @@ import { Caveats, Endings, Funnel, Lanes, OverTime, Records, ReplyWindow, ShareB
 import { A17Empty } from "./analytics/A17Empty";
 import { A21Header, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
-import { buildV21 } from "../lib/analyticsV21";
+import { buildV21, windowLede } from "../lib/analyticsV21";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
 import "./analytics/a21.css"; /* after a17: v21 restates its desktop rules */
@@ -101,18 +101,22 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
     body = <A17Empty />;
   } else {
     const b = v.banners;
+    /* v21 §D/§E: two sections are rebuilt and renamed; their kickers and ledes come with them */
+    const wl = windowLede(v21.window);
+    const b3 = { ...b[3], title: "Replies against the stated window" };
+    const b4 = { ...b[4], count: "from query to offer", title: "How long each step takes", sentence: "The usual number of days between one stage and the next, and how long queries ran before they ended. The later steps rest on very few queries, so they will move as more come in." };
     body = (
       <>
         <Glance cells={v.glance} />
         <A21Desk cards={v21.desk} onGo={go} />
         <Section sec={0} banner={b[0]}><Funnel model={model} /></Section>
-        <Section sec={1} banner={b[1]} readings={v.log.readings}><TrainingLog model={model} /></Section>
+        <Section sec={1} banner={b[1]} readings={v.log.readings} tint><TrainingLog model={model} /></Section>
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
-        <Section sec={3} banner={b[3]} readings={v.reply.readings}><ReplyWindow model={model} /></Section>
-        <Section sec={4} banner={b[4]} readings={v.waits.readings}><div className="a17-two"><StageGaps model={model} /><Endings model={model} /></div></Section>
-        <Section sec={5} banner={b[5]}><Records model={model} /></Section>
+        <Section sec={3} banner={b3} readings={v.reply.readings} tint lede={<>{wl.lead}{wl.bold ? <b>{wl.bold}</b> : null}{wl.rest}</>}><ReplyWindow model={model} /></Section>
+        <Section sec={4} banner={b4} readings={v.waits.readings}><div className="a17-two"><StageGaps model={model} /><Endings model={model} /></div></Section>
+        <Section sec={5} banner={b[5]} tint><Records model={model} /></Section>
         <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
-        <Section sec={7} banner={b[7]} readings={v.lanes.readings}><Lanes model={model} /></Section>
+        <Section sec={7} banner={b[7]} readings={v.lanes.readings} tint><Lanes model={model} /></Section>
         <Section sec={8} banner={b[8]} ws><Caveats model={model} /></Section>
       </>
     );
