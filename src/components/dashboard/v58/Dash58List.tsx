@@ -39,7 +39,8 @@ const FocusCard: React.FC<{
   item: ListItem; index: number; of: number; innerRef: React.Ref<HTMLDivElement>;
   onStep: (n: number) => void; onRun: (a: ListAction) => void; label: string;
 }> = ({ item, index, of, innerRef, onStep, onRun, label }) => (
-  <div className="d58-focus" data-d58="focus" data-group={item.group} data-key={item.key} ref={innerRef}>
+  <div className="d58-focus" data-d58="focus" data-group={item.group} data-key={item.key}
+    data-query={item.action.kind === "drawer" && item.action.request.mode !== "log" ? item.action.request.queryId : undefined} ref={innerRef}>
     <div className="d58-fband" style={{ background: BAND[item.tone] }}>
       <span className="d58-fpill" data-d58="focus-label">{label.toUpperCase()}</span>
       {of > 1 && (

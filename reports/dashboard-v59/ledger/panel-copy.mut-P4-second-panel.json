@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "P1",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"band\":\"— FOUNDING WRITER —\",\"more\":\"Tell us anything →\",\"heading\":\"The early bird gets the worm.\",\"note1\":\"Thank you for helping shape QueryHawk for future writers.\",\"note2\":\"Finding it useful? We’d love to hear your feedback!\",\"sig\":\"— Nick, founder\",\"cap\":\"This week?\",\"faces\":[\"Lost\",\"Meh\",\"Good\",\"Loving it\"],\"titles\":0}"
+ },
+ {
+  "lock": "P1",
+  "where": "band",
+  "ok": true,
+  "detail": "\"— FOUNDING WRITER —\""
+ },
+ {
+  "lock": "P1",
+  "where": "more",
+  "ok": true,
+  "detail": "\"Tell us anything →\""
+ },
+ {
+  "lock": "P1",
+  "where": "heading",
+  "ok": true,
+  "detail": "\"The early bird gets the worm.\""
+ },
+ {
+  "lock": "P1",
+  "where": "note1",
+  "ok": true,
+  "detail": "\"Thank you for helping shape QueryHawk for future writers.\""
+ },
+ {
+  "lock": "P1",
+  "where": "note2",
+  "ok": true,
+  "detail": "\"Finding it useful? We’d love to hear your feedback!\""
+ },
+ {
+  "lock": "P1",
+  "where": "sig",
+  "ok": true,
+  "detail": "\"— Nick, founder\""
+ },
+ {
+  "lock": "P1",
+  "where": "cap",
+  "ok": true,
+  "detail": "\"This week?\""
+ },
+ {
+  "lock": "P1",
+  "where": "the face labels",
+  "ok": true,
+  "detail": "Lost|Meh|Good|Loving it"
+ },
+ {
+  "lock": "P1",
+  "where": "no native title in the panel",
+  "ok": true,
+  "detail": "0 [title]"
+ },
+ {
+  "lock": "P4",
+  "where": "closed at rest",
+  "ok": true,
+  "detail": "0 open"
+ },
+ {
+  "lock": "P4",
+  "where": "Tell us anything opens one feedback panel",
+  "ok": false,
+  "detail": "2 panel(s)"
+ },
+ {
+  "lock": "P4",
+  "where": "the sidebar's Give feedback is on the page",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "P4",
+  "where": "the sidebar opens the same, single panel",
+  "ok": true,
+  "detail": "1 panel(s)"
+ }
+]

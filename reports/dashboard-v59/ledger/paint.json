@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "E1",
+  "where": "the paint runs on loading → loaded",
+  "ok": true,
+  "detail": "{\"sawPaint\":true,\"left\":\"d59Rise\",\"right\":\"d59Rise\",\"counts\":6}"
+ },
+ {
+  "lock": "E1",
+  "where": "it ends, and the figures are the true figures",
+  "ok": true,
+  "detail": "{\"attr\":null,\"figures\":[{\"text\":\"39\",\"value\":\"39\",\"shown\":\"none\"},{\"text\":\"11\",\"value\":\"11\",\"shown\":\"none\"},{\"text\":\"1\",\"value\":\"1\",\"shown\":\"none\"},{\"text\":\"8\",\"value\":\"8\",\"shown\":\"none\"},{\"text\":\"0\",\"value\":\"0\",\"shown\":\"none\"},{\"text\":\"2\",\"value\":\"2\",\"shown\":\"none\"}]}"
+ },
+ {
+  "lock": "E1",
+  "where": "not after a drawer close, a resize or a step",
+  "ok": true,
+  "detail": "paint seen again: false"
+ },
+ {
+  "lock": "E1",
+  "where": "under reduced motion nothing on the page animates",
+  "ok": true,
+  "detail": "0 running animation(s)"
+ }
+]

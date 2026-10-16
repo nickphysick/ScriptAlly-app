@@ -39,10 +39,7 @@
 .d58 {
   --d58-gutter: 50px;
   --d58-gap: 26px;
-  /* v59: the page's foot leaves the folder tab (34px, on the sheet's bottom edge) 22px clear of the
-     lowest card in each column; `--d58-inset-b` is what already lies between the page and the
-     sheet's bottom, measured by the page */
-  --d58-foot: max(0px, calc(56px - var(--d58-inset-b, 0px)));
+  --d58-foot: 26px;
   position: relative;
   box-sizing: border-box;
   /* one screen from 650px of window height up; below that the page scrolls and nothing shrinks.

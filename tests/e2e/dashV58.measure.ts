@@ -155,7 +155,8 @@ test("DB58 F1–F3 — one screen, never clipped, and the chart gives way", asyn
       L.check("F2", `${w} ${name} population`, !!e && e.n > 3, e ? `${e.n} boxes` : "absent");
       L.check("F2", `${w} ${name} inside its card`, !!e && e.out.length === 0, e ? e.out.join(" | ") || "all inside" : "absent");
     }
-    L.check("F2", `${w} scrolling regions`, f.page && f.scrollers.every((s) => s === "list"), `scrolls: ${f.scrollers.join(", ") || "none"}`);
+    /* REWRITTEN (Dashboard v59): the list and its scroller are retired, so nothing on the page scrolls */
+    L.check("F2", `${w} scrolling regions`, f.page && f.scrollers.length === 0, `scrolls: ${f.scrollers.join(", ") || "none"}`);
     L.check("F2", `${w} closed inside the window`, !!f.closed && f.closed.b <= vp.height, `closed card bottom ${f.closed?.b} in ${vp.height}`);
     L.check("F3", `${w} chart floor`, !!f.plot && f.plot.h >= 120, `chart ${f.plot?.h}`);
     L.check("F2", `${w} tab clear of the title`, !!f.tab && !!f.listTitle && f.tab.y > f.listTitle.b, `tab top ${f.tab?.y} · title bottom ${f.listTitle?.b}`);
@@ -330,14 +331,15 @@ test("DB58 R1 — the right column has no container", async ({ page }) => {
     await openDash(page, vp);
     const r = await readRight(page);
     const w = tag(vp);
-    L.check("R1", `${w} population`, r.right && r.rows.length > 0, `${r.rows.length} rows`);
+    /* REWRITTEN (Dashboard v59): no rows — the column is the title, one focus card, a hairline and the panel (DB59 R1) */
+    L.check("R1", `${w} population`, r.right && !!r.focus && r.rows.length === 0, `focus ${r.focus?.key} · ${r.rows.length} rows`);
     L.check("R1", `${w} nothing painted behind it`, r.right && r.painted.length === 0, r.painted.join(" | ") || "nothing");
-    L.check("R1", `${w} order`, r.order.join(">") === "list-head>focus>then>list", r.order.join(">"));
+    L.check("R1", `${w} order`, /^list-head>focus>(coming-extra>)?rule>panel$/.test(r.order.join(">")), r.order.join(">"));
     L.check("R1", `${w} title`, r.title === "What's on the list today?" && /Special Elite/.test(r.titleFace ?? ""), `"${r.title}" in ${r.titleFace}`);
     L.check("R1", `${w} the rust bar`, !!r.bar && Math.abs(r.bar.w - 44) <= 0.5 && Math.abs(r.bar.h - 3) <= 0.5 && r.bar.bg === "rgb(176, 96, 62)", JSON.stringify(r.bar));
-    L.check("R1", `${w} the list scrolls inside, clear of the tab`, r.list?.pb === "86px" && r.list?.oy === "auto", JSON.stringify(r.list));
+    /* RETIRED (Dashboard v59): "the list scrolls inside, clear of the tab" — the list is on the To-do page */
   }
-  L.done(12);
+  L.done(10);
 });
 
 const LABEL: Record<string, string> = { req: "AGENTS ARE WAITING", nudge: "WORTH A NUDGE", quiet: "GONE QUIET", house: "HOUSEKEEPING", ready: "READY TO QUERY", coming: "COMING UP" };
@@ -366,13 +368,12 @@ test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
     if (r.focus) tally[r.focus.group ?? "?"] = (tally[r.focus.group ?? "?"] ?? 0) + 1;
     L.check("R2", `${s.name} · the focus is the first group`, (r.focus?.group ?? "coming") === expectFirst, `focus ${r.focus?.group} · expected ${expectFirst} from ${JSON.stringify(r.counts)}`);
     L.check("R2", `${s.name} · label`, !r.focus || r.focus.label === LABEL[r.focus.group ?? ""], `"${r.focus?.label}"`);
-    const shown = [...new Set([r.focus?.group, ...r.rows.map((x) => x.group)].filter(Boolean))] as string[];
-    const owed = expectGroups.filter((g) => (r.counts[g] ?? 0) > 0);
-    L.check("R2", `${s.name} · groups in order, none skipped`, shown.join(">") === owed.join(">"), `shown ${shown.join(">")} · expected ${owed.join(">")}`);
-    L.check("R2", `${s.name} · the row groups never go backwards`, r.rows.every((x, i) => i === 0 || ORDER.indexOf(x.group ?? "") >= ORDER.indexOf(r.rows[i - 1].group ?? "")), r.rows.map((x) => x.group).join(","));
+    /* RETIRED (Dashboard v59): "groups in order, none skipped" and "the row groups never go backwards" —
+       the rows are on the To-do page; the order survives as WHICH group the focus card holds (above) */
+    void expectGroups;
     const n = r.counts[expectFirst] ?? 0;
     L.check("R2", `${s.name} · the count`, !r.focus || (n > 1 ? r.focus.pos === `1 OF ${n}` : !r.focus.pos), `"${r.focus?.pos}" for ${n}`);
-    L.check("R2", `${s.name} · Then or Also`, !r.then || r.then.startsWith(expectFirst === "ready" || expectFirst === "coming" ? "ALSO" : "THEN") || r.then.toUpperCase().startsWith(expectFirst === "ready" || expectFirst === "coming" ? "ALSO" : "THEN"), `"${r.then}"`);
+    /* RETIRED (Dashboard v59): "Then or Also" — the row is gone; "All {n} →" is DB59 R1 */
     if (expectFirst === "coming") {
       L.check("R2", `${s.name} · Add an agent and Discover agents`, r.extras.length === 2 && /Add an agent/.test(r.extras[0]) && /Discover agents/.test(r.extras[1]) && /SOON/.test(r.extras[1]), r.extras.join(" | "));
     }
@@ -383,51 +384,19 @@ test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
       await page.waitForTimeout(250);
       const r2 = await readRight(page);
       L.check("R2", `${s.name} · › steps to the second`, r2.focus?.pos === `2 OF ${n}` && r2.focus.key !== first && r2.focus.group === expectFirst, `"${r2.focus?.pos}" · ${first} → ${r2.focus?.key}`);
-      L.check("R2", `${s.name} · the first goes back into the list, first`, r2.rows[0]?.key === first && r2.rows.filter((x) => x.group === expectFirst).length === n - 1, `list opens on ${r2.rows[0]?.key}; ${r2.rows.filter((x) => x.group === expectFirst).length} of the group listed`);
+      /* RETIRED (Dashboard v59): "the first goes back into the list, first" — there is no list */
     }
     const name = s.name[0] === "C" ? "state-housekeeping" : s.name[0] === "D" ? "state-ready" : s.name[0] === "E" ? "state-coming-up" : null;
     if (name) for (const v of [SIZES[0], SIZES[2]]) { await openDash(page, v, { __SA_DASH_DROP: s.drop }); await shot(page, name, v); }
   }
   console.log(`  R2 focus groups seen: ${JSON.stringify(tally)}`);
   L.check("R2", "more than one state was entered", Object.keys(tally).length >= 3, JSON.stringify(tally));
-  L.done(28);
+  L.done(18);
 });
 
-test("DB58 R3 — an action opens the flow and writes nothing", async ({ page }) => {
-  const L = new Ledger("actions");
-  const vp = SIZES[0];
-  await openDash(page, vp);
-  const before = await readRight(page);
-  L.check("R3", "population", !!before.focus && before.rows.length > 0, `focus ${before.focus?.key} · ${before.rows.length} rows`);
-  const drawerOpen = () => page.locator("[data-qad-drawer]:visible, .agc-frame:visible, [data-agent-card-frame]:visible").count();
-
-  await page.locator('[data-d58="focus-act"]').click({ timeout: 4000 }).catch(() => {});
-  await page.waitForTimeout(900);
-  L.check("R3", "the focus action opens the flow", (await drawerOpen()) > 0, `${await drawerOpen()} flow surface(s) open`);
-  const mid = await readRight(page);
-  L.check("R3", "nothing changed on press", mid.focus?.key === before.focus?.key && mid.rows.length === before.rows.length, `${before.focus?.key} → ${mid.focus?.key} · rows ${before.rows.length} → ${mid.rows.length}`);
-  await page.keyboard.press("Escape");
-  await page.locator("[data-qad-close], .qad-x, [aria-label='Close']").first().click({ timeout: 1500 }).catch(() => {});
-  await page.waitForTimeout(600);
-
-  await openDash(page, vp);
-  const tick = page.locator('[data-d58="row"] [data-d58="tick"]').first();
-  const tickKey = await page.evaluate(() => document.querySelector('[data-d58="row"] [data-d58="tick"]')?.closest('[data-d58="row"]')?.getAttribute("data-key") ?? null);
-  L.check("R3", "a row has a tick", !!tickKey, `${tickKey}`);
-  await tick.click({ timeout: 4000 }).catch(() => {});
-  await page.waitForTimeout(900);
-  L.check("R3", "the tick opens the flow", (await drawerOpen()) > 0, `${await drawerOpen()} flow surface(s) open`);
-  const after = await readRight(page);
-  L.check("R3", "the tick wrote nothing", after.rows.some((x) => x.key === tickKey) && after.rows.length === before.rows.length, `row ${tickKey} still listed: ${after.rows.some((x) => x.key === tickKey)}`);
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(400);
-  await page.reload();
-  await page.locator('[data-d58="page"][data-loading="0"]').first().waitFor({ timeout: 20_000 }).catch(() => {});
-  await page.waitForTimeout(800);
-  const reloaded = await readRight(page);
-  L.check("R3", "the account is as it was after a reload", reloaded.focus?.key === before.focus?.key && reloaded.rows.length === before.rows.length, `${before.focus?.key} · ${before.rows.length} → ${reloaded.focus?.key} · ${reloaded.rows.length}`);
-  L.done(7);
-});
+/* RETIRED (Dashboard v59): DB58 R3 — "an action opens the flow and writes nothing". The tick went with
+   the rows, and the focus card's one button is "View task →", which DB59 V1 holds kind by kind: it lands
+   where the task is completed and the query, its log and its feed rows are unchanged. */
 
 /* ── A1 · A2 ───────────────────────────────────────────────────────────────────────────────── */
 
@@ -444,8 +413,9 @@ test("DB58 A1–A2 — the activity feed: the tab, the drawer and its rows", asy
       const win = document.querySelector(".ws-window")!.getBoundingClientRect();
       return { bg: getComputedStyle(e).backgroundColor, right: win.right - r.right, bottom: win.bottom - r.bottom, text: e.innerText.replace(/\s+/g, " ") };
     });
-    L.check("A1", `${w} the tab`, !!t && t.bg === "rgb(42, 58, 82)" && /Activity feed/.test(t.text) && /LAST 30 DAYS/.test(t.text), JSON.stringify(t));
-    L.check("A1", `${w} the tab's corner`, !!t && Math.abs(t.right - (vp.width >= 1440 ? 28 : 20)) <= 1.5 && Math.abs(t.bottom - (vp.width >= 1440 ? 26 : 20)) <= 1.5, `right ${t?.right} · bottom ${t?.bottom}`);
+    /* REWRITTEN (Dashboard v59): the tab is a desk-coloured folder tab on the sheet's bottom edge with no
+       "LAST 30 DAYS" (DB59 T1 holds its colour, edge and badge); here only that it is the feed's tab */
+    L.check("A1", `${w} the tab`, !!t && /Activity feed/.test(t.text) && t.bottom <= 1, JSON.stringify(t));
     L.check("A1", `${w} no feed card on the page`, (await page.locator('[data-d58="page"] .os-feed, [data-d58="page"] [data-probe="feed"]').count()) === 0, "the feed lives in the drawer");
     await tab.click({ timeout: 4000 }).catch(() => {});
     await page.waitForTimeout(700);
@@ -509,7 +479,7 @@ test("DB58 A1–A2 — the activity feed: the tab, the drawer and its rows", asy
     L.check("A1", `${w} a press outside closes it`, out.gone && out.back === "tab", JSON.stringify(out));
   }
   /* RE-POINTED (feed drawer v2): two A2 claims are retired, two readings a size */
-  L.done(36);
+  L.done(34);
 });
 
 /* ── L1 ────────────────────────────────────────────────────────────────────────────────────── */
@@ -524,7 +494,8 @@ test("DB58 L1 — loading and loaded boxes are the same boxes", async ({ page })
     const isLoading = await page.evaluate(() => document.querySelector('[data-d58="page"]')?.getAttribute("data-loading"));
     await shot(page, "loading", vp);
     await page.locator('[data-d58="page"][data-loading="0"]').first().waitFor({ timeout: 20_000 }).catch(() => {});
-    await page.waitForTimeout(900);
+    /* REWRITTEN (Dashboard v59): measured after the first paint has finished (PAINT_MS 1400) */
+    await page.waitForTimeout(1800);
     const loaded = await readFrame(page);
     const w = tag(vp);
     L.check("L1", `${w} the hold is real`, isLoading === "1", `data-loading ${isLoading}`);

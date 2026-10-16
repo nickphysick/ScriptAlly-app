@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512x900 the hold is real",
+  "ok": true,
+  "detail": "data-loading 1"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900 header",
+  "ok": true,
+  "detail": "loading 298,106 1156.0×146.6 · loaded 298,106 1156.0×146.6"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900 active",
+  "ok": true,
+  "detail": "loading 298,252 642.9×364.4 · loaded 298,252 642.9×364.4"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900 closed",
+  "ok": true,
+  "detail": "loading 298,643 642.9×223.0 · loaded 298,643 642.9×223.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900 focus",
+  "ok": true,
+  "detail": "loading 967,313 487.1×244.0 · loaded 967,313 487.1×243.5"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900 panel",
+  "ok": true,
+  "detail": "loading 967,592 487.1×243.8 · loaded 967,591 487.1×244.3"
+ },
+ {
+  "lock": "L1",
+  "where": "1512x900 tab",
+  "ok": true,
+  "detail": "loading 1258,858 196.0×34.0 · loaded 1258,858 196.0×34.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 the hold is real",
+  "ok": true,
+  "detail": "data-loading 1"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 header",
+  "ok": true,
+  "detail": "loading 282,106 956.0×134.2 · loaded 282,106 956.0×134.2"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 active",
+  "ok": true,
+  "detail": "loading 282,240 533.7×272.6 · loaded 282,240 533.7×272.6"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 closed",
+  "ok": true,
+  "detail": "loading 282,531 533.7×235.3 · loaded 282,531 533.7×235.3"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 focus",
+  "ok": true,
+  "detail": "loading 834,293 404.3×172.0 · loaded 834,293 404.3×172.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 panel",
+  "ok": true,
+  "detail": "loading 834,500 404.3×235.3 · loaded 834,500 404.3×235.3"
+ },
+ {
+  "lock": "L1",
+  "where": "1280x800 tab",
+  "ok": true,
+  "detail": "loading 1042,758 196.0×34.0 · loaded 1042,758 196.0×34.0"
+ }
+]

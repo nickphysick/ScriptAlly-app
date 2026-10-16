@@ -74,6 +74,9 @@ export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
 /** The first paint's whole length: the end dot finishes at 900 + 300 = 1200ms; a little after. */
 export const PAINT_MS = 1400;
 
+/** The panel's height below which its note's second sentence gives way (dash59.css `max-height: 178px`). */
+export const PANEL_FULL_H = 179;
+
 /** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
 const noticeDate = (iso: string | null): string => {
   const m = iso ? /^(\d{4})-(\d{2})-(\d{2})/.exec(iso) : null;
@@ -324,6 +327,45 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => { ro?.disconnect(); window.removeEventListener("resize", schedule); if (frame) window.cancelAnimationFrame(frame); };
   }, []);
 
+  /* ── the timeline gives way first (v59) ──
+     The pack's order of giving way is the focus card's timeline, THEN the panel's second sentence.
+     A media query cannot keep that order on every shell: the real header is taller than the ref's
+     (the beta strip, the book's title block), so at 1696×820 the panel lost its second sentence with
+     the timeline still showing. So it is MEASURED: while the timeline shows and the panel is below
+     the height that keeps both sentences, the timeline goes; it comes back only when the panel would
+     still keep them with the timeline's own height returned (the remembered height is the
+     hysteresis, so the two never chase each other). */
+  const [tight, setTight] = useState(false);
+  const tightRef = useRef(false);
+  const stagesH = useRef(0);
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || loading) return undefined;
+    const check = () => {
+      const panel = root.querySelector<HTMLElement>('[data-d58="panel"][data-loading="0"]');
+      const ph = panel?.getBoundingClientRect().height ?? 0;
+      if (ph <= 0) return; // not laid out (another page is on screen)
+      if (!tightRef.current) {
+        const st = root.querySelector<HTMLElement>('[data-d58="focus-stages"]');
+        if (st && st.offsetHeight > 0 && ph < PANEL_FULL_H) {
+          const cs = getComputedStyle(st);
+          stagesH.current = st.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+          tightRef.current = true;
+          setTight(true);
+        }
+      } else if (ph - stagesH.current >= PANEL_FULL_H) {
+        tightRef.current = false;
+        setTight(false);
+      }
+    };
+    check();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => check()) : null;
+    const col = root.querySelector('[data-d58="right"]');
+    if (col) ro?.observe(col);
+    window.addEventListener("resize", check);
+    return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
+  }, [loading, focus.item?.key]);
+
   /* ── what the loading page should be the shape of: this account's last loaded page ── */
   const [shape] = useState(() => readShape());
   const focusRef = useRef<HTMLDivElement>(null);
@@ -367,7 +409,7 @@ export const Dash58: React.FC<Dash58Props> = ({
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
-    <div ref={rootRef} className="os-root d58" data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-paint={paint ? "1" : undefined} data-tight={tight ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}

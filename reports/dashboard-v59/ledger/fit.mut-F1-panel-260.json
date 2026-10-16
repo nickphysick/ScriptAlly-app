@@ -1,0 +1,956 @@
+[
+ {
+  "lock": "R1",
+  "where": "1920x1080 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1920x1080 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1920x1080 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1860.0 · column right 1862.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1920x1080 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1920x1080 the link on the title's first line",
+  "ok": true,
+  "detail": "title 258.8→300.3 · link 274.8→288.8"
+ },
+ {
+  "lock": "R1",
+  "where": "1920x1080 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 662.9 of 662.9"
+ },
+ {
+  "lock": "R1",
+  "where": "1920x1080 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1920x1080 one screen",
+  "ok": true,
+  "detail": "scroller 966 in 966"
+ },
+ {
+  "lock": "F1",
+  "where": "1920x1080 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1664/1664 · doc 1920/1920"
+ },
+ {
+  "lock": "P2",
+  "where": "1920x1080 population",
+  "ok": true,
+  "detail": "27 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1920x1080 the panel ends 22px above the tab",
+  "ok": true,
+  "detail": "panel bottom 1015.8 · tab top 1038.0 · gap 22.3"
+ },
+ {
+  "lock": "P2",
+  "where": "1920x1080 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 1015.8 · tab top 1038.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1920x1080 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1920x1080 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "P2",
+  "where": "1920x1080 the poster tier",
+  "ok": true,
+  "detail": "{\"art\":true,\"hist\":true,\"cap\":true,\"note1\":true,\"note2\":true,\"note\":true,\"faces\":true,\"sig\":true,\"heading\":true,\"poster\":true}"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1636.0 · column right 1638.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 the link on the title's first line",
+  "ok": true,
+  "detail": "title 246.0→286.4 · link 261.0→275.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 566.4 of 566.4"
+ },
+ {
+  "lock": "R1",
+  "where": "1696x820 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1696x820 one screen",
+  "ok": true,
+  "detail": "scroller 706 in 706"
+ },
+ {
+  "lock": "F1",
+  "where": "1696x820 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1440/1440 · doc 1696/1696"
+ },
+ {
+  "lock": "P2",
+  "where": "1696x820 population",
+  "ok": true,
+  "detail": "27 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1696x820 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 778.4 · tab top 778.0 · gap -0.4"
+ },
+ {
+  "lock": "P2",
+  "where": "1696x820 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 755.8 · tab top 778.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1696x820 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1696x820 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "P2",
+  "where": "1696x820 art, dots and both sentences",
+  "ok": true,
+  "detail": "{\"art\":true,\"hist\":true,\"cap\":true,\"note1\":true,\"note2\":true,\"note\":true,\"faces\":true,\"sig\":true,\"heading\":true,\"poster\":false}"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1476.0 · column right 1478.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 the link on the title's first line",
+  "ok": true,
+  "detail": "title 250.6→285.1 · link 261.6→275.6"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 497.4 of 497.4"
+ },
+ {
+  "lock": "R1",
+  "where": "1536x864 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1536x864 one screen",
+  "ok": true,
+  "detail": "scroller 750 in 750"
+ },
+ {
+  "lock": "F1",
+  "where": "1536x864 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1280/1280 · doc 1536/1536"
+ },
+ {
+  "lock": "P2",
+  "where": "1536x864 population",
+  "ok": true,
+  "detail": "26 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1536x864 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 848.6 · tab top 822.0 · gap -26.6"
+ },
+ {
+  "lock": "P2",
+  "where": "1536x864 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 799.8 · tab top 822.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1536x864 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1536x864 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1452.0 · column right 1454.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 the link on the title's first line",
+  "ok": true,
+  "detail": "title 254.3→288.0 · link 264.3→278.3"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 487.1 of 487.1"
+ },
+ {
+  "lock": "R1",
+  "where": "1512x900 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1512x900 one screen",
+  "ok": true,
+  "detail": "scroller 786 in 786"
+ },
+ {
+  "lock": "F1",
+  "where": "1512x900 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1256/1256 · doc 1512/1512"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "26 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 851.5 · tab top 858.0 · gap 6.5"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 835.8 · tab top 858.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1380.0 · column right 1382.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 the link on the title's first line",
+  "ok": true,
+  "detail": "title 254.3→285.3 · link 263.3→277.3"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 456.0 of 456.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1440x900 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1440x900 one screen",
+  "ok": true,
+  "detail": "scroller 786 in 786"
+ },
+ {
+  "lock": "F1",
+  "where": "1440x900 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1184/1184 · doc 1440/1440"
+ },
+ {
+  "lock": "P2",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "26 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1440x900 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 848.8 · tab top 858.0 · gap 9.2"
+ },
+ {
+  "lock": "P2",
+  "where": "1440x900 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 835.8 · tab top 858.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1440x900 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1440x900 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1322.0 · column right 1324.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 the link on the title's first line",
+  "ok": true,
+  "detail": "title 238.6→268.3 · link 246.6→260.6"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 441.4 of 441.4"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x768 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x768 one screen",
+  "ok": true,
+  "detail": "scroller 654 in 654"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x768 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1110/1110 · doc 1366/1366"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "24 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x768 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 748.3 · tab top 726.0 · gap -22.3"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x768 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 703.8 · tab top 726.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x768 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x768 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1236.0 · column right 1238.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 the link on the title's first line",
+  "ok": true,
+  "detail": "title 241.9→268.5 · link 247.9→261.9"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 404.3 of 404.3"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x800 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x800 one screen",
+  "ok": true,
+  "detail": "scroller 686 in 686"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x800 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1024/1024 · doc 1280/1280"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "18 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 760.5 · tab top 758.0 · gap -2.5"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 735.8 · tab top 758.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 no art, both sentences",
+  "ok": true,
+  "detail": "{\"art\":false,\"hist\":false,\"cap\":false,\"note1\":true,\"note2\":true,\"note\":true,\"faces\":true,\"sig\":true,\"heading\":true,\"poster\":false}"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1236.0 · column right 1238.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 the link on the title's first line",
+  "ok": true,
+  "detail": "title 233.6→260.2 · link 239.6→253.6"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 404.3 of 404.3"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x720 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x720 one screen",
+  "ok": false,
+  "detail": "scroller 634 in 606"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x720 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1024/1024 · doc 1280/1280"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x720 population",
+  "ok": true,
+  "detail": "18 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x720 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 740.2 · tab top 678.0 · gap -62.2"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x720 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 655.8 · tab top 678.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x720 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x720 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1236.0 · column right 1238.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 the link on the title's first line",
+  "ok": true,
+  "detail": "title 229.5→256.0 · link 235.5→249.5"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 404.3 of 404.3"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x680 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x680 one screen",
+  "ok": false,
+  "detail": "scroller 610 in 566"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x680 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1024/1024 · doc 1280/1280"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x680 population",
+  "ok": true,
+  "detail": "18 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x680 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 716.0 · tab top 638.0 · gap -78.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x680 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 615.8 · tab top 638.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x680 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x680 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x680 the first sentence only",
+  "ok": false,
+  "detail": "{\"art\":false,\"hist\":false,\"cap\":false,\"note1\":true,\"note2\":true,\"note\":true,\"faces\":true,\"sig\":true,\"heading\":true,\"poster\":false}"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1322.0 · column right 1324.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 the link on the title's first line",
+  "ok": true,
+  "detail": "title 227.9→257.6 · link 235.9→249.9"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 441.4 of 441.4"
+ },
+ {
+  "lock": "R1",
+  "where": "1366x650 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x650 one screen",
+  "ok": false,
+  "detail": "scroller 612 in 536"
+ },
+ {
+  "lock": "F1",
+  "where": "1366x650 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1110/1110 · doc 1366/1366"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x650 population",
+  "ok": true,
+  "detail": "24 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x650 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 717.6 · tab top 608.0 · gap -109.6"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x650 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 585.8 · tab top 608.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x650 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1366x650 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 population",
+  "ok": true,
+  "detail": "right true · focus true · rule true · panel true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 order",
+  "ok": true,
+  "detail": "list-head>focus>rule>panel"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 \"All {n} →\" inside the column",
+  "ok": true,
+  "detail": "All 32 → · link right 1236.0 · column right 1238.0"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 the title never overflows",
+  "ok": true,
+  "detail": "scrollWidth ≤ clientWidth: true"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 the link on the title's first line",
+  "ok": true,
+  "detail": "title 227.9→254.5 · link 233.9→247.9"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 the hairline",
+  "ok": true,
+  "detail": "1px · rgba(28, 19, 15, 0.18) · 404.3 of 404.3"
+ },
+ {
+  "lock": "R1",
+  "where": "1280x650 no list rows, group headings or \"Then\"",
+  "ok": true,
+  "detail": "0 found"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x650 one screen",
+  "ok": false,
+  "detail": "scroller 609 in 536"
+ },
+ {
+  "lock": "F1",
+  "where": "1280x650 no horizontal overflow",
+  "ok": true,
+  "detail": "scroller 1024/1024 · doc 1280/1280"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x650 population",
+  "ok": true,
+  "detail": "18 boxes in the panel"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x650 the panel ends 22px above the tab",
+  "ok": false,
+  "detail": "panel bottom 714.5 · tab top 608.0 · gap -106.5"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x650 the closed card ends 22px above the tab line",
+  "ok": true,
+  "detail": "closed bottom 585.8 · tab top 608.0"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x650 nothing escapes the frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x650 the heading never overflows",
+  "ok": true,
+  "detail": "fits true · heading true faces true sig true"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x650 the note goes; heading and faces stay",
+  "ok": false,
+  "detail": "{\"art\":false,\"hist\":false,\"cap\":false,\"note1\":true,\"note2\":true,\"note\":true,\"faces\":true,\"sig\":true,\"heading\":true,\"poster\":false}"
+ }
+]

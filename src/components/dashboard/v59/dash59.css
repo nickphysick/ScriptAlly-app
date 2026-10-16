@@ -5,6 +5,18 @@
    The right column: the title with "All {n} →", one focus card, a hairline, and the founding
    writer panel. Every value here reads the v58 palette (`--d58-*`, declared on `.d58`). */
 
+/* ── the room for the folder tab ─────────────────────────────────────────────────────────────
+   The tab (34px, on the sheet's bottom edge) sits over the RIGHT column, which ends 22px above it:
+   56px from the sheet's bottom, less what already lies between the page and the sheet's bottom
+   (`--d58-inset-b`, measured by the page) and the page's own 26px foot.
+   ⚠️ DELIBERATELY THE RIGHT COLUMN ONLY. The pack asks for 22px in each column; on the real shell
+   (beta strip, the book's header) that took 30px from the left column and clipped the kept chart at
+   1440×760 and below. "Nothing clips" wins over clearance from a tab the left column is not under. */
+.d58 .d58-right {
+  box-sizing: border-box;
+  padding-bottom: max(0px, calc(56px - var(--d58-inset-b, 0px) - var(--d58-foot, 26px)));
+}
+
 /* ── the title row ─────────────────────────────────────────────────────────────────────────── */
 
 /* ⚠️ THE TITLE GIVES WAY TO THE LINK, NEVER THE REVERSE. The row is the title's size container and
@@ -60,6 +72,16 @@
 /* a laptop-sized window: the focus card's timeline is the first thing to go, before the founder's note */
 @media (max-height: 819px) and (max-width: 1400px) {
   .d58 .d58-stages { display: none; }
+}
+
+/* measured: the timeline goes before the panel's second sentence would (Dash58 `tight`) */
+.d58[data-tight="1"] .d58-stages { display: none; }
+/* a short window (700px tall and less): the focus card and the title row give back a little air, so
+   the panel keeps its 22px over the folder tab at the 650px floor with the real shell's header */
+@media (max-height: 700px) {
+  .d58 .d58-listhead { margin-bottom: 10px; }
+  .d58 .d58-fbody { padding-top: 8px; }
+  .d58 .d58-ffoot { margin-top: 6px; padding-top: 8px; padding-bottom: 9px; }
 }
 
 /* ── Coming up: its two buttons sit under the focus card, above the hairline ────────────────── */
@@ -317,6 +339,13 @@
   animation: d59NotedIn 250ms ease both;
 }
 .d59-noted > b { font-weight: 400; color: rgba(28, 19, 15, 0.72); }
+/* ⚠️ THE NOTED LINE WRAPS RATHER THAN RUNS OUT OF THE PANEL. The ref cuts "Say more →" off at
+   1512 (and loses "Change" entirely); nothing on this panel is ever cut, so in the Noted state the
+   row and the line may each break between their parts, never inside one. */
+.d59-fw.is-noted .d59-fwrow { flex-wrap: wrap; row-gap: 6px; }
+.d59-fw.is-noted .d59-mood { flex-wrap: wrap; row-gap: 6px; }
+.d59-noted { flex-wrap: wrap; row-gap: 4px; white-space: normal; }
+.d59-noted > * { white-space: nowrap; }
 .d58 .d59-say, .d58 .d59-chg {
   padding: 0; border: 0; background: none; cursor: pointer;
   font-family: var(--d58-serif) !important; font-size: 14px; line-height: 1.2;
@@ -353,6 +382,9 @@
 @container d59fw (max-height: 190px) { .d59-fwtxt { padding-top: 10px; padding-bottom: 10px; gap: 5px; } }
 @container d59fw (max-height: 178px) { .d59-fwnote > span + span { display: none; } }
 @container d59fw (max-height: 140px) { .d59-fwnote { display: none; } }
+/* Noted, on a short panel: the Noted line needs a second row, and the note — whose ask has just been
+   answered — is what gives way for it (never the heading, the faces or the signature) */
+@container d59fw (max-height: 190px) { .d59-fw.is-noted .d59-fwnote { display: none; } }
 /* the poster: a tall, wide panel */
 @container d59fw (min-height: 300px) and (min-width: 600px) {
   .d59-fwtxt { padding: 26px 30px 26px 10px; gap: 12px; }

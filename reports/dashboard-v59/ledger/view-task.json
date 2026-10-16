@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "V1",
+  "where": "a first-run manuscript exists on the account",
+  "ok": true,
+  "detail": "4 manuscripts · seeded db59-first-run"
+ },
+ {
+  "lock": "V1",
+  "where": "A as the account stands · the button",
+  "ok": true,
+  "detail": "req · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "A as the account stands · the query is known",
+  "ok": true,
+  "detail": "seed-query-12"
+ },
+ {
+  "lock": "V1",
+  "where": "A as the account stands · lands on the query panel",
+  "ok": true,
+  "detail": "task-offer-seed-query-12 → query panel seed-query-12"
+ },
+ {
+  "lock": "V1",
+  "where": "A as the account stands · nothing written",
+  "ok": true,
+  "detail": "query, log and flags unchanged"
+ },
+ {
+  "lock": "V1",
+  "where": "B no agents waiting · the button",
+  "ok": true,
+  "detail": "nudge · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "B no agents waiting · the query is known",
+  "ok": true,
+  "detail": "cor-undo"
+ },
+ {
+  "lock": "V1",
+  "where": "B no agents waiting · lands on the query panel",
+  "ok": true,
+  "detail": "task-nudge-cor-undo → query panel cor-undo"
+ },
+ {
+  "lock": "V1",
+  "where": "B no agents waiting · nothing written",
+  "ok": true,
+  "detail": "query, log and flags unchanged"
+ },
+ {
+  "lock": "V1",
+  "where": "B2 gone quiet · the button",
+  "ok": true,
+  "detail": "quiet · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "B2 gone quiet · the query is known",
+  "ok": true,
+  "detail": "cor-move-b"
+ },
+ {
+  "lock": "V1",
+  "where": "B2 gone quiet · lands on the query panel",
+  "ok": true,
+  "detail": "task-no-res-close-cor-move-b → query panel cor-move-b"
+ },
+ {
+  "lock": "V1",
+  "where": "B2 gone quiet · nothing written",
+  "ok": true,
+  "detail": "query, log and flags unchanged"
+ },
+ {
+  "lock": "V1",
+  "where": "C housekeeping only · the button",
+  "ok": true,
+  "detail": "house · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "C housekeeping only · lands on the agent card",
+  "ok": true,
+  "detail": "hk:reply → agent card"
+ },
+ {
+  "lock": "V1",
+  "where": "D ready to query · the button",
+  "ok": true,
+  "detail": "ready · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "D ready to query · lands on the drawer",
+  "ok": true,
+  "detail": "ready:thin-ag-chase → drawer log"
+ },
+ {
+  "lock": "V1",
+  "where": "E coming up · the button",
+  "ok": true,
+  "detail": "coming · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "E coming up · the query is known",
+  "ok": true,
+  "detail": "seed-query-8"
+ },
+ {
+  "lock": "V1",
+  "where": "E coming up · lands on the query panel",
+  "ok": true,
+  "detail": "coming:seed-query-8 → query panel seed-query-8"
+ },
+ {
+  "lock": "V1",
+  "where": "E coming up · nothing written",
+  "ok": true,
+  "detail": "query, log and flags unchanged"
+ },
+ {
+  "lock": "V1",
+  "where": "F first run · the button",
+  "ok": true,
+  "detail": "house · \"View task →\""
+ },
+ {
+  "lock": "V1",
+  "where": "F first run · lands on the route",
+  "ok": true,
+  "detail": "start:materials → /manuscripts/packages · 0 new dialog(s)"
+ },
+ {
+  "lock": "V1",
+  "where": "four or more kinds entered",
+  "ok": true,
+  "detail": "{\"A as the account stands\":\"req\",\"B no agents waiting\":\"nudge\",\"B2 gone quiet\":\"quiet\",\"C housekeeping only\":\"house\",\"D ready to query\":\"ready\",\"E coming up\":\"coming\",\"F first run\":\"house\"}"
+ }
+]
