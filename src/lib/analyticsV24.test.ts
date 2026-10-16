@@ -212,10 +212,11 @@ describe("monthlySends — how many, and when", () => {
     const off = walkAt(agent({ agency: "The Hollis Agency" }), at2(2026, 0, 3), [[R.FULL_REQUESTED, at2(2026, 1, 2)], [R.FULL_SENT, at2(2026, 1, 3)], [R.OFFER, at2(2026, 2, 17)]]);
     const wk = [1, 2, 4, 6].map((d) => walkAt(W6, at2(2026, 5, d)));
     const mo = run([first, req, off, ...wk], [...agents, ...[first, req, off].map((p) => ({ id: p.q.agentId, userId: "u", name: "A", agency: "" }) as Agent)]);
-    const list = moments(mo.items, monthlySends(mo.items, NOW));
+    const list = moments(mo.items, monthlySends(mo.items, NOW), NOW);
     it("4 Nov 2025 · 27 Nov (23 days) · 17 Mar (133 days) · 1 to 7 Jun (4)", () => {
       expect(list.map((x) => x.key)).toEqual(["first", "request", "offer", "busiest"]);
-      expect(list.map((x) => x.date)).toEqual(["4 Nov 2025", "27 Nov", "17 Mar", "1 to 7 Jun"]);
+      /* the mock's own dates; a date outside this year (2026) carries its year */
+      expect(list.map((x) => x.date)).toEqual(["4 Nov 2025", "27 Nov 2025", "17 Mar", "1 to 7 Jun"]);
       expect(list.map((x) => x.days)).toEqual([0, 23, 133, 4]);
     });
     it("no request and no offer → only the first query", () => {

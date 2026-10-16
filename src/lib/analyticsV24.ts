@@ -231,7 +231,9 @@ export function perMonthWords(sent: number, months: number): string {
 /* ══════════════════════════════════ moments ══════════════════════════════════ */
 
 export interface Moment { key: "first" | "request" | "offer" | "busiest"; atMs: number; date: string; title: string; line: string; days: number | null }
-export function moments(items: Enriched[], m: MonthlySends): Moment[] {
+export function moments(items: Enriched[], m: MonthlySends, nowMs: number = Date.now()): Moment[] {
+  /* a date outside this year carries its year */
+  const dOf = (ms: number) => (new Date(ms).getFullYear() === new Date(nowMs).getFullYear() ? dShort(ms) : dLong(ms));
   const out: Moment[] = [];
   const dated = items.filter((e) => e.row.sentMs !== null).sort((a, b) => (a.row.sentMs as number) - (b.row.sentMs as number));
   const first = dated[0];
@@ -246,7 +248,7 @@ export function moments(items: Enriched[], m: MonthlySends): Moment[] {
     const replies = items.map((x) => x.replyDays).filter((d): d is number => d !== null);
     const quick = e.replyDays !== null && replies.length > 0 && e.replyDays === Math.min(...replies);
     const d = after(t);
-    out.push({ key: "request", atMs: t, date: dShort(t), title: "First request to read more",
+    out.push({ key: "request", atMs: t, date: dOf(t), title: "First request to read more",
       line: `${agencyOf(e)} asked for ${kind}, ${d} ${d === 1 ? "day" : "days"} after your first query.${quick ? ` It was also your quickest reply, at ${spanProse(e.replyDays as number)}.` : ""}`, days: d });
   }
   const offers = items.map((e) => ({ e, t: e.dates.offer })).filter((x): x is { e: Enriched; t: number } => x.t !== null).sort((a, b) => a.t - b.t);
@@ -255,7 +257,7 @@ export function moments(items: Enriched[], m: MonthlySends): Moment[] {
     const d = after(t);
     const fr = e.dates.fullRequested;
     const tail = fr !== null && fr <= t ? ` They asked for the full on ${dShort(fr)} and offered ${spanProse((t - fr) / DAY_MS)} later.` : "";
-    out.push({ key: "offer", atMs: t, date: dShort(t), title: "Your first offer",
+    out.push({ key: "offer", atMs: t, date: dOf(t), title: "Your first offer",
       line: `${agencyOf(e)}, ${d} ${d === 1 ? "day" : "days"} after your first query.${tail} ${e.bucket === "closed" ? "Ended." : "Still open."}`, days: d });
   }
   /* the busiest week: Monday to Sunday, at least two sends, the earliest on a tie */
@@ -267,7 +269,8 @@ export function moments(items: Enriched[], m: MonthlySends): Moment[] {
     const [w, n] = best;
     const end = w + 6 * DAY_MS;
     const a = new Date(w), b = new Date(end);
-    const date = a.getMonth() === b.getMonth() ? `${a.getDate()} to ${b.getDate()} ${MONTHS_SHORT[b.getMonth()]}` : `${dShort(w)} to ${dShort(end)}`;
+    const yr = b.getFullYear() === new Date(nowMs).getFullYear() ? "" : ` ${b.getFullYear()}`;
+    const date = a.getMonth() === b.getMonth() ? `${a.getDate()} to ${b.getDate()} ${MONTHS_SHORT[b.getMonth()]}${yr}` : `${dShort(w)} to ${dShort(end)}${yr}`;
     const inBusiest = m.busiest.some((mm) => mm.key === mk(w) || mm.key === mk(end));
     out.push({ key: "busiest", atMs: w, date, title: "Your busiest week", line: `${n} queries in one week${inBusiest ? ", part of your busiest month" : ""}.`, days: n });
   }
@@ -318,7 +321,7 @@ export function buildV24(model: AnalyticsModel, nowMs: number): V24 {
   const m = monthlySends(model.items, nowMs);
   return {
     outcomes: o, rate: requestRate(o), keeping: replyKeeping(model.items), waiting: stillWaiting(model.items, nowMs), expected: e,
-    monthly: m, moments: moments(model.items, m), bench: benchmark(o, e), month: monthOf(m.firstMs, nowMs), nowMs,
+    monthly: m, moments: moments(model.items, m, nowMs), bench: benchmark(o, e), month: monthOf(m.firstMs, nowMs), nowMs,
   };
 }
 export { gapDays };

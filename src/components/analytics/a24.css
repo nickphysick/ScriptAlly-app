@@ -185,3 +185,32 @@
   .a24-pbr, .ws-app.sheet-wide .a24-pbr { grid-template-columns: 118px minmax(0, 1fr) 52px; }
   .a24-val { text-align: left; }
 }
+
+/* ══════════════ S6 · moments ══════════════ */
+.a24-mom { list-style: none; margin: 0; padding: 20px 28px 8px; }
+.ws-app.sheet-wide .a24-mom { padding: 22px 36px 10px; }
+.a24-mom li { display: grid; grid-template-columns: 150px 1fr; column-gap: 28px; position: relative; padding: 0 0 30px 0; }
+.a24-mom li::before { content: ""; position: absolute; left: 150px; top: 9px; bottom: -6px; width: 2px; background: rgba(28, 19, 15, 0.1); transform: translateX(13px); }
+.a24-mom li:last-child::before { display: none; }
+.a24-mom li::after { content: ""; position: absolute; left: 150px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 3px #2a3a52; transform: translateX(7px); }
+.a17-page .a24-mom time { font: 400 17px/1.3 var(--sp-type) !important; color: var(--sp-ink); text-align: right; padding-top: 1px; }
+.a24-mom div { padding-left: 36px; min-width: 0; }
+.a17-page .a24-mom b { display: block; font: 600 17px/1.35 var(--sp-serif) !important; color: var(--sp-ink); }
+.a17-page .a24-mom p { margin: 4px 0 0; font: 400 15.5px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.a24-momnone { padding: 26px 36px; }
+
+/* ══════════════ S7 · the note ══════════════ */
+.a24-note { padding: 22px 28px 6px; }
+.ws-app.sheet-wide .a24-note { padding: 26px 36px 10px; }
+.a17-page .a24-note p { margin: 0 0 18px; font: 400 17px/1.6 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.72); max-width: 72ch; }
+.a17-page .a24-note p b { font: inherit !important; font-weight: 600 !important; color: var(--sp-ink); }
+@media (max-width: 760px) {
+  .a24-mom, .ws-app.sheet-wide .a24-mom { padding: 16px 16px 6px; }
+  .a24-mom li { grid-template-columns: 1fr; padding-left: 34px; padding-bottom: 22px; }
+  .a24-mom li::before { left: 0; transform: translateX(6px); }
+  .a24-mom li::after { left: 0; transform: none; }
+  .a17-page .a24-mom time { text-align: left; font-size: 14px !important; }
+  .a24-mom div { padding-left: 0; }
+  .a24-note, .ws-app.sheet-wide .a24-note { padding: 18px 16px 4px; }
+  .a17-page .a24-note p { font-size: 15.5px !important; }
+}
