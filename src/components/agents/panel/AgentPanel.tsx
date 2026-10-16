@@ -20,7 +20,7 @@
  *    that claim is not a reason to close.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { Agent, QueryStatus } from "../../../types";
+import type { Activity, Agent, Query, QueryStatus } from "../../../types";
 import type { AgentFacts } from "../../../lib/contactList";
 import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
 import { agentInitials } from "../../../lib/agentDisplay";
@@ -38,7 +38,8 @@ import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/short
 import { formatDate } from "../../../lib/dates";
 import type { AgentEditPatch, SaveAgentResult } from "../../../lib/saveAgentEdits";
 import { SidePanel } from "../../shell/SidePanel";
-import { StatusDot } from "../../StatusDot";
+import { agentHistory, historySummary } from "../../../lib/agentHistory";
+import { AgentHistory, historyNext } from "./AgentHistory";
 import { AgentPaperCard, PaperIcon, type PaperCardData, type PaperStatus } from "../../shared/AgentPaperCard";
 import { materialRowsFromAgent } from "../../../lib/agentMaterials";
 import { NotesThread } from "../../reading-pane/NotesThread";
@@ -58,6 +59,9 @@ export interface AgentPanelProps {
   q: QcRow | null;
   /** every query to this agent, across all manuscripts */
   rows: readonly QcRow[];
+  /** v18.2 §B — the same queries as documents, and the feed, for the History tab */
+  queries: readonly Query[];
+  activities: readonly Activity[];
   msTitle: string | null;
   titleOf: (manuscriptId: string) => string | null;
   /** the agent's genres as labels, with whether each is one of the book's */
@@ -105,11 +109,6 @@ const subscribeWide = (on: () => void) => {
 /** a missing value, said quietly: never a dashed "+ Add" pill in the panel (v18.1 §B.3) */
 const Missing: React.FC<{ word?: string }> = ({ word = "Not recorded" }) => <i className="apn-miss" data-apc="missing">{word}</i>;
 
-const dateOf = (ms: number, nowMs: number) => ({
-  day: formatDate(new Date(ms), { day: "numeric", month: "short" }),
-  year: new Date(ms).getFullYear() === new Date(nowMs).getFullYear() ? null : String(new Date(ms).getFullYear()),
-});
-const COURT_WORD: Record<string, string> = { you: "With you", offer: "With you", agent: "With the agent", closed: "Closed" };
 
 export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   const { agent, facts, q, rows, msTitle, nowMs, tab, editing } = p;
@@ -130,8 +129,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   const sendBy = method ? viaLabel(method) : null;
   const silence = agent.noResponseMeansNo === true ? "Means no" : agent.noResponseMeansNo === false ? "They reply" : null;
   const since = onFileSince(agent.dateAdded, nowMs);
-  /* v18.1 — the panel IS the landing card: the band says whose move it is (rust · ink · slate · grey), from the slip;
-     its chip says the standing */
+  /* v18.1 — the panel IS the landing card. v18.2: its band is always the list header's slate; the slip says the state.
+     `paperStatus` travels to the band as `data-kind` only. */
   const paperStatus: PaperStatus = SLIP_BAND[slip.kind];
   const statusLabel = standingWords(stand, q);
   const weeksOn = typeof agent.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0 ? agent.responseTimeWeeks : null;
@@ -154,6 +153,9 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   const { showConfirm, showToast } = useToast();
   const { storedNotes, onAddNote, onEditNote, onDeleteNote } = useAgentNotes(agent, p.uid, p.writeAgent);
   const notes = [...storedNotes].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  /* v18.2 §B — History: every stored event between the writer and this agent, newest first */
+  const history = agentHistory({ agent, queries: p.queries, activities: p.activities, notes, titleOf: p.titleOf, nowMs });
+  const histNext = historyNext(slip.kind, stand.state, stand.heading, q?.expectedMs ?? null, nowMs);
 
   /* a query journey stepped into this panel (the drawer's request carries `panel`) */
   const drawerReq = useSyncExternalStore(subscribeDrawer, currentDrawerRequest, currentDrawerRequest);
@@ -249,7 +251,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
 
   const tabs: { key: AgentPanelTab; label: React.ReactNode }[] = [
     { key: "profile", label: "Profile" },
-    { key: "queries", label: rows.length > 0 ? <>Queries <i className="apn-tabn">{rows.length}</i></> : "Queries" },
+    /* v18.2 §B — the Queries tab is History, with no count; its key (and `?agent=`'s) stays "queries" */
+    { key: "queries", label: "History" },
     { key: "notes", label: notes.length > 0 ? <>Notes <i className="apn-tabn">{notes.length}</i></> : "Notes" },
   ];
   const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
@@ -356,32 +359,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                     ) : null}
                   </>
                 ) : tab === "queries" ? (
-                  ordered.length === 0 ? (
-                    <p className="apn-none" data-ap="queries-none">You haven{"’"}t queried {first} yet.</p>
-                  ) : (
-                    <div className="qlg apn-ledger" data-ap="ledger">
-                      {ordered.map((r) => {
-                        const d = dateOf(r.sentMs ?? r.lastMs, nowMs);
-                        const stageAt = r.stageStartMs != null ? dateOf(r.stageStartMs, nowMs) : null;
-                        return (
-                          <React.Fragment key={r.id}>
-                            <div className="qlg-d" data-ap="ledger-date">{d.day}{d.year ? <small>{d.year}</small> : null}</div>
-                            <div className="qlg-g"><StatusDot status={r.status as QueryStatus} overrideSize={16} decorative /></div>
-                            <div className="qlg-c">
-                              <button type="button" className="apn-qc" data-ap="ledger-entry" data-query={r.id} data-court={r.court} onClick={() => p.onOpenQuery(r.id)}>
-                                <b className="apn-qt">{p.titleOf(r.manuscriptId) ?? "A manuscript no longer on file"}</b>
-                                <i className="apn-qs">{STAGE_NAME[r.status as QueryStatus] ?? String(r.status)}{stageAt ? ` · ${stageAt.day}${stageAt.year ? ` ${stageAt.year}` : ""}` : ""}</i>
-                                <span className="apn-qf">
-                                  <span className="apn-qchip" data-court={r.court}>{COURT_WORD[r.court] ?? "With the agent"}</span>
-                                  <span className="apn-qo">Open the query {"›"}</span>
-                                </span>
-                              </button>
-                            </div>
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  )
+                  <AgentHistory entries={history} summary={historySummary(history, p.queries.length, first)} next={histNext} first={first}
+                    nextStatus={histNext && q ? (q.status as QueryStatus) : null} queried={p.queries.length > 0} nowMs={nowMs} />
                 ) : (
                   <NotesThread
                     resetKey={agent.id}
@@ -397,7 +376,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                 )}
               </div>
             ),
-            foot: tab === "notes" ? null : tab === "profile" && !confirmDel ? (
+            /* v18.2 §B — History wears the Profile tab's footer (v18.1); Notes keeps its composer as its foot */
+            foot: tab === "notes" ? null : (tab === "profile" || tab === "queries") && !confirmDel ? (
               <div className="apn-foot2" data-ap="foot">
                 {since ? <span className="apn-since" data-ap="since">{since}</span> : <span />}
                 <span className="apn-footr">

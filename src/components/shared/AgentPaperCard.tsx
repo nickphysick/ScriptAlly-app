@@ -11,8 +11,9 @@
  *   panel   (v18.1) the agent panel itself: framed's frame, band and head, with ✕ in the band, and the panel's tabs,
  *           body and footer as slots. The band is fixed; the head, tabs and body scroll together; the footer is fixed.
  *
- * ⚠️ THE BAND'S COLOUR SAYS WHOSE MOVE IT IS (v18.1): rust when it is the writer's, ink while the agent has it, slate
- *    when they have not been queried, grey when closed. The caller decides which; this draws it.
+ * ⚠️ THE BAND IS ALWAYS THE LIST HEADER'S SLATE, #3e5170 (v18.2 §B; v18.1 coloured it by whose move it was, and that
+ *    rule is retired). The state is said by the agent panel's stand slip, not by the band. `status` still travels as
+ *    `data-kind` for anything that reads it, and is never a colour.
  *
  * ⚠️ IT DRAWS WHAT IT IS GIVEN AND DERIVES NOTHING: the caller says the status, the words and which genre is the
  *    manuscript's. A value given as null is a dashed "+ Add …" pill when `onAdd` is supplied, and is left out when not.
@@ -21,7 +22,8 @@ import React from "react";
 import "./agentPaperCard.css";
 
 export type PaperStatus = "you" | "none" | "querying" | "closed";
-export const PAPER_STATUS_COLOUR: Record<PaperStatus, string> = { you: "#a2452a", none: "#5e7189", querying: "#2d3a50", closed: "#a9a39c" };
+/** v18.2 §B — every band, in every variant and every state: the list header's slate */
+export const PAPER_BAND = "#3e5170";
 
 export type PaperAddKey = "website" | "email" | "genres" | "wishlist" | "materials";
 
@@ -89,7 +91,7 @@ export const AgentPaperCard: React.FC<{
     return (
       <div className={`apc apc--panel${className ? ` ${className}` : ""}`} data-apc="card" data-variant="panel" data-status={d.status}>
         <div className="apc-frame" data-apc="frame">
-          <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_STATUS_COLOUR[d.status] }}>
+          <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_BAND }}>
             <span className="apc-st" data-apc="status">{d.statusLabel}</span>
             <span className="apc-bandr">
               <Stars n={d.stars ?? 0} />
@@ -144,7 +146,7 @@ export const AgentPaperCard: React.FC<{
   return (
     <div className={`apc apc--${variant}${className ? ` ${className}` : ""}`} data-apc="card" data-variant={variant} data-status={d.status} aria-hidden={ghost || undefined}>
       <div className="apc-frame" data-apc="frame">
-        <div className="apc-band" data-apc="band" style={{ background: PAPER_STATUS_COLOUR[d.status] }}>
+        <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_BAND }}>
           <span className="apc-st" data-apc="status">{ghost ? bar(110, 12) : d.statusLabel}</span>
           {!ghost && d.stars ? <Stars n={d.stars} /> : null}
         </div>

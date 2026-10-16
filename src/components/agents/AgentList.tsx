@@ -958,6 +958,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const panelFacts = useMemo(() => (panelAgent ? agentFacts(panelAgent, qcRows, scoped?.id ?? null) : null), [panelAgent, qcRows, scoped]);
   const panelQ = useMemo(() => (panelAgent ? cardQuery(cardRows(qcRows, panelAgent.id, scoped?.id ?? null)) : null), [panelAgent, qcRows, scoped]);
   const panelRows = useMemo(() => (panelAgent ? qcRows.filter((r) => r.query.agentId === panelAgent.id) : []), [panelAgent, qcRows]);
+  /* v18.2 §B — the same queries as documents, for the History tab */
+  const panelQueries = useMemo(() => (panelAgent ? queries.filter((q) => q.agentId === panelAgent.id) : []), [panelAgent, queries]);
   const panelGenres = useMemo(
     () => (panelAgent?.genres ?? []).map((g) => ({ label: genreLabel(g, personalGenres), hit: bookHit(g) })),
     [panelAgent, personalGenres, bookHit],
@@ -1112,7 +1114,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             agent's queries has the box */}
         {showList && active && panelAgent && panelFacts && !queryHasBox && (
           <AgentPanel
-            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
+            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows}
+            queries={panelQueries} activities={activities} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
             genres={panelGenres} nowMs={nowMs} uid={currentUser?.id ?? null} writeAgent={writePanelAgent}
             tab={panelTab} onTab={setPanelTab}
             editing={cardReq?.host === "panel" && cardReq.agentId === panelAgent.id}
