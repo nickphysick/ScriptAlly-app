@@ -32,14 +32,17 @@
    So nothing here inherits its face by default: this rule hands inheritance back (0-1-1 against the
    brand's 0-0-1), and every face this sheet names is `!important` so a classed element still wins
    over it. The kept chart card (`.d58-active`) is left to its own sheet. */
-:is(.d58-header, .d58-closed, .d58-right, .d58-dock, .d58-layer) :is(p, span, div, button, select, label) { font-family: inherit; }
+:is(.d58-header, .d58-closed, .d58-right, .d58-layer) :is(p, span, div, button, select, label) { font-family: inherit; }
 
 /* ── the frame ─────────────────────────────────────────────────────────────────────────────── */
 
 .d58 {
   --d58-gutter: 50px;
   --d58-gap: 26px;
-  --d58-foot: 26px;
+  /* v59: the page's foot leaves the folder tab (34px, on the sheet's bottom edge) 22px clear of the
+     lowest card in each column; `--d58-inset-b` is what already lies between the page and the
+     sheet's bottom, measured by the page */
+  --d58-foot: max(0px, calc(56px - var(--d58-inset-b, 0px)));
   position: relative;
   box-sizing: border-box;
   /* one screen from 650px of window height up; below that the page scrolls and nothing shrinks.
@@ -326,27 +329,6 @@
 .d58-extra { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .d58-quietline { margin: 0 0 4px; font-family: var(--d58-serif) !important; font-size: 15.5px; line-height: 1.45; color: var(--d58-ink-62); }
 
-/* ── the floating tab ──────────────────────────────────────────────────────────────────────── */
-
-/* a zero-height sticky dock at the foot of the page: at one screen it IS the page's foot, and on a
-   short window, where the page scrolls, it stays with the window's */
-.d58-dock { position: sticky; bottom: 0; height: 0; z-index: 20; flex: none; }
-.d58-tab {
-  position: absolute; right: calc(28px - var(--d58-inset-r, 0px)); bottom: 26px;
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 18px 12px 14px;
-  border: 0; border-radius: 16px; cursor: pointer; text-align: left;
-  background: var(--d58-navy); color: var(--d58-cream);
-  box-shadow: 0 18px 34px -14px rgba(28, 19, 15, 0.6);
-  transition: transform 0.14s ease;
-}
-.d58-tab:hover { transform: translateY(-2px); }
-.d58-tab:focus-visible { outline: 2px solid var(--d58-cream); outline-offset: -4px; }
-.d58-tabic { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); }
-.d58-tab b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 20px; line-height: 20px; white-space: nowrap; }
-.d58-tab small { display: block; margin-top: 5px; font-family: var(--d58-mono) !important; font-size: 9.5px; letter-spacing: 0.16em; line-height: 13px; color: rgba(251, 249, 245, 0.6); }
-.d58-tabnew { margin-left: 4px; padding: 2px 8px; border-radius: 20px; background: var(--d58-rust); color: #fff; font-family: var(--d58-mono) !important; font-size: 10.5px; font-weight: 600; line-height: 14px; white-space: nowrap; }
-
 /* ── the drawer (portalled: `.d58-layer`) ──────────────────────────────────────────────────── */
 
 .d58-wash {
@@ -490,7 +472,6 @@
   .d58-latest .d58-mono { display: none; }
   .d58 .d58-listtitle { font-size: 21px; line-height: 25.2px; }
   .d58-fsay { font-size: 17.5px; line-height: 21px; }
-  .d58-tab { right: calc(20px - var(--d58-inset-r, 0px)); bottom: 20px; }
 }
 /* a short window: the tiles go back to one row, and the focus card keeps to its sentence */
 @media (max-height: 779px) {
@@ -515,7 +496,7 @@
   .d58-drawer { width: 100vw; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .d58-wash, .d58-drawer, .d58-btn, .d58-tab { transition: none; }
+  .d58-wash, .d58-drawer, .d58-btn { transition: none; }
 }
 
 /* ── the skipped-rows line (onboarding v5 part 2; ref design-refs/import-flow-v1) ──────────────────

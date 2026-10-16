@@ -413,7 +413,6 @@ button.im-pick { cursor: pointer; }
 .sf .im-ldr { background: var(--ink-sheet); }
 /* the dashboard's own loading page, filling the sheet exactly as the shell's scroller would */
 .sf .im-ghost { position: absolute; inset: 0; pointer-events: none; }
-.sf .im-ghost .d58-dock { display: none; }
 .sf .im-ldrcard {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5; box-sizing: border-box;
   width: 421px; max-width: calc(100% - 28px); padding: 30px 40px 34px; text-align: center;

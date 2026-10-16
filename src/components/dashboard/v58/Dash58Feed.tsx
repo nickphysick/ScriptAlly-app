@@ -24,6 +24,7 @@ import {
   windowEndLine, type DrawerEvent, type FeedFilter,
 } from "../../../lib/dashFeedDrawer";
 import { actModeFor, feedFamily } from "./feedFamily";
+import { badgeText } from "../../../lib/dashFeedSeen";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 
@@ -33,12 +34,18 @@ const ListGlyph = () => (
   </svg>
 );
 
-/** `today` is the count; −1 holds the pill's place while the page loads. */
-export const FeedTab: React.FC<{ open: boolean; today: number; onOpen: () => void }> = ({ open, today, onOpen }) => (
-  <button type="button" className="d58-tab" data-d58="tab" aria-haspopup="dialog" aria-expanded={open} onClick={onOpen}>
-    <span className="d58-tabic"><ListGlyph /></span>
-    <span><b>Activity feed</b><small>LAST 30 DAYS</small></span>
-    {today !== 0 && <span className={`d58-tabnew${today < 0 ? " d58-sk" : ""}`} data-d58="tab-today">{today < 0 ? "0 today" : `${today} today`}</span>}
+/**
+ * THE FOLDER TAB (v59): it rises from the page sheet's bottom edge in the desk's colour, with an
+ * unseen badge. "LAST 30 DAYS" and the "{n} today" pill are retired. `unseen` is the count; the
+ * badge is hidden at 0, and −1 holds its place while the page loads. `bump` replays the 250ms rise when the count goes up while the page is open.
+ */
+export const FeedTab: React.FC<{ open: boolean; unseen: number; bump: boolean; onOpen: () => void }> = ({ open, unseen, bump, onOpen }) => (
+  <button type="button" className={`d59-ftab${bump ? " is-bump" : ""}`} data-d58="tab" aria-haspopup="dialog" aria-expanded={open} onClick={onOpen}
+    aria-label={unseen > 0 ? `Activity feed, ${unseen} new` : "Activity feed"}>
+    <span className="d59-ftabic" aria-hidden="true"><ListGlyph /></span>
+    <b>Activity feed</b>
+    {unseen !== 0 && <span className={`d59-badge${unseen < 0 ? " d58-sk" : ""}`} data-d58="tab-badge" aria-hidden="true">{unseen < 0 ? "0" : badgeText(unseen)}</span>}
+    <span className="d59-ftabup" aria-hidden="true">▲</span>
   </button>
 );
 

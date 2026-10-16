@@ -14,7 +14,8 @@
  */
 import { claimRightPanel, openQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../../types";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { localYMD } from "../../../lib/shellSidebar";
@@ -27,6 +28,7 @@ import { gettingStartedRows } from "../../../lib/dashEmpty";
 import { buildQcRows, rowsForTile } from "../../../lib/qcSummary";
 import { feedEntries } from "../../../lib/dashFeed";
 import { todayCount } from "../../../lib/dashFeedDrawer";
+import { readFeedSeen, unseenCount, writeFeedSeen } from "../../../lib/dashFeedSeen";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { queriesPathFor } from "../../../lib/queriesFilterParam";
@@ -183,6 +185,28 @@ export const Dash58: React.FC<Dash58Props> = ({
   );
   const today = todayCount(feed30, now);
   const [feedOpen, setFeedOpen] = useState(false);
+  /* v59: the tab's unseen badge — entries newer than this account last opened the drawer */
+  const feedUid = currentUser?.id ?? "";
+  const [feedSeenAt, setFeedSeenAt] = useState<number | null>(() => readFeedSeen(feedUid));
+  useEffect(() => { setFeedSeenAt(readFeedSeen(feedUid)); }, [feedUid]);
+  const unseen = loading ? 0 : unseenCount(feed30, feedSeenAt, now);
+  const lastUnseen = useRef<number | null>(null);
+  const [bump, setBump] = useState(false);
+  useEffect(() => {
+    if (loading) return undefined;
+    const prev = lastUnseen.current;
+    lastUnseen.current = unseen;
+    if (prev === null || unseen <= prev) return undefined;
+    setBump(true);
+    const t = window.setTimeout(() => setBump(false), 260);
+    return () => window.clearTimeout(t);
+  }, [unseen, loading]);
+  const openFeed = () => {
+    const at = Date.now();
+    writeFeedSeen(feedUid, at);
+    setFeedSeenAt(at);
+    setFeedOpen(true);
+  };
   /* Query panel v1 — one right-hand panel at a time: the feed says when it opens, and closes when a query does */
   useEffect(() => {
     if (!feedOpen) return undefined;
@@ -249,6 +273,11 @@ export const Dash58: React.FC<Dash58Props> = ({
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
      the window, so the floor below which the page scrolls is a 650px window's scrollport. */
   const rootRef = useRef<HTMLDivElement>(null);
+  /* v59: the page SHEET (`.ws-window`) — the folder tab and the hawk's shadow are placed in it, not in
+     the page, so neither moves with the page's content. `r` is the page's side gutter (the header
+     buttons' right edge, measured). */
+  const [sheet, setSheet] = useState<{ el: HTMLElement; r: number } | null>(null);
+  const onDash = useLocation().pathname === "/dashboard";
   useLayoutEffect(() => {
     const root = rootRef.current;
     const port = root?.closest(".ws-wbody") as HTMLElement | null;
@@ -264,9 +293,22 @@ export const Dash58: React.FC<Dash58Props> = ({
       set("--d58-chrome", window.innerHeight - h);
       /* the tab sits a stated distance inside the page SHEET's corner; the page's own box is inset
          from it by the scroller's gutter, so that inset is measured rather than assumed */
-      const win = root.closest(".ws-window")?.getBoundingClientRect();
+      const winEl = root.closest(".ws-window") as HTMLElement | null;
+      const win = winEl?.getBoundingClientRect();
       const box = root.getBoundingClientRect();
       if (win && box.width > 0) set("--d58-inset-r", Math.max(0, win.right - box.right));
+      /* v59: the folder tab sits on the SHEET's bottom edge, so the page's foot is measured from the
+         sheet: what lies between the page's content box and the sheet's bottom is subtracted from the
+         room the tab needs (34 + 22). */
+      if (win) {
+        const pr = port.getBoundingClientRect();
+        set("--d58-inset-b", Math.max(0, win.bottom - pr.bottom) + (parseFloat(cs.paddingBottom) || 0));
+        const btns = root.querySelector('[data-d58="buttons"]')?.getBoundingClientRect();
+        if (btns && btns.width > 0) setSheet((o) => {
+          const r = Math.round(win.right - btns.right);
+          return o && o.el === winEl && o.r === r ? o : { el: winEl!, r };
+        });
+      }
     };
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
     measure();
@@ -282,8 +324,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: today > 0 });
-  }, [loading, focus.item?.key, closed, today, shape.focusH]);
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0 });
+  }, [loading, focus.item?.key, closed, unseen, shape.focusH]);
 
   /* ── the skipped-rows line: read for this account, and read again whenever it changes ──
      This page stays mounted while the writer is on the Import page, so reading once showed the
@@ -369,10 +411,16 @@ export const Dash58: React.FC<Dash58Props> = ({
             />
           </div>
         </div>
-        <div className="d58-dock">
-          <FeedTab open={feedOpen} today={loading ? (shape.today ? -1 : 0) : today} onOpen={() => setFeedOpen(true)} />
-        </div>
+
       </DashPopupProvider>
+      {/* ⚠️ ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN: every page stays mounted, and a layer
+          portalled into the shell's sheet outlives its page otherwise. Never in the onboarding ghost. */}
+      {sheet && onDash && !rootRef.current?.closest(".im-ghost") && createPortal(
+        <div className="d58-layer d59-sheet" data-d58="sheet-layer" style={{ ["--d59-tab-r" as string]: `${sheet.r}px` } as React.CSSProperties}>
+          <FeedTab open={feedOpen} unseen={loading ? (shape.today ? -1 : 0) : unseen} bump={bump} onOpen={openFeed} />
+        </div>,
+        sheet.el,
+      )}
       {feedOpen && (
         <Dash58Feed
           title={title}

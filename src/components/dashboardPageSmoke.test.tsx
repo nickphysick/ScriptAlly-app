@@ -76,7 +76,10 @@ describe("/dashboard renders", () => {
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the
        landmark that replaces it, so this census still spans all three regions of the page. */
-    expect(html).toContain("Activity feed");    // the floating tab: the feed is a drawer now
+    /* ⚠️ RETARGETED (Dashboard v59): the feed's tab is portalled into the shell's page SHEET once the
+       page has measured it, so a static render cannot see it (`DB59 T1` holds it on the rendered
+       page). The right column's third landmark is the founding writer panel. */
+    expect(html).toContain("— FOUNDING WRITER —");
     /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
        rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
        shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy
