@@ -12,17 +12,15 @@
 /* ── §A · THE ARCHIVIST. As tall as the title block (eyebrow to buttons: `--cl182-ill-h`, written by one
    ResizeObserver from the TEXT's extent, see ContactLightHeader), its left edge 14px from the page sheet's, and the
    title block, byline and buttons 28px past its right edge. The pull into the margin is derived from the header's own
-   inset: the title row starts `--cl17-inset` into the header, and the header starts (sheet − header) ÷ 2 into the
+   inset: the title row starts `--phf-inset` (v138.5's shared frame) into the header, and the header starts (sheet − header) ÷ 2 into the
    sheet. ── */
-/* ⚠️ `--cl17-inset` holds a PERCENTAGE of the header's width, and a percentage in a custom property resolves where it
-   is READ: on the title block it would be a share of the grid area. The pull restates the same inset from the
-   header's own width (`--cl17-w`), which holds no percentage. */
-.cl17-hd { --cl182-inset: max(40px, calc((var(--cl17-w) - 900px) / 2)); }
-.ws-app.sheet-wide .cl17-hd { --cl182-inset: max(64px, calc((var(--cl17-w) - 1080px) / 2)); }
+/* The pull reads v138.5's shared frame inset (`--phf-inset`, shell/pageHeroFrame.css): it is in container units of
+   the header (`.phf` is the inline-size container), so it means the header's inset on the title row, the image and the
+   title block alike, with no restatement here. */
 .cl17-hd .cl17-tr {
   position: relative;
   --cl182-ill-w: calc(var(--cl182-ill-h, 0px) * 1.123);
-  --cl182-pull: calc(var(--cl182-inset) + (var(--hsheet-w) - var(--cl17-w)) / 2 - 14px);
+  --cl182-pull: calc(var(--phf-inset) + (var(--hsheet-w) - var(--cl17-w)) / 2 - 14px);
   /* the middle column may close to nothing: the title block grows by the archivist, the card does not move */
   grid-template-columns: max-content minmax(0, 1fr) auto;
 }
