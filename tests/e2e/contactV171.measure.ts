@@ -120,13 +120,15 @@ test("A4 · the title row is inset; the filter row and the list are not; no hawk
     L.check(`header present ${w}`, !!r.hd && !!r.tb && !!r.card, `hd ${!!r.hd} · title block ${!!r.tb} · card ${!!r.card}`);
     if (!r.hd || !r.tb || !r.card) continue;
     const ins = insetOf(r);
-    L.check(`title block's left = header's left + inset (±1) ${w}`, near(r.tb.l, r.hd.l + ins, 1), `${r.tb.l.toFixed(1)} vs ${(r.hd.l + ins).toFixed(1)} (inset ${ins.toFixed(1)}, ${r.wide ? "full" : "compact"})`);
+    /* RETIRED (v18.2 §A): the title block starts 28px past the archivist now, not at the row's inset (CL182 A1) */
+    void ins;
     L.check(`card's right = header's right − inset (±1) ${w}`, near(r.card.r, r.hd.r - ins, 1), `${r.card.r.toFixed(1)} vs ${(r.hd.r - ins).toFixed(1)}`);
     /* RETIRED (v18 §B): the filter row is gone from the page header */
     L.check(`no contact-disc-hawk image in the header ${w}`, r.hawk === 0, `${r.hawk}`);
-    L.check(`the shadow at opacity 0.15 (±0.01) ${w}`, near(r.shadow, 0.15, 0.01), `${r.shadow}`);
+    /* RE-POINTED (v18.2 §A): the shadow is at .1 over the List health card */
+    L.check(`the shadow at opacity 0.1 (±0.01) ${w}`, near(r.shadow, 0.1, 0.01), `${r.shadow}`);
   }
-  L.done(10);
+  L.done(8); /* v18.2: the title-left reading retired at both widths */
 });
 
 /* ───────────────────────── B3 · the card ───────────────────────── */

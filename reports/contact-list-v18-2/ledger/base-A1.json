@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "A1",
+  "where": "@1512 the archivist renders",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 no overlap with the letter strip",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 no overlap with the List health card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the title block clears the card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the archivist renders",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 no overlap with the letter strip",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 no overlap with the List health card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the title block clears the card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1024 the archivist is hidden",
+  "ok": true,
+  "detail": "true"
+ }
+]

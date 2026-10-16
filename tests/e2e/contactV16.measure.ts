@@ -47,7 +47,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the index card's margin line dropped */
   F3: { css: `.apn .apn-index::before { display: none !important; }` },
   /* the query opens in a second panel beside the agent's */
-  F4: { js: `(() => { if (window.__m16f4) return; window.__m16f4 = true; document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-ap="ledger-entry"]')) { const p = document.querySelector('[data-ap="panel"]'); if (p) { const c = p.cloneNode(true); c.setAttribute("data-mut", ""); c.removeAttribute("data-ap"); c.style.right = "580px"; document.body.appendChild(c); setTimeout(() => c.remove(), 1500); } } }, true); })()` },
+  F4: { js: `(() => { if (window.__m16f4) return; window.__m16f4 = true; document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-ap-h="open"]')) { const p = document.querySelector('[data-ap="panel"]'); if (p) { const c = p.cloneNode(true); c.setAttribute("data-mut", ""); c.removeAttribute("data-ap"); c.style.right = "580px"; document.body.appendChild(c); setTimeout(() => c.remove(), 1500); } } }, true); })()` },
   /* acting without a scrim */
   F5: { css: `.spanel-scrim { opacity: 0 !important; }` },
   /* the footer's primary is always "Edit profile" */
@@ -851,20 +851,22 @@ test.describe("Contact list v16", () => {
       if (!(await clickRow(page, '[data-stand="agent"], .aglist [data-clv="row"][data-stand="you"]').catch(() => false))) { L.check("F4", `${w} panel`, false, "no agent panel opened"); continue; }
       const id = (await readPanel(page)).id;
       await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(300);
+      /* RE-POINTED (v18.2 §B): the Queries tab is History; an entry that belongs to a query opens it, as the old
+         ledger's entries did. The ledger's own look (white card, court chip, "Open the query ›") is retired with it. */
       const q = await page.evaluate(() => {
         const p = document.querySelector('[data-ap="panel"]')!;
-        const e = [...p.querySelectorAll<HTMLElement>('[data-ap="ledger-entry"]')];
+        const e = [...p.querySelectorAll<HTMLElement>('[data-ap-h="open"]')];
         return {
           n: e.length, tab: (p.querySelector('[data-ap-tab="queries"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
           dates: [...p.querySelectorAll<HTMLElement>('[data-ap="ledger-date"]')].map((d) => (d.textContent ?? "").trim()),
-          first: e[0] ? { title: (e[0].querySelector(".apn-qt")?.textContent ?? "").trim(), titleFace: getComputedStyle(e[0].querySelector(".apn-qt")!).fontFamily, stage: (e[0].querySelector(".apn-qs")?.textContent ?? "").trim(), stageStyle: getComputedStyle(e[0].querySelector(".apn-qs")!).fontStyle, chip: (e[0].querySelector(".apn-qchip")?.textContent ?? "").trim(), open: (e[0].querySelector(".apn-qo")?.textContent ?? "").trim(), bg: getComputedStyle(e[0]).backgroundColor, radius: getComputedStyle(e[0]).borderTopLeftRadius, query: e[0].getAttribute("data-query") } : null,
+          first: e[0] ? { query: e[0].getAttribute("data-query") } : null,
           dots: p.querySelectorAll(".apn-ledger .qlg-g svg, .apn-ledger .qlg-g [data-status-dot], .apn-ledger .qlg-g > *").length, foot: !!p.querySelector('[data-ap="foot"]'),
         };
       });
-      L.check("F4", `${w} the Queries tab lists the agent's queries, and counts them`, q.n > 0 && /* RE-POINTED (v18.1 §B): the count is a chip now ("Queries 1"), not "· 1" */ q.tab.replace(/\s+/g, " ").replace(" · ", " ") === `Queries ${q.n}` && q.dates.length === q.n && q.dots >= q.n, `${q.n} entries · tab "${q.tab}" · ${q.dates.join(", ")}`);
-      L.check("F4", `${w} an entry is a white card: the book in the typewriter, the stage in italics, a court chip, "Open the query ›"`, !!q.first && q.first.bg === "rgb(255, 255, 255)" && q.first.radius === "12px" && /Special Elite/.test(q.first.titleFace) && q.first.stageStyle === "italic" && /^(With you|With the agent|Closed)$/.test(q.first.chip) && /^Open the query/.test(q.first.open) && q.first.title.length > 1, JSON.stringify(q.first));
+      L.check("F4", `${w} the History tab lists the agent's events, and those of a query open it`, q.n > 0 && q.tab === "History", `${q.n} openable entries · tab "${q.tab}"`);
+      void q.dates; void q.dots;
       /* open the query: the same box, the query panel's view, a way back, no Agent tab */
-      await page.locator(`${PANEL} [data-ap="ledger-entry"]`).first().click();
+      await page.locator(`${PANEL} [data-ap-h="open"]`).first().click();
       await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 }); await page.waitForTimeout(400);
       const v = await page.evaluate(() => {
         const vis = [...document.querySelectorAll<HTMLElement>("[data-side-panel]")].filter((e) => e.getBoundingClientRect().height > 0);
@@ -881,7 +883,7 @@ test.describe("Contact list v16", () => {
       const b = await readPanel(page);
       L.check("F4", `${w} Back returns to the agent, on the Queries tab`, b.panels === 1 && b.id === id && b.tab === "queries", `${b.panels} panels · ${b.id} · tab ${b.tab}`);
       /* Escape in the query view steps back too */
-      await page.locator(`${PANEL} [data-ap="ledger-entry"]`).first().click();
+      await page.locator(`${PANEL} [data-ap-h="open"]`).first().click();
       await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 }); await page.waitForTimeout(300);
       await page.keyboard.press("Escape"); await page.waitForTimeout(400);
       const esc = await readPanel(page);
@@ -894,14 +896,15 @@ test.describe("Contact list v16", () => {
       for (let i = 0; i < (await noneRows.count()) && !bare; i++) {
         await noneRows.nth(i).scrollIntoViewIfNeeded(); await noneRows.nth(i).click({ position: { x: 150, y: 28 } });
         await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(250);
-        const t = ((await page.locator(`${PANEL} [data-ap-tab="queries"]`).textContent()) ?? "").replace(/\s+/g, " ").trim();
+        /* RE-POINTED (v18.2 §B): History has no count chip; an agent with no query shows History's empty line */
+        await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(250);
+        const t = ((await page.locator(`${PANEL} [data-ap-h="summary"]`).textContent().catch(() => null)) ?? "").trim();
         tabText.push(t);
-        bare = t === "Queries";
+        bare = /^Nothing sent to /.test(t);
       }
-      L.check("F4", `${w} an agent with no query for any book is on the account`, bare, `tabs read: ${[...new Set(tabText)].join(" | ")}`);
-      await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(250);
-      const none = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap="queries-none"]')?.textContent ?? "").trim());
-      L.check("F4", `${w} no queries: one sentence`, /^You haven’t queried .+ yet\.$/.test(none), `"${none}"`);
+      L.check("F4", `${w} an agent with no query for any book is on the account`, bare, `summaries read: ${[...new Set(tabText)].join(" | ")}`);
+      const none = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap-h="empty"]')?.textContent ?? "").trim());
+      L.check("F4", `${w} no queries: one sentence`, /^When you query .+, every letter, request and reply lands here\.$/.test(none), `"${none}"`);
       /* Notes: the composer replaces the footer; a note is added, edited and deleted (the account is left as found) */
       await page.locator(`${PANEL} [data-ap-tab="notes"]`).click(); await page.waitForTimeout(400);
       /* ⚠️ THE ACCOUNT IS LEFT AS FOUND, AND A NOTE AN EARLIER RUN LEFT IS REMOVED FIRST. The confirmation's button is

@@ -286,7 +286,7 @@ export const SLIP_KIND: Record<StandState, SlipKind> = {
   send: "you", offer: "you", late: "you", waiting: "waiting", closed: "closed", fit: "notq", none: "notq", shut: "shut",
 };
 export const SLIP_LABEL: Record<SlipKind, string> = { you: "Your move", waiting: "Waiting", closed: "Closed", notq: "Not queried", shut: "Closed to queries" };
-/** the band's status, for the landing card's colours (rust · ink · slate · grey) */
+/** the band's `data-kind` (v18.2: never its colour, which is always the list header's slate) */
 export const SLIP_BAND: Record<SlipKind, "you" | "querying" | "none" | "closed"> = { you: "you", waiting: "querying", notq: "none", closed: "closed", shut: "closed" };
 
 export interface PanelSlip {

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D6",
+  "where": "materials: no stored 'not stated' value, so no link",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "D6",
+  "where": "genres: no stored 'not stated' value, so no link",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "D6",
+  "where": "wishlist: no stored 'not stated' value, so no link",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "D6",
+  "where": "reply: the link shows",
+  "ok": true,
+  "detail": "present"
+ },
+ {
+  "lock": "D6",
+  "where": "reply: it wrote the settled value through the save path",
+  "ok": true,
+  "detail": "clv181-bare:reply"
+ },
+ {
+  "lock": "D6",
+  "where": "…and the gap closed",
+  "ok": true,
+  "detail": "50"
+ }
+]

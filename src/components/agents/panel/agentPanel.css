@@ -141,6 +141,12 @@
 .apn .apn-slip[data-kind="you"] { background: #fbeee8; }
 .apn .apn-slip[data-kind="waiting"] { background: #eef1f6; }
 .apn .apn-slip[data-kind="closed"] { background: #f1efec; }
+/* v18.2 §B — THE SLIP CARRIES THE STATE (the band no longer does): waiting is navy with cream type; your move stays
+   blush; closed and closed to queries are grey; not queried (and open) has no fill and no shadow, only a dotted navy
+   edge. Declared here, after v18.1's tints, at the same specificity. */
+.apn .apn-slip[data-kind="waiting"] { background: #2d3a50; color: #f4eee5; }
+.apn .apn-slip[data-kind="closed"], .apn .apn-slip[data-kind="shut"] { background: #e9e5e0; }
+.apn .apn-slip[data-kind="notq"] { background: transparent; box-shadow: none; border: 1.5px dotted rgba(45, 58, 80, 0.6); }
 .apn .apn-slip .apn-sliptop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .apn .apn-slip .apn-sliplab { font: 500 10px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
 .apn .apn-slip .apn-slipfig { white-space: nowrap; font: 400 13px/1.3 var(--sp-type) !important; color: rgba(28, 19, 15, 0.6); }
@@ -161,6 +167,17 @@
 }
 .apn .apn-slip[data-kind="you"] .apn-slipgo { background: #a2452a; }
 .apn .apn-slip .apn-slipgo:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* v18.2 §B · waiting: the label at cream 70%, the figure at 80%, the headline cream, the text at 86%; the bar a cream
+   fill on a cream 20% track with its labels at 60%; the button cream with ink type */
+.apn .apn-slip[data-kind="waiting"] .apn-sliplab { color: rgba(244, 238, 229, 0.7); }
+.apn .apn-slip[data-kind="waiting"] .apn-slipfig { color: rgba(244, 238, 229, 0.8); }
+.apn .apn-slip[data-kind="waiting"] .apn-sliph { color: #f4eee5; }
+.apn .apn-slip[data-kind="waiting"] .apn-slipt { color: rgba(244, 238, 229, 0.86); }
+.apn .apn-slip[data-kind="waiting"] .apn-sliptrack { background: rgba(244, 238, 229, 0.2); }
+.apn .apn-slip[data-kind="waiting"] .apn-sliptrack i, .apn .apn-slip[data-kind="waiting"] .apn-slipbar[data-hot] .apn-sliptrack i { background: #f4eee5; }
+.apn .apn-slip[data-kind="waiting"] .apn-sliplabs { color: rgba(244, 238, 229, 0.6); }
+.apn .apn-slip[data-kind="waiting"] .apn-slipgo { background: #f4eee5; color: #1c130f; }
+.apn .apn-slip[data-kind="waiting"] .apn-slipgo:focus-visible { outline-color: #f4eee5; }
 /* Profile · 2 · the sections */
 .apn .apn-sec { padding: 12px 0 11px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
 .apn .apn-sec:last-child { border-bottom: 0; }
@@ -190,3 +207,49 @@
 /* Queries keeps v16's footer, inside the frame on white */
 .qsp.apn .apn-oldfoot { flex: none; position: relative; }
 .qsp.apn .apn-oldfoot .qcv-open-ft, .qsp.apn .apn-oldfoot .qcv-open-doors { background: #fff; }
+
+/* ── v18.2 §B · HISTORY: the agent's whole correspondence, newest first. A 1px rule behind the glyphs 67px in, month
+   dividers at the content column (92px in), and entries in three columns (date · glyph · body). The body's look says
+   who did it: the agent (#f4f0eb, a rust "{first} → You"), the writer to the agent (white with an ink ring, "You →
+   {first}"), or the writer's own record (no fill, no label). Every face is stated with two classes and !important
+   (brand.tsx names spans and bold at runtime). ── */
+.apn .hzz { padding-top: 2px; }
+.apn .hzz .hzz-sum { margin: 0 0 6px; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.apn .hzz .hzz-l { position: relative; margin: 0; padding: 0; list-style: none; isolation: isolate; }
+.apn .hzz .hzz-l::before { content: ""; position: absolute; left: 67px; top: 18px; bottom: 18px; width: 1px; background: rgba(28, 19, 15, 0.14); z-index: -2; }
+.apn .hzz .hzz-m { position: relative; padding: 18px 0 8px 92px; }
+.apn .hzz .hzz-m span { position: relative; z-index: 1; padding-right: 10px; background: #fff; font: 400 15px/1.3 var(--sp-type) !important; color: #1c130f; }
+.apn .hzz .hzz-m::after { content: ""; position: absolute; left: 92px; right: 0; top: 29px; height: 1px; background: rgba(28, 19, 15, 0.1); }
+.apn .hzz .hzz-e { display: grid; grid-template-columns: 52px 32px 1fr; column-gap: 8px; align-items: start; padding: 6px 0; }
+.apn .hzz .hzz-d { padding-top: 9px; text-align: right; line-height: 1; }
+.apn .hzz .hzz-d b { display: block; font: 400 22px/1 var(--sp-type) !important; color: #1c130f; }
+.apn .hzz .hzz-d small { display: block; margin-top: 3px; font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.apn .hzz .hzz-g { position: relative; z-index: 1; display: grid; place-items: center; width: 30px; height: 30px; margin-top: 9px; border-radius: 50%; background: #fff; color: #2d3a50; }
+.apn .hzz .hzz-c { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 10px 14px 11px; border-radius: 10px; }
+.apn .hzz .hzz-e[data-dir="in"] .hzz-c { background: #f4f0eb; }
+.apn .hzz .hzz-e[data-dir="out"] .hzz-c { background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+.apn .hzz .hzz-e[data-dir="you"] .hzz-c { padding-top: 8px; padding-bottom: 8px; }
+.apn .hzz .hzz-dir { font: 500 9.5px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.apn .hzz .hzz-e[data-dir="in"] .hzz-dir { color: #a2452a; }
+.apn .hzz .hzz-t { font: 500 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.apn .hzz .hzz-e[data-dir="you"] .hzz-t { font-size: 14.5px !important; color: rgba(28, 19, 15, 0.75); }
+.apn .hzz .hzz-e[data-dir="you"] .hzz-g { color: rgba(28, 19, 15, 0.45); }
+.apn .hzz .hzz-s { font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); }
+.apn .hzz .hzz-ch { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.apn .hzz .hzz-ch i { padding: 4px 8px; border-radius: 6px; background: #f4f0eb; color: #1c130f; font: normal 500 11px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.03em; }
+.apn .hzz .hzz-e[data-dir="in"] .hzz-ch i { background: #fff; }
+.apn .hzz .hzz-bk { margin-top: 5px; font: 400 12.5px/1.3 var(--sp-type) !important; color: rgba(28, 19, 15, 0.55); }
+.apn .hzz .hzz-bk i { font: italic 400 12.5px/1.3 var(--sp-serif) !important; }
+/* Next: dashed and unfilled; rust while it is the writer's move */
+.apn .hzz .hzz-next .hzz-d b { padding-top: 3px; font: 500 10px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase; color: #2d3a50; }
+.apn .hzz .hzz-next .hzz-c { background: transparent; border: 1.5px dashed rgba(45, 58, 80, 0.45); }
+.apn .hzz .hzz-next .hzz-g { color: #2d3a50; }
+.apn .hzz .hzz-next[data-r="you"] .hzz-c { border-color: rgba(162, 69, 42, 0.55); }
+.apn .hzz .hzz-next[data-r="you"] .hzz-d b, .apn .hzz .hzz-next[data-r="you"] .hzz-g, .apn .hzz .hzz-next[data-r="you"] .hzz-s { color: #a2452a; }
+.apn .hzz .hzz-empty { margin: 18px 0 0 92px; font: italic 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+/* an entry that belongs to a query opens it: the body is a button, reset to the card it draws */
+.apn .hzz button.hzz-open { box-sizing: border-box; width: 100%; margin: 0; border: 0; text-align: left; color: inherit; cursor: pointer; font: inherit; }
+.apn .hzz .hzz-e[data-dir="you"] button.hzz-open { background: none; }
+.apn .hzz button.hzz-open:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); }
+.apn .hzz .hzz-e[data-dir="out"] button.hzz-open:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
+.apn .hzz button.hzz-open:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }

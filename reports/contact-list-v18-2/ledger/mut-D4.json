@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "D4",
+  "where": "400ms after Save, exactly one '+n' in the top layer",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "D4",
+  "where": "it starts inside the Save button's box",
+  "ok": true,
+  "detail": "[1397.3671875,565.1875]"
+ },
+ {
+  "lock": "D4",
+  "where": "it ends within 8px of the ring's centre",
+  "ok": false,
+  "detail": "[1397.3631591796875,565.187744140625]"
+ },
+ {
+  "lock": "D4",
+  "where": "under reduced motion nothing is visible",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "each ledger follows the comparator (5 ledgers, 34 same-points-same-queried neighbours)",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "the fixture has ties to order",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "D1",
+  "where": "the whole queue's first is the first ledger's first (most points)",
+  "ok": false,
+  "detail": "seed-cal-bang:wishlist vs clv-fx-stub0:reply"
+ },
+ {
+  "lock": "D1",
+  "where": "Up next's question is the first card's",
+  "ok": true,
+  "detail": "What is Alasdair hoping to find?"
+ },
+ {
+  "lock": "D1",
+  "where": "Coming up follows the same order",
+  "ok": false,
+  "detail": "seed-agent-9:wishlist,seed-agent-nowin-1:wishlist,seed-cal-passed20:wishlist,seed-agent-8:wishlist,thin-ag-gap:materials"
+ },
+ {
+  "lock": "D1",
+  "where": "each By agent group orders its agents by their first task under the comparator (2 groups)",
+  "ok": false,
+  "detail": "false"
+ }
+]

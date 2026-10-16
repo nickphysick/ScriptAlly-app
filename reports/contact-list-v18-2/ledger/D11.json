@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "D11",
+  "where": "in Focus",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "D11",
+  "where": "it lands on home",
+  "ok": true,
+  "detail": "{\"home\":true,\"focus\":false,\"inView\":true}"
+ },
+ {
+  "lock": "D11",
+  "where": "Up next is in view",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D11",
+  "where": "one flash",
+  "ok": true,
+  "detail": "1"
+ }
+]

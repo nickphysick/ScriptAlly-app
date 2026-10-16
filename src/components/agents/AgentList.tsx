@@ -94,7 +94,7 @@ import { countryName } from "../../lib/territory";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-import { SHORTCUTS, isEditableTarget, matchesShortcut, shortcutLabel } from "../../lib/shortcuts";
+import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { AppFooter } from "../shell/AppFooter";
 import { PageGuide } from "../shell/PageGuide";
 import { useAgentsHold } from "../../lib/contactLoadHold";
@@ -342,8 +342,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      loading skeleton draws the same nodes, so the header holds its height while the page settles. */
   const listTools = (loading: boolean) => (
     <span className="cl18-lt" data-cl18="tools">
-      <ContactFind find={search} onFind={setSearch} disabled={loading}
-        findKey={<kbd className="cl13-kbd" data-cl13="find-key" aria-hidden="true">{shortcutLabel("contactsFind")}</kbd>} />
+      {/* v18.2 §C — no "/" keycap in the search: the / key still finds */}
+      <ContactFind find={search} onFind={setSearch} disabled={loading} />
       <ContactFiltersButton filters={filters} pop={pop} disabled={loading} />
       <span className="cl18-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
         {(["comfortable", "compact"] as const).map((d) => (
@@ -356,7 +356,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         ))}
       </span>
       <button type="button" className="cl16-fsb cl18-fsb" data-cl16="full" aria-pressed={full} disabled={loading}
-        aria-label={full ? "Exit full screen" : "Full screen"} title={`${full ? "Exit full screen" : "Full-screen list"} (${shortcutLabel("contactsFull")})`}
+        aria-label={full ? "Exit full screen" : "Full screen"} title={full ? "Exit full screen" : "Full-screen list"}
         onClick={() => setFull(!full)}>
         <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
           {full ? <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" /> : <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />}
@@ -958,6 +958,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const panelFacts = useMemo(() => (panelAgent ? agentFacts(panelAgent, qcRows, scoped?.id ?? null) : null), [panelAgent, qcRows, scoped]);
   const panelQ = useMemo(() => (panelAgent ? cardQuery(cardRows(qcRows, panelAgent.id, scoped?.id ?? null)) : null), [panelAgent, qcRows, scoped]);
   const panelRows = useMemo(() => (panelAgent ? qcRows.filter((r) => r.query.agentId === panelAgent.id) : []), [panelAgent, qcRows]);
+  /* v18.2 §B — the same queries as documents, for the History tab */
+  const panelQueries = useMemo(() => (panelAgent ? queries.filter((q) => q.agentId === panelAgent.id) : []), [panelAgent, queries]);
   const panelGenres = useMemo(
     () => (panelAgent?.genres ?? []).map((g) => ({ label: genreLabel(g, personalGenres), hit: bookHit(g) })),
     [panelAgent, personalGenres, bookHit],
@@ -1095,7 +1097,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             tabShown={hkTabShown} onDismissTab={dismissTab} tabNote={tabNote ? { onUndo: undoDismiss } : null}
             health={listH} introSeen={hkIntroSeen} onIntroSeen={markIntroSeen}
             open={hkOpen} onOpen={openHk} onClose={() => { setHkOpen(false); setHkRun(null); }} runAgent={hkRun}
-            view={hkView} onView={setHkView} routeActive={active} keyHint={shortcutLabel("contactsHk")}
+            view={hkView} onView={setHkView} routeActive={active}
             onFix={onHkFix}
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
             onShowAll={async () => { await updateUserPaths(showAllPath()); }}
@@ -1112,7 +1114,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             agent's queries has the box */}
         {showList && active && panelAgent && panelFacts && !queryHasBox && (
           <AgentPanel
-            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
+            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows}
+            queries={panelQueries} activities={activities} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
             genres={panelGenres} nowMs={nowMs} uid={currentUser?.id ?? null} writeAgent={writePanelAgent}
             tab={panelTab} onTab={setPanelTab}
             editing={cardReq?.host === "panel" && cardReq.agentId === panelAgent.id}

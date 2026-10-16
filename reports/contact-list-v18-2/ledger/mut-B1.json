@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "B1",
+  "where": "a you agent is on the account",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "B1",
+  "where": "you: the band is rgb(62, 81, 112)",
+  "ok": false,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "B1",
+  "where": "a waiting agent is on the account",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "B1",
+  "where": "waiting: the band is rgb(62, 81, 112)",
+  "ok": false,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "a notq agent is on the account",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "B1",
+  "where": "notq: the band is rgb(62, 81, 112)",
+  "ok": false,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "B1",
+  "where": "a closed agent is on the account",
+  "ok": true,
+  "detail": "msv12-agent-6"
+ },
+ {
+  "lock": "B1",
+  "where": "closed: the band is rgb(62, 81, 112)",
+  "ok": false,
+  "detail": "rgb(169, 163, 156)"
+ },
+ {
+  "lock": "B1",
+  "where": "a shut agent is on the account",
+  "ok": true,
+  "detail": "seed-agent-1"
+ },
+ {
+  "lock": "B1",
+  "where": "shut: the band is rgb(62, 81, 112)",
+  "ok": false,
+  "detail": "rgb(169, 163, 156)"
+ },
+ {
+  "lock": "B1",
+  "where": "the intro's framed card's band is rgb(62, 81, 112)",
+  "ok": false,
+  "detail": "rgb(94, 113, 137)"
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D9",
+  "where": "no tally before the first save",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "D9",
+  "where": "after a save the tally shows",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D9",
+  "where": "closing reset the tally",
+  "ok": true,
+  "detail": "1 before close"
+ },
+ {
+  "lock": "D9",
+  "where": "after saves of 6 and 5: '+11 this session · 2 filled'",
+  "ok": true,
+  "detail": "+11 this session · 2 filled"
+ },
+ {
+  "lock": "D9",
+  "where": "it resets when the drawer closes",
+  "ok": true,
+  "detail": "none"
+ }
+]

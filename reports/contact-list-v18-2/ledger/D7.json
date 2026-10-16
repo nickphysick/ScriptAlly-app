@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D7",
+  "where": "no website stored: no link",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "D7",
+  "where": "an agent with a stored website has a gap",
+  "ok": true,
+  "detail": "clv181-bare:wishlist"
+ },
+ {
+  "lock": "D7",
+  "where": "the link is present",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D7",
+  "where": "target=_blank",
+  "ok": true,
+  "detail": "_blank"
+ },
+ {
+  "lock": "D7",
+  "where": "rel contains noopener",
+  "ok": true,
+  "detail": "noopener noreferrer"
+ }
+]

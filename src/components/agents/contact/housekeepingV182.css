@@ -1,0 +1,140 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18.2 §C and §D — Housekeeping's frame and journey. Imported after housekeepingV18.css; the header's
+ * rules here replace v18's at the same or higher specificity. The drawer is portalled to the body, so ≤1440 is a media
+ * query on the window (the mock's own), and nothing reads a page-scoped token.
+ */
+
+/* ── §C · THE HEADER, layout B: ink, the ring spanning every row on the left, a title row, three tile buttons and a
+   6px bar. It sits above the drawer's body (z 5) so the points key, inside it, can hang over the body (z 40). ── */
+.hk8-head.hk82 {
+  position: relative; z-index: 5;
+  grid-template-columns: auto minmax(0, 1fr) auto auto; column-gap: 20px; row-gap: 12px; align-items: center;
+  padding: 18px 20px 18px 22px; background: #2a3a52;
+}
+.hk82 .hk8-ring, :root:has(.ws-app.sheet-wide) .hk82 .hk8-ring {
+  grid-column: 1; grid-row: 1 / span 3; align-self: center; width: 110px; height: 110px; min-width: 110px;
+}
+:root:has(.ws-app.sheet-wide) .hk82 .hk8-ring { width: 118px; height: 118px; min-width: 118px; }
+/* ⚠️ A STATED SQUARE, NOT `aspect-ratio` ON A STRETCHED ITEM: in a grid the column is sized before the rows, so a width
+   taken from the stretched height grows the column to whatever the ring's own content asks (it measured ~340). 118
+   (110 compact) is at least the three rows' natural height, so the rows grow to the ring and it spans them. Compact is
+   110 because the compact drawer is 560 wide: with 118 the third tile's label ran past its edge. */
+.hk82 .hk8-ring .hk8-ring-h img { width: 68%; }
+.hk82 .hk82-tr { grid-column: 2; grid-row: 1; display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.hk82 .hk82-tr .hk8-n, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tr .hk8-n { display: inline-block; margin: 0; font: 400 40px/1 var(--sp-type) !important; color: #f4eee5; font-variant-numeric: tabular-nums; }
+.hk82 .hk82-tr .hk8-n i { font: 400 20px/1 var(--sp-type) !important; font-style: normal !important; position: relative; top: -14px; margin-left: 2px; }
+.hk82 .hk82-tr .hk82-lh { font: 400 18px/1.2 var(--sp-type) !important; color: #f4eee5; white-space: nowrap; }
+.hk82 .hk8-how { grid-column: 3; grid-row: 1; justify-self: end; align-self: center; margin: 0; white-space: nowrap; }
+.hk82 .hk8-x { grid-column: 4; grid-row: 1; align-self: center; width: 32px; height: 32px; }
+.hk82 .hk82-tiles { grid-column: 2 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.hk82 .hk82-tile {
+  display: flex; align-items: baseline; gap: 5px; box-sizing: border-box; min-width: 0; margin: 0; padding: 9px 10px; border: 0; border-radius: 10px;
+  background: rgba(244, 238, 229, 0.09); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.12); color: #f4eee5; cursor: pointer; text-align: left;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+.hk82 .hk82-tile:hover { background: rgba(244, 238, 229, 0.18); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.28); }
+.hk82 .hk82-tile:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+/* compact first (the drawer is 560 wide): 20 / 12.5 with 10px sides; full: 22 / 13.5 with 14px; and at or below 1440 of
+   window always the smaller set (the mock's own step) */
+.hk82 .hk82-tile b { font: 400 20px/1 var(--sp-type) !important; color: #f4eee5; white-space: nowrap; }
+/* the label never truncates: no ellipsis, no clip */
+.hk82 .hk82-tile small { font: 400 12.5px/1.2 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75); white-space: nowrap; }
+:root:has(.ws-app.sheet-wide) .hk82 .hk82-tile { padding: 9px 14px; gap: 7px; }
+:root:has(.ws-app.sheet-wide) .hk82 .hk82-tile b { font-size: 22px !important; }
+:root:has(.ws-app.sheet-wide) .hk82 .hk82-tile small { font-size: 13.5px !important; }
+@media (max-width: 1440px) {
+  :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile { padding: 9px 10px; gap: 5px; }
+  :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile b { font-size: 20px !important; }
+  :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile small { font-size: 12.5px !important; }
+}
+.hk82 .hk82-bar { grid-column: 2 / -1; grid-row: 3; display: block; height: 6px; border-radius: 3px; background: rgba(217, 115, 79, 0.55); overflow: hidden; }
+.hk82 .hk82-bar i { display: block; height: 100%; border-radius: 3px; background: #f4eee5; transition: width 0.6s cubic-bezier(.22, .8, .3, 1); }
+/* §D.9 · the session's tally, under the bar */
+.hk82 .hk82-tally { grid-column: 2 / -1; grid-row: 4; margin: -4px 0 0; font: 400 13.5px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.78); }
+.hk82 .hk82-tally b { font: 400 13.5px/1.3 var(--sp-type) !important; color: #9fd3ad; }
+@media (prefers-reduced-motion: reduce) { .hk82 .hk82-bar i, .hk82 .hk82-tile { transition: none; } }
+
+/* the intro: the header steps down to its title row, a 64px ring, 14px top and bottom */
+.hk8-head.hk82[data-introing] { row-gap: 0; padding-top: 14px; padding-bottom: 14px; }
+.hk82[data-introing] .hk8-ring, :root:has(.ws-app.sheet-wide) .hk82[data-introing] .hk8-ring { grid-row: 1; align-self: center; width: 64px; height: 64px; min-width: 0; }
+
+/* ── §C · "HOW POINTS WORK": a popover under its link, 340 wide, 20px from the header's right, 58px from its top, with
+   a caret under the link. Above everything in the drawer. ── */
+.hk82 .hk82-key {
+  position: absolute; z-index: 40; top: 58px; right: 20px; left: auto; width: 340px; max-width: calc(100% - 40px); margin: 0;
+}
+.hk82 .hk82-key::before {
+  content: ""; position: absolute; top: -6px; right: 60px; width: 12px; height: 12px; background: #fff; transform: rotate(45deg);
+  box-shadow: -1px -1px 0 rgba(28, 19, 15, 0.1);
+}
+
+/* ── §C · THE INTRO: two set lines, left-aligned with the columns; the actions row pinned to the drawer's foot ── */
+.hk82-intro .hk82-ih, :root:has(.ws-app.sheet-wide) .hk82-intro .hk82-ih { margin: 0 0 22px; font: 400 28px/1.22 var(--sp-type) !important; text-align: left; }
+.hk82-intro .hk82-ihl { display: block; white-space: nowrap; font: inherit !important; }
+.hk82-intro .hk82-ihl em { font: inherit !important; font-style: normal !important; color: #a2452a; }
+@media (max-width: 1440px) { .hk82-intro .hk82-ih, :root:has(.ws-app.sheet-wide) .hk82-intro .hk82-ih { margin-bottom: 16px; font-size: 24px !important; } }
+.hk82-intro .hk82-iacts {
+  position: sticky; bottom: 0; z-index: 4; margin: 22px -26px -28px; padding: 38px 26px 18px;
+  background: linear-gradient(rgba(251, 250, 248, 0), #fbfaf8 22px);
+}
+.hk82-intro .hk82-iacts::before { content: ""; position: absolute; left: 0; right: 0; top: 22px; height: 1px; background: rgba(28, 19, 15, 0.08); }
+
+/* ── §C · "3 WAYS TO FILL THE GAPS": alone in home, vertically centred under the header ── */
+.hk8-home.hk82-choosing { display: flex; flex-direction: column; justify-content: center; min-height: calc(100% - 20px); }
+.hk8-db:has(> .hk82-choosing) { display: flex; flex-direction: column; min-height: 100%; box-sizing: border-box; }
+.hk8-db:has(> .hk82-choosing) > .hk82-choosing { flex: 1 1 auto; }
+.hk82-ways { padding: 26px 24px 18px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1.5px #2d3a50, 0 18px 30px -24px rgba(28, 19, 15, 0.5); }
+.hk82-ways .hk82-wh { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
+.hk82-ways .hk82-wh b { font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
+.hk82-ways .hk82-wh small { font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.hk82-ways .hk82-w {
+  display: grid; grid-template-columns: 46px 1fr auto; gap: 12px; align-items: center; box-sizing: border-box; width: 100%; margin: 0;
+  padding: 16px 10px; border: 0; border-top: 1px solid rgba(28, 19, 15, 0.08); border-radius: 8px; background: none; cursor: pointer; text-align: left; color: #1c130f;
+}
+.hk82-ways .hk82-w:first-of-type { border-top: 0; }
+.hk82-ways .hk82-w:hover { background: #f6f3ee; }
+.hk82-ways .hk82-wi { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #eef1f6; color: #2d3a50; }
+.hk82-ways .hk82-w[data-w="run"] .hk82-wi { background: #2d3a50; color: #f4eee5; }
+.hk82-ways .hk82-wt { display: flex; flex-direction: column; min-width: 0; }
+.hk82-ways .hk82-wt b { font: 500 15.5px/1.3 var(--sp-serif) !important; }
+.hk82-ways .hk82-wt small { margin-top: 2px; font: 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.hk82-ways .hk82-wa { font: normal 400 13.5px/1.2 var(--sp-type) !important; color: #2d3a50; white-space: nowrap; }
+.hk82-ways .hk82-w[data-w="run"] .hk82-wa { color: #a2452a; }
+.hk82-ways .hk82-wx {
+  display: block; margin: 14px auto 0; padding: 0; border: 0; background: none; cursor: pointer; color: rgba(28, 19, 15, 0.6);
+  font: 400 14px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px;
+}
+.hk82-ways .hk82-wx:hover { color: #1c130f; }
+.hk82-ways button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── §D.4 · THE "+n" FLIGHT: fixed, in the top layer (a portal at the end of the body), placed by its own transform
+   (the drawer's script sets it from the Save button's centre to the ring's). Invisible until its animation starts. ── */
+.hk82-fly {
+  position: fixed; left: 0; top: 0; z-index: 2147483000; opacity: 0; pointer-events: none; white-space: nowrap;
+  padding: 2px 10px; border-radius: 14px; background: #e3f1e6; color: #3f7a54; box-shadow: 0 6px 16px -8px rgba(28, 19, 15, 0.4);
+  font: 400 26px/1.2 var(--sp-type) !important;
+}
+
+/* ── §D.5 · UNDO IN THE FOOTER for 7s after a save: ink, cream type, "Undo" underlined on the right ── */
+.hk8-foot.hk82-foot--undo { background: #2a3a52; border-top-color: transparent; }
+.hk8-foot.hk82-foot--undo span { font: normal 400 14px/1.4 var(--sp-serif) !important; color: #f4eee5; }
+.hk8-foot.hk82-foot--undo .hk82-undo { color: #f4eee5; font: 500 14px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
+.hk8-foot.hk82-foot--undo .hk82-undo:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+
+/* ── §D.7 · the agent's website, under the why line, 12px above the field ── */
+.hk8-card .hk82-web {
+  display: flex; width: fit-content; gap: 4px; margin: 2px 0 12px; color: #2d3a50; cursor: pointer;
+  font: 400 14px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px;
+}
+.hk8-card .hk82-web:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── §D.8 · "Pick a date…": a chip of the chips' size with a dashed edge, then a native date input ── */
+/* the chips draw their edge as an inset shadow, so the dashed edge is a real border of the same 1px, the shadow off */
+.hk8-chips .hk82-pick { box-shadow: none; border: 1px dashed rgba(28, 19, 15, 0.4); }
+.hk8-chips .hk82-date {
+  box-sizing: border-box; height: 38px; padding: 0 12px; border: 1.2px solid #2d3a50; border-radius: 19px; background: #fff; color: #1c130f;
+  font: 400 15px/1 var(--sp-serif) !important;
+}
