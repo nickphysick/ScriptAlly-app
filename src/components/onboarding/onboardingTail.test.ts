@@ -77,19 +77,20 @@ describe("the legacy agents and completion screens are gone", () => {
   });
 });
 
-describe("both branch exits finish onto the agent list", () => {
+/* ⚠️ THE LAW (Dashboard v60): manual set-up exits land on the dashboard; the dashboard's doors are the
+   next step. It was "both branch exits finish onto the agent list" (the hatch to "agents"); the
+   dashboard is the ABSENCE of a hatch, so the claim is now that neither exit writes one. */
+describe("both manual exits finish on the dashboard", () => {
   /** The hand-off mechanism App.tsx reads and clears on completion. */
-  const HATCH = 'sessionStorage.setItem("scriptally_post_onboarding_tab", "agents")';
+  const HATCH = 'sessionStorage.setItem("scriptally_post_onboarding_tab"';
 
-  /* Re-pointed (onboarding v9): "Just getting started" saves from the Your-book page now. It still
-     ends on the Contact list. */
-  it("Just getting started finishes onto the agent list from the Your-book page", () => {
+  it("Just getting started finishes on the dashboard from the Your-book page", () => {
     const anchor = "if (await saveBranchManuscript(f, aStart.status)) {";
     expect(ONBOARDING).toContain(anchor);
     const from = ONBOARDING.slice(ONBOARDING.indexOf(anchor));
     const body = from.slice(0, from.indexOf("\n            }}"));
-    expect(body).toContain(HATCH);
     expect(body).toContain("finishOnboarding");
+    expect(body).not.toContain(HATCH);
     expect(body).not.toContain("goTo(5)");
   });
 
@@ -98,7 +99,8 @@ describe("both branch exits finish onto the agent list", () => {
     expect(ONBOARDING).toContain(anchor);
     const from = ONBOARDING.slice(ONBOARDING.indexOf(anchor));
     const body = from.slice(0, from.indexOf("}}"));
-    expect(body).toContain(HATCH);
+    expect(body).toContain("finishOnboarding");
+    expect(body).not.toContain(HATCH);
     expect(body).not.toContain("goTo(5)");
   });
 
