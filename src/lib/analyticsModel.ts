@@ -378,6 +378,8 @@ export interface AnalyticsModel {
   caveats: { lead: string; notes: { title: string; text: string }[] };
   /** Every figure and sentence the v17 page states (design-refs/analytics-v17.html). */
   v17: V17;
+  /** Analytics v21 — every query in range with its dated stages: what `lib/analyticsV21` derives from. */
+  items: Enriched[];
 }
 
 /**
@@ -697,6 +699,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
 
   return {
     v17,
+    items,
     range,
     sent,
     total: allRows.length,
