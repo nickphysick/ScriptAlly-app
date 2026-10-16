@@ -47,3 +47,14 @@ test("populated", async ({ page }) => {
     await page.screenshot({ path: `${DIR}/top-${w}.png` });
   }
 });
+
+/** AN24_PEEK="<selector>|<width>|<name>": one screenshot scrolled to a selector, for checking a part while building. */
+test("peek", async ({ page }) => {
+  test.skip(!process.env.AN24_PEEK, "AN24_PEEK to take one");
+  test.setTimeout(200_000);
+  mkdirSync(DIR, { recursive: true });
+  const [sel, w, name] = (process.env.AN24_PEEK as string).split("|");
+  await openMs(page, Number(w), process.env.AN24_MS ?? "seed-ms-1");
+  await scrollToSec(page, sel);
+  await page.screenshot({ path: `${DIR}/${name}.png` });
+});
