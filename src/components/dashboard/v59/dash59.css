@@ -452,17 +452,17 @@
 @media (prefers-reduced-motion: reduce) { .d59-hawkshadow { animation: none; } }
 
 /* ── the hover lift: a hovered card lifts and comes forward of the shadow ─────────────────────── */
-.d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw) {
+.d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw) {
   transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease;
 }
-.d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw):hover {
+.d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw):hover {
   z-index: 4;
   transform: translateY(-2px);
   box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08);
 }
 @media (prefers-reduced-motion: reduce) {
-  .d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw) { transition: none; }
-  .d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw):hover { transform: none; }
+  .d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw) { transition: none; }
+  .d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw):hover { transform: none; }
 }
 
 /* ── the Activity feed folder tab ──────────────────────────────────────────────────────────── */

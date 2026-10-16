@@ -101,7 +101,8 @@ describe("every dashboard container header carries one mark", () => {
   const files = {
     /* the page's files since Dashboard v58: the kept chart card and the four v58 parts */
     "Chart": "OneScreenChart.tsx",
-    "Closed": "v58/Dash58Closed.tsx",
+    "Left": "v60/Dash60Left.tsx",
+    "Lift": "v60/Dash60Lift.tsx",
     "List": "v58/Dash58List.tsx",
     "Feed": "v58/Dash58Feed.tsx",
     "Header": "v58/Dash58Header.tsx",

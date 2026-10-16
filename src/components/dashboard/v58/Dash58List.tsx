@@ -92,7 +92,9 @@ export const Dash58List: React.FC<{
   onAddAgent: () => void;
   /** the founding writer panel, below the hairline */
   panel: React.ReactNode;
-}> = ({ loading, focusH, plan, focus, focusRef, onStep, onView, onRun, onAll, onAddAgent, panel }) => {
+  /** v60: before the first query, "Ready for lift off?" takes the title row AND the focus card */
+  lift?: React.ReactNode;
+}> = ({ loading, focusH, plan, focus, focusRef, onStep, onView, onRun, onAll, onAddAgent, panel, lift }) => {
   const counts = Object.fromEntries(plan.groups.map((g) => [g.key, g.items.length]));
   const first = plan.groups[0];
   const coming = !loading && first?.key === "coming";
@@ -100,6 +102,8 @@ export const Dash58List: React.FC<{
   const allLabel = `All ${plan.items.length}`;
   return (
     <section className="d58-right" data-d58="right" data-counts={JSON.stringify(counts)} aria-label="To-do list">
+      {lift ?? (
+        <>
       <div className="d58-listhead" data-d58="list-head">
         <div className="d59-titlerow" data-d58="title-row">
           <h2 className="d58-listtitle" data-d58="list-title">{LIST_TITLE}</h2>
@@ -125,6 +129,8 @@ export const Dash58List: React.FC<{
             Discover agents {!DISCOVER_LIVE && <span className="d58-soon">SOON</span>}
           </button>
         </div>
+      )}
+        </>
       )}
       <hr className="d59-rule" data-d58="rule" />
       {panel}

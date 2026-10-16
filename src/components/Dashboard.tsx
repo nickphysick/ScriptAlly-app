@@ -500,7 +500,8 @@ export const Dashboard: React.FC<{
     addUserTask,
     updateUserTask,
     deleteUserTask,
-    updateUserProfile
+    updateUserProfile,
+    smartImportUsage,
   } = useScriptAllyDb();
 
   // Stat definitions (hook — must precede every conditional return).
@@ -1526,6 +1527,7 @@ export const Dashboard: React.FC<{
         currentUser={currentUser}
         activeManuscript={activeManuscriptForKicker}
         versions={versions}
+        smartImportUsage={smartImportUsage}
         onNavigate={onNavigate}
       />
 

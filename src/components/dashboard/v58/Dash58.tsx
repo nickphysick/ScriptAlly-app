@@ -16,7 +16,7 @@ import { claimRightPanel, openQueryPanel, releaseRightPanel, subscribeRightPanel
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../../types";
+import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { localYMD } from "../../../lib/shellSidebar";
 import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
@@ -25,7 +25,6 @@ import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
 import { dashList, focusOf, startingPlan, type ListAction } from "../../../lib/dashList";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
-import { buildQcRows, rowsForTile } from "../../../lib/qcSummary";
 import { feedEntries } from "../../../lib/dashFeed";
 import { todayCount } from "../../../lib/dashFeedDrawer";
 import { readFeedSeen, unseenCount, writeFeedSeen } from "../../../lib/dashFeedSeen";
@@ -39,16 +38,21 @@ import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadli
 import { DashPopupProvider } from "../DashPopup";
 import { OneScreenChart } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
-import { Dash58Closed } from "./Dash58Closed";
 import { Dash58List } from "./Dash58List";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
 import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
+import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
+import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
+import { Dash60Lift } from "../v60/Dash60Lift";
+import { openNewAgentCard } from "../../../lib/agentCardStore";
 import { openFeedback } from "../../../lib/feedbackStore";
 import { pulseWeeks, readEcho, writeEcho, type Mood } from "../../../lib/weeklyPulse";
 import { readWeeklyPulse, sendWeeklyPulse } from "../../../lib/weeklyPulseClient";
 import "../oneScreen.css";
 import "./dash58.css";
 import "../v59/dash59.css";
+/* ⚠️ LAST: the bundle orders sheets by first import, and v60's rules win ties against v58's and v59's */
+import "../v60/dash60.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -64,9 +68,12 @@ export interface Dash58Props {
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
   now?: Date;
+  /** v60: the "Import your journey" tile reads the entitlement from it */
+  smartImportUsage?: SmartImportUsage | null;
 }
 
-const NO_AID: DashAid = { drop: [], noClosed: false };
+const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
+const NO_AGENTS: Agent[] = [];
 
 /** The hawk's shadow, cast across the sheet (v59). The same versioned file the other pages place. */
 export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
@@ -132,8 +139,8 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
 };
 
 export const Dash58: React.FC<Dash58Props> = ({
-  loading: dataLoading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
-  activeManuscript, onNavigate, now: nowProp, versions = [],
+  loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
+  activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -147,13 +154,17 @@ export const Dash58: React.FC<Dash58Props> = ({
   const held = import.meta.env.MODE !== "production" ? useDashHold() : false;
   const loading = dataLoading || held;
   const aid = import.meta.env.MODE !== "production" ? dashAid() : NO_AID;
+  /* v60: the dev aid's "no agents" hands the page none (the day-one state); production never reads it */
+  const agents = aid.noAgents ? NO_AGENTS : agentsIn;
 
   const scopeId = activeManuscript?.id ?? null;
   const msIds = useMemo(() => new Set(manuscripts.map((m) => m.id)), [manuscripts]);
   const scopedQueries = useMemo(() => scopeQueries(queries, scopeId), [queries, scopeId]);
   const scopedActivities = useMemo(() => scopeActivities(activities, scopeId), [activities, scopeId]);
   const scopedTasks = useMemo(() => scopeTasks(tasks, queries, msIds, scopeId), [tasks, queries, msIds, scopeId]);
-  const empty = scopedQueries.length === 0;
+  /* ⚠️ THE ONE PRE-QUERY PREDICATE (v60): the chart's empty state AND both columns' first-use swap
+     read this one value, so they cannot disagree. Data, never a flag. */
+  const empty = isPreQuery(scopedQueries);
 
   /* ── the left column ── */
   const activeCount = loading ? null : liveCount(scopedQueries);
@@ -161,8 +172,6 @@ export const Dash58: React.FC<Dash58Props> = ({
     if (loading) return null;
     return closedTile(aid.noClosed ? [] : scopedQueries, scopedActivities);
   }, [loading, scopedQueries, scopedActivities, aid.noClosed]);
-  const qcRows = useMemo(() => buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), [scopedQueries, agents, scopedActivities, now]);
-  const qcClosed = useMemo(() => rowsForTile(qcRows, "closed").length, [qcRows]);
 
   /* ── the list: the board's own cards, then the contact list's, then the clock's ── */
   const plan = useMemo(() => {
@@ -366,14 +375,84 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
   }, [loading, focus.item?.key]);
 
+  /* ── v60: the left column's floor in the querying state — what the two hoop cards need ──
+     Each card's width, less its legend's box, plus the legend's NATURAL width (a Range over each row,
+     which is the text's own width whatever the column does — so this cannot feed back on itself). */
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    const measure = () => {
+      let need = 0;
+      const width = (el: Element) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; };
+      for (const card of root.querySelectorAll<HTMLElement>(".d60-hoopcard")) {
+        const hl = card.querySelector<HTMLElement>(".d60-hl");
+        const row = card.querySelector<HTMLElement>(".os-bandrow");
+        if (!hl || card.offsetWidth <= 0) continue;
+        /* ⚠️ READ UNWRAPPED: a cramped card wraps its labels (the container query), and a wrapped width
+           read back as the need would hold the column at the cramped size for ever. `nowrap` for the
+           instant of the read, in a layout effect, so nothing is painted that way. */
+        const lis = [...hl.querySelectorAll<HTMLElement>("li, .d60-ready")];
+        for (const li of lis) li.style.whiteSpace = "nowrap";
+        let natural = 0;
+        for (const li of hl.querySelectorAll("li")) natural = Math.max(natural, width(li));
+        need = Math.max(need, card.offsetWidth - hl.clientWidth + natural);
+        /* and the band: its title and its link side by side, with the row's gap */
+        if (row) {
+          const kids = [...row.children] as HTMLElement[];
+          const sum = kids.reduce((t, k) => t + width(k), 0) + Math.max(0, kids.length - 1) * (parseFloat(getComputedStyle(row).columnGap) || 12);
+          need = Math.max(need, card.offsetWidth - row.clientWidth + sum);
+        }
+        for (const li of lis) li.style.whiteSpace = "";
+      }
+      const v = need > 0 ? `${Math.ceil(need)}px` : "";
+      if (root.style.getPropertyValue("--d60-hoop-need") !== v) {
+        if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need");
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    void document.fonts?.ready.then(measure);
+    return () => window.removeEventListener("resize", measure);
+  });
+
   /* ── what the loading page should be the shape of: this account's last loaded page ── */
   const [shape] = useState(() => readShape());
   const focusRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0 });
-  }, [loading, focus.item?.key, closed, unseen, shape.focusH]);
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0 });
+  }, [loading, focus.item?.key, closed, unseen, shape.focusH, empty, agents.length]);
+
+  /* ── v60: first use, and the two hoops ──
+     While loading, the page draws whichever state the shape memory last saw, so the swap never
+     flashes; once loaded it is the one predicate's answer. */
+  const pre = loading ? shape.pre : empty;
+  const hasAgents = loading ? shape.agents : agents.length > 0;
+  const cov = useMemo(
+    () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
+    [agents, queries, activeManuscript, now],
+  );
+  const tiles = useMemo(
+    () => firstUseTiles({ plan: currentUser?.plan, usage: smartImportUsage, manuscript: activeManuscript, versions, now }),
+    [currentUser?.plan, smartImportUsage, activeManuscript, versions, now],
+  );
+  /* ⚠️ EACH TILE OPENS AN EXISTING PAGE. The add-material button (Submission packages), the comps add
+     drawer and the version dialog (Manuscripts) are each the page's own state with no door from
+     outside, so the tile lands on the page that holds the button — never a route invented here. */
+  const onTile = (k: TileKey) => {
+    if (k === "import") onNavigate("import");
+    else if (k === "mats") onNavigate("manuscripts", "Submission packages");
+    else if (k === "comps") onNavigate("manuscripts", "Comparable titles");
+    else onNavigate("manuscripts");
+  };
+  const toContacts = () => onNavigate("agents");
+  /* "Log a query" on the queries door: with agents, the drawer's log journey; with none, the new-agent
+     card first (its own "Log a query" door then opens the drawer), as the hint says */
+  const logFromDoor = () => {
+    if (agents.length === 0) openNewAgentCard({ from: "button" });
+    else openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
+  };
 
   /* ── the skipped-rows line: read for this account, and read again whenever it changes ──
      This page stays mounted while the writer is on the Import page, so reading once showed the
@@ -422,34 +501,39 @@ export const Dash58: React.FC<Dash58Props> = ({
             onAddAgent={() => onNavigate("agents", "Add an agent")}
           />
           <div className="d58-body" data-d58="body">
-            <div className="d58-left" data-d58="left">
-              <div className="d58-active" data-d58="active">
-                <OneScreenChart
-                  loading={loading}
-                  queries={scopedQueries}
-                  activities={scopedActivities}
-                  agents={agents}
-                  manuscripts={manuscripts}
-                  /* Query panel v1: the query opens in the side panel, over this page */
-                  onOpenQuery={(id) => openQueryPanel(id, "dashboard")}
-                  activeCount={activeCount}
-                  undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
-                  now={now}
-                  empty={empty}
-                  onSendFirst={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
-                />
-              </div>
-              <Dash58Closed
-                loading={loading}
-                shape={shape.closed}
-                tile={closed}
-                qcClosed={qcClosed}
-                sentTotal={scopedQueries.length}
-                queries={queries}
-                agents={agents}
-                now={now}
-                onSeeAll={() => navigate(queriesPathFor("closed"))}
-              />
+            <div className="d58-left" data-d58="left" data-pre={pre ? "1" : "0"}>
+              {pre ? (
+                <>
+                  <QueriesDoor loading={loading} agents={loading ? (hasAgents ? 1 : 0) : agents.length} onLog={logFromDoor} />
+                  {hasAgents
+                    ? <AgentsSnap loading={loading} cov={cov} onReady={toContacts} />
+                    : <AgentsDoor loading={loading} onAdd={() => openNewAgentCard({ from: "button" })} onImport={() => onNavigate("import")} />}
+                </>
+              ) : (
+                <>
+                  <div className="d58-active" data-d58="active">
+                    <OneScreenChart
+                      loading={loading}
+                      queries={scopedQueries}
+                      activities={scopedActivities}
+                      agents={agents}
+                      manuscripts={manuscripts}
+                      /* Query panel v1: the query opens in the side panel, over this page */
+                      onOpenQuery={(id) => openQueryPanel(id, "dashboard")}
+                      activeCount={activeCount}
+                      undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
+                      now={now}
+                      empty={empty}
+                      onSendFirst={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
+                    />
+                  </div>
+                  {/* v60: Closed folds into a pair of hoops beneath the full-width chart, beside Agents on file */}
+                  <div className="d60-hoops" data-d60="hoops">
+                    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))} />
+                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts} />
+                  </div>
+                </>
+              )}
             </div>
             <Dash58List
               loading={loading}
@@ -462,6 +546,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               onRun={run}
               onAll={() => onNavigate("todo")}
               onAddAgent={() => onNavigate("agents", "Add an agent")}
+              lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
                 <Dash59Panel
                   loading={loading}

@@ -49,7 +49,12 @@ describe("/dashboard renders", () => {
        founding writer panel; the rest of the getting-started plan lives on the To-do page behind
        "All {n} →". So the first deed is the focus card, and the list's second line ("Log your first
        query") is no longer on this page. */
-    expect(html).toContain("Add your first manuscript");
+    /* ⚠️ RETARGETED A FIFTH TIME (Dashboard v60). Before the first query the right column is "Ready
+       for lift off?" (it replaces the focus card, the getting-started plan included), and the left
+       column is the two doors. */
+    expect(html).toContain("Ready for lift off?");
+    expect(html).toContain("No queries out yet.");
+    expect(html).toContain("Your list starts here.");
     expect(html).toContain("The early bird gets the worm.");
   });
 
@@ -68,7 +73,10 @@ describe("/dashboard renders", () => {
     /* ⚠️ RETARGETED (dashboard header, stage 1): the stat cards are deleted, so "Agents on file" is
        no landmark any more. The header's counts line replaced them, and it only renders its words
        with a figure in front once the record set has been read — which is the populated branch. */
-    expect(html).not.toContain("Agents on file");
+    /* ⚠️ RETARGETED AGAIN (Dashboard v60): "Agents on file" IS a landmark of the querying page now —
+       the slate hoop card beside Closed, under the full-width chart. */
+    expect(html).toContain("Agents on file");
+    expect(html).toContain('data-d60="closed-hoop"');
     /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
        populated landmarks are the title-page eyebrow and the list column's own title. */
     expect(html).toContain("— NOW QUERYING —");
