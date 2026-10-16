@@ -15,6 +15,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PinListButton } from "../../shell/PinListButton";
+import { useStickyStack } from "../../shell/stickyStack";
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
@@ -337,6 +338,8 @@ export interface QcList138Props {
   total: number;
   shown: number;
   filtered: boolean;
+  /** v138.6 §B — the sticky stack's writer runs while this list is the page on screen */
+  stickyOn?: boolean;
   /** v138.5 §E — the Filters button and its panel (the panel holds the filters; "Clear all" lives there) */
   filtersSlot?: React.ReactNode;
   sort: Qc138Sort;
@@ -377,7 +380,7 @@ export interface QcList138Props {
 }
 
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, sort, onHeading, density, onDensity, full, onFull,
+  groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
   selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
@@ -417,6 +420,8 @@ export const QcList138: React.FC<QcList138Props> = ({
   }, [entering]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => window.clearTimeout(peekTimer.current), []);
   const boxRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  useStickyStack(topRef, stickyOn);
   const tip = useTip(boxRef);
   const [groupOpen, setGroupOpen] = useState(false);
   const groupBtn = useRef<HTMLButtonElement>(null);
@@ -537,7 +542,11 @@ export const QcList138: React.FC<QcList138Props> = ({
 
   return (
     <div className="qc138-sheet" data-qc138="sheet" data-density={density} ref={boxRef} {...tip.handlers}>
-      <div className="qc138-top" data-qc138="top" data-qcv="ws-head">
+      {/* v138.6 §B — THE STICKY ROW: the navy header, in a wrapper that sticks under the sheet's lip and fills the lip's
+          12px (and the header's rounded corners) with the sheet's colour, so no row shows through. Its height is the
+          one writer's (`useStickyStack`), read by the headings and the current group band beneath it. */}
+      <div className="qc138-topw" data-qc138="top-wrap">
+      <div className="qc138-top" data-qc138="top" data-qcv="ws-head" ref={topRef}>
         <p className="qc138-say" data-qc138="showing" data-qcv="ws-title">
           {filtered
             ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>
@@ -571,6 +580,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           {/* v138.6 §A — the shared pin button (both list pages); the pin itself is the shared hook's */}
           <PinListButton pinned={full} onToggle={onFull} attrs={{ "data-qc138": "pin" }} />
         </span>
+      </div>
       </div>
       <div className="qc138-heads" data-qc138="headings" role="row">
         {HEADINGS.map((h) => {

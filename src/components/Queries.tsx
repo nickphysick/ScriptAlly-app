@@ -103,7 +103,6 @@ import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { usePinList } from "./shell/useFullScreenList";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
-import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, QcFiltersButton138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
@@ -2437,14 +2436,10 @@ export const Queries: React.FC<{
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
   const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
   const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ ...readQcListMemory(), density: d }); }, []);
-  /* v138.1 §F — the search lives in the list sheet's navy row, mirrored by the pinned row's. "/" (useQcListKeys)
-     focuses whichever is the one on screen: this ref answers with the pinned row's field while the row is pinned. */
+  /* v138.1 §F — the search lives in the list sheet's navy row. v138.6 §B: that row is the sticky row and the old
+     pinned bar (with its mirrored search) is retired, so "/" (useQcListKeys) has the one field to focus. */
   const qcSheetFindRef = useRef<HTMLInputElement>(null);
-  const qcPinFindRef = useRef<HTMLInputElement>(null);
-  const qcPinnedNow = useRef(false);
-  const qcFindRef = useMemo(() => ({
-    get current() { return (qcPinnedNow.current && qcPinFindRef.current) || qcSheetFindRef.current; },
-  }) as React.RefObject<HTMLInputElement | null>, []);
+  const qcFindRef = qcSheetFindRef;
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /**
@@ -2487,9 +2482,6 @@ export const Queries: React.FC<{
      name. */
   const qcPin = usePinList("queries", { routeActive: routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
   const qcFull = qcPin.full;
-  /* v138 §A — the pinned row shows once the header's foot has scrolled under the sheet's top (desktop, on screen) */
-  const qc138Pinned = useQcPinned(qc138Ref, routeActive && qcDesk);
-  qcPinnedNow.current = qc138Pinned;
   /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
      ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
      const is a temporal-dead-zone throw. */
@@ -5179,24 +5171,7 @@ export const Queries: React.FC<{
         onClose={() => startBulk("close")}
         onClear={() => setQcPicked(new Set())}
       />
-      <QcPinned138
-        anchor={qc138Ref}
-        on={routeActive && qcDesk && !showGridSkeleton}
-        shown={qc138Pinned && !qcFull}
-        total={qcScoped.length}
-        counts={qcGlyphCounts}
-        stages={qcStages}
-        onGlyph={pickGlyph}
-        find={qcFind}
-        onFind={setQcFind}
-        findRef={qcPinFindRef}
-        onLog={() => onNavigate?.("queries", "Log a query")}
-        onTop={() => {
-          const sc = qc138Ref.current?.closest<HTMLElement>(".wpg-scroll");
-          sc?.scrollTo({ top: 0 });
-          qc138Ref.current?.closest<HTMLElement>(".qc138-hd")?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
-        }}
-      />
+      {/* v138.6 §B — the old pinned bar is retired: the navy list header is the sticky row */}
     </QcHeader138>
   ) : undefined;
 
@@ -7102,6 +7077,7 @@ export const Queries: React.FC<{
                   total={qcScoped.length}
                   shown={qcVisible.length}
                   filtered={qc138Filtered}
+                  stickyOn={routeActive && qcDesk}
                   filtersSlot={(
                     <QcFiltersButton138 filters={qcF138} disabled={showGridSkeleton}
                       onClearAll={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}>
