@@ -192,4 +192,12 @@ none.
 - **Also yours:** the gone-quiet landing (premise 2); `sendBetaFeedback` is undeployed, so "Tell us
   anything" opens a panel that cannot send on dev yet (premise 1).
 
-BRANCH_TAIL
+## Branch and build
+
+- Branch `dashboard-v59`, pushed. Parts A–F: `56ba184a` · `19ada182` · `a7949907` · `ef164e12` ·
+  `c2473ec3` · `fe8f2377` (this report's tail is one more commit on top). Cut from
+  `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386` at `fd9016f8`. Not merged to main.
+- Dev: hosting only, from the clean pushed tip `fe8f2377`, re-checked immediately before the deploy
+  (dev was still on `index-DalAPG6D.js` = `fd9016f8`). Dev now serves **`index-BdMa9Mvk.js`**.
+- Gates at the tip: tsc clean, functions tsc clean, production and dev builds clean (no errors or
+  warnings in the log), Vitest 598 files / 8,944 passed / 3 skipped, rules emulator 196/196.
