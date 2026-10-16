@@ -372,14 +372,65 @@
 }
 
 /* ── the sheet layer: what is placed in the page SHEET rather than the page ──────────────────
-   The folder tab (and, from Part D, the hawk's shadow) sit in `.ws-window`, so neither moves with the
-   page's content. ⚠️ THE LAYER IS ONE STACKING CONTEXT AT z 2: above the cards at rest (z 1), below a
-   hovered card (z 3). Inside it the tab sits under the shadow. */
+   The folder tab and the hawk's shadow sit in `.ws-window`, so neither moves with the page's content.
+
+   ⚠️ THE LAYER IS NOT A STACKING CONTEXT, AND MUST NOT BECOME ONE. No `z-index`, `transform`,
+   `opacity`, `filter`, `isolation` or `will-change` here. The shadow and the tab each take their own
+   z in the SAME stacking context as the four cards — cards at rest 1, the tab 2, the shadow 3, a
+   hovered card 4 — which is the whole of "the shadow falls over the cards and a hovered card comes
+   forward of it". Wrapped in a context, the pair would sit together against the cards, and the
+   shadow's `multiply` would blend with nothing but its own empty group.
+
+   ⚠️ IT CLIPS (`overflow: clip`, the sheet's own radius), so the shadow, which overhangs the sheet on
+   every side, never adds scroll anywhere. `clip` and not `hidden`: a `hidden` box is still a scroll
+   container that focus and `scrollIntoView` can move. */
 .d59-sheet {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  overflow: clip;
+  border-radius: inherit;
   pointer-events: none;
+}
+
+/* ── the hawk's shadow, cast across the desk (scheme C, the stronger setting) ─────────────────── */
+.d59-hawkshadow {
+  position: absolute;
+  z-index: 3;
+  left: 34%;
+  top: -140px;
+  width: 1150px;
+  max-width: none;
+  height: auto;
+  opacity: 0.145;
+  transform: rotate(-13deg);
+  transform-origin: 50% 50%;
+  filter: blur(2.5px);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: d59Drift 90s ease-in-out infinite;
+}
+/* ⚠️ LITERAL VALUES ONLY IN THE KEYFRAMES: a `var()` inside `@keyframes` fails silently here. */
+@keyframes d59Drift {
+  0% { transform: rotate(-13deg) translate(0, 0); }
+  50% { transform: rotate(-10.5deg) translate(-70px, 26px); }
+  100% { transform: rotate(-13deg) translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .d59-hawkshadow { animation: none; } }
+
+/* ── the hover lift: a hovered card lifts and comes forward of the shadow ─────────────────────── */
+.d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw) {
+  transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease;
+}
+.d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw):hover {
+  z-index: 4;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08);
+}
+@media (prefers-reduced-motion: reduce) {
+  .d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw) { transition: none; }
+  .d58 :is(.d58-active > .os-card, .d58-left > .d58-closed, .d58-focus, .d59-fw):hover { transform: none; }
 }
 
 /* ── the Activity feed folder tab ──────────────────────────────────────────────────────────── */
@@ -387,7 +438,7 @@
   position: absolute;
   right: var(--d59-tab-r, 50px);
   bottom: 0;
-  z-index: 1;
+  z-index: 2;
   box-sizing: border-box;
   height: 34px;
   display: flex;

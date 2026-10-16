@@ -68,6 +68,9 @@ export interface Dash58Props {
 
 const NO_AID: DashAid = { drop: [], noClosed: false };
 
+/** The hawk's shadow, cast across the sheet (v59). The same versioned file the other pages place. */
+export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
+
 /** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
 const noticeDate = (iso: string | null): string => {
   const m = iso ? /^(\d{4})-(\d{2})-(\d{2})/.exec(iso) : null;
@@ -417,6 +420,7 @@ export const Dash58: React.FC<Dash58Props> = ({
           portalled into the shell's sheet outlives its page otherwise. Never in the onboarding ghost. */}
       {sheet && onDash && !rootRef.current?.closest(".im-ghost") && createPortal(
         <div className="d58-layer d59-sheet" data-d58="sheet-layer" style={{ ["--d59-tab-r" as string]: `${sheet.r}px` } as React.CSSProperties}>
+          <img className="d59-hawkshadow" data-d58="shadow" alt="" aria-hidden="true" draggable={false} src={`${DASH_SHADOW.src}?v=${DASH_SHADOW.version}`} />
           <FeedTab open={feedOpen} unseen={loading ? (shape.today ? -1 : 0) : unseen} bump={bump} onOpen={openFeed} />
         </div>,
         sheet.el,
