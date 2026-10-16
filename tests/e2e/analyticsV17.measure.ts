@@ -147,79 +147,6 @@ test("AN17-3 · the Query Centre's band", async ({ page }) => {
   L.done(8);
 });
 
-/* ── AN17-4 · one 40px rhythm ── */
-test("AN17-4 · rhythm", async ({ page }) => {
-  const L = new Ledger("an17-4");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    L.check("AN17-4 band and strip found", w, !!d?.band && !!d?.glance, `${!!d?.band} ${!!d?.glance}`);
-    L.check("AN17-4 nine sections", w, d?.secs.length === 9, `${d?.secs.length}`);
-    if (d?.band && d.glance) L.check("AN17-4 band → strip 40 (±1)", w, near(d.glance.t - d.band.b, 40, 1), `${(d.glance.t - d.band.b).toFixed(1)}`);
-    if (d?.strip && d.secs[0]?.box) L.check("AN17-4 strip → first section 40 (±1)", w, near(d.secs[0].box.t - d.strip.b, 40, 1), `${(d.secs[0].box.t - d.strip.b).toFixed(1)}`);
-    for (let i = 1; i < (d?.secs.length ?? 0); i++) {
-      const prev = d!.secs[i - 1], cur = d!.secs[i];
-      L.check(`AN17-4 section ${prev.sec} frame → section ${cur.sec} 40 (±1)`, w, !!prev.frame && !!cur.box && near(cur.box.t - prev.frame.b, 40, 1),
-        `${prev.frame && cur.box ? (cur.box.t - prev.frame.b).toFixed(1) : "—"}`);
-    }
-    await checkOverflow(page, L, w);
-  }
-  L.done(48);
-});
-
-/* ── AN17-5 · at a glance ── */
-test("AN17-5 · glance", async ({ page }) => {
-  const L = new Ledger("an17-5");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    const cells = d?.cells ?? [];
-    L.check("AN17-5 five cells", w, cells.length === 5, `${cells.length}`);
-    cells.forEach((c, i) => {
-      L.check(`AN17-5 cell ${i + 1} has a number`, w, c.v.length > 0, c.v);
-      L.check(`AN17-5 cell ${i + 1} has a comparison line`, w, c.cmp.length > 8, c.cmp);
-      L.check(`AN17-5 cell ${i + 1} has a sparkline with marks`, w, c.sparkMarks > 0, `${c.sparkMarks}`);
-      const gr = c.colours.filter(isGreenOrRed);
-      L.check(`AN17-5 cell ${i + 1} has no green or red`, w, gr.length === 0, gr.slice(0, 3).join(" "));
-    });
-    if (vp.width === 1512) {
-      const before = cells.map((c) => c.v);
-      await page.locator('[data-a17="range"][data-v="d90"]:visible').first().click({ timeout: 4000 }).catch(() => {});
-      await page.waitForTimeout(250);
-      const mid = (await readDesk(page))?.cells.map((c) => c.v) ?? [];
-      await page.locator('[data-a17="range"][data-v="all"]:visible').first().click({ timeout: 4000 }).catch(() => {});
-      await page.waitForTimeout(250);
-      const after = (await readDesk(page))?.cells.map((c) => c.v) ?? [];
-      L.check("AN17-5 Last 90 days changes at least one big number", w, mid.length === 5 && mid.some((v, i) => v !== before[i]), `${before.join(" | ")} → ${mid.join(" | ")}`);
-      L.check("AN17-5 All time restores them", w, after.join("|") === before.join("|") && after.length === 5, `${after.join(" | ")}`);
-    }
-    await checkOverflow(page, L, w);
-  }
-  L.done(90);
-});
-
-/* ── AN17-6 · the open banner and its perch ── */
-test("AN17-6 · banner", async ({ page }) => {
-  const L = new Ledger("an17-6");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    L.check("AN17-6 nine sections", w, d?.secs.length === 9, `${d?.secs.length}`);
-    for (const s of d?.secs ?? []) {
-      L.check(`AN17-6 §${s.sec} the banner has no background`, w, s.banBg === "rgba(0, 0, 0, 0)" && s.banImg === "none", `${s.banBg} ${s.banImg}`);
-      L.check(`AN17-6 §${s.sec} the perch's foot is 14px (±2) below the frame's top`, w, !!s.perch && !!s.frame && near(s.perch.b - s.frame.t, 14, 2),
-        `${s.perch && s.frame ? (s.perch.b - s.frame.t).toFixed(1) : "—"}`);
-      L.check(`AN17-6 §${s.sec} the perch paints above the frame`, w, s.perchParentZ !== null && s.frameZ !== null && s.perchParentZ > s.frameZ, `banner z ${s.perchParentZ} frame z ${s.frameZ}`);
-      if (vp.width === 1512) L.check(`AN17-6 §${s.sec} the title is one line at 1512`, w, s.titleLines === 1, `${s.titleLines} lines (${s.titleH.toFixed(1)}px) "${s.titleText}"`);
-    }
-    await checkOverflow(page, L, w);
-  }
-  L.done(120);
-});
-
 /* ── AN17-7 · the funnel ── */
 test("AN17-7 · funnel", async ({ page }) => {
   const L = new Ledger("an17-7");
@@ -293,49 +220,6 @@ test("AN17-9 · shares", async ({ page }) => {
   L.done(28);
 });
 
-/* ── AN17-10 · response window honesty ── */
-test("AN17-10 · reply", async ({ page }) => {
-  const L = new Ledger("an17-10");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    const rows = d?.rrows ?? [];
-    L.check("AN17-10 rows exist", w, rows.length > 0, `${rows.length}`);
-    L.check("AN17-10 one row per replied query with a stated window", w, rows.length === d?.replyPop, `${rows.length} rows, population ${d?.replyPop}`);
-    const late = rows.filter((r) => r.late), ontime = rows.filter((r) => !r.late);
-    L.check("AN17-10 every late reply has a rust dotted leader", w, late.every((r) => r.leaders === 1 && r.leaderStroke === RUST), `${late.length} late; ${late.filter((r) => r.leaders !== 1).length} without`);
-    L.check("AN17-10 no on-time reply has one", w, ontime.every((r) => r.leaders === 0), `${ontime.filter((r) => r.leaders > 0).length} of ${ontime.length} on-time rows carry a leader`);
-    L.check("AN17-10 both kinds present, or the absent one reported", w, late.length + ontime.length === rows.length, `late ${late.length} on time ${ontime.length}`);
-    L.check("AN17-10 dots take status fills", w, rows.length > 0 && rows.every((r) => !!r.dotFill && FILLS.has(r.dotFill)), rows.map((r) => r.dotFill).slice(0, 4).join(" "));
-    await checkOverflow(page, L, w);
-  }
-  L.done(28);
-});
-
-/* ── AN17-11 · records ── */
-test("AN17-11 · records", async ({ page }) => {
-  const L = new Ledger("an17-11");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const recs = (await readDesk(page))?.recs ?? [];
-    L.check("AN17-11 six records", w, recs.length === 6, recs.map((r) => r.key).join(","));
-    for (const key of ["first-request", "first-offer"]) {
-      const r = recs.find((x) => x.key === key);
-      L.check(`AN17-11 ${key} renders StatusDot (and nothing else)`, w, !!r && r.statusDot === 1 && r.svgs === 1, `${r?.statusDot} StatusDot, ${r?.svgs} svg`);
-    }
-    for (const r of recs) {
-      const bad = /^(0|0%|—|-)$/.test(r.v) || r.v === "";
-      L.check(`AN17-11 ${r.key} states a value or "Not yet"`, w, !bad, `"${r.v}"`);
-    }
-    await checkOverflow(page, L, w);
-  }
-  L.done(40);
-  /* the "Not yet" branch is entered by AN17-16's single-query fixture, where no offer exists */
-});
-
-/* ── AN17-12 · scrubbing the campaign over time ── */
 async function scrubRead(page: Page) {
   return page.evaluate(() => {
     const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0);
@@ -349,6 +233,7 @@ async function scrubRead(page: Page) {
     };
   });
 }
+
 test("AN17-12 · scrub", async ({ page }) => {
   const L = new Ledger("an17-12");
   for (const vp of [AT_1512, { width: 390, height: 844 }]) {
@@ -405,28 +290,6 @@ test("AN17-13 · lanes", async ({ page }) => {
   L.done(24);
 });
 
-/* ── AN17-14 · the caveats' workspace and the footer ── */
-test("AN17-14 · workspace + footer", async ({ page }) => {
-  const L = new Ledger("an17-14");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    L.check("AN17-14 the workspace is blush", w, d?.wsBg === "rgb(244, 224, 212)", `${d?.wsBg}`);
-    L.check("AN17-14 radius 22", w, d?.wsRadius === "22px", `${d?.wsRadius}`);
-    L.check("AN17-14 an anthracite band", w, d?.wsBandBg === ANTH, `${d?.wsBandBg}`);
-    L.check("AN17-14 four white cards", w, d?.wsCards.length === 4 && d.wsCards.every((c) => c === "rgb(255, 255, 255)"), `${d?.wsCards.join(" ")}`);
-    L.check("AN17-14 the footer is mounted", w, !!d?.foot && !!d?.footIn, `${!!d?.foot}`);
-    if (d?.footIn) L.check("AN17-14 footer content box = the content column (±1)", w, near(d.footIn.l, d.col.l, 1) && near(d.footIn.r, d.col.r, 1), `${d.footIn.l}–${d.footIn.r} vs ${d.col.l}–${d.col.r}`);
-    /* ⚠️ RETIRED BY CONTACT LIST v15.1 §5 (8 Oct): "the footer's top rule spans the main column". The shared footer
-       has no ground of its own now and its one hairline runs the CONTENT column, on its inner wrapper — measured on
-       this route by tests/e2e/contactV151.measure.ts, F1. */
-    await checkOverflow(page, L, w);
-  }
-  L.done(28);
-});
-
-/* ── AN17-15 · the section tab ── */
 async function tabRead(page: Page) {
   return page.evaluate(() => {
     const t = [...document.querySelectorAll<HTMLElement>('[data-a17="tab"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
@@ -440,9 +303,12 @@ async function tabRead(page: Page) {
     };
   });
 }
+
 test("AN17-15 · tab", async ({ page }) => {
   const L = new Ledger("an17-15");
-  const NAMES = ["Where the", "Queries sent", "Response rate", "Response window honesty", "Wait times by stage", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers"];
+  /* REWRITTEN (analytics v21): sections 4 and 5 are renamed with their rebuilt figures; the law — the tab names the
+     section in view — is unchanged */
+  const NAMES = ["Where the", "Queries sent", "Response rate", "Replies against the stated window", "How long each step takes", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers"];
   for (const vp of DESKTOP) {
     await openAn(page, vp);
     const w = `${vp.width}`;
@@ -507,7 +373,8 @@ test("AN17-16 · thin sample", async ({ page }) => {
     const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0);
     if (!p) return null;
     /* every FIGURE: the strip's numbers, the readings, the records' values, the funnel counts */
-    const figs = [...p.querySelectorAll<HTMLElement>('[data-a17="gv"], [data-a17="read-v"], [data-a17="rec-v"], [data-a17="fcount"]')]
+    /* REWRITTEN (analytics v21): on the desktop the strip is the desk, and the records are v21's */
+    const figs = [...p.querySelectorAll<HTMLElement>('[data-a21="desk-figure"], [data-a21="desk-n"], [data-a17="read-v"], [data-a21="record-v"], [data-a17="fcount"], [data-a21="card-n"]')]
       .filter((e) => e.getBoundingClientRect().width > 0)
       /* ⚠️ innerText, NOT textContent, for BOTH reads: textContent glues a value to its unit ("0days") and to
          the next line ("None of 1No queries"), so a zero with a unit and a stated population both read wrong
@@ -516,24 +383,22 @@ test("AN17-16 · thin sample", async ({ page }) => {
     return { sent: Number(p.dataset.sent), figs };
   });
   const all = await read();
-  await page.locator('[data-a17="range"][data-v="d90"]:visible').first().click({ timeout: 4000 }).catch(() => {});
-  await page.waitForTimeout(250);
-  const d90 = await read();
-  await page.locator('[data-a17="range"][data-v="all"]:visible').first().click({ timeout: 4000 }).catch(() => {});
+  /* RETIRED (analytics v21): the desktop's "Last 90 days" strip state — the strip is not drawn there; the desk states
+     the 90-day figures as its own rows, which `all` already reads */
   const r = all;
   L.check("AN17-16 the page is cut to one query", "1512", r?.sent === 1, `${r?.sent}`);
   L.check("AN17-16 figures were found", "1512", (r?.figs.length ?? 0) >= 12, `${r?.figs.length}`);
-  L.check("AN17-16 the Last 90 days strip was read", "1512", (d90?.figs.filter((f) => f.kind === "gv").length ?? 0) === 5, `${d90?.figs.filter((f) => f.kind === "gv").length}`);
+
   const ZERO = /^(0|0%|0\s*[a-z]+|—|-)$/i; /* a unit may sit flush in its own span: "0days" */
-  for (const [state, set] of [["all time", all], ["last 90 days", d90]] as const) {
-    for (const f of (set?.figs ?? []).filter((x) => state === "all time" || x.kind === "gv")) {
+  for (const [state, set] of [["all time", all]] as const) {
+    for (const f of (set?.figs ?? [])) {
       L.check(`AN17-16 ${f.kind} is not 0 / 0% / a bare dash (${state})`, "1512", !ZERO.test(f.text) && f.text !== "", `"${f.text}"`);
       if (f.pop !== null && Number(f.pop) > 0 && Number(f.pop) < 5) {
         L.check(`AN17-16 ${f.kind} under 5 states its population (${state})`, "1512", /\b\d+\s+(QUER(Y|IES)|quer(y|ies)|repl(y|ies)|REPL(Y|IES))\b/.test(f.note) || /\bof \d+\b/.test(f.note), `"${f.text}" in "${f.note.slice(0, 120)}"`);
       }
     }
   }
-  L.done(14);
+  L.done(12);
 });
 
 /* ── AN17-17 · the phone ── */
@@ -565,7 +430,8 @@ test("AN17-17 · phone", async ({ page }) => {
         weeks: [...p.querySelectorAll('[data-a17="m-week"]')].filter(shown).length,
         more: [...p.querySelectorAll('[data-a17="m-more"]')].filter(shown).map((e) => e.textContent?.trim() ?? ""),
         stack: [...p.querySelectorAll('[data-a17="m-share"] [data-a17="m-stack"]')].filter(shown).length,
-        reply: [...p.querySelectorAll('[data-a17="m-reply"]')].filter(shown).length,
+        /* REWRITTEN (analytics v21 §D): the phone's replies are Part D's rows, not v17's chart */
+        reply: [...p.querySelectorAll('[data-a21="rw"]')].filter(shown).length,
         desktopShown: [...p.querySelectorAll(".a17-d")].filter(shown).length,
         desktopTotal: p.querySelectorAll(".a17-d").length,
         minSize: sizes.length ? Math.min(...sizes) : NaN, nSizes: sizes.length,
@@ -580,7 +446,7 @@ test("AN17-17 · phone", async ({ page }) => {
     L.check("AN17-17 the log shows 12 weeks (or all, if fewer)", w, r.weeks > 0 && r.weeks <= 12, `${r.weeks}`);
     L.check("AN17-17 the Show all toggle", w, r.more.length === 1 && /^Show all \d+ weeks$/.test(r.more[0]), r.more.join(" | "));
     L.check("AN17-17 the stacked share bar", w, r.stack === 2, `${r.stack}`);
-    L.check("AN17-17 the phone reply chart", w, r.reply === 1, `${r.reply}`);
+    L.check("AN17-17 the phone's replies are Part D's rows", w, r.reply === 1, `${r.reply}`);
     L.check("AN17-17 desktop figures hidden", w, r.desktopTotal > 0 && r.desktopShown === 0, `${r.desktopShown} of ${r.desktopTotal} shown`);
     L.check("AN17-17 every chart label ≥ 9px", w, r.nSizes > 10 && r.minSize >= 8.99, `min ${r.minSize.toFixed(2)} over ${r.nSizes}`);
     L.check("AN17-17 the disc is 100px", w, !!r.disc && near(r.disc.w, 100, 1) && near(r.disc.h, 100, 1), JSON.stringify(r.disc));

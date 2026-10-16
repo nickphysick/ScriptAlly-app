@@ -76,7 +76,7 @@ export const A21Desk: React.FC<{ cards: DeskCard[]; onGo: (sec: number) => void 
         </header>
         <div className="a21-djb">
           <div className="a21-djn">
-            <b data-a21="desk-figure" data-population={c.population ?? undefined}>{c.figure}</b>
+            <b data-a21="desk-figure" data-population={c.population ?? undefined} className={/^\d/.test(c.figure) ? undefined : "a21-djw"}>{c.figure}</b>
             {c.unit ? <small data-a21="desk-unit">{c.unit}</small> : null}
           </div>
           <ul>

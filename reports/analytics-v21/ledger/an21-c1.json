@@ -1,0 +1,362 @@
+[
+ {
+  "lock": "C1 the page colour is oat (--ws-page)",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 1 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 1 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 2 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 2 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 3 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 3 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 4 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 4 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 5 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 5 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 6 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 6 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 7 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 7 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 8 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 8 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 9 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 9 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 no horizontal overflow",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"doc\":[1512,1512],\"sc\":[1256,1256],\"app\":[1512,1512]}"
+ },
+ {
+  "lock": "C1 the page colour is oat (--ws-page)",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 1 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 1 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 2 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 2 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 3 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 3 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 4 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 4 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 5 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 5 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 6 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 6 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 7 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 7 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 8 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 8 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 9 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 9 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 no horizontal overflow",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"doc\":[1280,1280],\"sc\":[1024,1024],\"app\":[1280,1280]}"
+ },
+ {
+  "lock": "C1 the page colour is oat (--ws-page)",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 1 is on the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 1 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 2 is tinted",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 2 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 3 is on the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 3 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 4 is tinted",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 4 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 5 is on the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 5 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 6 is tinted",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 6 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 7 is on the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 7 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 section 8 is tinted",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 8 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 section 9 is on the page colour",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 section 9 paints edge to edge",
+  "where": "1920",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 no horizontal overflow",
+  "where": "1920",
+  "ok": true,
+  "detail": "{\"doc\":[1920,1920],\"sc\":[1664,1664],\"app\":[1920,1920]}"
+ }
+]

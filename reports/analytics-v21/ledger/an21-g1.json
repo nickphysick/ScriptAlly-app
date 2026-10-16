@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "G1 the chip counts are standing",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[\"all\",\"All 51\"],[\"waiting\",\"20\"],[\"reading\",\"18\"],[\"offer\",\"1\"],[\"ended\",\"12\"]] vs [[\"waiting\",20],[\"reading\",18],[\"offer\",1],[\"ended\",12]]"
+ },
+ {
+  "lock": "G1 All is every query",
+  "where": "1512",
+  "ok": true,
+  "detail": "All 51"
+ },
+ {
+  "lock": "G1 lane fills are the status fills",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(245, 230, 223) rgb(247, 239, 227) rgb(224, 229, 221) rgb(215, 224, 232) rgb(228, 225, 219)"
+ },
+ {
+  "lock": "G1 pressing Ended leaves only ended lanes",
+  "where": "1512",
+  "ok": true,
+  "detail": "12 of 12, a17-f-closed a17-hairrule"
+ },
+ {
+  "lock": "G1 All brings every lane back",
+  "where": "1512",
+  "ok": true,
+  "detail": "51"
+ },
+ {
+  "lock": "G1 the chip counts are standing",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[\"all\",\"All 51\"],[\"waiting\",\"20\"],[\"reading\",\"18\"],[\"offer\",\"1\"],[\"ended\",\"12\"]] vs [[\"waiting\",20],[\"reading\",18],[\"offer\",1],[\"ended\",12]]"
+ },
+ {
+  "lock": "G1 All is every query",
+  "where": "1280",
+  "ok": true,
+  "detail": "All 51"
+ },
+ {
+  "lock": "G1 lane fills are the status fills",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(245, 230, 223) rgb(247, 239, 227) rgb(224, 229, 221) rgb(215, 224, 232) rgb(228, 225, 219)"
+ },
+ {
+  "lock": "G1 pressing Ended leaves only ended lanes",
+  "where": "1280",
+  "ok": true,
+  "detail": "12 of 12, a17-f-closed a17-hairrule"
+ },
+ {
+  "lock": "G1 All brings every lane back",
+  "where": "1280",
+  "ok": true,
+  "detail": "51"
+ }
+]

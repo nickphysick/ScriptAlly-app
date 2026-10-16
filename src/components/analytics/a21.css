@@ -106,6 +106,7 @@
     box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 14px 30px -26px rgba(28, 19, 15, 0.4); transition: box-shadow 0.2s; outline: none; box-sizing: border-box;
   }
   .ws-app.sheet-wide .a21-dj { padding: 18px 22px 12px; }
+  @media (max-width: 1100px) { .a21-desk { grid-template-columns: minmax(0, 1fr); } }
   .a21-dj:hover { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 18px 34px -24px rgba(28, 19, 15, 0.5); }
   .a21-dj:focus-visible { box-shadow: 0 0 0 2px #2a3a52; }
   .a21-dj header { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 34px; }
@@ -126,6 +127,8 @@
   .ws-app.sheet-wide .a21-djn { padding-right: 18px; min-width: 96px; }
   .a17-page .a21-djn b { font: 400 38px/1 var(--sp-type) !important; color: var(--sp-ink); white-space: nowrap; }
   .ws-app.sheet-wide .a17-page .a21-djn b { font-size: 44px !important; }
+  /* a figure in words ("No replies", "None yet") at the numeral size pushes the rows out of the card */
+  .a17-page .a21-djn b.a21-djw, .ws-app.sheet-wide .a17-page .a21-djn b.a21-djw { font-size: 26px !important; line-height: 1.1 !important; white-space: normal; }
   .a17-page .a21-djn small { font: 400 13px/1.25 var(--sp-type) !important; color: rgba(28, 19, 15, 0.55); margin-top: 3px; }
   .a21-dj ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; min-width: 0; flex: 1; }
   .a17-page .a21-dj li { display: flex; align-items: center; gap: 8px; font: 400 14.5px/1.3 var(--sp-serif) !important; color: var(--sp-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -226,13 +229,13 @@
 
 /* ══════════════ E · how long each step takes (both widths; the phone runs it down the page) ══════════════ */
 .a21-jrline { display: flex; align-items: flex-start; padding: 6px 0 4px; }
-.a21-jrnode { flex: none; width: 84px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; z-index: 1; }
+.a21-jrnode { flex: none; width: 76px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; z-index: 1; }
 .ws-app.sheet-wide .a21-jrnode { width: 96px; }
 .a21-jrnode > :first-child { background: #fff; border-radius: 50%; }
 .a17-page .a21-jrnode b { font: 600 14.5px/1.25 var(--sp-serif) !important; }
-.a21-jrgap { min-width: 120px; flex-basis: 0; position: relative; padding: 0 6px; text-align: center; }
+.a21-jrgap { min-width: 104px; flex-basis: 0; position: relative; padding: 0 6px; text-align: center; }
 .ws-app.sheet-wide .a21-jrgap { min-width: 150px; }
-.a21-jrbar { display: block; height: 6px; border-radius: 3px; background: #2a3a52; margin: 14px -42px 14px; position: relative; z-index: 0; }
+.a21-jrbar { display: block; height: 6px; border-radius: 3px; background: #2a3a52; margin: 14px -38px 14px; position: relative; z-index: 0; }
 .ws-app.sheet-wide .a21-jrbar { margin-left: -48px; margin-right: -48px; }
 .a21-jrgap.you .a21-jrbar { background: #b4553f; }
 .a21-jrgap.thin .a21-jrbar { background: repeating-linear-gradient(90deg, #2a3a52 0 8px, transparent 8px 13px); }
@@ -251,8 +254,12 @@
 .a17-page .a21-enrow b { display: block; font: 400 30px/1.05 var(--sp-type) !important; }
 .a17-page .a21-enrow span { display: block; margin-top: 6px; font: 400 15px/1.4 var(--sp-serif) !important; color: var(--sp-ink); }
 .a17-page .a21-enrow small { display: block; margin-top: 6px; font: 400 9px/1.5 var(--font-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
-@media (min-width: 761px) and (max-width: 1100px) { .a21-enrow { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 760px) {
+/* ⚠️ THE LINE NEEDS ~800px compact (five 76px nodes and four 104px gaps; the mock's 84/120 need 900, which pokes into
+   the frame's padding at 1280) and ~1080 full. Below 800px of ITS OWN width the journey
+   runs down the page as it does on the phone — a container query, because the frame's width is the fact (L1 found
+   the overflow at a 1180 and a 1024 window, where the frame is ~780 and ~634) */
+.a21-jr { container: a21jr / inline-size; }
+@container a21jr (max-width: 799px) {
   .a21-jrline { flex-direction: column; align-items: stretch; }
   .a21-jrnode, .ws-app.sheet-wide .a21-jrnode { width: auto; flex-direction: row; gap: 12px; text-align: left; }
   .a21-jrgap, .ws-app.sheet-wide .a21-jrgap { min-width: 0; text-align: left; padding: 4px 0 10px 42px; border-left: 3px solid #2a3a52; margin-left: 15px; flex-grow: 0 !important; flex-basis: auto; }
@@ -262,6 +269,7 @@
   .a17-page .a21-jrv b, .ws-app.sheet-wide .a17-page .a21-jrv b { font-size: 26px !important; }
   .a21-enrow { grid-template-columns: minmax(0, 1fr); }
 }
+@media (max-width: 1100px) { .a21-enrow { grid-template-columns: minmax(0, 1fr); } }
 
 /* ══════════════ F · firsts and records: a tinted band, a featured card over a white panel (desktop) ══════════════ */
 .a21-dk { display: none; }

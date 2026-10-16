@@ -70,6 +70,13 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
     /* location.key: a switch re-opens the route, and the book in scope is read from storage */
   }, [queries, activities, agents, packages, versions, manuscript, location.key]);
 
+  /* ⚠️ DEV ONLY, GATED HERE AT THE CALL SITE: the AN21 locks compare what the page DRAWS with what the model SAYS.
+     A statically replaced MODE makes this dead in a production build, as the review aid above is. */
+  React.useEffect(() => {
+    if (import.meta.env.MODE === "production") return;
+    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, sent: model.sent, replies: model.replies, offers: model.offers, fulls: model.fulls };
+  }, [v21, model]);
+
   const load = useQcLoad(collectionsReady && activitiesReady);
   const v = model.v17;
   const names = NAV_NAMES(model.sent);

@@ -1,0 +1,434 @@
+[
+ {
+  "lock": "L1 document",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1664,1664]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1920",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1920 @4",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1920 @4",
+  "ok": true,
+  "detail": "[1664,1664]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1920 @4",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1920 @6",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1920 @6",
+  "ok": true,
+  "detail": "[1664,1664]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1920 @6",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1920 @8",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1920 @8",
+  "ok": true,
+  "detail": "[1664,1664]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1920 @8",
+  "ok": true,
+  "detail": "[1920,1920]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1256,1256]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1512 @4",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1512 @4",
+  "ok": true,
+  "detail": "[1256,1256]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1512 @4",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1512 @6",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1512 @6",
+  "ok": true,
+  "detail": "[1256,1256]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1512 @6",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1512 @8",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1512 @8",
+  "ok": true,
+  "detail": "[1256,1256]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1512 @8",
+  "ok": true,
+  "detail": "[1512,1512]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1280",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1280",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1280",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1280 @4",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1280 @4",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1280 @4",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1280 @6",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1280 @6",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1280 @6",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1280 @8",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1280 @8",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1280 @8",
+  "ok": true,
+  "detail": "[1280,1280]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1180",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1180",
+  "ok": true,
+  "detail": "[924,924]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1180",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1180 @4",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1180 @4",
+  "ok": true,
+  "detail": "[924,924]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1180 @4",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1180 @6",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1180 @6",
+  "ok": true,
+  "detail": "[924,924]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1180 @6",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1180 @8",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1180 @8",
+  "ok": true,
+  "detail": "[924,924]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1180 @8",
+  "ok": true,
+  "detail": "[1180,1180]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1024",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1024",
+  "ok": true,
+  "detail": "[768,768]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1024",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1024 @4",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1024 @4",
+  "ok": true,
+  "detail": "[768,768]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1024 @4",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1024 @6",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1024 @6",
+  "ok": true,
+  "detail": "[768,768]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1024 @6",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "1024 @8",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "1024 @8",
+  "ok": true,
+  "detail": "[768,768]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "1024 @8",
+  "ok": true,
+  "detail": "[1024,1024]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "390",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "390",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "390",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "390 @4",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "390 @4",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "390 @4",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "390 @6",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "390 @6",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "390 @6",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 document",
+  "where": "390 @8",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 sheet scroller",
+  "where": "390 @8",
+  "ok": true,
+  "detail": "[390,390]"
+ },
+ {
+  "lock": "L1 app frame",
+  "where": "390 @8",
+  "ok": true,
+  "detail": "[390,390]"
+ }
+]

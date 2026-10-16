@@ -107,7 +107,7 @@ export const A21Header: React.FC<{
           </h1>
           <p className="a21-by" data-a21="byline"><i aria-hidden="true" /><em>for</em> {msTitle ?? "your book"}<i aria-hidden="true" /></p>
           <div className="a21-b" data-a21="acts">
-            <button type="button" className="a21-p1" data-a21="record" onClick={onRecord}>+ Record a response</button>
+            <button type="button" className="a21-p1" data-a21="record-response" onClick={onRecord}>+ Record a response</button>
             <button type="button" className="a21-p2" data-a21="read" onClick={onRead} disabled={loading}>Read the numbers {"↓"}</button>
           </div>
         </div>
