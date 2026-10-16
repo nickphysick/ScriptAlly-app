@@ -5,5 +5,6 @@ export { assistAgentData } from "./assistAgentData";
 export { waitlist } from "./waitlist";
 export { sendContactMessage } from "./contactMessage";
 export { sendBetaFeedback } from "./betaFeedback";
+export { sendWeeklyPulse } from "./weeklyPulse";
 export { redeemInviteCode } from "./inviteCode";
 export { waitlistRetention } from "./waitlistRetention";

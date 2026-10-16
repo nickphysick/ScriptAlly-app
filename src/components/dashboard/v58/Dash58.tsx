@@ -42,7 +42,8 @@ import { Dash58List } from "./Dash58List";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
 import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
 import { openFeedback } from "../../../lib/feedbackStore";
-import type { Mood } from "../../../lib/weeklyPulse";
+import { pulseWeeks, readEcho, writeEcho, type Mood } from "../../../lib/weeklyPulse";
+import { readWeeklyPulse, sendWeeklyPulse } from "../../../lib/weeklyPulseClient";
 import "../oneScreen.css";
 import "./dash58.css";
 import "../v59/dash59.css";
@@ -205,10 +206,44 @@ export const Dash58: React.FC<Dash58Props> = ({
     else run(a);
   };
 
-  /* ── the founding writer panel's weekly pulse ── */
+  /* ── the founding writer panel's weekly pulse (v59) ──
+     One answer per ISO week, changeable within it. The face fills at once and the call runs; only
+     the server's yes shows "Noted" and moves this week's dot. A failure clears the face back to what
+     was stored and says so. The read of the five weeks never holds the panel back. */
+  const pulseUid = currentUser?.id ?? "";
+  const weeks = useMemo(() => pulseWeeks(now), [now]);
+  const thisWeek = weeks[4];
+  const [pulseHistory, setPulseHistory] = useState<(Mood | null)[]>([null, null, null, null, null]);
+  const [pulseStored, setPulseStored] = useState<Mood | null>(null);
   const [pulseChosen, setPulseChosen] = useState<Mood | null>(null);
   const [pulseState, setPulseState] = useState<PulseState>("idle");
-  const pulseHistory: (Mood | null)[] = [null, null, null, null, pulseState === "noted" ? pulseChosen : null];
+  useEffect(() => {
+    if (!pulseUid) return undefined;
+    let live = true;
+    const echo = readEcho(pulseUid, thisWeek);
+    if (echo) { setPulseStored(echo); setPulseChosen(echo); setPulseState("noted"); setPulseHistory((h) => [...h.slice(0, 4), echo]); }
+    void readWeeklyPulse(pulseUid, weeks).then((read) => {
+      if (!live) return;
+      const now4 = read[4] ?? echo;
+      setPulseHistory([...read.slice(0, 4), now4]);
+      if (read[4]) { setPulseStored(read[4]); setPulseChosen((c) => c ?? read[4]); setPulseState((st) => (st === "idle" ? "noted" : st)); }
+    });
+    return () => { live = false; };
+  }, [pulseUid, thisWeek, weeks]);
+  const choosePulse = (m: Mood) => {
+    if (!pulseUid || pulseState === "sending") return;
+    setPulseChosen(m);
+    setPulseState("sending");
+    sendWeeklyPulse(m, thisWeek).then(() => {
+      writeEcho(pulseUid, thisWeek, m);
+      setPulseStored(m);
+      setPulseHistory((h) => [...h.slice(0, 4), m]);
+      setPulseState("noted");
+    }, () => {
+      setPulseChosen(pulseStored);
+      setPulseState("failed");
+    });
+  };
 
   /* ── the page's own scrollport: the height the one screen fills ──
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
@@ -326,7 +361,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   history={pulseHistory}
                   chosen={pulseChosen}
                   state={pulseState}
-                  onChoose={(m) => { setPulseChosen(m); setPulseState("noted"); }}
+                  onChoose={choosePulse}
                   onChange={() => setPulseState("idle")}
                   onFeedback={openFeedback}
                 />

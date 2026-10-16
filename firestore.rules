@@ -1201,6 +1201,11 @@ service cloud.firestore {
     // the writer's own work in progress, so it is between them and the desk.
     match /betaFeedback/{id} { allow read: if isAdmin(); allow write: if false; }
 
+    // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post
+    // to the `sendWeeklyPulse` callable, which sets `betaPulse/{uid}_{week}` via the Admin SDK. A
+    // writer reads their own weeks (the panel's history dots); an admin reads all.
+    match /betaPulse/{id} { allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid); allow write: if false; }
+
     // ROUTE: Beta invite codes — NO client access whatsoever.
     // The signup gate posts to the `redeemInviteCode` callable, which validates and marks a code
     // used inside a transaction via the Admin SDK. A client READ would be the whole gate given
