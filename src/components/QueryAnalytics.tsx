@@ -38,6 +38,7 @@ import { A21Records } from "./analytics/A21Records";
 import { A21Stand } from "./analytics/A21Stand";
 import { A21Empty } from "./analytics/A21Empty";
 import { buildV21, windowLede } from "../lib/analyticsV21";
+import { buildV24, ringOf } from "../lib/analyticsV24";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
 import "./analytics/a21.css"; /* after a17: v21 restates its desktop rules */
@@ -59,14 +60,14 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
   const manuscript = resolveScopedManuscript(manuscripts, storedMs);
 
   /** ⚠️ ONE CLOCK PER DERIVATION, so every figure on the page agrees about what today is. */
-  const { model, v21 } = React.useMemo(() => {
+  const { model, v21, v24 } = React.useMemo(() => {
     const nowMs = Date.now();
     const own = manuscript ? queries.filter((q) => q.manuscriptId === manuscript.id) : [];
     /* ⚠️ THE DEV REVIEW AID IS GATED HERE, AT THE CALL SITE: a statically replaced MODE makes the branch
        dead in a production build, so the module is unreachable from it (AN17-16 cuts the fixture with it). */
     const scoped = import.meta.env.MODE === "production" ? own : limitForReview(own);
     const m = analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs, title: manuscript?.title });
-    return { model: m, v21: buildV21(m, agents, nowMs) };
+    return { model: m, v21: buildV21(m, agents, nowMs), v24: buildV24(m, nowMs) };
     /* location.key: a switch re-opens the route, and the book in scope is read from storage */
   }, [queries, activities, agents, packages, versions, manuscript, location.key]);
 
@@ -74,8 +75,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
      A statically replaced MODE makes this dead in a production build, as the review aid above is. */
   React.useEffect(() => {
     if (import.meta.env.MODE === "production") return;
-    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, sent: model.sent, replies: model.replies, offers: model.offers, fulls: model.fulls };
-  }, [v21, model]);
+    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, v24, sent: model.sent, replies: model.replies, offers: model.offers, fulls: model.fulls };
+  }, [v21, v24, model]);
 
   const load = useQcLoad(collectionsReady && activitiesReady);
   const v = model.v17;
@@ -143,7 +144,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
             {/* v21 §A: the desktop opens on the light header; the phone keeps v17's band (decision 5) */}
             {!phone && !empty && manuscript !== null ? (
               <A21Header loading={load.loading} sent={model.sent} replies={model.replies} msTitle={manuscript.title || null}
-                rows={load.loading ? null : v21.standing} inside={load.loading ? null : v21.inside}
+                rows={load.loading ? null : v21.standing} inside={load.loading ? null : ringOf(v24.keeping)}
                 onRecord={record} onRead={() => go(0)} onRing={() => go(3)} />
             ) : null}
             {phone && !empty ? <PageHeader

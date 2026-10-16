@@ -322,3 +322,10 @@ export function buildV24(model: AnalyticsModel, nowMs: number): V24 {
   };
 }
 export { gapDays };
+
+/** The header ring: replies kept to the stated time, over the replies that had one. Shaped as v21's ring reads it. */
+export function ringOf(k: ReplyKeeping): { inside: number; dated: number; pct: number | null; share: number } {
+  if (k.placed === 0) return { inside: 0, dated: 0, pct: null, share: 0 };
+  const share = k.kept.length / k.placed;
+  return { inside: k.kept.length, dated: k.placed, pct: Math.round(share * 100), share };
+}
