@@ -39,6 +39,7 @@ import { HK_HAWK, SessionModal, TabNote, type FixResult, type HkFix, type HkHand
 import "./housekeeping.css";
 import "./housekeepingV18.css";
 import "./housekeepingV182.css";
+import "./housekeepingV183.css";
 
 export interface HousekeepingDrawerProps extends HkHandlers {
   model: HkModel;
@@ -285,7 +286,6 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
   const saveRef = useRef<HTMLButtonElement>(null);
   const ringRef = useRef<HTMLSpanElement>(null);
-  const howRef = useRef<HTMLButtonElement>(null);
   const ptsRef = useRef<HTMLButtonElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -295,7 +295,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     if (!how) return undefined;
     const away = (e: PointerEvent) => {
       const t = e.target as Node;
-      if (popRef.current?.contains(t) || howRef.current?.contains(t) || ptsRef.current?.contains(t)) return;
+      if (popRef.current?.contains(t) || ptsRef.current?.contains(t)) return;
       setHow(false);
     };
     document.addEventListener("pointerdown", away, true);
@@ -426,14 +426,25 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
         <b className="hk8-n" data-hk8="pct">{health.pct === null ? "" : <>{pct}<i>%</i></>}</b>
         <span className="hk82-lh" data-hk8="label">List health</span>
       </div>
-      <button type="button" className="hk8-how" data-hk8="how" ref={howRef} aria-expanded={how} aria-haspopup="dialog" onClick={() => setHow((v) => !v)}>How points work</button>
+      {/* v18.3 §A — "How points work" is gone: the points tile is the only way to the key */}
       <button type="button" className="hk8-x" data-hk8="close" aria-label="Close Housekeeping" onClick={p.onClose}>✕</button>
       {!introing ? (
         <>
           <div className="hk82-tiles" data-hk8="tiles">
-            <button type="button" className="hk82-tile" data-hk8="tile" data-k="points" ref={ptsRef} aria-expanded={how} onClick={() => setHow((v) => !v)}>
-              <b>{held}</b><small>of {health.possible} pts</small>
-            </button>
+            {/* v18.3 §A — the key opens UNDER the points tile: the tile and its key share a positioned wrapper */}
+            <span className="hk83-ptw" data-hk8="points-wrap">
+              <button type="button" className="hk82-tile" data-hk8="tile" data-k="points" ref={ptsRef} aria-expanded={how} aria-haspopup="dialog" onClick={() => setHow((v) => !v)}>
+                <b>{held}</b><small>of {health.possible} pts</small>
+              </button>
+              {how ? (
+                <div className="hk8-howpop hk83-key" data-hk8="how-pop" ref={popRef} role="dialog" aria-label="How points work">
+                  <table><tbody>
+                    {POINTS_ORDER.map((g) => <tr key={g}><td>{DETAIL_NAME[g]}{g === "reopen" ? " (closed agents)" : ""}</td><td>{POINTS[g]}</td></tr>)}
+                  </tbody></table>
+                  <p>{POINTS_LINE}</p>
+                </div>
+              ) : null}
+            </span>
             <button type="button" className="hk82-tile" data-hk8="tile" data-k="gaps" onClick={toAllGaps}>
               <b>{gapsLeft}</b><small>{gapsLeft === 1 ? "gap" : "gaps"}</small>
             </button>
@@ -446,14 +457,6 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
             <p className="hk82-tally" data-hk8="tally"><b>+{tally.pts}</b> this session · {tally.n} filled</p>
           ) : null}
         </>
-      ) : null}
-      {how ? (
-        <div className="hk8-howpop hk82-key" data-hk8="how-pop" ref={popRef} role="dialog" aria-label="How points work">
-          <table><tbody>
-            {POINTS_ORDER.map((g) => <tr key={g}><td>{DETAIL_NAME[g]}{g === "reopen" ? " (closed agents)" : ""}</td><td>{POINTS[g]}</td></tr>)}
-          </tbody></table>
-          <p>{POINTS_LINE}</p>
-        </div>
       ) : null}
     </div>
   );
@@ -544,6 +547,8 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     const missing = agents.filter((a) => (model.gapsById.get(a.id) ?? []).includes(g)).length;
     const rows = items.filter((i) => i.gap === g);
     const complete = missing === 0;
+    /* v18.3 §A.5 — a detail every agent already has is not shown; it returns the moment a gap of that kind exists */
+    if (complete) return null;
     return (
       <div key={g} className={`hk8-dc${complete ? " complete" : ""}`} data-hk8="detail" data-gap={g} data-have={base - missing} data-base={base}>
         <div className="hk8-dband">
