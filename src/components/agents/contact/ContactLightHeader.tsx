@@ -14,15 +14,44 @@
  * ⚠️ THE TITLE KEEPS `data-page-title` (the hook anything asking "has the page's title scrolled past?" reads)
  *    and takes focus from the pinned row's "back to the top".
  */
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
 import "./contactV17.css";
 import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
+import "./contactV182.css"; /* after v18: v18.2 restates the header's shadow, the card's layers and the tabs */
 
 export const CONTACT_EYEBROW = "— CONTACT LIST —";
 export const CONTACT_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
+/** v18.2 §A — the archivist beside the title block (720 × 641, from the trimmed 922 × 821 master in design-refs) */
+export const CONTACT_ARCHIVIST = { src: "/images/contact-list-archivist.webp", version: 1 };
+
+/**
+ * v18.2 §A — the archivist is as tall as the title block (the eyebrow's top to the buttons' bottom). Its HEIGHT could
+ * be the grid area's in CSS, but the text beside it must start 28px past its right edge, and that edge is the height ×
+ * 1.123: a width that follows a height a sibling sets is a cycle no layout pass resolves (columns are sized before
+ * rows). So ONE ResizeObserver reads the text's own extent and writes `--cl182-ill-h` on the title row; nothing else
+ * writes it, and the illustration itself never drives layout (its size is read from the text, never the reverse).
+ */
+function useIllustrationHeight(row: React.RefObject<HTMLDivElement | null>) {
+  useLayoutEffect(() => {
+    const el = row.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const tb = el.querySelector<HTMLElement>(".cl17-tb");
+    const acts = el.querySelector<HTMLElement>(".cl17-acts");
+    if (!tb || !acts) return undefined;
+    const write = () => {
+      const h = acts.offsetTop + acts.offsetHeight - tb.offsetTop;
+      /* a zero reading is the page before layout (or hidden by a stage toggle): refused, never stored */
+      if (h > 0) { el.style.setProperty("--cl182-ill-h", `${h}px`); el.style.setProperty("--cl182-ill-t", `${tb.offsetTop}px`); }
+    };
+    write();
+    const ro = new ResizeObserver(write);
+    ro.observe(tb); ro.observe(acts);
+    return () => ro.disconnect();
+  }, [row]);
+}
 /** "41 agents on file" / "1 agent on file" */
 export const onFileWords = (n: number): string => (n === 1 ? "agent on file" : "agents on file");
 
@@ -128,11 +157,17 @@ export const ContactLightHeader: React.FC<{
   letters?: React.ReactNode;
   /** Part B — the search and filter row, under the header's rule */
   children?: React.ReactNode;
-}> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, letters, children }) => (
+}> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, letters, children }) => {
+  const rowRef = useRef<HTMLDivElement>(null);
+  useIllustrationHeight(rowRef);
+  return (
   <header className="cl17-hd" data-cl17="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-    <img className="cl17-shadow" data-cl17="shadow" alt="" aria-hidden="true" src={`${CONTACT_SHADOW.src}?v=${CONTACT_SHADOW.version}`} />
     {letters}
-    <div className="cl17-tr" data-cl17="header-row">
+    <div className="cl17-tr" data-cl17="header-row" ref={rowRef}>
+      {/* v18.2 §A — the archivist left of the title block, and the hawk's shadow cast over the List health card; both
+          are the title row's, so they are placed against it */}
+      <img className="cl182-ill" data-cl182="archivist" alt="" src={`${CONTACT_ARCHIVIST.src}?v=${CONTACT_ARCHIVIST.version}`} />
+      <img className="cl17-shadow" data-cl17="shadow" alt="" aria-hidden="true" src={`${CONTACT_SHADOW.src}?v=${CONTACT_SHADOW.version}`} />
       <div className="cl17-tb" data-cl17="title-block">
         <span className="cl17-ey" data-cl17="eyebrow">{CONTACT_EYEBROW}</span>
         <h1 className="cl17-title" data-page-title="" data-cl17="title" tabIndex={-1}
@@ -154,4 +189,5 @@ export const ContactLightHeader: React.FC<{
     </div>
     {children}
   </header>
-);
+  );
+};
