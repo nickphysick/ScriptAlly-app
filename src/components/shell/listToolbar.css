@@ -1,0 +1,86 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE LIST TOOLBAR AND ITS HEADINGS (Contact list v18.3 §E, shared with the Query Centre). One navy row per list page,
+ * a toolbar: the count and a "Grouped by {Group}" chip on the left; search, Filters, density and the pin on the right,
+ * every one 36 tall. Under it the table's own header row: white, flush with the sheet, solid while it sticks.
+ *
+ * ⚠️ THE CLASSES ARE DOUBLED (`.ltb.ltb`) so this sheet wins over each page's older rules for the same elements
+ *    whatever order the bundle emits them in; the pages keep their own navy, radius and stickiness.
+ * ⚠️ COMPACT FIRST: the base values are the compact ones and `.ws-app.sheet-wide` restates the full ones (v17's switch).
+ *    The search field is the only control whose size changes (200 compact, 240 full).
+ */
+
+/* ── the row ── */
+.ltb.ltb { display: flex; align-items: center; gap: 16px; box-sizing: border-box; min-height: 64px; padding: 14px 24px 14px 40px; }
+.ltb.ltb .ltb-l { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
+.ltb.ltb .ltb-count {
+  flex: none; margin: 0; white-space: nowrap; overflow: visible; font: 400 18px/1.2 var(--sp-type) !important; color: #f4eee5;
+}
+.ltb.ltb .ltb-count b, .ltb.ltb .ltb-count b span { font: inherit !important; color: inherit; }
+
+/* the grouping chip */
+.ltb.ltb .ltb-chipw { position: relative; display: inline-flex; flex: none; }
+.ltb.ltb .ltb-chip {
+  display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; height: 32px; margin: 0; padding: 0 10px 0 12px; border: 0;
+  border-radius: 16px; background: rgba(244, 238, 229, 0.12); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.22); color: #f4eee5;
+  cursor: pointer; white-space: nowrap; text-decoration: none;
+}
+.ltb.ltb .ltb-chip:hover, .ltb.ltb .ltb-chip[aria-expanded="true"] { background: rgba(244, 238, 229, 0.2); }
+.ltb.ltb .ltb-chip i { font: italic 400 14px/1 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.7); }
+.ltb.ltb .ltb-chip b { font: 400 15px/1 var(--sp-type) !important; color: #f4eee5; }
+.ltb.ltb .ltb-chip .ltb-caret { font: 400 11px/1 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75); }
+.ltb.ltb .ltb-chip:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+
+/* ── the right: every control 36 tall, one pill radius, one 1px cream 30% ring (search: white, no ring), gap 8 ── */
+.ltb.ltb .ltb-r { display: flex; align-items: center; gap: 8px; flex: none; }
+.ltb.ltb .ltb-search {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; width: 200px; height: 36px; padding: 0 14px;
+  border-radius: 18px; background: #fff; box-shadow: none; color: rgba(28, 19, 15, 0.55);
+}
+.ws-app.sheet-wide .ltb.ltb .ltb-search { width: 240px; }
+.ltb.ltb .ltb-ctl {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; height: 36px; margin: 0; padding: 0 14px;
+  border: 0; border-radius: 18px; background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3); cursor: pointer;
+}
+.ltb.ltb .ltb-dens {
+  display: inline-flex; align-items: stretch; gap: 0; box-sizing: border-box; height: 36px; padding: 0; border-radius: 18px;
+  box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3); overflow: hidden;
+}
+.ltb.ltb .ltb-dens button {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 38px; height: 36px; margin: 0; padding: 0;
+  border: 0; border-radius: 18px; background: none; color: rgba(244, 238, 229, 0.75); cursor: pointer;
+}
+.ltb.ltb .ltb-dens button.on, .ltb.ltb .ltb-dens button[aria-pressed="true"] { background: #f4eee5; color: #2d3a50; }
+.ltb.ltb .ltb-round { width: 36px; height: 36px; padding: 0; border-radius: 50%; }
+
+/* ── the headings: the table's own header row, white, flush with the sheet, a 1px rule; solid while it sticks, with an
+   8px soft shade below; rows never show through ── */
+.lth.lth {
+  box-sizing: border-box; min-height: 40px; height: 40px; margin-left: 0; margin-right: 0; padding-top: 0; padding-bottom: 0;
+  border-radius: 0; background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.12); box-shadow: none; align-items: center;
+}
+.lth.lth::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 8px; pointer-events: none;
+  background: linear-gradient(rgba(28, 19, 15, 0.07), rgba(28, 19, 15, 0));
+  opacity: 0;
+}
+.lth.lth.is-stuck::after, .lth.lth[data-stuck]::after { opacity: 1; }
+.lth.lth .lth-lab, .lth.lth .lt-lab, .lth.lth .qc138-h button, .lth.lth .qc138-h span {
+  font: 500 10.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.5);
+}
+.lth.lth .lt-lab.on, .lth.lth .qc138-h.on button, .lth.lth .qc138-h.on span { color: rgba(28, 19, 15, 0.85); }
+/* the shared pin button, inside a toolbar: 36 round, the same ring */
+.ltb.ltb .plb { width: 36px; height: 36px; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3); }
+
+/* the grouping menu, anchored UNDER the chip: left edges equal, 8 below. The chosen option's radio is filled navy, the
+   others are empty rings (the Contact list's menu is the shared Popover, already drawn so; the Query Centre's own menu
+   takes the same marks here). */
+.ltb.ltb .ltb-chipw > [role="menu"] { position: absolute; top: calc(100% + 8px); left: 0; right: auto; z-index: 30; }
+.ltb.ltb .ltb-chipw > [role="menu"] button { display: flex; align-items: center; gap: 10px; }
+.ltb.ltb .ltb-chipw > [role="menu"] button::before {
+  content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.4px rgba(28, 19, 15, 0.45);
+}
+.ltb.ltb .ltb-chipw > [role="menu"] button[aria-checked="true"]::before { box-shadow: inset 0 0 0 5px #2a3a52; }

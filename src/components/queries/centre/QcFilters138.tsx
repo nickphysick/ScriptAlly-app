@@ -239,7 +239,7 @@ export const QcFiltersButton138: React.FC<{
   }, [open, close]);
   return (
     <>
-      <button type="button" ref={btn} className="qc138-fb" data-qc138="filters-btn" aria-haspopup="dialog" aria-expanded={open}
+      <button type="button" ref={btn} className="qc138-fb ltb-ctl" data-qc138="filters-btn" aria-haspopup="dialog" aria-expanded={open}
         disabled={disabled} onClick={() => (open ? close() : setOpen(true))}>
         <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4h12M4.5 8h7M7 12h2" /></svg>
         <span>Filters</span>

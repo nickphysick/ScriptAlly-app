@@ -234,7 +234,7 @@
    stated height is the row's (never a reading of it). A group's own header sticks first where the list is grouped. */
 @media (min-width: 768px) {
   .clv-group .cl16-list .lt-labels { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px)); z-index: 7; background: #fff; transition: none; }
-  .clv-group .cl16-list .lt-labels.is-stuck { box-shadow: 0 10px 16px -14px rgba(28, 19, 15, 0.3); }
+  /* v18.3: the stuck shade is the shared headings' 8px `::after` */
   .clv-group .cl16-list .lt-gh { top: var(--cl17-pin-h); z-index: 7; }
   .clv-group .cl16-list .lt-div { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px) + 40px); z-index: 6; }
   /* a row brought into view by the keyboard lands below the sticky stack, not under it.

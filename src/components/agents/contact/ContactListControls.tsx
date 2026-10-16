@@ -21,7 +21,7 @@ export type ContactPop = "group" | "status" | "open" | "queried" | "more" | "fil
 export const ContactFind: React.FC<{
   find: string; onFind: (v: string) => void; findRef?: React.Ref<HTMLInputElement>; findKey?: React.ReactNode; disabled?: boolean;
 }> = ({ find, onFind, findRef, findKey, disabled }) => (
-  <label className="cl13-find cl17-find" data-clv="find" data-cl13-find="banner" data-cl17="find">
+  <label className="cl13-find cl17-find ltb-search" data-clv="find" data-cl13-find="banner" data-cl17="find">
     <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
     </svg>

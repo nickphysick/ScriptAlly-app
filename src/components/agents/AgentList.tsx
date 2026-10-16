@@ -86,6 +86,7 @@ import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from 
 import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
 import { PinListButton } from "../shell/PinListButton";
+import "../shell/listToolbar.css"; /* v18.3 §E — the list toolbar and headings, shared with the Query Centre */
 import { useStickyStack } from "../shell/stickyStack";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -349,11 +350,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v18 §B — THE LIST HEADER'S TOOLS, right of its sentence: search, the one Filters button, density, full screen. The
      loading skeleton draws the same nodes, so the header holds its height while the page settles. */
   const listTools = (loading: boolean) => (
-    <span className="cl18-lt" data-cl18="tools">
+    <span className="cl18-lt ltb-r" data-cl18="tools">
       {/* v18.2 §C — no "/" keycap in the search: the / key still finds */}
       <ContactFind find={search} onFind={setSearch} disabled={loading} />
       <ContactFiltersButton filters={filters} pop={pop} disabled={loading} />
-      <span className="cl18-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
+      <span className="cl18-dens ltb-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
         {(["comfortable", "compact"] as const).map((d) => (
           <button key={d} type="button" className={density === d ? "on" : undefined} aria-pressed={density === d} data-cl14-dens={d}
             aria-label={d === "comfortable" ? "Comfortable" : "Compact"} title={d === "comfortable" ? "Comfortable" : "Compact"} disabled={loading} onClick={() => setDensity(d)}>
@@ -1189,22 +1190,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           {/* v138.6 §C — THE STICKY ROW: the navy header in a wrapper that sticks under the sheet's lip, filled with the
               sheet's colour (the Query Centre's own construction) */}
           <div className="cl18-lhw" data-cl18="list-header-wrap">
-          <div className="cl18-lh" data-cl18="list-header" data-cl17="sheet-row" ref={lhRef}>
-            <p className="cl18-says" data-cl18="sentence" data-cl16="showing" data-cl17="showing" role="status">
-              {visibleFacts.length === factsAll.length && !anyActive ? (
-                <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> {factsAll.length === 1 ? "agent" : "agents"}</>
-              ) : (
-                <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b></>
-              )}
-              <span className="cl18-dim">{groupKey === "none" ? ", " : ", grouped by "}</span>
-              <button type="button" className="cl18-gn" data-cl18="group" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
-                onClick={(e) => pop.toggle("group", e.currentTarget)}>
-                {groupKey === "none" ? "A to Z" : (GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? "A to Z")}
-              </button>
-              {visibleFacts.length === factsAll.length && !anyActive ? null : (
-                <button type="button" className="cl18-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button>
-              )}
-            </p>
+          {/* v18.3 §E — THE TOOLBAR (shell/listToolbar.css, shared with the Query Centre): the count, then the grouping
+              chip on the left; every control on the right 36 tall. Sorting is on the column headings only. */}
+          <div className="cl18-lh ltb" data-cl18="list-header" data-cl17="sheet-row" ref={lhRef}>
+            <div className="ltb-l">
+              <p className="cl18-says ltb-count" data-cl18="sentence" data-cl16="showing" data-cl17="showing" role="status">
+                {visibleFacts.length === factsAll.length && !anyActive ? (
+                  <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> {factsAll.length === 1 ? "agent" : "agents"}</>
+                ) : (
+                  <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b></>
+                )}
+                {visibleFacts.length === factsAll.length && !anyActive ? null : (
+                  <button type="button" className="cl18-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button>
+                )}
+              </p>
+              <span className="ltb-chipw">
+                <button type="button" className="cl18-gn ltb-chip" data-cl18="group" data-ltb="chip" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
+                  onClick={(e) => pop.toggle("group", e.currentTarget)}>
+                  <i>Grouped by</i> <b data-ltb="group-name">{groupKey === "none" ? "None" : (GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? "None")}</b>
+                  <span className="ltb-caret" aria-hidden="true">⌄</span>
+                </button>
+              </span>
+            </div>
             {listTools(false)}
             <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
             <ContactFiltersPanel filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}

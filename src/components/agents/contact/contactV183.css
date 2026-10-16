@@ -52,3 +52,18 @@
 .cl183-pk .cl183-pp.is-add { background: transparent; box-shadow: none; border: 1.2px dashed rgba(42, 58, 82, 0.4); color: rgba(28, 19, 15, 0.55); font-style: italic !important; }
 .cl183-pk .cl183-pp.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.4); }
 .cl183-pk .cl183-pp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── §E · ONE SHEET: the white list is flush with the navy toolbar's edges, and the headings row spans it. Rows and
+   headings share one inset (78 left, 40 right), so each label sits on its column. ── */
+.clv-group .cl16-list { --cl17-row-l: 78px; }
+.clv-group .cl16-list .cl14-list { padding: 0 0 18px; }
+.clv-group .cl16-list .lt-panel { border-radius: 0; margin: 0; box-shadow: none; }
+.clv-group .cl16-list .clv-row { padding-right: 40px; }
+.clv-group .cl16-list .lt-labels.lth { margin: 0; padding: 0 40px 0 78px; }
+/* grouped: the group bands stick under the one headings row */
+@media (min-width: 768px) {
+  .clv-group .cl16-list .lt-panel .lt-gh { top: calc(var(--cl17-pin-h) + 40px); }
+}
+/* §E.4 · the first row of each letter: a 1px ink 16% rule, 14 above, the letter in Special Elite 26 at ink 30% */
+.cl16-list .cl17-margin .clv-row[data-first-letter] { box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.16); padding-top: 14px; }
+.cl16-list .clv-row .cl17-ml, .ws-app.sheet-wide .cl16-list .clv-row .cl17-ml { font-size: 26px !important; color: rgba(28, 19, 15, 0.3); }

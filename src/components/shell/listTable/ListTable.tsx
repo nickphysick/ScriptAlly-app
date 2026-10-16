@@ -83,7 +83,8 @@ export const ListPanel: React.FC<{
 };
 
 export const ListLabels: React.FC<{ columns: ListColumn[]; stuck: boolean; labelsRef?: React.Ref<HTMLDivElement> }> = ({ columns, stuck, labelsRef }) => (
-  <div className={`lt-labels${stuck ? " is-stuck" : ""}`} data-lt="labels" data-stuck={stuck || undefined} ref={labelsRef}>
+  /* v18.3 §E — `lth`: the table's own header row (shell/listToolbar.css), shared with the Query Centre's headings */
+  <div className={`lt-labels lth${stuck ? " is-stuck" : ""}`} data-lt="labels" data-stuck={stuck || undefined} ref={labelsRef}>
     {columns.map((c) =>
       c.sort ? (
         <button
