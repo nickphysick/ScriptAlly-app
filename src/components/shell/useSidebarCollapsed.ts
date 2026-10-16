@@ -17,7 +17,7 @@
  */
 import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { releaseSidebarHolds, sidebarHeld, subscribeSidebarHold } from "./sidebarForce";
+import { releaseSidebarHolds, sidebarHeld, sidebarInstant, subscribeSidebarHold } from "./sidebarForce";
 
 export const SIDEBAR_COLLAPSED_KEY = "scriptally:sidebar-collapsed";
 
@@ -95,6 +95,8 @@ export function useSidebarCollapsed(): SidebarCollapsedState {
 
   /* A page's hold (a full-screen list) reads as collapsed without touching the writer's own choice. */
   const held = useSyncExternalStore(subscribeSidebarHold, sidebarHeld, () => false);
+  /* v138.6 — a restored hold lands with no transition (the `sb-ready` gate is down for its two frames) */
+  const instant = useSyncExternalStore(subscribeSidebarHold, sidebarInstant, () => false);
 
   const toggle = useCallback(() => {
     /* pressed while a page holds it shut: the writer wants it open, so the hold goes and it opens */
@@ -137,5 +139,5 @@ export function useSidebarCollapsed(): SidebarCollapsedState {
     };
   }, []);
 
-  return { collapsed: collapsed || held, toggle, setCollapsed, ready };
+  return { collapsed: collapsed || held, toggle, setCollapsed, ready: ready && !instant };
 }

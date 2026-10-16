@@ -113,24 +113,7 @@
   }
   .qc138-sheet .qc138-dens button svg { width: 16px; height: 16px; }
   .qc138-sheet .qc138-dens button[aria-pressed="true"] { background: #fff; color: #2d3a50; box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.35); }
-  /* v138.5 §G — the pin: a 44px circle with a 1.5px cream line and a cream pushpin. Hover: a cream wash and its label
-     below. Pinned: cream with a navy pin turned −45°. */
-  .qc138-sheet .qc138-pinb {
-    position: relative; display: grid; place-items: center; box-sizing: border-box; width: 44px; height: 44px; padding: 0; margin: 0;
-    border: 1.5px solid rgba(244, 238, 229, 0.45); border-radius: 50%; background: transparent; color: #f4eee5; cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  }
-  .qc138-sheet .qc138-pinb svg { display: block; width: 19px; height: 19px; transition: rotate 0.2s ease; }
-  .qc138-sheet .qc138-pinb:hover { background: rgba(244, 238, 229, 0.1); }
-  .qc138-sheet .qc138-pinb[aria-pressed="true"], .qc138-sheet .qc138-pinb[aria-pressed="true"]:hover { background: #f4eee5; border-color: #f4eee5; color: #2a3a52; }
-  .qc138-sheet .qc138-pinb[aria-pressed="true"] svg { rotate: -45deg; }
-  .qc138-sheet .qc138-pinb-tip {
-    position: absolute; right: 0; top: calc(100% + 7px); z-index: 30; box-sizing: border-box; padding: 6px 10px; border-radius: 7px;
-    background: #1c130f; color: #f4eee5; white-space: nowrap; font: 400 12.5px/1.2 var(--sp-serif) !important;
-    pointer-events: none; opacity: 0; transition: opacity 140ms ease;
-  }
-  .qc138-sheet .qc138-pinb:hover .qc138-pinb-tip, .qc138-sheet .qc138-pinb:focus-visible .qc138-pinb-tip { opacity: 1; }
-  @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc138-pinb svg, .qc138-sheet .qc138-pinb-tip { transition: none; } }
+  /* v138.6 §A — the pin is the shared PinListButton (shell/pinListButton.css) */
 
   /* ── the headings: one grid with the rows, sticky under the pinned row ── */
   .qc138-sheet .qc138-heads {

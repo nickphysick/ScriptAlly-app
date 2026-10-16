@@ -100,7 +100,7 @@ import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
-import { holdSidebarCollapsed } from "./shell/sidebarForce";
+import { usePinList } from "./shell/useFullScreenList";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
@@ -2460,12 +2460,6 @@ export const Queries: React.FC<{
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
-  /* v138.5 §G — the pin (it replaced Full screen; the state keeps its name). Pinned: the sidebar is HELD at its icon
-     rail by the shell's own hold, which never touches the writer's own setting, so unpinning restores whatever it was
-     before; the header hides; the old pinned bar stands down. Held only while this page is on screen. Not kept across
-     page loads. */
-  const [qcFull, setQcFull] = useState(false);
-  useEffect(() => (qcFull && routeActive ? holdSidebarCollapsed() : undefined), [qcFull, routeActive]);
   /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
   const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());
   const [qcBulk, setQcBulk] = useState<{ mode: "nudge" | "resp" | "close"; ids: string[] } | null>(null);
@@ -2488,6 +2482,11 @@ export const Queries: React.FC<{
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  /* v138.6 §A — the pin is the shared hook (`usePinList`, the Contact list's too): held sidebar, remembered per page
+     and restored on the first frame, F and Esc, and the scroll position put back on the way out. `qcFull` keeps its
+     name. */
+  const qcPin = usePinList("queries", { routeActive: routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
+  const qcFull = qcPin.full;
   /* v138 §A — the pinned row shows once the header's foot has scrolled under the sheet's top (desktop, on screen) */
   const qc138Pinned = useQcPinned(qc138Ref, routeActive && qcDesk);
   qcPinnedNow.current = qc138Pinned;
@@ -7126,7 +7125,7 @@ export const Queries: React.FC<{
                   density={qcDensity}
                   onDensity={setQcDensity}
                   full={qcFull}
-                  onFull={() => setQcFull((f) => !f)}
+                  onFull={qcPin.toggle}
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */

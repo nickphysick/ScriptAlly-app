@@ -14,6 +14,7 @@
  *    one predicate (`nextDoor`).
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { PinListButton } from "../../shell/PinListButton";
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
@@ -66,7 +67,6 @@ const ICON = {
   box: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><rect x="2" y="3" width="12" height="3" rx="1" /><path d="M3 6v7h10V6M6.5 9h3" /></svg>,
   clock: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
   pkg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 8l9-4 9 4-9 4z" /><path d="M3 8v8l9 4 9-4V8" /><path d="M12 12v8" /></svg>,
-  pin: <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4v2H6v-2l4-4z" /><path d="M12 15v6" /></svg>,
   comfy: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3 4.5h10M3 8h10M3 11.5h10" /></svg>,
   dense: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 3.5h10M3 6.5h10M3 9.5h10M3 12.5h10" /></svg>,
 };
@@ -568,12 +568,8 @@ export const QcList138: React.FC<QcList138Props> = ({
             <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>
             <button type="button" aria-pressed={density === "compact"} data-d="compact" title="Compact rows" aria-label="Compact rows" onClick={() => onDensity("compact")}>{ICON.dense}</button>
           </span>
-          {/* v138.5 §G — the pin: it collapses the sidebar, hides the header and lets the list fill the sheet. Its label
-              ("Pin the list" / "Unpin") is drawn below it on hover, never a native title. */}
-          <button type="button" className="qc138-pinb" data-qc138="pin" aria-pressed={full} aria-label={full ? "Unpin" : "Pin the list"} onClick={onFull}>
-            {ICON.pin}
-            <span className="qc138-pinb-tip" data-qc138="pin-tip" aria-hidden="true">{full ? "Unpin" : "Pin the list"}</span>
-          </button>
+          {/* v138.6 §A — the shared pin button (both list pages); the pin itself is the shared hook's */}
+          <PinListButton pinned={full} onToggle={onFull} attrs={{ "data-qc138": "pin" }} />
         </span>
       </div>
       <div className="qc138-heads" data-qc138="headings" role="row">
