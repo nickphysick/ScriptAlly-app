@@ -69,8 +69,8 @@ export const SHORTCUTS = {
   contactsOpen:     { chords: [k("Enter")], label: "Open the agent's card", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsAct:      { chords: [k("l")], label: "Start the agent's next action", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
-  /* v16 §E — the list takes the whole content area; Escape leaves it (unless an agent's panel is open: Escape is the panel's first) */
-  contactsFull:     { chords: [k("f")], label: "Full screen list", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  /* v16 §E, v138.6 §C — the pin: owned by the shared pin hook (usePinList), not by the page; Escape leaves it last */
+  contactsFull:     { chords: [k("f")], label: "Pin the list", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
   /* v138.6 §A — the pin: owned by the shared pin hook (usePinList), not by the page */
   qcPin:            { chords: [k("f")], label: "Pin the list", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },

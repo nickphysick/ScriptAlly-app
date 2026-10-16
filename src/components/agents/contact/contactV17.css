@@ -213,47 +213,18 @@
 /* full screen: the header is hidden; the list is the page */
 .clv-group[data-full] > .cl17-hd { display: none; }
 
-/* ── §C · THE PINNED ROW. A child of the page sheet (`.ws-window`), so its left, top and width are the sheet's
-   own and nothing writes them. 68 tall, on the page colour (the folder tab's token). Its contents sit on the
-   list's left and right edges. ── */
-/* the pinned row's height is the shell's (`--pin-row-h`: the covered strip + 64, shell/pinnedRow.css); the row's box
-   and content row are PinnedRow's, and this sheet styles only its contents */
-.clv-group { --cl17-pin-h: var(--pin-row-h); }
-.cl17-pin .cl17-pin-in { gap: 10px; width: min(1600px, calc(100% - 48px)); margin: 0 auto; }
-.cl17-pin .cl17-pin-t {
-  flex: none; padding: 0; margin-right: 8px; border: 0; background: none; cursor: pointer; white-space: nowrap;
-  font: 400 20px/1 var(--sp-type) !important; color: #1c130f;
+/* ── §C · THE STICKY STACK (v138.6 §C; the v17 pinned row is retired). The navy list header is the sticky row, 12 under
+   the sheet's top (the lip's cover); the headings stick under it and a group's own header or divider under those.
+   `--cl17-pin-h` keeps its name: it is now the cover plus the navy header's measured height (`--stk-head-h`, the one
+   writer in shell/stickyStack.ts), pinned or not. ── */
+.clv-group { --cl17-pin-h: calc(var(--pin-cover, 12px) + var(--stk-head-h, 68px)); }
+@media (min-width: 768px) {
+  .cl16-list .cl18-lhw {
+    position: sticky; top: 0; z-index: 9; box-sizing: border-box;
+    margin-top: calc(-1 * var(--pin-cover, 12px)); padding-top: var(--pin-cover, 12px);
+    background: var(--ink-sheet, var(--ws-page));
+  }
 }
-.cl17-pin .cl17-pin-c { display: flex; gap: 8px; flex: none; }
-.cl17-pin .cl17-pin-c button {
-  display: inline-flex; align-items: center; gap: 7px; box-sizing: border-box; height: 34px; padding: 0 14px 0 12px; border: 0;
-  border-radius: 17px; background: rgba(255, 255, 255, 0.7); color: #1c130f; cursor: pointer; white-space: nowrap;
-  font: 400 15px/1 var(--sp-type) !important;
-}
-.cl17-pin .cl17-pin-c button i { display: block; width: 10px; height: 10px; border-radius: 3px; }
-.cl17-pin .cl17-pin-c button b { font: 400 18px/1 var(--sp-type) !important; }
-.cl17-pin .cl17-pin-c button[aria-pressed="true"] { background: #2d3a50; color: #f4eee5; }
-.cl17-pin .cl17-pin-f { flex: none; font: 400 14px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); white-space: nowrap; }
-.cl17-pin .cl17-pin-f b { font: 600 14px/1.2 var(--sp-serif) !important; color: #1c130f; }
-.cl17-pin .cl17-pin-f button { padding: 0; border: 0; background: none; cursor: pointer; font: inherit !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
-.cl17-pin .cl17-pin-sp { flex: 1 1 0; min-width: 0; }
-.cl17-pin .cl17-pin-s {
-  display: flex; align-items: center; gap: 8px; flex: 0 1 230px; min-width: 120px; box-sizing: border-box; height: 38px; padding: 0 14px;
-  border-radius: 19px; background: #fff; color: rgba(28, 19, 15, 0.55); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
-}
-.cl17-pin .cl17-pin-s input { flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; font: 400 15px/1.2 var(--sp-serif) !important; color: #1c130f; }
-.cl17-pin .cl17-pin-s:focus-within { box-shadow: inset 0 0 0 1.5px #2d3a50; }
-.cl17-pin .cl17-pin-a {
-  flex: none; box-sizing: border-box; height: 38px; padding: 0 18px; border: 0; border-radius: 19px; background: #2d3a50; color: #f4eee5;
-  cursor: pointer; white-space: nowrap; font: 400 16px/1 var(--sp-type) !important;
-}
-.cl17-pin .cl17-pin-a:hover { background: #1c130f; }
-.cl17-pin .cl17-pin-u {
-  display: none; flex: none; align-items: center; justify-content: center; box-sizing: border-box; width: 38px; height: 38px; padding: 0; border: 0;
-  border-radius: 50%; background: none; color: #1c130f; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.25);
-}
-.ws-app.sheet-wide .cl17-pin .cl17-pin-u { display: inline-flex; }
-.cl17-pin button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 
 /* the pin line's sentinel: the header's foot, zero height */
 .cl17-hd .cl17-sentinel { display: block; height: 0; }
@@ -265,13 +236,14 @@
   .clv-group .cl16-list .lt-labels.is-stuck { box-shadow: 0 10px 16px -14px rgba(28, 19, 15, 0.3); }
   .clv-group .cl16-list .lt-gh { top: var(--cl17-pin-h); z-index: 7; }
   .clv-group .cl16-list .lt-div { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px) + 40px); z-index: 6; }
-  /* a row brought into view by the keyboard lands below the row and the headings, not under them.
-     ⚠️ ONLY WHILE THE ROW IS SHOWN. Stated always, this padding made the browser scroll the page to the top whenever a
-        control near the scroller's top took focus: a press on a summary card row at scrollTop 60 landed at 0 (measured,
-        lock A2), because a focused element inside the scroll padding is "not in view". */
-  .ws-window:has(> .cl17-pin[data-on]) .agl-wpg .wpg-scroll { --wpg-scroll-pad: calc(var(--pin-row-h) + 56px); }
-  /* full screen: the header is hidden and the row is always shown, so the list starts under it */
-  .clv-group[data-full] > .clv-main { margin-top: calc(var(--cl17-pin-h) + 16px); }
+  /* a row brought into view by the keyboard lands below the sticky stack, not under it.
+     ⚠️ A SCROLL-MARGIN ON THE ROWS, NOT A SCROLL-PADDING ON THE SCROLLER. Stated as padding, it made the browser
+        scroll the page to the top whenever a control near the scroller's top took focus (a press on a summary card
+        row at scrollTop 60 landed at 0, v17 lock A2): a focused element inside the scroll padding is "not in view".
+        A margin on the rows applies only to the rows. (v17 stated the padding only while its pinned row showed.) */
+  .clv-group .cl16-list [data-clv="row"] { scroll-margin-top: calc(var(--cl17-pin-h) + 40px + 4px); }
+  /* pinned: the header is hidden, so the list starts 22 under the sheet's top (the Query Centre's own) */
+  .clv-group[data-full] > .clv-main { margin-top: 22px; }
 }
 
 /* ── §D · THE ROWS. Discs in status colours; the surname letter in the margin of each letter's first row (the
