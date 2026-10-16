@@ -22,7 +22,7 @@ import {
   type GapKey, type HkBook, type HkItem, type HkModel, type Run,
 } from "../../../lib/contactHousekeeping";
 import type { WishlistEvery } from "../../../lib/contactPrefs";
-import { POINTS, POINTS_LINE, POINTS_ORDER, agentPct, appliesTo, minutesFor, type Health } from "../../../lib/listHealth";
+import { POINTS, POINTS_LINE, POINTS_ORDER, agentPct, appliesTo, minutesFor, taskOrder, type Health } from "../../../lib/listHealth";
 import { bookGenreHit } from "../../../lib/genreMatch";
 import { encodeMats, matsOf, matsRows, type CardMats } from "../../../lib/cardDraft";
 import { materialRowsFromAgent, summaryFromRows, validateMaterials } from "../../../lib/agentMaterials";
@@ -575,7 +575,8 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
 
   const agentRows = (() => {
     const rows = model.byAgent.map((r) => ({ r, sum: r.items.reduce((s, i) => s + POINTS[i.gap], 0), queried: r.items.some((i) => i.live) }));
-    const order = (x: typeof rows[number], y: typeof rows[number]) => y.sum - x.sum || nameOf(x.r.agent).localeCompare(nameOf(y.r.agent));
+    /* v18.2 §D.1 — the model's own order (each agent at its first task under listHealth.taskOrder); never re-sorted */
+    const order = (x: typeof rows[number], y: typeof rows[number]) => taskOrder(x.r.items[0], y.r.items[0]);
     const group = (title: string, list: typeof rows, k: string) => (list.length ? (
       <div className="hk8-ag" data-hk8="agent-group" data-k={k} key={k}>
         <h6>{title}</h6>
