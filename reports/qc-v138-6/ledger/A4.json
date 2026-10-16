@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A4",
+  "where": "queries 1512 scrolled to 1200 first",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "queries 1512 pinning puts the list at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "queries 1512 unpinning returns to 1200 ±2",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "queries 1280 scrolled to 1200 first",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "queries 1280 pinning puts the list at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "queries 1280 unpinning returns to 1200 ±2",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "agents 1512 scrolled to 1200 first",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "agents 1512 pinning puts the list at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "agents 1512 unpinning returns to 1200 ±2",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "agents 1280 scrolled to 1200 first",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "lock": "A4",
+  "where": "agents 1280 pinning puts the list at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "agents 1280 unpinning returns to 1200 ±2",
+  "ok": true,
+  "detail": "1200"
+ }
+]

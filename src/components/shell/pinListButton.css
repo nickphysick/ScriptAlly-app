@@ -1,0 +1,31 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * v138.6 §A — the shared pin button (PinListButton.tsx). Every value stated: it sits on both pages' navy headers.
+ * ⚠️ brand.tsx names bare spans as the body sans at runtime: the label states its face with `!important`.
+ */
+.plb {
+  position: relative; flex: none; display: grid; place-items: center; box-sizing: border-box; width: 44px; height: 44px; padding: 0; margin: 0;
+  border: 1.5px solid rgba(244, 238, 229, 0.45); border-radius: 50%; background: transparent; color: #f4eee5; cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.plb > svg { display: block; width: 19px; height: 19px; transition: rotate 0.2s ease; }
+.plb:hover { background: rgba(244, 238, 229, 0.1); }
+.plb[aria-pressed="true"], .plb[aria-pressed="true"]:hover { background: #f4eee5; border-color: #f4eee5; color: #2a3a52; }
+.plb[aria-pressed="true"] > svg { rotate: -45deg; }
+.plb:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+/* the label: serif 12.5 on #1c130f, radius 7, then a key cap (JetBrains Mono 600 10.5, cream on cream 14%, a 1px
+   cream 30% line with a 2px foot, radius 4, 1 × 6) */
+.plb .plb-tip {
+  position: absolute; right: 0; top: calc(100% + 7px); z-index: 30; display: inline-flex; align-items: center; gap: 8px;
+  box-sizing: border-box; padding: 6px 8px 6px 10px; border-radius: 7px; background: #1c130f; color: #f4eee5; white-space: nowrap;
+  pointer-events: none; opacity: 0; transition: opacity 140ms ease;
+}
+.plb .plb-tl { font: 400 12.5px/1.2 var(--sp-serif) !important; color: #f4eee5; }
+.plb .plb-k {
+  display: inline-block; box-sizing: border-box; padding: 1px 6px; border: 1px solid rgba(244, 238, 229, 0.3); border-bottom-width: 2px;
+  border-radius: 4px; background: rgba(244, 238, 229, 0.14); color: #f4eee5; font: 600 10.5px/1.3 var(--font-mono) !important;
+}
+.plb:hover .plb-tip, .plb:focus-visible .plb-tip { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .plb > svg, .plb .plb-tip { transition: none; } }

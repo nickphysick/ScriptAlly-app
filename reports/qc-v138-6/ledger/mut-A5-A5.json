@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A5",
+  "where": "queries 'Pin the list' + F on hover",
+  "ok": true,
+  "detail": "{\"label\":\"Pin the list\",\"key\":\"F\",\"op\":\"1\",\"title\":\"Pin the list\"}"
+ },
+ {
+  "lock": "A5",
+  "where": "queries no native title",
+  "ok": false,
+  "detail": "Pin the list"
+ },
+ {
+  "lock": "A5",
+  "where": "queries pinned: 'Unpin' + F",
+  "ok": true,
+  "detail": "{\"label\":\"Unpin\",\"key\":\"F\",\"op\":\"1\",\"title\":\"Pin the list\"}"
+ },
+ {
+  "lock": "A5",
+  "where": "queries pinned: no native title",
+  "ok": false,
+  "detail": "Pin the list"
+ },
+ {
+  "lock": "A5",
+  "where": "agents 'Pin the list' + F on hover",
+  "ok": true,
+  "detail": "{\"label\":\"Pin the list\",\"key\":\"F\",\"op\":\"1\",\"title\":\"Pin the list\"}"
+ },
+ {
+  "lock": "A5",
+  "where": "agents no native title",
+  "ok": false,
+  "detail": "Pin the list"
+ },
+ {
+  "lock": "A5",
+  "where": "agents pinned: 'Unpin' + F",
+  "ok": true,
+  "detail": "{\"label\":\"Unpin\",\"key\":\"F\",\"op\":\"1\",\"title\":\"Pin the list\"}"
+ },
+ {
+  "lock": "A5",
+  "where": "agents pinned: no native title",
+  "ok": false,
+  "detail": "Pin the list"
+ }
+]

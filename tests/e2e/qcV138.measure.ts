@@ -366,7 +366,7 @@ test.describe("Query Centre v138", () => {
     L.done(5);
   });
 
-  test("D2 · bands: three in order, tints, Closed folded, Waiting sticks under the pinned row and the headings", async ({ page }) => {
+  test("D2 · bands: three in order, tints, Closed folded, Waiting sticks under the headings", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("D2");
     for (const vp of SIZES) {
@@ -385,9 +385,10 @@ test.describe("Query Centre v138", () => {
         sc.style.scrollBehavior = "auto";
         sc.scrollTop += band.getBoundingClientRect().top - sc.getBoundingClientRect().top + 260;
         await new Promise((res) => setTimeout(res, 300));
-        const pin = document.querySelector<HTMLElement>('[data-qc138="pinned"][data-on]');
+        /* RETARGETED (v138.6 §B): the pinned row is retired; the band sticks under the headings, which stick under the
+           navy header (the sticky row). QC138.6 B1 owns the whole stack. */
         const heads = g.querySelector<HTMLElement>('[data-qc138="headings"]')!;
-        return { band: band.getBoundingClientRect().top, want: (pin ? pin.getBoundingClientRect().bottom : NaN) + heads.getBoundingClientRect().height };
+        return { band: band.getBoundingClientRect().top, want: heads.getBoundingClientRect().bottom };
       });
       L.check("D2", `${w} sticky`, near(s.band, s.want, 1), `${s.band.toFixed(1)} against ${s.want.toFixed(1)}`);
     }

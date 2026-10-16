@@ -155,17 +155,18 @@ test("A3 · spy: stepping 1px over 600px, both strips name the row at the line; 
         let cur: string | null = null;
         for (const row of g.querySelectorAll<HTMLElement>('[data-clv="row"][data-initial]')) { if (row.getBoundingClientRect().top <= line) cur = row.dataset.initial ?? null; else break; }
         const top = g.querySelector('[data-cl18="tab"][aria-current="true"]')?.getAttribute("data-l") ?? null;
-        const pin = document.querySelector('[data-cl18="pin-letter"][aria-current="true"]')?.getAttribute("data-l") ?? null;
-        if (top !== cur || pin !== cur) bad.push(`${i}:${cur}/${top}/${pin}`);
-        const p = document.querySelector<HTMLElement>('[data-cl17="pinned"][data-on]');
-        if (p) { const b = p.getBoundingClientRect(); boxes.add(`${b.left.toFixed(1)},${b.top.toFixed(1)},${b.width.toFixed(1)}`); }
+        /* RETARGETED (Query Centre v138.6 §C): the pinned row and its compact letters are deleted, so the top strip is
+           the one strip; the box check moves to the slate header, the sticky row (one box while stuck) */
+        if (top !== cur) bad.push(`${i}:${cur}/${top}`);
+        const p = g.querySelector<HTMLElement>('[data-cl18="list-header"]');
+        if (p && p.getBoundingClientRect().top - sc.getBoundingClientRect().top <= 12.5) { const b = p.getBoundingClientRect(); boxes.add(`${b.left.toFixed(1)},${b.top.toFixed(1)},${b.width.toFixed(1)}`); }
         n++;
       }
       return { n, bad, boxes: [...boxes] };
     });
     L.check(`601 steps read ${w}`, r.n === 601, `${r.n}`);
-    L.check(`both strips' current letter is the row at the line at every step ${w}`, r.bad.length === 0, `${r.bad.length} misses: ${r.bad.slice(0, 6).join(" ")}`);
-    L.check(`the pinned row takes one box while pinned ${w}`, r.boxes.length === 1, `${r.boxes.length} boxes: ${r.boxes.slice(0, 3).join(" | ")}`);
+    L.check(`the strip's current letter is the row at the line at every step ${w}`, r.bad.length === 0, `${r.bad.length} misses: ${r.bad.slice(0, 6).join(" ")}`);
+    L.check(`the sticky header takes one box while stuck ${w}`, r.boxes.length === 1, `${r.boxes.length} boxes: ${r.boxes.slice(0, 3).join(" | ")}`);
   }
   L.done(6);
 });

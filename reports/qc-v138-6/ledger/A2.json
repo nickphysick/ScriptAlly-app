@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A2",
+  "where": "queries F pins",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "queries F unpins",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "queries F in the search does nothing",
+  "ok": true,
+  "detail": "false · \"f\""
+ },
+ {
+  "lock": "A2",
+  "where": "queries the Filters panel opened",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "queries Esc closes the panel, still pinned",
+  "ok": true,
+  "detail": "panel 0 · pinned true"
+ },
+ {
+  "lock": "A2",
+  "where": "queries the second Esc unpins",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "agents F pins",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "agents F unpins",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "agents F in the search does nothing",
+  "ok": true,
+  "detail": "false · \"f\""
+ },
+ {
+  "lock": "A2",
+  "where": "agents the Filters panel opened",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "agents Esc closes the panel, still pinned",
+  "ok": true,
+  "detail": "panel 0 · pinned true"
+ },
+ {
+  "lock": "A2",
+  "where": "agents the second Esc unpins",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "agents: the agent panel opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A2",
+  "where": "agents: Esc closes the agent panel only",
+  "ok": true,
+  "detail": "panel 0 · pinned true"
+ }
+]

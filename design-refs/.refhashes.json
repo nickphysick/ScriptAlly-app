@@ -394,7 +394,8 @@
     "design-refs/contact-list-v18-2/screens/20-hk-after-save-undo-1512@2x.png": "64a82dd5c38dda39ed17919288b64759090fe8c802a71609b49c696bb7958aef",
     "design-refs/contact-list-v18-2/screens/21-hk-reopen-question-1512@2x.png": "15723796e2210a751def1f31a30110c956a7a50a4301c2f52e534764200d4e72",
     "design-refs/contact-list-v18-2/screens/22-hk-by-agent-1280@2x.png": "245c994cc2ecf268e8e4564ded5873346d331a9218b52876dc7cbde24be5b240",
-    "design-refs/contact-list-v18-2/screens/23-hk-minutes-to-up-next-1280@2x.png": "7d2c813fdb6d718a43c574f66dd3ffc0914121cae7ed4eaec335a5d0dd7e3c79"
+    "design-refs/contact-list-v18-2/screens/23-hk-minutes-to-up-next-1280@2x.png": "7d2c813fdb6d718a43c574f66dd3ffc0914121cae7ed4eaec335a5d0dd7e3c79",
+    "design-refs/query-centre-v138-6/query-centre-v138-6.html": "b9104f0d6ea46cd68c21fc7869128354c418dbfe0a77f14751aa8d0f5e2c40b3"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
