@@ -24,8 +24,6 @@
 @media (min-width: 768px) {
   .qcv-group > .qc138-hd { width: var(--qc138-w); margin-left: calc(50% - var(--qc138-w) / 2); }
 }
-.qc138-hd { --qc138-sh-x: -60px; }
-.ws-app.sheet-wide .qc138-hd { --qc138-sh-x: -70px; }
 .qc138-hd .qc138-srow { margin-bottom: 22px; }
 /* hawk auto · title block max-content · spacer · chart; 22 apart, everything centred on one line.
    ⚠️ NOTHING HERE MAY CREATE A STACKING CONTEXT (no transform, no isolation, no z-index): the hawk shadow (§D)
@@ -89,11 +87,22 @@
   .qc138-hd .qc138-wk-big b { font-size: 58px !important; }
 }
 
+/* ── v138.5 §D · THE HAWK SHADOW: the Contact list's faint flying hawk (`hawk-shadow.png`), behind the chart, upper
+   right: its right edge 30 outside the inset, its top 10 above the header grid; 560 wide, .11, mirrored and tilted,
+   blurred 2px, multiplied. It is laid out on the grid (positioned, no z-index, so not a stacking context) and is
+   out of its flow.
+   ⚠️ THE ORDER IS THE POINT: at rest it paints OVER the card (z 2 over the card's 1), giving it a faint grey cast;
+      the title block and the hawk stay above it (z 3). On hover the card lifts IN FRONT of it (z 4, up 3px, a deeper
+      shadow, 220ms). All four are in the header's one stacking context (`isolation: isolate` on `.qc138-hd`); the
+      grid and the chart column must not make another, or the card could never rise above the shadow. ── */
+.qc138-hd .qc138-hg { position: relative; }
 .qc138-hd .qc138-shadow {
-  position: absolute; left: calc(var(--phf-inset) + var(--qc138-sh-x)); top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
-  opacity: 0.15; transform: rotate(-4deg); filter: blur(1.5px); pointer-events: none; user-select: none;
+  position: absolute; right: -30px; top: -10px; z-index: 2; width: 560px; height: auto; max-width: none;
+  opacity: 0.11; transform: rotate(-8deg) scaleX(-1); filter: blur(2px); mix-blend-mode: multiply;
+  pointer-events: none; user-select: none;
 }
-.ws-app.sheet-wide .qc138-hd .qc138-shadow { width: 460px; }
+.qc138-hd .qc138-wk:hover { z-index: 4; transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 22px 34px -20px rgba(28, 19, 15, 0.45); }
+@media (prefers-reduced-motion: reduce) { .qc138-hd .qc138-wk { transition: none; } }
 
 .qc138-hd .qc138-ey {
   display: block; margin: 0 0 15px; font: 500 12px/1 var(--font-mono) !important; letter-spacing: 0.24em; color: #a2452a; white-space: nowrap;

@@ -94,7 +94,6 @@ export const QcHeader138: React.FC<{
   }, []);
   return (
   <header className="qc138-hd phf" data-qc138="header" data-qcv="open-header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-    <img className="qc138-shadow" data-qc138="shadow" alt="" aria-hidden="true" src={`${QC_SHADOW.src}?v=${QC_SHADOW.version}`} />
     {/* v138.5 §A — the status row, at the top, within the shared inset */}
     <div className="qc138-srow phf-row" data-qc138="status-row">
       <GlyphRow counts={loading ? null : counts} stages={stages} onGlyph={onGlyph} loading={loading} />
@@ -121,6 +120,8 @@ export const QcHeader138: React.FC<{
         </div>
       </div>
       <span className="qc138-hsp" aria-hidden="true" />
+      {/* v138.5 §D — the faint flying hawk, upper right, over the chart card at rest and under it on hover */}
+      <img className="qc138-shadow" data-qc138="shadow" alt="" aria-hidden="true" src={`${QC_SHADOW.src}?v=${QC_SHADOW.version}`} />
       <div className="qc138-cc" data-qc138="chart-col">{chart}</div>
     </div>
     {children}
