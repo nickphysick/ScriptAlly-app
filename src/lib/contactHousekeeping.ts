@@ -23,6 +23,7 @@
  */
 import { QueryStatus, type Agent, type Query } from "../types";
 import { agentDataQualityNeeds } from "./agentDataQuality";
+import { taskOrder } from "./listHealth";
 import { isDoorClosed } from "./agentList";
 import { agentPrimary } from "./agentDisplay";
 import { joinGenres } from "./genreNoun";
@@ -231,7 +232,6 @@ export interface HkModel {
   gapsById: Map<string, GapKey[]>;
 }
 
-const byName = (x: Agent, y: Agent) => nameOf(x).toLowerCase().localeCompare(nameOf(y).toLowerCase());
 
 export function hkModel(agents: readonly Agent[], ctxOf: (a: Agent) => HkAgentCtx, prefs: ContactPrefs): HkModel {
   const all: HkItem[] = [];
@@ -246,8 +246,8 @@ export function hkModel(agents: readonly Agent[], ctxOf: (a: Agent) => HkAgentCt
       all.push({ agent: a, gap, group: GAP_GROUP[gap], key: itemKey(a.id, gap), score: gapScore(ctx, gap), live: ctx.live, fits: ctx.fits });
     }
   }
-  const order = (x: HkItem, y: HkItem) => y.score - x.score || byName(x.agent, y.agent) || GAP_ORDER.indexOf(x.gap) - GAP_ORDER.indexOf(y.gap);
-  all.sort(order);
+  /* v18.2 §D.1 — the one task order (listHealth.taskOrder): points, then queried, then name */
+  all.sort(taskOrder);
   const items = all.filter((i) => !prefs.later[i.key]);
   const hidden = all.filter((i) => !!prefs.later[i.key]);
   const rows = new Map<string, HkAgentRow>();
@@ -257,7 +257,8 @@ export function hkModel(agents: readonly Agent[], ctxOf: (a: Agent) => HkAgentCt
     r.best = Math.max(r.best, it.score);
     rows.set(it.agent.id, r);
   }
-  const byAgent = [...rows.values()].sort((x, y) => y.best - x.best || y.items.length - x.items.length || byName(x.agent, y.agent));
+  /* each agent's place is its first task's, under the same order */
+  const byAgent = [...rows.values()].sort((x, y) => taskOrder(x.items[0], y.items[0]));
   return {
     items, hidden, laterUntil: hidden.length ? earliestLater(prefs) : null,
     total: agents.length, complete, gapAgents: rows.size,

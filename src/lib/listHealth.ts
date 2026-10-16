@@ -14,6 +14,7 @@
 import type { Agent } from "../types";
 import type { GapKey, HkModel } from "./contactHousekeeping";
 import { isDoorClosed } from "./agentList";
+import { agentPrimary } from "./agentDisplay";
 
 /** points per detail, in points order (the drawer lists details in this order) */
 export const POINTS: Readonly<Record<GapKey, number>> = { reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 2 };
@@ -25,6 +26,19 @@ export const appliesTo = (gap: GapKey, a: Agent): boolean => (gap === "reopen" ?
 
 /** the most one profile can hold: 18, or 20 for an agent closed for now */
 export const possibleFor = (a: Agent): number => POINTS_ORDER.reduce((s, g) => s + (appliesTo(g, a) ? POINTS[g] : 0), 0);
+
+/**
+ * v18.2 §D.1 — THE ONE TASK ORDER: most points first, then agents you've queried (a live query), then the agent's
+ * name, then the agent's id (so two agents of one name keep a stable place). Up next, the focus queue, "Coming up",
+ * whole-queue runs, each By missing detail ledger and each By agent group all read this; nothing orders tasks on its
+ * own. It replaces the old usefulness score as the ORDER (the score is no longer a sort key anywhere).
+ */
+export interface Orderable { gap: GapKey; live: boolean; agent: Pick<Agent, "id" | "name" | "agency"> }
+export const taskOrder = (x: Orderable, y: Orderable): number =>
+  POINTS[y.gap] - POINTS[x.gap]
+  || Number(y.live) - Number(x.live)
+  || agentPrimary(x.agent as Agent).toLowerCase().localeCompare(agentPrimary(y.agent as Agent).toLowerCase())
+  || (x.agent.id < y.agent.id ? -1 : x.agent.id > y.agent.id ? 1 : 0);
 
 export const missingFor = (gaps: readonly GapKey[]): number => gaps.reduce((s, g) => s + POINTS[g], 0);
 

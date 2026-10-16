@@ -28,6 +28,8 @@ import { encodeMats, matsOf, matsRows, type CardMats } from "../../../lib/cardDr
 import { materialRowsFromAgent, summaryFromRows, validateMaterials } from "../../../lib/agentMaterials";
 import { agentInitials } from "../../../lib/agentDisplay";
 import { isDoorClosed } from "../../../lib/agentList";
+import { panelLinks } from "../../../lib/agentPanel";
+import { dayKey } from "../../../lib/contactPrefs";
 import { MaterialsField, Stepper } from "../card/cardInputs";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -82,8 +84,12 @@ export const UNLOCK: Record<GapKey, string> = {
   reopen: "A reminder on your to-do list when a closed agent reopens.",
 };
 const DETAIL_NAME = GAP_DETAIL;
+/** v18.2 §D.5 — "Saved {first}'s {detail}." */
+const SAVED_WORD: Record<GapKey, string> = { reply: "reply time", materials: "materials", genres: "genres", wishlist: "wishlist", reopen: "reopening date" };
 export const HK_FOOT_V18 = "We only ask for details that make QueryHawk more useful to you.";
 const nameOf = (a: Agent) => (a.name ?? "").trim() || (a.agency ?? "").trim();
+/** the agent's stored website as a link (the panel's own reading of the field), or null */
+const webOf = (a: Agent): string | null => { const l = panelLinks(a).find((x) => x.key === "website"); return l && "href" in l ? l.href : null; };
 
 /** the intro's example agent: fixed sample content, never stored and never counted */
 export const INTRO_AGENT: PaperCardData = {
@@ -108,25 +114,6 @@ const Dot: React.FC<{ a: Agent; size?: number }> = ({ a, size = 32 }) => (
 
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-function useCountUp(target: number): number {
-  const [shown, setShown] = useState(target);
-  const from = useRef(target);
-  useEffect(() => {
-    if (reduced() || from.current === target) { from.current = target; setShown(target); return undefined; }
-    const start = performance.now(), a = from.current;
-    let raf = 0;
-    const step = (t: number) => {
-      const k = Math.min(1, (t - start) / 700);
-      const e = 1 - Math.pow(1 - k, 3);
-      setShown(Math.round(a + (target - a) * e));
-      if (k < 1) raf = requestAnimationFrame(step); else from.current = target;
-    };
-    raf = requestAnimationFrame(step);
-    return () => { cancelAnimationFrame(raf); from.current = target; };
-  }, [target]);
-  return shown;
-}
-
 const HeadRing: React.FC<{ pct: number; bump: number; ringRef: React.Ref<HTMLSpanElement> }> = ({ pct, bump, ringRef }) => {
   const r = 46, c = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pct));
   return (
@@ -140,11 +127,32 @@ const HeadRing: React.FC<{ pct: number; bump: number; ringRef: React.Ref<HTMLSpa
   );
 };
 
-/* ── the pops, in the top layer ───────────────────────────────────────────────────────────────── */
+/* ── v18.2 §D.4 · ONE "+n" FLIES FROM SAVE TO THE RING, in the top layer (a fixed element in a portal at the end of the
+   body, so the drawer's own overflow never clips it): up 60 at the midpoint, scaling 1 → 1.25 → .6, fading at the end,
+   900ms. The ring bumps as it lands. Under reduced motion nothing flies; the ring still updates. ── */
 
-type Pop = { id: number; x: number; y: number; n: number; big: boolean };
-const Pops: React.FC<{ pops: Pop[] }> = ({ pops }) => (typeof document === "undefined" ? null : createPortal(
-  <>{pops.map((p) => <span key={p.id} className={`hk8-pop${p.big ? " big" : ""}`} data-hk8="pop" style={{ left: p.x, top: p.y }}>+{p.n}</span>)}</>,
+type Flight = { id: number; n: number; x0: number; y0: number; x1: number; y1: number };
+const FLY_MS = 900;
+const Fly: React.FC<{ f: Flight; onLand: (id: number) => void }> = ({ f, onLand }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof el.animate !== "function") { onLand(f.id); return undefined; }
+    const at = (x: number, y: number, s: number) => `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${s})`;
+    const mx = (f.x0 + f.x1) / 2, my = (f.y0 + f.y1) / 2 - 60;
+    const a = el.animate([
+      { transform: at(f.x0, f.y0, 1), opacity: 1, offset: 0 },
+      { transform: at(mx, my, 1.25), opacity: 1, offset: 0.5 },
+      { transform: at(f.x1, f.y1, 0.85), opacity: 1, offset: 0.85 },
+      { transform: at(f.x1, f.y1, 0.6), opacity: 0, offset: 1 },
+    ], { duration: FLY_MS, easing: "cubic-bezier(.4, .1, .3, 1)", fill: "forwards" });
+    a.finished.then(() => onLand(f.id), () => onLand(f.id));
+    return () => a.cancel();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return <span ref={ref} className="hk82-fly" data-hk8="fly" data-x1={f.x1} data-y1={f.y1}>+{f.n}</span>;
+};
+const Flights: React.FC<{ list: Flight[]; onLand: (id: number) => void }> = ({ list, onLand }) => (typeof document === "undefined" ? null : createPortal(
+  <>{list.map((f) => <Fly key={f.id} f={f} onLand={onLand} />)}</>,
   document.body,
 ));
 
@@ -159,6 +167,7 @@ const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: re
   const [picked, setPicked] = useState<string[]>([]);
   const [wish, setWish] = useState("");
   const [on, setOn] = useState<string | null>(null);
+  const [pick, setPick] = useState(false);
   const chips = useMemo(() => genreChips(book.genre, agents.flatMap((x) => x.genres ?? [])), [book.genre, agents]);
   const peer = useMemo(() => {
     const k = (a.agency ?? "").trim().toLowerCase();
@@ -215,15 +224,27 @@ const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: re
             onChange={(e) => { setWish(e.target.value); onAnswer(e.target.value.trim() ? { kind: "wishlist", text: e.target.value.trim() } : null); }} />
         </div>
       );
-    case "reopen":
+    case "reopen": {
+      /* v18.2 §D.8 — after the chips, "Pick a date…": a chip of the same size with a dashed edge that becomes a native
+         date input (today at the earliest). A picked date deselects the chips and saves through the same path. */
+      const chipsNow = reopenChips(today);
+      const picked = on !== null && !chipsNow.some((c) => c.value === on);
       return (
         <div className="hk8-field hk8-chips" data-hk8="field" data-gap="reopen">
-          {reopenChips(today).map((c) => (
+          {chipsNow.map((c) => (
             <button key={c.label} type="button" className={`hk8-chip${on === c.value ? " on" : ""}`} aria-pressed={on === c.value} data-hk8="remind-chip"
-              onClick={() => { setOn(c.value); onAnswer({ kind: "remind", on: c.value }); }}>{on === c.value ? "✓ " : ""}{c.label}</button>
+              onClick={() => { setOn(c.value); setPick(false); onAnswer({ kind: "remind", on: c.value }); }}>{on === c.value ? "✓ " : ""}{c.label}</button>
           ))}
+          {pick || picked ? (
+            <input type="date" className="hk82-date" data-hk8="pick-date" aria-label={QUESTION.reopen(firstNameOf(a))} autoFocus
+              min={dayKey(today)} value={picked ? on ?? "" : ""}
+              onChange={(e) => { const v = e.target.value; if (v && v >= dayKey(today)) { setOn(v); onAnswer({ kind: "remind", on: v }); } else { setOn(null); onAnswer(null); } }} />
+          ) : (
+            <button type="button" className="hk8-chip hk82-pick" data-hk8="pick" onClick={() => setPick(true)}>Pick a date…</button>
+          )}
         </div>
       );
+    }
     default: {
       const unhandled: never = item.gap;
       return unhandled;
@@ -234,7 +255,8 @@ const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: re
 /* ── the drawer ─────────────────────────────────────────────────────────────────────────────────── */
 
 type Mode = "intro" | "home" | "focus";
-type Run8 = { keys: string[]; name: string | null; total: number };
+/* v18.2 §D.2 — a run counts itself: `done` is saves in this run (Skip does not add one, Undo takes one back) */
+type Run8 = { keys: string[]; name: string | null; total: number; done: number };
 
 export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   const { model, book, today, agents, open, health } = p;
@@ -251,10 +273,10 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   const [tally, setTally] = useState<{ pts: number; n: number }>({ pts: 0, n: 0 });
   /* v18.2 §C — "3 ways to fill the gaps", shown once, straight after the intro's "Get started" */
   const [ways, setWays] = useState(false);
-  const [pops, setPops] = useState<Pop[]>([]);
+  const [flights, setFlights] = useState<Flight[]>([]);
   const [bump, setBump] = useState(0);
   const [banner, setBanner] = useState<string | null>(null);
-  const [foot, setFoot] = useState<{ text: string; undo?: () => Promise<boolean> } | null>(null);
+  const [foot, setFoot] = useState<{ text: string; undo?: () => Promise<boolean>; saved?: boolean } | null>(null);
   const [how, setHow] = useState(false);
   const [ses, setSes] = useState<Session | null>(null);
   const [leaving, setLeaving] = useState(false);
@@ -303,8 +325,10 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
     wasOpen.current = open;
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const held = useCountUp(health.held);
-  const pct = health.possible > 0 ? Math.round((100 * held) / health.possible) : 0;
+  /* v18.2 §D.3 — the drawer reads the one List health figure as it is, with no count-up, so it changes in the same
+     frame as the page ring and the tab (on save and on Undo, never on close) */
+  const held = health.held;
+  const pct = health.pct ?? 0;
 
   /* the queue: the run's keys still open, in order; the current task is its first */
   const pending = run ? run.keys.filter((k) => byKey.has(k)) : [];
@@ -315,7 +339,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
 
   const startFocus = (keys: string[], name: string | null, first?: string) => {
     const ordered = first ? [first, ...keys.filter((k) => k !== first)] : keys;
-    setRun({ keys: ordered, name, total: ordered.length });
+    setRun({ keys: ordered, name, total: ordered.length, done: 0 });
     setMode("focus");
   };
   /* v18.1 §B.4 — a run over one agent, asked for from the agent panel; after the open effect, so it wins over home */
@@ -345,30 +369,44 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   };
   const skip = () => { if (!run || !cur) return; setRun({ ...run, keys: [...run.keys.filter((k) => k !== cur.key), cur.key] }); };
 
-  const sayFoot = (text: string, undo?: () => Promise<boolean>) => {
-    setFoot({ text, undo });
+  const sayFoot = (text: string, undo?: () => Promise<boolean>, saved = false) => {
+    setFoot({ text, undo, saved });
     later(() => setFoot((f) => (f && f.text === text ? null : f)), 7000);
   };
 
-  const pop = (el: Element | null, n: number, big: boolean, dy: number) => {
-    if (!el || reduced()) return;
-    const r = el.getBoundingClientRect();
+  const fly = (n: number): number | null => {
+    const from = saveRef.current?.getBoundingClientRect(), to = ringRef.current?.getBoundingClientRect();
+    if (reduced() || !from || !to) { setBump((b) => b + 1); return null; }
     const id = Date.now() + Math.random();
-    setPops((ps) => [...ps, { id, x: r.left + r.width / 2, y: r.top - dy, n, big }]);
-    later(() => setPops((ps) => ps.filter((x) => x.id !== id)), 1300);
+    setFlights((fs) => [...fs, { id, n, x0: from.left + from.width / 2, y0: from.top + from.height / 2, x1: to.left + to.width / 2, y1: to.top + to.height / 2 }]);
+    return id;
   };
+  const landed = (id: number) => { setFlights((fs) => fs.filter((f) => f.id !== id)); setBump((b) => b + 1); };
 
   const save = async () => {
     if (!cur || !answer || busy) return;
     const item = cur, n = POINTS[item.gap];
     setBusy(true);
+    /* the "+n" leaves on the press, not when the write returns (a Firestore round trip can take longer than the
+       flight); a refused save takes it back */
+    const flight = fly(n);
     const r: FixResult = await p.onFix(item, answer);
     setBusy(false);
-    if ("error" in r) { sayFoot(`Couldn’t save that: ${r.error}`); return; }
-    sayFoot(r.line, r.undo);
-    pop(saveRef.current, n, false, 30);
-    pop(ringRef.current, n, true, 20);
-    setBump((b) => b + 1);
+    if ("error" in r) { if (flight != null) setFlights((fs) => fs.filter((f) => f.id !== flight)); sayFoot(`Couldn’t save that: ${r.error}`); return; }
+    setRun((x) => (x ? { ...x, done: x.done + 1 } : x));
+    setTally((t) => ({ pts: t.pts + n, n: t.n + 1 }));
+    /* v18.2 §D.5 — Undo in the footer for 7s: restores everything the save wrote (the page's own Undo, reply-time
+       deadlines and reminders included), puts the task back at the front of the run, and steps back the counter and
+       the tally. The figures follow the data. */
+    const undo = r.undo ? async () => {
+      const ok = await r.undo!();
+      if (ok) {
+        setRun((x) => (x ? { ...x, done: Math.max(0, x.done - 1), keys: [item.key, ...x.keys.filter((k) => k !== item.key)] } : x));
+        setTally((t) => ({ pts: Math.max(0, t.pts - n), n: Math.max(0, t.n - 1) }));
+      }
+      return ok;
+    } : undefined;
+    sayFoot(`Saved ${firstNameOf(item.agent)}’s ${SAVED_WORD[item.gap]}.`, undo, true);
     setDone((d) => [...d, { key: item.key, label: `${DETAIL_NAME[item.gap]} for ${firstNameOf(item.agent)}`, n }]);
     const others = (model.gapsById.get(item.agent.id) ?? []).filter((g) => g !== item.gap);
     if (others.length === 0) { const t = `✓ ${firstNameOf(item.agent)}’s profile is complete`; setBanner(t); later(() => setBanner((b) => (b === t ? null : b)), 2200); }
@@ -608,7 +646,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
 
   /* ── focus ── */
   const coming = pending.slice(1, 6).map((k) => byKey.get(k)).filter((x): x is HkItem => !!x);
-  const counter = run ? `${run.total - pending.length + 1} of ${run.total}` : "";
+  const counter = run ? `${Math.min(run.done + 1, run.total)} of ${run.total}` : "";
   const focus = cur && run ? (
     <div className="hk8-focus" data-hk8="focus">
       <div className="hk8-ftop">
@@ -625,6 +663,10 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
         </div>
         <h4 className="hk8-qh" data-hk8="question">{QUESTION[cur.gap](firstNameOf(cur.agent))}</h4>
         <p className="hk8-why"><RunsText runs={gapCopy(cur, book).why} /></p>
+        {/* v18.2 §D.7 — the agent's stored website, where the answer usually is; absent when none is stored */}
+        {webOf(cur.agent) ? (
+          <a className="hk82-web" data-hk8="website" href={webOf(cur.agent)!} target="_blank" rel="noopener noreferrer">Open {firstNameOf(cur.agent)}’s website ↗</a>
+        ) : null}
         <FocusField key={cur.key} item={cur} book={book} today={today} agents={agents} onAnswer={setAnswer} />
         <button type="button" className={`hk8-where${whereOpen ? " open" : ""}`} data-hk8="where" aria-expanded={whereOpen} onClick={() => setWhereOpen((v) => !v)}>
           {whereOpen ? "− Where to find it" : "+ Where to find it"}
@@ -668,12 +710,12 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
   const body = mode === "intro" ? intro : mode === "focus" ? (items.length === 0 ? complete : focus ?? home) : home;
 
   const footNode = (
-    <div className="hk8-foot" data-hkv="foot">
+    <div className={`hk8-foot${foot?.saved ? " hk82-foot--undo" : ""}`} data-hkv="foot" data-saved={foot?.saved ? "" : undefined}>
       {foot ? (
         <>
           <span data-hkv="foot-text">{foot.text}</span>
           {foot.undo ? (
-            <button type="button" className="hk8-lnk" data-hkv="undo" onClick={async () => {
+            <button type="button" className="hk8-lnk hk82-undo" data-hkv="undo" onClick={async () => {
               const u = foot.undo!; setFoot(null);
               const ok = await u();
               if (!ok) sayFoot("Couldn’t undo that.");
@@ -722,7 +764,7 @@ export const HousekeepingDrawer: React.FC<HousekeepingDrawerProps> = (p) => {
         ) : null}>
         <div className="hk8-db" data-hkv="body-wrap" data-hk8-mode={mode} ref={bodyRef}>{body}</div>
       </HalfDrawer>
-      <Pops pops={pops} />
+      <Flights list={flights} onLand={landed} />
     </>
   );
 };
