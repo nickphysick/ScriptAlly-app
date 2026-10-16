@@ -100,6 +100,7 @@ import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
+import { holdSidebarCollapsed } from "./shell/sidebarForce";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
@@ -2459,7 +2460,12 @@ export const Queries: React.FC<{
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
+  /* v138.5 §G — the pin (it replaced Full screen; the state keeps its name). Pinned: the sidebar is HELD at its icon
+     rail by the shell's own hold, which never touches the writer's own setting, so unpinning restores whatever it was
+     before; the header hides; the old pinned bar stands down. Held only while this page is on screen. Not kept across
+     page loads. */
   const [qcFull, setQcFull] = useState(false);
+  useEffect(() => (qcFull && routeActive ? holdSidebarCollapsed() : undefined), [qcFull, routeActive]);
   /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
   const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());
   const [qcBulk, setQcBulk] = useState<{ mode: "nudge" | "resp" | "close"; ids: string[] } | null>(null);
@@ -5177,7 +5183,7 @@ export const Queries: React.FC<{
       <QcPinned138
         anchor={qc138Ref}
         on={routeActive && qcDesk && !showGridSkeleton}
-        shown={qc138Pinned || qcFull}
+        shown={qc138Pinned && !qcFull}
         total={qcScoped.length}
         counts={qcGlyphCounts}
         stages={qcStages}
