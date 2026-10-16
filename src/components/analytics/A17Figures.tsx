@@ -247,69 +247,7 @@ export const ShareBars: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
   );
 };
 
-/* ═════════════ 4 · response window honesty ═════════════ */
-export const ReplyWindow: React.FC<{ model: AnalyticsModel }> = ({ model }) => {
-  const mark = useMark();
-  const rp = model.v17.reply;
-  const rows = rp.rows;
-  const maxW = rp.maxWeeks;
-  const step = maxW > 24 ? 8 : 4;
-  const W = 1200, x0 = 96, x1 = W - 30, per = (x1 - x0) / maxW;
-  const rowH = Math.max(22, Math.min(40, 350 / Math.max(1, rows.length)));
-  const H = rows.length * rowH + 50;
-  const ticks = Array.from({ length: Math.floor(maxW / step) }, (_, i) => (i + 1) * step);
-  /* phone */
-  const MW = 330, mper = (MW - 6) / maxW, mRow = 38;
-  const tipOf = (r: (typeof rows)[number]) => [`Said ${r.windowWeeks} ${r.windowWeeks === 1 ? "week" : "weeks"} · replied in ${Math.round(r.replyWeeks * 10) / 10} (${r.inside ? "inside" : "after"} the window)`, r.query.state];
-  return (
-    <Fig k="reply" title="Stated window and actual reply" note={rp.note + (rp.agents ? ` · ${rp.stated} of ${rp.agents} agents state a response time` : "")} population={rows.length}
-      keyItems={<><span><Sw c="a17-sw--win" />Stated window the agent gives</span><span><Sw c="a17-f-requested a17-sw--dot" />Reply, coloured by what it was</span><span><Sw c="a17-sw--dash" />How late it came</span></>}>
-      {rows.length === 0 ? <p className="a17-none">No replies against a stated window yet</p> : (
-        <>
-          <svg className="a17-d" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Stated window and actual reply">
-            {ticks.map((w) => (
-              <g key={w}>
-                <line x1={x0 + w * per} y1={0} x2={x0 + w * per} y2={H - 34} className="a17-faint" />
-                <text className="a17-ax" x={x0 + w * per} y={H - 12} textAnchor="middle">{w} WEEKS</text>
-              </g>
-            ))}
-            {rows.map((r, i) => {
-              const y = 6 + i * rowH + rowH / 2;
-              return (
-                <g key={r.id} data-a17="rrow" data-late={r.inside ? "false" : "true"}>
-                  <text className="a17-nm" x={0} y={y + 4}>{short(r.query)}</text>
-                  <rect {...mark(titleOf(r.query), [`States ${r.windowWeeks} ${r.windowWeeks === 1 ? "week" : "weeks"}`])} x={x0} y={y - 7} width={r.windowWeeks * per} height={14} rx={7} className="a17-win" />
-                  {!r.inside ? <line data-a17="leader" x1={x0 + r.windowWeeks * per} y1={y} x2={x0 + r.replyWeeks * per} y2={y} className="a17-leader" /> : null}
-                  <circle {...mark(titleOf(r.query), tipOf(r))} data-a17="rdot" cx={x0 + r.replyWeeks * per} cy={y} r={8} className={`a17-f-${r.bucket} a17-inkrule16`} />
-                </g>
-              );
-            })}
-          </svg>
-          <svg className="a17-m" viewBox={`0 0 ${MW} ${rows.length * mRow + 30}`} width="100%" data-a17="m-reply" role="img" aria-label="Stated window and actual reply">
-            {ticks.map((w) => (
-              <g key={w}>
-                <line x1={w * mper} y1={4} x2={w * mper} y2={rows.length * mRow + 6} className="a17-faint" />
-                <text className="a17-axm" x={Math.min(w * mper, MW - 4)} y={rows.length * mRow + 22} textAnchor={w === maxW ? "end" : "middle"}>{w}W</text>
-              </g>
-            ))}
-            {rows.map((r, i) => {
-              const y = i * mRow;
-              return (
-                <g key={r.id}>
-                  <text className="a17-lbm" x={0} y={y + 13}>{short(r.query)}</text>
-                  <text className="a17-axm" x={MW} y={y + 13} textAnchor="end">{`SAID ${r.windowWeeks}W · ${Math.round(r.replyWeeks)}W`}</text>
-                  <rect x={0} y={y + 19} width={r.windowWeeks * mper} height={10} rx={5} className="a17-win" />
-                  {!r.inside ? <line x1={r.windowWeeks * mper} y1={y + 24} x2={r.replyWeeks * mper} y2={y + 24} className="a17-leader" /> : null}
-                  <circle {...mark(titleOf(r.query), tipOf(r))} cx={Math.min(r.replyWeeks * mper, MW - 7)} cy={y + 24} r={7} className={`a17-f-${r.bucket} a17-inkrule14`} />
-                </g>
-              );
-            })}
-          </svg>
-        </>
-      )}
-    </Fig>
-  );
-};
+/* ═════════════ 4 · replies against the stated window: A21Window.tsx (v21) ═════════════ */
 
 /* ═════════════ 5 · wait times by stage ═════════════ */
 const GAP_ORDER = ["q-r", "r-s", "s-f", "f-o"] as const;
