@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "B1 three cards",
+  "where": "1920",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1 equal widths (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "402.7 402.7 402.7"
+ },
+ {
+  "lock": "B1 sent: the figure is the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "51/since Apr 2024 vs 51/since Apr 2024"
+ },
+ {
+  "lock": "B1 sent: the stamp is the model's, or absent",
+  "where": "1920",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 sent: the rows are the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"34 in the last 90 days\",\"20 still waiting\"] vs [\"34in the last 90 days\",\"20still waiting\"]"
+ },
+ {
+  "lock": "B1 rate: the figure is the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "41%/21 of 51 vs 41%/21 of 51"
+ },
+ {
+  "lock": "B1 rate: the stamp is the model's, or absent",
+  "where": "1920",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 rate: the rows are the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"14 went on to the full\",\"1 offer so far\"] vs [\"14went on to the full\",\"1offer so far\"]"
+ },
+ {
+  "lock": "B1 wait: the figure is the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "14/days vs 14/days"
+ },
+ {
+  "lock": "B1 wait: the stamp is the model's, or absent",
+  "where": "1920",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 wait: the rows are the model's",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"21 inside their window\",\"3 came after it\"] vs [\"21inside their window\",\"3came after it\"]"
+ },
+ {
+  "lock": "B1 three cards",
+  "where": "1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1 equal widths (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "375.8 375.8 375.8"
+ },
+ {
+  "lock": "B1 sent: the figure is the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "51/since Apr 2024 vs 51/since Apr 2024"
+ },
+ {
+  "lock": "B1 sent: the stamp is the model's, or absent",
+  "where": "1512",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 sent: the rows are the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"34 in the last 90 days\",\"20 still waiting\"] vs [\"34in the last 90 days\",\"20still waiting\"]"
+ },
+ {
+  "lock": "B1 rate: the figure is the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "41%/21 of 51 vs 41%/21 of 51"
+ },
+ {
+  "lock": "B1 rate: the stamp is the model's, or absent",
+  "where": "1512",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 rate: the rows are the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"14 went on to the full\",\"1 offer so far\"] vs [\"14went on to the full\",\"1offer so far\"]"
+ },
+ {
+  "lock": "B1 wait: the figure is the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "14/days vs 14/days"
+ },
+ {
+  "lock": "B1 wait: the stamp is the model's, or absent",
+  "where": "1512",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 wait: the rows are the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"21 inside their window\",\"3 came after it\"] vs [\"21inside their window\",\"3came after it\"]"
+ },
+ {
+  "lock": "B1 pressing sent scrolls to section 2",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 pressing rate scrolls to section 3",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 pressing wait scrolls to section 4",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 three cards",
+  "where": "1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "B1 equal widths (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "303.4 303.4 303.4"
+ },
+ {
+  "lock": "B1 sent: the figure is the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "51/since Apr 2024 vs 51/since Apr 2024"
+ },
+ {
+  "lock": "B1 sent: the stamp is the model's, or absent",
+  "where": "1280",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 sent: the rows are the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"34 in the last 90 days\",\"20 still waiting\"] vs [\"34in the last 90 days\",\"20still waiting\"]"
+ },
+ {
+  "lock": "B1 rate: the figure is the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "41%/21 of 51 vs 41%/21 of 51"
+ },
+ {
+  "lock": "B1 rate: the stamp is the model's, or absent",
+  "where": "1280",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 rate: the rows are the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"14 went on to the full\",\"1 offer so far\"] vs [\"14went on to the full\",\"1offer so far\"]"
+ },
+ {
+  "lock": "B1 wait: the figure is the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "14/days vs 14/days"
+ },
+ {
+  "lock": "B1 wait: the stamp is the model's, or absent",
+  "where": "1280",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 wait: the rows are the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"21 inside their window\",\"3 came after it\"] vs [\"21inside their window\",\"3came after it\"]"
+ }
+]

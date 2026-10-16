@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "A2 the card renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2 the rows are standing's non-zero buckets, in order",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[\"waiting\",20],[\"reading\",18],[\"offer\",1],[\"ended\",12]] vs [[\"waiting\",20],[\"reading\",18],[\"offer\",1],[\"ended\",12]]"
+ },
+ {
+  "lock": "A2 the rows sum to the queries sent",
+  "where": "1512",
+  "ok": true,
+  "detail": "51 vs 51"
+ },
+ {
+  "lock": "A2 waiting's swatch is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(247, 239, 227)"
+ },
+ {
+  "lock": "A2 reading's swatch is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "A2 offer's swatch is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A2 ended's swatch is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(228, 225, 219)"
+ },
+ {
+  "lock": "A2 waiting's segment is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(247, 239, 227)"
+ },
+ {
+  "lock": "A2 reading's segment is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "A2 offer's segment is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A2 ended's segment is its status fill",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(228, 225, 219)"
+ },
+ {
+  "lock": "A2 waiting's segment is in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "65.1 vs 65.1"
+ },
+ {
+  "lock": "A2 reading's segment is in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "58.6 vs 58.6"
+ },
+ {
+  "lock": "A2 offer's segment is in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "3.3 vs 3.3"
+ },
+ {
+  "lock": "A2 ended's segment is in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "39.1 vs 39.1"
+ },
+ {
+  "lock": "A2 the card renders",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2 the rows are standing's non-zero buckets, in order",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[\"waiting\",20],[\"reading\",18],[\"offer\",1],[\"ended\",12]] vs [[\"waiting\",20],[\"reading\",18],[\"offer\",1],[\"ended\",12]]"
+ },
+ {
+  "lock": "A2 the rows sum to the queries sent",
+  "where": "1280",
+  "ok": true,
+  "detail": "51 vs 51"
+ },
+ {
+  "lock": "A2 waiting's swatch is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(247, 239, 227)"
+ },
+ {
+  "lock": "A2 reading's swatch is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "A2 offer's swatch is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A2 ended's swatch is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(228, 225, 219)"
+ },
+ {
+  "lock": "A2 waiting's segment is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(247, 239, 227)"
+ },
+ {
+  "lock": "A2 reading's segment is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "A2 offer's segment is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A2 ended's segment is its status fill",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(228, 225, 219)"
+ },
+ {
+  "lock": "A2 waiting's segment is in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "60.9 vs 60.9"
+ },
+ {
+  "lock": "A2 reading's segment is in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "54.8 vs 54.8"
+ },
+ {
+  "lock": "A2 offer's segment is in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "3.0 vs 3.0"
+ },
+ {
+  "lock": "A2 ended's segment is in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "36.5 vs 36.5"
+ }
+]

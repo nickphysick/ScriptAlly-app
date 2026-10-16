@@ -29,9 +29,18 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { Caveats, Endings, Funnel, Lanes, OverTime, Records, ReplyWindow, ShareBars, StageGaps, TrainingLog } from "./analytics/A17Figures";
-import { A17Empty } from "./analytics/A17Empty";
+import { Caveats, Funnel, OverTime, Records, ShareBars, TrainingLog } from "./analytics/A17Figures";
+import { A21Header, usePhone } from "./analytics/A21Header";
+import { A21Desk } from "./analytics/A21Desk";
+import { A21Window } from "./analytics/A21Window";
+import { A21Steps } from "./analytics/A21Steps";
+import { A21Records } from "./analytics/A21Records";
+import { A21Stand } from "./analytics/A21Stand";
+import { A21Empty } from "./analytics/A21Empty";
+import { buildV21, windowLede } from "../lib/analyticsV21";
+import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
+import "./analytics/a21.css"; /* after a17: v21 restates its desktop rules */
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
@@ -50,18 +59,31 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
   const manuscript = resolveScopedManuscript(manuscripts, storedMs);
 
   /** ⚠️ ONE CLOCK PER DERIVATION, so every figure on the page agrees about what today is. */
-  const model = React.useMemo(() => {
+  const { model, v21 } = React.useMemo(() => {
+    const nowMs = Date.now();
     const own = manuscript ? queries.filter((q) => q.manuscriptId === manuscript.id) : [];
     /* ⚠️ THE DEV REVIEW AID IS GATED HERE, AT THE CALL SITE: a statically replaced MODE makes the branch
        dead in a production build, so the module is unreachable from it (AN17-16 cuts the fixture with it). */
     const scoped = import.meta.env.MODE === "production" ? own : limitForReview(own);
-    return analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs: Date.now(), title: manuscript?.title });
+    const m = analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs, title: manuscript?.title });
+    return { model: m, v21: buildV21(m, agents, nowMs) };
     /* location.key: a switch re-opens the route, and the book in scope is read from storage */
   }, [queries, activities, agents, packages, versions, manuscript, location.key]);
+
+  /* ⚠️ DEV ONLY, GATED HERE AT THE CALL SITE: the AN21 locks compare what the page DRAWS with what the model SAYS.
+     A statically replaced MODE makes this dead in a production build, as the review aid above is. */
+  React.useEffect(() => {
+    if (import.meta.env.MODE === "production") return;
+    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, sent: model.sent, replies: model.replies, offers: model.offers, fulls: model.fulls };
+  }, [v21, model]);
 
   const load = useQcLoad(collectionsReady && activitiesReady);
   const v = model.v17;
   const names = NAV_NAMES(model.sent);
+
+  const phone = usePhone();
+  /** "+ Record a response": query panel v2's picker where the Query Centre hosts it, else the drawer. */
+  const record = React.useCallback(() => { if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" }); }, []);
 
   /** Scroll the page's own scroller to a section (or, on the empty page, to the first example). */
   const go = React.useCallback((sec: number) => {
@@ -70,7 +92,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
     const target = (page?.querySelector(`[data-a17="sec"][data-sec="${sec}"]`) ?? page?.querySelector('[data-a17="example"]')) as HTMLElement | null;
     if (!scroller || !target) return;
     const top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 12;
-    scroller.scrollTo({ top, behavior: "smooth" });
+    const still = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scroller.scrollTo({ top, behavior: still ? "auto" : "smooth" });
   }, []);
 
   const empty = !load.loading && manuscript !== null && model.total === 0;
@@ -86,20 +109,26 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       </p>
     );
   } else if (empty) {
-    body = <A17Empty />;
+    body = <A21Empty title={manuscript?.title || null} onImport={() => onNavigate?.("import")} />;
   } else {
     const b = v.banners;
+    /* v21 §D/§E: two sections are rebuilt and renamed; their kickers and ledes come with them */
+    const wl = windowLede(v21.window);
+    const b3 = { ...b[3], title: "Replies against the stated window" };
+    const b4 = { ...b[4], count: "from query to offer", title: "How long each step takes", sentence: "The usual number of days between one stage and the next, and how long queries ran before they ended. The later steps rest on very few queries, so they will move as more come in." };
     body = (
       <>
         <Glance cells={v.glance} />
+        <A21Desk cards={v21.desk} onGo={go} />
         <Section sec={0} banner={b[0]}><Funnel model={model} /></Section>
-        <Section sec={1} banner={b[1]} readings={v.log.readings}><TrainingLog model={model} /></Section>
+        <Section sec={1} banner={b[1]} readings={v.log.readings} tint><TrainingLog model={model} /></Section>
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
-        <Section sec={3} banner={b[3]} readings={v.reply.readings}><ReplyWindow model={model} /></Section>
-        <Section sec={4} banner={b[4]} readings={v.waits.readings}><div className="a17-two"><StageGaps model={model} /><Endings model={model} /></div></Section>
-        <Section sec={5} banner={b[5]}><Records model={model} /></Section>
+        <Section sec={3} banner={b3} readings={v.reply.readings} tint lede={<>{wl.lead}{wl.bold ? <b>{wl.bold}</b> : null}{wl.rest}</>}><A21Window w={v21.window} /></Section>
+        <Section sec={4} banner={b4}><A21Steps steps={v21.steps} endings={v21.endings} /></Section>
+        <Section sec={5} banner={b[5]} tint
+          desktop={<A21Records rec={v21.records} count={b[5].count} title={b[5].title} msTitle={manuscript.title || null} onOverTime={() => go(6)} />}><Records model={model} /></Section>
         <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
-        <Section sec={7} banner={b[7]} readings={v.lanes.readings}><Lanes model={model} /></Section>
+        <A21Stand model={model} v21={v21} banner={b[7]} />
         <Section sec={8} banner={b[8]} ws><Caveats model={model} /></Section>
       </>
     );
@@ -111,8 +140,13 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       <WorkspacePageGrid className="qa-wpg" scrollLabel="Analytics" masthead={null}>
         <div className={pageClass} ref={pageRef} data-a17="page" data-sent={model.sent} data-dated={v.dated} data-ms={manuscript?.id ?? ""} data-phase={load.phase}>
           <TipProvider>
-            {/* the band is the page's own chrome, so it renders through loading and on the empty page */}
-            <PageHeader
+            {/* v21 §A: the desktop opens on the light header; the phone keeps v17's band (decision 5) */}
+            {!phone && !empty && manuscript !== null ? (
+              <A21Header loading={load.loading} sent={model.sent} replies={model.replies} msTitle={manuscript.title || null}
+                rows={load.loading ? null : v21.standing} inside={load.loading ? null : v21.inside}
+                onRecord={record} onRead={() => go(0)} onRing={() => go(3)} />
+            ) : null}
+            {phone && !empty ? <PageHeader
               variant="full"
               band
               bandFixed
@@ -122,7 +156,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
               primary={{ label: "Take a look ↓", onClick: () => go(0) }}
               secondary={{ label: "Record a response", onClick: () => openQueryDrawer({ mode: "resp" }) }}
               art={<BandDisc />}
-            />
+            /> : null}
             <div className="a17-flow" data-a17="flow">{body}</div>
             <div className="a17-after" />
             {onNavigate ? <AppFooter onNavigate={onNavigate} /> : null}

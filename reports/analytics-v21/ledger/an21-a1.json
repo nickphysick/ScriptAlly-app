@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "A1 the light header renders",
+  "where": "1920",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1 no image in the header but the shadow",
+  "where": "1920",
+  "ok": true,
+  "detail": "[\"shadow\"] bg 0"
+ },
+ {
+  "lock": "A1 no panel header on the page",
+  "where": "1920",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1 the title is {sent} queries, {replies} replies",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+ },
+ {
+  "lock": "A1 Special Elite",
+  "where": "1920",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1 56px (±1)",
+  "where": "1920",
+  "ok": true,
+  "detail": "56"
+ },
+ {
+  "lock": "A1 one line",
+  "where": "1920",
+  "ok": true,
+  "detail": "62.7 / lh 62.72"
+ },
+ {
+  "lock": "A1 the card's right edge is inside the header's",
+  "where": "1920",
+  "ok": true,
+  "detail": "1708.0 ≤ 1708.0"
+ },
+ {
+  "lock": "A1 the light header renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1 no image in the header but the shadow",
+  "where": "1512",
+  "ok": true,
+  "detail": "[\"shadow\"] bg 0"
+ },
+ {
+  "lock": "A1 no panel header on the page",
+  "where": "1512",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1 the title is {sent} queries, {replies} replies",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+ },
+ {
+  "lock": "A1 Special Elite",
+  "where": "1512",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1 50px (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "A1 one line",
+  "where": "1512",
+  "ok": true,
+  "detail": "56.0 / lh 56"
+ },
+ {
+  "lock": "A1 the card's right edge is inside the header's",
+  "where": "1512",
+  "ok": true,
+  "detail": "1436.0 ≤ 1455.6"
+ },
+ {
+  "lock": "A1 the light header renders",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1 no image in the header but the shadow",
+  "where": "1280",
+  "ok": true,
+  "detail": "[\"shadow\"] bg 0"
+ },
+ {
+  "lock": "A1 no panel header on the page",
+  "where": "1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1 the title is {sent} queries, {replies} replies",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+ },
+ {
+  "lock": "A1 Special Elite",
+  "where": "1280",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1 40px (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "A1 one line",
+  "where": "1280",
+  "ok": true,
+  "detail": "44.8 / lh 44.8"
+ },
+ {
+  "lock": "A1 the card's right edge is inside the header's",
+  "where": "1280",
+  "ok": true,
+  "detail": "1231.0 ≤ 1231.0"
+ },
+ {
+  "lock": "A1 the light header renders",
+  "where": "1180",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1 no image in the header but the shadow",
+  "where": "1180",
+  "ok": true,
+  "detail": "[\"shadow\"] bg 0"
+ },
+ {
+  "lock": "A1 no panel header on the page",
+  "where": "1180",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1 the title is {sent} queries, {replies} replies",
+  "where": "1180",
+  "ok": true,
+  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+ },
+ {
+  "lock": "A1 Special Elite",
+  "where": "1180",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "A1 40px (±1)",
+  "where": "1180",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "A1 one line",
+  "where": "1180",
+  "ok": true,
+  "detail": "44.8 / lh 44.8"
+ },
+ {
+  "lock": "A1 the card's right edge is inside the header's",
+  "where": "1180",
+  "ok": true,
+  "detail": "647.4 ≤ 1134.3"
+ }
+]

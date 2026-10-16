@@ -1,0 +1,494 @@
+[
+ {
+  "lock": "D1 rows render",
+  "where": "1512",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "D1 inside rows + after rows = dated replies",
+  "where": "1512",
+  "ok": true,
+  "detail": "21+3 vs 21+3 = 24"
+ },
+ {
+  "lock": "D1 row 0: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "502.1 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 1: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 2: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 3: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 4: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 5: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 6: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 7: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 8: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 9: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 10: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 11: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 12: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 619.9"
+ },
+ {
+  "lock": "D1 row 13: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 14: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 15: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 16: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "522.9 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 17: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "536.8 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 18: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "543.7 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 19: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "561.0 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 20: took ends at or before said",
+  "where": "1512",
+  "ok": true,
+  "detail": "613.0 ≤ 668.5"
+ },
+ {
+  "lock": "D1 row 21: took ends at said's end (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1170.0 vs 1170.0"
+ },
+ {
+  "lock": "D1 row 21: the rust bar starts there (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1170.015625 vs 1170.0"
+ },
+ {
+  "lock": "D1 row 22: took ends at said's end (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1136.3 vs 1136.3"
+ },
+ {
+  "lock": "D1 row 22: the rust bar starts there (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1136.265625 vs 1136.3"
+ },
+ {
+  "lock": "D1 row 23: took ends at said's end (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1170.0 vs 1170.0"
+ },
+ {
+  "lock": "D1 row 23: the rust bar starts there (±1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "1170.015625 vs 1170.0"
+ },
+ {
+  "lock": "D1 rows render",
+  "where": "1280",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "D1 inside rows + after rows = dated replies",
+  "where": "1280",
+  "ok": true,
+  "detail": "21+3 vs 21+3 = 24"
+ },
+ {
+  "lock": "D1 row 0: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "482.3 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 0: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 1: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 1: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 2: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 2: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 3: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 3: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 4: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 4: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 5: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 5: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 6: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 6: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 7: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 7: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 8: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 8: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 9: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 9: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 10: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 10: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 11: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 11: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 12: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 547.4"
+ },
+ {
+  "lock": "D1 row 12: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 13: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 13: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 14: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 14: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 15: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 15: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 16: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "493.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 16: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 17: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "501.4 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 17: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 18: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "505.3 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 18: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 19: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "514.8 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 19: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 20: took ends at or before said",
+  "where": "1280",
+  "ok": true,
+  "detail": "543.5 ≤ 574.2"
+ },
+ {
+  "lock": "D1 row 20: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 21: took ends at said's end (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "992.0 vs 992.0"
+ },
+ {
+  "lock": "D1 row 21: the rust bar starts there (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "991.96875 vs 992.0"
+ },
+ {
+  "lock": "D1 row 21: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 22: took ends at said's end (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "973.7 vs 973.7"
+ },
+ {
+  "lock": "D1 row 22: the rust bar starts there (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "973.734375 vs 973.7"
+ },
+ {
+  "lock": "D1 row 22: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1 row 23: took ends at said's end (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "992.0 vs 992.0"
+ },
+ {
+  "lock": "D1 row 23: the rust bar starts there (±1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "991.96875 vs 992.0"
+ },
+ {
+  "lock": "D1 row 23: labels do not wrap",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ }
+]

@@ -21,7 +21,9 @@ export const PLATE_ROUTES: readonly string[] = [];
  * Analytics v17 (5 Oct) opens on the same band (`PageHeader band bandFixed`), so it is named here too;
  * its header geometry belongs to `analyticsV17` AN17-2/AN17-3.
  */
-export const BAND_ROUTES: readonly string[] = ["/queries/analytics"];
+/* Analytics v21 (16 Oct): /queries/analytics LEFT the band for the centred light header (page-local, OWN_HEADER_ROUTES);
+   AN21 A1 holds it. The register is empty, and the band claims assert what they skipped IS this set. */
+export const BAND_ROUTES: readonly string[] = [];
 /**
  * THE OWN-HEADER REGISTER (Contact list v15, 8 Oct) — routes whose header is PAGE-LOCAL (`data-own-header`), neither the
  * shared open header, a plate nor a band. The Contact list left the band in v15 for an open header the shared component
@@ -36,7 +38,9 @@ export const BAND_ROUTES: readonly string[] = ["/queries/analytics"];
    and its empty page's navy panel too; PK4 A1 and F1 hold them. */
 /* /todo joined with To-do list v5 (15 Oct): the Contact list v17.1 centred light header, page-local (`data-own-header`),
    and its empty page's navy panel; TD5 A1 and G1 hold them (tests/e2e/todoV5.measure.ts). */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo"];
+/* /queries/analytics joined with Analytics v21 (16 Oct): the centred light header is page-local (`data-own-header`), and
+   its empty page's navy panel too; AN21 A1 and I1 hold them. The phone keeps v17's band. */
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The

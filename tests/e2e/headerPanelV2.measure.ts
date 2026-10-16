@@ -53,7 +53,9 @@ test("P1 P4 P5 P7 · the panel on every workspace route", async ({ page }) => {
     if (vp.width === 1280) L.check("P7 no horizontal overflow at 1280", w, r.overflowX <= 1 || (route === "/agents/discover" && near(r.overflowX, DISCOVER_OVERFLOW_1280, 2)), `${r.overflowX}${route === "/agents/discover" ? ` (as built before the pack: ${DISCOVER_OVERFLOW_1280})` : ""}`);
     if (vp.width === 1280) L.check("P7 the panel ends inside the page sheet", w, !!r.hd && !!r.win && r.hd.r <= r.win.r + 0.5 && r.hd.l >= r.win.l - 0.5, r.hd && r.win ? `panel ${r.hd.l.toFixed(0)}–${r.hd.r.toFixed(0)} · sheet ${r.win.l.toFixed(0)}–${r.win.r.toFixed(0)}` : "—");
   }
-  L.check("P5 population: several routes carry a drawing", "all", withArt >= 8, `${withArt} readings with a drawing`);
+  /* RE-POINTED (Analytics v21): Analytics left the panel with its disc on the desktop, so 6 readings carry a drawing
+     where the base read 8 */
+  L.check("P5 population: several routes carry a drawing", "all", withArt >= 6, `${withArt} readings with a drawing`);
   L.check("P4 population: several routes carry an intro", "all", withIntro >= 6, `${withIntro} intros`);
   L.done(SIZES.length * WORKSPACE.length * 8);
 });
@@ -68,7 +70,7 @@ test("P7 · no horizontal overflow at 390", async ({ page }) => {
   await open(page, "/dashboard", SIZES[0]);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of WORKSPACE) {
-    if (LIGHT_HEADER.includes(route) && route !== "/todo") continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow); /todo's phone page keeps its panel
+    if (LIGHT_HEADER.includes(route) && route !== "/todo" && route !== "/queries/analytics") continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow); /todo's and Analytics' phone pages keep their panel
     await page.goto(route); await page.waitForTimeout(2600);
     const r = await page.evaluate(() => {
       const vis = (e: Element) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().height > 0;
@@ -189,27 +191,8 @@ test("P8 · the header's Set aside door opens the tray's Set aside tab, on scree
 });
 
 /* ───────────────────────── P9 · Analytics ───────────────────────── */
-test("P9 · Analytics: in the column, not 337, and the section tab navigates", async ({ page }) => {
-  const L = new Ledger("P9");
-  await prepare(page);
-  for (const vp of SIZES) {
-    await open(page, "/queries/analytics", vp);
-    const r = await readPanel(page); const w = `@${vp.width}`;
-    const colL = await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>('[data-a17="sec"], [data-a17="glance"], .a17-sect')].find((e) => e.getBoundingClientRect().height > 0); return s ? s.getBoundingClientRect().left : null; });
-    L.check("P9 the header's left edge is the content column's (±1)", w, !!r.hd && colL !== null && near(r.hd.l, colL, 1), `panel ${r.hd?.l.toFixed(1)} · column ${colL?.toFixed(1)}`);
-    L.check("P9 its height is not the band's 337", w, !!r.hd && Math.abs(r.hd.h - 337) > 5, `${r.hd?.h.toFixed(1)}`);
-    const sc = () => page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0 && e.scrollHeight > e.clientHeight + 4); return s ? s.scrollTop : -1; });
-    const before = await sc();
-    await page.locator('[data-a17="tab"]:visible [data-a17="tab-all"]').first().click({ timeout: 8000 }).catch(() => {}); await page.waitForTimeout(350);
-    const items = page.locator('[data-a17="tab"] [data-a17="tab-item"]:visible');
-    const n = await items.count();
-    if (n > 3) await items.nth(3).click({ timeout: 8000 }).catch(() => {});
-    await page.waitForTimeout(1200);
-    const after = await sc();
-    L.check("P9 the section tab opens its list and a section is reached", w, n >= 5 && before >= 0 && after > before + 200, `${n} items · scroll ${before} → ${after}`);
-  }
-  L.done(SIZES.length * 3);
-});
+/* RETIRED (Analytics v21, 16 Oct): Analytics' desktop header is no longer the panel (AN21 A1 holds the light header), and
+   its section tab is held by AN17-15 (tests/e2e/RETIRED-analytics-v21.md). */
 
 /* ───────────────────────── A1–A6 ───────────────────────── */
 const HERO = {
@@ -474,7 +457,8 @@ test.skip("D7 · the desk is the same boxes loading and loaded", async ({ page }
 test("floor · the run wrote the readings it claims", async () => {
   if (process.env.HP2_MUTATE || process.env.HP2_CAPTURE || process.env.HP2_NO_FLOOR) return;
   /* RE-POINTED (Contact list v16): the A, C and D ledgers are retired with their cases */
-  const names = ["P1-P7", "P7-390", "P2", "P6", "P8", "P9"];
+  /* RE-POINTED (Analytics v21): P9 is retired with Analytics' panel */
+  const names = ["P1-P7", "P7-390", "P2", "P6", "P8"];
   const counts = names.map((n) => (existsSync(`${DIR}/ledger/${n}.json`) ? (JSON.parse(readFileSync(`${DIR}/ledger/${n}.json`, "utf8")) as unknown[]).length : 0));
   const total = counts.reduce((s, v) => s + v, 0);
   writeFileSync(`${DIR}/ledger/_totals.json`, JSON.stringify(Object.fromEntries(names.map((n, i) => [n, counts[i]]).concat([["total", total]])), null, 1));

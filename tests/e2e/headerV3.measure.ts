@@ -56,7 +56,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* hard-code 27 */
   H3: { js: `document.querySelectorAll('.hp3 [data-hp3-part="number"]:not(.hp3-blank)').forEach((n) => { if (n.textContent !== "27") n.textContent = "27"; });` },
   /* render a number on Analytics */
-  H4: { js: `if (location.pathname === "/queries/analytics") document.querySelectorAll(".hp3 h1.hp3-title").forEach((h) => { if (h.querySelector("[data-hp3-part='number']")) return; const n = document.createElement("span"); n.setAttribute("data-hp3-part", "number"); n.textContent = "12"; h.prepend(n); });` },
+  /* RE-POINTED (Analytics v21): Analytics is a light-header route now; the title page under test is Discover */
+  H4: { js: `if (location.pathname === "/agents/discover") document.querySelectorAll(".hp3 h1.hp3-title").forEach((h) => { if (h.querySelector("[data-hp3-part='number']")) return; const n = document.createElement("span"); n.setAttribute("data-hp3-part", "number"); n.textContent = "12"; h.prepend(n); });` },
   /* restore the stamp */
   H5: { js: `document.querySelectorAll(".hp3 .hp3-txt").forEach((t) => { if (t.querySelector(".hpanel-stamp")) return; const s = document.createElement("span"); s.className = "hpanel-stamp"; s.textContent = "4 need you"; t.appendChild(s); });` },
   H6: { css: `.hp3 .hp3-art { position: relative !important; top: 30px !important; }` },
@@ -190,7 +191,8 @@ test("H1–H7 · the panel on every workspace route", async ({ page }) => {
       L.check("H6 its vertical centre is the panel's (±3)", at, near((a.t + a.b) / 2, (h.t + h.b) / 2, 3), `${((a.t + a.b) / 2).toFixed(1)} vs ${((h.t + h.b) / 2).toFixed(1)}`);
     }
   }
-  L.check("H6 population: several routes carry a drawing", "all", withArt >= 8, `${withArt} readings`);
+  /* RE-POINTED (Analytics v21): Analytics left the panel with its disc on the desktop — 6 readings where the base read 8 */
+  L.check("H6 population: several routes carry a drawing", "all", withArt >= 6, `${withArt} readings`);
   /* RE-POINTED (Contact list v16): three number pages are left, so six readings at most; four is the floor.
      RE-POINTED AGAIN (To-do list v5): /todo left NUMBER, so the floor is every number page at every size — derived from
      the register, never restated. */

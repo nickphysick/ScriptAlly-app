@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "F1 the featured card is the first offer, else the first full request, else the first request",
+  "where": "1512",
+  "ok": true,
+  "detail": "First offer/Bright Literary vs First offer/Bright Literary"
+ },
+ {
+  "lock": "F1 the fixture has an offer, so the card is the first offer",
+  "where": "1512",
+  "ok": true,
+  "detail": "First offer with 1 offers"
+ },
+ {
+  "lock": "F1 no Longest full read",
+  "where": "1512",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F1 every row's figure is the model's",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[\"quickest\",\"8 days\"],[\"first-request\",\"22 Feb\"],[\"busiest\",\"14 queries\"],[\"run\",\"11 weeks\"],[\"quickest-pass\",\"2 weeks\"]] vs [[\"quickest\",\"8 days\"],[\"first-request\",\"22 Feb\"],[\"busiest\",\"14 queries\"],[\"run\",\"11 weeks\"],[\"quickest-pass\",\"2 weeks\"]]"
+ },
+ {
+  "lock": "F1 the featured card is the first offer, else the first full request, else the first request",
+  "where": "1280",
+  "ok": true,
+  "detail": "First offer/Bright Literary vs First offer/Bright Literary"
+ },
+ {
+  "lock": "F1 the fixture has an offer, so the card is the first offer",
+  "where": "1280",
+  "ok": true,
+  "detail": "First offer with 1 offers"
+ },
+ {
+  "lock": "F1 no Longest full read",
+  "where": "1280",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F1 every row's figure is the model's",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[\"quickest\",\"8 days\"],[\"first-request\",\"22 Feb\"],[\"busiest\",\"14 queries\"],[\"run\",\"11 weeks\"],[\"quickest-pass\",\"2 weeks\"]] vs [[\"quickest\",\"8 days\"],[\"first-request\",\"22 Feb\"],[\"busiest\",\"14 queries\"],[\"run\",\"11 weeks\"],[\"quickest-pass\",\"2 weeks\"]]"
+ }
+]
