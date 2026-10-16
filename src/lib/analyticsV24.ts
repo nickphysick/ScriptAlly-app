@@ -380,3 +380,112 @@ export function deskV24(model: AnalyticsModel, v: V24, nowMs: number): DeskCard[
   };
   return [sentCard, rateCard, waitCard];
 }
+
+/* ══════════════════════════════════ the seven questions ══════════════════════════════════ */
+
+/** A run of answer text; `b` is a key figure, set in 600 ink. */
+export interface Run { t: string; b?: boolean }
+export interface Head { kicker: string; title: string; answer: Run[] }
+/** The section tab's names and the h2s: one question each, in order. */
+export const QUESTIONS = [
+  "What happened to your queries?",
+  "Benchmarking",
+  "How many have you sent, and when?",
+  "Do agents reply when they say they will?",
+  "Who are you still waiting on?",
+  "Moments worth remembering",
+  "A note on these numbers",
+] as const;
+/** Sections 2, 4 and 6 (indexes 1, 3, 5) sit on the tint band. */
+export const TINTED = [1, 3, 5] as const;
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+/** "One", "two" … at the start of a sentence; digits past ten. */
+const Say = (n: number) => { const w = say(n); return w.charAt(0).toUpperCase() + w.slice(1); };
+const VERDICT_RATE: Record<string, string> = {
+  "Well above": "well above what most writers see", Above: "above what most writers see", "About the same": "about what most writers see",
+  Below: "below what most writers see", "Well below": "well below what most writers see",
+};
+
+export function heads(v: V24): Head[] {
+  const o = v.outcomes, k = v.keeping, w = v.waiting, m = v.monthly;
+  const nowY = new Date(v.nowMs).getFullYear();
+
+  /* S1 */
+  const s1: Run[] = [];
+  s1.push({ t: o.waiting * 2 > o.sent ? "Most are still waiting for an answer. " : o.waiting === 0 ? "None is still waiting for an answer. " : `${o.waiting} ${o.waiting === 1 ? "is" : "are"} still waiting for an answer. ` });
+  if (o.asked + o.ended.letter > 0) {
+    s1.push({ t: "Of the agents who have replied so far, " });
+    if (o.asked > 0) s1.push({ t: `${o.asked} asked to read more`, b: true });
+    if (o.asked > 0 && o.ended.letter > 0) s1.push({ t: " and " });
+    if (o.ended.letter > 0) s1.push({ t: `${o.ended.letter} said no to the letter` });
+    s1.push({ t: "." });
+  } else {
+    s1.push({ t: "No agent has replied yet." });
+  }
+  if (o.of.offer > 0 && o.asked > 0) s1.push({ t: ` ${Say(o.of.offer)} of the ${o.asked} ${o.of.offer === 1 ? "has" : "have"} made an offer.` });
+
+  /* S2 */
+  const [rate, reply] = v.bench;
+  const s2: Run[] = [];
+  const rateBit = rate.verdict === "Too early to say" ? "It is too early to compare your request rate with other writers'" : `Your request rate is ${VERDICT_RATE[rate.verdict]}`;
+  const replyBit = reply.verdict === "Too early to say" ? "too early to judge the silence"
+    : reply.verdict === "Below" || reply.verdict === "Well below" ? "you have had fewer replies than most: roughly half of all queries never get a reply"
+    : "the silence is ordinary: roughly half of all queries never get a reply";
+  s2.push({ t: `${rateBit}, and ${replyBit}. First, what you could expect by now from your own agents; then how your figures compare with other writers.` });
+
+  /* S3 */
+  const s3: Run[] = [];
+  const first = m.firstMs === null ? null : new Date(m.firstMs);
+  if (first) {
+    const fy = first.getFullYear();
+    const since = fy === nowY ? `${MONTHS_LONG[first.getMonth()]} this year` : fy === nowY - 1 ? `${MONTHS_LONG[first.getMonth()]} last year` : `${MONTHS_LONG[first.getMonth()]} ${fy}`;
+    s3.push({ t: `${plural(o.sent, "query", "queries")} since ${since}`, b: true });
+    s3.push({ t: `, which is ${perMonthWords(o.sent, m.months.length)}. ` });
+    const b = m.busiest;
+    if (b.length === 1) s3.push({ t: `${b[0].long} was your busiest month, with ${b[0].count}. ` });
+    else if (b.length > 1) s3.push({ t: `${listWords(b.map((x) => x.long))} were your busiest months, with ${b[0].count} each. ` });
+    s3.push({ t: `You have sent ${m.lastThree === 0 ? "none" : m.lastThree} in the last three months.` });
+  } else {
+    s3.push({ t: "None of your queries has a date sent yet." });
+  }
+
+  /* S4 */
+  const s4: Run[] = [{ t: "Most agents say in their guidelines how long they take to reply. " }];
+  if (k.placed > 0) {
+    s4.push({ t: `Of the ${k.placed} who have replied to you, ` });
+    s4.push({ t: `${k.kept.length} kept to their time`, b: true });
+    s4.push({ t: " and " });
+    s4.push({ t: `${k.longer.length} took longer`, b: true });
+    if (k.longer.length > 0) {
+      const lo = span(k.longer[0].diffDays), hi = span(k.longer[k.longer.length - 1].diffDays);
+      s4.push({ t: lo === hi ? `, by ${lo}` : `, by between ${lo} and ${hi}` });
+    }
+    s4.push({ t: ". Each row shows what the agent said next to what they actually took." });
+  } else {
+    s4.push({ t: k.replies === 0 ? "No agent has replied yet, so there is nothing to set against what they said." : "None of your replies came from an agency that gives a time." });
+  }
+  if (k.unplaced > 0 && k.placed > 0) s4.push({ t: ` ${Say(k.unplaced)} ${k.unplaced === 1 ? "reply came from an agency" : "replies came from agencies"} that give${k.unplaced === 1 ? "s" : ""} no time.` });
+
+  /* S5 */
+  const s5: Run[] = [];
+  s5.push({ t: plural(w.waiting.length, "query", "queries"), b: true });
+  s5.push({ t: ` ${w.waiting.length === 1 ? "has" : "have"} had no reply yet and ` });
+  s5.push({ t: plural(w.reading.length, "agent", "agents"), b: true });
+  s5.push({ t: ` ${w.reading.length === 1 ? "is" : "are"} reading more of the book. For each query still waiting, the top bar is how long the agent said they take and the bottom bar is how long you have waited so far. A rust bar has run past what they said. For agents reading more, the bar counts from the day they asked.` });
+
+  return [
+    { kicker: `Your ${plural(o.sent, "query", "queries")}`, title: QUESTIONS[0], answer: s1 },
+    { kicker: `you against other writers · month ${v.month} of querying`, title: QUESTIONS[1], answer: s2 },
+    { kicker: first ? `${plural(o.sent, "query", "queries")} since ${MONTHS_LONG[first.getMonth()]} ${first.getFullYear()}` : plural(o.sent, "query", "queries"), title: QUESTIONS[2], answer: s3 },
+    { kicker: `${plural(k.replies, "reply", "replies")} so far`, title: QUESTIONS[3], answer: s4 },
+    { kicker: `${w.waiting.length} waiting · ${w.reading.length} being read`, title: QUESTIONS[4], answer: s5 },
+    { kicker: `from ${plural(o.sent, "query", "queries")}`, title: QUESTIONS[5], answer: [{ t: "The firsts and the high points of the campaign so far, in the order they happened. They update as replies come in." }] },
+    { kicker: `${plural(o.sent, "query", "queries")} · ${plural(k.replies, "reply", "replies")}`, title: QUESTIONS[6], answer: [{ t: "Everything on this page comes from what you have logged. Three things worth keeping in mind when you read it." }] },
+  ];
+}
+/** "November and June", "May, June and July". */
+export function listWords(xs: string[]): string {
+  if (xs.length <= 1) return xs[0] ?? "";
+  return `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+}

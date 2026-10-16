@@ -24,3 +24,54 @@
   .a21-dj[data-key="wait"] .a21-djstamp { display: none; }
   .ws-app.sheet-wide .a21-dj[data-key="wait"] .a21-djstamp { display: inline-block; }
 }
+
+/* ══════════════ C · the seven question sections (every width) ══════════════ */
+.a17-page .a24-sx { position: relative; padding: 72px 0 0; box-sizing: border-box; min-width: 0; }
+.a17-page .a24-sx.a24-tint {
+  background: #e9e6e0; box-shadow: 0 0 0 100vmax #e9e6e0; clip-path: inset(0 -100vmax);
+  margin-top: 88px; padding: 64px 0 72px;
+}
+.a17-page .a24-sx.a24-tint + .a24-sx { padding-top: 88px; }
+.a24-h { margin-bottom: 28px; }
+.a17-page .a24-sx .a24-k {
+  margin: 0 0 10px; font: 400 9.5px/1.4 var(--font-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5);
+}
+/* brand.tsx forces h2 at runtime with !important: two classes and !important are the claw-back */
+.a17-page .a24-sx h2 { margin: 0; font: 400 40px/1.04 var(--sp-type) !important; color: var(--sp-ink); letter-spacing: -0.01em; }
+.ws-app.sheet-wide .a17-page .a24-sx h2 { font-size: 46px !important; }
+.a17-page .a24-sx .a24-a { margin: 14px 0 0; max-width: 66ch; font: 400 17.5px/1.55 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); }
+.ws-app.sheet-wide .a17-page .a24-sx .a24-a { font-size: 19px !important; }
+.a17-page .a24-sx .a24-a b { font: inherit !important; font-weight: 600 !important; color: var(--sp-ink); }
+.a24-f { background: #fff; border-radius: 24px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45); overflow: hidden; min-width: 0; }
+.a24-tint .a24-f { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 24px 46px -30px rgba(28, 19, 15, 0.35); }
+.a24-blk { padding: 26px 28px 6px; min-width: 0; }
+.ws-app.sheet-wide .a24-blk { padding: 30px 36px 8px; }
+.a24-blk + .a24-blk { border-top: 1px dashed rgba(28, 19, 15, 0.16); margin-top: 22px; padding-top: 30px; }
+.a17-page .a24-blk h3 {
+  margin: 0 0 18px; font: 400 21px/1.3 var(--sp-type) !important; color: var(--sp-ink); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.a17-page .a24-blk h3 small { font: italic 400 14px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+
+/* the readings foot */
+.a24-r { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.a24-r > div { padding: 18px 26px; display: flex; align-items: baseline; gap: 12px; border-left: 1px solid rgba(28, 19, 15, 0.1); min-width: 0; }
+.ws-app.sheet-wide .a24-r > div { padding: 22px 36px; }
+.a24-r > div:first-child { border-left: 0; }
+.a17-page .a24-r b { font: 400 28px/1 var(--sp-type) !important; color: var(--sp-ink); white-space: nowrap; }
+.ws-app.sheet-wide .a17-page .a24-r b { font-size: 34px !important; }
+.a17-page .a24-r span { font: italic 400 15px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); min-width: 0; }
+
+@media (max-width: 760px) {
+  .a17-page .a24-sx { padding-top: 44px; }
+  .a17-page .a24-sx.a24-tint { margin-top: 52px; padding: 40px 0 48px; }
+  .a17-page .a24-sx.a24-tint + .a24-sx { padding-top: 52px; }
+  .a24-h { margin-bottom: 18px; }
+  .a17-page .a24-sx h2, .ws-app.sheet-wide .a17-page .a24-sx h2 { font-size: 28px !important; }
+  .a17-page .a24-sx .a24-a, .ws-app.sheet-wide .a17-page .a24-sx .a24-a { font-size: 16px !important; }
+  .a24-f { border-radius: 16px; }
+  .a24-blk, .ws-app.sheet-wide .a24-blk { padding: 18px 16px 4px; }
+  .a17-page .a24-blk h3 { font-size: 18px !important; }
+  .a24-r { grid-template-columns: 1fr; }
+  .a24-r > div, .ws-app.sheet-wide .a24-r > div { border-left: 0; border-top: 1px solid rgba(28, 19, 15, 0.1); padding: 14px 16px; }
+  .a24-r > div:first-child { border-top: 0; }
+}

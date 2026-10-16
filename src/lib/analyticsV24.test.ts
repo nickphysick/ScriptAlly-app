@@ -11,7 +11,7 @@ import { describe, it, expect } from "vitest";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../types";
 import { analyticsModel } from "./analyticsModel";
 import {
-  benchmark, buildV24, deskV24, ringOf, diffWords, expectedByNow, monthOf, monthlySends, moments, outcomes, perMonthWords, rateWords,
+  benchmark, buildV24, deskV24, heads, listWords, ringOf, QUESTIONS, diffWords, expectedByNow, monthOf, monthlySends, moments, outcomes, perMonthWords, rateWords,
   replyKeeping, requestRate, span, spanParts, stillWaiting, verdictOf, BENCHMARKS_QUERYTRACKER,
 } from "./analyticsV24";
 
@@ -287,5 +287,47 @@ describe("deskV24 — the three desk cards", () => {
   it("the header ring: kept over placed, and nothing to say with none placed", () => {
     expect(ringOf(v.keeping)).toMatchObject({ inside: 5, dated: 10, pct: 50 });
     expect(ringOf(replyKeeping([]))).toEqual({ inside: 0, dated: 0, pct: null, share: 0 });
+  });
+});
+
+describe("heads — seven questions, each answered in its first sentence", () => {
+  const h = heads(buildV24(m, NOW));
+  const text = (i: number) => h[i].answer.map((r) => r.t).join("");
+  const bold = (i: number) => h[i].answer.filter((r) => r.b).map((r) => r.t);
+  it("seven sections, the h2s the seven questions in order", () => {
+    expect(h.map((x) => x.title)).toEqual([...QUESTIONS]);
+    expect(h.length).toBe(7);
+  });
+  it("S1 on the sample", () => {
+    expect(h[0].kicker).toBe("Your 27 queries");
+    /* ⚠️ the mock says "Most" for 13 of 27; the prompt's own rule keeps "Most" for more than half */
+    expect(text(0)).toBe("13 are still waiting for an answer. Of the agents who have replied so far, 7 asked to read more and 3 said no to the letter. One of the 7 has made an offer.");
+    expect(bold(0)).toEqual(["7 asked to read more"]);
+  });
+  it("S1's opening is true for the data, and the offer sentence goes at zero", () => {
+    const few = run(sample.slice(10, 20), agents);
+    const t = heads(buildV24(few, NOW))[0].answer.map((r) => r.t).join("");
+    expect(t.startsWith("3 are still waiting for an answer.")).toBe(true);
+    const none = run(sample.slice(0, 3), agents);
+    expect(heads(buildV24(none, NOW))[0].answer.map((r) => r.t).join("")).toBe("Most are still waiting for an answer. No agent has replied yet.");
+  });
+  it("S2 from the verdicts", () => {
+    expect(h[1].kicker).toBe("you against other writers · month 14 of querying");
+    expect(text(1)).toBe("Your request rate is well above what most writers see, and the silence is ordinary: roughly half of all queries never get a reply. First, what you could expect by now from your own agents; then how your figures compare with other writers.");
+  });
+  it("S4 names the overrun range, smallest to largest", () => {
+    expect(h[3].kicker).toBe("10 replies so far");
+    expect(text(3)).toBe("Most agents say in their guidelines how long they take to reply. Of the 10 who have replied to you, 5 kept to their time and 5 took longer, by between 2 days and 7 wks. Each row shows what the agent said next to what they actually took.");
+  });
+  it("S5 and S6 and S7", () => {
+    expect(h[4].kicker).toBe("13 waiting · 4 being read");
+    expect(bold(4)).toEqual(["13 queries", "4 agents"]);
+    expect(h[5].kicker).toBe("from 27 queries");
+    expect(h[6].kicker).toBe("27 queries · 10 replies");
+  });
+  it("lists read as English", () => {
+    expect(listWords(["November"])).toBe("November");
+    expect(listWords(["November", "June"])).toBe("November and June");
+    expect(listWords(["May", "June", "July"])).toBe("May, June and July");
   });
 });
