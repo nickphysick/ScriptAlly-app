@@ -1122,7 +1122,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         )}
 
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
-        <div className="clv-group" data-full={fullOn ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
+            flash the header while the list loads) */}
+        <div className="clv-group" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
