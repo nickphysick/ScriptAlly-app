@@ -99,13 +99,11 @@ import { countryName } from "../../lib/territory";
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { AppFooter } from "../shell/AppFooter";
-import { PageGuide } from "../shell/PageGuide";
+import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
-import { useWindowCorner } from "../shell/useWindowCorner";
-import { CONTACT_GUIDE, CONTACT_GUIDE_PAGE } from "./contact/contactGuide";
+import { CONTACT_CHECKLIST, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, contactGuideOf, guideDonePath, type ContactGuideKey } from "../../lib/pageChecklist";
 import { ContactSkeleton } from "./contact/ContactSkeleton";
 import "./agentList.css";
-import { floatInset } from "../shell/inkTokens";
 
 /**
  * ⚠️ THE DISCOVER DESTINATION COMES FROM THE RAIL'S OWN TABLE, NOT FROM A PAIR OF STRINGS TYPED
@@ -676,9 +674,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      the notice withdrawing once the Undo has run, and a delete's row collapsing */
   useEffect(() => subscribeAgentCardEvents((e) => {
     if (e.type === "saved") {
+      tickGuide.current("edit");
       undoSave.current = e.undo ?? null;
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
+      tickGuide.current("add");
       setNewId(e.agentId);
       /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
       if (addFromHere.current) addedInPanel.current = e.agentId;
@@ -775,6 +775,38 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
   const hkIntroSeen = introSeenOf(currentUser);
   const markIntroSeen = useCallback(() => { if (!hkIntroSeen) void updateUserPaths(INTRO_PATH_V18); }, [hkIntroSeen, updateUserPaths]);
+
+  /* v18.3 §F.4 — THE GUIDE'S TICKS ARE READ FROM APP STATE AND REAL SAVES, never from which button started the journey:
+     an agent saved new, the search holding two characters, a panel open (by any route), a card edit saved, a
+     Housekeeping save. Each is written once per account, by leaf; a write already in flight is not repeated. */
+  const guide = contactGuideOf(currentUser);
+  const guideAsked = useRef(new Set<ContactGuideKey>());
+  const tickGuide = useRef<(k: ContactGuideKey) => void>(() => {});
+  tickGuide.current = (k) => {
+    if (sandbox || !currentUser || guide.hidden || guide.done[k] || guideAsked.current.has(k)) return;
+    guideAsked.current.add(k);
+    void updateUserPaths(guideDonePath(k)).catch(() => { guideAsked.current.delete(k); });
+  };
+  useEffect(() => { if (search.trim().length >= 2) tickGuide.current("search"); }, [search]);
+  useEffect(() => { if (panelId) tickGuide.current("open"); }, [panelId]);
+  const markGuideSeen = useCallback(() => { if (!guide.seen) void updateUserPaths(GUIDE_SEEN_PATH); }, [guide.seen, updateUserPaths]);
+  const hideGuide = useCallback(() => { void updateUserPaths(GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  /* the control each item shows, on this page, as it is now */
+  const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
+    const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    const row = () => vis(".aglist [data-clv='row'][data-agent-card]");
+    switch (k) {
+      case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
+      case "search": return { el: vis(".aglist .cl18-lh [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
+      case "edit": {
+        const edit = vis("[data-ap='panel'] [data-ap='edit']");
+        return edit ? { el: edit, text: "Press Edit profile. Everything on the card can be changed here." }
+          : { el: row(), text: "Open any agent's card first. Edit profile is at the foot of it." };
+      }
+      case "hk": return { el: vis(".aglist [data-cl183='fill']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+    }
+  }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
      when the tab was hidden. `pendingDismiss` holds the value from the press until the user doc agrees, so the
      tab does not flash back while the write is in flight. */
@@ -854,6 +886,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       undo: r.undo,
     };
   }, [agents, hkPrefs, updateUserPaths, addUserTask, deleteUserTask, personalGenres, writeFix, hkBook]);
+  /* v18.3 §F.4 — a Housekeeping save that landed ticks the guide's "Do some housekeeping" */
+  const onHkFixGuided = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
+    const r = await onHkFix(item, fix);
+    if (r.ok) tickGuide.current("hk");
+    return r;
+  }, [onHkFix]);
 
   const hkEditCtx = useMemo(
     () => ({ queries, agents, msGenre: scoped?.genre ?? null, msTitle: scoped?.title ?? null, nowMs }),
@@ -881,20 +919,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (!currentUser) return;
     await commitAgentEdits(firestoreDb, currentUser.id, agentId, patch);
   }, [agents, sandbox, currentUser]);
-
-  /* v13 §8 — the page guide sits above the Housekeeping tab: the tab is placed from the window's
-     measured corner, so the guide is too — the corner, plus the tab's OWN measured height, plus 24 —
-     never a literal for a box another element owns. */
-  const guideCorner = useWindowCorner(floatInset());
-  const [tabH, setTabH] = useState(0);
-  useEffect(() => {
-    if (!active || !showList) return undefined;
-    const t = window.setTimeout(() => {
-      const tab = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]');
-      if (tab && tab.offsetHeight > 0) setTabH(tab.offsetHeight);
-    }, 0);
-    return () => window.clearTimeout(t);
-  }, [active, showList]);
 
   /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
      Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
@@ -1109,7 +1133,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             health={listH} introSeen={hkIntroSeen} onIntroSeen={markIntroSeen}
             open={hkOpen} onOpen={openHk} onClose={() => { setHkOpen(false); setHkRun(null); }} runAgent={hkRun}
             view={hkView} onView={setHkView} routeActive={active}
-            onFix={onHkFix}
+            onFix={onHkFixGuided}
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
             onShowAll={async () => { await updateUserPaths(showAllPath()); }}
             onCard={onHkCard}
@@ -1140,10 +1164,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           />
         )}
         {active && cardReq?.host === "panel" && cardReq.agentId === null && <AgentPanelNew />}
-        {showList && active && guideCorner && tabH > 0 && (
-          <PageGuide page={CONTACT_GUIDE_PAGE} steps={CONTACT_GUIDE}
-            dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",
-              style: { right: guideCorner.right, bottom: guideCorner.bottom + tabH + 24 } }} />
+        {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
+        {!sandbox && (
+          <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guide.done} seen={guide.seen} hidden={guide.hidden}
+            active={active} ready={showList} targetFor={guideTarget} onSeen={markGuideSeen} onHide={hideGuide}
+            art="/images/contact-list-scout.webp" />
         )}
 
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}

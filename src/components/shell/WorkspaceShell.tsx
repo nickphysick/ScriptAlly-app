@@ -62,6 +62,7 @@ import "./inkShell.css";
 import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
+import { setBarSlot } from "../../lib/barSlot";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -1018,6 +1019,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   * apart from the workspace group: an 18px gap and a hairline rule (CSS).
                   */}
                 <span className="ws-helpwrap" ref={helpWrapRef}>
+                  {/* v18.3 §F.1 — THE PAGE SLOT: a page may portal one control here, left of the "?" (`lib/barSlot`). The
+                      shell names no page; an empty slot takes no width. */}
+                  <span className="ws-pageslot" data-shell="page-slot" ref={setBarSlot} />
                   {/* ⚠️ "?" ALWAYS OPENS THE HELP MENU NOW (follow-up 2, 1c) — Help centre, the page guide
                       where the page has one, and Keyboard shortcuts (the existing ShortcutsSheet, through
                       its own event). It was a direct link to /help on every page without a guide. */}
