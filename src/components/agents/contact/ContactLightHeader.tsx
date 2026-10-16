@@ -18,6 +18,7 @@ import React from "react";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
+import "../../shell/pageHeroFrame.css"; /* v138.5 — the shared inset, before the page's own sheet */
 import "./contactV17.css";
 import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
 
@@ -129,7 +130,7 @@ export const ContactLightHeader: React.FC<{
   /** Part B — the search and filter row, under the header's rule */
   children?: React.ReactNode;
 }> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, letters, children }) => (
-  <header className="cl17-hd" data-cl17="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+  <header className="cl17-hd phf" data-cl17="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <img className="cl17-shadow" data-cl17="shadow" alt="" aria-hidden="true" src={`${CONTACT_SHADOW.src}?v=${CONTACT_SHADOW.version}`} />
     {letters}
     <div className="cl17-tr" data-cl17="header-row">

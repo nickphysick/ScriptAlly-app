@@ -14,6 +14,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GLYPHS, pressedGlyph, sentWords138, type GlyphKey, type StageSet } from "../../../lib/qc138";
 import { StageGlyph } from "./StageGlyph";
+import "../../shell/pageHeroFrame.css"; /* v138.5 — the inset the Contact list reads too */
 import "./qcv138.css";
 
 export const QC_EYEBROW = "— QUERY CENTRE —";
@@ -72,6 +73,9 @@ export const GlyphRow: React.FC<{
   );
 };
 
+/** v138.5 §A — the desk hawk, left of the title (decorative) */
+export const QC_DESK_HAWK = { src: "/images/query-centre/desk-hawk.webp", version: 1, w: 440, h: 405 };
+
 export const QcHeader138: React.FC<{
   loading: boolean;
   /** the manuscript-scoped count; null while loading */
@@ -86,13 +90,22 @@ export const QcHeader138: React.FC<{
   logRef?: React.Ref<HTMLButtonElement>;
   /** v138 §H — the page-load entrance has not finished */
   entering?: boolean;
+  /** v138.5 §C — the header grid's right-hand column (the weekly chart) */
+  chart?: React.ReactNode;
   /** Part B — the filter row, under the header's rule */
   children?: React.ReactNode;
-}> = ({ loading, total, msTitle, counts, stages, onGlyph, onLog, onRecord, logDisabled = false, logRef, entering = false, children }) => (
-  <header className="qc138-hd" data-qc138="header" data-qcv="open-header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+}> = ({ loading, total, msTitle, counts, stages, onGlyph, onLog, onRecord, logDisabled = false, logRef, entering = false, chart, children }) => (
+  <header className="qc138-hd phf" data-qc138="header" data-qcv="open-header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <img className="qc138-shadow" data-qc138="shadow" alt="" aria-hidden="true" src={`${QC_SHADOW.src}?v=${QC_SHADOW.version}`} />
-    <div className="qc138-tr" data-qc138="header-row">
-      <div className="qc138-tb" data-qc138="title-block">
+    {/* v138.5 §A — the status row, at the top, within the shared inset */}
+    <div className="qc138-srow phf-row" data-qc138="status-row">
+      <GlyphRow counts={loading ? null : counts} stages={stages} onGlyph={onGlyph} loading={loading} entering={entering} />
+    </div>
+    {/* v138.5 §A — the header grid: hawk · title block · spacer · chart. The hawk hangs out into the inset. */}
+    <div className="qc138-hg phf-row" data-qc138="header-row">
+      <img className="qc138-hawk" data-qc138="hawk" alt="" aria-hidden="true" draggable={false}
+        src={`${QC_DESK_HAWK.src}?v=${QC_DESK_HAWK.version}`} width={QC_DESK_HAWK.w} height={QC_DESK_HAWK.h} />
+      <div className="qc138-bt" data-qc138="title-block">
         <span className="qc138-ey" data-qc138="eyebrow">{QC_EYEBROW}</span>
         <h1 className="qc138-title" data-page-title="" data-qc138="title" tabIndex={-1}
           aria-label={total === null ? "Queries sent" : `${total} ${sentWords138(total)}`}>
@@ -104,12 +117,13 @@ export const QcHeader138: React.FC<{
         <div className="qc138-by" data-qc138="byline">
           {msTitle ? <span className="qc138-byt">for <i className="qc138-ms" data-qc138="ms">{msTitle}</i></span> : <span className="qc138-byt">for every book</span>}
         </div>
+        <div className="qc138-acts" data-qc138="acts">
+          <button type="button" className="qc138-b1" data-qcv="oh-log" ref={logRef} disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
+          <button type="button" className="qc138-b2" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
+        </div>
       </div>
-      <div className="qc138-acts" data-qc138="acts">
-        <button type="button" className="qc138-b1" data-qcv="oh-log" ref={logRef} disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
-        <button type="button" className="qc138-b2" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
-      </div>
-      <GlyphRow counts={loading ? null : counts} stages={stages} onGlyph={onGlyph} loading={loading} entering={entering} />
+      <span className="qc138-hsp" aria-hidden="true" />
+      <div className="qc138-cc" data-qc138="chart-col">{chart}</div>
     </div>
     {children}
     <i className="qc138-sentinel" data-qc138="pin-sentinel" aria-hidden="true" />

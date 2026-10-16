@@ -1,0 +1,22 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE PAGE HERO FRAME (Query Centre v138.5 §A) — the one inset the light headers come in from the sheet's edges by.
+ * The Contact list (`.cl17-hd`, which reads it as `--cl17-inset`) and the Query Centre (`.qc138-hd`) both carry `.phf`
+ * on their header, so their letter strip, status row, title rows and cards share their left and right edges.
+ *
+ * ⚠️ THE INSET IS IN CONTAINER UNITS, NOT A PERCENTAGE. A percentage in a margin resolves against the element's own
+ *    containing block, so the old `(100% − 900px) / 2` meant the header's width only on the header's direct
+ *    children. The Query Centre's desk hawk is a GRID ITEM and pulls itself out by the inset: there `100%` is its
+ *    grid area. `100cqw` is the header's width wherever it is read inside the header, because `.phf` is the
+ *    nearest inline-size container. It equals the old value on every element that used to read it.
+ * ⚠️ COMPACT AND FULL FOLLOW THE APP'S OWN SWITCH (`.ws-app.sheet-wide`, the page sheet's width), as v17.1's did:
+ *    compact max(40px, (100% − 900px) / 2), full max(64px, (100% − 1080px) / 2).
+ */
+.phf {
+  container-type: inline-size;
+  --phf-inset: max(40px, calc((100cqw - 900px) / 2));
+}
+.ws-app.sheet-wide .phf { --phf-inset: max(64px, calc((100cqw - 1080px) / 2)); }
+.phf .phf-row { margin-inline: var(--phf-inset); }

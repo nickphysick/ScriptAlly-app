@@ -27,8 +27,10 @@
 /* v17.1 §A · THE TITLE ROW COMES IN FROM THE SHEET'S EDGES: the inset is max(40px, (100% − 900px) / 2), full
    max(64px, (100% − 1080px) / 2), against the header's width (the list's). The filter row under it stays at the
    list's width. Title block over the buttons in column 1; the card spans both rows in column 3, centred. */
-.cl17-hd { --cl17-inset: max(40px, calc((100% - 900px) / 2)); --cl17-sh-x: -60px; }
-.ws-app.sheet-wide .cl17-hd { --cl17-inset: max(64px, calc((100% - 1080px) / 2)); --cl17-sh-x: -70px; }
+/* Query Centre v138.5 §A — the inset is the shared page hero frame's (shell/pageHeroFrame.css, `.phf` on the header),
+   which the Query Centre reads too: one value, so the two pages' edges cannot drift apart. */
+.cl17-hd { --cl17-inset: var(--phf-inset); --cl17-sh-x: -60px; }
+.ws-app.sheet-wide .cl17-hd { --cl17-sh-x: -70px; }
 .cl17-hd .cl17-tr {
   display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto; grid-template-rows: auto auto;
   row-gap: 24px; align-items: center; margin-inline: var(--cl17-inset);
