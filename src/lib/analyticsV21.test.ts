@@ -226,6 +226,7 @@ describe("firsts and records", () => {
     expect(r.featured?.meta).toBe("LONDON · REPLIES IN ~10 WKS");
     expect(r.featured?.stages.map((s) => s.label)).toEqual(["Queried", "Full requested", "Full sent", "Offer"]);
     expect(r.featured?.open).toBe(true);
+    expect(r.featured?.initials).toBe("HA");
   });
   it("falls back to the first full request, then the first request, then nothing", () => {
     const full = run([walk(W8, 100, [[R.PARTIAL_REQUESTED, 90]]), walk(W10, 100, [[R.FULL_REQUESTED, 60]])], agents);

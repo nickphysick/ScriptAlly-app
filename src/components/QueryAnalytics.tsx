@@ -35,6 +35,7 @@ import { A21Header, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
 import { A21Window } from "./analytics/A21Window";
 import { A21Steps } from "./analytics/A21Steps";
+import { A21Records } from "./analytics/A21Records";
 import { buildV21, windowLede } from "../lib/analyticsV21";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
@@ -116,7 +117,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
         <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
         <Section sec={3} banner={b3} readings={v.reply.readings} tint lede={<>{wl.lead}{wl.bold ? <b>{wl.bold}</b> : null}{wl.rest}</>}><A21Window w={v21.window} /></Section>
         <Section sec={4} banner={b4}><A21Steps steps={v21.steps} endings={v21.endings} /></Section>
-        <Section sec={5} banner={b[5]} tint><Records model={model} /></Section>
+        <Section sec={5} banner={b[5]} tint
+          desktop={<A21Records rec={v21.records} count={b[5].count} title={b[5].title} msTitle={manuscript.title || null} onOverTime={() => go(6)} />}><Records model={model} /></Section>
         <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
         <Section sec={7} banner={b[7]} readings={v.lanes.readings} tint><Lanes model={model} /></Section>
         <Section sec={8} banner={b[8]} ws><Caveats model={model} /></Section>

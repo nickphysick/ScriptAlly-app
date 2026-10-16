@@ -262,3 +262,55 @@
   .a17-page .a21-jrv b, .ws-app.sheet-wide .a17-page .a21-jrv b { font-size: 26px !important; }
   .a21-enrow { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ══════════════ F · firsts and records: a tinted band, a featured card over a white panel (desktop) ══════════════ */
+.a21-dk { display: none; }
+@media (min-width: 761px) {
+  .a21-dk { display: block; }
+  .a21-mk { display: none; }
+  .a17-page .a17-sect.a21-band, .ws-app.sheet-wide .a17-page .a17-sect.a21-band { padding: 0; }
+  .a21-fs { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr); column-gap: 40px; align-items: center; padding: 65px 0; }
+  .ws-app.sheet-wide .a21-fs { grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.6fr); padding: 73px 0; }
+  .a17-page .a21-fsk { font: 400 9.5px/1.5 var(--font-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); margin-bottom: 10px; }
+  .a17-page .a21-fst h2 { margin: 0; font: 400 40px/1.04 var(--sp-type) !important; }
+  .ws-app.sheet-wide .a17-page .a21-fst h2 { font-size: 46px !important; }
+  .a17-page .a21-fst p { margin: 16px 0 26px; font: 400 18px/1.55 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.66); }
+  .a17-page .a21-fst p b { color: var(--sp-ink); font-weight: 600; }
+  .a17-page .a21-fsbtn { height: 48px; padding: 0 22px; border-radius: 24px; border: 0; font: 400 16px/1 var(--sp-type) !important; cursor: pointer; white-space: nowrap; background: #2a3a52; color: #f4eee5; }
+  .a21-fsbtn:hover { background: #22304a; }
+  .a21-fsr { position: relative; padding-left: 130px; min-height: 420px; display: flex; align-items: center; }
+  .ws-app.sheet-wide .a21-fsr { padding-left: 170px; }
+  .a21-fs--nocard .a21-fsr, .ws-app.sheet-wide .a21-fs--nocard .a21-fsr { padding-left: 0; min-height: 0; }
+  .a21-fc { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 260px; z-index: 2; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
+  .ws-app.sheet-wide .a21-fc { width: 290px; }
+  .a17-page .a21-fch { display: flex; justify-content: space-between; padding: 12px 18px; font: 400 9.5px/1.4 var(--font-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: #3f566b; }
+  .a17-page .a21-fch span { font: inherit !important; }
+  .a21-fcwho { display: flex; align-items: center; gap: 12px; padding: 18px 18px 0; }
+  .a17-page .a21-fcini { width: 42px; height: 42px; border-radius: 50%; background: #2a3a52; color: #f4eee5; font: 600 11px/1 var(--font-mono) !important; display: flex; align-items: center; justify-content: center; flex: none; }
+  .a17-page .a21-fcwho b { display: block; font: 600 18px/1.25 var(--sp-serif) !important; }
+  .a17-page .a21-fcwho small { display: block; font: 400 8.5px/1.4 var(--font-mono) !important; letter-spacing: 0.12em; color: rgba(28, 19, 15, 0.5); margin-top: 3px; }
+  .a17-page .a21-fcst { display: inline-flex; align-items: center; gap: 8px; margin: 14px 18px 0; padding: 5px 12px; border-radius: 16px; background: #eef2f6; font: 400 15px/1.3 var(--sp-serif) !important; }
+  .a21-fcq { margin: 14px 18px 0; padding: 10px 14px; border-radius: 10px; background: #f4f1ec; }
+  .a17-page .a21-fcq small { display: block; font: 400 8.5px/1.4 var(--font-mono) !important; letter-spacing: 0.16em; color: rgba(28, 19, 15, 0.5); }
+  .a17-page .a21-fcq b { display: block; font: 400 18px/1.25 var(--sp-type) !important; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .a21-fcl { list-style: none; margin: 12px 18px 0; padding: 0; }
+  .a17-page .a21-fcl li { display: flex; align-items: center; gap: 10px; font: 400 14.5px/1.3 var(--sp-serif) !important; padding: 4px 0; }
+  .a17-page .a21-fcl em { margin-left: auto; font: 400 11px/1 var(--font-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.5); }
+  .a17-page .a21-fcf { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 12px 18px; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 400 14.5px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.66); }
+  .a17-page .a21-fcf button { height: 36px; padding: 0 18px; font: 400 15px/1 var(--sp-type) !important; border-radius: 18px; border: 0; background: #2a3a52; color: #f4eee5; cursor: pointer; }
+  .a21-fsp { flex: 1; min-width: 0; background: #fff; border-radius: 24px; padding: 28px 30px 22px 150px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.35); }
+  .a21-fs--nocard .a21-fsp { padding-left: 30px; }
+  .a21-fph { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+  .a17-page .a21-fph h3 { margin: 0; font: 400 26px/1.2 var(--sp-type) !important; }
+  .a17-page .a21-fph em { display: none; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+  .ws-app.sheet-wide .a17-page .a21-fph em { display: inline; }
+  .a21-fpl { list-style: none; margin: 0; padding: 0; }
+  .a21-fpl li { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; column-gap: 14px; align-items: center; padding: 12px 8px; border-bottom: 1px solid rgba(28, 19, 15, 0.07); }
+  .a21-fpl li:last-child { border-bottom: 0; }
+  .a21-md { width: 38px; height: 38px; border-radius: 50%; background: #eef2f6; color: #2a3a52; display: flex; align-items: center; justify-content: center; }
+  .a21-md > svg { width: 18px; height: 18px; }
+  .a17-page .a21-fpl b { display: block; font: 600 16.5px/1.3 var(--sp-serif) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .a17-page .a21-fpl i { display: block; font: italic 400 13px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ws-app.sheet-wide .a17-page .a21-fpl i { font-size: 14px !important; }
+  .a17-page .a21-fpv { font: 400 19px/1.2 var(--sp-type) !important; white-space: nowrap; }
+}

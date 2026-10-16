@@ -353,6 +353,9 @@ export interface Featured {
 export interface RecordRow { key: "quickest" | "first-request" | "busiest" | "run" | "quickest-pass"; label: string; detail: string; value: string }
 export interface Records { featured: Featured | null; rows: RecordRow[]; lede: { lead: string; bold: string[]; rest: string[] } }
 
+/** "The Hollis Agency" → "HA": the initials of the name the card shows beside them, skipping "The" and "&". */
+export const nameInitials = (name: string): string =>
+  name.split(/\s+/).filter((w) => w && !/^(the|&|and)$/i.test(w) && /[A-Za-z]/.test(w[0])).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 const durShort = (d: number): string => (d < 14 ? `${d} ${d === 1 ? "day" : "days"}` : `${Math.round(d / 7)} weeks`);
 
 export function records(model: AnalyticsModel, agents: Agent[], nowMs: number): Records {
@@ -386,7 +389,7 @@ export function records(model: AnalyticsModel, agents: Agent[], nowMs: number): 
       label: pick.label,
       atMs: pick.x.t,
       id: e.row.id,
-      initials: a ? agentInitials(a) : (e.row.agentName.trim()[0] ?? "–").toUpperCase(),
+      initials: nameInitials(agencyOf(e)) || (a ? agentInitials(a) : "–"),
       name: agencyOf(e),
       meta: [where.toUpperCase(), wks].filter(Boolean).join(" · "),
       status: e.row.status,

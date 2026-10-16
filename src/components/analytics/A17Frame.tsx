@@ -98,24 +98,34 @@ export const Section: React.FC<{
   tint?: boolean;
   /** v21 — a lede with rich runs, in place of the banner's plain sentence */
   lede?: React.ReactNode;
-}> = ({ sec, banner, perchSrc, readings, ws, children, tint, lede }) => (
-  <section className={`a17-sect${tint ? " a21-tint" : ""}`} data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`} data-a21-tint={tint ? "" : undefined}>
-    <div className="a17-ban a17-rv" data-a17="ban">
-      <Slot className="a17-perch" probe="perch" artSrc={perchSrc} />
-      <div className="a17-bantxt">
-        <div className="a17-cnt">{banner.count}</div>
-        <h2 className="a17-tw" data-a17="ban-title">{banner.title}</h2>
-        <p>{lede ?? <>{banner.sentence}{banner.bold ? <><b>{banner.bold}</b>. Four things worth keeping in mind.</> : null}</>}</p>
+  /** v21 §F — the desktop's own layout for the section; the banner and frame then show on the phone only */
+  desktop?: React.ReactNode;
+}> = ({ sec, banner, perchSrc, readings, ws, children, tint, lede, desktop }) => {
+  const v17 = (
+    <>
+      <div className="a17-ban a17-rv" data-a17="ban">
+        <Slot className="a17-perch" probe="perch" artSrc={perchSrc} />
+        <div className="a17-bantxt">
+          <div className="a17-cnt">{banner.count}</div>
+          <h2 className="a17-tw" data-a17="ban-title">{banner.title}</h2>
+          <p>{lede ?? <>{banner.sentence}{banner.bold ? <><b>{banner.bold}</b>. Four things worth keeping in mind.</> : null}</>}</p>
+        </div>
       </div>
-    </div>
-    {ws ? children : (
-      <div className="a17-frame a17-rv d1" data-a17="frame">
-        <div className="a17-body">{children}</div>
-        {readings ? <Readings items={readings} /> : null}
-      </div>
-    )}
-  </section>
-);
+      {ws ? children : (
+        <div className="a17-frame a17-rv d1" data-a17="frame">
+          <div className="a17-body">{children}</div>
+          {readings ? <Readings items={readings} /> : null}
+        </div>
+      )}
+    </>
+  );
+  return (
+    <section className={`a17-sect${tint ? " a21-tint" : ""}${desktop ? " a21-band" : ""}`} data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`} data-a21-tint={tint ? "" : undefined}>
+      {/* a section with its own desktop layout keeps v17's banner and frame for the phone alone */}
+      {desktop ? <><div className="a21-dk">{desktop}</div><div className="a21-mk">{v17}</div></> : v17}
+    </section>
+  );
+};
 
 /* ── at a glance ── */
 const Spark: React.FC<{ s: V17Glance["spark"] }> = ({ s }) => {
