@@ -139,3 +139,20 @@
   .a17-page .a24-stack i { font-size: 18px !important; padding: 0 10px; }
   .a24-when { grid-template-columns: 1fr; gap: 8px; }
 }
+
+/* ══════════════ S3 · monthly columns ══════════════ */
+.a24-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 14px; height: 220px; align-items: end; padding: 0 4px 8px; margin-bottom: 12px; }
+.a24-bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; min-width: 0; }
+.a24-bar i { display: block; width: 100%; max-width: 56px; background: #2a3a52; border-radius: 6px 6px 2px 2px; opacity: 0.82; flex: none; }
+.a24-bar.hi i { background: #b4553f; opacity: 1; }
+.a17-page .a24-bar b { font: 400 18px/1 var(--sp-type) !important; color: var(--sp-ink); min-height: 18px; }
+.a17-page .a24-bar.hi b { color: #a0452e; }
+.a17-page .a24-bar span {
+  font: 400 11px/1.2 var(--font-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5);
+  padding-top: 6px; border-top: 1px solid rgba(28, 19, 15, 0.12); width: 100%; text-align: center; white-space: nowrap; overflow: hidden;
+}
+@media (max-width: 760px) {
+  .a24-bars { height: 160px; gap: 6px; }
+  .a17-page .a24-bar b { font-size: 13px !important; min-height: 13px; }
+  .a17-page .a24-bar span { font-size: 9px !important; letter-spacing: 0.04em; }
+}
