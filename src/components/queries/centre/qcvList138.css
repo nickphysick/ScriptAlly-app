@@ -21,7 +21,11 @@
   .qcv-group[data-v138][data-full] > .qcv-page.qcw { margin-top: calc(var(--qc138-pin-h) + 16px); }
 
   .qc138-sheet {
-    --qc138-cols: minmax(0, 1.3fr) 108px minmax(0, 1fr) 246px minmax(170px, 0.85fr) 60px;
+    /* v138.5 §F — one template for headings, rows and the peek: the gap after "Where it stands" is gone (a fixed
+       148px), and What you sent is --sent-w, 18% of the list's width between 180 and 270, in the sheet's own
+       container units (never vw: the sidebar changes the list's width, not the window's) */
+    --sent-w: clamp(180px, 18cqw, 270px);
+    --qc138-cols: minmax(160px, 1.3fr) 90px 148px var(--sent-w) minmax(140px, 1fr) 56px;
     --qc138-gap: 20px;
     --qc138-ind: 52px;
     position: relative; box-sizing: border-box; container: qc138sheet / inline-size;
@@ -218,25 +222,26 @@
   .qc138-sheet .qc138-ws1 > span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-sub { margin-top: 3px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-sub.hot { font-style: normal !important; font-weight: 600 !important; color: #a2452a; }
-  /* what you sent: a 92px chip, a rule, four 30px tiles */
-  .qc138-sheet .qc138-mats { display: flex; align-items: center; gap: 5px; }
-  .qc138-sheet .qc138-sep { flex: none; width: 1px; height: 22px; margin: 0 3px; background: rgba(28, 19, 15, 0.12); }
+  /* v138.5 §F — what you sent, on two lines like the other columns: the package chip (26 tall, as wide as its name
+     up to the column, ending in "…" with the full name in its tooltip), then 5 under it the material icons (20px
+     squares, radius 5, 12px icons, 4 apart). No package: no chip, and the icons sit on line 1. */
+  .qc138-sheet .qc138-mats { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+  .qc138-sheet .qc138-mic { display: flex; align-items: center; gap: 4px; }
   .qc138-sheet .qc138-pkg {
-    flex: none; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; width: 92px; height: 32px; padding: 0 10px 0 8px;
-    border: 0; border-radius: 16px; background: none; cursor: pointer; white-space: nowrap; overflow: hidden; font: 400 13px/1 var(--sp-type) !important;
+    flex: none; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; width: auto; max-width: 100%; height: 26px; padding: 0 12px 0 10px;
+    border: 0; border-radius: 13px; background: none; cursor: pointer; white-space: nowrap; overflow: hidden; font: 400 12.5px/1 var(--sp-type) !important;
   }
-  .qc138-sheet .qc138-pkg span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
-  .qc138-sheet .qc138-pkg svg { flex: none; width: 16px; height: 16px; }
+  .qc138-sheet .qc138-pkg span { min-width: 0; font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
+  .qc138-sheet .qc138-pkg svg { flex: none; width: 14px; height: 14px; }
   .qc138-sheet .qc138-pkg--on { background: #f6e2d8; color: #8a4a2e; }
   .qc138-sheet .qc138-pkg--add { color: rgba(28, 19, 15, 0.45); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; }
   .qc138-sheet .qc138-pkg--add:hover, .qc138-sheet .qc138-pkg--add:focus-visible { color: #2a3a52; outline-color: #2a3a52; }
-  .qc138-sheet .qc138-pkg--none { pointer-events: none; }
   .qc138-sheet .qc138-tile {
-    flex: none; display: grid; place-items: center; box-sizing: border-box; width: 30px; height: 30px; border-radius: 9px;
+    flex: none; display: grid; place-items: center; box-sizing: border-box; width: 20px; height: 20px; border-radius: 5px;
     color: rgba(28, 19, 15, 0.2); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
   }
   .qc138-sheet .qc138-tile.on { color: #2a3a52; background: #f4f1ec; box-shadow: none; }
-  .qc138-sheet .qc138-tile svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .qc138-sheet .qc138-tile svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .qc138-sheet .qc138-tile:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
   /* next move: a subgrid over the last two tracks — the action in track 5, the due figure in track 6 */
   .qc138-sheet .qc138-nx {
@@ -276,18 +281,13 @@
   .qc138-sheet[data-density="compact"] .qc138-sub, .qc138-sheet[data-density="compact"] .qc138-dial-m { display: none; }
   .qc138-sheet[data-density="compact"] .qc138-ws1 { font-size: 14.5px !important; gap: 6px; }
   .qc138-sheet[data-density="compact"] .qc138-ws1 svg { width: 11px; height: 11px; }
-  .qc138-sheet[data-density="compact"] .qc138-pkg { height: 26px; }
-  .qc138-sheet[data-density="compact"] .qc138-tile { width: 24px; height: 24px; border-radius: 7px; }
-  .qc138-sheet[data-density="compact"] .qc138-tile svg { width: 15px; height: 15px; }
+  /* compact keeps one line: the chip shrinks first, then the icons follow it */
+  .qc138-sheet[data-density="compact"] .qc138-mats { flex-direction: row; align-items: center; }
+  .qc138-sheet[data-density="compact"] .qc138-pkg { flex: 0 1 auto; min-width: 0; }
   .qc138-sheet[data-density="compact"] .qc138-nxt { font-size: 14.5px !important; }
   .qc138-sheet[data-density="compact"] .qc138-fqd { font-size: 14.5px !important; }
 
-  /* below 1180px of sheet: the narrow grid; What you sent shows only the package chip */
-  @container qc138sheet (max-width: 1179.98px) {
-    /* ⚠️ ON THE CHILDREN: a container query cannot restyle the container itself */
-    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) 100px minmax(140px, 0.85fr) 56px; }
-    .qc138-sheet .qc138-sep, .qc138-sheet .qc138-tile { display: none; }
-  }
+  /* v138.5 §F — the narrow grid below 1180px of sheet is retired: the one template above holds at 1280 too */
   /* below 900px of sheet (a 1024 window with the sidebar open) What you sent goes, with its heading: at five
      columns the headings would run into each other */
   @container qc138sheet (max-width: 899.98px) {

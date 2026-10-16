@@ -298,7 +298,8 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
   );
 };
 
-/** "What you sent": a 92px package chip (or an empty 92px space), a rule, four 30px tiles */
+/** "What you sent" (v138.5 §F): the package chip, as wide as its name up to the column (or "+ Add" when nothing is
+    recorded), over the four material icons; with no package and something recorded, the icons alone on line 1 */
 const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
   const m = sentCell(row, pkg, nowMs);
   return (
@@ -313,16 +314,15 @@ const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: 
           onClick={(e) => { e.stopPropagation(); onAdd(); }}>
           <span className="qc138-pkg-plus" aria-hidden="true">+</span><span className="qc138-pkg-word">Add</span>
         </button>
-      ) : (
-        <span className="qc138-pkg qc138-pkg--none" data-qcv="row-pkg-none" aria-hidden="true" />
-      )}
-      <i className="qc138-sep" aria-hidden="true" />
-      {m.tiles.map((t) => (
-        <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
-          tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
-          <Mark kind={t.kind} />
-        </span>
-      ))}
+      ) : null}
+      <span className="qc138-mic" data-qcv="sent-icons">
+        {m.tiles.map((t) => (
+          <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
+            tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
+            <Mark kind={t.kind} />
+          </span>
+        ))}
+      </span>
     </div>
   );
 };
