@@ -168,3 +168,24 @@ and `19-hk-save-flight-1512.png` (the flight mid-arc, 400ms after Save). The loc
   the harness account List health is unchanged by this pack (the points table and formula are untouched; 77% before
   and after on the same data). The order changes only among ties: equal-points tasks now put queried agents first, then
   sort by name, where the old score mixed fit and queried.
+
+## Deploy (16 Oct, after the approved header resolution)
+
+- **Dev before:** `index-DQqNyNdX.js`, `dev/main-cl18-todo51-cl181-qc1385-an21` at `1e60a775` (main + Contact list v18 +
+  To-do v5.1 + Contact list v18.1 + Query Centre v138.5 + Analytics v21). Dev had moved twice since the first attempt.
+- **Integration branch:** `dev/main-cl18-todo51-cl181-qc1385-an21-cl182` at `0af3f810`: the merge `afe1445f` (two
+  conflicts: `.refhashes.json` as a union, 394 refs; `ContactLightHeader.tsx` keeping v138.5's `.phf` class and import
+  with v18.2's title row), then `0af3f810`, which deletes `--cl182-inset` and pulls the archivist from `--phf-inset`.
+  No script writes the inset; the one ResizeObserver still writes only the archivist's height, as before.
+- **Dev after:** `index-BboeA1eL.js`, built from a clean checkout of the pushed tip. Dev was checked again immediately
+  before the deploy and had not moved (Query Centre v138.6 was pushed but not deployed, so it is NOT in this build).
+- **Gates on the merged tree:** tsc 0, both builds clean, Vitest 593 of 594 files (8,919 passed), the one red being the
+  baseline `functions/src/email.test.ts`.
+- **Locks on the merged build:** CL182 23 passed (184 readings), with A1 to A4 read fresh at 1512 and 1280 and the
+  archivist hidden at 1024. A1 and A2 went red again under their named mutations on this build (4 and 2 readings).
+  QC138.5 12 passed; QC138, 138.1, 138.1 census, 138.3, 138.4 all green; 138.2 has 1 red, D1, the known frame-timing
+  flake on both builds. CL181, CL18, CL17, CL16, RS2 (Responses v2's locks; there is no RS1) and header v3 green.
+  CL171 had one red (D2, the tab dismissal's stored value read null after a reload) that passed on a re-run on both this
+  build and the dev tip.
+- **Header shots from the merged build:** `shots/01-header-1512.png`, `shots/01-header-1280.png`,
+  `shots/x-header-1024.png`.
