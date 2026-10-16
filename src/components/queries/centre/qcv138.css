@@ -46,6 +46,49 @@
   .qc138-hd .qc138-hawk { width: 190px; margin-top: -14px; margin-bottom: -22px; }
 }
 
+/* ── v138.5 §C · THE WEEKLY CHART: a white card as tall as the title block (`--qc138-bt-h`, the one writer in
+   QcHeader138). The eyebrow across the top; the number and its noun bottom left; twelve week buttons on the right,
+   26 from the number (16 at a header of 1180 or less), the axis 13 under them. ── */
+.qc138-hd .qc138-wk {
+  position: relative; z-index: 1; box-sizing: border-box; height: var(--qc138-bt-h, auto); padding: 20px 24px 18px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: 26px; row-gap: 6px;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 14px 26px -20px rgba(28, 19, 15, 0.32);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.qc138-hd .qc138-wk-ey {
+  grid-column: 1 / -1; font: 500 10px/1.3 var(--font-mono) !important; letter-spacing: 0.16em; text-transform: uppercase; color: #a2452a;
+}
+.qc138-hd .qc138-wk-big { grid-column: 1; grid-row: 2; align-self: end; min-width: 0; }
+.qc138-hd .qc138-wk-big b { display: block; font: 400 76px/0.82 var(--sp-type) !important; letter-spacing: -0.02em; color: #1c130f; transition: opacity 120ms ease; }
+.qc138-hd .qc138-wk-big[data-preview] b { opacity: 0.45; }
+.qc138-hd .qc138-wk-big span { display: block; margin-top: 10px; font: italic 400 15px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.qc138-hd .qc138-wk-bz { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.qc138-hd .qc138-wk-bars { flex: 1 1 0; min-height: 0; display: flex; align-items: stretch; gap: 3px; }
+.qc138-hd .qc138-wk-w {
+  position: relative; flex: 1 1 0; min-width: 0; margin: 0; padding: 0; border: 0; border-radius: 5px; background: none; cursor: pointer;
+}
+.qc138-hd .qc138-wk-w:disabled { cursor: default; }
+.qc138-hd .qc138-wk-w:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
+.qc138-hd .qc138-wk-b {
+  position: absolute; left: 1px; right: 1px; bottom: 0; border-radius: 4px; background: #2a3a52; opacity: 0.85;
+}
+.qc138-hd .qc138-wk-b--z { height: 4px; background: rgba(42, 58, 82, 0.16); opacity: 1; }
+.qc138-hd .qc138-wk-w[aria-pressed="true"] .qc138-wk-b { background: #b0603e; opacity: 1; }
+.qc138-hd .qc138-wk-w[aria-pressed="true"]::after {
+  content: ""; position: absolute; left: 50%; bottom: -9.5px; width: 5px; height: 5px; translate: -50% 0; border-radius: 50%; background: #b0603e;
+}
+.qc138-hd .qc138-wk-ax {
+  display: flex; justify-content: space-between; margin-top: 13px;
+  font: 500 9px/1.3 var(--font-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.38);
+}
+.qc138-hd .qc138-wk-ax span { font: inherit !important; white-space: nowrap; }
+.qc138-hd .qc138-wk[data-loading] .qc138-wk-big b { min-width: 0.7em; min-height: 0.82em; border-radius: 8px; background: rgba(28, 19, 15, 0.07); }
+@container qc138hd (max-width: 1180px) {
+  .qc138-hd .qc138-wk { padding: 18px; column-gap: 16px; }
+  .qc138-hd .qc138-wk-big b { font-size: 58px !important; }
+}
+
 .qc138-hd .qc138-shadow {
   position: absolute; left: calc(var(--phf-inset) + var(--qc138-sh-x)); top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
   opacity: 0.15; transform: rotate(-4deg); filter: blur(1.5px); pointer-events: none; user-select: none;

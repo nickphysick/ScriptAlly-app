@@ -11,7 +11,7 @@
  * ⚠️ THE GLYPHS SHARE THE STAGE SET WITH THE STAGE PILL (Part B): a press never scrolls.
  * ⚠️ THE TITLE KEEPS `data-page-title`, and takes focus from the pinned row's "back to the top".
  */
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { GLYPHS, pressedGlyph, sentWords138, type GlyphKey, type StageSet } from "../../../lib/qc138";
 import { StageGlyph } from "./StageGlyph";
 import "../../shell/pageHeroFrame.css"; /* v138.5 — the inset the Contact list reads too */
@@ -77,7 +77,22 @@ export const QcHeader138: React.FC<{
   chart?: React.ReactNode;
   /** Part B — the filter row, under the header's rule */
   children?: React.ReactNode;
-}> = ({ loading, total, msTitle, counts, stages, onGlyph, onLog, onRecord, logDisabled = false, logRef, chart, children }) => (
+}> = ({ loading, total, msTitle, counts, stages, onGlyph, onLog, onRecord, logDisabled = false, logRef, chart, children }) => {
+  /* v138.5 §C — THE ONE WRITER of the chart card's height: the title block's own height (eyebrow to the foot of
+     the buttons), written on the header grid on mount and whenever that block resizes. No polling. */
+  const gridRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const g = gridRef.current, t = titleRef.current;
+    if (!g || !t) return undefined;
+    const write = () => g.style.setProperty("--qc138-bt-h", `${Math.round(t.getBoundingClientRect().height * 100) / 100}px`);
+    write();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(write);
+    ro.observe(t);
+    return () => ro.disconnect();
+  }, []);
+  return (
   <header className="qc138-hd phf" data-qc138="header" data-qcv="open-header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <img className="qc138-shadow" data-qc138="shadow" alt="" aria-hidden="true" src={`${QC_SHADOW.src}?v=${QC_SHADOW.version}`} />
     {/* v138.5 §A — the status row, at the top, within the shared inset */}
@@ -85,10 +100,10 @@ export const QcHeader138: React.FC<{
       <GlyphRow counts={loading ? null : counts} stages={stages} onGlyph={onGlyph} loading={loading} />
     </div>
     {/* v138.5 §A — the header grid: hawk · title block · spacer · chart. The hawk hangs out into the inset. */}
-    <div className="qc138-hg phf-row" data-qc138="header-row">
+    <div className="qc138-hg phf-row" data-qc138="header-row" ref={gridRef}>
       <img className="qc138-hawk" data-qc138="hawk" alt="" aria-hidden="true" draggable={false}
         src={`${QC_DESK_HAWK.src}?v=${QC_DESK_HAWK.version}`} width={QC_DESK_HAWK.w} height={QC_DESK_HAWK.h} />
-      <div className="qc138-bt" data-qc138="title-block">
+      <div className="qc138-bt" data-qc138="title-block" ref={titleRef}>
         <span className="qc138-ey" data-qc138="eyebrow">{QC_EYEBROW}</span>
         <h1 className="qc138-title" data-page-title="" data-qc138="title" tabIndex={-1}
           aria-label={total === null ? "Queries sent" : `${total} ${sentWords138(total)}`}>
@@ -111,4 +126,5 @@ export const QcHeader138: React.FC<{
     {children}
     <i className="qc138-sentinel" data-qc138="pin-sentinel" aria-hidden="true" />
   </header>
-);
+  );
+};

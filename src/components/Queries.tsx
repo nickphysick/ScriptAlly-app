@@ -100,6 +100,8 @@ import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
+import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
+import { sentWeeks } from "../lib/qcSentWeeks";
 import { QcPinned138, useQcPinned } from "./queries/centre/QcPinned138";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
@@ -5160,6 +5162,7 @@ export const Queries: React.FC<{
       onRecord={() => onNavigate?.("queries", "Record a response")}
       logDisabled={creating}
       logRef={logTriggerRef}
+      chart={<QcWeekChart138 weeks={showGridSkeleton ? null : sentWeeks(qcScoped.map((r) => r.sentMs), qcNow138)} />}
     >
       <QcFilters138
         filters={qcF138}
