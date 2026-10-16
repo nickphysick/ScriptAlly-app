@@ -77,35 +77,35 @@
 .qc138-hd .qc138-acts button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .qc138-hd .qc138-acts button:disabled { cursor: default; }
 
-/* ── the glyph row: 520 (450) wide, six equal stage buttons, a 1px ink 18% divider, Closed at 74 (62) ── */
-.qc138-gr { --qc138-gw: 450px; --qc138-cw: 62px; --qc138-gs: 36px; --qc138-gn: 25px; --qc138-gl: 9px; width: var(--qc138-gw); }
-.ws-app.sheet-wide .qc138-gr { --qc138-gw: 520px; --qc138-cw: 74px; --qc138-gs: 44px; --qc138-gn: 28px; --qc138-gl: 10px; }
-.qc138-gr .qc138-gl {
-  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 1px var(--qc138-cw); align-items: stretch; column-gap: 0;
-}
-.qc138-gr .qc138-gdiv { display: block; width: 1px; margin: 8px 0; background: rgba(28, 19, 15, 0.18); }
-.qc138-gr .qc138-sg {
-  display: flex; flex-direction: column; align-items: center; box-sizing: border-box; min-width: 0; margin: 0; padding: 10px 2px;
-  border: 0; border-radius: 14px; background: transparent; color: #1c130f; cursor: pointer;
+/* ── v138.5 §B · THE STATUS GLYPHS: one centred row at the top, no rule and no counts on show. 62 × 56 buttons,
+   radius 12, a 38px glyph; 10 between buttons and 22 more before Closed. Rest: no ground, ink (Closed grey).
+   Hover #e9e1d4. Selected: navy, the glyph cream, the others dimmed. Hover or keyboard focus: a dark label 10 below. ── */
+.qc138-hd .qc138-srow .qc138-gl { display: flex; justify-content: center; align-items: center; gap: 10px; }
+.qc138-hd .qc138-sg {
+  position: relative; flex: none; display: grid; place-items: center; box-sizing: border-box; width: 62px; height: 56px;
+  margin: 0; padding: 0; border: 0; border-radius: 12px; background: transparent; color: #1c130f; cursor: pointer;
   transition: background-color 0.15s ease, opacity 0.15s ease;
 }
-.qc138-gr .qc138-sg .qc138-sgi { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.qc138-gr .qc138-sg svg { display: block; width: var(--qc138-gs); height: var(--qc138-gs); transition: transform 0.15s ease; }
-.qc138-gr .qc138-sg b { display: block; font: 400 var(--qc138-gn)/1 var(--sp-type) !important; color: inherit; min-height: 1em; }
-.qc138-gr .qc138-sg .qc138-sgl {
-  display: block; height: 2.7em; margin-top: 9px; font: 500 var(--qc138-gl)/1.35 var(--font-mono) !important;
-  letter-spacing: 0.1em; text-transform: uppercase; text-align: center; color: rgba(28, 19, 15, 0.55); white-space: nowrap;
+.qc138-hd .qc138-sg--cl { margin-left: 22px; color: rgba(28, 19, 15, 0.55); }
+.qc138-hd .qc138-sg > svg { display: block; width: 38px; height: 38px; }
+.qc138-hd .qc138-sg:hover:not(:disabled) { background: #e9e1d4; }
+.qc138-hd .qc138-gl[data-on] .qc138-sg[aria-pressed="false"] { opacity: 0.3; }
+.qc138-hd .qc138-gl[data-on] .qc138-sg[aria-pressed="false"]:hover:not(:disabled) { opacity: 1; }
+.qc138-hd .qc138-sg[aria-pressed="true"], .qc138-hd .qc138-sg[aria-pressed="true"]:hover { background: #2a3a52; color: #f4eee5; }
+.qc138-hd .qc138-sg:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.qc138-hd .qc138-sg:disabled { cursor: default; }
+/* the label: #1c130f, cream serif 13px, 6 × 11 padding, radius 8, a 10px arrow up; fades in over 140ms */
+.qc138-hd .qc138-gtip {
+  position: absolute; left: 50%; top: calc(100% + 10px); z-index: 20; translate: -50% 0;
+  box-sizing: border-box; padding: 6px 11px; border-radius: 8px; background: #1c130f; color: #f4eee5; white-space: nowrap;
+  font: 400 13px/1.3 var(--sp-serif) !important; pointer-events: none; opacity: 0; transition: opacity 140ms ease;
 }
-.qc138-gr .qc138-sg--cl svg, .qc138-gr .qc138-sg--cl b { color: rgba(28, 19, 15, 0.55); }
-.qc138-gr .qc138-sg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.65); }
-.qc138-gr .qc138-sg:hover:not(:disabled) svg { transform: scale(1.06); }
-.qc138-gr .qc138-gl[data-on] .qc138-sg[aria-pressed="false"] { opacity: 0.3; }
-.qc138-gr .qc138-sg[aria-pressed="true"], .qc138-gr .qc138-sg[aria-pressed="true"]:hover { background: #1c130f; color: #f4eee5; }
-.qc138-gr .qc138-sg[aria-pressed="true"] svg, .qc138-gr .qc138-sg[aria-pressed="true"] b,
-.qc138-gr .qc138-sg[aria-pressed="true"] .qc138-sgl { color: #f4eee5; }
-.qc138-gr .qc138-sg:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
-.qc138-gr .qc138-sg:disabled { cursor: default; }
-.qc138-hd[data-loading] .qc138-sg b { border-radius: 6px; background: rgba(28, 19, 15, 0.07); width: 1.2em; }
+.qc138-hd .qc138-gtip::before {
+  content: ""; position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; translate: -50% 0; rotate: 45deg;
+  border-radius: 2px; background: #1c130f;
+}
+.qc138-hd .qc138-sg:hover:not(:disabled) .qc138-gtip, .qc138-hd .qc138-sg:focus-visible .qc138-gtip { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .qc138-hd .qc138-gtip { transition: none; } }
 /* below 900px of header, the inset goes and the chart drops under the title block */
 @container qc138hd (max-width: 899.98px) {
   .qc138-hd .qc138-srow, .qc138-hd .qc138-hg { margin-inline: 0; }
@@ -159,7 +159,7 @@
 .ws-app.sheet-wide .qc138-pin .qc138-pin-u { display: inline-flex; }
 .qc138-pin button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
-  .qc138-gr .qc138-sg, .qc138-gr .qc138-sg svg { transition: none; }
+  .qc138-hd .qc138-sg { transition: none; }
 }
 
 /* ── §B · THE FILTER ROW, in the header: 22 under the title row, above a 1px ink 14% rule, 18 of padding over the
