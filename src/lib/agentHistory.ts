@@ -38,6 +38,8 @@ export interface HistEntry {
   chips: string[];
   /** the manuscript's title, or null where none applies (added, notes) */
   manuscript: string | null;
+  /** the query the entry belongs to (opens it in the panel), or null */
+  queryId: string | null;
 }
 
 export interface HistNext {
@@ -106,7 +108,7 @@ export function agentHistory({ agent, queries, activities, notes, titleOf, nowMs
   for (const a of activities) if (mine.has(a.queryId)) (log.get(a.queryId) ?? log.set(a.queryId, []).get(a.queryId)!).push(a);
 
   const added = anyToMs(agent.dateAdded);
-  if (added != null) out.push({ id: `added:${agent.id}`, ms: added, dir: "you", status: null, icon: "added", title: `You added ${f} to your contact list`, detail: null, quote: null, chips: [], manuscript: null });
+  if (added != null) out.push({ id: `added:${agent.id}`, ms: added, dir: "you", status: null, icon: "added", title: `You added ${f} to your contact list`, detail: null, quote: null, chips: [], manuscript: null, queryId: null });
 
   for (const q of queries) {
     const ms = titleOf(q.manuscriptId);
@@ -131,20 +133,20 @@ export function agentHistory({ agent, queries, activities, notes, titleOf, nowMs
         detail = CLOSED_WORD[s.status]!;
         quote = (q.agentComments ?? "").trim() || null;
       }
-      out.push({ id: `${q.id}:${s.status}:${i}`, ms: s.startMs, dir: w.dir, status: w.icon ? null : s.status, icon: w.icon, title: w.title, detail, quote, chips, manuscript: ms });
+      out.push({ id: `${q.id}:${s.status}:${i}`, ms: s.startMs, dir: w.dir, status: w.icon ? null : s.status, icon: w.icon, title: w.title, detail, quote, chips, manuscript: ms, queryId: q.id });
     });
     for (const a of log.get(q.id) ?? []) {
       if (!isNudge(a)) continue;
       const t = anyToMs(a.date);
       if (t == null) continue;
-      out.push({ id: `nudge:${a.id}`, ms: t, dir: "out", status: null, icon: "nudge", title: `You nudged ${f}`, detail: null, quote: null, chips: [], manuscript: ms });
+      out.push({ id: `nudge:${a.id}`, ms: t, dir: "out", status: null, icon: "nudge", title: `You nudged ${f}`, detail: null, quote: null, chips: [], manuscript: ms, queryId: q.id });
     }
   }
 
   for (const n of notes) {
     const t = anyToMs(n.createdAt);
     if (t == null || !n.text.trim()) continue;
-    out.push({ id: `note:${n.id}`, ms: t, dir: "you", status: null, icon: "note", title: "You added a note", detail: null, quote: n.text.trim(), chips: [], manuscript: null });
+    out.push({ id: `note:${n.id}`, ms: t, dir: "you", status: null, icon: "note", title: "You added a note", detail: null, quote: n.text.trim(), chips: [], manuscript: null, queryId: null });
   }
   /* newest first; on one instant, the later stage of the journey first (a reply landed after the send it answers) */
   return out.map((e, i) => ({ e, i })).sort((x, y) => y.e.ms - x.e.ms || y.i - x.i).map((x) => x.e);

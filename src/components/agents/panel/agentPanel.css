@@ -247,3 +247,9 @@
 .apn .hzz .hzz-next[data-r="you"] .hzz-c { border-color: rgba(162, 69, 42, 0.55); }
 .apn .hzz .hzz-next[data-r="you"] .hzz-d b, .apn .hzz .hzz-next[data-r="you"] .hzz-g, .apn .hzz .hzz-next[data-r="you"] .hzz-s { color: #a2452a; }
 .apn .hzz .hzz-empty { margin: 18px 0 0 92px; font: italic 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+/* an entry that belongs to a query opens it: the body is a button, reset to the card it draws */
+.apn .hzz button.hzz-open { box-sizing: border-box; width: 100%; margin: 0; border: 0; text-align: left; color: inherit; cursor: pointer; font: inherit; }
+.apn .hzz .hzz-e[data-dir="you"] button.hzz-open { background: none; }
+.apn .hzz button.hzz-open:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); }
+.apn .hzz .hzz-e[data-dir="out"] button.hzz-open:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
+.apn .hzz button.hzz-open:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }

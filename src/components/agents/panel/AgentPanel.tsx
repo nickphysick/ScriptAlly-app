@@ -360,7 +360,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                   </>
                 ) : tab === "queries" ? (
                   <AgentHistory entries={history} summary={historySummary(history, p.queries.length, first)} next={histNext} first={first}
-                    nextStatus={histNext && q ? (q.status as QueryStatus) : null} queried={p.queries.length > 0} nowMs={nowMs} />
+                    nextStatus={histNext && q ? (q.status as QueryStatus) : null} queried={p.queries.length > 0} nowMs={nowMs}
+                    onOpenQuery={p.onOpenQuery} />
                 ) : (
                   <NotesThread
                     resetKey={agent.id}

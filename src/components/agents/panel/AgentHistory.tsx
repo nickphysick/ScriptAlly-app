@@ -30,6 +30,13 @@ const DateCol: React.FC<{ ms: number }> = ({ ms }) => (
   </div>
 );
 
+/** an entry's body: a button that opens its query where it has one, a plain block otherwise */
+const Body: React.FC<{ e: HistEntry; onOpenQuery?: (id: string) => void; children: React.ReactNode }> = ({ e, onOpenQuery, children }) => (
+  e.queryId && onOpenQuery
+    ? <button type="button" className="hzz-c hzz-open" data-ap-h="open" data-query={e.queryId} aria-label={`${e.title}. Open the query`} onClick={() => onOpenQuery(e.queryId!)}>{children}</button>
+    : <div className="hzz-c">{children}</div>
+);
+
 export const AgentHistory: React.FC<{
   entries: readonly HistEntry[];
   summary: string;
@@ -39,7 +46,9 @@ export const AgentHistory: React.FC<{
   nextStatus: QueryStatus | null;
   queried: boolean;
   nowMs: number;
-}> = ({ entries, summary, next, first, nextStatus, queried, nowMs }) => {
+  /** an entry that belongs to a query opens it in this panel (the box changing hands, as the old ledger did) */
+  onOpenQuery?: (queryId: string) => void;
+}> = ({ entries, summary, next, first, nextStatus, queried, nowMs, onOpenQuery }) => {
   const rows: React.ReactNode[] = [];
   let month: string | null = null;
   for (const e of entries) {
@@ -54,7 +63,7 @@ export const AgentHistory: React.FC<{
         <span className="hzz-g" aria-hidden="true">
           {e.status ? <StatusDot status={e.status} overrideSize={20} decorative /> : <Icon kind={e.icon ?? "added"} />}
         </span>
-        <div className="hzz-c">
+        <Body e={e} onOpenQuery={onOpenQuery}>
           {e.dir === "in" ? <span className="hzz-dir" data-ap-h="dir">{first} → You</span>
             : e.dir === "out" ? <span className="hzz-dir" data-ap-h="dir">You → {first}</span> : null}
           <b className="hzz-t" data-ap-h="title">{e.title}</b>
@@ -62,7 +71,7 @@ export const AgentHistory: React.FC<{
           {e.quote ? <span className="hzz-s" data-ap-h="quote">{"“"}{e.quote}{"”"}</span> : null}
           {e.chips.length ? <span className="hzz-ch" data-ap-h="chips">{e.chips.map((c) => <i key={c}>{c}</i>)}</span> : null}
           {e.manuscript ? <span className="hzz-bk" data-ap-h="ms"><i>For</i> {e.manuscript}</span> : null}
-        </div>
+        </Body>
       </li>,
     );
   }
