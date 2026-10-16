@@ -30,13 +30,13 @@ import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
 import { Caveats, Funnel, OverTime, Records, ShareBars, TrainingLog } from "./analytics/A17Figures";
-import { A17Empty } from "./analytics/A17Empty";
 import { A21Header, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
 import { A21Window } from "./analytics/A21Window";
 import { A21Steps } from "./analytics/A21Steps";
 import { A21Records } from "./analytics/A21Records";
 import { A21Stand } from "./analytics/A21Stand";
+import { A21Empty } from "./analytics/A21Empty";
 import { buildV21, windowLede } from "../lib/analyticsV21";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
@@ -102,7 +102,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       </p>
     );
   } else if (empty) {
-    body = <A17Empty />;
+    body = <A21Empty title={manuscript?.title || null} onImport={() => onNavigate?.("import")} />;
   } else {
     const b = v.banners;
     /* v21 §D/§E: two sections are rebuilt and renamed; their kickers and ledes come with them */

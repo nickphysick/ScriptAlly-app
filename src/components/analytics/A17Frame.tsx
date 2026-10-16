@@ -293,17 +293,3 @@ export const Skeleton: React.FC = () => (
     ))}
   </div>
 );
-
-/** One example row of the empty page: a faded, tagged figure built from invented queries. */
-export const ExampleRow: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section className="a17-sect a17-ex" data-a17="example">
-    <div className="a17-ban">
-      <div className="a17-perch" aria-hidden="true" />
-      <div className="a17-bantxt">
-        <div className="a17-cnt"><span className="a17-extag">Example</span></div>
-        <h2 className="a17-tw">{title}</h2>
-      </div>
-    </div>
-    <div className="a17-frame a17-exframe"><div className="a17-body">{children}</div></div>
-  </section>
-);
