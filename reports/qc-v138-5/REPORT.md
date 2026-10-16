@@ -131,7 +131,11 @@ columns (09/10) and a group band (11).
 
 ## Deploy
 
-See the end of this file.
+- **Integration branch:** `dev/main-cl18-todo51-cl181-qc1385` at 983c3e8c (the branch itself, `query-centre-v138-5`, is
+  the same commit; it sits directly on what dev served, d3dd2a94, so nothing else needed merging).
+- **Dev build:** `index-OpIsaxaB.js` (was `index-BFjZu6hN.js`), built from a clean detached checkout of the pushed
+  tip; the served hash was re-checked immediately before `firebase deploy` and confirmed after. Prod untouched.
+- **Not merged to `main`.**
 
 ## For Nick
 
