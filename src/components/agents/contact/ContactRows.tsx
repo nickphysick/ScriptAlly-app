@@ -7,8 +7,9 @@
  * is the lib's (`agentFacts`, `rowDateLine`); a status is drawn only by `StatusDot`; missing data is the dashed slate
  * add pill, which opens the editor at that field; no colour encodes time pressure, and no row carries a coloured edge.
  *
- * ⚠️ THE PILLS DO THEIR OWN JOB AND DO NOT OPEN THE ROW: Add opens the card at the gap. The hover tray offers the
- * card's own next step (Log a query, Remind me, a send, a nudge…) beside Open card.
+ * ⚠️ THE PILLS DO THEIR OWN JOB AND DO NOT OPEN THE ROW: Add opens the card at the gap. There is no hover tray
+ * (v18.3.3 §B): the open row's details line carries the card's one next step (a send, a nudge, Remind me…) as a link in
+ * the Query status column, unless the status cell already offers it; clicking the row opens the card.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { STAGE_TRACK, discTone, stageTrack } from "../../../lib/contactStage";
@@ -24,6 +25,7 @@ import { dayMonth } from "../../../lib/dates";
 import type { CardAct, CardPrimary } from "../../../lib/agentCard";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { ContactPeek } from "./ContactPeek";
+import { nextStep } from "../../../lib/rowActions";
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
@@ -167,6 +169,16 @@ const Row: React.FC<{
     onPeek?.(v);
   };
   useEffect(() => { if (peek) stopMq(); }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* v18.3.3 §B — the labels the Query status cell offers as actions, read from what it rendered, as the peek opens and
+     before it paints, so the next step never repeats one (not even for a frame) */
+  const [statusLabels, setStatusLabels] = useState<readonly string[]>([]);
+  useLayoutEffect(() => {
+    if (!peek || !rowRef.current) return;
+    const cell = rowRef.current.querySelector<HTMLElement>(".clv-rq");
+    const next = cell ? [...cell.querySelectorAll<HTMLElement>("button, a, [role='button']")].map((e) => (e.textContent ?? "").trim()).filter(Boolean) : [];
+    setStatusLabels((prev) => (prev.length === next.length && prev.every((l, i) => l === next[i]) ? prev : next));
+  });
+  const nextLabel = nextStep(tray, statusLabels);
   /* v18.3.3 §A — once open (before paint): the details line sits 16 under the agent block. Its margin cannot change the
      main track (the line is in row 2), so one read of where it would sit settles it. */
   useLayoutEffect(() => {
@@ -222,7 +234,11 @@ const Row: React.FC<{
       data-genres={x.genres.join("|")}
       aria-current={current || undefined}
       /* v18 §D: opening the agent closes this row's peek (and any peek still waiting to open) */
-      onClick={(e) => { window.clearTimeout(hoverT.current); if (peek) onPeek?.(false); onOpen(e.currentTarget.getBoundingClientRect()); }}
+      onClick={(e) => {
+        /* v18.3.3 §B/§C — the contact details and the next step answer their own clicks; empty space still opens the card */
+        if ((e.target as HTMLElement).closest('[data-cl183="peek-pill"], [data-cl1833="next"]')) return;
+        window.clearTimeout(hoverT.current); if (peek) onPeek?.(false); onOpen(e.currentTarget.getBoundingClientRect());
+      }}
       onMouseEnter={() => {
         stopMq(); if (!peek) mq.current = startMarquee(wishRef.current);
         window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true), 450);
@@ -299,7 +315,13 @@ const Row: React.FC<{
       {/* v18.3.2 A — NOTHING IN THE ROW HIDES ON HOVER: the hover tray over the Query status cell is gone. A row with its
           peek closed shows no actions; they live on the peek's line (B). */}
       {peek ? (
-        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
+        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)}
+          next={nextLabel ? (
+            /* v18.3.3 §B — the next step: the status's own primary action as a link, styled as the status cell's
+               "+ Log a query" (it IS that class), running the handler the tray's button ran */
+            <button type="button" className="cl17-log cl1833-next" data-cl1833="next"
+              onClick={(e) => { e.stopPropagation(); onAct(tray.act); }} onKeyDown={(e) => e.stopPropagation()}>{nextLabel}</button>
+          ) : null} />
       ) : null}
     </div>
   );
