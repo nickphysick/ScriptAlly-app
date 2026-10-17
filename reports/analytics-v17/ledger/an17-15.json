@@ -3,7 +3,7 @@
   "lock": "AN17-15 the tab exists",
   "where": "1280",
   "ok": true,
-  "detail": "{\"l\":877.265625,\"t\":718,\"r\":1256,\"b\":776}"
+  "detail": "{\"l\":873.265625,\"t\":714,\"r\":1252,\"b\":772}"
  },
  {
   "lock": "AN17-15 fixed",
@@ -12,10 +12,10 @@
   "detail": "fixed"
  },
  {
-  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "lock": "AN17-15 20px from the window box's right and bottom (±1)",
   "where": "1280",
   "ok": true,
-  "detail": "24.0 / 24.0"
+  "detail": "20.0 / 20.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
@@ -27,61 +27,49 @@
   "lock": "AN17-15 names section 1 in view",
   "where": "1280",
   "ok": true,
-  "detail": "Where the 8 queries got to"
+  "detail": "What happened to your queries?"
  },
  {
   "lock": "AN17-15 names section 2 in view",
   "where": "1280",
   "ok": true,
-  "detail": "Queries sent"
+  "detail": "Benchmarking"
  },
  {
   "lock": "AN17-15 names section 3 in view",
   "where": "1280",
   "ok": true,
-  "detail": "Response rate"
+  "detail": "How many have you sent, and when?"
  },
  {
   "lock": "AN17-15 names section 4 in view",
   "where": "1280",
   "ok": true,
-  "detail": "Response window honesty"
+  "detail": "Do agents reply when they say they will?"
  },
  {
   "lock": "AN17-15 names section 5 in view",
   "where": "1280",
   "ok": true,
-  "detail": "Wait times by stage"
+  "detail": "Who are you still waiting on?"
  },
  {
   "lock": "AN17-15 names section 6 in view",
   "where": "1280",
   "ok": true,
-  "detail": "Firsts and records"
+  "detail": "Moments worth remembering"
  },
  {
   "lock": "AN17-15 names section 7 in view",
   "where": "1280",
   "ok": true,
-  "detail": "The campaign over time"
+  "detail": "A note on these numbers"
  },
  {
-  "lock": "AN17-15 names section 8 in view",
+  "lock": "AN17-15 ☰ opens a menu of seven",
   "where": "1280",
   "ok": true,
-  "detail": "How things stand"
- },
- {
-  "lock": "AN17-15 names section 9 in view",
-  "where": "1280",
-  "ok": true,
-  "detail": "Reading the numbers"
- },
- {
-  "lock": "AN17-15 ☰ opens a menu of nine",
-  "where": "1280",
-  "ok": true,
-  "detail": "true 9"
+  "detail": "true 7"
  },
  {
   "lock": "AN17-15 Escape closes the menu",
@@ -105,7 +93,7 @@
   "lock": "AN17-15 the tab exists",
   "where": "1440",
   "ok": true,
-  "detail": "{\"l\":1037.265625,\"t\":818,\"r\":1416,\"b\":876}"
+  "detail": "{\"l\":1033.265625,\"t\":814,\"r\":1412,\"b\":872}"
  },
  {
   "lock": "AN17-15 fixed",
@@ -114,10 +102,10 @@
   "detail": "fixed"
  },
  {
-  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "lock": "AN17-15 20px from the window box's right and bottom (±1)",
   "where": "1440",
   "ok": true,
-  "detail": "24.0 / 24.0"
+  "detail": "20.0 / 20.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
@@ -135,7 +123,7 @@
   "lock": "AN17-15 the tab exists",
   "where": "1512",
   "ok": true,
-  "detail": "{\"l\":1109.265625,\"t\":818,\"r\":1488,\"b\":876}"
+  "detail": "{\"l\":1105.265625,\"t\":814,\"r\":1484,\"b\":872}"
  },
  {
   "lock": "AN17-15 fixed",
@@ -144,10 +132,10 @@
   "detail": "fixed"
  },
  {
-  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "lock": "AN17-15 20px from the window box's right and bottom (±1)",
   "where": "1512",
   "ok": true,
-  "detail": "24.0 / 24.0"
+  "detail": "20.0 / 20.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",
@@ -159,73 +147,61 @@
   "lock": "AN17-15 precondition: the window is pulled in from the viewport",
   "where": "1512",
   "ok": true,
-  "detail": "60.0 / 40.0"
+  "detail": "68.0 / 48.0"
  },
  {
   "lock": "AN17-15 the tab follows the window, not the viewport (±1)",
   "where": "1512",
   "ok": true,
-  "detail": "24.0 / 24.0"
+  "detail": "20.0 / 20.0"
  },
  {
   "lock": "AN17-15 names section 1 in view",
   "where": "1512",
   "ok": true,
-  "detail": "Where the 8 queries got to"
+  "detail": "What happened to your queries?"
  },
  {
   "lock": "AN17-15 names section 2 in view",
   "where": "1512",
   "ok": true,
-  "detail": "Queries sent"
+  "detail": "Benchmarking"
  },
  {
   "lock": "AN17-15 names section 3 in view",
   "where": "1512",
   "ok": true,
-  "detail": "Response rate"
+  "detail": "How many have you sent, and when?"
  },
  {
   "lock": "AN17-15 names section 4 in view",
   "where": "1512",
   "ok": true,
-  "detail": "Response window honesty"
+  "detail": "Do agents reply when they say they will?"
  },
  {
   "lock": "AN17-15 names section 5 in view",
   "where": "1512",
   "ok": true,
-  "detail": "Wait times by stage"
+  "detail": "Who are you still waiting on?"
  },
  {
   "lock": "AN17-15 names section 6 in view",
   "where": "1512",
   "ok": true,
-  "detail": "Firsts and records"
+  "detail": "Moments worth remembering"
  },
  {
   "lock": "AN17-15 names section 7 in view",
   "where": "1512",
   "ok": true,
-  "detail": "The campaign over time"
+  "detail": "A note on these numbers"
  },
  {
-  "lock": "AN17-15 names section 8 in view",
+  "lock": "AN17-15 ☰ opens a menu of seven",
   "where": "1512",
   "ok": true,
-  "detail": "How things stand"
- },
- {
-  "lock": "AN17-15 names section 9 in view",
-  "where": "1512",
-  "ok": true,
-  "detail": "Reading the numbers"
- },
- {
-  "lock": "AN17-15 ☰ opens a menu of nine",
-  "where": "1512",
-  "ok": true,
-  "detail": "true 9"
+  "detail": "true 7"
  },
  {
   "lock": "AN17-15 Escape closes the menu",
@@ -249,7 +225,7 @@
   "lock": "AN17-15 the tab exists",
   "where": "1920",
   "ok": true,
-  "detail": "{\"l\":1517.265625,\"t\":998,\"r\":1896,\"b\":1056}"
+  "detail": "{\"l\":1513.265625,\"t\":994,\"r\":1892,\"b\":1052}"
  },
  {
   "lock": "AN17-15 fixed",
@@ -258,10 +234,10 @@
   "detail": "fixed"
  },
  {
-  "lock": "AN17-15 24px from the window box's right and bottom (±1)",
+  "lock": "AN17-15 20px from the window box's right and bottom (±1)",
   "where": "1920",
   "ok": true,
-  "detail": "24.0 / 24.0"
+  "detail": "20.0 / 20.0"
  },
  {
   "lock": "AN17-15 before the first section it reads Under the hood",

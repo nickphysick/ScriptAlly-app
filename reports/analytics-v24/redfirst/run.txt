@@ -1,0 +1,365 @@
+
+Running 12 tests using 1 worker
+
+[1/12] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/12] [measure] › tests/e2e/analyticsV24.measure.ts:104:1 › AN24-A3 · ring
+[measure] › tests/e2e/analyticsV24.measure.ts:104:1 › AN24-A3 · ring
+  ✗ A3 the ring renders · 1512 — true
+
+  ✗ A3 the ring renders · 1280 — true
+
+LEDGER an24-a3: 2 readings, 2 failed
+
+  1) [measure] › tests/e2e/analyticsV24.measure.ts:104:1 › AN24-A3 · ring ──────────────────────────
+
+    Error: an24-a3: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 10
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:140:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-A3-·-ring-measure/error-context.md
+
+
+[3/12] [measure] › tests/e2e/analyticsV24.measure.ts:144:1 › AN24-B1 · desk
+[measure] › tests/e2e/analyticsV24.measure.ts:144:1 › AN24-B1 · desk
+LEDGER an24-b1: 2 readings, 0 failed
+
+  2) [measure] › tests/e2e/analyticsV24.measure.ts:144:1 › AN24-B1 · desk ──────────────────────────
+
+    Error: an24-b1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 24
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:189:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-B1-·-desk-measure/error-context.md
+
+
+[4/12] [measure] › tests/e2e/analyticsV24.measure.ts:193:1 › AN24-C1 · sections
+[measure] › tests/e2e/analyticsV24.measure.ts:193:1 › AN24-C1 · sections
+  ✗ C1 exactly seven sections · 1512 — 0
+
+  ✗ C1 the h2s are the seven questions, in order · 1512 — 
+
+  ✗ C1 data-sec runs 0–6 · 1512 — 
+
+  ✗ C1 no older section left · 1512 — sec 7
+
+  ✗ C1 the tab reads 'n of 7' · 1512 — 3 of 9
+
+  ✗ C1 exactly seven sections · 1280 — 0
+
+  ✗ C1 the h2s are the seven questions, in order · 1280 — 
+
+  ✗ C1 data-sec runs 0–6 · 1280 — 
+
+  ✗ C1 no older section left · 1280 — sec 7
+
+  ✗ C1 the tab reads 'n of 7' · 1280 — 3 of 9
+
+LEDGER an24-c1: 42 readings, 10 failed
+
+  3) [measure] › tests/e2e/analyticsV24.measure.ts:193:1 › AN24-C1 · sections ──────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 12
+
+    - Array []
+    + Array [
+    +   "C1 exactly seven sections · 1512 — 0",
+    +   "C1 the h2s are the seven questions, in order · 1512 — ",
+    +   "C1 data-sec runs 0–6 · 1512 — ",
+    +   "C1 no older section left · 1512 — sec 7",
+    +   "C1 the tab reads 'n of 7' · 1512 — 3 of 9",
+    +   "C1 exactly seven sections · 1280 — 0",
+    +   "C1 the h2s are the seven questions, in order · 1280 — ",
+    +   "C1 data-sec runs 0–6 · 1280 — ",
+    +   "C1 no older section left · 1280 — sec 7",
+    +   "C1 the tab reads 'n of 7' · 1280 — 3 of 9",
+    + ]
+
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+      41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      43 |   }
+      44 | }
+      45 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:42:95)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:237:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-C1-·-sections-measure/error-context.md
+
+
+[5/12] [measure] › tests/e2e/analyticsV24.measure.ts:241:1 › AN24-S1 · pies
+[measure] › tests/e2e/analyticsV24.measure.ts:241:1 › AN24-S1 · pies
+  ✗ S1 pie 1 renders · 1512 — false
+
+  ✗ S1 pie 1 renders · 1280 — false
+
+LEDGER an24-s1: 2 readings, 2 failed
+
+  4) [measure] › tests/e2e/analyticsV24.measure.ts:241:1 › AN24-S1 · pies ──────────────────────────
+
+    Error: an24-s1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 20
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:291:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-S1-·-pies-measure/error-context.md
+
+
+[6/12] [measure] › tests/e2e/analyticsV24.measure.ts:295:1 › AN24-S2 · bench
+[measure] › tests/e2e/analyticsV24.measure.ts:295:1 › AN24-S2 · bench
+  ✗ S2 three panels · 1512 · anchors 6/50/44 — 0
+
+  ✗ S2 three panels · 1280 · anchors 9/40/60 — 0
+
+LEDGER an24-s2: 2 readings, 2 failed
+
+  5) [measure] › tests/e2e/analyticsV24.measure.ts:295:1 › AN24-S2 · bench ─────────────────────────
+
+    Error: an24-s2: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 30
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:344:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-S2-·-bench-measure/error-context.md
+
+
+[7/12] [measure] › tests/e2e/analyticsV24.measure.ts:348:1 › AN24-S3 · months
+[measure] › tests/e2e/analyticsV24.measure.ts:348:1 › AN24-S3 · months
+  ✗ the page publishes the v24 model · 1512 — no v24 block
+
+  ✗ the page publishes the v24 model · 1280 — no v24 block
+
+LEDGER an24-s3: 2 readings, 2 failed
+
+  6) [measure] › tests/e2e/analyticsV24.measure.ts:348:1 › AN24-S3 · months ────────────────────────
+
+    Error: an24-s3: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 12
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:377:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-S3-·-months-measure/error-context.md
+
+
+[8/12] [measure] › tests/e2e/analyticsV24.measure.ts:381:1 › AN24-S4 · kept
+[measure] › tests/e2e/analyticsV24.measure.ts:381:1 › AN24-S4 · kept
+  ✗ the page publishes the v24 model · 1512 — no v24 block
+
+  ✗ the page publishes the v24 model · 1280 — no v24 block
+
+LEDGER an24-s4: 2 readings, 2 failed
+
+  7) [measure] › tests/e2e/analyticsV24.measure.ts:381:1 › AN24-S4 · kept ──────────────────────────
+
+    Error: an24-s4: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 12
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:408:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-S4-·-kept-measure/error-context.md
+
+
+[9/12] [measure] › tests/e2e/analyticsV24.measure.ts:412:1 › AN24-S5 · waiting
+[measure] › tests/e2e/analyticsV24.measure.ts:412:1 › AN24-S5 · waiting
+  ✗ the page publishes the v24 model · 1512 — no v24 block
+
+  ✗ the page publishes the v24 model · 1280 — no v24 block
+
+LEDGER an24-s5: 2 readings, 2 failed
+
+  8) [measure] › tests/e2e/analyticsV24.measure.ts:412:1 › AN24-S5 · waiting ───────────────────────
+
+    Error: an24-s5: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 12
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:463:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-S5-·-waiting-measure/error-context.md
+
+
+[10/12] [measure] › tests/e2e/analyticsV24.measure.ts:467:1 › AN24-S6 · moments
+[measure] › tests/e2e/analyticsV24.measure.ts:467:1 › AN24-S6 · moments
+  ✗ the page publishes the v24 model · 1512 — no v24 block
+
+  ✗ the page publishes the v24 model · 1280 — no v24 block
+
+LEDGER an24-s6: 2 readings, 2 failed
+
+  9) [measure] › tests/e2e/analyticsV24.measure.ts:467:1 › AN24-S6 · moments ───────────────────────
+
+    Error: an24-s6: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 10
+    Received:    2
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:490:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-S6-·-moments-measure/error-context.md
+
+
+[11/12] [measure] › tests/e2e/analyticsV24.measure.ts:494:1 › AN24-U1 · units
+[measure] › tests/e2e/analyticsV24.measure.ts:494:1 › AN24-U1 · units
+LEDGER an24-u1: 10 readings, 0 failed
+
+[12/12] [measure] › tests/e2e/analyticsV24.measure.ts:516:3 › AN24-I1 › AN24-I1 · empty
+[measure] › tests/e2e/analyticsV24.measure.ts:516:3 › AN24-I1 › AN24-I1 · empty
+  ✗ I1 the steps card: 'How it works.' over three steps · 1512 —  0
+
+  ✗ I1 two arrows · 1512 — 0
+
+  ✗ I1 three art slots and three tiles · 1512 — 0 0
+
+  ✗ I1 v21's example card is gone · 1512 — true
+
+  ✗ I1 the steps card: 'How it works.' over three steps · 390 —  0
+
+  ✗ I1 three art slots and three tiles · 390 — 0 0
+
+  ✗ I1 v21's example card is gone · 390 — true
+
+LEDGER an24-i1: 17 readings, 7 failed
+
+  10) [measure] › tests/e2e/analyticsV24.measure.ts:516:3 › AN24-I1 › AN24-I1 · empty ──────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 9
+
+    - Array []
+    + Array [
+    +   "I1 the steps card: 'How it works.' over three steps · 1512 —  0",
+    +   "I1 two arrows · 1512 — 0",
+    +   "I1 three art slots and three tiles · 1512 — 0 0",
+    +   "I1 v21's example card is gone · 1512 — true",
+    +   "I1 the steps card: 'How it works.' over three steps · 390 —  0",
+    +   "I1 three art slots and three tiles · 390 — 0 0",
+    +   "I1 v21's example card is gone · 390 — true",
+    + ]
+
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+      41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      43 |   }
+      44 | }
+      45 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:42:95)
+        at /Users/nickphysick/ScriptAlly-analytics-v24/tests/e2e/analyticsV24.measure.ts:546:7
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-I1-AN24-I1-·-empty-measure/error-context.md
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-I1-AN24-I1-·-empty-measure/error-context.md
+
+
+  10 failed
+    [measure] › tests/e2e/analyticsV24.measure.ts:104:1 › AN24-A3 · ring ───────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:144:1 › AN24-B1 · desk ───────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:193:1 › AN24-C1 · sections ───────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:241:1 › AN24-S1 · pies ───────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:295:1 › AN24-S2 · bench ──────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:348:1 › AN24-S3 · months ─────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:381:1 › AN24-S4 · kept ───────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:412:1 › AN24-S5 · waiting ────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:467:1 › AN24-S6 · moments ────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:516:3 › AN24-I1 › AN24-I1 · empty ────────────────
+  2 passed (2.5m)

@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "I1 the page renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I1 no header card, desk, sections or tab",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"sent\":\"0\",\"card\":0,\"desk\":0,\"secs\":0,\"tab\":0,\"head\":\"How it works.\",\"steps\":3,\"arrows\":2,\"slots\":3,\"tiles\":3,\"ways\":3,\"example\":false,\"art\":\"http://127.0.0.1:4824/images/analytics/analytics-archivist.webp?v=1\"}"
+ },
+ {
+  "lock": "I1 the steps card: 'How it works.' over three steps",
+  "where": "1512",
+  "ok": true,
+  "detail": "How it works. 3"
+ },
+ {
+  "lock": "I1 two arrows",
+  "where": "1512",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "I1 three art slots and three tiles",
+  "where": "1512",
+  "ok": true,
+  "detail": "3 3"
+ },
+ {
+  "lock": "I1 v21's example card is gone",
+  "where": "1512",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "I1 the navy panel's Archivist and the three ways stand",
+  "where": "1512",
+  "ok": true,
+  "detail": "http://127.0.0.1:4824/images/analytics/analytics-archivist.webp?v=1 3"
+ },
+ {
+  "lock": "I1 the tiles' numbers are not counted",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "I1 the page renders",
+  "where": "390",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I1 no header card, desk, sections or tab",
+  "where": "390",
+  "ok": true,
+  "detail": "{\"sent\":\"0\",\"card\":0,\"desk\":0,\"secs\":0,\"tab\":0,\"head\":\"How it works.\",\"steps\":3,\"arrows\":0,\"slots\":3,\"tiles\":3,\"ways\":3,\"example\":false,\"art\":\"http://127.0.0.1:4824/images/analytics/analytics-archivist.webp?v=1\"}"
+ },
+ {
+  "lock": "I1 the steps card: 'How it works.' over three steps",
+  "where": "390",
+  "ok": true,
+  "detail": "How it works. 3"
+ },
+ {
+  "lock": "I1 no arrows on the phone",
+  "where": "390",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "I1 three art slots and three tiles",
+  "where": "390",
+  "ok": true,
+  "detail": "3 3"
+ },
+ {
+  "lock": "I1 v21's example card is gone",
+  "where": "390",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "I1 the navy panel's Archivist and the three ways stand",
+  "where": "390",
+  "ok": true,
+  "detail": "http://127.0.0.1:4824/images/analytics/analytics-archivist.webp?v=1 3"
+ },
+ {
+  "lock": "I1 the tiles' numbers are not counted",
+  "where": "390",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "I1 the tiles are not written",
+  "where": "account",
+  "ok": true,
+  "detail": "0"
+ }
+]

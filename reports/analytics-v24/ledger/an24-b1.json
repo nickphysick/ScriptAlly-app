@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "B1 three cards",
+  "where": "1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "the page publishes the v24 model",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card titles",
+  "where": "1512",
+  "ok": true,
+  "detail": "Queries sent | Asked to read more | Your typical reply time"
+ },
+ {
+  "lock": "B1 card 3's title starts 'Your'",
+  "where": "1512",
+  "ok": true,
+  "detail": "Your typical reply time"
+ },
+ {
+  "lock": "B1 card 2's figure is requestRate",
+  "where": "1512",
+  "ok": true,
+  "detail": "41% 21 of 51 vs 41%"
+ },
+ {
+  "lock": "B1 'asked' is no more than requests + offers",
+  "where": "1512",
+  "ok": true,
+  "detail": "21 vs 21+1"
+ },
+ {
+  "lock": "B1 card 3's figure is the typical in weeks",
+  "where": "1512",
+  "ok": true,
+  "detail": "2 vs 14"
+ },
+ {
+  "lock": "B1 one dot per reply",
+  "where": "1512",
+  "ok": true,
+  "detail": "24 / 24 / 24"
+ },
+ {
+  "lock": "B1 the TYPICAL mark sits at the typical (±1px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "60.2 vs 60.2"
+ },
+ {
+  "lock": "B1 the longest dot sits at the strip's end (±1px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "343.8 vs 343.8"
+ },
+ {
+  "lock": "B1 sent scrolls to S3",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 rate scrolls to S1",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 wait scrolls to S4",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 three cards",
+  "where": "1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "the page publishes the v24 model",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card titles",
+  "where": "1280",
+  "ok": true,
+  "detail": "Queries sent | Asked to read more | Your typical reply time"
+ },
+ {
+  "lock": "B1 card 3's title starts 'Your'",
+  "where": "1280",
+  "ok": true,
+  "detail": "Your typical reply time"
+ },
+ {
+  "lock": "B1 card 2's figure is requestRate",
+  "where": "1280",
+  "ok": true,
+  "detail": "41% 21 of 51 vs 41%"
+ },
+ {
+  "lock": "B1 'asked' is no more than requests + offers",
+  "where": "1280",
+  "ok": true,
+  "detail": "21 vs 21+1"
+ },
+ {
+  "lock": "B1 card 3's figure is the typical in weeks",
+  "where": "1280",
+  "ok": true,
+  "detail": "2 vs 14"
+ },
+ {
+  "lock": "B1 one dot per reply",
+  "where": "1280",
+  "ok": true,
+  "detail": "24 / 24 / 24"
+ },
+ {
+  "lock": "B1 the TYPICAL mark sits at the typical (±1px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "47.5 vs 47.5"
+ },
+ {
+  "lock": "B1 the longest dot sits at the strip's end (±1px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "271.4 vs 271.4"
+ },
+ {
+  "lock": "B1 sent scrolls to S3",
+  "where": "1280",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 rate scrolls to S1",
+  "where": "1280",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 wait scrolls to S4",
+  "where": "1280",
+  "ok": true,
+  "detail": "12"
+ }
+]

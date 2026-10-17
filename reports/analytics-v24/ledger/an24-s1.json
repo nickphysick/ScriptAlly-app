@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "S1 pie 1 renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "S1 pie 1 sums to sent",
+  "where": "1512",
+  "ok": true,
+  "detail": "51 / 51 / 51"
+ },
+ {
+  "lock": "S1 pie 1 asked is outcomes'",
+  "where": "1512",
+  "ok": true,
+  "detail": "21 vs 21"
+ },
+ {
+  "lock": "S1 pie 1 asked's angle (±1°)",
+  "where": "1512",
+  "ok": true,
+  "detail": "148.2 vs 148.2"
+ },
+ {
+  "lock": "S1 pie 1 waiting is outcomes'",
+  "where": "1512",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "S1 pie 1 waiting's angle (±1°)",
+  "where": "1512",
+  "ok": true,
+  "detail": "141.2 vs 141.2"
+ },
+ {
+  "lock": "S1 pie 1 ended is outcomes'",
+  "where": "1512",
+  "ok": true,
+  "detail": "10 vs 10"
+ },
+ {
+  "lock": "S1 pie 1 ended's angle (±1°)",
+  "where": "1512",
+  "ok": true,
+  "detail": "70.6 vs 70.6"
+ },
+ {
+  "lock": "S1 no zero slice in pie 1",
+  "where": "1512",
+  "ok": true,
+  "detail": "[21,20,10]"
+ },
+ {
+  "lock": "S1 pie 1 fills: anthracite / sand / stone",
+  "where": "1512",
+  "ok": true,
+  "detail": "asked:rgb(42, 58, 82) waiting:rgb(247, 239, 227) ended:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "S1 'asked' is the requests, plus any offer that came without one",
+  "where": "1512",
+  "ok": true,
+  "detail": "21 vs 21+1"
+ },
+ {
+  "lock": "S1 pie 2 renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "S1 pie 2 sums to asked",
+  "where": "1512",
+  "ok": true,
+  "detail": "21 vs 21"
+ },
+ {
+  "lock": "S1 pie 2 fills: offer / sage / stone",
+  "where": "1512",
+  "ok": true,
+  "detail": "offer:rgb(215, 224, 232) open:rgb(224, 229, 221) saidNo:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "S1 no zero slice in pie 2",
+  "where": "1512",
+  "ok": true,
+  "detail": "[1,18,2]"
+ },
+ {
+  "lock": "S1 pie 2 offer's angle (±1°)",
+  "where": "1512",
+  "ok": true,
+  "detail": "17.1"
+ },
+ {
+  "lock": "S1 pie 2 open's angle (±1°)",
+  "where": "1512",
+  "ok": true,
+  "detail": "308.6"
+ },
+ {
+  "lock": "S1 pie 2 saidNo's angle (±1°)",
+  "where": "1512",
+  "ok": true,
+  "detail": "34.3"
+ },
+ {
+  "lock": "S1 pie 1 renders",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "S1 pie 1 sums to sent",
+  "where": "1280",
+  "ok": true,
+  "detail": "51 / 51 / 51"
+ },
+ {
+  "lock": "S1 pie 1 asked is outcomes'",
+  "where": "1280",
+  "ok": true,
+  "detail": "21 vs 21"
+ },
+ {
+  "lock": "S1 pie 1 asked's angle (±1°)",
+  "where": "1280",
+  "ok": true,
+  "detail": "148.2 vs 148.2"
+ },
+ {
+  "lock": "S1 pie 1 waiting is outcomes'",
+  "where": "1280",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "S1 pie 1 waiting's angle (±1°)",
+  "where": "1280",
+  "ok": true,
+  "detail": "141.2 vs 141.2"
+ },
+ {
+  "lock": "S1 pie 1 ended is outcomes'",
+  "where": "1280",
+  "ok": true,
+  "detail": "10 vs 10"
+ },
+ {
+  "lock": "S1 pie 1 ended's angle (±1°)",
+  "where": "1280",
+  "ok": true,
+  "detail": "70.6 vs 70.6"
+ },
+ {
+  "lock": "S1 no zero slice in pie 1",
+  "where": "1280",
+  "ok": true,
+  "detail": "[21,20,10]"
+ },
+ {
+  "lock": "S1 pie 1 fills: anthracite / sand / stone",
+  "where": "1280",
+  "ok": true,
+  "detail": "asked:rgb(42, 58, 82) waiting:rgb(247, 239, 227) ended:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "S1 'asked' is the requests, plus any offer that came without one",
+  "where": "1280",
+  "ok": true,
+  "detail": "21 vs 21+1"
+ },
+ {
+  "lock": "S1 pie 2 renders",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "S1 pie 2 sums to asked",
+  "where": "1280",
+  "ok": true,
+  "detail": "21 vs 21"
+ },
+ {
+  "lock": "S1 pie 2 fills: offer / sage / stone",
+  "where": "1280",
+  "ok": true,
+  "detail": "offer:rgb(215, 224, 232) open:rgb(224, 229, 221) saidNo:rgb(228, 225, 219)"
+ },
+ {
+  "lock": "S1 no zero slice in pie 2",
+  "where": "1280",
+  "ok": true,
+  "detail": "[1,18,2]"
+ },
+ {
+  "lock": "S1 pie 2 offer's angle (±1°)",
+  "where": "1280",
+  "ok": true,
+  "detail": "17.1"
+ },
+ {
+  "lock": "S1 pie 2 open's angle (±1°)",
+  "where": "1280",
+  "ok": true,
+  "detail": "308.6"
+ },
+ {
+  "lock": "S1 pie 2 saidNo's angle (±1°)",
+  "where": "1280",
+  "ok": true,
+  "detail": "34.3"
+ }
+]

@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "S3 one column per calendar month, zeros kept (latest 18)",
+  "where": "1512",
+  "ok": true,
+  "detail": "18 vs 18"
+ },
+ {
+  "lock": "S3 the months run on without a gap, ending now",
+  "where": "1512",
+  "ok": true,
+  "detail": "May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct"
+ },
+ {
+  "lock": "S3 the counts sum to the dated queries shown",
+  "where": "1512",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "S3 January 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "8.9 vs 8.9"
+ },
+ {
+  "lock": "S3 February 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "8.9 vs 8.9"
+ },
+ {
+  "lock": "S3 May 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "8.9 vs 8.9"
+ },
+ {
+  "lock": "S3 June 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "53.3 vs 53.3"
+ },
+ {
+  "lock": "S3 July 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "151.1 vs 151.1"
+ },
+ {
+  "lock": "S3 August 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "160.0 vs 160.0"
+ },
+ {
+  "lock": "S3 September 2026 height in proportion (±2px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "53.3 vs 53.3"
+ },
+ {
+  "lock": "S3 only the busiest month(s) are rust",
+  "where": "1512",
+  "ok": true,
+  "detail": "August 2026"
+ },
+ {
+  "lock": "S3 one column per calendar month, zeros kept (latest 18)",
+  "where": "1280",
+  "ok": true,
+  "detail": "18 vs 18"
+ },
+ {
+  "lock": "S3 the months run on without a gap, ending now",
+  "where": "1280",
+  "ok": true,
+  "detail": "May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct"
+ },
+ {
+  "lock": "S3 the counts sum to the dated queries shown",
+  "where": "1280",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "S3 January 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "8.9 vs 8.9"
+ },
+ {
+  "lock": "S3 February 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "8.9 vs 8.9"
+ },
+ {
+  "lock": "S3 May 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "8.9 vs 8.9"
+ },
+ {
+  "lock": "S3 June 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "53.3 vs 53.3"
+ },
+ {
+  "lock": "S3 July 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "151.1 vs 151.1"
+ },
+ {
+  "lock": "S3 August 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "160.0 vs 160.0"
+ },
+ {
+  "lock": "S3 September 2026 height in proportion (±2px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "53.3 vs 53.3"
+ },
+ {
+  "lock": "S3 only the busiest month(s) are rust",
+  "where": "1280",
+  "ok": true,
+  "detail": "August 2026"
+ }
+]

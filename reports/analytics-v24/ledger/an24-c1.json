@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "C1 exactly seven sections",
+  "where": "1512",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "C1 the h2s are the seven questions, in order",
+  "where": "1512",
+  "ok": true,
+  "detail": "What happened to your queries? | Benchmarking | How many have you sent, and when? | Do agents reply when they say they will? | Who are you still waiting on? | Moments worth remembering | A note on these numbers"
+ },
+ {
+  "lock": "C1 data-sec runs 0–6",
+  "where": "1512",
+  "ok": true,
+  "detail": "0123456"
+ },
+ {
+  "lock": "C1 every section answers",
+  "where": "1512",
+  "ok": true,
+  "detail": "158 238 141 237 315 114 109"
+ },
+ {
+  "lock": "C1 no older section left",
+  "where": "1512",
+  "ok": true,
+  "detail": "sec 7"
+ },
+ {
+  "lock": "C1 S1 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S1 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 S2 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S2 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S3 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S3 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 S4 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S4 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S5 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S5 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 S6 is tinted",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S6 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S7 is on the page colour",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S7 paints edge to edge",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 the tab reads 'n of 7'",
+  "where": "1512",
+  "ok": true,
+  "detail": "3 of 7"
+ },
+ {
+  "lock": "C1 no horizontal overflow",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"doc\":[1512,1512],\"sc\":[1256,1256]}"
+ },
+ {
+  "lock": "C1 exactly seven sections",
+  "where": "1280",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "C1 the h2s are the seven questions, in order",
+  "where": "1280",
+  "ok": true,
+  "detail": "What happened to your queries? | Benchmarking | How many have you sent, and when? | Do agents reply when they say they will? | Who are you still waiting on? | Moments worth remembering | A note on these numbers"
+ },
+ {
+  "lock": "C1 data-sec runs 0–6",
+  "where": "1280",
+  "ok": true,
+  "detail": "0123456"
+ },
+ {
+  "lock": "C1 every section answers",
+  "where": "1280",
+  "ok": true,
+  "detail": "158 238 141 237 315 114 109"
+ },
+ {
+  "lock": "C1 no older section left",
+  "where": "1280",
+  "ok": true,
+  "detail": "sec 7"
+ },
+ {
+  "lock": "C1 S1 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S1 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 S2 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S2 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S3 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S3 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 S4 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S4 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S5 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S5 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 S6 is tinted",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S6 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(233, 230, 224) rgb(233, 230, 224) vs rgb(233, 230, 224)"
+ },
+ {
+  "lock": "C1 S7 is on the page colour",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C1 S7 paints edge to edge",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "C1 the tab reads 'n of 7'",
+  "where": "1280",
+  "ok": true,
+  "detail": "3 of 7"
+ },
+ {
+  "lock": "C1 no horizontal overflow",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"doc\":[1280,1280],\"sc\":[1024,1024]}"
+ }
+]

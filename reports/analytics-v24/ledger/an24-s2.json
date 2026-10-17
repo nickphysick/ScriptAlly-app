@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "S2 three panels",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "S2 rate: Most writers is the anchor",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "6% vs 6%"
+ },
+ {
+  "lock": "S2 rate: You is the model's",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "41% vs 41"
+ },
+ {
+  "lock": "S2 rate: column heights in proportion (±2px)",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "87.0 / 12.7 (6.84)"
+ },
+ {
+  "lock": "S2 rate: the verdict follows the rule",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "Well above vs Well above"
+ },
+ {
+  "lock": "S2 reply: Most writers is the anchor",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "50% vs 50%"
+ },
+ {
+  "lock": "S2 reply: You is the model's",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "66% vs 66"
+ },
+ {
+  "lock": "S2 reply: column heights in proportion (±2px)",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "87.0 / 65.9 (1.32)"
+ },
+ {
+  "lock": "S2 reply: the verdict follows the rule",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "Above vs Above"
+ },
+ {
+  "lock": "S2 sent: Most writers is the anchor",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "44 vs 44"
+ },
+ {
+  "lock": "S2 sent: You is the model's",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "51 vs 51"
+ },
+ {
+  "lock": "S2 sent: column heights in proportion (±2px)",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "87.0 / 75.0 (1.16)"
+ },
+ {
+  "lock": "S2 sent: the verdict follows the rule",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "About typical vs About typical"
+ },
+ {
+  "lock": "S2 'QueryTracker' is named in the caveat",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "These figures are a rough guide, not a target. “Most writers"
+ },
+ {
+  "lock": "S2 the overdue segment carries the rust ring",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "rgb(180, 85, 63) 0px 0px 0px 2px inset, rgba(28, 19, 15, 0.14) 0px 0px 0px 1px inset"
+ },
+ {
+  "lock": "S2 the bar's segments are expectedByNow's",
+  "where": "1512 · anchors 6/50/44",
+  "ok": true,
+  "detail": "[{\"k\":\"replied\",\"n\":29},{\"k\":\"closed\",\"n\":2},{\"k\":\"overdue\",\"n\":13},{\"k\":\"inside\",\"n\":6}]"
+ },
+ {
+  "lock": "S2 three panels",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "S2 rate: Most writers is the anchor",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "9% vs 9%"
+ },
+ {
+  "lock": "S2 rate: You is the model's",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "41% vs 41"
+ },
+ {
+  "lock": "S2 rate: column heights in proportion (±2px)",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "87.0 / 19.1 (4.56)"
+ },
+ {
+  "lock": "S2 rate: the verdict follows the rule",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "Well above vs Well above"
+ },
+ {
+  "lock": "S2 reply: Most writers is the anchor",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "40% vs 40%"
+ },
+ {
+  "lock": "S2 reply: You is the model's",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "66% vs 66"
+ },
+ {
+  "lock": "S2 reply: column heights in proportion (±2px)",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "87.0 / 52.7 (1.65)"
+ },
+ {
+  "lock": "S2 reply: the verdict follows the rule",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "Well above vs Well above"
+ },
+ {
+  "lock": "S2 sent: Most writers is the anchor",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "60 vs 60"
+ },
+ {
+  "lock": "S2 sent: You is the model's",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "51 vs 51"
+ },
+ {
+  "lock": "S2 sent: column heights in proportion (±2px)",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "73.9 / 87.0 (0.85)"
+ },
+ {
+  "lock": "S2 sent: the verdict follows the rule",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "Still early vs Still early"
+ },
+ {
+  "lock": "S2 'QueryTracker' is named in the caveat",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "These figures are a rough guide, not a target. “Most writers"
+ },
+ {
+  "lock": "S2 the overdue segment carries the rust ring",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "rgb(180, 85, 63) 0px 0px 0px 2px inset, rgba(28, 19, 15, 0.14) 0px 0px 0px 1px inset"
+ },
+ {
+  "lock": "S2 the bar's segments are expectedByNow's",
+  "where": "1280 · anchors 9/40/60",
+  "ok": true,
+  "detail": "[{\"k\":\"replied\",\"n\":29},{\"k\":\"closed\",\"n\":2},{\"k\":\"overdue\",\"n\":13},{\"k\":\"inside\",\"n\":6}]"
+ }
+]
