@@ -5,8 +5,8 @@
  * Contact list v18 §D — THE ROW PEEK, opened after 450ms of hover (or Space on a focused row). v18.3 §C: it shows only
  * how to reach the agent (email, website, social); v18's index card (wishlist, genres, facts, notes) is retired.
  *
- * ⚠️ A CLICK INSIDE THE PEEK NEVER OPENS THE ROW: it stops every click and key from reaching the row, so Copy, the
- *    links and the "Add …" pills do only what they say.
+ * ⚠️ A CLICK ON A DETAIL NEVER OPENS THE ROW: each detail stops its own click and keys, so the email (which copies,
+ *    v18.3.3 §C), the links and the "Add …" items do only what they say.
  */
 import React, { useEffect, useRef, useState } from "react";
 import type { Agent } from "../../../types";
@@ -36,15 +36,46 @@ export function sendThem(a: Pick<Agent, "materialsWanted">): string | null {
 type Edit = (tab: AgentCardTab, focus?: AgentCardField) => void;
 
 
-const Copy: React.FC<{ text: string }> = ({ text }) => {
+/** Copies `text`: the Clipboard API, falling back to a selected textarea and `execCommand("copy")` (an insecure
+    origin, or a browser that refuses the API) */
+export async function copyText(text: string): Promise<boolean> {
+  try { if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); return true; } } catch { /* fall back */ }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0"; ta.style.pointerEvents = "none";
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand("copy"); ta.remove(); return ok;
+  } catch { return false; }
+}
+
+/** the copy glyph: two overlapping rounded squares */
+const CopyIcon: React.FC = () => (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
+    <rect x="5.5" y="5.5" width="8" height="8" rx="1.6" /><path d="M10.5 3.6V3.9A1.4 1.4 0 0 0 9.1 2.5H4A1.5 1.5 0 0 0 2.5 4v5.1a1.4 1.4 0 0 0 1.4 1.4h.2" />
+  </svg>
+);
+
+/**
+ * v18.3.3 §C — THE EMAIL IS THE COPY BUTTON. Hover or focus turns its disc navy with the copy glyph; a click, Enter or
+ * Space copies the FULL address (the text may be shortened with "…") and reads "Copied" for 1400ms. It never opens the
+ * card: it stops its own click and keys, and the row's click handler ignores it as well.
+ */
+const CopyEmail: React.FC<{ email: string }> = ({ email }) => {
   const [done, setDone] = useState(false);
   const t = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(t.current), []);
+  const go = () => {
+    void copyText(email);
+    setDone(true); window.clearTimeout(t.current); t.current = window.setTimeout(() => setDone(false), 1400);
+  };
   return (
-    <button type="button" className="cl18-copy" data-cl18="peek-copy" onClick={() => {
-      void navigator.clipboard?.writeText(text).catch(() => undefined);
-      setDone(true); window.clearTimeout(t.current); t.current = window.setTimeout(() => setDone(false), 1400);
-    }}>{done ? "Copied" : "Copy"}</button>
+    <span className="cl1833-it cl1833-em" data-cl183="peek-pill" data-k="email" role="button" tabIndex={0}
+      aria-label={`Copy email ${email}`} data-done={done ? "" : undefined} title={email}
+      onClick={(e) => { e.stopPropagation(); go(); }}
+      onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }}>
+      <i className="cl183-pd"><span className="cl1833-ic"><PkIcon kind="mail" /></span><span className="cl1833-ic cl1833-cp"><CopyIcon /></span></i>
+      <span className="cl183-pt" aria-live="polite">{done ? "Copied" : email}</span>
+    </span>
   );
 };
 
@@ -85,9 +116,7 @@ export const ContactPeek: React.FC<{
   return (
     <div className="cl183-pk cl1833-pk" data-cl18="peek" data-cl183="peek">
       {email ? (
-        <span className="cl1833-it cl1833-em" data-cl183="peek-pill" data-k="email" onClick={stop}>
-          <i className="cl183-pd"><PkIcon kind="mail" /></i><span className="cl183-pt" title={email}>{email}</span><Copy text={email} />
-        </span>
+        <CopyEmail email={email} />
       ) : missing("email", "mail", "Add their email", () => onEdit("who", "email"))}
       {site ? (
         <a className="cl1833-it cl1833-web" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer" onClick={stop}>

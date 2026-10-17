@@ -74,13 +74,18 @@
 .cl1833-pk .cl1833-it.is-add .cl183-pt { font-style: italic !important; color: rgba(28, 19, 15, 0.48); }
 .cl1833-pk .cl1833-it.is-add:hover .cl183-pt { color: #2d3a50; text-decoration: underline; text-underline-offset: 3px; }
 .cl1833-pk .cl1833-it:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; border-radius: 15px; }
-/* the Copy chip (until §C replaces it with the email itself) */
-.cl1833-pk .cl18-copy {
-  flex: none; display: inline-flex; align-items: center; box-sizing: border-box; height: 22px; margin: 0 0 0 2px;
-  padding: 0 8px; border: 0; border-radius: 6px; background: #fff; cursor: pointer;
-  font: 400 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7);
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18);
-}
+/* §C — the email is the copy button: hover/focus turns the disc navy with a cream copy glyph and underlines the address;
+   a copy reads "Copied" in green for 1400ms */
+.cl1833-pk .cl1833-em { cursor: pointer; }
+.cl1833-pk .cl1833-em .cl183-pd { transition: background-color 0.15s, color 0.15s; }
+.cl1833-pk .cl1833-em .cl1833-ic { display: inline-flex; }
+.cl1833-pk .cl1833-em .cl1833-cp, .cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl1833-ic:not(.cl1833-cp) { display: none; }
+.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl1833-cp { display: inline-flex; }
+.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl183-pd { background: #2d3a50; color: #fdfaf5; }
+.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl183-pt { text-decoration: underline; text-decoration-color: rgba(45, 58, 80, 0.35); text-underline-offset: 3px; }
+.cl1833-pk .cl1833-em[data-done] .cl183-pd { background: #e3efe7; color: #2f6b4f; }
+.cl1833-pk .cl1833-em[data-done] .cl183-pt { font-style: italic !important; color: #2f6b4f; text-decoration: none; }
+@media (prefers-reduced-motion: reduce) { .cl1833-pk .cl1833-em .cl183-pd { transition: none; } }
 
 /* ── §E · ONE SHEET: the white list is flush with the navy toolbar's edges, and the headings row spans it. Rows and
    headings share one inset (78 left, 40 right), so each label sits on its column. ── */
