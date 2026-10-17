@@ -250,7 +250,9 @@ export interface DeskCard {
   /** what the figure rests on, when it is a statistic */
   population: number | null;
   rows: DeskRow[];
-  chart: { kind: "bars"; values: number[] } | { kind: "line"; values: number[] };
+  chart: { kind: "bars"; values: number[] } | { kind: "line"; values: number[] }
+    /* v24: every dated reply as a dot along 0..longest, with the typical marked */
+    | { kind: "dots"; dots: { at: number; title: string }[]; typical: number | null };
   axis: string[];
 }
 const monthLabel = (ms: number, nowMs: number): string => {

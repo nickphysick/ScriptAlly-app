@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "the page publishes the v24 model",
+  "where": "1512",
+  "ok": false,
+  "detail": "no v24 block"
+ },
+ {
+  "lock": "the page publishes the v24 model",
+  "where": "1280",
+  "ok": false,
+  "detail": "no v24 block"
+ }
+]

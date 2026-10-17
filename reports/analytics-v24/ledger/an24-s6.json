@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "S6 entries are in date order",
+  "where": "1512",
+  "ok": true,
+  "detail": "first request busiest offer"
+ },
+ {
+  "lock": "S6 the entries are moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "first,request,busiest,offer vs first,request,busiest,offer"
+ },
+ {
+  "lock": "S6 first: the date is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "18 Apr 2024 vs 18 Apr 2024"
+ },
+ {
+  "lock": "S6 request: the date is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "22 Feb vs 22 Feb"
+ },
+ {
+  "lock": "S6 request: the day count is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "Vance Associates asked for a partial, 675 days after your first query."
+ },
+ {
+  "lock": "S6 busiest: the date is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "3 to 9 Aug vs 3 to 9 Aug"
+ },
+ {
+  "lock": "S6 busiest: the count is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "14 queries in one week, part of your busiest month."
+ },
+ {
+  "lock": "S6 offer: the date is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "19 Aug vs 19 Aug"
+ },
+ {
+  "lock": "S6 offer: the day count is moments'",
+  "where": "1512",
+  "ok": true,
+  "detail": "Bright Literary, 853 days after your first query. They asked for the full on 22 Jul and offered four weeks later. Still open."
+ },
+ {
+  "lock": "S6 an offer entry only with an offer",
+  "where": "1512",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "S6 entries are in date order",
+  "where": "1280",
+  "ok": true,
+  "detail": "first request busiest offer"
+ },
+ {
+  "lock": "S6 the entries are moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "first,request,busiest,offer vs first,request,busiest,offer"
+ },
+ {
+  "lock": "S6 first: the date is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "18 Apr 2024 vs 18 Apr 2024"
+ },
+ {
+  "lock": "S6 request: the date is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "22 Feb vs 22 Feb"
+ },
+ {
+  "lock": "S6 request: the day count is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "Vance Associates asked for a partial, 675 days after your first query."
+ },
+ {
+  "lock": "S6 busiest: the date is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "3 to 9 Aug vs 3 to 9 Aug"
+ },
+ {
+  "lock": "S6 busiest: the count is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "14 queries in one week, part of your busiest month."
+ },
+ {
+  "lock": "S6 offer: the date is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "19 Aug vs 19 Aug"
+ },
+ {
+  "lock": "S6 offer: the day count is moments'",
+  "where": "1280",
+  "ok": true,
+  "detail": "Bright Literary, 853 days after your first query. They asked for the full on 22 Jul and offered four weeks later. Still open."
+ },
+ {
+  "lock": "S6 an offer entry only with an offer",
+  "where": "1280",
+  "ok": true,
+  "detail": "1"
+ }
+]

@@ -13,6 +13,8 @@
  * ⚠️ THE CARD'S ROWS ARE `standing` (lib/analyticsV21), THE ONE PARTITION — the How things stand chips read the
  *    same derivation, so the two cannot disagree. Its swatches and bar are the LOCKED STATUS FILLS; a zero row is
  *    hidden and its segment left out. The ring is ink only: no rust in it.
+ * ⚠️ v24 §A: THE RING IS "Replied on time" — `ringOf(replyKeeping)` (lib/analyticsV24), kept over the replies that
+ *    had a stated time — and it scrolls to the section that asks the same question (S4).
  * ⚠️ DESKTOP ONLY. The phone (≤ 760) keeps v17's band, which the page mounts instead (decision 5).
  */
 import React from "react";
@@ -70,11 +72,11 @@ export const A21Card: React.FC<{ rows: StandingRow[] | null; inside: V21["inside
         </ul>
       </div>
       <button type="button" className="a21-c2" data-a21="ring-panel" onClick={onRing} disabled={loading}
-        aria-label={inside && inside.pct !== null ? `Inside the window: ${inside.inside} of ${inside.dated} dated replies` : "Inside the window: no dated replies yet"}>
+        aria-label={inside && inside.pct !== null ? `Replied on time: ${inside.inside} of the ${inside.dated} replies` : "Replied on time: no replies yet"}>
         <InsideRing inside={loading ? null : inside} />
-        <span className="a21-rl">Inside the window</span>
+        <span className="a21-rl" data-a21="ring-label">Replied on time</span>
         <span className="a21-rs" data-a21="ring-sub">
-          {loading ? "" : inside && inside.pct !== null ? `${inside.inside} of ${inside.dated} dated ${inside.dated === 1 ? "reply" : "replies"}` : "No dated replies yet"}
+          {loading ? "" : inside && inside.pct !== null ? `${inside.inside} of the ${inside.dated} ${inside.dated === 1 ? "reply" : "replies"}` : "No replies yet"}
         </span>
       </button>
     </div>
@@ -108,7 +110,7 @@ export const A21Header: React.FC<{
           <p className="a21-by" data-a21="byline"><i aria-hidden="true" /><em>for</em> {msTitle ?? "your book"}<i aria-hidden="true" /></p>
           <div className="a21-b" data-a21="acts">
             <button type="button" className="a21-p1" data-a21="record-response" onClick={onRecord}>+ Record a response</button>
-            <button type="button" className="a21-p2" data-a21="read" onClick={onRead} disabled={loading}>Read the numbers {"↓"}</button>
+            <button type="button" className="a21-p2" data-a21="read" onClick={onRead} disabled={loading}>See what happened {"↓"}</button>
           </div>
         </div>
         <A21Card rows={rows} inside={inside} onRing={onRing} loading={loading} />

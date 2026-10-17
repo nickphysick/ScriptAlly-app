@@ -6,7 +6,9 @@
  * sent, Request rate, Median wait — each a figure over its unit, two counted rows, a 40px chart and an axis, and a
  * rotated double-ringed stamp. DESKTOP ONLY: the phone keeps v17's at-a-glance strip.
  *
- * ⚠️ EVERY FIGURE IS `buildV21(...).desk`, and a stamp is drawn only where its comparison has something to compare.
+ * ⚠️ v24 §B: THE CARDS ARE `deskV24` (lib/analyticsV24) — Queries sent, Asked to read more, Your typical reply
+ *    time — and the third draws a dot strip rather than a line.
+ * ⚠️ EVERY FIGURE IS the desk derivation's, and a stamp is drawn only where its comparison has something to compare.
  * ⚠️ THE WHOLE CARD SCROLLS TO ITS SECTION. It is a `role="button"` article, not a `<button>`: a heading is not
  *    phrasing content and may not sit inside one.
  * ⚠️ THE ICON DISC'S TINT IS PRE-COMPUTED (12% of the card's colour over white): no `color-mix()`.
@@ -43,6 +45,18 @@ const Chart: React.FC<{ card: DeskCard }> = ({ card }) => {
     return (
       <div className="a21-djbars" data-a21="desk-chart" aria-hidden="true">
         {vs.map((v, i) => <i key={i} style={{ height: `${Math.max(3, (v / max) * 100)}%`, opacity: i === vs.length - 1 ? 1 : undefined }} />)}
+      </div>
+    );
+  }
+  if (card.chart.kind === "dots") {
+    /* v24 §B: each dated reply a dot along 0..the longest, the typical a dashed mark */
+    const { dots, typical } = card.chart;
+    const max = dots.length ? Math.max(1, dots[dots.length - 1].at) : 1;
+    const at = (d: number) => `${((d / max) * 100).toFixed(1)}%`;
+    return (
+      <div className="a24-djstrip" data-a24="desk-strip" aria-hidden="true">
+        {typical !== null ? <u data-a24="desk-typical" style={{ left: at(typical) }}><span>typical</span></u> : null}
+        {dots.map((d, i) => <i key={i} data-a24="desk-dot" style={{ left: at(d.at) }} title={d.title} />)}
       </div>
     );
   }

@@ -24,6 +24,12 @@ import {
 import { retired } from "./inkRetired";
 
 test.describe.configure({ timeout: Number(process.env.AN17_TIMEOUT ?? 900_000) });
+/* ⚠️ PINNED (analytics v24): the shared harness account gains manuscripts from other sessions mid-run, and the page opens
+   whichever book is active; the AN21 and AN24 locks already pin "The Smoke Test". AN17-18 still switches through the
+   bar, which writes the key itself without a reload, so the pin does not undo its switch. */
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => { try { if (!sessionStorage.getItem("an17-pinned")) { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); sessionStorage.setItem("an17-pinned", "1"); } } catch { /* */ } });
+});
 const rgb = (s: string | null) => (s?.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
 const isGreenOrRed = (c: string) => {
   const [r, g, b] = rgb(c);
@@ -147,148 +153,8 @@ test("AN17-3 · the Query Centre's band", async ({ page }) => {
   L.done(8);
 });
 
-/* ── AN17-7 · the funnel ── */
-test("AN17-7 · funnel", async ({ page }) => {
-  const L = new Ledger("an17-7");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    const bars = d?.fbars ?? [];
-    L.check("AN17-7 four bars", w, bars.length === 4, `${bars.length}`);
-    L.check("AN17-7 the top bar's population is non-zero", w, (bars[0]?.count ?? 0) > 0, `${bars[0]?.count}`);
-    if (bars.length === 4 && bars[0].count > 0) {
-      const unit = bars[0].w / bars[0].count;
-      /* the drawn floor (the ref's 28 of 1200 viewBox units, scaled) keeps a 1-count bar visible; at or
-         above it a bar is to scale within ±2% of the top bar */
-      const floor = (28 / 850) * bars[0].w;
-      bars.forEach((b, i) => {
-        const want = b.count * unit;
-        const ok = want <= floor ? near(b.w, floor, 1) : Math.abs(b.w - want) <= bars[0].w * 0.02;
-        L.check(`AN17-7 bar ${i + 1} is to scale (${b.count})`, w, ok, `w ${b.w.toFixed(1)} expected ${Math.max(want, floor).toFixed(1)}`);
-      });
-      const fig = (d?.funnelFig?.counts ?? "").split(",").map(Number);
-      L.check("AN17-7 the counts are the model's", w, fig.length === 4 && fig.every((n, i) => n === bars[i].count), `bars ${bars.map((b) => b.count)} model ${fig}`);
-    }
-    const went = d?.went ?? [];
-    L.check("AN17-7 three \"went on\" notes", w, went.length === 3 && went.every((x) => /went on/.test(x.text)), went.map((x) => x.text).join(" | "));
-    L.check("AN17-7 the notes are rust", w, went.length === 3 && went.every((x) => x.fill === RUST || x.color === RUST), went.map((x) => x.fill).join(" "));
-    await checkOverflow(page, L, w);
-  }
-  L.done(40);
-});
-
-/* ── AN17-8 · the training log ── */
-test("AN17-8 · log", async ({ page }) => {
-  const L = new Ledger("an17-8");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    const dots = d?.logdots ?? [], bars = d?.wkbars ?? [];
-    L.check("AN17-8 the page has dated queries", w, (d?.dated ?? 0) > 0, `${d?.dated}`);
-    L.check("AN17-8 one dot per dated query", w, dots.length === d?.dated, `${dots.length} dots, ${d?.dated} dated`);
-    L.check("AN17-8 each dot takes its query's status fill", w, dots.length > 0 && dots.every((x) => x.fill === STATE_RGB[x.bucket]), dots.filter((x) => x.fill !== STATE_RGB[x.bucket]).slice(0, 3).map((x) => `${x.bucket}:${x.fill}`).join(" "));
-    L.check("AN17-8 weekly bars present", w, bars.length > 0, `${bars.length}`);
-    const rust = bars.filter((x) => x.fill === RUST);
-    const max = Math.max(0, ...bars.map((x) => x.count));
-    L.check("AN17-8 exactly one rust weekly bar", w, rust.length === 1, `${rust.length}`);
-    L.check("AN17-8 the rust bar is the busiest week", w, rust.length === 1 && rust[0].count === max, `rust ${rust[0]?.count} busiest ${max}`);
-    L.check("AN17-8 the rest are anthracite", w, bars.filter((x) => x.fill !== RUST).every((x) => x.fill === ANTH), [...new Set(bars.map((x) => x.fill))].join(" "));
-    await checkOverflow(page, L, w);
-  }
-  L.done(32);
-});
-
-/* ── AN17-9 · the two share bars ── */
-test("AN17-9 · shares", async ({ page }) => {
-  const L = new Ledger("an17-9");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    const shares = d?.shares ?? [];
-    L.check("AN17-9 two share bars", w, shares.length === 2, `${shares.length}`);
-    shares.forEach((s, i) => {
-      L.check(`AN17-9 bar ${i + 1} has segments`, w, s.segs.length > 0, `${s.segs.length}`);
-      const sum = s.segs.reduce((a, g) => a + g.count, 0);
-      L.check(`AN17-9 bar ${i + 1} segments sum to its total`, w, s.total > 0 && sum === s.total, `${sum} of ${s.total}`);
-      L.check(`AN17-9 bar ${i + 1} segments take status fills`, w, s.segs.every((g) => g.fill === STATE_RGB[g.bucket] && FILLS.has(g.fill)), s.segs.map((g) => `${g.bucket}:${g.fill}`).join(" "));
-    });
-    await checkOverflow(page, L, w);
-  }
-  L.done(28);
-});
-
-async function scrubRead(page: Page) {
-  return page.evaluate(() => {
-    const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0);
-    const svg = p ? [...p.querySelectorAll<SVGSVGElement>('[data-a17="scrub"]')].find((e) => e.getBoundingClientRect().width > 0) : undefined;
-    const guide = svg?.querySelector('[data-a17="guide"]');
-    const r = svg?.getBoundingClientRect();
-    return {
-      found: !!svg, box: r ? { l: r.left, t: r.top, w: r.width, h: r.height } : null,
-      date: p?.querySelector('[data-a17="sread-date"]')?.textContent?.trim() ?? null,
-      guideX: guide ? Number(guide.getAttribute("x1")) : null,
-    };
-  });
-}
-
-test("AN17-12 · scrub", async ({ page }) => {
-  const L = new Ledger("an17-12");
-  for (const vp of [AT_1512, { width: 390, height: 844 }]) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    await scrollToSec(page, 6, -40);
-    await page.waitForTimeout(300);
-    const a = await scrubRead(page);
-    L.check("AN17-12 the chart is on screen", w, a.found && !!a.box && a.box.t >= 0 && a.box.t + a.box.h <= vp.height, JSON.stringify(a.box));
-    L.check("AN17-12 the readout starts at Today", w, a.date === "Today", `${a.date}`);
-    if (!a.box) { L.done(3); return; }
-    const x = a.box.l + a.box.w * 0.6, y = a.box.t + a.box.h * 0.5;
-    if (vp.width > 760) {
-      await page.mouse.move(x, y);
-    } else {
-      /* a finger drag: pointer events, which the page binds on the phone */
-      await page.mouse.move(a.box.l + a.box.w * 0.9, y);
-      await page.mouse.down();
-      await page.mouse.move(x, y, { steps: 6 });
-    }
-    await page.waitForTimeout(200);
-    const b = await scrubRead(page);
-    L.check("AN17-12 moving to 60% changes the date from Today", w, !!b.date && b.date !== "Today", `${b.date}`);
-    L.check("AN17-12 the guide moves", w, b.guideX !== null && a.guideX !== null && Math.abs(b.guideX - a.guideX) > 1, `${a.guideX} → ${b.guideX}`);
-    if (vp.width > 760) {
-      await page.mouse.move(a.box.l + a.box.w / 2, a.box.t - 60);
-    } else {
-      await page.mouse.up();
-      await page.mouse.move(a.box.l + a.box.w / 2, a.box.t - 60);
-    }
-    await page.waitForTimeout(200);
-    const c = await scrubRead(page);
-    L.check("AN17-12 leaving restores Today", w, c.date === "Today", `${c.date}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(12);
-});
-
-/* ── AN17-13 · every query against time ── */
-test("AN17-13 · lanes", async ({ page }) => {
-  const L = new Ledger("an17-13");
-  for (const vp of DESKTOP) {
-    await openAn(page, vp);
-    const w = `${vp.width}`;
-    const d = await readDesk(page);
-    const lanes = d?.lanes ?? [];
-    L.check("AN17-13 lanes present", w, lanes.length > 0, `${lanes.length}`);
-    L.check("AN17-13 one line per dated query", w, lanes.length === d?.dated && lanes.length === d?.lanesPop, `${lanes.length} lanes, ${d?.dated} dated, population ${d?.lanesPop}`);
-    L.check("AN17-13 each line in a status fill", w, lanes.length > 0 && lanes.every((l) => FILLS.has(l.fill)), [...new Set(lanes.map((l) => l.fill))].join(" "));
-    L.check("AN17-13 the today line is rust", w, d?.todayStroke === RUST, `${d?.todayStroke}`);
-    L.check("AN17-13 the today line sits at the plot's right edge", w, !!d?.today && !!d?.plot && near(d.today.r, d.plot.r, 2), `today ${d?.today?.r} plot ${d?.plot?.r}`);
-    await checkOverflow(page, L, w);
-  }
-  L.done(24);
-});
+/* RETIRED (analytics v24): AN17-7 funnel, -8 log, -9 shares, -12 scrub and -13 lanes measured v17 figures that v24 deletes
+   (tests/e2e/RETIRED-analytics-v24.md). Their laws live on in AN24-S1, -S3 and -S5. */
 
 async function tabRead(page: Page) {
   return page.evaluate(() => {
@@ -306,9 +172,8 @@ async function tabRead(page: Page) {
 
 test("AN17-15 · tab", async ({ page }) => {
   const L = new Ledger("an17-15");
-  /* REWRITTEN (analytics v21): sections 4 and 5 are renamed with their rebuilt figures; the law — the tab names the
-     section in view — is unchanged */
-  const NAMES = ["Where the", "Queries sent", "Response rate", "Replies against the stated window", "How long each step takes", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers"];
+  /* REWRITTEN (analytics v24): seven question sections; the law — the tab names the section in view — is unchanged */
+  const NAMES = ["What happened to your queries?", "Benchmarking", "How many have you sent, and when?", "Do agents reply when they say they will?", "Who are you still waiting on?", "Moments worth remembering", "A note on these numbers"];
   for (const vp of DESKTOP) {
     await openAn(page, vp);
     const w = `${vp.width}`;
@@ -335,7 +200,7 @@ test("AN17-15 · tab", async ({ page }) => {
       await page.waitForTimeout(300);
     }
     if (vp.width === 1512 || vp.width === 1280) {
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < NAMES.length; i++) {
         await scrollToSec(page, i, -40);
         await page.waitForTimeout(350);
         const r = await tabRead(page);
@@ -344,7 +209,7 @@ test("AN17-15 · tab", async ({ page }) => {
       await page.locator('[data-a17="tab-all"]:visible').first().click({ timeout: 3000 }).catch(() => {});
       await page.waitForTimeout(200);
       const m = await tabRead(page);
-      L.check("AN17-15 ☰ opens a menu of nine", w, m.menuOpen && m.items === 9, `${m.menuOpen} ${m.items}`);
+      L.check("AN17-15 ☰ opens a menu of seven", w, m.menuOpen && m.items === 7, `${m.menuOpen} ${m.items}`);
       await page.keyboard.press("Escape");
       await page.waitForTimeout(200);
       const e = await tabRead(page);
@@ -358,7 +223,7 @@ test("AN17-15 · tab", async ({ page }) => {
     const a = await tabRead(page);
     L.check("AN17-15 absent at ≤760px", `${vp.width}`, !a.tab, JSON.stringify(a.tab));
   }
-  L.done(45);
+  L.done(40);
 });
 
 /* ── AN17-16 · the thin-sample rule, on a single query ── */
@@ -374,12 +239,13 @@ test("AN17-16 · thin sample", async ({ page }) => {
     if (!p) return null;
     /* every FIGURE: the strip's numbers, the readings, the records' values, the funnel counts */
     /* REWRITTEN (analytics v21): on the desktop the strip is the desk, and the records are v21's */
-    const figs = [...p.querySelectorAll<HTMLElement>('[data-a21="desk-figure"], [data-a21="desk-n"], [data-a17="read-v"], [data-a21="record-v"], [data-a17="fcount"], [data-a21="card-n"]')]
+    /* REWRITTEN (analytics v24): the readings are v24's (`reading-fig`); the funnel and the records are deleted */
+    const figs = [...p.querySelectorAll<HTMLElement>('[data-a21="desk-figure"], [data-a21="desk-n"], [data-a24="reading-fig"], [data-a21="card-n"]')]
       .filter((e) => e.getBoundingClientRect().width > 0)
       /* ⚠️ innerText, NOT textContent, for BOTH reads: textContent glues a value to its unit ("0days") and to
          the next line ("None of 1No queries"), so a zero with a unit and a stated population both read wrong
          (measured — the first is how the median-wait mutation went green) */
-      .map((e) => ({ kind: e.dataset.a17 ?? "", text: (e.innerText ?? e.textContent ?? "").replace(/\s+/g, " ").trim() /* an SVG <text> has no innerText */, pop: e.dataset.population ?? null, note: (((e.closest("[data-a17-fig]") ?? e.parentElement) as HTMLElement | null)?.innerText ?? "").replace(/\s+/g, " ").trim() }));
+      .map((e) => ({ kind: e.dataset.a17 ?? e.dataset.a21 ?? e.dataset.a24 ?? "", text: (e.innerText ?? e.textContent ?? "").replace(/\s+/g, " ").trim() /* an SVG <text> has no innerText */, pop: e.dataset.population ?? null, note: (((e.closest("[data-a17-fig]") ?? e.parentElement) as HTMLElement | null)?.innerText ?? "").replace(/\s+/g, " ").trim() }));
     return { sent: Number(p.dataset.sent), figs };
   });
   const all = await read();
@@ -425,15 +291,12 @@ test("AN17-17 · phone", async ({ page }) => {
       for (const e of [...p.querySelectorAll<HTMLElement>(".a17-m *")].filter((e) => shown(e) && e.childNodes.length && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))) {
         sizes.push(parseFloat(getComputedStyle(e).fontSize));
       }
+      /* REWRITTEN (analytics v24): the phone draws v24's seven sections; v17's phone figures are deleted */
+      const secs = [...p.querySelectorAll<HTMLElement>('section[data-a24="sec"]')].filter(shown);
+      const reads = [...p.querySelectorAll<HTMLElement>('[data-a24="readings"]')].filter(shown);
       return {
-        funRows: [...p.querySelectorAll('[data-a17="m-fun"] [data-a17="m-funrow"]')].filter(shown).length,
-        weeks: [...p.querySelectorAll('[data-a17="m-week"]')].filter(shown).length,
-        more: [...p.querySelectorAll('[data-a17="m-more"]')].filter(shown).map((e) => e.textContent?.trim() ?? ""),
-        stack: [...p.querySelectorAll('[data-a17="m-share"] [data-a17="m-stack"]')].filter(shown).length,
-        /* REWRITTEN (analytics v21 §D): the phone's replies are Part D's rows, not v17's chart */
-        reply: [...p.querySelectorAll('[data-a21="rw"]')].filter(shown).length,
-        desktopShown: [...p.querySelectorAll(".a17-d")].filter(shown).length,
-        desktopTotal: p.querySelectorAll(".a17-d").length,
+        secs: secs.length, h2: secs.map((x) => x.querySelector("h2")?.textContent ?? ""),
+        oneCol: reads.every((r) => getComputedStyle(r).gridTemplateColumns.split(" ").length === 1), reads: reads.length,
         minSize: sizes.length ? Math.min(...sizes) : NaN, nSizes: sizes.length,
         disc: db ? { w: db.width, h: db.height, top: db.top, right: db.right } : null,
         band: bb ? { top: bb.top, right: bb.right } : null,
@@ -442,24 +305,13 @@ test("AN17-17 · phone", async ({ page }) => {
     });
     L.check("AN17-17 the page renders", w, !!r, `${!!r}`);
     if (!r) continue;
-    L.check("AN17-17 funnel rows", w, r.funRows === 4, `${r.funRows}`);
-    L.check("AN17-17 the log shows 12 weeks (or all, if fewer)", w, r.weeks > 0 && r.weeks <= 12, `${r.weeks}`);
-    L.check("AN17-17 the Show all toggle", w, r.more.length === 1 && /^Show all \d+ weeks$/.test(r.more[0]), r.more.join(" | "));
-    L.check("AN17-17 the stacked share bar", w, r.stack === 2, `${r.stack}`);
-    L.check("AN17-17 the phone's replies are Part D's rows", w, r.reply === 1, `${r.reply}`);
-    L.check("AN17-17 desktop figures hidden", w, r.desktopTotal > 0 && r.desktopShown === 0, `${r.desktopShown} of ${r.desktopTotal} shown`);
-    L.check("AN17-17 every chart label ≥ 9px", w, r.nSizes > 10 && r.minSize >= 8.99, `min ${r.minSize.toFixed(2)} over ${r.nSizes}`);
+    L.check("AN17-17 the seven sections, on the phone too", w, r.secs === 7 && r.h2[0] === "What happened to your queries?", `${r.secs} ${r.h2[0]}`);
+    L.check("AN17-17 the readings are one column", w, r.reads >= 5 && r.oneCol, `${r.reads} ${r.oneCol}`);
     L.check("AN17-17 the disc is 100px", w, !!r.disc && near(r.disc.w, 100, 1) && near(r.disc.h, 100, 1), JSON.stringify(r.disc));
     L.check("AN17-17 the disc is top-right of the band's text", w, !!r.disc && !!r.band && r.disc.top - r.band.top <= 40 && r.band.right - r.disc.right <= r.bandPadR + 2, `${JSON.stringify(r.disc)} band ${JSON.stringify(r.band)}`);
-    /* the toggle shows all */
-    await page.locator('[data-a17="m-more"]:visible').first().click({ timeout: 3000 }).catch(() => {});
-    await page.waitForTimeout(200);
-    const all = await page.evaluate(() => [...document.querySelectorAll('[data-a17="m-week"]')].filter((e) => e.getBoundingClientRect().height > 0).length);
-    const label = r.more[0]?.match(/\d+/)?.[0];
-    L.check("AN17-17 Show all reveals every week", w, !!label && all === Number(label), `${all} of ${label}`);
     await checkOverflow(page, L, w);
   }
-  L.done(36);
+  L.done(18);
 });
 
 /* ── AN17-18 · the active manuscript ── */
@@ -471,7 +323,8 @@ test("AN17-18 · manuscript", async ({ page }) => {
     return {
       ms: p?.dataset.ms ?? null, sent: Number(p?.dataset.sent ?? "-1"),
       strip: p?.querySelector('[data-a17="gcell"] [data-a17="gv"]')?.textContent?.trim() ?? null,
-      funnel: p?.querySelector('[data-a17="fig"][data-key="funnel"]')?.getAttribute("data-counts") ?? null,
+      /* REWRITTEN (analytics v24): the funnel is deleted; S1's first pie states the same book's counts */
+      funnel: [...(p?.querySelectorAll<SVGElement>('[data-a24="pie-all"] [data-a24="slice"]') ?? [])].map((x) => x.dataset.n).join(",") || null,
     };
   });
   const a = await read();
@@ -494,7 +347,7 @@ test("AN17-18 · manuscript", async ({ page }) => {
   L.check("AN17-18 switched to another manuscript with queries", "1512", !!changed, JSON.stringify(changed));
   if (changed) {
     L.check("AN17-18 the strip's first number changes", "1512", changed.strip !== a.strip, `${a.strip} → ${changed.strip}`);
-    L.check("AN17-18 the funnel's top count changes", "1512", (changed.funnel ?? "").split(",")[0] !== (a.funnel ?? "").split(",")[0], `${a.funnel} → ${changed.funnel}`);
+    L.check("AN17-18 S1's pie changes", "1512", (changed.funnel ?? "").split(",")[0] !== (a.funnel ?? "").split(",")[0], `${a.funnel} → ${changed.funnel}`);
   }
   const loadsAfter = await page.evaluate(() => performance.getEntriesByType("navigation").length);
   L.check("AN17-18 without a reload", "1512", loadsAfter === loadsBefore, `${loadsBefore} → ${loadsAfter} document loads`);

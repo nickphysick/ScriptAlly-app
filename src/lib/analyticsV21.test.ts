@@ -190,7 +190,7 @@ describe("the desk", () => {
     expect(d[2].figure).toBe(String(m.medianWaitDays));
     expect(d[2].rows.map((r) => r.n)).toEqual([5, 5]);
     expect(d[0].chart).toMatchObject({ kind: "bars" });
-    expect((d[0].chart.values as number[]).length).toBe(13);
+    expect((d[0].chart as { values: number[] }).values.length).toBe(13);
   });
   it("omits a stamp with nothing to compare", () => {
     /* nothing sent this month and no replies in either window */
