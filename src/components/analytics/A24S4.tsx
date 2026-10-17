@@ -47,9 +47,8 @@ export function s4Readings(v: V24): Reading[] {
 export const S4Body: React.FC<{ v: V24 }> = ({ v }) => {
   const k = v.keeping;
   const scale = s4Scale(v);
-  if (k.placed === 0) {
-    return <Block probe="keep-none"><p className="a24-none">{k.replies === 0 ? "No replies yet." : "None of your replies came from an agency that gives a time, so there is nothing to set them against."}</p></Block>;
-  }
+  /* nothing placed: the answer already says why, so the frame carries its readings alone rather than say it twice */
+  if (k.placed === 0) return null;
   return (
     <>
       {k.kept.length ? (

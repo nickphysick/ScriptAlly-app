@@ -5,6 +5,7 @@
  */
 import { test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { openAn } from "./an17Lib";
 
 const DIR = process.env.AN24_DIR ?? "reports/analytics-v24/shots";
@@ -30,6 +31,7 @@ const SECS = [["01-what-happened", 0], ["02-benchmarking", 1], ["03-how-many", 2
 const want = (name: string) => !ONLY || ONLY.split(",").some((o) => name.includes(o));
 
 test("populated", async ({ page }) => {
+  test.skip(ONLY === "empty" || ONLY === "states", "AN24_ONLY");
   test.setTimeout(600_000);
   mkdirSync(DIR, { recursive: true });
   for (const w of [1512, 1280, 390]) {
@@ -57,4 +59,47 @@ test("peek", async ({ page }) => {
   await openMs(page, Number(w), process.env.AN24_MS ?? "seed-ms-1");
   await scrollToSec(page, sel);
   await page.screenshot({ path: `${DIR}/${name}.png` });
+});
+
+/** The empty page beside 08 and 09, at the three widths. Seeds and removes its own manuscript. */
+test("empty", async ({ page }) => {
+  test.skip(!!ONLY && !ONLY.includes("empty"), "AN24_ONLY");
+  test.setTimeout(400_000);
+  mkdirSync(DIR, { recursive: true });
+  execSync("node tests/e2e/seedAn21.mjs empty", { stdio: "pipe" });
+  try {
+    for (const w of [1512, 1280, 390]) {
+      await openMs(page, w, "seed-an21-empty");
+      await page.screenshot({ path: `${DIR}/08-empty-top-${w}.png` });
+      await scrollToSec(page, '[data-a24="steps"]');
+      await page.screenshot({ path: `${DIR}/09-empty-how-it-works-${w}.png` });
+    }
+  } finally { execSync("node tests/e2e/seedAn21.mjs restore", { stdio: "pipe" }); }
+});
+
+/** Exactly one query (the dev review aid), one reply that is a pass, and no stated times at all: at 1512, top and S1–S5. */
+test("states", async ({ page }) => {
+  test.skip(!!ONLY && !ONLY.includes("states"), "AN24_ONLY");
+  test.setTimeout(600_000);
+  mkdirSync(DIR, { recursive: true });
+  const take = async (name: string) => {
+    await page.screenshot({ path: `${DIR}/${name}-top.png` });
+    for (const sec of [0, 1, 3, 4]) { await scrollToSec(page, `[data-a17="sec"][data-sec="${sec}"]`); await page.screenshot({ path: `${DIR}/${name}-s${sec + 1}.png` }); }
+  };
+  await page.addInitScript(() => { (window as unknown as { __SA_AN_LIMIT?: number }).__SA_AN_LIMIT = 1; });
+  await openMs(page, 1512, "seed-ms-1");
+  await take("state-one-query");
+  for (const [mode, name] of [["pass", "state-one-pass"], ["notime", "state-no-stated-times"]] as const) {
+    const ms = execSync(`node tests/e2e/seedAn24.mjs ${mode}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+    try {
+      const p2 = await page.context().newPage();
+      await openMs(p2, 1512, ms);
+      const take2 = async () => {
+        await p2.screenshot({ path: `${DIR}/${name}-top.png` });
+        for (const sec of [0, 1, 3, 4]) { await scrollToSec(p2, `[data-a17="sec"][data-sec="${sec}"]`); await p2.screenshot({ path: `${DIR}/${name}-s${sec + 1}.png` }); }
+      };
+      await take2();
+      await p2.close();
+    } finally { execSync("node tests/e2e/seedAn24.mjs restore", { stdio: "pipe" }); }
+  }
 });

@@ -20,6 +20,11 @@
     position: absolute; top: -2px; left: 6px; font: 400 9.5px/1.2 var(--font-mono) !important; letter-spacing: 0.12em;
     text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap;
   }
+  /* v24's rows are longer than v21's ("in the last three months", "asked for the whole book"): in the compact sheet they
+     wrap rather than end in an ellipsis; the full sheet has the room and keeps one line */
+  .a17-page .a21-dj li { white-space: normal; overflow: visible; text-overflow: clip; align-items: flex-start; line-height: 1.25 !important; }
+  .a17-page .a21-dj li .a21-djc { flex: none; }
+  .ws-app.sheet-wide .a17-page .a21-dj li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-items: center; }
   /* the reply card's stamp is the full sheet's only: in the compact sheet the card has no room for it */
   .a21-dj[data-key="wait"] .a21-djstamp { display: none; }
   .ws-app.sheet-wide .a21-dj[data-key="wait"] .a21-djstamp { display: inline-block; }
