@@ -43,7 +43,7 @@ import { DESK_SLOT, placeDeskSlot } from "./deskSlot";
 import { currentAgentCard, dataNeedTarget, openAgentCard, subscribeAgentCard } from "../../../lib/agentCardStore";
 import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
-import { escapeDepth } from "../../../lib/escapeStack";
+import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
 import { TODO_OPEN_TASK_KEY } from "../../../lib/corkboard";
 import { setAsideItems, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -65,10 +65,12 @@ import { useTagWrites } from "../useTagWrites";
 import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
 import { TrayHeader } from "./TrayHeader";
-import { TrayCalendar, shortDay } from "./TrayCalendar";
+import { TrayCalendar, dayChip, shortDay } from "./TrayCalendar";
 import { TrayCalDrawer } from "./TrayCalDrawer";
 import { calFilterLabel, calendarItems, dayBuckets, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
-import { TrayFilterRow } from "./TrayFilters";
+import { TrayFilterRow, TrayFind } from "./TrayFilters";
+import { usePinList } from "../../shell/useFullScreenList";
+import { PinListButton } from "../../shell/PinListButton";
 import { DeskCard, Disc, DoneToday, DueDial } from "./TrayDesk";
 import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
 import { dayMonth, MONTHS_SHORT } from "../../../lib/dates";
@@ -186,7 +188,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const setSort = (s: TraySort) => { setSortState(s); writeSession(SORT_KEY, s); };
   const [shut, setShutState] = useState<Partial<Record<TrayGroupId, true>>>(() => readSession(SHUT_KEY, {}, (v): v is Partial<Record<TrayGroupId, true>> => !!v && typeof v === "object"));
   const toggleShut = (g: TrayGroupId) => setShutState((s) => { const x = { ...s }; if (x[g]) delete x[g]; else x[g] = true; writeSession(SHUT_KEY, x); return x; });
-  const [focusMode, setFocusMode] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
   const visible = useMemo(() => items.filter((i) => matches(i, filters, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)),
@@ -430,6 +431,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   }, [location.pathname]);
 
   /* ── keys ── */
+  const ownLayers = useRef(0);
   const stateRef = useRef({ walk, sel, act, add: () => {} });
   /* the Set aside tab's and the popover's key doors, filled below (a ref: the key handler is bound once) */
   const asideKeys = useRef<{ view: "tray" | "aside"; list: SetAsideItem[]; sel: string | null; select: (id: string) => void; bring: () => void; pop: (f: "snooze" | "dismiss") => void; toSheet: () => void }>({
@@ -441,7 +443,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       if (location.pathname !== "/todo") return;
       const root = document.querySelector<HTMLElement>(".td5-root");
       if (!root || root.getBoundingClientRect().height === 0) return;
-      if (isEditableTarget(e.target) || escapeDepth() > 0) return;
+      /* v5.2 §E — the pin's own layer (and, pinned, Find's) are this page's: they do not stand the keys down */
+      if (isEditableTarget(e.target) || escapeDepth() > ownLayers.current) return;
       if (document.querySelector('[aria-modal="true"]')) return;
       const { walk: w, sel: s, act: a } = stateRef.current;
       const x = asideKeys.current;
@@ -518,6 +521,36 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     /* v5.1 §G — with the compose card open (from the empty page's "Add a task yourself", or "+ Add a task" on a clear
        desk) the page is the populated layout around an empty tray; cancelling with nothing saved goes back */
     : live.length > 0 || compose ? "list" : ((aid === "nothing" ? 0 : queries.length) === 0 && !openOwn) ? "nothing" : "caught";
+  /* ── v5.2 §E · the pin (the shared hook, a third page key): held sidebar, the header hidden, the sheet the window ── */
+  const pin = usePinList("todo", { routeActive: location.pathname === "/todo", scroller });
+  /* loading counts: a restored pin hides the header from the first frame, not once the data lands (E1: a header flash) */
+  const pinned = pin.full && (state === "list" || state === "loading");
+  /* after a reload there is no earlier place to go back to (the hook only knows a position it saw at pin time), so
+     unpinning a RESTORED pin lands on the sheet. The hook holds its own position for 600ms and lets go when the reader
+     scrolls; a wheel event is that signal. */
+  const pinRestored = useRef<boolean | null>(null);
+  if (pinRestored.current === null && state !== "loading") pinRestored.current = pin.full;
+  const pinWas = useRef(pin.full);
+  useLayoutEffect(() => {
+    if (pinWas.current === pin.full) return;
+    const unpinned = pinWas.current && !pin.full;
+    pinWas.current = pin.full;
+    if (pin.full) { pinRestored.current = false; return; }
+    if (!unpinned || !pinRestored.current) return;
+    pinRestored.current = false;
+    requestAnimationFrame(() => {
+      const sc = scroller(), sheet = sheetRef.current;
+      if (!sc || !sheet) return;
+      window.dispatchEvent(new WheelEvent("wheel"));
+      sc.scrollTop += sheet.getBoundingClientRect().top - sc.getBoundingClientRect().top - 10;
+    });
+  }, [pin.full]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* the board emptying, or the last query going, unpins: All caught up and Nothing yet have no list to pin */
+  useEffect(() => { if (pin.full && (state === "caught" || state === "nothing")) pin.setFull(false); }, [pin.full, state]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ⚠️ THE ESCAPE STACK HEARS THE KEY FIRST (window, capture), so a pinned page would unpin from inside Find. While
+     pinned and Find holds text, Escape clears it first — the field's own behaviour, unchanged */
+  useEscapeLayer(pinned && !!filters.find, () => setFilters((f) => ({ ...f, find: "" })), ESC_LEVEL.page);
+  ownLayers.current = (pin.full ? 1 : 0) + (pinned && filters.find ? 1 : 0);
   const kindActive: TrayKind | null = filters.type === "you" || filters.type === "chase" || filters.type === "tidy" ? filters.type : null;
   const holding = queries.filter((q) => courtOf(q.status as QueryStatus) === "agent").length;
   const pastReply = queries.filter((q) => {
@@ -903,7 +936,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       ) : undefined}
     >
       {state === "list" || state === "loading" ? (
-        <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading}
+        <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading} findHere={!pinned}
           calChip={calFilter ? { label: calFilterLabel(calFilter, shortDay), onClear: () => setCalFilter(null) } : null} />
       ) : null}
     </TrayHeader>
@@ -933,7 +966,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   };
 
   return (
-    <div className="td5-root" data-todo-v5="" data-state={state} ref={rootRef}>
+    <div className="td5-root" data-todo-v5="" data-state={state} data-pinned={pinned ? "" : undefined} ref={rootRef}>
       <WorkspacePageGrid className="td5-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="td5-group" data-td5="group">
           {state === "nothing" ? (
@@ -941,7 +974,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           ) : (
             <>
               {header}
-              <div className="td5-sheet" ref={sheetRef} data-td5="sheet" data-focus={focusMode ? "" : undefined}
+              <div className="td5-sheet" ref={sheetRef} data-td5="sheet"
                 data-one={state === "list" || state === "loading" ? "" : undefined} data-working={busyDesk ? "" : undefined}>
                 <div className="td5-nav" data-td5="nav">
                   {state === "caught" ? (
@@ -966,14 +999,32 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                       ) : null}
                     </div>
                   )}
+                  {pinned ? (
+                    /* v5.2 §E — what the hidden header carried: the day (Part B's figures; opens the drawer) and the
+                       calendar filter */
+                    <span className="td52-pinx" data-td52="pinx">
+                      <button type="button" className="td52-pday" data-td52="pin-day" aria-label="Open the calendar" onClick={() => setCalDrawer(true)}>
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" /><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" /></svg>
+                        <span className="td52-pdt">
+                          {dayChip(calToday)}
+                          {calBuckets.overdue || calBuckets.today ? (
+                            <>{calBuckets.overdue ? <> · <b>{calBuckets.overdue} OVERDUE</b></> : null}{calBuckets.today ? <> <em>·</em> {calBuckets.today} due today</> : null}</>
+                          ) : <> · nothing due</>}
+                        </span>
+                      </button>
+                      {calFilter ? (
+                        <button type="button" className="td52-pflt" data-td52="pin-filter" onClick={() => setCalFilter(null)}>
+                          {calFilterLabel(calFilter, shortDay)} <i aria-hidden="true">×</i>
+                        </button>
+                      ) : null}
+                    </span>
+                  ) : null}
                   <span className="td5-sp" />
                   {state === "list" ? (
                     <>
-                      <span className="td5-keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move<span className="td5-gap" /><kbd>E</kbd> act</span>
-                      <button type="button" className="td5-focusbtn" data-td5="focus" aria-pressed={focusMode} onClick={() => setFocusMode((f) => !f)}>
-                        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="1.5" /><path d="M5.5 6.5h5M5.5 9.5h3" /></svg>
-                        Just the desk
-                      </button>
+                      {pinned ? null : <span className="td5-keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move<span className="td5-gap" /><kbd>E</kbd> act</span>}
+                      {pinned ? <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder="Find a task" pinned /> : null}
+                      <PinListButton pinned={pin.full} onToggle={pin.toggle} attrs={{ "data-td52": "pin" }} />
                     </>
                   ) : null}
                 </div>

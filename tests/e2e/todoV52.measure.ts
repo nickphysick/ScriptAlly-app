@@ -12,7 +12,7 @@ import { expect, test } from "@playwright/test";
 import { doc, setDoc } from "firebase/firestore";
 import { harnessDb } from "./harnessDocs";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { DIR, Ledger, SIZES, flagId, fontsReady, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
+import { DIR, LIB as LIB_TD5, Ledger, SIZES, flagId, fontsReady, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
 
 test.setTimeout(480_000);
 /* ⚠️ a measurement that writes puts the account back in the same run, whatever happened (the house rule) */
@@ -465,4 +465,128 @@ test("TD52 D1 — one drawing per group; none in the desk head; each stands 3px 
     L.check(`${w} its drawing crosses the strip cleanly (on top of it)`, stuck.hitImg, String(stuck.hit));
   }
   L.done(2 * 14);
+});
+
+/* ───────────────────────── E1 · the pin ───────────────────────── */
+const pinState = (page: import("@playwright/test").Page) => page.evaluate(() => {
+  const { q, sc } = (window as unknown as W).__td5();
+  const sheet = q(".td5-sheet")!.getBoundingClientRect(), port = sc.getBoundingClientRect();
+  const panel = document.querySelector<HTMLElement>(".ws-panel");
+  const day = q('[data-td52="pin-day"]'), find = q('[data-td52="pin-find"]');
+  const nav = q('[data-td5="nav"]');
+  return {
+    pressed: q('[data-td52="pin"]')?.getAttribute("aria-pressed") ?? null,
+    panel: panel ? panel.getBoundingClientRect().width : -1,
+    header: q('[data-td5="header"]') ? getComputedStyle(q('[data-td5="header"]')!).display : "absent",
+    top: sheet.top - port.top, h: sheet.height, port: sc.clientHeight, scroll: sc.scrollTop,
+    findInNav: !!find && !!nav && nav.contains(find), findRightOfDay: !!find && !!day && find.getBoundingClientRect().left > day.getBoundingClientRect().right,
+    value: (q('[data-td5="find"] input') as HTMLInputElement | null)?.value ?? null,
+    sbKey: localStorage.getItem("sa.sidebarCollapsed"),
+  };
+});
+test("TD52 E1 — the pin: F, the held rail, the sheet the window, Find in the navy row; restored with no transition; F stands down", async ({ page }) => {
+  const L = new Ledger("E1");
+  await page.addInitScript(() => {
+    const w: number[] = [], hd: boolean[] = [];
+    (window as unknown as { __w: number[]; __hd: boolean[] }).__w = w; (window as unknown as { __hd: boolean[] }).__hd = hd;
+    const tick = () => {
+      const p = document.querySelector<HTMLElement>(".ws-panel");
+      const root = [...document.querySelectorAll<HTMLElement>("[data-todo-v5]")].find((e) => e.getBoundingClientRect().height > 0);
+      if (p && root) { w.push(Math.round(p.getBoundingClientRect().width)); const h = root.querySelector<HTMLElement>('[data-td5="header"]'); hd.push(!!h && h.getBoundingClientRect().height > 0); }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  try {
+    for (const vp of SIZES) {
+      const w = `@${vp.width}`;
+      await openTodo(page, vp);
+      await fontsReady(page);
+      const sb0 = await page.evaluate(() => localStorage.getItem("sa.sidebarCollapsed"));
+      const panel0 = (await pinState(page)).panel;
+      /* a value in Find, and a scroll position to come back to */
+      await page.locator('[data-todo-v5] [data-td5="find"] input').first().fill("Re");
+      await page.evaluate(() => { (document.activeElement as HTMLElement | null)?.blur(); const { sc } = (window as unknown as W).__td5(); sc.scrollTop = 140; });
+      await page.waitForTimeout(300);
+      const y0 = (await pinState(page)).scroll;
+      await page.locator('[data-todo-v5] [data-td52="pin"]').first().click();
+      await page.waitForTimeout(900);
+      const a = await pinState(page);
+      L.check(`${w} pinned (aria-pressed)`, a.pressed === "true", String(a.pressed));
+      L.check(`${w} the sidebar is the 68 rail`, near(a.panel, 68, 1), String(a.panel));
+      L.check(`${w} the header is hidden`, a.header === "none", a.header);
+      L.check(`${w} the sheet is 12 from the top (±1)`, near(a.top, 12, 1), a.top.toFixed(1));
+      L.check(`${w} the sheet is the scroller less 26 (±2)`, near(a.h, a.port - 26, 2), `${a.h} vs ${a.port}`);
+      L.check(`${w} Find is in the navy row, right of the day chip`, a.findInNav && a.findRightOfDay, JSON.stringify(a));
+      L.check(`${w} Find keeps its value`, a.value === "Re", String(a.value));
+      L.check(`${w} pinning leaves sa.sidebarCollapsed alone`, a.sbKey === sb0, `${a.sbKey} vs ${sb0}`);
+      /* Esc: Find's text first, then the pin */
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      const e1 = await pinState(page);
+      L.check(`${w} Esc clears Find first, still pinned`, e1.value === "" && e1.pressed === "true", JSON.stringify({ v: e1.value, p: e1.pressed }));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(1200);
+      await page.mouse.move(5, 5);
+      const b = await pinState(page);
+      L.check(`${w} the second Esc unpins`, b.pressed === "false", String(b.pressed));
+      L.check(`${w} the sidebar comes back as it was`, near(b.panel, panel0, 1), `${b.panel} vs ${panel0}`);
+      L.check(`${w} the scroll position comes back (±2)`, near(b.scroll, y0, 2), `${b.scroll} vs ${y0}`);
+      L.check(`${w} Find is back in the filter row`, !b.findInNav && b.header !== "none", JSON.stringify({ nav: b.findInNav, hd: b.header }));
+      /* F stands down while typing, and while the compose card, the set-aside popover or the calendar drawer is open */
+      const input = page.locator('[data-todo-v5] [data-td5="find"] input').first();
+      await input.click(); await page.keyboard.type("f"); await page.waitForTimeout(400);
+      L.check(`${w} F in Find types, and does not pin`, (await pinState(page)).pressed === "false" && (await input.inputValue()) === "f", await input.inputValue());
+      await input.fill(""); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      for (const [name, open, shut] of [
+        ["the compose card", async () => { await page.keyboard.press("n"); }, async () => { await page.keyboard.press("Escape"); }],
+        ["the set-aside popover", async () => { await page.keyboard.press("s"); }, async () => { await page.keyboard.press("Escape"); }],
+        ["the calendar drawer", async () => { await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="open-drawer"]') as HTMLButtonElement).click()); }, async () => { await page.keyboard.press("Escape"); }],
+      ] as const) {
+        await open(); await page.waitForTimeout(600);
+        await page.keyboard.press("f"); await page.waitForTimeout(500);
+        L.check(`${w} F does nothing with ${name} open`, (await pinState(page)).pressed === "false", String((await pinState(page)).pressed));
+        await shut(); await page.waitForTimeout(500);
+      }
+      /* F pins; reload: pinned from the first frame, no sidebar transition, no header flash */
+      await page.keyboard.press("f"); await page.waitForTimeout(900);
+      L.check(`${w} F pins`, (await pinState(page)).pressed === "true", "");
+      await page.reload();
+      await page.waitForSelector('[data-todo-v5][data-state="list"]', { timeout: 45_000 });
+      await page.evaluate(LIB_TD5);
+      await page.waitForTimeout(2000);
+      const fr = await page.evaluate(() => ({ w: (window as unknown as { __w: number[] }).__w, hd: (window as unknown as { __hd: boolean[] }).__hd }));
+      L.check(`${w} reload: pinned`, (await pinState(page)).pressed === "true", "");
+      L.check(`${w} reload: the rail on every frame (no transition)`, fr.w.length > 10 && fr.w.every((x) => near(x, 68, 1)), `${[...new Set(fr.w)].join(",")} over ${fr.w.length}`);
+      L.check(`${w} reload: no header flash`, fr.hd.every((x) => !x), `${fr.hd.filter(Boolean).length} frames`);
+      await page.keyboard.press("f"); await page.waitForTimeout(1200);
+      const c = await pinState(page);
+      L.check(`${w} after a reload, unpinning lands on the sheet`, c.pressed === "false" && c.scroll > 0, JSON.stringify({ p: c.pressed, y: c.scroll }));
+      L.check(`${w} sa.sidebarCollapsed never changed`, c.sbKey === sb0, `${c.sbKey} vs ${sb0}`);
+    }
+  } finally {
+    await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } }).catch(() => {});
+  }
+  L.done(2 * 22);
+});
+
+/* ───────────────────────── E2 · "Just the desk" is retired ───────────────────────── */
+test("TD52 E2 — no Just the desk control, state or class on /todo", async ({ page }) => {
+  const L = new Ledger("E2");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await mutate(page, "E2");
+    const r = await page.evaluate(() => {
+      const { r: root } = (window as unknown as W).__td5();
+      return { text: /Just the desk/i.test(root.textContent ?? ""), btn: root.querySelectorAll('[data-td5="focus"], .td5-focusbtn').length, attr: root.querySelectorAll(".td5-sheet[data-focus]").length };
+    });
+    L.check(`${w} no "Just the desk" words`, !r.text, "");
+    L.check(`${w} no focus control`, r.btn === 0, String(r.btn));
+    L.check(`${w} no desk-only layout`, r.attr === 0, String(r.attr));
+  }
+  const fs = await import("node:fs");
+  const src = fs.readFileSync("src/components/todo/v5/TodoTray.tsx", "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const css = [fs.readFileSync("src/components/todo/v5/todoV5.css", "utf8"), fs.readFileSync("src/components/todo/v5/todoV52.css", "utf8")].join("\n").replace(/\/\*[\s\S]*?\*\//g, "");
+  L.check("source: no focusMode state", !/focusMode|setFocusMode/.test(src), "");
+  L.check("CSS: no td5-focusbtn or [data-focus] rule", !/\.td5-focusbtn|\[data-focus\]/.test(css), "");
+  L.done(8);
 });

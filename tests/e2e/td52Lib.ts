@@ -43,6 +43,8 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   A1: { css: `[data-todo-v5] .td52-cal { contain: none !important; container-type: normal !important; }` },
   /* A2 — the day column at 140px */
   A2: { css: `[data-todo-v5] .td52-cal { --cal-dayw: 140px !important; }` },
+  /* E2 — the old "Just the desk" button left mounted */
+  E2: { js: `(() => { const n = [...document.querySelectorAll('[data-todo-v5] [data-td5="nav"]')].find((e) => e.getBoundingClientRect().height > 0); if (n) { const b = document.createElement("button"); b.className = "td5-focusbtn"; b.dataset.td5 = "focus"; b.textContent = "Just the desk"; n.append(b); } })()` },
   /* D1 — the desk head's art restored */
   D1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="desk-head"]')].find((e) => e.getBoundingClientRect().height > 0);
     const b = document.querySelector('[data-todo-v5] [data-td5="band-art"]'); if (h && b) { const i = document.createElement("img"); i.src = b.getAttribute("src"); i.style.cssText = "position:absolute;left:8px;top:-10px;width:46px"; h.prepend(i); } })()` },
