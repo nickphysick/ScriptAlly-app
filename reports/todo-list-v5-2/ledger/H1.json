@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "H1",
+  "where": "filtering animates rows (Web Animations present)",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "H1",
+  "where": "reduced motion: no row animation",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "the empty line names the search and how many it hides",
+  "ok": true,
+  "detail": "{\"text\":\"Nothing matches “zzqqxx-nothing”. 50 tasks are hidden by it.Clear the search\",\"btn\":\"Clear the search\"}"
+ },
+ {
+  "lock": "H1",
+  "where": "…with Clear the search",
+  "ok": true,
+  "detail": "Clear the search"
+ },
+ {
+  "lock": "H1",
+  "where": "the button restores the rows, as many as it said it hid",
+  "ok": true,
+  "detail": "50 vs 50 (earlier 50)"
+ },
+ {
+  "lock": "H1",
+  "where": "the explainer shows on the first Set aside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "GOT IT takes it away",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "…stored on the user",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "after a reload it never shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "…nor in a second browser",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "the probe task is in the tray",
+  "ok": true,
+  "detail": "zz-td52-save-mvd0vcp3"
+ },
+ {
+  "lock": "H1",
+  "where": "2s into a save that has not settled: still Saving…, the buttons disabled",
+  "ok": true,
+  "detail": "{\"saving\":true,\"off\":true}"
+ },
+ {
+  "lock": "H1",
+  "where": "released once it settled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "a double E started one save (one slip)",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "H1",
+  "where": "unpinned: no PINNED",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "pinned: PINNED, just before the pin",
+  "ok": true,
+  "detail": "{\"t\":\"PINNED\",\"before\":true}"
+ }
+]

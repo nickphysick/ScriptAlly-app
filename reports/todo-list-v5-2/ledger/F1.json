@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "F1",
+  "where": "@1512 the h1 reads \"30 overdue · 1 due today\"",
+  "ok": true,
+  "detail": "\"30 overdue · 1 due today\""
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 its accessible name says the same",
+  "ok": true,
+  "detail": "30 overdue · 1 due today"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 it keeps data-page-title",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 a long title fits its column: the card stays inside the row",
+  "ok": true,
+  "detail": "{\"right\":879.9375,\"card\":921.5,\"cardR\":1325.5,\"rowR\":1325.5,\"fs\":\"35.8px\",\"hd\":264}"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 …and the header keeps its height",
+  "ok": true,
+  "detail": "264 vs 264"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 the overdue part is rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 the h1 reads \"30 overdue · 1 due today\"",
+  "ok": true,
+  "detail": "\"30 overdue · 1 due today\""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 its accessible name says the same",
+  "ok": true,
+  "detail": "30 overdue · 1 due today"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 it keeps data-page-title",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 a long title fits its column: the card stays inside the row",
+  "ok": true,
+  "detail": "{\"right\":761.359375,\"card\":803,\"cardR\":1207,\"rowR\":1207,\"fs\":\"35.4px\",\"hd\":264}"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 …and the header keeps its height",
+  "ok": true,
+  "detail": "264 vs 264"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 the overdue part is rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "F1",
+  "where": "caught: keeps v5.1's title",
+  "ok": true,
+  "detail": "[\"Your tray is empty\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "nothing: keeps v5.1's title",
+  "ok": true,
+  "detail": "[\"Your next move,always on top\"]"
+ }
+]

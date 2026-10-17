@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "F2",
+  "where": "@1512 query and agent rows to read",
+  "ok": true,
+  "detail": "42"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 every query/agent row's bold line is the agent's name",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 chase rows read \"Nudge · …\"",
+  "ok": true,
+  "detail": "Nudge · Queried · Quint Literary | Nudge · Partial sent · Oyelaran Books"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 close rows read \"Consider closing · …\"",
+  "ok": true,
+  "detail": "Consider closing · Queried · Vale & Marchetti | Consider closing · Queried · Quint Literary"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 overdue dials to read",
+  "ok": true,
+  "detail": "39"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 every overdue dial is spoken (\"Overdue since {date}\", role img)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 every overdue dial's tag has the right unit and figure",
+  "ok": true,
+  "detail": "0 of 39"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 the tags exercised: mo, wk, d",
+  "ok": true,
+  "detail": "mo,wk,d"
+ },
+ {
+  "lock": "F2",
+  "where": "@1512 the desk's dial carries no tag",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 query and agent rows to read",
+  "ok": true,
+  "detail": "42"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 every query/agent row's bold line is the agent's name",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 chase rows read \"Nudge · …\"",
+  "ok": true,
+  "detail": "Nudge · Queried · Quint Literary | Nudge · Partial sent · Oyelaran Books"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 close rows read \"Consider closing · …\"",
+  "ok": true,
+  "detail": "Consider closing · Queried · Vale & Marchetti | Consider closing · Queried · Quint Literary"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 overdue dials to read",
+  "ok": true,
+  "detail": "39"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 every overdue dial is spoken (\"Overdue since {date}\", role img)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 every overdue dial's tag has the right unit and figure",
+  "ok": true,
+  "detail": "0 of 39"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 the tags exercised: mo, wk, d",
+  "ok": true,
+  "detail": "mo,wk,d"
+ },
+ {
+  "lock": "F2",
+  "where": "@1280 the desk's dial carries no tag",
+  "ok": true,
+  "detail": ""
+ }
+]

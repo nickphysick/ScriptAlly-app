@@ -1,0 +1,42 @@
+[
+ {
+  "lock": "A5",
+  "where": "a nudge to set aside",
+  "ok": true,
+  "detail": "thin-q-chase"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 days with dots to read",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 a snoozed dot was read",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 the seeded snooze is faint on 2026-10-20",
+  "ok": false
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 days with dots to read",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 a snoozed dot was read",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 the seeded snooze is faint on 2026-10-20",
+  "ok": false
+ }
+]

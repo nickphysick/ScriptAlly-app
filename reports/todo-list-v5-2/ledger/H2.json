@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "H2",
+  "where": "all five open (menu, bulk, drawer, Find's text, pin)",
+  "ok": true,
+  "detail": "{\"menu\":true,\"bulk\":true,\"drawer\":true,\"find\":\"a\",\"pin\":\"true\"}"
+ },
+ {
+  "lock": "H2",
+  "where": "Esc 1 closes one thing",
+  "ok": true,
+  "detail": "{\"menu\":false,\"bulk\":true,\"drawer\":true,\"find\":\"a\",\"pin\":\"true\"}"
+ },
+ {
+  "lock": "H2",
+  "where": "Esc 2 closes one thing",
+  "ok": true,
+  "detail": "{\"menu\":false,\"bulk\":false,\"drawer\":true,\"find\":\"a\",\"pin\":\"true\"}"
+ },
+ {
+  "lock": "H2",
+  "where": "Esc 3 closes one thing",
+  "ok": true,
+  "detail": "{\"menu\":false,\"bulk\":false,\"drawer\":false,\"find\":\"a\",\"pin\":\"true\"}"
+ },
+ {
+  "lock": "H2",
+  "where": "Esc 4 closes one thing",
+  "ok": true,
+  "detail": "{\"menu\":false,\"bulk\":false,\"drawer\":false,\"find\":\"\",\"pin\":\"true\"}"
+ },
+ {
+  "lock": "H2",
+  "where": "Esc 5 closes one thing",
+  "ok": true,
+  "detail": "{\"menu\":false,\"bulk\":false,\"drawer\":false,\"find\":\"\",\"pin\":\"false\"}"
+ }
+]

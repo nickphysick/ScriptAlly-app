@@ -70,6 +70,10 @@ import { TrayCalDrawer } from "./TrayCalDrawer";
 import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
 import { lateTag, rowLines } from "../../../lib/trayRows";
 import { doingTitle } from "../../../lib/deskDoing";
+import { noreplyAnswers, saveClose } from "../../../lib/queryActions/closeSave";
+import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
+import { todayDay } from "../../../lib/queryActions/dates";
+import { owes } from "../../queryActions/journeys/common";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { calFilterLabel, calendarItems, dayBuckets, daysFrom, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
 import { TrayFilterRow, TrayFind } from "./TrayFilters";
@@ -872,6 +876,53 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const b = el.getBoundingClientRect();
     setDialMenu({ key: i.key, left: Math.max(8, Math.min(b.left - 150, window.innerWidth - 216)), top: Math.min(b.bottom + 6, window.innerHeight - 260), opener: el });
   };
+  /* ── v5.2 §G.3 · close several Gone quiet at once: the close journey's own save (lib/queryActions/closeSave) with its
+     "No reply" answers, once per query, each through the drawer's snapshot so ONE Undo restores every one exactly.
+     Never a close outside that save. ── */
+  const [bulk, setBulk] = useState<ReadonlySet<string>>(() => new Set());
+  const bulkable = (i: TrayItem) => i.bucket === "close" && !!i.query && !owes(i.query) && !i.sweep;
+  const toggleBulk = (key: string) => setBulk((b) => { const n = new Set(b); if (n.has(key)) n.delete(key); else n.add(key); return n; });
+  /* a selection only ever holds rows on screen: one that leaves (filtered, closed elsewhere) drops out */
+  useEffect(() => {
+    if (!bulk.size) return;
+    const on = new Set(visible.filter(bulkable).map((i) => i.key));
+    if ([...bulk].some((k) => !on.has(k))) setBulk(new Set([...bulk].filter((k) => on.has(k))));
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEscapeLayer(bulk.size > 0, () => setBulk(new Set()), ESC_LEVEL.trayBulk);
+  const bulkClose = () => guarded(async () => {
+    const uid = currentUser?.id;
+    if (!uid) return;
+    const chosen = visible.filter((i) => bulk.has(i.key) && bulkable(i));
+    const today0 = todayDay();
+    const undos: (() => Promise<void>)[] = [];
+    let failed = 0;
+    for (const it of chosen) {
+      const q = it.query!;
+      const agent = agents.find((a) => a.id === q.agentId) ?? null;
+      try {
+        const snap = await takeSnapshot(uid, [q.id]);
+        await saveClose(db, q, agent, noreplyAnswers(today0), today0);
+        const undo = async () => { const after = await packagesHeldBy(uid, snap.queryIds); await restoreSnapshot(snap); await db.reconcileStamps([...packagesIn(snap), ...after]); };
+        undos.push(undo);
+        savedUndos.current.push({ queryId: q.id, mode: "close", undo, used: false });
+      } catch (e) {
+        console.error("[to-do] bulk close: a save failed", e);
+        failed++;
+      }
+    }
+    setBulk(new Set());
+    const k = undos.length;
+    if (!k) { flash("Couldn't close those queries. Nothing was changed."); return; }
+    flash(`Closed ${k} ${k === 1 ? "query" : "queries"} · Moved to Closed${failed ? ` · ${failed} couldn't be closed` : ""}`, { label: "Undo", fn: async () => {
+      for (const u of [...undos].reverse()) {
+        const e = savedUndos.current.find((x) => x.undo === u);
+        if (e?.used) continue;
+        if (e) e.used = true;
+        await u();
+      }
+      bump((x) => x + 1);
+    } }, UNDO_MS);
+  });
   /* v5.2 §H.3 — the explainer, once: GOT IT is stored on the user (todoPrefs.tray.explainedSetAside, one leaf) */
   const [explainedHere, setExplainedHere] = useState(false);
   const gotIt = () => { setExplainedHere(true); void db.updateUserPaths({ "todoPrefs.tray.explainedSetAside": true }).catch(() => undefined); };
@@ -1088,11 +1139,14 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           draggable={!pinned && movable(i) ? true : undefined}
           onDragStart={(e) => { if (pinned || !movable(i)) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", i.key); e.dataTransfer.effectAllowed = "move"; setDragKey(i.key); }}
           onDragEnd={() => setDragKey(null)}
-          data-live={working && deskItem?.key === i.key ? "" : undefined} aria-describedby={tip?.key === i.key ? "td52-tip" : undefined}
+          data-live={working && deskItem?.key === i.key ? "" : undefined} data-bulk={bulk.has(i.key) ? "" : undefined} aria-describedby={tip?.key === i.key ? "td52-tip" : undefined}
           onMouseEnter={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onMouseLeave={() => { setRowLit(null); setTip(null); }}
           onFocus={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onBlur={() => { setRowLit(null); setTip(null); }}
           onClick={(e) => { const d = (e.target as HTMLElement).closest<HTMLElement>('[data-td5="dial"]'); if (d && movable(i)) { openDialMenu(i, d); return; } selectRow(i.key); }}>
-          <Disc item={i} />
+          {bulkable(i) ? (
+            <span className={`td52-dck${bulk.has(i.key) ? " on" : ""}`} role="checkbox" aria-checked={bulk.has(i.key)} aria-label={`Select ${(i.agent?.name || i.agent?.agency || i.who).trim()}`}
+              data-td52="bulk-check" onClick={(e) => { e.stopPropagation(); toggleBulk(i.key); }}><Disc item={i} /></span>
+          ) : <Disc item={i} />}
           <span className="td5-tx" data-agent-led={lines(i).agentLed ? "" : undefined}><b data-td52="row-bold">{lines(i).bold}{working && deskItem?.key === i.key ? <span className="td52-live" data-td52="in-progress">IN PROGRESS</span> : startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small data-td52="row-italic">{lines(i).italic}</small></span>
           <DueDial dial={i.dial} size={52} selected={!ghost && sel?.key === i.key} pressable={movable(i)}
             tag={i.dial.kind === "late" && i.dial.ymd ? lateTag(daysFrom(i.dial.ymd, calToday)) : null} />
@@ -1232,7 +1286,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                           <div key={gd.id} className="td5-grp" data-td5="group-block" data-g={gd.id} data-shut={shut[gd.id] ? "" : undefined}>
                             <button type="button" className="td5-band" data-td5="band" style={{ background: gd.tint, color: gd.ink }} aria-expanded={!shut[gd.id]} onClick={() => toggleShut(gd.id)}>
                               <img src={gd.art.src} alt="" aria-hidden="true" data-td5="band-art" style={{ "--aw": `${gd.art.w}px` } as React.CSSProperties} />
-                              <span className="td5-bn">{gd.name}</span><span className="td5-bc">{g.items.length}</span><span className="td5-chv" aria-hidden="true">▾</span>
+                              <span className="td5-bn">{gd.name}</span><span className="td5-bc">{g.items.length}</span>
+                              {gd.id === "quiet" && g.items.some(bulkable) ? (
+                                <span className="td52-selall" role="button" tabIndex={-1} data-td52="select-all"
+                                  onClick={(e) => { e.stopPropagation(); setBulk(new Set(g.items.filter(bulkable).map((x) => x.key))); }}>SELECT ALL</span>
+                              ) : null}
+                              <span className="td5-chv" aria-hidden="true">▾</span>
                             </button>
                             {shut[gd.id] ? null : <div className="td5-rows">{renderRows(g)}</div>}
                           </div>
@@ -1247,6 +1306,13 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                         </div>
                       ) : <div className="td5-none">Nothing in your tray yet.</div>}
                       {loading ? null : <button type="button" className="td5-addrow" data-td5="add-row" onClick={() => openCompose()}>+ Add a task<kbd>N</kbd></button>}
+                      {bulk.size ? (
+                        <div className="td52-bulk" data-td52="bulk" role="region" aria-label="Close several queries">
+                          <span><b>{bulk.size}</b> selected</span><span className="td52-bsp" />
+                          <button type="button" className="td52-bno" data-td52="bulk-cancel" onClick={() => setBulk(new Set())}>Cancel</button>
+                          <button type="button" className="td52-bgo" data-td52="bulk-close" disabled={deskSaving} onClick={bulkClose}>Close {bulk.size} {bulk.size === 1 ? "query" : "queries"}</button>
+                        </div>
+                      ) : null}
                       </>}
                     </div>
                     <div className="td5-deskcol" data-td5="deskcol">

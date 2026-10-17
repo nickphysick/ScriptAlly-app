@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "A1",
+  "where": "a baseline from the base build exists",
+  "ok": true,
+  "detail": "reports/todo-list-v5-2/header-baseline.json"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the header is the base's height (±1)",
+  "ok": true,
+  "detail": "264.0 vs 264.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the card is the calendar",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the card's box is the header row's height (±1)",
+  "ok": false,
+  "detail": "159.6 vs 179.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the header is the base's height (±1)",
+  "ok": true,
+  "detail": "264.0 vs 264.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the card is the calendar",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the card's box is the header row's height (±1)",
+  "ok": false,
+  "detail": "159.6 vs 179.0"
+ }
+]

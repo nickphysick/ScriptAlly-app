@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "A4",
+  "where": "@1512 the harness has future days with items",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-10-23 reads DUE THIS DAY",
+  "ok": true,
+  "detail": "DUE THIS DAY"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-10-23 one row per kind, each with that day's count",
+  "ok": true,
+  "detail": "[[\"mine\",1]] vs {\"mine\":1}"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-10-23 swatches match the month's dots",
+  "ok": true,
+  "detail": "[\"td52-sw h\"]"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-10-26 reads DUE THIS DAY",
+  "ok": true,
+  "detail": "DUE THIS DAY"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-10-26 one row per kind, each with that day's count",
+  "ok": true,
+  "detail": "[[\"mine\",1]] vs {\"mine\":1}"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-10-26 swatches match the month's dots",
+  "ok": true,
+  "detail": "[\"td52-sw h\"]"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 the harness has a past day still open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-09-28 reads STILL OPEN · d DAYS LATE",
+  "ok": true,
+  "detail": "STILL OPEN · 20 DAYS LATE"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 2026-09-28 eyebrow \"d DAYS AGO\"",
+  "ok": true,
+  "detail": "— 20 DAYS AGO —"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 its number is rust on the grid",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 its number is rust before it is selected",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 the harness has a clear future day",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 a clear day reads \"A clear day.\"",
+  "ok": true,
+  "detail": "A clear day."
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 the foot returns to today",
+  "ok": true,
+  "detail": "— TODAY —"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 the harness has future days with items",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-10-23 reads DUE THIS DAY",
+  "ok": true,
+  "detail": "DUE THIS DAY"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-10-23 one row per kind, each with that day's count",
+  "ok": true,
+  "detail": "[[\"mine\",1]] vs {\"mine\":1}"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-10-23 swatches match the month's dots",
+  "ok": true,
+  "detail": "[\"td52-sw h\"]"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-10-26 reads DUE THIS DAY",
+  "ok": true,
+  "detail": "DUE THIS DAY"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-10-26 one row per kind, each with that day's count",
+  "ok": true,
+  "detail": "[[\"mine\",1]] vs {\"mine\":1}"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-10-26 swatches match the month's dots",
+  "ok": true,
+  "detail": "[\"td52-sw h\"]"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 the harness has a past day still open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-09-28 reads STILL OPEN · d DAYS LATE",
+  "ok": true,
+  "detail": "STILL OPEN · 20 DAYS LATE"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 2026-09-28 eyebrow \"d DAYS AGO\"",
+  "ok": true,
+  "detail": "— 20 DAYS AGO —"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 its number is rust on the grid",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 its number is rust before it is selected",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 the harness has a clear future day",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 a clear day reads \"A clear day.\"",
+  "ok": true,
+  "detail": "A clear day."
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 the foot returns to today",
+  "ok": true,
+  "detail": "— TODAY —"
+ }
+]

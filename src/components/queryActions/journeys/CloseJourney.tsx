@@ -15,10 +15,9 @@
  * status. The agent stays on the Contact list.
  */
 import React, { useState } from "react";
-import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../../../lib/db";
-import { QueryStatus, type EventKey, type Query } from "../../../types";
-import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
+import { QueryStatus } from "../../../types";
+import { saveClose } from "../../../lib/queryActions/closeSave";
 import { addDays, dayDiff, dayIso, dm, fmt, offWeekend, pastAnchors, rel, toDay, type Anchor } from "../../../lib/queryActions/dates";
 import type { TrackPoint } from "../../../lib/queryActions/track";
 import { Chips, DateField, Fl, Note, PlanTrack, Radios, TextBox, Toggle, Who } from "../controls";
@@ -190,25 +189,8 @@ export function CloseJourney({ req, today, children, switchTo }: JourneyProps) {
     touched: () => [q.id],
     commit: async () => {
       if (!why || why === "said" || !db.currentUser) throw new Error("No reason chosen");
-      const ms = db.manuscripts.find((m) => m.id === q.manuscriptId) || null;
-      const key: EventKey = why === "noreply" ? "closed_no_reply" : why === "withdraw" ? "withdrawn" : "closed_agent_gone";
-      const data: RecordResponseData = {
-        responseType: "close",
-        materialsType: "Pages", materialsQuantity: 0, materialsOtherText: "", expectedBy: "", sendReminderDate: "",
-        dateReceived: dayIso(on), rrNotes: "", feedbackType: "Form", feedbackText: "", privateReflection: "", rejectionLesson: "",
-        requeryPreference: "", offerDate: "", offerDeadline: "", offerNotes: "",
-        closingReason: why === "noreply" ? "No response after expected window" : why === "withdraw" ? "Withdrew my submission" : "Agent no longer accepting queries",
-        closingNotes: [why === "withdraw" ? `${{ offer: "An offer elsewhere", revise: "Revising the book", other: "Something else" }[wd]}` : "", note.trim()].filter(Boolean).join(" · "),
-        eventKey: key,
-        ...(why === "gone" ? { closeAs: "withdrawn" as const, closingToken: "agent_closed" } : {}),
-      };
-      await recordQueryResponse({ userId: db.currentUser.id, query: q, agent, manuscript: ms }, data);
-      const extra: Record<string, unknown> = {};
-      if (q.nudgeDate) extra.nudgeDate = deleteField();
-      if (q.closePlan) extra.closePlan = deleteField();
-      if (why === "withdraw" && !told && remindTell) extra.withdrawTold = false;
-      if (why === "gone" && recheckOn) extra.agentRecheckOn = dayIso(recheckOn);
-      if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>);
+      /* the save is a function (lib/queryActions/closeSave): the tray's bulk close runs the same one per query */
+      await saveClose(db, q, agent, { why, on, wd, told, remindTell, recheck, note }, today);
       return { queryId: q.id, message: `Query closed · ${agentName(agent)}`, sub: "AGENT STAYS ON YOUR CONTACT LIST", touched: [q.id] };
     },
   };
