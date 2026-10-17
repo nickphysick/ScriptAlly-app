@@ -100,6 +100,8 @@ export const GET_CACHE_SECONDS = 60;
 export const ALLOWED_ORIGINS: readonly string[] = [
   "https://queryhawk.net",
   "https://www.queryhawk.net",
+  /* Dev's own address until prod launches, so queryhawk.net itself only ever means the real site. */
+  "https://dev.queryhawk.net",
   "https://scriptally-app.web.app",
   "https://scriptally-dev.web.app",
 ];
