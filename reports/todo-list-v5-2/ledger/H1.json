@@ -15,7 +15,7 @@
   "lock": "H1",
   "where": "the empty line names the search and how many it hides",
   "ok": true,
-  "detail": "{\"text\":\"Nothing matches “zzqqxx-nothing”. 54 tasks are hidden by it.Clear the search\",\"btn\":\"Clear the search\"}"
+  "detail": "{\"text\":\"Nothing matches “zzqqxx-nothing”. 50 tasks are hidden by it.Clear the search\",\"btn\":\"Clear the search\"}"
  },
  {
   "lock": "H1",
@@ -27,7 +27,7 @@
   "lock": "H1",
   "where": "the button restores the rows, as many as it said it hid",
   "ok": true,
-  "detail": "54 vs 54 (earlier 54)"
+  "detail": "50 vs 50 (earlier 50)"
  },
  {
   "lock": "H1",
@@ -63,7 +63,7 @@
   "lock": "H1",
   "where": "the probe task is in the tray",
   "ok": true,
-  "detail": "zz-td52-save-mvcxz8jb"
+  "detail": "zz-td52-save-mvd0vcp3"
  },
  {
   "lock": "H1",
@@ -81,7 +81,7 @@
   "lock": "H1",
   "where": "a double E started one save (one slip)",
   "ok": true,
-  "detail": "1 → 2"
+  "detail": "0 → 1"
  },
  {
   "lock": "H1",

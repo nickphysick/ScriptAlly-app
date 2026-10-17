@@ -3,25 +3,25 @@
   "lock": "G2",
   "where": "the probe task is in the tray",
   "ok": true,
-  "detail": "zz-td52-move-mvcxxo3x"
+  "detail": "zz-td52-move-mvd0t1zl"
  },
  {
   "lock": "G2",
   "where": "a future day on the grid to drop on",
   "ok": true,
-  "detail": "2026-10-20"
+  "detail": "2026-10-21"
  },
  {
   "lock": "G2",
-  "where": "own task: the drop moves dueDate to 2026-10-20",
+  "where": "own task: the drop moves dueDate to 2026-10-21",
   "ok": true,
-  "detail": "2026-10-20"
+  "detail": "2026-10-21"
  },
  {
   "lock": "G2",
   "where": "own task: the toast says it moved",
   "ok": true,
-  "detail": "Zz td52 move probe · moved to Tue 20 OctUndo"
+  "detail": "Zz td52 move probe · moved to Wed 21 OctUndo"
  },
  {
   "lock": "G2",
@@ -69,7 +69,7 @@
   "lock": "G2",
   "where": "In a week writes a snooze",
   "ok": true,
-  "detail": "2026-10-24T22:01:09.446Z"
+  "detail": "2026-10-24T23:21:32.773Z"
  },
  {
   "lock": "G2",
@@ -81,7 +81,7 @@
   "lock": "G2",
   "where": "the toast: {Agent} · set for {date}",
   "ok": true,
-  "detail": "Tobias Quint · set for Sat 24 OctUndo"
+  "detail": "Tobias Quint · set for Sun 25 OctUndo"
  },
  {
   "lock": "G2",
@@ -128,8 +128,8 @@
  {
   "lock": "G2",
   "where": "an offer: Tomorrow only",
-  "ok": true,
-  "detail": "[{\"k\":\"tomorrow\",\"off\":false},{\"k\":\"monday\",\"off\":true},{\"k\":\"week\",\"off\":true},{\"k\":\"month\",\"off\":true},{\"k\":\"pick\",\"off\":false}]"
+  "ok": false,
+  "detail": "[{\"k\":\"tomorrow\",\"off\":false},{\"k\":\"monday\",\"off\":false},{\"k\":\"week\",\"off\":true},{\"k\":\"month\",\"off\":true},{\"k\":\"pick\",\"off\":false}]"
  },
  {
   "lock": "G2",

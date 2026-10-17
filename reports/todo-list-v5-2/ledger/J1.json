@@ -9,7 +9,7 @@
   "lock": "J1",
   "where": "@1512 the dot and TASK IN PROGRESS",
   "ok": true,
-  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":\"TASK IN PROGRESS\",\"dot\":true,\"navDashes\":5,\"navDone\":1,\"navSt\":\"· STEP 1 OF 5\",\"bandSt\":\"STEP 1 OF 5\",\"bandDashes\":5,\"say\":null,\"cn\":null,\"status\":false,\"band\":\"Sending your partial · Priya Nair\",\"rows\":54}"
+  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":\"TASK IN PROGRESS\",\"dot\":true,\"navDashes\":5,\"navDone\":1,\"navSt\":\"· STEP 1 OF 5\",\"bandSt\":\"STEP 1 OF 5\",\"bandDashes\":5,\"say\":null,\"cn\":null,\"status\":false,\"band\":\"Sending your partial · Priya Nair\",\"rows\":50}"
  },
  {
   "lock": "J1",
@@ -39,7 +39,7 @@
   "lock": "J1",
   "where": "@1512 leaving restores \"Working through\"",
   "ok": true,
-  "detail": "Working through 54 tasks, most urgent first"
+  "detail": "Working through 50 tasks, most urgent first"
  },
  {
   "lock": "J1",
@@ -57,7 +57,7 @@
   "lock": "J1",
   "where": "@1280 the dot and TASK IN PROGRESS",
   "ok": true,
-  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":\"TASK IN PROGRESS\",\"dot\":true,\"navDashes\":5,\"navDone\":1,\"navSt\":\"· STEP 1 OF 5\",\"bandSt\":\"STEP 1 OF 5\",\"bandDashes\":5,\"say\":null,\"cn\":null,\"status\":false,\"band\":\"Sending your partial · Priya Nair\",\"rows\":54}"
+  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":\"TASK IN PROGRESS\",\"dot\":true,\"navDashes\":5,\"navDone\":1,\"navSt\":\"· STEP 1 OF 5\",\"bandSt\":\"STEP 1 OF 5\",\"bandDashes\":5,\"say\":null,\"cn\":null,\"status\":false,\"band\":\"Sending your partial · Priya Nair\",\"rows\":50}"
  },
  {
   "lock": "J1",
@@ -87,7 +87,7 @@
   "lock": "J1",
   "where": "@1280 leaving restores \"Working through\"",
   "ok": true,
-  "detail": "Working through 54 tasks, most urgent first"
+  "detail": "Working through 50 tasks, most urgent first"
  },
  {
   "lock": "J1",

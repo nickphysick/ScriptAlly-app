@@ -9,17 +9,17 @@
   "lock": "A2",
   "where": "@1600 three days to read (today, a past open day, a future day)",
   "ok": true,
-  "detail": "2026-10-17 2026-09-28 2026-10-23"
+  "detail": "2026-10-18 2026-09-28 2026-10-23"
  },
  {
   "lock": "A2",
-  "where": "@1600 2026-10-17: text nodes read",
+  "where": "@1600 2026-10-18: text nodes read",
   "ok": true,
   "detail": "61"
  },
  {
   "lock": "A2",
-  "where": "@1600 2026-10-17: nothing clips",
+  "where": "@1600 2026-10-18: nothing clips",
   "ok": true,
   "detail": ""
  },
@@ -57,17 +57,17 @@
   "lock": "A2",
   "where": "@1512 three days to read (today, a past open day, a future day)",
   "ok": true,
-  "detail": "2026-10-17 2026-09-28 2026-10-23"
+  "detail": "2026-10-18 2026-09-28 2026-10-23"
  },
  {
   "lock": "A2",
-  "where": "@1512 2026-10-17: text nodes read",
+  "where": "@1512 2026-10-18: text nodes read",
   "ok": true,
   "detail": "61"
  },
  {
   "lock": "A2",
-  "where": "@1512 2026-10-17: nothing clips",
+  "where": "@1512 2026-10-18: nothing clips",
   "ok": true,
   "detail": ""
  },
@@ -105,17 +105,17 @@
   "lock": "A2",
   "where": "@1440 three days to read (today, a past open day, a future day)",
   "ok": true,
-  "detail": "2026-10-17 2026-09-28 2026-10-23"
+  "detail": "2026-10-18 2026-09-28 2026-10-23"
  },
  {
   "lock": "A2",
-  "where": "@1440 2026-10-17: text nodes read",
+  "where": "@1440 2026-10-18: text nodes read",
   "ok": true,
   "detail": "61"
  },
  {
   "lock": "A2",
-  "where": "@1440 2026-10-17: nothing clips",
+  "where": "@1440 2026-10-18: nothing clips",
   "ok": true,
   "detail": ""
  },
@@ -153,17 +153,17 @@
   "lock": "A2",
   "where": "@1366 three days to read (today, a past open day, a future day)",
   "ok": true,
-  "detail": "2026-10-17 2026-09-28 2026-10-23"
+  "detail": "2026-10-18 2026-09-28 2026-10-23"
  },
  {
   "lock": "A2",
-  "where": "@1366 2026-10-17: text nodes read",
+  "where": "@1366 2026-10-18: text nodes read",
   "ok": true,
   "detail": "61"
  },
  {
   "lock": "A2",
-  "where": "@1366 2026-10-17: nothing clips",
+  "where": "@1366 2026-10-18: nothing clips",
   "ok": true,
   "detail": ""
  },
@@ -201,17 +201,17 @@
   "lock": "A2",
   "where": "@1280 three days to read (today, a past open day, a future day)",
   "ok": true,
-  "detail": "2026-10-17 2026-09-28 2026-10-23"
+  "detail": "2026-10-18 2026-09-28 2026-10-23"
  },
  {
   "lock": "A2",
-  "where": "@1280 2026-10-17: text nodes read",
+  "where": "@1280 2026-10-18: text nodes read",
   "ok": true,
   "detail": "61"
  },
  {
   "lock": "A2",
-  "where": "@1280 2026-10-17: nothing clips",
+  "where": "@1280 2026-10-18: nothing clips",
   "ok": true,
   "detail": ""
  },

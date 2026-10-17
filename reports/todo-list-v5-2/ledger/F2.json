@@ -27,7 +27,7 @@
   "lock": "F2",
   "where": "@1512 overdue dials to read",
   "ok": true,
-  "detail": "42"
+  "detail": "39"
  },
  {
   "lock": "F2",
@@ -39,7 +39,7 @@
   "lock": "F2",
   "where": "@1512 every overdue dial's tag has the right unit and figure",
   "ok": true,
-  "detail": "0 of 42"
+  "detail": "0 of 39"
  },
  {
   "lock": "F2",
@@ -81,7 +81,7 @@
   "lock": "F2",
   "where": "@1280 overdue dials to read",
   "ok": true,
-  "detail": "42"
+  "detail": "39"
  },
  {
   "lock": "F2",
@@ -93,7 +93,7 @@
   "lock": "F2",
   "where": "@1280 every overdue dial's tag has the right unit and figure",
   "ok": true,
-  "detail": "0 of 42"
+  "detail": "0 of 39"
  },
  {
   "lock": "F2",

@@ -267,7 +267,7 @@
   "lock": "L1",
   "where": "@1280 pinned the compact day chip (\"15 Oct · …\")",
   "ok": true,
-  "detail": "17 Oct · 33 OVERDUE"
+  "detail": "18 Oct · 30 OVERDUE"
  },
  {
   "lock": "L1",
@@ -297,7 +297,7 @@
   "lock": "L1",
   "where": "@1280 pinned mid-journey the compact day chip (\"15 Oct · …\")",
   "ok": true,
-  "detail": "17 Oct · 33 OVERDUE"
+  "detail": "18 Oct · 30 OVERDUE"
  },
  {
   "lock": "L1",
@@ -375,7 +375,7 @@
   "lock": "L1",
   "where": "@1180 pinned the compact day chip (\"15 Oct · …\")",
   "ok": true,
-  "detail": "17 Oct · 33 OVERDUE"
+  "detail": "18 Oct · 30 OVERDUE"
  },
  {
   "lock": "L1",
@@ -405,7 +405,7 @@
   "lock": "L1",
   "where": "@1180 pinned mid-journey the compact day chip (\"15 Oct · …\")",
   "ok": true,
-  "detail": "17 Oct · 33 OVERDUE"
+  "detail": "18 Oct · 30 OVERDUE"
  },
  {
   "lock": "L1",
@@ -483,7 +483,7 @@
   "lock": "L1",
   "where": "@1024 pinned the compact day chip (\"15 Oct · …\")",
   "ok": true,
-  "detail": "17 Oct · 33 OVERDUE"
+  "detail": "18 Oct · 30 OVERDUE"
  },
  {
   "lock": "L1",
@@ -513,6 +513,6 @@
   "lock": "L1",
   "where": "@1024 pinned mid-journey the compact day chip (\"15 Oct · …\")",
   "ok": true,
-  "detail": "17 Oct · 33 OVERDUE"
+  "detail": "18 Oct · 30 OVERDUE"
  }
 ]

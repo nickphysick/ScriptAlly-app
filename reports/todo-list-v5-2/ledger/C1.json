@@ -33,7 +33,7 @@
   "lock": "C1",
   "where": "@1512 …and keeps every other chip",
   "ok": true,
-  "detail": "13 vs 13"
+  "detail": "9 vs 9"
  },
  {
   "lock": "C1",
@@ -117,7 +117,7 @@
   "lock": "C1",
   "where": "@1280 …and keeps every other chip",
   "ok": true,
-  "detail": "13 vs 13"
+  "detail": "9 vs 9"
  },
  {
   "lock": "C1",

@@ -57,7 +57,11 @@ for (const vp of SIZES) test(`shots @${vp.width}`, async ({ page }) => {
   await snap(page, "08-dial-reschedule", w);
   await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="group-block"][data-g="quiet"]')?.scrollIntoView({ block: "start" })); await page.waitForTimeout(400);
-  await snap(page, "09-bulk-close-NOT-BUILT-gone-quiet", w);
+  /* three Gone quiet rows ticked: the checkboxes, the tint, the bar — nothing is written (no Close press) */
+  await page.evaluate(() => { const c = (window as unknown as W).__td5().qa('[data-td52="bulk-check"]'); c.slice(0, 3).forEach((x) => x.click()); });
+  await page.waitForTimeout(500);
+  await snap(page, "09-bulk-close", w);
+  await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   await page.locator('[data-todo-v5] [data-td5="find"] input').first().fill("zzqq nothing like this"); await page.waitForTimeout(600);
   await toSheet(page); await page.waitForTimeout(300);
   await snap(page, "10-empty-filter", w);

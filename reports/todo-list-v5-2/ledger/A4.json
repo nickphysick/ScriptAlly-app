@@ -51,13 +51,13 @@
   "lock": "A4",
   "where": "@1512 2026-09-28 reads STILL OPEN · d DAYS LATE",
   "ok": true,
-  "detail": "STILL OPEN · 19 DAYS LATE"
+  "detail": "STILL OPEN · 20 DAYS LATE"
  },
  {
   "lock": "A4",
   "where": "@1512 2026-09-28 eyebrow \"d DAYS AGO\"",
   "ok": true,
-  "detail": "— 19 DAYS AGO —"
+  "detail": "— 20 DAYS AGO —"
  },
  {
   "lock": "A4",
@@ -141,13 +141,13 @@
   "lock": "A4",
   "where": "@1280 2026-09-28 reads STILL OPEN · d DAYS LATE",
   "ok": true,
-  "detail": "STILL OPEN · 19 DAYS LATE"
+  "detail": "STILL OPEN · 20 DAYS LATE"
  },
  {
   "lock": "A4",
   "where": "@1280 2026-09-28 eyebrow \"d DAYS AGO\"",
   "ok": true,
-  "detail": "— 19 DAYS AGO —"
+  "detail": "— 20 DAYS AGO —"
  },
  {
   "lock": "A4",

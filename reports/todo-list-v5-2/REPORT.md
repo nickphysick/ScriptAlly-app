@@ -1,13 +1,13 @@
 # To-do list v5.2 — the calendar in the header, one drawing per group, the pin, mid-task signals and the finishing touches
 
-Branch `todo-list-v5-2`, commits `99382fb0` → `1adc2aee` in the pack's order B, A, C, D, E, F, G, H, J, I. **Not merged to main. Nothing to prod; prod rules untouched (no rules change in this pack).**
+Branch `todo-list-v5-2`, commits `99382fb0` → `1adc2aee` in the pack's order B, A, C, D, E, F, G, H, J, I, then **G.3 `8fba8313`** once Nick lifted the fence on `CloseJourney` (17 Oct). **Not merged to main. Nothing to prod; prod rules untouched (no rules change in this pack).**
 
 ## False premises
 
 1. **`lib/todoCalendar` is taken.** It is the Calendar page's module. Part B's derivation is `lib/trayCalendar` (same contract: `calendarKind`, `calendarDay`, `calendarItems`, `dayBuckets`).
 2. **The drawing table's tops describe a 50px band.** At the table's widths every drawing's foot lands 3px above a **50px** floor (talon 42 wide → 58.4 tall, top −11 → foot 47.4). The app's bands are **44** (compact — both measured sizes, since the sheet is only "wide" past 1440px of sheet) and **56** (sheet-wide). Built: the foot is anchored `bottom: 3px`, the slot centred at x 31, widths the table's on 56px bands and scaled **44/50** on 44px bands (talon 37, hourglass 43.1, pile 44, index hawk 46.6, quill 38.7). D1 asserts width, centre and foot, not the table's tops.
 3. **"An unsurfaced own task opens its card on the desk the way v5.1's Coming up does"** — v5.1's Coming up rows are not pressable (`TrayEmpty.tsx`: plain `div`s). Call: the drawer opens an unsurfaced own task on v5.1's compose card in edit mode (the own task's own Edit route).
-4. **The close journey's noreply save cannot run without its UI** (§0.6), so **G.3 (bulk close) did not run** — the pack's Stop for that item only. The G3 lock asserts the select UI is absent; H.6's order has four layers, not five.
+4. **The close journey's noreply save could not run without its UI** (§0.6), so G.3 stopped at first. **Nick then allowed the edit to `CloseJourney`**: the save is now a function (`lib/queryActions/closeSave`), the journey calls it, and G.3 is built (`8fba8313`). H.6's order has all five layers.
 5. **TD5 C2 has no desk-head art assertion to retire** — its "art breaks out" check reads the tray bands, which still do.
 6. **"Compact bands (44 tall) scale by the same ratio as v5.1"** — v5.1 used one set of pixel values at both band heights (ratio 1); see 2.
 7. **The reference's day panel ellipsises** ("Consider closing" in the 158px column); the pack forbids it. The compact panel's side padding and row columns are tighter than the reference's, and its row labels 12.5px (the reference's own compact `.cal-led` size), so the longest label fits with no ellipsis (A2).
@@ -31,10 +31,10 @@ Branch `todo-list-v5-2`, commits `99382fb0` → `1adc2aee` in the pack's order B
 3. **Unsurfaced own tasks:** `UserTask`s with a `dueDate`, not done, not on the board — on the month (an own-task ring), never in `n` or the mix bar.
 4. **The pin:** `usePinList(page)` took a third page key with **one change**: `PinPage` gains `"todo"`, `PIN_KEYS.todo = "sa.pinList.todo"`, `PIN_SHORTCUT.todo = SHORTCUTS.todoPin` (a new registry entry, F, "To-do list" scope). Nothing else in the hook changed. It holds the sidebar through `holdSidebarCollapsed` (restored pins `instant`), never writes `sa.sidebarCollapsed`, and stands F down in fields, with the query drawer open, or with any escape layer beyond its own. Two page-side fixes E1 found: a restored pin showed the header for the loading frames; unpinning after a reload went to the very top (the hook only knows a position seen at pin time) — a restored pin now lands on the sheet.
 5. **"Just the desk":** `focusMode` state, the `[data-td5="focus"]` button and the `.td5-sheet[data-focus]` / `.td5-focusbtn` CSS in `todoV5.css`; named by v5.1's shots (05, 06) only. All removed; E2 asserts the absence on the page and in source.
-6. **The noreply close save** is `view.commit` inside `CloseJourney` (`queryActions/journeys/CloseJourney.tsx`): a closure over the component's state, writing through `recordQueryResponse` then `db.updateQuery`. Its defaults are complete for `noreply` past the window (no blocking guard), **but there is no pure save function the journey calls**, so it cannot run for a query without the journey's UI, and extracting one would edit a `queryActions/**` journey. **G.3 stopped.**
+6. **The noreply close save** is `view.commit` inside `CloseJourney` (`queryActions/journeys/CloseJourney.tsx`): a closure over the component's state, writing through `recordQueryResponse` then `db.updateQuery`. Its defaults are complete for `noreply` past the window (no blocking guard), **but there was no pure save function the journey called**, so it could not run for a query without the journey's UI. **G.3 stopped, then went ahead on Nick's word:** the record is `closeRecord(answers)` (pure, `lib/queryActions/closeRecord`), the save is `saveClose(db, q, agent, answers, today)` (`lib/queryActions/closeSave` — `recordQueryResponse`, then the nudge/close-plan removals and the withdraw/recheck marks, the same writes in the same order), and `CloseJourney.commit` calls it and nothing else. The bulk close calls it with `noreplyAnswers(today)` once per query, each behind its own `takeSnapshot`.
 7. **Save in flight:** the desk host knew nothing. The query drawer guards its own saves (`savingRef` in `QueryDrawer`, `busy` in `DrawerShell`), the compose card holds a `busy` state (beatable by two presses in one tick), and the own-task tick none of its own. Built (H.4): one count of desk saves in flight, released in `finally` when each save settles — never a timer; a journey's save is read from its slot (`.qad-save.busy`).
 8. **Art:** talon `/images/query-centre/your-move-talon.webp` 92 × 128 · hourglass `waiting-hourglass.webp` 108 × 111 · pile `/images/packages/materials-tray-pile.png` 400 × 403 · index hawk `/images/contact/contact-index-hawk.webp` 640 × 569 · quill `/images/dash/quill.png` 379 × 480.
-9. **The escape stack on `/todo`** (higher first): dial menu **47** (new) · bulk 46 (new, unused while G.3 is stopped) · calendar drawer **45** (new) · the query drawer's popups 40 · the desk journey's drawer 30 · the Set aside popover and the compose card's calendar/link 7 (pageModal) · the filter popovers, the compose card, and (pinned, with text) Find 5 (page) · the pin 4 (pageMode). H2 measures dial menu → drawer → Find's text → pin, one press each.
+9. **The escape stack on `/todo`** (higher first): dial menu **47** (new) · bulk 46 (new) · calendar drawer **45** (new) · the query drawer's popups 40 · the desk journey's drawer 30 · the Set aside popover and the compose card's calendar/link 7 (pageModal) · the filter popovers, the compose card, and (pinned, with text) Find 5 (page) · the pin 4 (pageMode). H2 measures dial menu → bulk selection → drawer → Find's text → pin, one press each.
 10. **Journeys and their band titles** (`lib/deskDoing`, unit-locked; n = steps + the review, read from the shell's stepper on the page):
 
 | Journey (door) | n (steps + review), measured | Band title |
@@ -89,9 +89,9 @@ TD52, every lock on my build at `6ccee20e` and again at `1adc2aee` (after the ti
 | F3 contrast | 8/8 | 8/8 | 4/8 | 4/8 (ink 45% restored) |
 | G1 link | 10/10 | 10/10 | 0/2 | 8/10 (light by kind, not date) |
 | G2 move | 23/23 | 23/23 | threw | 22/23 (the drop's refusal removed — see G2's note) |
-| G3 bulk (stopped) | 6/6 | 6/6 | 6/6 | — (asserts an absence) |
+| G3 bulk close (`8fba8313`) | 11/11 | — | 0/1 (no select UI) | 7/11 (write the status directly: three documents differ, no slips) |
 | H1 feel | 16/16 | 16/16 | threw | 14/16 (guard released on an 1100ms timer) |
-| H2 Esc | 5/5 | 5/5 | threw | 2/5 (one Esc closes two) |
+| H2 Esc (five layers at `8fba8313`) | 6/6 | — | red | 2/5 (one Esc closes two); 2/6 (bulk layer off) |
 | J1 signals | 18/18 | 18/18 | 7/18 | 17/18 (n fixed in the page) |
 | J2 band | 12/12 | 12/12 | threw | 10/12 (title may ellipsise) |
 | J3 tray | 10/10 | 10/10 | 5/10 | 7/10 (click-eating overlay) |
@@ -104,9 +104,11 @@ Unit: `trayCalendar.test.ts` (red under "UTC today"), `trayRows.test.ts`, `deskD
 - My first L2 run hit **Firebase's password-verification quota** (`auth/quota-exceeded`) part-way; the seeders failed and twelve cases read red with no fixture. Re-run once the quota recovered: **QC v138.6 10/10**, Contact list v18 + v18.3 + query panel v2 **42/44**, and the two still red (CL1832-D1, query panel V6–V8) are **red on the base too**.
 - **Only regressions: TD5 A1, A2, B1**, retired by design. TD5 E2, tlRowHead and tlTodayMark are red on both builds.
 
+**After G.3 (`8fba8313`, 18 Oct):** TD52 22/23 on my build — the one red is **G2's offer check, which is a Sunday:** the dial offers "Monday" beside "Tomorrow", and on a Sunday they are the same day. v5.1's TD5 I2 is red the same way, identically on the base build. The close journey's own locks re-ran green on the refactor: `qaJourneys` D4 ×2, D5 × noreply/withdraw/gone, "they said no"; v5.1 E2, E3, I1, I3–I5, J1. Gates: tsc 0, build 0 with 0 warnings, Vitest 607 files, 9,043 passed (`functions/node_modules` linked into the worktree for `email.test.ts`).
+
 ## Shots
 
-`reports/todo-list-v5-2/shots/` — each `NN-*-{1512,1280}.png` beside `design-refs/todo-list-v5-2/screens/NN-*`, plus `todo-{pinned,unpinned}-{1920,1024}.png`. **09 is the Gone quiet band without a select UI** (G.3 stopped).
+`reports/todo-list-v5-2/shots/` — each `NN-*-{1512,1280}.png` beside `design-refs/todo-list-v5-2/screens/NN-*`, plus `todo-{pinned,unpinned}-{1920,1024}.png`. **09 is three Gone quiet rows selected**, the bar at the tray's foot (nothing written).
 
 ## Integration and dev
 
@@ -117,7 +119,7 @@ Unit: `trayCalendar.test.ts` (red under "UTC today"), `trayRows.test.ts`, `deskD
 ## For Nick
 
 - **Moving a system task's date is a snooze** — it leaves the tray into Set aside ("back {date}") and shows faint on its return day. The mock kept it in the tray with a new date. Overturn if wrong.
-- **Bulk close was not built** (§0.6). To build it the close journey needs a pure save (`noreplyClose(q, agent, ms, db)`) that `CloseJourney.commit` also calls — an edit to `queryActions/**`, which this pack fenced.
+- **Bulk close is built** (G.3, after your go-ahead). Two calls to check: a Gone quiet row that is the writer's turn (`owes(q)`) gets no checkbox, since a noreply close would be wrong for it; and the one toast's Undo reverses every close, while each Done today slip's Undo reverses its own.
 - Should **the offer's answer-by date** go on the calendar? It's off.
 - The h1 now repeats the card's today counts. Keep both, or let the card's Today rows go quieter?
 - Drag is off while pinned (the month is hidden); the dial menu covers it.

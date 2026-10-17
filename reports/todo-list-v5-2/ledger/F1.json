@@ -1,15 +1,15 @@
 [
  {
   "lock": "F1",
-  "where": "@1512 the h1 reads \"33 overdue · 2 due today\"",
+  "where": "@1512 the h1 reads \"30 overdue · 1 due today\"",
   "ok": true,
-  "detail": "\"33 overdue · 2 due today\""
+  "detail": "\"30 overdue · 1 due today\""
  },
  {
   "lock": "F1",
   "where": "@1512 its accessible name says the same",
   "ok": true,
-  "detail": "33 overdue · 2 due today"
+  "detail": "30 overdue · 1 due today"
  },
  {
   "lock": "F1",
@@ -37,15 +37,15 @@
  },
  {
   "lock": "F1",
-  "where": "@1280 the h1 reads \"33 overdue · 2 due today\"",
+  "where": "@1280 the h1 reads \"30 overdue · 1 due today\"",
   "ok": true,
-  "detail": "\"33 overdue · 2 due today\""
+  "detail": "\"30 overdue · 1 due today\""
  },
  {
   "lock": "F1",
   "where": "@1280 its accessible name says the same",
   "ok": true,
-  "detail": "33 overdue · 2 due today"
+  "detail": "30 overdue · 1 due today"
  },
  {
   "lock": "F1",
