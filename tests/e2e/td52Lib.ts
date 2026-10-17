@@ -45,6 +45,10 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   A2: { css: `[data-todo-v5] .td52-cal { --cal-dayw: 140px !important; }` },
   /* E2 — the old "Just the desk" button left mounted */
   E2: { js: `(() => { const n = [...document.querySelectorAll('[data-todo-v5] [data-td5="nav"]')].find((e) => e.getBoundingClientRect().height > 0); if (n) { const b = document.createElement("button"); b.className = "td5-focusbtn"; b.dataset.td5 = "focus"; b.textContent = "Just the desk"; n.append(b); } })()` },
+  /* F1 — the title reads the tray count (the h1 restated as v5.1's "{n} tasks in your tray") */
+  F1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="title"]')].find((e) => e.getBoundingClientRect().height > 0); const n = document.querySelectorAll('[data-todo-v5] [data-td5="row"]').length; if (h) { h.firstElementChild.textContent = n + " tasks in your tray"; h.setAttribute("aria-label", n + " tasks in your tray"); } })()` },
+  /* F3 — v5.1's ink 45% back on the page's labels */
+  F3: { css: `[data-todo-v5] { --td5-ink62: rgba(28, 19, 15, 0.45) !important; --td5-ink70: rgba(28, 19, 15, 0.58) !important; }` },
   /* D1 — the desk head's art restored */
   D1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="desk-head"]')].find((e) => e.getBoundingClientRect().height > 0);
     const b = document.querySelector('[data-todo-v5] [data-td5="band-art"]'); if (h && b) { const i = document.createElement("img"); i.src = b.getAttribute("src"); i.style.cssText = "position:absolute;left:8px;top:-10px;width:46px"; h.prepend(i); } })()` },

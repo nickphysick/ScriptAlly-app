@@ -351,7 +351,7 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
   guards.push(mine);
   const order = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').map((r) => r.dataset.td5Row));
   const next = order[order.indexOf(key!) + 1] ?? order[order.indexOf(key!) - 1];
-  const cleared0 = Number(await page.locator('[data-todo-v5] [data-td5="ring-n"]').textContent());
+  /* v5.2 Part A retired the header's Cleared ring: the save's evidence is the slip (RETIRED-todo-list-v5-2.md) */
   const slips0 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
   await page.locator('[data-todo-v5] [data-td5="act"]').click();
   /* v5.1 §E — the journey runs in the desk card */
@@ -381,23 +381,13 @@ async function sendFromDesk(page: Page, L: Ledger, at: string, reduced: boolean)
     const { qa, q } = (window as unknown as W).__td5();
     return {
       rowGone: !qa('[data-td5="row"]').some((r) => r.dataset.td5Row === key), desk: q('[data-td5="desk-card"]')?.dataset.key,
-      slips: qa('[data-td5="slip"]').length, undo: qa('[data-td5="slip-undo"]').length, cleared: Number(q('[data-td5="ring-n"]')!.textContent),
+      slips: qa('[data-td5="slip"]').length, undo: qa('[data-td5="slip-undo"]').length
     };
   }, key);
   L.check("D2", `${at} the row leaves`, end.rowGone, "");
   L.check("D2", `${at} the next task is on the desk`, end.desk === next, `${end.desk} vs ${next}`);
   L.check("D2", `${at} a slip lands`, end.slips === slips0 + 1, `${slips0} → ${end.slips}`);
-  L.check("D2", `${at} cleared +1`, end.cleared === cleared0 + 1, `${cleared0} → ${end.cleared}`);
   L.check("D2", `${at} the slip offers Undo`, end.undo > 0, `${end.undo}`);
-  /* B1 with something cleared: the shared account clears nothing this week on its own, so the ring's proportion is
-     read here, between the save and its Undo, where cleared is above zero */
-  const ring = await page.evaluate(() => {
-    const { q } = (window as unknown as W).__td5();
-    const ink = q('[data-td5="ring-ink"]');
-    const C = 2 * Math.PI * 42;
-    return { cleared: Number(q('[data-td5="ring-n"]')!.textContent), n: Number((q("h1")!.textContent || "").match(/\d+/)?.[0]), arc: ink ? Number((ink.getAttribute("stroke-dasharray") || "").split(/\s+/)[0]) / C : 0 };
-  });
-  L.check("B1", `${at} arc ∝ cleared with cleared > 0`, ring.cleared > 0 && near(ring.arc, ring.cleared / (ring.cleared + ring.n), 0.01), JSON.stringify(ring));
   if (end.undo > 0) {
     await page.locator('[data-todo-v5] [data-td5="slip-undo"]').first().click();
     await expect.poll(async () => diffSets(before, await readSet(ids)), { timeout: 20_000, message: "the slip's Undo left the account different" }).toEqual([]);

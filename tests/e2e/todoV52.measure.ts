@@ -12,7 +12,7 @@ import { expect, test } from "@playwright/test";
 import { doc, setDoc } from "firebase/firestore";
 import { harnessDb } from "./harnessDocs";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { DIR, LIB as LIB_TD5, Ledger, SIZES, flagId, fontsReady, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
+import { DIR, LIB as LIB_TD5, Ledger, SIZES, canon as canonOf, flagId, fontsReady, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
 
 test.setTimeout(480_000);
 /* ⚠️ a measurement that writes puts the account back in the same run, whatever happened (the house rule) */
@@ -589,4 +589,304 @@ test("TD52 E2 — no Just the desk control, state or class on /todo", async ({ p
   L.check("source: no focusMode state", !/focusMode|setFocusMode/.test(src), "");
   L.check("CSS: no td5-focusbtn or [data-focus] rule", !/\.td5-focusbtn|\[data-focus\]/.test(css), "");
   L.done(8);
+});
+
+/* ───────────────────────── F · presentation ───────────────────────── */
+test("TD52 F1 — the h1 reads Part B's overdue and today counts, the overdue part rust; caught up and empty keep v5.1's titles", async ({ page }) => {
+  const L = new Ledger("F1");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    await mutate(page, "F1");
+    const r = await page.evaluate(() => {
+      const { q } = (window as unknown as W).__td5();
+      const h1 = q('[data-td5="title"]')!;
+      const num = (f: string) => Number(q(`[data-td52="cal-row"][data-f="${f}"] b`)?.textContent ?? NaN);
+      const od = q('[data-td52="title-od"]');
+      return { text: (h1.textContent ?? "").trim(), label: h1.getAttribute("aria-label"), pageTitle: h1.hasAttribute("data-page-title"), o: num("overdue"), t: num("today"),
+        rust: od ? getComputedStyle(od).color : null };
+    });
+    const want = r.o || r.t ? [r.o ? `${r.o} overdue` : "", r.t ? `${r.t} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today";
+    L.check(`${w} the h1 reads "${want}"`, r.text === want, `"${r.text}"`);
+    L.check(`${w} its accessible name says the same`, r.label === want, String(r.label));
+    L.check(`${w} it keeps data-page-title`, r.pageTitle, "");
+    if (r.o) L.check(`${w} the overdue part is rust`, r.rust === "rgb(162, 69, 42)", String(r.rust));
+  }
+  for (const [st, want] of [["caught", "Your tray is empty"], ["nothing", "Your next move,always on top"]] as const) {
+    await openTodo(page, SIZES[0], { state: st });
+    const t = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-todo-v5] [data-page-title]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").trim()));
+    L.check(`${st}: keeps v5.1's title`, t.length === 1 && t[0] === want, JSON.stringify(t));
+  }
+  L.done(9);
+});
+
+test("TD52 F2 — rows lead with the agent; chase and close say so; overdue dials carry the right tag and a spoken label", async ({ page }) => {
+  const L = new Ledger("F2");
+  const DAY = 86_400_000;
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    const today = todayYmd();
+    const rows = await page.evaluate(() => {
+      const { qa } = (window as unknown as W).__td5();
+      return qa('[data-td5="row"]').map((r) => {
+        const d = r.querySelector<HTMLElement>('[data-td5="dial"]')!;
+        return {
+          key: r.dataset.td5Row!, bucket: r.dataset.bucket!, type: r.dataset.taskType ?? "", sweep: r.hasAttribute("data-sweep"),
+          bold: (r.querySelector('[data-td52="row-bold"]')?.childNodes[0]?.textContent ?? "").trim(),
+          italic: (r.querySelector('[data-td52="row-italic"]')?.textContent ?? "").trim(),
+          disc: (r.querySelector(".td5-disc")?.textContent ?? "").trim(),
+          late: d.dataset.kind === "late", title: d.getAttribute("title") ?? "", role: d.getAttribute("role"), aria: d.getAttribute("aria-label"),
+          tag: d.querySelector('[data-td52="age"]')?.textContent ?? null,
+        };
+      });
+    });
+    /* one agent's rows: not own tasks, not sweeps, and not a several-agents card (its disc is a count, "5S") */
+    const agentRows = rows.filter((r) => r.type !== "own" && !r.sweep && r.disc && r.disc !== "··" && !/^\d/.test(r.disc));
+    L.check(`${w} query and agent rows to read`, agentRows.length > 10, String(agentRows.length));
+    /* the bold line is the agent: its initials are the disc's (the disc is the agent's, v5.1) */
+    const initials = (s: string) => s.split(/\s+/).filter(Boolean).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
+    const notAgent = agentRows.filter((r) => initials(r.bold) !== r.disc.slice(0, 2).toUpperCase());
+    L.check(`${w} every query/agent row's bold line is the agent's name`, notAgent.length === 0, notAgent.slice(0, 3).map((r) => `${r.bold}/${r.disc}`).join(" · "));
+    const chase = agentRows.filter((r) => r.bucket === "chase"), close = agentRows.filter((r) => r.bucket === "close");
+    L.check(`${w} chase rows read "Nudge · …"`, chase.length > 0 && chase.every((r) => r.italic.startsWith("Nudge · ")), chase.slice(0, 2).map((r) => r.italic).join(" | "));
+    L.check(`${w} close rows read "Consider closing · …"`, close.length > 0 && close.every((r) => r.italic.startsWith("Consider closing · ")), close.slice(0, 2).map((r) => r.italic).join(" | "));
+    /* every overdue dial: the tag's unit from the dial's own date, and the spoken label */
+    const late = rows.filter((r) => r.late);
+    L.check(`${w} overdue dials to read`, late.length > 5, String(late.length));
+    const units = new Set<string>();
+    let wrong = 0, mute = 0;
+    for (const r of late) {
+      const m = r.aria?.match(/^Overdue since (\d+) (\w+)(?: (\d{4}))?$/);
+      if (!m || r.role !== "img") { mute++; continue; }
+      const y = m[3] ? Number(m[3]) : Number(today.slice(0, 4));
+      const mi = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(m[2]);
+      const days = Math.round((Date.UTC(+today.slice(0, 4), +today.slice(5, 7) - 1, +today.slice(8, 10)) - Date.UTC(y, mi, +m[1])) / DAY);
+      const want = days < 14 ? `+${days} d` : days < 60 ? `+${Math.round(days / 7)} wk` : `+${Math.round(days / 30.4)} mo`;
+      if (r.tag !== want) wrong++;
+      units.add((r.tag ?? "").split(" ")[1] ?? "?");
+    }
+    L.check(`${w} every overdue dial is spoken ("Overdue since {date}", role img)`, mute === 0, String(mute));
+    L.check(`${w} every overdue dial's tag has the right unit and figure`, wrong === 0, `${wrong} of ${late.length}`);
+    L.check(`${w} the tags exercised: ${[...units].join(", ")}`, units.size >= 2, [...units].join(","));
+    const desk = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="desk-card"] [data-td5="dial"] [data-td52="age"]'));
+    L.check(`${w} the desk's dial carries no tag`, !desk, "");
+  }
+  L.done(2 * 9);
+});
+
+test("TD52 F3 — every visible text on /todo meets 4.5:1 (3:1 large) against its computed background", async ({ page }) => {
+  const L = new Ledger("F3");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    await mutate(page, "F3");
+    for (const where of ["top", "sheet"] as const) {
+      if (where === "sheet") await page.evaluate(() => { const { sc, q } = (window as unknown as W).__td5(); sc.scrollTop += q(".td5-sheet")!.getBoundingClientRect().top - sc.getBoundingClientRect().top; });
+      await page.waitForTimeout(400);
+      const r = await page.evaluate(() => {
+        const { r: root } = (window as unknown as W).__td5();
+        const parse = (c: string) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
+        const over = (f: { r: number; g: number; b: number; a: number }, b: { r: number; g: number; b: number }) => ({ r: f.r * f.a + b.r * (1 - f.a), g: f.g * f.a + b.g * (1 - f.a), b: f.b * f.a + b.b * (1 - f.a) });
+        const lum = (c: { r: number; g: number; b: number }) => { const f = (v: number) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+        /* the ground under the text: an ancestor's background counts only where the text actually sits inside its box
+           (a label positioned outside its parent — the desk's "Today" beside its rust tick — is on the card, not the tick) */
+        const bgOf = (el: Element, x: number, y: number) => {
+          const chain: Element[] = [];
+          for (let e: Element | null = el; e; e = e.parentElement) chain.push(e);
+          let bg = { r: 255, g: 255, b: 255 };
+          for (const e of chain.reverse()) {
+            const b = e.getBoundingClientRect();
+            if (x < b.left || x > b.right || y < b.top || y > b.bottom) continue;
+            const c = parse(getComputedStyle(e).backgroundColor); if (c && c.a > 0) bg = over(c, bg);
+          }
+          return bg;
+        };
+        const opacityOf = (el: Element) => { let o = 1; for (let e: Element | null = el; e; e = e.parentElement) o *= Number(getComputedStyle(e).opacity); return o; };
+        const bad: string[] = [];
+        let n = 0;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let t = walker.nextNode(); t; t = walker.nextNode()) {
+          const s = (t.textContent ?? "").trim();
+          if (!s) continue;
+          const el = t.parentElement!;
+          const rg = document.createRange(); rg.selectNodeContents(t);
+          const rc = [...rg.getClientRects()].find((x) => x.width > 0 && x.height > 0);
+          if (!rc || rc.bottom < 0 || rc.top > innerHeight || rc.right < 0 || rc.left > innerWidth) continue;
+          const cs = getComputedStyle(el);
+          if (cs.visibility === "hidden" || el.closest("button:disabled, [disabled], .td52-rw.z, [inert]")) continue;
+          /* text over a picture is the picture's, not a ground's */
+          let pic = false; for (let e: Element | null = el; e; e = e.parentElement) if (getComputedStyle(e).backgroundImage !== "none") { pic = true; break; }
+          if (pic) continue;
+          const fg0 = parse(cs.color)!; const op = opacityOf(el);
+          if (op < 0.05) continue; /* not painted (a tooltip at rest) */
+          const bg = bgOf(el, rc.left + rc.width / 2, rc.top + rc.height / 2);
+          const fg = over({ ...fg0, a: fg0.a * op }, bg);
+          const L1 = lum(fg), L2 = lum(bg);
+          const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+          const px = parseFloat(cs.fontSize), wt = Number(cs.fontWeight);
+          const large = px >= 24 || (px >= 18.66 && wt >= 700);
+          n++;
+          if (ratio < (large ? 3 : 4.5)) bad.push(`"${s.slice(0, 22)}" ${ratio.toFixed(2)} (${px}px ${cs.color} on rgb(${Math.round(bg.r)},${Math.round(bg.g)},${Math.round(bg.b)}) ${el.className || el.tagName})`);
+        }
+        return { n, bad };
+      });
+      L.check(`${w} ${where}: texts read`, r.n > 40, String(r.n));
+      L.check(`${w} ${where}: every text meets its ratio`, r.bad.length === 0, `${r.bad.length}: ${r.bad.slice(0, 12).join(" · ")}`);
+    }
+  }
+  L.done(2 * 4);
+});
+
+/* ───────────────────────── G · dates and groups ───────────────────────── */
+test("TD52 G1 — hovering a dated row lights exactly its day; hovering a day lights exactly its rows", async ({ page }) => {
+  const L = new Ledger("G1");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await mutate(page, "G1");
+    const t = todayYmd();
+    const month = t.slice(0, 7);
+    /* a dated row whose day is on the visible month */
+    const key = await page.evaluate((month) => {
+      const { qa } = (window as unknown as W).__td5();
+      const r = qa('[data-td5="row"]').find((e) => e.dataset.calYmd?.startsWith(month) && e.getBoundingClientRect().height > 0);
+      return r ? { key: r.dataset.td5Row!, ymd: r.dataset.calYmd! } : null;
+    }, month);
+    L.check(`${w} a dated row on this month`, !!key, "");
+    if (!key) continue;
+    await page.locator(`[data-todo-v5] [data-td5-row="${key.key}"]`).hover();
+    await page.waitForTimeout(250);
+    const lit = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td52="day-cell"].lit').map((c) => c.dataset.ymd));
+    L.check(`${w} the row lights exactly its day`, JSON.stringify(lit) === JSON.stringify([key.ymd]), `${lit} vs ${key.ymd}`);
+    await page.mouse.move(5, 5);
+    await page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${key.ymd}"]`).hover();
+    await page.waitForTimeout(250);
+    const rows = await page.evaluate((ymd) => {
+      const { qa } = (window as unknown as W).__td5();
+      return { lit: qa('[data-td5="row"][data-lit]').map((r) => r.dataset.td5Row).sort(), want: qa(`[data-td5="row"][data-cal-ymd="${ymd}"]`).map((r) => r.dataset.td5Row).sort(),
+        red: qa('[data-td5="row"][data-lit] [data-td52="row-bold"]').every((b) => getComputedStyle(b).color === "rgb(162, 69, 42)") };
+    }, key.ymd);
+    L.check(`${w} the day lights exactly its rows`, rows.lit.length > 0 && JSON.stringify(rows.lit) === JSON.stringify(rows.want), `${rows.lit.length} vs ${rows.want.length}`);
+    L.check(`${w} a lit row's name is rust`, rows.red, "");
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(200);
+    const off = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"][data-lit], [data-td52="day-cell"].lit').length);
+    L.check(`${w} leaving lights nothing`, off === 0, String(off));
+  }
+  L.done(2 * 5);
+});
+
+const rowLoc = (page: import("@playwright/test").Page, key: string) => page.locator(`[data-todo-v5] [data-td5-row="${key}"]`).first();
+const toastText = (page: import("@playwright/test").Page) => page.locator(".tdb-toast").first().textContent({ timeout: 4000 }).catch(() => null);
+const pressUndo = async (page: import("@playwright/test").Page) => {
+  const b = page.locator(".tdb-toast .tdb-toast-act").first();
+  if (!(await b.isVisible().catch(() => false))) return false;
+  await b.click(); return true;
+};
+test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; the guards; Undo is exact", async ({ page }) => {
+  const L = new Ledger("G2");
+  const { db, uid } = await harnessDb();
+  const vp = SIZES[0];
+  const t = todayYmd();
+  const plus = (n: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(Date.now() + n * 86_400_000));
+  /* an own task due today (surfaced), written for this run and removed by the guard */
+  const id = `zz-td52-move-${Date.now().toString(36)}`;
+  await guardDocs([`tasks/${id}`]);
+  await setDoc(doc(db, "users", uid, "tasks", id), { id, userId: uid, text: "Zz td52 move probe", done: false, dueDate: t, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  await openTodo(page, vp);
+  await mutate(page, "G2");
+  const key = await page.evaluate((id) => (window as unknown as W).__td5().qa('[data-td5="row"]').find((r) => r.dataset.td5Row?.includes(id))?.dataset.td5Row ?? null, id);
+  L.check("the probe task is in the tray", !!key, String(key));
+  /* the drop day: three days on, in today's month if it is there, else the next day that is on the grid */
+  const target = await page.evaluate(([a, b]) => { const { q } = (window as unknown as W).__td5(); return q(`[data-td52="day-cell"][data-ymd="${a}"]`) ? a : q(`[data-td52="day-cell"][data-ymd="${b}"]`) ? b : null; }, [plus(3), plus(1)]);
+  L.check("a future day on the grid to drop on", !!target, String(target));
+  const before = await snapDocs([`tasks/${id}`]);
+  if (key && target) {
+    await rowLoc(page, key).dragTo(page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${target}"]`));
+    await page.waitForTimeout(1200);
+    const after = (await snapDocs([`tasks/${id}`])).get(`tasks/${id}`) as { dueDate?: string } | null;
+    L.check(`own task: the drop moves dueDate to ${target}`, after?.dueDate?.slice(0, 10) === target, String(after?.dueDate));
+    const tt = await toastText(page);
+    L.check("own task: the toast says it moved", !!tt && /Zz td52 move probe · moved to/.test(tt), String(tt));
+    L.check("own task: Undo", await pressUndo(page), "");
+    await page.waitForTimeout(1500);
+    const back = await snapDocs([`tasks/${id}`]);
+    L.check("own task: Undo restores the document byte for byte", canonOf(back.get(`tasks/${id}`)) === canonOf(before.get(`tasks/${id}`)), "");
+    /* today and the past refuse a drop */
+    await rowLoc(page, key).dragTo(page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${t}"]`));
+    await page.waitForTimeout(900);
+    const still = await snapDocs([`tasks/${id}`]);
+    L.check("a drop on today is refused (nothing written)", canonOf(still.get(`tasks/${id}`)) === canonOf(before.get(`tasks/${id}`)), "");
+    const why = await toastText(page);
+    L.check("…and a toast says why", !!why && /today|past/i.test(why), String(why));
+  }
+  /* a nudge, by the dial menu: In a week → a snooze through clampSnooze; the row goes to Set aside */
+  await openTodo(page, vp);
+  const nudge = await page.evaluate(() => { const r = (window as unknown as W).__td5().qa('[data-td5="row"][data-task-type="nudge_overdue"]')[0]; return r ? { key: r.dataset.td5Row!, q: r.dataset.query! } : null; });
+  L.check("a nudge in the tray", !!nudge, "");
+  if (nudge) {
+    const fp = `taskFlags/${flagId("nudge_overdue", nudge.q)}`;
+    const fb = await guardDocs([fp]);
+    await rowLoc(page, nudge.key).locator('[data-td5="dial"]').click();
+    await page.waitForTimeout(400);
+    const menu = await page.evaluate(() => { const m = document.querySelector<HTMLElement>('[data-td52="dial-menu"]'); return m ? { head: m.querySelector('[data-td52="dm-head"]')?.textContent ?? "", ks: [...m.querySelectorAll<HTMLButtonElement>("[data-k]")].map((b) => `${b.dataset.k}${b.disabled ? "×" : ""}`) } : null; });
+    L.check("the dial opens the menu, not the row", !!menu && menu.head === "SET A NEW DATE", JSON.stringify(menu));
+    L.check("…Tomorrow · Monday · In a week · In a month · Pick on the calendar", !!menu && JSON.stringify(menu.ks.map((k) => k.replace("×", ""))) === JSON.stringify(["tomorrow", "monday", "week", "month", "pick"]), JSON.stringify(menu?.ks));
+    await page.locator('[data-td52="dial-menu"] [data-k="week"]').click();
+    await page.waitForTimeout(1400);
+    const flag = (await snapDocs([fp])).get(fp) as { snoozedUntil?: string } | null;
+    L.check("In a week writes a snooze", !!flag?.snoozedUntil, String(flag?.snoozedUntil));
+    const gone = await page.evaluate((k) => !(window as unknown as W).__td5().q(`[data-td5="row"][data-td5-row="${k}"]`), nudge.key);
+    L.check("…and the row leaves the tray for Set aside", gone, "");
+    const tt = await toastText(page);
+    L.check("the toast: {Agent} · set for {date}", !!tt && / · set for /.test(tt), String(tt));
+    L.check("nudge: Undo", await pressUndo(page), "");
+    await page.waitForTimeout(1500);
+    const nb = await snapDocs([fp]);
+    L.check("nudge: Undo puts the flag back as it was", canonOf(nb.get(fp)) === canonOf(fb.get(fp)), "");
+  }
+  /* the guards, read off the menu for each kind present */
+  await openTodo(page, vp);
+  const kinds = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').map((r) => ({ key: r.dataset.td5Row!, type: r.dataset.taskType ?? "", bucket: r.dataset.bucket! })));
+  const seen: string[] = [];
+  const openMenu = async (k: string) => { await page.keyboard.press("Escape").catch(() => {}); await rowLoc(page, k).locator('[data-td5="dial"]').click(); await page.waitForTimeout(350); return page.evaluate(() => { const m = document.querySelector<HTMLElement>('[data-td52="dial-menu"]'); return m ? { cant: !!m.querySelector('[data-td52="cant-snooze"]'), door: !!m.querySelector('[data-td52="sendby-door"]'), ks: [...m.querySelectorAll<HTMLButtonElement>("[data-k]")].map((b) => ({ k: b.dataset.k!, off: b.disabled })) } : null; }); };
+  const hk = kinds.find((x) => x.bucket === "fix");
+  if (hk) {
+    await page.keyboard.press("Escape").catch(() => {});
+    await rowLoc(page, hk.key).locator('[data-td5="dial"]').click();
+    await page.waitForTimeout(300);
+    L.check("housekeeping: the dial opens nothing", (await page.locator('[data-td52="dial-menu"]').count()) === 0, "");
+    L.check("housekeeping: the row cannot be dragged", (await rowLoc(page, hk.key).getAttribute("draggable")) !== "true", "");
+    seen.push("hk");
+  }
+  for (const r of kinds.filter((x) => x.bucket === "send").slice(0, 8)) {
+    const m = await openMenu(r.key);
+    if (m?.cant) { L.check(`a passed send-by: CAN'T BE SNOOZED with its send-by door (${r.key.slice(0, 18)})`, m.door && m.ks.filter((x) => x.k !== "pick").length === 0, JSON.stringify(m)); seen.push("passed"); break; }
+  }
+  for (const r of kinds.filter((x) => x.bucket === "send").slice(0, 12)) {
+    const m = await openMenu(r.key);
+    if (m && !m.cant && m.ks.some((x) => x.off)) { L.check(`a capped task: days past its ceiling are disabled (${r.key.slice(0, 18)})`, m.ks.some((x) => x.off) && m.ks.some((x) => !x.off), JSON.stringify(m.ks)); seen.push("capped"); break; }
+  }
+  const offer = kinds.find((x) => x.type === "offer_received");
+  if (offer) { const m = await openMenu(offer.key); L.check("an offer: Tomorrow only", !!m && JSON.stringify(m.ks.filter((x) => x.k !== "pick" && !x.off).map((x) => x.k)) === JSON.stringify(["tomorrow"]), JSON.stringify(m?.ks)); seen.push("offer"); }
+  await page.keyboard.press("Escape").catch(() => {});
+  console.log(`[G2] guards exercised: ${seen.join(", ") || "none"}`);
+  L.check("guards exercised (housekeeping and at least one dated guard)", seen.includes("hk") && seen.length >= 2, seen.join(","));
+  L.done(18);
+});
+
+test("TD52 G3 — the bulk close is skipped under the pack's Stop: no select UI", async ({ page }) => {
+  const L = new Ledger("G3");
+  for (const vp of SIZES) {
+    await openTodo(page, vp);
+    const r = await page.evaluate(() => { const { r: root } = (window as unknown as W).__td5(); return { all: /SELECT ALL/i.test(root.textContent ?? ""), boxes: root.querySelectorAll('[role="checkbox"]').length, bar: root.querySelectorAll('[data-td52="bulk"]').length }; });
+    L.check(`@${vp.width} no SELECT ALL`, !r.all, "");
+    L.check(`@${vp.width} no row checkboxes`, r.boxes === 0, String(r.boxes));
+    L.check(`@${vp.width} no bulk bar`, r.bar === 0, String(r.bar));
+  }
+  L.done(6);
 });

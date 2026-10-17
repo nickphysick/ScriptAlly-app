@@ -120,10 +120,12 @@
 .td52-mon .td52-c .td52-tk i.faint { opacity: 0.45; }
 .td52-mon .td52-c:hover { background: rgba(28, 19, 15, 0.06); }
 .td52-mon .td52-c:focus-visible { outline: 2px solid var(--td5-navy); outline-offset: 0; }
-.td52-mon .td52-c.om { opacity: 0.3; }
-.td52-mon .td52-c.past { color: rgba(28, 19, 15, 0.42); }
-.td52-mon .td52-c.wk { color: rgba(28, 19, 15, 0.62); }
-.td52-mon .td52-c.wk.past { color: rgba(28, 19, 15, 0.36); }
+/* ⚠️ F.4: the reference greys past days to ink 42% and other months to 30% opacity, under 4.5:1 — here they are ink 62%
+   (past, other months) against the weekday's full ink and the weekend's 70% */
+.td52-mon .td52-c.om { color: rgba(28, 19, 15, 0.62); }
+.td52-mon .td52-c.past { color: rgba(28, 19, 15, 0.62); }
+.td52-mon .td52-c.wk { color: rgba(28, 19, 15, 0.7); }
+.td52-mon .td52-c.wk.past { color: rgba(28, 19, 15, 0.62); }
 .td52-mon .td52-c.open:not(.sel) .td52-cn { color: #a2452a; }
 .td52-mon .td52-c.today { box-shadow: inset 0 0 0 1.5px #2d3a50; }
 .td52-mon .td52-c.sel { background: #2a3a52; color: #f4eee5; box-shadow: none; }
@@ -220,6 +222,26 @@
 .td5-root .td5-nav .td52-pfind input { flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; color: #1c130f; font: 400 15px/1.2 var(--sp-serif) !important; }
 .td5-root .td5-nav .td52-pfind kbd { flex: none; display: inline-grid; place-items: center; min-width: 18px; height: 18px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.25); font: 400 11px/1 var(--font-mono) !important; color: rgba(28, 19, 15, 0.62); }
 
+/* ═════════ §F · PRESENTATION ═════════ */
+/* F.1 — the title says what's urgent; the overdue part is rust; it ticks when the figure changes */
+.td5-hd h1.td5-title .td52-urg { display: inline-block; font: inherit !important; }
+.td5-hd h1.td5-title .td52-urg span { font: inherit !important; }
+.td5-hd h1.td5-title .td52-od { color: #a2452a; }
+.td5-hd h1.td5-title .td52-urg.tick { animation: td52Tick 0.32s cubic-bezier(.2, .8, .3, 1); }
+@keyframes td52Tick { from { transform: translateY(10px); opacity: 0.2; } to { transform: none; opacity: 1; } }
+/* F.3 — how late, under a tray dial */
+.td5-dial .td52-age {
+  position: absolute; left: 50%; bottom: -7px; z-index: 1; transform: translateX(-50%); padding: 2px 5px; border-radius: 7px; white-space: nowrap;
+  background: #a2452a; color: #fff; font: 600 8.5px/1 var(--font-mono) !important; letter-spacing: 0.04em;
+}
+.td5-dial .td52-age.sel { box-shadow: 0 0 0 2px #fff; }
+/* F.4 — every text on /todo at 4.5:1 (TD52 F3 measures it): the labels v5.1 set fainter than that, raised */
+.td5-fr .td5-find kbd { color: var(--td5-ink62); }
+.td5-root .td5-nav .td5-keys { color: rgba(244, 238, 229, 0.62); }
+.td5-strip .td5-h { color: rgba(45, 58, 80, 0.75); }
+.td5-strip .td5-tab { color: rgba(45, 58, 80, 0.75); }
+.td5-dial[data-kind="late"] small { color: #a2452a; }
+
 /* ═════════ §C · THE SLIDE-OUT CALENDAR (portalled to the body: literals, never `--td5-*`) ═════════ */
 .td52-scrim { position: fixed; inset: 0; z-index: 130; background: rgba(28, 19, 15, 0.42); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .td52-scrim.on { opacity: 1; pointer-events: auto; }
@@ -314,4 +336,5 @@
 @media (prefers-reduced-motion: reduce) {
   .td52-day .td52-roll > span { animation: none !important; }
   .td52-dr, .td52-dr:not(.on), .td52-scrim { transition: none !important; }
+  .td5-hd h1.td5-title .td52-urg.tick { animation: none !important; }
 }

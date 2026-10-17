@@ -67,7 +67,8 @@ import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
 import { TrayHeader } from "./TrayHeader";
 import { TrayCalendar, dayChip, shortDay } from "./TrayCalendar";
 import { TrayCalDrawer } from "./TrayCalDrawer";
-import { calFilterLabel, calendarItems, dayBuckets, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
+import { lateTag, rowLines } from "../../../lib/trayRows";
+import { calFilterLabel, calendarItems, dayBuckets, daysFrom, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
 import { TrayFilterRow, TrayFind } from "./TrayFilters";
 import { usePinList } from "../../shell/useFullScreenList";
 import { PinListButton } from "../../shell/PinListButton";
@@ -146,6 +147,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       words: (c) => { const i = byKey.get(c.key); return { deed: i?.deed ?? c.title, who: i?.who ?? c.who }; } });
   }, [live, items, trayDb, taskFlags, now]);
   const calBuckets = useMemo(() => dayBuckets(calItems, live, calToday), [calItems, live, calToday]);
+  /* v5.2 §F.2 — the row's lines lead with the agent (lib/trayRows) */
+  const lines = rowLines;
   const calYmdOf = useMemo(() => new Map(calItems.filter((x) => x.surfaced && !x.snoozed && x.ymd).map((x) => [x.key, x.ymd as string])), [calItems]);
   const [calFilter, setCalFilter] = useState<CalFilter | null>(null);
   const [calSel, setCalSel] = useState<string>(() => londonToday(Date.now()));
@@ -930,6 +933,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       onRing={() => sheetRef.current?.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" })}
       onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => showView("aside")}
       calFiltered={!!calFilter}
+      urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null}
       calendar={state === "list" ? (
         <TrayCalendar today={calToday} items={calItems} buckets={calBuckets} n={n} filter={calFilter} onFilter={setCalFilter}
           onOpenDrawer={() => setCalDrawer(true)} onSetAside={() => showView("aside")} drawerOpen={calDrawer} sel={calSel} onSel={setCalSel} />
@@ -958,8 +962,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           data-query={i.query?.id} data-cal-ymd={calYmdOf.get(i.key)} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
           onClick={() => selectRow(i.key)}>
           <Disc item={i} />
-          <span className="td5-tx"><b>{i.deed}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small>{i.sub}</small></span>
-          <DueDial dial={i.dial} size={52} />
+          <span className="td5-tx" data-agent-led={lines(i).agentLed ? "" : undefined}><b data-td52="row-bold">{lines(i).bold}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small data-td52="row-italic">{lines(i).italic}</small></span>
+          <DueDial dial={i.dial} size={52} selected={!ghost && sel?.key === i.key}
+            tag={i.dial.kind === "late" && i.dial.ymd ? lateTag(daysFrom(i.dial.ymd, calToday)) : null} />
         </button>
       );
     });

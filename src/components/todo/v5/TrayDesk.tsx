@@ -10,6 +10,8 @@
  * ⚠️ THE STATUS IN THE HEAD IS THE REAL `StatusDot`.
  */
 import React from "react";
+import { overdueLabel } from "../../../lib/trayRows";
+import { londonToday } from "../../../lib/trayCalendar";
 import { StatusDot } from "../../StatusDot";
 import type { Dial, Fact, Stop, TrayItem } from "../../../lib/todoTray";
 import type { ClearedAct } from "../../../lib/todoCleared";
@@ -29,13 +31,15 @@ const PKG = (
 
 /** the due dial (v138's grammar): rust ring + halo once the date has passed, a navy arc for the share of the
  *  window gone otherwise, dashed with no date */
-export const DueDial: React.FC<{ dial: Dial; size: number }> = ({ dial, size }) => {
+export const DueDial: React.FC<{ dial: Dial; size: number; tag?: string | null; selected?: boolean }> = ({ dial, size, tag = null, selected = false }) => {
   const r = size / 2 - 3;
+  /* v5.2 §F.5 — an overdue dial is spoken: "Overdue since 20 June" (its marks are presentational under role="img") */
+  const spoken = dial.kind === "late" && dial.ymd ? overdueLabel(dial.ymd, londonToday(Date.now())) : null;
   const c = 2 * Math.PI * r;
   const h = size / 2;
   return (
     <span className="td5-dial" data-td5="dial" data-kind={dial.kind} data-big={size > 52 ? "" : undefined} data-small={size < 48 ? "" : undefined} data-frac={dial.frac.toFixed(3)}
-      style={{ width: size, height: size }} title={dial.title}>
+      style={{ width: size, height: size }} title={dial.title} role={spoken ? "img" : undefined} aria-label={spoken ?? undefined}>
       <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
         {dial.kind === "none" ? (
           <circle cx={h} cy={h} r={r} fill="none" stroke="rgba(28,19,15,.22)" strokeWidth="1.5" strokeDasharray="2.5 3" />
@@ -50,6 +54,8 @@ export const DueDial: React.FC<{ dial: Dial; size: number }> = ({ dial, size }) 
         )}
       </svg>
       {dial.kind === "none" ? <small>no<br />date</small> : <><b>{dial.day}</b><small>{dial.mon}</small></>}
+      {/* v5.2 §F.3 — how late, on a tray dial (52 or smaller); never on the desk's 60 */}
+      {tag && size <= 52 ? <span className={`td52-age${selected ? " sel" : ""}`} data-td52="age" aria-hidden="true">{tag}</span> : null}
     </span>
   );
 };
