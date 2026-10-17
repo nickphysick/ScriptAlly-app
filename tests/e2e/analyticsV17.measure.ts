@@ -242,6 +242,9 @@ test("AN17-16 · thin sample", async ({ page }) => {
     /* REWRITTEN (analytics v24): the readings are v24's (`reading-fig`); the funnel and the records are deleted */
     const figs = [...p.querySelectorAll<HTMLElement>('[data-a21="desk-figure"], [data-a21="desk-n"], [data-a24="reading-fig"], [data-a21="card-n"]')]
       .filter((e) => e.getBoundingClientRect().width > 0)
+      /* ⚠️ EXEMPT BY RULING (analytics v24.1): "Replies due"'s two row chips show a zero as "0" — the prompt states it
+         ("Zeros show as '0'; the rows stay") and AN24-B2 asserts it. The only figures on the page the rule spares. */
+      .filter((e) => !e.closest('[data-a21="desk-card"][data-key="due"]'))
       /* ⚠️ innerText, NOT textContent, for BOTH reads: textContent glues a value to its unit ("0days") and to
          the next line ("None of 1No queries"), so a zero with a unit and a stated population both read wrong
          (measured — the first is how the median-wait mutation went green) */
