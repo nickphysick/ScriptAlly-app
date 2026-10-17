@@ -75,7 +75,7 @@
    content edge), vertically centred with the pills, no background of their own, fading in over 120ms.
    The line is one flex row: the pills (shrinkable) then the actions (fixed, pushed right), with at least 16px between.
    ⚠️ WHEN SPACE IS SHORT THE VALUES GIVE WAY IN ORDER: the email never shortens; the social handle shortens first
-   (flex-shrink 1000), then the website (1). Each stops at 96px and ends in an ellipsis, with the full value as its
+   (flex-shrink 1000), then the website (1). Each stops at 72px (a disc and a few letters) and ends in an ellipsis, with the full value as its
    title. The line takes the peek's place in the grid (row 2, every column); the pills inside it lose their own
    margin and inset, which the line now carries. ── */
 .cl1832-pl {
@@ -87,8 +87,8 @@
 .cl1832-pl > .cl183-pk, .clv-list--compact .cl1832-pl > .cl183-pk { flex: 0 1 auto; min-width: 0; margin: 0 16px 0 0; padding: 0; grid-column: auto; }
 .cl1832-pl .cl183-pk .cl183-pp { max-width: none; flex: 0 1 auto; }
 .cl1832-pl .cl183-pk .cl183-pp[data-k="email"] { flex-shrink: 0; }
-.cl1832-pl .cl183-pk .cl183-pp[data-k="website"] { flex-shrink: 1; min-width: 96px; }
-.cl1832-pl .cl183-pk .cl183-pp[data-k="social"] { flex-shrink: 1000; min-width: 96px; }
+.cl1832-pl .cl183-pk .cl183-pp[data-k="website"] { flex-shrink: 1; min-width: 72px; }
+.cl1832-pl .cl183-pk .cl183-pp[data-k="social"] { flex-shrink: 1000; min-width: 72px; }
 .cl1832-pl .cl183-pk .cl183-pp.is-add { flex-shrink: 0; }
 .cl1832-tray { flex: none; margin-left: auto; display: flex; align-items: center; gap: 8px; background: none; animation: cl1832in 0.12s ease both; }
 @keyframes cl1832in { from { opacity: 0; } to { opacity: 1; } }
