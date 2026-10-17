@@ -126,4 +126,13 @@ The real shell's beta strip is in every shot; the ref has none.
 - **Agents on file's "ready to query →"** opens the Contact list. If a ready view is wanted again,
   that is a Contact list change.
 
-BRANCH_TAIL
+## Branch and build
+
+- Branch `dashboard-v60`, pushed, NOT merged: `82b699e0` (onboarding) · `b107fcdc` (the dashboard) ·
+  `5f9be100` (locks, the loading floor, this report); this tail is one more report-only commit.
+- **Dev:** it was serving `dashboard-v59` (`index-BdMa9Mvk.js`, my own v59 deploy), which this branch
+  contains, so it was deployed directly — hosting only, from the clean pushed tip `5f9be100`, the served
+  hash re-checked immediately before. **Dev now serves `index-BC2n4YOQ.js`.** No functions or rules
+  were deployed; prod untouched.
+- Gates at `5f9be100`: tsc clean; Vitest 599 files, 8,953 passed, 3 skipped; production and dev builds
+  clean (no errors or warnings in the log).
