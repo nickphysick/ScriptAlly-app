@@ -38,7 +38,7 @@ export function s4Readings(v: V24): Reading[] {
   const k = v.keeping;
   const worst = k.longer[k.longer.length - 1];
   return [
-    { fig: k.placed === 0 ? "None" : `${k.kept.length} of ${k.placed}`, line: k.placed === 0 ? "replies from an agency that gives a time" : "replied within the time they gave" },
+    { fig: k.placed === 0 ? "None" : `${k.kept.length === 0 ? "None" : k.kept.length} of ${k.placed}`, line: k.placed === 0 ? "replies from an agency that gives a time" : "replied within the time they gave" },
     worst ? { fig: span(worst.diffDays), line: `the biggest overrun, ${worst.agency}` } : { fig: "None", line: "took longer than they said" },
     k.typical === null ? { fig: "None", line: "replies yet" } : { fig: span(k.typical), line: "your typical wait for a reply" },
   ];

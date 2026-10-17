@@ -13,7 +13,8 @@
 import React from "react";
 import { span } from "../../lib/analyticsV24";
 
-export interface Bar { label: string; days: number; fill: string; kind: "said" | "took" | "waited" | "asked" }
+/** `days: null` is a bar with no date to measure from: no bar is drawn and the value says so. */
+export interface Bar { label: string; days: number | null; fill: string; kind: "said" | "took" | "waited" | "asked" }
 export interface PairRowProps {
   id: string;
   who: string;
@@ -32,10 +33,10 @@ export const PairRow: React.FC<PairRowProps> = ({ id, who, sub, bars, scale, ver
     <div className="a24-who"><b>{who}</b><small>{sub}</small></div>
     <div className="a24-pb">
       {bars.map((b) => (
-        <div key={b.kind} className="a24-pbr" data-a24="pair-bar" data-kind={b.kind} data-days={Math.round(b.days)}>
+        <div key={b.kind} className="a24-pbr" data-a24="pair-bar" data-kind={b.kind} data-days={b.days === null ? "" : Math.round(b.days)}>
           <span>{b.label}</span>
-          <div className="a24-pbt"><i style={{ width: `${Math.max(0, Math.min(100, (b.days / scale) * 100)).toFixed(3)}%`, background: b.fill }} /></div>
-          <em>{span(b.days)}</em>
+          <div className="a24-pbt">{b.days === null ? null : <i style={{ width: `${Math.max(0, Math.min(100, (b.days / scale) * 100)).toFixed(3)}%`, background: b.fill }} />}</div>
+          <em>{b.days === null ? "Not dated" : Math.round(b.days) === 0 ? "Today" : span(b.days)}</em>
         </div>
       ))}
     </div>

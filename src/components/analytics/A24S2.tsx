@@ -6,13 +6,13 @@
  * a paragraph and three fixed cards), then how you compare with other writers (three You-against-Most-writers column
  * pairs, the verdicts from `benchmark`).
  *
- * ⚠️ "MOST WRITERS" IS `BENCHMARKS_QUERYTRACKER`, A FIXED ANCHOR, READ HERE AND NEVER RESTATED. No community data is
+ * ⚠️ "MOST WRITERS" IS `BENCHMARKS_QUERYTRACKER`, A FIXED ANCHOR, carried in `v.bench` / `v.anchors` and NEVER RESTATED here. No community data is
  *    collected or shown; the opt-in line in the caveat is copy only.
  * ⚠️ THE OVERDUE SEGMENT IS SAND WITH A 2px RUST INSET RING: rust marks time past what an agent said, and sand keeps
  *    the waiting status's meaning underneath it.
  */
 import React from "react";
-import { BENCHMARKS_QUERYTRACKER, span, type Bench, type V24 } from "../../lib/analyticsV24";
+import { span, type Bench, type V24 } from "../../lib/analyticsV24";
 import { DAY_MS } from "../../lib/analytics";
 import { Block, type Reading } from "./A24Frame";
 
@@ -71,9 +71,9 @@ const Panel: React.FC<{ b: Bench }> = ({ b }) => {
 
 export function s2Readings(v: V24): Reading[] {
   const o = v.outcomes, m = v.monthly;
-  const typical = Math.round(100 / BENCHMARKS_QUERYTRACKER.requestRate);
+  const typical = Math.round(100 / v.anchors.requestRate);
   return [
-    { fig: String(v.expected.overdue), line: "overdue: past the agent's time and still silent" },
+    { fig: v.expected.overdue === 0 ? "None" : String(v.expected.overdue), line: "overdue: past the agent's time and still silent" },
     o.asked > 0
       ? { fig: `1 in ${Math.round(o.sent / o.asked)}`, line: `asked to read more; most writers see about 1 in ${typical}` }
       : { fig: "None", line: `asked to read more yet; most writers see about 1 in ${typical}` },

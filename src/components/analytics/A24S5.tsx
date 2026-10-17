@@ -43,14 +43,14 @@ const Wait: React.FC<{ r: WaitRow; scale: number }> = ({ r, scale }) => {
 const Read: React.FC<{ r: ReadRow; scale: number }> = ({ r, scale }) => (
   <PairRow id={r.id} probe="read-row" state={r.yourMove ? "your-move" : "sent"} who={r.agency}
     sub={`Asked for ${r.asked} ${r.askedMs === null ? "on an unknown date" : `on ${dShort(r.askedMs)}`}`} scale={scale}
-    bars={[{ kind: "asked", label: "Since they asked", days: r.sinceDays ?? 0, fill: STATE_FILL[r.bucket] }]}
+    bars={[{ kind: "asked", label: "Since they asked", days: r.sinceDays, fill: STATE_FILL[r.bucket] }]}
     verdict={r.yourMove ? { big: "Your move", small: "send it" } : { big: "Sent", small: "with the agent" }} />
 );
 
 export function s5Readings(v: V24): Reading[] {
   const w = v.waiting;
   return [
-    w.waiting.length ? { fig: `${w.pastCount} of ${w.waiting.length}`, line: "waiting queries are past the time the agent gave" } : { fig: "None", line: "of your queries is waiting for a first reply" },
+    w.waiting.length ? { fig: `${w.pastCount === 0 ? "None" : w.pastCount} of ${w.waiting.length}`, line: "waiting queries are past the time the agent gave" } : { fig: "None", line: "of your queries is waiting for a first reply" },
     w.longest ? { fig: span(w.longest.waitedDays), line: `the longest wait so far, ${w.longest.agency}` } : { fig: "None", line: "waiting" },
     { fig: w.yourMove === 0 ? "None" : String(w.yourMove), line: w.yourMove === 1 ? "is your move: material to send" : "are your move: material to send" },
   ];
