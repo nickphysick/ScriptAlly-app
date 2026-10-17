@@ -114,7 +114,8 @@ Unit: `trayCalendar.test.ts` (red under "UTC today"), `trayRows.test.ts`, `deskD
 
 - Integration branch: **`dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241-db601-cl1831b-cl1832-cl1833-cx28-qhnet-td52`** (pushed), cut from the branch dev served at the time (its tip built to `index-CshxOLQG.js`, the served hash, verified), merged with `todo-list-v5-2` twice (`37fb4e4e`, then `5aaa96a2` for the title fit). The only conflict was `design-refs/.refhashes.json` (both sides' new refs; union, 556 refs, verified).
 - Gates there: tsc 0 · production build 0, 0 warnings · Vitest 608/609 files, 9,050 passed — the one failure is `functions/src/email.test.ts`, which fails identically on the dev tip alone (a fresh worktree has no `functions/node_modules`); `pageStructure`'s Queries case timed out under load once and passes alone. TD52 **23/23**.
-- **Dev now serves `index-D_Mx4fR9.js`** (hosting only, `firebase.dev.json`, project `scriptally-dev`), deployed from a clean checkout of the pushed tip after re-checking the served hash. Prod untouched; no rules or functions deployed.
+- **After G.3 (18 Oct):** `todo-list-v5-2` merged into the same integration branch again (`180cd3cb`, no conflicts); gates there tsc 0 · production build 0, 0 warnings · Vitest 610 files, 9,062 passed; TD52 G3 11/11 and H2 6/6 on that build. **Dev now serves `index-5Q6l_Tb7.js`**, deployed hosting-only from a clean checkout of the pushed tip after re-checking the served hash.
+- Before G.3, dev served `index-D_Mx4fR9.js` (hosting only, `firebase.dev.json`, project `scriptally-dev`), deployed from a clean checkout of the pushed tip after re-checking the served hash. Prod untouched; no rules or functions deployed.
 
 ## For Nick
 
