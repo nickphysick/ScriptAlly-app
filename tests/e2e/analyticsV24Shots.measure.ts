@@ -4,7 +4,7 @@
  * one-query / one-pass / no-stated-time states are seeded and removed in the same run (tests/e2e/seedAn24.mjs).
  */
 import { test, type Page } from "@playwright/test";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { openAn } from "./an17Lib";
 
@@ -102,4 +102,20 @@ test("states", async ({ page }) => {
       await p2.close();
     } finally { execSync("node tests/e2e/seedAn24.mjs restore", { stdio: "pipe" }); }
   }
+});
+
+/** The harness account's figures, for the report's "for Nick" (not a lock). */
+test("figures", async ({ page }) => {
+  test.skip(!!ONLY && !ONLY.includes("figures"), "AN24_ONLY");
+  mkdirSync(DIR, { recursive: true });
+  await openMs(page, 1512, "seed-ms-1");
+  await page.waitForFunction(() => !!(window as unknown as { __SA_AN21?: unknown }).__SA_AN21);
+  const f = await page.evaluate(() => {
+    const m = (window as unknown as { __SA_AN21: any }).__SA_AN21; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const v = m.v24;
+    return { sent: m.sent, replies: m.replies, requests: m.requests, offers: m.offers, outcomes: v.outcomes, rate: v.rate, expected: v.expected, bench: v.bench,
+      replyNoTime: v.keeping.unplaced, repliesPlaced: v.keeping.placed, waiting: v.waiting.waiting.length, waitingNoTime: v.waiting.noTime,
+      readingUndated: v.waiting.reading.filter((r: { askedMs: number | null }) => r.askedMs === null).length, reading: v.waiting.reading.length, month: v.month };
+  });
+  writeFileSync(`${DIR}/../harness-figures.json`, JSON.stringify(f, null, 1));
 });
