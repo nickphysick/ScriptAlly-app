@@ -66,7 +66,8 @@ import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
 import { TrayHeader } from "./TrayHeader";
 import { TrayCalendar, shortDay } from "./TrayCalendar";
-import { calFilterLabel, calendarItems, dayBuckets, londonToday, passesCalFilter, type CalFilter } from "../../../lib/trayCalendar";
+import { TrayCalDrawer } from "./TrayCalDrawer";
+import { calFilterLabel, calendarItems, dayBuckets, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
 import { TrayFilterRow } from "./TrayFilters";
 import { DeskCard, Disc, DoneToday, DueDial } from "./TrayDesk";
 import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
@@ -632,6 +633,26 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const { createTagDef } = useTagWrites((m) => flash(m));
   openComposeRef.current = () => openCompose();
 
+  /* ── v5.2 §C — the slide-out calendar hands a task to the desk and starts nothing ── */
+  const calWords = (it: CalItem) => {
+    const ti = it.card ? items.find((x) => x.key === it.key) : undefined;
+    if (ti) return { deed: ti.deed, line: ti.sub };
+    if (it.userTask) return { deed: it.userTask.text, line: "Your own task" };
+    return { deed: it.title, line: `${it.who ? `${it.who} · ` : ""}back from Set aside` };
+  };
+  const calToDesk = (it: CalItem) => {
+    setCalDrawer(false);
+    setCalFilter(null);
+    setFilters((f) => (f.find ? { ...f, find: "" } : f));
+    /* a task set aside lives in the Set aside tab; an own task that has not surfaced opens on the compose card (Call:
+       v5.1's Coming up rows are not pressable, so its "path" was the own task's own Edit) */
+    if (it.snoozed) { showView("aside"); return; }
+    if (!it.surfaced && it.userTask) { openCompose(it.userTask); return; }
+    setTrayView("tray");
+    selectRow(it.key);
+    scrollRowIntoView(it.key);
+  };
+
   /* ── set aside: the popover's choices (v5.1 §I.3–I.4). Each writes through an existing writer, with Undo, and the
      card flies into the Set aside tab first. No confirmation dialog anywhere: Undo replaces it. ── */
   const DAYMS = 86400000;
@@ -1146,6 +1167,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           <TagsPane />
         </AnchoredPanel>
       ) : null}
+      <TrayCalDrawer open={calDrawer} today={calToday} items={calItems} n={n} sel={calSel} onSel={setCalSel}
+        onClose={() => setCalDrawer(false)} onDesk={calToDesk} wordsOf={calWords} onAdd={() => { setCalDrawer(false); openCompose(); }} />
       {flow ? <HousekeepingSweep items={flow.items} onClose={() => { setFlow(null); }} onNavigate={onNavigate} onToast={flash} /> : null}
       {confirmAskNode}
       {toast && (

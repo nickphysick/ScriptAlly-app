@@ -19,10 +19,10 @@ import {
 } from "../../../lib/trayCalendar";
 import { MONTHS_SHORT } from "../../../lib/dates";
 
-const WD_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const WD_SHORT = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-const MON_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const ymdParts = (ymd: string) => { const [y, m, d] = ymd.split("-").map(Number); return { y, m: m - 1, d }; };
+export const WD_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const WD_SHORT = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+export const MON_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export const ymdParts = (ymd: string) => { const [y, m, d] = ymd.split("-").map(Number); return { y, m: m - 1, d }; };
 export const ymdOf = (y: number, m: number, d: number) => { const x = new Date(Date.UTC(y, m, d)); return `${x.getUTCFullYear()}-${String(x.getUTCMonth() + 1).padStart(2, "0")}-${String(x.getUTCDate()).padStart(2, "0")}`; };
 export const plusDays = (ymd: string, n: number) => { const p = ymdParts(ymd); return ymdOf(p.y, p.m, p.d + n); };
 export const weekdayOf = (ymd: string) => { const p = ymdParts(ymd); return new Date(Date.UTC(p.y, p.m, p.d)).getUTCDay(); };

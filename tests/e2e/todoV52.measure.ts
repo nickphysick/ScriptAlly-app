@@ -322,3 +322,83 @@ test("TD52 A5 — one dot per kind present, in its colour; a snooze faint; nothi
   }
   L.done(2 * 7);
 });
+
+/* ───────────────────────── C1 · the slide-out calendar ───────────────────────── */
+test("TD52 C1 — ⤢ opens the drawer; kind filters hide chips; Month and Week agree; Open on the desk selects and starts nothing; no writes", async ({ page }) => {
+  const L = new Ledger("C1");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    const writes: string[] = [];
+    const onReq = (r: import("@playwright/test").Request) => { if (/google\.firestore\.v1\.Firestore\/(Write|Commit)/.test(r.url()) || (r.method() === "POST" && /:commit|:batchWrite/.test(r.url()))) writes.push(r.url()); };
+    page.on("request", onReq);
+    await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="open-drawer"]') as HTMLButtonElement).click());
+    await page.waitForTimeout(500);
+    const dr = page.locator('[data-td52="drawer"]');
+    const box = await dr.evaluate((e) => { const b = e.getBoundingClientRect(); return { on: e.classList.contains("on"), top: b.top, right: innerWidth - b.right, bottom: innerHeight - b.bottom, w: b.width, r: getComputedStyle(e).borderTopLeftRadius }; });
+    L.check(`${w} ⤢ opens the drawer`, box.on, "");
+    L.check(`${w} the drawer sits 8 from the top, right and bottom`, near(box.top, 8, 1) && near(box.right, 8, 1) && near(box.bottom, 8, 1), JSON.stringify(box));
+    L.check(`${w} width min(1180, 100vw − 110)`, near(box.w, Math.min(1180, vp.width - 110), 1), `${box.w}`);
+    /* move to a month holding chips of several kinds (today's, or the one before) */
+    const chips = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td52="drawer"] [data-td52="dr-chip"]')].map((c) => ({ key: c.dataset.key!, kind: c.dataset.kind!, ymd: (c.closest("[data-ymd]") as HTMLElement).dataset.ymd! })));
+    let all = await chips();
+    if (new Set(all.map((c) => c.kind)).size < 2) { await page.locator('[data-td52="drawer"] [aria-label="Previous month"]').click(); await page.waitForTimeout(300); all = await chips(); }
+    const kinds = [...new Set(all.map((c) => c.kind))];
+    L.check(`${w} chips of two or more kinds to filter`, kinds.length >= 2, kinds.join(","));
+    const k0 = kinds[0];
+    await page.locator(`[data-td52="drawer"] [data-td52="dr-kind"][data-kind="${k0}"]`).click();
+    await page.waitForTimeout(250);
+    const after = await chips();
+    L.check(`${w} pressing ${k0} hides its chips`, !after.some((c) => c.kind === k0), `${after.filter((c) => c.kind === k0).length} left`);
+    L.check(`${w} …and keeps every other chip`, after.length === all.filter((c) => c.kind !== k0).length, `${after.length} vs ${all.filter((c) => c.kind !== k0).length}`);
+    await page.locator(`[data-td52="drawer"] [data-td52="dr-kind"][data-kind="${k0}"]`).click();
+    await page.waitForTimeout(250);
+    /* Month and Week: select a day with chips, then compare that week's chips in both views */
+    const day = all[0];
+    await page.locator(`[data-td52="drawer"] [data-td52="dr-day"][data-ymd="${day.ymd}"]`).click({ position: { x: 6, y: 6 } });
+    await page.waitForTimeout(250);
+    const monthWeek = await page.evaluate((ymd) => {
+      const dr = document.querySelector('[data-td52="drawer"]')!;
+      const cells = [...dr.querySelectorAll<HTMLElement>('[data-td52="dr-day"]')];
+      const i = cells.findIndex((c) => c.dataset.ymd === ymd);
+      const row = cells.slice(i - (i % 7), i - (i % 7) + 7);
+      return row.map((c) => ({ ymd: c.dataset.ymd!, more: !!c.querySelector(".td52-more"), keys: [...c.querySelectorAll<HTMLElement>('[data-td52="dr-chip"]')].map((x) => x.dataset.key).sort() }));
+    }, day.ymd);
+    await page.locator('[data-td52="drawer"] [data-td52="dr-week"]').click();
+    await page.waitForTimeout(250);
+    const week = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td52="drawer"] [data-td52="dr-day"]')].map((c) => ({ ymd: c.dataset.ymd!, keys: [...c.querySelectorAll<HTMLElement>('[data-td52="dr-chip"]')].map((x) => x.dataset.key).sort() })));
+    L.check(`${w} Week shows the selected day's week`, JSON.stringify(week.map((x) => x.ymd)) === JSON.stringify(monthWeek.map((x) => x.ymd)), `${week.map((x) => x.ymd)} vs ${monthWeek.map((x) => x.ymd)}`);
+    const agree = monthWeek.filter((m) => !m.more).every((m) => JSON.stringify(m.keys) === JSON.stringify(week.find((x) => x.ymd === m.ymd)?.keys));
+    L.check(`${w} Month and Week show the same items`, agree && monthWeek.some((m) => m.keys.length), JSON.stringify(monthWeek.map((m) => m.keys.length)));
+    await page.locator('[data-td52="drawer"] [data-td52="dr-month"]').click();
+    await page.waitForTimeout(250);
+    /* Open on the desk: a tray task's agenda item */
+    const target = all.find((c) => !c.key.startsWith("task:") && !c.key.startsWith("flag:"));
+    L.check(`${w} a tray task on the calendar`, !!target, "");
+    if (!target) continue;
+    await page.locator(`[data-td52="drawer"] [data-td52="dr-day"][data-ymd="${target.ymd}"]`).click({ position: { x: 6, y: 6 } });
+    await page.waitForTimeout(250);
+    await page.locator(`[data-td52="drawer"] [data-td52="ag-item"][data-key="${target.key}"] [data-td52="ag-go"]`).click();
+    await page.waitForTimeout(900);
+    const res = await page.evaluate((key) => {
+      const { q, sc } = (window as unknown as W).__td5();
+      const row = q(`[data-td5-row="${CSS.escape(key)}"]`);
+      const rb = row?.getBoundingClientRect(), sb = sc.getBoundingClientRect();
+      return {
+        open: document.querySelector('[data-td52="drawer"]')!.classList.contains("on"),
+        current: row?.getAttribute("aria-current") ?? null,
+        inView: !!rb && rb.top >= sb.top - 1 && rb.bottom <= sb.bottom + 1,
+        journey: [...document.querySelectorAll("[data-td5-slot] [data-qad-drawer]")].filter((e) => (e as HTMLElement).offsetParent !== null).length + document.querySelectorAll(".qad-root.is-open").length,
+        desk: q('[data-td5="desk-card"]')?.getAttribute("data-key") ?? null,
+      };
+    }, target.key);
+    L.check(`${w} Open on the desk closes the drawer`, !res.open, "");
+    L.check(`${w} …selects that row`, res.current === "true" && res.desk === target.key, JSON.stringify(res));
+    L.check(`${w} …and scrolls it into view`, res.inView, "");
+    L.check(`${w} …and starts no journey`, res.journey === 0, String(res.journey));
+    page.off("request", onReq);
+    L.check(`${w} the drawer wrote nothing`, writes.length === 0, writes.slice(0, 2).join(" "));
+  }
+  L.done(2 * 14);
+});
