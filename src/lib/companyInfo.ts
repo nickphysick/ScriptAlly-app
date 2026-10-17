@@ -13,9 +13,9 @@
  * ⚠️ THE SUPPORT ADDRESS IS DEFINED ONCE, HERE, AND IT CHANGED WHEN IT WAS UNIFIED.
  * `HelpCentre.tsx` carried `support@scriptally.com` — a different mailbox on a domain the product
  * does not otherwise use — while the legal copy names `hello@scriptally.ink` as the controller's
- * contact. Two published addresses is the fault; which one is real is Nick's call, flagged in the
- * run report. The `.ink` address wins here because it is the one the privacy policy now publishes
- * as the route for a UK GDPR request, and that is the address that has to work.
+ * contact. Two published addresses is the fault. Since 17 Oct the one address is
+ * hello@queryhawk.net (scriptally.ink is retired): it is the route the privacy policy publishes for
+ * a UK GDPR request, and that is the address that has to work.
  *
  * ⚠️ IT LIVES IN `lib/`, NOT IN `marketing/`. These are facts about the company, and the workspace
  * needs them too — the Help centre offers the same address the legal pages name. Keeping the
@@ -24,16 +24,17 @@
  */
 
 /** The address every peripheral surface offers, and the one the legal copy names. */
-export const SUPPORT_EMAIL = "hello@scriptally.ink";
+export const SUPPORT_EMAIL = "hello@queryhawk.net";
 
 /**
  * The public host.
  *
  * ⚠️ NOTHING RENDERS IT SINCE 17 SEP. The footer's base line printed it in mono capitals — which put
  * "SCRIPTALLY.INK" on every public page — and now states the support address instead. Kept, value
- * untouched, because it names infrastructure; a new reader should know it is currently unread.
+ * kept because it names infrastructure (queryhawk.net since 17 Oct); a new reader should know it is
+ * currently unread.
  */
-export const SITE_HOST = "scriptally.ink";
+export const SITE_HOST = "queryhawk.net";
 
 /** Operating entity — pending confirmation; rendered verbatim, brackets and all. */
 export const LEGAL_ENTITY_NAME = "[LEGAL ENTITY NAME]";

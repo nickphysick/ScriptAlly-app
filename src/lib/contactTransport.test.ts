@@ -83,10 +83,10 @@ describe("the rate limit", () => {
 });
 
 describe("the mailto", () => {
-  const href = () => contactMailto("hello@scriptally.ink", draft());
+  const href = () => contactMailto("hello@queryhawk.net", draft());
 
   it("addresses the support inbox and states the topic in the subject", () => {
-    expect(href()).toContain("mailto:hello@scriptally.ink?subject=");
+    expect(href()).toContain("mailto:hello@queryhawk.net?subject=");
     expect(href()).toContain(encodeURIComponent(`QueryHawk — ${CONTACT_TOPICS[0]}`));
   });
 
@@ -95,13 +95,13 @@ describe("the mailto", () => {
    * mail client, so the recipient reads a message ending mid-word.
    */
   it("encodes an ampersand in the message rather than truncating on it", () => {
-    const h = contactMailto("hello@scriptally.ink", draft({ message: "Carter & Vale never replied" }));
+    const h = contactMailto("hello@queryhawk.net", draft({ message: "Carter & Vale never replied" }));
     expect(h).toContain("%26");
     expect(h).toContain(encodeURIComponent("never replied"));
   });
 
   it("carries the reply address into the body, so a name-less message is still answerable", () => {
-    const h = contactMailto("hello@scriptally.ink", draft({ name: "" }));
+    const h = contactMailto("hello@queryhawk.net", draft({ name: "" }));
     expect(decodeURIComponent(h)).toContain("From: m@webb.co.uk");
   });
 });

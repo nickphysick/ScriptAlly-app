@@ -273,7 +273,7 @@ describe("the settled decisions are pinned where a future edit will trip over th
    * or matching one by suffix, is the same as having no allowlist while looking like having one.
    */
   it("origins are listed literally, with no wildcard and no suffix match", () => {
-    expect(ALLOWED_ORIGINS).toContain("https://scriptally.ink");
+    expect(ALLOWED_ORIGINS).toContain("https://queryhawk.net");
     expect(ALLOWED_ORIGINS).toContain("https://scriptally-dev.web.app");
     for (const o of ALLOWED_ORIGINS) {
       expect(o.startsWith("https://"), o).toBe(true);

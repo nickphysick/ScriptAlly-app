@@ -2,7 +2,7 @@
  * The transport, driven with `fetch` stubbed.
  *
  * ⚠️ NOTHING HERE REACHES THE NETWORK, AND THAT IS NOT A STYLE CHOICE. Dev sends from the REAL
- * verified `scriptally.ink` domain — there is one Resend account and no sandbox — so a test that
+ * verified `queryhawk.net` domain — there is one Resend account and no sandbox — so a test that
  * actually posted would be spending the reputation the founding invites depend on, on every CI run.
  * Every case below replaces `globalThis.fetch`.
  *

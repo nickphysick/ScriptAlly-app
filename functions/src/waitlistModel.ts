@@ -98,8 +98,8 @@ export const GET_CACHE_SECONDS = 60;
  * dressed as having one.
  */
 export const ALLOWED_ORIGINS: readonly string[] = [
-  "https://scriptally.ink",
-  "https://www.scriptally.ink",
+  "https://queryhawk.net",
+  "https://www.queryhawk.net",
   "https://scriptally-app.web.app",
   "https://scriptally-dev.web.app",
 ];
