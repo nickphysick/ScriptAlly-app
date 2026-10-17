@@ -326,3 +326,12 @@ started" pill and the contact pills) and v18.3.1. The branch is `contact-list-v1
 
 **Shots** (`shots-v18-3-2/`, one beside each `screens/*` file): full, sparse and not queried with the peek open, at 1512
 and 1280.
+
+**Branch and build:**
+- **Commits:** `contact-list-v18-3-2`, pushed: revert `03581e72` · A `eb1843e6` · B `6814e189` · B fix `9a7f2000` ·
+  C `92c3fa52` · locks and report `fb25648a` · this tail.
+- **Integration:** dev still served `c24f9484` at deploy time, and this branch sits directly on it. So the integration
+  branch `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241-db601-cl1831b-cl1832` is a
+  fast-forward to `fb25648a`: the same tree as the branch, gated and measured above, with no conflicts.
+- **Dev:** hosting only, from the clean pushed tip, re-checked immediately before. Dev now serves
+  **`index-LkecNKe9.js`**.
