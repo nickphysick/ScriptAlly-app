@@ -203,6 +203,42 @@ export function stillWaiting(items: Enriched[], nowMs: number): StillWaiting {
   };
 }
 
+/* ══════════════════════════════════ v24.1 · replies due ══════════════════════════════════ */
+
+/**
+ * The desk's third card: open queries whose agency's stated reply time is running out. ⚠️ IT IS `stillWaiting`'s OWN
+ * POPULATION — a query still waiting for a first reply — so its past count is S5's "{past} of {waiting}" by
+ * construction. A query with a request, an offer or an ending is not due anything. A waiting query whose agency states
+ * no time is counted (`noStatedTime`) and not drawn.
+ */
+export const DUE_SOON_DAYS = 14;
+export interface DueDot { id: string; days: number; title: string }
+export interface RepliesDue {
+  past: number; soon: number; later: number;
+  /** the soonest due date that has not passed */
+  next: { atMs: number; days: number; agency: string } | null;
+  noStatedTime: number;
+  /** one per waiting query not yet past its time, soonest first */
+  dots: DueDot[];
+}
+export function repliesDue(w: StillWaiting, nowMs: number): RepliesDue {
+  const out: RepliesDue = { past: 0, soon: 0, later: 0, next: null, noStatedTime: w.noTime, dots: [] };
+  for (const r of w.waiting) {
+    if (r.saidWeeks === null || r.pastDays === null) continue;
+    const days = -r.pastDays;
+    if (days < 0) { out.past++; continue; }
+    if (days <= DUE_SOON_DAYS) out.soon++; else out.later++;
+    out.dots.push({ id: r.id, days, title: `${r.agency}: due ${days === 0 ? "today" : `in ${days} ${days === 1 ? "day" : "days"}`}` });
+    const atMs = r.sentMs + r.saidWeeks * 7 * DAY_MS;
+    if (!out.next || days < out.next.days) out.next = { atMs, days, agency: r.agency };
+  }
+  out.dots.sort((a, b) => a.days - b.days);
+  return out;
+}
+/** Where a due dot sits on the desk's strip: the past zone is the left 22%, then eight weeks across the rest. */
+export const DUE_TODAY_AT = 22;
+export const dueLeft = (days: number): number => DUE_TODAY_AT + (Math.min(days, 56) / 56) * (100 - DUE_TODAY_AT);
+
 /* ══════════════════════════════════ what you could expect by now ══════════════════════════════════ */
 
 export interface ExpectedByNow { past: number; replied: number; closed: number; overdue: number; inside: number; noTime: number; undated: number }
@@ -340,7 +376,9 @@ export const monthOf = (firstMs: number | null, nowMs: number): number => (first
 export interface V24 {
   outcomes: Outcomes; rate: Rate; keeping: ReplyKeeping;
   /** v24.1: every reply (a request is a reply), the dated ones, and the bad dates */
-  tally: ReplyTally; waiting: StillWaiting; expected: ExpectedByNow;
+  tally: ReplyTally;
+  /** v24.1: the desk's "Replies due" */
+  due: RepliesDue; waiting: StillWaiting; expected: ExpectedByNow;
   monthly: MonthlySends; moments: Moment[]; bench: Bench[]; month: number; nowMs: number;
   /** the anchors the verdicts were read against */
   anchors: Benchmarks;
@@ -350,8 +388,11 @@ export function buildV24(model: AnalyticsModel, nowMs: number, bench: Benchmarks
   const o = outcomes(model.items);
   const e = expectedByNow(model.items, nowMs);
   const m = monthlySends(model.items, nowMs);
+  /* one population for S5 and the desk's Replies due */
+  const sw = stillWaiting(model.items, nowMs);
   return {
-    outcomes: o, rate: requestRate(o), keeping: replyKeeping(model.items), tally: replyTally(model.items), waiting: stillWaiting(model.items, nowMs), expected: e,
+    outcomes: o, rate: requestRate(o), keeping: replyKeeping(model.items), tally: replyTally(model.items),
+    due: repliesDue(sw, nowMs), waiting: sw, expected: e,
     monthly: m, moments: moments(model.items, m, nowMs), bench: benchmark(o, e, bench), month: monthOf(m.firstMs, nowMs), nowMs, anchors: bench,
   };
 }
@@ -373,7 +414,7 @@ export function ringOf(k: ReplyKeeping): { inside: number; dated: number; pct: n
  */
 export function deskV24(model: AnalyticsModel, v: V24, nowMs: number): DeskCard[] {
   const [sent, rate] = desk(model, windowReplies(model.items), nowMs);
-  const o = v.outcomes, k = v.keeping;
+  const o = v.outcomes;
   const sentCard: DeskCard = {
     ...sent, sec: 2,
     rows: [
@@ -391,28 +432,23 @@ export function deskV24(model: AnalyticsModel, v: V24, nowMs: number): DeskCard[
       { n: o.of.offer, text: `${o.of.offer === 1 ? "offer" : "offers"} so far`, tone: null, zero: "No" },
     ],
   };
-  const dots = model.items
-    .filter((e) => e.replyDays !== null)
-    .map((e) => ({ at: e.replyDays as number, title: `${agencyOf(e)}: ${span(e.replyDays as number)}` }))
-    .sort((a, b) => a.at - b.at);
-  const t = k.typical === null ? null : spanParts(k.typical);
-  const q = k.quickest === null ? null : spanParts(k.quickest);
-  const l = k.longest === null ? null : spanParts(k.longest);
-  const longUnit = (p: { n: number; unit: string }) => (p.unit === "wk" ? "week" : p.unit === "wks" ? "weeks" : p.unit);
-  const waitCard: DeskCard = {
-    key: "wait", title: "Your typical reply time", sec: 3, colour: "#a0633f",
-    stamp: k.replies === 0 ? null : `${k.replies} ${k.replies === 1 ? "reply" : "replies"}`,
-    figure: t === null ? "No replies" : String(t.n),
-    unit: t === null ? null : `${longUnit(t)}${k.replies < THIN_SAMPLE ? `, from ${k.replies} ${k.replies === 1 ? "reply" : "replies"}` : ""}`,
-    population: t === null ? null : k.replies,
-    rows: q && l ? [
-      { n: q.n, text: `${q.unit}, your quickest`, tone: "r" },
-      { n: l.n, text: `${l.unit}, your longest`, tone: null },
-    ] : [],
-    chart: { kind: "dots", dots, typical: k.typical },
-    axis: l === null ? [] : ["0", "Your replies, in weeks", span(k.longest as number)],
+  /* v24.1: card 3 is "Replies due" — open queries' stated reply times running out. The typical reply time stays in S4. */
+  const d = v.due;
+  const big = d.soon >= 1 ? { figure: String(d.soon), unit: "due in the next\ntwo weeks" }
+    : d.next ? { figure: span(d.next.days), unit: "until the next\nis due" }
+    : { figure: "–", unit: "nothing due" };
+  const dueCard: DeskCard = {
+    key: "due", title: "Replies due", sec: 4, colour: "#a0633f",
+    stamp: d.next ? `next ${dShort(d.next.atMs)}` : null,
+    figure: big.figure, unit: big.unit, population: null,
+    rows: [
+      { n: d.past, text: "past their time", tone: "r", zero: "0" },
+      { n: d.later, text: "due later", tone: null, zero: "0" },
+    ],
+    chart: { kind: "due", past: d.past, dots: d.dots.map((x) => ({ left: dueLeft(x.days), title: x.title })) },
+    axis: ["Past", "Next 8 weeks", "8 wks"],
   };
-  return [sentCard, rateCard, waitCard];
+  return [sentCard, rateCard, dueCard];
 }
 
 /* ══════════════════════════════════ the seven questions ══════════════════════════════════ */

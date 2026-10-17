@@ -239,7 +239,7 @@ export function endings(items: Enriched[]): Endings {
 
 export interface DeskRow { n: number; text: string; tone: "b" | "r" | null; /** the chip's word at zero, where "None" would not read */ zero?: string }
 export interface DeskCard {
-  key: "sent" | "rate" | "wait";
+  key: "sent" | "rate" | "wait" | "due";
   title: string;
   /** the section the card scrolls to */
   sec: number;
@@ -251,8 +251,8 @@ export interface DeskCard {
   population: number | null;
   rows: DeskRow[];
   chart: { kind: "bars"; values: number[] } | { kind: "line"; values: number[] }
-    /* v24: every dated reply as a dot along 0..longest, with the typical marked */
-    | { kind: "dots"; dots: { at: number; title: string }[]; typical: number | null };
+    /* v24.1: Replies due — the past count in the left zone, then a dot per open query at its `left` (% of the strip) */
+    | { kind: "due"; past: number; dots: { left: number; title: string }[] };
   axis: string[];
 }
 const monthLabel = (ms: number, nowMs: number): string => {

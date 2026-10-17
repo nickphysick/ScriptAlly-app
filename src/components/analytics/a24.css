@@ -25,9 +25,19 @@
   .a17-page .a21-dj li { white-space: normal; overflow: visible; text-overflow: clip; align-items: flex-start; line-height: 1.25 !important; }
   .a17-page .a21-dj li .a21-djc { flex: none; }
   .ws-app.sheet-wide .a17-page .a21-dj li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-items: center; }
-  /* the reply card's stamp is the full sheet's only: in the compact sheet the card has no room for it */
-  .a21-dj[data-key="wait"] .a21-djstamp { display: none; }
-  .ws-app.sheet-wide .a21-dj[data-key="wait"] .a21-djstamp { display: inline-block; }
+  /* card 3's stamp is the full sheet's only: in the compact sheet the card has no room for it */
+  .a21-dj[data-key="due"] .a21-djstamp { display: none; }
+  .ws-app.sheet-wide .a21-dj[data-key="due"] .a21-djstamp { display: inline-block; }
+
+  /* v24.1 · Replies due: a two-line unit, the past zone with its pill, and an axis that stays on one line at 1280 */
+  .a17-page .a21-dj[data-key="due"] .a21-djn small { white-space: pre-line; line-height: 1.25 !important; }
+  .a24-dstrip .a24-pz { position: absolute; left: 0; top: 0; bottom: 0; width: 22%; display: flex; align-items: flex-end; padding-bottom: 3px; box-sizing: border-box; }
+  .a17-page .a24-past { font: 400 11px/1 var(--sp-type) !important; color: #fff; background: #b4553f; border-radius: 10px; padding: 4px 7px; white-space: nowrap; }
+  .ws-app.sheet-wide .a17-page .a24-past { font-size: 12px !important; padding: 5px 9px; }
+  .a17-page .a24-past.none, .ws-app.sheet-wide .a17-page .a24-past.none {
+    background: none; color: rgba(28, 19, 15, 0.45); padding-left: 0; font: italic 400 12px/1 var(--sp-serif) !important;
+  }
+  .a17-page .a21-dj[data-key="due"] .a21-djax span { white-space: nowrap; }
 }
 
 /* ══════════════ C · the seven question sections (every width) ══════════════ */
