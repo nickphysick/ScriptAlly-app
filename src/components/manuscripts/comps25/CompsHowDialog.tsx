@@ -18,6 +18,7 @@ import { createPortal } from "react-dom";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { CompsSteps } from "./CompsSteps";
 import { CloseButton } from "./marks";
+import { openerOf, refocus } from "../comps28/refocus";
 
 const HEADING_ID = "cv-how-pop-h";
 
@@ -27,13 +28,10 @@ export const CompsHowDialog: React.FC<{ open: boolean; onClose: () => void; onPi
   const giveBack = useRef(true);
   useEffect(() => {
     if (!open) return;
-    const opener = document.activeElement as HTMLElement | null;
+    const opener = openerOf();
     giveBack.current = true;
     closeRef.current?.focus();
-    return () => {
-      if (!giveBack.current || !opener || !opener.isConnected) return;
-      opener.focus({ preventScroll: true });
-    };
+    return () => { if (giveBack.current) refocus(opener); };
   }, [open]);
   useEscapeLayer(open, onClose, ESC_LEVEL.pageModal);
   if (!open || typeof document === "undefined") return null;

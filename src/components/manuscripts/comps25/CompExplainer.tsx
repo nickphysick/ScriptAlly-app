@@ -13,13 +13,17 @@ import { DASH_ART } from "../../../lib/dashArt";
 import "./compExplainer.css";
 
 export const EXPLAIN_POINTS: { lead: string; text: string }[] = [
-  { lead: "Recent.", text: "Out in the last few years, so it reflects today’s market." },
+  { lead: "Recent.", text: "Out in the last five years or so, so it reflects today’s market." },
   { lead: "A fair match.", text: "Similar readers and tone, not just a similar plot." },
   { lead: "Not a household name.", text: "A mega-bestseller says little about your book. A steady seller says more." },
 ];
 
-/** "What's a comparable title?" Open for a writer with no comps yet; one link otherwise. Never stored. */
-export const CompExplainer: React.FC<{ open: boolean; first: boolean; onToggle: (open: boolean) => void }> = ({ open, first, onToggle }) => {
+/**
+ * "What's a comparable title?" Open for a writer with no comps yet; one link otherwise. Never stored.
+ * ⚠️ ONE COMPONENT, TWO HOSTS (comps v28): the add form's card, and the pop-up the empty page's "What makes a good
+ *    comp?" opens. The pop-up passes `noHide` (it closes by its own ✕) and `headingId` (it is labelled by the heading).
+ */
+export const CompExplainer: React.FC<{ open: boolean; first: boolean; onToggle: (open: boolean) => void; noHide?: boolean; headingId?: string }> = ({ open, first, onToggle, noHide, headingId }) => {
   const art = DASH_ART.mentorLooking;
   if (!open) {
     return (
@@ -32,7 +36,7 @@ export const CompExplainer: React.FC<{ open: boolean; first: boolean; onToggle: 
     <section className="cf-ax" data-cf="explain" aria-label="What’s a comparable title?">
       <span className="cf-ax-art" aria-hidden="true"><img src={`${art.src}?v=${art.version}`} width={art.width} height={art.height} alt="" /></span>
       <div>
-        <p className="cf-ax-h" data-cf="explain-heading">What’s a comparable title?</p>
+        <p className="cf-ax-h" data-cf="explain-heading" id={headingId}>What’s a comparable title?</p>
         <p className="cf-ax-p">A recent book, film or show that shares something real with yours: its readers, its feel, its world. Agents use comps to picture where your book would sit in a shop, and who would buy it.</p>
         <ul>
           {EXPLAIN_POINTS.map((p, i) => (
@@ -42,7 +46,7 @@ export const CompExplainer: React.FC<{ open: boolean; first: boolean; onToggle: 
       </div>
       <div className="cf-axf">
         <span>Two or three in a query letter is usual. Keep more on your shelf to choose from.</span>
-        <button type="button" data-cf="explain-hide" onClick={() => onToggle(false)}>{first ? "Got it, hide this" : "Hide"}</button>
+        {noHide ? null : <button type="button" data-cf="explain-hide" onClick={() => onToggle(false)}>{first ? "Got it, hide this" : "Hide"}</button>}
       </div>
     </section>
   );

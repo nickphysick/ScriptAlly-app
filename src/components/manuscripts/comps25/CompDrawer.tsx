@@ -26,7 +26,8 @@ export const DRAWER_WIDTH = "min(640px, 54vw)";
 
 export type DrawerState =
   | { mode: "view"; key: string }
-  | { mode: "edit"; key: string; focusNote?: boolean }
+  /** `back`: opened from this comp's detail, so ✕, Escape, Cancel and Save return there (comps v28 §E) */
+  | { mode: "edit"; key: string; focusNote?: boolean; back?: boolean }
   | { mode: "add" };
 
 /** The same status words the Query Centre prints. */
@@ -39,9 +40,11 @@ export const CompDrawer: React.FC<{
   /** why Remove is not offered, or null when it is */
   removeBlocked: string | null;
   letterShortOf: (letterId: string) => string;
+  /** close everything (the dim, and ✕/Escape anywhere but an edit opened from the detail) */
   onClose: () => void;
+  /** ✕, Escape and Cancel: back to the detail when the edit was opened from it, else close */
+  onBack: () => void;
   onEdit: (focusNote?: boolean) => void;
-  onBackToView: () => void;
   onPick: () => void;
   onSave: (draft: CompDraft) => void;
   /** `again`: the writer pressed "Add and add another", so the drawer stays open */
@@ -91,17 +94,17 @@ export const CompDrawer: React.FC<{
           </div>
         </>
       )}
-      <CloseButton className="cv-x" data-cv="drawer-close" onClick={p.onClose} />
+      <CloseButton className="cv-x" data-cv="drawer-close" onClick={editing ? p.onBack : p.onClose} />
     </div>
   );
 
   const foot = editing ? (
     <CompFormFoot form={form}
-      onCancel={() => (state!.mode === "edit" ? p.onBackToView() : p.onClose())}
+      onCancel={() => (state!.mode === "edit" ? p.onBack() : p.onClose())}
       onRemove={state!.mode === "edit" ? p.onRemove : undefined} removeBlocked={p.removeBlocked} />
   ) : row ? (
     <div className="cv-layer cv-df" data-cv="drawer-foot">
-      <span>{row.where === "sent" ? "Its letter has gone out, so this record is fixed." : "You can still change which letters name it."}</span>
+      <span data-cv="drawer-foot-line">{row.letters.some((l) => l.sent) ? "A sent letter names it, so that record is fixed." : "You can still change which letters name it."}</span>
       <span className="cv-bt">
         <button type="button" className="cv-ghost" data-cv="drawer-edit" onClick={() => p.onEdit(false)}>Edit</button>
         <button type="button" className="cv-pillbtn" data-cv="drawer-pick" disabled={!row.ready} onClick={p.onPick}>Log in a letter</button>
@@ -110,15 +113,15 @@ export const CompDrawer: React.FC<{
   ) : undefined;
 
   return (
-    <HalfDrawer probe="comp" open={open} onClose={p.onClose} label={state?.mode === "add" ? "Add a comp" : state?.mode === "edit" ? "Edit a comp" : "Comp details"} width={DRAWER_WIDTH} head={head} foot={foot} bodyRef={bodyRef}>
+    <HalfDrawer probe="comp" open={open} onClose={editing ? p.onBack : p.onClose} onDim={p.onClose} label={state?.mode === "add" ? "Add a comp" : state?.mode === "edit" ? "Edit a comp" : "Comp details"} width={DRAWER_WIDTH} head={head} foot={foot} bodyRef={bodyRef}>
       {editing ? (
-        <CompFormBody form={form} first={first} row={state?.mode === "edit" ? row : null} />
+        <CompFormBody form={form} first={first} />
       ) : row ? (
         <div className="cv-layer cv-db" data-cv="drawer-body">
           <div className="cv-stat">
-            <div><span>Named in</span><b data-cv="stat-named">{row.letters.length ? row.letters.map((l) => l.short).join(", ") : "No letter yet"}</b></div>
-            <div><span>Seen by</span><b data-cv="stat-seen">{row.queries.length ? `${row.queries.length} ${row.queries.length === 1 ? "agent" : "agents"}` : "No one yet"}</b></div>
-            <div><span>Asked for more</span><b data-cv="stat-asked">{row.queries.length ? row.askedForMore : "—"}</b></div>
+            <div><span>Named in</span><b data-cv="stat-named">{row.letters.length ? `${row.letters.length} ${row.letters.length === 1 ? "letter" : "letters"}` : "No letter yet"}</b></div>
+            <div><span>Went out with</span><b data-cv="stat-seen">{row.queries.length ? `${row.queries.length} ${row.queries.length === 1 ? "query" : "queries"}` : "None yet"}</b></div>
+            <div><span>Asked for more</span><b data-cv="stat-asked">{row.queries.length ? `${row.askedForMore} · ${Math.round((row.askedForMore / row.queries.length) * 100)}%` : "—"}</b></div>
           </div>
 
           <h5 className="cv-h5">Why it compares</h5>
@@ -133,12 +136,12 @@ export const CompDrawer: React.FC<{
             </>
           )}
 
-          <h5 className="cv-h5">Letters and packages</h5>
+          <h5 className="cv-h5">Letters</h5>
           {row.letters.length ? row.letters.map((l) => (
             <div key={l.id} className="cv-lt" data-cv="drawer-letter">
               <LetterIcon /><b>{l.short}</b>
               <span className="cv-pk">{l.packages.length ? `in ${l.packages.join(", ")}` : "in no package"}</span>
-              <span className="cv-lk">{l.sent ? <><LockIcon />SENT</> : "NOT SENT"}</span>
+              <span className="cv-lk" data-cv="drawer-letter-state">{l.sent ? <><LockIcon />SENT · FIXED</> : "NOT SENT"}</span>
             </div>
           )) : <div className="cv-empq">{row.ready ? "Not logged in any letter yet." : "Add a publisher before a letter can name it."}</div>}
 

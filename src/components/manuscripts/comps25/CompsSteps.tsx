@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "How comp tracking works." — the heading, three illustrated steps with their arrows, and an optional
+ * "How it works." (comps v28; v27 read "How comp tracking works.") — the heading, three illustrated steps with their arrows, and an optional
  * door into the letter picker (Comparable titles v27).
  *
  * ⚠️ ONE COMPONENT, TWO HOSTS, AND NOTHING ELSE DRAWS THE STEPS: the empty page's card, and the
@@ -16,7 +16,9 @@
  */
 import React from "react";
 
-export const STEPS_HEADING = "How comp tracking works.";
+export const STEPS_HEADING = "How it works.";
+/** Comps v28: the steps' foot line, in both hosts. */
+export const STEPS_NOTE = "Two or three comps in a letter is usual. Keep more on your shelf to choose from.";
 export const STEPS_PICK = "Log the comps in a letter";
 
 export const HOW_STEPS = [
@@ -48,6 +50,7 @@ export const CompsSteps: React.FC<{
         </li>
       ))}
     </ol>
+    <p className="cv-hsteps-note" data-cv="steps-note">{STEPS_NOTE}</p>
     {onPick ? <button type="button" className="cv-hsteps-more" data-cv="how-pick" onClick={onPick}>{STEPS_PICK}</button> : null}
   </section>
 );

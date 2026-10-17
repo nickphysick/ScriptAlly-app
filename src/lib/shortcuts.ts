@@ -58,7 +58,6 @@ export const SHORTCUTS = {
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* comps v25: the list's own keys — not in a field, and not while the drawer or the picker is open */
   compsFind:        { chords: [k("/")], label: "Find a comp", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
-  compsFull:        { chords: [k("f")], label: "Full-screen list", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* the Contact list's keys (v13 §8) — not in a field, and not while a card, the drawer or a popover is
      open */
   contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },

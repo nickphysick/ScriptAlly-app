@@ -11,12 +11,18 @@
  *   - sent and recorded: FIXED. The list is read-only and the foot offers "New version of {name}".
  *
  * The ticks are the dialog's own draft; nothing is written until Save.
+ *
+ * Comps v28 §E: each row shows its record (its asked-for-more rate if it has gone out, its age if it is over five
+ * years old, else "not sent yet"), and a live tip advises against more than three comps or old ones. The tip
+ * NEVER blocks Save. A comp brought by a card's or the drawer's "Log in a letter" is pre-ticked only on an unsent
+ * letter (a sent one records what actually went).
  */
 import React, { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CompTitle } from "../../../types";
 import { MAX_LETTER_COMPS, compKey, ready } from "../../../lib/compUsage";
-import { LetterLite, kindOf, letterShort } from "../../../lib/compsLibrary";
+import { CompRow, LetterLite, kindOf, letterShort } from "../../../lib/compsLibrary";
+import { pickRecord, pickTip } from "../../../lib/compsShelf";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { CloseButton, KindIcon, LockIcon, TickIcon } from "./marks";
 
@@ -27,6 +33,9 @@ export const CompLetterPicker: React.FC<{
   letters: readonly LetterLite[];
   currentLetterId: string | null;
   comps: readonly CompTitle[];
+  /** the shelf's rows (for each comp's record), and the current year */
+  rows: readonly CompRow[];
+  now: number;
   /** letter id → the number of queries it went out with */
   sentByLetter: ReadonlyMap<string, number>;
   onClose: () => void;
@@ -50,9 +59,9 @@ export const CompLetterPicker: React.FC<{
   const load = (id: string | null, forKey?: string) => {
     const l = p.letters.find((x) => x.id === id) ?? null;
     const next = new Set((l?.compIds ?? []).map((cid) => keyOfId.get(cid)).filter((k): k is string => !!k));
-    const isFixed = !!l && Array.isArray(l.compIds) && (p.sentByLetter.get(l.id) ?? 0) > 0;
+    const unsent = !!l && (p.sentByLetter.get(l.id) ?? 0) === 0;
     const c = forKey ? p.comps.find((x, i) => compKey(x, i) === forKey) : null;
-    if (c && ready(c) && !isFixed && next.size < MAX_LETTER_COMPS) next.add(forKey!);
+    if (c && ready(c) && unsent && next.size < MAX_LETTER_COMPS) next.add(forKey!);
     setLetterId(l?.id ?? null);
     setTicks(next);
   };
@@ -79,13 +88,15 @@ export const CompLetterPicker: React.FC<{
     return n;
   });
   const short = letter ? letterShort(letter.versionName) : "";
+  const rowByKey = new Map(p.rows.map((r) => [r.key, r]));
+  const tip = fixed ? [] : pickTip(p.comps.filter((c, i) => ticks.has(compKey(c, i))), p.now);
   const q = `${sent} ${sent === 1 ? "query" : "queries"}`;
 
   return createPortal(
     <div className="cv-layer cv-pdim" data-cv="picker-dim" onPointerDown={(e) => { if (e.target === e.currentTarget) p.onClose(); }}>
       <div className="cv-pk" role="dialog" aria-modal="true" aria-label="Log comps in a letter" data-cv="picker" data-letter={letter?.id ?? ""} data-fixed={fixed ? "true" : "false"}>
         <div className="cv-ph">
-          <div><h3 className="cv-pt">Comps this letter mentions</h3><small>Choose every comp the letter references.</small></div>
+          <div><h3 className="cv-pt">Comps this letter names</h3><small>Choose every comp the letter mentions.</small></div>
           <CloseButton className="cv-x" data-cv="picker-close" onClick={p.onClose} />
         </div>
         {p.letters.length === 0 ? (
@@ -122,12 +133,27 @@ export const CompLetterPicker: React.FC<{
                     <span className="cv-cbx">{on && <TickIcon />}</span>
                     <span className={`cv-disc${on ? "" : " is-ring"}`}><KindIcon kind={kindOf(c)} /></span>
                     <span><b>{c.title}</b>{ok ? <small>{by}</small> : <small className="is-need">{kindOf(c) === "book" && !c.publisher?.trim() ? "Needs a publisher first" : "Needs a year first"}</small>}</span>
+                    {(() => {
+                      const r = rowByKey.get(key);
+                      if (!r) return null;
+                      const rec = pickRecord(r, p.now);
+                      return rec.kind === "rate"
+                        ? <span className="cx-pr" data-cv="picker-record" data-kind="rate">{rec.pct}%<small>of {rec.queries} asked for more</small></span>
+                        : rec.kind === "old"
+                          ? <span className="cx-pr is-old" data-cv="picker-record" data-kind="old"><small>{rec.age} yrs old</small></span>
+                          : <span className="cx-pr" data-cv="picker-record" data-kind="unsent"><small>Not sent yet</small></span>;
+                    })()}
                   </li>
                 );
               })}
             </ul>
+            {tip.length ? (
+              <p className="cx-tip" data-cv="picker-tip">
+                {tip.map((t, i) => <React.Fragment key={i}>{i ? " " : ""}<b>{t.strong}</b>{t.rest}</React.Fragment>)}
+              </p>
+            ) : null}
             <div className="cv-pf">
-              <span data-cv="picker-count">{ticks.size} logged{ticks.size >= MAX_LETTER_COMPS ? ` · a letter records up to ${MAX_LETTER_COMPS}` : ""}</span>
+              <span data-cv="picker-count">{ticks.size} {ticks.size === 1 ? "comp" : "comps"} named{ticks.size >= MAX_LETTER_COMPS ? ` · a letter records up to ${MAX_LETTER_COMPS}` : ""}</span>
               <div className="cv-bt">
                 {fixed ? (
                   <>
