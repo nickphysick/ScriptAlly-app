@@ -22,7 +22,7 @@ export const CONTACT_ENV = "WAITLIST_CONTACT_EMAIL";
  * which makes the sender look forged to a reader and to some filters. Overridable per environment
  * so a sandbox or a subdomain can be swapped in without touching a template.
  */
-export const DEFAULT_FROM = "Nick at ScriptAlly <nick@scriptally.ink>";
+export const DEFAULT_FROM = "Nick at QueryHawk <nick@queryhawk.net>";
 
 /**
  * ⚠️ A VISIBLE CONTACT ROUTE IN THE BODY, NOT JUST A HEADER. Replies to the from-address are
@@ -35,12 +35,11 @@ export const DEFAULT_FROM = "Nick at ScriptAlly <nick@scriptally.ink>";
  * value is stated twice on purpose. The Help Centre, the landing copy and the legal copy all read
  * the other one; if either moves, both move.
  *
- * ⚠️ AND IT IS THE INTENDED PUBLIC ADDRESS, NOT NECESSARILY A DELIVERING ONE. Namecheap forwarding
- * has one alias configured and it is not delivering; nothing routes this one either. So the value
- * an email PRINTS is `WAITLIST_CONTACT_EMAIL`, which falls back to this. `SUPPORT_EMAIL` itself is
- * unchanged and stays the long-term answer — it is the delivery that is broken, not the address.
+ * ⚠️ queryhawk.net SINCE 17 OCT. hello@ is an alias of the nick@queryhawk.net mailbox, so it
+ * delivers. The value an email PRINTS is still `WAITLIST_CONTACT_EMAIL`, which falls back to this,
+ * and each environment states it explicitly.
  */
-export const SUPPORT_EMAIL = "hello@scriptally.ink";
+export const SUPPORT_EMAIL = "hello@queryhawk.net";
 
 /* ══════════════ Paths ══════════════ */
 
