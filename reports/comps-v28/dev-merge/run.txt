@@ -1,0 +1,51 @@
+
+Running 32 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.5s)
+[A1] 8/8 green
+  ✓   2 [measure] › tests/e2e/compsV25.measure.ts:78:3 › Comparable titles v25 › A1 · ids: every comp the page writes has a unique id, and an id survives an edit, an add and a remove (19.6s)
+[E2] 11/11 green
+  ✓   3 [measure] › tests/e2e/compsV25.measure.ts:130:3 › Comparable titles v25 › E2 · picker: Save writes compIds to the chosen letter only; Undo restores it exactly (14.9s)
+[A3] 12/12 green
+  ✓   4 [measure] › tests/e2e/compsV25.measure.ts:181:3 › Comparable titles v25 › A3 · fixed: a sent, recorded letter offers no checkbox and makes a new version; a sent, unrecorded one accepts one save (14.3s)
+  ✓   5 [measure] › tests/e2e/compsV25.measure.ts:239:1 › CV25 · every lock has a named mutation (1ms)
+[AD1] 16/16 green
+  ✓   6 [measure] › tests/e2e/compsV26.measure.ts:112:3 › Comparable titles v26 › AD1 · one heading: the drawer's only heading is its title, in add, first-comp and edit (22.9s)
+[AD2] 14/14 green
+  ✓   7 [measure] › tests/e2e/compsV26.measure.ts:134:3 › Comparable titles v26 › AD2 · explainer: open with no comps, a link otherwise, and absent in edit (22.8s)
+[AD3] 36/36 green
+  ✓   8 [measure] › tests/e2e/compsV26.measure.ts:161:3 › Comparable titles v26 › AD3 · labels follow the type, and what is typed survives a type change (11.8s)
+[AD4] 14/14 green
+  ✓   9 [measure] › tests/e2e/compsV26.measure.ts:193:3 › Comparable titles v26 › AD4 · ready: the note's state is ready(), and Save is never blocked by it (14.9s)
+[AD5] 18/18 green
+  ✓  10 [measure] › tests/e2e/compsV26.measure.ts:221:3 › Comparable titles v26 › AD5 · foot: pinned to the drawer's bottom with the body scrolled to its end; no horizontal overflow (11.2s)
+[AD6] 18/18 green
+  ✓  11 [measure] › tests/e2e/compsV26.measure.ts:261:3 › Comparable titles v26 › AD6 · again: one comp written, the drawer open on an empty form, Book, focus in Title, the explainer folded (32.1s)
+[AD7] 11/11 green
+  ✓  12 [measure] › tests/e2e/compsV26.measure.ts:298:3 › Comparable titles v26 › AD7 · tags: saved to matchAxis as today, read back as two chips; a seventh is refused (16.5s)
+[AD10] 24/24 green
+  ✓  13 [measure] › tests/e2e/compsV26.measure.ts:348:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note (36.1s)
+  ✓  14 [measure] › tests/e2e/compsV26.measure.ts:398:1 › AD · every lock has a named mutation (0ms)
+[X1] 30/30 green
+  ✓  15 [measure] › tests/e2e/compsV271.measure.ts:49:3 › Comparable titles v27.1 › X1 · centred: each of the five close buttons holds an SVG ✕ at its centre, and is named "Close" (25.4s)
+  ✓  16 [measure] › tests/e2e/compsV271.measure.ts:86:1 › V27.1 · every lock has a named mutation (1ms)
+  ✓  17 [measure] › tests/e2e/compsV28.measure.ts:111:1 › H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has them (29.5s)
+  ✓  18 [measure] › tests/e2e/compsV28.measure.ts:141:1 › H2 · card: the three counts are the shelf's partition and sum to the comp count; the ring is logged ÷ sent; a row filters (11.8s)
+  ✓  19 [measure] › tests/e2e/compsV28.measure.ts:167:1 › H3 · empty: the panel and the steps card only; b1 opens the first-comp form with the explainer; b2 the explainer pop-up (13.4s)
+  ✓  20 [measure] › tests/e2e/compsV28.measure.ts:190:1 › N1 · notice: one banner, its copy by the one/several rule, its button opens the picker on the first unrecorded letter (31.9s)
+  ✓  21 [measure] › tests/e2e/compsV28.measure.ts:217:1 › S1 · grid: 3 columns at 1512, 2 at 1280; the toolbar one row, no overflow, at 1024/1280/1512; the add card last, gone while filtered (14.0s)
+  ✓  22 [measure] › tests/e2e/compsV28.measure.ts:254:1 › S2 · card: the slip by state (sent, draft, shelf-ready, not ready); no hover action buttons (10.7s)
+  ✓  23 [measure] › tests/e2e/compsV28.measure.ts:274:1 › S3 · age: the chip's text and tone from the year (render); no year, no chip (9.2s)
+  ✓  24 [measure] › tests/e2e/compsV28.measure.ts:289:1 › S4 · sort: each order as the table says; Best response puts never-sent comps last (14.5s)
+  ✓  25 [measure] › tests/e2e/compsV28.measure.ts:308:1 › S5 · filters: where, type and find compose (AND); the type toggles hide in compact; Clear restores all (12.3s)
+  ✓  26 [measure] › tests/e2e/compsV28.measure.ts:332:1 › D1 · landing: by-comp rows are each sent comp's queries, asked and rate, by queries; the marker at your average; hollow under five (30.9s)
+  ✓  27 [measure] › tests/e2e/compsV28.measure.ts:365:1 › D2 · landing: by-letter blocks sent → unrecorded → unsent; Log them opens the picker; rates are asked ÷ queries (13.7s)
+  ✓  28 [measure] › tests/e2e/compsV28.measure.ts:384:1 › E1 · back: from the drawer's Edit, Cancel, ✕ and Escape return to the detail; Save returns with the new values; the scrim closes all (31.8s)
+  ✓  29 [measure] › tests/e2e/compsV28.measure.ts:420:1 › E2 · focus: back to the card after the drawer; to the card after a picker Save from its link; to the opener after either pop-up (50.9s)
+  ✓  30 [measure] › tests/e2e/compsV28.measure.ts:448:1 › E3 · picker: records and ages; four ticked with one old shows both tips; Save stays enabled and writes that letter only (31.9s)
+  ✓  31 [measure] › tests/e2e/compsV28.measure.ts:481:1 › L0 · loading: the header's loading state only; no flash of the empty panel on a seeded account (9.6s)
+  ✓  32 [measure] › tests/e2e/compsV28.measure.ts:497:1 › CX28 · the run measured enough (1ms)
+
+  Slow test file: [measure] › tests/e2e/compsV28.measure.ts (5.3m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  32 passed (10.1m)
