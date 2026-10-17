@@ -13,3 +13,6 @@ Each line names what was retired, by which part, and why. The rest of each file 
 | `todoV51.measure.ts` | inside **TD5 I4** and **I5**: n read from the h1 | F | Retargeted to the "In your tray" tab's count (the same unfiltered n). |
 
 **Red on the base build too, not caused by v5.2:** TD5 E2 — "sent: the same documents written, field by field": the desk's write carries `lastSentLabel` and the panel's does not (measured on fb25648a's build, 27/28 there as here).
+| `qcV138.measure.ts` D1 | a recorded note (not an assertion) read `[data-td5="card-row"]` on /todo | I | Re-pointed to the calendar card's today rows and mix bar. |
+| `todoV5.measure.ts` C2 | "art breaks out" | D | **Kept, unchanged:** it reads the TRAY bands' drawings, which still break out; v5.1 has no desk-head art assertion to retire (the pack expected one). |
+| `todoV51.measure.ts` E2 | — | — | **Red on the base build too** (see above), not retired. |

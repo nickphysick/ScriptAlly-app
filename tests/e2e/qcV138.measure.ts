@@ -359,10 +359,11 @@ test.describe("Query Centre v138", () => {
     L.check("D1", "no-window rows are in Waiting", r.nodate.every((x) => x.grp === "waiting"), r.nodate.map((x) => x.grp).join(","));
     L.check("D1", "no 'No reply yet' group", !r.bands.some((b) => /no reply yet|past the date/i.test(b)), r.bands.join(" | "));
     /* the To-do list's Your move count is task cards, not queries (see the report): read and recorded, not asserted equal.
-       RE-POINTED (To-do list v5): the v2 tiles became the header card's three rows. */
+       RE-POINTED (To-do list v5): the v2 tiles became the header card's three rows.
+       RE-POINTED (To-do list v5.2): the populated header card is the calendar; its today rows are read instead. */
     await openRoute(page, "/todo", vp);
     await page.waitForTimeout(2500);
-    const todo = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td5="card-row"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()).slice(0, 3));
+    const todo = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td52="cal-row"], [data-td52="mix"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()).slice(0, 3));
     L.note("D1", "to-do v5 card rows", `${JSON.stringify(todo)} against the Query Centre's "${r.you}"`);
     L.done(5);
   });
