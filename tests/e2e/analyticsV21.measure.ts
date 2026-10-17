@@ -112,7 +112,9 @@ test("AN21-A1 · header", async ({ page }) => {
     const ww = `${w}`;
     L.check("A1 the light header renders", ww, !!r, `${!!r}`);
     if (!r || !m) continue;
-    const want = `${m.sent} ${m.sent === 1 ? "query" : "queries"}, ${m.replies === 0 ? "no" : m.replies} ${m.replies === 1 ? "reply" : "replies"}`;
+    /* REWRITTEN (analytics v24.1): a request is a reply — the header counts v24's tally, not the dated first replies */
+    const rep = m.v24?.tally?.all ?? m.replies;
+    const want = `${m.sent} ${m.sent === 1 ? "query" : "queries"}, ${rep === 0 ? "no" : rep} ${rep === 1 ? "reply" : "replies"}`;
     L.check("A1 no image in the header but the shadow", ww, r.imgs.length === 1 && r.imgs[0] === "shadow" && r.bgImgs === 0, `${JSON.stringify(r.imgs)} bg ${r.bgImgs}`);
     L.check("A1 no panel header on the page", ww, !r.panel, `${r.panel}`);
     L.check("A1 the title is {sent} queries, {replies} replies", ww, r.text === want, `"${r.text}" vs "${want}"`);

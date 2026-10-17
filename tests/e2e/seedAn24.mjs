@@ -10,6 +10,8 @@
  *
  *   node tests/e2e/seedAn24.mjs pass      # "One Pass" — one query, a pass after 30 days
  *   node tests/e2e/seedAn24.mjs notime    # "No Stated Times" — four queries to two agencies that give no time
+ *   node tests/e2e/seedAn24.mjs thin      # "Two Due Later" (v24.1 B2) — two waiting queries due in 35 and 49 days
+ *   node tests/e2e/seedAn24.mjs baddate   # "Bad Reply Dates" (v24.1 R2) — a reply dated before its send, one 850 days after
  *   node tests/e2e/seedAn24.mjs restore
  */
 import { readFileSync, existsSync } from "node:fs";
@@ -37,8 +39,10 @@ const P = "seed-an24-";
 const day = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
 const cmd = process.argv[2];
 
-const MS = { pass: `${P}pass`, notime: `${P}notime` };
+const MS = { pass: `${P}pass`, notime: `${P}notime`, thin: `${P}thin`, baddate: `${P}baddate` };
 const AG = [`${P}ag-1`, `${P}ag-2`];
+/* v24.1: agents with exact stated windows, so a due date is known to the day */
+const AGW = [[`${P}ag-6w`, 6], [`${P}ag-8w`, 8]];
 const QS = {
   pass: [{ id: `${P}q-pass`, agent: 0, sent: 60, steps: [["Rejected", 30]] }],
   notime: [
@@ -46,6 +50,16 @@ const QS = {
     { id: `${P}q-n2`, agent: 2, sent: 40, steps: [] },
     { id: `${P}q-n3`, agent: 1, sent: 120, steps: [["Rejected", 70]] },
     { id: `${P}q-n4`, agent: 2, sent: 80, steps: [["Partial Requested", 50]] },
+  ],
+  thin: [
+    { id: `${P}q-t1`, agent: 1, sent: 7, steps: [] },   // 6 weeks: due in 35 days
+    { id: `${P}q-t2`, agent: 2, sent: 7, steps: [] },   // 8 weeks: due in 49 days
+  ],
+  baddate: [
+    { id: `${P}q-b1`, agent: 1, sent: 30, steps: [["Rejected", 40]] },   // the reply is dated BEFORE the send
+    { id: `${P}q-b2`, agent: 1, sent: 900, steps: [["Rejected", 50]] },  // 850 days after the send
+    { id: `${P}q-b3`, agent: 2, sent: 60, steps: [["Rejected", 30]] },   // a good reply, 30 days
+    { id: `${P}q-b4`, agent: 2, sent: 20, steps: [] },                   // still waiting
   ],
 };
 
@@ -73,9 +87,9 @@ function queryWithLog(b, ms, title, q, agentId) {
   }
 }
 
-if (cmd === "pass" || cmd === "notime") {
+if (cmd in MS) {
   const b = writeBatch(db);
-  const title = cmd === "pass" ? "One Pass" : "No Stated Times";
+  const title = { pass: "One Pass", notime: "No Stated Times", thin: "Two Due Later", baddate: "Bad Reply Dates" }[cmd];
   await manuscript(b, MS[cmd], title);
   let agentIds = [];
   if (cmd === "pass") {
@@ -84,6 +98,11 @@ if (cmd === "pass" || cmd === "notime") {
     const a = all.docs.find((d) => (d.data().responseTimeWeeks ?? 0) > 0);
     if (!a) throw new Error("no agent with a stated window");
     agentIds = [a.id];
+  } else if (cmd === "thin" || cmd === "baddate") {
+    const all = await getDocs(query(collection(db, "users", uid, "agents"), limit(1)));
+    const base = all.docs[0].data();
+    for (const [id, w] of AGW) b.set(doc(db, "users", uid, "agents", id), { ...base, id, name: `Window ${w}`, agency: `${w}-Week Agency`, responseTimeWeeks: w });
+    agentIds = AGW.map(([id]) => id);
   } else {
     const all = await getDocs(query(collection(db, "users", uid, "agents"), limit(1)));
     const base = all.docs[0].data();
@@ -97,7 +116,7 @@ if (cmd === "pass" || cmd === "notime") {
   await b.commit();
   console.log(MS[cmd]);
 } else if (cmd === "restore") {
-  for (const k of ["pass", "notime"]) {
+  for (const k of Object.keys(MS)) {
     for (const q of QS[k]) {
       for (const a of (await getDocs(collection(db, "users", uid, "queries", q.id, "activity"))).docs) await deleteDoc(a.ref);
       const rungs = ["sent", ...q.steps.map((_, i) => `r${i}`)];
@@ -106,7 +125,7 @@ if (cmd === "pass" || cmd === "notime") {
     }
     await deleteDoc(doc(db, "users", uid, "manuscripts", MS[k]));
   }
-  for (const id of AG) if ((await getDoc(doc(db, "users", uid, "agents", id))).exists()) await deleteDoc(doc(db, "users", uid, "agents", id));
+  for (const id of [...AG, ...AGW.map(([i]) => i)]) if ((await getDoc(doc(db, "users", uid, "agents", id))).exists()) await deleteDoc(doc(db, "users", uid, "agents", id));
   console.log("restored");
 } else {
   throw new Error(`unknown command ${cmd}`);
