@@ -133,4 +133,11 @@ are written and removed by `tests/e2e/seedAn24.mjs` in the same run.
 
 ## Integration and dev
 
-See the end of this file once deployed.
+- **Integration branch:** `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24` at `c6505699`: the branch
+  dev was serving when the pack finished (`…-db60-cl183` at `df68225a`, which builds to the served `index-DsVZarm0.js`,
+  confirmed by building it) plus `analytics-v24`. One conflict, `design-refs/.refhashes.json`, resolved by taking dev's
+  manifest and enrolling the 31 v24 refs into it. Gates there: tsc clean, production build clean, 9002 unit tests passed.
+  AN24 and AN21 green on its local build.
+- **Dev:** deployed hosting only, from a clean worktree, after re-checking the served hash. **Dev now serves
+  `index-DYhkEY1Y.js`.** AN24 green against the deployed site (all eleven, 255 readings). Nothing is merged to `main`;
+  prod is untouched; no rules or functions changed.
