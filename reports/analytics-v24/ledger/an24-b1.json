@@ -15,13 +15,7 @@
   "lock": "B1 card titles",
   "where": "1512",
   "ok": true,
-  "detail": "Queries sent | Asked to read more | Your typical reply time"
- },
- {
-  "lock": "B1 card 3's title starts 'Your'",
-  "where": "1512",
-  "ok": true,
-  "detail": "Your typical reply time"
+  "detail": "Queries sent | Asked to read more | Replies due"
  },
  {
   "lock": "B1 card 2's figure is requestRate",
@@ -36,28 +30,70 @@
   "detail": "21 vs 21+1"
  },
  {
-  "lock": "B1 card 3's figure is the typical in weeks",
+  "lock": "B1 card 3 renders",
   "where": "1512",
   "ok": true,
-  "detail": "2 vs 14"
+  "detail": "true"
  },
  {
-  "lock": "B1 one dot per reply",
+  "lock": "B1 card 3's title is 'Replies due'",
   "where": "1512",
   "ok": true,
-  "detail": "24 / 24 / 24"
+  "detail": "Replies due"
  },
  {
-  "lock": "B1 the TYPICAL mark sits at the typical (±1px)",
+  "lock": "B1 card 3's figure and unit follow the state table",
   "where": "1512",
   "ok": true,
-  "detail": "60.2 vs 60.2"
+  "detail": "1 / \"due in the next\\ntwo weeks\" vs 1 / due in the next\ntwo weeks"
  },
  {
-  "lock": "B1 the longest dot sits at the strip's end (±1px)",
+  "lock": "B1 card 3's rows: past, due later (zeros as 0)",
   "where": "1512",
   "ok": true,
-  "detail": "343.8 vs 343.8"
+  "detail": "13,5 13 past their time,5 due later"
+ },
+ {
+  "lock": "B1 card 3's stamp is the next due date, or absent",
+  "where": "1512",
+  "ok": true,
+  "detail": "next 27 Oct vs next 27 Oct"
+ },
+ {
+  "lock": "B1 one dot per open query not past its time",
+  "where": "1512",
+  "ok": true,
+  "detail": "6 vs 1+5"
+ },
+ {
+  "lock": "B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 off of 6"
+ },
+ {
+  "lock": "B1 today's mark at 22% (±1px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "75.6 vs 75.6"
+ },
+ {
+  "lock": "B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"text\":\"13 past\",\"none\":false,\"bg\":\"rgb(180, 85, 63)\"}"
+ },
+ {
+  "lock": "B1 the past count is S5's past reading",
+  "where": "1512",
+  "ok": true,
+  "detail": "13 vs \"13 of 20\""
+ },
+ {
+  "lock": "B1 past + soon + later + no stated time = S5's waiting rows",
+  "where": "1512",
+  "ok": true,
+  "detail": "13+1+5+1 vs 20"
  },
  {
   "lock": "B1 sent scrolls to S3",
@@ -72,10 +108,10 @@
   "detail": "12"
  },
  {
-  "lock": "B1 wait scrolls to S4",
+  "lock": "B1 due scrolls to S5",
   "where": "1512",
   "ok": true,
-  "detail": "12"
+  "detail": "18"
  },
  {
   "lock": "B1 three cards",
@@ -93,13 +129,7 @@
   "lock": "B1 card titles",
   "where": "1280",
   "ok": true,
-  "detail": "Queries sent | Asked to read more | Your typical reply time"
- },
- {
-  "lock": "B1 card 3's title starts 'Your'",
-  "where": "1280",
-  "ok": true,
-  "detail": "Your typical reply time"
+  "detail": "Queries sent | Asked to read more | Replies due"
  },
  {
   "lock": "B1 card 2's figure is requestRate",
@@ -114,28 +144,70 @@
   "detail": "21 vs 21+1"
  },
  {
-  "lock": "B1 card 3's figure is the typical in weeks",
+  "lock": "B1 card 3 renders",
   "where": "1280",
   "ok": true,
-  "detail": "2 vs 14"
+  "detail": "true"
  },
  {
-  "lock": "B1 one dot per reply",
+  "lock": "B1 card 3's title is 'Replies due'",
   "where": "1280",
   "ok": true,
-  "detail": "24 / 24 / 24"
+  "detail": "Replies due"
  },
  {
-  "lock": "B1 the TYPICAL mark sits at the typical (±1px)",
+  "lock": "B1 card 3's figure and unit follow the state table",
   "where": "1280",
   "ok": true,
-  "detail": "47.5 vs 47.5"
+  "detail": "1 / \"due in the next\\ntwo weeks\" vs 1 / due in the next\ntwo weeks"
  },
  {
-  "lock": "B1 the longest dot sits at the strip's end (±1px)",
+  "lock": "B1 card 3's rows: past, due later (zeros as 0)",
   "where": "1280",
   "ok": true,
-  "detail": "271.4 vs 271.4"
+  "detail": "13,5 13 past their time,5 due later"
+ },
+ {
+  "lock": "B1 card 3's stamp is the next due date, or absent",
+  "where": "1280",
+  "ok": true,
+  "detail": "next 27 Oct vs next 27 Oct"
+ },
+ {
+  "lock": "B1 one dot per open query not past its time",
+  "where": "1280",
+  "ok": true,
+  "detail": "6 vs 1+5"
+ },
+ {
+  "lock": "B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 off of 6"
+ },
+ {
+  "lock": "B1 today's mark at 22% (±1px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "59.7 vs 59.7"
+ },
+ {
+  "lock": "B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill",
+  "where": "1280",
+  "ok": true,
+  "detail": "{\"text\":\"13 past\",\"none\":false,\"bg\":\"rgb(180, 85, 63)\"}"
+ },
+ {
+  "lock": "B1 the past count is S5's past reading",
+  "where": "1280",
+  "ok": true,
+  "detail": "13 vs \"13 of 20\""
+ },
+ {
+  "lock": "B1 past + soon + later + no stated time = S5's waiting rows",
+  "where": "1280",
+  "ok": true,
+  "detail": "13+1+5+1 vs 20"
  },
  {
   "lock": "B1 sent scrolls to S3",
@@ -150,9 +222,9 @@
   "detail": "12"
  },
  {
-  "lock": "B1 wait scrolls to S4",
+  "lock": "B1 due scrolls to S5",
   "where": "1280",
   "ok": true,
-  "detail": "12"
+  "detail": "19"
  }
 ]

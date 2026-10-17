@@ -21,7 +21,7 @@
   "lock": "C1 every section answers",
   "where": "1512",
   "ok": true,
-  "detail": "158 238 141 237 315 114 109"
+  "detail": "158 238 141 287 315 114 109"
  },
  {
   "lock": "C1 no older section left",
@@ -147,7 +147,7 @@
   "lock": "C1 every section answers",
   "where": "1280",
   "ok": true,
-  "detail": "158 238 141 237 315 114 109"
+  "detail": "158 238 141 287 315 114 109"
  },
  {
   "lock": "C1 no older section left",

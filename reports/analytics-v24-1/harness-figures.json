@@ -1,0 +1,151 @@
+{
+ "sent": 51,
+ "replies": 24,
+ "requests": 21,
+ "offers": 1,
+ "outcomes": {
+  "sent": 51,
+  "asked": 21,
+  "waiting": 20,
+  "ended": {
+   "total": 10,
+   "letter": 8,
+   "closed": 1,
+   "withdrew": 1
+  },
+  "of": {
+   "offer": 1,
+   "open": 18,
+   "saidNo": 2,
+   "withdrew": 0
+  },
+  "full": 14,
+  "ids": {
+   "asked": [
+    "cor-closed",
+    "cor-move-a",
+    "cor-pair",
+    "cor-undo",
+    "rj-dupe",
+    "rj-send",
+    "seed-cal-passed865-q",
+    "seed-pkgq-10",
+    "seed-pkgq-3",
+    "seed-pkgq-4",
+    "seed-pkgq-9",
+    "seed-query-10",
+    "seed-query-11",
+    "seed-query-12",
+    "seed-query-14",
+    "seed-query-20",
+    "seed-query-21",
+    "seed-query-23",
+    "seed-query-7",
+    "seed-query-8",
+    "seed-query-9"
+   ],
+   "waiting": [
+    "cor-move-b",
+    "probe-dangling-pkg",
+    "probe-goalstress-today",
+    "probe-un-noagent",
+    "rj-nudge",
+    "seed-cal-bang-q",
+    "seed-cal-near-q",
+    "seed-cal-passed20-q",
+    "seed-cal-soon-q",
+    "seed-pkgq-1",
+    "seed-pkgq-2",
+    "seed-pkgq-7",
+    "seed-query-1",
+    "seed-query-19",
+    "seed-query-2",
+    "seed-query-22",
+    "seed-query-3",
+    "seed-query-4",
+    "seed-query-5",
+    "seed-query-6"
+   ],
+   "ended": [
+    "cor-move-c",
+    "rej-query-1",
+    "seed-pkgq-5",
+    "seed-pkgq-6",
+    "seed-pkgq-8",
+    "seed-query-13",
+    "seed-query-15",
+    "seed-query-16",
+    "seed-query-17",
+    "seed-query-18"
+   ]
+  }
+ },
+ "rate": {
+  "pct": 41,
+  "n": 21,
+  "of": 51
+ },
+ "expected": {
+  "past": 44,
+  "replied": 29,
+  "closed": 2,
+  "overdue": 13,
+  "inside": 6,
+  "noTime": 1,
+  "undated": 0
+ },
+ "bench": [
+  {
+   "key": "rate",
+   "you": 41,
+   "typical": 6,
+   "unit": "%",
+   "verdict": "Well above"
+  },
+  {
+   "key": "reply",
+   "you": 66,
+   "typical": 50,
+   "unit": "%",
+   "verdict": "Above"
+  },
+  {
+   "key": "sent",
+   "you": 51,
+   "typical": 44,
+   "unit": "",
+   "verdict": "About typical"
+  }
+ ],
+ "replyNoTime": 0,
+ "repliesPlaced": 24,
+ "waiting": 20,
+ "waitingNoTime": 1,
+ "readingUndated": 5,
+ "reading": 18,
+ "month": 30,
+ "tally": {
+  "all": 29,
+  "dated": 24,
+  "noDate": 5,
+  "bad": [
+   {
+    "id": "seed-query-11",
+    "agency": "Kwan & Hall",
+    "sentMs": 1783468800000,
+    "rawDays": -10
+   }
+  ]
+ },
+ "due": {
+  "past": 13,
+  "soon": 1,
+  "later": 5,
+  "noStatedTime": 1,
+  "next": {
+   "atMs": 1793059200000,
+   "days": 10,
+   "agency": "Curtis Vane"
+  }
+ }
+}

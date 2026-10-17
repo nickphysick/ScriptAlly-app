@@ -31,7 +31,7 @@ const SECS = [["01-what-happened", 0], ["02-benchmarking", 1], ["03-how-many", 2
 const want = (name: string) => !ONLY || ONLY.split(",").some((o) => name.includes(o));
 
 test("populated", async ({ page }) => {
-  test.skip(ONLY === "empty" || ONLY === "states", "AN24_ONLY");
+  test.skip(ONLY === "empty" || ONLY === "states" || ONLY === "due" || ONLY === "figures", "AN24_ONLY");
   test.setTimeout(600_000);
   mkdirSync(DIR, { recursive: true });
   for (const w of [1512, 1280, 390]) {
@@ -115,7 +115,28 @@ test("figures", async ({ page }) => {
     const v = m.v24;
     return { sent: m.sent, replies: m.replies, requests: m.requests, offers: m.offers, outcomes: v.outcomes, rate: v.rate, expected: v.expected, bench: v.bench,
       replyNoTime: v.keeping.unplaced, repliesPlaced: v.keeping.placed, waiting: v.waiting.waiting.length, waitingNoTime: v.waiting.noTime,
-      readingUndated: v.waiting.reading.filter((r: { askedMs: number | null }) => r.askedMs === null).length, reading: v.waiting.reading.length, month: v.month };
+      readingUndated: v.waiting.reading.filter((r: { askedMs: number | null }) => r.askedMs === null).length, reading: v.waiting.reading.length, month: v.month,
+      tally: v.tally, due: { past: v.due.past, soon: v.due.soon, later: v.due.later, noStatedTime: v.due.noStatedTime, next: v.due.next } };
   });
-  writeFileSync(`${DIR}/../harness-figures.json`, JSON.stringify(f, null, 1));
+  writeFileSync(process.env.AN24_FIGS ?? `${DIR}/../harness-figures.json`, JSON.stringify(f, null, 1));
+});
+
+/** v24.1: the Replies due card beside the reference — the harness account, the thin fixture and nothing due — and the top. */
+test("due", async ({ page }) => {
+  test.skip(!!ONLY && !ONLY.includes("due"), "AN24_ONLY");
+  test.setTimeout(400_000);
+  const dir = process.env.AN241_DIR ?? "reports/analytics-v24-1/shots";
+  mkdirSync(dir, { recursive: true });
+  for (const f of ["thin", "pass"]) execSync(`node tests/e2e/seedAn24.mjs ${f}`, { stdio: "pipe" });
+  try {
+    for (const w of [1512, 1280]) {
+      for (const [ms, name] of [["seed-ms-1", "card-full"], ["seed-an24-thin", "card-thin"], ["seed-an24-pass", "card-nothing-due"]] as const) {
+        const p = await page.context().newPage();
+        await openMs(p, w, ms);
+        if (ms === "seed-ms-1") await p.screenshot({ path: `${dir}/top-${w}.png` });
+        await p.locator('[data-a21="desk-card"][data-key="due"]:visible').first().screenshot({ path: `${dir}/${name}-${w}.png` });
+        await p.close();
+      }
+    }
+  } finally { execSync("node tests/e2e/seedAn24.mjs restore", { stdio: "pipe" }); }
 });

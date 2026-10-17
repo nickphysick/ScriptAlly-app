@@ -1,0 +1,139 @@
+
+Running 5 tests using 1 worker
+
+[1/5] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/5] [measure] › tests/e2e/analyticsV24.measure.ts:195:1 › AN24-B1 · desk
+[measure] › tests/e2e/analyticsV24.measure.ts:195:1 › AN24-B1 · desk
+  ✗ B1 card titles · 1512 — Queries sent | Asked to read more | Your typical reply time
+
+  ✗ B1 card 3 renders · 1512 — false
+
+  ✗ B1 due scrolls to S5 · 1512 — no such card
+
+  ✗ B1 card titles · 1280 — Queries sent | Asked to read more | Your typical reply time
+
+  ✗ B1 card 3 renders · 1280 — false
+
+  ✗ B1 due scrolls to S5 · 1280 — no such card
+
+LEDGER an24-b1: 18 readings, 6 failed
+
+  1) [measure] › tests/e2e/analyticsV24.measure.ts:195:1 › AN24-B1 · desk ──────────────────────────
+
+    Error: an24-b1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 38
+    Received:    18
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:240:5
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-B1-·-desk-measure/error-context.md
+
+
+[3/5] [measure] › tests/e2e/analyticsV24.measure.ts:611:3 › AN24 v24.1 fixtures › AN24-B2 · thin
+[measure] › tests/e2e/analyticsV24.measure.ts:611:3 › AN24 v24.1 fixtures › AN24-B2 · thin
+  ✗ B2 card 3 renders · 1512 · seed-an24-thin — false
+
+  ✗ B2 card 3 renders · 1512 · seed-an24-pass — false
+
+  ✗ B2 card 3 renders · 1280 · seed-an24-thin — false
+
+  ✗ B2 card 3 renders · 1280 · seed-an24-pass — false
+
+LEDGER an24-b2: 4 readings, 4 failed
+
+  2) [measure] › tests/e2e/analyticsV24.measure.ts:611:3 › AN24 v24.1 fixtures › AN24-B2 · thin ────
+
+    Error: an24-b2: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 40
+    Received:    4
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+    > 41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      43 |   }
+      44 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:41:77)
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:636:7
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-v24-1-fixtures-AN24-B2-·-thin-measure/error-context.md
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-v24-1-fixtures-AN24-B2-·-thin-measure/error-context.md
+
+
+[4/5] [measure] › tests/e2e/analyticsV24.measure.ts:639:3 › AN24 v24.1 fixtures › AN24-R1 · replies
+[measure] › tests/e2e/analyticsV24.measure.ts:639:3 › AN24 v24.1 fixtures › AN24-R1 · replies
+  ✗ R1 replies = asked + said no to the letter · seed-ms-1 — 24 vs 21+8
+
+  ✗ R1 replies = asked + said no to the letter · seed-an24-baddate — 2 vs 0+3
+
+LEDGER an24-r1: 15 readings, 2 failed
+
+  3) [measure] › tests/e2e/analyticsV24.measure.ts:639:3 › AN24 v24.1 fixtures › AN24-R1 · replies ─
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "R1 replies = asked + said no to the letter · seed-ms-1 — 24 vs 21+8",
+    +   "R1 replies = asked + said no to the letter · seed-an24-baddate — 2 vs 0+3",
+    + ]
+
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+      41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      43 |   }
+      44 | }
+      45 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:42:95)
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:656:7
+
+    Error Context: test-results/analyticsV24.measure.ts-AN-d6566--fixtures-AN24-R1-·-replies-measure/error-context.md
+
+    Error Context: test-results/analyticsV24.measure.ts-AN-d6566--fixtures-AN24-R1-·-replies-measure/error-context.md
+
+
+[5/5] [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates
+  4) [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates ───
+
+    TypeError: Cannot read properties of undefined (reading 'bad')
+
+      672 |           typical: [...sec.querySelectorAll<HTMLElement>('[data-a24="reading-fig"]')].map((x) => x.textContent ?? "")[2] ?? "" };
+      673 |       });
+    > 674 |       L.check("R2 the bad dates are found", ww, (m.v24.tally.bad as { id: string; rawDays: number }[]).map((b) => b.id).sort().join(",") === "seed-an24-q-b1,seed-an24-q-b2", JSON.stringify(m.v24.tally.bad));
+          |                                                              ^
+      675 |       L.check("R2 a reply dated before its send, or two years after, is not in S4's rows", ww, !r.rows.includes("seed-an24-q-b1") && !r.rows.includes("seed-an24-q-b2") && r.rows.includes("seed-an24-q-b3"), r.rows.join(","));
+      676 |       L.check("R2 the typical rests on the good reply alone", ww, JSON.stringify(m.v24.keeping.all) === "[30]" && r.typical === "4 wks", `${JSON.stringify(m.v24.keeping.all)} ${r.typical}`);
+      677 |       L.check("R2 S4 counts them under 'no reply date'", ww, /Two replies have no reply date and are left out\./.test(r.answer), r.answer);
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:674:62
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-v24-1-fixtures-AN24-R2-·-dates-measure/error-context.md
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-v24-1-fixtures-AN24-R2-·-dates-measure/error-context.md
+
+
+  4 failed
+    [measure] › tests/e2e/analyticsV24.measure.ts:195:1 › AN24-B1 · desk ───────────────────────────
+    [measure] › tests/e2e/analyticsV24.measure.ts:611:3 › AN24 v24.1 fixtures › AN24-B2 · thin ─────
+    [measure] › tests/e2e/analyticsV24.measure.ts:639:3 › AN24 v24.1 fixtures › AN24-R1 · replies ──
+    [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates ────
+  1 passed (1.8m)

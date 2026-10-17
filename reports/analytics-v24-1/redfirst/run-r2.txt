@@ -1,0 +1,61 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates
+[measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates
+  ✗ R2 the bad dates are found · 1512 — null
+
+  ✗ R2 a reply dated before its send, or two years after, is not in S4's rows · 1512 — seed-an24-q-b3,seed-an24-q-b2
+
+  ✗ R2 the typical rests on the good reply alone · 1512 — [30,850] 63 wks
+
+  ✗ R2 S4 counts them under 'no reply date' · 1512 — Most agents say in their guidelines how long they take to reply. Of the 2 who have replied to you, 1 kept to their time and 1 took longer, by 115 wks. Each row shows what the agent said next to what they actually took.
+
+  ✗ R2 the bad dates are found · 1280 — null
+
+  ✗ R2 a reply dated before its send, or two years after, is not in S4's rows · 1280 — seed-an24-q-b3,seed-an24-q-b2
+
+  ✗ R2 the typical rests on the good reply alone · 1280 — [30,850] 63 wks
+
+  ✗ R2 S4 counts them under 'no reply date' · 1280 — Most agents say in their guidelines how long they take to reply. Of the 2 who have replied to you, 1 kept to their time and 1 took longer, by 115 wks. Each row shows what the agent said next to what they actually took.
+
+LEDGER an24-r2: 8 readings, 8 failed
+
+  1) [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates ───
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "R2 the bad dates are found · 1512 — null",
+    +   "R2 a reply dated before its send, or two years after, is not in S4's rows · 1512 — seed-an24-q-b3,seed-an24-q-b2",
+    +   "R2 the typical rests on the good reply alone · 1512 — [30,850] 63 wks",
+    +   "R2 S4 counts them under 'no reply date' · 1512 — Most agents say in their guidelines how long they take to reply. Of the 2 who have replied to you, 1 kept to their time and 1 took longer, by 115 wks. Each row shows what the agent said next to what they actually took.",
+    +   "R2 the bad dates are found · 1280 — null",
+    +   "R2 a reply dated before its send, or two years after, is not in S4's rows · 1280 — seed-an24-q-b3,seed-an24-q-b2",
+    +   "R2 the typical rests on the good reply alone · 1280 — [30,850] 63 wks",
+    +   "R2 S4 counts them under 'no reply date' · 1280 — Most agents say in their guidelines how long they take to reply. Of the 2 who have replied to you, 1 kept to their time and 1 took longer, by 115 wks. Each row shows what the agent said next to what they actually took.",
+    + ]
+
+      40 |     console.log(`LEDGER ${this.name}: ${this.rows.length} readings, ${this.rows.filter((r) => !r.ok).length} failed`);
+      41 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 42 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      43 |   }
+      44 | }
+      45 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:42:95)
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV24.measure.ts:680:7
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-v24-1-fixtures-AN24-R2-·-dates-measure/error-context.md
+
+    Error Context: test-results/analyticsV24.measure.ts-AN24-v24-1-fixtures-AN24-R2-·-dates-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates ────
+  1 passed (38.0s)
