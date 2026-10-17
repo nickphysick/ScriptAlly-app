@@ -402,3 +402,67 @@ test("TD52 C1 — ⤢ opens the drawer; kind filters hide chips; Month and Week 
   }
   L.done(2 * 14);
 });
+
+/* ───────────────────────── D1 · one drawing per group ───────────────────────── */
+const ART_W: Record<string, number> = { you: 42, chase: 49, quiet: 50, tidy: 53, mine: 44 };
+test("TD52 D1 — one drawing per group; none in the desk head; each stands 3px above its band's floor, centred at 31; the strip never paints over one", async ({ page }) => {
+  const L = new Ledger("D1");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    await mutate(page, "D1");
+    await mutate(page, "D1b");
+    const r = await page.evaluate(() => {
+      const { r: root, qa, q } = (window as unknown as W).__td5();
+      const wide = !!document.querySelector(".ws-app.sheet-wide");
+      const bandH = q('[data-td5="band"]')!.getBoundingClientRect().height;
+      /* rendered on the page (a band below the fold still counts: its copy is on the page, not on the screen yet) */
+      const vis = (e: Element) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
+      const imgs = [...root.querySelectorAll("img")].filter(vis).map((i) => i.getAttribute("src"));
+      const head = q('[data-td5="desk-head"]');
+      const bands = qa('[data-td5="group-block"]').map((g) => {
+        const band = g.querySelector('[data-td5="band"]')!, img = band.querySelector("img")!;
+        const bb = band.getBoundingClientRect(), ib = img.getBoundingClientRect();
+        img.style.pointerEvents = "auto";
+        const hit = ib.top >= 0 ? document.elementFromPoint(ib.left + ib.width / 2, ib.top + 2) : null;
+        img.style.pointerEvents = "";
+        return { g: g.dataset.g!, src: img.getAttribute("src"), w: ib.width, cx: ib.left + ib.width / 2 - bb.left, foot: bb.bottom - ib.bottom, top: ib.top - bb.top, hitImg: hit === img, onScreen: ib.top >= 0 && ib.bottom <= innerHeight, hit: hit ? (hit.className || hit.tagName) : null };
+      });
+      return { wide, bandH, imgs, headImgs: head ? head.querySelectorAll("img").length : -1, bands };
+    });
+    const k = r.wide ? 1 : 44 / 50;
+    L.check(`${w} the desk head has no drawing`, r.headImgs === 0, String(r.headImgs));
+    L.check(`${w} groups to read`, r.bands.length >= 3, String(r.bands.length));
+    for (const b of r.bands) {
+      L.check(`${w} ${b.g}: one copy of its drawing on the page`, r.imgs.filter((x) => x === b.src).length === 1, String(r.imgs.filter((x) => x === b.src).length));
+      L.check(`${w} ${b.g}: width ${ART_W[b.g]} × ${k.toFixed(2)} (±1)`, near(b.w, ART_W[b.g] * k, 1), b.w.toFixed(1));
+      L.check(`${w} ${b.g}: centred at 31 (±1)`, near(b.cx, 31, 1), b.cx.toFixed(1));
+      L.check(`${w} ${b.g}: foot 3 above the floor (±1)`, near(b.foot, 3, 1), `${b.foot.toFixed(1)} (top ${b.top.toFixed(1)}, band ${r.bandH})`);
+      if (b.onScreen) L.check(`${w} ${b.g}: nothing paints over its top edge`, b.hitImg, String(b.hit));
+    }
+    /* stuck: scroll until a band sits under the strip, so its drawing crosses the strip's lower edge */
+    const stuck = await page.evaluate(async () => {
+      const { q, qa } = (window as unknown as W).__td5();
+      const strip = q(".td5-strip")!;
+      /* the tray scrolls itself (its strip and bands stick inside `.td5-tray`), not the page */
+      const tray = q(".td5-tray")!;
+      const bands = qa('[data-td5="band"]');
+      const second = bands[1] ?? bands[0];
+      tray.scrollTop += second.getBoundingClientRect().top - strip.getBoundingClientRect().bottom + 40;
+      await new Promise((r) => setTimeout(r, 300));
+      const sb = strip.getBoundingClientRect();
+      const band = qa('[data-td5="band"]').find((b) => Math.abs(b.getBoundingClientRect().top - sb.bottom) < 2);
+      if (!band) return { found: false, crosses: false, hit: null as string | null, hitImg: false };
+      const img = band.querySelector("img")!, ib = img.getBoundingClientRect();
+      img.style.pointerEvents = "auto";
+      const y = Math.max(ib.top + 2, sb.top + 1);
+      const hit = document.elementFromPoint(ib.left + ib.width / 2, y);
+      img.style.pointerEvents = "";
+      return { found: true, crosses: ib.top < sb.bottom - 1, hit: hit ? (hit.className || hit.tagName) : null, hitImg: hit === img };
+    });
+    L.check(`${w} a band stuck under the strip`, stuck.found && stuck.crosses, JSON.stringify(stuck));
+    L.check(`${w} its drawing crosses the strip cleanly (on top of it)`, stuck.hitImg, String(stuck.hit));
+  }
+  L.done(2 * 14);
+});

@@ -37,12 +37,15 @@ export class Ledger {
 
 /** one named break per lock, applied in the page */
 export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
+  /* D1b — the bands back under the tray's sticky strip (proves the overpaint read, not only the copies) */
+  D1b: { css: `[data-todo-v5] .td5-band { z-index: 10 !important; }` },
   /* A1 — the card sets the header's height again */
   A1: { css: `[data-todo-v5] .td52-cal { contain: none !important; container-type: normal !important; }` },
   /* A2 — the day column at 140px */
   A2: { css: `[data-todo-v5] .td52-cal { --cal-dayw: 140px !important; }` },
   /* D1 — the desk head's art restored */
-  D1: { css: `[data-todo-v5] .td5-chead img { display: block !important; }` },
+  D1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="desk-head"]')].find((e) => e.getBoundingClientRect().height > 0);
+    const b = document.querySelector('[data-todo-v5] [data-td5="band-art"]'); if (h && b) { const i = document.createElement("img"); i.src = b.getAttribute("src"); i.style.cssText = "position:absolute;left:8px;top:-10px;width:46px"; h.prepend(i); } })()` },
 };
 export async function mutate(page: Page, lock: string) {
   const m = MUT === lock ? MUTATIONS[MUT] : null;

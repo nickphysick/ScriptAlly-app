@@ -179,6 +179,16 @@
 .td52-pk .td52-pr { display: flex; align-items: center; gap: 7px; line-height: 1.55; font: inherit !important; }
 .td52-pk .td52-pr i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
 
+/* ═════════ §D · ONE DRAWING PER GROUP ═════════
+   The tray's band carries the group's drawing; the desk card's head band does not repeat it. Each drawing stands 3px
+   above its band's floor, centred at x 31, at the width the group's table gives for a 56px band; a 44px band scales it
+   by 44/50 (the reference's bands are 50 tall: its tops put every drawing's foot 3px above a 50px floor). */
+.td5-root { --td5-artk: 0.88; }
+.ws-app.sheet-wide .td5-root { --td5-artk: 1; }
+.td5-root .td5-band { z-index: 13; }
+.td5-root .td5-band img { top: auto; bottom: 3px; width: calc(var(--aw) * var(--td5-artk)); left: calc(31px - var(--aw) * var(--td5-artk) / 2); filter: drop-shadow(0 1.5px 1px rgba(28, 19, 15, 0.14)); }
+.td5-root .td5-chead { padding-left: 24px; }
+
 /* ═════════ §C · THE SLIDE-OUT CALENDAR (portalled to the body: literals, never `--td5-*`) ═════════ */
 .td52-scrim { position: fixed; inset: 0; z-index: 130; background: rgba(28, 19, 15, 0.42); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .td52-scrim.on { opacity: 1; pointer-events: auto; }

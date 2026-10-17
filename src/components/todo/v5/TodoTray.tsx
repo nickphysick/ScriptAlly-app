@@ -1030,7 +1030,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                         return (
                           <div key={gd.id} className="td5-grp" data-td5="group-block" data-g={gd.id} data-shut={shut[gd.id] ? "" : undefined}>
                             <button type="button" className="td5-band" data-td5="band" style={{ background: gd.tint, color: gd.ink }} aria-expanded={!shut[gd.id]} onClick={() => toggleShut(gd.id)}>
-                              <img src={gd.art.src} alt="" aria-hidden="true" data-td5="band-art" style={{ width: gd.art.w, left: gd.art.l, top: gd.art.t }} />
+                              <img src={gd.art.src} alt="" aria-hidden="true" data-td5="band-art" style={{ "--aw": `${gd.art.w}px` } as React.CSSProperties} />
                               <span className="td5-bn">{gd.name}</span><span className="td5-bc">{g.items.length}</span><span className="td5-chv" aria-hidden="true">▾</span>
                             </button>
                             {shut[gd.id] ? null : <div className="td5-rows">{renderRows(g)}</div>}

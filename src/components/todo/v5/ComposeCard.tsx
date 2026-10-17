@@ -174,7 +174,6 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
   return (
     <article className="td5-dcard td5-compose" data-td5="compose" data-mode={d.mode} data-work="">
       <div className="td5-chead" data-td5="desk-head" style={{ background: isTask ? g.tint : PAPER_BG[d.paper], color: g.ink }}>
-        <img src={g.art.src} alt="" aria-hidden="true" style={{ width: g.art.w + 6, left: g.art.l + 4, top: g.art.t - 2 }} />
         <span className="td5-cn">{edit ? (isTask ? "Edit task" : "Edit note") : isTask ? "New task" : "New note"}</span>
         <span className="td5-why">{isTask ? "From you" : "For your corkboard"}</span>
         <span className="td5-sp" />
