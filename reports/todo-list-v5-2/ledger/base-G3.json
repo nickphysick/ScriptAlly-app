@@ -1,38 +1,8 @@
 [
  {
   "lock": "G3",
-  "where": "@1512 no SELECT ALL",
-  "ok": true,
-  "detail": ""
- },
- {
-  "lock": "G3",
-  "where": "@1512 no row checkboxes",
-  "ok": true,
-  "detail": "0"
- },
- {
-  "lock": "G3",
-  "where": "@1512 no bulk bar",
-  "ok": true,
-  "detail": "0"
- },
- {
-  "lock": "G3",
-  "where": "@1280 no SELECT ALL",
-  "ok": true,
-  "detail": ""
- },
- {
-  "lock": "G3",
-  "where": "@1280 no row checkboxes",
-  "ok": true,
-  "detail": "0"
- },
- {
-  "lock": "G3",
-  "where": "@1280 no bulk bar",
-  "ok": true,
+  "where": "three Gone quiet rows to close",
+  "ok": false,
   "detail": "0"
  }
 ]

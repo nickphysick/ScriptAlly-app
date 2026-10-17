@@ -11,8 +11,9 @@
 import { expect, test } from "@playwright/test";
 import { doc, setDoc } from "firebase/firestore";
 import { harnessDb } from "./harnessDocs";
+import { rawSet, restoreSet, type Raw } from "./journeyGuard";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { DIR, LIB as LIB_TD5, Ledger, SIZES, canon as canonOf, flagId, fontsReady, leaveDesk, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
+import { DIR, LIB as LIB_TD5, Ledger, SIZES, canon as canonOf, diffSets, flagId, fontsReady, leaveDesk, mutate, near, openTodo, readBadge, readSet, restoreDocs, snapDocs, type Snap } from "./td52Lib";
 
 test.setTimeout(480_000);
 /* ⚠️ a measurement that writes puts the account back in the same run, whatever happened (the house rule) */
@@ -923,16 +924,86 @@ test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; 
   L.done(20);
 });
 
-test("TD52 G3 — the bulk close is skipped under the pack's Stop: no select UI", async ({ page }) => {
+/* G3 — close several Gone quiet at once: the bulk save IS three single close-journey saves, and one Undo is exact */
+const qGuards: { before: Raw; ids: string[] }[] = [];
+test.afterEach(async () => {
+  if (qGuards.length) await new Promise((r) => setTimeout(r, 2500));
+  while (qGuards.length) { const g = qGuards.pop()!; const f = await restoreSet(g.before, g.ids); if (f.length) console.log(`[guard] restored:\n  ${f.join("\n  ")}`); }
+});
+/** what a save wrote, comparable across two saves of one query: changed documents only, with generated ids and
+ *  times written DURING this run masked (a historical date still compares — only "now" is allowed to differ) */
+const RUN_START = Date.now() - 60_000;
+const maskNow = (v: string) => v
+  .replace(/"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z)"/g, (m, iso: string) => (Date.parse(iso) >= RUN_START ? '"<now>"' : m))
+  .replace(/ts:(\d{12,})/g, (m, ms: string) => (Number(ms) >= RUN_START ? "ts:<now>" : m))
+  .replace(/"(act|evt|entry|log)-[a-z0-9-]+"/g, '"<id>"')
+  .replace(/"[A-Za-z0-9]{20}"/g, '"<autoid>"');
+const written = (before: Map<string, string>, after: Map<string, string>) => [...after.entries()]
+  .filter(([k, v]) => before.get(k) !== v)
+  .map(([k, v]) => `${/[A-Za-z0-9]{20}$/.test(k) || !before.has(k) ? k.replace(/\/[^/]*$/, "/*") : k}=${maskNow(v)}`)
+  .concat([...before.keys()].filter((k) => !after.has(k)).map((k) => `removed ${k}`))
+  .sort();
+test("TD52 G3 — select three Gone quiet, close: each query written exactly as a single close-journey save; three slips; one Undo restores all", async ({ page }) => {
   const L = new Ledger("G3");
-  for (const vp of SIZES) {
+  const vp = SIZES[0];
+  await openTodo(page, vp);
+  await mutate(page, "G3");
+  const rows = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').filter((r) => r.querySelector('[data-td52="bulk-check"]')).map((r) => ({ key: r.dataset.td5Row!, q: r.dataset.query! })));
+  L.check("three Gone quiet rows to close", rows.length >= 3, String(rows.length));
+  if (rows.length < 3) { L.done(1); return; }
+  const pick = rows.slice(0, 3);
+  const ids = pick.map((r) => r.q);
+  qGuards.push({ before: await rawSet(ids), ids });
+  const before = await readSet(ids);
+  const beforeOf = new Map<string, Map<string, string>>();
+  for (const q of ids) beforeOf.set(q, await readSet([q]));
+  /* the SINGLE saves, one at a time through the desk's close journey (its noreply door), each undone after */
+  const single = new Map<string, string[]>();
+  for (const r of pick) {
     await openTodo(page, vp);
-    const r = await page.evaluate(() => { const { r: root } = (window as unknown as W).__td5(); return { all: /SELECT ALL/i.test(root.textContent ?? ""), boxes: root.querySelectorAll('[role="checkbox"]').length, bar: root.querySelectorAll('[data-td52="bulk"]').length }; });
-    L.check(`@${vp.width} no SELECT ALL`, !r.all, "");
-    L.check(`@${vp.width} no row checkboxes`, r.boxes === 0, String(r.boxes));
-    L.check(`@${vp.width} no bulk bar`, r.bar === 0, String(r.bar));
+    await rowLoc(page, r.key).click(); await page.waitForTimeout(400);
+    await page.locator('[data-todo-v5] [data-td5="act"]').click();
+    await page.locator('[data-td5-slot] [data-qad-drawer="close"]').waitFor({ timeout: 10_000 });
+    const skip = page.locator("[data-td5-slot] .qad-skip");
+    if (await skip.count()) await skip.first().click();
+    await page.waitForTimeout(500);
+    await page.locator("[data-td5-slot] [data-qad-primary]").first().click();
+    await expect.poll(async () => written(beforeOf.get(r.q)!, await readSet([r.q])).length > 0, { timeout: 15_000 }).toBe(true);
+    await page.waitForTimeout(1200);
+    single.set(r.q, written(beforeOf.get(r.q)!, await readSet([r.q])));
+    /* the single save's own Undo (the toast) */
+    const u = page.locator(".tdb-toast .tdb-toast-act").first();
+    const had = await u.isVisible().catch(() => false);
+    if (had) await u.click();
+    const mineBefore = beforeOf.get(r.q)!;
+    const undone = await expect.poll(async () => diffSets(mineBefore, await readSet([r.q])).length, { timeout: 20_000 }).toBe(0).then(() => true).catch(() => false);
+    L.check(`single close of ${r.q}: written, and its Undo put it back`, had && undone && (single.get(r.q)?.length ?? 0) > 0, `${single.get(r.q)?.length} documents${undone ? "" : " · left: " + diffSets(mineBefore, await readSet([r.q])).slice(0, 4).join(" · ").slice(0, 600)}`);
+    if (!undone) { L.done(10); return; }
   }
-  L.done(6);
+  /* the BULK save: the same three, selected and closed together */
+  await openTodo(page, vp);
+  const slips0 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+  for (const r of pick) await page.locator(`[data-todo-v5] [data-td5-row="${r.key}"] [data-td52="bulk-check"]`).click();
+  const bar = await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="bulk"]') as HTMLElement | null)?.innerText?.replace(/\s+/g, " ").trim() ?? null);
+  L.check("the bar: '3 selected · Cancel · Close 3 queries'", bar === "3 selected Cancel Close 3 queries", String(bar));
+  const checked = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td52="bulk-check"][aria-checked="true"]').length);
+  L.check("three rows checked (role checkbox)", checked === 3, String(checked));
+  await page.locator('[data-todo-v5] [data-td52="bulk-close"]').click();
+  await expect.poll(async () => page.locator(".tdb-toast").first().textContent().catch(() => ""), { timeout: 30_000 }).toMatch(/Closed 3 queries · Moved to Closed/);
+  await page.waitForTimeout(1500);
+  for (const r of pick) {
+    const mine = written(beforeOf.get(r.q)!, await readSet([r.q]));
+    const want = single.get(r.q) ?? [];
+    const same = JSON.stringify(mine) === JSON.stringify(want);
+    L.check(`${r.q}: the bulk wrote what a single close writes, field by field`, same && mine.length > 0, same ? `${mine.length} documents` : `bulk ${JSON.stringify(mine).slice(0, 400)} · single ${JSON.stringify(want).slice(0, 400)}`);
+  }
+  const slips1 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+  L.check("three slips land", slips1 === slips0 + 3, `${slips0} → ${slips1}`);
+  await page.locator(".tdb-toast .tdb-toast-act").first().click();
+  const back = await expect.poll(async () => diffSets(before, await readSet(ids)).length, { timeout: 30_000 }).toBe(0).then(() => true).catch(() => false);
+  L.check("one Undo restores the account byte for byte", back, back ? "" : diffSets(before, await readSet(ids)).slice(0, 4).join(" · "));
+  if (back) qGuards.pop();
+  L.done(10);
 });
 
 /* ───────────────────────── H · feel and guidance ───────────────────────── */
@@ -1032,7 +1103,7 @@ test("TD52 H1 — rows glide (none under reduced motion); a helpful empty filter
   L.done(15);
 });
 
-test("TD52 H2 — one Esc order: the dial menu, the drawer, Find's text (v5.1's layer), the pin — one each", async ({ page }) => {
+test("TD52 H2 — one Esc order: the dial menu, the bulk selection, the drawer, Find's text (v5.1's layer), the pin — one each", async ({ page }) => {
   const L = new Ledger("H2");
   await openTodo(page, SIZES[0]);
   await mutate(page, "H2");
@@ -1040,22 +1111,25 @@ test("TD52 H2 — one Esc order: the dial menu, the drawer, Find's text (v5.1's 
     await page.keyboard.press("f"); await page.waitForTimeout(800);
     await page.locator('[data-todo-v5] [data-td52="pin-find"] input').fill("a");
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    /* a bulk selection: one Gone quiet row ticked */
+    await page.evaluate(() => (window as unknown as W).__td5().q('[data-td52="bulk-check"]')?.click()); await page.waitForTimeout(300);
     await page.locator('[data-todo-v5] [data-td52="pin-day"]').click(); await page.waitForTimeout(600);
     /* the dial menu over the drawer: a click dispatched on a movable dial (the scrim takes pointer presses) */
     await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"] .td52-press')[0]?.click());
     await page.waitForTimeout(400);
     const st = () => page.evaluate(() => ({
-      menu: !!document.querySelector('[data-td52="dial-menu"]'), drawer: !!document.querySelector('[data-td52="drawer"].on'),
+      menu: !!document.querySelector('[data-td52="dial-menu"]'), bulk: (window as unknown as W).__td5().qa('[data-td52="bulk-check"][aria-checked="true"]').length > 0, drawer: !!document.querySelector('[data-td52="drawer"].on'),
       find: ((window as unknown as W).__td5().q('[data-td5="find"] input') as HTMLInputElement | null)?.value ?? "",
       pin: (window as unknown as W).__td5().q('[data-td52="pin"]')?.getAttribute("aria-pressed"),
     }));
     const s0 = await st();
-    L.check("all four open (menu, drawer, Find's text, pin)", s0.menu && s0.drawer && s0.find === "a" && s0.pin === "true", JSON.stringify(s0));
+    L.check("all five open (menu, bulk, drawer, Find's text, pin)", s0.menu && s0.bulk && s0.drawer && s0.find === "a" && s0.pin === "true", JSON.stringify(s0));
     const want = [
-      { menu: false, drawer: true, find: "a", pin: "true" },
-      { menu: false, drawer: false, find: "a", pin: "true" },
-      { menu: false, drawer: false, find: "", pin: "true" },
-      { menu: false, drawer: false, find: "", pin: "false" },
+      { menu: false, bulk: true, drawer: true, find: "a", pin: "true" },
+      { menu: false, bulk: false, drawer: true, find: "a", pin: "true" },
+      { menu: false, bulk: false, drawer: false, find: "a", pin: "true" },
+      { menu: false, bulk: false, drawer: false, find: "", pin: "true" },
+      { menu: false, bulk: false, drawer: false, find: "", pin: "false" },
     ];
     for (let i = 0; i < want.length; i++) {
       await page.keyboard.press("Escape"); await page.waitForTimeout(700);
@@ -1065,7 +1139,7 @@ test("TD52 H2 — one Esc order: the dial menu, the drawer, Find's text (v5.1's 
   } finally {
     await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
   }
-  L.done(5);
+  L.done(6);
 });
 
 /* ───────────────────────── J · mid-task signals ───────────────────────── */

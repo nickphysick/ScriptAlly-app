@@ -1,38 +1,68 @@
 [
  {
   "lock": "G3",
-  "where": "@1512 no SELECT ALL",
+  "where": "three Gone quiet rows to close",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "lock": "G3",
+  "where": "single close of thin-q-close: written, and its Undo put it back",
+  "ok": true,
+  "detail": "3 documents"
+ },
+ {
+  "lock": "G3",
+  "where": "single close of thin-q-cohort-2: written, and its Undo put it back",
+  "ok": true,
+  "detail": "3 documents"
+ },
+ {
+  "lock": "G3",
+  "where": "single close of msv12-q-7: written, and its Undo put it back",
+  "ok": true,
+  "detail": "3 documents"
+ },
+ {
+  "lock": "G3",
+  "where": "the bar: '3 selected · Cancel · Close 3 queries'",
+  "ok": true,
+  "detail": "3 selected Cancel Close 3 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "three rows checked (role checkbox)",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "G3",
+  "where": "thin-q-close: the bulk wrote what a single close writes, field by field",
+  "ok": true,
+  "detail": "3 documents"
+ },
+ {
+  "lock": "G3",
+  "where": "thin-q-cohort-2: the bulk wrote what a single close writes, field by field",
+  "ok": true,
+  "detail": "3 documents"
+ },
+ {
+  "lock": "G3",
+  "where": "msv12-q-7: the bulk wrote what a single close writes, field by field",
+  "ok": true,
+  "detail": "3 documents"
+ },
+ {
+  "lock": "G3",
+  "where": "three slips land",
+  "ok": true,
+  "detail": "0 → 3"
+ },
+ {
+  "lock": "G3",
+  "where": "one Undo restores the account byte for byte",
   "ok": true,
   "detail": ""
- },
- {
-  "lock": "G3",
-  "where": "@1512 no row checkboxes",
-  "ok": true,
-  "detail": "0"
- },
- {
-  "lock": "G3",
-  "where": "@1512 no bulk bar",
-  "ok": true,
-  "detail": "0"
- },
- {
-  "lock": "G3",
-  "where": "@1280 no SELECT ALL",
-  "ok": true,
-  "detail": ""
- },
- {
-  "lock": "G3",
-  "where": "@1280 no row checkboxes",
-  "ok": true,
-  "detail": "0"
- },
- {
-  "lock": "G3",
-  "where": "@1280 no bulk bar",
-  "ok": true,
-  "detail": "0"
  }
 ]
