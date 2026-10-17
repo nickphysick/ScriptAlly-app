@@ -1,0 +1,16 @@
+{"lock":"H1","vp":"1512x900","what":"populated: the shared LightHeader is the header","value":false,"ok":false}
+{"lock":"H2","vp":"1512x900","what":"the card's rows","value":[],"ok":false}
+{"lock":"H3","vp":"1512x900","what":"the panel","value":false,"ok":false}
+{"lock":"N1","vp":"1512x900","what":"one letter: banners","value":0,"ok":false}
+{"lock":"S1","vp":"1512x900","what":"the grid and toolbar were read","value":null,"ok":false}
+{"lock":"S2","vp":"1512x900","what":"sent (Salt Road)","value":null,"ok":false}
+{"lock":"S3","vp":"1512x900","what":"every card's chip","value":[],"ok":false}
+{"lock":"S4","vp":"1512x900","what":"the sort button is on the page","value":false,"ok":false}
+{"lock":"S5","vp":"1512x900","what":"type toggles shown (three types on the shelf; hidden in compact)","value":false,"ok":false}
+{"lock":"D1","vp":"1512x900","what":"What's landing is on the page","value":false,"ok":false}
+{"lock":"D2","vp":"1512x900","what":"What's landing is on the page","value":false,"ok":false}
+{"lock":"E1","vp":"1512x900","what":"Salt Road's card is on the page","value":false,"ok":false}
+{"lock":"E2","vp":"1512x900","what":"Salt Road's card is on the page","value":false,"ok":false}
+{"lock":"E3","vp":"1512x900","what":"the header's Log comps in a letter is on the page","value":false,"ok":false}
+{"lock":"L0","vp":"1512x900","what":"saw: the empty panel · the loading header · the shelf while loading","value":[false,false,false],"ok":false}
+{"lock":"CX28","vp":null,"what":"readings","value":15,"ok":false}

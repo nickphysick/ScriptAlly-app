@@ -1,0 +1,22 @@
+
+Running 17 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+  ✓   2 [measure] › tests/e2e/compsV28.measure.ts:89:1 › H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has one (21.8s)
+  ✓   3 [measure] › tests/e2e/compsV28.measure.ts:121:1 › H2 · card: the three counts are the shelf's partition and sum to the comp count; the ring is logged ÷ sent; a row filters (11.8s)
+  ✓   4 [measure] › tests/e2e/compsV28.measure.ts:147:1 › H3 · empty: the panel and the steps card only; b1 opens the first-comp form with the explainer; b2 the explainer pop-up (13.1s)
+  ✓   5 [measure] › tests/e2e/compsV28.measure.ts:170:1 › N1 · notice: one banner, its copy by the one/several rule, its button opens the picker on the first unrecorded letter (29.1s)
+  ✓   6 [measure] › tests/e2e/compsV28.measure.ts:197:1 › S1 · grid: 3 columns at 1512, 2 at 1280; the toolbar one row, no overflow, at 1024/1280/1512; the add card last, gone while filtered (14.4s)
+  ✓   7 [measure] › tests/e2e/compsV28.measure.ts:230:1 › S2 · card: the slip by state (sent, draft, shelf-ready, not ready); no hover action buttons (8.9s)
+  ✓   8 [measure] › tests/e2e/compsV28.measure.ts:250:1 › S3 · age: the chip's text and tone from the year (render); no year, no chip (8.9s)
+  ✓   9 [measure] › tests/e2e/compsV28.measure.ts:265:1 › S4 · sort: each order as the table says; Best response puts never-sent comps last (12.4s)
+  ✓  10 [measure] › tests/e2e/compsV28.measure.ts:284:1 › S5 · filters: where, type and find compose (AND); the type toggles hide in compact; Clear restores all (12.2s)
+  ✓  11 [measure] › tests/e2e/compsV28.measure.ts:308:1 › D1 · landing: by-comp rows are each sent comp's queries, asked and rate, by queries; the marker at your average; hollow under five (26.3s)
+  ✓  12 [measure] › tests/e2e/compsV28.measure.ts:341:1 › D2 · landing: by-letter blocks sent → unrecorded → unsent; Log them opens the picker; rates are asked ÷ queries (11.8s)
+  ✓  13 [measure] › tests/e2e/compsV28.measure.ts:360:1 › E1 · back: from the drawer's Edit, Cancel, ✕ and Escape return to the detail; Save returns with the new values; the scrim closes all (31.4s)
+  ✓  14 [measure] › tests/e2e/compsV28.measure.ts:396:1 › E2 · focus: back to the card after the drawer; to the card after a picker Save from its link; to the opener after either pop-up (48.0s)
+  ✓  15 [measure] › tests/e2e/compsV28.measure.ts:424:1 › E3 · picker: records and ages; four ticked with one old shows both tips; Save stays enabled and writes that letter only (30.5s)
+  ✓  16 [measure] › tests/e2e/compsV28.measure.ts:457:1 › L0 · loading: the header's loading state only; no flash of the empty panel on a seeded account (9.0s)
+  ✓  17 [measure] › tests/e2e/compsV28.measure.ts:473:1 › CX28 · the run measured enough (2ms)
+
+  17 passed (5.3m)

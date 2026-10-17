@@ -13,6 +13,11 @@
  *   node tests/e2e/seedCompsV25.mjs --restore  # delete everything it wrote
  *   node tests/e2e/seedCompsV25.mjs --dump     # {"comps":[…],"letters":{id:compIds|null}} as stored (--ms <id> for another manuscript's comps)
  *   node tests/e2e/seedCompsV25.mjs --empty    # also write `cv25-ms-empty` (no comps)
+ *
+ * Comps v28 variants (each written over the default and undone by a plain re-seed in the same run):
+ *   --variant two-unrecorded   v2 stored WITHOUT compIds, so two sent letters are unrecorded (CX28 N1)
+ *   --variant light            a fourth letter, v1b (Apr), recorded [Nine Miles Out], carrying queries 13 and 14,
+ *                              so a comp has gone out with fewer than five queries (CX28 D1's hollow dot)
  */
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -50,11 +55,21 @@ const COMPS = [
   { id: "cmp_cv25ferr", title: "The Ferry at Dusk", author: "Mairead Quinn", year: 2025, matchAxis: "Donegal · One night", note: "Small-town Donegal, one long night, nobody telling the truth.", source: "user" },
   { id: "cmp_cv25last", title: "Last Crossing", author: "dir. Tom Arden", publisher: "Film4", year: 2023, media: "film", matchAxis: "Single journey", note: "One crossing, real time. The clock I’m borrowing.", source: "user" },
 ];
-const LETTERS = [
+const vi = process.argv.indexOf("--variant");
+const VARIANT = vi > -1 ? process.argv[vi + 1] : null;
+const L1B = "cv25-let-1b";
+const LETTERS_BASE = [
   { id: L1, versionName: "Query letter v1", createdDate: day("2026-03-01") },
   { id: L2, versionName: "Query letter v2", createdDate: day("2026-05-20"), compIds: ["cmp_cv25tide", "cmp_cv25salt"] },
   { id: L3, versionName: "Query letter v3", createdDate: day("2026-09-25"), compIds: ["cmp_cv25tide", "cmp_cv25last"] },
 ];
+const LETTERS = VARIANT === "two-unrecorded"
+  ? LETTERS_BASE.map((l) => (l.id === L2 ? { id: l.id, versionName: l.versionName, createdDate: l.createdDate } : l))
+  : VARIANT === "light"
+    ? [...LETTERS_BASE, { id: L1B, versionName: "Query letter v1b", createdDate: day("2026-04-01"), compIds: ["cmp_cv25nine"] }]
+    : LETTERS_BASE;
+/* the light variant sends queries 13 and 14 with v1b, by their recorded versions */
+const LIGHT = new Set(["13", "14"]);
 const PKGS = [
   { id: "cv25-pkg-orig", packageName: "Original", letter: L1 },
   { id: "cv25-pkg-std", packageName: "Standard", letter: L2 },
@@ -135,11 +150,15 @@ for (const [n, name, agency, status, sent, route, pkg] of Q) {
   const p = PKGS.find((x) => x.id === pkg);
   await put(["queries", queryId(n)], {
     id: queryId(n), userId: uid, manuscriptId: MS, agentId: agentId(n), status, dateSent: day(sent), personalisationNotes: "", sendMethod: "Email",
-    packageId: route === "ver" ? "" : pkg,
-    ...(route === "ed" ? { sentHow: "package", sentPackageId: pkg, sentPackageEdition: 1, sentPackageName: p.packageName } : {}),
-    ...(route === "ver" ? { sentHow: "individual", sentVersions: [p.letter, SYN], sentMaterials: "Query letter, synopsis", sentPackageName: p.packageName } : {}),
+    ...(VARIANT === "light" && LIGHT.has(n)
+      ? { packageId: "", sentHow: "individual", sentVersions: [L1B, SYN], sentMaterials: "Query letter, synopsis" }
+      : {
+        packageId: route === "ver" ? "" : pkg,
+        ...(route === "ed" ? { sentHow: "package", sentPackageId: pkg, sentPackageEdition: 1, sentPackageName: p.packageName } : {}),
+        ...(route === "ver" ? { sentHow: "individual", sentVersions: [p.letter, SYN], sentMaterials: "Query letter, synopsis", sentPackageName: p.packageName } : {}),
+      }),
     ...(status !== "Queried" ? { lastStatusChange: day(sent) } : {}),
   });
 }
-console.log(`comps v25 fixture ready: ${MS} · ${COMPS.length} comps · ${LETTERS.length} letters · ${PKGS.length} packages · ${Q.length} queries`);
+console.log(`comps v25 fixture ready${VARIANT ? ` (variant ${VARIANT})` : ""}: ${MS} · ${COMPS.length} comps · ${LETTERS.length} letters · ${PKGS.length} packages · ${Q.length} queries`);
 process.exit(0);

@@ -1,0 +1,66 @@
+[
+ {
+  "test": "H1 \u00b7 same header: Light",
+  "first_red": "H1 1512 \u00b7 populated: the shared LightHeader is the header"
+ },
+ {
+  "test": "H2 \u00b7 card: the three c",
+  "first_red": "H2 1512 \u00b7 the card's rows"
+ },
+ {
+  "test": "H3 \u00b7 empty: the panel ",
+  "first_red": "H3 1512 \u00b7 the panel"
+ },
+ {
+  "test": "N1 \u00b7 notice: one banne",
+  "first_red": "N1 1512 \u00b7 one letter: banners"
+ },
+ {
+  "test": "S1 \u00b7 grid: 3 columns a",
+  "first_red": "S1 1512 \u00b7 the grid and toolbar were read"
+ },
+ {
+  "test": "S2 \u00b7 card: the slip by",
+  "first_red": "S2 1512 \u00b7 sent (Salt Road)"
+ },
+ {
+  "test": "S3 \u00b7 age: the chip's t",
+  "first_red": "S3 1512 \u00b7 every card's chip"
+ },
+ {
+  "test": "S4 \u00b7 sort: each order ",
+  "first_red": "locator.click: Test timeout of 300000ms exceeded."
+ },
+ {
+  "test": "S5 \u00b7 filters: where, t",
+  "first_red": "S5 1512 \u00b7 type toggles shown (three types on the shelf; hidden in compact)"
+ },
+ {
+  "test": "D1 \u00b7 landing: by-comp ",
+  "first_red": "page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')"
+ },
+ {
+  "test": "D2 \u00b7 landing: by-lette",
+  "first_red": "page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')"
+ },
+ {
+  "test": "E1 \u00b7 back: from the dr",
+  "first_red": "page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')"
+ },
+ {
+  "test": "E2 \u00b7 focus: back to th",
+  "first_red": "dist/ is STALE: src/ was edited 21 minute(s) after the bundle was built, and http://127.0.0.1:4729 serves the bundle. Measuring now would report your edit as absent. Run `npm run build:dev`."
+ },
+ {
+  "test": "E3 \u00b7 picker: records a",
+  "first_red": "dist/ is STALE: src/ was edited 21 minute(s) after the bundle was built, and http://127.0.0.1:4729 serves the bundle. Measuring now would report your edit as absent. Run `npm run build:dev`."
+ },
+ {
+  "test": "L0 \u00b7 loading: the head",
+  "first_red": "dist/ is STALE: src/ was edited 21 minute(s) after the bundle was built, and http://127.0.0.1:4729 serves the bundle. Measuring now would report your edit as absent. Run `npm run build:dev`."
+ },
+ {
+  "test": "CX28 \u00b7 the run measure",
+  "first_red": "the ledger holds 0 readings; the floor is 120"
+ }
+]
