@@ -162,3 +162,24 @@ Centre's navy row and headings after Part E, at 1512 and 1280.
   of the two wants a ruling.
 - The harness account's guide state is back to absent, as it was before this pack. The locks set it and restore it
   per run, and the full L1 run on this branch ticked items, which is correct behaviour.
+
+## Branch and build
+
+- **Branch:** `contact-list-v18-3`, pushed. Not merged to main, and no rules or functions changed. The commits:
+  - A `59532416` · B `1dd3a72b` · C `96e4a6f0` · D `fefd480f` · E `f1bece84` · F `c5cf5cc2`;
+  - the E fix `9bde19b9`;
+  - G `ca6799bc`;
+  - this tail, one more commit.
+- **Dev before:** `index-BC2n4YOQ.js` (`dashboard-v60`; at the start of this pack it was `index-BdMa9Mvk.js`,
+  `dashboard-v59`).
+- **The integration branch:** `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183` at `df68225a`. It is cut
+  from `origin/dashboard-v60` (what dev served), with `contact-list-v18-3` merged in.
+- **The one conflict, resolved under the pack's rule:** `design-refs/.refhashes.json`, where both sides only added
+  refs. The resolution is the union, and the ref check reads 433 refs unchanged. There were no source conflicts.
+- **Gates on the integration branch:**
+  - tsc, the production build and the dev build are clean;
+  - Vitest is 600 files, 8,951 passed and 3 skipped, with the one known red (`functions/src/email.test.ts`, red on
+    every base);
+  - CL183, 18/18, and DB60, 4/4, are green on its build.
+- **Dev after:** hosting only, from the clean pushed tip, with dev re-checked immediately before the deploy. Dev now
+  serves **`index-DsVZarm0.js`**.
