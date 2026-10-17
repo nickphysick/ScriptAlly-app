@@ -57,40 +57,51 @@ const PkIcon: React.FC<{ kind: "mail" | "web" | "at" }> = ({ kind }) => (
 );
 
 /**
- * Contact list v18.3 §C — THE PEEK IS HOW TO REACH THE AGENT, AND NOTHING ELSE: one line of three pills (email,
- * website, social) under the row's main line, starting at the agent's name. A missing one is a dashed "Add …" pill that
- * opens Edit profile on that field. The open row keeps its own background: no tint, lift, shadow or radius change.
+ * Contact list v18.3.3 §A — THE OPEN ROW SITS ON THE ROW'S OWN COLUMNS: one line of contact details laid on the row's
+ * grid (a subgrid), no pill shells. The email sits in the Agent column (its disc centred under the avatar, its text on
+ * the name's left edge); the website in What they want; the social handle from Replies, running into Query status and
+ * stopping 24px short of the next step (§B), which the row passes in as `next`. A missing detail is "Add …" in italic
+ * that opens Edit profile on that field.
+ *
+ * ⚠️ EACH DETAIL STOPS ITS OWN CLICK; THE LINE DOES NOT. Empty space in the open row still opens the card (as the row
+ *    does), and the row's own click handler also ignores the details and the next step (belt and braces).
  */
 export const ContactPeek: React.FC<{
   agent: Agent;
   onEdit: Edit;
-}> = ({ agent: a, onEdit }) => {
+  /** §B — the next step, at the Query status cell's right edge on this line; none when the cell already offers it */
+  next?: React.ReactNode;
+}> = ({ agent: a, onEdit, next }) => {
   const email = (a.email ?? "").trim();
   const site = (a.website ?? "").trim();
   const social = socialOf(a);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const missing = (k: string, kind: "mail" | "web" | "at", label: string, go: () => void) => (
-    <button type="button" className="cl183-pp is-add" data-cl183="peek-pill" data-k={k} data-missing="" onClick={go}>
-      <i className="cl183-pd"><PkIcon kind={kind} /></i><span>{label}</span>
+    <button type="button" className="cl1833-it is-add" data-cl183="peek-pill" data-k={k} data-missing=""
+      onClick={(e) => { e.stopPropagation(); go(); }} onKeyDown={stop}>
+      <i className="cl183-pd"><PkIcon kind={kind} /></i><span className="cl183-pt">{label}</span>
     </button>
   );
   return (
-    <div className="cl183-pk" data-cl18="peek" data-cl183="peek" onClick={stop} onKeyDown={stop} onMouseDown={stop}>
+    <div className="cl183-pk cl1833-pk" data-cl18="peek" data-cl183="peek">
       {email ? (
-        <span className="cl183-pp" data-cl183="peek-pill" data-k="email">
-          <i className="cl183-pd"><PkIcon kind="mail" /></i><a href={`mailto:${email}`} className="cl183-pt">{email}</a><Copy text={email} />
+        <span className="cl1833-it cl1833-em" data-cl183="peek-pill" data-k="email" onClick={stop}>
+          <i className="cl183-pd"><PkIcon kind="mail" /></i><span className="cl183-pt" title={email}>{email}</span><Copy text={email} />
         </span>
       ) : missing("email", "mail", "Add their email", () => onEdit("who", "email"))}
       {site ? (
-        <a className="cl183-pp" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer">
-          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom">{domainOf(site)}</span><span className="cl183-ext" data-cl183="ext" aria-hidden="true">↗</span>
+        <a className="cl1833-it cl1833-web" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer" onClick={stop}>
+          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom" title={domainOf(site)}>{domainOf(site)}</span><span className="cl183-ext" data-cl183="ext" aria-hidden="true">↗</span>
         </a>
       ) : missing("website", "web", "Add their website", () => onEdit("who", "website"))}
-      {social ? (
-        <span className="cl183-pp" data-cl183="peek-pill" data-k="social">
-          <i className="cl183-pd"><PkIcon kind="at" /></i><span className="cl183-pt">{social}</span>
-        </span>
-      ) : missing("social", "at", "Add a social handle", () => onEdit("who"))}
+      <span className="cl1833-tail" data-cl1833="tail">
+        {social ? (
+          <span className="cl1833-it cl1833-soc" data-cl183="peek-pill" data-k="social" onClick={stop}>
+            <i className="cl183-pd"><PkIcon kind="at" /></i><span className="cl183-pt" title={social}>{social}</span>
+          </span>
+        ) : missing("social", "at", "Add a social handle", () => onEdit("who"))}
+        {next}
+      </span>
     </div>
   );
 };

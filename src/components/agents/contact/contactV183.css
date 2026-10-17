@@ -18,57 +18,69 @@
 .cl17-card .cl17-rg .cl17-pc.cl17-pc--full, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc.cl17-pc--full { font-size: 33px !important; }
 .cl17-card .cl17-rg .cl17-pc i, .ws-app.sheet-wide .cl17-card .cl17-rg .cl17-pc i { font-size: 15px !important; top: -7px; opacity: 0.85; }
 
-/* ── §C · THE ROW PEEK: how to reach the agent, nothing else. The open row keeps its own background: no tint, no lift,
-   no shadow, no radius change (v18's open-row dress is undone here). One line of three pills under the main line,
-   starting at the agent's name (the disc, 38 / 28 compact, plus the who cell's 11 gap), gap 12.
-   v18.3.1 — THE SPACING: 16 between the main line's bottom (the name and agency block) and the pills' top, 18 between the pills and the row's foot
-   (14 and 16 below the full-size sheet). The open row holds its resting main track (`--cl183-track`, read as the peek
-   opens), so the main line never re-centres; the pills' margin is the target less the distance the main line already
-   sits above that track's end (`--cl183-under`), floored at 2 so a taller wishlist cell is never overlapped. ── */
+/* ── §C · THE OPEN ROW (v18.3.3 §A; this block replaces v18.3's pills, v18.3.1's spacing and v18.3.2's peek line). One
+   line of contact details laid on the row's own grid: the line is a SUBGRID of the row's four columns, so every detail
+   sits on a column edge by construction, never by a hand-set offset.
+     email     Agent column: the disc centred under the avatar, the text on the name's left edge
+     website   What they want: the disc on the column's left edge
+     social    from Replies' left edge, running into Query status, 24px short of the next step (which ends on the
+               status cell's right edge)
+   Each detail is a 30px disc (#eef1f6, a 15px navy icon), 10px, then the value in the body serif at 15.5px. No pill
+   shell. A missing detail: a ringed transparent disc, italic ink at 48%, navy with an underline on hover.
+   RHYTHM: 16 from the agent block's bottom to the line's top, 16 from the line to the row's foot. As the mock draws it,
+   the open row's main track is its tallest cell (the 80px resting height no longer pads it), so the full row is 124 at
+   1512. The line's margin is set by the row once it has opened (`--cl1833-mt`, measured before paint): 16 less the
+   distance the agent block sits above the track's end. It cannot move the main track, so one read settles it.
+   The open row keeps the row's hover colour, undoing v18's per-status tints. ── */
 .cl16-list .clv-row[data-peek], .cl16-list .clv-row[data-peek][data-disc="none"], .cl16-list .clv-row[data-peek][data-disc="live"],
 .cl16-list .clv-row[data-peek][data-disc="closed"] {
-  z-index: auto; border-radius: 0; box-shadow: none; background: #fff;
-  --cl183-gap-t: 14px; --cl183-gap-b: 16px;
-  grid-template-rows: var(--cl183-track, auto) auto; padding-bottom: var(--cl183-gap-b);
+  z-index: auto; border-radius: 0; box-shadow: none; background: #fdfbf8;
+  grid-template-rows: auto auto; padding-bottom: 16px;
 }
-.ws-app.sheet-wide .cl16-list .clv-row[data-peek] { --cl183-gap-t: 16px; --cl183-gap-b: 18px; }
-.cl183-pk {
-  grid-column: 1 / -1; display: flex; flex-wrap: nowrap; gap: 12px; min-width: 0;
-  margin-top: max(2px, calc(var(--cl183-gap-t, 14px) - var(--cl183-under, 0px)));
-  padding-left: calc(38px + 11px); cursor: default; text-align: left; animation: cl183pk 0.2s ease both;
+.cl16-list { --cl1833-av: 38px; }
+.clv-list--compact.cl16-list, .cl16-list .clv-list--compact, .clv-list--compact { --cl1833-av: 28px; }
+.cl183-pk.cl1833-pk {
+  grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; min-width: 0;
+  margin: var(--cl1833-mt, 16px) 0 0; padding: 0; cursor: default; text-align: left;
+  animation: cl183pk 0.2s ease both;
 }
-.clv-list--compact .cl183-pk { padding-left: calc(28px + 11px); }
 @keyframes cl183pk { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .cl183-pk { animation: none; } }
-.cl183-pk .cl183-pp {
-  display: inline-flex; align-items: center; gap: 9px; box-sizing: border-box; min-width: 0; max-width: 34%; height: 36px; margin: 0;
-  padding: 0 14px 0 5px; border: 0; border-radius: 20px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.13);
-  color: #1c130f; text-decoration: none; cursor: pointer; white-space: nowrap; font: 400 14px/1 var(--sp-serif) !important;
+@media (prefers-reduced-motion: reduce) { .cl183-pk.cl1833-pk { animation: none; } }
+.cl1833-pk .cl1833-it {
+  all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 10px; height: 30px; min-width: 0;
+  max-width: 100%; justify-self: start; white-space: nowrap; color: #1c130f; cursor: pointer;
+  background: transparent; border: 0; box-shadow: none;
 }
-.ws-app.sheet-wide .cl183-pk .cl183-pp { height: 40px; font-size: 15px !important; }
-.cl183-pk .cl183-pp > span, .cl183-pk .cl183-pp > a, .cl183-pk .cl183-pt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: inherit !important; color: inherit; text-decoration: none; }
-.cl183-pk .cl183-pd {
-  flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #eef1f6; color: #2a3a52;
+.cl1833-pk .cl1833-it .cl183-pd {
+  flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #eef1f6; color: #2d3a50;
 }
-.ws-app.sheet-wide .cl183-pk .cl183-pd { width: 30px; height: 30px; }
-.cl183-pk .cl183-pd svg { width: 13px; height: 13px; }
-.ws-app.sheet-wide .cl183-pk .cl183-pd svg { width: 15px; height: 15px; }
-.cl183-pk a.cl183-pp:hover .cl183-dom { text-decoration: underline; text-underline-offset: 3px; }
-/* v18.3.1 — Copy is v18's small button (it was plain text here: v18's rule is scoped to the retired .cl18-pk peek), and
-   the website's ↗ is 13px navy, not the domain's size (the pill's "> span" rule sets every span to the pill's font) */
-.cl183-pk .cl18-copy {
+.cl1833-pk .cl1833-it .cl183-pd svg { width: 15px; height: 15px; }
+.cl1833-pk .cl1833-it .cl183-pt {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15.5px/1.35 var(--sp-serif) !important; color: inherit;
+}
+/* the email: Agent column, disc centred under the avatar, text on the name's left edge (avatar + the who cell's 11) */
+.cl1833-pk > .cl1833-it[data-k="email"] { grid-column: 1; margin-left: calc((var(--cl1833-av) - 30px) / 2); gap: calc(var(--cl1833-av) / 2 - 4px); }
+/* the website: What they want, underlined, the 13px navy arrow */
+.cl1833-pk > .cl1833-it[data-k="website"] { grid-column: 2; }
+.cl1833-pk > .cl1833-it[data-k="website"] .cl183-dom { text-decoration: underline; text-decoration-color: rgba(45, 58, 80, 0.35); text-underline-offset: 3px; }
+.cl1833-pk > .cl1833-it[data-k="website"]:hover .cl183-dom { text-decoration-color: #2d3a50; }
+.cl1833-pk .cl183-ext { flex: none; margin-left: -4px; font: 400 13px/1 var(--sp-serif) !important; color: #2d3a50; }
+/* Replies to Query status: the social handle, then the next step on the status cell's right edge, 24px apart */
+.cl1833-pk > .cl1833-tail { grid-column: 3 / -1; display: flex; align-items: center; column-gap: 24px; min-width: 0; }
+.cl1833-pk > .cl1833-tail > .cl1833-it { flex: 0 1 auto; }
+.cl1833-pk > .cl1833-tail > :not(.cl1833-it) { flex: none; margin-left: auto; }
+/* a missing detail */
+.cl1833-pk .cl1833-it.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); color: rgba(28, 19, 15, 0.38); }
+.cl1833-pk .cl1833-it.is-add .cl183-pt { font-style: italic !important; color: rgba(28, 19, 15, 0.48); }
+.cl1833-pk .cl1833-it.is-add:hover .cl183-pt { color: #2d3a50; text-decoration: underline; text-underline-offset: 3px; }
+.cl1833-pk .cl1833-it:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; border-radius: 15px; }
+/* the Copy chip (until §C replaces it with the email itself) */
+.cl1833-pk .cl18-copy {
   flex: none; display: inline-flex; align-items: center; box-sizing: border-box; height: 22px; margin: 0 0 0 2px;
   padding: 0 8px; border: 0; border-radius: 6px; background: #fff; cursor: pointer;
   font: 400 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7);
   box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18);
 }
-.cl183-pk .cl18-copy:hover { color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
-.cl183-pk .cl18-copy:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-.cl183-pk .cl183-pp > .cl183-ext { flex: none; overflow: visible; font: 400 13px/1 var(--sp-serif) !important; color: #2d3a50; }
-/* a missing one: dashed, transparent, italic, ink 55%; the disc is a ring */
-.cl183-pk .cl183-pp.is-add { background: transparent; box-shadow: none; border: 1.2px dashed rgba(42, 58, 82, 0.4); color: rgba(28, 19, 15, 0.55); font-style: italic !important; }
-.cl183-pk .cl183-pp.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.4); }
-.cl183-pk .cl183-pp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
 /* ── §E · ONE SHEET: the white list is flush with the navy toolbar's edges, and the headings row spans it. Rows and
    headings share one inset (78 left, 40 right), so each label sits on its column. ── */

@@ -163,19 +163,21 @@ const Row: React.FC<{
     const el = rowRef.current;
     if (v && el && !peek) {
       el.style.setProperty("--cl18-mh", `${el.offsetHeight}px`);
-      /* v18.3.1 — read at rest, before the row grows: the main line's own track (so the open row can hold it, and the
-         line does not re-centre), and how far below the main line (the name and agency block) that track ends (so the
-         pills can sit a fixed distance under that block rather than under the track) */
-      const cs = getComputedStyle(el);
-      const track = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      const agy = el.querySelector<HTMLElement>(".clv-rwn") ?? el.querySelector<HTMLElement>(".clv-rwho");
-      const under = agy ? el.getBoundingClientRect().bottom - parseFloat(cs.paddingBottom) - agy.getBoundingClientRect().bottom : 0;
-      el.style.setProperty("--cl183-track", `${track}px`);
-      el.style.setProperty("--cl183-under", `${Math.max(0, under)}px`);
     }
     onPeek?.(v);
   };
   useEffect(() => { if (peek) stopMq(); }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* v18.3.3 §A — once open (before paint): the details line sits 16 under the agent block. Its margin cannot change the
+     main track (the line is in row 2), so one read of where it would sit settles it. */
+  useLayoutEffect(() => {
+    const el = rowRef.current;
+    if (!peek || !el) return;
+    const line = el.querySelector<HTMLElement>(".cl1833-pk"), who = el.querySelector<HTMLElement>(".clv-rwn") ?? el.querySelector<HTMLElement>(".clv-rwho");
+    if (!line || !who) return;
+    const m0 = parseFloat(getComputedStyle(line).marginTop) || 0;
+    const mt = Math.max(2, m0 + (who.getBoundingClientRect().bottom + 16 - line.getBoundingClientRect().top));
+    el.style.setProperty("--cl1833-mt", `${Math.round(mt * 100) / 100}px`);
+  }, [peek]);
   /* the fade at the right edge says "there is more"; measured after layout and on resize */
   const [long, setLong] = useState(false);
   useLayoutEffect(() => {
