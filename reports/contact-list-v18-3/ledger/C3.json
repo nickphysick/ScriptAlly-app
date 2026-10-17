@@ -1,32 +1,740 @@
 [
  {
   "lock": "C3",
-  "where": "the ↗ is 13px",
+  "where": "@1512 queried and not-queried rows to hover (the population)",
   "ok": true,
-  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(42, 58, 82)\"}"
+  "detail": "[{\"id\":\"msv12-agent-4\",\"log\":false},{\"id\":\"seed-agent-1\",\"log\":false},{\"id\":\"seed-cal-soon\",\"log\":true},{\"id\":\"seed-cal-passed20\",\"log\":true}]"
  },
  {
   "lock": "C3",
-  "where": "the ↗ is navy #2a3a52",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): actions shown",
   "ok": true,
-  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(42, 58, 82)\"}"
+  "detail": "2"
  },
  {
   "lock": "C3",
-  "where": "Copy is mono 11",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): (a) the actions' right edge is the status cell's ±1",
   "ok": true,
-  "detail": "{\"fs\":\"11px\",\"ff\":\"\\\"JetBrains Mono\\\", monospace\",\"rad\":\"6px\",\"ring\":\"rgba(28, 19, 15, 0.16) 0px 0px 0px 1px inset\"}"
+  "detail": "1440.0 vs 1440.0"
  },
  {
   "lock": "C3",
-  "where": "Copy has radius 6 and a hairline ring",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): (a) nothing past the Replies column's left",
   "ok": true,
-  "detail": "{\"fs\":\"11px\",\"ff\":\"\\\"JetBrains Mono\\\", monospace\",\"rad\":\"6px\",\"ring\":\"rgba(28, 19, 15, 0.16) 0px 0px 0px 1px inset\"}"
+  "detail": "1226.8 vs 1088.4"
  },
  {
   "lock": "C3",
-  "where": "an agent with an email and one with a website were found",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
   "ok": true,
-  "detail": "1 · 1"
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "580.8 vs 580.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1226.8 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "580.8 vs 580.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4 (queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 msv12-agent-4: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1130.4 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "560.8 vs 560.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1130.4 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "560.8 vs 560.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1 (queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-agent-1: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1239.4 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "DIV.clv-row"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "560.8 vs 560.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1239.4 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "DIV.clv-row"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "560.8 vs 560.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon (not queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-soon: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1239.4 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "DIV.clv-row"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "638.8 vs 638.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1239.4 vs 1088.4"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "DIV.clv-row"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "638.8 vs 638.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20 (not queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1512 seed-cal-passed20: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 queried and not-queried rows to hover (the population)",
+  "ok": true,
+  "detail": "[{\"id\":\"msv12-agent-4\",\"log\":false},{\"id\":\"seed-agent-1\",\"log\":false},{\"id\":\"seed-cal-soon\",\"log\":true},{\"id\":\"seed-cal-passed20\",\"log\":true}]"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "994.8 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "580.8 vs 580.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "994.8 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "580.8 vs 580.8"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4 (queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 msv12-agent-4: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "898.4 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "511.1 vs 511.1"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "898.4 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "511.3 vs 511.3"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1 (queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-agent-1: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1007.4 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "511.3 vs 511.3"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1007.4 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "511.3 vs 511.3"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon (not queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-soon: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1007.4 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "589.3 vs 589.3"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek closed): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): actions shown",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): (a) the actions' right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): (a) nothing past the Replies column's left",
+  "ok": true,
+  "detail": "1007.4 vs 898.0"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): (b) 4px inside the status cell, at the main line, is the row or an action",
+  "ok": true,
+  "detail": "BUTTON.clv-trb p"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): (c) the actions' centre is the main line's ±1",
+  "ok": true,
+  "detail": "589.3 vs 589.3"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): no background of its own",
+  "ok": true,
+  "detail": "none|rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20 (not queried, peek open): (d) the status content is hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "C3",
+  "where": "@1280 seed-cal-passed20: (d) the status content is visible again 200ms after leaving",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "C3",
+  "where": "both branches (queried and not-queried rows) and an open peek were measured",
+  "ok": true,
+  "detail": "4 · 4 · 8"
  }
 ]

@@ -21,7 +21,7 @@
   "lock": "F4",
   "where": "nothing else ticked",
   "ok": true,
-  "detail": "{\"edit\":true,\"open\":true,\"search\":true}"
+  "detail": "{\"search\":true,\"open\":true,\"edit\":true}"
  },
  {
   "lock": "F4",

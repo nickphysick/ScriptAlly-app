@@ -13,7 +13,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-near: pills' top − agency line's bottom = 14 ±1",
+  "where": "@1512 seed-cal-near: pills' top − main line's bottom = 14 ±1",
   "ok": false,
   "detail": "9.7"
  },
@@ -25,7 +25,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-near: the main line does not move (agency line ±0.5)",
+  "where": "@1512 seed-cal-near: the main line does not move (±0.5)",
   "ok": true,
   "detail": "681.09375 → 681.09375"
  },
@@ -55,7 +55,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-soon: pills' top − agency line's bottom = 14 ±1",
+  "where": "@1512 seed-cal-soon: pills' top − main line's bottom = 14 ±1",
   "ok": false,
   "detail": "7.7"
  },
@@ -67,7 +67,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-soon: the main line does not move (agency line ±0.5)",
+  "where": "@1512 seed-cal-soon: the main line does not move (±0.5)",
   "ok": true,
   "detail": "763.09375 → 763.09375"
  },
@@ -97,7 +97,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-passed20: pills' top − agency line's bottom = 14 ±1",
+  "where": "@1512 seed-cal-passed20: pills' top − main line's bottom = 14 ±1",
   "ok": false,
   "detail": "9.7"
  },
@@ -109,7 +109,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-passed20: the main line does not move (agency line ±0.5)",
+  "where": "@1512 seed-cal-passed20: the main line does not move (±0.5)",
   "ok": true,
   "detail": "818.09375 → 818.09375"
  },
@@ -145,7 +145,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-near: pills' top − agency line's bottom = 14 ±1",
+  "where": "@1280 seed-cal-near: pills' top − main line's bottom = 14 ±1",
   "ok": false,
   "detail": "2.2"
  },
@@ -157,7 +157,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-near: the main line does not move (agency line ±0.5)",
+  "where": "@1280 seed-cal-near: the main line does not move (±0.5)",
   "ok": true,
   "detail": "692.328125 → 692.53125"
  },
@@ -187,7 +187,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-soon: pills' top − agency line's bottom = 14 ±1",
+  "where": "@1280 seed-cal-soon: pills' top − main line's bottom = 14 ±1",
   "ok": false,
   "detail": "7.7"
  },
@@ -199,7 +199,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-soon: the main line does not move (agency line ±0.5)",
+  "where": "@1280 seed-cal-soon: the main line does not move (±0.5)",
   "ok": true,
   "detail": "719.671875 → 719.671875"
  },
@@ -229,7 +229,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-passed20: pills' top − agency line's bottom = 14 ±1",
+  "where": "@1280 seed-cal-passed20: pills' top − main line's bottom = 14 ±1",
   "ok": false,
   "detail": "9.7"
  },
@@ -241,7 +241,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-passed20: the main line does not move (agency line ±0.5)",
+  "where": "@1280 seed-cal-passed20: the main line does not move (±0.5)",
   "ok": true,
   "detail": "718.671875 → 718.671875"
  },
@@ -277,7 +277,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-near: pills' top − agency line's bottom = 16 ±1",
+  "where": "@1920 seed-cal-near: pills' top − main line's bottom = 16 ±1",
   "ok": false,
   "detail": "9.7"
  },
@@ -289,7 +289,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-near: the main line does not move (agency line ±0.5)",
+  "where": "@1920 seed-cal-near: the main line does not move (±0.5)",
   "ok": true,
   "detail": "709.09375 → 709.09375"
  },
@@ -319,7 +319,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-soon: pills' top − agency line's bottom = 16 ±1",
+  "where": "@1920 seed-cal-soon: pills' top − main line's bottom = 16 ±1",
   "ok": false,
   "detail": "7.7"
  },
@@ -331,7 +331,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-soon: the main line does not move (agency line ±0.5)",
+  "where": "@1920 seed-cal-soon: the main line does not move (±0.5)",
   "ok": true,
   "detail": "791.09375 → 791.09375"
  },
@@ -361,7 +361,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-passed20: pills' top − agency line's bottom = 16 ±1",
+  "where": "@1920 seed-cal-passed20: pills' top − main line's bottom = 16 ±1",
   "ok": false,
   "detail": "9.7"
  },
@@ -373,7 +373,7 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-passed20: the main line does not move (agency line ±0.5)",
+  "where": "@1920 seed-cal-passed20: the main line does not move (±0.5)",
   "ok": true,
   "detail": "869.09375 → 869.09375"
  },

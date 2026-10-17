@@ -56,6 +56,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   B1: { js: `(() => { const fix = () => { if (!document.querySelector('[data-ftab="housekeeping"]')) { const b = document.createElement("button"); b.dataset.ftab = "housekeeping"; b.textContent = "Housekeeping"; b.style.cssText = "position:fixed;right:30px;bottom:30px;z-index:50"; document.body.appendChild(b); } }; fix(); setInterval(fix, 200); })()` },
   B2: { css: `@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px !important; } }` },
   C2: { css: `.cl183-pk { margin-top: 2px !important; }` },
+  C3: { css: `.cl16-list .clv-row[data-clv="row"] > .clv-rtray.clv-rtray { position: absolute !important; right: 14px !important; top: 3px !important; bottom: 3px !important; grid-column: auto !important; padding-left: 30px !important; background: linear-gradient(90deg, transparent, #fdfbf8 18px) !important; } .cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within) > :is(.clv-rq, .clv-rrep) { opacity: 1 !important; visibility: visible !important; }` },
   E1: { js: `(() => { new MutationObserver(() => { const s = [...document.querySelectorAll('.cl18-lh .ltb-search')].find((e) => e.getBoundingClientRect().height > 0); const m = [...document.querySelectorAll('.lpop, [role="menu"]')].find((e) => e.getBoundingClientRect().height > 0 && /Group the list by/i.test(e.textContent || "")); if (s && m && !m.dataset.mut) { m.dataset.mut = "1"; m.style.setProperty("left", s.getBoundingClientRect().left + "px", "important"); m.style.setProperty("position", "fixed", "important"); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); })()` },
   E2: { css: `.lth.lth { background: transparent !important; }` },
   F1: { js: `(() => { const go = () => { const p = document.querySelector('[data-pck="pill"]'); const side = [...document.querySelectorAll('.ws-panel, aside, nav')].find((e) => e.getBoundingClientRect().height > 300 && e.getBoundingClientRect().left < 50); if (p && side && p.parentElement !== side) side.appendChild(p); }; setInterval(go, 150); go(); })()` },
@@ -342,12 +343,12 @@ test("C1 · peek: the closed row's ground, three contact pills from the name's l
 });
 
 /* ───────────────────────── C2 · the peek's spacing (v18.3.1) ───────────────────────── */
-test("C2 · spacing: pills 16 (14) under the agency line and 18 (16) above the row's foot; nothing else moves", async ({ page }) => {
+test("C2 · spacing: pills 16 (14) under the main line and 18 (16) above the row's foot; nothing else moves", async ({ page }) => {
   test.setTimeout(400_000);
   const L = new Ledger("C2");
   const boxes = () => page.evaluate(() => {
     const rows = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0);
-    return rows.map((r) => ({ id: r.dataset.agentCard!, top: r.getBoundingClientRect().top, h: r.getBoundingClientRect().height, agy: r.querySelector<HTMLElement>(".clv-ragy")?.getBoundingClientRect().bottom ?? null }));
+    return rows.map((r) => ({ id: r.dataset.agentCard!, top: r.getBoundingClientRect().top, h: r.getBoundingClientRect().height, agy: r.querySelector<HTMLElement>(".clv-rwn")?.getBoundingClientRect().bottom ?? null }));
   });
   let seenFull = 0, seenCompact = 0;
   for (const vp of [...SIZES, { width: 1920, height: 1080 }]) {
@@ -367,18 +368,19 @@ test("C2 · spacing: pills 16 (14) under the agency line and 18 (16) above the r
       const r = await page.evaluate((id) => {
         const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
         const pills = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((p) => p.getBoundingClientRect());
-        const agy = el.querySelector<HTMLElement>(".clv-ragy")!.getBoundingClientRect();
+        /* the main line: the name and agency block */
+        const agy = el.querySelector<HTMLElement>(".clv-rwn")!.getBoundingClientRect();
         const rb = el.getBoundingClientRect();
         return { open: el.hasAttribute("data-peek"), n: pills.length, pTop: Math.min(...pills.map((p) => p.top)), pBot: Math.max(...pills.map((p) => p.bottom)), agyB: agy.bottom, rowB: rb.bottom };
       }, id);
       const after = await boxes();
       L.check(`${w} ${id}: the peek opened`, r.open && r.n === 3, `${r.open} · ${r.n}`);
       if (!r.open) continue;
-      L.check(`${w} ${id}: pills' top − agency line's bottom = ${want.top} ±1`, near(r.pTop - r.agyB, want.top, 1), (r.pTop - r.agyB).toFixed(1));
+      L.check(`${w} ${id}: pills' top − main line's bottom = ${want.top} ±1`, near(r.pTop - r.agyB, want.top, 1), (r.pTop - r.agyB).toFixed(1));
       L.check(`${w} ${id}: row's bottom − pills' bottom = ${want.foot} ±1`, near(r.rowB - r.pBot, want.foot, 1), (r.rowB - r.pBot).toFixed(1));
       const i = before.findIndex((b) => b.id === id);
       const grow = after[i].h - before[i].h;
-      L.check(`${w} ${id}: the main line does not move (agency line ±0.5)`, near(after[i].agy, before[i].agy ?? NaN, 0.5), `${before[i].agy} → ${after[i].agy}`);
+      L.check(`${w} ${id}: the main line does not move (±0.5)`, near(after[i].agy, before[i].agy ?? NaN, 0.5), `${before[i].agy} → ${after[i].agy}`);
       L.check(`${w} ${id}: the row grows by exactly the peek (${want.top} + pills + foot − its resting foot)`, grow > 0 && near(after[i].top + after[i].h - (r.pBot + want.foot), 0, 1), grow.toFixed(1));
       L.check(`${w} ${id}: the rows above do not move`, before.slice(0, i).every((b, k) => near(after[k].top, b.top, 0.5)), "");
       L.check(`${w} ${id}: the row below moves by exactly the growth`, i + 1 >= before.length || near(after[i + 1].top - before[i + 1].top, grow, 0.5), i + 1 < before.length ? `${(after[i + 1].top - before[i + 1].top).toFixed(1)} vs ${grow.toFixed(1)}` : "last");
@@ -389,9 +391,10 @@ test("C2 · spacing: pills 16 (14) under the agency line and 18 (16) above the r
   L.done(40);
 });
 
-test("C3 · pills' details: Copy is v18's small button; the website's ↗ is 13px navy", async ({ page }) => {
+/* C2d — C2's details half: Copy and the ↗ (the pack's C2 names Copy; the ↗ is held here beside it) */
+test("C2d · pills' details: Copy is v18's small button, 22 tall with a ring; the website's ↗ is 13px navy", async ({ page }) => {
   test.setTimeout(400_000);
-  const L = new Ledger("C3");
+  const L = new Ledger("C2d");
   /* the harness account has no agent with a website, so the bare fixture gets one for this read and is re-seeded after */
   reseed();
   { const { db, uid } = await harnessDb(); await updateDoc(doc(db, "users", uid, "agents", BARE), { website: "https://example.com/agency" }); }
@@ -410,14 +413,81 @@ test("C3 · pills' details: Copy is v18's small button; the website's ↗ is 13p
       const c = el.querySelector<HTMLElement>('[data-cl18="peek-copy"]');
       const a = el.querySelector<HTMLElement>('[data-cl183="peek-pill"][data-k="website"] [data-cl183="ext"]');
       const cs = c ? getComputedStyle(c) : null, as = a ? getComputedStyle(a) : null;
-      return { c: cs && { fs: cs.fontSize, ff: cs.fontFamily, rad: cs.borderTopLeftRadius, ring: cs.boxShadow }, a: as && { fs: as.fontSize, col: as.color } };
+      return { c: cs && { fs: cs.fontSize, ff: cs.fontFamily, rad: cs.borderTopLeftRadius, ring: cs.boxShadow, h: c!.getBoundingClientRect().height, pad: cs.padding }, a: as && { fs: as.fontSize, col: as.color } };
     }, id);
-    if (r.c && !copy) { copy++; L.check("Copy is mono 11", r.c.fs === "11px" && /Mono/i.test(r.c.ff), JSON.stringify(r.c)); L.check("Copy has radius 6 and a hairline ring", r.c.rad === "6px" && /inset/.test(r.c.ring), JSON.stringify(r.c)); }
-    if (r.a && !arrow) { arrow++; L.check("the ↗ is 13px", r.a.fs === "13px", JSON.stringify(r.a)); L.check("the ↗ is navy #2a3a52", r.a.col === "rgb(42, 58, 82)", JSON.stringify(r.a)); }
+    if (r.c && !copy) { copy++; L.check("Copy is mono 11", r.c.fs === "11px" && /Mono/i.test(r.c.ff), JSON.stringify(r.c)); L.check("Copy has radius 6 and a non-transparent inset ring", r.c.rad === "6px" && /inset/.test(r.c.ring) && !/rgba\([^)]*, 0\)/.test(r.c.ring), JSON.stringify(r.c)); L.check("Copy is 22 tall (±1) with padding 0 8px", near(r.c.h, 22, 1) && r.c.pad === "0px 8px", JSON.stringify(r.c)); }
+    if (r.a && !arrow) { arrow++; L.check("the ↗ is 13px", r.a.fs === "13px", JSON.stringify(r.a)); L.check("the ↗ is navy #2d3a50", r.a.col === "rgb(45, 58, 80)", JSON.stringify(r.a)); }
   }
   L.check("an agent with an email and one with a website were found", copy > 0 && arrow > 0, `${copy} · ${arrow}`);
   } finally { reseed(); }
-  L.done(5);
+  L.done(6);
+});
+
+/* ───────────────────────── C3 · the hover actions (v18.3.1 §B) ───────────────────────── */
+test("C3 · actions: in the status cell (reaching left over Replies only), on the main line, the status content swapped out", async ({ page }) => {
+  test.setTimeout(500_000);
+  const L = new Ledger("C3");
+  let queried = 0, notQueried = 0, peeked = 0;
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await open(page, vp, "C3");
+    const pick = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0);
+      const q = rows.filter((r) => !r.querySelector(".cl17-log")).slice(0, 2), n = rows.filter((r) => r.querySelector(".cl17-log")).slice(1, 3);
+      return [...q, ...n].map((r) => ({ id: r.dataset.agentCard!, log: !!r.querySelector(".cl17-log") }));
+    });
+    L.check(`${w} queried and not-queried rows to hover (the population)`, pick.some((p) => p.log) && pick.some((p) => !p.log), JSON.stringify(pick));
+    for (const { id, log } of pick) {
+      const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
+      await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(350);
+      const box = await row.boundingBox();
+      await page.mouse.move(box!.x + 60, box!.y + 20);
+      const read = (phase: string) => page.evaluate(([id, phase]) => {
+        const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
+        const cs = getComputedStyle(el), rb = el.getBoundingClientRect();
+        /* the columns from the row's own grid: left = row's content edge + tracks + gaps */
+        const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat), gap = parseFloat(cs.columnGap) || 0;
+        const lefts: number[] = []; let x = rb.left + parseFloat(cs.paddingLeft);
+        for (const t of tracks) { lefts.push(x); x += t + gap; }
+        const status = { l: lefts[3], r: lefts[3] + tracks[3] }, repL = lefts[2];
+        const tray = el.querySelector<HTMLElement>(".clv-rtray")!;
+        const acts = [...tray.children].map((c) => (c as HTMLElement).getBoundingClientRect()).filter((b) => b.width > 0);
+        const wn = el.querySelector<HTMLElement>(".clv-rwn")!.getBoundingClientRect();
+        const mainC = wn.top + wn.height / 2;
+        const tb = tray.getBoundingClientRect();
+        const hit = document.elementFromPoint(status.l + 4, mainC);
+        const q = el.querySelector<HTMLElement>(".clv-rq")!;
+        return {
+          phase, peek: el.hasAttribute("data-peek"), n: acts.length,
+          right: Math.max(...acts.map((b) => b.right)), left: Math.min(...acts.map((b) => b.left)), statusR: status.r, repL,
+          trayC: tb.top + tb.height / 2, mainC, trayBg: getComputedStyle(tray).backgroundImage + "|" + getComputedStyle(tray).backgroundColor,
+          hitOk: !!hit && (hit === el || tray.contains(hit) || (el.contains(hit) && !q.contains(hit) && !el.querySelector(".clv-rrep")!.contains(hit))), hit: hit ? `${hit.tagName}.${(hit as HTMLElement).className}` : null,
+          qVis: getComputedStyle(q).visibility, inRow: acts.every((b) => b.top >= rb.top && b.bottom <= rb.bottom),
+        };
+      }, [id, phase] as const);
+      await page.waitForTimeout(200);
+      const closed = await read("peek closed");
+      await page.waitForTimeout(700);
+      const opened = await read("peek open");
+      for (const r of [closed, opened]) {
+        const t = `${w} ${id} (${log ? "not queried" : "queried"}, ${r.phase})`;
+        L.check(`${t}: actions shown`, r.n >= 1, `${r.n}`);
+        L.check(`${t}: (a) the actions' right edge is the status cell's ±1`, near(r.right, r.statusR, 1), `${r.right.toFixed(1)} vs ${r.statusR.toFixed(1)}`);
+        L.check(`${t}: (a) nothing past the Replies column's left`, r.left >= r.repL - 0.5, `${r.left.toFixed(1)} vs ${r.repL.toFixed(1)}`);
+        L.check(`${t}: (b) 4px inside the status cell, at the main line, is the row or an action`, r.hitOk, `${r.hit}`);
+        L.check(`${t}: (c) the actions' centre is the main line's ±1`, near(r.trayC, r.mainC, 1), `${r.trayC.toFixed(1)} vs ${r.mainC.toFixed(1)}`);
+        L.check(`${t}: no background of its own`, /none\|rgba\(0, 0, 0, 0\)/.test(r.trayBg), r.trayBg);
+        L.check(`${t}: (d) the status content is hidden`, r.qVis === "hidden", r.qVis);
+      }
+      if (opened.peek) peeked += 1;
+      if (log) notQueried += 1; else queried += 1;
+      await page.mouse.move(5, 5); await page.waitForTimeout(200);
+      const back = await page.evaluate((id) => { const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!; return getComputedStyle(el.querySelector(".clv-rq")!).visibility; }, id);
+      L.check(`${w} ${id}: (d) the status content is visible again 200ms after leaving`, back === "visible", back);
+    }
+  }
+  L.check("both branches (queried and not-queried rows) and an open peek were measured", queried > 0 && notQueried > 0 && peeked > 0, `${queried} · ${notQueried} · ${peeked}`);
+  L.done(60);
 });
 
 /* ───────────────────────── D · adding an agent ───────────────────────── */

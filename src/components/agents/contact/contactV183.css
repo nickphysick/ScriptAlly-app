@@ -21,9 +21,9 @@
 /* ── §C · THE ROW PEEK: how to reach the agent, nothing else. The open row keeps its own background: no tint, no lift,
    no shadow, no radius change (v18's open-row dress is undone here). One line of three pills under the main line,
    starting at the agent's name (the disc, 38 / 28 compact, plus the who cell's 11 gap), gap 12.
-   v18.3.1 — THE SPACING: 16 between the agency line's bottom and the pills' top, 18 between the pills and the row's foot
+   v18.3.1 — THE SPACING: 16 between the main line's bottom (the name and agency block) and the pills' top, 18 between the pills and the row's foot
    (14 and 16 below the full-size sheet). The open row holds its resting main track (`--cl183-track`, read as the peek
-   opens), so the main line never re-centres; the pills' margin is the target less the distance the agency line already
+   opens), so the main line never re-centres; the pills' margin is the target less the distance the main line already
    sits above that track's end (`--cl183-under`), floored at 2 so a taller wishlist cell is never overlapped. ── */
 .cl16-list .clv-row[data-peek], .cl16-list .clv-row[data-peek][data-disc="none"], .cl16-list .clv-row[data-peek][data-disc="live"],
 .cl16-list .clv-row[data-peek][data-disc="closed"] {
@@ -57,17 +57,51 @@
 /* v18.3.1 — Copy is v18's small button (it was plain text here: v18's rule is scoped to the retired .cl18-pk peek), and
    the website's ↗ is 13px navy, not the domain's size (the pill's "> span" rule sets every span to the pill's font) */
 .cl183-pk .cl18-copy {
-  flex: none; margin: 0 0 0 2px; padding: 2px 7px; border: 0; border-radius: 6px; background: #fff; cursor: pointer;
-  font: 400 11px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7);
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+  flex: none; display: inline-flex; align-items: center; box-sizing: border-box; height: 22px; margin: 0 0 0 2px;
+  padding: 0 8px; border: 0; border-radius: 6px; background: #fff; cursor: pointer;
+  font: 400 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18);
 }
 .cl183-pk .cl18-copy:hover { color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
 .cl183-pk .cl18-copy:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-.cl183-pk .cl183-pp > .cl183-ext { flex: none; overflow: visible; font: 400 13px/1 var(--sp-serif) !important; color: #2a3a52; }
+.cl183-pk .cl183-pp > .cl183-ext { flex: none; overflow: visible; font: 400 13px/1 var(--sp-serif) !important; color: #2d3a50; }
 /* a missing one: dashed, transparent, italic, ink 55%; the disc is a ring */
 .cl183-pk .cl183-pp.is-add { background: transparent; box-shadow: none; border: 1.2px dashed rgba(42, 58, 82, 0.4); color: rgba(28, 19, 15, 0.55); font-style: italic !important; }
 .cl183-pk .cl183-pp.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.4); }
 .cl183-pk .cl183-pp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── v18.3.1 §B · THE HOVER ACTIONS SWAP INTO THE STATUS CELL. The tray was an overlay with its own background,
+   narrower than the Query status cell (so "YOUR M…" showed at its left edge) and centred on the row's full height (so
+   with the pills open it sat above the name line). It is now a grid item on the MAIN LINE (row 1), right-aligned to the
+   status cell's right edge, no background of its own: the row's hover colour shows behind it. On hover, focus-within or
+   keyboard focus the status and Replies content go to opacity 0 / hidden (keeping their space, so nothing reflows) and
+   the actions fade in; 120ms each way, instant under reduced motion.
+   ⚠️ THE ACTIONS MAY REACH LEFT OVER THE REPLIES COLUMN (Nick's ruling, 17 Oct): the status cell is 212 wide at 1512
+   and 170 at 1280, while a pair of unchanged buttons runs 209–310, so the tray's area is Replies + status and both
+   columns' content hides on hover.
+   ⚠️ EVERY CELL IS PLACED EXPLICITLY: an explicitly placed tray would push auto-placed cells off the main line (grid
+   auto-placement never overlaps), so who, fit, Replies and status are pinned to row 1 and the peek to row 2. ── */
+.cl16-list .clv-row[data-clv="row"] > .clv-rwho { grid-row: 1; grid-column: 1; }
+.cl16-list .clv-row[data-clv="row"] > .clv-rfit { grid-row: 1; grid-column: 2; }
+.cl16-list .clv-row[data-clv="row"] > .clv-rrep { grid-row: 1; grid-column: 3; }
+.cl16-list .clv-row[data-clv="row"] > .clv-rq { grid-row: 1; grid-column: 4; }
+.cl16-list .clv-row[data-clv="row"] > .cl183-pk { grid-row: 2; }
+.cl16-list .clv-row[data-clv="row"] > :is(.clv-rq, .clv-rrep) { transition: opacity 0.12s, visibility 0s; }
+.cl16-list .clv-row[data-clv="row"] > .clv-rtray.clv-rtray {
+  position: static; grid-row: 1; grid-column: 3 / -1; justify-self: end; align-self: center; z-index: 1;
+  top: auto; bottom: auto; right: auto; height: auto; transform: none; padding: 0; gap: 8px; background: none;
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s, visibility 0s 0.12s;
+}
+.cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within, .kf) > :is(.clv-rq, .clv-rrep) {
+  opacity: 0; visibility: hidden; transition: opacity 0.12s, visibility 0s 0.12s;
+}
+.cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within, .kf) > .clv-rtray.clv-rtray {
+  display: flex; opacity: 1; visibility: visible; pointer-events: auto; background: none; transition: opacity 0.12s, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl16-list .clv-row[data-clv="row"] > :is(.clv-rq, .clv-rrep, .clv-rtray),
+  .cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within, .kf) > :is(.clv-rq, .clv-rrep, .clv-rtray.clv-rtray) { transition: none; }
+}
 
 /* ── §E · ONE SHEET: the white list is flush with the navy toolbar's edges, and the headings row spans it. Rows and
    headings share one inset (78 left, 40 right), so each label sits on its column. ── */

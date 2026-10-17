@@ -471,7 +471,8 @@
    that has not been queried its first button is also "Log a query" (the plain drawer's): the link under it could
    never be pressed with a pointer (measured: lock D2 waited out its whole timeout on a covered link). On those rows
    the link IS the action, so the pointer's tray stands down; the keyboard's (`.kf`, the L key) is unchanged. */
-.cl16-list .clv-row:has(.cl17-log):not(.kf) .clv-rtray { display: none; }
+/* RETIRED (v18.3.1 §B): the actions swap INTO the status cell, so "+ Log a query" is hidden while the tray's own
+   "Log a query" shows; nothing is covered and the tray no longer stands down on these rows. */
 
 /* the hover tray covers the whole Query status cell: the cell is three lines tall now (stage, track, date), and a
    tray centred on one line let the stage and the "Your move" chip show above and below it */

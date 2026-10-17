@@ -472,6 +472,10 @@
     "design-refs/analytics-v24-1/screens/card-thin-1512@2x.png": "6ddb9e24b37ee42b7bd1f833e78c1227f62af3081b9c1201728632c94690bfa4",
     "design-refs/analytics-v24-1/screens/top-1280@2x.png": "8a00b70b3168e71d43d0caacb2dfedc80448bf495408bd99b433861d3db1c6b5",
     "design-refs/analytics-v24-1/screens/top-1512@2x.png": "86a2387a1f7d27efc35d2e5b4bfd4d028278e1fbed767788916c78eb6596da76",
+    "design-refs/contact-list-v18-3-1/contact-list-v18-3-1.html": "cc22e309a94ead9bace2a420333ca79c01f754a5682078727993a10a806bd033",
+    "design-refs/contact-list-v18-3-1/screens/01-hover-closed-1512@2x.png": "4c5b772c600f37a76baf72787f538887c1ba9e68fccc239aa3668cac8900afab",
+    "design-refs/contact-list-v18-3-1/screens/02-hover-peek-1512@2x.png": "fa28acf0bafa523e9853ffee74092d10dc4d03ef08cf6e4f910de13f24b4e8b7",
+    "design-refs/contact-list-v18-3-1/screens/03-hover-peek-1280@2x.png": "bff8582fc5d995371fd2e5b26bbe6f3cd252e58f30c56f4e663820df6d8dc381",
     "design-refs/dashboard-v60-1/dashboard-v60-1.html": "cd8f8b1ad18c5ad50758f92d2c20856e9d4c0283d6d61a3da33417933303bc05"
   },
   "superseded": {

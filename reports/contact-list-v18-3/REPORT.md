@@ -198,3 +198,65 @@ Branch `contact-list-v18-3-1`, cut from what dev served:
   no agent with a website, so C3 gives the bare fixture one for the read and re-seeds it.
 - **C1:** 176/176.
 - **CL18:** 11 passed, 3 retired as before.
+
+## v18.3.1, amended — the peek's spacing and hover actions in the status cell
+
+**Base:** dev served `contact-list-v18-3-1` at ab86ac14 (`index-BfyN6LLe.js`), the first v18.3.1 build. It carries
+v18.3: the "Getting started" pill and the contact pills. The amendment continues on that branch. Refs are enrolled at
+`design-refs/contact-list-v18-3-1/`, and all four hashes match (468 refs guarded).
+
+**False premises:**
+1. **"No box wider than the cell" cannot hold with the buttons unchanged.** The status cell is 212px at 1512 and 170px
+   at 1280; an unchanged pair of buttons with an 8px gap runs about 209–310px ("Send a nudge / Open card" about 209,
+   "Record a response / Open card" about 244, "Remind me when they reopen / Open card" about 310). At 1280 only "Open
+   card" alone fits, and the mock's own tray overflows its cell (242 against 213).
+   **Nick's ruling:** the actions stay right-aligned to the status cell and may reach left over the Replies column,
+   whose content also hides on hover. C3(a) is "right edge on the cell's, nothing past the Replies column's left".
+2. **Part A's spacing was already on dev** (ab86ac14). This pass moves its anchor from the italic agency span to the
+   name-and-agency block (`.clv-rwn`), as the pack names it (under a pixel of difference), and corrects Copy and the ↗.
+   So C2 is green on this pack's base. Its red-first stands from v18.3 (4.2 / 14.0), and its mutation reddens it here
+   (9.7 and 7.7 against 14).
+3. **The tray stood down on not-queried rows,** so that "+ Log a query" could be clicked (v17). The mock swaps those rows
+   too: the link hides and the tray's own "Log a query" and "Open card" show. That rule is retired.
+4. **The Query Centre's rows do not use this tray.** Theirs is `.qc138-tray`, inside the "Next move" cell, and a
+   different component. The pack applies the rule only if the tray is shared, so the Query Centre is unchanged;
+   `shots-v18-3-1/x-qc-row-hover-*` show it as it is.
+
+**A** (`ba7f5826`): the pills sit 16 (14) under the main line and 18 (16) above the foot. Copy is 22 tall, padding
+`0 8px`, radius 6, white, with a 1px ink-18% inset ring. The ↗ is 13px `#2d3a50`.
+
+**B** (`8065c128`): the tray is a grid item on the main line (row 1), in the Replies + status area, right-aligned, gap 8,
+with no background of its own. On hover, focus-within or keyboard focus the status and Replies content go to `opacity:
+0; visibility: hidden`, keeping their space, and the actions fade in, 120ms each way, none under reduced motion. Every
+cell is placed explicitly, because grid auto-placement never overlaps: an explicitly placed tray would have pushed the
+auto-placed cells off the main line.
+
+**Locks:**
+
+| Lock | This branch | Base (ab86ac14) | Mutation |
+|---|---|---|---|
+| C2 spacing | 67/67 | 67/67 (premise 2) | 2px gap restored: 58/67, 9.7 / 7.7 against 14 |
+| C2d Copy and ↗ | 6/6 | 4/6: Copy 18.3 tall, `2px 7px`, ring 16%; ↗ `#2a3a52` | — |
+| C3 actions | 123/123 | 51/123: right edge 1466 against 1440, off the main line by 2–5px, own gradient, status visible | overlay restored: 59/123, up to 30px off the main line with the peek open |
+
+- C3 runs at 1512 and 1280.
+- It hovers queried and not-queried rows, and reads each with the peek closed and open.
+- It asserts every branch was entered.
+
+**L1:**
+- **Green on this branch:** CL18 (12 passed, 3 retired), QC138.1, .3, .4, .5 and .6.
+- **QC138.2 C1 / D1:** red here and on every base since v18.3.
+- **CL183 E3, CL17 D1, CL16 F4–F7 / G1 and QC138 J1 went red during the run.** Each needs queried agents, and another
+  session was running the dashboard v58–v60.1 suites against the shared harness account at the same time, seeding a
+  manuscript with no queries (`db60-pre`, "DB60 Pre-query"). With it on the account every agent read "Not queried".
+  Re-run on the base build in the same state:
+  - CL183 E3 and four of the CL16 five failed there too;
+  - CL17 D1 and QC138 J1 passed, as the fixture came and went.
+  - **Re-run on this branch once the other session's run had ended** (`db60-pre` gone): **all eight pass.** CL183 E3,
+    CL17 D1, CL16 F4–F7, G1 and QC138 J1. They are the account's state, not this change.
+- **Not touched:** that session's fixture is its own.
+
+**Shots** (`shots-v18-3-1/`, beside each `screens/*`):
+- `01-hover-closed-1512`, `02-hover-peek-1512`, `03-hover-peek-1280`;
+- `x-hover-peek-not-queried-1512`, showing "Log a query" taking "+ Log a query"'s place;
+- `x-qc-row-hover-1512/1280`, the Query Centre unchanged.
