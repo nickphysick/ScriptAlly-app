@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CL1832-D3",
+  "where": "the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1832-D3",
+  "where": "(a) the last pill's right edge ≤ the actions' left − 16",
+  "ok": true,
+  "detail": "1372.1 vs 1372.1"
+ },
+ {
+  "lock": "CL1832-D3",
+  "where": "(b) the pills share one line (equal tops ±1)",
+  "ok": true,
+  "detail": "[617.09375,617.09375,617.09375]"
+ },
+ {
+  "lock": "CL1832-D3",
+  "where": "(c) the email is whole (scrollWidth ≤ clientWidth + 1)",
+  "ok": true,
+  "detail": "{\"k\":\"email\",\"sw\":291,\"cw\":291,\"title\":\"theo.abara@abaragrantliteraryagency.co.uk\",\"text\":\"theo.abara@abaragrantliteraryagency.co.uk\"}"
+ },
+ {
+  "lock": "CL1832-D3",
+  "where": "something shortened (the branch is entered)",
+  "ok": false,
+  "detail": "[{\"k\":\"email\",\"sw\":291,\"cw\":291,\"title\":\"theo.abara@abaragrantliteraryagency.co.uk\",\"text\":\"theo.abara@abaragrantliteraryagency.co.uk\"},{\"k\":\"website\",\"sw\":208,\"cw\":208,\"title\":\"abaragrantliteraryagency.co.uk\",\"text\":\"abaragrantliteraryagency.co.uk\"},{\"k\":\"social\",\"sw\":213,\"cw\":213,\"title\":\"@theo.abara.literary.bsky.social\",\"text\":\"@theo.abara.literary.bsky.social\"}]"
+ },
+ {
+  "lock": "CL1832-D3",
+  "where": "the social handle gives way before the website",
+  "ok": true,
+  "detail": "{\"soc\":{\"k\":\"social\",\"sw\":213,\"cw\":213,\"title\":\"@theo.abara.literary.bsky.social\",\"text\":\"@theo.abara.literary.bsky.social\"},\"web\":{\"k\":\"website\",\"sw\":208,\"cw\":208,\"title\":\"abaragrantliteraryagency.co.uk\",\"text\":\"abaragrantliteraryagency.co.uk\"}}"
+ }
+]

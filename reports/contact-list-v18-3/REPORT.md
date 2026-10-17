@@ -260,3 +260,69 @@ auto-placed cells off the main line.
 - `01-hover-closed-1512`, `02-hover-peek-1512`, `03-hover-peek-1280`;
 - `x-hover-peek-not-queried-1512`, showing "Log a query" taking "+ Log a query"'s place;
 - `x-qc-row-hover-1512/1280`, the Query Centre unchanged.
+
+## v18.3.2 — the row keeps all its information on hover; the actions sit on the peek's line; no action twice
+
+**Which v18.3.1 case applied:** v18.3.1 **had** been run (its Part B was on dev). Part B is reverted (`03581e72`,
+reverting `8065c128`); v18.3.1 Part A (16 / 18, Copy, the ↗) stands.
+
+**Base:** dev served `…-an241-db601-cl1831b` at `c24f9484` (`index-DMZJAn0z.js`), which carries v18.3 (the "Getting
+started" pill and the contact pills) and v18.3.1. The branch is `contact-list-v18-3-2`. Refs are enrolled at
+`design-refs/contact-list-v18-3-2/`, and all seven hashes match (483 guarded).
+
+**False premises:**
+1. **The harness has no "full" row with an offer.** On the active manuscript (Harbour of Glass) no query is at Offer,
+   and no agent has contact details. So the locks use these rows:
+   - **"full":** Theo Abara, at Full requested, which carries the same stage, bar, YOUR MOVE and date. The run gives him
+     three long contact details.
+   - **"sparse":** Sun-hee Park (Full sent), given a website only.
+   - **"not-queried":** the bare fixture.
+
+   Every field is read first and put back exactly. Moving a query to Offer would have meant a status write and a
+   recompute on shared data.
+2. **The pills' shortening needs a floor, and it decides what fits.** With the email never shortening, at 1280 a long
+   email (the lock uses a 41-character one) leaves about 180px for the website and social pills. At a 96px floor they
+   ran 34px into the actions' 16px clearance (CL1832-D3 found it). They stop at 72px now: the disc and a few letters.
+   With a mock-like email (`shots-v18-3-2/04-…`) the social handle shows two characters before its ellipsis, where the
+   mock's keeps a few more. A higher floor would overflow the long-email case.
+3. **The Query Centre's rows do not share this tray** (`.qc138-tray`, in the "Next move" cell, as v18.3.1 found). It is
+   unchanged, for B and C alike. Its status cell offers no action of its own for the tray to repeat.
+
+**The commits:**
+- **A** (`eb1843e6`): the hover tray over the Query status cell is gone. Every column keeps its content on hover, and
+  a row with its peek closed shows no actions.
+  - ⚠️ A was committed with two unit tests red. My gate chain checked the summary line rather than the exit, which is
+    the very fault CLAUDE.md warns about. B repairs them in a follow-up commit, not an amend. The gate now refuses to
+    commit unless the only red is the known `email.test.ts`.
+- **B** (`6814e189`, fix `9a7f2000`): while the peek is open the actions sit at the right-hand end of the peek's line.
+  - The line is one flex row: the pills, then the actions, at least 16px apart.
+  - The actions' right edge is the status cell's, centred with the pills, with no background, fading in over 120ms
+    (none under reduced motion).
+  - When space is short, the social handle shortens first (flex-shrink 1000), then the website. The email never
+    shortens.
+  - Each shortened value keeps its full value as its `title`. Copy and ↗ still use the full values.
+- **C** (`92c3fa52`): `lib/rowActions` drops any action whose label (ignoring a leading "+", whitespace and case)
+  matches one the status cell offers. The row reads those labels from the rendered cell as the peek opens, in a layout
+  effect, so nothing duplicated paints, and nothing names "Log a query". Not-queried rows show Open card alone.
+
+**Locks (CL183.2, named `CL1832-D1`–`D4`; the file's own D1/D2 are the add-agent and policy locks):**
+
+| Lock | This branch | Base (c24f9484) | Mutation |
+|---|---|---|---|
+| D1 nothing hides | 54/54 | 14/54: stage, track, YOUR MOVE and date hidden on hover | v18.3.1 B's swap: 18/54 |
+| D2 actions on the peek line | 24/24 | 12/24: actions on the main line, off the pills' centre | tray centred on the row: 12/24, 603.9 against 635.1 |
+| D3 no collision (1280, full) | 8/8 | 4/9 | pill row unshrinkable: 5/6 (see below) |
+| D4 no action twice (every row, 1512) | 68/68 | 12/68: not-queried rows show two actions | dedupe removed (src): 12/68, "log a query" in both |
+
+- **D3's mutation reddens "something shortened", not (a).** With the pill row unshrinkable the actions are pushed
+  right with it, so the 16px gap still holds. D2's right-edge check is what catches that overflow.
+- **v18.3.1 C3 is retired:** the test, its mutation and its three ledgers are deleted. C2 (spacing) and C2d (Copy and
+  the ↗) stand and pass.
+
+**L1:**
+- **Green:** CL183 in full (24 tests), CL18 (12 passed, 3 retired), CL16 (10, 10 retired), QC138, .1, .3, .4, .5 and
+  .6.
+- **Red, all pre-existing:** CL17 FS1 (the pin's wording since QC v138.6), and QC138.2 C1/D1.
+
+**Shots** (`shots-v18-3-2/`, one beside each `screens/*` file): full, sparse and not queried with the peek open, at 1512
+and 1280.

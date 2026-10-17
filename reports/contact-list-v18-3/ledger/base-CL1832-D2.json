@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-4: the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true · 2"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-4: (a) the actions' centre is the pills' ±1",
+  "ok": false,
+  "detail": "580.8 vs 635.1"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-4: (b) the last action's right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-4: (c) the actions do not intersect the status cell's main-line box",
+  "ok": false,
+  "detail": "{\"tray\":{\"l\":1226.75,\"r\":1439.984375,\"t\":564.75,\"b\":596.75,\"c\":580.75},\"main\":{\"t\":552.75,\"b\":608.75}}"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-5: the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true · 2"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-5: (a) the actions' centre is the pills' ±1",
+  "ok": false,
+  "detail": "510.8 vs 565.1"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-5: (b) the last action's right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 msv12-agent-5: (c) the actions do not intersect the status cell's main-line box",
+  "ok": false,
+  "detail": "{\"tray\":{\"l\":1196.375,\"r\":1439.984375,\"t\":494.75,\"b\":526.75,\"c\":510.75},\"main\":{\"t\":482.75,\"b\":538.75}}"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 clv181-bare: the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true · 2"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 clv181-bare: (a) the actions' centre is the pills' ±1",
+  "ok": false,
+  "detail": "510.8 vs 565.1"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 clv181-bare: (b) the last action's right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1440.0 vs 1440.0"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1512 clv181-bare: (c) the actions do not intersect the status cell's main-line box",
+  "ok": false,
+  "detail": "{\"tray\":{\"l\":1239.421875,\"r\":1439.984375,\"t\":494.75,\"b\":526.75,\"c\":510.75},\"main\":{\"t\":482.75,\"b\":538.75}}"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-4: the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true · 2"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-4: (a) the actions' centre is the pills' ±1",
+  "ok": false,
+  "detail": "580.8 vs 635.1"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-4: (b) the last action's right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-4: (c) the actions do not intersect the status cell's main-line box",
+  "ok": false,
+  "detail": "{\"tray\":{\"l\":994.765625,\"r\":1208,\"t\":564.75,\"b\":596.75,\"c\":580.75},\"main\":{\"t\":552.75,\"b\":608.75}}"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-5: the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true · 2"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-5: (a) the actions' centre is the pills' ±1",
+  "ok": false,
+  "detail": "460.1 vs 514.4"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-5: (b) the last action's right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 msv12-agent-5: (c) the actions do not intersect the status cell's main-line box",
+  "ok": false,
+  "detail": "{\"tray\":{\"l\":964.390625,\"r\":1208,\"t\":444.0625,\"b\":476.0625,\"c\":460.0625},\"main\":{\"t\":432.0625,\"b\":488.0625}}"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 clv181-bare: the peek is open with actions (precondition)",
+  "ok": true,
+  "detail": "true · 2"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 clv181-bare: (a) the actions' centre is the pills' ±1",
+  "ok": false,
+  "detail": "460.2 vs 514.6"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 clv181-bare: (b) the last action's right edge is the status cell's ±1",
+  "ok": true,
+  "detail": "1208.0 vs 1208.0"
+ },
+ {
+  "lock": "CL1832-D2",
+  "where": "@1280 clv181-bare: (c) the actions do not intersect the status cell's main-line box",
+  "ok": false,
+  "detail": "{\"tray\":{\"l\":1007.4375,\"r\":1208,\"t\":444.21875,\"b\":476.21875,\"c\":460.21875},\"main\":{\"t\":432.21875,\"b\":488.21875}}"
+ }
+]

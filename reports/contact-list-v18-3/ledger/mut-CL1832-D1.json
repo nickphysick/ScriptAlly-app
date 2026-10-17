@@ -1,0 +1,326 @@
+[
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4: the peek is still closed at 200ms (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: ym is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: the status cell's stage is there to read",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek closed: no action button has a visible box",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4: the peek opened",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek open: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek open: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek open: ym is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek open: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-4 peek open: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5: the peek is still closed at 200ms (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek closed: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek closed: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek closed: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek closed: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek closed: the status cell's stage is there to read",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek closed: no action button has a visible box",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5: the peek opened",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek open: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek open: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek open: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 msv12-agent-5 peek open: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1512 the full row carries YOUR MOVE (the badge was read)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4: the peek is still closed at 200ms (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: ym is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: the status cell's stage is there to read",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek closed: no action button has a visible box",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4: the peek opened",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek open: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek open: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek open: ym is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek open: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-4 peek open: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5: the peek is still closed at 200ms (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek closed: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek closed: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek closed: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek closed: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek closed: the status cell's stage is there to read",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek closed: no action button has a visible box",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5: the peek opened",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek open: stage is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek open: track is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek open: date is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 msv12-agent-5 peek open: reply is visible, opacity 1",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL1832-D1",
+  "where": "@1280 the full row carries YOUR MOVE (the badge was read)",
+  "ok": true,
+  "detail": "true"
+ }
+]

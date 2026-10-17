@@ -1,0 +1,410 @@
+[
+ {
+  "lock": "CL1832-D4",
+  "where": "rows to sweep (the population)",
+  "ok": true,
+  "detail": "38"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "msv12-agent-4: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"send the full\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-near: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-near: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-soon: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-soon: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-passed20: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-passed20: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-12: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-12: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-bang: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-bang: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-9: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-9: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-2: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-2: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-remind: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-remind: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-passed865: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-cal-passed865: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-1: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"remind me when they reopen\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-nowin-1: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-nowin-1: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rj-agent-2: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rj-agent-2: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-reopen: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"remind me when they reopen\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "msv12-agent-1: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"send a nudge\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-stub0: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-stub0: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-11: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"remind me when they reopen\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-7: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-7: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-8: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-8: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-stale: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-stale: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-4: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-4: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-6: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"remind me when they reopen\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-nowin-2: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-nowin-2: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "msv12-agent-5: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"record a response\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rj-agent-3: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rj-agent-3: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-chase: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-chase: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "msv12-agent-6: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rej-agent-1: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rej-agent-1: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-gap: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-gap: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-3: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-3: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "msv12-agent-2: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"record a response\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv181-bare: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv181-bare: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-never: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "clv-fx-never: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rj-agent-1: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "rj-agent-1: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-close: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "thin-ag-close: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-10: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-10: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "msv12-agent-3: no action also in the status cell",
+  "ok": true,
+  "detail": "{\"acts\":[\"send the partial\",\"open card\"],\"status\":[]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-5: no action also in the status cell",
+  "ok": false,
+  "detail": "{\"acts\":[\"log a query\",\"open card\"],\"status\":[\"log a query\"]}"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "seed-agent-5: not queried: exactly one action, Open card",
+  "ok": false,
+  "detail": "[\"log a query\",\"open card\"]"
+ },
+ {
+  "lock": "CL1832-D4",
+  "where": "both branches swept (not-queried rows and rows with an action)",
+  "ok": true,
+  "detail": "28 · 9"
+ }
+]

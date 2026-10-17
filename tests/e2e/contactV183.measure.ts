@@ -56,7 +56,9 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   B1: { js: `(() => { const fix = () => { if (!document.querySelector('[data-ftab="housekeeping"]')) { const b = document.createElement("button"); b.dataset.ftab = "housekeeping"; b.textContent = "Housekeeping"; b.style.cssText = "position:fixed;right:30px;bottom:30px;z-index:50"; document.body.appendChild(b); } }; fix(); setInterval(fix, 200); })()` },
   B2: { css: `@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px !important; } }` },
   C2: { css: `.cl183-pk { margin-top: 2px !important; }` },
-  C3: { css: `.cl16-list .clv-row[data-clv="row"] > .clv-rtray.clv-rtray { position: absolute !important; right: 14px !important; top: 3px !important; bottom: 3px !important; grid-column: auto !important; padding-left: 30px !important; background: linear-gradient(90deg, transparent, #fdfbf8 18px) !important; } .cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within) > :is(.clv-rq, .clv-rrep) { opacity: 1 !important; visibility: visible !important; }` },
+  "CL1832-D1": { css: `.cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within) > :is(.clv-rq, .clv-rrep) { opacity: 0 !important; visibility: hidden !important; }` },
+  "CL1832-D2": { css: `.cl16-list .clv-row[data-clv="row"] { position: relative; } .cl1832-tray { position: absolute !important; right: 40px; top: 50% !important; transform: translateY(-50%); margin: 0 !important; }` },
+  "CL1832-D3": { css: `.cl1832-pl > .cl183-pk, .clv-list--compact .cl1832-pl > .cl183-pk { flex: none !important; }` },
   E1: { js: `(() => { new MutationObserver(() => { const s = [...document.querySelectorAll('.cl18-lh .ltb-search')].find((e) => e.getBoundingClientRect().height > 0); const m = [...document.querySelectorAll('.lpop, [role="menu"]')].find((e) => e.getBoundingClientRect().height > 0 && /Group the list by/i.test(e.textContent || "")); if (s && m && !m.dataset.mut) { m.dataset.mut = "1"; m.style.setProperty("left", s.getBoundingClientRect().left + "px", "important"); m.style.setProperty("position", "fixed", "important"); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); })()` },
   E2: { css: `.lth.lth { background: transparent !important; }` },
   F1: { js: `(() => { const go = () => { const p = document.querySelector('[data-pck="pill"]'); const side = [...document.querySelectorAll('.ws-panel, aside, nav')].find((e) => e.getBoundingClientRect().height > 300 && e.getBoundingClientRect().left < 50); if (p && side && p.parentElement !== side) side.appendChild(p); }; setInterval(go, 150); go(); })()` },
@@ -423,71 +425,148 @@ test("C2d · pills' details: Copy is v18's small button, 22 tall with a ring; th
   L.done(6);
 });
 
-/* ───────────────────────── C3 · the hover actions (v18.3.1 §B) ───────────────────────── */
-test("C3 · actions: in the status cell (reaching left over Replies only), on the main line, the status content swapped out", async ({ page }) => {
-  test.setTimeout(500_000);
-  const L = new Ledger("C3");
-  let queried = 0, notQueried = 0, peeked = 0;
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await open(page, vp, "C3");
-    const pick = await page.evaluate(() => {
-      const rows = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0);
-      const q = rows.filter((r) => !r.querySelector(".cl17-log")).slice(0, 2), n = rows.filter((r) => r.querySelector(".cl17-log")).slice(1, 3);
-      return [...q, ...n].map((r) => ({ id: r.dataset.agentCard!, log: !!r.querySelector(".cl17-log") }));
-    });
-    L.check(`${w} queried and not-queried rows to hover (the population)`, pick.some((p) => p.log) && pick.some((p) => !p.log), JSON.stringify(pick));
-    for (const { id, log } of pick) {
-      const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
-      await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(350);
-      const box = await row.boundingBox();
-      await page.mouse.move(box!.x + 60, box!.y + 20);
-      const read = (phase: string) => page.evaluate(([id, phase]) => {
-        const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
-        const cs = getComputedStyle(el), rb = el.getBoundingClientRect();
-        /* the columns from the row's own grid: left = row's content edge + tracks + gaps */
-        const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat), gap = parseFloat(cs.columnGap) || 0;
-        const lefts: number[] = []; let x = rb.left + parseFloat(cs.paddingLeft);
-        for (const t of tracks) { lefts.push(x); x += t + gap; }
-        const status = { l: lefts[3], r: lefts[3] + tracks[3] }, repL = lefts[2];
-        const tray = el.querySelector<HTMLElement>(".clv-rtray")!;
-        const acts = [...tray.children].map((c) => (c as HTMLElement).getBoundingClientRect()).filter((b) => b.width > 0);
-        const wn = el.querySelector<HTMLElement>(".clv-rwn")!.getBoundingClientRect();
-        const mainC = wn.top + wn.height / 2;
-        const tb = tray.getBoundingClientRect();
-        const hit = document.elementFromPoint(status.l + 4, mainC);
-        const q = el.querySelector<HTMLElement>(".clv-rq")!;
-        return {
-          phase, peek: el.hasAttribute("data-peek"), n: acts.length,
-          right: Math.max(...acts.map((b) => b.right)), left: Math.min(...acts.map((b) => b.left)), statusR: status.r, repL,
-          trayC: tb.top + tb.height / 2, mainC, trayBg: getComputedStyle(tray).backgroundImage + "|" + getComputedStyle(tray).backgroundColor,
-          hitOk: !!hit && (hit === el || tray.contains(hit) || (el.contains(hit) && !q.contains(hit) && !el.querySelector(".clv-rrep")!.contains(hit))), hit: hit ? `${hit.tagName}.${(hit as HTMLElement).className}` : null,
-          qVis: getComputedStyle(q).visibility, inRow: acts.every((b) => b.top >= rb.top && b.bottom <= rb.bottom),
-        };
-      }, [id, phase] as const);
-      await page.waitForTimeout(200);
-      const closed = await read("peek closed");
-      await page.waitForTimeout(700);
-      const opened = await read("peek open");
-      for (const r of [closed, opened]) {
-        const t = `${w} ${id} (${log ? "not queried" : "queried"}, ${r.phase})`;
-        L.check(`${t}: actions shown`, r.n >= 1, `${r.n}`);
-        L.check(`${t}: (a) the actions' right edge is the status cell's ±1`, near(r.right, r.statusR, 1), `${r.right.toFixed(1)} vs ${r.statusR.toFixed(1)}`);
-        L.check(`${t}: (a) nothing past the Replies column's left`, r.left >= r.repL - 0.5, `${r.left.toFixed(1)} vs ${r.repL.toFixed(1)}`);
-        L.check(`${t}: (b) 4px inside the status cell, at the main line, is the row or an action`, r.hitOk, `${r.hit}`);
-        L.check(`${t}: (c) the actions' centre is the main line's ±1`, near(r.trayC, r.mainC, 1), `${r.trayC.toFixed(1)} vs ${r.mainC.toFixed(1)}`);
-        L.check(`${t}: no background of its own`, /none\|rgba\(0, 0, 0, 0\)/.test(r.trayBg), r.trayBg);
-        L.check(`${t}: (d) the status content is hidden`, r.qVis === "hidden", r.qVis);
-      }
-      if (opened.peek) peeked += 1;
-      if (log) notQueried += 1; else queried += 1;
-      await page.mouse.move(5, 5); await page.waitForTimeout(200);
-      const back = await page.evaluate((id) => { const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!; return getComputedStyle(el.querySelector(".clv-rq")!).visibility; }, id);
-      L.check(`${w} ${id}: (d) the status content is visible again 200ms after leaving`, back === "visible", back);
-    }
+/* ───────────────────────── v18.3.2 · the row keeps its information; the actions sit on the peek's line ─────────── */
+/* THE FIXTURE: three rows on the active manuscript (Harbour of Glass). "full" is Theo Abara (Full requested: stage, bar,
+   YOUR MOVE, date) with three long contact details so 1280 must shorten them; the harness has no query at Offer on
+   this manuscript, so a Full-requested row stands in. "sparse" is Sun-hee Park (Full sent) with a website only.
+   "not-queried" is the bare fixture. Every field written is read first and put back exactly (absent means deleted). */
+const FULL = "msv12-agent-4", SPARSE = "msv12-agent-5";
+const CONTACT = ["email", "website", "socials", "twitter", "bluesky", "instagram"] as const;
+const withRows = async (fn: () => Promise<void>) => {
+  const { db, uid } = await harnessDb();
+  const ref = (id: string) => doc(db, "users", uid, "agents", id);
+  const before: Record<string, Record<string, unknown>> = {};
+  for (const id of [FULL, SPARSE]) { const d = (await getDoc(ref(id))).data() ?? {}; before[id] = Object.fromEntries(CONTACT.map((k) => [k, d[k]])); }
+  try {
+    await updateDoc(ref(FULL), { email: "theo.abara@abaragrantliteraryagency.co.uk", website: "https://www.abaragrantliteraryagency.co.uk", socials: [{ platform: "bluesky", handle: "@theo.abara.literary.bsky.social" }] });
+    await updateDoc(ref(SPARSE), { website: "https://parkliterary.example" });
+    await fn();
+  } finally {
+    for (const id of [FULL, SPARSE]) await updateDoc(ref(id), Object.fromEntries(CONTACT.map((k) => [k, before[id][k] === undefined ? deleteField() : before[id][k]])));
   }
-  L.check("both branches (queried and not-queried rows) and an open peek were measured", queried > 0 && notQueried > 0 && peeked > 0, `${queried} · ${notQueried} · ${peeked}`);
-  L.done(60);
+};
+const hoverRow = async (page: Page, id: string, wait: number) => {
+  const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
+  await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(350);
+  const b = await row.boundingBox(); await page.mouse.move(b!.x + 60, b!.y + 20); await page.waitForTimeout(wait);
+};
+/** one read of a row: its status and reply cells' visibility, its actions, pills and cells */
+const readRow = (page: Page, id: string) => page.evaluate((id) => {
+  const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
+  const shown = (e: Element | null) => { if (!e) return null; for (let x: Element | null = e; x && x !== el.parentElement; x = x.parentElement) { const cs = getComputedStyle(x); if (cs.visibility !== "visible" || parseFloat(cs.opacity) < 1) return false; } return true; };
+  const cs = getComputedStyle(el), rb = el.getBoundingClientRect();
+  const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat), gap = parseFloat(cs.columnGap) || 0;
+  let x = rb.left + parseFloat(cs.paddingLeft); const lefts: number[] = []; for (const t of tracks) { lefts.push(x); x += t + gap; }
+  const statusL = lefts[lefts.length - 1], statusR = statusL + tracks[tracks.length - 1];
+  const mainTop = rb.top + parseFloat(cs.paddingTop), mainH = parseFloat(cs.gridTemplateRows.split(" ")[0]) || 0;
+  const acts = [...el.querySelectorAll<HTMLElement>('[data-cl13="tray-act"], [data-cl13="tray-open"]')].filter((b) => b.getBoundingClientRect().height > 0);
+  const tray = el.querySelector<HTMLElement>('[data-cl13="tray"]');
+  const pills = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((p) => p.getBoundingClientRect());
+  const texts = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"] .cl183-pt')].map((t) => ({ k: t.closest<HTMLElement>('[data-cl183="peek-pill"]')!.dataset.k, sw: t.scrollWidth, cw: t.clientWidth, title: t.getAttribute("title"), text: (t.textContent ?? "").trim() }));
+  const statusLabels = [...el.querySelectorAll<HTMLElement>(".clv-rq button, .clv-rq a, .clv-rq [role='button']")].filter((b) => b.getBoundingClientRect().height > 0).map((b) => (b.textContent ?? "").trim());
+  const tb = tray?.getBoundingClientRect() ?? null;
+  return {
+    peek: el.hasAttribute("data-peek"),
+    seen: { stage: shown(el.querySelector('[data-cl17="stage"]')), track: shown(el.querySelector('[data-cl17="track"]')), ym: shown(el.querySelector(".clv-ym")), date: shown(el.querySelector('[data-cl17="date-line"]')), reply: shown(el.querySelector(".clv-rrep")) },
+    acts: acts.map((a) => ({ label: (a.textContent ?? "").trim(), l: a.getBoundingClientRect().left, r: a.getBoundingClientRect().right })),
+    tray: tb && { l: tb.left, r: tb.right, t: tb.top, b: tb.bottom, c: tb.top + tb.height / 2 },
+    pillsC: pills.length ? (Math.min(...pills.map((p) => p.top)) + Math.max(...pills.map((p) => p.bottom))) / 2 : null,
+    pillTops: pills.map((p) => p.top), pillR: pills.length ? Math.max(...pills.map((p) => p.right)) : null,
+    statusL, statusR, main: { t: mainTop, b: mainTop + mainH }, texts, statusLabels,
+  };
+}, id);
+const norm = (s: string) => s.replace(/^\s*\+\s*/, "").replace(/\s+/g, " ").trim().toLowerCase();
+
+test("CL1832-D1 · nothing hides: on hover the status and reply cells stay visible; no actions with the peek closed", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("CL1832-D1");
+  await withRows(async () => {
+    for (const vp of SIZES) {
+      const w = `@${vp.width}`;
+      await open(page, vp, "CL1832-D1");
+      for (const id of [FULL, SPARSE]) {
+        await hoverRow(page, id, 200);
+        const c = await readRow(page, id);
+        L.check(`${w} ${id}: the peek is still closed at 200ms (precondition)`, !c.peek, `${c.peek}`);
+        for (const [k, v] of Object.entries(c.seen)) if (v !== null) L.check(`${w} ${id} peek closed: ${k} is visible, opacity 1`, v, `${v}`);
+        L.check(`${w} ${id} peek closed: the status cell's stage is there to read`, c.seen.stage !== null, `${c.seen.stage}`);
+        L.check(`${w} ${id} peek closed: no action button has a visible box`, c.acts.length === 0, JSON.stringify(c.acts.map((a) => a.label)));
+        await page.waitForTimeout(800);
+        const o = await readRow(page, id);
+        L.check(`${w} ${id}: the peek opened`, o.peek, `${o.peek}`);
+        for (const [k, v] of Object.entries(o.seen)) if (v !== null) L.check(`${w} ${id} peek open: ${k} is visible, opacity 1`, v, `${v}`);
+      }
+      const ym = await readRow(page, FULL);
+      L.check(`${w} the full row carries YOUR MOVE (the badge was read)`, ym.seen.ym !== null, `${ym.seen.ym}`);
+    }
+  });
+  L.done(20);
+});
+
+test("CL1832-D2 · actions on the peek line: centred with the pills, right edge on the status cell's, clear of its main line", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("CL1832-D2");
+  await withRows(async () => {
+    for (const vp of SIZES) {
+      const w = `@${vp.width}`;
+      await open(page, vp, "CL1832-D2");
+      for (const id of [FULL, SPARSE, BARE]) {
+        await hoverRow(page, id, 900);
+        const r = await readRow(page, id);
+        L.check(`${w} ${id}: the peek is open with actions (precondition)`, r.peek && r.acts.length > 0 && !!r.tray, `${r.peek} · ${r.acts.length}`);
+        if (!r.tray || r.pillsC == null) continue;
+        L.check(`${w} ${id}: (a) the actions' centre is the pills' ±1`, near(r.tray.c, r.pillsC, 1), `${r.tray.c.toFixed(1)} vs ${r.pillsC.toFixed(1)}`);
+        L.check(`${w} ${id}: (b) the last action's right edge is the status cell's ±1`, near(Math.max(...r.acts.map((a) => a.r)), r.statusR, 1), `${Math.max(...r.acts.map((a) => a.r)).toFixed(1)} vs ${r.statusR.toFixed(1)}`);
+        const hits = r.tray.l < r.statusR && r.tray.r > r.statusL && r.tray.t < r.main.b && r.tray.b > r.main.t;
+        L.check(`${w} ${id}: (c) the actions do not intersect the status cell's main-line box`, !hits, JSON.stringify({ tray: r.tray, main: r.main }));
+      }
+    }
+  });
+  L.done(20);
+});
+
+test("CL1832-D3 · no collision at 1280: pills on one line, 16 clear of the actions; the email whole; a shortened value titled", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("CL1832-D3");
+  await withRows(async () => {
+    await open(page, SIZES[1], "CL1832-D3");
+    await hoverRow(page, FULL, 900);
+    const r = await readRow(page, FULL);
+    L.check("the peek is open with actions (precondition)", r.peek && !!r.tray, `${r.peek}`);
+    if (r.tray && r.pillR != null) L.check("(a) the last pill's right edge ≤ the actions' left − 16", r.pillR <= r.tray.l - 16 + 0.5, `${r.pillR.toFixed(1)} vs ${(r.tray.l - 16).toFixed(1)}`);
+    L.check("(b) the pills share one line (equal tops ±1)", r.pillTops.length === 3 && r.pillTops.every((t) => near(t, r.pillTops[0], 1)), JSON.stringify(r.pillTops));
+    const email = r.texts.find((t) => t.k === "email");
+    L.check("(c) the email is whole (scrollWidth ≤ clientWidth + 1)", !!email && email.sw <= email.cw + 1, JSON.stringify(email));
+    const short = r.texts.filter((t) => t.sw > t.cw + 1);
+    L.check("something shortened (the branch is entered)", short.length > 0, JSON.stringify(r.texts));
+    for (const t of short) L.check(`(d) the shortened ${t.k} has its full value as its title`, t.title === t.text, `${t.title} vs ${t.text}`);
+    const order = (k: string) => r.texts.find((t) => t.k === k);
+    const soc = order("social"), web = order("website");
+    L.check("the social handle gives way before the website", !!soc && !!web && (soc.sw - soc.cw) >= (web.sw - web.cw) - 1 || (soc != null && soc.sw > soc.cw + 1), JSON.stringify({ soc, web }));
+  });
+  L.done(6);
+});
+
+test("CL1832-D4 · no action twice: every row at 1512, peek open; a not-queried row shows Open card only", async ({ page }) => {
+  test.setTimeout(900_000);
+  const L = new Ledger("CL1832-D4");
+  await open(page, SIZES[0], "CL1832-D4");
+  const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
+  L.check("rows to sweep (the population)", ids.length >= 20, `${ids.length}`);
+  let notQueried = 0, withAct = 0;
+  for (const id of ids) {
+    await hoverRow(page, id, 800);
+    const r = await readRow(page, id);
+    if (!r.peek) { L.check(`${id}: the peek opened`, false, "closed"); continue; }
+    const acts = r.acts.map((a) => norm(a.label)), status = r.statusLabels.map(norm);
+    const twice = acts.filter((a) => status.includes(a));
+    L.check(`${id}: no action also in the status cell`, twice.length === 0, JSON.stringify({ acts, status }));
+    if (status.includes("log a query")) { notQueried += 1; L.check(`${id}: not queried: exactly one action, Open card`, acts.length === 1 && acts[0] === "open card", JSON.stringify(acts)); }
+    else if (acts.length === 2) withAct += 1;
+  }
+  L.check("both branches swept (not-queried rows and rows with an action)", notQueried > 0 && withAct > 0, `${notQueried} · ${withAct}`);
+  await page.mouse.move(5, 5);
+  L.done(20);
 });
 
 /* ───────────────────────── D · adding an agent ───────────────────────── */
