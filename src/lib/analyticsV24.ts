@@ -296,8 +296,8 @@ export function verdictOf(you: number, typical: number): Verdict {
   return "Well below";
 }
 export interface Bench { key: "rate" | "reply" | "sent"; you: number | null; typical: number; verdict: Verdict; unit: "%" | "" }
-export function benchmark(o: Outcomes, ebn: ExpectedByNow): Bench[] {
-  const B = BENCHMARKS_QUERYTRACKER;
+export type Benchmarks = { requestRate: number; replyRate: number; queriesSent: number };
+export function benchmark(o: Outcomes, ebn: ExpectedByNow, B: Benchmarks = BENCHMARKS_QUERYTRACKER): Bench[] {
   const rate = o.sent ? Math.round((o.asked / o.sent) * 100) : null;
   const reply = ebn.past ? Math.round((ebn.replied / ebn.past) * 100) : null;
   return [
@@ -314,14 +314,17 @@ export const monthOf = (firstMs: number | null, nowMs: number): number => (first
 export interface V24 {
   outcomes: Outcomes; rate: Rate; keeping: ReplyKeeping; waiting: StillWaiting; expected: ExpectedByNow;
   monthly: MonthlySends; moments: Moment[]; bench: Bench[]; month: number; nowMs: number;
+  /** the anchors the verdicts were read against */
+  anchors: Benchmarks;
 }
-export function buildV24(model: AnalyticsModel, nowMs: number): V24 {
+/** `bench` is for the AN24-S2 lock only (a dev build can swap the anchors to prove the page reads them). */
+export function buildV24(model: AnalyticsModel, nowMs: number, bench: Benchmarks = BENCHMARKS_QUERYTRACKER): V24 {
   const o = outcomes(model.items);
   const e = expectedByNow(model.items, nowMs);
   const m = monthlySends(model.items, nowMs);
   return {
     outcomes: o, rate: requestRate(o), keeping: replyKeeping(model.items), waiting: stillWaiting(model.items, nowMs), expected: e,
-    monthly: m, moments: moments(model.items, m, nowMs), bench: benchmark(o, e), month: monthOf(m.firstMs, nowMs), nowMs,
+    monthly: m, moments: moments(model.items, m, nowMs), bench: benchmark(o, e, bench), month: monthOf(m.firstMs, nowMs), nowMs, anchors: bench,
   };
 }
 export { gapDays };

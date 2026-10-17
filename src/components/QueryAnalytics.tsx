@@ -71,7 +71,9 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
        dead in a production build, so the module is unreachable from it (AN17-16 cuts the fixture with it). */
     const scoped = import.meta.env.MODE === "production" ? own : limitForReview(own);
     const m = analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs, title: manuscript?.title });
-    return { model: m, v21: buildV21(m, agents, nowMs), v24: buildV24(m, nowMs) };
+    /* ⚠️ DEV ONLY, GATED HERE: the AN24-S2 lock swaps the benchmark anchors to prove the panels read them */
+    const anchors = import.meta.env.MODE === "production" || typeof window === "undefined" ? undefined : (window as unknown as { __SA_AN24_BENCH?: Parameters<typeof buildV24>[2] }).__SA_AN24_BENCH;
+    return { model: m, v21: buildV21(m, agents, nowMs), v24: buildV24(m, nowMs, anchors) };
     /* location.key: a switch re-opens the route, and the book in scope is read from storage */
   }, [queries, activities, agents, packages, versions, manuscript, location.key]);
 
@@ -79,7 +81,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
      A statically replaced MODE makes this dead in a production build, as the review aid above is. */
   React.useEffect(() => {
     if (import.meta.env.MODE === "production") return;
-    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, v24, sent: model.sent, replies: model.replies, offers: model.offers, fulls: model.fulls };
+    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, v24, sent: model.sent, requests: model.requests, replies: model.replies, offers: model.offers, fulls: model.fulls };
   }, [v21, v24, model]);
 
   const load = useQcLoad(collectionsReady && activitiesReady);
