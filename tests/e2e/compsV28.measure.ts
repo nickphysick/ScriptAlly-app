@@ -86,34 +86,54 @@ test.beforeAll(() => {
 test.afterAll(() => { seed("--empty"); });
 
 /* ═══ H1 · the same header ═══ */
-test("H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has one", async ({ page }) => {
+/** the computed values that make the header the same header, read off whichever root `kind` names */
+const headerValues = (page: Page, kind: "comps-light" | "comps-empty" | "an-light" | "an-empty") => page.evaluate((k) => {
+  const vis = (s: string) => [...document.querySelectorAll(s)].find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+  const S: Record<string, [string, string, string, string, string, string]> = {
+    "comps-light": ['[data-cv="page"] [data-slh="header"]', ".slh-h1", ".slh-k", ".slh-by", ".slh-p1", ".slh-card"],
+    "an-light": ['[data-a21="header"]', "h1", ".a21-k", ".a21-by", ".a21-p1", ".a21-card"],
+    "comps-empty": ['[data-cv="page"] [data-epn="panel"]', "h1", ".epn-k", ".epn-p", ".epn-b1", ""],
+    "an-empty": ['[data-a21="empty-panel"]', "h1", ".a21-aek", ".a21-aep", ".a21-aeb1", ""],
+  };
+  const [root, h, ey, line, btn, card] = S[k];
+  const r = vis(root);
+  if (!r) return null;
+  const cs = (q: string) => { const e = q ? (r.querySelector(q) as HTMLElement | null) : null; return e ? getComputedStyle(e) : null; };
+  const H = cs(h), K = cs(ey), L = cs(line), B = cs(btn), C = cs(card), R = getComputedStyle(r);
+  if (!H || !K || !L || !B) return null;
+  return {
+    title: [H.fontFamily, H.fontSize], eyebrow: [K.fontSize, K.letterSpacing, K.color], line: [L.fontSize, L.fontFamily], button: [B.fontSize, B.paddingTop, B.paddingLeft, B.backgroundColor],
+    ...(C ? { card: C.borderTopLeftRadius } : {}),
+    box: k.endsWith("empty") ? [R.backgroundColor, R.borderTopLeftRadius, R.paddingTop, R.paddingLeft] : [R.paddingTop, R.paddingBottom],
+  };
+}, kind);
+
+test("H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has them", async ({ page }) => {
   for (const vp of SIZES) {
     await openCx(page, vp);
     truthy("H1", vp, "populated: the shared LightHeader is the header", await has(page, '[data-slh="header"].slh.cx-lh'));
     check("H1", vp, "populated: no EmptyPanel", await has(page, '[data-epn="panel"]'), false);
     check("H1", vp, "populated: no v27 title panel", await has(page, '[data-hp3="title"], .cv-panel'), false);
-    const mine = await page.evaluate(() => {
-      const w = window as any, cs = (s: string) => { const e = w.__q(s) as HTMLElement | null; return e ? getComputedStyle(e) : null; };
-      const h = cs(".slh-h1"), k = cs(".slh-k"), by = cs(".slh-by"), b = cs(".slh-p1"), c = cs(".slh-card"), hd = cs(".slh");
-      return h && k && by && b && c && hd ? { h1: [h.fontFamily, h.fontSize], k: [k.fontSize, k.letterSpacing, k.color], by: by.fontSize, btn: [b.fontSize, b.paddingTop, b.paddingLeft], card: c.borderTopLeftRadius, pad: [hd.paddingTop, hd.paddingBottom] } : null;
-    });
-    truthy("H1", vp, "populated: the header's values were read", mine);
+    const light = await headerValues(page, "comps-light");
+    truthy("H1", vp, "populated: the header's values were read", light);
+    /* Analytics on the SAME manuscript (the init scripts so far name the populated one), where this build has its
+       light header (Analytics v21+ is on dev; main's Analytics is v17) */
+    await page.goto("/queries/analytics"); await page.waitForTimeout(3000);
+    const anLight = await headerValues(page, "an-light");
+    note("H1", vp, "Analytics' light header on this build", anLight ? "present" : "absent", true);
+    if (anLight && light) check("H1", vp, "populated: comps' values equal Analytics' light header's", light, anLight);
+
     await openCx(page, vp, { ms: MS_EMPTY });
     truthy("H1", vp, "empty: the shared EmptyPanel is the header", await has(page, '[data-epn="panel"].epn.cx-empty-panel'));
     check("H1", vp, "empty: no LightHeader", await has(page, '[data-slh="header"]'), false);
     check("H1", vp, "empty: no v27 title panel", await has(page, '[data-hp3="title"], .cv-panel'), false);
-    /* Analytics' light header, where this build has one (Analytics v21+ is on dev; main's Analytics is v17) */
-    await page.goto("/queries/analytics");
-    await page.waitForTimeout(2500);
-    const an = await page.evaluate(() => {
-      const root = [...document.querySelectorAll('[data-a21="header"]')].find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
-      if (!root) return null;
-      const cs = (s: string) => { const e = root.querySelector(s) as HTMLElement | null; return e ? getComputedStyle(e) : null; };
-      const h = cs("h1"), k = cs(".a21-k"), by = cs(".a21-by"), b = cs(".a21-p1"), c = getComputedStyle(root.querySelector(".a21-card")!), hd = getComputedStyle(root);
-      return h && k && by && b ? { h1: [h.fontFamily, h.fontSize], k: [k.fontSize, k.letterSpacing, k.color], by: by.fontSize, btn: [b.fontSize, b.paddingTop, b.paddingLeft], card: c.borderTopLeftRadius, pad: [hd.paddingTop, hd.paddingBottom] } : null;
-    });
-    note("H1", vp, "Analytics' light header on this build", an ? "present" : "absent", true);
-    if (an && mine) check("H1", vp, "comps' header values equal Analytics'", mine, an);
+    const empty = await headerValues(page, "comps-empty");
+    truthy("H1", vp, "empty: the panel's values were read", empty);
+    /* the empty manuscript has no queries, so Analytics shows ITS empty panel */
+    await page.goto("/queries/analytics"); await page.waitForTimeout(3000);
+    const anEmpty = await headerValues(page, "an-empty");
+    note("H1", vp, "Analytics' empty panel on this build", anEmpty ? "present" : "absent", true);
+    if (anEmpty && empty) check("H1", vp, "empty: comps' values equal Analytics' empty panel's", empty, anEmpty);
   }
 });
 
