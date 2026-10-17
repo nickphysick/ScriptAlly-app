@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "F3",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F3",
+  "where": "open: \"[data-pck='item'][data-k='open'] button\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F3",
+  "where": "the spotlight is on (precondition)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "the spotlight ended within 200ms",
+  "ok": true,
+  "detail": "37ms"
+ },
+ {
+  "lock": "F3",
+  "where": "the click opened the panel",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A1",
+  "where": "@1512 the score's font size ≥ 52",
+  "ok": false,
+  "detail": "40"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 \"List health\" ≥ 20",
+  "ok": false,
+  "detail": "18"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 score and \"List health\" on one line",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 no \"How points work\" element",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 three tiles",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 tile 1's label is untruncated",
+  "ok": true,
+  "detail": "[{\"t\":\"521\",\"clip\":false},{\"t\":\"of 692 pts\",\"clip\":false}]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 tile 2's label is untruncated",
+  "ok": true,
+  "detail": "[{\"t\":\"50\",\"clip\":false},{\"t\":\"gaps\",\"clip\":false}]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 tile 3's label is untruncated",
+  "ok": true,
+  "detail": "[{\"t\":\"~25\",\"clip\":false},{\"t\":\"min to fill\",\"clip\":false}]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the score's font size ≥ 52",
+  "ok": false,
+  "detail": "40"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 \"List health\" ≥ 20",
+  "ok": false,
+  "detail": "18"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 score and \"List health\" on one line",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 no \"How points work\" element",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 three tiles",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 tile 1's label is untruncated",
+  "ok": true,
+  "detail": "[{\"t\":\"521\",\"clip\":false},{\"t\":\"of 692 pts\",\"clip\":false}]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 tile 2's label is untruncated",
+  "ok": true,
+  "detail": "[{\"t\":\"50\",\"clip\":false},{\"t\":\"gaps\",\"clip\":false}]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 tile 3's label is untruncated",
+  "ok": true,
+  "detail": "[{\"t\":\"~25\",\"clip\":false},{\"t\":\"min to fill\",\"clip\":false}]"
+ }
+]

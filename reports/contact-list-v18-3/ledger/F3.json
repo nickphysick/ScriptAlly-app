@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "F3",
+  "where": "the spotlight is on (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "the spotlight ended within 200ms",
+  "ok": true,
+  "detail": "38ms"
+ },
+ {
+  "lock": "F3",
+  "where": "the click opened the panel",
+  "ok": true,
+  "detail": ""
+ }
+]

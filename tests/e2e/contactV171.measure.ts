@@ -184,7 +184,8 @@ test("B4 · every gap filled: a solid ink ring, 100%, All filled in, and no tab"
   for (const vp of SIZES) {
     await open(page, vp, "B4", { allFilled: true });
     const r = await read(page); const w = `@${vp.width}`;
-    const C = 2 * Math.PI * 42;
+    /* RE-POINTED (v18.3 §B): the ring's radius is 42.5 (stroke 10, round cap; RING in lib/contactHealth) */
+    const C = 2 * Math.PI * 42.5;
     L.check(`precondition: the list is not empty ${w}`, !!r.card, "card");
     L.check(`solid ink: the arc is the whole circle, no rust, no joins ${w}`, near(r.inkDash, C, 0.01) && !r.gapsCircle && r.joins === 0, `ink ${r.inkDash?.toFixed(2)} of ${C.toFixed(2)} · rust ${r.gapsCircle} · joins ${r.joins}`);
     L.check(`reads 100% ${w}`, r.pct === "100%", `"${r.pct}"`);
@@ -210,7 +211,8 @@ test.skip("C2 · the search is 220 at compact widths and the filter row does not
 });
 
 /* ───────────────────────── D1 · the tab shows ───────────────────────── */
-test("D1 · the tab shows, in ink, only with gaps", async ({ page }) => {
+/* RETIRED (Contact list v18.3 §B): there is no floating Housekeeping tab; CL183 B1 holds its absence */
+test.skip("D1 · the tab shows, in ink, only with gaps", async ({ page }) => {
   const L = new Ledger("D1");
   for (const vp of SIZES) {
     await open(page, vp, "D1");
@@ -231,7 +233,8 @@ test("D1 · the tab shows, in ink, only with gaps", async ({ page }) => {
 });
 
 /* ───────────────────────── D2 · dismiss ───────────────────────── */
-test("D2 · × hides the tab for the account; it stays hidden as gaps are filled and returns for a new one; Undo", async ({ page }) => {
+/* RETIRED (Contact list v18.3 §B): the tab and its × are gone, so there is nothing to dismiss */
+test.skip("D2 · × hides the tab for the account; it stays hidden as gaps are filled and returns for a new one; Undo", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("D2");
   const vp = SIZES[0];

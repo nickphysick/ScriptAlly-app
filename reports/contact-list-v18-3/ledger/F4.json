@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "F4",
+  "where": "a row click ticks Open (stored)",
+  "ok": true,
+  "detail": "{\"open\":true}"
+ },
+ {
+  "lock": "F4",
+  "where": "a saved edit ticks Edit (stored)",
+  "ok": true,
+  "detail": "{\"edit\":true,\"open\":true}"
+ },
+ {
+  "lock": "F4",
+  "where": "two characters tick Search (stored)",
+  "ok": true,
+  "detail": "{\"open\":true,\"search\":true,\"edit\":true}"
+ },
+ {
+  "lock": "F4",
+  "where": "nothing else ticked",
+  "ok": true,
+  "detail": "{\"edit\":true,\"open\":true,\"search\":true}"
+ },
+ {
+  "lock": "F4",
+  "where": "after a reload the checklist shows Open, Search and Edit done",
+  "ok": true,
+  "detail": "{\"add\":false,\"search\":true,\"open\":true,\"edit\":true,\"hk\":false}"
+ },
+ {
+  "lock": "F4",
+  "where": "the pill reads 3/5",
+  "ok": true,
+  "detail": "3/5"
+ }
+]

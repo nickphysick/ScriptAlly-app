@@ -1,0 +1,8 @@
+[
+ {
+  "lock": "E3",
+  "where": "the grouping chip: \"[data-ltb='chip']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ }
+]

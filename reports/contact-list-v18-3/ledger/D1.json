@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "the agent panel opens in a new-agent state",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "its title is \"Add an agent\"",
+  "ok": true,
+  "detail": "Add an agent"
+ },
+ {
+  "lock": "D1",
+  "where": "no centred add card in the DOM",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "Add to your list is disabled until a name or agency",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "no \"Paste a link\" field",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "the agency field has no placeholder and no datalist",
+  "ok": true,
+  "detail": "{\"panel\":true,\"title\":\"Add an agent\",\"centred\":false,\"disabled\":true,\"paste\":false,\"agPh\":\"\",\"agList\":null,\"lists\":0}"
+ },
+ {
+  "lock": "D1",
+  "where": "Add enables once a name is typed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "the save reached the existing add path (it wrote the agent, or answered with its cap)",
+  "ok": true,
+  "detail": "{\"id\":null,\"name\":false,\"capped\":true,\"foot\":\"Couldn’t save: Free tier is capped at 5 agents. Upgrade to QueryHawk Pro for unlimited research!CancelAdd to your list\"}"
+ }
+]

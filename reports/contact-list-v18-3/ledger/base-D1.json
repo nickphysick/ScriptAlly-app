@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "the agent panel opens in a new-agent state",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "its title is \"Add an agent\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "D1",
+  "where": "no centred add card in the DOM",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "Add to your list is disabled until a name or agency",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "no \"Paste a link\" field",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "the agency field has no placeholder and no datalist",
+  "ok": true,
+  "detail": "{\"panel\":false,\"title\":null,\"centred\":true,\"disabled\":false,\"paste\":false,\"agPh\":\"\",\"agList\":null,\"lists\":0}"
+ }
+]

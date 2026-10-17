@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "F4",
+  "where": "a row click ticks Open (stored)",
+  "ok": false,
+  "detail": "{}"
+ },
+ {
+  "lock": "F4",
+  "where": "a saved edit ticks Edit (stored)",
+  "ok": false,
+  "detail": "{}"
+ },
+ {
+  "lock": "F4",
+  "where": "two characters tick Search (stored)",
+  "ok": false,
+  "detail": "{}"
+ },
+ {
+  "lock": "F4",
+  "where": "nothing else ticked",
+  "ok": true,
+  "detail": "{}"
+ },
+ {
+  "lock": "F4",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F4",
+  "where": "after a reload the checklist shows Open, Search and Edit done",
+  "ok": false,
+  "detail": "{}"
+ },
+ {
+  "lock": "F4",
+  "where": "the pill reads 3/5",
+  "ok": false,
+  "detail": "null"
+ }
+]

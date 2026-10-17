@@ -114,7 +114,9 @@ const landing = (page: Page, L: string) => page.evaluate((L) => {
   const row = g.querySelector<HTMLElement>(`[data-clv="row"][data-initial="${L}"]`);
   const lab = g.querySelector<HTMLElement>(".lt-panel > .lt-labels");
   const s = g.querySelector('[data-cl18="sentence"]')?.textContent ?? "";
-  return { row: row?.getBoundingClientRect().top ?? null, lab: lab?.getBoundingClientRect().bottom ?? null, sentence: s.replace(/\s+/g, " ").trim() };
+  /* v18.3 §E: the grouping is named by the toolbar's chip, not the sentence */
+  const chip = (g.querySelector('[data-ltb="group-name"]')?.textContent ?? "").trim();
+  return { row: row?.getBoundingClientRect().top ?? null, lab: lab?.getBoundingClientRect().bottom ?? null, sentence: s.replace(/\s+/g, " ").trim(), chip };
 }, L);
 test("A2 · jump: M lands under the headings, and a grouped list switches to A to Z first", async ({ page }) => {
   const L = new Ledger("A2");
@@ -127,10 +129,11 @@ test("A2 · jump: M lands under the headings, and a grouped list switches to A t
     await vis(page, '.aglist [data-cl18="group"]').click(); await page.waitForTimeout(300);
     await page.locator('[data-opt="group:status"]').click(); await page.waitForTimeout(600);
     const g0 = await landing(page, "M");
-    L.check(`precondition: grouped by status ${w}`, /grouped by Status/.test(g0.sentence), g0.sentence);
+    /* RE-POINTED (v18.3 §E): the chip reads "Grouped by Status" */
+    L.check(`precondition: grouped by status ${w}`, g0.chip === "Status", g0.chip);
     await vis(page, '.aglist [data-cl18="tab"][data-l="M"]').click(); await page.waitForTimeout(1800);
     const b = await landing(page, "M");
-    L.check(`it switched to A to Z, ungrouped ${w}`, /, A to Z/.test(b.sentence), b.sentence);
+    L.check(`it switched to A to Z, ungrouped ${w}`, b.chip === "None", b.chip);
     L.check(`and M landed the same way (±2) ${w}`, b.row !== null && b.lab !== null && near(b.row, b.lab, 2), `${b.row?.toFixed(1)} vs ${b.lab?.toFixed(1)}`);
   }
   L.done(8);
@@ -193,14 +196,16 @@ test("B1 · header: slate, one sentence that follows the filters, the four tools
     });
     const r = await read();
     L.check(`the list header is rgb(62, 81, 112) ${w}`, r.bg === "rgb(62, 81, 112)", `${r.bg}`);
-    L.check(`"Showing all {N} agents, A to Z" ${w}`, r.sentence === `Showing all ${r.rows} agents, A to Z`, `"${r.sentence}"`);
+    /* RE-POINTED (v18.3 §E): the sentence is the count alone; the grouping is the chip's */
+    L.check(`"Showing all {N} agents" ${w}`, r.sentence === `Showing all ${r.rows} agents`, `"${r.sentence}"`);
     L.check(`no filter row in the page header ${w}`, r.filterRow === 0, `${r.filterRow}`);
     L.check(`search, Filters, density and full screen in the header, on one line ${w}`, r.tools === 4 && r.spread < 2 && r.lines === 1, `${r.tools} tools · spread ${r.spread.toFixed(1)} · ${r.lines} line(s)`);
     await vis(page, '.aglist [data-cl18="filters"]').click(); await page.waitForTimeout(300);
     await page.locator('[data-cl18="filters-panel"] [data-opt="open:open"]').click(); await page.waitForTimeout(500);
     await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     const f = await read();
-    L.check(`filtered: "Showing {n} of {N}, A to Z" with Clear all ${w}`, new RegExp(`^Showing ${f.rows} of ${r.rows}, A to Z ?Clear all$`).test(f.sentence), `"${f.sentence}"`);
+    /* RE-POINTED (v18.3 §E): the grouping left the sentence for the chip */
+    L.check(`filtered: "Showing {n} of {N}" with Clear all ${w}`, new RegExp(`^Showing ${f.rows} of ${r.rows} ?Clear all$`).test(f.sentence), `"${f.sentence}"`);
     await vis(page, '.aglist [data-cl18="list-header"] [data-cl17="clear-all"]').click(); await page.waitForTimeout(400);
   }
   L.done(10);
@@ -252,7 +257,8 @@ test("C1 · headings: the Query Centre's strip at the sheet's full width, each h
       return { bg: getComputedStyle(lab).backgroundColor, l: lr.left, r: lr.right, sl: sheet.left, sr: sheet.right,
         off: heads.map((h, i) => (i === 3 ? h.right - cells[i].right : h.left - cells[i].left)) };
     });
-    L.check(`the strip is rgb(233, 237, 243) ${w}`, r.bg === "rgb(233, 237, 243)", `${r.bg}`);
+    /* RE-POINTED (v18.3 §E): the headings are the table's own white header row */
+    L.check(`the strip is white ${w}`, r.bg === "rgb(255, 255, 255)", `${r.bg}`);
     L.check(`at the sheet's full width (±1) ${w}`, near(r.l, r.sl, 1) && near(r.r, r.sr, 1), `${r.l.toFixed(1)}–${r.r.toFixed(1)} vs ${r.sl.toFixed(1)}–${r.sr.toFixed(1)}`);
     L.check(`each heading within 2px of its column ${w}`, r.off.every((d) => Math.abs(d) <= 2), r.off.map((d) => d.toFixed(1)).join(" · "));
   }
@@ -275,7 +281,8 @@ test("C2 · disc: a not-queried disc is a dotted ring with no fill", async ({ pa
 });
 
 /* ───────────────────────── D1 · peek ───────────────────────── */
-test("D1 · peek: none at 300ms, open by 900ms; Copy never opens the row; Space toggles; missing fields not drawn", async ({ page }) => {
+/* RETIRED (Contact list v18.3 §C): the peek is three contact pills now; CL183 C1 holds it */
+test.skip("D1 · peek: none at 300ms, open by 900ms; Copy never opens the row; Space toggles; missing fields not drawn", async ({ page }) => {
   const L = new Ledger("D1");
   for (const vp of SIZES) {
     await open(page, vp, "D1"); const w = `@${vp.width}`;
@@ -356,7 +363,8 @@ test("F1 · score: the page ring, the tab and the drawer show one number; a repl
   await page.keyboard.press("h"); await page.waitForTimeout(1000);
   if (await page.locator('[data-hk8="not-now"]').count()) { await page.locator('[data-hk8="not-now"]').click(); await page.waitForTimeout(500); await page.keyboard.press("h"); await page.waitForTimeout(900); }
   const a = await nums();
-  L.check("the page ring, the tab and the drawer show one number", !!a.ring && a.ring === a.tab && a.ring === a.drawer, `${a.ring} · ${a.tab} · ${a.drawer}`);
+  /* RE-POINTED (v18.3 §B): there is no tab; the page ring and the drawer show one number */
+  L.check("the page ring and the drawer show one number", !!a.ring && a.ring === a.drawer, `${a.ring} · ${a.drawer}`);
   const held0 = Number(a.points.match(/^(\d+) of (\d+) points/)?.[1]);
   L.check("the drawer states held of possible", Number.isFinite(held0), `"${a.points}"`);
   /* a reply time: Focus on the first reply gap, one step, Save */
@@ -368,7 +376,7 @@ test("F1 · score: the page ring, the tab and the drawer show one number; a repl
   const b = await nums();
   const held1 = Number(b.points.match(/^(\d+) of/)?.[1]);
   L.check("saving a reply time adds exactly 6 to held", held1 - held0 === 6, `${held0} → ${held1}`);
-  L.check("the three still agree after the save", b.ring === b.tab && b.ring === b.drawer, `${b.ring} · ${b.tab} · ${b.drawer}`);
+  L.check("the two still agree after the save", b.ring === b.drawer, `${b.ring} · ${b.drawer}`);
   /* put the account back */
   await page.locator('[data-hkv="undo"]').click(); await page.waitForTimeout(2500);
   const c = await nums();

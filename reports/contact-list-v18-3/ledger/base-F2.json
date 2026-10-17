@@ -1,0 +1,248 @@
+[
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "add: \"[data-pck='item'][data-k='add'] button\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "add: the checklist closed",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "add: the dim shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "add: the step card shows \"Step 1 of 5\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F2",
+  "where": "add: the hole contains the target",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "add: no panel opened, no drawer, no search typed",
+  "ok": true,
+  "detail": "{\"pop\":false,\"dim\":false,\"card\":false,\"step\":null,\"contains\":false,\"panel\":false,\"drawer\":false,\"find\":true}"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='back']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "search: \"[data-pck='item'][data-k='search'] button\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "search: the checklist closed",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "search: the dim shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "search: the step card shows \"Step 2 of 5\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F2",
+  "where": "search: the hole contains the target",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "search: no panel opened, no drawer, no search typed",
+  "ok": true,
+  "detail": "{\"pop\":false,\"dim\":false,\"card\":false,\"step\":null,\"contains\":false,\"panel\":false,\"drawer\":false,\"find\":true}"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='back']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "open: \"[data-pck='item'][data-k='open'] button\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "open: the checklist closed",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "open: the dim shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "open: the step card shows \"Step 3 of 5\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F2",
+  "where": "open: the hole contains the target",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "open: no panel opened, no drawer, no search typed",
+  "ok": true,
+  "detail": "{\"pop\":false,\"dim\":false,\"card\":false,\"step\":null,\"contains\":false,\"panel\":false,\"drawer\":false,\"find\":true}"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='back']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "edit: \"[data-pck='item'][data-k='edit'] button\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "edit: the checklist closed",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "edit: the dim shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "edit: the step card shows \"Step 4 of 5\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F2",
+  "where": "edit: the hole contains the target",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "edit: no panel opened, no drawer, no search typed",
+  "ok": true,
+  "detail": "{\"pop\":false,\"dim\":false,\"card\":false,\"step\":null,\"contains\":false,\"panel\":false,\"drawer\":false,\"find\":true}"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='back']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='pill']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "hk: \"[data-pck='item'][data-k='hk'] button\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "hk: the checklist closed",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "hk: the dim shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "hk: the step card shows \"Step 5 of 5\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F2",
+  "where": "hk: the hole contains the target",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "F2",
+  "where": "hk: no panel opened, no drawer, no search typed",
+  "ok": true,
+  "detail": "{\"pop\":false,\"dim\":false,\"card\":false,\"step\":null,\"contains\":false,\"panel\":false,\"drawer\":false,\"find\":true}"
+ },
+ {
+  "lock": "F2",
+  "where": "step: \"[data-pck='back']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F2",
+  "where": "nothing was ticked by the guide's own buttons",
+  "ok": true,
+  "detail": "{\"seen\":true}"
+ }
+]

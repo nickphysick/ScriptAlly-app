@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A3",
+  "where": "sections render (the population)",
+  "ok": true,
+  "detail": "[\"materials\",\"genres\",\"wishlist\",\"reopen\"]"
+ },
+ {
+  "lock": "A3",
+  "where": "with every reply settled, no Reply time section",
+  "ok": true,
+  "detail": "[{\"g\":\"materials\",\"have\":35,\"base\":38},{\"g\":\"genres\",\"have\":37,\"base\":38},{\"g\":\"wishlist\",\"have\":2,\"base\":38},{\"g\":\"reopen\",\"have\":0,\"base\":4}]"
+ },
+ {
+  "lock": "A3",
+  "where": "the materials section shown has a gap (35 < 38)",
+  "ok": true,
+  "detail": "35/38"
+ },
+ {
+  "lock": "A3",
+  "where": "the genres section shown has a gap (37 < 38)",
+  "ok": true,
+  "detail": "37/38"
+ },
+ {
+  "lock": "A3",
+  "where": "the wishlist section shown has a gap (2 < 38)",
+  "ok": true,
+  "detail": "2/38"
+ },
+ {
+  "lock": "A3",
+  "where": "the reopen section shown has a gap (0 < 4)",
+  "ok": true,
+  "detail": "0/4"
+ },
+ {
+  "lock": "A3",
+  "where": "one unsettled agent brings the Reply time section back",
+  "ok": true,
+  "detail": "[\"reply\",\"materials\",\"genres\",\"wishlist\",\"reopen\"]"
+ },
+ {
+  "lock": "A3",
+  "where": "…with exactly that one gap",
+  "ok": true,
+  "detail": "37/38"
+ }
+]
