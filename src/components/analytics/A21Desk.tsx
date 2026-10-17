@@ -6,8 +6,8 @@
  * sent, Request rate, Median wait — each a figure over its unit, two counted rows, a 40px chart and an axis, and a
  * rotated double-ringed stamp. DESKTOP ONLY: the phone keeps v17's at-a-glance strip.
  *
- * ⚠️ v24 §B: THE CARDS ARE `deskV24` (lib/analyticsV24) — Queries sent, Asked to read more, Your typical reply
- *    time — and the third draws a dot strip rather than a line.
+ * ⚠️ v24 §B / v24.1: THE CARDS ARE `deskV24` (lib/analyticsV24) — Queries sent, Asked to read more, Replies due —
+ *    and the third draws the due strip (the past zone, today, the next eight weeks) rather than a line.
  * ⚠️ EVERY FIGURE IS the desk derivation's, and a stamp is drawn only where its comparison has something to compare.
  * ⚠️ THE WHOLE CARD SCROLLS TO ITS SECTION. It is a `role="button"` article, not a `<button>`: a heading is not
  *    phrasing content and may not sit inside one.
@@ -22,6 +22,8 @@ const ICON: Record<DeskCard["key"], React.ReactNode> = {
   sent: <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 9.5 17 3l-4.5 14-3-5.5z" /><path d="M9.5 11.5 17 3" /></svg>,
   rate: <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3.5 4.5h13v8.5h-7.2L5.5 16v-3H3.5z" /></svg>,
   wait: <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="10" cy="10" r="7" /><path d="M10 6v4l3 2" /></svg>,
+  /* v24.1: a calendar — an outlined square, two ring tabs and a top rule */
+  due: <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="4.5" width="13" height="12" rx="2" /><path d="M3.5 8.5h13M7 3v3M13 3v3" /></svg>,
 };
 
 /** The line chart: points evenly along 6..514 of a 520 × 40 box, the higher value nearer the top. */
@@ -48,15 +50,16 @@ const Chart: React.FC<{ card: DeskCard }> = ({ card }) => {
       </div>
     );
   }
-  if (card.chart.kind === "dots") {
-    /* v24 §B: each dated reply a dot along 0..the longest, the typical a dashed mark */
-    const { dots, typical } = card.chart;
-    const max = dots.length ? Math.max(1, dots[dots.length - 1].at) : 1;
-    const at = (d: number) => `${((d / max) * 100).toFixed(1)}%`;
+  if (card.chart.kind === "due") {
+    /* v24.1: the past zone (left 22%), today's mark, then a dot per open query across the next eight weeks */
+    const { past, dots } = card.chart;
     return (
-      <div className="a24-djstrip" data-a24="desk-strip" aria-hidden="true">
-        {typical !== null ? <u data-a24="desk-typical" style={{ left: at(typical) }}><span>typical</span></u> : null}
-        {dots.map((d, i) => <i key={i} data-a24="desk-dot" style={{ left: at(d.at) }} title={d.title} />)}
+      <div className="a24-djstrip a24-dstrip" data-a24="desk-strip" aria-hidden="true">
+        <span className="a24-pz">
+          {past > 0 ? <b className="a24-past" data-a24="desk-past">{past} past</b> : <b className="a24-past none" data-a24="desk-past">none past</b>}
+        </span>
+        <u data-a24="desk-today" style={{ left: "22%" }}><span>today</span></u>
+        {dots.map((d, i) => <i key={i} data-a24="desk-dot" style={{ left: `${d.left.toFixed(2)}%` }} title={d.title} />)}
       </div>
     );
   }

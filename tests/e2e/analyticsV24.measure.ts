@@ -100,6 +100,57 @@ async function scrollTop0(page: Page) {
 }
 const weeks = (d: number) => (Math.round(d) < 7 ? Math.round(d) : Math.round(Math.round(d) / 7));
 
+
+/* ════════════ v24.1 · card 3, "Replies due" — read and checked the same way on the harness account and the fixtures ════════════ */
+const MON3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const spanTxt = (d: number) => { const r = Math.round(d); if (r < 7) return `${r} ${r === 1 ? "day" : "days"}`; const w = Math.round(r / 7); return `${w} ${w === 1 ? "wk" : "wks"}`; };
+async function readDue(page: Page) {
+  return page.evaluate(() => {
+    const c = [...document.querySelectorAll<HTMLElement>('[data-a21="desk-card"][data-key="due"]')].find((e) => e.getBoundingClientRect().height > 0);
+    if (!c) return null;
+    const strip = c.querySelector<HTMLElement>('[data-a24="desk-strip"]');
+    const sr = strip?.getBoundingClientRect();
+    const today = strip?.querySelector<HTMLElement>('[data-a24="desk-today"]');
+    const pill = strip?.querySelector<HTMLElement>('[data-a24="desk-past"]');
+    return {
+      title: c.querySelector("h3")?.textContent ?? "", fig: c.querySelector('[data-a21="desk-figure"]')?.textContent ?? null,
+      unit: c.querySelector('[data-a21="desk-unit"]')?.textContent ?? null, stamp: c.querySelector('[data-a21="desk-stamp"]')?.textContent ?? null,
+      chips: [...c.querySelectorAll<HTMLElement>('[data-a21="desk-n"]')].map((x) => x.textContent ?? ""),
+      rows: [...c.querySelectorAll<HTMLElement>('[data-a21="desk-row"]')].map((r) => r.innerText.replace(/\s+/g, " ").trim()),
+      stripW: sr?.width ?? 0, todayX: today && sr ? today.getBoundingClientRect().left + 1 - sr.left : null,
+      dots: strip && sr ? [...strip.querySelectorAll<HTMLElement>('[data-a24="desk-dot"]')].map((d) => { const b = d.getBoundingClientRect(); return b.left + b.width / 2 - sr.left; }) : [],
+      pill: pill ? { text: pill.textContent ?? "", none: pill.classList.contains("none"), bg: getComputedStyle(pill).backgroundColor } : null,
+    };
+  });
+}
+/** S5 on the page: its first reading ("{past} of {waiting}") and how many waiting rows it draws. */
+async function readS5(page: Page) {
+  return page.evaluate(() => {
+    const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+    const sec = p.querySelector<HTMLElement>('[data-a17="sec"][data-sec="4"]');
+    const fig = sec?.querySelector('[data-a24="reading-fig"]')?.textContent ?? "";
+    return { fig, rows: sec ? sec.querySelectorAll('[data-a24="wait-row"]').length : -1 };
+  });
+}
+type Due = { past: number; soon: number; later: number; noStatedTime: number; next: { atMs: number; days: number } | null; dots: { days: number }[] };
+function checkDue(L: Ledger, ww: string, c: NonNullable<Awaited<ReturnType<typeof readDue>>>, d: Due, s5: { fig: string; rows: number }) {
+  L.check("B1 card 3's title is 'Replies due'", ww, c.title.trim().endsWith("Replies due"), c.title);
+  const want = d.soon >= 1 ? [String(d.soon), "due in the next\ntwo weeks"] : d.next ? [spanTxt(d.next.days), "until the next\nis due"] : ["–", "nothing due"];
+  L.check("B1 card 3's figure and unit follow the state table", ww, c.fig === want[0] && c.unit === want[1], `${c.fig} / ${JSON.stringify(c.unit)} vs ${want.join(" / ")}`);
+  L.check("B1 card 3's rows: past, due later (zeros as 0)", ww, JSON.stringify(c.chips) === JSON.stringify([String(d.past), String(d.later)]) && /past their time/.test(c.rows[0] ?? "") && /due later/.test(c.rows[1] ?? ""), `${c.chips} ${c.rows}`);
+  const stamp = d.next ? `next ${new Date(d.next.atMs).getDate()} ${MON3[new Date(d.next.atMs).getMonth()]}` : null;
+  L.check("B1 card 3's stamp is the next due date, or absent", ww, c.stamp === stamp, `${c.stamp} vs ${stamp}`);
+  L.check("B1 one dot per open query not past its time", ww, c.dots.length === d.soon + d.later && d.dots.length === c.dots.length, `${c.dots.length} vs ${d.soon}+${d.later}`);
+  const off = c.dots.filter((x, i) => Math.abs(x - ((22 + (Math.min(d.dots[i]?.days ?? 0, 56) / 56) * 78) / 100) * c.stripW) > 1).length;
+  L.check("B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)", ww, off === 0, `${off} off of ${c.dots.length}`);
+  L.check("B1 today's mark at 22% (±1px)", ww, c.todayX !== null && Math.abs(c.todayX - 0.22 * c.stripW) <= 1, `${c.todayX?.toFixed(1)} vs ${(0.22 * c.stripW).toFixed(1)}`);
+  L.check("B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill", ww, !!c.pill && (d.past > 0 ? c.pill.text === `${d.past} past` && !c.pill.none && c.pill.bg === RUST : c.pill.text === "none past" && c.pill.none), JSON.stringify(c.pill));
+  /* ⚠️ THE ANCHOR A LIB MUTATION CANNOT MOVE: what S5 itself draws */
+  const s5past = /^None/.test(s5.fig) ? 0 : Number(s5.fig.match(/^\d+/)?.[0] ?? NaN);
+  L.check("B1 the past count is S5's past reading", ww, d.past === s5past || (s5.rows === 0 && d.past === 0), `${d.past} vs "${s5.fig}"`);
+  L.check("B1 past + soon + later + no stated time = S5's waiting rows", ww, d.past + d.soon + d.later + d.noStatedTime === Math.max(0, s5.rows), `${d.past}+${d.soon}+${d.later}+${d.noStatedTime} vs ${s5.rows}`);
+}
+
 /* ════════════ A3 · the ring ════════════ */
 test("AN24-A3 · ring", async ({ page }) => {
   const L = new Ledger("an24-a3");
@@ -164,30 +215,29 @@ test("AN24-B1 · desk", async ({ page }) => {
     if (!m || cards.length !== 3) continue;
     const [c1, c2, c3] = cards;
     const v = m.v24, o = v.outcomes;
-    L.check("B1 card titles", ww, c1.title.endsWith("Queries sent") && c2.title.endsWith("Asked to read more") && c3.title.endsWith("Your typical reply time"), cards.map((c) => c.title).join(" | "));
-    L.check("B1 card 3's title starts 'Your'", ww, /^Your/.test(c3.title.trim()), c3.title);
+    L.check("B1 card titles", ww, c1.title.endsWith("Queries sent") && c2.title.endsWith("Asked to read more") && c3.title.endsWith("Replies due"), cards.map((c) => c.title).join(" | "));
     const rate = o.sent >= 5 ? `${Math.round((o.asked / o.sent) * 100)}%` : `${o.asked} of ${o.sent}`;
     L.check("B1 card 2's figure is requestRate", ww, c2.fig === rate && (o.sent < 5 || c2.unit === `${o.asked} of ${o.sent}`), `${c2.fig} ${c2.unit} vs ${rate}`);
     /* ⚠️ the independent anchor: v17's own count of queries that reached a request, plus the offers */
     L.check("B1 'asked' is no more than requests + offers", ww, o.asked <= m.requests + m.offers && o.asked >= m.requests, `${o.asked} vs ${m.requests}+${m.offers}`);
-    const k = v.keeping;
-    L.check("B1 card 3's figure is the typical in weeks", ww, k.typical === null ? c3.fig === "No replies" : c3.fig === String(weeks(k.typical)), `${c3.fig} vs ${k.typical}`);
-    L.check("B1 one dot per reply", ww, c3.dots.length === k.replies && k.replies === m.replies, `${c3.dots.length} / ${k.replies} / ${m.replies}`);
-    if (k.typical !== null && k.longest) {
-      const want = (k.typical / k.longest) * c3.stripW;
-      L.check("B1 the TYPICAL mark sits at the typical (±1px)", ww, c3.typ !== null && Math.abs(c3.typ - want) <= 1, `${c3.typ?.toFixed(1)} vs ${want.toFixed(1)}`);
-      const far = Math.max(...c3.dots);
-      L.check("B1 the longest dot sits at the strip's end (±1px)", ww, Math.abs(far - c3.stripW) <= 1, `${far.toFixed(1)} vs ${c3.stripW.toFixed(1)}`);
-    }
-    for (const [key, sec] of [["sent", 2], ["rate", 0], ["wait", 3]] as const) {
+    /* REWRITTEN (v24.1): card 3 is Replies due — the dot-strip assertions are retired (RETIRED-analytics-v24-1.md) */
+    const due = await readDue(page);
+    await toSec(page, 4);
+    const s5 = await readS5(page);
+    L.check("B1 card 3 renders", ww, !!due, `${!!due}`);
+    if (due) checkDue(L, ww, due, v.due, s5);
+    for (const [key, sec] of [["sent", 2], ["rate", 0], ["due", 4]] as const) {
       await scrollTop0(page);
-      await page.locator(`[data-a21="desk-card"][data-key="${key}"]:visible`).first().click();
+      const card = page.locator(`[data-a21="desk-card"][data-key="${key}"]:visible`).first();
+      /* a missing card is a failed reading, never a wait out to the timeout */
+      if ((await card.count()) === 0) { L.check(`B1 ${key} scrolls to S${sec + 1}`, ww, false, "no such card"); continue; }
+      await card.click();
       await page.waitForTimeout(1200);
       const at = await secTop(page, sec);
       L.check(`B1 ${key} scrolls to S${sec + 1}`, ww, !!at && at.top > -60 && at.top < 200, `${at?.top.toFixed(0)}`);
     }
   }
-  L.done(26);
+  L.done(38);
 });
 
 /* ════════════ C1 · the seven sections ════════════ */
@@ -545,5 +595,88 @@ test.describe("AN24-I1", () => {
     const written = execSync("node tests/e2e/seedAn21.mjs count", { encoding: "utf8" }).trim();
     L.check("I1 the tiles are not written", "account", written === "0", written);
     L.done(16);
+  });
+});
+
+/* ════════════ v24.1 · B2 thin, R1 replies, R2 dates — on seeded manuscripts (tests/e2e/seedAn24.mjs), restored in the run ════════════ */
+const readHeader = (page: Page) => page.evaluate(() => {
+  const h = [...document.querySelectorAll<HTMLElement>('[data-a21="title"]')].find((e) => e.getBoundingClientRect().height > 0);
+  const t = (h?.getAttribute("aria-label") ?? "").match(/^(\d+) quer(?:y|ies), (no|\d+) repl/);
+  return t ? { sent: Number(t[1]), replies: t[2] === "no" ? 0 : Number(t[2]) } : null;
+});
+test.describe("AN24 v24.1 fixtures", () => {
+  test.beforeAll(() => { for (const f of ["thin", "pass", "baddate", "notime"]) execSync(`node tests/e2e/seedAn24.mjs ${f}`, { stdio: "pipe" }); });
+  test.afterAll(() => { execSync("node tests/e2e/seedAn24.mjs restore", { stdio: "pipe" }); });
+
+  test("AN24-B2 · thin", async ({ page }) => {
+    test.setTimeout(240_000);
+    const L = new Ledger("an24-b2");
+    for (const w of [1512, 1280]) {
+      for (const ms of ["seed-an24-thin", "seed-an24-pass"]) {
+        await open(page, w, ms);
+        const m = await model(page);
+        const ww = `${w} · ${ms}`;
+        if (!m) { L.check("the page publishes the v24 model", ww, false, "no v24 block"); continue; }
+        const c = await readDue(page);
+        await toSec(page, 4);
+        const s5 = await readS5(page);
+        L.check("B2 card 3 renders", ww, !!c, `${!!c}`);
+        if (!c) continue;
+        checkDue(L, ww, c, m.v24.due, s5);
+        if (ms === "seed-an24-thin") {
+          L.check("B2 thin: '5 wks' until the next is due", ww, c.fig === "5 wks" && c.unit === "until the next\nis due", `${c.fig} / ${JSON.stringify(c.unit)}`);
+          L.check("B2 thin: 0 past, 2 due later, 'none past' with no pill", ww, JSON.stringify(c.chips) === '["0","2"]' && !!c.pill?.none && c.pill.text === "none past", `${c.chips} ${JSON.stringify(c.pill)}`);
+          L.check("B2 thin: a stamp 'next {date}'", ww, /^next \d{1,2} [A-Z][a-z]{2}$/.test(c.stamp ?? ""), `${c.stamp}`);
+          L.check("B2 thin: two dots", ww, c.dots.length === 2, `${c.dots.length}`);
+        } else {
+          L.check("B2 nothing waiting: '–', 'nothing due', no stamp, no dots", ww, c.fig === "–" && c.unit === "nothing due" && c.stamp === null && c.dots.length === 0, `${c.fig} ${c.unit} ${c.stamp} ${c.dots.length}`);
+        }
+      }
+    }
+    L.done(40);
+  });
+
+  test("AN24-R1 · replies", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("an24-r1");
+    for (const ms of ["seed-ms-1", "seed-an24-thin", "seed-an24-pass", "seed-an24-baddate", "seed-an24-notime"]) {
+      await open(page, 1512, ms);
+      const m = await model(page);
+      const h = await readHeader(page);
+      const ww = ms;
+      if (!m || !h) { L.check("the page publishes the v24 model and a header", ww, false, `${!!m} ${!!h}`); continue; }
+      const o = m.v24.outcomes;
+      /* the card's own "{asked} of {sent}" where the rate is a percentage, else the outcomes' count */
+      const unit = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-a21="desk-card"][data-key="rate"] [data-a21="desk-unit"]')].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "");
+      const askedOnCard = Number(unit.match(/^(\d+) of/)?.[1] ?? o.asked);
+      L.check("R1 header replies ≥ card 2's asked", ww, h.replies >= askedOnCard, `${h.replies} vs ${askedOnCard}`);
+      L.check("R1 replies = asked + said no to the letter", ww, h.replies === o.asked + o.ended.letter, `${h.replies} vs ${o.asked}+${o.ended.letter}`);
+      L.check("R1 header queries = sent", ww, h.sent === m.sent, `${h.sent} vs ${m.sent}`);
+    }
+    L.done(15);
+  });
+
+  test("AN24-R2 · dates", async ({ page }) => {
+    test.setTimeout(180_000);
+    const L = new Ledger("an24-r2");
+    for (const w of [1512, 1280]) {
+      await open(page, w, "seed-an24-baddate");
+      const m = await model(page);
+      const ww = `${w}`;
+      if (!m) { L.check("the page publishes the v24 model", ww, false, "no v24 block"); continue; }
+      await toSec(page, 3);
+      const r = await page.evaluate(() => {
+        const p = [...document.querySelectorAll<HTMLElement>('[data-a17="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+        const sec = p.querySelector<HTMLElement>('[data-a17="sec"][data-sec="3"]')!;
+        return { answer: sec.querySelector('[data-a24="answer"]')?.textContent ?? "", rows: [...sec.querySelectorAll<HTMLElement>('[data-a24="keep-row"]')].map((x) => x.dataset.id ?? ""),
+          typical: [...sec.querySelectorAll<HTMLElement>('[data-a24="reading-fig"]')].map((x) => x.textContent ?? "")[2] ?? "" };
+      });
+      const bad = (m.v24.tally?.bad ?? null) as { id: string; rawDays: number }[] | null;
+      L.check("R2 the bad dates are found", ww, !!bad && bad.map((b) => b.id).sort().join(",") === "seed-an24-q-b1,seed-an24-q-b2", JSON.stringify(bad));
+      L.check("R2 a reply dated before its send, or two years after, is not in S4's rows", ww, !r.rows.includes("seed-an24-q-b1") && !r.rows.includes("seed-an24-q-b2") && r.rows.includes("seed-an24-q-b3"), r.rows.join(","));
+      L.check("R2 the typical rests on the good reply alone", ww, JSON.stringify(m.v24.keeping.all) === "[30]" && r.typical === "4 wks", `${JSON.stringify(m.v24.keeping.all)} ${r.typical}`);
+      L.check("R2 S4 counts them under 'no reply date'", ww, /Two replies have no reply date and are left out\./.test(r.answer), r.answer);
+    }
+    L.done(8);
   });
 });

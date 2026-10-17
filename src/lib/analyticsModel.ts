@@ -234,6 +234,12 @@ export interface Enriched {
   replyDays: number | null;
   /** What that first reply was. */
   replyStatus: QueryStatus | null;
+  /**
+   * Analytics v24.1 — the first reply's gap in days WITHOUT the order check, or null where no reply date exists at all.
+   * `replyDays` drops a reply dated before its send silently; this keeps it, so the page can count it as having no
+   * usable reply date and the report can list it. Read it only to find bad dates, never as a wait.
+   */
+  replyRawDays: number | null;
 }
 
 /**
@@ -248,8 +254,11 @@ export interface Enriched {
  * a dated "first request" in the story rail and "no dated replies" in the fact line three inches
  * away — two sources disagreeing on one page, measured on the harness account.
  */
-function firstReply(row: AnalyticsRow, dates: StageDates): { days: number | null; status: QueryStatus | null } {
-  if (row.replyDays !== null) return { days: row.replyDays, status: row.respondedStatus };
+function firstReply(row: AnalyticsRow, dates: StageDates): { days: number | null; status: QueryStatus | null; raw: number | null } {
+  const signed = (t: number | null) => (row.sentMs === null || t === null ? null : Math.round((t - row.sentMs) / DAY_MS));
+  if (row.replyDays !== null) return { days: row.replyDays, status: row.respondedStatus, raw: row.replyDays };
+  /* a log rung dated before the send: the wait is not sane, but the date exists */
+  if (row.respondedMs !== null && row.sentMs !== null) return { days: null, status: row.respondedStatus, raw: signed(row.respondedMs) };
   const candidates: [number | null, QueryStatus][] = [
     [dates.partialRequested, QueryStatus.PARTIAL_REQUESTED],
     [dates.fullRequested, QueryStatus.FULL_REQUESTED],
@@ -258,9 +267,9 @@ function firstReply(row: AnalyticsRow, dates: StageDates): { days: number | null
   ];
   let best: { t: number; s: QueryStatus } | null = null;
   for (const [t, st] of candidates) if (t !== null && (best === null || t < best.t)) best = { t, s: st };
-  if (!best) return { days: null, status: null };
+  if (!best) return { days: null, status: null, raw: null };
   const g = gapDays(row.sentMs, best.t);
-  return g === null ? { days: null, status: null } : { days: g, status: best.s };
+  return g === null ? { days: null, status: null, raw: signed(best.t) } : { days: g, status: best.s, raw: g };
 }
 
 export interface SplitRow {
@@ -395,7 +404,7 @@ export function analyticsModel(input: ModelInput): AnalyticsModel {
     const q = byId.get(row.id)!;
     const dates = stageDates(row, q);
     const reply = firstReply(row, dates);
-    return { row, q, dates, bucket: stateBucket(row.status), replyDays: reply.days, replyStatus: reply.status };
+    return { row, q, dates, bucket: stateBucket(row.status), replyDays: reply.days, replyStatus: reply.status, replyRawDays: reply.raw };
   });
 
   const sent = items.length;

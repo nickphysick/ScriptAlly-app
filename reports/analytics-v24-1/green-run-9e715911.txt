@@ -1,0 +1,174 @@
+
+Running 27 tests using 1 worker
+
+[1/27] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/27] [measure] › tests/e2e/analyticsV17.measure.ts:42:1 › AN17-1 · shell
+[3/27] [measure] › tests/e2e/analyticsV17.measure.ts:88:6 › AN17-2 · band
+[4/27] [measure] › tests/e2e/analyticsV17.measure.ts:133:1 › AN17-3 · the Query Centre's band
+[5/27] [measure] › tests/e2e/analyticsV17.measure.ts:173:1 › AN17-15 · tab
+[measure] › tests/e2e/analyticsV17.measure.ts:173:1 › AN17-15 · tab
+LEDGER an17-15: 45 readings, 0 failed
+
+[6/27] [measure] › tests/e2e/analyticsV17.measure.ts:230:1 › AN17-16 · thin sample
+[measure] › tests/e2e/analyticsV17.measure.ts:230:1 › AN17-16 · thin sample
+  ✗ AN17-16 desk-n is not 0 / 0% / a bare dash (all time) · 1512 — "0"
+
+  ✗ AN17-16 desk-n is not 0 / 0% / a bare dash (all time) · 1512 — "0"
+
+LEDGER an17-16: 28 readings, 2 failed
+
+  1) [measure] › tests/e2e/analyticsV17.measure.ts:230:1 › AN17-16 · thin sample ───────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "AN17-16 desk-n is not 0 / 0% / a bare dash (all time) · 1512 — \"0\"",
+    +   "AN17-16 desk-n is not 0 / 0% / a bare dash (all time) · 1512 — \"0\"",
+    + ]
+
+       at an17Lib.ts:50
+
+      48 |     this.write();
+      49 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 50 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      51 |   }
+      52 | }
+      53 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/an17Lib.ts:50:95)
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV17.measure.ts:267:5
+
+    Error Context: test-results/analyticsV17.measure.ts-AN17-16-·-thin-sample-measure/error-context.md
+
+
+[7/27] [measure] › tests/e2e/analyticsV17.measure.ts:271:1 › AN17-17 · phone
+[measure] › tests/e2e/analyticsV17.measure.ts:271:1 › AN17-17 · phone
+  ✗ AN17-17 the disc is 100px · 390 — null
+
+  ✗ AN17-17 the disc is top-right of the band's text · 390 — null band {"top":151,"right":362}
+
+  ✗ AN17-17 the disc is 100px · 414 — null
+
+  ✗ AN17-17 the disc is top-right of the band's text · 414 — null band {"top":151,"right":386}
+
+  ✗ AN17-17 the disc is 100px · 760 — null
+
+  ✗ AN17-17 the disc is top-right of the band's text · 760 — null band {"top":133,"right":732}
+
+LEDGER an17-17: 18 readings, 6 failed
+
+  2) [measure] › tests/e2e/analyticsV17.measure.ts:271:1 › AN17-17 · phone ─────────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "AN17-17 the disc is 100px · 390 — null",
+    +   "AN17-17 the disc is top-right of the band's text · 390 — null band {\"top\":151,\"right\":362}",
+    +   "AN17-17 the disc is 100px · 414 — null",
+    +   "AN17-17 the disc is top-right of the band's text · 414 — null band {\"top\":151,\"right\":386}",
+    +   "AN17-17 the disc is 100px · 760 — null",
+    +   "AN17-17 the disc is top-right of the band's text · 760 — null band {\"top\":133,\"right\":732}",
+    + ]
+
+       at an17Lib.ts:50
+
+      48 |     this.write();
+      49 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 50 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      51 |   }
+      52 | }
+      53 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/an17Lib.ts:50:95)
+        at /Users/nickphysick/ScriptAlly-analytics-v24-1/tests/e2e/analyticsV17.measure.ts:314:5
+
+    Error Context: test-results/analyticsV17.measure.ts-AN17-17-·-phone-measure/error-context.md
+
+
+[8/27] [measure] › tests/e2e/analyticsV17.measure.ts:318:1 › AN17-18 · manuscript
+[measure] › tests/e2e/analyticsV17.measure.ts:318:1 › AN17-18 · manuscript
+LEDGER an17-18: 6 readings, 0 failed
+
+[9/27] [measure] › tests/e2e/analyticsV17.measure.ts:370:5 › AN17 shots › shots @ 1512
+[10/27] [measure] › tests/e2e/analyticsV17.measure.ts:370:5 › AN17 shots › shots @ 390
+[11/27] [measure] › tests/e2e/analyticsV21.measure.ts:95:1 › AN21-A1 · header
+[measure] › tests/e2e/analyticsV21.measure.ts:95:1 › AN21-A1 · header
+LEDGER an21-a1: 32 readings, 0 failed
+
+[12/27] [measure] › tests/e2e/analyticsV21.measure.ts:131:1 › AN21-A2 · card
+[measure] › tests/e2e/analyticsV21.measure.ts:131:1 › AN21-A2 · card
+LEDGER an21-a2: 30 readings, 0 failed
+
+[13/27] [measure] › tests/e2e/analyticsV21.measure.ts:167:1 › AN21-L1 · overflow
+[measure] › tests/e2e/analyticsV21.measure.ts:167:1 › AN21-L1 · overflow
+LEDGER an21-l1: 72 readings, 0 failed
+
+[14/27] [measure] › tests/e2e/analyticsV24.measure.ts:155:1 › AN24-A3 · ring
+[measure] › tests/e2e/analyticsV24.measure.ts:155:1 › AN24-A3 · ring
+LEDGER an24-a3: 14 readings, 0 failed
+
+[15/27] [measure] › tests/e2e/analyticsV24.measure.ts:195:1 › AN24-B1 · desk
+[measure] › tests/e2e/analyticsV24.measure.ts:195:1 › AN24-B1 · desk
+LEDGER an24-b1: 38 readings, 0 failed
+
+[16/27] [measure] › tests/e2e/analyticsV24.measure.ts:244:1 › AN24-C1 · sections
+[measure] › tests/e2e/analyticsV24.measure.ts:244:1 › AN24-C1 · sections
+LEDGER an24-c1: 42 readings, 0 failed
+
+[17/27] [measure] › tests/e2e/analyticsV24.measure.ts:292:1 › AN24-S1 · pies
+[measure] › tests/e2e/analyticsV24.measure.ts:292:1 › AN24-S1 · pies
+LEDGER an24-s1: 36 readings, 0 failed
+
+[18/27] [measure] › tests/e2e/analyticsV24.measure.ts:346:1 › AN24-S2 · bench
+[measure] › tests/e2e/analyticsV24.measure.ts:346:1 › AN24-S2 · bench
+LEDGER an24-s2: 32 readings, 0 failed
+
+[19/27] [measure] › tests/e2e/analyticsV24.measure.ts:399:1 › AN24-S3 · months
+[measure] › tests/e2e/analyticsV24.measure.ts:399:1 › AN24-S3 · months
+LEDGER an24-s3: 22 readings, 0 failed
+
+[20/27] [measure] › tests/e2e/analyticsV24.measure.ts:432:1 › AN24-S4 · kept
+[measure] › tests/e2e/analyticsV24.measure.ts:432:1 › AN24-S4 · kept
+LEDGER an24-s4: 12 readings, 0 failed
+
+[21/27] [measure] › tests/e2e/analyticsV24.measure.ts:463:1 › AN24-S5 · waiting
+[measure] › tests/e2e/analyticsV24.measure.ts:463:1 › AN24-S5 · waiting
+LEDGER an24-s5: 14 readings, 0 failed
+
+[22/27] [measure] › tests/e2e/analyticsV24.measure.ts:518:1 › AN24-S6 · moments
+[measure] › tests/e2e/analyticsV24.measure.ts:518:1 › AN24-S6 · moments
+LEDGER an24-s6: 20 readings, 0 failed
+
+[23/27] [measure] › tests/e2e/analyticsV24.measure.ts:545:1 › AN24-U1 · units
+[measure] › tests/e2e/analyticsV24.measure.ts:545:1 › AN24-U1 · units
+LEDGER an24-u1: 10 readings, 0 failed
+
+[24/27] [measure] › tests/e2e/analyticsV24.measure.ts:567:3 › AN24-I1 › AN24-I1 · empty
+[measure] › tests/e2e/analyticsV24.measure.ts:567:3 › AN24-I1 › AN24-I1 · empty
+LEDGER an24-i1: 17 readings, 0 failed
+
+[25/27] [measure] › tests/e2e/analyticsV24.measure.ts:611:3 › AN24 v24.1 fixtures › AN24-B2 · thin
+[measure] › tests/e2e/analyticsV24.measure.ts:611:3 › AN24 v24.1 fixtures › AN24-B2 · thin
+LEDGER an24-b2: 54 readings, 0 failed
+
+[26/27] [measure] › tests/e2e/analyticsV24.measure.ts:639:3 › AN24 v24.1 fixtures › AN24-R1 · replies
+[measure] › tests/e2e/analyticsV24.measure.ts:639:3 › AN24 v24.1 fixtures › AN24-R1 · replies
+LEDGER an24-r1: 15 readings, 0 failed
+
+[27/27] [measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates
+[measure] › tests/e2e/analyticsV24.measure.ts:659:3 › AN24 v24.1 fixtures › AN24-R2 · dates
+LEDGER an24-r2: 8 readings, 0 failed
+
+  2 failed
+    [measure] › tests/e2e/analyticsV17.measure.ts:230:1 › AN17-16 · thin sample ────────────────────
+    [measure] › tests/e2e/analyticsV17.measure.ts:271:1 › AN17-17 · phone ──────────────────────────
+  5 skipped
+  20 passed (5.9m)

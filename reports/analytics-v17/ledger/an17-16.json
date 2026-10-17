@@ -9,7 +9,7 @@
   "lock": "AN17-16 figures were found",
   "where": "1512",
   "ok": true,
-  "detail": "23"
+  "detail": "22"
  },
  {
   "lock": "AN17-16 card-n is not 0 / 0% / a bare dash (all time)",
@@ -58,12 +58,6 @@
   "where": "1512",
   "ok": true,
   "detail": "\"No\""
- },
- {
-  "lock": "AN17-16 desk-figure is not 0 / 0% / a bare dash (all time)",
-  "where": "1512",
-  "ok": true,
-  "detail": "\"No replies\""
  },
  {
   "lock": "AN17-16 reading-fig is not 0 / 0% / a bare dash (all time)",

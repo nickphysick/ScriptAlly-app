@@ -21,7 +21,7 @@
   "lock": "A1 the title is {sent} queries, {replies} replies",
   "where": "1920",
   "ok": true,
-  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+  "detail": "\"51 queries, 29 replies\" vs \"51 queries, 29 replies\""
  },
  {
   "lock": "A1 Special Elite",
@@ -69,7 +69,7 @@
   "lock": "A1 the title is {sent} queries, {replies} replies",
   "where": "1512",
   "ok": true,
-  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+  "detail": "\"51 queries, 29 replies\" vs \"51 queries, 29 replies\""
  },
  {
   "lock": "A1 Special Elite",
@@ -117,7 +117,7 @@
   "lock": "A1 the title is {sent} queries, {replies} replies",
   "where": "1280",
   "ok": true,
-  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+  "detail": "\"51 queries, 29 replies\" vs \"51 queries, 29 replies\""
  },
  {
   "lock": "A1 Special Elite",
@@ -165,7 +165,7 @@
   "lock": "A1 the title is {sent} queries, {replies} replies",
   "where": "1180",
   "ok": true,
-  "detail": "\"51 queries, 24 replies\" vs \"51 queries, 24 replies\""
+  "detail": "\"51 queries, 29 replies\" vs \"51 queries, 29 replies\""
  },
  {
   "lock": "A1 Special Elite",

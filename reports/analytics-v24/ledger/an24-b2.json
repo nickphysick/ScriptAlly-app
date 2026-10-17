@@ -1,0 +1,326 @@
+[
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card 3's title is 'Replies due'",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "Replies due"
+ },
+ {
+  "lock": "B1 card 3's figure and unit follow the state table",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "5 wks / \"until the next\\nis due\" vs 5 wks / until the next\nis due"
+ },
+ {
+  "lock": "B1 card 3's rows: past, due later (zeros as 0)",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "0,2 0 past their time,2 due later"
+ },
+ {
+  "lock": "B1 card 3's stamp is the next due date, or absent",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "next 21 Nov vs next 21 Nov"
+ },
+ {
+  "lock": "B1 one dot per open query not past its time",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "2 vs 0+2"
+ },
+ {
+  "lock": "B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "0 off of 2"
+ },
+ {
+  "lock": "B1 today's mark at 22% (±1px)",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "75.6 vs 75.6"
+ },
+ {
+  "lock": "B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "{\"text\":\"none past\",\"none\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "B1 the past count is S5's past reading",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "0 vs \"None of 2\""
+ },
+ {
+  "lock": "B1 past + soon + later + no stated time = S5's waiting rows",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "0+0+2+0 vs 2"
+ },
+ {
+  "lock": "B2 thin: '5 wks' until the next is due",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "5 wks / \"until the next\\nis due\""
+ },
+ {
+  "lock": "B2 thin: 0 past, 2 due later, 'none past' with no pill",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "0,2 {\"text\":\"none past\",\"none\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "B2 thin: a stamp 'next {date}'",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "next 21 Nov"
+ },
+ {
+  "lock": "B2 thin: two dots",
+  "where": "1512 · seed-an24-thin",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card 3's title is 'Replies due'",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "Replies due"
+ },
+ {
+  "lock": "B1 card 3's figure and unit follow the state table",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "– / \"nothing due\" vs – / nothing due"
+ },
+ {
+  "lock": "B1 card 3's rows: past, due later (zeros as 0)",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "0,0 0 past their time,0 due later"
+ },
+ {
+  "lock": "B1 card 3's stamp is the next due date, or absent",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 one dot per open query not past its time",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "0 vs 0+0"
+ },
+ {
+  "lock": "B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "0 off of 0"
+ },
+ {
+  "lock": "B1 today's mark at 22% (±1px)",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "75.6 vs 75.6"
+ },
+ {
+  "lock": "B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "{\"text\":\"none past\",\"none\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "B1 the past count is S5's past reading",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "0 vs \"None\""
+ },
+ {
+  "lock": "B1 past + soon + later + no stated time = S5's waiting rows",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "0+0+0+0 vs 0"
+ },
+ {
+  "lock": "B2 nothing waiting: '–', 'nothing due', no stamp, no dots",
+  "where": "1512 · seed-an24-pass",
+  "ok": true,
+  "detail": "– nothing due null 0"
+ },
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card 3's title is 'Replies due'",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "Replies due"
+ },
+ {
+  "lock": "B1 card 3's figure and unit follow the state table",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "5 wks / \"until the next\\nis due\" vs 5 wks / until the next\nis due"
+ },
+ {
+  "lock": "B1 card 3's rows: past, due later (zeros as 0)",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "0,2 0 past their time,2 due later"
+ },
+ {
+  "lock": "B1 card 3's stamp is the next due date, or absent",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "next 21 Nov vs next 21 Nov"
+ },
+ {
+  "lock": "B1 one dot per open query not past its time",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "2 vs 0+2"
+ },
+ {
+  "lock": "B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "0 off of 2"
+ },
+ {
+  "lock": "B1 today's mark at 22% (±1px)",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "59.7 vs 59.7"
+ },
+ {
+  "lock": "B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "{\"text\":\"none past\",\"none\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "B1 the past count is S5's past reading",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "0 vs \"None of 2\""
+ },
+ {
+  "lock": "B1 past + soon + later + no stated time = S5's waiting rows",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "0+0+2+0 vs 2"
+ },
+ {
+  "lock": "B2 thin: '5 wks' until the next is due",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "5 wks / \"until the next\\nis due\""
+ },
+ {
+  "lock": "B2 thin: 0 past, 2 due later, 'none past' with no pill",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "0,2 {\"text\":\"none past\",\"none\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "B2 thin: a stamp 'next {date}'",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "next 21 Nov"
+ },
+ {
+  "lock": "B2 thin: two dots",
+  "where": "1280 · seed-an24-thin",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card 3's title is 'Replies due'",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "Replies due"
+ },
+ {
+  "lock": "B1 card 3's figure and unit follow the state table",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "– / \"nothing due\" vs – / nothing due"
+ },
+ {
+  "lock": "B1 card 3's rows: past, due later (zeros as 0)",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "0,0 0 past their time,0 due later"
+ },
+ {
+  "lock": "B1 card 3's stamp is the next due date, or absent",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "B1 one dot per open query not past its time",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "0 vs 0+0"
+ },
+ {
+  "lock": "B1 each dot sits at 22% + min(days, 56)/56 × 78% (±1px)",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "0 off of 0"
+ },
+ {
+  "lock": "B1 today's mark at 22% (±1px)",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "59.7 vs 59.7"
+ },
+ {
+  "lock": "B1 the past zone: a rust '{n} past' pill, or 'none past' with no pill",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "{\"text\":\"none past\",\"none\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "B1 the past count is S5's past reading",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "0 vs \"None\""
+ },
+ {
+  "lock": "B1 past + soon + later + no stated time = S5's waiting rows",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "0+0+0+0 vs 0"
+ },
+ {
+  "lock": "B2 nothing waiting: '–', 'nothing due', no stamp, no dots",
+  "where": "1280 · seed-an24-pass",
+  "ok": true,
+  "detail": "– nothing due null 0"
+ }
+]

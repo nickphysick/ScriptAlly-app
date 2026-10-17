@@ -12,7 +12,7 @@ import React from "react";
 import type { V24 } from "../../lib/analyticsV24";
 
 export const S7Body: React.FC<{ v: V24 }> = ({ v }) => {
-  const r = v.keeping.replies, w = v.outcomes.waiting;
+  const r = v.tally.all, w = v.outcomes.waiting;
   return (
     <div className="a24-note" data-a24="note">
       <p><b>Small numbers move a lot.</b> With {r === 0 ? "no replies" : `${r} ${r === 1 ? "reply" : "replies"}`}, one more reply shifts the figures noticeably. Treat them as a rough picture, not a precise measure.</p>

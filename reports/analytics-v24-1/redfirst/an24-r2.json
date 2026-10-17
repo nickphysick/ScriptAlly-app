@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "R2 the bad dates are found",
+  "where": "1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "R2 a reply dated before its send, or two years after, is not in S4's rows",
+  "where": "1512",
+  "ok": false,
+  "detail": "seed-an24-q-b3,seed-an24-q-b2"
+ },
+ {
+  "lock": "R2 the typical rests on the good reply alone",
+  "where": "1512",
+  "ok": false,
+  "detail": "[30,850] 63 wks"
+ },
+ {
+  "lock": "R2 S4 counts them under 'no reply date'",
+  "where": "1512",
+  "ok": false,
+  "detail": "Most agents say in their guidelines how long they take to reply. Of the 2 who have replied to you, 1 kept to their time and 1 took longer, by 115 wks. Each row shows what the agent said next to what they actually took."
+ },
+ {
+  "lock": "R2 the bad dates are found",
+  "where": "1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "R2 a reply dated before its send, or two years after, is not in S4's rows",
+  "where": "1280",
+  "ok": false,
+  "detail": "seed-an24-q-b3,seed-an24-q-b2"
+ },
+ {
+  "lock": "R2 the typical rests on the good reply alone",
+  "where": "1280",
+  "ok": false,
+  "detail": "[30,850] 63 wks"
+ },
+ {
+  "lock": "R2 S4 counts them under 'no reply date'",
+  "where": "1280",
+  "ok": false,
+  "detail": "Most agents say in their guidelines how long they take to reply. Of the 2 who have replied to you, 1 kept to their time and 1 took longer, by 115 wks. Each row shows what the agent said next to what they actually took."
+ }
+]

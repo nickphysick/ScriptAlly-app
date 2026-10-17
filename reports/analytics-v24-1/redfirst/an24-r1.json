@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "R1 header replies ≥ card 2's asked",
+  "where": "seed-ms-1",
+  "ok": true,
+  "detail": "24 vs 21"
+ },
+ {
+  "lock": "R1 replies = asked + said no to the letter",
+  "where": "seed-ms-1",
+  "ok": false,
+  "detail": "24 vs 21+8"
+ },
+ {
+  "lock": "R1 header queries = sent",
+  "where": "seed-ms-1",
+  "ok": true,
+  "detail": "51 vs 51"
+ },
+ {
+  "lock": "R1 header replies ≥ card 2's asked",
+  "where": "seed-an24-thin",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "R1 replies = asked + said no to the letter",
+  "where": "seed-an24-thin",
+  "ok": true,
+  "detail": "0 vs 0+0"
+ },
+ {
+  "lock": "R1 header queries = sent",
+  "where": "seed-an24-thin",
+  "ok": true,
+  "detail": "2 vs 2"
+ },
+ {
+  "lock": "R1 header replies ≥ card 2's asked",
+  "where": "seed-an24-pass",
+  "ok": true,
+  "detail": "1 vs 0"
+ },
+ {
+  "lock": "R1 replies = asked + said no to the letter",
+  "where": "seed-an24-pass",
+  "ok": true,
+  "detail": "1 vs 0+1"
+ },
+ {
+  "lock": "R1 header queries = sent",
+  "where": "seed-an24-pass",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "lock": "R1 header replies ≥ card 2's asked",
+  "where": "seed-an24-baddate",
+  "ok": true,
+  "detail": "2 vs 0"
+ },
+ {
+  "lock": "R1 replies = asked + said no to the letter",
+  "where": "seed-an24-baddate",
+  "ok": false,
+  "detail": "2 vs 0+3"
+ },
+ {
+  "lock": "R1 header queries = sent",
+  "where": "seed-an24-baddate",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "lock": "R1 header replies ≥ card 2's asked",
+  "where": "seed-an24-notime",
+  "ok": true,
+  "detail": "2 vs 1"
+ },
+ {
+  "lock": "R1 replies = asked + said no to the letter",
+  "where": "seed-an24-notime",
+  "ok": true,
+  "detail": "2 vs 1+1"
+ },
+ {
+  "lock": "R1 header queries = sent",
+  "where": "seed-an24-notime",
+  "ok": true,
+  "detail": "4 vs 4"
+ }
+]

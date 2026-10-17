@@ -108,6 +108,30 @@ export function requestRate(o: Outcomes): Rate {
 /** "26%" or "1 of 2" or "No queries". */
 export const rateWords = (r: Rate): string => (r.of === 0 ? "No queries" : r.pct !== null ? `${r.pct}%` : `${r.n === 0 ? "None" : r.n} of ${r.of}`);
 
+/* ══════════════════════════════════ v24.1 · a request is a reply ══════════════════════════════════ */
+
+/**
+ * ⚠️ ON THIS PAGE A REQUEST IS A REPLY. A query that asked to read more, offered, or was declined by letter has been
+ *    answered, whether or not the log dates the answer: `replies` = asked to read more + said no to the letter, and
+ *    can never be fewer than the asked. (v24 took the header's count from the DATED first replies while "asked to read
+ *    more" came from status, so an imported account read "27 queries, 3 replies" beside "10 of 27 asked to read more".)
+ * ⚠️ A TIMING FIGURE USES DATED REPLIES ONLY: a gap from 0 to `MAX_REPLY_DAYS`. A reply dated before its send, or more
+ *    than two years after it, is a bad date: left out of every timing figure, counted with the undated, and listed.
+ */
+export const MAX_REPLY_DAYS = 730;
+const answered = (e: Enriched): boolean => asked(e) || e.row.status === QueryStatus.REJECTED;
+export const isDatedReply = (e: Enriched): boolean => e.replyDays !== null && e.replyDays >= 0 && e.replyDays <= MAX_REPLY_DAYS;
+export interface BadDate { id: string; agency: string; sentMs: number | null; rawDays: number }
+export interface ReplyTally { all: number; dated: number; noDate: number; bad: BadDate[] }
+export function replyTally(items: Enriched[]): ReplyTally {
+  const ans = items.filter(answered);
+  const bad: BadDate[] = items
+    .filter((e) => e.replyRawDays !== null && (e.replyRawDays < 0 || e.replyRawDays > MAX_REPLY_DAYS))
+    .map((e) => ({ id: e.row.id, agency: agencyOf(e), sentMs: e.row.sentMs, rawDays: e.replyRawDays as number }));
+  const dated = ans.filter(isDatedReply).length;
+  return { all: ans.length, dated, noDate: ans.length - dated, bad };
+}
+
 /* ══════════════════════════════════ did they reply when they said? ══════════════════════════════════ */
 
 export interface KeepRow { id: string; agency: string; what: string; sentMs: number | null; saidWeeks: number; tookDays: number; diffDays: number }
@@ -129,11 +153,13 @@ export function replyKeeping(items: Enriched[]): ReplyKeeping {
   let unplaced = 0;
   const all: number[] = [];
   for (const e of items) {
-    if (e.replyDays === null) continue;
-    all.push(e.replyDays);
+    /* v24.1: dated replies only — a bad date is no date */
+    if (!isDatedReply(e)) continue;
+    all.push(e.replyDays as number);
     const w = e.row.windowWeeks;
     if (w === null || !(w > 0)) { unplaced++; continue; }
-    rows.push({ id: e.row.id, agency: agencyOf(e), what: replyWhat(e.replyStatus, e.row.status), sentMs: e.row.sentMs, saidWeeks: w, tookDays: e.replyDays, diffDays: e.replyDays - w * 7 });
+    const d = e.replyDays as number;
+    rows.push({ id: e.row.id, agency: agencyOf(e), what: replyWhat(e.replyStatus, e.row.status), sentMs: e.row.sentMs, saidWeeks: w, tookDays: d, diffDays: d - w * 7 });
   }
   const kept = rows.filter((r) => r.diffDays <= 0).sort((a, b) => a.tookDays - b.tookDays || a.agency.localeCompare(b.agency));
   const longer = rows.filter((r) => r.diffDays > 0).sort((a, b) => a.diffDays - b.diffDays || a.agency.localeCompare(b.agency));
@@ -176,6 +202,42 @@ export function stillWaiting(items: Enriched[], nowMs: number): StillWaiting {
     noTime: waiting.filter((r) => r.saidWeeks === null).length,
   };
 }
+
+/* ══════════════════════════════════ v24.1 · replies due ══════════════════════════════════ */
+
+/**
+ * The desk's third card: open queries whose agency's stated reply time is running out. ⚠️ IT IS `stillWaiting`'s OWN
+ * POPULATION — a query still waiting for a first reply — so its past count is S5's "{past} of {waiting}" by
+ * construction. A query with a request, an offer or an ending is not due anything. A waiting query whose agency states
+ * no time is counted (`noStatedTime`) and not drawn.
+ */
+export const DUE_SOON_DAYS = 14;
+export interface DueDot { id: string; days: number; title: string }
+export interface RepliesDue {
+  past: number; soon: number; later: number;
+  /** the soonest due date that has not passed */
+  next: { atMs: number; days: number; agency: string } | null;
+  noStatedTime: number;
+  /** one per waiting query not yet past its time, soonest first */
+  dots: DueDot[];
+}
+export function repliesDue(w: StillWaiting, nowMs: number): RepliesDue {
+  const out: RepliesDue = { past: 0, soon: 0, later: 0, next: null, noStatedTime: w.noTime, dots: [] };
+  for (const r of w.waiting) {
+    if (r.saidWeeks === null || r.pastDays === null) continue;
+    const days = -r.pastDays;
+    if (days < 0) { out.past++; continue; }
+    if (days <= DUE_SOON_DAYS) out.soon++; else out.later++;
+    out.dots.push({ id: r.id, days, title: `${r.agency}: due ${days === 0 ? "today" : `in ${days} ${days === 1 ? "day" : "days"}`}` });
+    const atMs = r.sentMs + r.saidWeeks * 7 * DAY_MS;
+    if (!out.next || days < out.next.days) out.next = { atMs, days, agency: r.agency };
+  }
+  out.dots.sort((a, b) => a.days - b.days);
+  return out;
+}
+/** Where a due dot sits on the desk's strip: the past zone is the left 22%, then eight weeks across the rest. */
+export const DUE_TODAY_AT = 22;
+export const dueLeft = (days: number): number => DUE_TODAY_AT + (Math.min(days, 56) / 56) * (100 - DUE_TODAY_AT);
 
 /* ══════════════════════════════════ what you could expect by now ══════════════════════════════════ */
 
@@ -245,8 +307,8 @@ export function moments(items: Enriched[], m: MonthlySends, nowMs: number = Date
   if (reqs.length) {
     const { e, t } = reqs[0];
     const kind = e.dates.partialRequested !== null && (e.dates.fullRequested === null || e.dates.partialRequested <= e.dates.fullRequested) ? "a partial" : "the full";
-    const replies = items.map((x) => x.replyDays).filter((d): d is number => d !== null);
-    const quick = e.replyDays !== null && replies.length > 0 && e.replyDays === Math.min(...replies);
+    const replies = items.filter(isDatedReply).map((x) => x.replyDays as number);
+    const quick = isDatedReply(e) && replies.length > 0 && e.replyDays === Math.min(...replies);
     const d = after(t);
     out.push({ key: "request", atMs: t, date: dOf(t), title: "First request to read more",
       line: `${agencyOf(e)} asked for ${kind}, ${d} ${d === 1 ? "day" : "days"} after your first query.${quick ? ` It was also your quickest reply, at ${spanProse(e.replyDays as number)}.` : ""}`, days: d });
@@ -312,7 +374,11 @@ export const monthOf = (firstMs: number | null, nowMs: number): number => (first
 /* ══════════════════════════════════ everything the page reads ══════════════════════════════════ */
 
 export interface V24 {
-  outcomes: Outcomes; rate: Rate; keeping: ReplyKeeping; waiting: StillWaiting; expected: ExpectedByNow;
+  outcomes: Outcomes; rate: Rate; keeping: ReplyKeeping;
+  /** v24.1: every reply (a request is a reply), the dated ones, and the bad dates */
+  tally: ReplyTally;
+  /** v24.1: the desk's "Replies due" */
+  due: RepliesDue; waiting: StillWaiting; expected: ExpectedByNow;
   monthly: MonthlySends; moments: Moment[]; bench: Bench[]; month: number; nowMs: number;
   /** the anchors the verdicts were read against */
   anchors: Benchmarks;
@@ -322,8 +388,11 @@ export function buildV24(model: AnalyticsModel, nowMs: number, bench: Benchmarks
   const o = outcomes(model.items);
   const e = expectedByNow(model.items, nowMs);
   const m = monthlySends(model.items, nowMs);
+  /* one population for S5 and the desk's Replies due */
+  const sw = stillWaiting(model.items, nowMs);
   return {
-    outcomes: o, rate: requestRate(o), keeping: replyKeeping(model.items), waiting: stillWaiting(model.items, nowMs), expected: e,
+    outcomes: o, rate: requestRate(o), keeping: replyKeeping(model.items), tally: replyTally(model.items),
+    due: repliesDue(sw, nowMs), waiting: sw, expected: e,
     monthly: m, moments: moments(model.items, m, nowMs), bench: benchmark(o, e, bench), month: monthOf(m.firstMs, nowMs), nowMs, anchors: bench,
   };
 }
@@ -345,7 +414,7 @@ export function ringOf(k: ReplyKeeping): { inside: number; dated: number; pct: n
  */
 export function deskV24(model: AnalyticsModel, v: V24, nowMs: number): DeskCard[] {
   const [sent, rate] = desk(model, windowReplies(model.items), nowMs);
-  const o = v.outcomes, k = v.keeping;
+  const o = v.outcomes;
   const sentCard: DeskCard = {
     ...sent, sec: 2,
     rows: [
@@ -363,28 +432,23 @@ export function deskV24(model: AnalyticsModel, v: V24, nowMs: number): DeskCard[
       { n: o.of.offer, text: `${o.of.offer === 1 ? "offer" : "offers"} so far`, tone: null, zero: "No" },
     ],
   };
-  const dots = model.items
-    .filter((e) => e.replyDays !== null)
-    .map((e) => ({ at: e.replyDays as number, title: `${agencyOf(e)}: ${span(e.replyDays as number)}` }))
-    .sort((a, b) => a.at - b.at);
-  const t = k.typical === null ? null : spanParts(k.typical);
-  const q = k.quickest === null ? null : spanParts(k.quickest);
-  const l = k.longest === null ? null : spanParts(k.longest);
-  const longUnit = (p: { n: number; unit: string }) => (p.unit === "wk" ? "week" : p.unit === "wks" ? "weeks" : p.unit);
-  const waitCard: DeskCard = {
-    key: "wait", title: "Your typical reply time", sec: 3, colour: "#a0633f",
-    stamp: k.replies === 0 ? null : `${k.replies} ${k.replies === 1 ? "reply" : "replies"}`,
-    figure: t === null ? "No replies" : String(t.n),
-    unit: t === null ? null : `${longUnit(t)}${k.replies < THIN_SAMPLE ? `, from ${k.replies} ${k.replies === 1 ? "reply" : "replies"}` : ""}`,
-    population: t === null ? null : k.replies,
-    rows: q && l ? [
-      { n: q.n, text: `${q.unit}, your quickest`, tone: "r" },
-      { n: l.n, text: `${l.unit}, your longest`, tone: null },
-    ] : [],
-    chart: { kind: "dots", dots, typical: k.typical },
-    axis: l === null ? [] : ["0", "Your replies, in weeks", span(k.longest as number)],
+  /* v24.1: card 3 is "Replies due" — open queries' stated reply times running out. The typical reply time stays in S4. */
+  const d = v.due;
+  const big = d.soon >= 1 ? { figure: String(d.soon), unit: "due in the next\ntwo weeks" }
+    : d.next ? { figure: span(d.next.days), unit: "until the next\nis due" }
+    : { figure: "–", unit: "nothing due" };
+  const dueCard: DeskCard = {
+    key: "due", title: "Replies due", sec: 4, colour: "#a0633f",
+    stamp: d.next ? `next ${dShort(d.next.atMs)}` : null,
+    figure: big.figure, unit: big.unit, population: null,
+    rows: [
+      { n: d.past, text: "past their time", tone: "r", zero: "0" },
+      { n: d.later, text: "due later", tone: null, zero: "0" },
+    ],
+    chart: { kind: "due", past: d.past, dots: d.dots.map((x) => ({ left: dueLeft(x.days), title: x.title })) },
+    axis: ["Past", "Next 8 weeks", "8 wks"],
   };
-  return [sentCard, rateCard, waitCard];
+  return [sentCard, rateCard, dueCard];
 }
 
 /* ══════════════════════════════════ the seven questions ══════════════════════════════════ */
@@ -469,9 +533,11 @@ export function heads(v: V24): Head[] {
     }
     s4.push({ t: ". Each row shows what the agent said next to what they actually took." });
   } else {
-    s4.push({ t: k.replies === 0 ? "No agent has replied yet, so there is nothing to set against what they said." : "None of your replies came from an agency that gives a time." });
+    s4.push({ t: v.tally.all === 0 ? "No agent has replied yet, so there is nothing to set against what they said." : k.replies === 0 ? "None of your replies has a reply date, so there is nothing to set against what they said." : "None of your dated replies came from an agency that gives a time." });
   }
   if (k.unplaced > 0 && k.placed > 0) s4.push({ t: ` ${Say(k.unplaced)} ${k.unplaced === 1 ? "reply came from an agency" : "replies came from agencies"} that give${k.unplaced === 1 ? "s" : ""} no time.` });
+  /* v24.1: an answer with no usable reply date (none logged, or a bad one) is counted here and nowhere in the timings */
+  if (v.tally.noDate > 0) s4.push({ t: ` ${Say(v.tally.noDate)} ${v.tally.noDate === 1 ? "reply has" : "replies have"} no reply date and ${v.tally.noDate === 1 ? "is" : "are"} left out.` });
 
   /* S5 */
   const s5: Run[] = [];
@@ -484,10 +550,10 @@ export function heads(v: V24): Head[] {
     { kicker: `Your ${plural(o.sent, "query", "queries")}`, title: QUESTIONS[0], answer: s1 },
     { kicker: `you against other writers · month ${v.month} of querying`, title: QUESTIONS[1], answer: s2 },
     { kicker: first ? `${plural(o.sent, "query", "queries")} since ${MONTHS_LONG[first.getMonth()]} ${first.getFullYear()}` : plural(o.sent, "query", "queries"), title: QUESTIONS[2], answer: s3 },
-    { kicker: `${plural(k.replies, "reply", "replies")} so far`, title: QUESTIONS[3], answer: s4 },
+    { kicker: `${plural(v.tally.all, "reply", "replies")} so far`, title: QUESTIONS[3], answer: s4 },
     { kicker: `${w.waiting.length} waiting · ${w.reading.length} being read`, title: QUESTIONS[4], answer: s5 },
     { kicker: `from ${plural(o.sent, "query", "queries")}`, title: QUESTIONS[5], answer: [{ t: "The firsts and the high points of the campaign so far, in the order they happened. They update as replies come in." }] },
-    { kicker: `${plural(o.sent, "query", "queries")} · ${plural(k.replies, "reply", "replies")}`, title: QUESTIONS[6], answer: [{ t: "Everything on this page comes from what you have logged. Three things worth keeping in mind when you read it." }] },
+    { kicker: `${plural(o.sent, "query", "queries")} · ${plural(v.tally.all, "reply", "replies")}`, title: QUESTIONS[6], answer: [{ t: "Everything on this page comes from what you have logged. Three things worth keeping in mind when you read it." }] },
   ];
 }
 /** "November and June", "May, June and July". */

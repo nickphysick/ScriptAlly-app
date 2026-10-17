@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "B1 three cards",
+  "where": "1512",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "the page publishes the v24 model",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card titles",
+  "where": "1512",
+  "ok": false,
+  "detail": "Queries sent | Asked to read more | Your typical reply time"
+ },
+ {
+  "lock": "B1 card 2's figure is requestRate",
+  "where": "1512",
+  "ok": true,
+  "detail": "41% 21 of 51 vs 41%"
+ },
+ {
+  "lock": "B1 'asked' is no more than requests + offers",
+  "where": "1512",
+  "ok": true,
+  "detail": "21 vs 21+1"
+ },
+ {
+  "lock": "B1 card 3 renders",
+  "where": "1512",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "B1 sent scrolls to S3",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 rate scrolls to S1",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 due scrolls to S5",
+  "where": "1512",
+  "ok": false,
+  "detail": "no such card"
+ },
+ {
+  "lock": "B1 three cards",
+  "where": "1280",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "the page publishes the v24 model",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1 card titles",
+  "where": "1280",
+  "ok": false,
+  "detail": "Queries sent | Asked to read more | Your typical reply time"
+ },
+ {
+  "lock": "B1 card 2's figure is requestRate",
+  "where": "1280",
+  "ok": true,
+  "detail": "41% 21 of 51 vs 41%"
+ },
+ {
+  "lock": "B1 'asked' is no more than requests + offers",
+  "where": "1280",
+  "ok": true,
+  "detail": "21 vs 21+1"
+ },
+ {
+  "lock": "B1 card 3 renders",
+  "where": "1280",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "B1 sent scrolls to S3",
+  "where": "1280",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 rate scrolls to S1",
+  "where": "1280",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1 due scrolls to S5",
+  "where": "1280",
+  "ok": false,
+  "detail": "no such card"
+ }
+]
