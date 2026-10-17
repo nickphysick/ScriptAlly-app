@@ -294,13 +294,8 @@ const Row: React.FC<{
           </>
         )}
       </span>
-      {/* the hover tray: the next step, then Open card, over the query column on hover or keyboard focus */}
-      <span className="clv-rtray" data-cl13="tray">
-        {!tray.ghost && (
-          <TrayBtn primary probe="tray-act" label={tray.label} onPress={() => onAct(tray.act)} />
-        )}
-        <TrayBtn probe="tray-open" label="Open card" onPress={(r) => onOpen(r)} />
-      </span>
+      {/* v18.3.2 A — NOTHING IN THE ROW HIDES ON HOVER: the hover tray over the Query status cell is gone. A row with its
+          peek closed shows no actions; they live on the peek's line (B). */}
       {peek ? (
         <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
       ) : null}
