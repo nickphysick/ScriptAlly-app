@@ -266,6 +266,31 @@
 .td52-dm .td52-dmc b { display: block; margin-bottom: 2px; font: 600 9px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: #a2452a; }
 .td52-dm .td52-dml { all: unset; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 2px; font: inherit !important; }
 
+/* ═════════ §H · FEEL AND GUIDANCE ═════════ */
+/* H.2 — a helpful empty filter */
+.td5-none.td52-none { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font-style: normal !important; color: #1c130f; }
+.td5-none.td52-none b { font: 600 15px/1.4 var(--sp-serif) !important; }
+.td5-none.td52-none span { font: italic 400 15px/1.4 var(--sp-serif) !important; color: var(--td5-ink70); }
+.td5-none.td52-none .td52-nclr {
+  all: unset; box-sizing: border-box; margin-top: 6px; flex-basis: 100%; width: max-content; max-width: max-content; padding: 7px 12px; border-radius: 10px; cursor: pointer;
+  background: #2a3a52; color: #fff; font: 400 14px/1.2 var(--sp-serif) !important;
+}
+.td5-none.td52-none .td52-nclr:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+/* H.3 — Set aside, explained once */
+.td5-sapop .td52-explain { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: #f3efe8; font: 400 13px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.td5-sapop .td52-explain span, .td5-sapop .td52-explain b { font: inherit !important; }
+.td5-sapop .td52-explain b { font-weight: 600 !important; }
+.td5-sapop .td52-explain button { all: unset; flex: none; cursor: pointer; padding: 3px 8px; border-radius: 6px; background: #2a3a52; color: #fff; font: 600 9.5px/1.3 var(--font-mono) !important; letter-spacing: 0.1em; }
+/* H.4 — a save in flight: the foot's buttons dim, "Saving…" in rust mono */
+.td5-cfoot[data-saving] button:disabled { opacity: 0.45; cursor: default; }
+.td5-cfoot .td52-saving { font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.12em; text-transform: uppercase; color: #a2452a; white-space: nowrap; }
+/* H.5 — a visible PINNED label before the pin */
+.td5-root .td5-nav .td52-pinned { flex: none; font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.14em; color: rgba(244, 238, 229, 0.8); white-space: nowrap; }
+/* H.7 — below 1360 the pinned day chip drops its weekday and the trailing words: "15 Oct · 8 OVERDUE" */
+@media (max-width: 1359px) {
+  .td52-pday .td52-pwd, .td52-pday .td52-ptail { display: none; }
+}
+
 /* ═════════ §C · THE SLIDE-OUT CALENDAR (portalled to the body: literals, never `--td5-*`) ═════════ */
 .td52-scrim { position: fixed; inset: 0; z-index: 130; background: rgba(28, 19, 15, 0.42); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .td52-scrim.on { opacity: 1; pointer-events: auto; }

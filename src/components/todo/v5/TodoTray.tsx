@@ -356,7 +356,30 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       onCancel: () => setPending(null),
     };
   }, [queries, flash]);
+  /* ── v5.2 §H.4 · no double saves: one count of desk saves in flight, released when each save SETTLES (success or
+     failure, `finally`) — never on a timer. A ref gates the keys synchronously; the state draws "Saving…". A journey's
+     save happens inside the desk's drawer (its DrawerShell holds its own `busy`); the desk reads that from the slot. ── */
+  const savingRef = useRef(0);
+  const [savingN, setSavingN] = useState(0);
+  const runSave = async <T,>(f: () => Promise<T>): Promise<T> => {
+    savingRef.current++; setSavingN((n) => n + 1);
+    try { return await f(); } finally { savingRef.current--; setSavingN((n) => n - 1); }
+  };
+  const [journeyBusy, setJourneyBusy] = useState(false);
+  const journeyBusyRef = useRef(false);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    const read = () => { const b = !!root.querySelector("[data-td5-slot] .qad-save.busy"); journeyBusyRef.current = b; setJourneyBusy((x) => (x === b ? x : b)); };
+    const mo = new MutationObserver(read);
+    mo.observe(root, { subtree: true, attributes: true, attributeFilter: ["class"], childList: true });
+    return () => mo.disconnect();
+  }, []);
+  const deskSaving = savingN > 0 || journeyBusy;
+  /** a desk write, unless one is already in flight */
+  const guarded = (f: () => Promise<unknown>) => { if (savingRef.current > 0 || journeyBusyRef.current) return; void runSave(f); };
   const act = useCallback((i: TrayItem) => {
+    if (savingRef.current > 0 || journeyBusyRef.current) return;
     const c = i.card;
     if (i.sweep) {
       const group = hkGroups.find((g) => g.rule === (c as BoardCard & { sweepRule?: string }).sweepRule);
@@ -371,7 +394,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     }
     if (c.userTaskId) {
       setPending({ key: i.key, at: Date.now() });
-      void quickDone(c).then((ok) => { if (!ok) setPending(null); });
+      void runSave(() => quickDone(c)).then((ok) => { if (!ok) setPending(null); });
       return;
     }
     if (c.taskType === "data_quality_poor" && i.agent) {
@@ -496,6 +519,29 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [location.pathname, filters.find]);
+
+  /* ── v5.2 §H.1 · rows glide: when the tray's set or order changes (a filter, a search, a sort, a save) a row that stays
+     slides from where it was (280ms) and a new one fades up 6px (240ms). A layout effect, so no frame paints the jump.
+     Reduced motion: none. Positions are in the tray's own content (scroll-independent). ── */
+  const rowTops = useRef(new Map<string, number>());
+  const glideKey = `${trayView}|${visible.map((i) => i.key).join(",")}`;
+  useLayoutEffect(() => {
+    const tray = rootRef.current?.querySelector<HTMLElement>(".td5-tray");
+    if (!tray) return;
+    const tb = tray.getBoundingClientRect();
+    const prev = rowTops.current, next = new Map<string, number>();
+    const still = reduced() || prev.size === 0;
+    for (const r of tray.querySelectorAll<HTMLElement>("[data-td5-row]")) {
+      const k = r.dataset.td5Row!;
+      const top = r.getBoundingClientRect().top - tb.top + tray.scrollTop;
+      next.set(k, top);
+      if (still || typeof r.animate !== "function") continue;
+      const was = prev.get(k);
+      if (was == null) r.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 240, easing: "cubic-bezier(.2,.8,.2,1)" });
+      else if (Math.abs(was - top) > 1) r.animate([{ transform: `translateY(${was - top}px)` }, { transform: "none" }], { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" });
+    }
+    rowTops.current = next;
+  }, [glideKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── v5.1 §J · one screen: the sheet is the scrollport's height, published as --td5-port from the scroller's own
      `clientHeight` (never 100vh — the scroller starts below the shell's bar) ── */
@@ -796,6 +842,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const b = el.getBoundingClientRect();
     setDialMenu({ key: i.key, left: Math.max(8, Math.min(b.left - 150, window.innerWidth - 216)), top: Math.min(b.bottom + 6, window.innerHeight - 260), opener: el });
   };
+  /* v5.2 §H.3 — the explainer, once: GOT IT is stored on the user (todoPrefs.tray.explainedSetAside, one leaf) */
+  const [explainedHere, setExplainedHere] = useState(false);
+  const gotIt = () => { setExplainedHere(true); void db.updateUserPaths({ "todoPrefs.tray.explainedSetAside": true }).catch(() => undefined); };
   const flagKeysFor = (i: TrayItem) => {
     const g = groupOf(i);
     return g ? g.members.filter((m) => m.agentId).map((m) => flagKeyForTask("data_quality_poor", m.agentId!))
@@ -981,7 +1030,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         <TrayCalendar today={calToday} items={calItems} buckets={calBuckets} n={n} filter={calFilter} onFilter={setCalFilter}
           onOpenDrawer={() => setCalDrawer(true)} onSetAside={() => showView("aside")} drawerOpen={calDrawer} sel={calSel} onSel={setCalSel}
           litDay={rowLit} onHoverDay={setDayHover} dragging={!!dragKey}
-          onDropDay={(ymd) => { const it = items.find((x) => x.key === dragKey); setDragKey(null); if (it) void moveTo(it, ymd); }} />
+          onDropDay={(ymd) => { const it = items.find((x) => x.key === dragKey); setDragKey(null); if (it) guarded(() => moveTo(it, ymd)); }} />
       ) : undefined}
     >
       {state === "list" || state === "loading" ? (
@@ -1062,9 +1111,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                       <button type="button" className="td52-pday" data-td52="pin-day" aria-label="Open the calendar" onClick={() => setCalDrawer(true)}>
                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" /><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" /></svg>
                         <span className="td52-pdt">
-                          {dayChip(calToday)}
+                          <span className="td52-pwd">{dayChip(calToday).split(" ")[0]} </span>{shortDay(calToday)}
                           {calBuckets.overdue || calBuckets.today ? (
-                            <>{calBuckets.overdue ? <> · <b>{calBuckets.overdue} OVERDUE</b></> : null}{calBuckets.today ? <> <em>·</em> {calBuckets.today} due today</> : null}</>
+                            <>{calBuckets.overdue ? <> · <b>{calBuckets.overdue} OVERDUE</b></> : null}{calBuckets.today ? <span className={calBuckets.overdue ? "td52-ptail" : undefined}> <em>·</em> {calBuckets.today} due today</span> : null}</>
                           ) : <> · nothing due</>}
                         </span>
                       </button>
@@ -1080,6 +1129,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                     <>
                       {pinned ? null : <span className="td5-keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move<span className="td5-gap" /><kbd>E</kbd> act</span>}
                       {pinned ? <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder="Find a task" pinned /> : null}
+                      {pinned ? <span className="td52-pinned" data-td52="pinned-label">PINNED</span> : null}
                       <PinListButton pinned={pin.full} onToggle={pin.toggle} attrs={{ "data-td52": "pin" }} />
                     </>
                   ) : null}
@@ -1143,7 +1193,15 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                             {shut[gd.id] ? null : <div className="td5-rows">{renderRows(g)}</div>}
                           </div>
                         );
-                      }) : loading ? null : <div className="td5-none">{items.length ? "Nothing matches. Clear the filter to see the rest of your tray." : "Nothing in your tray yet."}</div>}
+                      }) : loading ? null : items.length ? (
+                        /* v5.2 §H.2 — a helpful empty filter: what hides the rows, how many, and the one thing that clears it */
+                        <div className="td5-none td52-none" data-td52="empty-filter">
+                          <b>{filters.find.trim() ? <>Nothing matches “{filters.find.trim()}”.</> : "Nothing matches this filter."}</b>{" "}
+                          <span>{items.length} {items.length === 1 ? "task is" : "tasks are"} hidden by it.</span>
+                          <button type="button" className="td52-nclr" data-td52="empty-clear"
+                            onClick={() => (filters.find.trim() ? setFilters((f) => ({ ...f, find: "" })) : clearAll())}>{filters.find.trim() ? "Clear the search" : "Clear the filter"}</button>
+                        </div>
+                      ) : <div className="td5-none">Nothing in your tray yet.</div>}
                       {loading ? null : <button type="button" className="td5-addrow" data-td5="add-row" onClick={() => openCompose()}>+ Add a task<kbd>N</kbd></button>}
                       </>}
                     </div>
@@ -1205,7 +1263,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                             <div className="td5-stack" aria-hidden="true"><i /><i /></div>
                             <ComposeCard todayYmd={todayYmd} draft={compose.draft} setDraft={(d) => setCompose((c) => (c ? { ...c, draft: d } : c))} edit={compose.edit}
                               queries={queries} agents={agents} manuscripts={manuscripts} userTags={currentUser?.tags ?? []} onCreateTag={(t) => void createTagDef(t)}
-                              onSave={saveCompose} onCancel={closeCompose} stamp={composeStamp} />
+                              onSave={() => (savingRef.current > 0 ? Promise.resolve(false) : runSave(saveCompose))} onCancel={closeCompose} stamp={composeStamp} />
                           </div>
                         ) : deskItem ? (
                           <>
@@ -1222,7 +1280,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                 item={deskItem} facts={deskFacts(deskItem, trayDb, now)} lede={lede(deskItem, trayDb, now)}
                                 stops={stopsFor(deskItem)} pastDays={pastDaysFor(deskItem)} pin={pinFor(deskItem)}
                                 action={startedKey === deskItem.key ? "Carry on" : actionWords(deskItem)} onAct={() => act(deskItem)}
-                                work={working} hostRef={setHostEl}
+                                work={working} hostRef={setHostEl} saving={deskSaving}
                                 asideLabel={deskItem.userTask ? "Move it" : "Set aside"}
                                 banner={(() => { const b = backOf(deskItem); return b ? <div className="td5-asideban" data-kind="back" data-td5="back-banner"><b>Back</b>{b.line}</div> : null; })()}
                                 over={pop && pop.mode !== "change" && !ghost ? (() => {
@@ -1232,8 +1290,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                   return (
                                     <SetAsidePop mode={pop.mode} focus={pop.focus} todayYmd={todayYmd} rules={r} first={first} backLine={backLineFor(deskItem)}
                                       rulePlain={rk ? RULE_PLAIN[rk] : null} deedPlain={deskItem.deed.toLowerCase()}
-                                      onSnooze={(d, y) => void doSnooze(deskItem, d, y)} onDismiss={() => void doDismiss(deskItem)} onRule={() => void doRule(deskItem)}
-                                      onDelete={() => void doDelete(deskItem)} onDoor={(d) => doDoor(deskItem, d)} onClose={() => setPop(null)} opener={deskAsideRef.current} />
+                                      explain={!currentUser?.todoPrefs?.tray?.explainedSetAside && !explainedHere} onExplained={gotIt}
+                                      onSnooze={(d, y) => guarded(() => doSnooze(deskItem, d, y))} onDismiss={() => guarded(() => doDismiss(deskItem))} onRule={() => guarded(() => doRule(deskItem))}
+                                      onDelete={() => guarded(() => doDelete(deskItem))} onDoor={(d) => doDoor(deskItem, d)} onClose={() => setPop(null)} opener={deskAsideRef.current} />
                                   );
                                 })() : clash && clash.key === deskItem.key && parkedHere ? (() => {
                                   const q = queries.find((x) => x.id === clash.req.queryId);
@@ -1285,7 +1344,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           onDoor: () => { setDialMenu(null); doDoor(it, dl?.what === "send-by date" ? "sendby" : "offer"); },
         } : null;
         return <TrayDialMenu left={dialMenu.left} top={dialMenu.top} opener={dialMenu.opener} head={it.userTask ? "MOVE TO" : "SET A NEW DATE"} opts={dialOpts(it)} cant={cant}
-          onPick={(ymd) => void moveTo(it, ymd)} onClose={() => setDialMenu(null)}
+          onPick={(ymd) => guarded(() => moveTo(it, ymd))} onClose={() => setDialMenu(null)}
           onPickCal={() => { setDialMenu(null); const sc = scroller(); if (sc) sc.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" }); flash("Drag the row onto a day in the calendar."); }} />;
       })() : null}
       <TrayCalDrawer open={calDrawer} today={calToday} items={calItems} n={n} sel={calSel} onSel={setCalSel}

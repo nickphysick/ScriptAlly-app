@@ -921,3 +921,136 @@ test("TD52 G3 — the bulk close is skipped under the pack's Stop: no select UI"
   }
   L.done(6);
 });
+
+/* ───────────────────────── H · feel and guidance ───────────────────────── */
+test("TD52 H1 — rows glide (none under reduced motion); a helpful empty filter; the explainer once; one save per double E; PINNED", async ({ page, browser }) => {
+  const L = new Ledger("H1");
+  const vp = SIZES[0];
+  await openTodo(page, vp, { motion: true });
+  /* (a) filtering animates the rows that stay or arrive */
+  const anim = async () => { await page.locator('[data-todo-v5] [data-td5="find"] input').first().fill("Send"); await page.waitForTimeout(60);
+    const n = await page.evaluate(() => (window as unknown as W).__td5().qa("[data-td5-row]").reduce((s, r) => s + r.getAnimations().length, 0));
+    await page.locator('[data-todo-v5] [data-td5="find"] input').first().fill(""); await page.waitForTimeout(400); return n; };
+  const moving = await anim();
+  L.check("filtering animates rows (Web Animations present)", moving > 0, String(moving));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const still = await anim();
+  L.check("reduced motion: no row animation", still === 0, String(still));
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  /* (b) an all-hiding search: the empty line, and its button restores the rows */
+  const all = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').length);
+  await page.locator('[data-todo-v5] [data-td5="find"] input').first().fill("zzqqxx-nothing");
+  await page.waitForTimeout(400);
+  const e = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); const b = q('[data-td52="empty-filter"]'); return b ? { text: (b.textContent ?? "").replace(/\s+/g, " ").trim(), btn: q('[data-td52="empty-clear"]')?.textContent } : null; });
+  const hid = Number(e?.text.match(/ (\d+) tasks? (?:is|are) hidden by it\./)?.[1] ?? NaN);
+  L.check("the empty line names the search and how many it hides", !!e && e.text.startsWith("Nothing matches “zzqqxx-nothing”.") && Number.isFinite(hid), JSON.stringify(e));
+  L.check("…with Clear the search", e?.btn === "Clear the search", String(e?.btn));
+  await page.locator('[data-todo-v5] [data-td52="empty-clear"]').click();
+  await page.waitForTimeout(400);
+  const back = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').length);
+  /* the account is shared, so the figure is read off the same moment as the rows it counts (not one read earlier) */
+  L.check("the button restores the rows, as many as it said it hid", back === hid && back > 0, `${back} vs ${hid} (earlier ${all})`);
+  /* (c) the explainer: once, and never after GOT IT (stored on the user, so a reload and a second browser agree) */
+  const { db, uid } = await harnessDb();
+  const ub = await guardDocs([""]);
+  const prefs = (ub.get("") as { todoPrefs?: Record<string, unknown> } | null)?.todoPrefs ?? {};
+  await setDoc(doc(db, "users", uid), { todoPrefs: { ...prefs, tray: {} } }, { merge: true });
+  const openAside = async (p: import("@playwright/test").Page) => {
+    await p.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').find((r) => r.dataset.taskType && r.dataset.taskType !== "own")?.click());
+    await p.waitForTimeout(400);
+    await p.locator('[data-todo-v5] [data-td5="desk-aside"]').first().click();
+    await p.waitForTimeout(400);
+    return p.locator('[data-td5="aside-pop"] [data-td52="explain"]').count();
+  };
+  await openTodo(page, vp);
+  L.check("the explainer shows on the first Set aside", (await openAside(page)) === 1, "");
+  await page.locator('[data-td5="aside-pop"] [data-td52="got-it"]').click();
+  await page.waitForTimeout(300);
+  L.check("GOT IT takes it away", (await page.locator('[data-td5="aside-pop"] [data-td52="explain"]').count()) === 0, "");
+  await expect.poll(async () => ((await snapDocs([""])).get("") as { todoPrefs?: { tray?: { explainedSetAside?: boolean } } })?.todoPrefs?.tray?.explainedSetAside, { timeout: 10_000 }).toBe(true);
+  L.check("…stored on the user", true, "");
+  await page.keyboard.press("Escape");
+  await openTodo(page, vp);
+  L.check("after a reload it never shows", (await openAside(page)) === 0, "");
+  const ctx2 = await browser.newContext();
+  const p2 = await ctx2.newPage();
+  await openTodo(p2, vp);
+  L.check("…nor in a second browser", (await openAside(p2)) === 0, "");
+  await ctx2.close();
+  await page.keyboard.press("Escape");
+  /* (d) one save per double E, released when the save SETTLES (never on a timer): offline, the tick's write cannot
+     settle, so the desk must still say Saving… after 2s and a second E must start nothing; online, one slip lands */
+  const id = `zz-td52-save-${Date.now().toString(36)}`;
+  await guardDocs([`tasks/${id}`]);
+  await setDoc(doc(db, "users", uid, "tasks", id), { id, userId: uid, text: "Zz td52 save probe", done: false, dueDate: todayYmd(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  await openTodo(page, vp);
+  const key = await page.evaluate((id) => (window as unknown as W).__td5().qa('[data-td5="row"]').find((r) => r.dataset.td5Row?.includes(id))?.dataset.td5Row ?? null, id);
+  L.check("the probe task is in the tray", !!key, String(key));
+  if (key) {
+    await rowLoc(page, key).click();
+    await page.waitForTimeout(400);
+    const slips0 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.context().setOffline(true);
+    try {
+      await page.keyboard.press("e");
+      await page.waitForTimeout(2000);
+      const mid = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); return { saving: !!q('[data-td52="saving"]'), off: (q('[data-td5="act"]') as HTMLButtonElement | null)?.disabled ?? null }; });
+      L.check("2s into a save that has not settled: still Saving…, the buttons disabled", mid.saving && mid.off === true, JSON.stringify(mid));
+      await page.keyboard.press("e");
+      await page.waitForTimeout(400);
+    } finally {
+      await page.context().setOffline(false);
+    }
+    await expect.poll(() => page.locator('[data-todo-v5] [data-td52="saving"]').count(), { timeout: 20_000 }).toBe(0);
+    await page.waitForTimeout(1500);
+    const slips1 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+    L.check("released once it settled", true, "");
+    L.check("a double E started one save (one slip)", slips1 === slips0 + 1, `${slips0} → ${slips1}`);
+  }
+  /* (e) PINNED shows only while pinned */
+  await openTodo(page, vp);
+  L.check("unpinned: no PINNED", (await page.locator('[data-todo-v5] [data-td52="pinned-label"]').count()) === 0, "");
+  await page.keyboard.press("f"); await page.waitForTimeout(800);
+  const pl = await page.evaluate(() => { const e = (window as unknown as W).__td5().q('[data-td52="pinned-label"]'); const b = (window as unknown as W).__td5().q('[data-td52="pin"]'); return e && b ? { t: e.textContent, before: e.getBoundingClientRect().right <= b.getBoundingClientRect().left } : null; });
+  L.check("pinned: PINNED, just before the pin", !!pl && pl.t === "PINNED" && pl.before, JSON.stringify(pl));
+  await page.keyboard.press("f"); await page.waitForTimeout(600);
+  await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
+  L.done(15);
+});
+
+test("TD52 H2 — one Esc order: the dial menu, the drawer, Find's text (v5.1's layer), the pin — one each", async ({ page }) => {
+  const L = new Ledger("H2");
+  await openTodo(page, SIZES[0]);
+  await mutate(page, "H2");
+  try {
+    await page.keyboard.press("f"); await page.waitForTimeout(800);
+    await page.locator('[data-todo-v5] [data-td52="pin-find"] input').fill("a");
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator('[data-todo-v5] [data-td52="pin-day"]').click(); await page.waitForTimeout(600);
+    /* the dial menu over the drawer: a click dispatched on a movable dial (the scrim takes pointer presses) */
+    await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"] .td52-press')[0]?.click());
+    await page.waitForTimeout(400);
+    const st = () => page.evaluate(() => ({
+      menu: !!document.querySelector('[data-td52="dial-menu"]'), drawer: !!document.querySelector('[data-td52="drawer"].on'),
+      find: ((window as unknown as W).__td5().q('[data-td5="find"] input') as HTMLInputElement | null)?.value ?? "",
+      pin: (window as unknown as W).__td5().q('[data-td52="pin"]')?.getAttribute("aria-pressed"),
+    }));
+    const s0 = await st();
+    L.check("all four open (menu, drawer, Find's text, pin)", s0.menu && s0.drawer && s0.find === "a" && s0.pin === "true", JSON.stringify(s0));
+    const want = [
+      { menu: false, drawer: true, find: "a", pin: "true" },
+      { menu: false, drawer: false, find: "a", pin: "true" },
+      { menu: false, drawer: false, find: "", pin: "true" },
+      { menu: false, drawer: false, find: "", pin: "false" },
+    ];
+    for (let i = 0; i < want.length; i++) {
+      await page.keyboard.press("Escape"); await page.waitForTimeout(700);
+      const s = await st();
+      L.check(`Esc ${i + 1} closes one thing`, JSON.stringify(s) === JSON.stringify(want[i]), JSON.stringify(s));
+    }
+  } finally {
+    await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
+  }
+  L.done(5);
+});

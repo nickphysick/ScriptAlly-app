@@ -92,13 +92,15 @@ export interface DeskCardProps {
   banner?: React.ReactNode;
   /** v5.1 §I.5 — a set-aside card: its head band desaturated */
   asided?: boolean;
+  /** v5.2 §H.4 — a desk save is in flight: the buttons are disabled and "Saving…" shows at the foot */
+  saving?: boolean;
   /** v5.1 — the foot replaced (the Set aside desk's own buttons) */
   foot?: React.ReactNode;
   /** v5.1 — something that sits over the card above its foot: the set-aside popover, the clash */
   over?: React.ReactNode;
 }
 
-export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase, work = false, hostRef, asideLabel = "Set aside", onEdit = null, banner = null, asided = false, foot = null, over = null }) => {
+export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase, work = false, hostRef, asideLabel = "Set aside", onEdit = null, banner = null, asided = false, foot = null, over = null, saving = false }) => {
   const g = item.group;
   return (
     <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}
@@ -160,12 +162,13 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
       </div>
       {over}
       {foot ?? (
-        <div className="td5-cfoot" data-td5="card-foot">
-          <button type="button" className="td5-b1" data-td5="act" onClick={onAct}>{action}</button>
-          {onAside ? <button type="button" className="td5-b2" data-td5="desk-aside" ref={asideRef} onClick={onAside}>{asideLabel}</button> : null}
-          {onOpenQuery ? <button type="button" className="td5-lnk" data-td5="open-query" onClick={onOpenQuery}>Open the query</button> : null}
-          {onEdit ? <button type="button" className="td5-lnk" data-td5="edit" onClick={onEdit}>Edit</button> : null}
+        <div className="td5-cfoot" data-td5="card-foot" data-saving={saving ? "" : undefined}>
+          <button type="button" className="td5-b1" data-td5="act" disabled={saving} onClick={onAct}>{action}</button>
+          {onAside ? <button type="button" className="td5-b2" data-td5="desk-aside" ref={asideRef} disabled={saving} onClick={onAside}>{asideLabel}</button> : null}
+          {onOpenQuery ? <button type="button" className="td5-lnk" data-td5="open-query" disabled={saving} onClick={onOpenQuery}>Open the query</button> : null}
+          {onEdit ? <button type="button" className="td5-lnk" data-td5="edit" disabled={saving} onClick={onEdit}>Edit</button> : null}
           <span className="td5-sp" />
+          {saving ? <span className="td52-saving" data-td52="saving" role="status">Saving…</span> : null}
           <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
         </div>
       )}
