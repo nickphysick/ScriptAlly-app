@@ -36,7 +36,9 @@ export const TrayFilterRow: React.FC<{
   hasPin: (i: TrayItem) => boolean;
   findRef: React.Ref<HTMLInputElement>;
   disabled?: boolean;
-}> = ({ filters, setFilters, all, countFor, hasPin, findRef, disabled }) => {
+  /** v5.2 §A — a calendar filter on: the Due pill shows it as its chip ("Overdue ×", "Due: 23 Oct ×") and × clears it */
+  calChip?: { label: string; onClear: () => void } | null;
+}> = ({ filters, setFilters, all, countFor, hasPin, findRef, disabled, calChip }) => {
   const [open, setOpen] = useState<PanelId | null>(null);
   const anchors = useRef<Partial<Record<PanelId, HTMLButtonElement | null>>>({});
   const panelRef = useRef<HTMLDivElement>(null);
@@ -162,7 +164,12 @@ export const TrayFilterRow: React.FC<{
       <div className="td5-pills" data-td5="pills">
         {pill("type", "Task type", filters.type ? typeLabel(filters.type) : null, () => setFilters({ ...filters, type: null }))}
         {pill("agent", "Agent", filters.agentId ? (agents.find((a) => a.id === filters.agentId)?.name ?? "Agent") : null, () => setFilters({ ...filters, agentId: null }))}
-        {pill("due", "Due", filters.due ? DUE_OPTS.find((d) => d.id === filters.due)!.label : null, () => setFilters({ ...filters, due: null }))}
+        {calChip ? (
+          <span className="td5-fpw on" data-td5-pill="due" data-td52="due-chip">
+            <button type="button" className="td5-fp" ref={(el) => { anchors.current.due = el; }} aria-pressed="true" disabled={disabled} onClick={calChip.onClear}><span>{calChip.label}</span></button>
+            <button type="button" className="td5-fpx" aria-label={`Clear ${calChip.label}`} onClick={calChip.onClear}><X /></button>
+          </span>
+        ) : pill("due", "Due", filters.due ? DUE_OPTS.find((d) => d.id === filters.due)!.label : null, () => setFilters({ ...filters, due: null }))}
         {pill("more", "More filters", moreOn ? "More filters" : null, () => setFilters({ ...filters, linked: false, pinned: false }), moreOn ? <i className="td5-fpn">{moreOn} on</i> : null)}
       </div>
       {open && typeof document !== "undefined" ? createPortal(

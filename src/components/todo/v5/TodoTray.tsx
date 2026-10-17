@@ -65,6 +65,8 @@ import { useTagWrites } from "../useTagWrites";
 import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
 import { TrayHeader } from "./TrayHeader";
+import { TrayCalendar, shortDay } from "./TrayCalendar";
+import { calFilterLabel, calendarItems, dayBuckets, londonToday, passesCalFilter, type CalFilter } from "../../../lib/trayCalendar";
 import { TrayFilterRow } from "./TrayFilters";
 import { DeskCard, Disc, DoneToday, DueDial } from "./TrayDesk";
 import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
@@ -73,6 +75,7 @@ import { trayReviewState } from "../../../lib/todoReviewAid";
 import { QueryStatus, type TaskFlag, type UserTask } from "../../../types";
 import "../v2/todoV2.css";
 import "./todoV5.css";
+import "./todoV52.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const SORT_KEY = "sa.todoTray.sort";
@@ -132,6 +135,18 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups }),
     [queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups]);
   const items = useMemo(() => live.map((c) => trayItem(c, trayDb, now)), [live, trayDb, now]);
+  /* ── v5.2 §A/§B — the calendar: one derivation (lib/trayCalendar), read by the card, the drawer, the h1 and the chip ── */
+  const calToday = londonToday(now);
+  const calItems = useMemo(() => {
+    const byKey = new Map(items.map((i) => [i.key, i]));
+    return calendarItems({ cards: live, db: trayDb, flags: taskFlags, nowMs: now,
+      words: (c) => { const i = byKey.get(c.key); return { deed: i?.deed ?? c.title, who: i?.who ?? c.who }; } });
+  }, [live, items, trayDb, taskFlags, now]);
+  const calBuckets = useMemo(() => dayBuckets(calItems, live, calToday), [calItems, live, calToday]);
+  const calYmdOf = useMemo(() => new Map(calItems.filter((x) => x.surfaced && !x.snoozed && x.ymd).map((x) => [x.key, x.ymd as string])), [calItems]);
+  const [calFilter, setCalFilter] = useState<CalFilter | null>(null);
+  const [calSel, setCalSel] = useState<string>(() => londonToday(Date.now()));
+  const [calDrawer, setCalDrawer] = useState(false);
   const counts = useMemo(() => kindCounts(live), [live]);
 
   /* the manuscript in scope: the shared key, as the Contact list reads it */
@@ -173,11 +188,14 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const [focusMode, setFocusMode] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
-  const visible = useMemo(() => items.filter((i) => matches(i, filters, hasPin)), [items, filters, hasPin]);
+  const visible = useMemo(() => items.filter((i) => matches(i, filters, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)),
+    [items, filters, hasPin, calFilter, calItems, calToday]);
   const groups = useMemo(() => trayOrder(visible, sort), [visible, sort]);
   const ordered = useMemo(() => groups.flatMap((g) => g.items), [groups]);
   const walk = useMemo(() => groups.flatMap((g) => (shut[g.group.id] ? [] : g.items)), [groups, shut]);
-  const countFor = useCallback((f: TrayFilters) => items.filter((i) => matches(i, f, hasPin)).length, [items, hasPin]);
+  const countFor = useCallback((f: TrayFilters) => items.filter((i) => matches(i, f, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)).length, [items, hasPin, calFilter, calItems, calToday]);
+  const anyFilter = filtersOn(filters) || !!calFilter;
+  const clearAll = () => { setFilters(NO_FILTERS); setCalFilter(null); };
 
   /* ── selection ── */
   const [selKey, setSelKey] = useState<string | null>(null);
@@ -857,9 +875,15 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       cleared={week.length} ringTitle={undated}
       onRing={() => sheetRef.current?.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" })}
       onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => showView("aside")}
+      calFiltered={!!calFilter}
+      calendar={state === "list" ? (
+        <TrayCalendar today={calToday} items={calItems} buckets={calBuckets} n={n} filter={calFilter} onFilter={setCalFilter}
+          onOpenDrawer={() => setCalDrawer(true)} onSetAside={() => showView("aside")} drawerOpen={calDrawer} sel={calSel} onSel={setCalSel} />
+      ) : undefined}
     >
       {state === "list" || state === "loading" ? (
-        <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading} />
+        <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading}
+          calChip={calFilter ? { label: calFilterLabel(calFilter, shortDay), onClear: () => setCalFilter(null) } : null} />
       ) : null}
     </TrayHeader>
   );
@@ -877,7 +901,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       return (
         <button key={i.key} type="button" className="td5-row2" data-td5-row={i.key} data-td5="row" data-group={i.group.id} data-bucket={i.bucket}
           data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
-          data-query={i.query?.id} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
+          data-query={i.query?.id} data-cal-ymd={calYmdOf.get(i.key)} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
           onClick={() => selectRow(i.key)}>
           <Disc item={i} />
           <span className="td5-tx"><b>{i.deed}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small>{i.sub}</small></span>
@@ -905,14 +929,14 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                     </p>
                   ) : (
                     <div className="td5-say" data-td5="say" style={{ position: "relative", overflow: "visible" }}>
-                      {filtersOn(filters) ? (
-                        <>Showing <b>{visible.length}</b> of <b>{items.length}</b><button type="button" className="td5-clr" data-td5="clear-all" onClick={() => setFilters(NO_FILTERS)}>Clear all</button></>
+                      {anyFilter ? (
+                        <>Showing <b>{visible.length}</b> of <b>{items.length}</b><button type="button" className="td5-clr" data-td5="clear-all" onClick={clearAll}>Clear all</button></>
                       ) : (
                         <>Working through <b>{visible.length} {visible.length === 1 ? "task" : "tasks"}</b>,{" "}
                           <button type="button" className="td5-sortb" data-td5="sort" aria-haspopup="menu" aria-expanded={sortOpen} onClick={() => setSortOpen((o) => !o)}>{SORT_LABEL[sort]}</button>
                         </>
                       )}
-                      {sortOpen && !filtersOn(filters) ? (
+                      {sortOpen && !anyFilter ? (
                         <div className="td5-sortmenu" role="menu" onMouseLeave={() => setSortOpen(false)}>
                           {(Object.keys(SORT_LABEL) as TraySort[]).map((k) => (
                             <button key={k} type="button" role="menuitemradio" aria-checked={sort === k} onClick={() => { setSort(k); setSortOpen(false); }}>{SORT_LABEL[k]}</button>

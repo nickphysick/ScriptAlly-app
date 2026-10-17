@@ -69,8 +69,14 @@ export const TrayHeader: React.FC<{
   asideN: number;
   asideRef: React.Ref<HTMLButtonElement>;
   onAside: () => void;
+  /** v5.2 §A — on the populated page the card's contents are the calendar (TrayCalendar); caught up and empty keep v5.1's */
+  calendar?: React.ReactNode;
+  /** a calendar filter is on: the card's other rows fade */
+  calFiltered?: boolean;
+  /** v5.2 §F.1 — the populated title: "{o} overdue · {t} due today" (Part B's figures) */
+  urgent?: { overdue: number; today: number } | null;
   children?: React.ReactNode;
-}> = ({ loading, n, caught, msTitle, counts, active, onKind, cleared, onRing, ringTitle, onAdd, asideN, asideRef, onAside, children }) => {
+}> = ({ loading, n, caught, msTitle, counts, active, onKind, cleared, onRing, ringTitle, onAdd, asideN, asideRef, onAside, calendar, calFiltered, urgent, children }) => {
   const left = n ?? 0;
   return (
     <header className="td5-hd" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
@@ -94,6 +100,9 @@ export const TrayHeader: React.FC<{
           <button type="button" className="td5-b1" data-td5="add" disabled={loading} onClick={onAdd}>+ Add a task</button>
           <button type="button" className="td5-b2" data-td5="aside" ref={asideRef} disabled={loading} onClick={onAside}>{asideN ? `Set aside · ${asideN}` : "Set aside"}</button>
         </div>
+        {calendar ? (
+          <div className="td5-card td52-cal" data-td5="card" data-td52="cal" data-filtered={calFiltered ? "" : undefined}>{calendar}</div>
+        ) : (
         <div className="td5-card" data-td5="card" data-on={active ?? undefined}>
           <div className="td5-cnt" data-td5="counts" role="group" aria-label="What is in your tray">
             <div className="td5-bar" data-td5="card-bar" aria-hidden="true">
@@ -121,6 +130,7 @@ export const TrayHeader: React.FC<{
             </span>
           </button>
         </div>
+        )}
       </div>
       {children}
     </header>

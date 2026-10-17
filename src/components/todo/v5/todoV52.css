@@ -1,0 +1,184 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v5.2 (design-refs/todo-list-v5-2/todo-list-v5-2.html) — the calendar card, the slide-out calendar, the pin,
+ * the improvements and the mid-task signals, ported from the reference's v5.2 layers at their COMPUTED values (the
+ * later blocks win, as in the reference). Every class is `td52-`; every token v5.1's `--td5-*`.
+ *
+ * ⚠️ THE CARD'S SIZE RULES KEY OFF ITS OWN HEIGHT (`@container calc (max-height: 185px)`), as the reference's do. The
+ *    header row is 179px at both sizes here, so they apply at both. The reference's 185 also stood in for "the 1280
+ *    card", which hides the rows' hints and " · n DAYS LATE"; those two rules key off the card's WIDTH instead
+ *    (404 compact, 496 full), so 1512 shows them and 1280 does not, as the reference screens do.
+ * ⚠️ brand.tsx forces h1–h3 and names spans as the body sans: faces carry two classes and `!important`.
+ */
+
+/* ═════════ §A · THE CALENDAR CARD ═════════ */
+.td5-hd .td5-card.td52-cal {
+  --cal-w: 404px; --cal-dayw: 158px; --cal-hair: rgba(28, 19, 15, 0.08); --cal-ink45: rgba(28, 19, 15, 0.62);
+  display: block; width: var(--cal-w); align-self: stretch; overflow: hidden;
+  contain: size; container-type: size; container-name: calc;
+}
+.ws-app.sheet-wide .td5-hd .td5-card.td52-cal { --cal-w: 496px; --cal-dayw: 212px; }
+.td52-calin { display: grid; grid-template-columns: var(--cal-dayw) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; }
+
+/* the day panel */
+.td52-day { box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 14px 18px 12px 20px; border-right: 1px solid var(--cal-hair); }
+.td52-day .td52-ey { font: 500 10px/1.2 var(--font-mono) !important; letter-spacing: 0.2em; color: #a2452a; white-space: nowrap; }
+.td52-day .td52-ey.past { color: var(--cal-ink45); }
+.td52-day .td52-dhd { display: flex; align-items: center; gap: 12px; margin: 4px 0 8px; }
+.td52-day .td52-num { font: 400 48px/1 var(--sp-type) !important; letter-spacing: -0.03em; padding-top: 2px; color: var(--td5-ink); }
+.td52-day .td52-num span { font: inherit !important; }
+.td52-day .td52-roll { display: inline-block; overflow: visible; vertical-align: top; }
+.td52-day .td52-roll > span { display: inline-block; }
+.td52-day .td52-roll.up > span { animation: td52Up 0.3s cubic-bezier(.2, .8, .3, 1); }
+.td52-day .td52-roll.dn > span { animation: td52Dn 0.3s cubic-bezier(.2, .8, .3, 1); }
+@keyframes td52Up { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes td52Dn { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.td52-day .td52-wd { font: 400 15px/1.15 var(--sp-type) !important; color: var(--td5-ink); padding: 0; }
+.ws-app:not(.sheet-wide) .td52-day .td52-wd { font-size: 14px !important; }
+.td52-day .td52-wd small { display: block; margin-top: 2px; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--cal-ink45); }
+.td52-day .td52-rows { display: flex; flex-direction: column; border-top: 1px solid var(--cal-hair); }
+.td52-day .td52-rw {
+  all: unset; box-sizing: border-box; display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; align-content: center;
+  height: 22px; padding: 0 6px; border-bottom: 1px solid var(--cal-hair); cursor: pointer; white-space: nowrap; color: var(--td5-ink);
+  font: 400 14px/1 var(--sp-serif) !important; transition: opacity 0.14s ease;
+}
+.td52-day .td52-rw b { font: 400 17px/1 var(--sp-type) !important; }
+/* ⚠️ the label's box holds its line: at line-height 1 Source Serif's content area (≈1.4em) spills past the span and the row (A2) */
+.td52-day .td52-rw .td52-lb { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; font: inherit !important; line-height: 1.4 !important; }
+.td52-day .td52-rw .td52-hn { font: 500 9px/1 var(--font-mono) !important; letter-spacing: 0.06em; color: var(--cal-ink45); white-space: nowrap; padding-left: 6px; }
+.td52-day .td52-rw:hover { background: rgba(28, 19, 15, 0.05); }
+.td52-day .td52-rw:focus-visible { outline: 2px solid var(--td5-navy); outline-offset: -2px; }
+.td52-day .td52-rw.od b { color: #a2452a; }
+.td52-day .td52-rw.od .td52-hn { color: #a2452a; opacity: 0.8; }
+.td52-day .td52-rw.z { opacity: 0.35; cursor: default; pointer-events: none; }
+.td52-day .td52-rw[aria-pressed="true"] .td52-lb { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.td52-day .td52-sw { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--td5-ink); }
+.td52-day .td52-sw.y { background: #a2452a; }
+.td52-day .td52-sw.s { background: rgba(28, 19, 15, 0.38); }
+.td52-day .td52-sw.h { background: transparent; box-shadow: inset 0 0 0 1.3px var(--td5-ink); }
+.td52-day .td52-sw.faint { opacity: 0.45; }
+.td52-day .td52-rw--back .td52-lb { color: var(--cal-ink45); font-style: italic !important; }
+/* a calendar filter on: the other rows fade */
+.td5-card.td52-cal[data-filtered] .td52-rw[aria-pressed="false"]:not(.z), .td5-card.td52-cal[data-filtered] .td52-mix[aria-pressed="false"] { opacity: 0.32; }
+.td52-day .td52-mix {
+  all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: calc(100% + 8px); margin: auto -4px 0;
+  padding: 3px 4px; border-radius: 6px; cursor: pointer; transition: opacity 0.14s ease;
+}
+.td52-day .td52-mix:hover { background: rgba(28, 19, 15, 0.05); }
+.td52-day .td52-mix:focus-visible { outline: 2px solid var(--td5-navy); outline-offset: -2px; }
+.td52-day .td52-mix[aria-pressed="true"] .td52-tx { text-decoration: underline; text-underline-offset: 3px; }
+.td52-day .td52-bar { flex: 1; display: flex; gap: 2px; height: 6px; }
+.td52-day .td52-bar i { display: block; height: 6px; align-self: center; border-radius: 2px; min-width: 3px; }
+.td52-day .td52-bar .o { background: #a2452a; }
+.td52-day .td52-bar .t { background: var(--td5-ink); }
+.td52-day .td52-bar .l { background: #c9ced8; }
+.td52-day .td52-bar .u { background: rgba(28, 19, 15, 0.12); }
+.td52-day .td52-tx { font: 500 9px/1.2 var(--font-mono) !important; letter-spacing: 0.06em; color: var(--cal-ink45); white-space: nowrap; }
+.td52-day .td52-lab { margin: 0 0 3px; font: 600 9px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; color: var(--cal-ink45); white-space: nowrap; }
+.td52-day .td52-lab.od { color: #a2452a; }
+.td52-day .td52-lab span { font: inherit !important; }
+.td52-day .td52-note { margin-top: 4px; font: italic 400 14px/1.35 var(--sp-serif) !important; color: var(--cal-ink45); }
+.td52-day .td52-ft { margin-top: auto; white-space: nowrap; }
+.td52-day .td52-ftl {
+  all: unset; box-sizing: border-box; display: inline-flex; align-items: center; height: 15px; cursor: pointer;
+  font: 500 9px/1.4 var(--font-mono) !important; letter-spacing: 0.04em; color: #2a3a52; border-bottom: 1px dotted #2a3a52;
+}
+
+/* the month */
+.td52-mon { box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 14px 16px 12px 14px; }
+.td52-mon .td52-mh { display: flex; align-items: center; gap: 4px; height: 26px; margin-bottom: 4px; }
+.td52-mon .td52-mt { margin-right: auto; font: 400 16px/1.3 var(--sp-type) !important; white-space: nowrap; color: var(--td5-ink); }
+.td52-mon .td52-nb {
+  all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); cursor: pointer; color: var(--td5-ink); font: 400 12px/1 var(--sp-serif) !important;
+}
+.td52-mon .td52-nb:hover { background: rgba(28, 19, 15, 0.05); }
+.td52-mon .td52-nb.sq { border-radius: 6px; }
+.td52-mon .td52-nb svg { width: 11px; height: 11px; }
+.td52-mon .td52-nb:focus-visible, .td52-mon .td52-tb:focus-visible { outline: 2px solid var(--td5-navy); outline-offset: 1px; }
+.td52-mon .td52-tb {
+  all: unset; box-sizing: border-box; display: inline-flex; align-items: center; height: 24px; padding: 0 7px; border-radius: 11px; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); font: 500 8.5px/1 var(--font-mono) !important; letter-spacing: 0.12em; color: var(--td5-ink);
+}
+.td52-mon .td52-tb.hide { display: none; }
+.td52-mon .td52-g { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: 16px; grid-auto-rows: minmax(0, 1fr); gap: 3px 4px; min-height: 0; }
+.td52-mon .td52-gr { display: contents; }
+.td52-mon .td52-w { font: 500 9px/16px var(--font-mono) !important; letter-spacing: 0.1em; text-align: center; color: var(--cal-ink45); }
+.td52-mon .td52-c {
+  all: unset; box-sizing: border-box; position: relative; display: block; min-height: 0; border-radius: 7px; cursor: pointer; text-align: center;
+  color: var(--td5-ink); font: 500 12px/1 var(--font-mono) !important;
+}
+.td52-mon .td52-c .td52-cn { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); line-height: 1; font: inherit !important; color: inherit; }
+.td52-mon .td52-c.m .td52-cn { transform: translate(-4px, -50%); }
+.td52-mon .td52-c .td52-tk { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+.td52-mon .td52-c .td52-tk i { display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--td5-ink); }
+.td52-mon .td52-c .td52-tk i.y { background: #a2452a; }
+.td52-mon .td52-c .td52-tk i.s { background: rgba(28, 19, 15, 0.38); }
+.td52-mon .td52-c .td52-tk i.h { background: transparent; box-shadow: inset 0 0 0 1.3px var(--td5-ink); }
+.td52-mon .td52-c .td52-tk i.faint { opacity: 0.45; }
+.td52-mon .td52-c:hover { background: rgba(28, 19, 15, 0.06); }
+.td52-mon .td52-c:focus-visible { outline: 2px solid var(--td5-navy); outline-offset: 0; }
+.td52-mon .td52-c.om { opacity: 0.3; }
+.td52-mon .td52-c.past { color: rgba(28, 19, 15, 0.42); }
+.td52-mon .td52-c.wk { color: rgba(28, 19, 15, 0.62); }
+.td52-mon .td52-c.wk.past { color: rgba(28, 19, 15, 0.36); }
+.td52-mon .td52-c.open:not(.sel) .td52-cn { color: #a2452a; }
+.td52-mon .td52-c.today { box-shadow: inset 0 0 0 1.5px #2d3a50; }
+.td52-mon .td52-c.sel { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.td52-mon .td52-c.sel.today { outline: 1.5px solid #2a3a52; outline-offset: 1px; }
+.td52-mon .td52-c.sel .td52-tk i { background: #f4eee5; }
+.td52-mon .td52-c.sel .td52-tk i.y { background: #e7a184; }
+.td52-mon .td52-c.sel .td52-tk i.s { background: rgba(255, 255, 255, 0.55); }
+.td52-mon .td52-c.sel .td52-tk i.h { background: transparent; box-shadow: inset 0 0 0 1.3px #fff; }
+/* §G.1 — a hovered row lights its day; §G.2 — the drop target fills navy */
+.td52-mon .td52-c.lit:not(.sel) { background: #f6e2d8; box-shadow: inset 0 0 0 1.5px #a2452a; }
+.td52-mon .td52-c.drop { background: #2a3a52 !important; color: #f4eee5; }
+
+/* the card's own tight rules: its height */
+@container calc (max-height: 185px) {
+  /* ⚠️ "Consider closing" with its count and swatch must fit the 158 column without an ellipsis (the pack's rule; the
+     reference ellipsises): the compact panel's side padding and the rows' columns are tighter than the reference's */
+  .td52-day { padding: 12px 10px 10px 12px; }
+  .td52-day .td52-rw { grid-template-columns: 20px minmax(0, 1fr) auto; padding: 0 2px; }
+  .td52-day .td52-rw .td52-lb { gap: 4px; }
+  .td52-day .td52-num { font-size: 40px !important; }
+  .td52-day .td52-dhd { gap: 9px; margin: 2px 0 4px; }
+  .td52-day .td52-rw { height: 20px; font-size: 12.5px !important; }
+  .td52-day .td52-rw b { font-size: 15px !important; }
+  .td52-day .td52-mix { padding: 2px 4px; }
+  .td52-day .td52-lab { margin-bottom: 2px; }
+  .td52-day .td52-note { font-size: 13px !important; }
+  .td52-day .td52-ftl { font-size: 8.5px !important; letter-spacing: 0.03em; }
+  .td52-mon { padding: 11px 12px 9px 12px; }
+  .td52-mon .td52-mh { height: 22px; margin-bottom: 2px; }
+  .td52-mon .td52-nb { width: 22px; height: 22px; }
+  .td52-mon .td52-tb { height: 22px; }
+  .td52-mon .td52-c .td52-cn { line-height: 13px !important; }
+  .td52-mon .td52-mt { font-size: 14px !important; }
+  .td52-mon .td52-g { grid-template-rows: 13px; gap: 2px 3px; }
+  .td52-mon .td52-w { line-height: 13px !important; }
+  .td52-mon .td52-c { font-size: 11px !important; }
+  .td52-mon .td52-c .td52-tk { right: 4px; gap: 1.5px; }
+  .td52-mon .td52-c .td52-tk i { width: 3.5px; height: 3.5px; }
+  .td52-mon .td52-c.m .td52-cn { transform: translate(-3px, -50%); }
+}
+/* and its width: the 1280 card drops the hints and " · n DAYS LATE" (see the header) */
+@container calc (max-width: 440px) {
+  .td52-day .td52-rw .td52-hn { display: none; }
+  .td52-day .td52-lab .td52-ago { display: none; }
+}
+
+/* the hover peek (portalled to the body) */
+.td52-pk {
+  position: fixed; z-index: 120; pointer-events: none; padding: 8px 11px; border-radius: 10px; background: #1c130f; color: #fff;
+  font: 400 12.5px/1.2 var(--sp-serif) !important; white-space: nowrap; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+.td52-pk .td52-pd { margin-bottom: 4px; font: 500 9px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; opacity: 0.6; }
+.td52-pk .td52-pr { display: flex; align-items: center; gap: 7px; line-height: 1.55; font: inherit !important; }
+.td52-pk .td52-pr i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .td52-day .td52-roll > span { animation: none !important; }
+}
