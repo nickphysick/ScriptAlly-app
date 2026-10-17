@@ -260,3 +260,21 @@ auto-placed cells off the main line.
 - `01-hover-closed-1512`, `02-hover-peek-1512`, `03-hover-peek-1280`;
 - `x-hover-peek-not-queried-1512`, showing "Log a query" taking "+ Log a query"'s place;
 - `x-qc-row-hover-1512/1280`, the Query Centre unchanged.
+
+**Branch and build (the amendment):**
+- **Commits:** `contact-list-v18-3-1`, pushed: A `ba7f5826`, B `8065c128`, C `72eb8cbd`, and this tail.
+- **Dev moved twice during the deploy:**
+  - first to Analytics v24.1 (`…-cl1831-an241`, `index-D7Qn07nQ.js`);
+  - then, while the locks ran, to dashboard v60.1 (`…-an241-db601`, `index-sztC00HD.js`). The pre-deploy check
+    caught that and nothing was deployed over it.
+- **An unused integration branch:** `…-an241-cl1831b` is pushed but was never deployed. It is superseded.
+- **The deployed integration:** `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241-db601-cl1831b`
+  at `c24f9484`, which is dashboard v60.1's dev branch with `contact-list-v18-3-1` merged in.
+- **The one conflict:** `design-refs/.refhashes.json`, where both sides only add refs. The resolution is the union,
+  and the ref check reads 476 refs unchanged.
+- **Gates there:**
+  - tsc and both builds are clean;
+  - Vitest is 9,004 passed and 3 skipped, with the known `functions/src/email.test.ts` red;
+  - CL183 C1, C2, C2d and C3 and DB60.1 are green. On the previous merge CL183 was 20/20 and AN24 14/14.
+- **Dev after:** hosting only, from the clean pushed tip, re-checked immediately before. Dev now serves
+  **`index-DMZJAn0z.js`**.
