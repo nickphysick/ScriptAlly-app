@@ -143,7 +143,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
           <TipProvider>
             {/* v21 §A: the desktop opens on the light header; the phone keeps v17's band (decision 5) */}
             {!phone && !empty && manuscript !== null ? (
-              <A21Header loading={load.loading} sent={model.sent} replies={model.replies} msTitle={manuscript.title || null}
+              <A21Header loading={load.loading} sent={model.sent} replies={v24.tally.all} msTitle={manuscript.title || null}
                 rows={load.loading ? null : v21.standing} inside={load.loading ? null : ringOf(v24.keeping)}
                 onRecord={record} onRead={() => go(0)} onRing={() => go(3)} />
             ) : null}

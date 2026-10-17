@@ -11,7 +11,7 @@ import { describe, it, expect } from "vitest";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../types";
 import { analyticsModel } from "./analyticsModel";
 import {
-  benchmark, buildV24, deskV24, heads, listWords, ringOf, QUESTIONS, diffWords, expectedByNow, monthOf, monthlySends, moments, outcomes, perMonthWords, rateWords,
+  benchmark, buildV24, deskV24, heads, listWords, ringOf, QUESTIONS, replyTally, MAX_REPLY_DAYS, diffWords, expectedByNow, monthOf, monthlySends, moments, outcomes, perMonthWords, rateWords,
   replyKeeping, requestRate, span, spanParts, stillWaiting, verdictOf, BENCHMARKS_QUERYTRACKER,
 } from "./analyticsV24";
 
@@ -330,5 +330,57 @@ describe("heads — seven questions, each answered in its first sentence", () =>
     expect(listWords(["November"])).toBe("November");
     expect(listWords(["November", "June"])).toBe("November and June");
     expect(listWords(["May", "June", "July"])).toBe("May, June and July");
+  });
+});
+
+/* ══════════ v24.1 Part B · a request is a reply ══════════ */
+describe("replyTally — the Bethany Carter contradiction (27 queries, '3 replies', '10 of 27 asked')", () => {
+  /** an imported query: a status and a send date, and no log at all */
+  const imported = (a: Agent, sentAgo: number, status: QueryStatus): Part => {
+    const q = { id: nid(), userId: "u", manuscriptId: "ms", agentId: a.id, packageId: "", status, personalisationNotes: "", sendMethod: "Email", dateSent: ago(sentAgo) } as unknown as Query;
+    return { q, acts: [] };
+  };
+  const parts: Part[] = [
+    ...Array.from({ length: 13 }, (_, i) => walk(W6, 20 + i * 5)),                                       // 13 waiting
+    ...Array.from({ length: 6 }, (_, i) => imported(W6, 100 + i, R.PARTIAL_REQUESTED)),                  // 9 being read, undated
+    ...Array.from({ length: 3 }, (_, i) => imported(W6, 120 + i, R.FULL_SENT)),
+    imported(W6, 140, R.REJECTED),                                                                      // read, then said no — undated
+    walk(W6, 900, [[R.REJECTED, 899]]),                                                                 // by letter, 1 day
+    walk(W6, 1000, [[R.REJECTED, 132]]),                                                                // by letter, 868 days: a bad date
+    walk(W6, 1010, [[R.REJECTED, 135]]),                                                                // by letter, 875 days: a bad date
+    walk(W6, 400, [[R.NO_RESPONSE, 300]]),                                                              // closed
+  ];
+  const mm = run(parts, agents);
+  const v = buildV24(mm, NOW);
+  it("reproduces the contradiction on v24's count: dated first replies fewer than the asked", () => {
+    expect(mm.sent).toBe(27);
+    /* v24's header read model.replies — the DATED first replies only: 3, beside 9 asked to read more */
+    expect([mm.replies, v.outcomes.asked]).toEqual([3, 9]);
+    expect(mm.replies).toBeLessThan(v.outcomes.asked);
+  });
+  it("a request is a reply: replies = asked + said no to the letter, never fewer than the asked", () => {
+    expect(v.tally.all).toBe(v.outcomes.asked + v.outcomes.ended.letter);
+    expect(v.tally.all).toBeGreaterThanOrEqual(v.outcomes.asked);
+  });
+  it("a reply dated more than two years after its send is a bad date: listed, left out of the timings, counted as no date", () => {
+    expect(v.tally.bad.map((b) => b.rawDays).sort((a, b) => a - b)).toEqual([868, 875]);
+    expect(v.keeping.all).toEqual([1]);
+    expect(v.keeping.longest).toBe(1);
+    expect(v.tally.dated).toBe(1);
+    expect(v.tally.noDate).toBe(v.tally.all - 1);
+    expect(MAX_REPLY_DAYS).toBe(730);
+  });
+  it("a reply dated before its send is a bad date too", () => {
+    const before = walk(W6, 50, []);
+    before.acts.push(rung(before.q.id, R.REJECTED, ago(60)));
+    before.q.status = R.REJECTED;
+    const t = replyTally(run([before], agents).items);
+    expect(t.bad.map((b) => b.rawDays)).toEqual([-10]);
+    expect([t.all, t.dated, t.noDate]).toEqual([1, 0, 1]);
+  });
+  it("S4 says how many replies have no reply date", () => {
+    const h = heads(v);
+    expect(h[3].kicker).toBe(`${v.tally.all} replies so far`);
+    expect(h[3].answer.map((r) => r.t).join("")).toContain(`replies have no reply date and are left out.`);
   });
 });
