@@ -21,19 +21,19 @@
   "lock": "E2",
   "where": "@1512 Contact list: label 1 is within 1px of a column's left",
   "ok": true,
-  "detail": "0.0 (label 350.0; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344)"
+  "detail": "0.0 (label 350.0; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344,1252,1362)"
  },
  {
   "lock": "E2",
   "where": "@1512 Contact list: label 2 is within 1px of a column's left",
   "ok": true,
-  "detail": "0.0 (label 645.1; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344)"
+  "detail": "0.0 (label 645.1; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344,1252,1362)"
  },
  {
   "lock": "E2",
   "where": "@1512 Contact list: label 3 is within 1px of a column's left",
   "ok": true,
-  "detail": "0.0 (label 1088.4; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344)"
+  "detail": "0.0 (label 1088.4; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344,1252,1362)"
  },
  {
   "lock": "E2",
@@ -105,19 +105,19 @@
   "lock": "E2",
   "where": "@1280 Contact list: label 1 is within 1px of a column's left",
   "ok": true,
-  "detail": "0.0 (label 350.0; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112)"
+  "detail": "0.0 (label 350.0; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112,1020,1130)"
  },
  {
   "lock": "E2",
   "where": "@1280 Contact list: label 2 is within 1px of a column's left",
   "ok": true,
-  "detail": "0.0 (label 570.1; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112)"
+  "detail": "0.0 (label 570.1; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112,1020,1130)"
  },
  {
   "lock": "E2",
   "where": "@1280 Contact list: label 3 is within 1px of a column's left",
   "ok": true,
-  "detail": "0.0 (label 898.0; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112)"
+  "detail": "0.0 (label 898.0; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112,1020,1130)"
  },
  {
   "lock": "E2",

@@ -13,27 +13,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-near: pills' top − agency line's bottom = 14 ±1",
-  "ok": false,
-  "detail": "4.2"
- },
- {
-  "lock": "C2",
-  "where": "@1512 seed-cal-near: row's bottom − pills' bottom = 16 ±1",
-  "ok": false,
+  "where": "@1512 seed-cal-near: pills' top − main line's bottom = 14 ±1",
+  "ok": true,
   "detail": "14.0"
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-near: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "681.09375 → 675.59375"
+  "where": "@1512 seed-cal-near: row's bottom − pills' bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "C2",
+  "where": "@1512 seed-cal-near: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "681.09375 → 681.09375"
  },
  {
   "lock": "C2",
   "where": "@1512 seed-cal-near: the row grows by exactly the peek (14 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "31.0"
+  "ok": true,
+  "detail": "48.3"
  },
  {
   "lock": "C2",
@@ -45,7 +45,7 @@
   "lock": "C2",
   "where": "@1512 seed-cal-near: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "31.0 vs 31.0"
+  "detail": "48.3 vs 48.3"
  },
  {
   "lock": "C2",
@@ -55,27 +55,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-soon: pills' top − agency line's bottom = 14 ±1",
-  "ok": false,
-  "detail": "4.2"
- },
- {
-  "lock": "C2",
-  "where": "@1512 seed-cal-soon: row's bottom − pills' bottom = 16 ±1",
-  "ok": false,
+  "where": "@1512 seed-cal-soon: pills' top − main line's bottom = 14 ±1",
+  "ok": true,
   "detail": "14.0"
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-soon: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "763.09375 → 759.59375"
+  "where": "@1512 seed-cal-soon: row's bottom − pills' bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "C2",
+  "where": "@1512 seed-cal-soon: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "763.09375 → 763.09375"
  },
  {
   "lock": "C2",
   "where": "@1512 seed-cal-soon: the row grows by exactly the peek (14 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "35.0"
+  "ok": true,
+  "detail": "50.3"
  },
  {
   "lock": "C2",
@@ -87,7 +87,7 @@
   "lock": "C2",
   "where": "@1512 seed-cal-soon: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "35.0 vs 35.0"
+  "detail": "50.3 vs 50.3"
  },
  {
   "lock": "C2",
@@ -97,27 +97,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-passed20: pills' top − agency line's bottom = 14 ±1",
-  "ok": false,
-  "detail": "4.2"
- },
- {
-  "lock": "C2",
-  "where": "@1512 seed-cal-passed20: row's bottom − pills' bottom = 16 ±1",
-  "ok": false,
+  "where": "@1512 seed-cal-passed20: pills' top − main line's bottom = 14 ±1",
+  "ok": true,
   "detail": "14.0"
  },
  {
   "lock": "C2",
-  "where": "@1512 seed-cal-passed20: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "827.09375 → 821.59375"
+  "where": "@1512 seed-cal-passed20: row's bottom − pills' bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "C2",
+  "where": "@1512 seed-cal-passed20: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "812.09375 → 812.09375"
  },
  {
   "lock": "C2",
   "where": "@1512 seed-cal-passed20: the row grows by exactly the peek (14 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "31.0"
+  "ok": true,
+  "detail": "48.3"
  },
  {
   "lock": "C2",
@@ -129,7 +129,7 @@
   "lock": "C2",
   "where": "@1512 seed-cal-passed20: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "31.0 vs 31.0"
+  "detail": "48.3 vs 48.3"
  },
  {
   "lock": "C2",
@@ -145,27 +145,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-near: pills' top − agency line's bottom = 14 ±1",
-  "ok": false,
-  "detail": "2.0"
+  "where": "@1280 seed-cal-near: pills' top − main line's bottom = 14 ±1",
+  "ok": true,
+  "detail": "14.2"
  },
  {
   "lock": "C2",
   "where": "@1280 seed-cal-near: row's bottom − pills' bottom = 16 ±1",
-  "ok": false,
-  "detail": "14.0"
+  "ok": true,
+  "detail": "16.0"
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-near: the main line does not move (agency line ±0.5)",
+  "where": "@1280 seed-cal-near: the main line does not move (±0.5)",
   "ok": true,
-  "detail": "692.328125 → 692.328125"
+  "detail": "692.328125 → 692.53125"
  },
  {
   "lock": "C2",
   "where": "@1280 seed-cal-near: the row grows by exactly the peek (14 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "42.0"
+  "ok": true,
+  "detail": "56.4"
  },
  {
   "lock": "C2",
@@ -177,7 +177,7 @@
   "lock": "C2",
   "where": "@1280 seed-cal-near: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "42.0 vs 42.0"
+  "detail": "56.4 vs 56.4"
  },
  {
   "lock": "C2",
@@ -187,27 +187,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-soon: pills' top − agency line's bottom = 14 ±1",
-  "ok": false,
-  "detail": "4.2"
- },
- {
-  "lock": "C2",
-  "where": "@1280 seed-cal-soon: row's bottom − pills' bottom = 16 ±1",
-  "ok": false,
+  "where": "@1280 seed-cal-soon: pills' top − main line's bottom = 14 ±1",
+  "ok": true,
   "detail": "14.0"
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-soon: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "722.671875 → 719.171875"
+  "where": "@1280 seed-cal-soon: row's bottom − pills' bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "C2",
+  "where": "@1280 seed-cal-soon: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "707.671875 → 707.671875"
  },
  {
   "lock": "C2",
   "where": "@1280 seed-cal-soon: the row grows by exactly the peek (14 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "35.0"
+  "ok": true,
+  "detail": "50.3"
  },
  {
   "lock": "C2",
@@ -219,7 +219,7 @@
   "lock": "C2",
   "where": "@1280 seed-cal-soon: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "35.0 vs 35.0"
+  "detail": "50.3 vs 50.3"
  },
  {
   "lock": "C2",
@@ -229,27 +229,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-passed20: pills' top − agency line's bottom = 14 ±1",
-  "ok": false,
-  "detail": "4.2"
- },
- {
-  "lock": "C2",
-  "where": "@1280 seed-cal-passed20: row's bottom − pills' bottom = 16 ±1",
-  "ok": false,
+  "where": "@1280 seed-cal-passed20: pills' top − main line's bottom = 14 ±1",
+  "ok": true,
   "detail": "14.0"
  },
  {
   "lock": "C2",
-  "where": "@1280 seed-cal-passed20: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "727.671875 → 722.171875"
+  "where": "@1280 seed-cal-passed20: row's bottom − pills' bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "C2",
+  "where": "@1280 seed-cal-passed20: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "711.671875 → 711.671875"
  },
  {
   "lock": "C2",
   "where": "@1280 seed-cal-passed20: the row grows by exactly the peek (14 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "31.0"
+  "ok": true,
+  "detail": "48.3"
  },
  {
   "lock": "C2",
@@ -261,7 +261,7 @@
   "lock": "C2",
   "where": "@1280 seed-cal-passed20: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "31.0 vs 31.0"
+  "detail": "48.3 vs 48.3"
  },
  {
   "lock": "C2",
@@ -277,27 +277,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-near: pills' top − agency line's bottom = 16 ±1",
-  "ok": false,
-  "detail": "4.2"
+  "where": "@1920 seed-cal-near: pills' top − main line's bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
  },
  {
   "lock": "C2",
   "where": "@1920 seed-cal-near: row's bottom − pills' bottom = 18 ±1",
-  "ok": false,
-  "detail": "14.0"
+  "ok": true,
+  "detail": "18.0"
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-near: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "709.09375 → 703.59375"
+  "where": "@1920 seed-cal-near: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "709.09375 → 709.09375"
  },
  {
   "lock": "C2",
   "where": "@1920 seed-cal-near: the row grows by exactly the peek (16 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "35.0"
+  "ok": true,
+  "detail": "56.3"
  },
  {
   "lock": "C2",
@@ -309,7 +309,7 @@
   "lock": "C2",
   "where": "@1920 seed-cal-near: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "35.0 vs 35.0"
+  "detail": "56.3 vs 56.3"
  },
  {
   "lock": "C2",
@@ -319,27 +319,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-soon: pills' top − agency line's bottom = 16 ±1",
-  "ok": false,
-  "detail": "4.2"
+  "where": "@1920 seed-cal-soon: pills' top − main line's bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
  },
  {
   "lock": "C2",
   "where": "@1920 seed-cal-soon: row's bottom − pills' bottom = 18 ±1",
-  "ok": false,
-  "detail": "14.0"
+  "ok": true,
+  "detail": "18.0"
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-soon: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "791.09375 → 787.59375"
+  "where": "@1920 seed-cal-soon: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "791.09375 → 791.09375"
  },
  {
   "lock": "C2",
   "where": "@1920 seed-cal-soon: the row grows by exactly the peek (16 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "39.0"
+  "ok": true,
+  "detail": "58.3"
  },
  {
   "lock": "C2",
@@ -351,7 +351,7 @@
   "lock": "C2",
   "where": "@1920 seed-cal-soon: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "39.0 vs 39.0"
+  "detail": "58.3 vs 58.3"
  },
  {
   "lock": "C2",
@@ -361,27 +361,27 @@
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-passed20: pills' top − agency line's bottom = 16 ±1",
-  "ok": false,
-  "detail": "4.2"
+  "where": "@1920 seed-cal-passed20: pills' top − main line's bottom = 16 ±1",
+  "ok": true,
+  "detail": "16.0"
  },
  {
   "lock": "C2",
   "where": "@1920 seed-cal-passed20: row's bottom − pills' bottom = 18 ±1",
-  "ok": false,
-  "detail": "14.0"
+  "ok": true,
+  "detail": "18.0"
  },
  {
   "lock": "C2",
-  "where": "@1920 seed-cal-passed20: the main line does not move (agency line ±0.5)",
-  "ok": false,
-  "detail": "869.09375 → 863.59375"
+  "where": "@1920 seed-cal-passed20: the main line does not move (±0.5)",
+  "ok": true,
+  "detail": "869.09375 → 869.09375"
  },
  {
   "lock": "C2",
   "where": "@1920 seed-cal-passed20: the row grows by exactly the peek (16 + pills + foot − its resting foot)",
-  "ok": false,
-  "detail": "35.0"
+  "ok": true,
+  "detail": "56.3"
  },
  {
   "lock": "C2",
@@ -393,7 +393,7 @@
   "lock": "C2",
   "where": "@1920 seed-cal-passed20: the row below moves by exactly the growth",
   "ok": true,
-  "detail": "35.0 vs 35.0"
+  "detail": "56.3 vs 56.3"
  },
  {
   "lock": "C2",

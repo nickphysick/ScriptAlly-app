@@ -464,7 +464,11 @@
     "design-refs/analytics-v24/screens/08-empty-top-390@2x.png": "7b87b90d02c369922d882c2ac141f091dfbb092d6cd03c6ad6956d51c4f1066e",
     "design-refs/analytics-v24/screens/09-empty-how-it-works-1280@2x.png": "46a431d2f7776f504f09ed088a3d3550b5c50690b08af64bca90b629a022a2bb",
     "design-refs/analytics-v24/screens/09-empty-how-it-works-1512@2x.png": "2b0154b209f8d5b204e6f994cf6f9a905e812528d6cf7427da091569a1e31420",
-    "design-refs/analytics-v24/screens/09-empty-how-it-works-390@2x.png": "55621d12f71de37ae8c5699a00734e9a4f956f3e2efc280a0ff9f096fd1b0657"
+    "design-refs/analytics-v24/screens/09-empty-how-it-works-390@2x.png": "55621d12f71de37ae8c5699a00734e9a4f956f3e2efc280a0ff9f096fd1b0657",
+    "design-refs/contact-list-v18-3-1/contact-list-v18-3-1.html": "cc22e309a94ead9bace2a420333ca79c01f754a5682078727993a10a806bd033",
+    "design-refs/contact-list-v18-3-1/screens/01-hover-closed-1512@2x.png": "4c5b772c600f37a76baf72787f538887c1ba9e68fccc239aa3668cac8900afab",
+    "design-refs/contact-list-v18-3-1/screens/02-hover-peek-1512@2x.png": "fa28acf0bafa523e9853ffee74092d10dc4d03ef08cf6e4f910de13f24b4e8b7",
+    "design-refs/contact-list-v18-3-1/screens/03-hover-peek-1280@2x.png": "bff8582fc5d995371fd2e5b26bbe6f3cd252e58f30c56f4e663820df6d8dc381"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
