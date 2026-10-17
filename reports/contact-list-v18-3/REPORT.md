@@ -415,3 +415,12 @@ cell. Nothing there changed.
   .6.
 - **Red, all pre-existing and unchanged from v18.3.2:** CL17 FS1 (the pin's wording since QC v138.6), and QC138.2 C1/D1.
 - Other packs' ledgers rewritten by the run were put back, and the guide's state was cleared.
+
+**Deploy:**
+- Dev still served v18.3.2's integration (`fb25648a`, `index-LkecNKe9.js`), and this branch was cut from it. So the
+  merge was a fast-forward, with no conflicts.
+- The integration branch is `dev/…-db601-cl1831b-cl1832-cl1833` at `963ea282`. That is the exact commit the gates and
+  locks above ran on, so they were not re-run.
+- It was built from a clean detached worktree and deployed to dev (`index-BuhCraZJ.js`). The served hash was
+  re-checked just before the deploy.
+- Not merged to main.
