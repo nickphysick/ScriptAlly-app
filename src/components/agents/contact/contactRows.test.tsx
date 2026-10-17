@@ -31,20 +31,18 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
   it("replies: an unstated window reads Not stated over the door", () => {
     expect(html(false)).toMatch(/<b class="unk">Not stated<\/b><small>Open to queries<\/small>/);
   });
-  it("the row is a div role=button (it holds real buttons), and the tray's controls are buttons", () => {
-    const h = html(false);
-    expect(h).toMatch(/<div role="button" tabindex="0" class="clv-row"/);
-    expect(h).toMatch(/<button type="button" class="clv-trb p" data-cl13="tray-act"/);
+  /* RE-POINTED (v18.3.2 A/B): nothing in a closed row hides on hover, and the actions live on the peek's line, which a
+     static render never opens; the tray's contents and its dedupe are held by lib/rowActions.test.ts */
+  it("the row is a div role=button (it holds real buttons)", () => {
+    expect(html(false)).toMatch(/<div role="button" tabindex="0" class="clv-row"/);
   });
-  it("the tray: the step, then Open card — and no ghost way-out", () => {
-    const h = html(false);
-    expect(h).toContain('data-cl13="tray"');
-    expect(h).toMatch(/data-cl13="tray-act"[^>]*>Log a query</);
-    expect(h).toMatch(/data-cl13="tray-open"[^>]*>Open card</);
-    expect(h.indexOf('data-cl13="tray-act"')).toBeLessThan(h.indexOf('data-cl13="tray-open"'));
-    const g = html(true);
-    expect(g).not.toContain('data-cl13="tray-act"');
-    expect(g).not.toContain("Open in Query Centre");
+  it("a row with its peek closed renders no tray and no tray buttons", () => {
+    for (const h of [html(false), html(true)]) {
+      expect(h).not.toContain('data-cl13="tray"');
+      expect(h).not.toContain('data-cl13="tray-act"');
+      expect(h).not.toContain('data-cl13="tray-open"');
+      expect(h).not.toContain("Open in Query Centre");
+    }
   });
   it("a closed door with nothing queried marks the row shut (the grey disc), and says till when", () => {
     const shutFacts = { ...(facts as object), door: "closed", agent: { ...(agent as object), reopensOn: "2026-11-01" } } as never;

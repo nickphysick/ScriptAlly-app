@@ -297,7 +297,17 @@ const Row: React.FC<{
       {/* v18.3.2 A — NOTHING IN THE ROW HIDES ON HOVER: the hover tray over the Query status cell is gone. A row with its
           peek closed shows no actions; they live on the peek's line (B). */}
       {peek ? (
-        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
+        /* v18.3.2 B — THE ACTIONS SIT ON THE PEEK'S LINE: one flex line, the pills then the actions, right-aligned with at
+           least 16px between them. A press anywhere on the line stays on the line (it never opens the row). */
+        <div className="cl1832-pl" data-cl1832="peek-line" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+          <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
+          <span className="cl1832-tray" data-cl13="tray">
+            {!tray.ghost && (
+              <TrayBtn primary probe="tray-act" label={tray.label} onPress={() => onAct(tray.act)} />
+            )}
+            <TrayBtn probe="tray-open" label="Open card" onPress={(r) => onOpen(r)} />
+          </span>
+        </div>
       ) : null}
     </div>
   );
