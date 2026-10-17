@@ -110,3 +110,19 @@ red on v24.1 that is not red on the base (the base had eleven more, on /manuscri
   above).
 - **Waiting queries with no stated time:** 1 of 20 on the harness account (counted, not drawn).
 - **The "0" chips** on Replies due are the one place the page shows a bare zero; say if you want "None" there instead.
+
+## Integration and dev
+
+- **Dev moved during the pack.** It served `index-DYhkEY1Y.js` (`c6505699`) at the start and `index-BfyN6LLe.js` at the end,
+  which is `origin/contact-list-v18-3-1` at `ab86ac14` (Contact list v18.3.1 on the v24 dev branch; confirmed by building
+  it). The local `contact-list-v18-3-1` worktree is ahead at `8065c128` with uncommitted work: another session's, not
+  touched and not deployed.
+- **Integration branch:** `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241` at
+  `87cec57e` = `ab86ac14` + `analytics-v24-1`, a clean merge. Gates there: tsc clean, production build clean, 9010 unit
+  tests passed. AN24 and AN21 green on its local build.
+- **Dev now serves `index-D7Qn07nQ.js`**, deployed (hosting only) from a clean worktree at the pushed tip after re-checking
+  the served hash. AN24-B1 green against the deployed site. Nothing merged to `main`; prod untouched; no rules or
+  functions changed.
+- **One clean-up scare, resolved:** the integration run's fixture restore was refused by Firebase ("Exceeded quota for
+  verifying passwords") after a long run of sign-ins; it succeeded on the third retry a minute apart. No seeded
+  manuscript, query, log entry or agent is left on the harness account.
