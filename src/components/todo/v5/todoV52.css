@@ -242,6 +242,30 @@
 .td5-strip .td5-tab { color: rgba(45, 58, 80, 0.75); }
 .td5-dial[data-kind="late"] small { color: #a2452a; }
 
+/* ═════════ §G · DATES AND GROUPS ═════════ */
+/* G.1 — a lit row (its day hovered in the month) */
+.td5-root .td5-row2[data-lit] { background: #fbf1ec; }
+.td5-root .td5-row2[data-lit] [data-td52="row-bold"] { color: #a2452a; }
+.td5-root .td5-row2[draggable="true"] { cursor: grab; }
+/* G.2 — a movable dial opens the date menu */
+.td5-dial.td52-press { cursor: pointer; }
+.td5-dial.td52-press:hover { box-shadow: 0 0 0 3px rgba(42, 58, 82, 0.14); }
+.td52-dm {
+  position: fixed; z-index: 200; box-sizing: border-box; width: 200px; padding: 8px; border-radius: 12px; background: #fff; color: #1c130f;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 16px 36px rgba(28, 19, 15, 0.22);
+}
+.td52-dm .td52-dmh { padding: 4px 6px 6px; font: 600 9px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; color: rgba(28, 19, 15, 0.62); }
+.td52-dm button[data-td52="move"] {
+  all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: baseline; width: 100%; padding: 7px 8px; border-radius: 7px;
+  cursor: pointer; font: 400 14px/1.2 var(--sp-serif) !important;
+}
+.td52-dm button[data-td52="move"] small { font: 500 10px/1.2 var(--font-mono) !important; color: rgba(28, 19, 15, 0.62); }
+.td52-dm button[data-td52="move"]:hover:not(:disabled), .td52-dm button[data-td52="move"]:focus-visible { background: #f3efe8; outline: none; }
+.td52-dm button[data-td52="move"]:disabled { cursor: default; color: rgba(28, 19, 15, 0.62); text-decoration: line-through; }
+.td52-dm .td52-dmc { padding: 6px 8px 8px; font: 400 13px/1.4 var(--sp-serif) !important; color: #1c130f; }
+.td52-dm .td52-dmc b { display: block; margin-bottom: 2px; font: 600 9px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: #a2452a; }
+.td52-dm .td52-dml { all: unset; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 2px; font: inherit !important; }
+
 /* ═════════ §C · THE SLIDE-OUT CALENDAR (portalled to the body: literals, never `--td5-*`) ═════════ */
 .td52-scrim { position: fixed; inset: 0; z-index: 130; background: rgba(28, 19, 15, 0.42); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .td52-scrim.on { opacity: 1; pointer-events: auto; }

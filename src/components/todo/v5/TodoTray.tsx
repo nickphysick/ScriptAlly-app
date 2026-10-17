@@ -65,8 +65,9 @@ import { useTagWrites } from "../useTagWrites";
 import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
 import { TrayHeader } from "./TrayHeader";
-import { TrayCalendar, dayChip, shortDay } from "./TrayCalendar";
+import { TrayCalendar, dayChip, plusDays as calPlus, shortDay, weekdayOf } from "./TrayCalendar";
 import { TrayCalDrawer } from "./TrayCalDrawer";
+import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
 import { lateTag, rowLines } from "../../../lib/trayRows";
 import { calFilterLabel, calendarItems, dayBuckets, daysFrom, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
 import { TrayFilterRow, TrayFind } from "./TrayFilters";
@@ -153,6 +154,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const [calFilter, setCalFilter] = useState<CalFilter | null>(null);
   const [calSel, setCalSel] = useState<string>(() => londonToday(Date.now()));
   const [calDrawer, setCalDrawer] = useState(false);
+  /* v5.2 §G.1 — a hovered (or focused) row lights its day; a hovered day lights its rows. Writes nothing. */
+  const [rowLit, setRowLit] = useState<string | null>(null);
+  const [dayHover, setDayHover] = useState<string | null>(null);
   const counts = useMemo(() => kindCounts(live), [live]);
 
   /* the manuscript in scope: the shared key, as the Contact list reads it */
@@ -729,14 +733,14 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const captureFlags = (keys: { taskType: string; queryId?: string; agentId?: string }[]) =>
     keys.map((k) => { const id = taskFlagId(k); return { id, was: taskFlags.find((f) => f.id === id) ?? null }; });
   const putBack = (cap: { id: string; was: TaskFlag | null }[]) => Promise.all(cap.map((c) => restoreTaskFlag(c.id, c.was)));
-  const doSnooze = async (i: TrayItem, days: number, ymd: string) => {
+  const doSnooze = async (i: TrayItem, days: number, ymd: string, o: { say?: string; fly?: boolean } = {}) => {
     setPop(null);
     if (i.card.userTaskId && i.userTask) {
       /* an own task is MOVED, not snoozed: its due date changes and it stays on the Corkboard; Undo writes the task
          back verbatim (restoreUserTask), so not even its updatedAt moves */
       const t = i.userTask;
       await updateUserTask(t.id, { dueDate: ymd });
-      flash(`Moved to ${dayLabel(ymd)}`, { label: "Undo", fn: async () => { await restoreUserTask(t); toBack(i)(); } }, UNDO_MS);
+      flash(o.say ?? `Moved to ${dayLabel(ymd)}`, { label: "Undo", fn: async () => { await restoreUserTask(t); toBack(i)(); } }, UNDO_MS);
       return;
     }
     const r = rulesFor(i);
@@ -744,14 +748,53 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (capped <= 0) return;
     const until = capped === days ? ymd : plusYmd(todayYmd, capped);
     const next = nextAfter(i);
-    await fly();
+    if (o.fly !== false) await fly();
     const g = groupOf(i);
     const cap = captureFlags(flagKeysFor(i));
     const daysToDeadline = r?.deadline && !r.deadline.passed ? daysBetween(todayYmd, r.deadline.ymd) : undefined;
     const w = g ? snoozeGroupWrites({ upsertTaskFlag, dismissTask }, g, capped) : snoozeCardWrites({ upsertTaskFlag, dismissTask }, i.card, capped, `until ${dayLabel(until)}`, daysToDeadline);
     if (!w) return;
-    setSelKey(next); setBumpTab((b) => b + 1);
-    flash(`Snoozed until ${dayLabel(until)}`, { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
+    if (!sel || sel.key === i.key) setSelKey(next);
+    setBumpTab((b) => b + 1);
+    flash(o.say ?? `Snoozed until ${dayLabel(until)}`, { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
+  };
+  /* ── v5.2 §G.2 · move a date: two doors (the dial's menu, a drag onto a day), one rule — an own task's due date
+     changes; anything else is SNOOZED to that day through v5.1's writer and guards, and leaves for Set aside ── */
+  const [dialMenu, setDialMenu] = useState<{ key: string; left: number; top: number; opener: HTMLElement } | null>(null);
+  const [dragKey, setDragKey] = useState<string | null>(null);
+  /* a task with a date of its own: an own task's due date, or a dial that has one (the offer's answer-by included);
+     housekeeping and sweeps have none, so their dials open nothing and they cannot be dragged */
+  const movable = (i: TrayItem) => !i.sweep && i.bucket !== "fix" && (i.userTask ? !!i.userTask.dueDate : i.dial.kind !== "none");
+  const nextMonday = (ymd: string) => { const wd = weekdayOf(ymd); return calPlus(ymd, wd === 1 ? 7 : (8 - wd) % 7 || 7); };
+  const inMonth = (ymd: string) => { const [y, m, d] = ymd.split("-").map(Number); const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); const mm = m === 12 ? 1 : m + 1; const yy = m === 12 ? y + 1 : y;
+    return `${yy}-${String(mm).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`; };
+  /** why a day is refused, in v5.1's words, or null */
+  const refusal = (i: TrayItem, ymd: string): string | null => {
+    if (ymd <= calToday) return "Pick a day after today.";
+    const r = rulesFor(i);
+    if (!r) return null;
+    const dl = r.deadline;
+    if (r.ceiling <= 0) return `Can’t be snoozed. Your ${dl?.what ?? "date"} ${dl && dl.ymd < todayYmd ? `passed on ${dayLabel(dl.ymd)}` : "is today"}.`;
+    if (daysFrom(calToday, ymd) > r.ceiling) return r.offer ? "An offer can wait a day at most." : dl ? `Can’t go past ${dayLabel(dl.ymd)}, your ${dl.what}.` : `Can’t go past ${dayLabel(calPlus(calToday, r.ceiling))}.`;
+    return null;
+  };
+  const moveTo = async (i: TrayItem, ymd: string) => {
+    setDialMenu(null);
+    const why = refusal(i, ymd);
+    if (why) { flash(why); return; }
+    if (i.userTask) { await doSnooze(i, daysFrom(calToday, ymd), ymd, { say: `${i.userTask.text} · moved to ${dayLabel(ymd)}`, fly: false }); return; }
+    const who = (i.agent?.name || i.agent?.agency || i.who || "").trim();
+    await doSnooze(i, daysFrom(calToday, ymd), ymd, { say: `${who} · set for ${dayLabel(ymd)}`, fly: false });
+  };
+  const dialOpts = (i: TrayItem): DialOpt[] => {
+    const r = rulesFor(i);
+    return ([["tomorrow", "Tomorrow", calPlus(calToday, 1)], ["monday", "Monday", nextMonday(calToday)], ["week", "In a week", calPlus(calToday, 7)], ["month", "In a month", inMonth(calToday)]] as const)
+      .map(([k, label, ymd]) => ({ k, label, ymd, date: shortDay(ymd), disabled: !!r && daysFrom(calToday, ymd) > r.ceiling }));
+  };
+  const openDialMenu = (i: TrayItem, el: HTMLElement) => {
+    if (!movable(i)) return;
+    const b = el.getBoundingClientRect();
+    setDialMenu({ key: i.key, left: Math.max(8, Math.min(b.left - 150, window.innerWidth - 216)), top: Math.min(b.bottom + 6, window.innerHeight - 260), opener: el });
   };
   const flagKeysFor = (i: TrayItem) => {
     const g = groupOf(i);
@@ -936,7 +979,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null}
       calendar={state === "list" ? (
         <TrayCalendar today={calToday} items={calItems} buckets={calBuckets} n={n} filter={calFilter} onFilter={setCalFilter}
-          onOpenDrawer={() => setCalDrawer(true)} onSetAside={() => showView("aside")} drawerOpen={calDrawer} sel={calSel} onSel={setCalSel} />
+          onOpenDrawer={() => setCalDrawer(true)} onSetAside={() => showView("aside")} drawerOpen={calDrawer} sel={calSel} onSel={setCalSel}
+          litDay={rowLit} onHoverDay={setDayHover} dragging={!!dragKey}
+          onDropDay={(ymd) => { const it = items.find((x) => x.key === dragKey); setDragKey(null); if (it) void moveTo(it, ymd); }} />
       ) : undefined}
     >
       {state === "list" || state === "loading" ? (
@@ -960,10 +1005,16 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         <button key={i.key} type="button" className="td5-row2" data-td5-row={i.key} data-td5="row" data-group={i.group.id} data-bucket={i.bucket}
           data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
           data-query={i.query?.id} data-cal-ymd={calYmdOf.get(i.key)} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
-          onClick={() => selectRow(i.key)}>
+          data-lit={dayHover && calYmdOf.get(i.key) === dayHover ? "" : undefined}
+          draggable={!pinned && movable(i) ? true : undefined}
+          onDragStart={(e) => { if (pinned || !movable(i)) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", i.key); e.dataTransfer.effectAllowed = "move"; setDragKey(i.key); }}
+          onDragEnd={() => setDragKey(null)}
+          onMouseEnter={() => setRowLit(calYmdOf.get(i.key) ?? null)} onMouseLeave={() => setRowLit(null)}
+          onFocus={() => setRowLit(calYmdOf.get(i.key) ?? null)} onBlur={() => setRowLit(null)}
+          onClick={(e) => { const d = (e.target as HTMLElement).closest<HTMLElement>('[data-td5="dial"]'); if (d && movable(i)) { openDialMenu(i, d); return; } selectRow(i.key); }}>
           <Disc item={i} />
           <span className="td5-tx" data-agent-led={lines(i).agentLed ? "" : undefined}><b data-td52="row-bold">{lines(i).bold}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small data-td52="row-italic">{lines(i).italic}</small></span>
-          <DueDial dial={i.dial} size={52} selected={!ghost && sel?.key === i.key}
+          <DueDial dial={i.dial} size={52} selected={!ghost && sel?.key === i.key} pressable={movable(i)}
             tag={i.dial.kind === "late" && i.dial.ymd ? lateTag(daysFrom(i.dial.ymd, calToday)) : null} />
         </button>
       );
@@ -1223,6 +1274,20 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           <TagsPane />
         </AnchoredPanel>
       ) : null}
+      {dialMenu ? (() => {
+        const it = items.find((x) => x.key === dialMenu.key);
+        if (!it) return null;
+        const r = rulesFor(it);
+        const dl = r?.deadline ?? null;
+        const cant = r && r.ceiling <= 0 ? {
+          line: `Your ${dl?.what ?? "date"} ${dl && dl.ymd < todayYmd ? `passed on ${dayLabel(dl.ymd)}` : "is today"}. Snoozing would hide a date that’s already gone.`,
+          door: dl?.what === "send-by date" ? "Set a new send-by date →" : "Record where you are →",
+          onDoor: () => { setDialMenu(null); doDoor(it, dl?.what === "send-by date" ? "sendby" : "offer"); },
+        } : null;
+        return <TrayDialMenu left={dialMenu.left} top={dialMenu.top} opener={dialMenu.opener} head={it.userTask ? "MOVE TO" : "SET A NEW DATE"} opts={dialOpts(it)} cant={cant}
+          onPick={(ymd) => void moveTo(it, ymd)} onClose={() => setDialMenu(null)}
+          onPickCal={() => { setDialMenu(null); const sc = scroller(); if (sc) sc.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" }); flash("Drag the row onto a day in the calendar."); }} />;
+      })() : null}
       <TrayCalDrawer open={calDrawer} today={calToday} items={calItems} n={n} sel={calSel} onSel={setCalSel}
         onClose={() => setCalDrawer(false)} onDesk={calToDesk} wordsOf={calWords} onAdd={() => { setCalDrawer(false); openCompose(); }} />
       {flow ? <HousekeepingSweep items={flow.items} onClose={() => { setFlow(null); }} onNavigate={onNavigate} onToast={flash} /> : null}

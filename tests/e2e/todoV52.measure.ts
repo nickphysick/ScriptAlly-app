@@ -787,6 +787,19 @@ const pressUndo = async (page: import("@playwright/test").Page) => {
   if (!(await b.isVisible().catch(() => false))) return false;
   await b.click(); return true;
 };
+/* a drag, dispatched on the exact row and the exact day (Playwright's pointer drag lands on whatever is under the
+   pointer after the page scrolls to the target, which on a scrolling page is a neighbour) */
+const dragRowTo = (page: import("@playwright/test").Page, key: string, ymd: string) => page.evaluate(async ([key, ymd]) => {
+  const { q } = (window as unknown as W).__td5();
+  const row = q(`[data-td5-row="${CSS.escape(key)}"]`)!, cell = q(`[data-td52="day-cell"][data-ymd="${ymd}"]`)!;
+  const dt = new DataTransfer();
+  const fire = (el: Element, type: string) => el.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
+  fire(row, "dragstart");
+  await new Promise((r) => setTimeout(r, 120));
+  fire(cell, "dragenter"); fire(cell, "dragover");
+  await new Promise((r) => setTimeout(r, 120));
+  fire(cell, "drop"); fire(row, "dragend");
+}, [key, ymd] as const);
 test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; the guards; Undo is exact", async ({ page }) => {
   const L = new Ledger("G2");
   const { db, uid } = await harnessDb();
@@ -806,7 +819,7 @@ test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; 
   L.check("a future day on the grid to drop on", !!target, String(target));
   const before = await snapDocs([`tasks/${id}`]);
   if (key && target) {
-    await rowLoc(page, key).dragTo(page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${target}"]`));
+    await dragRowTo(page, key, target);
     await page.waitForTimeout(1200);
     const after = (await snapDocs([`tasks/${id}`])).get(`tasks/${id}`) as { dueDate?: string } | null;
     L.check(`own task: the drop moves dueDate to ${target}`, after?.dueDate?.slice(0, 10) === target, String(after?.dueDate));
@@ -817,7 +830,7 @@ test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; 
     const back = await snapDocs([`tasks/${id}`]);
     L.check("own task: Undo restores the document byte for byte", canonOf(back.get(`tasks/${id}`)) === canonOf(before.get(`tasks/${id}`)), "");
     /* today and the past refuse a drop */
-    await rowLoc(page, key).dragTo(page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${t}"]`));
+    await dragRowTo(page, key, t);
     await page.waitForTimeout(900);
     const still = await snapDocs([`tasks/${id}`]);
     L.check("a drop on today is refused (nothing written)", canonOf(still.get(`tasks/${id}`)) === canonOf(before.get(`tasks/${id}`)), "");
@@ -865,7 +878,25 @@ test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; 
   }
   for (const r of kinds.filter((x) => x.bucket === "send").slice(0, 8)) {
     const m = await openMenu(r.key);
-    if (m?.cant) { L.check(`a passed send-by: CAN'T BE SNOOZED with its send-by door (${r.key.slice(0, 18)})`, m.door && m.ks.filter((x) => x.k !== "pick").length === 0, JSON.stringify(m)); seen.push("passed"); break; }
+    if (m?.cant) {
+      L.check(`a passed send-by: CAN'T BE SNOOZED with its send-by door (${r.key.slice(0, 18)})`, m.door && m.ks.filter((x) => x.k !== "pick").length === 0, JSON.stringify(m));
+      seen.push("passed");
+      /* …and a drop past its ceiling (0) is refused: nothing written, a toast says why */
+      await page.keyboard.press("Escape").catch(() => {});
+      const qid = await rowLoc(page, r.key).getAttribute("data-query");
+      const fp = `taskFlags/${flagId(r.type, qid ?? "")}`;
+      const fb = await guardDocs([fp]);
+      const day = await page.evaluate(([a, b]) => { const { q } = (window as unknown as W).__td5(); return q(`[data-td52="day-cell"][data-ymd="${a}"]`) ? a : b; }, [plus(4), plus(1)]);
+      await dragRowTo(page, r.key, day);
+      await page.waitForTimeout(1200);
+      const fa = await snapDocs([fp]);
+      /* ⚠️ TWO GUARDS, ONE OBSERVABLE: v5.1's snooze writer clamps to the ceiling itself (a ceiling of 0 writes nothing),
+         so with the page's refusal removed this read stays green — the toast below is what reddens (proved) */
+      L.check("a drop past the ceiling writes nothing", canonOf(fa.get(fp)) === canonOf(fb.get(fp)), JSON.stringify(fa.get(fp)));
+      const why = await toastText(page);
+      L.check("…and says why (v5.1's words)", !!why && /Can’t be snoozed/.test(why), String(why));
+      break;
+    }
   }
   for (const r of kinds.filter((x) => x.bucket === "send").slice(0, 12)) {
     const m = await openMenu(r.key);
@@ -876,7 +907,7 @@ test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; 
   await page.keyboard.press("Escape").catch(() => {});
   console.log(`[G2] guards exercised: ${seen.join(", ") || "none"}`);
   L.check("guards exercised (housekeeping and at least one dated guard)", seen.includes("hk") && seen.length >= 2, seen.join(","));
-  L.done(18);
+  L.done(20);
 });
 
 test("TD52 G3 — the bulk close is skipped under the pack's Stop: no select UI", async ({ page }) => {

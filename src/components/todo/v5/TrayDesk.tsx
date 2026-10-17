@@ -31,14 +31,14 @@ const PKG = (
 
 /** the due dial (v138's grammar): rust ring + halo once the date has passed, a navy arc for the share of the
  *  window gone otherwise, dashed with no date */
-export const DueDial: React.FC<{ dial: Dial; size: number; tag?: string | null; selected?: boolean }> = ({ dial, size, tag = null, selected = false }) => {
+export const DueDial: React.FC<{ dial: Dial; size: number; tag?: string | null; selected?: boolean; pressable?: boolean }> = ({ dial, size, tag = null, selected = false, pressable = false }) => {
   const r = size / 2 - 3;
   /* v5.2 §F.5 — an overdue dial is spoken: "Overdue since 20 June" (its marks are presentational under role="img") */
   const spoken = dial.kind === "late" && dial.ymd ? overdueLabel(dial.ymd, londonToday(Date.now())) : null;
   const c = 2 * Math.PI * r;
   const h = size / 2;
   return (
-    <span className="td5-dial" data-td5="dial" data-kind={dial.kind} data-big={size > 52 ? "" : undefined} data-small={size < 48 ? "" : undefined} data-frac={dial.frac.toFixed(3)}
+    <span className={`td5-dial${pressable ? " td52-press" : ""}`} data-td5="dial" data-kind={dial.kind} data-big={size > 52 ? "" : undefined} data-small={size < 48 ? "" : undefined} data-frac={dial.frac.toFixed(3)}
       style={{ width: size, height: size }} title={dial.title} role={spoken ? "img" : undefined} aria-label={spoken ?? undefined}>
       <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
         {dial.kind === "none" ? (
