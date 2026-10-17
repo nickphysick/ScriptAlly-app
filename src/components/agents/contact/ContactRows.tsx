@@ -133,7 +133,8 @@ const Row: React.FC<{
   onLog?: () => void;
   /** v18 §D — this row's peek is open (one row at a time: the list holds which) */
   peek?: boolean;
-  onPeek?: (open: boolean) => void;
+  /** `via` says what asked (v18.3.3 §D): the pointer's dwell or leaving, the keyboard, or focus leaving the row */
+  onPeek?: (open: boolean, via: PeekVia) => void;
   /** v18 §D — a "+ Add" pill in the peek opens Edit profile on that field */
   onEdit?: (tab: AgentCardTab, focus?: AgentCardField) => void;
 }> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog, peek = false, onPeek, onEdit }) => {
@@ -161,12 +162,12 @@ const Row: React.FC<{
   const rowRef = useRef<HTMLDivElement>(null);
   const hoverT = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(hoverT.current), []);
-  const openPeek = (v: boolean) => {
+  const openPeek = (v: boolean, via: PeekVia) => {
     const el = rowRef.current;
     if (v && el && !peek) {
       el.style.setProperty("--cl18-mh", `${el.offsetHeight}px`);
     }
-    onPeek?.(v);
+    onPeek?.(v, via);
   };
   useEffect(() => { if (peek) stopMq(); }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v18.3.3 §B — the labels the Query status cell offers as actions, read from what it rendered, as the peek opens and
@@ -237,17 +238,22 @@ const Row: React.FC<{
       onClick={(e) => {
         /* v18.3.3 §B/§C — the contact details and the next step answer their own clicks; empty space still opens the card */
         if ((e.target as HTMLElement).closest('[data-cl183="peek-pill"], [data-cl1833="next"]')) return;
-        window.clearTimeout(hoverT.current); if (peek) onPeek?.(false); onOpen(e.currentTarget.getBoundingClientRect());
+        window.clearTimeout(hoverT.current); if (peek) onPeek?.(false, "click"); onOpen(e.currentTarget.getBoundingClientRect());
       }}
       onMouseEnter={() => {
         stopMq(); if (!peek) mq.current = startMarquee(wishRef.current);
-        window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true), 450);
+        window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true, "pointer"), 450);
       }}
-      onMouseLeave={() => { stopMq(); window.clearTimeout(hoverT.current); if (peek) openPeek(false); }}
+      onMouseLeave={() => { stopMq(); window.clearTimeout(hoverT.current); if (peek) openPeek(false, "pointer"); }}
+      /* v18.3.3 §D — a row opened from the keyboard closes when focus leaves it (the list ignores this for a row the
+         pointer opened, which closes when the pointer leaves) */
+      onBlur={(e) => { if (peek && !e.currentTarget.contains(e.relatedTarget as Node | null)) openPeek(false, "focus"); }}
       onKeyDown={(e) => {
+        /* v18.3.3 §D — Escape closes an open row from anywhere inside it, and focus goes back to the row */
+        if (e.key === "Escape" && peek) { e.preventDefault(); e.stopPropagation(); openPeek(false, "key"); e.currentTarget.focus(); return; }
         if (e.target !== e.currentTarget) return; // a control inside the row answers its own keys
         /* v18 §D: Space toggles the peek; Enter still opens the agent panel */
-        if (e.key === " " && onPeek) { e.preventDefault(); openPeek(!peek); return; }
+        if (e.key === " " && onPeek) { e.preventDefault(); openPeek(!peek, "key"); return; }
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(e.currentTarget.getBoundingClientRect()); }
       }}
     >
@@ -341,6 +347,9 @@ const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPre
 );
 
 /** the column labels' sort control — the page's own sort state, so a label and the Sort pill cannot disagree */
+/** v18.3.3 §D — what asked a row's peek to open or close */
+export type PeekVia = "pointer" | "key" | "focus" | "click";
+
 export interface ContactSortControl { key: SortKey; reversed: boolean; onSort: (k: SortKey) => void; onReverse: () => void }
 
 export const ContactRows: React.FC<ContactRowsProps & {
@@ -355,6 +364,63 @@ export const ContactRows: React.FC<ContactRowsProps & {
 }) => {
   /* v18 §D — one peek at a time */
   const [peekId, setPeekId] = useState<string | null>(null);
+  /* v18.3.3 §D — AN OPEN ROW ALWAYS CLOSES. A row the pointer opened stays open only while the pointer is over it; one
+     the keyboard opened, only while focus is inside it. Events alone cannot promise that (a scroll moves the row out
+     from under a still pointer and sends no mouseleave), so the list RE-CHECKS: it keeps the last pointer position and,
+     on every scroll, resize and pointer move, asks the document what is under it. */
+  const listRef = useRef<HTMLDivElement>(null);
+  const peekRef = useRef<{ id: string; via: PeekVia } | null>(null);
+  const ptr = useRef<{ x: number; y: number } | null>(null);
+  const rowUnderPointer = (): string | null | undefined => {
+    const p = ptr.current;
+    if (!p) return undefined; // no pointer known: nothing to judge by
+    const el = document.elementFromPoint(p.x, p.y)?.closest<HTMLElement>('[data-clv="row"]');
+    return el && listRef.current?.contains(el) ? el.dataset.agentCard ?? null : null;
+  };
+  const setPeek = (next: { id: string; via: PeekVia } | null) => { peekRef.current = next; setPeekId(next?.id ?? null); };
+  const onPeekFor = (id: string) => (open: boolean, via: PeekVia) => {
+    const cur = peekRef.current;
+    if (open) {
+      /* a dwell's open lands only if the pointer is still on that row — a scroll, a leave or a blur since the timer
+         was set means it is not the intended row any more */
+      if (via === "pointer") { const under = rowUnderPointer(); if (under !== undefined && under !== id) return; }
+      setPeek({ id, via });
+      return;
+    }
+    if (!cur || cur.id !== id) return;
+    /* the pointer leaving does not close a row the keyboard opened, nor focus leaving one the pointer opened */
+    if ((via === "pointer" && cur.via === "key") || (via === "focus" && cur.via === "pointer")) return;
+    setPeek(null);
+  };
+  useEffect(() => {
+    let raf = 0;
+    const check = () => {
+      raf = 0;
+      const cur = peekRef.current;
+      if (!cur || cur.via !== "pointer") return;
+      if (rowUnderPointer() !== cur.id) setPeek(null);
+    };
+    const soon = () => { if (!raf) raf = requestAnimationFrame(check); };
+    const move = (e: PointerEvent) => { ptr.current = { x: e.clientX, y: e.clientY }; soon(); };
+    const gone = () => { ptr.current = { x: -1, y: -1 }; if (peekRef.current?.via === "pointer") setPeek(null); };
+    const out = (e: PointerEvent | MouseEvent) => { if (!e.relatedTarget) gone(); };
+    const blur = () => { if (peekRef.current) setPeek(null); };
+    window.addEventListener("pointermove", move, { capture: true, passive: true });
+    window.addEventListener("scroll", soon, { capture: true, passive: true });
+    window.addEventListener("resize", soon, { passive: true });
+    window.addEventListener("blur", blur);
+    document.addEventListener("pointerout", out);
+    document.documentElement.addEventListener("mouseleave", gone);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", move, { capture: true });
+      window.removeEventListener("scroll", soon, { capture: true });
+      window.removeEventListener("resize", soon);
+      window.removeEventListener("blur", blur);
+      document.removeEventListener("pointerout", out);
+      document.documentElement.removeEventListener("mouseleave", gone);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const col = (label: string, k: SortKey | null, align?: "end"): ListColumn => ({
     label, align,
     sort: k && sort ? {
@@ -381,13 +447,13 @@ export const ContactRows: React.FC<ContactRowsProps & {
         onOpen={(from) => onOpen(id, from)} tray={trayFor(x)} onAct={(act) => onAct(id, act)}
         onAddGenres={() => onAddGenres(id)} onAddWishlist={() => onAddWishlist(id)}
         letter={letter} onLog={onLog ? () => onLog(id) : undefined}
-        peek={peekId === id} onPeek={onEdit ? (v) => setPeekId((p) => (v ? id : p === id ? null : p)) : undefined}
+        peek={peekId === id} onPeek={onEdit ? onPeekFor(id) : undefined}
         onEdit={onEdit ? (tab, focus) => onEdit(id, tab, focus) : undefined}
       />
     );
   });
   return (
-    <div className={`clv-list${compact ? " clv-list--compact" : ""}${margin ? " cl17-margin" : ""}`} data-clv="list" data-cl17-margin={margin ? "" : undefined} data-density={compact ? "compact" : "comfortable"}>
+    <div ref={listRef} className={`clv-list${compact ? " clv-list--compact" : ""}${margin ? " cl17-margin" : ""}`} data-clv="list" data-cl17-margin={margin ? "" : undefined} data-density={compact ? "compact" : "comfortable"}>
       {ungrouped ? (
         /* v16 §C — no grouping: ONE panel, the labels and then every row, no dividers */
         <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
