@@ -12,7 +12,7 @@ import { expect, test } from "@playwright/test";
 import { doc, setDoc } from "firebase/firestore";
 import { harnessDb } from "./harnessDocs";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { DIR, LIB as LIB_TD5, Ledger, SIZES, canon as canonOf, flagId, fontsReady, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
+import { DIR, LIB as LIB_TD5, Ledger, SIZES, canon as canonOf, flagId, fontsReady, leaveDesk, mutate, near, openTodo, readBadge, restoreDocs, snapDocs, type Snap } from "./td52Lib";
 
 test.setTimeout(480_000);
 /* ⚠️ a measurement that writes puts the account back in the same run, whatever happened (the house rule) */
@@ -1053,4 +1053,232 @@ test("TD52 H2 — one Esc order: the dial menu, the drawer, Find's text (v5.1's 
     await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
   }
   L.done(5);
+});
+
+/* ───────────────────────── J · mid-task signals ───────────────────────── */
+const startOn = async (page: import("@playwright/test").Page, type: string) => {
+  const k = await page.evaluate((t) => (window as unknown as W).__td5().qa(`[data-td5="row"][data-task-type="${t}"]`)[0]?.dataset.td5Row ?? null, type);
+  if (!k) return null;
+  await rowLoc(page, k).click(); await page.waitForTimeout(400);
+  await page.locator('[data-todo-v5] [data-td5="act"]').click();
+  await page.locator("[data-td5-slot] [data-qad-drawer]").first().waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(600);
+  return k;
+};
+const jRead = (page: import("@playwright/test").Page) => page.evaluate(() => {
+  const { q, qa } = (window as unknown as W).__td5();
+  const d = q("[data-td5-slot] [data-qad-drawer]");
+  const steps = d ? [...d.querySelectorAll<HTMLElement>("[data-qad-stepper] [data-qad-step]")] : [];
+  const nav = q('[data-td52="in-progress-row"]');
+  return {
+    jn: steps.length, jk: steps.findIndex((s) => s.getAttribute("aria-current") === "step") + 1,
+    navLab: nav?.querySelector(".td52-wlab")?.textContent ?? null, dot: !!nav?.querySelector(".td52-wdot"),
+    navDashes: nav ? nav.querySelectorAll(".td52-wdash u").length : -1, navDone: nav ? nav.querySelectorAll(".td52-wdash u.d").length : -1,
+    navSt: q('[data-td52="nav-steps"]')?.textContent?.trim() ?? null,
+    bandSt: q('[data-td52="band-steps"]')?.textContent?.trim() ?? null, bandDashes: q('[data-td52="band-steps"]')?.querySelectorAll("u").length ?? -1,
+    say: q('[data-td5="say"]')?.textContent ?? null, cn: q('[data-td5="desk-card"] .td5-cn')?.textContent ?? null, status: !!q('[data-td5="desk-status"]'),
+    band: q('[data-td52="band"]')?.getAttribute("aria-label") ?? null, rows: qa('[data-td5="row"]').length,
+  };
+});
+test("TD52 J1 — the navy row and the band count the journey's own steps; Next, Review and a switch move them; leaving restores", async ({ page }) => {
+  const L = new Ledger("J1");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    const k = await startOn(page, "partial_requested") ?? await startOn(page, "full_requested");
+    L.check(`${w} a send to start`, !!k, "");
+    if (!k) continue;
+    const a = await jRead(page);
+    L.check(`${w} the dot and TASK IN PROGRESS`, a.dot && a.navLab === "TASK IN PROGRESS", JSON.stringify(a));
+    L.check(`${w} n dashes, n = the journey's steps + its review`, a.jn > 1 && a.navDashes === a.jn, `${a.navDashes} vs ${a.jn}`);
+    L.check(`${w} STEP 1 OF n in the row and the band`, a.navSt === `· STEP 1 OF ${a.jn}` && a.bandSt === `STEP 1 OF ${a.jn}` && a.navDone === 1, `${a.navSt} | ${a.bandSt}`);
+    await page.locator("[data-td5-slot] [data-qad-primary]").first().click(); await page.waitForTimeout(700);
+    const b = await jRead(page);
+    L.check(`${w} Next: both counters at 2`, b.jk === 2 && b.navSt === `· STEP 2 OF ${b.jn}` && b.bandSt === `STEP 2 OF ${b.jn}` && b.navDone === 2, `${b.navSt} | ${b.bandSt}`);
+    const rv = page.locator("[data-td5-slot] .qad-skip");
+    if (await rv.count()) { await rv.first().click(); await page.waitForTimeout(700); }
+    const c = await jRead(page);
+    L.check(`${w} the review reads n of n`, c.jk === c.jn && c.navSt === `· STEP ${c.jn} OF ${c.jn}` && c.bandSt === `STEP ${c.jn} OF ${c.jn}`, `${c.navSt} | ${c.bandSt}`);
+    await leaveDesk(page); await page.waitForTimeout(900);
+    const d = await jRead(page);
+    L.check(`${w} leaving restores "Working through"`, !!d.say && /Working through/.test(d.say) && d.navLab === null, String(d.say));
+    L.check(`${w} …and the band's group name and StatusDot`, !!d.cn && d.status && d.band === null, JSON.stringify({ cn: d.cn, st: d.status }));
+  }
+  /* a switch recounts: Close → "They said no" → a response */
+  await openTodo(page, SIZES[0]);
+  const k = await startOn(page, "no_response_close");
+  L.check("a close to switch", !!k, "");
+  if (k) {
+    const a = await jRead(page);
+    await page.locator("[data-td5-slot]").getByText("They said no", { exact: true }).first().click();
+    await page.waitForTimeout(1200);
+    const b = await jRead(page);
+    L.check("the switch recounts from the new journey", b.navDashes === b.jn && b.bandSt === `STEP ${b.jk} OF ${b.jn}` && b.band?.startsWith("Logging their reply"), `${a.jn} → ${b.jn}; ${b.bandSt}; ${b.band}`);
+    await leaveDesk(page);
+  }
+  L.done(2 * 8 + 2);
+});
+
+test("TD52 J2 — the band's title: '{doing} · {agent}' at 1512; at 1280 the agent goes, one line, inside the band, no ellipsis", async ({ page }) => {
+  const L = new Ledger("J2");
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await openTodo(page, vp);
+    await fontsReady(page);
+    await mutate(page, "J2");
+    const k = await startOn(page, "partial_requested") ?? await startOn(page, "full_requested");
+    if (!k) { L.check(`${w} a send to start`, false, ""); continue; }
+    await page.waitForTimeout(2600);
+    const r = await page.evaluate(() => {
+      const { q } = (window as unknown as W).__td5();
+      const band = q('[data-td52="band"]')!, tt = q('[data-td52="band-title"]')!, ag = q('[data-td52="band-agent"]');
+      const bb = band.getBoundingClientRect();
+      const rg = document.createRange(); rg.selectNodeContents(tt);
+      const rs = [...rg.getClientRects()].filter((x) => x.width > 0);
+      const lines = new Set(rs.map((x) => Math.round(x.top))).size;
+      const right = Math.max(...rs.map((x) => x.right));
+      const cs = getComputedStyle(tt);
+      return { label: band.getAttribute("aria-label"), bandW: bb.width, agentShown: !!ag && getComputedStyle(ag).display !== "none" && ag.getBoundingClientRect().width > 0,
+        doing: q('[data-td52="band-doing"]')?.textContent, lines, inside: right <= bb.right + 0.5 && Math.min(...rs.map((x) => x.left)) >= bb.left - 0.5,
+        clipped: tt.scrollWidth > tt.clientWidth + 0.5 || cs.textOverflow === "ellipsis", eyebrow: q('[data-td52="band-eyebrow"]')?.textContent };
+    });
+    L.check(`${w} the accessible name is the full title`, !!r.label && /^Sending your (partial|full) · .+/.test(r.label), String(r.label));
+    L.check(`${w} the eyebrow is the group`, r.eyebrow === "Your move", String(r.eyebrow));
+    if (r.bandW >= 640) L.check(`${w} the agent shows (band ${r.bandW.toFixed(0)})`, r.agentShown, "");
+    else L.check(`${w} under 640 the agent goes (band ${r.bandW.toFixed(0)})`, !r.agentShown, "");
+    L.check(`${w} one line`, r.lines === 1, String(r.lines));
+    L.check(`${w} inside the band`, r.inside, "");
+    L.check(`${w} no ellipsis, nothing clipped`, !r.clipped, "");
+    await leaveDesk(page);
+  }
+  L.done(2 * 6);
+});
+
+test("TD52 J3 — the tray goes quiet, never blocked: 42% and full on hover; the live row; the tip only with answers", async ({ page }) => {
+  const L = new Ledger("J3");
+  const vp = SIZES[0];
+  await openTodo(page, vp);
+  const k = await startOn(page, "partial_requested") ?? await startOn(page, "full_requested");
+  L.check("a send to start", !!k, "");
+  if (!k) { L.done(1); return; }
+  await mutate(page, "J3");
+  const r = await page.evaluate((k) => {
+    const { qa, q } = (window as unknown as W).__td5();
+    const others = qa('[data-td5="row"]').filter((x) => x.dataset.td5Row !== k);
+    const ops = others.flatMap((x) => [".td5-tx", ".td5-disc", ".td5-dial"].map((s) => Number(getComputedStyle(x.querySelector(s)!).opacity)));
+    const live = q(`[data-td5-row="${CSS.escape(k)}"]`)!;
+    return { ops, liveTag: live.querySelector('[data-td52="in-progress"]')?.textContent ?? null, edge: getComputedStyle(live).boxShadow, band: Number(getComputedStyle(q('[data-td5="band"]')!).opacity) };
+  }, k);
+  L.check("every other row's disc, text and dial at 0.42", r.ops.length > 6 && r.ops.every((o) => near(o, 0.42, 0.02)), `${Math.min(...r.ops)}–${Math.max(...r.ops)}`);
+  L.check("bands at 0.6", near(r.band, 0.6, 0.02), String(r.band));
+  L.check("the live row says IN PROGRESS", r.liveTag === "IN PROGRESS", String(r.liveTag));
+  L.check("…with a 4px rust edge", /rgb\(162, 69, 42\) 4px 0px 0px 0px inset/.test(r.edge), r.edge);
+  const other = await page.evaluate((k) => (window as unknown as W).__td5().qa('[data-td5="row"]').find((x) => x.dataset.td5Row !== k && x.getBoundingClientRect().height > 0)!.dataset.td5Row!, k);
+  await rowLoc(page, other).hover({ timeout: 4000 }).catch(() => {}); await page.waitForTimeout(300);
+  const hov = await page.evaluate((o) => { const r = (window as unknown as W).__td5().q(`[data-td5-row="${CSS.escape(o)}"]`)!; return [".td5-tx", ".td5-disc", ".td5-dial"].map((s) => Number(getComputedStyle(r.querySelector(s)!).opacity)); }, other);
+  L.check("full on hover", hov.every((o) => near(o, 1, 0.02)), hov.join(","));
+  L.check("no answers yet: no tip", (await page.locator('[data-td52="tip"]').count()) === 0, "");
+  /* answer something: Next marks the journey touched in most sends; a field typed is the sure way */
+  /* an answer: step 2's quantity, one up */
+  await page.locator("[data-td5-slot] [data-qad-primary]").first().click(); await page.waitForTimeout(600);
+  await page.locator("[data-td5-slot] .qad-body button", { hasText: /^\+$/ }).first().click();
+  await page.waitForTimeout(600);
+  const dirty = (await page.locator("[data-td5-slot] [data-qad-later]").count()) > 0;
+  await page.mouse.move(5, 5); await rowLoc(page, other).hover({ timeout: 4000 }).catch(() => {}); await page.waitForTimeout(400);
+  const tip = await page.evaluate(() => { const t = document.querySelector('[data-td52="tip"]'); return t ? t.textContent : null; });
+  L.check("with answers: the tip on hover", dirty && !!tip && tip.startsWith("YOUR ANSWERS ARE KEPT"), `${dirty} ${tip}`);
+  await rowLoc(page, k).hover({ timeout: 4000 }).catch(() => {}); await page.waitForTimeout(300);
+  L.check("never on the live row", (await page.locator('[data-td52="tip"]').count()) === 0, "");
+  /* still pressable: a row click selects it (and parks the journey with answers) */
+  /* bounded: a row something covers cannot be pressed, and that is the reading, not a crash */
+  await rowLoc(page, other).click({ timeout: 4000 }).catch(() => {}); await page.waitForTimeout(900);
+  const desk = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="desk-card"]')?.dataset.key);
+  L.check("a row click still selects", desk === other, `${desk} vs ${other}`);
+  /* clean up: discard the parked journey */
+  await page.evaluate(() => sessionStorage.removeItem("qh.parkedJourney"));
+  await rowLoc(page, k).click({ timeout: 4000 }).catch(() => {}); await page.waitForTimeout(400);
+  await leaveDesk(page);
+  L.done(10);
+});
+
+test("TD52 J4 — the typewriter once per start; the fill at k/n; sheen and breathing only while working; reduced motion: nothing moves", async ({ page }) => {
+  const L = new Ledger("J4");
+  const vp = SIZES[0];
+  await openTodo(page, vp, { motion: true });
+  const k = await startOn(page, "partial_requested") ?? await startOn(page, "full_requested");
+  L.check("a send to start", !!k, "");
+  if (!k) { L.done(1); return; }
+  const early = await page.evaluate(() => ({ t: (window as unknown as W).__td5().q('[data-td52="band-doing"]')?.textContent ?? "", typing: !!(window as unknown as W).__td5().q(".td52-wtw.typing") }));
+  await page.waitForTimeout(2400);
+  const late = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td52="band-doing"]')?.textContent ?? "");
+  L.check("the title types in on a start", early.t.length < late.length || early.typing, `${early.t.length} → ${late.length}`);
+  await page.locator("[data-td5-slot] [data-qad-primary]").first().click();
+  const afterNext = await page.evaluate(() => ({ t: (window as unknown as W).__td5().q('[data-td52="band-doing"]')?.textContent ?? "", typing: !!(window as unknown as W).__td5().q(".td52-wtw.typing") }));
+  L.check("not retyped on Next", afterNext.t === late && !afterNext.typing, JSON.stringify(afterNext));
+  await page.waitForTimeout(900);
+  const f = await page.evaluate(() => {
+    const { q } = (window as unknown as W).__td5();
+    const band = q('[data-td52="band"]')!, fill = q('[data-td52="fill"]')!;
+    const st = (q('[data-td52="band-steps"]')?.textContent ?? "").match(/STEP (\d+) OF (\d+)/);
+    return { w: fill.getBoundingClientRect().width, bw: band.getBoundingClientRect().width, k: Number(st?.[1]), n: Number(st?.[2]),
+      sheen: getComputedStyle(band, "::after").animationName, breathe: getComputedStyle(q('[data-td5="row"][data-live]')!).animationName };
+  });
+  L.check("the fill line is k/n of the band (±1px)", near(f.w, (f.bw * f.k) / f.n, 1), `${f.w.toFixed(1)} vs ${((f.bw * f.k) / f.n).toFixed(1)}`);
+  L.check("sheen and breathing run while working", f.sheen === "td52Sheen" && f.breathe === "td52Breathe", `${f.sheen} ${f.breathe}`);
+  await leaveDesk(page); await page.waitForTimeout(800);
+  const rest = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); return { band: !!q('[data-td52="band"]'), live: !!q('[data-td5="row"][data-live]') }; });
+  L.check("they stop when the journey goes", !rest.band && !rest.live, JSON.stringify(rest));
+  /* reduced motion: no element under the sheet runs an animation or a transition; the same end state */
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openTodo(page, vp, { motion: true });
+  const k2 = await startOn(page, "partial_requested") ?? await startOn(page, "full_requested");
+  await page.locator("[data-td5-slot] [data-qad-primary]").first().click();
+  await page.waitForTimeout(150);
+  const rm = await page.evaluate(() => {
+    const { q } = (window as unknown as W).__td5();
+    const sheet = q(".td5-sheet")!;
+    const running = document.getAnimations().filter((a) => { const t = (a.effect as KeyframeEffect | null)?.target as Element | null; return !!t && sheet.contains(t) && !t.closest("[data-td5-slot]") && a.playState === "running"; });
+    const band = q('[data-td52="band"]')!, fill = q('[data-td52="fill"]')!;
+    const st = (q('[data-td52="band-steps"]')?.textContent ?? "").match(/STEP (\d+) OF (\d+)/);
+    return { running: running.map((a) => `${(a as CSSAnimation).animationName ?? (a as CSSTransition).transitionProperty ?? "waapi"}@${((a.effect as KeyframeEffect).target as Element).className}`), full: q('[data-td52="band-doing"]')?.textContent,
+      w: fill.getBoundingClientRect().width, want: (band.getBoundingClientRect().width * Number(st?.[1])) / Number(st?.[2]) };
+  });
+  L.check("reduced motion: nothing under the sheet animates", rm.running.length === 0, rm.running.slice(0, 5).join(" · "));
+  L.check("…the title in full at once, the fill at k/n", !!rm.full && /^Sending/.test(rm.full) && near(rm.w, rm.want, 1), JSON.stringify(rm));
+  if (k2) await leaveDesk(page);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  L.done(8);
+});
+
+/* ───────────────────────── L1 · no overflow ───────────────────────── */
+test("TD52 L1 — no horizontal overflow at five widths, pinned and not, at rest and mid-journey; the navy row never wraps at 1280", async ({ page }) => {
+  const L = new Ledger("L1");
+  for (const width of [1920, 1512, 1280, 1180, 1024]) {
+    for (const pin of [false, true]) for (const mid of [false, true]) {
+      const w = `@${width}${pin ? " pinned" : ""}${mid ? " mid-journey" : ""}`;
+      await openTodo(page, { width, height: width >= 1512 ? 900 : 800 });
+      await mutate(page, "L1");
+      if (pin) { await page.keyboard.press("f"); await page.waitForTimeout(800); }
+      if (mid) { const k = await startOn(page, "partial_requested") ?? await startOn(page, "full_requested"); if (!k) { L.check(`${w} a journey`, false, ""); continue; } }
+      const r = await page.evaluate(() => {
+        const { q, sc } = (window as unknown as W).__td5();
+        const de = document.documentElement, app = document.querySelector<HTMLElement>(".ws-app");
+        const nav = q('[data-td5="nav"]')!;
+        const kids = [...nav.children].filter((c) => (c as HTMLElement).getBoundingClientRect().width > 0).map((c) => Math.round((c as HTMLElement).getBoundingClientRect().top + (c as HTMLElement).getBoundingClientRect().height / 2));
+        return { doc: [de.scrollWidth, de.clientWidth], sc: [sc.scrollWidth, sc.clientWidth], app: app ? [app.scrollWidth, app.clientWidth] : [0, 0],
+          navRows: new Set(kids).size > 1 ? Math.max(...kids) - Math.min(...kids) : 0, navOver: nav.scrollWidth > nav.clientWidth + 0.5,
+          chip: (q('[data-td52="pin-day"]') as HTMLElement | null)?.innerText.replace(/\s+/g, " ").trim() ?? null };
+      });
+      L.check(`${w} the document`, r.doc[0] <= r.doc[1], r.doc.join(" vs "));
+      L.check(`${w} the sheet's scroller`, r.sc[0] <= r.sc[1], r.sc.join(" vs "));
+      L.check(`${w} the app frame`, r.app[0] <= r.app[1], r.app.join(" vs "));
+      L.check(`${w} the navy row on one line`, r.navRows <= 6 && !r.navOver, `${r.navRows}px apart, over ${r.navOver}`);
+      /* H.7 — below 1360 the pinned chip is the short form: no weekday, no trailing "due today" beside an overdue figure */
+      if (pin && width < 1360) L.check(`${w} the compact day chip ("15 Oct · …")`, !!r.chip && /^\d{1,2} [A-Z][a-z]{2}\b/.test(r.chip), String(r.chip));
+      if (mid) await leaveDesk(page);
+      if (pin) await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
+    }
+  }
+  L.done(5 * 4 * 4 + 3 * 2);
 });

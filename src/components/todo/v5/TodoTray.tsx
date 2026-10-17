@@ -69,6 +69,8 @@ import { TrayCalendar, dayChip, plusDays as calPlus, shortDay, weekdayOf } from 
 import { TrayCalDrawer } from "./TrayCalDrawer";
 import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
 import { lateTag, rowLines } from "../../../lib/trayRows";
+import { doingTitle } from "../../../lib/deskDoing";
+import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { calFilterLabel, calendarItems, dayBuckets, daysFrom, londonToday, passesCalFilter, type CalFilter, type CalItem } from "../../../lib/trayCalendar";
 import { TrayFilterRow, TrayFind } from "./TrayFilters";
 import { usePinList } from "../../shell/useFullScreenList";
@@ -366,13 +368,23 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     try { return await f(); } finally { savingRef.current--; setSavingN((n) => n - 1); }
   };
   const [journeyBusy, setJourneyBusy] = useState(false);
+  const [jdom, setJdom] = useState<{ mode: DrawerMode | null; k: number; n: number; dirty: boolean }>({ mode: null, k: 0, n: 0, dirty: false });
   const journeyBusyRef = useRef(false);
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return undefined;
-    const read = () => { const b = !!root.querySelector("[data-td5-slot] .qad-save.busy"); journeyBusyRef.current = b; setJourneyBusy((x) => (x === b ? x : b)); };
+    const read = () => {
+      const b = !!root.querySelector("[data-td5-slot] .qad-save.busy"); journeyBusyRef.current = b; setJourneyBusy((x) => (x === b ? x : b));
+      /* v5.2 §J — the journey's own state, as its shell draws it: the mode, the stepper (k of n, the review last) and
+         whether it has answers ("Finish later" shows exactly when `view.dirty`). Read, never counted a second time. */
+      const d = root.querySelector<HTMLElement>("[data-td5-slot] [data-qad-drawer]");
+      const steps = d ? [...d.querySelectorAll<HTMLElement>("[data-qad-stepper] [data-qad-step]")] : [];
+      const at = steps.findIndex((x) => x.getAttribute("aria-current") === "step");
+      const next = { mode: (d?.dataset.qadDrawer as DrawerMode | undefined) ?? null, k: at + 1, n: steps.length, dirty: !!d?.querySelector("[data-qad-later]") };
+      setJdom((j) => (j.mode === next.mode && j.k === next.k && j.n === next.n && j.dirty === next.dirty ? j : next));
+    };
     const mo = new MutationObserver(read);
-    mo.observe(root, { subtree: true, attributes: true, attributeFilter: ["class"], childList: true });
+    mo.observe(root, { subtree: true, attributes: true, attributeFilter: ["class", "aria-current", "data-qad-drawer"], childList: true });
     return () => mo.disconnect();
   }, []);
   const deskSaving = savingN > 0 || journeyBusy;
@@ -617,6 +629,24 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const deskItem = ghost?.item ?? sel;
   /* v5.1 §E — working: a journey is open on the desk card for the task on it */
   const working = !!deskReq && !!deskItem && workKey === deskItem.key;
+  /* v5.2 §J.4 — a journey STARTING or RESUMING (not a step change, not a switch): the typewriter, the fill from 0 (or from
+     the parked step), the card's lift */
+  const [jStart, setJStart] = useState(0);
+  const wasWorking = useRef(false);
+  useEffect(() => { if (working && !wasWorking.current) setJStart((x) => x + 1); wasWorking.current = working; }, [working]);
+  const jResumed = !!(deskReq?.resume || deskReq?.seed);
+  const jTitle = working && deskItem ? doingTitle((jdom.mode ?? deskReq!.mode) as DrawerMode, deskItem.card.taskType, deskReq?.preset) : "";
+  const jSteps = working && jdom.n > 0 ? { k: Math.max(1, jdom.k), n: jdom.n } : null;
+  /* J.3 — the reassuring tip: another row, hovered or focused, while the journey has answers */
+  const [tip, setTip] = useState<{ key: string; left: number; top: number } | null>(null);
+  const showTip = (key: string, el: HTMLElement) => {
+    if (!working || !jdom.dirty || deskItem?.key === key) { setTip(null); return; }
+    const b = el.getBoundingClientRect();
+    setTip({ key, left: Math.min(b.left + 60, window.innerWidth - 270), top: b.bottom + 6 });
+  };
+  /* sheen and breathing pause while the tab is hidden */
+  const [tabHidden, setTabHidden] = useState(false);
+  useEffect(() => { const on = () => setTabHidden(document.visibilityState === "hidden"); document.addEventListener("visibilitychange", on); return () => document.removeEventListener("visibilitychange", on); }, []);
   const parkedHere = parked && parked.req.panel?.slot === DESK_SLOT ? parked : null;
   const startedKey = parkedHere ? (items.find((i) => !i.sweep && !i.card.userTaskId && i.bucket !== "fix" && i.query?.id === parkedHere.req.queryId)?.key ?? null) : null;
   /** leave the journey on the desk before looking at something else: parked with answers, closed without */
@@ -1058,11 +1088,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           draggable={!pinned && movable(i) ? true : undefined}
           onDragStart={(e) => { if (pinned || !movable(i)) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", i.key); e.dataTransfer.effectAllowed = "move"; setDragKey(i.key); }}
           onDragEnd={() => setDragKey(null)}
-          onMouseEnter={() => setRowLit(calYmdOf.get(i.key) ?? null)} onMouseLeave={() => setRowLit(null)}
-          onFocus={() => setRowLit(calYmdOf.get(i.key) ?? null)} onBlur={() => setRowLit(null)}
+          data-live={working && deskItem?.key === i.key ? "" : undefined} aria-describedby={tip?.key === i.key ? "td52-tip" : undefined}
+          onMouseEnter={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onMouseLeave={() => { setRowLit(null); setTip(null); }}
+          onFocus={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onBlur={() => { setRowLit(null); setTip(null); }}
           onClick={(e) => { const d = (e.target as HTMLElement).closest<HTMLElement>('[data-td5="dial"]'); if (d && movable(i)) { openDialMenu(i, d); return; } selectRow(i.key); }}>
           <Disc item={i} />
-          <span className="td5-tx" data-agent-led={lines(i).agentLed ? "" : undefined}><b data-td52="row-bold">{lines(i).bold}{startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small data-td52="row-italic">{lines(i).italic}</small></span>
+          <span className="td5-tx" data-agent-led={lines(i).agentLed ? "" : undefined}><b data-td52="row-bold">{lines(i).bold}{working && deskItem?.key === i.key ? <span className="td52-live" data-td52="in-progress">IN PROGRESS</span> : startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small data-td52="row-italic">{lines(i).italic}</small></span>
           <DueDial dial={i.dial} size={52} selected={!ghost && sel?.key === i.key} pressable={movable(i)}
             tag={i.dial.kind === "late" && i.dial.ymd ? lateTag(daysFrom(i.dial.ymd, calToday)) : null} />
         </button>
@@ -1071,7 +1102,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   };
 
   return (
-    <div className="td5-root" data-todo-v5="" data-state={state} data-pinned={pinned ? "" : undefined} ref={rootRef}>
+    <div className="td5-root" data-todo-v5="" data-state={state} data-pinned={pinned ? "" : undefined} data-journey={working ? "" : undefined} data-tab-hidden={tabHidden ? "" : undefined} ref={rootRef}>
       <WorkspacePageGrid className="td5-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="td5-group" data-td5="group">
           {state === "nothing" ? (
@@ -1086,6 +1117,18 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                     <p className="td5-say" data-td5="say">
                       Nothing in your tray.{nextLand[0] ? <> The next task lands on <b>{dayMonth(nextLand[0].ms)}</b>.</> : null}
                     </p>
+                  ) : working || compose ? (
+                    /* v5.2 §J.1 — while a task is open on the desk, the row says so: a pulsing dot, the label, and the
+                       journey's own steps (none for the compose card) */
+                    <div className="td52-wtop" data-td52="in-progress-row">
+                      <i className="td52-wdot" aria-hidden="true" /><span className="td52-wlab">TASK IN PROGRESS</span>
+                      {working && jSteps ? (
+                        <>
+                          <span className="td52-wdash" aria-hidden="true">{Array.from({ length: jSteps.n }, (_, x) => <u key={x} className={x < jSteps.k ? "d" : ""} />)}</span>
+                          <span className="td52-wst" data-td52="nav-steps">· STEP <b>{jSteps.k}</b> OF {jSteps.n}</span>
+                        </>
+                      ) : null}
+                    </div>
                   ) : (
                     <div className="td5-say" data-td5="say" style={{ position: "relative", overflow: "visible" }}>
                       {anyFilter ? (
@@ -1127,9 +1170,10 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                   <span className="td5-sp" />
                   {state === "list" ? (
                     <>
-                      {pinned ? null : <span className="td5-keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move<span className="td5-gap" /><kbd>E</kbd> act</span>}
+                      {working ? null : pinned ? null : <span className="td5-keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move<span className="td5-gap" /><kbd>E</kbd> act</span>}
                       {pinned ? <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder="Find a task" pinned /> : null}
                       {pinned ? <span className="td52-pinned" data-td52="pinned-label">PINNED</span> : null}
+                      {working ? <span className="td52-wesc" data-td52="esc-back" aria-hidden="true"><kbd>Esc</kbd> STEP BACK</span> : null}
                       <PinListButton pinned={pin.full} onToggle={pin.toggle} attrs={{ "data-td52": "pin" }} />
                     </>
                   ) : null}
@@ -1281,6 +1325,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                 stops={stopsFor(deskItem)} pastDays={pastDaysFor(deskItem)} pin={pinFor(deskItem)}
                                 action={startedKey === deskItem.key ? "Carry on" : actionWords(deskItem)} onAct={() => act(deskItem)}
                                 work={working} hostRef={setHostEl} saving={deskSaving}
+                                doing={working ? { title: jTitle, agent: (deskItem.agent?.name || deskItem.agent?.agency || "").trim(), steps: jSteps, start: jStart, resumed: jResumed } : null}
                                 asideLabel={deskItem.userTask ? "Move it" : "Set aside"}
                                 banner={(() => { const b = backOf(deskItem); return b ? <div className="td5-asideban" data-kind="back" data-td5="back-banner"><b>Back</b>{b.line}</div> : null; })()}
                                 over={pop && pop.mode !== "change" && !ghost ? (() => {
@@ -1332,6 +1377,11 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         <AnchoredPanel anchor={tagsRef.current} ariaLabel="Tags" variant="panel" onClose={(back) => { setTagsOpen(false); if (back) tagsRef.current?.focus(); }}>
           <TagsPane />
         </AnchoredPanel>
+      ) : null}
+      {tip && working && jdom.dirty ? (
+        <div className="td52-tip" id="td52-tip" role="tooltip" data-td52="tip" style={{ left: tip.left, top: tip.top }}>
+          <b>YOUR ANSWERS ARE KEPT</b>Open this and {((deskItem?.agent?.name || deskItem?.agent?.agency || "This").trim().split(/\s+/)[0])}’s task stays “Started”. Carry on any time.
+        </div>
       ) : null}
       {dialMenu ? (() => {
         const it = items.find((x) => x.key === dialMenu.key);

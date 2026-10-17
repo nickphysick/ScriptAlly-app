@@ -14,7 +14,7 @@
 import { expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 
-export { openTodo, readBadge, scrollSheet, near, canon, readSet, diffSets, LIB, flagId, snapDocs, restoreDocs, type Snap } from "./td5Lib";
+export { openTodo, readBadge, scrollSheet, near, canon, readSet, diffSets, LIB, flagId, snapDocs, restoreDocs, leaveDesk, type Snap } from "./td5Lib";
 export const DIR = "reports/todo-list-v5-2";
 export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 export const MUT = process.env.TD52_MUTATE ?? "";
@@ -49,6 +49,12 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   F1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="title"]')].find((e) => e.getBoundingClientRect().height > 0); const n = document.querySelectorAll('[data-todo-v5] [data-td5="row"]').length; if (h) { h.firstElementChild.textContent = n + " tasks in your tray"; h.setAttribute("aria-label", n + " tasks in your tray"); } })()` },
   /* F3 — v5.1's ink 45% back on the page's labels */
   F3: { css: `[data-todo-v5] { --td5-ink62: rgba(28, 19, 15, 0.45) !important; --td5-ink70: rgba(28, 19, 15, 0.58) !important; }` },
+  /* J2 — the band's title allowed to ellipsise */
+  J2: { css: `[data-todo-v5] .td52-wband .td52-wtt { flex: 0 1 auto !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; }` },
+  /* J3 — the tray dimmed by an overlay that eats clicks */
+  J3: { js: `(() => { const t = [...document.querySelectorAll('[data-todo-v5] .td5-tray')].find((e) => e.getBoundingClientRect().height > 0); if (t) { t.style.position = "relative"; const o = document.createElement("div"); o.style.cssText = "position:absolute;inset:0;z-index:50;background:rgba(255,255,255,.4)"; t.append(o); } })()` },
+  /* L1 — the pinned day chip's compact form dropped (the weekday and trailing words always shown) */
+  L1: { css: `.td52-pday .td52-pwd, .td52-pday .td52-ptail { display: inline !important; }` },
   /* D1 — the desk head's art restored */
   D1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="desk-head"]')].find((e) => e.getBoundingClientRect().height > 0);
     const b = document.querySelector('[data-todo-v5] [data-td5="band-art"]'); if (h && b) { const i = document.createElement("img"); i.src = b.getAttribute("src"); i.style.cssText = "position:absolute;left:8px;top:-10px;width:46px"; h.prepend(i); } })()` },

@@ -291,6 +291,61 @@
   .td52-pday .td52-pwd, .td52-pday .td52-ptail { display: none; }
 }
 
+/* ═════════ §J · MID-TASK SIGNALS ═════════ Nothing here blocks anything, and nothing dims the page. */
+/* J.1 — the navy row */
+.td52-wtop { display: flex; align-items: center; gap: 10px; min-width: 0; white-space: nowrap; }
+.td52-wtop .td52-wdot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #e7a184; animation: td52Pulse 1.6s ease-in-out infinite; }
+@keyframes td52Pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.td52-wtop .td52-wlab { font: 600 11px/1 var(--font-mono) !important; letter-spacing: 0.2em; color: #e7a184; }
+.td52-wtop .td52-wdash { display: flex; gap: 5px; margin-left: 6px; }
+.td52-wtop .td52-wdash u { display: block; width: 14px; height: 3px; border-radius: 2px; background: rgba(244, 238, 229, 0.22); text-decoration: none; }
+.td52-wtop .td52-wdash u.d { background: #e7a184; }
+.td52-wtop .td52-wst { font: 500 11px/1 var(--font-mono) !important; letter-spacing: 0.16em; color: rgba(244, 238, 229, 0.62); }
+.td52-wtop .td52-wst b { font: inherit !important; font-weight: 600 !important; color: #f4eee5; }
+.td5-root .td5-nav .td52-wesc { flex: none; display: inline-flex; align-items: center; gap: 6px; font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.12em; color: rgba(244, 238, 229, 0.7); white-space: nowrap; }
+.td5-root .td5-nav .td52-wesc kbd { padding: 2px 6px; border-radius: 5px; background: rgba(244, 238, 229, 0.12); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3); color: #f4eee5; font: 600 10px/1.2 var(--font-mono) !important; }
+/* J.2 — the card's band while working: one line, never wrapping or ellipsising */
+.td5-chead.td52-wband { position: relative; overflow: hidden; padding-left: 24px; container: wband / inline-size; }
+.td52-wband .td52-wey { flex: none; font: 600 9.5px/1 var(--font-mono) !important; letter-spacing: 0.16em; text-transform: uppercase; }
+.td52-wband .td52-wtt { flex: none; font: 400 20px/1.2 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+.td52-wband .td52-wtt span, .td52-wband .td52-wtt em { font: inherit !important; font-style: normal !important; }
+.td52-wband .td52-wag { color: rgba(28, 19, 15, 0.62); }
+.td52-wband .td52-wtw.typing::after { content: ""; display: inline-block; width: 2px; height: 0.95em; margin-left: 2px; vertical-align: -2px; background: currentColor; animation: td52Caret 0.7s steps(1) infinite; }
+@keyframes td52Caret { 50% { opacity: 0; } }
+.td52-wband .td52-wpg { flex: none; display: flex; align-items: center; gap: 8px; font: 600 9.5px/1 var(--font-mono) !important; letter-spacing: 0.14em; white-space: nowrap; }
+.td52-wband .td52-wds { display: flex; gap: 4px; }
+.td52-wband .td52-wds u { display: block; width: 14px; height: 4px; border-radius: 2px; background: rgba(28, 19, 15, 0.14); text-decoration: none; }
+.td52-wband .td52-wds u.d { background: #1c130f; }
+@container wband (max-width: 639px) { .td52-wband .td52-wag { display: none; } }
+@container wband (max-width: 519px) { .td52-wband .td52-wds { display: none; } }
+/* J.4 (2) the fill line, (3) the sheen */
+.td52-wband .td52-fill { position: absolute; left: 0; bottom: 0; height: 3px; border-radius: 0 2px 2px 0; background: #a2452a; transition: width 0.6s cubic-bezier(.2, .8, .2, 1); }
+.td52-wband::after { content: ""; position: absolute; top: 0; bottom: 0; left: -40%; width: 35%; pointer-events: none; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent); animation: td52Sheen 6s ease-in-out infinite; }
+@keyframes td52Sheen { 0%, 62% { left: -40%; } 100% { left: 120%; } }
+/* J.3 — the tray goes quiet (never blocked): other rows at 42%, full on hover or focus; bands at 60% */
+.td5-root[data-journey] .td5-row2:not([data-live]) .td5-tx, .td5-root[data-journey] .td5-row2:not([data-live]) .td5-disc,
+.td5-root[data-journey] .td5-row2:not([data-live]) .td5-dial { opacity: 0.42; transition: opacity 0.18s; }
+.td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) .td5-tx,
+.td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) .td5-disc,
+.td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) .td5-dial { opacity: 1; }
+.td5-root[data-journey] .td5-band { opacity: 0.6; }
+/* the live row: IN PROGRESS, and a 4px rust edge inside the selected ring, breathing (4) */
+.td5-root .td52-live { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 6px; vertical-align: 2px; background: #2a3a52; color: #f4eee5; font: 600 8.5px/1.3 var(--font-mono) !important; letter-spacing: 0.12em; }
+.td5-root[data-journey] .td5-row2[data-live] { box-shadow: inset 0 0 0 1.5px #2a3a52, inset 4px 0 0 #a2452a, 0 8px 18px -14px rgba(28, 19, 15, 0.5); animation: td52Breathe 2.6s ease-in-out infinite; }
+@keyframes td52Breathe { 0%, 100% { box-shadow: inset 0 0 0 1.5px #2a3a52, inset 4px 0 0 #a2452a, 0 8px 18px -14px rgba(28, 19, 15, 0.5); } 50% { box-shadow: inset 0 0 0 1.5px #2a3a52, inset 4px 0 0 rgba(162, 69, 42, 0.35), 0 8px 18px -14px rgba(28, 19, 15, 0.5); } }
+.td5-root[data-tab-hidden] .td52-wband::after, .td5-root[data-tab-hidden] .td5-row2[data-live] { animation-play-state: paused; }
+/* the desk card lifts (5), with its working shadow */
+.td5-root[data-journey] .td5-dcard[data-work]:not(.td5-compose) { box-shadow: 0 0 0 1.5px rgba(42, 58, 82, 0.35), 0 30px 60px -28px rgba(28, 19, 15, 0.55); animation: td52Lift 0.5s cubic-bezier(.2, .8, .2, 1); }
+@keyframes td52Lift { from { transform: translateY(8px); } to { transform: none; } }
+/* the reassuring tip */
+.td52-tip { position: fixed; z-index: 450; max-width: 250px; padding: 8px 11px; border-radius: 9px; pointer-events: none; background: #1c130f; color: #f4eee5; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.6); font: 400 13px/1.35 var(--sp-serif) !important; }
+.td52-tip b { display: block; margin-bottom: 3px; font: 600 9px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; color: #e7a184; }
+@media (prefers-reduced-motion: reduce) {
+  .td52-wtop .td52-wdot, .td52-wband::after, .td52-wband .td52-wtw.typing::after, .td5-root[data-journey] .td5-row2[data-live], .td5-root[data-journey] .td5-dcard[data-work] { animation: none !important; }
+  .td52-wband::after { display: none; }
+  .td52-wband .td52-fill, .td5-root[data-journey] .td5-row2 .td5-tx, .td5-root[data-journey] .td5-row2 .td5-disc, .td5-root[data-journey] .td5-row2 .td5-dial { transition: none !important; }
+}
+
 /* ═════════ §C · THE SLIDE-OUT CALENDAR (portalled to the body: literals, never `--td5-*`) ═════════ */
 .td52-scrim { position: fixed; inset: 0; z-index: 130; background: rgba(28, 19, 15, 0.42); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .td52-scrim.on { opacity: 1; pointer-events: auto; }

@@ -94,17 +94,66 @@ export interface DeskCardProps {
   asided?: boolean;
   /** v5.2 §H.4 — a desk save is in flight: the buttons are disabled and "Saving…" shows at the foot */
   saving?: boolean;
+  /** v5.2 §J.2 — a journey is open on the card: the band says what you're doing and how far through it is */
+  doing?: { title: string; agent: string; steps: { k: number; n: number } | null; start: number; resumed: boolean } | null;
   /** v5.1 — the foot replaced (the Set aside desk's own buttons) */
   foot?: React.ReactNode;
   /** v5.1 — something that sits over the card above its foot: the set-aside popover, the clash */
   over?: React.ReactNode;
 }
 
-export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase, work = false, hostRef, asideLabel = "Set aside", onEdit = null, banner = null, asided = false, foot = null, over = null, saving = false }) => {
+/** v5.2 §J.2 + §J.4 — the band while working: the group's eyebrow, what you're doing (typed in on a start or a resume),
+ *  the agent, the journey's own steps, and a rust fill line at k/n. Keyed by the start, so a step change never retypes. */
+const reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const WorkingBand: React.FC<{ g: TrayItem["group"]; doing: NonNullable<DeskCardProps["doing"]> }> = ({ g, doing }) => {
+  const still = reducedMotion();
+  const full = `${doing.title}${doing.agent ? ` · ${doing.agent}` : ""}`;
+  const [typed, setTyped] = React.useState(still ? doing.title.length : 0);
+  const [agentOn, setAgentOn] = React.useState(still);
+  /* the title types once, on mount (a start or resume); a switch changes the words in place */
+  const firstTitle = React.useRef(doing.title);
+  React.useEffect(() => {
+    if (still) return undefined;
+    let i = 0, t = 0;
+    const step = () => {
+      i++; setTyped(i);
+      if (i < firstTitle.current.length) t = window.setTimeout(step, 34 + ((i * 7) % 31));
+      else t = window.setTimeout(() => setAgentOn(true), 350);
+    };
+    t = window.setTimeout(step, 34);
+    return () => window.clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const done = typed >= firstTitle.current.length;
+  const shown = done ? doing.title : doing.title.slice(0, typed);
+  const s = doing.steps;
+  const frac = s ? s.k / s.n : 0;
+  const [fill, setFill] = React.useState(still || doing.resumed ? frac : 0);
+  React.useEffect(() => { const r = requestAnimationFrame(() => setFill(frac)); return () => cancelAnimationFrame(r); }, [frac]);
+  return (
+    <div className="td5-chead td52-wband" data-td5="desk-head" data-td52="band" role="group" aria-label={full} style={{ background: g.tint, color: g.ink }}>
+      <span className="td52-wey" data-td52="band-eyebrow">{g.name}</span>
+      <span className="td52-wtt" data-td52="band-title" aria-hidden="true">
+        <span className={`td52-wtw${done ? "" : " typing"}`} data-td52="band-doing">{shown}</span>
+        {doing.agent ? <em className="td52-wag" data-td52="band-agent" style={{ visibility: agentOn || done && still ? "visible" : agentOn ? "visible" : "hidden" }}> · {doing.agent}</em> : null}
+      </span>
+      <span className="td5-sp" />
+      {s ? (
+        <span className="td52-wpg" data-td52="band-steps">
+          <span className="td52-wds" aria-hidden="true">{Array.from({ length: s.n }, (_, x) => <u key={x} className={x < s.k ? "d" : ""} />)}</span>
+          STEP {s.k} OF {s.n}
+        </span>
+      ) : null}
+      <i className="td52-fill" data-td52="fill" aria-hidden="true" style={{ width: `${(fill * 100).toFixed(3)}%` }} />
+    </div>
+  );
+};
+
+export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase, work = false, hostRef, asideLabel = "Set aside", onEdit = null, banner = null, asided = false, foot = null, over = null, saving = false, doing = null }) => {
   const g = item.group;
   return (
     <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}
       data-work={work ? "" : undefined} data-asided={asided ? "" : undefined}>
+      {doing ? <WorkingBand key={doing.start} g={g} doing={doing} /> : (
       <div className="td5-chead" data-td5="desk-head" style={{ background: g.tint, color: g.ink }}>
         <span className="td5-cn">{g.name}</span>
         <span className="td5-why">{g.note}</span>
@@ -112,7 +161,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
         {item.query?.status ? (
           <span className="td5-st" data-td5="desk-status"><StatusDot status={item.query.status} overrideSize={18} decorative />{sentence(String(item.query.status))}</span>
         ) : null}
-      </div>
+      </div>)}
       {stamp ? <div className="td5-stamp" data-td5="stamp" data-navy={stamp.navy ? "" : undefined} aria-hidden="true">{stamp.word}</div> : null}
       {/* v5.1 §E — the journey's own head, steps, questions and foot are portalled in here (deskSlot.ts) */}
       <div className="td5-jhost" data-td5="journey-host" ref={hostRef} hidden={!work} />
