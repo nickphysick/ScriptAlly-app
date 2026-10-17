@@ -90,6 +90,8 @@ describe("the domain move to queryhawk.net", () => {
   it("D3 · the waitlist accepts queryhawk.net and refuses scriptally.ink", () => {
     expect(ALLOWED_ORIGINS).toContain("https://queryhawk.net");
     expect(ALLOWED_ORIGINS).toContain("https://www.queryhawk.net");
+    /* Dev lives at dev.queryhawk.net, and a browser POST always carries Origin, so it must be listed. */
+    expect(ALLOWED_ORIGINS).toContain("https://dev.queryhawk.net");
     expect(ALLOWED_ORIGINS.filter((o) => /scriptally\.ink/i.test(o))).toEqual([]);
     /* The Firebase site ids are infrastructure and stay reachable. */
     expect(ALLOWED_ORIGINS).toContain("https://scriptally-app.web.app");
