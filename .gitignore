@@ -44,3 +44,7 @@ run-artifacts/*-deploy.txt
 # `.env` is where a personal reply-to address lives, while `.env.<projectId>` stays tracked for the
 # values that are safe to publish (a database id, a public host). See functions/.env.example.
 functions/.env
+
+# comps v28: the CX28 run ledger and its once-per-run marker (rewritten by every run; the kept copies are under reports/comps-v28/)
+reports/comps-v28/ledger.jsonl
+reports/comps-v28/.ledger-run

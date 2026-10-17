@@ -4,7 +4,8 @@
  *
  * The comp form (comps v26; ref design-refs/materials/comps-v26-add.html). ONE form for add and
  * edit, inside the comp drawer: one column in three numbered sections, labels that follow the type,
- * a note on whether a letter can name the comp, and a preview drawn from the library row's own cells.
+ * and a note on whether a letter can name the comp. (Comps v28: v26's third section, a preview drawn from the
+ * library list's own row, is retired with the list; the v28 mock's form has no preview.)
  *
  * The drawer has a head, a scrolling body and a pinned foot, and all three read the form: the head's
  * disc shows the chosen type, the foot's buttons save. So the state is a hook (`useCompForm`) the
@@ -27,9 +28,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CompMedia, CompTitle } from "../../types";
 import { CompDraft } from "../../lib/comps";
 import { ready } from "../../lib/compUsage";
-import { CompKind, CompRow, draftRow, kindOf } from "../../lib/compsLibrary";
+import { CompKind, kindOf } from "../../lib/compsLibrary";
 import { CompExplainer } from "./comps25/CompExplainer";
-import { CompCell, NextCell } from "./comps25/CompsLibrary";
 import { KindIcon } from "./comps25/marks";
 
 /** The four types, in the control's order. Stored in `CompTitle.media`; "book" is the absent default. */
@@ -91,7 +91,7 @@ export interface CompFormApi {
   f: Fields;
   set: (patch: Partial<Fields>) => void;
   kind: CompKind;
-  /** the comp as it would be saved now (the preview and the ready note read it) */
+  /** the comp as it would be saved now (the ready note reads it) */
   draft: CompTitle;
   state: ReadyState;
   hasTitle: boolean;
@@ -223,9 +223,7 @@ const SectionHead: React.FC<{ n: number; title: string; tag?: string }> = ({ n, 
 export const CompFormBody: React.FC<{
   form: CompFormApi;
   first: boolean;
-  /** edit: the comp's own row, so the preview keeps its letters and its next move */
-  row?: CompRow | null;
-}> = ({ form, first, row }) => {
+}> = ({ form, first }) => {
   const { f, set, state } = form;
   const copy = FIELD_COPY[f.media];
   const enterSaves = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -240,9 +238,6 @@ export const CompFormBody: React.FC<{
     set({ media: next.value });
     (e.currentTarget.parentElement?.querySelector(`[data-media="${next.value}"]`) as HTMLElement | null)?.focus();
   };
-  /* a new comp is on the shelf and in no letter; an edited one keeps where it already is */
-  const fresh = draftRow(form.draft);
-  const preview: CompRow = row ? { ...row, comp: form.draft, kind: fresh.kind, ready: fresh.ready } : fresh;
   const left = TAG_SUGGESTIONS.filter((s) => !f.tags.some((t) => t.toLowerCase() === s.toLowerCase()));
   const full = f.tags.length >= MAX_TAGS;
 
@@ -343,14 +338,6 @@ export const CompFormBody: React.FC<{
         </label>
       </section>
 
-      <section className="cf-sec" data-cf="section" data-section="preview">
-        <SectionHead n={3} title="How it’ll look in your library" />
-        {/* the library row's OWN two cells, from the comp as it would be saved now */}
-        <div className="cf-prev" data-cf="preview" aria-hidden="true">
-          <CompCell r={preview} placeholder="Your comp’s title" />
-          <NextCell r={preview} />
-        </div>
-      </section>
     </form>
   );
 };

@@ -1,0 +1,23 @@
+
+Running 10 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.2s)
+[AD1] 16/16 green
+  ✓   2 [measure] › tests/e2e/compsV26.measure.ts:112:3 › Comparable titles v26 › AD1 · one heading: the drawer's only heading is its title, in add, first-comp and edit (22.0s)
+[AD2] 14/14 green
+  ✓   3 [measure] › tests/e2e/compsV26.measure.ts:134:3 › Comparable titles v26 › AD2 · explainer: open with no comps, a link otherwise, and absent in edit (22.6s)
+[AD3] 36/36 green
+  ✓   4 [measure] › tests/e2e/compsV26.measure.ts:161:3 › Comparable titles v26 › AD3 · labels follow the type, and what is typed survives a type change (11.8s)
+[AD4] 14/14 green
+  ✓   5 [measure] › tests/e2e/compsV26.measure.ts:193:3 › Comparable titles v26 › AD4 · ready: the note's state is ready(), and Save is never blocked by it (11.3s)
+[AD5] 18/18 green
+  ✓   6 [measure] › tests/e2e/compsV26.measure.ts:221:3 › Comparable titles v26 › AD5 · foot: pinned to the drawer's bottom with the body scrolled to its end; no horizontal overflow (10.5s)
+[AD6] 18/18 green
+  ✓   7 [measure] › tests/e2e/compsV26.measure.ts:261:3 › Comparable titles v26 › AD6 · again: one comp written, the drawer open on an empty form, Book, focus in Title, the explainer folded (26.8s)
+[AD7] 11/11 green
+  ✓   8 [measure] › tests/e2e/compsV26.measure.ts:298:3 › Comparable titles v26 › AD7 · tags: saved to matchAxis as today, read back as two chips; a seventh is refused (13.8s)
+[AD10] 24/24 green
+  ✓   9 [measure] › tests/e2e/compsV26.measure.ts:348:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note (31.9s)
+  ✓  10 [measure] › tests/e2e/compsV26.measure.ts:398:1 › AD · every lock has a named mutation (0ms)
+
+  10 passed (2.9m)

@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "AD5",
+  "where": "1512 the body scrolls",
+  "ok": true,
+  "detail": "538px to scroll"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 at the top: the foot's bottom is the drawer's bottom",
+  "ok": true,
+  "detail": "scrollTop 0 · foot 892 · drawer 892"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 scrolled to the end",
+  "ok": true,
+  "detail": "scrollTop 538 of 538"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 at the end: the foot's bottom is the drawer's bottom",
+  "ok": true,
+  "detail": "foot 892 · drawer 892"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 the foot did not move with the scroll",
+  "ok": true,
+  "detail": "foot top 819 → 819"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 the head stays at the drawer's top",
+  "ok": true,
+  "detail": "head 8 · drawer 8"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 the drawer floats: inset 8, on screen",
+  "ok": true,
+  "detail": "top 8 · bottom 8 · right 8"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 no horizontal overflow",
+  "ok": true,
+  "detail": "0px · 0 element(s) past the edge"
+ },
+ {
+  "lock": "AD5",
+  "where": "1512 Add is disabled with an empty title",
+  "ok": true,
+  "detail": "Add comp disabled true"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 the body scrolls",
+  "ok": true,
+  "detail": "638px to scroll"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 at the top: the foot's bottom is the drawer's bottom",
+  "ok": true,
+  "detail": "scrollTop 0 · foot 792 · drawer 792"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 scrolled to the end",
+  "ok": true,
+  "detail": "scrollTop 638 of 638"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 at the end: the foot's bottom is the drawer's bottom",
+  "ok": true,
+  "detail": "foot 792 · drawer 792"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 the foot did not move with the scroll",
+  "ok": true,
+  "detail": "foot top 719 → 719"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 the head stays at the drawer's top",
+  "ok": true,
+  "detail": "head 8 · drawer 8"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 the drawer floats: inset 8, on screen",
+  "ok": true,
+  "detail": "top 8 · bottom 8 · right 8"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 no horizontal overflow",
+  "ok": true,
+  "detail": "0px · 0 element(s) past the edge"
+ },
+ {
+  "lock": "AD5",
+  "where": "1280 Add is disabled with an empty title",
+  "ok": true,
+  "detail": "Add comp disabled true"
+ }
+]

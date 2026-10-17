@@ -277,3 +277,33 @@ export function usageModel(manuscript: Manuscript, versions: readonly VersionLik
     unrecorded: unrecordedLetters(manuscript, versions, packages, queries),
   };
 }
+
+/* ══ comps v28: the rates "What's landing" reads ══════════════════════════════════════════════ */
+
+/** A rate: how many asked for more, of how many sent, and the whole percentage (null when none were sent). */
+export interface AskedRate { asked: number; sent: number; pct: number | null }
+const rateOf = (asked: number, sent: number): AskedRate => ({ asked, sent, pct: sent ? Math.round((asked / sent) * 100) : null });
+
+/**
+ * "Your average": the manuscript's request rate, the share of ALL its queries that reached a partial or full
+ * request, or an offer.
+ * ⚠️ THE ANALYTICS DERIVATION (`buildRows(...).reachedRequest` over every query, waiting ones included), the same
+ *    numerator and denominator as Analytics' "Request rate" on all time, so the two pages cannot disagree. Unit-locked
+ *    against `analyticsModel` in compUsage.test.ts.
+ */
+export function averageAsked(manuscript: Pick<Manuscript, "id">, queries: readonly QueryLike[], activities: readonly Activity[] = []): AskedRate {
+  const mine = queries.filter((q) => q.manuscriptId === manuscript.id);
+  const asked = buildRows(mine as Query[], [...activities], [], 0).filter((r) => r.reachedRequest).length;
+  return rateOf(asked, mine.length);
+}
+
+/** One letter's rate: of the queries it went out with, how many asked for more. */
+export function letterRate(model: Pick<UsageModel, "letterOfQuery" | "asked">, letterId: string): AskedRate {
+  let sent = 0, asked = 0;
+  for (const [q, l] of model.letterOfQuery) {
+    if (l !== letterId) continue;
+    sent++;
+    if (model.asked.has(q)) asked++;
+  }
+  return rateOf(asked, sent);
+}

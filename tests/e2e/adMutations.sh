@@ -18,7 +18,8 @@ run() { # lock [tag: a second mutation of the same lock logs under lock-tag]
   AD_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV26.measure.ts -g "^.*$1 · " > "$log" 2>&1
   echo "$1${2:+ ($2)}: exit $? · $(grep -c '✗' "$log") red reading(s)"
 }
-for L in AD1 AD5 AD8; do want "$L" && run "$L"; done
+# AD8 retired with comps v28 (the form has no preview)
+for L in AD1 AD5; do want "$L" && run "$L"; done
 
 src() { # lock file old new
   want "$1" || return

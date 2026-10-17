@@ -3,8 +3,8 @@
 #
 #   SA_E2E_BASE_URL=http://127.0.0.1:<port> bash tests/e2e/cv25Mutations.sh
 #
-# Seven mutations are applied in the page (CV25_MUTATE reaches the suite). Six are edits to the
-# source: each is made, the dev bundle rebuilt, the lock run, and the file put back FROM A COPY —
+# Comps v28: only the data locks remain (A1, A3, E2); B1, B2, D1–D4, E1, F1 and L1 retired with the v25 list.
+# Each mutation is an edit to the source: made, the dev bundle rebuilt, the lock run, and the file put back FROM A COPY —
 # never with git, which would restore HEAD and take uncommitted work with it. Run it in the
 # measurement worktree, with `vite preview` serving that worktree's dist/.
 set -u
@@ -20,7 +20,6 @@ run() { # lock [tag: a second mutation of the same lock logs under lock-tag]
   CV25_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV25.measure.ts -g "^.*$1 · " > "$log" 2>&1
   echo "$1${2:+ ($2)}: exit $? · $(grep -c '✗' "$log") red reading(s)"
 }
-for L in B1 B2 D1 D2 E1 L1; do want "$L" && run "$L"; done
 
 src() { # lock file python-edit
   want "$1" || return
@@ -37,12 +36,9 @@ open(p,'w',encoding='utf-8').write(s.replace(o,n))" "$2" "$3" "$4" || { cp "$BAK
 PAGE=src/components/manuscripts/ComparableTitlesPage.tsx
 src A1 "$PAGE" 'const clean = withCompIds(next.map(normalizeComp));' 'const clean = withCompIds(next.map(normalizeComp).map((c) => { const d = { ...c }; delete d.id; return d; }));'
 src A3 src/components/manuscripts/comps25/CompLetterPicker.tsx 'const fixed = sent > 0 && recorded;' 'const fixed = false;'
-src D3 src/lib/compsLibrary.ts 'const firstDir = (k: SortKey): 1 | -1 => (k === "title" ? 1 : -1);' 'const firstDir = (_k: SortKey): 1 | -1 => 1;'
-src D4 "$PAGE" 'useState<GroupBy>("none")' 'useState<GroupBy>("where")'
 src E2 "$PAGE" 'const err = await updateVersion(letterId, { compIds: ids });' 'let err: string | null = null; for (const l of letters) { const e = await updateVersion(l.id, { compIds: ids }); if (l.id === letterId) err = e; }'
 # comps v26.1: the picker's first frame. The letter is chosen in an effect, after the picker is first drawn.
 src E2 src/components/manuscripts/comps25/CompLetterPicker.tsx '  if (stale) sync();' '  React.useEffect(() => { if (stale) sync(); });' firstframe
-src F1 src/components/shell/useFullScreenList.ts 'useEffect(() => (full ? holdSidebarCollapsed() : undefined), [full]);' 'useEffect(() => undefined, [full]);'
 
 npm run build:dev > "$OUT/restore.build.log" 2>&1 && echo "restored and rebuilt"
 node tests/e2e/seedCompsV25.mjs --restore > /dev/null 2>&1

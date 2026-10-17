@@ -9,9 +9,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { FIELD_COPY, MAX_TAGS, MEDIA, NEEDS_BOOK, NEEDS_SCREEN, TAG_SUGGESTIONS, joinTags, readyState, splitTags, withTag, yearError } from "./CompForm";
-import { CompCell, NextCell } from "./comps25/CompsLibrary";
 import { ready } from "../../lib/compUsage";
-import { draftRow } from "../../lib/compsLibrary";
 
 describe("the type and the labels that follow it", () => {
   it("four types, Book first, stored in `media`", () => {
@@ -81,18 +79,9 @@ describe("the ready note", () => {
   });
 });
 
-describe("the preview is the library row's own cells", () => {
-  it("a draft is on the shelf, in no letter, and its cells render from the same components the list uses", () => {
-    const r = draftRow({ title: "Salt and Iron", author: "J. Mercer", year: 2024 });
-    expect([r.where, r.ready, r.kind]).toEqual(["none", false, "book"]);
-    const cell = renderToStaticMarkup(<CompCell r={r} placeholder="Your comp’s title" />);
-    expect(cell).toContain('data-cv="comp-cell"');
-    expect(cell).toContain("Salt and Iron");
-    /* with no handler the missing publisher is words, never a button */
-    expect(cell).not.toContain("<button");
-    expect(renderToStaticMarkup(<NextCell r={r} />)).toContain("Add a publisher");
-    expect(renderToStaticMarkup(<CompCell r={draftRow({ title: "" })} placeholder="Your comp’s title" />)).toMatch(/is-placeholder"[^>]*>Your comp’s title</);
-    const form = readFileSync("src/components/manuscripts/CompForm.tsx", "utf8");
-    expect(form).toContain('import { CompCell, NextCell } from "./comps25/CompsLibrary";');
+describe("no preview (comps v28)", () => {
+  it("the form draws no list-row preview: the list it previewed is retired, and the v28 mock's form has none", () => {
+    const form = readFileSync("src/components/manuscripts/CompForm.tsx", "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(form).not.toMatch(/data-section="preview"|CompCell|NextCell|draftRow/);
   });
 });
