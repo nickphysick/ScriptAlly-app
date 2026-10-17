@@ -14,9 +14,9 @@ export const DASH_SHAPE_KEY = "sa.dash58Shape";
 
 /** v60: `pre` is whether the last loaded page was before the first query, `agents` whether it had any
  *  agents — so the loading page draws the state it last saw and the swap never flashes. */
-export interface DashShape { focusH: number; closed: "some" | "none"; today: boolean; pre: boolean; agents: boolean }
+export interface DashShape { focusH: number; closed: "some" | "none"; today: boolean; pre: boolean; agents: boolean; hoopNeed: number }
 
-export const DEFAULT_SHAPE: DashShape = { focusH: 246, closed: "some", today: false, pre: false, agents: true };
+export const DEFAULT_SHAPE: DashShape = { focusH: 246, closed: "some", today: false, pre: false, agents: true, hoopNeed: 0 };
 
 export function readShape(): DashShape {
   try {
@@ -29,6 +29,8 @@ export function readShape(): DashShape {
       today: v.today === true,
       pre: v.pre === true,
       agents: v.agents !== false,
+      /* v60: the last measured width the two hoop cards needed — the loading page's left-column floor */
+      hoopNeed: typeof v.hoopNeed === "number" && v.hoopNeed >= 0 && v.hoopNeed <= 2000 ? v.hoopNeed : 0,
     };
   } catch { return DEFAULT_SHAPE; }
 }

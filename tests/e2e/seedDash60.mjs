@@ -4,6 +4,8 @@
  * "day one" adds the dev aid `__SA_DASH_NO_AGENTS`. Nothing else on the account is touched.
  *
  *   node tests/e2e/seedDash60.mjs          create (or reset) the manuscript, bare
+ *   node tests/e2e/seedDash60.mjs --full   ...with one of each material, two comps and one book version
+ *                                          (every "Ready for lift off?" tile but the import done)
  *   node tests/e2e/seedDash60.mjs --clean  remove it, and every version written for it
  */
 import { readFileSync, existsSync } from "node:fs";
@@ -29,12 +31,22 @@ if (process.argv.includes("--clean")) {
   await deleteDoc(doc(db, "users", uid, "manuscripts", MS));
   console.log(`removed ${MS} and ${versions.size} version(s)`);
 } else {
+  const full = process.argv.includes("--full");
   await setDoc(doc(db, "users", uid, "manuscripts", MS), {
     id: MS, userId: uid, title: "DB60 Pre-query", genre: "Fantasy", ageCategory: "Adult",
     wordCount: 0, logline: "", status: "Drafting", statusChangedDate: new Date().toISOString(),
+    ...(full ? {
+      comps: [{ id: "db60-c1", title: "The Night Circus", author: "Erin Morgenstern", year: 2011 }, { id: "db60-c2", title: "Piranesi", author: "Susanna Clarke", year: 2020 }],
+      bookVersions: [{ id: "db60-bv1", name: "First draft", kind: "initial", createdDate: "2026-10-01" }],
+    } : {}),
   });
+  if (full) {
+    for (const [i, t] of [["ql", "Query Letter"], ["syn", "Synopsis"], ["sp", "Sample Pages"]]) {
+      await setDoc(doc(db, "users", uid, "versions", `db60-v-${i}`), { id: `db60-v-${i}`, manuscriptId: MS, userId: uid, componentType: t, versionName: `${t} v1`, fileAttached: false, createdDate: new Date().toISOString() });
+    }
+  }
   const qs = await getDocs(query(collection(db, "users", uid, "queries"), where("manuscriptId", "==", MS)));
   if (qs.size) throw new Error(`${MS} has ${qs.size} queries — not pre-query`);
-  console.log(`seeded ${MS} bare (removed ${versions.size} old version(s))`);
+  console.log(`seeded ${MS} ${full ? "full" : "bare"} (removed ${versions.size} old version(s))`);
 }
 process.exit(0);

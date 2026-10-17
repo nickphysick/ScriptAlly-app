@@ -1,0 +1,299 @@
+
+Running 5 tests using 1 worker
+
+[1/5] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/5] [measure] › tests/e2e/dashV60.measure.ts:142:1 › DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed or second before the first query, and fit
+[measure] › tests/e2e/dashV60.measure.ts:142:1 › DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed or second before the first query, and fit
+  ✗ P1 · 1512x900 A left follows the predicate — pre null · door false · chart true · expected pre
+
+  ✗ P1 · 1512x900 A right follows the predicate — lift "null" · list "What's on the list today?" · focus true
+
+  ✗ P2 · 1512x900 A slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P6 · 1512x900 A no closed strip — closed element true · closed words false
+
+  ✗ P7 · 1512x900 A one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c
+
+  ✗ P7 · 1512x900 A the agents door carries a glyph or the snapshot, no drawing — door false · snap false
+
+  ✗ P1 · 1512x900 B left follows the predicate — pre null · door false · chart true · expected pre
+
+  ✗ P1 · 1512x900 B right follows the predicate — lift "null" · list "What's on the list today?" · focus true
+
+  ✗ P2 · 1512x900 B slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P6 · 1512x900 B no closed strip — closed element true · closed words false
+
+  ✗ P7 · 1512x900 B one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c
+
+  ✗ P7 · 1512x900 B the agents door carries a glyph or the snapshot, no drawing — door false · snap false
+
+  ✗ P1 · 1512x900 C left follows the predicate — pre null · door false · chart true · expected querying
+
+  ✗ P2 · 1512x900 C slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P3 · 1512x900 C population — 0 hoop cards
+
+  ✗ P3 · 1512x900 C equal widths — undefined · undefined
+
+  ✗ P3 · 1512x900 C side by side, beneath the chart — chart bottom 616.8 · hoops undefined/undefined
+
+  ✗ P3 · 1512x900 C the chart takes the full width — chart 642.9 · hoops row undefined · column 642.9
+
+  ✗ P1 · 1280x800 A left follows the predicate — pre null · door false · chart true · expected pre
+
+  ✗ P1 · 1280x800 A right follows the predicate — lift "null" · list "What's on the list today?" · focus true
+
+  ✗ P2 · 1280x800 A slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P6 · 1280x800 A no closed strip — closed element true · closed words false
+
+  ✗ P7 · 1280x800 A one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c
+
+  ✗ P7 · 1280x800 A the agents door carries a glyph or the snapshot, no drawing — door false · snap false
+
+  ✗ P1 · 1280x800 B left follows the predicate — pre null · door false · chart true · expected pre
+
+  ✗ P1 · 1280x800 B right follows the predicate — lift "null" · list "What's on the list today?" · focus true
+
+  ✗ P2 · 1280x800 B slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P6 · 1280x800 B no closed strip — closed element true · closed words false
+
+  ✗ P7 · 1280x800 B one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c
+
+  ✗ P7 · 1280x800 B the agents door carries a glyph or the snapshot, no drawing — door false · snap false
+
+  ✗ P1 · 1280x800 C left follows the predicate — pre null · door false · chart true · expected querying
+
+  ✗ P2 · 1280x800 C slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P3 · 1280x800 C population — 0 hoop cards
+
+  ✗ P3 · 1280x800 C equal widths — undefined · undefined
+
+  ✗ P3 · 1280x800 C side by side, beneath the chart — chart bottom 512.5 · hoops undefined/undefined
+
+  ✗ P3 · 1280x800 C the chart takes the full width — chart 533.7 · hoops row undefined · column 533.7
+
+  ✗ P1 · 1709x849 A left follows the predicate — pre null · door false · chart true · expected pre
+
+  ✗ P1 · 1709x849 A right follows the predicate — lift "null" · list "What's on the list today?" · focus true
+
+  ✗ P2 · 1709x849 A slate band —  · --clv-slate rgb(95, 123, 147)
+
+  ✗ P6 · 1709x849 A no closed strip — closed element true · closed words false
+
+  1) [measure] › tests/e2e/dashV60.measure.ts:142:1 › DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed or second before the first query, and fit 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 56
+
+    - Array []
+    + Array [
+    +   "P1 · 1512x900 A left follows the predicate — pre null · door false · chart true · expected pre",
+    +   "P1 · 1512x900 A right follows the predicate — lift \"null\" · list \"What's on the list today?\" · focus true",
+    +   "P2 · 1512x900 A slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P6 · 1512x900 A no closed strip — closed element true · closed words false",
+    +   "P7 · 1512x900 A one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c",
+    +   "P7 · 1512x900 A the agents door carries a glyph or the snapshot, no drawing — door false · snap false",
+    +   "P1 · 1512x900 B left follows the predicate — pre null · door false · chart true · expected pre",
+    +   "P1 · 1512x900 B right follows the predicate — lift \"null\" · list \"What's on the list today?\" · focus true",
+    +   "P2 · 1512x900 B slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P6 · 1512x900 B no closed strip — closed element true · closed words false",
+    +   "P7 · 1512x900 B one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c",
+    +   "P7 · 1512x900 B the agents door carries a glyph or the snapshot, no drawing — door false · snap false",
+    +   "P1 · 1512x900 C left follows the predicate — pre null · door false · chart true · expected querying",
+    +   "P2 · 1512x900 C slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P3 · 1512x900 C population — 0 hoop cards",
+    +   "P3 · 1512x900 C equal widths — undefined · undefined",
+    +   "P3 · 1512x900 C side by side, beneath the chart — chart bottom 616.8 · hoops undefined/undefined",
+    +   "P3 · 1512x900 C the chart takes the full width — chart 642.9 · hoops row undefined · column 642.9",
+    +   "P1 · 1280x800 A left follows the predicate — pre null · door false · chart true · expected pre",
+    +   "P1 · 1280x800 A right follows the predicate — lift \"null\" · list \"What's on the list today?\" · focus true",
+    +   "P2 · 1280x800 A slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P6 · 1280x800 A no closed strip — closed element true · closed words false",
+    +   "P7 · 1280x800 A one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c",
+    +   "P7 · 1280x800 A the agents door carries a glyph or the snapshot, no drawing — door false · snap false",
+    +   "P1 · 1280x800 B left follows the predicate — pre null · door false · chart true · expected pre",
+    +   "P1 · 1280x800 B right follows the predicate — lift \"null\" · list \"What's on the list today?\" · focus true",
+    +   "P2 · 1280x800 B slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P6 · 1280x800 B no closed strip — closed element true · closed words false",
+    +   "P7 · 1280x800 B one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c",
+    +   "P7 · 1280x800 B the agents door carries a glyph or the snapshot, no drawing — door false · snap false",
+    +   "P1 · 1280x800 C left follows the predicate — pre null · door false · chart true · expected querying",
+    +   "P2 · 1280x800 C slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P3 · 1280x800 C population — 0 hoop cards",
+    +   "P3 · 1280x800 C equal widths — undefined · undefined",
+    +   "P3 · 1280x800 C side by side, beneath the chart — chart bottom 512.5 · hoops undefined/undefined",
+    +   "P3 · 1280x800 C the chart takes the full width — chart 533.7 · hoops row undefined · column 533.7",
+    +   "P1 · 1709x849 A left follows the predicate — pre null · door false · chart true · expected pre",
+    +   "P1 · 1709x849 A right follows the predicate — lift \"null\" · list \"What's on the list today?\" · focus true",
+    +   "P2 · 1709x849 A slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P6 · 1709x849 A no closed strip — closed element true · closed words false",
+    +   "P7 · 1709x849 A one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c",
+    +   "P7 · 1709x849 A the agents door carries a glyph or the snapshot, no drawing — door false · snap false",
+    +   "P1 · 1709x849 B left follows the predicate — pre null · door false · chart true · expected pre",
+    +   "P1 · 1709x849 B right follows the predicate — lift \"null\" · list \"What's on the list today?\" · focus true",
+    +   "P2 · 1709x849 B slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P6 · 1709x849 B no closed strip — closed element true · closed words false",
+    +   "P7 · 1709x849 B one drawing, the Courier — /images/dash/courier.png?v=9c2a4371 | /images/dash/archivist.png?v=b746635c",
+    +   "P7 · 1709x849 B the agents door carries a glyph or the snapshot, no drawing — door false · snap false",
+    +   "P1 · 1709x849 C left follows the predicate — pre null · door false · chart true · expected querying",
+    +   "P2 · 1709x849 C slate band —  · --clv-slate rgb(95, 123, 147)",
+    +   "P3 · 1709x849 C population — 0 hoop cards",
+    +   "P3 · 1709x849 C equal widths — undefined · undefined",
+    +   "P3 · 1709x849 C side by side, beneath the chart — chart bottom 568.0 · hoops undefined/undefined",
+    +   "P3 · 1709x849 C the chart takes the full width — chart 755.0 · hoops row undefined · column 755.0",
+    + ]
+
+      54 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      55 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 56 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      57 |   }
+      58 | }
+      59 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash60base/tests/e2e/dashV60.measure.ts:56:95)
+        at /Users/nickphysick/ScriptAlly-dash60base/tests/e2e/dashV60.measure.ts:184:5
+
+    Error Context: test-results/dashV60.measure.ts-DB60-P1-243dd-ore-the-first-query-and-fit-measure/error-context.md
+
+    Error Context: test-results/dashV60.measure.ts-DB60-P1-243dd-ore-the-first-query-and-fit-measure/error-context.md
+
+
+[3/5] [measure] › tests/e2e/dashV60.measure.ts:189:1 › DB60 P4 P5 — the agents figures are the Contact list's; the closed counts are closedTile's
+[measure] › tests/e2e/dashV60.measure.ts:189:1 › DB60 P4 P5 — the agents figures are the Contact list's; the closed counts are closedTile's
+  ✗ P4 · C population — 38 agents
+
+  ✗ P4 · C the page's figures are agentQueryStates' and nextStep's — page null · contact list {"querying":20,"closed":3,"none":15,"ready":6,"total":38}
+
+  ✗ P4 · C and the words say them — "null"
+
+  ✗ P4 · C the legend reads the same three — 
+
+  ✗ P5 · the hoop's four counts are closedTile's — page null · closedTile {"quiet":1,"letter":8,"partial":0,"full":2}
+
+  ✗ P5 · the legend reads them, in bucket order — 
+
+  ✗ P5 · the title is their sum — "null" · 11
+
+  ✗ P4 · B population — 38 agents
+
+  ✗ P4 · B the page's figures are agentQueryStates' and nextStep's — page null · contact list {"querying":0,"closed":0,"none":38,"ready":1,"total":38}
+
+  ✗ P4 · B and the words say them — "null"
+
+  ✗ P4 · B the snapshot's big figure is the queried count — "null"
+
+  2) [measure] › tests/e2e/dashV60.measure.ts:189:1 › DB60 P4 P5 — the agents figures are the Contact list's; the closed counts are closedTile's 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 13
+
+    - Array []
+    + Array [
+    +   "P4 · C population — 38 agents",
+    +   "P4 · C the page's figures are agentQueryStates' and nextStep's — page null · contact list {\"querying\":20,\"closed\":3,\"none\":15,\"ready\":6,\"total\":38}",
+    +   "P4 · C and the words say them — \"null\"",
+    +   "P4 · C the legend reads the same three — ",
+    +   "P5 · the hoop's four counts are closedTile's — page null · closedTile {\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2}",
+    +   "P5 · the legend reads them, in bucket order — ",
+    +   "P5 · the title is their sum — \"null\" · 11",
+    +   "P4 · B population — 38 agents",
+    +   "P4 · B the page's figures are agentQueryStates' and nextStep's — page null · contact list {\"querying\":0,\"closed\":0,\"none\":38,\"ready\":1,\"total\":38}",
+    +   "P4 · B and the words say them — \"null\"",
+    +   "P4 · B the snapshot's big figure is the queried count — \"null\"",
+    + ]
+
+      54 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      55 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 56 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      57 |   }
+      58 | }
+      59 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash60base/tests/e2e/dashV60.measure.ts:56:95)
+        at /Users/nickphysick/ScriptAlly-dash60base/tests/e2e/dashV60.measure.ts:221:5
+
+    Error Context: test-results/dashV60.measure.ts-DB60-P4-0aebb-sed-counts-are-closedTile-s-measure/error-context.md
+
+    Error Context: test-results/dashV60.measure.ts-DB60-P4-0aebb-sed-counts-are-closedTile-s-measure/error-context.md
+
+
+[4/5] [measure] › tests/e2e/dashV60.measure.ts:227:1 › DB60 P8 — the tiles' done states
+[measure] › tests/e2e/dashV60.measure.ts:227:1 › DB60 P8 — the tiles' done states
+  P8 branches entered both ways:  (import: the account's one state; the unit suite enters both)
+
+  ✗ P8 · bare population — 0 tiles
+
+  ✗ P8 · bare: materials 0 of 3, not done — 
+
+  ✗ P8 · bare: no comps, not done — 
+
+  ✗ P8 · bare: no version, not done — 
+
+  ✗ P8 · bare import follows the entitlement — undefined · spent false
+
+  ✗ P8 · --full population — 0 tiles
+
+  ✗ P8 · full: materials 3 of 3, done — 
+
+  ✗ P8 · full: two comps, done — 
+
+  ✗ P8 · full: one version, done — 
+
+  ✗ P8 · full: the count is the tiles' — "null"
+
+  ✗ P8 · --full import follows the entitlement — undefined · spent false
+
+  ✗ P8 · materials, comps and version each entered done and not done — 
+
+  3) [measure] › tests/e2e/dashV60.measure.ts:227:1 › DB60 P8 — the tiles' done states ─────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 14
+
+    - Array []
+    + Array [
+    +   "P8 · bare population — 0 tiles",
+    +   "P8 · bare: materials 0 of 3, not done — ",
+    +   "P8 · bare: no comps, not done — ",
+    +   "P8 · bare: no version, not done — ",
+    +   "P8 · bare import follows the entitlement — undefined · spent false",
+    +   "P8 · --full population — 0 tiles",
+    +   "P8 · full: materials 3 of 3, done — ",
+    +   "P8 · full: two comps, done — ",
+    +   "P8 · full: one version, done — ",
+    +   "P8 · full: the count is the tiles' — \"null\"",
+    +   "P8 · --full import follows the entitlement — undefined · spent false",
+    +   "P8 · materials, comps and version each entered done and not done — ",
+    + ]
+
+      54 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      55 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 56 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      57 |   }
+      58 | }
+      59 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash60base/tests/e2e/dashV60.measure.ts:56:95)
+        at /Users/nickphysick/ScriptAlly-dash60base/tests/e2e/dashV60.measure.ts:263:5
+
+    Error Context: test-results/dashV60.measure.ts-DB60-P8-—-the-tiles-done-states-measure/error-context.md
+
+    Error Context: test-results/dashV60.measure.ts-DB60-P8-—-the-tiles-done-states-measure/error-context.md
+
+
+[5/5] [measure] › tests/e2e/dashV60.measure.ts:268:1 › DB60 P10 — loading draws the state it last saw, at its loaded size
+  3 failed
+    [measure] › tests/e2e/dashV60.measure.ts:142:1 › DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed or second before the first query, and fit 
+    [measure] › tests/e2e/dashV60.measure.ts:189:1 › DB60 P4 P5 — the agents figures are the Contact list's; the closed counts are closedTile's 
+    [measure] › tests/e2e/dashV60.measure.ts:227:1 › DB60 P8 — the tiles' done states ──────────────
+  2 passed (1.9m)

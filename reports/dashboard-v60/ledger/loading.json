@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "P10",
+  "where": "B the hold is real",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "P10",
+  "where": "B the same containers",
+  "ok": true,
+  "detail": "[data-d60=\"queries-door\"],[data-d60=\"agents-snap\"],[data-d60=\"ways\"],[data-d58=\"panel\"] → [data-d60=\"queries-door\"],[data-d60=\"agents-snap\"],[data-d60=\"ways\"],[data-d58=\"panel\"]"
+ },
+ {
+  "lock": "P10",
+  "where": "B at their loaded size",
+  "ok": true,
+  "detail": "none moved"
+ },
+ {
+  "lock": "P10",
+  "where": "C the hold is real",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "P10",
+  "where": "C the same containers",
+  "ok": true,
+  "detail": "[data-d58=\"active\"],[data-d60=\"hoops\"],[data-d58=\"focus\"],[data-d58=\"panel\"] → [data-d58=\"active\"],[data-d60=\"hoops\"],[data-d58=\"focus\"],[data-d58=\"panel\"]"
+ },
+ {
+  "lock": "P10",
+  "where": "C at their loaded size",
+  "ok": true,
+  "detail": "none moved"
+ }
+]

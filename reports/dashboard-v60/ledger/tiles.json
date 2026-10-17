@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "P8",
+  "where": "bare population",
+  "ok": true,
+  "detail": "4 tiles"
+ },
+ {
+  "lock": "P8",
+  "where": "bare: materials 0 of 3, not done",
+  "ok": true,
+  "detail": "0 OF 3 ON FILE"
+ },
+ {
+  "lock": "P8",
+  "where": "bare: no comps, not done",
+  "ok": true,
+  "detail": "0 COMPS"
+ },
+ {
+  "lock": "P8",
+  "where": "bare: no version, not done",
+  "ok": true,
+  "detail": "NONE YET"
+ },
+ {
+  "lock": "P8",
+  "where": "bare import follows the entitlement",
+  "ok": true,
+  "detail": "ONE FREE IMPORT · spent false"
+ },
+ {
+  "lock": "P8",
+  "where": "--full population",
+  "ok": true,
+  "detail": "4 tiles"
+ },
+ {
+  "lock": "P8",
+  "where": "full: materials 3 of 3, done",
+  "ok": true,
+  "detail": "✓ 3 OF 3 ON FILE"
+ },
+ {
+  "lock": "P8",
+  "where": "full: two comps, done",
+  "ok": true,
+  "detail": "✓ 2 COMPS"
+ },
+ {
+  "lock": "P8",
+  "where": "full: one version, done",
+  "ok": true,
+  "detail": "✓ V1 CURRENT"
+ },
+ {
+  "lock": "P8",
+  "where": "full: the count is the tiles'",
+  "ok": true,
+  "detail": "\"3 OF 4 · NOTHING REQUIRED\""
+ },
+ {
+  "lock": "P8",
+  "where": "--full import follows the entitlement",
+  "ok": true,
+  "detail": "ONE FREE IMPORT · spent false"
+ },
+ {
+  "lock": "P8",
+  "where": "materials, comps and version each entered done and not done",
+  "ok": true,
+  "detail": "mats,comps,version"
+ }
+]

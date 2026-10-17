@@ -119,7 +119,8 @@ const readPage = (page: Page) => page.evaluate(() => {
     titleFits: title ? title.scrollWidth <= title.clientWidth + 0.5 : null,
     focus: box(q('[data-d58="focus"]')), rule: box(rule), ruleBg: rule ? getComputedStyle(rule).backgroundColor : null,
     panel: box(panel), tab: box(q('[data-d58="tab"]')), sheet: box(document.querySelector(".ws-window")),
-    closed: box(q('[data-d58="closed"]')),
+    /* RE-POINTED (Dashboard v60): the left column's lowest card is the Closed hoop's row */
+    closed: box(q('[data-d60="closed-hoop"]')),
     rows: document.querySelectorAll('[data-d58="row"], [data-d58="group"], [data-d58="then"]').length,
     scroller: scroller ? { sh: scroller.scrollHeight, ch: scroller.clientHeight, sw: scroller.scrollWidth, cw: scroller.clientWidth } : null,
     doc: { sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, sh: document.documentElement.scrollHeight, ch: document.documentElement.clientHeight },
@@ -205,23 +206,10 @@ test("DB59 V1 — View task lands, and writes nothing", async ({ page }) => {
     { name: "D ready to query", drop: ["req", "nudge", "quiet", "house"] },
     { name: "E coming up", drop: ["req", "nudge", "quiet", "house", "ready"] },
   ];
-  /* first run: a manuscript of this account's with no queries on it */
-  const { db, uid } = await harnessDb();
-  const { collection, getDocs } = await import("firebase/firestore");
-  const mss = (await getDocs(collection(db, "users", uid, "manuscripts"))).docs.map((d: { id: string }) => d.id);
-  const qms = new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d: { data: () => { manuscriptId?: string } }) => d.data().manuscriptId));
-  /* the account has none, so one is seeded for this case and removed in the same run */
-  let emptyMs = mss.find((m: string) => !qms.has(m));
-  let seeded = false;
-  if (!emptyMs) {
-    const { doc, setDoc } = await import("firebase/firestore");
-    emptyMs = "db59-first-run";
-    await setDoc(doc(db, "users", uid, "manuscripts", emptyMs), { id: emptyMs, userId: uid, title: "DB59 first run", genre: "Fantasy", ageCategory: "Adult", wordCount: 0, logline: "", status: "Drafting", statusChangedDate: new Date().toISOString() }).then(() => { seeded = true; }, (e: Error) => console.log(`  seeding the first-run manuscript failed: ${e.message}`));
-  }
-  if (emptyMs && (seeded || mss.includes(emptyMs))) states.push({ name: "F first run", drop: [], ms: emptyMs });
-  L.check("V1", "a first-run manuscript exists on the account", states.length === 7, `${mss.length} manuscripts · ${seeded ? "seeded" : "found"} ${emptyMs}`);
+  /* RETIRED (Dashboard v60): the "F first run" state. Before the first query the right column is "Ready
+     for lift off?" and there is no focus card to press; DB60 P1 holds that swap, and the left column's
+     doors carry "Log a query" and "Add an agent". */
   const seen: Record<string, string> = {};
-  try {
   for (const s of states) {
     await openDash(page, V1512, { __SA_DASH_DROP: s.drop }, s.ms);
     const f = await page.evaluate(() => {
@@ -261,12 +249,9 @@ test("DB59 V1 — View task lands, and writes nothing", async ({ page }) => {
     await page.keyboard.press("Escape");
     await page.waitForTimeout(500);
   }
-  } finally {
-    if (seeded) { const { doc, deleteDoc } = await import("firebase/firestore"); await deleteDoc(doc(db, "users", uid, "manuscripts", "db59-first-run")); }
-  }
   console.log(`  V1 kinds seen: ${JSON.stringify(seen)}`);
   L.check("V1", "four or more kinds entered", new Set(Object.values(seen)).size >= 4, JSON.stringify(seen));
-  L.done(18);
+  L.done(16);
 });
 
 /* ── P1 · P4 — the copy, and the one feedback panel ─────────────────────────────────────────── */
@@ -540,7 +525,7 @@ test("DB59 L1 — loading and loaded boxes are the same boxes", async ({ page })
   const read = () => page.evaluate(() => {
     const q = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
     const box = (s: string) => { const e = q(s); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; };
-    return { header: box('[data-d58="header"]'), active: box('[data-d58="active"]'), closed: box('[data-d58="closed"]'), focus: box('[data-d58="focus"]'), panel: box('[data-d58="panel"]'), tab: box('[data-d58="tab"]') };
+    return { header: box('[data-d58="header"]'), active: box('[data-d58="active"]'), closed: box('[data-d60="closed-hoop"]'), focus: box('[data-d58="focus"]'), panel: box('[data-d58="panel"]'), tab: box('[data-d58="tab"]') };
   });
   for (const vp of [V1512, { width: 1280, height: 800 }]) {
     await openDash(page, vp);

@@ -46,11 +46,11 @@ class Ledger {
 /** The in-page breaks. Each is the lock's own named mutation. */
 const MUTATIONS: Record<string, string> = {
   "F1-header-pad": `[data-d58="header"] { padding-top: 146px !important; }`,
-  "F2-closed-flex": `[data-d58="closed"] { flex: 1 1 0 !important; min-height: 0 !important; }`,
+  "F2-closed-flex": `[data-d60="hoops"] { flex: 1 1 0 !important; min-height: 0 !important; }`,
   "F3-chart-fixed": `[data-d58="active"] { flex: none !important; height: 402px !important; } [data-d58="active"] .os-acplot { flex: none !important; height: 340px !important; }`,
   "R1-white-frame": `[data-d58="right"] { background: #fff !important; box-shadow: 0 0 0 1px rgba(0,0,0,.2) !important; }`,
   "A1-dark-dim": `[data-d58="wash"] { background: rgba(28, 19, 15, 0.28) !important; }`,
-  "L1-no-closed-skeleton": `[data-d58="closed"][data-loading="1"] [data-d58="closed-body"] { display: none !important; }`,
+  "L1-no-closed-skeleton": `[data-d60="closed-hoop"][data-loading="1"] .d60-hb { display: none !important; }`,
 };
 
 async function openDash(page: Page, vp: VP, flags: Record<string, unknown> = {}) {
@@ -113,20 +113,21 @@ const readFrame = (page: Page) => page.evaluate(() => {
     header: box(q('[data-d58="header"]')),
     active: box(q('[data-d58="active"]')),
     plot: box(q('[data-d58="active"] .os-acplot')),
-    closed: box(q('[data-d58="closed"]')),
+    /* RE-POINTED (Dashboard v60): the closed card is the Closed hoop card */
+    closed: box(q('[data-d60="closed-hoop"]')),
     focus: box(q('[data-d58="focus"]')),
     tab: box(q('[data-d58="tab"]')),
     listTitle: box(q('[data-d58="list-title"]')),
     clips: {
       activeFrame: clip('[data-d58="active"] .os-frame'),
-      closedFrame: clip('[data-d58="closed"] .os-frame'),
-      closedBody: clip('[data-d58="closed-body"]'),
-      tiles: clip('[data-d58="tiles"]'),
+      closedFrame: clip('[data-d60="closed-hoop"] .os-frame'),
+      closedBody: clip('[data-d60="closed-hoop"] .d60-hb'),
+      tiles: clip('[data-d60="closed-legend"]'),
       focus: clip('[data-d58="focus"]'),
     },
     escapes: {
       active: escapes('[data-d58="active"]', [".os-mentor"]),
-      closed: escapes('[data-d58="closed"]'),
+      closed: escapes('[data-d60="closed-hoop"]'),
       focus: escapes('[data-d58="focus"]'),
     },
     /* the only things that may scroll: the list and the drawer body */
@@ -172,7 +173,8 @@ test("DB58 F1–F3 — one screen, never clipped, and the chart gives way", asyn
   for (const vp of [SIZES[0], SIZES[3]]) {
     await openDash(page, vp);
     const free = await page.evaluate(() => {
-      const card = document.querySelector<HTMLElement>('[data-d58="closed"]');
+      /* RE-POINTED (Dashboard v60): the hoops row is what sits under the chart now */
+      const card = document.querySelector<HTMLElement>('[data-d60="hoops"]');
       if (!card) return null;
       const before = card.getBoundingClientRect().height;
       const left = card.parentElement as HTMLElement;
@@ -182,7 +184,7 @@ test("DB58 F1–F3 — one screen, never clipped, and the chart gives way", asyn
       left.style.cssText = keep;
       return { before, roomy };
     });
-    L.check("F3", `${tag(vp)} closed is its content's height`, !!free && Math.abs(free.before - free.roomy) <= 1, `in the page ${free?.before} · given 2400px of room ${free?.roomy}`);
+    L.check("F3", `${tag(vp)} the hoops are their content's height`, !!free && Math.abs(free.before - free.roomy) <= 1, `in the page ${free?.before} · given 2400px of room ${free?.roomy}`);
   }
   L.done(60);
 });
@@ -237,59 +239,10 @@ test("DB58 H1 — the header is the book", async ({ page }) => {
   L.done(16);
 });
 
-/* ── C1 ────────────────────────────────────────────────────────────────────────────────────── */
-
-const readClosed = (page: Page) => page.evaluate(() => {
-  const q = (s: string) => document.querySelector<HTMLElement>(s);
-  const card = q('[data-d58="closed"]');
-  const tiles = [...document.querySelectorAll<HTMLElement>('[data-d58="tile"]')];
-  return {
-    card: !!card,
-    title: q('[data-d58="closed-title"]')?.textContent?.trim() ?? null,
-    bandBg: q('[data-d58="closed-band"]') ? getComputedStyle(q('[data-d58="closed-band"]')!).backgroundColor : null,
-    bandInk: q('[data-d58="closed-title"]') ? getComputedStyle(q('[data-d58="closed-title"]')!).color : null,
-    tiles: tiles.map((t) => ({ key: t.getAttribute("data-bucket"), n: Number(t.querySelector('[data-d58="tile-n"]')?.textContent ?? NaN), label: t.querySelector('[data-d58="tile-label"]')?.textContent?.trim(), zero: t.classList.contains("is-zero") })),
-    derived: card?.getAttribute("data-derived") ?? null,
-    none: q('[data-d58="closed-none"]')?.innerText ?? null,
-    latest: q('[data-d58="latest"]')?.innerText ?? null,
-    arc: q('[data-d58="arc"]')?.getAttribute("stroke-dasharray") ?? null,
-  };
-});
-
-test("DB58 C1 — closed queries: the grey band, four outcomes that sum, and none closed", async ({ page }) => {
-  const L = new Ledger("closed");
-  for (const vp of [SIZES[0], SIZES[2]]) {
-    await openDash(page, vp);
-    const c = await readClosed(page);
-    const w = tag(vp);
-    const sum = c.tiles.reduce((s, t) => s + t.n, 0);
-    const derived = c.derived ? JSON.parse(c.derived) as { total: number; counts: Record<string, number> } : null;
-    L.check("C1", `${w} population`, c.card && c.tiles.length === 4 && sum > 0, `${c.tiles.length} tiles summing to ${sum}`);
-    L.check("C1", `${w} band`, c.bandBg === "rgb(228, 225, 219)" && c.bandInk === "rgb(28, 19, 15)", `${c.bandBg} · ink ${c.bandInk}`);
-    L.check("C1", `${w} title`, !!derived && c.title === (derived.total === 1 ? "1 closed query" : `${derived.total} closed queries`), `"${c.title}" for ${derived?.total}`);
-    L.check("C1", `${w} tiles are the derived counts`, !!derived && c.tiles.every((t) => derived.counts[t.key ?? ""] === t.n), JSON.stringify(c.tiles.map((t) => [t.key, t.n])) + " against " + JSON.stringify(derived?.counts));
-    L.check("C1", `${w} sum`, !!derived && sum === derived.total, `tiles ${sum} · title ${derived?.total}`);
-    L.check("C1", `${w} labels`, c.tiles.map((t) => t.label).join("|") === "No reply|Passed on query|Passed on partial|Passed on full", c.tiles.map((t) => t.label).join("|"));
-    L.check("C1", `${w} a zero is muted, never hidden`, c.tiles.every((t) => t.zero === (t.n === 0)), JSON.stringify(c.tiles.map((t) => [t.n, t.zero])));
-    L.check("C1", `${w} latest`, !!c.latest && /(passed on your (query|partial|full)|didn't reply)/.test(c.latest) && /See all/.test(c.latest), `"${c.latest?.replace(/\s+/g, " ")}"`);
-    await shot(page, "closed-some", vp);
-  }
-  await openDash(page, SIZES[0]);
-  const again = await readClosed(page);
-  const total = again.derived ? (JSON.parse(again.derived) as { total: number; qc: number }) : null;
-  L.check("C1", "matches the Query Centre's rule", !!total && total.total <= total.qc, `card ${total?.total} · the Query Centre's closed court ${total?.qc}`);
-
-  for (const vp of [SIZES[0], SIZES[2]]) {
-    await openDash(page, vp, { __SA_DASH_NO_CLOSED: true });
-    const c = await readClosed(page);
-    const w = tag(vp);
-    L.check("C1", `${w} none: title`, c.title === "Closed queries", `"${c.title}"`);
-    L.check("C1", `${w} none: words`, !!c.none && c.none.includes("None closed yet") && c.none.includes("When an agent passes, or you close a query that has gone quiet, it is counted here with how far it got."), `"${c.none?.replace(/\s+/g, " ")}"`);
-    L.check("C1", `${w} none: no tiles, track only`, c.tiles.length === 0 && c.arc === null, `${c.tiles.length} tiles · arc ${c.arc}`);
-    await shot(page, "closed-none", vp);
-  }
-  L.done(22);
-});
+/* RETIRED (Dashboard v60): DB58 C1 — the closed card's grey band, four tiles, latest line and "none
+   closed" state. The card is folded into the Closed HOOP beneath the full-width chart (same buckets,
+   same `closedTile`, same "See all"); DB60 P5 holds its counts against `closedTile`, and P6 holds that
+   nothing closed is drawn before the first query. See tests/e2e/RETIRED-dashboard-v60.md. */
 
 /* ── R1 · R2 · R3 ──────────────────────────────────────────────────────────────────────────── */
 

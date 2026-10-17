@@ -375,6 +375,7 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
   }, [loading, focus.item?.key]);
 
+  const hoopNeedRef = useRef(0);
   /* ── v60: the left column's floor in the querying state — what the two hoop cards need ──
      Each card's width, less its legend's box, plus the legend's NATURAL width (a Range over each row,
      which is the text's own width whatever the column does — so this cannot feed back on itself). */
@@ -382,6 +383,13 @@ export const Dash58: React.FC<Dash58Props> = ({
     const root = rootRef.current;
     if (!root) return undefined;
     const measure = () => {
+      /* while loading, the floor is the one the last loaded page measured: the hoops' figures (and
+         "+n this week") are not known yet, and a narrower column would jump when they land */
+      if (loading) {
+        const v = shape.hoopNeed > 0 ? `${shape.hoopNeed}px` : "";
+        if (root.style.getPropertyValue("--d60-hoop-need") !== v) { if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need"); }
+        return;
+      }
       let need = 0;
       const width = (el: Element) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; };
       for (const card of root.querySelectorAll<HTMLElement>(".d60-hoopcard")) {
@@ -395,7 +403,17 @@ export const Dash58: React.FC<Dash58Props> = ({
         for (const li of lis) li.style.whiteSpace = "nowrap";
         let natural = 0;
         for (const li of hl.querySelectorAll("li")) natural = Math.max(natural, width(li));
-        need = Math.max(need, card.offsetWidth - hl.clientWidth + natural);
+        /* ⚠️ FROM FIXED PARTS, never "card − legend box + natural": the legend is shrink-to-fit, so with
+           room to spare its box IS its natural width and that sum is just the card's own width — a
+           floor that ratchets wider on every load. The card's chrome, the body's padding, the hoop
+           and the gap do not depend on the column. */
+        const hb = card.querySelector<HTMLElement>(".d60-hb");
+        const hoop = card.querySelector<HTMLElement>(".d60-hoop");
+        if (hb && hoop) {
+          const cs = getComputedStyle(hb);
+          const chrome = card.offsetWidth - hb.clientWidth;
+          need = Math.max(need, chrome + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0) + hoop.offsetWidth + (parseFloat(cs.columnGap) || 0) + natural);
+        }
         /* and the band: its title and its link side by side, with the row's gap */
         if (row) {
           const kids = [...row.children] as HTMLElement[];
@@ -404,6 +422,11 @@ export const Dash58: React.FC<Dash58Props> = ({
         }
         for (const li of lis) li.style.whiteSpace = "";
       }
+      const n = need > 0 ? Math.ceil(need) : 0;
+      /* remembered for the next loading page the moment it changes — the shape effect below runs before
+         the webfonts land, and a floor written then is the narrower one */
+      if (n > 0 && n !== hoopNeedRef.current) writeShape({ ...readShape(), hoopNeed: n });
+      hoopNeedRef.current = n;
       const v = need > 0 ? `${Math.ceil(need)}px` : "";
       if (root.style.getPropertyValue("--d60-hoop-need") !== v) {
         if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need");
@@ -421,7 +444,7 @@ export const Dash58: React.FC<Dash58Props> = ({
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0 });
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
   }, [loading, focus.item?.key, closed, unseen, shape.focusH, empty, agents.length]);
 
   /* ── v60: first use, and the two hoops ──
