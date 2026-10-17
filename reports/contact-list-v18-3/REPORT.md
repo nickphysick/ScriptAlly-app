@@ -162,3 +162,39 @@ Centre's navy row and headings after Part E, at 1512 and 1280.
   of the two wants a ruling.
 - The harness account's guide state is back to absent, as it was before this pack. The locks set it and restore it
   per run, and the full L1 run on this branch ticked items, which is correct behaviour.
+
+## v18.3.1 — the peek's spacing
+
+Branch `contact-list-v18-3-1`, cut from what dev served:
+`dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24` (c6505699, `index-DYhkEY1Y.js`).
+
+**False premise.** The pills were not simply "2px under the main line". The open row also re-centred its main line:
+- At rest the row is a single 56px grid track with its cells centred.
+- Open, the first track shrank to its tallest cell (49px), so the name and agency rose 3.5–5.5px as the peek opened.
+- That breaks "no other row moves", in the row's own main line.
+
+**The fix:**
+- **The main line stays put.** As the peek opens, the row reads its resting main track and pins the open row's first
+  track to it (`--cl183-track`).
+- **16 under the agency line (14 compact).** The row also reads how far the agency line already sits above the track's
+  end (`--cl183-under`), and the pills' margin is the target less that, floored at 2px so a taller wishlist cell is
+  never overlapped.
+- **18 above the row's foot (16 compact),** as the open row's bottom padding.
+- **Unchanged:** the pills' left edge, size and 12px gap, the hover timer and the Space toggle. All of these run
+  through the same `openPeek`.
+
+**The details, checked against Part C:**
+- Copy rendered as plain 14px body text, because v18's Copy rule is scoped to the retired `.cl18-pk` peek. It is v18's
+  small button again: mono 11, radius 6, hairline ring.
+- The website's ↗ took the domain's size, because the pill's `> span` rule sets every span to the pill's font. It is
+  13px navy now.
+
+**Locks:**
+- **C2, the spacing:** at 1512 × 900, 1280 × 800 and 1920 × 1080, so both the compact and the full-size branch are
+  entered. It is 67/67 green.
+  - On base it reads 4.2 / 14.0, with the main line moving 3.5–5.5px.
+  - Under its mutation (the 2px gap restored) it reads 9.7 against 14 / 16.
+- **C3, the details:** 5/5 green; red on base (Copy 14px Source Sans with no ring; no ↗ hook). The harness account has
+  no agent with a website, so C3 gives the bare fixture one for the read and re-seeds it.
+- **C1:** 176/176.
+- **CL18:** 11 passed, 3 retired as before.

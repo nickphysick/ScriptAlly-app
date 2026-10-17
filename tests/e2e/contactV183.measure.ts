@@ -55,6 +55,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   A4: { css: `.hk8-drawer, [data-hk8-drawer], .hkd, aside:has([data-hk8="head"]) { z-index: 1 !important; }` },
   B1: { js: `(() => { const fix = () => { if (!document.querySelector('[data-ftab="housekeeping"]')) { const b = document.createElement("button"); b.dataset.ftab = "housekeeping"; b.textContent = "Housekeeping"; b.style.cssText = "position:fixed;right:30px;bottom:30px;z-index:50"; document.body.appendChild(b); } }; fix(); setInterval(fix, 200); })()` },
   B2: { css: `@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px !important; } }` },
+  C2: { css: `.cl183-pk { margin-top: 2px !important; }` },
   E1: { js: `(() => { new MutationObserver(() => { const s = [...document.querySelectorAll('.cl18-lh .ltb-search')].find((e) => e.getBoundingClientRect().height > 0); const m = [...document.querySelectorAll('.lpop, [role="menu"]')].find((e) => e.getBoundingClientRect().height > 0 && /Group the list by/i.test(e.textContent || "")); if (s && m && !m.dataset.mut) { m.dataset.mut = "1"; m.style.setProperty("left", s.getBoundingClientRect().left + "px", "important"); m.style.setProperty("position", "fixed", "important"); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); })()` },
   E2: { css: `.lth.lth { background: transparent !important; }` },
   F1: { js: `(() => { const go = () => { const p = document.querySelector('[data-pck="pill"]'); const side = [...document.querySelectorAll('.ws-panel, aside, nav')].find((e) => e.getBoundingClientRect().height > 300 && e.getBoundingClientRect().left < 50); if (p && side && p.parentElement !== side) side.appendChild(p); }; setInterval(go, 150); go(); })()` },
@@ -338,6 +339,85 @@ test("C1 · peek: the closed row's ground, three contact pills from the name's l
     L.check(`${w} a missing email or social was seen (the dashed branch)`, seenMissing > 0, `${seenMissing}`);
   }
   L.done(14);
+});
+
+/* ───────────────────────── C2 · the peek's spacing (v18.3.1) ───────────────────────── */
+test("C2 · spacing: pills 16 (14) under the agency line and 18 (16) above the row's foot; nothing else moves", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("C2");
+  const boxes = () => page.evaluate(() => {
+    const rows = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0);
+    return rows.map((r) => ({ id: r.dataset.agentCard!, top: r.getBoundingClientRect().top, h: r.getBoundingClientRect().height, agy: r.querySelector<HTMLElement>(".clv-ragy")?.getBoundingClientRect().bottom ?? null }));
+  });
+  let seenFull = 0, seenCompact = 0;
+  for (const vp of [...SIZES, { width: 1920, height: 1080 }]) {
+    const w = `@${vp.width}`;
+    await open(page, vp, "C2");
+    const full = await page.evaluate(() => !!document.querySelector(".ws-app.sheet-wide"));
+    if (full) seenFull += 1; else seenCompact += 1;
+    const want = full ? { top: 16, foot: 18 } : { top: 14, foot: 16 };
+    /* rows with an agency line, past the first, so there is a row above and below */
+    const ids = (await boxes()).filter((b) => b.agy != null).slice(1, 4).map((b) => b.id);
+    L.check(`${w} rows to open (the population)`, ids.length >= 2, `${ids.length}`);
+    for (const id of ids) {
+      const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
+      await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(300);
+      const before = await boxes();
+      await row.hover(); await page.waitForTimeout(800);
+      const r = await page.evaluate((id) => {
+        const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
+        const pills = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((p) => p.getBoundingClientRect());
+        const agy = el.querySelector<HTMLElement>(".clv-ragy")!.getBoundingClientRect();
+        const rb = el.getBoundingClientRect();
+        return { open: el.hasAttribute("data-peek"), n: pills.length, pTop: Math.min(...pills.map((p) => p.top)), pBot: Math.max(...pills.map((p) => p.bottom)), agyB: agy.bottom, rowB: rb.bottom };
+      }, id);
+      const after = await boxes();
+      L.check(`${w} ${id}: the peek opened`, r.open && r.n === 3, `${r.open} · ${r.n}`);
+      if (!r.open) continue;
+      L.check(`${w} ${id}: pills' top − agency line's bottom = ${want.top} ±1`, near(r.pTop - r.agyB, want.top, 1), (r.pTop - r.agyB).toFixed(1));
+      L.check(`${w} ${id}: row's bottom − pills' bottom = ${want.foot} ±1`, near(r.rowB - r.pBot, want.foot, 1), (r.rowB - r.pBot).toFixed(1));
+      const i = before.findIndex((b) => b.id === id);
+      const grow = after[i].h - before[i].h;
+      L.check(`${w} ${id}: the main line does not move (agency line ±0.5)`, near(after[i].agy, before[i].agy ?? NaN, 0.5), `${before[i].agy} → ${after[i].agy}`);
+      L.check(`${w} ${id}: the row grows by exactly the peek (${want.top} + pills + foot − its resting foot)`, grow > 0 && near(after[i].top + after[i].h - (r.pBot + want.foot), 0, 1), grow.toFixed(1));
+      L.check(`${w} ${id}: the rows above do not move`, before.slice(0, i).every((b, k) => near(after[k].top, b.top, 0.5)), "");
+      L.check(`${w} ${id}: the row below moves by exactly the growth`, i + 1 >= before.length || near(after[i + 1].top - before[i + 1].top, grow, 0.5), i + 1 < before.length ? `${(after[i + 1].top - before[i + 1].top).toFixed(1)} vs ${grow.toFixed(1)}` : "last");
+    }
+    await page.mouse.move(5, 5);
+  }
+  L.check("both the full and the compact branch were measured", seenFull > 0 && seenCompact > 0, `${seenFull} full · ${seenCompact} compact`);
+  L.done(40);
+});
+
+test("C3 · pills' details: Copy is v18's small button; the website's ↗ is 13px navy", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("C3");
+  /* the harness account has no agent with a website, so the bare fixture gets one for this read and is re-seeded after */
+  reseed();
+  { const { db, uid } = await harnessDb(); await updateDoc(doc(db, "users", uid, "agents", BARE), { website: "https://example.com/agency" }); }
+  try {
+  await open(page, SIZES[0], "C3");
+  const all = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
+  const ids = [BARE, ...all.filter((x) => x !== BARE)];
+  let copy = 0, arrow = 0;
+  for (const id of ids) {
+    if (copy && arrow) break;
+    const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
+    await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(250);
+    await row.hover(); await page.waitForTimeout(800);
+    const r = await page.evaluate((id) => {
+      const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
+      const c = el.querySelector<HTMLElement>('[data-cl18="peek-copy"]');
+      const a = el.querySelector<HTMLElement>('[data-cl183="peek-pill"][data-k="website"] [data-cl183="ext"]');
+      const cs = c ? getComputedStyle(c) : null, as = a ? getComputedStyle(a) : null;
+      return { c: cs && { fs: cs.fontSize, ff: cs.fontFamily, rad: cs.borderTopLeftRadius, ring: cs.boxShadow }, a: as && { fs: as.fontSize, col: as.color } };
+    }, id);
+    if (r.c && !copy) { copy++; L.check("Copy is mono 11", r.c.fs === "11px" && /Mono/i.test(r.c.ff), JSON.stringify(r.c)); L.check("Copy has radius 6 and a hairline ring", r.c.rad === "6px" && /inset/.test(r.c.ring), JSON.stringify(r.c)); }
+    if (r.a && !arrow) { arrow++; L.check("the ↗ is 13px", r.a.fs === "13px", JSON.stringify(r.a)); L.check("the ↗ is navy #2a3a52", r.a.col === "rgb(42, 58, 82)", JSON.stringify(r.a)); }
+  }
+  L.check("an agent with an email and one with a website were found", copy > 0 && arrow > 0, `${copy} · ${arrow}`);
+  } finally { reseed(); }
+  L.done(5);
 });
 
 /* ───────────────────────── D · adding an agent ───────────────────────── */

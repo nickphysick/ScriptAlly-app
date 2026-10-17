@@ -83,7 +83,7 @@ export const ContactPeek: React.FC<{
       ) : missing("email", "mail", "Add their email", () => onEdit("who", "email"))}
       {site ? (
         <a className="cl183-pp" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer">
-          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom">{domainOf(site)}</span><span aria-hidden="true">↗</span>
+          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom">{domainOf(site)}</span><span className="cl183-ext" data-cl183="ext" aria-hidden="true">↗</span>
         </a>
       ) : missing("website", "web", "Add their website", () => onEdit("who", "website"))}
       {social ? (

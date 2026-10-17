@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C3",
+  "where": "the ↗ is 13px",
+  "ok": true,
+  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "the ↗ is navy #2a3a52",
+  "ok": true,
+  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "Copy is mono 11",
+  "ok": true,
+  "detail": "{\"fs\":\"11px\",\"ff\":\"\\\"JetBrains Mono\\\", monospace\",\"rad\":\"6px\",\"ring\":\"rgba(28, 19, 15, 0.16) 0px 0px 0px 1px inset\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "Copy has radius 6 and a hairline ring",
+  "ok": true,
+  "detail": "{\"fs\":\"11px\",\"ff\":\"\\\"JetBrains Mono\\\", monospace\",\"rad\":\"6px\",\"ring\":\"rgba(28, 19, 15, 0.16) 0px 0px 0px 1px inset\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "an agent with an email and one with a website were found",
+  "ok": true,
+  "detail": "1 · 1"
+ }
+]

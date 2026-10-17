@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "C3",
+  "where": "Copy is mono 11",
+  "ok": false,
+  "detail": "{\"fs\":\"14px\",\"ff\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"rad\":\"0px\",\"ring\":\"none\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "Copy has radius 6 and a hairline ring",
+  "ok": false,
+  "detail": "{\"fs\":\"14px\",\"ff\":\"\\\"Source Sans 3\\\", system-ui, -apple-system, sans-serif\",\"rad\":\"0px\",\"ring\":\"none\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "an agent with an email and one with a website were found",
+  "ok": false,
+  "detail": "1 · 0"
+ }
+]

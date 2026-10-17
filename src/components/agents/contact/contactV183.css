@@ -20,14 +20,21 @@
 
 /* ── §C · THE ROW PEEK: how to reach the agent, nothing else. The open row keeps its own background: no tint, no lift,
    no shadow, no radius change (v18's open-row dress is undone here). One line of three pills under the main line,
-   starting at the agent's name (the disc, 38 / 28 compact, plus the who cell's 11 gap), 2 under the main line and 14
-   above the row's foot, gap 12. ── */
+   starting at the agent's name (the disc, 38 / 28 compact, plus the who cell's 11 gap), gap 12.
+   v18.3.1 — THE SPACING: 16 between the agency line's bottom and the pills' top, 18 between the pills and the row's foot
+   (14 and 16 below the full-size sheet). The open row holds its resting main track (`--cl183-track`, read as the peek
+   opens), so the main line never re-centres; the pills' margin is the target less the distance the agency line already
+   sits above that track's end (`--cl183-under`), floored at 2 so a taller wishlist cell is never overlapped. ── */
 .cl16-list .clv-row[data-peek], .cl16-list .clv-row[data-peek][data-disc="none"], .cl16-list .clv-row[data-peek][data-disc="live"],
 .cl16-list .clv-row[data-peek][data-disc="closed"] {
-  z-index: auto; border-radius: 0; box-shadow: none; background: #fff; padding-bottom: 14px;
+  z-index: auto; border-radius: 0; box-shadow: none; background: #fff;
+  --cl183-gap-t: 14px; --cl183-gap-b: 16px;
+  grid-template-rows: var(--cl183-track, auto) auto; padding-bottom: var(--cl183-gap-b);
 }
+.ws-app.sheet-wide .cl16-list .clv-row[data-peek] { --cl183-gap-t: 16px; --cl183-gap-b: 18px; }
 .cl183-pk {
-  grid-column: 1 / -1; display: flex; flex-wrap: nowrap; gap: 12px; min-width: 0; margin-top: 2px;
+  grid-column: 1 / -1; display: flex; flex-wrap: nowrap; gap: 12px; min-width: 0;
+  margin-top: max(2px, calc(var(--cl183-gap-t, 14px) - var(--cl183-under, 0px)));
   padding-left: calc(38px + 11px); cursor: default; text-align: left; animation: cl183pk 0.2s ease both;
 }
 .clv-list--compact .cl183-pk { padding-left: calc(28px + 11px); }
@@ -47,7 +54,16 @@
 .cl183-pk .cl183-pd svg { width: 13px; height: 13px; }
 .ws-app.sheet-wide .cl183-pk .cl183-pd svg { width: 15px; height: 15px; }
 .cl183-pk a.cl183-pp:hover .cl183-dom { text-decoration: underline; text-underline-offset: 3px; }
-.cl183-pk .cl18-copy { flex: none; }
+/* v18.3.1 — Copy is v18's small button (it was plain text here: v18's rule is scoped to the retired .cl18-pk peek), and
+   the website's ↗ is 13px navy, not the domain's size (the pill's "> span" rule sets every span to the pill's font) */
+.cl183-pk .cl18-copy {
+  flex: none; margin: 0 0 0 2px; padding: 2px 7px; border: 0; border-radius: 6px; background: #fff; cursor: pointer;
+  font: 400 11px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+}
+.cl183-pk .cl18-copy:hover { color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
+.cl183-pk .cl18-copy:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl183-pk .cl183-pp > .cl183-ext { flex: none; overflow: visible; font: 400 13px/1 var(--sp-serif) !important; color: #2a3a52; }
 /* a missing one: dashed, transparent, italic, ink 55%; the disc is a ring */
 .cl183-pk .cl183-pp.is-add { background: transparent; box-shadow: none; border: 1.2px dashed rgba(42, 58, 82, 0.4); color: rgba(28, 19, 15, 0.55); font-style: italic !important; }
 .cl183-pk .cl183-pp.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.4); }
