@@ -83,16 +83,50 @@ export const TrayHeader: React.FC<{
   const seenKey = React.useRef<string | null>(null);
   const tick = !!urgent && seenKey.current !== null && seenKey.current !== urgentKey;
   React.useEffect(() => { if (urgent) seenKey.current = urgentKey; }, [urgentKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ⚠️ THE TITLE FITS ITS COLUMN, IT NEVER PUSHES THE CARD (found on the integration run: "33 overdue · 2 due today" is
+     533px at 44px, and at 1280 the column beside the card is 452). The header cannot grow (A1), so the title cannot wrap:
+     its font steps down until it fits, floor 26px, re-measured on resize and once the fonts are in. */
+  const rowRef = React.useRef<HTMLDivElement>(null);
+  const h1Ref = React.useRef<HTMLHeadingElement>(null);
+  React.useLayoutEffect(() => {
+    const row = rowRef.current, h1 = h1Ref.current;
+    if (!row || !h1) return undefined;
+    const fit = () => {
+      h1.removeAttribute("data-fit");
+      const card = row.querySelector<HTMLElement>('[data-td5="card"]');
+      const gap = 40;
+      const avail = row.clientWidth - (card && getComputedStyle(card).gridColumnStart === "3" ? card.offsetWidth + gap : 0);
+      const w = h1.scrollWidth, base = parseFloat(getComputedStyle(h1).fontSize);
+      /* the line box keeps the unfitted size, so the header's height never moves with the figure (A1) */
+      if (!(avail > 0 && w > avail)) return;
+      h1.style.setProperty("--td52-fit-lh", getComputedStyle(h1).lineHeight);
+      /* width is not quite linear in size (the face's spacing), so step until it fits: a few passes at most */
+      let fs = base;
+      for (let i = 0; i < 4 && h1.scrollWidth > avail && fs > 26; i++) {
+        fs = Math.max(26, Math.floor((fs * avail) / h1.scrollWidth * 10) / 10 - (i ? 0.5 : 0));
+        h1.style.setProperty("--td52-fit", `${fs}px`);
+        h1.setAttribute("data-fit", "");
+      }
+    };
+    fit();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
+    ro?.observe(row);
+    /* and whenever the title's words change (the row's width need not) */
+    const mo = new MutationObserver(fit);
+    mo.observe(h1, { childList: true, characterData: true, subtree: true });
+    void document.fonts?.ready.then(fit);
+    return () => { ro?.disconnect(); mo.disconnect(); };
+  }, [urgentKey, caught, n]);
   const urgentWords = urgent
     ? (urgent.overdue || urgent.today ? [urgent.overdue ? `${urgent.overdue} overdue` : "", urgent.today ? `${urgent.today} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today")
     : "";
   return (
     <header className="td5-hd" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
       <img className="td5-shadow" data-td5="shadow" alt="" aria-hidden="true" src={TODO_SHADOW} />
-      <div className="td5-tr" data-td5="header-row">
+      <div className="td5-tr" data-td5="header-row" ref={rowRef}>
         <div className="td5-tb" data-td5="title-block">
           <span className="td5-ey" data-td5="eyebrow">{TODO_EYEBROW}</span>
-          <h1 className="td5-title" data-page-title="" data-td5="title" tabIndex={-1}
+          <h1 ref={h1Ref} className="td5-title" data-page-title="" data-td5="title" tabIndex={-1}
             aria-label={caught ? "Your tray is empty" : urgent && n !== null ? urgentWords : n === null ? "Tasks in your tray" : `${n} ${titleWords(n)}`}>
             <span aria-hidden="true">
               {caught ? "Your tray is empty" : urgent && n !== null ? (
