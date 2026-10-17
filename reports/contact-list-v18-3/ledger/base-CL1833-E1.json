@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the row is open with its three details (precondition)",
+  "ok": true,
+  "detail": "true · email,website,social"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the email's disc is centred under the avatar ±1",
+  "ok": false,
+  "detail": "417.0 vs 369.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the email's text starts on the name's left ±1",
+  "ok": false,
+  "detail": "439.0 vs 399.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the website's disc is on What they want's left ±1",
+  "ok": false,
+  "detail": "814.1 vs 645.1"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the social disc is on Replies' left ±1",
+  "ok": false,
+  "detail": "1110.3 vs 1088.4"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the next step is there",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-4: the shortened social carries its full value as a title",
+  "ok": true,
+  "detail": "@theo.abara.literary.bsky.social · @theo.abara.literary.bsky.social"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-5: the row is open with its three details (precondition)",
+  "ok": true,
+  "detail": "true · email,website,social"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-5: the email's disc is centred under the avatar ±1",
+  "ok": false,
+  "detail": "418.0 vs 369.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-5: the website's disc is on What they want's left ±1",
+  "ok": false,
+  "detail": "568.0 vs 645.1"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1512 msv12-agent-5: the social disc is on Replies' left ±1",
+  "ok": false,
+  "detail": "797.0 vs 1088.4"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the row is open with its three details (precondition)",
+  "ok": true,
+  "detail": "true · email,website,social"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the email's disc is centred under the avatar ±1",
+  "ok": false,
+  "detail": "417.0 vs 369.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the email's text starts on the name's left ±1",
+  "ok": false,
+  "detail": "439.0 vs 399.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the website's disc is on What they want's left ±1",
+  "ok": false,
+  "detail": "814.1 vs 570.1"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the social disc is on Replies' left ±1",
+  "ok": false,
+  "detail": "911.8 vs 898.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the next step is there",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the shortened website carries its full value as a title",
+  "ok": true,
+  "detail": "abaragrantliteraryagency.co.uk · abaragrantliteraryagency.co.uk"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the shortened social carries its full value as a title",
+  "ok": true,
+  "detail": "@theo.abara.literary.bsky.social · @theo.abara.literary.bsky.social"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-4: the long email is shortened here (the branch is entered)",
+  "ok": false,
+  "detail": "291 > 291"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-5: the row is open with its three details (precondition)",
+  "ok": true,
+  "detail": "true · email,website,social"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-5: the email's disc is centred under the avatar ±1",
+  "ok": false,
+  "detail": "418.0 vs 369.0"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-5: the website's disc is on What they want's left ±1",
+  "ok": false,
+  "detail": "568.0 vs 570.1"
+ },
+ {
+  "lock": "CL1833-E1",
+  "where": "@1280 msv12-agent-5: the social disc is on Replies' left ±1",
+  "ok": false,
+  "detail": "778.4 vs 898.0"
+ }
+]

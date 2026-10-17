@@ -1,37 +1,25 @@
 [
  {
   "lock": "C1",
-  "where": "@1512 msv12-agent-4: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 msv12-agent-4: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 msv12-agent-4: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 msv12-agent-4: the missing email is dashed",
+  "where": "@1512 msv12-agent-4: the missing email is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 msv12-agent-4: the missing website is dashed",
+  "where": "@1512 msv12-agent-4: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 msv12-agent-4: the missing social is dashed",
+  "where": "@1512 msv12-agent-4: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -43,31 +31,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-near: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-cal-near: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-near: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-cal-near: the missing website is dashed",
+  "where": "@1512 seed-cal-near: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-near: the missing social is dashed",
+  "where": "@1512 seed-cal-near: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -79,31 +55,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-soon: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-cal-soon: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-soon: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-cal-soon: the missing website is dashed",
+  "where": "@1512 seed-cal-soon: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-soon: the missing social is dashed",
+  "where": "@1512 seed-cal-soon: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -115,31 +79,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-passed20: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-cal-passed20: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-passed20: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-cal-passed20: the missing website is dashed",
+  "where": "@1512 seed-cal-passed20: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-passed20: the missing social is dashed",
+  "where": "@1512 seed-cal-passed20: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -151,31 +103,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-12: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-agent-12: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-12: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-agent-12: the missing website is dashed",
+  "where": "@1512 seed-agent-12: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-12: the missing social is dashed",
+  "where": "@1512 seed-agent-12: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -187,31 +127,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-bang: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-cal-bang: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-bang: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-cal-bang: the missing website is dashed",
+  "where": "@1512 seed-cal-bang: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-bang: the missing social is dashed",
+  "where": "@1512 seed-cal-bang: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -223,31 +151,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-9: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-agent-9: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-9: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-agent-9: the missing website is dashed",
+  "where": "@1512 seed-agent-9: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-9: the missing social is dashed",
+  "where": "@1512 seed-agent-9: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -259,31 +175,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-2: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-agent-2: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-2: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-agent-2: the missing website is dashed",
+  "where": "@1512 seed-agent-2: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-2: the missing social is dashed",
+  "where": "@1512 seed-agent-2: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -295,31 +199,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 thin-ag-remind: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 thin-ag-remind: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 thin-ag-remind: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 thin-ag-remind: the missing website is dashed",
+  "where": "@1512 thin-ag-remind: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 thin-ag-remind: the missing social is dashed",
+  "where": "@1512 thin-ag-remind: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -331,31 +223,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-passed865: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-cal-passed865: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-passed865: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-cal-passed865: the missing website is dashed",
+  "where": "@1512 seed-cal-passed865: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-cal-passed865: the missing social is dashed",
+  "where": "@1512 seed-cal-passed865: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -367,31 +247,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-1: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-agent-1: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-1: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-agent-1: the missing website is dashed",
+  "where": "@1512 seed-agent-1: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-1: the missing social is dashed",
+  "where": "@1512 seed-agent-1: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -403,31 +271,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-nowin-1: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 seed-agent-nowin-1: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-nowin-1: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 seed-agent-nowin-1: the missing website is dashed",
+  "where": "@1512 seed-agent-nowin-1: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 seed-agent-nowin-1: the missing social is dashed",
+  "where": "@1512 seed-agent-nowin-1: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -439,31 +295,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 rj-agent-2: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 rj-agent-2: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 rj-agent-2: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 rj-agent-2: the missing website is dashed",
+  "where": "@1512 rj-agent-2: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 rj-agent-2: the missing social is dashed",
+  "where": "@1512 rj-agent-2: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -475,37 +319,25 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 clv-fx-reopen: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1512 clv-fx-reopen: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1512 clv-fx-reopen: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1512 clv-fx-reopen: the missing email is dashed",
+  "where": "@1512 clv-fx-reopen: the missing email is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 clv-fx-reopen: the missing website is dashed",
+  "where": "@1512 clv-fx-reopen: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1512 clv-fx-reopen: the missing social is dashed",
+  "where": "@1512 clv-fx-reopen: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -523,15 +355,9 @@
  },
  {
   "lock": "C1",
-  "where": "@1512 a missing email or social was seen (the dashed branch)",
+  "where": "@1512 a missing email or social was seen (the missing branch)",
   "ok": true,
   "detail": "14"
- },
- {
-  "lock": "C1",
-  "where": "@1280 msv12-agent-4: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
  },
  {
   "lock": "C1",
@@ -541,25 +367,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 msv12-agent-4: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 msv12-agent-4: the missing email is dashed",
+  "where": "@1280 msv12-agent-4: the missing email is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 msv12-agent-4: the missing website is dashed",
+  "where": "@1280 msv12-agent-4: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 msv12-agent-4: the missing social is dashed",
+  "where": "@1280 msv12-agent-4: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -571,31 +391,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-near: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-cal-near: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-near: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-cal-near: the missing website is dashed",
+  "where": "@1280 seed-cal-near: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-near: the missing social is dashed",
+  "where": "@1280 seed-cal-near: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -607,31 +415,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-soon: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-cal-soon: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-soon: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-cal-soon: the missing website is dashed",
+  "where": "@1280 seed-cal-soon: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-soon: the missing social is dashed",
+  "where": "@1280 seed-cal-soon: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -643,31 +439,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-passed20: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-cal-passed20: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-passed20: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-cal-passed20: the missing website is dashed",
+  "where": "@1280 seed-cal-passed20: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-passed20: the missing social is dashed",
+  "where": "@1280 seed-cal-passed20: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -679,31 +463,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-12: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-agent-12: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-12: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-agent-12: the missing website is dashed",
+  "where": "@1280 seed-agent-12: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-12: the missing social is dashed",
+  "where": "@1280 seed-agent-12: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -715,31 +487,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-bang: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-cal-bang: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-bang: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-cal-bang: the missing website is dashed",
+  "where": "@1280 seed-cal-bang: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-bang: the missing social is dashed",
+  "where": "@1280 seed-cal-bang: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -751,31 +511,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-9: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-agent-9: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-9: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-agent-9: the missing website is dashed",
+  "where": "@1280 seed-agent-9: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-9: the missing social is dashed",
+  "where": "@1280 seed-agent-9: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -787,31 +535,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-2: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-agent-2: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-2: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-agent-2: the missing website is dashed",
+  "where": "@1280 seed-agent-2: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-2: the missing social is dashed",
+  "where": "@1280 seed-agent-2: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -823,31 +559,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 thin-ag-remind: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 thin-ag-remind: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 thin-ag-remind: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 thin-ag-remind: the missing website is dashed",
+  "where": "@1280 thin-ag-remind: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 thin-ag-remind: the missing social is dashed",
+  "where": "@1280 thin-ag-remind: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -859,31 +583,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-passed865: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-cal-passed865: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-passed865: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-cal-passed865: the missing website is dashed",
+  "where": "@1280 seed-cal-passed865: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-cal-passed865: the missing social is dashed",
+  "where": "@1280 seed-cal-passed865: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -895,31 +607,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-1: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-agent-1: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-1: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-agent-1: the missing website is dashed",
+  "where": "@1280 seed-agent-1: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-1: the missing social is dashed",
+  "where": "@1280 seed-agent-1: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -931,31 +631,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-nowin-1: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 seed-agent-nowin-1: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-nowin-1: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 seed-agent-nowin-1: the missing website is dashed",
+  "where": "@1280 seed-agent-nowin-1: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 seed-agent-nowin-1: the missing social is dashed",
+  "where": "@1280 seed-agent-nowin-1: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -967,31 +655,19 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 rj-agent-2: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 rj-agent-2: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 rj-agent-2: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 rj-agent-2: the missing website is dashed",
+  "where": "@1280 rj-agent-2: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 rj-agent-2: the missing social is dashed",
+  "where": "@1280 rj-agent-2: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -1003,37 +679,25 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 clv-fx-reopen: the open row's ground is a closed row's",
-  "ok": true,
-  "detail": "rgb(255, 255, 255) vs rgb(255, 255, 255)"
- },
- {
-  "lock": "C1",
   "where": "@1280 clv-fx-reopen: exactly the three pills, in order",
   "ok": true,
   "detail": "[\"email\",\"website\",\"social\"]"
  },
  {
   "lock": "C1",
-  "where": "@1280 clv-fx-reopen: the first pill's left is the name's ±1",
-  "ok": true,
-  "detail": "399 vs 399"
- },
- {
-  "lock": "C1",
-  "where": "@1280 clv-fx-reopen: the missing email is dashed",
+  "where": "@1280 clv-fx-reopen: the missing email is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 clv-fx-reopen: the missing website is dashed",
+  "where": "@1280 clv-fx-reopen: the missing website is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
  {
   "lock": "C1",
-  "where": "@1280 clv-fx-reopen: the missing social is dashed",
+  "where": "@1280 clv-fx-reopen: the missing social is a transparent disc in a ring",
   "ok": true,
   "detail": "true"
  },
@@ -1051,7 +715,7 @@
  },
  {
   "lock": "C1",
-  "where": "@1280 a missing email or social was seen (the dashed branch)",
+  "where": "@1280 a missing email or social was seen (the missing branch)",
   "ok": true,
   "detail": "14"
  }

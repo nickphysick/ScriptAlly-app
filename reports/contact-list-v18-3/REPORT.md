@@ -326,3 +326,92 @@ started" pill and the contact pills) and v18.3.1. The branch is `contact-list-v1
 
 **Shots** (`shots-v18-3-2/`, one beside each `screens/*` file): full, sparse and not queried with the peek open, at 1512
 and 1280.
+
+## v18.3.3 — the open row on the row's own columns; no tray, no Open card; the email copies itself; an open row always closes
+
+This replaces v18.3.1 Part B and all of v18.3.2.
+
+**False premises:**
+1. **There is still no Offer row on the harness account.** As in v18.3.2, the "full" row is Theo Abara at Full
+   requested, which carries the same stage, bar, YOUR MOVE and date. Its next step is "Send the full", not "Answer the
+   offer". "Sparse" is Sun-hee Park (Full sent) with a website only, and "not-queried" is the bare fixture. Every field
+   is read first and put back exactly.
+2. **The lock file already had E1–E3** (the shared toolbar and headings locks). The new locks are named
+   `CL1833-E1`–`E5`, as v18.3.2's were `CL1832-D1`–`D4`.
+3. **"v18.3.1 C3" was filed as `C2d`** (Copy and the ↗) in this file. It is deleted; the ↗ reading moved into
+   CL1833-E2.
+4. **A 16px top margin cannot give a 124px row on its own.** The open row's line starts after the main line's track,
+   which is taller than the agent block. So the line's top margin is set by measurement, once, as the row opens: the
+   agent block's bottom + 16 − the line's natural top (`--cl1833-mt`, a layout effect in `ContactRows`). Measured: the
+   full row is 123.8 at both widths; the bare row 126.3 (its two add pills make the main line taller).
+
+**Base case:** v18.3.1 and v18.3.2 were both present. The base is dev's
+`dev/…-an241-db601-cl1831b-cl1832` at `fb25648a` (`index-LkecNKe9.js`). The branch is `contact-list-v18-3-3`.
+- **Reverted** (`799d24f0`): v18.3.2 B (the tray on the peek line), its fix (the 72px pill floors) and C's rendering.
+  v18.3.1 B had already been reverted by v18.3.2 (`03581e72`).
+- **Kept:** v18.3.2 A (no hover tray over the status cell).
+- **Carried forward:** the dedupe rule, now as Part B on the next-step link.
+- **Replaced:** v18.3.1 A's spacing (16 / 18 under and above a pill row, the held resting track) and its Copy chip.
+
+**The commits:**
+- **A** (`581d6075`): the details line is a subgrid on the row's own four columns.
+  - The email sits in Agent: its disc is centred under the avatar and its text starts on the name's left.
+  - The website sits in What they want. The social handle starts on Replies and runs into Query status, stopping 24px
+    short of the next step.
+  - Each detail is a 30px disc `#eef1f6` with a 15px navy icon, 10px to a 15.5px serif value. There is no pill shell.
+  - A missing detail is a transparent disc in a faint ring, with italic text at ink 48% (navy and underlined on hover),
+    and the same add flow.
+- **B** (`0fcf196a`): the hover tray and "Open card" are gone; clicking the row (or empty space in the open row) opens
+  the card.
+  - The next step is the status's own primary action, as a link at the status cell's right edge on the details line.
+    It is the `cl17-log` class, so it is styled exactly as "+ Log a query", and it runs the old tray's handler.
+  - `lib/rowActions` drops it when the rendered status cell already offers it (labels compared ignoring a leading "+",
+    whitespace and case). So not-queried and Closed rows show none.
+  - The row's click ignores the contact details and the next step.
+- **C** (`b23383df`): the Copy chip goes and the email is the copy button.
+  - It is a focusable `role="button"` named "Copy email {address}".
+  - On hover or focus, the disc turns navy with a cream copy glyph and the address takes a light navy underline.
+  - Click, Enter or Space copies the full address (Clipboard API, then `execCommand`). It reads "Copied" in green
+    `#2f6b4f` on a `#e3efe7` disc for 1400ms.
+- **D** (`15fc53cb`): an open row always closes.
+  - The list keeps the last pointer position. On every scroll (capture), resize and pointer move it asks
+    `elementFromPoint` what is under it, and closes a pointer-opened row the pointer is no longer on.
+  - A dwell's open lands only if the pointer is still on that row.
+  - Window blur and the pointer leaving the document close it.
+  - A keyboard-opened row closes on Escape (from anywhere inside it) or when focus leaves the row.
+  - The 450ms dwell and the animation are unchanged.
+
+**Locks (CL183.3, `CL1833-E1`–`E5`)**, at 1512 and 1280:
+
+| Lock | This branch | Base (fb25648a) | Mutation |
+|---|---|---|---|
+| E1 columns | 29/29 | 7/24: email disc 417 against the avatar's 369, website 814 against 645 | the pill row restored: 13/28 |
+| E2 rhythm | 59/59 | 31/59 | the 2px gap: 55/59, 5.2 under the agent block and a 113 row |
+| E3 next step (every row at 1512) | 110/110 | 68/107: "Open card" on not-queried rows | the tray re-added: 72/110 |
+| E4 copy | 16/16 | 8/16: clicking the email copies nothing | the click guard removed (src): 10/16, the card opens |
+| E5 closes | 18/18 | 12/18: (a), (c) and (e) red | the scroll re-check removed (src): 16/18, (a) red |
+
+- **E4's and E5's mutations are in the source** (the click guard is in two places, the email's own handler and the
+  row's; the scroll listener is in `ContactRows`). Each was applied in the worktree from a path-derived backup, built,
+  measured and restored.
+- **E5 (d) passes on the base as well.** The base already cleared the dwell timer on `mouseleave`. It is kept, because
+  D's validation is a second guard against the same open.
+
+**Retired:**
+- **Deleted:** `CL1832-D1`–`D4`; C2 (v18.3.1's spacing, now CL1833-E2); C2d ("C3": the Copy chip, now CL1833-E4; the ↗
+  reading moved into CL1833-E2). Their tests, mutations and ledgers are gone, and `contactV1832Shots.measure.ts` with
+  them (its shots stay, as history).
+- **C1 is re-pointed.** The ground and the first pill's left are now CL1833-E2's and -E1's. A missing detail is
+  checked as a transparent disc in a ring, not dashed. It reads 120/120.
+
+**The Query Centre:** its rows share neither the peek nor the tray. Its tray is `.qc138-tray`, inside the Next move
+cell. Nothing there changed.
+
+**Shots** (`shots-v18-3-3/`, beside each `screens/*` file): full, sparse and not queried open at 1512 and 1280, and at
+1512 the full row's email on hover and just copied.
+
+**L1:**
+- **Green:** CL183 in full (23 tests), CL18 (12 passed, 3 retired), CL16 (10, 10 retired), QC138, .1, .3, .4, .5 and
+  .6.
+- **Red, all pre-existing and unchanged from v18.3.2:** CL17 FS1 (the pin's wording since QC v138.6), and QC138.2 C1/D1.
+- Other packs' ledgers rewritten by the run were put back, and the guide's state was cleared.

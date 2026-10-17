@@ -55,10 +55,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   A4: { css: `.hk8-drawer, [data-hk8-drawer], .hkd, aside:has([data-hk8="head"]) { z-index: 1 !important; }` },
   B1: { js: `(() => { const fix = () => { if (!document.querySelector('[data-ftab="housekeeping"]')) { const b = document.createElement("button"); b.dataset.ftab = "housekeeping"; b.textContent = "Housekeeping"; b.style.cssText = "position:fixed;right:30px;bottom:30px;z-index:50"; document.body.appendChild(b); } }; fix(); setInterval(fix, 200); })()` },
   B2: { css: `@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px !important; } }` },
-  C2: { css: `.cl183-pk { margin-top: 2px !important; }` },
-  "CL1832-D1": { css: `.cl16-list .clv-row[data-clv="row"]:is(:hover, :focus-within) > :is(.clv-rq, .clv-rrep) { opacity: 0 !important; visibility: hidden !important; }` },
-  "CL1832-D2": { css: `.cl16-list .clv-row[data-clv="row"] { position: relative; } .cl1832-tray { position: absolute !important; right: 40px; top: 50% !important; transform: translateY(-50%); margin: 0 !important; }` },
-  "CL1832-D3": { css: `.cl1832-pl > .cl183-pk, .clv-list--compact .cl1832-pl > .cl183-pk { flex: none !important; }` },
+  /* v18.3.3 — CL1833-E4 (the click guard) and CL1833-E5 (the scroll re-check) are broken in src; the report names each */
+  "CL1833-E1": { css: `.cl183-pk.cl1833-pk { display: flex !important; gap: 8px; } .cl1833-pk .cl1833-it, .cl1833-pk .cl1833-em { margin-left: 0 !important; } .cl1833-pk > .cl1833-tail { display: contents !important; }` },
+  "CL1833-E2": { css: `.cl183-pk.cl1833-pk { margin-top: 2px !important; }` },
+  "CL1833-E3": { js: `(() => { const fix = () => { for (const r of document.querySelectorAll('.aglist [data-clv="row"][data-peek]')) { if (r.querySelector('[data-mut]')) continue; const b = document.createElement("button"); b.dataset.mut = "1"; b.textContent = "Open card"; b.style.cssText = "position:absolute;right:48px;top:8px;z-index:3"; r.style.position = "relative"; r.appendChild(b); } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-peek"] }); })()` },
   E1: { js: `(() => { new MutationObserver(() => { const s = [...document.querySelectorAll('.cl18-lh .ltb-search')].find((e) => e.getBoundingClientRect().height > 0); const m = [...document.querySelectorAll('.lpop, [role="menu"]')].find((e) => e.getBoundingClientRect().height > 0 && /Group the list by/i.test(e.textContent || "")); if (s && m && !m.dataset.mut) { m.dataset.mut = "1"; m.style.setProperty("left", s.getBoundingClientRect().left + "px", "important"); m.style.setProperty("position", "fixed", "important"); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); })()` },
   E2: { css: `.lth.lth { background: transparent !important; }` },
   F1: { js: `(() => { const go = () => { const p = document.querySelector('[data-pck="pill"]'); const side = [...document.querySelectorAll('.ws-panel, aside, nav')].find((e) => e.getBoundingClientRect().height > 300 && e.getBoundingClientRect().left < 50); if (p && side && p.parentElement !== side) side.appendChild(p); }; setInterval(go, 150); go(); })()` },
@@ -300,7 +300,9 @@ test("B2 · spacing 14 / 34 / 54, the last equal to the Query Centre's", async (
 });
 
 /* ───────────────────────── C · the row peek ───────────────────────── */
-test("C1 · peek: the closed row's ground, three contact pills from the name's left, dashed when missing, nothing else", async ({ page }) => {
+/* RE-POINTED by v18.3.3: the ground and the first pill's left are CL1833-E2's and -E1's now (the details sit on the row's own
+   columns, the email under the avatar), and a missing detail is a transparent disc in a faint ring, no longer dashed. */
+test("C1 · peek: three contact details in order, a missing one a ringed transparent disc, nothing else", async ({ page }) => {
   test.setTimeout(400_000);
   const L = new Ledger("C1");
   for (const vp of SIZES) {
@@ -321,17 +323,15 @@ test("C1 · peek: the closed row's ground, three contact pills from the name's l
         return {
           open: el.hasAttribute("data-peek"), bg: getComputedStyle(el).backgroundColor, closedBg: getComputedStyle(closed).backgroundColor,
           ks: pills.map((x) => x.dataset.k), firstL: pills[0]?.getBoundingClientRect().left ?? null, nameL: name.getBoundingClientRect().left,
-          missing: pills.filter((x) => x.hasAttribute("data-missing")).map((x) => ({ k: x.dataset.k, dashed: getComputedStyle(x).borderStyle.includes("dashed") || getComputedStyle(x).outlineStyle.includes("dashed") })),
+          missing: pills.filter((x) => x.hasAttribute("data-missing")).map((x) => { const d = x.querySelector<HTMLElement>(".cl183-pd"); const c = d ? getComputedStyle(d) : null; return { k: x.dataset.k, dashed: !!c && c.backgroundColor === "rgba(0, 0, 0, 0)" && /inset/.test(c.boxShadow) && !/rgba\([^)]*, 0\)/.test(c.boxShadow) }; }),
           extra: !!pk && /wishlist|looking for|note/i.test([...pk.querySelectorAll("p, blockquote, .clv-wish, [data-cl18='wish']")].map((e) => e.textContent).join(" ")),
           rel: site && !site.hasAttribute("data-missing") ? (site.closest("a") ?? site.querySelector("a") ?? site).getAttribute("rel") : "n/a",
         };
       }, id);
       if (!p.open) continue;
       peeks += 1;
-      L.check(`${w} ${id}: the open row's ground is a closed row's`, p.bg === p.closedBg, `${p.bg} vs ${p.closedBg}`);
       L.check(`${w} ${id}: exactly the three pills, in order`, JSON.stringify(p.ks) === JSON.stringify(["email", "website", "social"]), JSON.stringify(p.ks));
-      L.check(`${w} ${id}: the first pill's left is the name's ±1`, near(p.firstL, p.nameL, 1), `${p.firstL} vs ${p.nameL}`);
-      for (const m of p.missing) L.check(`${w} ${id}: the missing ${m.k} is dashed`, m.dashed, `${m.dashed}`);
+      for (const m of p.missing) L.check(`${w} ${id}: the missing ${m.k} is a transparent disc in a ring`, m.dashed, `${m.dashed}`);
       L.check(`${w} ${id}: no wishlist or notes text`, !p.extra, `${p.extra}`);
       if (p.rel !== "n/a") { seenFull += 1; L.check(`${w} ${id}: the website's rel has noopener`, /noopener/.test(p.rel ?? ""), `${p.rel}`); }
       if (p.missing.some((m) => m.k === "email" || m.k === "social")) seenMissing += 1;
@@ -339,93 +339,16 @@ test("C1 · peek: the closed row's ground, three contact pills from the name's l
       if (peeks >= 6 && seenMissing && seenFull) break;
     }
     L.check(`${w} peeks were opened`, peeks > 0, `${peeks}`);
-    L.check(`${w} a missing email or social was seen (the dashed branch)`, seenMissing > 0, `${seenMissing}`);
+    L.check(`${w} a missing email or social was seen (the missing branch)`, seenMissing > 0, `${seenMissing}`);
   }
   L.done(14);
 });
 
-/* ───────────────────────── C2 · the peek's spacing (v18.3.1) ───────────────────────── */
-test("C2 · spacing: pills 16 (14) under the main line and 18 (16) above the row's foot; nothing else moves", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("C2");
-  const boxes = () => page.evaluate(() => {
-    const rows = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0);
-    return rows.map((r) => ({ id: r.dataset.agentCard!, top: r.getBoundingClientRect().top, h: r.getBoundingClientRect().height, agy: r.querySelector<HTMLElement>(".clv-rwn")?.getBoundingClientRect().bottom ?? null }));
-  });
-  let seenFull = 0, seenCompact = 0;
-  for (const vp of [...SIZES, { width: 1920, height: 1080 }]) {
-    const w = `@${vp.width}`;
-    await open(page, vp, "C2");
-    const full = await page.evaluate(() => !!document.querySelector(".ws-app.sheet-wide"));
-    if (full) seenFull += 1; else seenCompact += 1;
-    const want = full ? { top: 16, foot: 18 } : { top: 14, foot: 16 };
-    /* rows with an agency line, past the first, so there is a row above and below */
-    const ids = (await boxes()).filter((b) => b.agy != null).slice(1, 4).map((b) => b.id);
-    L.check(`${w} rows to open (the population)`, ids.length >= 2, `${ids.length}`);
-    for (const id of ids) {
-      const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
-      await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(300);
-      const before = await boxes();
-      await row.hover(); await page.waitForTimeout(800);
-      const r = await page.evaluate((id) => {
-        const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
-        const pills = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((p) => p.getBoundingClientRect());
-        /* the main line: the name and agency block */
-        const agy = el.querySelector<HTMLElement>(".clv-rwn")!.getBoundingClientRect();
-        const rb = el.getBoundingClientRect();
-        return { open: el.hasAttribute("data-peek"), n: pills.length, pTop: Math.min(...pills.map((p) => p.top)), pBot: Math.max(...pills.map((p) => p.bottom)), agyB: agy.bottom, rowB: rb.bottom };
-      }, id);
-      const after = await boxes();
-      L.check(`${w} ${id}: the peek opened`, r.open && r.n === 3, `${r.open} · ${r.n}`);
-      if (!r.open) continue;
-      L.check(`${w} ${id}: pills' top − main line's bottom = ${want.top} ±1`, near(r.pTop - r.agyB, want.top, 1), (r.pTop - r.agyB).toFixed(1));
-      L.check(`${w} ${id}: row's bottom − pills' bottom = ${want.foot} ±1`, near(r.rowB - r.pBot, want.foot, 1), (r.rowB - r.pBot).toFixed(1));
-      const i = before.findIndex((b) => b.id === id);
-      const grow = after[i].h - before[i].h;
-      L.check(`${w} ${id}: the main line does not move (±0.5)`, near(after[i].agy, before[i].agy ?? NaN, 0.5), `${before[i].agy} → ${after[i].agy}`);
-      L.check(`${w} ${id}: the row grows by exactly the peek (${want.top} + pills + foot − its resting foot)`, grow > 0 && near(after[i].top + after[i].h - (r.pBot + want.foot), 0, 1), grow.toFixed(1));
-      L.check(`${w} ${id}: the rows above do not move`, before.slice(0, i).every((b, k) => near(after[k].top, b.top, 0.5)), "");
-      L.check(`${w} ${id}: the row below moves by exactly the growth`, i + 1 >= before.length || near(after[i + 1].top - before[i + 1].top, grow, 0.5), i + 1 < before.length ? `${(after[i + 1].top - before[i + 1].top).toFixed(1)} vs ${grow.toFixed(1)}` : "last");
-    }
-    await page.mouse.move(5, 5);
-  }
-  L.check("both the full and the compact branch were measured", seenFull > 0 && seenCompact > 0, `${seenFull} full · ${seenCompact} compact`);
-  L.done(40);
-});
+/* RETIRED by v18.3.3 (reports/contact-list-v18-3/REPORT.md): C2 (v18.3.1's pill spacing, 16/18 under and above a pill
+   row) and C2d (v18's Copy chip; v18.3.1 called it C3) described a peek that is gone. CL1833-E2 holds the details line's
+   16/16 and the ↗; CL1833-E4 holds the email that copies itself. Their ledgers are deleted with them. */
 
-/* C2d — C2's details half: Copy and the ↗ (the pack's C2 names Copy; the ↗ is held here beside it) */
-test("C2d · pills' details: Copy is v18's small button, 22 tall with a ring; the website's ↗ is 13px navy", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("C2d");
-  /* the harness account has no agent with a website, so the bare fixture gets one for this read and is re-seeded after */
-  reseed();
-  { const { db, uid } = await harnessDb(); await updateDoc(doc(db, "users", uid, "agents", BARE), { website: "https://example.com/agency" }); }
-  try {
-  await open(page, SIZES[0], "C3");
-  const all = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
-  const ids = [BARE, ...all.filter((x) => x !== BARE)];
-  let copy = 0, arrow = 0;
-  for (const id of ids) {
-    if (copy && arrow) break;
-    const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
-    await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(250);
-    await row.hover(); await page.waitForTimeout(800);
-    const r = await page.evaluate((id) => {
-      const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
-      const c = el.querySelector<HTMLElement>('[data-cl18="peek-copy"]');
-      const a = el.querySelector<HTMLElement>('[data-cl183="peek-pill"][data-k="website"] [data-cl183="ext"]');
-      const cs = c ? getComputedStyle(c) : null, as = a ? getComputedStyle(a) : null;
-      return { c: cs && { fs: cs.fontSize, ff: cs.fontFamily, rad: cs.borderTopLeftRadius, ring: cs.boxShadow, h: c!.getBoundingClientRect().height, pad: cs.padding }, a: as && { fs: as.fontSize, col: as.color } };
-    }, id);
-    if (r.c && !copy) { copy++; L.check("Copy is mono 11", r.c.fs === "11px" && /Mono/i.test(r.c.ff), JSON.stringify(r.c)); L.check("Copy has radius 6 and a non-transparent inset ring", r.c.rad === "6px" && /inset/.test(r.c.ring) && !/rgba\([^)]*, 0\)/.test(r.c.ring), JSON.stringify(r.c)); L.check("Copy is 22 tall (±1) with padding 0 8px", near(r.c.h, 22, 1) && r.c.pad === "0px 8px", JSON.stringify(r.c)); }
-    if (r.a && !arrow) { arrow++; L.check("the ↗ is 13px", r.a.fs === "13px", JSON.stringify(r.a)); L.check("the ↗ is navy #2d3a50", r.a.col === "rgb(45, 58, 80)", JSON.stringify(r.a)); }
-  }
-  L.check("an agent with an email and one with a website were found", copy > 0 && arrow > 0, `${copy} · ${arrow}`);
-  } finally { reseed(); }
-  L.done(6);
-});
-
-/* ───────────────────────── v18.3.2 · the row keeps its information; the actions sit on the peek's line ─────────── */
+/* ───────────────────────── v18.3.3 · the open row on the row's own columns ───────────────────────── */
 /* THE FIXTURE: three rows on the active manuscript (Harbour of Glass). "full" is Theo Abara (Full requested: stage, bar,
    YOUR MOVE, date) with three long contact details so 1280 must shorten them; the harness has no query at Offer on
    this manuscript, so a Full-requested row stands in. "sparse" is Sun-hee Park (Full sent) with a website only.
@@ -450,124 +373,214 @@ const hoverRow = async (page: Page, id: string, wait: number) => {
   await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(350);
   const b = await row.boundingBox(); await page.mouse.move(b!.x + 60, b!.y + 20); await page.waitForTimeout(wait);
 };
-/** one read of a row: its status and reply cells' visibility, its actions, pills and cells */
-const readRow = (page: Page, id: string) => page.evaluate((id) => {
+/** one read of an open row: its tracks, the agent block, and every item on the details line */
+const readLine = (page: Page, id: string) => page.evaluate((id) => {
   const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
-  const shown = (e: Element | null) => { if (!e) return null; for (let x: Element | null = e; x && x !== el.parentElement; x = x.parentElement) { const cs = getComputedStyle(x); if (cs.visibility !== "visible" || parseFloat(cs.opacity) < 1) return false; } return true; };
+  const box = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, h: r.height, cx: r.left + r.width / 2, cy: r.top + r.height / 2 }; };
   const cs = getComputedStyle(el), rb = el.getBoundingClientRect();
   const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat), gap = parseFloat(cs.columnGap) || 0;
   let x = rb.left + parseFloat(cs.paddingLeft); const lefts: number[] = []; for (const t of tracks) { lefts.push(x); x += t + gap; }
-  const statusL = lefts[lefts.length - 1], statusR = statusL + tracks[tracks.length - 1];
-  const mainTop = rb.top + parseFloat(cs.paddingTop), mainH = parseFloat(cs.gridTemplateRows.split(" ")[0]) || 0;
-  const acts = [...el.querySelectorAll<HTMLElement>('[data-cl13="tray-act"], [data-cl13="tray-open"]')].filter((b) => b.getBoundingClientRect().height > 0);
-  const tray = el.querySelector<HTMLElement>('[data-cl13="tray"]');
-  const pills = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((p) => p.getBoundingClientRect());
-  const texts = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"] .cl183-pt')].map((t) => ({ k: t.closest<HTMLElement>('[data-cl183="peek-pill"]')!.dataset.k, sw: t.scrollWidth, cw: t.clientWidth, title: t.getAttribute("title"), text: (t.textContent ?? "").trim() }));
+  const items = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((e) => {
+    const ics = getComputedStyle(e), d = e.querySelector<HTMLElement>(".cl183-pd"), t = e.querySelector<HTMLElement>(".cl183-pt");
+    return {
+      k: e.dataset.k ?? "", missing: e.hasAttribute("data-missing"), box: box(e), disc: box(d), text: box(t),
+      bg: ics.backgroundColor, bw: ics.borderTopWidth, bs: ics.borderTopStyle, sh: ics.boxShadow,
+      discBg: d ? getComputedStyle(d).backgroundColor : null, discSh: d ? getComputedStyle(d).boxShadow : null,
+      sw: t?.scrollWidth ?? 0, cw: t?.clientWidth ?? 0, title: t?.getAttribute("title") ?? e.getAttribute("title"), txt: (t?.textContent ?? "").trim(),
+    };
+  });
+  const next = el.querySelector<HTMLElement>('[data-cl1833="next"]');
+  const ext = el.querySelector<HTMLElement>('[data-cl183="ext"]');
   const statusLabels = [...el.querySelectorAll<HTMLElement>(".clv-rq button, .clv-rq a, .clv-rq [role='button']")].filter((b) => b.getBoundingClientRect().height > 0).map((b) => (b.textContent ?? "").trim());
-  const tb = tray?.getBoundingClientRect() ?? null;
   return {
-    peek: el.hasAttribute("data-peek"),
-    seen: { stage: shown(el.querySelector('[data-cl17="stage"]')), track: shown(el.querySelector('[data-cl17="track"]')), ym: shown(el.querySelector(".clv-ym")), date: shown(el.querySelector('[data-cl17="date-line"]')), reply: shown(el.querySelector(".clv-rrep")) },
-    acts: acts.map((a) => ({ label: (a.textContent ?? "").trim(), l: a.getBoundingClientRect().left, r: a.getBoundingClientRect().right })),
-    tray: tb && { l: tb.left, r: tb.right, t: tb.top, b: tb.bottom, c: tb.top + tb.height / 2 },
-    pillsC: pills.length ? (Math.min(...pills.map((p) => p.top)) + Math.max(...pills.map((p) => p.bottom))) / 2 : null,
-    pillTops: pills.map((p) => p.top), pillR: pills.length ? Math.max(...pills.map((p) => p.right)) : null,
-    statusL, statusR, main: { t: mainTop, b: mainTop + mainH }, texts, statusLabels,
+    peek: el.hasAttribute("data-peek"), row: box(el), bg: cs.backgroundColor, lefts, statusR: lefts[lefts.length - 1] + tracks[tracks.length - 1],
+    name: box(el.querySelector(".clv-rwn b")), av: box(el.querySelector(".clv-ini")), agent: box(el.querySelector(".clv-rwn")), line: box(el.querySelector(".cl183-pk")),
+    items, next: next && { ...box(next)!, label: (next.textContent ?? "").trim() }, statusLabels,
+    ext: ext && { fs: getComputedStyle(ext).fontSize, col: getComputedStyle(ext).color },
   };
 }, id);
+const visibleOpenCard = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("button, a, [role='button']")].filter((b) => b.getBoundingClientRect().height > 0 && /^\s*open card\s*$/i.test(b.textContent ?? "")).length);
 const norm = (s: string) => s.replace(/^\s*\+\s*/, "").replace(/\s+/g, " ").trim().toLowerCase();
 
-test("CL1832-D1 · nothing hides: on hover the status and reply cells stay visible; no actions with the peek closed", async ({ page }) => {
+test("CL1833-E1 · columns: email under the avatar and the name, website on its column, social on Replies, the next step on the status's right", async ({ page }) => {
   test.setTimeout(400_000);
-  const L = new Ledger("CL1832-D1");
+  const L = new Ledger("CL1833-E1");
   await withRows(async () => {
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
-      await open(page, vp, "CL1832-D1");
+      await open(page, vp, "CL1833-E1");
       for (const id of [FULL, SPARSE]) {
-        await hoverRow(page, id, 200);
-        const c = await readRow(page, id);
-        L.check(`${w} ${id}: the peek is still closed at 200ms (precondition)`, !c.peek, `${c.peek}`);
-        for (const [k, v] of Object.entries(c.seen)) if (v !== null) L.check(`${w} ${id} peek closed: ${k} is visible, opacity 1`, v, `${v}`);
-        L.check(`${w} ${id} peek closed: the status cell's stage is there to read`, c.seen.stage !== null, `${c.seen.stage}`);
-        L.check(`${w} ${id} peek closed: no action button has a visible box`, c.acts.length === 0, JSON.stringify(c.acts.map((a) => a.label)));
-        await page.waitForTimeout(800);
-        const o = await readRow(page, id);
-        L.check(`${w} ${id}: the peek opened`, o.peek, `${o.peek}`);
-        for (const [k, v] of Object.entries(o.seen)) if (v !== null) L.check(`${w} ${id} peek open: ${k} is visible, opacity 1`, v, `${v}`);
+        await hoverRow(page, id, 900);
+        const r = await readLine(page, id);
+        L.check(`${w} ${id}: the row is open with its three details (precondition)`, r.peek && r.items.length === 3, `${r.peek} · ${r.items.map((i) => i.k)}`);
+        const it = (k: string) => r.items.find((i) => i.k === k);
+        const em = it("email"), web = it("website"), soc = it("social");
+        if (em && r.av) L.check(`${w} ${id}: the email's disc is centred under the avatar ±1`, near(em.disc?.cx, r.av.cx, 1), `${em.disc?.cx.toFixed(1)} vs ${r.av.cx.toFixed(1)}`);
+        if (em && !em.missing && r.name) L.check(`${w} ${id}: the email's text starts on the name's left ±1`, near(em.text?.l, r.name.l, 1), `${em.text?.l.toFixed(1)} vs ${r.name.l.toFixed(1)}`);
+        if (web) L.check(`${w} ${id}: the website's disc is on What they want's left ±1`, near(web.disc?.l, r.lefts[1], 1), `${web.disc?.l.toFixed(1)} vs ${r.lefts[1].toFixed(1)}`);
+        if (soc) L.check(`${w} ${id}: the social disc is on Replies' left ±1`, near(soc.disc?.l, r.lefts[2], 1), `${soc.disc?.l.toFixed(1)} vs ${r.lefts[2].toFixed(1)}`);
+        if (id === FULL) {
+          L.check(`${w} ${id}: the next step is there`, !!r.next, `${r.next?.label}`);
+          if (r.next) L.check(`${w} ${id}: the next step's right is the status cell's right ±1`, near(r.next.r, r.statusR, 1), `${r.next.r.toFixed(1)} vs ${r.statusR.toFixed(1)}`);
+          if (r.next && soc?.box) L.check(`${w} ${id}: the social stops ≥24 short of the next step`, r.next.l - soc.box.r >= 23.5, (r.next.l - soc.box.r).toFixed(1));
+          const short = r.items.filter((i) => i.sw > i.cw + 1);
+          for (const i of short) L.check(`${w} ${id}: the shortened ${i.k} carries its full value as a title`, !!i.title && i.title === i.txt && (i.k !== "email" || i.title === "theo.abara@abaragrantliteraryagency.co.uk"), `${i.title} · ${i.txt}`);
+          if (vp.width === 1280) L.check(`${w} ${id}: the long email is shortened here (the branch is entered)`, !!em && em.sw > em.cw + 1, `${em?.sw} > ${em?.cw}`);
+        }
       }
-      const ym = await readRow(page, FULL);
-      L.check(`${w} the full row carries YOUR MOVE (the badge was read)`, ym.seen.ym !== null, `${ym.seen.ym}`);
     }
   });
-  L.done(20);
+  L.done(18);
 });
 
-test("CL1832-D2 · actions on the peek line: centred with the pills, right edge on the status cell's, clear of its main line", async ({ page }) => {
+test("CL1833-E2 · rhythm: one centre, 16 above and 16 below, a 124 row at 1512, no shells, no ground change, nothing else moves", async ({ page }) => {
   test.setTimeout(400_000);
-  const L = new Ledger("CL1832-D2");
+  const L = new Ledger("CL1833-E2");
+  const tops = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => ({ id: e.dataset.agentCard!, t: e.getBoundingClientRect().top, h: e.getBoundingClientRect().height })));
   await withRows(async () => {
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
-      await open(page, vp, "CL1832-D2");
+      await open(page, vp, "CL1833-E2");
       for (const id of [FULL, SPARSE, BARE]) {
-        await hoverRow(page, id, 900);
-        const r = await readRow(page, id);
-        L.check(`${w} ${id}: the peek is open with actions (precondition)`, r.peek && r.acts.length > 0 && !!r.tray, `${r.peek} · ${r.acts.length}`);
-        if (!r.tray || r.pillsC == null) continue;
-        L.check(`${w} ${id}: (a) the actions' centre is the pills' ±1`, near(r.tray.c, r.pillsC, 1), `${r.tray.c.toFixed(1)} vs ${r.pillsC.toFixed(1)}`);
-        L.check(`${w} ${id}: (b) the last action's right edge is the status cell's ±1`, near(Math.max(...r.acts.map((a) => a.r)), r.statusR, 1), `${Math.max(...r.acts.map((a) => a.r)).toFixed(1)} vs ${r.statusR.toFixed(1)}`);
-        const hits = r.tray.l < r.statusR && r.tray.r > r.statusL && r.tray.t < r.main.b && r.tray.b > r.main.t;
-        L.check(`${w} ${id}: (c) the actions do not intersect the status cell's main-line box`, !hits, JSON.stringify({ tray: r.tray, main: r.main }));
+        await hoverRow(page, id, 200);
+        const before = await tops(); const resting = await readLine(page, id);
+        await page.waitForTimeout(800);
+        const r = await readLine(page, id); const after = await tops();
+        L.check(`${w} ${id}: the row is open (precondition)`, r.peek && r.items.length === 3, `${r.peek}`);
+        if (!r.peek || !r.line || !r.agent || !r.row) continue;
+        const cs = [...r.items.map((i) => i.box?.cy ?? NaN), ...(r.next ? [r.next.cy] : [])];
+        L.check(`${w} ${id}: every item shares one centre ±1`, cs.every((c) => near(c, cs[0], 1)), JSON.stringify(cs.map((c) => c.toFixed(1))));
+        for (const i of r.items) L.check(`${w} ${id}: the ${i.k} has no shell (transparent, no border, no ring)`, i.bg === "rgba(0, 0, 0, 0)" && (i.bw === "0px" || i.bs === "none") && i.sh === "none", `${i.bg} · ${i.bw} ${i.bs} · ${i.sh}`);
+        L.check(`${w} ${id}: the ground does not change as it opens`, r.bg === resting.bg, `${resting.bg} → ${r.bg}`);
+        if (vp.width === 1512) {
+          L.check(`${w} ${id}: 16 ±1 from the agent block's bottom to the line's top`, near(r.line.t - r.agent.b, 16, 1), (r.line.t - r.agent.b).toFixed(1));
+          L.check(`${w} ${id}: 16 ±1 from the line's bottom to the row's bottom`, near(r.row.b - r.line.b, 16, 1), (r.row.b - r.line.b).toFixed(1));
+          if (id === FULL) L.check(`${w} ${id}: the full row is 124 ±2`, near(r.row.h, 124, 2), r.row.h.toFixed(1));
+        }
+        const i = before.findIndex((b) => b.id === id), grow = after[i].h - before[i].h;
+        L.check(`${w} ${id}: the rows above do not move`, before.slice(0, i).every((b, k) => near(after[k].t, b.t, 0.5)), "");
+        L.check(`${w} ${id}: the row below moves by exactly the growth`, i + 1 >= before.length || near(after[i + 1].t - before[i + 1].t, grow, 0.5), i + 1 < before.length ? `${(after[i + 1].t - before[i + 1].t).toFixed(1)} vs ${grow.toFixed(1)}` : "last");
+        if (r.ext) L.check(`${w} ${id}: the website's ↗ is 13px navy #2d3a50`, r.ext.fs === "13px" && r.ext.col === "rgb(45, 58, 80)", JSON.stringify(r.ext));
       }
     }
   });
-  L.done(20);
+  L.done(40);
 });
 
-test("CL1832-D3 · no collision at 1280: pills on one line, 16 clear of the actions; the email whole; a shortened value titled", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("CL1832-D3");
-  await withRows(async () => {
-    await open(page, SIZES[1], "CL1832-D3");
-    await hoverRow(page, FULL, 900);
-    const r = await readRow(page, FULL);
-    L.check("the peek is open with actions (precondition)", r.peek && !!r.tray, `${r.peek}`);
-    if (r.tray && r.pillR != null) L.check("(a) the last pill's right edge ≤ the actions' left − 16", r.pillR <= r.tray.l - 16 + 0.5, `${r.pillR.toFixed(1)} vs ${(r.tray.l - 16).toFixed(1)}`);
-    L.check("(b) the pills share one line (equal tops ±1)", r.pillTops.length === 3 && r.pillTops.every((t) => near(t, r.pillTops[0], 1)), JSON.stringify(r.pillTops));
-    const email = r.texts.find((t) => t.k === "email");
-    L.check("(c) the email is whole (scrollWidth ≤ clientWidth + 1)", !!email && email.sw <= email.cw + 1, JSON.stringify(email));
-    const short = r.texts.filter((t) => t.sw > t.cw + 1);
-    L.check("something shortened (the branch is entered)", short.length > 0, JSON.stringify(r.texts));
-    for (const t of short) L.check(`(d) the shortened ${t.k} has its full value as its title`, t.title === t.text, `${t.title} vs ${t.text}`);
-    const order = (k: string) => r.texts.find((t) => t.k === k);
-    const soc = order("social"), web = order("website");
-    L.check("the social handle gives way before the website", !!soc && !!web && (soc.sw - soc.cw) >= (web.sw - web.cw) - 1 || (soc != null && soc.sw > soc.cw + 1), JSON.stringify({ soc, web }));
-  });
-  L.done(6);
-});
-
-test("CL1832-D4 · no action twice: every row at 1512, peek open; a not-queried row shows Open card only", async ({ page }) => {
+test("CL1833-E3 · next step: no Open card anywhere, styled as '+ Log a query', never an action the status cell offers", async ({ page }) => {
   test.setTimeout(900_000);
-  const L = new Ledger("CL1832-D4");
-  await open(page, SIZES[0], "CL1832-D4");
-  const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
-  L.check("rows to sweep (the population)", ids.length >= 20, `${ids.length}`);
-  let notQueried = 0, withAct = 0;
-  for (const id of ids) {
-    await hoverRow(page, id, 800);
-    const r = await readRow(page, id);
-    if (!r.peek) { L.check(`${id}: the peek opened`, false, "closed"); continue; }
-    const acts = r.acts.map((a) => norm(a.label)), status = r.statusLabels.map(norm);
-    const twice = acts.filter((a) => status.includes(a));
-    L.check(`${id}: no action also in the status cell`, twice.length === 0, JSON.stringify({ acts, status }));
-    if (status.includes("log a query")) { notQueried += 1; L.check(`${id}: not queried: exactly one action, Open card`, acts.length === 1 && acts[0] === "open card", JSON.stringify(acts)); }
-    else if (acts.length === 2) withAct += 1;
-  }
-  L.check("both branches swept (not-queried rows and rows with an action)", notQueried > 0 && withAct > 0, `${notQueried} · ${withAct}`);
-  await page.mouse.move(5, 5);
-  L.done(20);
+  const L = new Ledger("CL1833-E3");
+  await withRows(async () => {
+    await open(page, SIZES[0], "CL1833-E3");
+    /* the reference: a not-queried row's "+ Log a query" */
+    const ref = await page.evaluate(() => {
+      const b = [...document.querySelectorAll<HTMLElement>(".aglist .clv-rq [data-cl17='log']")].find((e) => e.getBoundingClientRect().height > 0);
+      if (!b) return null; const c = getComputedStyle(b);
+      return { ff: c.fontFamily, fs: c.fontSize, col: c.color, dc: c.textDecorationColor, off: c.textUnderlineOffset, dl: c.textDecorationLine };
+    });
+    L.check("a '+ Log a query' to compare with (precondition)", !!ref, JSON.stringify(ref));
+    const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
+    L.check("rows to sweep (the population)", ids.length >= 20, `${ids.length}`);
+    let notQueried = 0, withNext = 0, styled = 0;
+    for (const id of ids) {
+      await hoverRow(page, id, 800);
+      const r = await readLine(page, id);
+      if (!r.peek) { L.check(`${id}: the row opened`, false, "closed"); continue; }
+      L.check(`${id}: no visible "Open card"`, (await visibleOpenCard(page)) === 0, `${await visibleOpenCard(page)}`);
+      const status = r.statusLabels.map(norm), nx = r.next ? norm(r.next.label) : null;
+      L.check(`${id}: the next step is not one of the status cell's actions`, !nx || !status.includes(nx), JSON.stringify({ nx, status }));
+      if (status.includes("log a query")) { notQueried += 1; L.check(`${id}: not queried: no next step`, !r.next, `${r.next?.label}`); }
+      if (r.next) {
+        withNext += 1;
+        if (ref && styled < 3) {
+          styled += 1;
+          const c = await page.evaluate((id) => { const b = [...document.querySelectorAll<HTMLElement>(`.aglist [data-agent-card="${id}"] [data-cl1833="next"]`)].find((e) => e.getBoundingClientRect().height > 0)!; const s = getComputedStyle(b); return { ff: s.fontFamily, fs: s.fontSize, col: s.color, dc: s.textDecorationColor, off: s.textUnderlineOffset, dl: s.textDecorationLine }; }, id);
+          L.check(`${id}: the next step is styled exactly as '+ Log a query'`, JSON.stringify(c) === JSON.stringify(ref), `${JSON.stringify(c)} vs ${JSON.stringify(ref)}`);
+        }
+      }
+    }
+    L.check("both branches swept (not-queried rows and rows with a next step)", notQueried > 0 && withNext > 0, `${notQueried} · ${withNext}`);
+    await page.mouse.move(5, 5);
+  });
+  L.done(30);
 });
+
+test("CL1833-E4 · copy: the email copies the full address, reads 'Copied', never opens the card, reverts; Enter does the same", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("CL1833-E4");
+  const ADDR = "theo.abara@abaragrantliteraryagency.co.uk";
+  await withRows(async () => {
+    for (const vp of SIZES) {
+      const w = `@${vp.width}`;
+      await open(page, vp, "CL1833-E4");
+      await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+      const email = page.locator(`.aglist [data-agent-card="${FULL}"] [data-cl183="peek-pill"][data-k="email"]`).filter({ visible: true }).first();
+      const panels = () => page.locator('[data-ap="panel"]').filter({ visible: true }).count();
+      const textNow = () => page.evaluate((id) => { const e = [...document.querySelectorAll<HTMLElement>(`.aglist [data-agent-card="${id}"] [data-k="email"] .cl183-pt`)].find((x) => x.getBoundingClientRect().height > 0); return (e?.textContent ?? "").trim(); }, FULL);
+      for (const how of ["click", "Enter"] as const) {
+        await hoverRow(page, FULL, 900);
+        await page.evaluate(() => navigator.clipboard.writeText("—"));
+        if (!(await email.count())) { L.check(`${w} ${how}: the email is there (precondition)`, false, "missing"); continue; }
+        if (how === "click") await email.click(); else { await email.focus(); await page.keyboard.press("Enter"); }
+        await page.waitForTimeout(150);
+        const clip = await page.evaluate(() => navigator.clipboard.readText());
+        L.check(`${w} ${how}: the clipboard holds the full address`, clip === ADDR, clip);
+        L.check(`${w} ${how}: it reads "Copied"`, (await textNow()) === "Copied", await textNow());
+        L.check(`${w} ${how}: the card does not open`, (await panels()) === 0, `${await panels()}`);
+        const t0 = Date.now(); let back = false;
+        while (Date.now() - t0 < 1600) { if ((await textNow()) === ADDR) { back = true; break; } await page.waitForTimeout(50); }
+        L.check(`${w} ${how}: it reverts within 1600ms`, back, `${Date.now() - t0}ms · ${await textNow()}`);
+        await closeAll(page); await page.mouse.move(5, 5); await page.waitForTimeout(300);
+      }
+    }
+  });
+  L.done(16);
+});
+
+test("CL1833-E5 · closes: a scroll with every pointer event suppressed, a small scroll keeps it, blur, leaving early, and the keyboard", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("CL1833-E5");
+  const anyOpen = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-peek]")].filter((e) => e.getBoundingClientRect().height > 0).length);
+  const scrollBy = (dy: number) => page.evaluate((dy) => { const r = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row']")].find((e) => e.getBoundingClientRect().height > 0)!; let s: HTMLElement | null = r.parentElement; while (s && !(s.scrollHeight > s.clientHeight && /auto|scroll/.test(getComputedStyle(s).overflowY))) s = s.parentElement; s!.scrollBy(0, dy); }, dy);
+  const SUPPRESS = `for (const t of ["pointermove","pointerover","pointerout","pointerenter","pointerleave","pointerdown","pointerup","mousemove","mouseover","mouseout","mouseenter","mouseleave"]) window.addEventListener(t, (e) => e.stopImmediatePropagation(), { capture: true });`;
+  for (const vp of SIZES) {
+    const w = `@${vp.width}`;
+    await open(page, vp, "CL1833-E5");
+    const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
+    const id = ids[3];
+    /* (b) a 20px scroll that leaves the pointer on the row keeps it open */
+    await hoverRow(page, id, 900);
+    L.check(`${w} the row opened on hover (precondition)`, (await anyOpen()) === 1, `${await anyOpen()}`);
+    await scrollBy(20); await page.waitForTimeout(300);
+    L.check(`${w} (b) a 20px scroll that leaves the pointer on the row keeps it open`, (await anyOpen()) === 1, `${await anyOpen()}`);
+    /* (c) window blur closes it */
+    await hoverRow(page, id, 900);
+    await page.evaluate(() => window.dispatchEvent(new Event("blur"))); await page.waitForTimeout(200);
+    L.check(`${w} (c) window blur closes it`, (await anyOpen()) === 0, `${await anyOpen()}`);
+    /* (d) hover 300ms, leave the list: nothing opens at 450 */
+    await hoverRow(page, ids[4], 300);
+    await page.mouse.move(5, 5); await page.waitForTimeout(400);
+    L.check(`${w} (d) leaving before the dwell: nothing opens`, (await anyOpen()) === 0, `${await anyOpen()}`);
+    /* (e) Space opens, Escape closes; focus leaving closes */
+    const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${ids[2]}"]`).filter({ visible: true }).first();
+    await row.focus(); await page.keyboard.press(" "); await page.waitForTimeout(300);
+    L.check(`${w} (e) Space opens the focused row (precondition)`, (await anyOpen()) === 1, `${await anyOpen()}`);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+    L.check(`${w} (e) Escape closes it`, (await anyOpen()) === 0, `${await anyOpen()}`);
+    await row.focus(); await page.keyboard.press(" "); await page.waitForTimeout(300);
+    await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLElement>("input, button")].find((e) => e.getBoundingClientRect().height > 0 && !e.closest(".aglist")); i?.focus(); });
+    await page.waitForTimeout(300);
+    L.check(`${w} (e) focus leaving the row closes it`, (await anyOpen()) === 0, `${await anyOpen()}`);
+    /* (a) hover-open, then a 500px scroll with every pointer and mouse event suppressed: closed within 300ms */
+    await hoverRow(page, id, 900);
+    L.check(`${w} (a) open before the scroll (precondition)`, (await anyOpen()) === 1, `${await anyOpen()}`);
+    await page.evaluate(SUPPRESS);
+    await scrollBy(500); await page.waitForTimeout(300);
+    L.check(`${w} (a) a 500px scroll with pointer events suppressed closes it within 300ms`, (await anyOpen()) === 0, `${await anyOpen()}`);
+  }
+  L.done(18);
+});
+
 
 /* ───────────────────────── D · adding an agent ───────────────────────── */
 test("D1 · add: the panel's act view, no centred card, Add disabled until a name, saves through addAgent, then the panel shows them", async ({ page }) => {

@@ -1,0 +1,356 @@
+[
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the row is open (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: every item shares one centre ±1",
+  "ok": true,
+  "detail": "[\"631.6\",\"631.6\",\"631.6\",\"631.6\"]"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the email has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the website has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the social has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the ground does not change as it opens",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: 16 ±1 from the agent block's bottom to the line's top",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: 16 ±1 from the line's bottom to the row's bottom",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the full row is 124 ±2",
+  "ok": true,
+  "detail": "123.8"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the rows above do not move",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the row below moves by exactly the growth",
+  "ok": true,
+  "detail": "43.8 vs 43.8"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-4: the website's ↗ is 13px navy #2d3a50",
+  "ok": true,
+  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(45, 58, 80)\"}"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the row is open (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: every item shares one centre ±1",
+  "ok": true,
+  "detail": "[\"566.6\",\"566.6\",\"566.6\",\"566.6\"]"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the email has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the website has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the social has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the ground does not change as it opens",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: 16 ±1 from the agent block's bottom to the line's top",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: 16 ±1 from the line's bottom to the row's bottom",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the rows above do not move",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the row below moves by exactly the growth",
+  "ok": true,
+  "detail": "42.8 vs 42.8"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 msv12-agent-5: the website's ↗ is 13px navy #2d3a50",
+  "ok": true,
+  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(45, 58, 80)\"}"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the row is open (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: every item shares one centre ±1",
+  "ok": true,
+  "detail": "[\"571.1\",\"571.1\",\"571.1\"]"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the email has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the website has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the social has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the ground does not change as it opens",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: 16 ±1 from the agent block's bottom to the line's top",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: 16 ±1 from the line's bottom to the row's bottom",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the rows above do not move",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1512 clv181-bare: the row below moves by exactly the growth",
+  "ok": true,
+  "detail": "46.3 vs 46.3"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the row is open (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: every item shares one centre ±1",
+  "ok": true,
+  "detail": "[\"631.6\",\"631.6\",\"631.6\",\"631.6\"]"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the email has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the website has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the social has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the ground does not change as it opens",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the rows above do not move",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the row below moves by exactly the growth",
+  "ok": true,
+  "detail": "43.8 vs 43.8"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-4: the website's ↗ is 13px navy #2d3a50",
+  "ok": true,
+  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(45, 58, 80)\"}"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the row is open (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: every item shares one centre ±1",
+  "ok": true,
+  "detail": "[\"516.9\",\"516.9\",\"516.9\",\"516.9\"]"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the email has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the website has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the social has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the ground does not change as it opens",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the rows above do not move",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the row below moves by exactly the growth",
+  "ok": true,
+  "detail": "42.8 vs 42.8"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 msv12-agent-5: the website's ↗ is 13px navy #2d3a50",
+  "ok": true,
+  "detail": "{\"fs\":\"13px\",\"col\":\"rgb(45, 58, 80)\"}"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the row is open (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: every item shares one centre ±1",
+  "ok": true,
+  "detail": "[\"521.5\",\"521.5\",\"521.5\"]"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the email has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the website has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the social has no shell (transparent, no border, no ring)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · none"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the ground does not change as it opens",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the rows above do not move",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL1833-E2",
+  "where": "@1280 clv181-bare: the row below moves by exactly the growth",
+  "ok": true,
+  "detail": "46.3 vs 46.3"
+ }
+]
