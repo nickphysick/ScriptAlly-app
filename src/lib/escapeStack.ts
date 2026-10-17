@@ -46,6 +46,12 @@ export const ESC_LEVEL = {
   dockPeek: 35,
   /** anything open inside the drawer */
   drawerPopup: 40,
+  /** To-do v5.2 — the tray's slide-out calendar, over the desk's journey and its popups */
+  trayCalendar: 45,
+  /** To-do v5.2 — a bulk selection in the tray (Escape clears it before the calendar closes) */
+  trayBulk: 46,
+  /** To-do v5.2 — a dial's reschedule menu, the topmost layer on the page */
+  dialMenu: 47,
 } as const;
 
 interface Layer { level: number; order: number; handle: () => void }

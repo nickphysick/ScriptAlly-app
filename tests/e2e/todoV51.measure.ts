@@ -442,7 +442,8 @@ test("TD5 I4 — Set aside lists every snooze, holding dismissal and muted rule;
   await updateDoc(doc(db, "users", uid), { mutedTaskRules: [...new Set([...(user.mutedTaskRules ?? []), "no_response_close", "nudge_overdue"])] });
   await openTodo(page, { width: 1512, height: 900 });
   await page.waitForTimeout(800);
-  const n0 = Number(((await page.locator("[data-todo-v5] h1").textContent()) || "").match(/\d+/)?.[0]);
+  /* v5.2 §F.1: the h1 says what is urgent; the tray's count is the In-your-tray tab (unfiltered here) */
+  const n0 = Number(((await page.locator('[data-todo-v5] [data-td5="tab-tray"] b').first().textContent()) || "").trim());
   await page.locator('[data-todo-v5] [data-td5="tab-aside"]').click();
   await page.waitForTimeout(400);
   const list = await page.evaluate(() => {
@@ -498,11 +499,12 @@ test("TD5 I5 — an own task due in 10 days, a week early, is not in the tray or
   const dueYmd = `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, "0")}-${String(due.getDate()).padStart(2, "0")}`;
   try {
     await openTodo(page, { width: 1512, height: 900 });
-    const n0 = Number(((await page.locator("[data-todo-v5] h1").textContent()) || "").match(/\d+/)?.[0]);
+    /* v5.2 §F.1: the h1 says what is urgent; the tray's count is the In-your-tray tab (unfiltered here) */
+    const n0 = Number(((await page.locator('[data-todo-v5] [data-td5="tab-tray"] b').first().textContent()) || "").trim());
     await setDoc(doc(db, "users", uid, "tasks", id), { id, userId: uid, text: `Zz td51 probe ${id}`, done: false, dueDate: dueYmd, surfaceOffset: "week-before", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
     await page.waitForTimeout(2500);
     await mutate(page, "I5");
-    const n1 = Number(((await page.locator("[data-todo-v5] h1").textContent()) || "").match(/\d+/)?.[0]);
+    const n1 = Number(((await page.locator('[data-todo-v5] [data-td5="tab-tray"] b').first().textContent()) || "").trim());
     const inTray = (await page.locator(`[data-todo-v5] [data-td5-row="${id}"]`).count()) > 0;
     L.check("I5", "not in the tray today", !inTray, "");
     L.check("I5", "not in n (the badge's number)", n1 === n0, `${n0} → ${n1}`);

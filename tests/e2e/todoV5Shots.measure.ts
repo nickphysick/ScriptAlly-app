@@ -82,18 +82,7 @@ for (const vp of SIZES) {
     await page.waitForTimeout(700);
     await page.screenshot({ path: `${DIR}/11-journey-review-${vp.width}.png` });
     await leaveDesk(page); await page.waitForTimeout(600);
-    /* 05 · filtered to To chase */
-    await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>("[data-todo-v5] .wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0); if (s) s.scrollTop = 0; });
-    await page.locator('[data-todo-v5] [data-td5="card-row"][data-k="chase"]').click();
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: `${DIR}/05-filtered-${vp.width}.png` });
-    await page.locator('[data-todo-v5] [data-td5="card-row"][data-k="chase"]').click();
-    /* 06 · just the desk */
-    await sc(); await page.waitForTimeout(300);
-    await page.locator('[data-todo-v5] [data-td5="focus"]').click();
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: `${DIR}/06-just-the-desk-${vp.width}.png` });
-    await page.locator('[data-todo-v5] [data-td5="focus"]').click();
+    /* 05 (the counts card filtered) and 06 (Just the desk) are retired by v5.2 — tests/e2e/RETIRED-todo-list-v5-2.md */
     /* 12 · the compose card, a task; 13 · a note */
     await page.evaluate(() => sessionStorage.removeItem("sa.todoTray.draft"));
     await page.locator('[data-todo-v5] [data-td5="add-row"]').click();

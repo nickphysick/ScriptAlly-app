@@ -26,6 +26,24 @@ export const typeLabel = (t: F["type"]): string => TRAY_KINDS.find((k) => k.id =
 const Chev = () => <svg className="td5-chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const X = () => <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
 
+/** Find: the filter row's field, and (v5.2 §E) the navy row's while pinned — the same state, `/` and Escape */
+export const TrayFind: React.FC<{
+  filters: F;
+  setFilters: (f: F) => void;
+  findRef: React.Ref<HTMLInputElement>;
+  disabled?: boolean;
+  placeholder?: string;
+  pinned?: boolean;
+}> = ({ filters, setFilters, findRef, disabled, placeholder = "Find a task, agent or agency", pinned = false }) => (
+  <label className={`td5-find${pinned ? " td52-pfind" : ""}`} data-td5="find" data-td52={pinned ? "pin-find" : undefined}>
+    <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="m11 11 3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+    <input ref={findRef} value={filters.find} disabled={disabled} placeholder={placeholder} aria-label={placeholder}
+      onChange={(e) => setFilters({ ...filters, find: e.target.value })}
+      onKeyDown={(e) => { if (e.key === "Escape" && filters.find) { e.preventDefault(); e.stopPropagation(); setFilters({ ...filters, find: "" }); } }} />
+    <kbd aria-hidden="true">/</kbd>
+  </label>
+);
+
 export const TrayFilterRow: React.FC<{
   filters: F;
   setFilters: (f: F) => void;
@@ -36,7 +54,11 @@ export const TrayFilterRow: React.FC<{
   hasPin: (i: TrayItem) => boolean;
   findRef: React.Ref<HTMLInputElement>;
   disabled?: boolean;
-}> = ({ filters, setFilters, all, countFor, hasPin, findRef, disabled }) => {
+  /** v5.2 §A — a calendar filter on: the Due pill shows it as its chip ("Overdue ×", "Due: 23 Oct ×") and × clears it */
+  calChip?: { label: string; onClear: () => void } | null;
+  /** v5.2 §E — false while pinned: Find is drawn in the navy row instead (the same field, one at a time) */
+  findHere?: boolean;
+}> = ({ filters, setFilters, all, countFor, hasPin, findRef, disabled, calChip, findHere = true }) => {
   const [open, setOpen] = useState<PanelId | null>(null);
   const anchors = useRef<Partial<Record<PanelId, HTMLButtonElement | null>>>({});
   const panelRef = useRef<HTMLDivElement>(null);
@@ -152,17 +174,16 @@ export const TrayFilterRow: React.FC<{
 
   return (
     <div className="td5-fr" data-td5="filters">
-      <label className="td5-find" data-td5="find">
-        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="m11 11 3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-        <input ref={findRef} value={filters.find} disabled={disabled} placeholder="Find a task, agent or agency" aria-label="Find a task, agent or agency"
-          onChange={(e) => setFilters({ ...filters, find: e.target.value })}
-          onKeyDown={(e) => { if (e.key === "Escape" && filters.find) { e.preventDefault(); e.stopPropagation(); setFilters({ ...filters, find: "" }); } }} />
-        <kbd aria-hidden="true">/</kbd>
-      </label>
+      {findHere ? <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} disabled={disabled} /> : null}
       <div className="td5-pills" data-td5="pills">
         {pill("type", "Task type", filters.type ? typeLabel(filters.type) : null, () => setFilters({ ...filters, type: null }))}
         {pill("agent", "Agent", filters.agentId ? (agents.find((a) => a.id === filters.agentId)?.name ?? "Agent") : null, () => setFilters({ ...filters, agentId: null }))}
-        {pill("due", "Due", filters.due ? DUE_OPTS.find((d) => d.id === filters.due)!.label : null, () => setFilters({ ...filters, due: null }))}
+        {calChip ? (
+          <span className="td5-fpw on" data-td5-pill="due" data-td52="due-chip">
+            <button type="button" className="td5-fp" ref={(el) => { anchors.current.due = el; }} aria-pressed="true" disabled={disabled} onClick={calChip.onClear}><span>{calChip.label}</span></button>
+            <button type="button" className="td5-fpx" aria-label={`Clear ${calChip.label}`} onClick={calChip.onClear}><X /></button>
+          </span>
+        ) : pill("due", "Due", filters.due ? DUE_OPTS.find((d) => d.id === filters.due)!.label : null, () => setFilters({ ...filters, due: null }))}
         {pill("more", "More filters", moreOn ? "More filters" : null, () => setFilters({ ...filters, linked: false, pinned: false }), moreOn ? <i className="td5-fpn">{moreOn} on</i> : null)}
       </div>
       {open && typeof document !== "undefined" ? createPortal(

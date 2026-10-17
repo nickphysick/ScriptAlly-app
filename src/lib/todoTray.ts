@@ -41,21 +41,23 @@ export interface TrayGroup {
   buckets: Bucket[];
   tint: string;
   ink: string;
-  art: { src: string; w: number; l: number; t: number };
+  /** v5.2 §D — the band's drawing, by its width on a 56px band (equal weight, not equal width). It stands 3px above the
+   *  band's floor in a slot centred at x 31; compact bands scale the width (todoV52.css `--td5-artk`) */
+  art: { src: string; w: number };
 }
 
 /** the table's order IS the tray's order */
 export const TRAY_GROUPS: readonly TrayGroup[] = [
   { id: "you", name: "Your move", note: "Asked of you", buckets: ["send", "decide"], tint: "#f6e2d8", ink: "#a2452a",
-    art: { src: "/images/query-centre/your-move-talon.webp", w: 44, l: 8, t: -20 } },
+    art: { src: "/images/query-centre/your-move-talon.webp", w: 42 } },
   { id: "chase", name: "Worth a nudge", note: "Past the reply date", buckets: ["chase"], tint: "#e2e7ef", ink: "#2a3a52",
-    art: { src: "/images/query-centre/waiting-hourglass.webp", w: 52, l: 4, t: -9 } },
+    art: { src: "/images/query-centre/waiting-hourglass.webp", w: 49 } },
   { id: "quiet", name: "Gone quiet", note: "Time to decide", buckets: ["close"], tint: "#ece8e3", ink: "rgba(28, 19, 15, 0.6)",
-    art: { src: "/images/packages/materials-tray-pile.png", w: 50, l: 5, t: -8 } },
+    art: { src: "/images/packages/materials-tray-pile.png", w: 50 } },
   { id: "tidy", name: "Housekeeping", note: "Gaps worth filling", buckets: ["fix"], tint: "#e3e8e1", ink: "#4f6250",
-    art: { src: "/images/contact/contact-index-hawk.webp", w: 54, l: 3, t: -7 } },
+    art: { src: "/images/contact/contact-index-hawk.webp", w: 53 } },
   { id: "mine", name: "Your tasks", note: "Your own", buckets: ["note"], tint: "#f4ecdc", ink: "#8a6a3c",
-    art: { src: "/images/dash/quill.png", w: 34, l: 14, t: -16 } },
+    art: { src: "/images/dash/quill.png", w: 44 } },
 ];
 
 export const TRAY_KINDS: readonly { id: TrayKind; label: string; buckets: Bucket[] }[] = [

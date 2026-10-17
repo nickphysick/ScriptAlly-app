@@ -20,6 +20,9 @@ const plusDays = (ymd: string, n: number) => { const [y, m, d] = ymd.split("-").
 
 export type PopMode = "aside" | "move" | "change";
 export interface SetAsidePopProps {
+  /** v5.2 §H.3 — the one-time explainer at the top; GOT IT calls `onExplained` (stored on the user) */
+  explain?: boolean;
+  onExplained?: () => void;
   mode: PopMode;
   focus: "snooze" | "dismiss";
   todayYmd: string;
@@ -42,7 +45,7 @@ export interface SetAsidePopProps {
   opener: HTMLElement | null;
 }
 
-export const SetAsidePop: React.FC<SetAsidePopProps> = ({ mode, focus, todayYmd, rules, first, backLine, rulePlain, deedPlain, onSnooze, onDismiss, onRule, onDelete, onDoor, onClose, opener }) => {
+export const SetAsidePop: React.FC<SetAsidePopProps> = ({ explain = false, onExplained, mode, focus, todayYmd, rules, first, backLine, rulePlain, deedPlain, onSnooze, onDismiss, onRule, onDelete, onDoor, onClose, opener }) => {
   const ref = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [cal, setCal] = useState(false);
@@ -107,6 +110,12 @@ export const SetAsidePop: React.FC<SetAsidePopProps> = ({ mode, focus, todayYmd,
   return (
     <div ref={ref} className="td5-sapop" role="dialog" aria-label={mode === "move" ? "Move it" : "Set aside"} data-td5="aside-pop" data-mode={mode}>
       <div ref={bodyRef} className="td5-pbody">
+        {explain && mode === "aside" ? (
+          <div className="td52-explain" data-td52="explain">
+            <span><b>Snooze</b> brings it back on the date you pick. <b>Dismiss</b> keeps it away until something changes on the query. Either way, nothing is lost.</span>
+            <button type="button" data-td52="got-it" onClick={onExplained}>GOT IT</button>
+          </div>
+        ) : null}
         <div className="td5-psec" data-td5="pop-snooze">
           <div className="td5-ph"><b>{head}</b><span>{sub}</span></div>
           {canSnooze ? (

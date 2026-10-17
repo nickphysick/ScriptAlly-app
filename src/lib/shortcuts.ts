@@ -73,6 +73,7 @@ export const SHORTCUTS = {
   /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
   /* v138.6 §A — the pin: owned by the shared pin hook (usePinList), not by the page */
   qcPin:            { chords: [k("f")], label: "Pin the list", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  todoPin:          { chords: [k("f")], label: "Pin the list", scope: "To-do list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   qcFind:           { chords: [k("/")], label: "Find a query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcDown:           { chords: [k("j"), k("ArrowDown")], label: "Next query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcUp:             { chords: [k("k"), k("ArrowUp")], label: "Previous query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
