@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "F3",
+  "where": "@1512 top: texts read",
+  "ok": true,
+  "detail": "80"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 top: every text meets its ratio",
+  "ok": false,
+  "detail": "22: \"/\" 4.05 (11px rgba(28, 19, 15, 0.55) on rgb(255,255,255) KBD) · \"move\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"act\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"Set aside\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) td5-tab) · \"2\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) B) · \"Due\" 3.49 (10.5px rgba(45, 58, 80, 0.62) on rgb(233,237,243) td5-h) · \"Marcus Reed · Reed & P\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Jun\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Priya Nair · Northbank\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Ana Duarte · Duarte Wo\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL)"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 sheet: texts read",
+  "ok": true,
+  "detail": "95"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 sheet: every text meets its ratio",
+  "ok": false,
+  "detail": "33: \"/\" 4.05 (11px rgba(28, 19, 15, 0.55) on rgb(255,255,255) KBD) · \"move\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"act\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"Set aside\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) td5-tab) · \"2\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) B) · \"Due\" 3.49 (10.5px rgba(45, 58, 80, 0.62) on rgb(233,237,243) td5-h) · \"Marcus Reed · Reed & P\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Jun\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Priya Nair · Northbank\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Ana Duarte · Duarte Wo\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL)"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 top: texts read",
+  "ok": true,
+  "detail": "65"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 top: every text meets its ratio",
+  "ok": false,
+  "detail": "15: \"/\" 4.05 (11px rgba(28, 19, 15, 0.55) on rgb(255,255,255) KBD) · \"move\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"act\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"Set aside\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) td5-tab) · \"2\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) B) · \"Due\" 3.49 (10.5px rgba(45, 58, 80, 0.62) on rgb(233,237,243) td5-h) · \"Marcus Reed · Reed & P\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Jun\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Priya Nair · Northbank\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"1\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"of\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN)"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 sheet: texts read",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 sheet: every text meets its ratio",
+  "ok": false,
+  "detail": "31: \"/\" 4.05 (11px rgba(28, 19, 15, 0.55) on rgb(255,255,255) KBD) · \"move\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"act\" 3.12 (10px rgba(244, 238, 229, 0.42) on rgb(45,58,80) td5-keys) · \"Set aside\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) td5-tab) · \"2\" 2.94 (10.5px rgba(45, 58, 80, 0.55) on rgb(233,237,243) B) · \"Due\" 3.49 (10.5px rgba(45, 58, 80, 0.62) on rgb(233,237,243) td5-h) · \"Marcus Reed · Reed & P\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Jun\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Priya Nair · Northbank\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL) · \"Ana Duarte · Duarte Wo\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Aug\" 3.68 (7px rgba(162, 69, 42, 0.75) on rgb(255,255,255) SMALL)"
+ }
+]

@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "G2",
+  "where": "the probe task is in the tray",
+  "ok": true,
+  "detail": "zz-td52-move-mvcnn4b4"
+ },
+ {
+  "lock": "G2",
+  "where": "a future day on the grid to drop on",
+  "ok": true,
+  "detail": "2026-10-20"
+ },
+ {
+  "lock": "G2",
+  "where": "own task: the drop moves dueDate to 2026-10-20",
+  "ok": true,
+  "detail": "2026-10-20"
+ },
+ {
+  "lock": "G2",
+  "where": "own task: the toast says it moved",
+  "ok": true,
+  "detail": "Zz td52 move probe · moved to Tue 20 OctUndo"
+ },
+ {
+  "lock": "G2",
+  "where": "own task: Undo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "own task: Undo restores the document byte for byte",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "a drop on today is refused (nothing written)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "…and a toast says why",
+  "ok": true,
+  "detail": "Pick a day after today."
+ },
+ {
+  "lock": "G2",
+  "where": "a nudge in the tray",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "the dial opens the menu, not the row",
+  "ok": true,
+  "detail": "{\"head\":\"SET A NEW DATE\",\"ks\":[\"tomorrow\",\"monday\",\"week\",\"month\",\"pick\"]}"
+ },
+ {
+  "lock": "G2",
+  "where": "…Tomorrow · Monday · In a week · In a month · Pick on the calendar",
+  "ok": true,
+  "detail": "[\"tomorrow\",\"monday\",\"week\",\"month\",\"pick\"]"
+ },
+ {
+  "lock": "G2",
+  "where": "In a week writes a snooze",
+  "ok": true,
+  "detail": "2026-10-24T17:13:02.171Z"
+ },
+ {
+  "lock": "G2",
+  "where": "…and the row leaves the tray for Set aside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "the toast: {Agent} · set for {date}",
+  "ok": true,
+  "detail": "Tobias Quint · set for Sat 24 OctUndo"
+ },
+ {
+  "lock": "G2",
+  "where": "nudge: Undo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "nudge: Undo puts the flag back as it was",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "housekeeping: the dial opens nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "housekeeping: the row cannot be dragged",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G2",
+  "where": "a passed send-by: CAN'T BE SNOOZED with its send-by door (task-partial-seed-)",
+  "ok": true,
+  "detail": "{\"cant\":true,\"door\":true,\"ks\":[{\"k\":\"pick\",\"off\":false}]}"
+ },
+ {
+  "lock": "G2",
+  "where": "a drop past the ceiling writes nothing",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "G2",
+  "where": "…and says why (v5.1's words)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "G2",
+  "where": "an offer: Tomorrow only",
+  "ok": true,
+  "detail": "[{\"k\":\"tomorrow\",\"off\":false},{\"k\":\"monday\",\"off\":true},{\"k\":\"week\",\"off\":true},{\"k\":\"month\",\"off\":true},{\"k\":\"pick\",\"off\":false}]"
+ },
+ {
+  "lock": "G2",
+  "where": "guards exercised (housekeeping and at least one dated guard)",
+  "ok": true,
+  "detail": "hk,passed,offer"
+ }
+]

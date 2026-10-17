@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "D1",
+  "where": "@1512 the desk head has no drawing",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 groups to read",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 you: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 you: width 42 × 0.88 (±1)",
+  "ok": true,
+  "detail": "37.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 you: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 you: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -10.4, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 you: nothing paints over its top edge",
+  "ok": true,
+  "detail": "IMG"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 chase: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 chase: width 49 × 0.88 (±1)",
+  "ok": true,
+  "detail": "43.1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 chase: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 chase: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -3.3, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 quiet: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 quiet: width 50 × 0.88 (±1)",
+  "ok": true,
+  "detail": "44.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 quiet: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 quiet: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -3.3, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 tidy: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 tidy: width 53 × 0.88 (±1)",
+  "ok": true,
+  "detail": "46.6"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 tidy: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 tidy: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -0.4, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 mine: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 mine: width 44 × 0.88 (±1)",
+  "ok": true,
+  "detail": "38.7"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 mine: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 mine: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -8.0, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 a band stuck under the strip",
+  "ok": true,
+  "detail": "{\"found\":true,\"crosses\":true,\"hit\":\"td5-strip\",\"hitImg\":false}"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 its drawing crosses the strip cleanly (on top of it)",
+  "ok": false,
+  "detail": "td5-strip"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 the desk head has no drawing",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 groups to read",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 you: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 you: width 42 × 0.88 (±1)",
+  "ok": true,
+  "detail": "37.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 you: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 you: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -10.4, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 you: nothing paints over its top edge",
+  "ok": true,
+  "detail": "IMG"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 chase: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 chase: width 49 × 0.88 (±1)",
+  "ok": true,
+  "detail": "43.1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 chase: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 chase: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -3.3, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 quiet: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 quiet: width 50 × 0.88 (±1)",
+  "ok": true,
+  "detail": "44.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 quiet: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 quiet: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -3.3, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 tidy: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 tidy: width 53 × 0.88 (±1)",
+  "ok": true,
+  "detail": "46.6"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 tidy: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 tidy: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -0.4, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 mine: one copy of its drawing on the page",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 mine: width 44 × 0.88 (±1)",
+  "ok": true,
+  "detail": "38.7"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 mine: centred at 31 (±1)",
+  "ok": true,
+  "detail": "31.0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 mine: foot 3 above the floor (±1)",
+  "ok": true,
+  "detail": "3.0 (top -8.0, band 44)"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 a band stuck under the strip",
+  "ok": true,
+  "detail": "{\"found\":true,\"crosses\":true,\"hit\":\"td5-strip\",\"hitImg\":false}"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 its drawing crosses the strip cleanly (on top of it)",
+  "ok": false,
+  "detail": "td5-strip"
+ }
+]

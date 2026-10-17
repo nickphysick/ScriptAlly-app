@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "F1",
+  "where": "@1512 the h1 reads \"33 overdue\"",
+  "ok": false,
+  "detail": "\"48 tasks in your tray\""
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 its accessible name says the same",
+  "ok": false,
+  "detail": "48 tasks in your tray"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 it keeps data-page-title",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 the overdue part is rust",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 the h1 reads \"33 overdue\"",
+  "ok": false,
+  "detail": "\"48 tasks in your tray\""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 its accessible name says the same",
+  "ok": false,
+  "detail": "48 tasks in your tray"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 it keeps data-page-title",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 the overdue part is rust",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F1",
+  "where": "caught: keeps v5.1's title",
+  "ok": true,
+  "detail": "[\"Your tray is empty\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "nothing: keeps v5.1's title",
+  "ok": true,
+  "detail": "[\"Your next move,always on top\"]"
+ }
+]

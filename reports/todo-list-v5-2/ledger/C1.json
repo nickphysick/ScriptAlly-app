@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "C1",
+  "where": "@1512 ⤢ opens the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 the drawer sits 8 from the top, right and bottom",
+  "ok": true,
+  "detail": "{\"on\":true,\"top\":8,\"right\":8,\"bottom\":8,\"w\":1180,\"r\":\"12px\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 width min(1180, 100vw − 110)",
+  "ok": true,
+  "detail": "1180"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 chips of two or more kinds to filter",
+  "ok": true,
+  "detail": "close,nudge,mine,send"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 pressing close hides its chips",
+  "ok": true,
+  "detail": "0 left"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 …and keeps every other chip",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 Week shows the selected day's week",
+  "ok": true,
+  "detail": "2026-09-28,2026-09-29,2026-09-30,2026-10-01,2026-10-02,2026-10-03,2026-10-04 vs 2026-09-28,2026-09-29,2026-09-30,2026-10-01,2026-10-02,2026-10-03,2026-10-04"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 Month and Week show the same items",
+  "ok": true,
+  "detail": "[1,1,2,0,0,1,1]"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 a tray task on the calendar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 Open on the desk closes the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 …selects that row",
+  "ok": true,
+  "detail": "{\"open\":false,\"current\":\"true\",\"inView\":true,\"journey\":0,\"desk\":\"task-no-res-close-cor-move-b\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 …and scrolls it into view",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 …and starts no journey",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "@1512 the drawer wrote nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 ⤢ opens the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 the drawer sits 8 from the top, right and bottom",
+  "ok": true,
+  "detail": "{\"on\":true,\"top\":8,\"right\":8,\"bottom\":8,\"w\":1170,\"r\":\"12px\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 width min(1180, 100vw − 110)",
+  "ok": true,
+  "detail": "1170"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 chips of two or more kinds to filter",
+  "ok": true,
+  "detail": "close,nudge,mine,send"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 pressing close hides its chips",
+  "ok": true,
+  "detail": "0 left"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 …and keeps every other chip",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 Week shows the selected day's week",
+  "ok": true,
+  "detail": "2026-09-28,2026-09-29,2026-09-30,2026-10-01,2026-10-02,2026-10-03,2026-10-04 vs 2026-09-28,2026-09-29,2026-09-30,2026-10-01,2026-10-02,2026-10-03,2026-10-04"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 Month and Week show the same items",
+  "ok": true,
+  "detail": "[1,1,2,0,0,1,1]"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 a tray task on the calendar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 Open on the desk closes the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 …selects that row",
+  "ok": true,
+  "detail": "{\"open\":false,\"current\":\"true\",\"inView\":true,\"journey\":0,\"desk\":\"task-no-res-close-cor-move-b\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 …and scrolls it into view",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 …and starts no journey",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "@1280 the drawer wrote nothing",
+  "ok": true,
+  "detail": ""
+ }
+]

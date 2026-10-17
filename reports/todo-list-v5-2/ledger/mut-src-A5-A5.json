@@ -1,0 +1,716 @@
+[
+ {
+  "lock": "A5",
+  "where": "a nudge to set aside",
+  "ok": true,
+  "detail": "thin-q-chase"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 days with dots to read",
+  "ok": true,
+  "detail": "11"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-28 dots = kinds present",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-28 close is a calendar kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-28 close in its colour",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.38)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-28 close full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-29 dots = kinds present",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-29 close is a calendar kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-29 close in its colour",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.38)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-29 close full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 dots = kinds present",
+  "ok": true,
+  "detail": "nudge,mine vs mine,nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 nudge is a calendar kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 nudge in its colour",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 nudge full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-09-30 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-03 dots = kinds present",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-03 close is a calendar kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-03 close in its colour",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.38)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-03 close full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-04 dots = kinds present",
+  "ok": true,
+  "detail": "send vs send"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-04 send is a calendar kind",
+  "ok": true,
+  "detail": "send"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-04 send in its colour",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-04 send full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-12 dots = kinds present",
+  "ok": true,
+  "detail": "nudge vs nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-12 nudge is a calendar kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-12 nudge in its colour",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-12 nudge full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 dots = kinds present",
+  "ok": false,
+  "detail": "mine,mine,mine,mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-16 dots = kinds present",
+  "ok": true,
+  "detail": "mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-16 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-16 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-16 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-20 dots = kinds present",
+  "ok": true,
+  "detail": "nudge vs nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-20 nudge is a calendar kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-20 nudge in its colour",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-20 snoozed nudge at 0.45",
+  "ok": true,
+  "detail": "0.45"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-23 dots = kinds present",
+  "ok": true,
+  "detail": "mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-23 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-23 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-23 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-26 dots = kinds present",
+  "ok": true,
+  "detail": "mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-26 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-26 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 2026-10-26 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 a snoozed dot was read",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1512 the seeded snooze is faint on 2026-10-20",
+  "ok": true,
+  "detail": "[{\"kind\":\"nudge\",\"cls\":\" faint\",\"op\":0.45,\"bg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}]"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 days with dots to read",
+  "ok": true,
+  "detail": "11"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-28 dots = kinds present",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-28 close is a calendar kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-28 close in its colour",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.38)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-28 close full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-29 dots = kinds present",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-29 close is a calendar kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-29 close in its colour",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.38)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-29 close full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 dots = kinds present",
+  "ok": true,
+  "detail": "nudge,mine vs mine,nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 nudge is a calendar kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 nudge in its colour",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 nudge full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-09-30 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-03 dots = kinds present",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-03 close is a calendar kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-03 close in its colour",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.38)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-03 close full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-04 dots = kinds present",
+  "ok": true,
+  "detail": "send vs send"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-04 send is a calendar kind",
+  "ok": true,
+  "detail": "send"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-04 send in its colour",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-04 send full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-12 dots = kinds present",
+  "ok": true,
+  "detail": "nudge vs nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-12 nudge is a calendar kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-12 nudge in its colour",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-12 nudge full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 dots = kinds present",
+  "ok": false,
+  "detail": "mine,mine,mine,mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-15 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-16 dots = kinds present",
+  "ok": true,
+  "detail": "mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-16 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-16 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-16 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-20 dots = kinds present",
+  "ok": true,
+  "detail": "nudge vs nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-20 nudge is a calendar kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-20 nudge in its colour",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-20 snoozed nudge at 0.45",
+  "ok": true,
+  "detail": "0.45"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-23 dots = kinds present",
+  "ok": true,
+  "detail": "mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-23 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-23 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-23 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-26 dots = kinds present",
+  "ok": true,
+  "detail": "mine vs mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-26 mine is a calendar kind",
+  "ok": true,
+  "detail": "mine"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-26 own task is a ring",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15) 0px 0px 0px 1.3px inset"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 2026-10-26 mine full strength",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 a snoozed dot was read",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A5",
+  "where": "@1280 the seeded snooze is faint on 2026-10-20",
+  "ok": true,
+  "detail": "[{\"kind\":\"nudge\",\"cls\":\" faint\",\"op\":0.45,\"bg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}]"
+ }
+]

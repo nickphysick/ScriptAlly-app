@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "E2",
+  "where": "@1512 no \"Just the desk\" words",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 no focus control",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 no desk-only layout",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 no \"Just the desk\" words",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 no focus control",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 no desk-only layout",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E2",
+  "where": "source: no focusMode state",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E2",
+  "where": "CSS: no td5-focusbtn or [data-focus] rule",
+  "ok": true,
+  "detail": ""
+ }
+]

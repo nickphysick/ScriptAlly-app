@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "A2",
+  "where": "@1600 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 three days to read (today, a past open day, a future day)",
+  "ok": true,
+  "detail": "2026-10-17 2026-09-28 2026-10-23"
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 2026-10-17: text nodes read",
+  "ok": true,
+  "detail": "61"
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 2026-10-17: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 2026-09-28: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 2026-09-28: nothing clips",
+  "ok": false,
+  "detail": "\"Consider closing\" outside its cell (1036.3–1136.9 × 222.3–239.3 vs 1004.3–1121.3 × 221.5–241.5) · td52-day scrollWidth 145 > 139 · td52-ey past scrollWidth 120 > 117 · td52-rows scrollWidth 133 > 117"
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 2026-10-23: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1600 2026-10-23: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 three days to read (today, a past open day, a future day)",
+  "ok": true,
+  "detail": "2026-10-17 2026-09-28 2026-10-23"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 2026-10-17: text nodes read",
+  "ok": true,
+  "detail": "61"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 2026-10-17: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 2026-09-28: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 2026-09-28: nothing clips",
+  "ok": false,
+  "detail": "\"Consider closing\" outside its cell (992.3–1092.9 × 222.3–239.3 vs 960.3–1077.3 × 221.5–241.5) · td52-day scrollWidth 145 > 139 · td52-ey past scrollWidth 120 > 117 · td52-rows scrollWidth 133 > 117"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 2026-10-23: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 2026-10-23: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 three days to read (today, a past open day, a future day)",
+  "ok": true,
+  "detail": "2026-10-17 2026-09-28 2026-10-23"
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 2026-10-17: text nodes read",
+  "ok": true,
+  "detail": "61"
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 2026-10-17: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 2026-09-28: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 2026-09-28: nothing clips",
+  "ok": false,
+  "detail": "\"Consider closing\" outside its cell (956.3–1056.9 × 222.3–239.3 vs 924.3–1041.3 × 221.5–241.5) · td52-day scrollWidth 145 > 139 · td52-ey past scrollWidth 120 > 117 · td52-rows scrollWidth 133 > 117"
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 2026-10-23: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1440 2026-10-23: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 three days to read (today, a past open day, a future day)",
+  "ok": true,
+  "detail": "2026-10-17 2026-09-28 2026-10-23"
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 2026-10-17: text nodes read",
+  "ok": true,
+  "detail": "61"
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 2026-10-17: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 2026-09-28: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 2026-09-28: nothing clips",
+  "ok": false,
+  "detail": "\"Consider closing\" outside its cell (919.3–1019.9 × 222.3–239.3 vs 887.3–1004.3 × 221.5–241.5) · td52-day scrollWidth 145 > 139 · td52-ey past scrollWidth 120 > 117 · td52-rows scrollWidth 133 > 117"
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 2026-10-23: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1366 2026-10-23: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 real fonts loaded",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 three days to read (today, a past open day, a future day)",
+  "ok": true,
+  "detail": "2026-10-17 2026-09-28 2026-10-23"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 2026-10-17: text nodes read",
+  "ok": true,
+  "detail": "61"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 2026-10-17: nothing clips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 2026-09-28: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 2026-09-28: nothing clips",
+  "ok": false,
+  "detail": "\"Consider closing\" outside its cell (878.3–978.9 × 222.3–239.3 vs 846.3–963.3 × 221.5–241.5) · td52-day scrollWidth 145 > 139 · td52-ey past scrollWidth 120 > 117 · td52-rows scrollWidth 133 > 117"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 2026-10-23: text nodes read",
+  "ok": true,
+  "detail": "59"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 2026-10-23: nothing clips",
+  "ok": true,
+  "detail": ""
+ }
+]

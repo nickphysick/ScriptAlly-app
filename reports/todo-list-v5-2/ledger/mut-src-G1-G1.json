@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "G1",
+  "where": "@1512 a dated row on this month",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "@1512 the row lights exactly its day",
+  "ok": true,
+  "detail": "2026-10-04 vs 2026-10-04"
+ },
+ {
+  "lock": "G1",
+  "where": "@1512 the day lights exactly its rows",
+  "ok": false,
+  "detail": "34 vs 1"
+ },
+ {
+  "lock": "G1",
+  "where": "@1512 a lit row's name is rust",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "@1512 leaving lights nothing",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "G1",
+  "where": "@1280 a dated row on this month",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "@1280 the row lights exactly its day",
+  "ok": true,
+  "detail": "2026-10-04 vs 2026-10-04"
+ },
+ {
+  "lock": "G1",
+  "where": "@1280 the day lights exactly its rows",
+  "ok": false,
+  "detail": "34 vs 1"
+ },
+ {
+  "lock": "G1",
+  "where": "@1280 a lit row's name is rust",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "@1280 leaving lights nothing",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "J2",
+  "where": "@1512 the accessible name is the full title",
+  "ok": true,
+  "detail": "Sending your partial · Priya Nair"
+ },
+ {
+  "lock": "J2",
+  "where": "@1512 the eyebrow is the group",
+  "ok": true,
+  "detail": "Your move"
+ },
+ {
+  "lock": "J2",
+  "where": "@1512 the agent shows (band 772)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J2",
+  "where": "@1512 one line",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "J2",
+  "where": "@1512 inside the band",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J2",
+  "where": "@1512 no ellipsis, nothing clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J2",
+  "where": "@1280 the accessible name is the full title",
+  "ok": true,
+  "detail": "Sending your partial · Priya Nair"
+ },
+ {
+  "lock": "J2",
+  "where": "@1280 the eyebrow is the group",
+  "ok": true,
+  "detail": "Your move"
+ },
+ {
+  "lock": "J2",
+  "where": "@1280 under 640 the agent goes (band 540)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J2",
+  "where": "@1280 one line",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "J2",
+  "where": "@1280 inside the band",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J2",
+  "where": "@1280 no ellipsis, nothing clipped",
+  "ok": true,
+  "detail": ""
+ }
+]

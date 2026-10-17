@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "J1",
+  "where": "@1512 a send to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 the dot and TASK IN PROGRESS",
+  "ok": true,
+  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":\"TASK IN PROGRESS\",\"dot\":true,\"navDashes\":5,\"navDone\":1,\"navSt\":\"· STEP 1 OF 5\",\"bandSt\":\"STEP 1 OF 5\",\"bandDashes\":5,\"say\":null,\"cn\":null,\"status\":false,\"band\":\"Sending your partial · Priya Nair\",\"rows\":54}"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 n dashes, n = the journey's steps + its review",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 STEP 1 OF n in the row and the band",
+  "ok": true,
+  "detail": "· STEP 1 OF 5 | STEP 1 OF 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 Next: both counters at 2",
+  "ok": true,
+  "detail": "· STEP 2 OF 5 | STEP 2 OF 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 the review reads n of n",
+  "ok": true,
+  "detail": "· STEP 5 OF 5 | STEP 5 OF 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 leaving restores \"Working through\"",
+  "ok": true,
+  "detail": "Working through 54 tasks, most urgent first"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 …and the band's group name and StatusDot",
+  "ok": true,
+  "detail": "{\"cn\":\"Your move\",\"st\":true}"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 a send to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 the dot and TASK IN PROGRESS",
+  "ok": true,
+  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":\"TASK IN PROGRESS\",\"dot\":true,\"navDashes\":5,\"navDone\":1,\"navSt\":\"· STEP 1 OF 5\",\"bandSt\":\"STEP 1 OF 5\",\"bandDashes\":5,\"say\":null,\"cn\":null,\"status\":false,\"band\":\"Sending your partial · Priya Nair\",\"rows\":54}"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 n dashes, n = the journey's steps + its review",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 STEP 1 OF n in the row and the band",
+  "ok": true,
+  "detail": "· STEP 1 OF 5 | STEP 1 OF 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 Next: both counters at 2",
+  "ok": true,
+  "detail": "· STEP 2 OF 5 | STEP 2 OF 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 the review reads n of n",
+  "ok": true,
+  "detail": "· STEP 5 OF 5 | STEP 5 OF 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 leaving restores \"Working through\"",
+  "ok": true,
+  "detail": "Working through 54 tasks, most urgent first"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 …and the band's group name and StatusDot",
+  "ok": true,
+  "detail": "{\"cn\":\"Your move\",\"st\":true}"
+ },
+ {
+  "lock": "J1",
+  "where": "a close to switch",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "the switch recounts from the new journey",
+  "ok": true,
+  "detail": "3 → 3; STEP 2 OF 3; Logging their reply · Rosalind Vale"
+ }
+]

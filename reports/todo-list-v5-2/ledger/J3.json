@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "J3",
+  "where": "a send to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J3",
+  "where": "every other row's disc, text and dial at 0.42",
+  "ok": true,
+  "detail": "0.42–0.42"
+ },
+ {
+  "lock": "J3",
+  "where": "bands at 0.6",
+  "ok": true,
+  "detail": "0.6"
+ },
+ {
+  "lock": "J3",
+  "where": "the live row says IN PROGRESS",
+  "ok": true,
+  "detail": "IN PROGRESS"
+ },
+ {
+  "lock": "J3",
+  "where": "…with a 4px rust edge",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) 0px 0px 0px 1.5px inset, rgb(162, 69, 42) 4px 0px 0px 0px inset, rgba(28, 19, 15, 0.5) 0px 8px 18px -14px"
+ },
+ {
+  "lock": "J3",
+  "where": "full on hover",
+  "ok": true,
+  "detail": "1,1,1"
+ },
+ {
+  "lock": "J3",
+  "where": "no answers yet: no tip",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J3",
+  "where": "with answers: the tip on hover",
+  "ok": true,
+  "detail": "true YOUR ANSWERS ARE KEPTOpen this and Priya’s task stays “Started”. Carry on any time."
+ },
+ {
+  "lock": "J3",
+  "where": "never on the live row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J3",
+  "where": "a row click still selects",
+  "ok": true,
+  "detail": "task-full-seed-pkgq-3 vs task-full-seed-pkgq-3"
+ }
+]

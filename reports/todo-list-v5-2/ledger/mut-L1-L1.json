@@ -1,0 +1,518 @@
+[
+ {
+  "lock": "L1",
+  "where": "@1920 the document",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 the sheet's scroller",
+  "ok": true,
+  "detail": "1664 vs 1664"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 the app frame",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 mid-journey the document",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1664 vs 1664"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 mid-journey the app frame",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned the document",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned the sheet's scroller",
+  "ok": true,
+  "detail": "1844 vs 1844"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned the app frame",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned mid-journey the document",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1844 vs 1844"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned mid-journey the app frame",
+  "ok": true,
+  "detail": "1920 vs 1920"
+ },
+ {
+  "lock": "L1",
+  "where": "@1920 pinned mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 the document",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 the sheet's scroller",
+  "ok": true,
+  "detail": "1256 vs 1256"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 the app frame",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 mid-journey the document",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1256 vs 1256"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 mid-journey the app frame",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned the document",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned the sheet's scroller",
+  "ok": true,
+  "detail": "1436 vs 1436"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned the app frame",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned mid-journey the document",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1436 vs 1436"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned mid-journey the app frame",
+  "ok": true,
+  "detail": "1512 vs 1512"
+ },
+ {
+  "lock": "L1",
+  "where": "@1512 pinned mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 the document",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 the sheet's scroller",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 the app frame",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 mid-journey the document",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 mid-journey the app frame",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned the document",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned the sheet's scroller",
+  "ok": true,
+  "detail": "1204 vs 1204"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned the app frame",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned the compact day chip (\"15 Oct · …\")",
+  "ok": false,
+  "detail": "Sat 17 Oct · 33 OVERDUE"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned mid-journey the document",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1204 vs 1204"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned mid-journey the app frame",
+  "ok": true,
+  "detail": "1280 vs 1280"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1280 pinned mid-journey the compact day chip (\"15 Oct · …\")",
+  "ok": false,
+  "detail": "Sat 17 Oct · 33 OVERDUE"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 the document",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 the sheet's scroller",
+  "ok": true,
+  "detail": "924 vs 924"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 the app frame",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 mid-journey the document",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "924 vs 924"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 mid-journey the app frame",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned the document",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned the sheet's scroller",
+  "ok": true,
+  "detail": "1104 vs 1104"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned the app frame",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned the compact day chip (\"15 Oct · …\")",
+  "ok": false,
+  "detail": "Sat 17 Oct · 33 OVERDUE"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned mid-journey the document",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "1104 vs 1104"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned mid-journey the app frame",
+  "ok": true,
+  "detail": "1180 vs 1180"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1180 pinned mid-journey the compact day chip (\"15 Oct · …\")",
+  "ok": false,
+  "detail": "Sat 17 Oct · 33 OVERDUE"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 the document",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 the sheet's scroller",
+  "ok": true,
+  "detail": "768 vs 768"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 the app frame",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 mid-journey the document",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "768 vs 768"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 mid-journey the app frame",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned the document",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned the sheet's scroller",
+  "ok": true,
+  "detail": "948 vs 948"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned the app frame",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned the compact day chip (\"15 Oct · …\")",
+  "ok": false,
+  "detail": "Sat 17 Oct · 33 OVERDUE"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned mid-journey the document",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned mid-journey the sheet's scroller",
+  "ok": true,
+  "detail": "948 vs 948"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned mid-journey the app frame",
+  "ok": true,
+  "detail": "1024 vs 1024"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned mid-journey the navy row on one line",
+  "ok": true,
+  "detail": "0px apart, over false"
+ },
+ {
+  "lock": "L1",
+  "where": "@1024 pinned mid-journey the compact day chip (\"15 Oct · …\")",
+  "ok": false,
+  "detail": "Sat 17 Oct · 33 OVERDUE"
+ }
+]

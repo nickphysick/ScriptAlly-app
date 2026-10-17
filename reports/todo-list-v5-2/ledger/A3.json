@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "A3",
+  "where": "@1512 overdue + today + later + no date = the tray",
+  "ok": true,
+  "detail": "33+2+0+19 = 54 vs 54 rows"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 … = the sidebar badge",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 the bar's title",
+  "ok": true,
+  "detail": "Your whole tray: overdue, due today, coming up, no date"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 segment o ∝ its count (±2px)",
+  "ok": true,
+  "detail": "34.7 vs 35.2"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 segment t ∝ its count (±2px)",
+  "ok": true,
+  "detail": "3.0 vs 2.1"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 segment u ∝ its count (±2px)",
+  "ok": true,
+  "detail": "20.0 vs 20.3"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 there are overdue items to press",
+  "ok": true,
+  "detail": "33"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 Overdue leaves only overdue rows",
+  "ok": true,
+  "detail": "33 rows, all overdue true"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 Overdue is pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 the other rows fade to 0.32 (±0.02)",
+  "ok": true,
+  "detail": "0.32,0.32"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 the Due pill shows the chip",
+  "ok": true,
+  "detail": "Overdue"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 nothing scrolled",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A3",
+  "where": "@1512 × clears it",
+  "ok": true,
+  "detail": "{\"n\":54,\"tab\":54,\"chip\":false,\"pressed\":\"false\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 overdue + today + later + no date = the tray",
+  "ok": true,
+  "detail": "33+2+0+19 = 54 vs 54 rows"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 … = the sidebar badge",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 the bar's title",
+  "ok": true,
+  "detail": "Your whole tray: overdue, due today, coming up, no date"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 segment o ∝ its count (±2px)",
+  "ok": true,
+  "detail": "34.7 vs 35.2"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 segment t ∝ its count (±2px)",
+  "ok": true,
+  "detail": "3.0 vs 2.1"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 segment u ∝ its count (±2px)",
+  "ok": true,
+  "detail": "20.0 vs 20.3"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 there are overdue items to press",
+  "ok": true,
+  "detail": "33"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 Overdue leaves only overdue rows",
+  "ok": true,
+  "detail": "33 rows, all overdue true"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 Overdue is pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 the other rows fade to 0.32 (±0.02)",
+  "ok": true,
+  "detail": "0.32,0.32"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 the Due pill shows the chip",
+  "ok": true,
+  "detail": "Overdue"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 nothing scrolled",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A3",
+  "where": "@1280 × clears it",
+  "ok": true,
+  "detail": "{\"n\":54,\"tab\":54,\"chip\":false,\"pressed\":\"false\"}"
+ }
+]
