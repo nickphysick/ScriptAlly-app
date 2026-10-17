@@ -1,0 +1,746 @@
+[
+ {
+  "lock": "S3",
+  "where": "1512x900 A sent population",
+  "ok": true,
+  "detail": "2 ringed + 4 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A sent rings exactly its targets",
+  "ok": true,
+  "detail": "ring queries,tile:import"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A sent dims every other target",
+  "ok": true,
+  "detail": "dim agents,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A sent START HERE on the first target",
+  "ok": true,
+  "detail": "queries"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A sent the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A sent choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A sent first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring queries,tile:import"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A sent focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A sent second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A agents population",
+  "ok": true,
+  "detail": "1 ringed + 5 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A agents rings exactly its targets",
+  "ok": true,
+  "detail": "ring agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A agents dims every other target",
+  "ok": true,
+  "detail": "dim queries,tile:import,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A agents START HERE on the first target",
+  "ok": true,
+  "detail": "agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A agents the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A agents choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A agents first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring agents"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A agents focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A agents second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A materials population",
+  "ok": true,
+  "detail": "3 ringed + 3 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A materials rings exactly its targets",
+  "ok": true,
+  "detail": "ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A materials dims every other target",
+  "ok": true,
+  "detail": "dim queries,agents,tile:import @ 0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A materials START HERE on the first target",
+  "ok": true,
+  "detail": "tile:mats"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A materials the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A materials choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A materials first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A materials focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A materials second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 A a click outside clears",
+  "ok": true,
+  "detail": "cleared"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 A ✕ closes and returns focus",
+  "ok": true,
+  "detail": "pop false · focus button"
+ },
+ {
+  "lock": "S7",
+  "where": "1512x900 A no Firestore write",
+  "ok": true,
+  "detail": "0 write requests"
+ },
+ {
+  "lock": "S7",
+  "where": "1512x900 A no new storage key",
+  "ok": true,
+  "detail": "local [] · session []"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B sent population",
+  "ok": true,
+  "detail": "2 ringed + 4 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B sent rings exactly its targets",
+  "ok": true,
+  "detail": "ring queries,tile:import"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B sent dims every other target",
+  "ok": true,
+  "detail": "dim agents,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B sent START HERE on the first target",
+  "ok": true,
+  "detail": "queries"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B sent the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B sent choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B sent first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring queries,tile:import"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B sent focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B sent second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B agents population",
+  "ok": true,
+  "detail": "1 ringed + 5 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B agents rings exactly its targets",
+  "ok": true,
+  "detail": "ring agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B agents dims every other target",
+  "ok": true,
+  "detail": "dim queries,tile:import,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B agents START HERE on the first target",
+  "ok": true,
+  "detail": "agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B agents the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B agents choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B agents first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring agents"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B agents focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B agents second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B materials population",
+  "ok": true,
+  "detail": "3 ringed + 3 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B materials rings exactly its targets",
+  "ok": true,
+  "detail": "ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B materials dims every other target",
+  "ok": true,
+  "detail": "dim queries,agents,tile:import @ 0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B materials START HERE on the first target",
+  "ok": true,
+  "detail": "tile:mats"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B materials the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B materials choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B materials first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B materials focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B materials second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B a click outside clears",
+  "ok": true,
+  "detail": "cleared"
+ },
+ {
+  "lock": "S4",
+  "where": "1512x900 B ✕ closes and returns focus",
+  "ok": true,
+  "detail": "pop false · focus button"
+ },
+ {
+  "lock": "S7",
+  "where": "1512x900 B no Firestore write",
+  "ok": true,
+  "detail": "0 write requests"
+ },
+ {
+  "lock": "S7",
+  "where": "1512x900 B no new storage key",
+  "ok": true,
+  "detail": "local [] · session []"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A sent population",
+  "ok": true,
+  "detail": "2 ringed + 4 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A sent rings exactly its targets",
+  "ok": true,
+  "detail": "ring queries,tile:import"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A sent dims every other target",
+  "ok": true,
+  "detail": "dim agents,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A sent START HERE on the first target",
+  "ok": true,
+  "detail": "queries"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A sent the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A sent choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A sent first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring queries,tile:import"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A sent focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A sent second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A agents population",
+  "ok": true,
+  "detail": "1 ringed + 5 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A agents rings exactly its targets",
+  "ok": true,
+  "detail": "ring agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A agents dims every other target",
+  "ok": true,
+  "detail": "dim queries,tile:import,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A agents START HERE on the first target",
+  "ok": true,
+  "detail": "agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A agents the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A agents choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A agents first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring agents"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A agents focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A agents second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A materials population",
+  "ok": true,
+  "detail": "3 ringed + 3 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A materials rings exactly its targets",
+  "ok": true,
+  "detail": "ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A materials dims every other target",
+  "ok": true,
+  "detail": "dim queries,agents,tile:import @ 0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A materials START HERE on the first target",
+  "ok": true,
+  "detail": "tile:mats"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A materials the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A materials choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A materials first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A materials focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A materials second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A a click outside clears",
+  "ok": true,
+  "detail": "cleared"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 A ✕ closes and returns focus",
+  "ok": true,
+  "detail": "pop false · focus button"
+ },
+ {
+  "lock": "S7",
+  "where": "1280x800 A no Firestore write",
+  "ok": true,
+  "detail": "0 write requests"
+ },
+ {
+  "lock": "S7",
+  "where": "1280x800 A no new storage key",
+  "ok": true,
+  "detail": "local [] · session []"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B sent population",
+  "ok": true,
+  "detail": "2 ringed + 4 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B sent rings exactly its targets",
+  "ok": true,
+  "detail": "ring queries,tile:import"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B sent dims every other target",
+  "ok": true,
+  "detail": "dim agents,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B sent START HERE on the first target",
+  "ok": true,
+  "detail": "queries"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B sent the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B sent choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B sent first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring queries,tile:import"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B sent focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B sent second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B agents population",
+  "ok": true,
+  "detail": "1 ringed + 5 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B agents rings exactly its targets",
+  "ok": true,
+  "detail": "ring agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B agents dims every other target",
+  "ok": true,
+  "detail": "dim queries,tile:import,tile:mats,tile:comps,tile:version @ 0.38,0.38,0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B agents START HERE on the first target",
+  "ok": true,
+  "detail": "agents"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B agents the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B agents choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B agents first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring agents"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B agents focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B agents second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B materials population",
+  "ok": true,
+  "detail": "3 ringed + 3 dimmed"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B materials rings exactly its targets",
+  "ok": true,
+  "detail": "ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B materials dims every other target",
+  "ok": true,
+  "detail": "dim queries,agents,tile:import @ 0.38,0.38,0.38"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B materials START HERE on the first target",
+  "ok": true,
+  "detail": "tile:mats"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B materials the founding panel never dims",
+  "ok": true,
+  "detail": "opacity 1 · filter none"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B materials choosing closed the pop-up",
+  "ok": true,
+  "detail": "pop false · expanded false"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B materials first Escape closes the pop-up only",
+  "ok": true,
+  "detail": "pop false · ring tile:mats,tile:comps,tile:version"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B materials focus back on the button",
+  "ok": true,
+  "detail": "focus button"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B materials second Escape clears the spotlight",
+  "ok": true,
+  "detail": "ring 0 · dim 0"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B a click outside clears",
+  "ok": true,
+  "detail": "cleared"
+ },
+ {
+  "lock": "S4",
+  "where": "1280x800 B ✕ closes and returns focus",
+  "ok": true,
+  "detail": "pop false · focus button"
+ },
+ {
+  "lock": "S7",
+  "where": "1280x800 B no Firestore write",
+  "ok": true,
+  "detail": "0 write requests"
+ },
+ {
+  "lock": "S7",
+  "where": "1280x800 B no new storage key",
+  "ok": true,
+  "detail": "local [] · session []"
+ }
+]

@@ -44,6 +44,9 @@ import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
 import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
 import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { Dash60Lift } from "../v60/Dash60Lift";
+import { SpotProvider, WhereStart } from "../v60/WhereStart";
+import type { StartKey } from "../../../lib/dashFirstUse";
+import { switcherStanding } from "../../../lib/manuscriptStanding";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
 import { openFeedback } from "../../../lib/feedbackStore";
 import { pulseWeeks, readEcho, writeEcho, type Mood } from "../../../lib/weeklyPulse";
@@ -452,6 +455,11 @@ export const Dash58: React.FC<Dash58Props> = ({
      flashes; once loaded it is the one predicate's answer. */
   const pre = loading ? shape.pre : empty;
   const hasAgents = loading ? shape.agents : agents.length > 0;
+  /* v60.1 "Where do I start?": page state only — nothing stored, nothing routed */
+  const [startOpen, setStartOpen] = useState(false);
+  const [startAnswer, setStartAnswer] = useState<StartKey | null>(null);
+  const spotValue = useMemo(() => ({ answer: pre ? startAnswer : null, hasAgents }), [pre, startAnswer, hasAgents]);
+  useEffect(() => { if (!pre) { setStartOpen(false); setStartAnswer(null); } }, [pre]);
   const cov = useMemo(
     () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
     [agents, queries, activeManuscript, now],
@@ -508,6 +516,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   }, [loading]);
 
   const author = (currentUser?.name ?? "").trim();
+  /* v60.1: the eyebrow reads the sidebar's own function */
+  const standing = activeManuscript ? switcherStanding(activeManuscript, scopedQueries) : null;
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
@@ -522,7 +532,10 @@ export const Dash58: React.FC<Dash58Props> = ({
             onLog={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
             onRecord={() => onNavigate("queries", "Record a response")}
             onAddAgent={() => onNavigate("agents", "Add an agent")}
+            status={standing?.status ?? null}
+            start={pre ? <WhereStart hasAgents={hasAgents} open={startOpen} setOpen={setStartOpen} answer={startAnswer} setAnswer={setStartAnswer} disabled={loading} /> : undefined}
           />
+          <SpotProvider value={spotValue}>
           <div className="d58-body" data-d58="body">
             <div className="d58-left" data-d58="left" data-pre={pre ? "1" : "0"}>
               {pre ? (
@@ -583,6 +596,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               }
             />
           </div>
+          </SpotProvider>
         </div>
 
       </DashPopupProvider>

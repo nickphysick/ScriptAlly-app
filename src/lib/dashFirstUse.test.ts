@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ComponentType, QueryStatus, SubmissionStatus, UserPlan, type Agent, type Manuscript, type ManuscriptVersion, type Query } from "../types";
-import { agentCoverage, firstUseTiles, isPreQuery, tilesDone } from "./dashFirstUse";
+import { START_TARGETS, agentCoverage, firstUseTiles, isPreQuery, spotOf, startAnswers, tilesDone } from "./dashFirstUse";
 import { agentQueryStates } from "./contactDesk";
 import { nextStep } from "./contactNextStep";
 import { bookGenres } from "./genreMatch";
@@ -76,5 +76,38 @@ describe("Ready for lift off? — the four tiles, every branch", () => {
     const bv = [{ id: "v1", name: "First", kind: "initial", createdDate: "2026-09-01" }];
     expect(firstUseTiles({ ...base, manuscript: ms({ bookVersions: bv as never }) })[3]).toMatchObject({ status: "v1 current", done: true });
     expect(tilesDone(firstUseTiles({ ...base, usage: { smartImportFreeUsed: true } as never, manuscript: ms({ bookVersions: bv as never }) }))).toBe(2);
+  });
+});
+
+describe("v60.1 Where do I start? — answers → targets", () => {
+  it("each answer rings exactly its targets and dims every other one", () => {
+    const want: Record<string, string[]> = {
+      sent: ["queries", "tile:import"],
+      agents: ["agents"],
+      materials: ["tile:mats", "tile:comps", "tile:version"],
+    };
+    for (const hasAgents of [false, true]) {
+      for (const a of startAnswers(hasAgents)) {
+        expect([...a.targets]).toEqual(want[a.key]);
+        for (const t of START_TARGETS) expect(spotOf(a.key, t, hasAgents)).toBe(want[a.key].includes(t) ? "ring" : "dim");
+      }
+      for (const t of START_TARGETS) expect(spotOf(null, t, hasAgents)).toBeNull();
+    }
+  });
+  it("the agents answer's line follows whether agents are on file; nothing carries an em dash", () => {
+    expect(startAnswers(false)[1].line).toBe("Add the agents you want to query.");
+    expect(startAnswers(true)[1].line).toBe("Add more, and see who you haven't queried.");
+    for (const h of [false, true]) for (const a of startAnswers(h)) {
+      for (const s of [a.title, a.line, ...a.labels.map((l) => l.text)]) expect(s).not.toContain("—");
+    }
+  });
+  it("the tiles' copy is the pack's, with no em dash", () => {
+    const tiles = firstUseTiles({ plan: undefined, usage: null, manuscript: null, versions: [] });
+    expect(tiles.map((t) => t.copy)).toEqual([
+      "Bring in the spreadsheet you've been tracking queries in.",
+      "Your letter, synopsis and opening sample, kept as versions.",
+      "Most agents want two comparable titles in a query.",
+      "Save the draft you're sending, so you know which one each agent got.",
+    ]);
   });
 });

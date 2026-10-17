@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "S3",
+  "where": "1512x900 A population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S3",
+  "where": "1512x900 B population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 A population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S3",
+  "where": "1280x800 B population",
+  "ok": false,
+  "detail": "no start button"
+ }
+]

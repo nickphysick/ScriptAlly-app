@@ -149,7 +149,6 @@
 .d58 .d60-doorh--sm { font-size: clamp(20px, 1.6vw, 24px); }
 .d58 .d60-doorp { margin: 8px 0 0; max-width: 400px; font-family: var(--d58-serif) !important; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.72); }
 .d60-doorrow { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
-.d58 .d60-hint { font-family: var(--d58-mono) !important; font-size: 9.5px; letter-spacing: 0.16em; color: var(--d58-ink-42); white-space: nowrap; }
 .d60-doorbody--sm { flex: none; grid-template-columns: auto minmax(0, 1fr); gap: 26px; padding: 16px 22px 18px; }
 .d60-doorbody--sm .d60-doorp { margin-top: 6px; }
 .d60-doorbody--sm .d60-doorrow { margin-top: 12px; }
@@ -193,7 +192,7 @@
   color: rgba(28, 19, 15, 0.72);
 }
 .d58 .d60-liftsub b { font-family: var(--d58-mono) !important; font-weight: 500; font-size: 10.5px; letter-spacing: 0.18em; color: var(--d58-ink-42); white-space: nowrap; }
-.d60-ways { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+.d60-ways { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 12px; container: ways / inline-size; }
 .d60-way {
   position: relative;
   min-width: 0;
@@ -250,6 +249,23 @@
   .d58 .d60-wp { -webkit-line-clamp: 1; }
   .d60-liftsub { margin-top: -8px; }
   .d60-ways { margin-top: 8px; }
+}
+/* ⚠️ v60.1: THE TWO-LINE CLAMP NEEDS ABOUT 235px OF TEXT for the longest description ("Save the
+   draft you're sending…"); a 2×2 tile gives 183 at 1440 and 199 at 1512, where the ref itself cuts
+   three of the four. So while the grid is narrower than 540px, each tile is a full-width row: icon,
+   title over its description, and the link. The status goes, as it does below 1400 (where v60's own
+   one-line rows, which draw no description, take over). */
+@media (min-width: 1401px) {
+  @container ways (max-width: 539px) {
+    .d60-way { grid-column: 1 / -1; }
+    .d60-wi { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "ic t a" "ic p p"; column-gap: 12px; row-gap: 0; align-items: center; padding: 8px 13px 8px; }
+    .d60-wh, .d60-wf { display: contents; }
+    .d60-ic { grid-area: ic; align-self: start; }
+    .d58 .d60-wt { grid-area: t; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .d58 .d60-wp { grid-area: p; margin: 2px 0 0; }
+    .d58 .d60-wa { grid-area: a; }
+    .d58 .d60-wf small { display: none; }
+  }
 }
 /* below 1400px of window: one column of one-line rows (icon, title, link); copy and status go */
 @media (max-width: 1400px) {

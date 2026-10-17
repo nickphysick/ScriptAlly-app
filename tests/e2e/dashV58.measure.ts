@@ -209,6 +209,8 @@ test("DB58 H1 — the header is the book", async ({ page }) => {
         title: q('[data-d58="title"]')?.textContent?.trim() ?? null,
         titleTag: q('[data-d58="title"]')?.tagName ?? null,
         eyebrow: q('[data-d58="eyebrow"]')?.textContent?.trim() ?? null,
+        /* v60.1: the eyebrow is the sidebar's status, read through the same function */
+        sideStatus: (document.querySelector('.ws-ms--side [data-ms="standing"]')?.childNodes[0]?.textContent ?? "").trim() || null,
         byline: q('[data-d58="byline"]')?.textContent?.trim() ?? null,
         expectTitle: head?.getAttribute("data-ms-title") ?? null,
         expectAuthor: head?.getAttribute("data-author") ?? null,
@@ -229,7 +231,8 @@ test("DB58 H1 — the header is the book", async ({ page }) => {
     L.check("H1", `${w} one h1`, h.h1s === 1 && h.titleTag === "H1", `${h.h1s} h1 · title is ${h.titleTag}`);
     L.check("H1", `${w} title`, !!h.title && !!h.expectTitle && h.title === h.expectTitle, `"${h.title}" against the active manuscript "${h.expectTitle}"`);
     L.check("H1", `${w} byline`, !!h.expectAuthor && h.byline === `by ${h.expectAuthor}`, `"${h.byline}" against "by ${h.expectAuthor}"`);
-    L.check("H1", `${w} eyebrow`, h.eyebrow === "— NOW QUERYING —", `"${h.eyebrow}"`);
+    /* retargeted by v60.1: the constant "— NOW QUERYING —" is retired; the eyebrow names the sidebar's status (DB601 S1) */
+    L.check("H1", `${w} eyebrow`, !!h.sideStatus && h.eyebrow === `— ${h.sideStatus.toUpperCase()} —`, `"${h.eyebrow}" against the sidebar's "${h.sideStatus}"`);
     L.check("H1", `${w} no counts`, !!h.headerDigits && h.headerDigits.length === 0 && (h.underByline?.length ?? 1) === 0, `digits in the header: ${h.headerDigits?.join(",") || "none"}`);
     L.check("H1", `${w} Add an agent`, h.addAgent === (vp.width >= 1440) && h.log && h.record, `add an agent visible: ${h.addAgent} at ${vp.width}`);
     L.check("H1", `${w} centred`, h.centres.book != null && h.centres.btns != null && Math.abs(h.centres.book - h.centres.btns) <= 4, `book ${h.centres.book} · buttons ${h.centres.btns}`);

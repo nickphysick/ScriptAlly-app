@@ -249,7 +249,7 @@ test("DB60 P8 — the tiles' done states", async ({ page }) => {
         L.check("P8", "full: materials 3 of 3, done", by.mats?.status === "✓ 3 OF 3 ON FILE" && by.mats.done, by.mats?.status ?? "");
         L.check("P8", "full: two comps, done", by.comps?.status === "✓ 2 COMPS" && by.comps.done, by.comps?.status ?? "");
         L.check("P8", "full: one version, done", by.version?.status === "✓ V1 CURRENT" && by.version.done, by.version?.status ?? "");
-        L.check("P8", "full: the count is the tiles'", r.liftDone === `${r.ways.filter((w) => w.done).length} OF 4 · NOTHING REQUIRED`, `"${r.liftDone}"`);
+        L.check("P8", "full: the count is the tiles'", r.liftDone === `${r.ways.filter((w) => w.done).length} OF 4 · OPTIONAL`, `"${r.liftDone}"`);
       }
       /* the import tile is the entitlement's own answer, in whichever state the account holds */
       L.check("P8", `${mode || "bare"} import follows the entitlement`, by.import?.done === spent, `${by.import?.status} · spent ${spent}`);

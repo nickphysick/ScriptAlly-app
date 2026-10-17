@@ -12,6 +12,7 @@
 import React from "react";
 import type { FirstUseTile, TileKey } from "../../../lib/dashFirstUse";
 import { tilesDone } from "../../../lib/dashFirstUse";
+import { StartTag, useSpot } from "./WhereStart";
 
 export const LIFT_TITLE = "Ready for lift off?";
 
@@ -36,12 +37,20 @@ export const Dash60Lift: React.FC<{
       <span className="d58-listbar" data-d58="list-bar" aria-hidden="true" />
     </div>
     <div className="d60-liftsub" data-d60="lift-sub">
-      <span>{hasAgents ? "Agents are on file. While you're here:" : "Start on the left, or with any of these:"}</span>
-      <b className={loading ? "d58-sk" : undefined} data-d60="lift-done">{tilesDone(tiles)} OF 4 · NOTHING REQUIRED</b>
+      <span>{hasAgents ? "You could also:" : "Start on the left, or with any of these:"}</span>
+      <b className={loading ? "d58-sk" : undefined} data-d60="lift-done">{tilesDone(tiles)} OF 4 · OPTIONAL</b>
     </div>
     <div className="d60-ways" data-d60="ways">
-      {tiles.map((t) => (
-        <div key={t.key} className={`d60-way${t.done ? " is-done" : ""}`} data-d60="way" data-key={t.key} data-done={t.done ? "1" : "0"}>
+      {tiles.map((t) => <Way key={t.key} t={t} loading={loading} onTile={onTile} />)}
+    </div>
+  </>
+);
+
+const Way: React.FC<{ t: FirstUseTile; loading: boolean; onTile: (k: TileKey) => void }> = ({ t, loading, onTile }) => {
+  const { spot, first } = useSpot(`tile:${t.key}`);
+  return (
+        <div className={`d60-way${t.done ? " is-done" : ""}`} data-d60="way" data-key={t.key} data-done={t.done ? "1" : "0"} data-spot={spot}>
+          <StartTag show={first} />
           <div className="d60-wi">
             <div className="d60-wh">
               <span className="d60-ic" aria-hidden="true"><svg viewBox="0 0 20 20">{ICON[t.key]}</svg></span>
@@ -54,7 +63,5 @@ export const Dash60Lift: React.FC<{
             </div>
           </div>
         </div>
-      ))}
-    </div>
-  </>
-);
+  );
+};
