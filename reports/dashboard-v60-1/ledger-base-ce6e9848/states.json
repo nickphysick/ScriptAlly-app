@@ -1,0 +1,974 @@
+[
+ {
+  "lock": "S1",
+  "where": "1280x800 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 A eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 A only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":false}]"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A closed: one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1280x800 A population",
+  "ok": true,
+  "detail": "0 descriptions drawn, expected 0"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 A closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nLog one you've | Agents on file\n0 ON FILE\nYour list starts here.\n\nA"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 B eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 B only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":false}]"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B closed: one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1280x800 B population",
+  "ok": true,
+  "detail": "0 descriptions drawn, expected 0"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 B closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nPick one of yo"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 C eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 C closed: one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 A eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 A only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1184/1184"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "75/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Query letter, synopsis a…\"",
+  "ok": false,
+  "detail": "56/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Comparable titles shape …\"",
+  "ok": false,
+  "detail": "56/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Pin the draft you send, …\"",
+  "ok": false,
+  "detail": "56/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 A closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nLog one you've | Agents on file\n0 ON FILE\nYour list starts here.\n\nA"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 B eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 B only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1184/1184"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "75/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Query letter, synopsis a…\"",
+  "ok": false,
+  "detail": "56/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Comparable titles shape …\"",
+  "ok": false,
+  "detail": "56/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Pin the draft you send, …\"",
+  "ok": false,
+  "detail": "56/37 at 183px of text, column 456"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 B closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nPick one of yo"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 C eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 C closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1184/1184"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 A eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 A only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "75/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Query letter, synopsis a…\"",
+  "ok": false,
+  "detail": "56/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Comparable titles shape …\"",
+  "ok": false,
+  "detail": "56/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Pin the draft you send, …\"",
+  "ok": false,
+  "detail": "56/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 A closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nLog one you've | Agents on file\n0 ON FILE\nYour list starts here.\n\nA"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 B eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 B only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "75/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Query letter, synopsis a…\"",
+  "ok": false,
+  "detail": "56/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Comparable titles shape …\"",
+  "ok": false,
+  "detail": "56/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Pin the draft you send, …\"",
+  "ok": false,
+  "detail": "56/37 at 199px of text, column 487"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 B closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nPick one of yo"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 C eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 C closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 A eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 A only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A closed: one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "56/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Query letter, synopsis a…\"",
+  "ok": false,
+  "detail": "56/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Comparable titles shape …\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Pin the draft you send, …\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 A closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nLog one you've | Agents on file\n0 ON FILE\nYour list starts here.\n\nA"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 B eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 B only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B closed: one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "56/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Query letter, synopsis a…\"",
+  "ok": false,
+  "detail": "56/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Comparable titles shape …\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Pin the draft you send, …\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 B closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nPick one of yo"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 C eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 C closed: one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 A eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 A only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A closed: one screen",
+  "ok": true,
+  "detail": "966/966 · 1664/1664"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "56/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Query letter, synopsis a…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Comparable titles shape …\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Pin the draft you send, …\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 A closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nLog one you've | Agents on file\n0 ON FILE\nYour list starts here.\n\nA"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 B eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 B only \"Where do I start?\"",
+  "ok": false,
+  "detail": "[{\"d\":\"btn-log\",\"vis\":true},{\"d\":\"btn-record\",\"vis\":true},{\"d\":\"btn-agent\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B closed: one screen",
+  "ok": true,
+  "detail": "966/966 · 1664/1664"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Drop in the spreadsheet …\"",
+  "ok": false,
+  "detail": "56/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Query letter, synopsis a…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Comparable titles shape …\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Pin the draft you send, …\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 B closed: no em dash",
+  "ok": false,
+  "detail": "No queries yet\nNo queries out yet.\n\nPick one of yo"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B open: population",
+  "ok": false,
+  "detail": "no start button"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 C eyebrow is the sidebar's status",
+  "ok": false,
+  "detail": "eyebrow \"— NOW QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 C closed: one screen",
+  "ok": true,
+  "detail": "966/966 · 1664/1664"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ }
+]

@@ -1,0 +1,175 @@
+
+Running 3 tests using 1 worker
+
+[1/3] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/3] [measure] › tests/e2e/dashV601.measure.ts:117:1 › DB601 S1 S2 S5 S6 E — eyebrow, header, copy and fit
+[measure] › tests/e2e/dashV601.measure.ts:117:1 › DB601 S1 S2 S5 S6 E — eyebrow, header, copy and fit
+  ✗ S1 · 1280x800 A eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Drafting"
+
+  ✗ S2 · 1280x800 A only "Where do I start?" — [{"d":"btn-log","vis":true},{"d":"btn-record","vis":true},{"d":"btn-agent","vis":false}]
+
+  ✗ S5 · 1280x800 A closed: no em dash — No queries yet
+No queries out yet.
+
+Log one you've | Agents on file
+0 ON FILE
+Your list starts here.
+
+A
+
+  ✗ E · 1280x800 A open: population — no start button
+
+  ✗ S1 · 1280x800 B eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Drafting"
+
+  ✗ S2 · 1280x800 B only "Where do I start?" — [{"d":"btn-log","vis":true},{"d":"btn-record","vis":true},{"d":"btn-agent","vis":false}]
+
+  ✗ S5 · 1280x800 B closed: no em dash — No queries yet
+No queries out yet.
+
+Pick one of yo
+
+  ✗ E · 1280x800 B open: population — no start button
+
+  ✗ S1 · 1280x800 C eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Querying"
+
+  ✗ S1 · 1440x900 A eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Drafting"
+
+  ✗ S2 · 1440x900 A only "Where do I start?" — [{"d":"btn-log","vis":true},{"d":"btn-record","vis":true},{"d":"btn-agent","vis":true}]
+
+  ✗ S6 · 1440x900 A "Drop in the spreadsheet …" — 75/37 at 183px of text, column 456
+
+  ✗ S6 · 1440x900 A "Query letter, synopsis a…" — 56/37 at 183px of text, column 456
+
+  ✗ S6 · 1440x900 A "Comparable titles shape …" — 56/37 at 183px of text, column 456
+
+  ✗ S6 · 1440x900 A "Pin the draft you send, …" — 56/37 at 183px of text, column 456
+
+  ✗ S5 · 1440x900 A closed: no em dash — No queries yet
+No queries out yet.
+
+Log one you've | Agents on file
+0 ON FILE
+Your list starts here.
+
+A
+
+  ✗ E · 1440x900 A open: population — no start button
+
+  ✗ S1 · 1440x900 B eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Drafting"
+
+  ✗ S2 · 1440x900 B only "Where do I start?" — [{"d":"btn-log","vis":true},{"d":"btn-record","vis":true},{"d":"btn-agent","vis":true}]
+
+  ✗ S6 · 1440x900 B "Drop in the spreadsheet …" — 75/37 at 183px of text, column 456
+
+  ✗ S6 · 1440x900 B "Query letter, synopsis a…" — 56/37 at 183px of text, column 456
+
+  ✗ S6 · 1440x900 B "Comparable titles shape …" — 56/37 at 183px of text, column 456
+
+  ✗ S6 · 1440x900 B "Pin the draft you send, …" — 56/37 at 183px of text, column 456
+
+  ✗ S5 · 1440x900 B closed: no em dash — No queries yet
+No queries out yet.
+
+Pick one of yo
+
+  ✗ E · 1440x900 B open: population — no start button
+
+  ✗ S1 · 1440x900 C eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Querying"
+
+  ✗ S1 · 1512x900 A eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Drafting"
+
+  ✗ S2 · 1512x900 A only "Where do I start?" — [{"d":"btn-log","vis":true},{"d":"btn-record","vis":true},{"d":"btn-agent","vis":true}]
+
+  ✗ S6 · 1512x900 A "Drop in the spreadsheet …" — 75/37 at 199px of text, column 487
+
+  ✗ S6 · 1512x900 A "Query letter, synopsis a…" — 56/37 at 199px of text, column 487
+
+  ✗ S6 · 1512x900 A "Comparable titles shape …" — 56/37 at 199px of text, column 487
+
+  ✗ S6 · 1512x900 A "Pin the draft you send, …" — 56/37 at 199px of text, column 487
+
+  ✗ S5 · 1512x900 A closed: no em dash — No queries yet
+No queries out yet.
+
+Log one you've | Agents on file
+0 ON FILE
+Your list starts here.
+
+A
+
+  ✗ E · 1512x900 A open: population — no start button
+
+  ✗ S1 · 1512x900 B eyebrow is the sidebar's status — eyebrow "— NOW QUERYING —" · sidebar "Drafting"
+
+  ✗ S2 · 1512x900 B only "Where do I start?" — [{"d":"btn-log","vis":true},{"d":"btn-record","vis":true},{"d":"btn-agent","vis":true}]
+
+  ✗ S6 · 1512x900 B "Drop in the spreadsheet …" — 75/37 at 199px of text, column 487
+
+  ✗ S6 · 1512x900 B "Query letter, synopsis a…" — 56/37 at 199px of text, column 487
+
+  ✗ S6 · 1512x900 B "Comparable titles shape …" — 56/37 at 199px of text, column 487
+
+  ✗ S6 · 1512x900 B "Pin the draft you send, …" — 56/37 at 199px of text, column 487
+
+  1) [measure] › tests/e2e/dashV601.measure.ts:117:1 › DB601 S1 S2 S5 S6 E — eyebrow, header, copy and fit 
+
+    Error: states: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 212
+    Received:    162
+
+      50 |     writeFileSync(`${DIR}/ledger/${this.name}${MUT ? `.mut-${MUT}` : ""}.json`, JSON.stringify(this.rows, null, 1));
+      51 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+    > 52 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      53 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      54 |   }
+      55 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash601-base/tests/e2e/dashV601.measure.ts:52:77)
+        at /Users/nickphysick/ScriptAlly-dash601-base/tests/e2e/dashV601.measure.ts:167:5
+
+    Error Context: test-results/dashV601.measure.ts-DB601--55526-eyebrow-header-copy-and-fit-measure/error-context.md
+
+    Error Context: test-results/dashV601.measure.ts-DB601--55526-eyebrow-header-copy-and-fit-measure/error-context.md
+
+
+[3/3] [measure] › tests/e2e/dashV601.measure.ts:190:1 › DB601 S3 S4 S7 — the answers light their targets, Escape unwinds in order, nothing is written
+[measure] › tests/e2e/dashV601.measure.ts:190:1 › DB601 S3 S4 S7 — the answers light their targets, Escape unwinds in order, nothing is written
+  ✗ S3 · 1512x900 A population — no start button
+
+  ✗ S3 · 1512x900 B population — no start button
+
+  ✗ S3 · 1280x800 A population — no start button
+
+  ✗ S3 · 1280x800 B population — no start button
+
+  2) [measure] › tests/e2e/dashV601.measure.ts:190:1 › DB601 S3 S4 S7 — the answers light their targets, Escape unwinds in order, nothing is written 
+
+    Error: spotlight: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 124
+    Received:    4
+
+      50 |     writeFileSync(`${DIR}/ledger/${this.name}${MUT ? `.mut-${MUT}` : ""}.json`, JSON.stringify(this.rows, null, 1));
+      51 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+    > 52 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      53 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      54 |   }
+      55 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash601-base/tests/e2e/dashV601.measure.ts:52:77)
+        at /Users/nickphysick/ScriptAlly-dash601-base/tests/e2e/dashV601.measure.ts:248:5
+
+    Error Context: test-results/dashV601.measure.ts-DB601--9d79d-in-order-nothing-is-written-measure/error-context.md
+
+    Error Context: test-results/dashV601.measure.ts-DB601--9d79d-in-order-nothing-is-written-measure/error-context.md
+
+
+  2 failed
+    [measure] › tests/e2e/dashV601.measure.ts:117:1 › DB601 S1 S2 S5 S6 E — eyebrow, header, copy and fit 
+    [measure] › tests/e2e/dashV601.measure.ts:190:1 › DB601 S3 S4 S7 — the answers light their targets, Escape unwinds in order, nothing is written 
+  1 passed (1.8m)

@@ -1,0 +1,1274 @@
+[
+ {
+  "lock": "S1",
+  "where": "1280x800 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 A eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 A only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A closed: one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1280x800 A population",
+  "ok": true,
+  "detail": "0 descriptions drawn, expected 0"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 A closed: no em dash",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A open: width",
+  "ok": true,
+  "detail": "400 vs 400"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":838,\"y\":215.4375,\"w\":400,\"h\":547.21875,\"r\":1238,\"b\":762.65625} · sheet {\"x\":248,\"y\":105.75,\"r\":1272,\"b\":792}"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 A open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 A population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 A no em dash",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 B eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 B only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B closed: one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1280x800 B population",
+  "ok": true,
+  "detail": "0 descriptions drawn, expected 0"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 B closed: no em dash",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B open: width",
+  "ok": true,
+  "detail": "400 vs 400"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":838,\"y\":215.4375,\"w\":400,\"h\":566.8125,\"r\":1238,\"b\":782.25} · sheet {\"x\":248,\"y\":105.75,\"r\":1272,\"b\":792}"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 B open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 B population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1280x800 B no em dash",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x800 C eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1280x800 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 C closed: one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "E",
+  "where": "1280x800 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 A eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 A only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1184/1184"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "19/19 at 374px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "37/37 at 374px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "19/19 at 374px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 A \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 374px of text, column 456"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 A closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":922,\"y\":221.84375,\"w\":460,\"h\":440.84375,\"r\":1382,\"b\":662.6875} · sheet {\"x\":248,\"y\":105.75,\"r\":1432,\"b\":892}"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 A open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 A population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 A no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 B eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 B only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1184/1184"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "19/19 at 374px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "37/37 at 374px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "19/19 at 374px of text, column 456"
+ },
+ {
+  "lock": "S6",
+  "where": "1440x900 B \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 374px of text, column 456"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 B closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":922,\"y\":221.84375,\"w\":460,\"h\":460.4375,\"r\":1382,\"b\":682.28125} · sheet {\"x\":248,\"y\":105.75,\"r\":1432,\"b\":892}"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 B open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 B population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1440x900 B no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 C eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1440x900 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 C closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1184/1184"
+ },
+ {
+  "lock": "E",
+  "where": "1440x900 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 A eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 A only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "19/19 at 405px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "19/19 at 405px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "19/19 at 405px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 A \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 405px of text, column 487"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 A closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":994,\"y\":221.84375,\"w\":460,\"h\":440.84375,\"r\":1454,\"b\":662.6875} · sheet {\"x\":248,\"y\":105.75,\"r\":1504,\"b\":892}"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 A open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 A population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 A no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 B eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 B only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "19/19 at 405px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "19/19 at 405px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "19/19 at 405px of text, column 487"
+ },
+ {
+  "lock": "S6",
+  "where": "1512x900 B \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 405px of text, column 487"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 B closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":994,\"y\":221.84375,\"w\":460,\"h\":460.4375,\"r\":1454,\"b\":682.28125} · sheet {\"x\":248,\"y\":105.75,\"r\":1504,\"b\":892}"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 B open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 B population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1512x900 B no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nSmart"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 C eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1512x900 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 C closed: one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "E",
+  "where": "1512x900 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 A eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 A only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A closed: one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 A \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 A closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":1191,\"y\":219.078125,\"w\":460,\"h\":440.84375,\"r\":1651,\"b\":659.921875} · sheet {\"x\":248,\"y\":105.75,\"r\":1701,\"b\":841}"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 A open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 A population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 A no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 B eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 B only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B closed: one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S6",
+  "where": "1709x849 B \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 241px of text, column 572"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 B closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":1191,\"y\":219.078125,\"w\":460,\"h\":460.4375,\"r\":1651,\"b\":679.515625} · sheet {\"x\":248,\"y\":105.75,\"r\":1701,\"b\":841}"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 B open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 B population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1709x849 B no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1709x849 C eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1709x849 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 C closed: one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "E",
+  "where": "1709x849 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 A population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 A eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 A state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 A only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A closed: one screen",
+  "ok": true,
+  "detail": "966/966 · 1664/1664"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 A \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 A closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 A closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":1402,\"y\":225.25,\"w\":460,\"h\":440.84375,\"r\":1862,\"b\":666.09375} · sheet {\"x\":248,\"y\":105.75,\"r\":1912,\"b\":1072}"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 A open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 A population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 A no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 B population",
+  "ok": true,
+  "detail": "sidebar status \"Drafting\""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 B eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— DRAFTING —\" · sidebar \"Drafting\""
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 B state",
+  "ok": true,
+  "detail": "pre 1"
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 B only \"Where do I start?\"",
+  "ok": true,
+  "detail": "[{\"d\":\"button\",\"vis\":true}]"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B closed: one screen",
+  "ok": true,
+  "detail": "966/966 · 1664/1664"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B population",
+  "ok": true,
+  "detail": "4 descriptions drawn, expected 4"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Your letter — synopsis…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Your letter, synopsis an…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Most agents want two com…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S6",
+  "where": "1920x1080 B \"Save the draft you're se…\"",
+  "ok": true,
+  "detail": "37/37 at 286px of text, column 663"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 B closed: population",
+  "ok": true,
+  "detail": "7 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 B closed: no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B open: population",
+  "ok": true,
+  "detail": "pop-up drawn"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B open: width",
+  "ok": true,
+  "detail": "460 vs 460"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B open: inside the sheet",
+  "ok": true,
+  "detail": "pop {\"x\":1402,\"y\":225.25,\"w\":460,\"h\":460.4375,\"r\":1862,\"b\":685.6875} · sheet {\"x\":248,\"y\":105.75,\"r\":1912,\"b\":1072}"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 B open: nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 B population",
+  "ok": true,
+  "detail": "8 first-use surfaces"
+ },
+ {
+  "lock": "S5",
+  "where": "1920x1080 B no em dash",
+  "ok": false,
+  "detail": "Import your journey\n\nYour letter — synopsis\n\nONE F"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 C population",
+  "ok": true,
+  "detail": "sidebar status \"Querying\""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 C eyebrow is the sidebar's status",
+  "ok": true,
+  "detail": "eyebrow \"— QUERYING —\" · sidebar \"Querying\""
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 C state",
+  "ok": true,
+  "detail": "pre 0"
+ },
+ {
+  "lock": "S2",
+  "where": "1920x1080 C the three buttons, no start button",
+  "ok": true,
+  "detail": "btn-log,btn-record,btn-agent"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 C closed: one screen",
+  "ok": true,
+  "detail": "966/966 · 1664/1664"
+ },
+ {
+  "lock": "E",
+  "where": "1920x1080 C closed: nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ }
+]

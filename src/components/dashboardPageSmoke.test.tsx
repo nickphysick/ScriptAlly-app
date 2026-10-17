@@ -54,7 +54,8 @@ describe("/dashboard renders", () => {
        column is the two doors. */
     expect(html).toContain("Ready for lift off?");
     expect(html).toContain("No queries out yet.");
-    expect(html).toContain("Your list starts here.");
+    expect(html).toContain("No agents yet."); // v60.1 copy (was "Your list starts here.")
+    expect(html).toContain("Where do I start?"); // v60.1: the one header button before the first query
     expect(html).toContain("The early bird gets the worm.");
   });
 
@@ -79,7 +80,7 @@ describe("/dashboard renders", () => {
     expect(html).toContain('data-d60="closed-hoop"');
     /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
        populated landmarks are the title-page eyebrow and the list column's own title. */
-    expect(html).toContain("— NOW QUERYING —");
+    expect(html).toContain("— QUERYING —"); // v60.1: the eyebrow is the sidebar's status (fixture: Querying), no longer a constant
     expect(html).toContain("What&#x27;s on the list today?");
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the

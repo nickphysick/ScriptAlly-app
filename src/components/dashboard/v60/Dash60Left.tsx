@@ -22,6 +22,7 @@ import type { AgentCoverage } from "../../../lib/dashFirstUse";
 import { DASH_ART, artUrl } from "../../../lib/dashArt";
 import { CountUp } from "../v59/CountUp";
 import { Hoop, type HoopSeg } from "./Hoop";
+import { StartTag, useSpot } from "./WhereStart";
 
 /** Closed's four stone shades, light to dark, in bucket order (literal: they also draw in, never via a `var()` keyframe). */
 export const CLOSED_STONES: Record<string, string> = { quiet: "#b9b2a8", letter: "#8c8379", partial: "#6f6962", full: "#4a443f" };
@@ -37,8 +38,11 @@ const LogGlyph = () => (
 
 /* ── before the first query ─────────────────────────────────────────────────────────────────── */
 
-export const QueriesDoor: React.FC<{ loading: boolean; agents: number; onLog: () => void }> = ({ loading, agents, onLog }) => (
-  <div className="os-card d60-card d60-door" data-d60="queries-door" role="group" aria-label="No queries yet">
+export const QueriesDoor: React.FC<{ loading: boolean; agents: number; onLog: () => void }> = ({ loading, agents, onLog }) => {
+  const { spot, first } = useSpot("queries");
+  return (
+  <div className="os-card d60-card d60-door" data-d60="queries-door" data-spot={spot} role="group" aria-label="No queries yet">
+    <StartTag show={first} />
     <div className="os-frame">
       <div className="os-band d60-band--navy"><div className="os-bandrow"><h3 className="os-cardttl">No queries yet</h3></div></div>
       <div className="d60-doorbody">
@@ -49,28 +53,31 @@ export const QueriesDoor: React.FC<{ loading: boolean; agents: number; onLog: ()
           <h3 className="d60-doorh">No queries out yet.</h3>
           <p className={`d60-doorp${loading ? " d58-sk" : ""}`} data-d60="queries-copy">
             {agents > 0
-              ? `Pick one of your ${agents.toLocaleString("en-GB")} agents and log what you sent — any date. The line starts there.`
-              : "Log one you've already sent — any date — and the line starts here."}
+              ? `Log a query to one of your ${agents.toLocaleString("en-GB")} agents and it'll show up here.`
+              : "Log a query you've sent and it'll show up here, with any date."}
           </p>
           <div className="d60-doorrow">
             <button type="button" className="d58-btn d58-btn--pri" data-d60="log" disabled={loading} onClick={onLog}><LogGlyph />Log a query</button>
-            {agents === 0 && !loading && <span className="d60-hint" data-d60="log-hint">THE AGENT CARD OPENS FIRST</span>}
           </div>
         </div>
       </div>
     </div>
   </div>
-);
+  );
+};
 
-export const AgentsDoor: React.FC<{ loading: boolean; onAdd: () => void; onImport: () => void }> = ({ loading, onAdd, onImport }) => (
-  <div className="os-card d60-card d60-agents" data-d60="agents-door" role="group" aria-label="Agents on file">
+export const AgentsDoor: React.FC<{ loading: boolean; onAdd: () => void; onImport: () => void }> = ({ loading, onAdd, onImport }) => {
+  const { spot, first } = useSpot("agents");
+  return (
+  <div className="os-card d60-card d60-agents" data-d60="agents-door" data-spot={spot} role="group" aria-label="Agents on file">
+    <StartTag show={first} />
     <div className="os-frame">
       <div className="os-band d60-band--slate"><div className="os-bandrow"><h3 className="os-cardttl">Agents on file</h3><span className="d60-meta" data-d60="agents-meta">0 ON FILE</span></div></div>
       <div className="d60-doorbody d60-doorbody--sm">
         <span className="d60-glyph" data-d60="glyph" aria-hidden="true"><PersonGlyph /></span>
         <div className="d60-doortext">
-          <h3 className="d60-doorh d60-doorh--sm">Your list starts here.</h3>
-          <p className="d60-doorp">Add agents as you find them — no querying needed.</p>
+          <h3 className="d60-doorh d60-doorh--sm">No agents yet.</h3>
+          <p className="d60-doorp">Add the agents you'd like to query. You can add them long before you send anything.</p>
           <div className="d60-doorrow">
             <button type="button" className="d58-btn d58-btn--pri" data-d60="add-agent" disabled={loading} onClick={onAdd}>+ Add an agent</button>
             <button type="button" className="d58-btn" data-d60="import-list" disabled={loading} onClick={onImport}>Import a list</button>
@@ -79,16 +86,20 @@ export const AgentsDoor: React.FC<{ loading: boolean; onAdd: () => void; onImpor
       </div>
     </div>
   </div>
-);
+  );
+};
 
 const Key: React.FC<{ cls: string; n: number; label: string }> = ({ cls, n, label }) => (
   <span className={`d60-key${n === 0 ? " is-zero" : ""}`} data-d60={`key-${cls}`}><i className={`d60-sw d60-sw--${cls}`} /><b>{n}</b> {label}</span>
 );
 
 /** Agents on file once there are agents but no query: the coverage snapshot as one row. */
-export const AgentsSnap: React.FC<{ loading: boolean; cov: AgentCoverage; onReady: () => void }> = ({ loading, cov, onReady }) => (
-  <div className="os-card d60-card d60-agents" data-d60="agents-snap" role="group" aria-label="Agents on file"
+export const AgentsSnap: React.FC<{ loading: boolean; cov: AgentCoverage; onReady: () => void }> = ({ loading, cov, onReady }) => {
+  const { spot, first } = useSpot("agents");
+  return (
+  <div className="os-card d60-card d60-agents" data-d60="agents-snap" data-spot={spot} role="group" aria-label="Agents on file"
     data-cov={JSON.stringify({ querying: cov.querying, closed: cov.closed, none: cov.none, ready: cov.ready, total: cov.total })}>
+    <StartTag show={first} />
     <div className="os-frame">
       <div className="os-band d60-band--slate">
         <div className="os-bandrow"><h3 className="os-cardttl">Agents on file</h3>
@@ -114,7 +125,8 @@ export const AgentsSnap: React.FC<{ loading: boolean; cov: AgentCoverage; onRead
       </div>
     </div>
   </div>
-);
+  );
+};
 
 /* ── once a query exists: the two hoops ─────────────────────────────────────────────────────── */
 

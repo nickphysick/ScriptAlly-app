@@ -108,28 +108,87 @@ export function firstUseTiles(input: {
   return [
     {
       key: "import", title: "Import your journey",
-      copy: "Drop in the spreadsheet you've been tracking queries in. QueryHawk sorts it for you to check.",
+      copy: "Bring in the spreadsheet you've been tracking queries in.",
       /* ⚠️ THE ENTITLEMENT'S OWN ANSWER (`allowed`), never a second reading of plan and usage */
       status: !ent.allowed ? "Used" : ent.reason === "pro_available" ? "One this month" : "One free import",
       done: !ent.allowed, action: "Smart import",
     },
     {
       key: "mats", title: "Add your materials",
-      copy: "Query letter, synopsis and opening sample, kept as versions as you revise them.",
+      copy: "Your letter, synopsis and opening sample, kept as versions.",
       status: `${mats} of 3 on file`, done: mats >= 3, action: "Add a material",
     },
     {
       key: "comps", title: "Build your comps",
-      copy: "Comparable titles shape the pitch and the letter. Two is the usual ask.",
+      copy: "Most agents want two comparable titles in a query.",
       status: `${comps} ${comps === 1 ? "comp" : "comps"}`, done: comps >= 2, action: "Add a comp",
     },
     {
       key: "version", title: "Record a version",
-      copy: "Pin the draft you send, so every query knows which one went.",
+      copy: "Save the draft you're sending, so you know which one each agent got.",
       status: bv ? `v${bv} current` : "None yet", done: bv > 0, action: "Add a version",
     },
   ];
 }
 
-/** "{done} OF 4 · NOTHING REQUIRED" */
+/** "{done} OF 4 · OPTIONAL" */
 export const tilesDone = (tiles: readonly FirstUseTile[]): number => tiles.filter((t) => t.done).length;
+
+/* ── "Where do I start?" (v60.1) ───────────────────────────────────────────────────────────── */
+
+/** What can be lit: the two left cards and the four tiles. */
+export type StartTarget = "queries" | "agents" | `tile:${TileKey}`;
+export type StartKey = "sent" | "agents" | "materials";
+export type LabelTone = "navy" | "slate" | "pale";
+
+export interface StartAnswer {
+  key: StartKey;
+  /** the disc's colour: the colour of the card the answer points to */
+  tone: LabelTone;
+  title: string;
+  line: string;
+  /** the small labels naming what will light up, each in its card's colours */
+  labels: readonly { text: string; tone: LabelTone }[];
+  /** what lights up, in order — the first carries "START HERE" */
+  targets: readonly StartTarget[];
+}
+
+/**
+ * The three answers and what each lights. Pure, so the table is unit-tested; the page only draws it.
+ * ⚠️ IT WRITES NOTHING AND REMEMBERS NOTHING: no "seen" flag, no route, no navigation.
+ */
+export function startAnswers(hasAgents: boolean): StartAnswer[] {
+  return [
+    {
+      key: "sent", tone: "navy",
+      title: "I've already sent some queries",
+      line: "Log them one by one, or import your spreadsheet.",
+      labels: [{ text: "No queries yet", tone: "navy" }, { text: "Import your journey", tone: "pale" }],
+      targets: ["queries", "tile:import"],
+    },
+    {
+      key: "agents", tone: "slate",
+      title: "I'm building my agent list first",
+      line: hasAgents ? "Add more, and see who you haven't queried." : "Add the agents you want to query.",
+      labels: [{ text: "Agents on file", tone: "slate" }],
+      targets: ["agents"],
+    },
+    {
+      key: "materials", tone: "pale",
+      title: "I'm still getting my materials ready",
+      line: "Your letter, synopsis, comps and draft.",
+      labels: [{ text: "Materials", tone: "pale" }, { text: "Comps", tone: "pale" }, { text: "Version", tone: "pale" }],
+      targets: ["tile:mats", "tile:comps", "tile:version"],
+    },
+  ];
+}
+
+/** Every target the spotlight can ring or dim (the founding panel is never one of them). */
+export const START_TARGETS: readonly StartTarget[] = ["queries", "agents", "tile:import", "tile:mats", "tile:comps", "tile:version"];
+
+/** "ring" for the answer's targets, "dim" for every other target, null with no answer chosen. */
+export function spotOf(answer: StartKey | null, target: StartTarget, hasAgents: boolean): "ring" | "dim" | null {
+  if (!answer) return null;
+  const a = startAnswers(hasAgents).find((x) => x.key === answer);
+  return a?.targets.includes(target) ? "ring" : "dim";
+}
