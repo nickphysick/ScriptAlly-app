@@ -366,7 +366,7 @@ export const ContactFiltersButton: React.FC<{ filters: ContactFilters; pop: Popo
   const n = contactFilterCount(filters);
   const open = pop.open === "filters";
   return (
-    <button type="button" className={`cl18-fb${n ? " on" : ""}`} data-cl18="filters" data-n={n} aria-haspopup="dialog" aria-expanded={open}
+    <button type="button" className={`cl18-fb ltb-ctl${n ? " on" : ""}`} data-cl18="filters" data-n={n} aria-haspopup="dialog" aria-expanded={open}
       disabled={disabled} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
       {FUNNEL}<span>Filters</span>{n ? <em data-cl18="filters-n">{n}</em> : null}
     </button>

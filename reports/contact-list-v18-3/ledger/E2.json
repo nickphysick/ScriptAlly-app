@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "E2",
+  "where": "@1512 Contact list: scrolled past the top, the headings are stuck (precondition)",
+  "ok": true,
+  "detail": "76"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Contact list: their background is opaque white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Contact list: labels found",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Contact list: label 1 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 350.0; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Contact list: label 2 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 645.1; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Contact list: label 3 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 1088.4; columns 350,645,1088,1228,294,362,399,399,655,653,1088,1096,1105,1088,1344)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: scrolled past the top, the headings are stuck (precondition)",
+  "ok": true,
+  "detail": "76"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: their background is opaque white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: labels found",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: label 1 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 364.0; columns 312,624,734,902,1139,1384,324,364,364,624,624,649,754,912,924,1139,1139,1403,1406,1339)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: label 2 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 624.0; columns 312,624,734,902,1139,1384,324,364,364,624,624,649,754,912,924,1139,1139,1403,1406,1339)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: label 3 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 734.0; columns 312,624,734,902,1139,1384,324,364,364,624,624,649,754,912,924,1139,1139,1403,1406,1339)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: label 4 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 902.0; columns 312,624,734,902,1139,1384,324,364,364,624,624,649,754,912,924,1139,1139,1403,1406,1339)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1512 Query Centre: label 5 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 1139.4; columns 312,624,734,902,1139,1384,324,364,364,624,624,649,754,912,924,1139,1139,1403,1406,1339)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Contact list: scrolled past the top, the headings are stuck (precondition)",
+  "ok": true,
+  "detail": "76"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Contact list: their background is opaque white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Contact list: labels found",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Contact list: label 1 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 350.0; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Contact list: label 2 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 570.1; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Contact list: label 3 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 898.0; columns 350,570,898,1038,294,362,399,399,580,578,898,906,915,898,1112)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: scrolled past the top, the headings are stuck (precondition)",
+  "ok": true,
+  "detail": "76"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: their background is opaque white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: labels found",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: label 1 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 364.0; columns 312,514,624,792,992,1152,324,364,364,514,514,539,644,802,814,992,992,1171,1174,1107)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: label 2 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 514.0; columns 312,514,624,792,992,1152,324,364,364,514,514,539,644,802,814,992,992,1171,1174,1107)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: label 3 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 624.0; columns 312,514,624,792,992,1152,324,364,364,514,514,539,644,802,814,992,992,1171,1174,1107)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: label 4 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 792.0; columns 312,514,624,792,992,1152,324,364,364,514,514,539,644,802,814,992,992,1171,1174,1107)"
+ },
+ {
+  "lock": "E2",
+  "where": "@1280 Query Centre: label 5 is within 1px of a column's left",
+  "ok": true,
+  "detail": "0.0 (label 992.0; columns 312,514,624,792,992,1152,324,364,364,514,514,539,644,802,814,992,992,1171,1174,1107)"
+ }
+]

@@ -75,6 +75,7 @@ import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { LetterTabs } from "./contact/ContactLetters";
+import { AgentPanelNew } from "./panel/AgentPanelNew";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
 import { firstNameOf } from "../../lib/agentPanel";
@@ -85,6 +86,7 @@ import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from 
 import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
 import { PinListButton } from "../shell/PinListButton";
+import "../shell/listToolbar.css"; /* v18.3 §E — the list toolbar and headings, shared with the Query Centre */
 import { useStickyStack } from "../shell/stickyStack";
 import { fitsGenre } from "../../lib/contactStrip";
 import { joinGenres } from "../../lib/genreNoun";
@@ -97,13 +99,11 @@ import { countryName } from "../../lib/territory";
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { AppFooter } from "../shell/AppFooter";
-import { PageGuide } from "../shell/PageGuide";
+import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
-import { useWindowCorner } from "../shell/useWindowCorner";
-import { CONTACT_GUIDE, CONTACT_GUIDE_PAGE } from "./contact/contactGuide";
+import { CONTACT_CHECKLIST, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, contactGuideOf, guideDonePath, type ContactGuideKey } from "../../lib/pageChecklist";
 import { ContactSkeleton } from "./contact/ContactSkeleton";
 import "./agentList.css";
-import { floatInset } from "../shell/inkTokens";
 
 /**
  * ⚠️ THE DISCOVER DESTINATION COMES FROM THE RAIL'S OWN TABLE, NOT FROM A PAIR OF STRINGS TYPED
@@ -348,11 +348,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v18 §B — THE LIST HEADER'S TOOLS, right of its sentence: search, the one Filters button, density, full screen. The
      loading skeleton draws the same nodes, so the header holds its height while the page settles. */
   const listTools = (loading: boolean) => (
-    <span className="cl18-lt" data-cl18="tools">
+    <span className="cl18-lt ltb-r" data-cl18="tools">
       {/* v18.2 §C — no "/" keycap in the search: the / key still finds */}
       <ContactFind find={search} onFind={setSearch} disabled={loading} />
       <ContactFiltersButton filters={filters} pop={pop} disabled={loading} />
-      <span className="cl18-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
+      <span className="cl18-dens ltb-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
         {(["comfortable", "compact"] as const).map((d) => (
           <button key={d} type="button" className={density === d ? "on" : undefined} aria-pressed={density === d} data-cl14-dens={d}
             aria-label={d === "comfortable" ? "Comfortable" : "Compact"} title={d === "comfortable" ? "Comfortable" : "Compact"} disabled={loading} onClick={() => setDensity(d)}>
@@ -574,11 +574,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* kept under its old name for the doors that asked for the card's editor at a field */
   const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => openPanel(agentId, opts.tab || opts.focus || opts.prefill ? { tab: opts.tab, focus: opts.focus, prefill: opts.prefill } : undefined), [openPanel]);
 
-  /** "+ Add an agent" — the empty card, growing out of the button that asked for it. */
+  /** "+ Add an agent" — v18.3 §D: the agent panel's act view in a new-agent state (the centred card is no longer
+   *  opened from this page). An agent's panel open at the time closes first: one right-hand panel at a time. */
+  const addedInPanel = useRef<string | null>(null);
+  /* only an add STARTED here moves the panel (a centred add on another page emits "added" too) */
+  const addFromHere = useRef(false);
   const openAdd = useCallback(() => {
-    const r = addBtnRef.current?.getBoundingClientRect();
-    openNewAgentCard({ from: "button", originRect: r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null });
-  }, []);
+    addFromHere.current = true;
+    if (panelIdRef.current) setPanelParam(null, "replace");
+    setHkOpenRef.current(false);
+    openNewAgentCard({ from: "button", host: "panel" });
+  }, [setPanelParam]);
 
   /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
      Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
@@ -668,10 +674,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      the notice withdrawing once the Undo has run, and a delete's row collapsing */
   useEffect(() => subscribeAgentCardEvents((e) => {
     if (e.type === "saved") {
+      tickGuide.current("edit");
       undoSave.current = e.undo ?? null;
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
+      tickGuide.current("add");
       setNewId(e.agentId);
+      /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
+      if (addFromHere.current) addedInPanel.current = e.agentId;
+      addFromHere.current = false;
     } else if (e.type === "undone") {
       undoSave.current = null;
       setNotice((n) => (n && n.agentId === e.agentId && n.kind !== "failed" ? null : n));
@@ -692,6 +703,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
     }
   }), [beginSaveChoreography]);
+
+  /* the new-agent form left without an add: a later add elsewhere is not this page's */
+  useEffect(() => { if (!cardReq && !addedInPanel.current) addFromHere.current = false; }, [cardReq]);
+  /* v18.3 §D — the panel follows an add made in it */
+  useEffect(() => {
+    const id = addedInPanel.current;
+    if (!id || !agents.some((a) => a.id === id)) return;
+    addedInPanel.current = null;
+    openPanel(id);
+  }, [agents, openPanel]);
 
   /* §8.4: the new row into view, centred, once the store's own update has rendered it; the ring
      class rides `newId` and drops when the animation has had its 2.4s (reduced motion shows the
@@ -754,6 +775,38 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
   const hkIntroSeen = introSeenOf(currentUser);
   const markIntroSeen = useCallback(() => { if (!hkIntroSeen) void updateUserPaths(INTRO_PATH_V18); }, [hkIntroSeen, updateUserPaths]);
+
+  /* v18.3 §F.4 — THE GUIDE'S TICKS ARE READ FROM APP STATE AND REAL SAVES, never from which button started the journey:
+     an agent saved new, the search holding two characters, a panel open (by any route), a card edit saved, a
+     Housekeeping save. Each is written once per account, by leaf; a write already in flight is not repeated. */
+  const guide = contactGuideOf(currentUser);
+  const guideAsked = useRef(new Set<ContactGuideKey>());
+  const tickGuide = useRef<(k: ContactGuideKey) => void>(() => {});
+  tickGuide.current = (k) => {
+    if (sandbox || !currentUser || guide.hidden || guide.done[k] || guideAsked.current.has(k)) return;
+    guideAsked.current.add(k);
+    void updateUserPaths(guideDonePath(k)).catch(() => { guideAsked.current.delete(k); });
+  };
+  useEffect(() => { if (search.trim().length >= 2) tickGuide.current("search"); }, [search]);
+  useEffect(() => { if (panelId) tickGuide.current("open"); }, [panelId]);
+  const markGuideSeen = useCallback(() => { if (!guide.seen) void updateUserPaths(GUIDE_SEEN_PATH); }, [guide.seen, updateUserPaths]);
+  const hideGuide = useCallback(() => { void updateUserPaths(GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  /* the control each item shows, on this page, as it is now */
+  const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
+    const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    const row = () => vis(".aglist [data-clv='row'][data-agent-card]");
+    switch (k) {
+      case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
+      case "search": return { el: vis(".aglist .cl18-lh [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
+      case "edit": {
+        const edit = vis("[data-ap='panel'] [data-ap='edit']");
+        return edit ? { el: edit, text: "Press Edit profile. Everything on the card can be changed here." }
+          : { el: row(), text: "Open any agent's card first. Edit profile is at the foot of it." };
+      }
+      case "hk": return { el: vis(".aglist [data-cl183='fill']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+    }
+  }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
      when the tab was hidden. `pendingDismiss` holds the value from the press until the user doc agrees, so the
      tab does not flash back while the write is in flight. */
@@ -833,6 +886,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       undo: r.undo,
     };
   }, [agents, hkPrefs, updateUserPaths, addUserTask, deleteUserTask, personalGenres, writeFix, hkBook]);
+  /* v18.3 §F.4 — a Housekeeping save that landed ticks the guide's "Do some housekeeping" */
+  const onHkFixGuided = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
+    const r = await onHkFix(item, fix);
+    if (r.ok) tickGuide.current("hk");
+    return r;
+  }, [onHkFix]);
 
   const hkEditCtx = useMemo(
     () => ({ queries, agents, msGenre: scoped?.genre ?? null, msTitle: scoped?.title ?? null, nowMs }),
@@ -860,20 +919,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (!currentUser) return;
     await commitAgentEdits(firestoreDb, currentUser.id, agentId, patch);
   }, [agents, sandbox, currentUser]);
-
-  /* v13 §8 — the page guide sits above the Housekeeping tab: the tab is placed from the window's
-     measured corner, so the guide is too — the corner, plus the tab's OWN measured height, plus 24 —
-     never a literal for a box another element owns. */
-  const guideCorner = useWindowCorner(floatInset());
-  const [tabH, setTabH] = useState(0);
-  useEffect(() => {
-    if (!active || !showList) return undefined;
-    const t = window.setTimeout(() => {
-      const tab = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]');
-      if (tab && tab.offsetHeight > 0) setTabH(tab.offsetHeight);
-    }, 0);
-    return () => window.clearTimeout(t);
-  }, [active, showList]);
 
   /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
      Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
@@ -1088,7 +1133,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             health={listH} introSeen={hkIntroSeen} onIntroSeen={markIntroSeen}
             open={hkOpen} onOpen={openHk} onClose={() => { setHkOpen(false); setHkRun(null); }} runAgent={hkRun}
             view={hkView} onView={setHkView} routeActive={active}
-            onFix={onHkFix}
+            onFix={onHkFixGuided}
             onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
             onShowAll={async () => { await updateUserPaths(showAllPath()); }}
             onCard={onHkCard}
@@ -1118,10 +1163,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onFillIn={() => { const id = panelAgent.id; closePanel(); setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
           />
         )}
-        {showList && active && guideCorner && tabH > 0 && (
-          <PageGuide page={CONTACT_GUIDE_PAGE} steps={CONTACT_GUIDE}
-            dress={{ kicker: "How this page works", back: true, finish: "Got it", className: "pgd--contacts",
-              style: { right: guideCorner.right, bottom: guideCorner.bottom + tabH + 24 } }} />
+        {active && cardReq?.host === "panel" && cardReq.agentId === null && <AgentPanelNew />}
+        {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
+        {!sandbox && (
+          <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guide.done} seen={guide.seen} hidden={guide.hidden}
+            active={active} ready={showList} targetFor={guideTarget} onSeen={markGuideSeen} onHide={hideGuide}
+            art="/images/contact-list-scout.webp" />
         )}
 
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
@@ -1168,22 +1215,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           {/* v138.6 §C — THE STICKY ROW: the navy header in a wrapper that sticks under the sheet's lip, filled with the
               sheet's colour (the Query Centre's own construction) */}
           <div className="cl18-lhw" data-cl18="list-header-wrap">
-          <div className="cl18-lh" data-cl18="list-header" data-cl17="sheet-row" ref={lhRef}>
-            <p className="cl18-says" data-cl18="sentence" data-cl16="showing" data-cl17="showing" role="status">
-              {visibleFacts.length === factsAll.length && !anyActive ? (
-                <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> {factsAll.length === 1 ? "agent" : "agents"}</>
-              ) : (
-                <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b></>
-              )}
-              <span className="cl18-dim">{groupKey === "none" ? ", " : ", grouped by "}</span>
-              <button type="button" className="cl18-gn" data-cl18="group" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
-                onClick={(e) => pop.toggle("group", e.currentTarget)}>
-                {groupKey === "none" ? "A to Z" : (GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? "A to Z")}
-              </button>
-              {visibleFacts.length === factsAll.length && !anyActive ? null : (
-                <button type="button" className="cl18-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button>
-              )}
-            </p>
+          {/* v18.3 §E — THE TOOLBAR (shell/listToolbar.css, shared with the Query Centre): the count, then the grouping
+              chip on the left; every control on the right 36 tall. Sorting is on the column headings only. */}
+          <div className="cl18-lh ltb" data-cl18="list-header" data-cl17="sheet-row" ref={lhRef}>
+            <div className="ltb-l">
+              <p className="cl18-says ltb-count" data-cl18="sentence" data-cl16="showing" data-cl17="showing" role="status">
+                {visibleFacts.length === factsAll.length && !anyActive ? (
+                  <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> {factsAll.length === 1 ? "agent" : "agents"}</>
+                ) : (
+                  <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b></>
+                )}
+                {visibleFacts.length === factsAll.length && !anyActive ? null : (
+                  <button type="button" className="cl18-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button>
+                )}
+              </p>
+              <span className="ltb-chipw">
+                <button type="button" className="cl18-gn ltb-chip" data-cl18="group" data-ltb="chip" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
+                  onClick={(e) => pop.toggle("group", e.currentTarget)}>
+                  <i>Grouped by</i> <b data-ltb="group-name">{groupKey === "none" ? "None" : (GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? "None")}</b>
+                  <span className="ltb-caret" aria-hidden="true">⌄</span>
+                </button>
+              </span>
+            </div>
             {listTools(false)}
             <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
             <ContactFiltersPanel filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}

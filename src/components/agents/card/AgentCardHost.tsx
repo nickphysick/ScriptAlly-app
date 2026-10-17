@@ -171,7 +171,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   /* the editor a door asked for opens straight away, with its carried answers; otherwise the
      quick view. The carried answers belong to THAT opening — the pencil later starts clean. */
   /* Contact list v16 §F — hosted in the agent's side panel there is no quick view: the editor is all there is */
-  const inPanel = req?.host === "panel" && req.agentId !== null;
+  /* v18.3 §D — a NEW agent can be hosted there too: "+ Add an agent" opens the panel's act view with the empty editor */
+  const inPanel = req?.host === "panel";
   const [editing, setEditingRaw] = useState<EditTarget | null>(
     req?.tab || inPanel ? { tab: req?.tab ?? "who", focus: req?.focus, prefill: req?.prefill } : null,
   );
@@ -476,10 +477,10 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
         <div className="ac apn-edit" data-ap="edit">
           <AgentCardEditor
             variant="panel"
-            mode="edit" agent={agent} prefill={target.prefill} personal={personal} tab={target.tab} focus={target.focus}
+            mode={isNew ? "new" : "edit"} agent={isNew ? null : agent} prefill={target.prefill} personal={personal} tab={target.tab} focus={target.focus}
             agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
             isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor} notes={storedNotes} earlierNote={agent?.notes ?? ""}
-            onSave={onEditorSave} onLeave={() => closeAgentCard()} onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
+            onSave={isNew ? (dd) => onCreateAgent(dd) : onEditorSave} onLeave={() => closeAgentCard()} onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
             onNewGenre={onNewGenre} onAddNote={onAddNote} onEditNote={onEditNote} onDeleteNote={onDeleteNote} bindLeave={editorLeave}
           />
         </div>,

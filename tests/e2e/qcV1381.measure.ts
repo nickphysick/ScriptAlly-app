@@ -226,13 +226,18 @@ test.describe("Query Centre v138.1", () => {
       L.check("F1", `${w} sheet measured`, r.sheet > 0, `${r.sheet}`);
       L.check("F1", `${w} none in the filter row`, r.inFilters === 0, `${r.inFilters}`);
       L.check("F1", `${w} one in the navy row`, r.inTop === 1, `${r.inTop}`);
-      L.check("F1", `${w} rest width`, near(r.w, wide ? 300 : 220, 1), `${r.w} · sheet ${r.sheet}`);
+      /* RE-POINTED (Contact list v18.3 §E, the shared toolbar): the search rests at 240 on the full-size sheet and 200
+         otherwise — the toolbar's own rule keys on the sheet's size switch, so the expectation does too */
+      const full = await page.evaluate(() => !!document.querySelector(".ws-app.sheet-wide"));
+      L.check("F1", `${w} rest width`, near(r.w, full ? 240 : 200, 1), `${r.w} · sheet ${r.sheet} · full ${full}`);
       await page.mouse.click(5, 300);
       await page.keyboard.press("/");
       await page.waitForTimeout(400);
       const f = await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>('[data-qc138="search"]')].find((e) => e.getBoundingClientRect().height > 0)!; return { w: s.getBoundingClientRect().width, active: document.activeElement === s.querySelector("input") }; });
       L.check("F1", `${w} / focuses it`, f.active, `${f.active}`);
-      L.check("F1", `${w} focus width`, near(f.w, wide ? 360 : 260, 2), `${f.w}`);
+      /* RE-POINTED (Contact list v18.3 §E, the shared toolbar): the search holds the toolbar's width when focused (240,
+         or 200 below the full-size sheet); v138.1's grow-on-focus is retired with it — reported to Nick */
+      L.check("F1", `${w} focus width`, near(f.w, full ? 240 : 200, 2), `${f.w} · full ${full}`);
       const rows = page.locator('.qcv-group[data-v138] [data-qcv="row"]');
       const n0 = await rows.count();
       await page.keyboard.type("Reed");

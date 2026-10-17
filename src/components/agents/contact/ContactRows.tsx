@@ -189,6 +189,7 @@ const Row: React.FC<{
       role="button"
       tabIndex={0}
       data-peek={peek ? "" : undefined}
+      data-first-letter={letter ? "" : undefined}
       aria-expanded={onPeek ? peek : undefined}
       className={`clv-row${fresh ? " clv-row--new" : ""}${focused ? " kf" : ""}`}
       data-clv="row"
@@ -289,8 +290,7 @@ const Row: React.FC<{
         <TrayBtn probe="tray-open" label="Open card" onPress={(r) => onOpen(r)} />
       </span>
       {peek ? (
-        <ContactPeek agent={a} genres={genres.map((g) => ({ label: g, hit: genreHit(g) }))}
-          onEdit={(tab, focus) => onEdit?.(tab, focus)} onProfile={() => onOpen(rowRef.current?.getBoundingClientRect() ?? new DOMRect())} />
+        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
       ) : null}
     </div>
   );
@@ -373,15 +373,16 @@ export const ContactRows: React.FC<ContactRowsProps & {
           ))}
         </ListPanel>
       ) : (
-        /* any other grouping: a powder header over each group's own panel (§5), its labels pinning under it */
-        groups.map((g) => (
-          <section className="clv-grp" key={g.label} data-clv="grp">
-            <ListGroupHeader tone="powder" title={g.label} count={countOf(g)} data-clv="band" />
-            <ListPanel cols={CONTACT_COLS} columns={columns} stickTop={54} data-clv="panel">
+        /* any other grouping — v18.3 §E: ONE panel, ONE headings row at the top (it sticks), each group only its own
+           band over its rows. Clicking a heading sorts within every group, as before. */
+        <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
+          {groups.map((g) => (
+            <section className="clv-grp" key={g.label} data-clv="grp">
+              <ListGroupHeader tone="powder" title={g.label} count={countOf(g)} data-clv="band" />
               {rowsOf(g)}
-            </ListPanel>
-          </section>
-        ))
+            </section>
+          ))}
+        </ListPanel>
       )}
     </div>
   );

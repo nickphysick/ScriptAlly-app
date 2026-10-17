@@ -329,7 +329,8 @@ test.describe("QC138.5", () => {
         return { badge: grp.querySelector('[data-qc138="filters-badge"]')?.textContent ?? null, title: (grp.querySelector<HTMLElement>('[data-qc138="showing"]')?.innerText ?? "").replace(/\s+/g, " ") };
       }, G);
       L.check("E1", "one filter set: the badge reads 1", set.badge === "1", `${set.badge}`);
-      L.check("E1", "one filter set: the title reads 'Showing {n} of {N} queries, …'", /^Showing \d+ of \d+ quer(y|ies), grouped by /.test(set.title), set.title);
+      /* RE-POINTED (Contact list v18.3 §E, shared): the grouping left the title for the chip */
+      L.check("E1", "one filter set: the title reads 'Showing {n} of {N} queries'", /^Showing \d+ of \d+ quer(y|ies)\b/.test(set.title) && !/grouped by/i.test(set.title), set.title);
       L.check("E1", "no Clear all in the title", !/Clear all/.test(set.title), set.title);
       await page.keyboard.press("Escape");
       await page.waitForTimeout(300);

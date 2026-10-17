@@ -22,6 +22,7 @@ import "../../shell/pageHeroFrame.css"; /* v138.5 — the shared inset, before t
 import "./contactV17.css";
 import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
 import "./contactV182.css"; /* after v18: v18.2 restates the header's shadow, the card's layers and the tabs */
+import "./contactV183.css"; /* after v18.2: the second button and the ring */
 
 export const CONTACT_EYEBROW = "— CONTACT LIST —";
 export const CONTACT_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
@@ -71,17 +72,10 @@ export const HealthRing: React.FC<{ pct: number | null }> = ({ pct }) => {
           <circle data-cl17="ring-gaps" cx={c} cy={c} r={RING.r} fill="none" stroke="#a2452a" strokeOpacity={pct === null ? 0.12 : 0.85} strokeWidth={RING.w} />
         )}
         {pct !== null && arc.ink > 0 ? (
-          <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="butt"
+          <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="round"
             strokeDasharray={`${arc.ink} ${RING_C}`} transform={rot} />
         ) : null}
-        {pct !== null && arc.joins ? (
-          <>
-            <circle data-cl17="ring-join" cx={c} cy={c} r={RING.r} fill="none" stroke="#fff" strokeWidth={RING.w + 1}
-              strokeDasharray={`${RING.join} ${RING_C - RING.join}`} strokeDashoffset={RING.join / 2} transform={rot} />
-            <circle data-cl17="ring-join" cx={c} cy={c} r={RING.r} fill="none" stroke="#fff" strokeWidth={RING.w + 1}
-              strokeDasharray={`${RING.join} ${RING_C - RING.join}`} strokeDashoffset={-(arc.ink - RING.join / 2)} transform={rot} />
-          </>
-        ) : null}
+        {/* v18.3 §B — the two cream separator ticks are gone; the filled arc has a round cap */}
       </svg>
       <span className={`cl17-pc${pct === 100 ? " cl17-pc--full" : ""}`} data-cl17="ring-pct">
         {pct === null ? "" : <>{pct}<i>%</i></>}
@@ -184,7 +178,11 @@ export const ContactLightHeader: React.FC<{
       </div>
       <div className="cl17-acts" data-cl17="acts">
         <button type="button" className="cl17-b1" data-cl15="add" data-cl17="add" ref={addRef} disabled={loading} onClick={onAdd}>+ Add an agent</button>
-        {onDiscover ? <button type="button" className="cl17-b2" data-cl16="discover" data-cl17="discover" disabled={loading} onClick={onDiscover}>Discover agents</button> : null}
+        {/* v18.3 §B — "Discover agents" leaves the header (it stays in the sidebar); "Fill in the gaps" opens Housekeeping,
+            with the open gap count in a pill (hidden at zero; the button stays) */}
+        <button type="button" className="cl17-b2 cl183-fill" data-cl183="fill" disabled={loading || !onHealth} onClick={onHealth}>
+          Fill in the gaps{health && health.gaps > 0 ? <span className="cl183-fn" data-cl183="fill-n" aria-label={`${health.gaps} gaps`}>{health.gaps}</span> : null}
+        </button>
       </div>
       <ContactSummaryCard model={model} active={active} onGroup={onGroup} loading={loading} health={health ?? null} onHealth={onHealth} />
     </div>

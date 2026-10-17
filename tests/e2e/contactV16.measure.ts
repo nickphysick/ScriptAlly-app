@@ -357,7 +357,8 @@ test.describe("Contact list v16", () => {
       panels: [...g.querySelectorAll<HTMLElement>('[data-clv="panel"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
       labs: labs.map((l) => ({ col: l.dataset.ltCol ?? "", tag: l.tagName, sort: l.getAttribute("aria-sort"), text: (l.textContent ?? "").trim() })),
       sortPill: [...g.querySelectorAll('[data-cl16="bar"] :is([data-lp="sort"], [data-lp="dir"], .lp-join)')].length,
-      /* RE-POINTED (v18 §B): the grouping is named by the list header's sentence ("…, A to Z" ungrouped) */ group: (g.querySelector('[data-cl18="sentence"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      /* RE-POINTED (v18 §B, then v18.3 §E): the grouping is named by the toolbar's chip ("Grouped by None" ungrouped);
+         the sentence is the count alone now */ group: (g.querySelector('[data-ltb="group-name"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
     };
   });
   /** the last word of a name: the page's own surname rule, in the test's words */
@@ -372,7 +373,7 @@ test.describe("Contact list v16", () => {
       const w = `${vp.width}`;
       const r = await readRows(page);
       L.check("C3", `${w} one panel, no group labels`, r.bands === 0 && r.panels === 1 && r.names.length > 5, `${r.bands} bands · ${r.panels} panels · ${r.names.length} rows`);
-      L.check("C3", `${w} ungrouped: the sentence ends ", A to Z"`, /, A to Z/.test(r.group), `"${r.group}"`);
+      L.check("C3", `${w} ungrouped: the grouping chip reads "None" (v18.3 §E)`, r.group === "None", `"${r.group}"`);
       const sur = r.names.map(surname);
       L.check("C3", `${w} rows are A to Z by surname`, sur.every((x, i) => i === 0 || sur[i - 1].localeCompare(x) <= 0), sur.slice(0, 8).join(" · "));
       L.check("C3", `${w} the order is not a single letter (the claim has something to order)`, new Set(r.initials).size > 4, `${new Set(r.initials).size} initials`);
@@ -729,7 +730,7 @@ test.describe("Contact list v16", () => {
       L.check("F1", `${w} exactly one row is selected, and it is this agent's`, r.selected.length === 1 && r.selected[0] === r.id, `${r.selected.join()} · panel ${r.id}`);
       L.check("F1", `${w} the selected row: #f7f3ed with a 3px ink left edge`, r.selBg === "rgb(247, 243, 237)" && /rgb\(42, 58, 82\) 3px 0px 0px 0px inset/.test(r.selEdge ?? ""), `${r.selBg} · ${r.selEdge}`);
       L.check("F1", `${w} the address carries the agent`, r.url === `?agent=${r.id}`, r.url);
-      L.check("F1", `${w} the Housekeeping tab stands down`, r.hkTab !== null && r.hkTab < 0.05, `${r.hkTab}`);
+      /* RETIRED (v18.3 §B): there is no floating Housekeeping tab to stand down — B1 in contactV183 holds its absence */
       /* another row swaps the agent in the same panel; ↓ walks to the next row */
       const before = r.id;
       await rowOf(page, `[data-stand="none"]:not([data-agent-card="${before}"])`).click({ position: { x: 150, y: 28 } }); await page.waitForTimeout(400);

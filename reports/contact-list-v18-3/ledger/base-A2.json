@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A2",
+  "where": "@1512 the key shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 its left is the tile's ±2",
+  "ok": false,
+  "detail": "48.0"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 its top is 8–12 below the tile",
+  "ok": false,
+  "detail": "-51.0"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 fully in the viewport",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 unclipped (its corners and centre hit it)",
+  "ok": true,
+  "detail": "5/5"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 Escape closes the key",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 …with the drawer still open",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 the key shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 its left is the tile's ±2",
+  "ok": false,
+  "detail": "48.0"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 its top is 8–12 below the tile",
+  "ok": false,
+  "detail": "-51.0"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 fully in the viewport",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 unclipped (its corners and centre hit it)",
+  "ok": true,
+  "detail": "5/5"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 Escape closes the key",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 …with the drawer still open",
+  "ok": true,
+  "detail": "true"
+ }
+]

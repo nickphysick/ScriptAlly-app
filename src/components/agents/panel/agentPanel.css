@@ -253,3 +253,8 @@
 .apn .hzz button.hzz-open:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); }
 .apn .hzz .hzz-e[data-dir="out"] button.hzz-open:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
 .apn .hzz button.hzz-open:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── v18.3 §D · "+ Add an agent" in the panel: the head's one line, and the editor's foot messages ── */
+.apn .apn-newline { margin: 6px 0 0; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.78); }
+.apn .ae-need { font: italic 400 14px/1.3 var(--sp-serif) !important; color: #8a3d27; }
+.apn .ae-will { font: 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }

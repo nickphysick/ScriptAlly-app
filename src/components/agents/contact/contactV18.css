@@ -51,10 +51,9 @@
 /* ── §B · THE LIST HEADER: the top of the list sheet, slate. One sentence left; search, Filters, density and full
    screen right, gap 10, on one line. ── */
 .cl16-list .cl18-lh {
-  display: flex; align-items: center; gap: 16px; box-sizing: border-box; min-width: 0; min-height: 68px;
-  padding: 16px 32px 16px 40px; border-radius: 20px 20px 0 0; background: #3e5170; color: #f4eee5;
+  min-width: 0; border-radius: 20px 20px 0 0; background: #3e5170; color: #f4eee5;
+  /* v18.3: the row's height, padding and layout are the shared toolbar's (shell/listToolbar.css) */
 }
-.ws-app.sheet-wide .cl16-list .cl18-lh { min-height: 76px; padding: 18px 36px 18px 44px; }
 .cl18-lh .cl18-says {
   flex: 1 1 auto; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   font: 400 19px/1.3 var(--sp-type) !important; color: #f4eee5;
@@ -73,15 +72,11 @@
 }
 .cl18-lh .cl18-lt { display: flex; align-items: center; gap: 10px; flex: none; }
 .cl18-lh .cl18-lt .cl17-find.cl13-find {
-  flex: none; box-sizing: border-box; width: 200px; height: 38px; padding: 0 12px 0 14px; border-radius: 19px;
-  background: #fff; color: rgba(28, 19, 15, 0.55); box-shadow: none;
+  /* v18.3: size and fill are the shared toolbar's `.ltb-search` */
 }
-.ws-app.sheet-wide .cl18-lh .cl18-lt .cl17-find.cl13-find { width: 260px; }
 .cl18-lh .cl18-lt .cl17-find.cl13-find:focus-within { box-shadow: 0 0 0 2px #e7a184; }
 .cl18-lh .cl18-fb {
-  display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: 38px; padding: 0 16px; border: 0;
-  border-radius: 19px; background: transparent; color: #f4eee5; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35);
-  font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
+  font: 400 16px/1 var(--sp-type) !important; white-space: nowrap; /* v18.3: box is the toolbar's `.ltb-ctl` */
 }
 .cl18-lh .cl18-fb span { font: inherit !important; }
 .cl18-lh .cl18-fb.on { background: #f4eee5; color: #2d3a50; box-shadow: none; }
@@ -90,15 +85,10 @@
   border-radius: 10px; background: #2d3a50; color: #f4eee5; font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important;
 }
 .cl18-lh .cl18-fb:focus-visible, .cl18-lh .cl18-dens button:focus-visible, .cl18-lh .cl18-fsb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
-.cl18-lh .cl18-dens { display: inline-flex; gap: 2px; padding: 4px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25); }
-.cl18-lh .cl18-dens button {
-  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 28px; padding: 0; border: 0; border-radius: 8px;
-  background: none; color: rgba(244, 238, 229, 0.75); cursor: pointer;
-}
-.cl18-lh .cl18-dens button.on { background: #fff; color: #2d3a50; }
+/* v18.3: the density pair is the toolbar's `.ltb-dens` */
 .cl18-lh .cl18-fsb.cl16-fsb {
-  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 38px; height: 38px; padding: 0; border: 0;
-  border-radius: 50%; background: none; color: #f4eee5; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35); font-size: 0 !important;
+  display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: #f4eee5; cursor: pointer;
+  font-size: 0 !important; /* v18.3: 36 round, the toolbar's `.ltb-round` */
 }
 .cl18-lh button:disabled { cursor: default; opacity: 0.6; }
 
@@ -118,13 +108,7 @@
 .cl18-fp .cl18-fp-f { margin-top: 6px; }
 
 /* ── §B · THE COLUMN HEADINGS: the Query Centre's strip, at the sheet's full width ── */
-.clv-group .cl16-list .lt-labels {
-  height: auto; padding-top: 12px; padding-bottom: 13px; background: #e9edf3; border-bottom: 1.5px solid rgba(45, 58, 80, 0.28);
-}
-.clv-group .cl16-list .lt-labels .lt-lab {
-  font: 600 10.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62);
-}
-.clv-group .cl16-list .lt-labels .lt-lab.on { color: #2d3a50; }
+/* v18.3: the row's fill, height, rule and label type are the shared headings' (`.lth`, shell/listToolbar.css) */
 .clv-group .cl16-list .lt-labels .lt-lab i { color: #a2452a; }
 .clv-group .cl16-list .lt-labels button.lt-lab:not(.on):hover::after { content: " ↓"; opacity: 0.35; }
 

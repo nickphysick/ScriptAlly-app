@@ -1,0 +1,134 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18.3 §F — the "Getting started" guide: the pill (in the top bar's page slot), the checklist popover, the
+ * spotlight and the done note. Values are the mock's (`design-refs/contact-list-v18-3`). The popover, spotlight and note
+ * are portalled to <body> and fixed to the window; their layers sit above every drawer and panel (the panel scrim is
+ * under 70), the spotlight above the popover and the note.
+ */
+
+/* ── the pill: 36 tall, blush, a rust ring, 10px before the "?" ── */
+.pck-pill {
+  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; height: 36px;
+  margin-right: 10px; padding: 0 14px 0 12px; border-radius: 18px; background: #fbeee8; color: #1c130f;
+  box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.28); transition: background 0.15s, box-shadow 0.15s;
+}
+.pck-pill:hover, .pck-pill.open { background: #f8e2d8; box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.5); }
+.pck-pill:focus-visible { outline: 2px solid #e7a184; outline-offset: 2px; }
+.pck-pbars { display: inline-flex; gap: 2px; }
+.pck-pbars i { width: 6px; height: 14px; border-radius: 2px; background: rgba(162, 69, 42, 0.2); }
+.pck-pbars i.on { background: #a2452a; }
+.pck-pill .pck-pt { font: 400 14px/1 var(--sp-serif) !important; white-space: nowrap; color: #1c130f; }
+.pck-pill .pck-pt b { font: inherit !important; font-weight: 600 !important; }
+.pck-pill .pck-pn { font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: #a2452a; }
+/* at 1440 and below: no bars (§F.1 — a window width, as stated, not the sheet's compact switch) */
+@media (max-width: 1440px) { .pck-pbars { display: none; } .pck-pill { gap: 8px; padding: 0 12px; } }
+
+.pck-layer { position: relative; z-index: 95; }
+
+/* ── the checklist ── */
+.pck-pop {
+  position: fixed; z-index: 95; box-sizing: border-box; width: 340px; padding: 7px; border-radius: 16px; background: #fff;
+  box-shadow: 0 24px 54px -18px rgba(20, 14, 10, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.1);
+  animation: pck-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pck-pop::before {
+  content: ""; position: absolute; right: 22px; top: -6px; width: 12px; height: 12px; background: #fbeee8; transform: rotate(45deg);
+  box-shadow: -1px -1px 0 rgba(28, 19, 15, 0.1);
+}
+@keyframes pck-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.pck-fr { position: relative; border: 1px solid rgba(165, 131, 123, 0.7); border-radius: 11px; overflow: hidden; background: #fff; }
+.pck-h { padding: 12px 10px 12px 14px; background: #fbeee8; border-bottom: 1px solid rgba(162, 69, 42, 0.18); }
+.pck-ht { display: flex; align-items: center; gap: 12px; }
+.pck-art { flex: none; width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(28, 19, 15, 0.22)); }
+.pck-h h4 { flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px; margin: 0; font: 400 17px/1.1 var(--sp-type) !important; color: #1c130f; }
+.pck-pg { font: 500 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase; color: #a2452a; }
+.pck-x { all: unset; flex: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: rgba(28, 19, 15, 0.5); font-size: 13px; }
+.pck-x:hover { background: rgba(162, 69, 42, 0.1); color: #1c130f; }
+.pck-x:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
+.pck-bar { display: flex; gap: 4px; margin: 12px 6px 0 0; }
+.pck-bar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(162, 69, 42, 0.16); transition: background 0.3s; }
+.pck-bar i.on { background: #a2452a; }
+
+.pck-l { list-style: none; margin: 0; padding: 4px 8px 0; }
+.pck-l li + li { border-top: 1px solid rgba(28, 19, 15, 0.07); }
+.pck-l button {
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; grid-template-columns: 24px 1fr auto; gap: 12px;
+  align-items: center; padding: 9px 6px 9px 4px; border-radius: 10px;
+}
+.pck-l button:hover { background: #f6f3ee; }
+.pck-l button:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
+.pck-tick {
+  box-sizing: border-box; width: 22px; height: 22px; border-radius: 50%; border: 1.5px dotted rgba(45, 58, 80, 0.5); display: grid; place-items: center;
+  font: 600 12px/1 var(--sp-serif) !important; color: #f4eee5; transition: background 0.2s, border-color 0.2s;
+}
+.pck-l li.is-done .pck-tick { background: #2d3a50; border: 1.5px solid #2d3a50; }
+.pck-l li.just .pck-tick { animation: pck-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); }
+@keyframes pck-pop { 0% { transform: scale(0.7); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.pck-tx { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pck-tx b { font: 500 15px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.pck-tx small { font: 400 13px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.pck-l li.is-done .pck-tx b { color: rgba(28, 19, 15, 0.5); font-weight: 400 !important; }
+.pck-l li.is-done .pck-tx small { display: none; }
+.pck-go { font: 400 15px/1 var(--sp-type) !important; color: #2d3a50; opacity: 0; transform: translateX(-4px); transition: opacity 0.15s, transform 0.15s; }
+.pck-l button:hover .pck-go, .pck-l button:focus-visible .pck-go { opacity: 1; transform: none; }
+.pck-n { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 6px 12px 10px; }
+.pck-n i { font: italic 400 12.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.pck-off {
+  all: unset; cursor: pointer; white-space: nowrap; font: 400 12.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5);
+  text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px;
+}
+.pck-off:hover { color: #1c130f; }
+.pck-off:focus-visible, .pck-sb button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-sure { padding: 14px 16px; }
+.pck-sure b { display: block; margin-bottom: 6px; font: 400 17px/1.2 var(--sp-type) !important; color: #1c130f; }
+.pck-sure p { margin: 0 0 12px; font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); }
+.pck-sb { display: flex; justify-content: flex-end; gap: 8px; }
+.pck-sb button { all: unset; cursor: pointer; height: 34px; padding: 0 14px; border-radius: 17px; font: 500 14px/34px var(--sp-serif) !important; }
+.pck-sb .pck-keep { color: #1c130f; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); }
+.pck-sb .pck-off2 { background: #2a3a52; color: #f4eee5; }
+
+/* ── the spotlight: the dim (a live hole, by clip path) and the step card ── */
+.pck-spot { position: fixed; inset: 0; z-index: 97; pointer-events: none; }
+.pck-dim { position: absolute; inset: 0; background: rgba(28, 19, 15, 0.55); pointer-events: auto; cursor: pointer; animation: pck-fade 0.2s; }
+@keyframes pck-fade { from { opacity: 0; } to { opacity: 1; } }
+.pck-card {
+  position: absolute; z-index: 1; box-sizing: border-box; max-width: 320px; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 10px;
+  border-radius: 12px; background: #fff; pointer-events: auto;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 40px -18px rgba(28, 19, 15, 0.6);
+}
+.pck-card::before {
+  content: ""; position: absolute; left: 22px; top: -6px; width: 12px; height: 12px; background: #fff; transform: rotate(45deg);
+  box-shadow: -1px -1px 0 rgba(28, 19, 15, 0.12);
+}
+.pck-card.up::before { top: auto; bottom: -6px; box-shadow: 1px 1px 0 rgba(28, 19, 15, 0.12); }
+.pck-ck { font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: #a2452a; }
+.pck-card b { font: 400 16px/1.25 var(--sp-type) !important; color: #1c130f; }
+.pck-ci { font: 400 14.5px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.8); }
+.pck-back {
+  all: unset; cursor: pointer; width: max-content; margin-top: 6px; font: 400 13px/1.2 var(--sp-serif) !important; color: #2d3a50;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.pck-back:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+
+/* ── the note, under the pill, after a step is done ── */
+.pck-note {
+  position: fixed; z-index: 96; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 40px -18px rgba(28, 19, 15, 0.55); animation: pck-in 0.2s;
+}
+.pck-ok { width: 26px; height: 26px; border-radius: 50%; background: #2d3a50; color: #f4eee5; display: grid; place-items: center; font: 600 13px/1 var(--sp-serif) !important; }
+.pck-nt { display: flex; flex-direction: column; gap: 2px; }
+.pck-nt b { font: 500 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.pck-nt small { font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.pck-note button {
+  all: unset; cursor: pointer; margin-left: 6px; height: 32px; padding: 0 13px; border-radius: 16px; background: #2a3a52; color: #f4eee5;
+  font: 500 13.5px/32px var(--sp-serif) !important; white-space: nowrap;
+}
+.pck-note button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-all { margin-left: 6px; font: italic 400 13.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pck-pill, .pck-pop, .pck-dim, .pck-note, .pck-tick, .pck-go, .pck-bar i { transition: none; animation: none; }
+  .pck-l li.just .pck-tick { animation: none; }
+}

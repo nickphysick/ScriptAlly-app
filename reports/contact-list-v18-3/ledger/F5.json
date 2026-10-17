@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "F5",
+  "where": "the note appears",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F5",
+  "where": "it reads \"Next: Edit an agent\"",
+  "ok": true,
+  "detail": "Next: Edit an agent →"
+ },
+ {
+  "lock": "F5",
+  "where": "it sits 12 ±2 under the pill, right-aligned to it ±2",
+  "ok": true,
+  "detail": "12 · 0"
+ },
+ {
+  "lock": "F5",
+  "where": "pressing it starts the Edit spotlight",
+  "ok": true,
+  "detail": "Edit an agent"
+ }
+]

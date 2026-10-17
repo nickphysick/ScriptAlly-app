@@ -78,7 +78,7 @@ const NEED_TARGET: Record<AgentDataNeed, { tab: AgentCardTab; focus: AgentCardFi
 export function dataNeedTarget(needs: readonly AgentDataNeed[]): { tab: AgentCardTab; focus: AgentCardField } | null {
   return needs.length ? NEED_TARGET[needs[0]] : null;
 }
-export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from"> = {}): void {
+export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from" | "host"> = {}): void {
   current = { ...opts, agentId: null, seq: ++seq };
   notify();
 }

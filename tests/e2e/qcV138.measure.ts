@@ -276,7 +276,8 @@ test.describe("Query Centre v138", () => {
       L.check("C1", `${w} navy`, r.bg === "rgb(45, 58, 80)", r.bg);
       L.check("C1", `${w} centred`, Math.abs(r.dy) <= 2, `${r.dy.toFixed(1)}`);
       L.check("C1", `${w} no sort control`, r.sort === 0, `${r.sort}`);
-      L.check("C1", `${w} headings`, r.hbg === "rgb(233, 237, 243)" && /Mono/i.test(r.face) && r.tt === "uppercase", `${r.hbg} · ${r.face} · ${r.tt}`);
+      /* RE-POINTED (Contact list v18.3 §E, shared): the headings are the table's own white header row */
+      L.check("C1", `${w} headings`, r.hbg === "rgb(255, 255, 255)" && /Mono/i.test(r.face) && r.tt === "uppercase", `${r.hbg} · ${r.face} · ${r.tt}`);
       for (const a of r.al) L.check("C1", `${w} heading ${a.k}`, Math.abs(a.d) <= 2, `${a.d.toFixed(1)}`);
     }
     L.done(20);

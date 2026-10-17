@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "E3",
+  "where": "the list is grouped (precondition: more than one group)",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E3",
+  "where": "exactly one headings row is visible",
+  "ok": false,
+  "detail": "6"
+ },
+ {
+  "lock": "E3",
+  "where": "Replies is now the sort column",
+  "ok": true,
+  "detail": "[\"Replies ↓\",\"Replies ↓\",\"Replies ↓\",\"Replies ↓\",\"Replies ↓\",\"Replies ↓\"]"
+ },
+ {
+  "lock": "E3",
+  "where": "group 4's rows are in reply-time order",
+  "ok": true,
+  "detail": "[6,8]"
+ },
+ {
+  "lock": "E3",
+  "where": "group 5's rows are in reply-time order",
+  "ok": true,
+  "detail": "[4,4,4,6,6,6,6,6,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,10,10,12,16,null,null,null]"
+ }
+]

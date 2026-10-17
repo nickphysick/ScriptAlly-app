@@ -2,20 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v18 §D — THE ROW PEEK: the index card a row opens downwards onto after 450ms of hover (or Space on a
- * focused row). Everything the row does not show: their own words on the left, the facts on the right, the latest
- * note along the foot.
+ * Contact list v18 §D — THE ROW PEEK, opened after 450ms of hover (or Space on a focused row). v18.3 §C: it shows only
+ * how to reach the agent (email, website, social); v18's index card (wishlist, genres, facts, notes) is retired.
  *
- * ⚠️ ONLY WHAT THE AGENT RECORD HOLDS. There is no "not for them" (exclusions) field and no submission-form or
- *    QueryManager address on an agent, so neither is drawn: a field that cannot be stored is left out, never shown
- *    as a gap to fill. "Query via" therefore names the method and links nothing.
- * ⚠️ A CLICK INSIDE THE CARD NEVER OPENS THE ROW: the card stops every click and key from reaching the row, so Copy,
- *    the links and the "+ Add" pills do only what they say.
+ * ⚠️ A CLICK INSIDE THE PEEK NEVER OPENS THE ROW: it stops every click and key from reaching the row, so Copy, the
+ *    links and the "Add …" pills do only what they say.
  */
 import React, { useEffect, useRef, useState } from "react";
 import type { Agent } from "../../../types";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
-import { materialWords, methodAnswer } from "../../../lib/agentPanel";
+import { materialWords } from "../../../lib/agentPanel";
 import { materialRowsFromAgent } from "../../../lib/agentMaterials";
 
 /** "agency.co.uk" for a website, without the scheme or a trailing slash */
@@ -36,14 +32,9 @@ export function sendThem(a: Pick<Agent, "materialsWanted">): string | null {
   return rows.map(materialWords).join(" · ");
 }
 
-export const replyPolicy = (a: Pick<Agent, "noResponseMeansNo">): string | null =>
-  a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "replies to every query" : null;
 
 type Edit = (tab: AgentCardTab, focus?: AgentCardField) => void;
 
-const Add: React.FC<{ label: string; onPress: () => void; probe: string }> = ({ label, onPress, probe }) => (
-  <button type="button" className="cl18-add" data-cl18="peek-add" data-k={probe} onClick={onPress}>{label}</button>
-);
 
 const Copy: React.FC<{ text: string }> = ({ text }) => {
   const [done, setDone] = useState(false);
@@ -57,57 +48,49 @@ const Copy: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
+const PkIcon: React.FC<{ kind: "mail" | "web" | "at" }> = ({ kind }) => (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {kind === "mail" ? <><rect x="2" y="3.5" width="12" height="9" rx="1.4" /><path d="m2.5 4.3 5.5 4.4 5.5-4.4" /></>
+      : kind === "web" ? <><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2.2 2 9.8 0 12M8 2c-2 2.2-2 9.8 0 12" /></>
+      : <><circle cx="8" cy="8" r="2.6" /><path d="M10.6 8v1.1a1.9 1.9 0 0 0 3.8 0V8a6.4 6.4 0 1 0-2.5 5.1" /></>}
+  </svg>
+);
+
+/**
+ * Contact list v18.3 §C — THE PEEK IS HOW TO REACH THE AGENT, AND NOTHING ELSE: one line of three pills (email,
+ * website, social) under the row's main line, starting at the agent's name. A missing one is a dashed "Add …" pill that
+ * opens Edit profile on that field. The open row keeps its own background: no tint, lift, shadow or radius change.
+ */
 export const ContactPeek: React.FC<{
   agent: Agent;
-  /** the genres as the row orders them, and whether each is the manuscript's */
-  genres: { label: string; hit: boolean }[];
   onEdit: Edit;
-  onProfile: () => void;
-}> = ({ agent: a, genres, onEdit, onProfile }) => {
-  const wish = (a.mswlNotes ?? "").trim();
-  const source = a.fieldSources?.mswlNotes?.source?.trim() || null;
+}> = ({ agent: a, onEdit }) => {
   const email = (a.email ?? "").trim();
   const site = (a.website ?? "").trim();
   const social = socialOf(a);
-  const via = methodAnswer(a.submissionMethod);
-  const send = sendThem(a);
-  const w = a.responseTimeWeeks;
-  const weeks = typeof w === "number" && w > 0 ? w : null;
-  const policy = replyPolicy(a);
-  const note = (a.notePreview ?? "").trim();
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
-  const row = (k: string, label: string, value: React.ReactNode) => (
-    <React.Fragment key={k}><dt data-cl18="peek-label" data-k={k}>{label}</dt><dd data-cl18="peek-value" data-k={k}>{value}</dd></React.Fragment>
+  const missing = (k: string, kind: "mail" | "web" | "at", label: string, go: () => void) => (
+    <button type="button" className="cl183-pp is-add" data-cl183="peek-pill" data-k={k} data-missing="" onClick={go}>
+      <i className="cl183-pd"><PkIcon kind={kind} /></i><span>{label}</span>
+    </button>
   );
   return (
-    <div className="cl18-pk" data-cl18="peek" onClick={stop} onKeyDown={stop} onMouseDown={stop}>
-      <div className="cl18-pk-l" data-cl18="peek-words">
-        <h4>In their words</h4>
-        {wish ? (
-          <>
-            <blockquote className="cl18-pk-wish" data-cl18="peek-wish">{wish}</blockquote>
-            {source ? <p className="cl18-pk-src" data-cl18="peek-source">From {source}</p> : null}
-          </>
-        ) : <Add probe="wishlist" label="+ Add their wishlist" onPress={() => onEdit("want", "wishlist")} />}
-        {genres.length ? (
-          <span className="clv-gch cl18-pk-g" data-cl18="peek-genres">
-            {genres.map((g) => <span key={g.label} className={g.hit ? "clv-hit" : undefined}>{g.label}</span>)}
-          </span>
-        ) : <Add probe="genres" label="+ Add their genres" onPress={() => onEdit("want", "genres")} />}
-      </div>
-      <i className="cl18-pk-rule" aria-hidden="true" />
-      <dl className="cl18-pk-r" data-cl18="peek-facts">
-        {row("email", "Email", email ? <><a href={`mailto:${email}`}>{email}</a><Copy text={email} /></> : <Add probe="email" label="+ Add their email" onPress={() => onEdit("who", "email")} />)}
-        {row("website", "Website", site ? <a href={hrefOf(site)} target="_blank" rel="noopener noreferrer">{domainOf(site)} ↗</a> : <Add probe="website" label="+ Add their website" onPress={() => onEdit("who", "website")} />)}
-        {row("social", "Social", social ?? <Add probe="social" label="+ Add a social handle" onPress={() => onEdit("who")} />)}
-        {row("via", "Query via", via ?? <Add probe="via" label="+ Add how they take queries" onPress={() => onEdit("work", "method")} />)}
-        {row("send", "Send them", send ?? <Add probe="send" label="+ Add what they ask for" onPress={() => onEdit("want", "materials")} />)}
-        {row("replies", "Replies", weeks ? <>~{weeks} {weeks === 1 ? "week" : "weeks"}{policy ? <em className="cl18-pk-pol">{policy[0].toUpperCase() + policy.slice(1)}</em> : null}</> : <Add probe="replies" label="+ Add their reply time" onPress={() => onEdit("work", "reply")} />)}
-      </dl>
-      <div className="cl18-pk-f" data-cl18="peek-foot">
-        <span className="cl18-pk-n"><b>Your notes</b>{note ? <i data-cl18="peek-note">{note}</i> : <i className="none" data-cl18="peek-note">No notes yet</i>}</span>
-        <button type="button" className="cl18-pk-open" data-cl18="peek-open" onClick={onProfile}>Open their profile →</button>
-      </div>
+    <div className="cl183-pk" data-cl18="peek" data-cl183="peek" onClick={stop} onKeyDown={stop} onMouseDown={stop}>
+      {email ? (
+        <span className="cl183-pp" data-cl183="peek-pill" data-k="email">
+          <i className="cl183-pd"><PkIcon kind="mail" /></i><a href={`mailto:${email}`} className="cl183-pt">{email}</a><Copy text={email} />
+        </span>
+      ) : missing("email", "mail", "Add their email", () => onEdit("who", "email"))}
+      {site ? (
+        <a className="cl183-pp" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer">
+          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom">{domainOf(site)}</span><span aria-hidden="true">↗</span>
+        </a>
+      ) : missing("website", "web", "Add their website", () => onEdit("who", "website"))}
+      {social ? (
+        <span className="cl183-pp" data-cl183="peek-pill" data-k="social">
+          <i className="cl183-pd"><PkIcon kind="at" /></i><span className="cl183-pt">{social}</span>
+        </span>
+      ) : missing("social", "at", "Add a social handle", () => onEdit("who"))}
     </div>
   );
 };

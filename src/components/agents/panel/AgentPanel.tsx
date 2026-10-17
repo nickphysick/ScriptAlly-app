@@ -127,7 +127,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
   const wishText = (agent.mswlNotes ?? "").trim() || null;
   const method = methodOf(agent.submissionMethod);
   const sendBy = method ? viaLabel(method) : null;
-  const silence = agent.noResponseMeansNo === true ? "Means no" : agent.noResponseMeansNo === false ? "They reply" : null;
+  /* v18.3 §D — "Response policy", in the editor's words */
+  const silence = agent.noResponseMeansNo === true ? "No response means no" : agent.noResponseMeansNo === false ? "Always replies" : null;
   const since = onFileSince(agent.dateAdded, nowMs);
   /* v18.1 — the panel IS the landing card. v18.2: its band is always the list header's slate; the slip says the state.
      `paperStatus` travels to the band as `data-kind` only. */
@@ -335,7 +336,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                         <div className="apn-how" data-ap="how">
                           <div data-ap-how="send"><span>Send by</span>{sendBy ? <b>{sendBy}</b> : <Missing />}</div>
                           <div data-ap-how="replies"><span>Replies</span>{weeksOn ? <b>In about {weeksOn} week{weeksOn === 1 ? "" : "s"}</b> : <Missing word="Not stated" />}</div>
-                          <div data-ap-how="silence"><span>Silence</span>{silence ? <b>{silence}</b> : <Missing word="Not stated" />}</div>
+                          <div data-ap-how="silence"><span>Response policy</span>{silence ? <b>{silence}</b> : <Missing word="Not stated" />}</div>
                         </div>
                       </section>
                       <section className="apn-sec" data-ap-sec="send">

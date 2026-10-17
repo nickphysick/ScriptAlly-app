@@ -96,6 +96,16 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
         const stuck = Math.abs(at - top) < 1 && !!grp && grp.bottom > r.bottom + 1 && grp.top < r.top - 1;
         if (stuck) b.setAttribute("data-stuck", ""); else b.removeAttribute("data-stuck");
       });
+      /* v18.3 §E — the headings row is stuck the same way: at its sticky top with the list still running under it
+         (the shared `.lth` then draws its 8px shade) */
+      const h = root.querySelector<HTMLElement>(".qc138-heads");
+      if (h) {
+        const top = parseFloat(getComputedStyle(h).top) || 0;
+        const r = h.getBoundingClientRect();
+        const at = r.top - sc.getBoundingClientRect().top;
+        const stuck = Math.abs(at - top) < 1 && root.getBoundingClientRect().bottom > r.bottom + 1 && sc.scrollTop > 0;
+        if (stuck) h.setAttribute("data-stuck", ""); else h.removeAttribute("data-stuck");
+      }
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(read); };
     read();
@@ -546,14 +556,17 @@ export const QcList138: React.FC<QcList138Props> = ({
           12px (and the header's rounded corners) with the sheet's colour, so no row shows through. Its height is the
           one writer's (`useStickyStack`), read by the headings and the current group band beneath it. */}
       <div className="qc138-topw" data-qc138="top-wrap">
-      <div className="qc138-top" data-qc138="top" data-qcv="ws-head" ref={topRef}>
-        <p className="qc138-say" data-qc138="showing" data-qcv="ws-title">
+      {/* v18.3 §E — the shared list toolbar (shell/listToolbar.css): the count, the grouping chip, the 36-tall tools */}
+      <div className="qc138-top ltb" data-qc138="top" data-qcv="ws-head" ref={topRef}>
+        <div className="ltb-l">
+        <p className="qc138-say ltb-count" data-qc138="showing" data-qcv="ws-title">
           {filtered
-            ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>
-            : <>Showing all <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>}
-          {" "}<span className="qc138-gb">grouped by</span>{" "}
-          <button type="button" ref={groupBtn} className="qc138-grp" data-qc138="group" aria-haspopup="menu" aria-expanded={groupOpen}
-            onClick={() => setGroupOpen((o) => !o)}>{groupLabel}</button>
+            ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"}</>
+            : <>Showing all <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"}</>}
+        </p>
+        <span className="ltb-chipw">
+          <button type="button" ref={groupBtn} className="qc138-grp ltb-chip" data-qc138="group" data-ltb="chip" aria-haspopup="menu" aria-expanded={groupOpen}
+            onClick={() => setGroupOpen((o) => !o)}><i>Grouped by</i> <b data-ltb="group-name">{groupLabel}</b><span className="ltb-caret" aria-hidden="true">⌄</span></button>
           {groupOpen ? (
             <span className="qc138-gmenu" role="menu" data-qc138="group-menu">
               {GROUP_BY_OPTIONS.map((o) => (
@@ -562,9 +575,11 @@ export const QcList138: React.FC<QcList138Props> = ({
               ))}
             </span>
           ) : null}
-        </p>
+        </span>
+        </div>
+        <span className="ltb-r">
         {onFind ? (
-          <label className="qc138-tsearch" data-qc138="search">
+          <label className="qc138-tsearch ltb-search" data-qc138="search">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
             <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
             <kbd aria-hidden="true">/</kbd>
@@ -573,16 +588,17 @@ export const QcList138: React.FC<QcList138Props> = ({
         {/* v138.5 §E — the Filters button and its panel, between the search and the density control */}
         {filtersSlot}
         <span className="qc138-tools">
-          <span className="qc138-dens" role="group" aria-label="Row density" data-qcv="ws-density">
+          <span className="qc138-dens ltb-dens" role="group" aria-label="Row density" data-qcv="ws-density">
             <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>
             <button type="button" aria-pressed={density === "compact"} data-d="compact" title="Compact rows" aria-label="Compact rows" onClick={() => onDensity("compact")}>{ICON.dense}</button>
           </span>
           {/* v138.6 §A — the shared pin button (both list pages); the pin itself is the shared hook's */}
           <PinListButton pinned={full} onToggle={onFull} attrs={{ "data-qc138": "pin" }} />
         </span>
+        </span>
       </div>
       </div>
-      <div className="qc138-heads" data-qc138="headings" role="row">
+      <div className="qc138-heads lth" data-qc138="headings" role="row">
         {HEADINGS.map((h) => {
           const on = sort.key === h.key;
           return (

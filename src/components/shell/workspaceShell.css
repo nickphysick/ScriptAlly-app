@@ -483,6 +483,9 @@
  * something to call "inside".
  */
 .ws-helpwrap { position: relative; display: inline-flex; }
+/* v18.3 §F.1 — the page slot, left of the "?": empty, it takes no width */
+.ws-pageslot { display: inline-flex; align-items: center; }
+.ws-pageslot:empty { display: none; }
 .ws-helpmenu {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 41; min-width: 186px;
   box-sizing: border-box; padding: 6px;

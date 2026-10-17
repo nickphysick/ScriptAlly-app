@@ -381,7 +381,8 @@ test("C2 · key: in the viewport, unclipped; closes on a click outside and on Es
   const L = new Ledger("C2");
   await open(page, { width: 1280, height: 800 }, "C2");
   await openHome(page);
-  await page.locator('[data-hk8="how"]').click(); await page.waitForTimeout(400);
+  /* RE-POINTED (v18.3 §A): "How points work" is gone; the points tile opens the key */
+  await page.locator('[data-hk8="tile"][data-k="points"]').click(); await page.waitForTimeout(400);
   await shot(page, "17-hk-points-key-1280x800");
   const r = await page.evaluate(() => {
     const p = document.querySelector('[data-hk8="how-pop"]'); if (!p) return null;
@@ -400,7 +401,7 @@ test("C2 · key: in the viewport, unclipped; closes on a click outside and on Es
   await page.mouse.click(inDrawer[0], inDrawer[1]); await page.waitForTimeout(400);
   L.check("an outside click closes it", (await page.locator('[data-hk8="how-pop"]').count()) === 0, "closed");
   L.check("…and the drawer stays open", (await page.locator('[data-hk8="home"]').count()) === 1, "open");
-  await page.locator('[data-hk8="how"]').click(); await page.waitForTimeout(300);
+  await page.locator('[data-hk8="tile"][data-k="points"]').click(); await page.waitForTimeout(300);
   await page.keyboard.press("Escape"); await page.waitForTimeout(400);
   L.check("Escape closes it", (await page.locator('[data-hk8="how-pop"]').count()) === 0, "closed");
   L.check("…and the drawer stays open", (await page.locator('[data-hk8="home"]').count()) === 1, "open");
@@ -572,7 +573,8 @@ const figures = (page: Page) => page.evaluate(() => {
     drawer: num(document.querySelector('[data-hk8="pct"]')?.textContent),
     page: num(vis('[data-cl17="ring-pct"]')?.textContent),
     gapsLine: num(vis('[data-cl17="health-gaps"]')?.textContent),
-    tab: document.querySelector("[data-hkv='tab-counts']")?.textContent ?? "",
+    /* RE-POINTED (v18.3 §B): the tab is gone; the header's "Fill in the gaps {n}" is the figure's other home */
+    fill: num(vis('[data-cl183="fill-n"]')?.textContent),
     drawerGaps: num(document.querySelector('[data-hk8="tile"][data-k="gaps"] b')?.textContent),
   };
 });
@@ -583,8 +585,7 @@ test("D3 · in step: the drawer, the page ring, its line and the tab show one fi
   await open(page, SIZES[0], "D3");
   await focusKey(page, `${BARE}:wishlist`);
   const agree = (f: Awaited<ReturnType<typeof figures>>) => {
-    const tabGaps = Number((f.tab.match(/(\d+) gaps?/) ?? [])[1]), tabPct = Number((f.tab.match(/(\d+)% list health/) ?? [])[1]);
-    return f.drawer === f.page && f.page === tabPct && f.gapsLine === tabGaps && f.drawerGaps === tabGaps;
+    return f.drawer === f.page && f.gapsLine === f.drawerGaps && f.fill === f.drawerGaps;
   };
   const f0 = await figures(page);
   L.check("before: all agree", agree(f0), JSON.stringify(f0));
