@@ -31,7 +31,9 @@ export const HalfDrawer: React.FC<{
   children: React.ReactNode;
   /** an overlay the drawer opens (a modal) — rendered beside it, in the same portal */
   over?: React.ReactNode;
-}> = ({ probe, open, onClose, label, width, head, foot, bodyRef, children, over }) => {
+  /** a click on the dim, when it should do more than `onClose` (comps v28: Escape steps back, the dim closes all). Default `onClose`. */
+  onDim?: () => void;
+}> = ({ probe, open, onClose, label, width, head, foot, bodyRef, children, over, onDim }) => {
   /* mounted, then slid in on the next frame, so the entrance transition has a start to run from */
   const [shown, setShown] = useState(false);
   useEffect(() => {
@@ -43,7 +45,7 @@ export const HalfDrawer: React.FC<{
   if (!open || typeof document === "undefined") return null;
   return createPortal(
     <>
-      <div className={`hdr-dim${shown ? " is-in" : ""}`} data-hdr="dim" data-hdr-of={probe} onClick={onClose} aria-hidden="true" />
+      <div className={`hdr-dim${shown ? " is-in" : ""}`} data-hdr="dim" data-hdr-of={probe} onClick={onDim ?? onClose} aria-hidden="true" />
       <aside
         className={`hdr${shown ? " is-in" : ""}`} data-hdr={probe} role="dialog" aria-modal="true" aria-label={label}
         style={{ width }}

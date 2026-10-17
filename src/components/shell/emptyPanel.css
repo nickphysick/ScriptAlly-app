@@ -1,0 +1,40 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * EmptyPanel (shell/EmptyPanel.tsx). Values: the comps v28 / Analytics v24 mock's `.ae-panel` (viewport breakpoints
+ * 1440 and 760, as the mock states them).
+ * ⚠️ lib/brand.tsx forces h1: faces carry two classes and `!important`.
+ */
+.epn {
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: center; gap: 40px;
+  box-sizing: border-box; min-width: 0; background: #2c3a53; border-radius: 20px; padding: 52px 56px 52px 64px; color: #f4eee5; overflow: hidden;
+}
+.epn *, .epn *::before, .epn *::after { box-sizing: border-box; }
+.epn :where(span, p, div, b, i, em, small, button) { font-family: inherit; }
+.epn > * { min-width: 0; }
+.epn .epn-k.epn-k { margin: 0 0 18px; font: 400 12px/1.5 var(--font-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: #e0a188; }
+.epn h1.epn-h1.epn-h1 { margin: 0; font: 400 64px/1.08 var(--sp-type) !important; color: #f8f3ea; outline: none; }
+.epn h1.epn-h1 span { font: inherit !important; }
+.epn .epn-p.epn-p { margin: 22px 0 0; max-width: 34em; font: 400 19px/1.6 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.86); }
+.epn .epn-p .epn-mono { font-family: var(--sp-type) !important; color: #f8f3ea; }
+.epn-b { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.epn .epn-b .epn-b1, .epn .epn-b .epn-b2 { font: 400 17px/1.2 var(--sp-type) !important; padding: 14px 20px; border-radius: 9px; cursor: pointer; box-shadow: none; white-space: nowrap; }
+.epn-b .epn-b1 { background: #f4eee5; color: #1c130f; border: 1px solid #f4eee5; }
+.epn-b .epn-b1:hover { background: #fff; }
+.epn-b .epn-b2 { background: transparent; color: #f4eee5; border: 1px solid rgba(244, 238, 229, 0.55); }
+.epn-b .epn-b2:hover { border-color: #f4eee5; }
+.epn-b button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+.epn-art img { width: 100%; max-width: 440px; height: auto; display: block; margin-left: auto; }
+@media (max-width: 1440px) {
+  .epn h1.epn-h1.epn-h1 { font-size: 54px !important; }
+  .epn { padding: 44px 44px 44px 52px; }
+}
+@media (max-width: 760px) {
+  .epn { grid-template-columns: minmax(0, 1fr); padding: 30px 24px; gap: 20px; }
+  .epn-art { order: -1; }
+  .epn-art img { max-width: 220px; margin: 0 auto; }
+  .epn h1.epn-h1.epn-h1 { font-size: 38px !important; }
+  .epn .epn-p.epn-p { font-size: 17px !important; }
+  .epn-b button { width: 100%; white-space: normal; text-align: left; }
+}
