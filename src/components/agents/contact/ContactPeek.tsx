@@ -78,17 +78,17 @@ export const ContactPeek: React.FC<{
     <div className="cl183-pk" data-cl18="peek" data-cl183="peek" onClick={stop} onKeyDown={stop} onMouseDown={stop}>
       {email ? (
         <span className="cl183-pp" data-cl183="peek-pill" data-k="email">
-          <i className="cl183-pd"><PkIcon kind="mail" /></i><a href={`mailto:${email}`} className="cl183-pt" title={email}>{email}</a><Copy text={email} />
+          <i className="cl183-pd"><PkIcon kind="mail" /></i><a href={`mailto:${email}`} className="cl183-pt">{email}</a><Copy text={email} />
         </span>
       ) : missing("email", "mail", "Add their email", () => onEdit("who", "email"))}
       {site ? (
         <a className="cl183-pp" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer">
-          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom" title={domainOf(site)}>{domainOf(site)}</span><span className="cl183-ext" data-cl183="ext" aria-hidden="true">↗</span>
+          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom">{domainOf(site)}</span><span className="cl183-ext" data-cl183="ext" aria-hidden="true">↗</span>
         </a>
       ) : missing("website", "web", "Add their website", () => onEdit("who", "website"))}
       {social ? (
         <span className="cl183-pp" data-cl183="peek-pill" data-k="social">
-          <i className="cl183-pd"><PkIcon kind="at" /></i><span className="cl183-pt" title={social}>{social}</span>
+          <i className="cl183-pd"><PkIcon kind="at" /></i><span className="cl183-pt">{social}</span>
         </span>
       ) : missing("social", "at", "Add a social handle", () => onEdit("who"))}
     </div>

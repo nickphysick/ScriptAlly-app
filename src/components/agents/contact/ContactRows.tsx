@@ -24,7 +24,6 @@ import { dayMonth } from "../../../lib/dates";
 import type { CardAct, CardPrimary } from "../../../lib/agentCard";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { ContactPeek } from "./ContactPeek";
-import { rowActions } from "../../../lib/rowActions";
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
@@ -177,15 +176,6 @@ const Row: React.FC<{
     onPeek?.(v);
   };
   useEffect(() => { if (peek) stopMq(); }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
-  /* v18.3.2 C — the labels the Query status cell offers as actions, read from what it rendered, as the peek opens and
-     before it paints, so the tray never shows an action twice (not even for a frame) */
-  const [statusLabels, setStatusLabels] = useState<readonly string[]>([]);
-  useLayoutEffect(() => {
-    if (!peek || !rowRef.current) return;
-    const cell = rowRef.current.querySelector<HTMLElement>(".clv-rq");
-    const next = cell ? [...cell.querySelectorAll<HTMLElement>("button, a, [role='button']")].map((e) => (e.textContent ?? "").trim()).filter(Boolean) : [];
-    setStatusLabels((prev) => (prev.length === next.length && prev.every((l, i) => l === next[i]) ? prev : next));
-  });
   /* the fade at the right edge says "there is more"; measured after layout and on resize */
   const [long, setLong] = useState(false);
   useLayoutEffect(() => {
@@ -307,17 +297,7 @@ const Row: React.FC<{
       {/* v18.3.2 A — NOTHING IN THE ROW HIDES ON HOVER: the hover tray over the Query status cell is gone. A row with its
           peek closed shows no actions; they live on the peek's line (B). */}
       {peek ? (
-        /* v18.3.2 B — THE ACTIONS SIT ON THE PEEK'S LINE: one flex line, the pills then the actions, right-aligned with at
-           least 16px between them. A press anywhere on the line stays on the line (it never opens the row). */
-        <div className="cl1832-pl" data-cl1832="peek-line" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-          <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
-          <span className="cl1832-tray" data-cl13="tray">
-            {/* v18.3.2 C — never an action the status cell already offers (read from what it rendered) */}
-            {rowActions(tray, statusLabels).map((act) => act.kind === "act"
-              ? <TrayBtn key="act" primary probe="tray-act" label={act.label} onPress={() => onAct(tray.act)} />
-              : <TrayBtn key="open" probe="tray-open" label={act.label} onPress={(r) => onOpen(r)} />)}
-          </span>
-        </div>
+        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)} />
       ) : null}
     </div>
   );
