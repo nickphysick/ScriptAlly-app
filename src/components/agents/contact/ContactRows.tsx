@@ -164,11 +164,11 @@ const Row: React.FC<{
     if (v && el && !peek) {
       el.style.setProperty("--cl18-mh", `${el.offsetHeight}px`);
       /* v18.3.1 — read at rest, before the row grows: the main line's own track (so the open row can hold it, and the
-         line does not re-centre), and how far below the agency line that track ends (so the pills can sit a fixed
-         distance under the agency line rather than under the track) */
+         line does not re-centre), and how far below the main line (the name and agency block) that track ends (so the
+         pills can sit a fixed distance under that block rather than under the track) */
       const cs = getComputedStyle(el);
       const track = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      const agy = el.querySelector<HTMLElement>(".clv-ragy") ?? el.querySelector<HTMLElement>(".clv-rwho");
+      const agy = el.querySelector<HTMLElement>(".clv-rwn") ?? el.querySelector<HTMLElement>(".clv-rwho");
       const under = agy ? el.getBoundingClientRect().bottom - parseFloat(cs.paddingBottom) - agy.getBoundingClientRect().bottom : 0;
       el.style.setProperty("--cl183-track", `${track}px`);
       el.style.setProperty("--cl183-under", `${Math.max(0, under)}px`);
