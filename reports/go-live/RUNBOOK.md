@@ -290,6 +290,6 @@ None of these could be read without credentials, so check each one:
 
   Until then App Check is inert on live: requests carry no token, nothing is rejected, and the
   waitlist logs them as unverified.
-- **API key (hardening, not blocking).** The live web key has no HTTP-referrer restriction. It
-  answered a request claiming `example.com`. Restrict it to `queryhawk.net`, `www.queryhawk.net`,
+- **API key (hardening, not blocking).** Google Cloud console → APIs & Services → Credentials →
+  the browser key → HTTP referrers. Allow `queryhawk.net`, `www.queryhawk.net`,
   `scriptally-app.web.app` and `gen-lang-client-0801391782.firebaseapp.com`.

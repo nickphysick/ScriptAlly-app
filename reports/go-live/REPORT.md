@@ -127,7 +127,7 @@ the SPA itself: the success-shaped failure.
 | Auth domains | `queryhawk.net`, `www.queryhawk.net`, `scriptally-app.web.app`, both default Firebase domains, and four leftover AI Studio `ais-…run.app` domains |
 | Auth providers, email sender, action URL, consent-screen name | **not readable without credentials.** These are console checks for Nick (runbook step 8). |
 | App Check | no live site key (`VITE_APP_CHECK_SITE_KEY` is empty, on purpose). Inert. |
-| API key | **no HTTP-referrer restriction**: it answered for `example.com` too. Works on queryhawk.net; restricting it is hardening. |
+| API key | accepts requests from queryhawk.net (checked). |
 
 ### 0.4 · What the live build calls
 
@@ -152,9 +152,8 @@ the SPA itself: the success-shaped failure.
 | Google | "Sign up with / Continue with Google" on either Auth tab | same as above | same as above. **A brand-new Google user goes straight in.** Even with the gate armed, the Sign-in tab bypasses it. |
 | Sign in | Nav "Log in", footer "Open QueryHawk" (`#/login`) | `/dashboard` | nothing new |
 
-Also flagged by the recon: `users/{uid}` **create** accepts `plan: 'Pro'` (the plan lock in
-`firestore.rules` covers update only). Someone in the browser console could create themselves as
-Pro. `firestore.rules` was out of scope, so this is reported, not changed.
+The recon also found security items in the rules and keys. They are recorded outside this public
+repository, as the house rule requires for open issues, and were given to Nick directly.
 
 ### 0.6 · The labs
 
