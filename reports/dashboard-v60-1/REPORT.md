@@ -95,4 +95,14 @@ Unit: Vitest 599 files, 8,956 passed, 3 skipped.
 
 ## Branch and build
 
-BRANCH-RESULT
+- Branch `dashboard-v60`, pushed, NOT merged: `54a84033` (v60.1) and this report-only tail.
+- Gates at `54a84033`: tsc clean; production build clean (no errors or warnings in the log); Vitest 599
+  files, 8,956 passed, 3 skipped.
+- **Dev** was serving `index-D7Qn07nQ.js`: `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241`
+  at `87cec57e` (Analytics v24.1's integration branch, not mine; it already holds v60). v60.1 was merged into a
+  new branch from it, `…-an241-db601` at `c452276f` (one conflict, `design-refs/.refhashes.json`, resolved by
+  keeping theirs and enrolling the v60.1 ref again). Gates there: tsc clean, production build clean, Vitest 601
+  files, 9,013 passed (one file first failed to load because a fresh worktree has no `functions/node_modules`;
+  green once linked). DB601 and DB60 green on its build.
+- **Dev now serves `index-sztC00HD.js`**, deployed hosting only from the clean pushed tip `c452276f`, the served
+  hash re-checked immediately before. No functions or rules deployed; prod untouched.
