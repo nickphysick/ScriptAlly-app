@@ -227,6 +227,8 @@
 .td5-hd h1.td5-title .td52-urg { display: inline-block; font: inherit !important; }
 .td5-hd h1.td5-title .td52-urg span { font: inherit !important; }
 .td5-hd h1.td5-title .td52-od { color: #a2452a; }
+/* the title fits its column (TrayHeader measures it); 0-3-1 beats v5.1's forced 0-2-1 face */
+.td5-hd h1.td5-title[data-fit] { font-size: var(--td52-fit) !important; line-height: var(--td52-fit-lh) !important; }
 .td5-hd h1.td5-title .td52-urg.tick { animation: td52Tick 0.32s cubic-bezier(.2, .8, .3, 1); }
 @keyframes td52Tick { from { transform: translateY(10px); opacity: 0.2; } to { transform: none; opacity: 1; } }
 /* F.3 — how late, under a tray dial */

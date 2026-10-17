@@ -47,6 +47,8 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   E2: { js: `(() => { const n = [...document.querySelectorAll('[data-todo-v5] [data-td5="nav"]')].find((e) => e.getBoundingClientRect().height > 0); if (n) { const b = document.createElement("button"); b.className = "td5-focusbtn"; b.dataset.td5 = "focus"; b.textContent = "Just the desk"; n.append(b); } })()` },
   /* F1 — the title reads the tray count (the h1 restated as v5.1's "{n} tasks in your tray") */
   F1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="title"]')].find((e) => e.getBoundingClientRect().height > 0); const n = document.querySelectorAll('[data-todo-v5] [data-td5="row"]').length; if (h) { h.firstElementChild.textContent = n + " tasks in your tray"; h.setAttribute("aria-label", n + " tasks in your tray"); } })()` },
+  /* F1b — the title's fit undone (it pushes the card again) */
+  F1b: { css: `[data-todo-v5] .td5-hd h1.td5-title[data-fit] { font-size: 44px !important; }` },
   /* F3 — v5.1's ink 45% back on the page's labels */
   F3: { css: `[data-todo-v5] { --td5-ink62: rgba(28, 19, 15, 0.45) !important; --td5-ink70: rgba(28, 19, 15, 0.58) !important; }` },
   /* J2 — the band's title allowed to ellipsise */

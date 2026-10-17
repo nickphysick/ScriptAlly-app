@@ -219,8 +219,10 @@ test("TD52 A3 — the four parts are the tray; the bar is in proportion; Overdue
     L.check(`${w} nothing scrolled`, near(p.top, top0, 0.5), `${p.top} vs ${top0}`);
     await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="due-chip"] .td5-fpx') as HTMLButtonElement).click());
     await page.waitForTimeout(400);
-    const c = await page.evaluate(() => { const { q, qa } = (window as unknown as W).__td5(); return { n: qa('[data-td5="row"]').length, chip: !!q('[data-td52="due-chip"]'), pressed: q('[data-td52="cal-row"][data-f="overdue"]')?.getAttribute("aria-pressed") }; });
-    L.check(`${w} × clears it`, c.n === r.rows && !c.chip && c.pressed === "false", JSON.stringify(c));
+    /* the account is shared and other sessions write to it: the rows are compared with the tray's own count read in the same
+       moment, never with a figure read before the filter */
+    const c = await page.evaluate(() => { const { q, qa } = (window as unknown as W).__td5(); return { n: qa('[data-td5="row"]').length, tab: Number(q('[data-td5="tab-tray"] b')?.textContent ?? NaN), chip: !!q('[data-td52="due-chip"]'), pressed: q('[data-td52="cal-row"][data-f="overdue"]')?.getAttribute("aria-pressed") }; });
+    L.check(`${w} × clears it`, c.n === c.tab && c.n >= r.rows - 8 && !c.chip && c.pressed === "false", JSON.stringify(c));
   }
   L.done(2 * 12);
 });
@@ -599,6 +601,7 @@ test("TD52 F1 — the h1 reads Part B's overdue and today counts, the overdue pa
     await openTodo(page, vp);
     await fontsReady(page);
     await mutate(page, "F1");
+    await mutate(page, "F1b");
     const r = await page.evaluate(() => {
       const { q } = (window as unknown as W).__td5();
       const h1 = q('[data-td5="title"]')!;
@@ -611,6 +614,16 @@ test("TD52 F1 — the h1 reads Part B's overdue and today counts, the overdue pa
     L.check(`${w} the h1 reads "${want}"`, r.text === want, `"${r.text}"`);
     L.check(`${w} its accessible name says the same`, r.label === want, String(r.label));
     L.check(`${w} it keeps data-page-title`, r.pageTitle, "");
+    /* the longest title the account could reach ("33 overdue · 12 due today", whatever today's figures are): written
+       into the title, then a 1px resize re-fits it; it must stay clear of the card and keep the header's height */
+    const hd0 = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="header"]')!.getBoundingClientRect().height);
+    await page.evaluate(() => { const s = (window as unknown as W).__td5().q('[data-td52="title-urgent"]'); if (s) s.textContent = "33 overdue · 12 due today"; });
+    await page.setViewportSize({ width: vp.width - 1, height: vp.height }); await page.waitForTimeout(300);
+    /* the failure is not an overlap: the title's column is max-content, so a title too wide PUSHES the card out of the row */
+    const gapOk = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); const h = q('[data-td5="title"]')!.getBoundingClientRect(), c = q('[data-td5="card"]')!.getBoundingClientRect(), r = q('[data-td5="header-row"]')!.getBoundingClientRect(); return { right: h.right, card: c.left, cardR: c.right, rowR: r.right, fs: getComputedStyle(q('[data-td5="title"]')!).fontSize, hd: q('[data-td5="header"]')!.getBoundingClientRect().height }; });
+    L.check(`${w} a long title fits its column: the card stays inside the row`, gapOk.cardR <= gapOk.rowR + 0.5 && gapOk.right <= gapOk.card, JSON.stringify(gapOk));
+    L.check(`${w} …and the header keeps its height`, near(gapOk.hd, hd0, 1), `${gapOk.hd} vs ${hd0}`);
+    await page.setViewportSize(vp);
     if (r.o) L.check(`${w} the overdue part is rust`, r.rust === "rgb(162, 69, 42)", String(r.rust));
   }
   for (const [st, want] of [["caught", "Your tray is empty"], ["nothing", "Your next move,always on top"]] as const) {
@@ -618,7 +631,7 @@ test("TD52 F1 — the h1 reads Part B's overdue and today counts, the overdue pa
     const t = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-todo-v5] [data-page-title]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").trim()));
     L.check(`${st}: keeps v5.1's title`, t.length === 1 && t[0] === want, JSON.stringify(t));
   }
-  L.done(9);
+  L.done(13);
 });
 
 test("TD52 F2 — rows lead with the agent; chase and close say so; overdue dials carry the right tag and a spoken label", async ({ page }) => {
