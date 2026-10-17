@@ -235,16 +235,21 @@ const ShellLab: React.FC = () => {
   );
 };
 
-/** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
-const useStatusDotDemoRoute = () => {
-  const [isDemo, setIsDemo] = useState(() => window.location.hash === "#/status-dots");
-  useEffect(() => {
-    const onHashChange = () => setIsDemo(window.location.hash === "#/status-dots");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-  return isDemo;
-};
+/** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots).
+ *  ⚠️ DEFINED ONLY IN DEV. A hook runs in every build, so the hash it compares against shipped to
+ *  production although nothing could render there (`prodBuild.test.ts` P1). In a production build
+ *  this is a constant `false`, and the string is gone with the body. */
+const useStatusDotDemoRoute: () => boolean = import.meta.env.DEV
+  ? () => {
+      const [isDemo, setIsDemo] = useState(() => window.location.hash === "#/status-dots");
+      useEffect(() => {
+        const onHashChange = () => setIsDemo(window.location.hash === "#/status-dots");
+        window.addEventListener("hashchange", onHashChange);
+        return () => window.removeEventListener("hashchange", onHashChange);
+      }, []);
+      return isDemo;
+    }
+  : () => false;
 
 /** Current location hash, re-rendering on change (no router — same pattern as above).
  *  Used only to choose the logged-out front door (landing vs. the auth deep-links). */
@@ -434,8 +439,9 @@ function AppContent() {
   /* #/onb-lab — the screens before the app (sign-up, sign-in, the set-up steps), each held in one
      state over fixtures inside the real SetupFrame. Gated on MODE exactly as the contact lab is:
      served by `build:dev`, absent from production. It carries a query (`?s=fork&…`), so it is
-     matched by prefix. */
-  if (hash.startsWith("#/onb-lab") && import.meta.env.MODE !== "production") {
+     matched by prefix. ⚠️ `MODE` FIRST: with the hash first, the minifier kept the `startsWith`
+     call, and the lab's name with it, in the production bundle (`prodBuild.test.ts` P1). */
+  if (import.meta.env.MODE !== "production" && hash.startsWith("#/onb-lab")) {
     return <OnbLab />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.

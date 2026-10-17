@@ -16,7 +16,7 @@
  * "every case is the same case" fault, five times over in one pass.
  *
  * ⚠️ AND IT IS A FIXTURE, NOT A SEED. Nothing here is ever written to dev. It is mounted through
- * `ContactListLab`'s stubbed `DbContext` at `#/contact-lab`, which renders the REAL page, so a
+ * `ContactListLab`'s stubbed `DbContext` at the contact lab's hash route, which renders the REAL page, so a
  * measurement over it is a measurement of what the app serves — not of a reconstruction.
  *
  * ⚠️ EVERY ROW IS HERE FOR A NAMED CASE, and `CONTACT_FIXTURE_CASES` states which. A fixture whose

@@ -12,10 +12,13 @@
  *
  * ⚠️ THE SUPPORT ADDRESS IS DEFINED ONCE, HERE, AND IT CHANGED WHEN IT WAS UNIFIED.
  * `HelpCentre.tsx` carried `support@scriptally.com` — a different mailbox on a domain the product
- * does not otherwise use — while the legal copy names `hello@scriptally.ink` as the controller's
- * contact. Two published addresses is the fault. Since 17 Oct the one address is
- * hello@queryhawk.net (scriptally.ink is retired): it is the route the privacy policy publishes for
- * a UK GDPR request, and that is the address that has to work.
+ * does not otherwise use — while the legal copy named the old `.ink` domain's hello@ as the
+ * controller's contact. Two published addresses is the fault. Since 17 Oct the one address is
+ * hello@queryhawk.net (the `.ink` domain is retired): it is the route the privacy policy publishes
+ * for a UK GDPR request, and that is the address that has to work.
+ *
+ * ⚠️ THIS DOCBLOCK SHIPS. esbuild copies `@license` comments into the bundle whole, so it does not
+ * spell the retired domain (`prodBuild.test.ts` P3).
  *
  * ⚠️ IT LIVES IN `lib/`, NOT IN `marketing/`. These are facts about the company, and the workspace
  * needs them too — the Help centre offers the same address the legal pages name. Keeping the
