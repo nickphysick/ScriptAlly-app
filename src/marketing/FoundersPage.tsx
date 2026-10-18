@@ -29,7 +29,9 @@
  * `MarketingShell` like every other public route, and takes the shared footer with it.
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { parseVerified, VERIFY_STATES, VerifyKind } from "./foundersVerifyCopy";
 import { Runs } from "./CopyRuns";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { FoundingBand } from "./FoundingBand";
@@ -46,9 +48,48 @@ import {
  */
 const ART = { src: "/images/off-the-ground.png", version: "430029d2", width: 1200, height: 1200 };
 
+/**
+ * What a confirmation link came back with, drawn at the top of the page in place of the hero's
+ * sign-up form and counter. The artwork and the rest of the page stay as they are.
+ *
+ * ⚠️ `role="status"` AND FOCUS ON THE HEADLINE. It is the page's news, so a screen reader hears it
+ * and the keyboard starts there. The inline form for a dead link is the SAME `FoundingSignup` with
+ * its own id prefix, never a copy. Its source is `founders-hero`, because the server records only
+ * the sources it already knows and adding one would change the function.
+ */
+const VerifyState: React.FC<{ kind: VerifyKind; onNavigate: (tab: string, subPageName?: string) => void }> = ({ kind, onNavigate }) => {
+  const s = VERIFY_STATES[kind];
+  const headRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { headRef.current?.focus(); }, []);
+  return (
+    <div className="mk-fwverify" role="status" data-verified={kind}>
+      <p className="mk-fwchip">{s.chip}</p>
+      <h1 className="mk-fwh1 mk-fwvh" ref={headRef} tabIndex={-1}>{s.headline}</h1>
+      <p className="mk-fwlede">{s.body}</p>
+      {s.form && (
+        <div className="mk-fwvform">
+          <FoundingSignup idPrefix="mk-verify" source="founders-hero" formClass="mk-claimform" onNavigate={onNavigate} />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const FoundersPage: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ onNavigate }) => {
+  /* Read ONCE on arrival, then take the parameter out of the address, so a refresh or a shared URL
+     does not replay "You're in." to someone it is not about. */
+  const [params, setParams] = useSearchParams();
+  const [verified] = useState(() => parseVerified(params.get("verified")));
+  useEffect(() => {
+    if (!params.has("verified")) return;
+    const next = new URLSearchParams(params);
+    next.delete("verified");
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const prev = document.title;
     document.title = FOUNDERS_DOCUMENT_TITLE;
@@ -64,6 +105,12 @@ export const FoundersPage: React.FC<{
             against each other. A `stretch` here would hand the picture a height it has no way to
             use and reintroduce the crop the earth needed `object-fit` to avoid. */}
         <header className="mk-fwhero">
+          {verified ? (
+            <div className="mk-fwcol">
+              <p className="mk-fweyebrow">{FOUNDERS_EYEBROW}</p>
+              <VerifyState kind={verified} onNavigate={onNavigate} />
+            </div>
+          ) : (
           <div className="mk-fwcol">
             <p className="mk-fweyebrow">{FOUNDERS_EYEBROW}</p>
             <h1 className="mk-fwh1">{FOUNDERS_H1}</h1>
@@ -81,6 +128,7 @@ export const FoundersPage: React.FC<{
                 the stylesheet — the component is reused, never restyled in place. */}
             <FoundingCounter variant="claim" />
           </div>
+          )}
 
           <img
             className="mk-fwart"

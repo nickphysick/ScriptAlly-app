@@ -55,6 +55,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
   /* Retarget, same law: the founders headline changed with the hero rebuild (16 Sep). */
   ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help get things off the ground."],
+  /* The confirmation state a verify link lands on (landing-live, Part B): the page renders it, not the hero form. */
+  ["/founders?verified=verified", () => <FoundersPage onNavigate={noNavigate} />, "Place confirmed"],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],
 ];
