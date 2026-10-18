@@ -445,10 +445,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     };
     pass();
   }, []);
-  /* v18 §A — A LETTER PICK always lands on a sorted A to Z list: grouped, or sorted by another column, it switches to
-     A to Z, ungrouped, first (the jump then waits for that list to render). The jump is smooth, to the row's
-     measured place under the stuck headings, then `landUnder` corrects it once the scroll has ended. */
-  const pendingLetter = useRef<string | null>(null);
+  /* the jump to a letter's first row (in the order the list draws): smooth, to the row's measured place under the
+     stuck headings, then `landUnder` corrects it once the scroll has ended */
   const jumpToLetter = useCallback((letter: string) => {
     const col = mainColRef.current;
     const sc = col?.closest<HTMLElement>(".wpg-scroll");
@@ -467,21 +465,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     row.setAttribute("data-wash", "");
     window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
   }, [landUnder]);
+  /* v19 §B — A LETTER PICK. Ungrouped: the first row IN THE CURRENT ORDER whose surname starts with the letter (the
+     sort is left as it is). Grouped by Letter: that letter's band. The A to Z shows only in those two groupings. */
   const pickLetter = useCallback((letter: string) => {
-    if (groupKey !== "none" || sortKey !== "surname" || reversed) {
-      pendingLetter.current = letter;
-      setGroupKey("none"); setSortKeyRaw("surname"); setReversed(false);
+    if (groupKey === "letter") {
+      const col = mainColRef.current;
+      const band = col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`)).find((b) => b.getBoundingClientRect().height > 0) : null;
+      if (band) landUnder(band);
       return;
     }
     jumpToLetter(letter);
-  }, [groupKey, sortKey, reversed, jumpToLetter]);
-  useEffect(() => {
-    const L = pendingLetter.current;
-    if (!L || groupKey !== "none" || sortKey !== "surname" || reversed) return;
-    pendingLetter.current = null;
-    const raf = requestAnimationFrame(() => requestAnimationFrame(() => jumpToLetter(L)));
-    return () => cancelAnimationFrame(raf);
-  }, [groupKey, sortKey, reversed, jumpToLetter]);
+  }, [groupKey, jumpToLetter, landUnder]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
   /* the current letter: the per-frame reader's, else (at the list's top) the first row's own */
   const firstInitial = useMemo(() => (visibleFacts.length ? surnameInitial(groups[0] ? (factsById.get(groups[0].ids[0])?.agent ?? visibleFacts[0].agent) : visibleFacts[0].agent) : null), [visibleFacts, groups, factsById]);

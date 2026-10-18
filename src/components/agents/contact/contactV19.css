@@ -83,6 +83,10 @@
 }
 .cl19-az button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
 .cl19-az button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+/* the give-way order: (1) letters with no agents hide, (2) the letters tighten */
+.cl19-tb[data-fit="1"] .cl19-az button:disabled,
+.cl19-tb[data-fit="2"] .cl19-az button:disabled { display: none; }
+.cl19-tb[data-fit="2"] .cl19-az button { width: 18px; }
 
 .cl19-sp { flex: 1 1 0; min-width: 0; }
 .cl19-tools { display: flex; align-items: center; gap: 8px; flex: none; }
@@ -106,7 +110,7 @@
   min-width: 20px; height: 20px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; box-sizing: border-box;
 }
 
-/* Find: 150 wide */
+/* Find: 150 wide; at ≤1440 a 42px icon button that opens to 240 over the letter row (focus, or a search held) */
 .cl19-findw { position: relative; flex: none; display: inline-flex; width: 150px; height: 34px; }
 .cl19-find { width: 100%; padding: 0 16px; cursor: text; color: rgba(28, 19, 15, 0.45); }
 .cl19-find svg { flex: none; }
@@ -116,6 +120,16 @@
 }
 .cl19-find input::placeholder { color: rgba(28, 19, 15, 0.45); }
 .cl19-find:focus-within { box-shadow: 0 0 0 1.5px #2a3a52, 0 1px 2px rgba(28, 19, 15, 0.06); }
+@media (max-width: 1440px) {
+  .cl19-findw { width: 42px; }
+  .cl19-find { position: absolute; right: 0; top: 0; width: 42px; padding: 0; justify-content: center; gap: 0; cursor: pointer; transition: width 0.18s cubic-bezier(.22,.8,.3,1); }
+  .cl19-find input { flex: 0 0 0; width: 0; opacity: 0; }
+  .cl19-findw:focus-within .cl19-find, .cl19-findw[data-has] .cl19-find {
+    z-index: 3; width: 240px; padding: 0 16px; justify-content: flex-start; gap: 8px; cursor: text;
+  }
+  .cl19-findw:focus-within .cl19-find input, .cl19-findw[data-has] .cl19-find input { flex: 1 1 auto; width: 100%; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .cl19-find { transition: none; } }
 
 /* Pin: navy, white text, the pin turned −30°; icon-only and square at ≤1440 (the aria-label stays) */
 .cl19-pin {

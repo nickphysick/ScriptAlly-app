@@ -10,9 +10,15 @@
  *   - IN BOTH POSITIONS, the toolbar: the A to Z (ungrouped or grouped by Letter), then Find, Group by, Filters, Pin.
  *     It is the SAME markup pinned and unpinned; only the band is added.
  *
- * ⚠️ THE TOOLBAR NEVER WRAPS: its items do not shrink (Part B adds the give-way order).
+ * ⚠️ THE TOOLBAR NEVER WRAPS. Its items do not shrink; when the row is too narrow it gives way in a fixed order, set
+ *    as `data-fit` on the toolbar by one measuring pass (never React state, so a fit change cannot re-render the page):
+ *      0 — everything shows;
+ *      1 — letters with no agents hide;
+ *      2 — the letters tighten from 21 to 18 wide.
+ *    At ≤1440px Find folds to a 42px icon button and opens to 240px OVER the letter row (CSS: focus, or a search held).
+ *    Group by and Filters never shrink and never lose their labels.
  */
-import React, { useRef } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { LETTERS } from "./ContactLetters";
 import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
 import { GROUP_OPTIONS, type GroupKey } from "../../../lib/contactList";
@@ -104,6 +110,27 @@ export const ContactListHead: React.FC<{
   const showLetters = groupKey === "none" || groupKey === "letter";
   const groupName = groupKey === "none" ? null : GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? null;
 
+  /* ── the give-way pass: the smallest `data-fit` at which nothing in the row is clipped ── */
+  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "");
+  useLayoutEffect(() => {
+    const tb = tbRef.current;
+    if (!tb) return undefined;
+    const fit = () => {
+      if (tb.clientWidth === 0) return;
+      for (let lv = 0; lv <= 2; lv += 1) {
+        tb.setAttribute("data-fit", String(lv));
+        if (tb.scrollWidth <= tb.clientWidth + 0.5) return;
+      }
+    };
+    fit();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    let w = tb.clientWidth;
+    const ro = new ResizeObserver(() => { if (tb.clientWidth !== w) { w = tb.clientWidth; fit(); } });
+    ro.observe(tb);
+    void document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [sig]);
+
   return (
     <div className="cl19-head" ref={headRef} data-cl19="head" data-pinned={pinned ? "" : undefined}>
       {pinned && band && (
@@ -141,7 +168,7 @@ export const ContactListHead: React.FC<{
       {/* the wrapper carries the card's 18px top corners unpinned, so the toolbar itself is the same box in both
           positions (radius included) */}
       <div className="cl19-tbw">
-      <div className="cl19-tb" ref={tbRef} data-cl19="toolbar" data-cl18="list-header">
+      <div className="cl19-tb" ref={tbRef} data-cl19="toolbar" data-cl18="list-header" data-fit="0">
         {showLetters ? (
           <nav className="cl19-az" data-cl19="az" aria-label="Jump to a letter">
             {LETTERS.map((L) => {
