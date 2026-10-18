@@ -6,6 +6,7 @@
  *   rules       signed-out reads on the named database: a private path DENIED, the open
  *               health-check path ALLOWED (so a deny means the rules, not a broken probe)
  *   hosting     the page, its caching, the www redirect, the second domain, a deep link
+ *   signup      live refuses new accounts (runbook step 5), proved without creating one
  *   all         all of the above, plus the waitlist through the hosting rewrite (CORS, JSON)
  *
  * Exits 1 if any check fails. The reads are what any browser can do: public URLs, and the web API
@@ -117,10 +118,32 @@ const rules = async () => {
   info("rules · what this cannot show", "which ruleset is live: the July rules deny the first read too. The proof is the release time from the deploy run with --debug (runbook step 4).");
 };
 
+/**
+ * Live refuses sign-up (the console's User actions → "Enable create (sign-up)" unticked).
+ *
+ * ⚠️ IT CANNOT CREATE AN ACCOUNT, WHATEVER THE SWITCH SAYS. The probe asks Firebase Auth's public
+ * sign-up endpoint (the same one the browser SDK uses, with the web key that ships in the bundle) to
+ * create a throwaway address with a ONE-CHARACTER password:
+ *   - switch off → refused with ADMIN_ONLY_OPERATION (or OPERATION_NOT_ALLOWED): PASS;
+ *   - switch on  → refused with WEAK_PASSWORD, so still no account: FAIL, "sign-up is open".
+ * Anything else is reported as it is. A success would need a valid password, which is never sent.
+ */
+const signup = async () => {
+  const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${KEY}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Referer: `${APEX}/` },
+    body: JSON.stringify({ email: `signup-probe-${Date.now()}@example.invalid`, password: "x", returnSecureToken: false }),
+  });
+  const body = await r.json().catch(() => ({}));
+  const code = String(body?.error?.message ?? (r.ok ? "CREATED" : r.status)).split(" ")[0];
+  line(code === "ADMIN_ONLY_OPERATION" || code === "OPERATION_NOT_ALLOWED", "signup · live refuses new accounts",
+    code === "WEAK_PASSWORD" ? "WEAK_PASSWORD: sign-up is OPEN (refused only for the probe's password)" : code);
+};
+
 const step = process.argv[2];
-const plan = { functions: [functions], rules: [rules], hosting: [hosting], all: [functions, rules, hosting, waitlist] }[step];
+const plan = { functions: [functions], rules: [rules], signup: [signup], hosting: [hosting], all: [functions, rules, signup, hosting, waitlist] }[step];
 if (!plan) {
-  console.log("usage: node scripts/live-verify.mjs functions|rules|hosting|all");
+  console.log("usage: node scripts/live-verify.mjs functions|rules|signup|hosting|all");
   process.exit(2);
 }
 for (const run of plan) await run();

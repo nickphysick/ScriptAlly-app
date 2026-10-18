@@ -18,9 +18,8 @@ import { join } from "node:path";
 const ROOT = process.cwd();
 const PROJECT = "prod"; // .firebaserc alias for gen-lang-client-0801391782
 const PROD_ENV_FILE = "functions/.env.gen-lang-client-0801391782";
-/* landing-live until it is merged into release/live-1, then release/live-1. Either is safe, because
-   checks 0 and 3e refuse a build that is not landing-only whichever branch it came from. */
-const BRANCHES = ["landing-live", "release/live-1"];
+/* landing-live was fast-forwarded into release/live-1 (18 Oct), and the runbook runs from there. */
+const BRANCHES = ["release/live-1"];
 const LIVE_TITLE = "QueryHawk: Query With Confidence";
 /** Every lab hash App.tsx routes; `#/plans` is the DEV hash, not the `/plans` path. Kept equal to
  *  `LAB_HASHES` in src/lib/prodBuild.test.ts (that file's P1 is the same claim, at build time). */

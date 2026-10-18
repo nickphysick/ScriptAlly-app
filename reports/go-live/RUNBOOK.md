@@ -7,8 +7,9 @@ the app. You keep using the app on dev, at dev.queryhawk.net.
 Run these yourself, one step at a time. After each step, tell Claude Code which step you ran, and
 it will run the matching check and report.
 
-**Where to run them.** Use the worktree at `/Users/nickphysick/ScriptAlly-landing`, on branch
-`landing-live`.
+**Where to run them.** Use the worktree at `/Users/nickphysick/ScriptAlly-live`, on branch
+`release/live-1` (`landing-live` was fast-forwarded into it on 18 Oct). The preflight's check `4b`
+refuses any other branch.
 
 **Every command names `--project prod`.** A bare `firebase deploy` would resolve `.firebaserc`'s
 default, which is also prod. Naming it keeps every line readable for what it does.
@@ -17,7 +18,7 @@ default, which is also prod. Naming it keeps every line readable for what it doe
 > page in front of a back end that isn't there. It also deploys only `smartImportMap`.
 
 ```bash
-cd /Users/nickphysick/ScriptAlly-landing
+cd /Users/nickphysick/ScriptAlly-live
 ```
 
 ---
@@ -173,6 +174,17 @@ directly with the public web key. With this switch off, Firebase refuses them.
 - Existing accounts are unaffected.
 - On 18 Oct this switch was **on**.
 - **To reopen later:** the same place, tick "Enable create (sign-up)", Save.
+
+**Verify:**
+
+```bash
+node scripts/live-verify.mjs signup
+```
+
+**Good:** `PASS  signup · live refuses new accounts — ADMIN_ONLY_OPERATION`.
+
+- The probe never creates an account: it sends a one-character password.
+- If it says `WEAK_PASSWORD: sign-up is OPEN`, the switch is still ticked.
 
 ---
 
