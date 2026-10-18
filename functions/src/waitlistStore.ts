@@ -19,6 +19,7 @@ import {
   CounterState, COUNTER_PATH, DEFAULT_CAP, RATELIMIT_COLLECTION, RATE_LIMIT_WINDOW_MS,
   VERIFY_TTL_MS, WaitlistSource, WaitlistStatus,
   emailHash, mayResendConfirm, newVerifyToken, overRateLimit, rateLimitKey, readCounter,
+  readNumbering, nextFoundingNumber,
   tokenHash, tokensMatch,
 } from "./waitlistModel";
 
@@ -176,18 +177,20 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
       };
     }
 
-    /* ── Double opt-in OFF: verified on the spot, which is today's behaviour. ── */
-    const position = counter.verifiedCount + 1;
+    /* ── Double opt-in OFF: verified on the spot. The same allocator as the verify path. ── */
+    const nextCount = counter.verifiedCount + 1;
+    const { foundingNumber, freedAfter } = nextFoundingNumber(
+      counter, readNumbering(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined));
     tx.set(sRef, {
       email: emailNormalised, emailNormalised,
       createdAt: now, lastInteractionAt: now,
       verified: true, verifiedAt: now, status: "verified" as WaitlistStatus,
-      position, source, ...(hashedIp ? { ipHash: hashedIp } : {}),
+      position: foundingNumber, foundingNumber, source, ...(hashedIp ? { ipHash: hashedIp } : {}),
     });
-    writeCounter(tx, cRef, counter, position, now);
+    writeCounter(tx, cRef, counter, nextCount, now, { freedNumbers: freedAfter });
     return {
       outcome: "joined" as const, status: "verified" as WaitlistStatus,
-      position, counter: { ...counter, verifiedCount: position }, docId,
+      position: foundingNumber, counter: { ...counter, verifiedCount: nextCount }, docId,
     };
   });
 };
@@ -200,18 +203,22 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
  */
 const writeCounter = (
   tx: Tx, cRef: firestore.DocumentReference, counter: CounterState, next: number, now: Date,
+  numbering?: Partial<{ freedNumbers: number[]; reserveIssued: number }>,
 ): void => {
-  tx.set(cRef, { verifiedCount: next, cap: counter.cap || DEFAULT_CAP, updatedAt: now }, { merge: true });
+  tx.set(cRef, {
+    verifiedCount: next, cap: counter.cap || DEFAULT_CAP, updatedAt: now, ...(numbering ?? {}),
+  }, { merge: true });
 };
 
 /* ══════════════ Verifying ══════════════ */
 
 export type VerifyOutcome =
+  /** `position` is the writer's founding number (stored as both `position` and `foundingNumber`). */
   | { kind: "verified"; position: number; counter: CounterState; docId: string }
   /** Verified after the cap filled — a real race with an honest answer. */
-  | { kind: "waiting"; counter: CounterState }
+  | { kind: "waiting"; counter: CounterState; docId: string; reserveNumber: number }
   /** Already done. Clicking the link twice is not an error. */
-  | { kind: "already"; position: number | null }
+  | { kind: "already"; position: number | null; docId: string }
   | { kind: "expired" }
   | { kind: "unknown" };
 
@@ -253,7 +260,7 @@ export const verifyWaitlist = async (
      * take two places.
      */
     if (status === "verified" || status === "waiting") {
-      return { kind: "already" as const, position: (doc.get("position") as number | undefined) ?? null };
+      return { kind: "already" as const, position: (doc.get("foundingNumber") as number | undefined) ?? null, docId: doc.id };
     }
 
     const expiresRaw = doc.get("verifyTokenExpiresAt") as { toMillis?: () => number } | Date | undefined;
@@ -274,19 +281,28 @@ export const verifyWaitlist = async (
 
     const counter = readCounter(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined);
 
+    const numbering = readNumbering(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined);
+
     if (counter.verifiedCount >= counter.cap) {
+      /* A confirmed writer who missed the cap takes the next place in the reserve queue, in the
+         same transaction, so two people confirming together can never share one. */
+      const reserveNumber = numbering.reserveIssued + 1;
       tx.set(doc.ref, {
-        status: "waiting" as WaitlistStatus, verified: false,
+        status: "waiting" as WaitlistStatus, verified: false, reserveNumber, reserveAt: now,
         /* Spent, not erased — see the note on the verified path below. Someone who lands in the
            waiting list and clicks again is told `already`, not `unknown`. */
         lastInteractionAt: now, verifyTokenSpentAt: now, verifyTokenExpiresAt: null,
       }, { merge: true });
-      return { kind: "waiting" as const, counter };
+      tx.set(cRef, { reserveIssued: reserveNumber, updatedAt: now }, { merge: true });
+      return { kind: "waiting" as const, counter, docId: doc.id, reserveNumber };
     }
 
-    const position = counter.verifiedCount + 1;
+    /* The count goes up by one; the NUMBER is the lowest freed one, or the next unissued one. */
+    const nextCount = counter.verifiedCount + 1;
+    const { foundingNumber, freedAfter } = nextFoundingNumber(counter, numbering);
+    const position = foundingNumber;
     tx.set(doc.ref, {
-      verified: true, verifiedAt: now, status: "verified" as WaitlistStatus, position,
+      verified: true, verifiedAt: now, status: "verified" as WaitlistStatus, position, foundingNumber,
       lastInteractionAt: now,
       /**
        * ⚠️ THE HASH SURVIVES AS A LOOKUP KEY. IT IS SPENT, NOT ERASED — and the reason is mail
@@ -315,8 +331,8 @@ export const verifyWaitlist = async (
        */
       verifyTokenSpentAt: now, verifyTokenExpiresAt: null,
     }, { merge: true });
-    writeCounter(tx, cRef, counter, position, now);
-    return { kind: "verified" as const, position, counter: { ...counter, verifiedCount: position }, docId: doc.id };
+    writeCounter(tx, cRef, counter, nextCount, now, { freedNumbers: freedAfter });
+    return { kind: "verified" as const, position, counter: { ...counter, verifiedCount: nextCount }, docId: doc.id };
   });
 };
 
@@ -370,9 +386,13 @@ export const unsubscribeById = async (
 
     const counter = readCounter(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined);
     const releases = was === "verified";
+    /* The released place's number goes back on the freed list, for the next writer to confirm. A
+       pre-numbering doc carries only `position`, which was its number. */
+    const held = (sSnap.get("foundingNumber") as number | undefined) ?? (sSnap.get("position") as number | undefined) ?? null;
+    const numbering = readNumbering(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined);
 
     tx.set(sRef, {
-      status: "unsubscribed" as WaitlistStatus, verified: false, position: null,
+      status: "unsubscribed" as WaitlistStatus, verified: false, position: null, foundingNumber: null,
       lastInteractionAt: now, unsubscribedAt: now,
       /* Both tokens die with the subscription. The signed unsubscribe token keeps working —
          it is derived, not stored — which is what makes a second click idempotent rather than
@@ -381,7 +401,10 @@ export const unsubscribeById = async (
     }, { merge: true });
 
     if (releases && counter.verifiedCount > 0) {
-      writeCounter(tx, cRef, counter, counter.verifiedCount - 1, now);
+      const freedNumbers = held !== null && Number.isInteger(held) && held >= 1
+        ? [...new Set([...numbering.freed, held])].sort((a, b) => a - b)
+        : numbering.freed;
+      writeCounter(tx, cRef, counter, counter.verifiedCount - 1, now, { freedNumbers });
     }
     return { found: true, released: releases, was };
   });

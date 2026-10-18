@@ -342,6 +342,47 @@ export const readCounter = (data: Record<string, unknown> | undefined): CounterS
   return { verifiedCount: verified, cap: cap === 0 ? DEFAULT_CAP : cap };
 };
 
+/* ══════════════ Founding and reserve numbers ══════════════ */
+
+/**
+ * A writer's founding number is assigned ONCE, inside the transaction that confirms them, and
+ * stored on their waitlist doc as `foundingNumber`. Nothing ever recomputes it.
+ *
+ * ⚠️ A NUMBER IS A PLACE, NOT A PERSON (Nick's ruling, 18 Oct). When a confirmed writer unsubscribes,
+ * their place is released and their number goes on the counter's `freedNumbers`. The next writer to
+ * confirm takes the LOWEST freed number. So numbers stay within 1–cap, "of 100" is always true, and
+ * no number is ever held by two people at once.
+ *
+ * The issued numbers are always exactly 1..highest minus the freed ones, so with nothing freed the
+ * next number is `verifiedCount + 1`, which no one holds.
+ *
+ * A reserve number is a place in the waiting list's queue (1, 2, 3 …), from the counter's
+ * `reserveIssued`. It only goes up.
+ */
+export interface Numbering {
+  /** Founding numbers released by unsubscribes, ascending, each within 1..cap. */
+  freed: number[];
+  /** Reserve numbers issued so far. */
+  reserveIssued: number;
+}
+
+export const readNumbering = (data: Record<string, unknown> | undefined): Numbering => {
+  const raw = Array.isArray(data?.freedNumbers) ? (data!.freedNumbers as unknown[]) : [];
+  const freed = [...new Set(raw.filter((v): v is number =>
+    typeof v === "number" && Number.isInteger(v) && v >= 1))].sort((a, b) => a - b);
+  const r = data?.reserveIssued;
+  const reserveIssued = typeof r === "number" && Number.isInteger(r) && r >= 0 ? r : 0;
+  return { freed, reserveIssued };
+};
+
+/** The number the next confirmed writer takes, and the freed list that leaves behind. */
+export const nextFoundingNumber = (
+  counter: CounterState, numbering: Numbering,
+): { foundingNumber: number; freedAfter: number[] } =>
+  numbering.freed.length > 0
+    ? { foundingNumber: numbering.freed[0], freedAfter: numbering.freed.slice(1) }
+    : { foundingNumber: counter.verifiedCount + 1, freedAfter: [] };
+
 /* ══════════════ The GET contract ══════════════ */
 
 export interface CountPayload {
