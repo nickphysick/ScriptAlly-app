@@ -581,7 +581,8 @@
     "design-refs/discover-v1/ref-top-1280@2x.png": "e035384db8edc06a0585b11350851bac5d79f6fb9561c9123c076b83ca19d4b2",
     "design-refs/discover-v1/ref-top-1512@2x.png": "8c6fc51e34c6500949b71875fa5d404d9a2540c9972dea28b7c39188423af849",
     "design-refs/discover-v1/ref-tune-1280@2x.png": "303b63e09bf0481485c24678c1b29dbc1e7fadb335514d95c9fc14ce51ae6f2b",
-    "design-refs/discover-v1/ref-tune-1512@2x.png": "3127960fc7c89668f719875e6a5d5f32ca63ea886fd20e0821b77249022a2973"
+    "design-refs/discover-v1/ref-tune-1512@2x.png": "3127960fc7c89668f719875e6a5d5f32ca63ea886fd20e0821b77249022a2973",
+    "design-refs/query-centre-v139/query-centre-v139.html": "dc7b4286ad93e645212d7d7936337c8b41f0642f7bf99c31aa2e59966065288f"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",

@@ -1,0 +1,15 @@
+import { readFileSync, existsSync } from "node:fs";
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
+const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
+const dev = env(".env.development"); const local = existsSync(".env.local") ? env(".env.local") : {};
+if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+const app = initializeApp({ apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN, projectId: dev.VITE_FIREBASE_PROJECT_ID, appId: dev.VITE_FIREBASE_APP_ID });
+const db = getFirestore(app);
+const { user } = await signInWithEmailAndPassword(getAuth(app), process.env.SA_E2E_EMAIL ?? "harness@scriptally.test", local.SA_E2E_PASSWORD);
+const q = await getDoc(doc(db, "users", user.uid, "queries", "practice-pip"));
+const acts = await getDocs(collection(db, "users", user.uid, "queries", "practice-pip", "activity"));
+const feed = await getDocs(query(collection(db, "users", user.uid, "activities"), where("queryId", "==", "practice-pip")));
+console.log(JSON.stringify({ queryDoc: q.exists(), activityDocs: acts.size, feedRows: feed.size }));
+process.exit(0);

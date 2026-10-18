@@ -20,6 +20,7 @@
  * are the pills' whole text; the ⛉ ☰ ⌄ the reference types are SVGs, because Special Elite carries
  * none of them and a pill's text is what a reader (and a check) reads.
  */
+import { guideWalking } from "../../../lib/guideWalk";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../../lib/stageScroll";
@@ -122,6 +123,8 @@ export const QcBirdsDrawer: React.FC<{
       const k = keyState.current;
       if (!k.routeActive || k.open || k.cardOpen || k.actionOpen || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
       if (e.key !== "b" && e.key !== "B") return;
+      /* v139 — the page guide's walkthrough is running: B stands down */
+      if (guideWalking()) return;
       const t = e.target as HTMLElement | null;
       if (t?.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
       e.preventDefault();

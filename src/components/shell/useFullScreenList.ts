@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../lib/escapeStack";
+import { guideWalking } from "../../lib/guideWalk";
 import { SHORTCUTS, isEditableTarget, matchesShortcut, type Shortcut } from "../../lib/shortcuts";
 import { holdSidebarCollapsed } from "./sidebarForce";
 
@@ -162,6 +163,8 @@ export function useFullScreenList(o: {
       if (!k.on || !k.id || !matchesShortcut(k.id, e)) return;
       if (e.shiftKey || isEditableTarget(e.target)) return;
       if (document.querySelector(".qad-root.is-open") || escapeDepth() > (k.full ? 1 : 0)) return;
+      /* v139 — the page guide's walkthrough is running: F stands down */
+      if (guideWalking()) return;
       e.preventDefault();
       k.setFull(!k.full);
     };

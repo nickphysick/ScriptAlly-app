@@ -98,3 +98,40 @@ export function contactGuideOf(user: User | null | undefined): GuideState<Contac
 export const guideDonePath = (k: ContactGuideKey): UserPaths => ({ [`${BASE}.done.${k}`]: true });
 export const GUIDE_SEEN_PATH: UserPaths = { [`${BASE}.seen`]: true };
 export const GUIDE_HIDDEN_PATH: UserPaths = { [`${BASE}.hidden`]: true };
+
+/* ── the Query Centre's state (v139) ── */
+
+export type QcGuideKey = "log" | "find" | "open" | "resp" | "birds";
+
+export const QC_CHECKLIST: readonly ChecklistItem<QcGuideKey>[] = [
+  { key: "log", title: "Log a query", line: "Who you sent it to, and when." },
+  { key: "find", title: "Find a query", line: "Search by agent or agency, filter, or tap a status at the top." },
+  { key: "open", title: "Open a query", line: "Its whole story, in one panel." },
+  { key: "resp", title: "Record a response", line: "Try it on a practice query. Nothing is saved." },
+  { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline. Press B." },
+];
+
+/** With no queries yet, the items that need one (§A): the practice query does not, so "resp" is never here. */
+export const QC_NEEDS_A_QUERY: readonly QcGuideKey[] = ["find", "open", "birds"];
+export const QC_AFTER_FIRST = "After your first query";
+
+export const QC_ALL_DONE = {
+  title: "All done",
+  line: "You know your way round the Query Centre. This checklist goes away next time you visit.",
+};
+
+const QC_BASE = "todoPrefs.queries.guide";
+
+/** `finished`: all five were done in an earlier visit — the pill does not come back (v18.3 F). */
+export interface QcGuideState extends GuideState<QcGuideKey> { finished: boolean }
+
+export function qcGuideOf(user: User | null | undefined): QcGuideState {
+  const g = (user?.todoPrefs as { queries?: { guide?: { done?: Record<string, unknown>; seen?: unknown; hidden?: unknown; finished?: unknown } } } | undefined)?.queries?.guide;
+  const done: DoneMap<QcGuideKey> = {};
+  for (const it of QC_CHECKLIST) if (g?.done?.[it.key] === true) done[it.key] = true;
+  return { done, seen: g?.seen === true, hidden: g?.hidden === true, finished: g?.finished === true };
+}
+export const qcGuideDonePath = (k: QcGuideKey): UserPaths => ({ [`${QC_BASE}.done.${k}`]: true });
+export const QC_GUIDE_SEEN_PATH: UserPaths = { [`${QC_BASE}.seen`]: true };
+export const QC_GUIDE_HIDDEN_PATH: UserPaths = { [`${QC_BASE}.hidden`]: true };
+export const QC_GUIDE_FINISHED_PATH: UserPaths = { [`${QC_BASE}.finished`]: true };

@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "A2",
+  "where": "imported queries tick item 1",
+  "ok": true,
+  "detail": "{\"log\":true,\"find\":false,\"open\":false,\"resp\":false,\"birds\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "find written by the event",
+  "ok": false,
+  "detail": "{\"done\":{\"log\":true},\"seen\":true}"
+ },
+ {
+  "lock": "A2",
+  "where": "find ticked after a reload",
+  "ok": false,
+  "detail": "{\"log\":true,\"find\":false,\"open\":false,\"resp\":false,\"birds\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "find with no spotlight",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "find written by the event",
+  "ok": false,
+  "detail": "{\"done\":{\"log\":true},\"seen\":true}"
+ },
+ {
+  "lock": "A2",
+  "where": "find ticked after a reload",
+  "ok": false,
+  "detail": "{\"log\":true,\"find\":false,\"open\":false,\"resp\":false,\"birds\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "find with no spotlight",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "open written by the event",
+  "ok": false,
+  "detail": "{\"done\":{\"log\":true},\"seen\":true}"
+ },
+ {
+  "lock": "A2",
+  "where": "open ticked after a reload",
+  "ok": false,
+  "detail": "{\"log\":true,\"find\":false,\"open\":false,\"resp\":false,\"birds\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "open with no spotlight",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "birds written by the event",
+  "ok": false,
+  "detail": "{\"done\":{\"log\":true},\"seen\":true}"
+ },
+ {
+  "lock": "A2",
+  "where": "birds ticked after a reload",
+  "ok": false,
+  "detail": "{\"log\":true,\"find\":false,\"open\":false,\"resp\":false,\"birds\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "birds with no spotlight",
+  "ok": true,
+  "detail": ""
+ }
+]

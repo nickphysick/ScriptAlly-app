@@ -113,7 +113,11 @@ import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
-import { PageGuide, type GuideStep } from "./shell/PageGuide";
+import { PageChecklist, type ChecklistTarget, type FlowCard } from "./shell/guide/PageChecklist";
+import { QC_ALL_DONE, QC_AFTER_FIRST, QC_CHECKLIST, QC_GUIDE_FINISHED_PATH, QC_GUIDE_HIDDEN_PATH, QC_GUIDE_SEEN_PATH, QC_NEEDS_A_QUERY, qcGuideDonePath, qcGuideOf, type QcGuideKey } from "../lib/pageChecklist";
+import { setGuideWalk } from "../lib/guideWalk";
+import { bandToneOf } from "../lib/qcBandArt";
+import { PIP_AGENCY, PIP_AGENT_LINE, PIP_ID, PIP_NAME, currentPractice, endPractice, isPracticeId, startPractice, usePractice } from "../lib/practiceQuery";
 
 /**
  * §4b — THE QUERY CENTRE'S THREE STEPS. Step one's title and both its sentences are the
@@ -121,29 +125,6 @@ import { PageGuide, type GuideStep } from "./shell/PageGuide";
  * to its voice and to §4b's own description of them ("the list and its hover", "the Birds-eye
  * view"). Nothing here states a number or a name the page does not.
  */
-const QC_GUIDE: readonly GuideStep[] = [
-  {
-    title: "Your desk, in three bands",
-    body: [
-      "The desk at the top counts what's with you, with agents, and closed. Click a section to see all of them in the cards below it.",
-      "The desk only chooses the cards. The list underneath always shows every query, whatever the desk says.",
-    ],
-  },
-  {
-    title: "Every query, one row",
-    body: [
-      "The list is every query. Hover a row for its next action; click it for the full record.",
-      "Find, Filter, Group and Sort narrow what you are looking at — the band above the rows says how it is grouped.",
-    ],
-  },
-  {
-    title: "The Birds-eye view",
-    body: [
-      "The tab at the bottom right, or B, opens every live query on one set of dates.",
-      "A bar runs in its stage's colour up to today. Past the due date, a dashed tick marks the day it was due and a beacon marks today.",
-    ],
-  },
-];
 import { QcBirdsDrawer } from "./queries/centre/QcBirdsDrawer";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList132";
@@ -213,7 +194,7 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
+import { closeQueryDrawer, currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, nextDoor, primaryDoor } from "../lib/queryActions/entry";
@@ -260,7 +241,7 @@ import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
 import { formatQueryMaterial, materialLabel, materialToken, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
@@ -528,7 +509,7 @@ export const Queries: React.FC<{
     editActivity,
     updateAgent,
     updateQueryStatus,
-    logNudge, setQueryPackage} = useScriptAllyDb();
+    logNudge, setQueryPackage, updateUserPaths} = useScriptAllyDb();
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
@@ -3828,7 +3809,8 @@ export const Queries: React.FC<{
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
   /* v138 §C — a band's tint from its group (Part D settles the groups themselves) */
-  const qc138Tone = (g: { key: string }): BandTone => (g.key === "you" ? "you" : g.key === "closed" ? "closed" : "waiting");
+  /* v139 §C — under Status and Next action the band follows whose court it is; packages are powder */
+  const qc138Tone = (g: { key: string }): BandTone => bandToneOf(qcGroup, g.key);
   /* v138 §B — the filter row's counts, over the manuscript-scoped set (as v17's are over the whole list) */
   const qc138Counts = (() => {
     const stage = new Map<string, number>();
@@ -5643,6 +5625,263 @@ export const Queries: React.FC<{
     />
   ) : null;
 
+
+  /* ══ v139 §A — THE PAGE GUIDE: the shared one (Contact list v18.3 F), with the Query Centre's five items ══
+     ⚠️ THE TICKS ARE READ FROM APP STATE AND REAL EVENTS, NEVER FROM THE GUIDE'S OWN BUTTONS (v18.3 F §F.4): a query
+     on the account (any, imported included), the list narrowed by two characters of search, a filter or a status glyph,
+     a real query's panel open, the Birds-eye drawer open. Each is written once per account, by leaf. "resp" is Part B's
+     practice query reaching its last card. */
+  const qcGuide = qcGuideOf(currentUser);
+  const guideAsked = useRef(new Set<QcGuideKey>());
+  const tickGuide = useRef<(k: QcGuideKey) => void>(() => {});
+  tickGuide.current = (k) => {
+    if (!currentUser || qcGuide.hidden || qcGuide.done[k] || guideAsked.current.has(k)) return;
+    guideAsked.current.add(k);
+    void updateUserPaths(qcGuideDonePath(k)).catch(() => { guideAsked.current.delete(k); });
+  };
+  const hasQueries = queries.length > 0;
+  /* item 1 is already true for an account with any query; it is written too, so the tick survives every later state */
+  useEffect(() => { if (routeActive && collectionsReady && hasQueries) tickGuide.current("log"); }, [routeActive, collectionsReady, hasQueries]);
+  const narrowed = qcFind.trim().length >= 2 || qc138FilterCount(qcF138) > 0 || qcFilter !== "all";
+  useEffect(() => { if (routeActive && narrowed) tickGuide.current("find"); }, [routeActive, narrowed]);
+  const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
+  useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
+  useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
+  const guideDone = useMemo(() => ({ ...qcGuide.done, ...(hasQueries ? { log: true } : {}) }), [qcGuide.done, hasQueries]);
+  /* all five done in an EARLIER visit: the pill does not come back (read once, when the account first loads here) */
+  const finishedAtLoad = useRef<boolean | null>(null);
+  if (finishedAtLoad.current === null && currentUser) finishedAtLoad.current = qcGuide.finished;
+  const allGuideDone = QC_CHECKLIST.every((it) => guideDone[it.key]);
+  useEffect(() => { if (allGuideDone && currentUser && !qcGuide.finished) void updateUserPaths(QC_GUIDE_FINISHED_PATH); }, [allGuideDone, currentUser, qcGuide.finished, updateUserPaths]);
+  const markQcGuideSeen = useCallback(() => { if (!qcGuide.seen) void updateUserPaths(QC_GUIDE_SEEN_PATH); }, [qcGuide.seen, updateUserPaths]);
+  const hideQcGuide = useCallback(() => { void updateUserPaths(QC_GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  const guideOff = useMemo<Partial<Record<QcGuideKey, string>>>(
+    () => (collectionsReady && !hasQueries ? Object.fromEntries(QC_NEEDS_A_QUERY.map((k) => [k, QC_AFTER_FIRST])) : {}),
+    [collectionsReady, hasQueries],
+  );
+  const [guideFlow, setGuideFlow] = useState<FlowCard | null>(null);
+  const [guideOpenNonce, setGuideOpenNonce] = useState(0);
+  const reopenGuide = useCallback(() => setGuideOpenNonce((n) => n + 1), []);
+
+  useEffect(() => () => setGuideWalk(false), []);
+
+  /* the control each item shows, as it is now. A pinned list hides its header: the header's targets unpin first. */
+  const guideTarget = useCallback((k: QcGuideKey): ChecklistTarget => {
+    const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    const unpinned = <T,>(read: () => T): T => { if (qcPin.full) flushSync(() => qcPin.setFull(false)); return read(); };
+    switch (k) {
+      case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
+      case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters. You can also tap a status glyph at the top of the page." };
+      case "open": {
+        const row = vis(".qc138-sheet [data-qcv='row']");
+        const q = row ? queries.find((x) => x.id === row.dataset.id) : undefined;
+        const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+        const first = ((ag?.name || ag?.agency || "").trim().split(/\s+/)[0]) || "the first";
+        return { el: row, text: `Click ${first}'s row, or any row. The query opens in a panel on the right, with its whole story.` };
+      }
+      case "birds": return { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Click here, or press B from anywhere on the page." };
+      default: return { el: null, text: "" };
+    }
+  }, [queries, agents, qcPin]);
+
+  /* item 1's second card: the journey it opened. The step is armed by pressing the item; the drawer opening for a log
+     journey within a few seconds moves the spotlight to it. Saving logs the query (item 1 is ticked by the data);
+     closing without saving returns to the checklist, unticked. */
+  const guideQueries = useRef(queries);
+  guideQueries.current = queries;
+  const logArmed = useRef(0);
+  const logCount = useRef(0);
+  const startWalkRef = useRef<() => void>(() => {});
+  const onGuideStart = useCallback((k: QcGuideKey): boolean => {
+    if (k === "log") { logArmed.current = Date.now(); logCount.current = queries.length; }
+    if (k === "resp") { startWalkRef.current(); return true; }
+    return false;
+  }, [queries.length]);
+  useEffect(() => subscribeDrawer((r) => {
+    if (r?.mode === "log" && logArmed.current && Date.now() - logArmed.current < 15000) {
+      logArmed.current = 0;
+      const leave = () => { setGuideFlow(null); closeQueryDrawer(); reopenGuide(); };
+      setGuideFlow({
+        id: "log-2",
+        target: () => document.querySelector<HTMLElement>(".qad-root.is-open [data-qad-drawer='log']"),
+        kicker: "Query Centre · Step 1 of 5",
+        title: "Log a query",
+        body: "Choose the agent and the date you sent it, then save. If you're just looking, press Cancel.",
+        place: "left",
+        passThrough: true,
+        onBack: leave,
+        onEscape: leave,
+      });
+      return;
+    }
+    if (!r) {
+      setGuideFlow((f) => {
+        if (f?.id !== "log-2") return f;
+        const before = logCount.current;
+        window.setTimeout(() => { if (guideQueries.current.length <= before) reopenGuide(); }, 900);
+        return null;
+      });
+    }
+  }), [reopenGuide]);
+
+
+  /* ══ v139 §B — THE PRACTICE QUERY'S WALKTHROUGH ══════════════════════════════════════════════════════════════
+     Pip Ledger lives in `lib/practiceQuery` (memory only). This page draws him in its own Practice band and builds his
+     panel from the panel's real components; the action drawer sees him through `PracticeOverlay`. The walkthrough's
+     cards follow the real journey: 1 the band · 2 the footer's Record a response · then one card per journey step (the
+     first "What came back?", the last "Check and save", any between "The details") · last "That's the whole journey".
+     ⚠️ EVERY WAY OUT BEFORE THE LAST CARD REMOVES PIP AND LEAVES ITEM 4 UNTICKED: Back to checklist, Esc, the panel's
+        close, the journey's own Cancel or Back. Only "Clear Pip away" (or Esc on the last card) ticks it. */
+  const practice = usePractice();
+  const [walk, setWalk] = useState<"band" | "door" | "journey" | "done" | null>(null);
+  const [pipOpen, setPipOpen] = useState(false);
+  const [pipLeaving, setPipLeaving] = useState(false);
+  const [jStep, setJStep] = useState<{ cur: number; of: number; review: boolean }>({ cur: 0, of: 0, review: false });
+  const walkRef = useRef(walk);
+  walkRef.current = walk;
+  const pipRow = useMemo(() => (practice ? buildQcRows([practice.query], [practice.agent], practice.feed, Date.now())[0] ?? null : null), [practice]);
+
+  const endWalk = useCallback((how: "clear" | "early") => {
+    setWalk(null);
+    if (currentDrawerRequest() && isPracticeId(currentDrawerRequest()!.queryId)) closeQueryDrawer();
+    setPipOpen(false);
+    if (how === "clear") {
+      tickGuide.current("resp");
+      setPipLeaving(true);
+      window.setTimeout(() => { endPractice(); setPipLeaving(false); }, 350);
+    } else {
+      endPractice();
+      setPipLeaving(false);
+      reopenGuide();
+    }
+  }, [reopenGuide]);
+  /* a walkthrough never outlives the page being on screen */
+  useEffect(() => { if (!routeActive && walkRef.current) endWalk("early"); }, [routeActive, endWalk]);
+  useEffect(() => () => endPractice(), []);
+
+  startWalkRef.current = () => {
+    if (!currentUser) return;
+    const ms = trackedManuscript ?? manuscripts[0] ?? null;
+    if (selectedQueryId || extPanel) closeQueryCard();
+    if (qcPin.full) qcPin.setFull(false);
+    startPractice({ userId: currentUser.id, manuscriptId: ms?.id ?? "", manuscriptTitle: ms?.title ?? null });
+    setPipLeaving(false);
+    setPipOpen(false);
+    setJStep({ cur: 0, of: 0, review: false });
+    setWalk("band");
+    /* the band is at the head of the list: bring it into view */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const band = [...document.querySelectorAll<HTMLElement>("[data-qc139='practice']")].find((e) => e.getBoundingClientRect().height > 0);
+      const sc = band?.closest<HTMLElement>(".wpg-scroll");
+      if (band && sc) {
+        const v = sc.getBoundingClientRect(); const b = band.getBoundingClientRect();
+        if (b.top < v.top + 120 || b.bottom > v.bottom - 40) sc.scrollTo({ top: Math.max(0, sc.scrollTop + b.top - v.top - 240), behavior: "instant" as ScrollBehavior });
+      }
+    }));
+  };
+  const openPip = useCallback(() => {
+    if (!practice) return;
+    if (selectedQueryId || extPanel) closeQueryCard();
+    setPipOpen(true);
+    if (walkRef.current === "band") setWalk("door");
+  }, [practice, selectedQueryId, extPanel, closeQueryCard]);
+  /* the real journey, opened on Pip in his panel: received today, a partial of 3 chapters, sent by in 21 days */
+  const openPipResp = useCallback(() => {
+    const t = new Date(); const by = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 21);
+    const day = `${by.getFullYear()}-${String(by.getMonth() + 1).padStart(2, "0")}-${String(by.getDate()).padStart(2, "0")}`;
+    openQueryDrawer({
+      mode: "resp", queryId: PIP_ID,
+      panel: { name: PIP_NAME, agency: PIP_AGENCY, first: "Pip" },
+      seed: { s: { unit: "chapters", amt: 3, from: 1, sect: false, fu: null }, sendByMode: "custom", sendByCustom: day },
+    } as OpenRequest);
+    if (walkRef.current === "door") setWalk("journey");
+  }, []);
+  /* the journey's own step, read off its stepper (the cards follow it), and its end: saved → the last card;
+     closed without a save → an early exit */
+  useEffect(() => {
+    if (walk !== "journey") return undefined;
+    const t = window.setInterval(() => {
+      const root = document.querySelector<HTMLElement>(".qad-root.is-open[data-practice]");
+      if (!root) return;
+      const steps = [...root.querySelectorAll<HTMLElement>("[data-qad-step]")];
+      const cur = Math.max(0, steps.findIndex((b) => b.getAttribute("aria-current") === "step"));
+      const review = !!root.querySelector("[data-qad-review]");
+      setJStep((o) => (o.cur === cur && o.of === steps.length && o.review === review ? o : { cur, of: steps.length, review }));
+    }, 120);
+    return () => window.clearInterval(t);
+  }, [walk]);
+  useEffect(() => subscribeDrawer((r) => {
+    if (r || walkRef.current !== "journey") return;
+    if (currentPractice()?.answered) setWalk("done"); else endWalk("early");
+  }), [endWalk]);
+
+  const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+  const pipFlow: FlowCard | null = useMemo(() => {
+    if (!walk || !practice) return null;
+    const of = walk === "journey" || walk === "done" ? Math.max(1, jStep.of) + 3 : 6;
+    const dots = (k: number) => ({ k, n: of });
+    const kick = (k: number) => `Query Centre · Step 4 of 5 · ${k} of ${of}`;
+    const early = () => endWalk("early");
+    const base = { onBack: early, onEscape: early };
+    if (walk === "band") return {
+      ...base, id: "pip-1", target: () => vis("[data-qc139='practice']"), kicker: kick(1), dots: dots(1),
+      title: "Meet Pip, a practice query",
+      body: <>We{"’"}ve put a practice query at the top of your list so you can try the whole journey. Pip isn{"’"}t a real agent: nothing you do here is saved to your account or counted anywhere. <b>Click Pip{"’"}s row</b> to open it.</>,
+    };
+    if (walk === "door") return {
+      ...base, id: "pip-2", target: () => vis("[data-qp='panel'] [data-door='resp']"), kicker: kick(2), dots: dots(2),
+      title: "Record a response",
+      body: <>An open query shows its story, and what you can do next sits along the bottom. When an agent replies, press <b>Record a response</b>.</>,
+    };
+    if (walk === "journey") {
+      const k = jStep.cur + 3;
+      const last = jStep.of > 0 && jStep.cur === jStep.of - 1;
+      const target = () => vis("[data-qp='panel']");
+      if (jStep.cur === 0) return { ...base, id: "pip-3", target, place: "left", kicker: kick(3), dots: dots(3), title: "What came back?", body: <>Pick any answer: each one leads somewhere different. Then press <b>Next</b>.</> };
+      if (last) return { ...base, id: `pip-${k}`, target, place: "left", kicker: kick(k), dots: dots(k), title: "Check and save", body: <>This is what you{"’"}ll see with a real reply. Press <b>Save</b>.</> };
+      return { ...base, id: `pip-${k}`, target, place: "left", kicker: kick(k), dots: dots(k), title: "The details", body: <>We{"’"}ve filled these in for you. Change anything you like, then press <b>Next</b>.</> };
+    }
+    const closed = practice.answered === QueryStatus.REJECTED;
+    const clear = () => endWalk("clear");
+    return {
+      id: "pip-done", target: () => vis("[data-qp='panel']"), place: "left", kicker: kick(of), dots: dots(of),
+      title: "That’s the whole journey",
+      body: <>The reply is in Pip{"’"}s story, and the query has moved on: {closed ? "it’s now closed." : "it’s now your move."} Your real queries work exactly like this. Pip goes once you{"’"}re done.</>,
+      action: { label: "Clear Pip away", onClick: clear, attrs: { "data-qc139": "clear-pip" } },
+      onBack: clear, onEscape: clear,
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walk, practice, jStep, endWalk]);
+
+  /* his panel: the panel's real components over his object — the ledger and the stand card read the same builders */
+  const pipPanel = practice && pipRow && pipOpen ? (() => {
+    const evs = practice.log.map((d) => ({ id: d.id, ...d.data }));
+    const ledgerRows = buildTimelineRows(evs, practice.query, practice.agent);
+    const now0 = Date.now();
+    const stand = (
+      <StandCard key={PIP_ID} view={standCard({
+        status: pipRow.status, first: "Pip", agency: PIP_AGENCY, court: pipRow.court, stageStartMs: pipRow.stageStartMs,
+        expectedMs: pipRow.expectedMs, windowWeeks: 6, unansweredNudgeMs: null, closedHow: pipRow.closedHow,
+        manuscriptTitle: (trackedManuscript ?? manuscripts[0])?.title ?? null, hasSentDate: true, keepTracking: false, reminderOpen: false,
+      }, now0)} onLink={() => {}} renderSetDate={() => null} />
+    );
+    return (
+      <QcOpenCard row={pipRow} nowMs={now0} packages={packages} practice
+        onClose={() => endWalk(walkRef.current === "done" ? "clear" : "early")}
+        manuscriptTitle={null} manuscript="none" manuscriptTags={[]}
+        onPrimary={() => { if (pipRow.court === "agent") openPipResp(); }}
+        onAction={() => {}}
+        onDoor={(mode) => { if (mode === "resp") openPipResp(); }}
+        tracking={<QueryLedger rows={ledgerRows} stand={stand} nowMs={now0} sendMethod={practice.query.sendMethod} revisionRound={practice.query.revisionRound} onFork={() => {}} highlightId={null} freshId={null} confirmFor={null} confirmNode={null} />}
+        agentTab={<p className="qc139-pagent" data-qc139="pip-agent">{PIP_AGENT_LINE}</p>}
+        notesTab={null} noteCount={0} />
+    );
+  })() : null;
+  const pipStepOpen = useSyncExternalStore(subscribeDrawer, () => { const r = currentDrawerRequest(); return !!r && isPracticeId(r.queryId) && !!r.panel; }, () => false);
+  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking);
+  const guideFlowShown = pipFlow ?? guideFlow;
+  useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
+
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
@@ -7103,9 +7342,10 @@ export const Queries: React.FC<{
                   full={qcFull}
                   onFull={qcPin.toggle}
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
-                  onTimeline={(id) => { requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
+                  onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
                   loadPeek={async (id) => {
+                    if (isPracticeId(id)) return [];
                     const q0 = qcById.get(id)?.query;
                     if (!q0) return [];
                     const docs = await readQueryActivity(id);
@@ -7121,7 +7361,7 @@ export const Queries: React.FC<{
                       onClearFilters={() => { qc138ClearAll(); setQcScope(null); }} />
                   ) : null}
                   selected={qcPicked}
-                  onPick={pickQc138}
+                  onPick={(id) => { if (!isPracticeId(id)) pickQc138(id); }}
                   folded={qcFolded}
                   onFold={(k) => setQcFolded((f) => { const n = new Set(f); if (n.has(k)) n.delete(k); else n.add(k); return n; })}
                   /* the chip opens the packages page; "+ Add" opens the edit journey (the "Record what you sent" route) */
@@ -7134,17 +7374,20 @@ export const Queries: React.FC<{
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
                   groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
-                  selectedId={selectedQueryId} onOpen={(id) => { cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
+                  /* v139 §B — the practice band, and Pip's row opening his own panel */
+                  practice={practice && pipRow ? { row: pipRow, leaving: pipLeaving } : null}
+                  selectedId={pipOpen ? PIP_ID : selectedQueryId} onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
                   coming={qcComing}
                   /* Query panel v1 — the tray's journey steps INTO the row's panel (`stepRow`) */
                   onAct={(id, bucket) => {
+                    if (isPracticeId(id)) { openPip(); return; }
                     const r = qcById.get(id);
                     const req = r ? trayOpen(bucket, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
                   }}
                   /* §3 — Edit and Close open their own journeys; neither commits anything. */
-                  onEdit={(id) => { if (DRAWER_LIVE.edit) stepRow({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
-                  onClose={(id) => { if (DRAWER_LIVE.close) stepRow({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
+                  onEdit={(id) => { if (isPracticeId(id)) return; if (DRAWER_LIVE.edit) stepRow({ mode: "edit", queryId: id }); else onOpenQuery?.(id); }}
+                  onClose={(id) => { if (isPracticeId(id)) return; if (DRAWER_LIVE.close) stepRow({ mode: "close", queryId: id }); else onOpenQuery?.(id); }} />
                 ) : (
                 <QcList
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the
@@ -7178,7 +7421,12 @@ export const Queries: React.FC<{
             * menu's "Show the page guide" is the way back once it has been dismissed. Its own
             * placement keeps it off the rail's header, which is what its third step is about.
             */}
-          {!showGridSkeleton && <PageGuide page="queries" steps={QC_GUIDE} />}
+          {/* v139 §A — the old bottom-right guide is retired; the shared page guide (v18.3 F) takes its place */}
+          <PageChecklist page="Query Centre" items={QC_CHECKLIST} done={guideDone} seen={qcGuide.seen}
+            hidden={qcGuide.hidden || !!finishedAtLoad.current}
+            active={routeActive} ready={collectionsReady && !showGridSkeleton} targetFor={guideTarget}
+            onSeen={markQcGuideSeen} onHide={hideQcGuide} art="/images/active-query-hawk.png"
+            disabled={guideOff} allDone={QC_ALL_DONE} flow={guideFlowShown} onStart={onGuideStart} openNonce={guideOpenNonce} />
 
           {/* §1 (log-sheet) — FORM MODE: the same drawer, widened, wearing the sheet's chrome.
               The modes are exclusive by construction: openCreate stashes and clears the
@@ -7276,10 +7524,13 @@ export const Queries: React.FC<{
               store). The centred modal and the under-900 drawer it replaces are gone. */}
           {/* §E — ONE host element whether it holds a query or only the picker, so a pick changes its contents
               and never the panel: the journey's form is portalled into this element's slot. */}
-          {((qcOpenCardNode && cardQueryId) || picking) && (
-            <QueryPanelHost id={qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel ? extPanel.from : "queries"}
-              step={(qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))} onClose={fromAgent ? backToAgent : closeQueryCard}>
-              {qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
+          {/* v139 §B — the same one host holds the practice query's panel while it is open (built over Pip's in-memory
+              object); the page's own query and the picker otherwise. Opening Pip closes any real query first. */}
+          {(pipShown || (qcOpenCardNode && cardQueryId) || picking) && (
+            <QueryPanelHost id={pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
+              step={pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
+              onClose={pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
+              {pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
             </QueryPanelHost>
           )}
           </>

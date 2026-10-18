@@ -91,7 +91,8 @@ describe("§8.3 · the default, and what differs from it", () => {
        the tab a reader never sees ("Urgency" is what the cards are about), and "Nothing" reads as
        an option that does something. */
     expect(GROUP_BY_OPTIONS.map((o) => o.key)).toEqual(["attention", "status", "action", "package", "none"]);
-    expect(GROUP_BY_OPTIONS.map((o) => o.label)).toEqual(["Urgency", "Status", "Next action", "Submission package", "No grouping"]);
+    /* v139 §C — "Urgency" is renamed "Who it's with"; its stored key stays `attention` (asserted above) */
+    expect(GROUP_BY_OPTIONS.map((o) => o.label)).toEqual(["Who it's with", "Status", "Next action", "Submission package", "No grouping"]);
     expect(SORT_BY_OPTIONS.map((o) => o.key)).toEqual(["queried", "changed", "due"]);
     expect(SORT_BY_OPTIONS.map((o) => o.label)).toEqual(["Date queried", "Status changed", "Next action due"]);
   });

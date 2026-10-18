@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "B4",
+  "where": "Esc at card 3: no band",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "Esc at card 3: no panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "Esc at card 3: item 4 unticked",
+  "ok": true,
+  "detail": "{\"seen\":true,\"done\":{\"log\":true}}"
+ },
+ {
+  "lock": "B4",
+  "where": "Esc at card 3: the checklist is open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "the journey's Finish later: no band",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "the journey's Finish later: no panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "the journey's Finish later: item 4 unticked",
+  "ok": true,
+  "detail": "{\"done\":{\"log\":true},\"seen\":true}"
+ },
+ {
+  "lock": "B4",
+  "where": "the journey's Finish later: the checklist is open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "a reload mid-walkthrough shows no Pip",
+  "ok": true,
+  "detail": ""
+ }
+]

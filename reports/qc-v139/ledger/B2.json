@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "B2",
+  "where": "the real journey was discarded, not parked",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B2",
+  "where": "Pip arrives",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B2",
+  "where": "the journey opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B2",
+  "where": "the real response drawer, stepped into the panel",
+  "ok": true,
+  "detail": "{\"drawer\":\"resp\",\"steps\":\"The response › Check and save\",\"stepper\":true}"
+ },
+ {
+  "lock": "B2",
+  "where": "partial: the same steps",
+  "ok": true,
+  "detail": "real \"The response › What they asked for › When you'll send it by › Check and save\" · practice \"The response › What they asked for › When you'll send it by › Check and save\""
+ },
+ {
+  "lock": "B2",
+  "where": "full: the same steps",
+  "ok": true,
+  "detail": "real \"The response › When you'll send it by › Check and save\" · practice \"The response › When you'll send it by › Check and save\""
+ },
+ {
+  "lock": "B2",
+  "where": "pass: the same steps",
+  "ok": true,
+  "detail": "real \"The response › Feedback › Check and save\" · practice \"The response › Feedback › Check and save\""
+ },
+ {
+  "lock": "B2",
+  "where": "offer: the same steps",
+  "ok": true,
+  "detail": "real \"The response › The offer › Check and save\" · practice \"The response › The offer › Check and save\""
+ },
+ {
+  "lock": "B2",
+  "where": "rr: the same steps",
+  "ok": true,
+  "detail": "real \"The response › What they'd like revised › When you'll resubmit by › Check and save\" · practice \"The response › What they'd like revised › When you'll resubmit by › Check and save\""
+ }
+]

@@ -10,6 +10,7 @@
  *   node tests/e2e/guideFlags.mjs --seen           # mark it seen (so the first-visit open does not fire)
  *   node tests/e2e/guideFlags.mjs --done add,open  # tick those items
  *   node tests/e2e/guideFlags.mjs --restore '<json>'  # put back exactly what a --print gave (null = absent)
+ *   …add `--page queries` to any of these for the Query Centre's guide (v139): todoPrefs.queries.guide
  *
  * Dev only: it refuses any other project.
  */
@@ -31,7 +32,10 @@ const app = initializeApp({ apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.V
 const db = getFirestore(app);
 const { user } = await signInWithEmailAndPassword(getAuth(app), EMAIL, PASSWORD);
 const ref = doc(db, "users", user.uid);
-const G = "todoPrefs.contacts.guide";
+/* v139 — `--page queries` reads and writes the Query Centre's guide (todoPrefs.queries.guide) instead */
+const PAGE = process.argv.includes("--page") ? process.argv[process.argv.indexOf("--page") + 1] : "contacts";
+if (PAGE !== "contacts" && PAGE !== "queries") throw new Error("--page contacts|queries");
+const G = `todoPrefs.${PAGE}.guide`;
 const arg = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
 if (process.argv.includes("--clear")) await updateDoc(ref, { [G]: deleteField() });
 if (process.argv.includes("--seen")) await updateDoc(ref, { [`${G}.seen`]: true });
@@ -39,6 +43,6 @@ const d = arg("--done");
 if (d) await updateDoc(ref, Object.fromEntries(d.split(",").filter(Boolean).map((k) => [`${G}.done.${k}`, true])));
 const r = arg("--restore");
 if (r) { const v = JSON.parse(r); await updateDoc(ref, { [G]: v == null ? deleteField() : v }); }
-const g = (await getDoc(ref)).data()?.todoPrefs?.contacts?.guide ?? null;
+const g = (await getDoc(ref)).data()?.todoPrefs?.[PAGE]?.guide ?? null;
 console.log(JSON.stringify(g));
 process.exit(0);

@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "B3",
+  "where": "1512 card 1 on the Practice band",
+  "ok": true,
+  "detail": "pip-1"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 the hole is round the band and Pip's row",
+  "ok": true,
+  "detail": "{\"h\":{\"left\":282,\"top\":537.859375,\"width\":1188,\"height\":156,\"r\":14},\"b\":{\"left\":290,\"top\":545.859375,\"width\":1172,\"height\":140}}"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 the band says what it is",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 row → card 2 in his panel",
+  "ok": true,
+  "detail": "pip-3"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 saved → the last card",
+  "ok": true,
+  "detail": "pip-3,pip-4,pip-5,pip-6"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 one card per journey step",
+  "ok": true,
+  "detail": "pip-3,pip-4,pip-5,pip-6"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 the ledger shows the reply",
+  "ok": true,
+  "detail": "PL\nPRACTICE\nPip Ledger\nThe Practice Desk\n×\n\nPartial requested\nDay 12 · queried 6 Oct\n\nTracking\nAgent\nNotes\n6 Oct\n\nYou sent the query by email\n\n···\n18 Oct\n\nThey "
+ },
+ {
+  "lock": "B3",
+  "where": "1512 the footer is his next action",
+  "ok": true,
+  "detail": "Mark partial sent"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 the last card says your move",
+  "ok": true,
+  "detail": "Query Centre · Step 4 of 5 · 7 of 7That’s the whole journeyThe reply is in Pip’s story, and the query has moved on: it’s"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 the band is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1512 item 4 ticked",
+  "ok": false,
+  "detail": "{\"done\":{\"log\":true},\"seen\":true}"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 card 1 on the Practice band",
+  "ok": true,
+  "detail": "pip-1"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 the hole is round the band and Pip's row",
+  "ok": true,
+  "detail": "{\"h\":{\"left\":282,\"top\":534.75,\"width\":956,\"height\":156,\"r\":14},\"b\":{\"left\":290,\"top\":542.75,\"width\":940,\"height\":140}}"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 the band says what it is",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 row → card 2 in his panel",
+  "ok": true,
+  "detail": "pip-3"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 saved → the last card",
+  "ok": true,
+  "detail": "pip-3,pip-4,pip-5,pip-6"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 one card per journey step",
+  "ok": true,
+  "detail": "pip-3,pip-4,pip-5,pip-6"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 the ledger shows the reply",
+  "ok": true,
+  "detail": "PL\nPRACTICE\nPip Ledger\nThe Practice Desk\n×\n\nPartial requested\nDay 12 · queried 6 Oct\n\nTracking\nAgent\nNotes\n6 Oct\n\nYou sent the query by email\n\n···\n18 Oct\n\nThey "
+ },
+ {
+  "lock": "B3",
+  "where": "1280 the footer is his next action",
+  "ok": true,
+  "detail": "Mark partial sent"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 the last card says your move",
+  "ok": true,
+  "detail": "Query Centre · Step 4 of 5 · 7 of 7That’s the whole journeyThe reply is in Pip’s story, and the query has moved on: it’s"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 the band is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1280 item 4 ticked",
+  "ok": false,
+  "detail": "{\"seen\":true,\"done\":{\"log\":true}}"
+ }
+]
