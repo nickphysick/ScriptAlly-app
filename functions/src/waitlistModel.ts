@@ -383,6 +383,78 @@ export const nextFoundingNumber = (
     ? { foundingNumber: numbering.freed[0], freedAfter: numbering.freed.slice(1) }
     : { foundingNumber: counter.verifiedCount + 1, freedAfter: [] };
 
+/* ══════════════ The founding welcome ══════════════ */
+
+/**
+ * The confirmation link redirects to `/welcome`, and the page needs the writer's number. Putting the
+ * number in the URL would let anyone type "No. 1". So on every outcome with a person behind it, the
+ * verify handler mints a random REFERENCE, stores only its hash with a 30-minute expiry, and the page
+ * trades the reference for the number. A refresh inside the 30 minutes still works.
+ */
+export const WELCOME_PATH = "/welcome";
+export const WELCOME_REF_TTL_MS = 30 * 60 * 1000;
+export type WelcomeKind = "verified" | "already" | "waiting" | "expired" | "unknown";
+
+/** 192 random bits, URL-safe. */
+export const newWelcomeRef = (): string => randomBytes(24).toString("base64url");
+
+/** Where a confirmation link sends a person. The only thing after `v=` is the kind. */
+export const welcomeRedirect = (kind: WelcomeKind, ref: string | null): string =>
+  ref ? `${WELCOME_PATH}?v=${kind}&r=${encodeURIComponent(ref)}` : `${WELCOME_PATH}?v=${kind}`;
+
+export interface WelcomePayload {
+  kind: WelcomeKind;
+  foundingNumber?: number;
+  reserveNumber?: number;
+  /** The UK calendar date they confirmed, YYYY-MM-DD. Date only, by design. */
+  confirmedOn?: string;
+}
+
+const ukDate = (v: unknown): string | undefined => {
+  const d = v instanceof Date ? v
+    : v && typeof (v as { toDate?: () => Date }).toDate === "function" ? (v as { toDate: () => Date }).toDate()
+    : null;
+  if (!d || Number.isNaN(d.getTime())) return undefined;
+  /* en-CA formats as YYYY-MM-DD. */
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+};
+const posInt = (v: unknown): number | undefined =>
+  typeof v === "number" && Number.isInteger(v) && v >= 1 ? v : undefined;
+
+/**
+ * ⚠️ AN ALLOWLIST, NOT A FILTER. The page learns the kind, the writer's own number and the date
+ * they confirmed, and nothing else: no email, no source, no IP hash. Built field by field, so a new
+ * field on the document can never leak by default.
+ */
+export const welcomePayload = (doc: Record<string, unknown>): WelcomePayload => {
+  const kind = (doc.welcomeRefKind as WelcomeKind) ?? "unknown";
+  if (doc.status === "waiting") {
+    const reserveNumber = posInt(doc.reserveNumber);
+    const confirmedOn = ukDate(doc.reserveAt ?? doc.verifyTokenSpentAt);
+    return { kind, ...(reserveNumber ? { reserveNumber } : {}), ...(confirmedOn ? { confirmedOn } : {}) };
+  }
+  const foundingNumber = posInt(doc.foundingNumber);
+  const confirmedOn = ukDate(doc.verifiedAt);
+  return { kind, ...(foundingNumber ? { foundingNumber } : {}), ...(confirmedOn ? { confirmedOn } : {}) };
+};
+
+export const ANSWER_STAGE = ["getting-ready", "just-started", "in-the-thick", "revising"] as const;
+export const ANSWER_QUERIED = ["none", "1-10", "11-50", "50-plus"] as const;
+export const ANSWER_TRACKER = ["spreadsheet", "querytracker", "notebook", "inbox", "other"] as const;
+
+/** The three quick taps, validated server-side. Exactly these keys and values, or null. */
+export const readWelcomeAnswers = (body: unknown): {
+  answerStage: string; answerQueried: string; answerTracker: string;
+} | null => {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const b = body as Record<string, unknown>;
+  const keys = Object.keys(b).filter((k) => k !== "r");
+  if (keys.length !== 3 || !["stage", "queried", "tracker"].every((k) => keys.includes(k))) return null;
+  const ok = (v: unknown, set: readonly string[]) => typeof v === "string" && set.includes(v);
+  if (!ok(b.stage, ANSWER_STAGE) || !ok(b.queried, ANSWER_QUERIED) || !ok(b.tracker, ANSWER_TRACKER)) return null;
+  return { answerStage: b.stage as string, answerQueried: b.queried as string, answerTracker: b.tracker as string };
+};
+
 /* ══════════════ The GET contract ══════════════ */
 
 export interface CountPayload {

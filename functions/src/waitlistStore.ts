@@ -19,7 +19,8 @@ import {
   CounterState, COUNTER_PATH, DEFAULT_CAP, RATELIMIT_COLLECTION, RATE_LIMIT_WINDOW_MS,
   VERIFY_TTL_MS, WaitlistSource, WaitlistStatus,
   emailHash, mayResendConfirm, newVerifyToken, overRateLimit, rateLimitKey, readCounter,
-  readNumbering, nextFoundingNumber,
+  readNumbering, nextFoundingNumber, newWelcomeRef, welcomePayload, WELCOME_REF_TTL_MS,
+  type WelcomeKind, type WelcomePayload,
   tokenHash, tokensMatch,
 } from "./waitlistModel";
 
@@ -218,7 +219,7 @@ export type VerifyOutcome =
   /** Verified after the cap filled — a real race with an honest answer. */
   | { kind: "waiting"; counter: CounterState; docId: string; reserveNumber: number }
   /** Already done. Clicking the link twice is not an error. */
-  | { kind: "already"; position: number | null; docId: string }
+  | { kind: "already"; position: number | null; docId: string; status: WaitlistStatus }
   | { kind: "expired" }
   | { kind: "unknown" };
 
@@ -260,7 +261,7 @@ export const verifyWaitlist = async (
      * take two places.
      */
     if (status === "verified" || status === "waiting") {
-      return { kind: "already" as const, position: (doc.get("foundingNumber") as number | undefined) ?? null, docId: doc.id };
+      return { kind: "already" as const, position: (doc.get("foundingNumber") as number | undefined) ?? null, docId: doc.id, status };
     }
 
     const expiresRaw = doc.get("verifyTokenExpiresAt") as { toMillis?: () => number } | Date | undefined;
@@ -418,3 +419,56 @@ export const unsubscribe = async (
   db: Db, emailNormalised: string, nowMs: number,
 ): Promise<UnsubscribeOutcome> =>
   unsubscribeById(db, emailHash(emailNormalised), nowMs);
+
+/* ══════════════ The founding welcome ══════════════ */
+
+/**
+ * Mints the reference a confirmation redirect carries, and stores only its HASH and a 30-minute
+ * expiry on the writer's document. A new click mints a new reference and replaces the old one.
+ * Runs after the verify transaction: nothing here touches the counter.
+ */
+export const mintWelcomeRef = async (
+  db: Db, docId: string, kind: WelcomeKind, nowMs: number,
+): Promise<string> => {
+  const ref = newWelcomeRef();
+  await db.doc(`waitlist/${docId}`).set({
+    welcomeRefHash: tokenHash(ref),
+    welcomeRefExpiresAt: new Date(nowMs + WELCOME_REF_TTL_MS),
+    welcomeRefKind: kind,
+  }, { merge: true });
+  return ref;
+};
+
+const findByWelcomeRef = async (db: Db, ref: string, nowMs: number) => {
+  if (typeof ref !== "string" || ref.length < 16 || ref.length > 128) return null;
+  const hash = tokenHash(ref);
+  const found = await db.collection("waitlist").where("welcomeRefHash", "==", hash).limit(1).get();
+  if (found.empty) return null;
+  const doc = found.docs[0];
+  if (!tokensMatch((doc.get("welcomeRefHash") as string) ?? "", hash)) return null;
+  const exp = doc.get("welcomeRefExpiresAt") as { toMillis?: () => number } | Date | undefined;
+  const expMs = exp instanceof Date ? exp.getTime() : typeof exp?.toMillis === "function" ? exp.toMillis() : 0;
+  if (!expMs || expMs < nowMs) return null;
+  /* Someone who has since unsubscribed has no welcome to read. */
+  const status = doc.get("status") as WaitlistStatus;
+  if (status !== "verified" && status !== "waiting") return null;
+  return doc;
+};
+
+/** The welcome page's data for a live reference, or null (unknown, expired, or no longer on the list). */
+export const readWelcome = async (db: Db, ref: string, nowMs: number): Promise<WelcomePayload | null> => {
+  const doc = await findByWelcomeRef(db, ref, nowMs);
+  return doc ? welcomePayload(doc.data() as Record<string, unknown>) : null;
+};
+
+/** Stores the three quick answers as flat fields. A second post within the reference's life overwrites. */
+export const saveWelcomeAnswers = async (
+  db: Db, ref: string,
+  answers: { answerStage: string; answerQueried: string; answerTracker: string }, nowMs: number,
+): Promise<boolean> => {
+  const doc = await findByWelcomeRef(db, ref, nowMs);
+  if (!doc) return false;
+  await doc.ref.set({ ...answers, answeredAt: new Date(nowMs) }, { merge: true });
+  return true;
+};
+

@@ -55,9 +55,9 @@ export const WELCOME_SUBJECT = "You're in — you're a Founding Writer";
 
 export const WELCOME_HEADING = "That's your place confirmed.";
 
-/** `position` and `cap` are the real, stored figures — never rounded and never estimated. */
-export const welcomeLead = (position: number, cap: number): string =>
-  `You're founding writer number ${position} of ${cap}.`;
+/** The writer's stored founding number — never rounded and never estimated. Unpadded here. */
+export const welcomeLead = (foundingNumber: number): string =>
+  `You're Founding Writer No. ${foundingNumber}.`;
 
 /**
  * ⚠️ WAVES, AND NO DATE. Saying "in waves" is a true description of how this will work; naming a

@@ -24,7 +24,9 @@ import {
 } from "./waitlistModel";
 import {
   consumeRateLimit, joinWaitlist, readCounterState, unsubscribeById, verifyWaitlist,
+  mintWelcomeRef, readWelcome, saveWelcomeAnswers,
 } from "./waitlistStore";
+import { WELCOME_REF_TTL_MS } from "./waitlistModel";
 import { runRetention } from "./waitlistRetention";
 import { RETENTION_MS, UNSUBSCRIBED_GRACE_MS, CONFIRM_RESEND_MS } from "./waitlistModel";
 
@@ -215,6 +217,65 @@ describe("founding numbers are assigned once, atomically, and never held twice",
     expect(first.kind).toBe("verified");
     expect(again).toMatchObject({ kind: "already", position: 11 });
     expect((await counterOf()).verifiedCount).toBe(11);
+  });
+});
+
+/* ══════════════ The founding welcome ══════════════ */
+
+describe("the welcome reference trades for the writer's number, and nothing else", () => {
+  const confirmed = async (email: string, count = 22) => {
+    await setCounter(count);
+    const t = await seedPending(email);
+    const out = await verifyWaitlist(db, t, Date.now());
+    if (out.kind !== "verified") throw new Error("expected verified");
+    return out.docId;
+  };
+
+  it("a live reference returns the kind, the number and the date — and reads again on refresh", async () => {
+    const docId = await confirmed("w1@example.com");
+    const ref = await mintWelcomeRef(db, docId, "verified", Date.now());
+    const once = await readWelcome(db, ref, Date.now());
+    expect(once).toMatchObject({ kind: "verified", foundingNumber: 23 });
+    expect(once!.confirmedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(JSON.stringify(once)).not.toContain("@");
+    expect(await readWelcome(db, ref, Date.now() + 60_000), "a refresh still works").toEqual(once);
+    /* Only the hash is stored. */
+    const stored = (await db.doc(`waitlist/${docId}`).get()).data()!;
+    expect(JSON.stringify(stored)).not.toContain(ref);
+  });
+
+  it("an expired reference is refused", async () => {
+    const docId = await confirmed("w2@example.com");
+    const t0 = Date.now();
+    const ref = await mintWelcomeRef(db, docId, "verified", t0);
+    expect(await readWelcome(db, ref, t0 + WELCOME_REF_TTL_MS + 1)).toBeNull();
+  });
+
+  it("an unknown reference is refused, and so is anyone who has since unsubscribed", async () => {
+    expect(await readWelcome(db, "x".repeat(32), Date.now())).toBeNull();
+    const docId = await confirmed("w3@example.com");
+    const ref = await mintWelcomeRef(db, docId, "verified", Date.now());
+    await unsubscribeById(db, docId, Date.now());
+    expect(await readWelcome(db, ref, Date.now())).toBeNull();
+  });
+
+  it("the three answers are stored as flat fields, and a second send overwrites", async () => {
+    const docId = await confirmed("w4@example.com");
+    const ref = await mintWelcomeRef(db, docId, "verified", Date.now());
+    expect(await saveWelcomeAnswers(db, ref, { answerStage: "just-started", answerQueried: "none", answerTracker: "inbox" }, Date.now())).toBe(true);
+    expect(await saveWelcomeAnswers(db, ref, { answerStage: "revising", answerQueried: "50-plus", answerTracker: "spreadsheet" }, Date.now())).toBe(true);
+    const d = (await db.doc(`waitlist/${docId}`).get()).data()!;
+    expect(d).toMatchObject({ answerStage: "revising", answerQueried: "50-plus", answerTracker: "spreadsheet" });
+    expect(d.answeredAt).toBeTruthy();
+    expect(d.answers, "flat fields, not a map").toBeUndefined();
+  });
+
+  it("answers against an expired reference are refused and change nothing", async () => {
+    const docId = await confirmed("w5@example.com");
+    const t0 = Date.now();
+    const ref = await mintWelcomeRef(db, docId, "verified", t0);
+    expect(await saveWelcomeAnswers(db, ref, { answerStage: "revising", answerQueried: "none", answerTracker: "inbox" }, t0 + WELCOME_REF_TTL_MS + 1)).toBe(false);
+    expect((await db.doc(`waitlist/${docId}`).get()).get("answerStage")).toBeUndefined();
   });
 });
 

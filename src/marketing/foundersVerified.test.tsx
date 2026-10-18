@@ -72,16 +72,13 @@ describe("V2 · a state says nothing the redirect does not carry", () => {
 describe("V3 · every kind the verify handler can send has a state", () => {
   it("read from the functions, not from a list written here", () => {
     const handler = stripComments(readFileSync(join(process.cwd(), "functions/src/waitlist.ts"), "utf8"));
-    const store = stripComments(readFileSync(join(process.cwd(), "functions/src/waitlistStore.ts"), "utf8"));
-    /* The handler redirects with literal kinds (a missing token) and with `outcome.kind`, where the
-       outcome is verifyWaitlist's. Both halves are read, so neither can grow alone. */
-    expect(handler, "the handler redirects with the outcome's kind").toMatch(/\?verified=\$\{outcome\.kind\}/);
-    const literal = [...handler.matchAll(/\?verified=([a-z]+)/g)].map((m) => m[1]);
-    const typeStart = store.indexOf("export type VerifyOutcome");
-    expect(typeStart, "verifyWaitlist's outcome type is found").toBeGreaterThan(-1);
-    const typeBody = store.slice(typeStart, store.indexOf(";", store.indexOf("{ kind: \"unknown\" }", typeStart)) + 1);
-    const outcome = [...typeBody.matchAll(/kind:\s*"([a-z]+)"/g)].map((m) => m[1]);
-    const sent = new Set([...literal, ...outcome]);
+    const model = stripComments(readFileSync(join(process.cwd(), "functions/src/waitlistModel.ts"), "utf8"));
+    /* Re-pointed (founding welcome, Part B): the handler now redirects through welcomeRedirect, and
+       the kinds it can send are the WelcomeKind union. Same law; Part C moves it to /welcome. */
+    expect(handler, "the handler redirects through welcomeRedirect").toMatch(/welcomeRedirect\(/);
+    const m = model.match(/export type WelcomeKind\s*=\s*([^;]+);/);
+    expect(m, "the WelcomeKind union is found").not.toBeNull();
+    const sent = new Set([...m![1].matchAll(/"([a-z]+)"/g)].map((x) => x[1]));
     expect(sent.size, "a real population was read").toBeGreaterThanOrEqual(5);
     for (const k of sent) expect(VERIFY_KINDS as readonly string[], `"${k}" has no state`).toContain(k);
   });

@@ -15,7 +15,9 @@
  *
  *   GET  /api/waitlist          → { visible, cap, count? }   — `count` absent only when unreadable
  *   POST /api/waitlist          → { ok, alreadyJoined?, full?, count?, cap, position? }
- *   GET  /api/waitlist/verify?token=…  → 302 to /founders?verified=…
+ *   GET  /api/waitlist/verify?token=…  → 302 to /welcome?v=<kind>[&r=<reference>]
+ *   GET  /api/waitlist/welcome?r=…      → { ok, kind, foundingNumber | reserveNumber, confirmedOn }
+ *   POST /api/waitlist/welcome/answers  → { ok }   (body: { r, stage, queried, tracker })
  *
  * The decisions live in `waitlistModel.ts`; the transactions live in `waitlistStore.ts`. What is
  * here is method, origin, content-type, size and response shape.
@@ -26,9 +28,13 @@ import { defineSecret } from "firebase-functions/params";
 import { db } from "./firestore";
 import {
   ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, MIN_SUBMIT_MS, REQUIRE_VERIFICATION,
-  countPayload, ipHash, judgeJoin, normaliseEmail, readSource,
+  countPayload, ipHash, judgeJoin, normaliseEmail, readSource, readWelcomeAnswers, welcomeRedirect,
+  type WelcomeKind,
 } from "./waitlistModel";
-import { consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist } from "./waitlistStore";
+import {
+  consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist,
+  mintWelcomeRef, readWelcome, saveWelcomeAnswers,
+} from "./waitlistStore";
 import { RESEND_API_KEY, sendEmail } from "./email";
 import { resolveMailConfig } from "./emailConfig";
 import { prepareConfirm, prepareWelcome } from "./emailTemplates";
@@ -81,8 +87,6 @@ const monitorAppCheck = async (
  */
 const IP_HASH_SALT = defineSecret("WAITLIST_IP_SALT");
 
-/** The public origin a verify link lands on. Overridden per environment by hosting, not by code. */
-const FOUNDERS_PATH = "/founders";
 
 const jsonHeaders = (res: { set: (k: string, v: string) => void }, origin: string | undefined) => {
   /* ⚠️ AN ORIGIN IS ALLOWED OR IT IS NOT ECHOED. Reflecting whatever arrived is the same as having
@@ -161,9 +165,8 @@ export const waitlist = onRequest(
       const isUnsubscribe = path.endsWith("/unsubscribe");
 
       /* ── Unsubscribing ──
-         ⚠️ A PLAIN PAGE, SERVED HERE, NOT A REDIRECT. The verify link redirects to `/founders`
-         and nothing on that page reads the parameter yet, so a redirect would land someone who
-         just unsubscribed on a page still selling them the offer. A self-contained answer needs
+         ⚠️ A PLAIN PAGE, SERVED HERE, NOT A REDIRECT. A redirect would land someone who just
+         unsubscribed on a page still selling them the offer. A self-contained answer needs
          no client change and cannot say the wrong thing.
          ⚠️ NO CONFIRMATION STEP AND NO REACTIVATION NAG. They clicked the link in an email they
          received; asking "are you sure" is a dark pattern, and offering to undo it is the same
@@ -187,15 +190,64 @@ export const waitlist = onRequest(
       if (isVerify) {
         if (req.method !== "GET") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
         const token = typeof req.query.token === "string" ? req.query.token : "";
-        if (!token) { res.redirect(302, `${FOUNDERS_PATH}?verified=unknown`); return; }
+        if (!token) { res.redirect(302, welcomeRedirect("unknown", null)); return; }
         const outcome = await verifyWaitlist(db, token, Date.now());
         if (outcome.kind === "verified") {
           await sendWelcome(outcome.docId, outcome.position, outcome.counter.cap,
                             IP_HASH_SALT.value());
         }
         /* ⚠️ A REDIRECT, NOT JSON. This URL is opened by a person from their email client, so the
-           answer has to be a page. `/founders` reads the parameter and says what happened. */
-        res.redirect(302, `${FOUNDERS_PATH}?verified=${outcome.kind}`);
+           answer has to be a page: `/welcome` says what happened.
+           ⚠️ THE NUMBER NEVER RIDES THE URL. Where there is a person behind the outcome, a random
+           reference does, and the page trades it for the number. A second click from someone on
+           the waiting list is told they are waiting, not "already in". */
+        if (outcome.kind === "verified" || outcome.kind === "already" || outcome.kind === "waiting") {
+          const kind: WelcomeKind = outcome.kind === "already" && outcome.status === "waiting" ? "waiting" : outcome.kind;
+          const ref = await mintWelcomeRef(db, outcome.docId, kind, Date.now());
+          res.set("Cache-Control", "no-store");
+          res.redirect(302, welcomeRedirect(kind, ref));
+          return;
+        }
+        res.redirect(302, welcomeRedirect(outcome.kind, null));
+        return;
+      }
+
+      /* ── The founding welcome: the page trades its reference for the writer's number, and
+            sends the three quick answers back. Both are rate-limited like joining. ── */
+      const isWelcomeAnswers = path.endsWith("/welcome/answers");
+      const isWelcome = path.endsWith("/welcome");
+      if (isWelcome || isWelcomeAnswers) {
+        res.set("Cache-Control", "no-store");
+        const rawIp = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim() || req.ip || "";
+        const salt = IP_HASH_SALT.value();
+        const hashedIp = rawIp && salt ? ipHash(rawIp, salt) : null;
+        if (hashedIp) {
+          const { allowed } = await consumeRateLimit(db, hashedIp, Date.now());
+          if (!allowed) { res.status(429).json({ ok: false, error: "Too many attempts. Please try again later." }); return; }
+        }
+
+        if (isWelcome) {
+          if (req.method !== "GET") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
+          const payload = await readWelcome(db, typeof req.query.r === "string" ? req.query.r : "", Date.now());
+          /* Unknown, expired or no longer on the list all look the same from outside. */
+          if (!payload) { res.status(404).json({ ok: false }); return; }
+          res.status(200).json({ ok: true, ...payload });
+          return;
+        }
+
+        if (req.method !== "POST") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
+        if (!String(req.headers["content-type"] ?? "").toLowerCase().includes("application/json")) {
+          res.status(415).json({ ok: false, error: "Expected JSON." }); return;
+        }
+        if ((Buffer.isBuffer(req.rawBody) ? req.rawBody.length : 0) > MAX_BODY_BYTES) {
+          res.status(413).json({ ok: false, error: "That request was too large." }); return;
+        }
+        const body = (req.body && typeof req.body === "object") ? req.body as Record<string, unknown> : {};
+        const answers = readWelcomeAnswers(body);
+        if (!answers || typeof body.r !== "string") { res.status(400).json({ ok: false, error: "Those answers aren't ones we know." }); return; }
+        const saved = await saveWelcomeAnswers(db, body.r, answers, Date.now());
+        if (!saved) { res.status(404).json({ ok: false }); return; }
+        res.status(200).json({ ok: true });
         return;
       }
 
