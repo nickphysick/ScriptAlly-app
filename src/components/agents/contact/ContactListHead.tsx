@@ -162,14 +162,20 @@ export const ContactListHead: React.FC<{
   /** v19 §E — the jump row, when grouped by anything but Letter */
   jump: ContactJump | null;
   filterCount: number;
+  /** v19 §F — the Filters chip's ✕: every filter and the search cleared */
+  onClearFilters: () => void;
+  /** v19 §F — the Filters chip's button, so "+N more" can open the menu from it */
+  filtersRef?: React.MutableRefObject<HTMLButtonElement | null>;
   pop: PopoverState<ContactPop>;
   onPin: () => void;
-}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, pop, onPin }) => {
+}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin }) => {
   const tbRef = useRef<HTMLDivElement>(null);
   const showLetters = groupKey === "none" || groupKey === "letter";
   const groupName = groupKey === "none" ? null : GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? null;
 
   const grpRef = useRef<HTMLButtonElement>(null);
+  const ownFilRef = useRef<HTMLButtonElement | null>(null);
+  const filRef = filtersRef ?? ownFilRef;
   const jumpRef = useRef<HTMLElement>(null);
   /* v19 §E — "+N more": the index from which the jump row's groups go into the menu (null: all fit) */
   const [cut, setCut] = useState<number | null>(null);
@@ -333,11 +339,20 @@ export const ContactListHead: React.FC<{
                 onClick={() => { if (pop.open === "group") pop.close(); onStopGroup(); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS}</button>
             ) : null}
           </span>
-          <button type="button" className="cl19-ctl cl19-fil" data-cl19="filters" data-cl18="filters" data-n={filterCount} aria-haspopup="dialog"
-            aria-expanded={pop.open === "filters"} disabled={loading} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
-            <span className="cl19-ic">{FILTER_ICON}</span><span className="cl19-l">Filters</span>
-            {filterCount ? <em data-cl18="filters-n">{filterCount}</em> : null}
-          </button>
+          {/* v19 §F — Filters, the same applied-chip pattern: filtered, the chip reads "Filtered", carries a navy count (search
+              is not counted) and a separate ✕ that clears every filter and the search, and never opens the menu */}
+          <span className="cl19-filw" data-cl19="filters-chip" data-on={filterCount ? "" : undefined}>
+            <button type="button" ref={filRef} className="cl19-ctl cl19-fil" data-cl19="filters" data-cl18="filters" data-n={filterCount} aria-haspopup="dialog"
+              aria-expanded={pop.open === "filters"} aria-label={filterCount ? `Filters: ${filterCount} applied` : "Filters"} disabled={loading}
+              onClick={(e) => pop.toggle("filters", e.currentTarget)}>
+              <span className="cl19-ic">{FILTER_ICON}</span><span className="cl19-l">{filterCount ? "Filtered" : "Filters"}</span>
+              {filterCount ? <em data-cl19="filters-n" data-cl18="filters-n">{filterCount}</em> : null}
+            </button>
+            {filterCount ? (
+              <button type="button" className="cl19-grpx cl19-filx" data-cl19="filters-clear" aria-label="Clear all filters" title="Clear all filters" disabled={loading}
+                onClick={() => { if (pop.open === "filters") pop.close(); onClearFilters(); filRef.current?.focus({ preventScroll: true }); }}>{CROSS}</button>
+            ) : null}
+          </span>
           <button type="button" className="cl19-pin" data-cl19="pin" data-cl16="full" data-pin-list="" aria-pressed={pinned} aria-keyshortcuts="F"
             aria-label={pinned ? "Unpin" : "Pin list"} disabled={loading} onClick={onPin}>
             {PIN_ICON}<span className="cl19-pin-l">{pinned ? "Unpin" : "Pin list"}</span>

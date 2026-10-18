@@ -72,6 +72,15 @@ export interface PopoverState<K extends string> {
   toggle: (k: K, anchor: HTMLElement) => void;
   close: () => void;
 }
+/** v19 (Contact list §F) — a scroll the PAGE makes while a panel is open (the list going back to its top when the filters
+ *  change behind a live menu) must not close that panel: scroll events from `run` are ignored for a moment. */
+let quietUntil = 0;
+export function quietScroll(run: () => void): void {
+  quietUntil = (typeof performance !== "undefined" ? performance.now() : Date.now()) + 300;
+  run();
+}
+const quiet = () => (typeof performance !== "undefined" ? performance.now() : Date.now()) < quietUntil;
+
 export function usePopover<K extends string>(): PopoverState<K> {
   const [open, setOpen] = useState<K | null>(null);
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -94,6 +103,7 @@ export function usePopover<K extends string>(): PopoverState<K> {
     };
     /* a page scroll closes it: the panel is fixed and cannot follow its anchor */
     const scroll = (e: Event) => {
+      if (quiet()) return;
       const t = e.target as Node;
       if (t instanceof Element && t.closest(".lpop")) return;
       close();

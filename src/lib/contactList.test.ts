@@ -428,3 +428,83 @@ describe("v19 §C/§J — Date added: the record's own dateAdded, newest first, 
     expect(addedMs({ dateAdded: "2026-05-12T10:00:00.000Z" })).toBe(Date.parse("2026-05-12T10:00:00.000Z"));
   });
 });
+
+/* ══ v19 §F — the quick picks, the applied-filters row and "what the list would show" ═════════════════════════════ */
+import {
+  QUICK_PICKS, WAITING_STATUSES, appliedFilters, genreList, standsRows, wouldShow, STANDS_ROWS,
+} from "./contactList";
+
+describe("v19 §F — filtering: each quick pick selects its population, checked against a direct predicate", () => {
+  const f0 = emptyContactFilters();
+  const pool = () => true;
+  const ids = (f: ContactFilters) => facts.filter((x) => matchesContactFilters(x, f)).map((x) => x.agent.id).sort();
+  const pick = (k: string) => QUICK_PICKS.find((p) => p.key === k)!;
+  /* the direct predicates — written from the pack's own table, never from the model */
+  const direct: Record<string, (x: (typeof facts)[number]) => boolean> = {
+    you: (x) => x.standing.kind === "open" && x.standing.yourMove, // the band's "your move" count
+    ready: (x) => x.standing.kind === "none" && x.openKey === "open",
+    wait: (x) => ["Queried", "Partial Sent", "Full Sent"].includes(String(x.q?.status)) && x.standing.kind === "open",
+    open: (x) => x.openKey === "open",
+  };
+  it("the four picks, in the pack's order, with its words", () => {
+    expect(QUICK_PICKS.map((p) => [p.key, p.title, p.line])).toEqual([
+      ["you", "Your move", "Agents waiting on you"],
+      ["ready", "Ready to query", "Not queried yet and open now"],
+      ["wait", "Waiting to hear back", "Queried, or sent pages"],
+      ["open", "Open to submissions", "Taking queries now"],
+    ]);
+  });
+  for (const k of ["you", "ready", "wait", "open"]) {
+    it(`${k}: the list it gives is exactly the direct query's`, () => {
+      const f = pick(k).set(f0, true);
+      expect(pick(k).on(f)).toBe(true);
+      const want = facts.filter(direct[k]).map((x) => x.agent.id).sort();
+      expect(want.length, `population: the fixture holds no ${k} agent`).toBeGreaterThan(0);
+      expect(ids(f)).toEqual(want);
+      expect(wouldShow(facts, f, pool)).toBe(want.length);
+      /* off again: back to everyone */
+      expect(pick(k).on(pick(k).set(f, false))).toBe(false);
+      expect(ids(pick(k).set(f, false)).length).toBe(facts.length);
+    });
+  }
+  it("Ready to query also selects Open to submissions, and the applied row shows it as its two parts", () => {
+    const f = pick("ready").set(f0, true);
+    expect(pick("open").on(f)).toBe(true);
+    expect(appliedFilters(f, (k) => k).map((a) => a.label)).toEqual(["Open to submissions", "Not queried yet"]);
+    /* dropping Open leaves Ready off and Not queried yet on */
+    const g = appliedFilters(f, (k) => k).find((a) => a.key === "open")!.drop(f);
+    expect(pick("ready").on(g)).toBe(false);
+    expect(g.queried).toBe("no");
+  });
+  it("Waiting to hear back is exactly Queried, Partial sent and Full sent — a fourth status turns it off", () => {
+    expect([...WAITING_STATUSES]).toEqual(["queried", "ps", "fs"]);
+    const f = pick("wait").set(f0, true);
+    expect(pick("wait").on({ ...f, status: [...f.status, "pr"] })).toBe(false);
+  });
+  it("the applied row: one chip per filter, never the search; the chip count is the same number", () => {
+    const f: ContactFilters = { ...f0, status: ["queried", "pr"], action: true, open: "closed", queried: "yes", mats: true, always: true, genres: ["a", "b"] };
+    const labels = appliedFilters(f, (k) => k.toUpperCase()).map((a) => a.label);
+    expect(labels).toEqual(["Status: Queried +1", "Your move", "Closed to submissions", "Queried", "Missing materials", "Always replies", "Genre: A +1"]);
+    expect(contactFilterCount(f)).toBe(labels.length);
+    expect(contactFilterCount(f0)).toBe(0);
+    /* each chip's drop removes its own filter and only that */
+    for (const a of appliedFilters(f, (k) => k)) expect(appliedFilters(a.drop(f), (k) => k).map((b) => b.key)).not.toContain(a.key);
+    expect(appliedFilters(f, (k) => k).reduce((g, a) => a.drop(g), f)).toEqual(f0);
+  });
+  it("wouldShow counts under the pool too (Find, the band's group)", () => {
+    const only = facts[0].agent.id;
+    expect(wouldShow(facts, f0, (x) => x.agent.id === only)).toBe(1);
+    expect(wouldShow(facts, f0, () => false)).toBe(0);
+  });
+  it("Where your query stands: the pack's eight, and R&R / Resubmitted / Signed only while someone is there or it is on", () => {
+    expect(standsRows(() => false, f0)).toEqual([...STANDS_ROWS]);
+    expect(standsRows((k) => k === "rr", f0)).toEqual(["none", "queried", "pr", "ps", "fr", "fs", "rr", "offer", "closed"]);
+    expect(standsRows(() => false, { ...f0, status: ["signed"] })).toContain("signed");
+  });
+  it("the genres, largest first, keyed as the filter reads them, counted over the whole list", () => {
+    const list = genreList(facts, (_k, raw) => raw);
+    for (let i = 1; i < list.length; i += 1) expect(list[i - 1].n).toBeGreaterThanOrEqual(list[i].n);
+    for (const g of list) expect(g.n).toBe(facts.filter((x) => x.genres.map(genreKey).includes(g.key)).length);
+    expect(list.length, "population: the fixture carries genres").toBeGreaterThan(0);
+  });
+});

@@ -92,20 +92,7 @@
 }
 .cl18-lh button:disabled { cursor: default; opacity: 0.6; }
 
-/* ── §B · THE FILTERS PANEL: under the button's right edge, white, five sections of the pills' own options ── */
-.lpop.cl18-fp {
-  position: fixed; z-index: 60; box-sizing: border-box; width: min(640px, 70vw); display: flex; flex-direction: column;
-  padding: 14px 16px 16px; border-radius: 16px; background: #fff; overflow: hidden;
-}
-.cl18-fp .cl18-fp-h b { font: 400 17px/1.2 var(--sp-type) !important; color: #1c130f; }
-.cl18-fp .cl18-fp-b { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 8px -4px 0; padding: 0 4px; }
-.cl18-fp .cl18-fs { padding: 10px 0; border-top: 1px solid rgba(28, 19, 15, 0.08); }
-.cl18-fp .cl18-fs:first-child { border-top: 0; }
-.cl18-fp .cl18-fs h6 { margin: 0 0 6px; font: 400 13px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, 0.5); }
-.cl18-fp .cl18-fs[data-k="status"] { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
-.cl18-fp .cl18-fs[data-k="status"] h6 { grid-column: 1 / -1; }
-.cl18-fp .cl18-fs[data-k="genre"] .cl14-gtok { width: 100%; }
-.cl18-fp .cl18-fp-f { margin-top: 6px; }
+/* ── §B · THE FILTERS PANEL: retired by v19 §F (contactV19.css, `.cl19-fm`) ── */
 
 /* ── §B · THE COLUMN HEADINGS: the Query Centre's strip, at the sheet's full width ── */
 /* v18.3: the row's fill, height, rule and label type are the shared headings' (`.lth`, shell/listToolbar.css) */

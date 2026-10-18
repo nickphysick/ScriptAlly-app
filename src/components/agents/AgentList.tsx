@@ -47,7 +47,7 @@ import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { contactFilterCount, agentRows, GROUP_OPTIONS } from "../../lib/contactList";
+import { contactFilterCount, agentRows, appliedFilters, GROUP_OPTIONS } from "../../lib/contactList";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
@@ -56,17 +56,17 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactLightHeader } from "./contact/ContactLightHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
+  contactCensus, contactGroups, dropOptions, emptyContactFilters,
   letterCounts, matchesContactFilters, sortFacts, surnameInitial,
 } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
-import { ContactFiltersPanel } from "./contact/ContactFilterStrip";
+import { ContactAppliedRow, ContactFilterMenu, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
 import { useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
-import { usePopover } from "../shell/ListPills";
+import { quietScroll, usePopover } from "../shell/ListPills";
 import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
@@ -84,7 +84,7 @@ import { genreLabel } from "../../lib/genres";
 import { destroyManifest } from "../../lib/cascade";
 import { emitAgentCardEvent, closeAgentCard } from "../../lib/agentCardStore";
 import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from "../../lib/queryPanelStore";
-import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { GLANCE_LABEL, glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
 import "../shell/listToolbar.css"; /* v18.3 §E — the list toolbar and headings, shared with the Query Centre */
 import { useStickyStack } from "../shell/stickyStack";
@@ -329,9 +329,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     () => glanceModel({ facts: factsAll, rows: qcRows, msId: scoped?.id ?? null, readyIds: step.ready.map((a) => a.id), nowMs }),
     [factsAll, qcRows, scoped, step, nowMs],
   );
-  /* v14 §4: every control's count is faceted — under every OTHER control and Find */
-  const counts = useMemo(() => facetCounts(factsAll, filters, inPool), [factsAll, filters, inPool]);
-  const tallies = useMemo(() => genreTallies(factsAll), [factsAll]);
+  /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
+     the genre tallies it fed are retired with the strip */
   const visibleFacts = useMemo(
     () => sortFacts(factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed),
     [factsAll, inPool, filters, sortKey, reversed],
@@ -365,6 +364,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
   const wsRef = useRef<HTMLElement | null>(null);
+  /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
+  const filRef = useRef<HTMLButtonElement | null>(null);
 
   const resetList = useCallback(() => {
     setFilters(emptyContactFilters());
@@ -553,6 +554,46 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showList = pageState === "list" && !showEmpty;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
+  /* ── v19 §F — THE APPLIED-FILTERS ROW: one chip per filter, per search and for the band's group, in that order the
+     search first. The Filters chip counts the filters (and the band's group) but never the search. */
+  const appliedChips = useMemo<AppliedChip[]>(() => {
+    const out: AppliedChip[] = [];
+    const q = search.trim();
+    if (q) out.push({ key: "search", label: `\u201c${q}\u201d`, off: () => setSearch("") });
+    if (glance) out.push({ key: "glance", label: GLANCE_LABEL[glance], off: () => setGlance(null) });
+    for (const a of appliedFilters(filters, genreWords)) out.push({ key: a.key, label: a.label, off: () => setFilters(a.drop(filters)) });
+    return out;
+  }, [search, glance, filters]);
+  const chipCount = contactFilterCount(filters) + (glance ? 1 : 0);
+  /* the row's measured height, published on the list card as `--cl19-af-h` (0 when there is no row) so the headings and
+     the group bands stick under it */
+  const afRef = useRef<HTMLDivElement | null>(null);
+  const afOn = appliedChips.length > 0;
+  useLayoutEffect(() => {
+    const card = wsRef.current;
+    const row = afRef.current;
+    if (!card) return undefined;
+    if (!afOn || !row) { card.style.setProperty("--cl19-af-h", "0px"); return undefined; }
+    const write = () => { const h = row.offsetHeight; if (h > 0) card.style.setProperty("--cl19-af-h", `${h}px`); };
+    write();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(write);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [afOn, showList, fullOn]);
+  /* when the SET of filters changes, the list goes back to its top (the toolbar at the top of the scroll area) — only if
+     it has scrolled past it, and quietly, so a live menu stays open */
+  const filterSig = JSON.stringify([filters, search.trim(), glance]);
+  const lastSig = useRef(filterSig);
+  useEffect(() => {
+    if (lastSig.current === filterSig) return;
+    lastSig.current = filterSig;
+    const card = wsRef.current;
+    const sc = card?.closest<HTMLElement>(".wpg-scroll");
+    if (!card || !sc) return;
+    const over = card.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+    if (over < -0.5) quietScroll(() => { sc.scrollTop += over; });
+  }, [filterSig]);
   /* v19 §A — the folder tab and the sheet lip go navy while this list is pinned and on screen, and ONLY then: a
      layout effect, so the tab never paints navy over an unpinned page (or cream over a pinned one) */
   useLayoutEffect(() => {
@@ -1135,7 +1176,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         yourMove: yourMoveN, health: pageState === "list" ? health : null, onHealth: openHk, onAdd: openAdd,
       } : null}
       counts={stripCounts} current={currentLetter} onPick={pickLetter}
-      search={search} onSearch={setSearch} groupKey={groupKey} filterCount={contactFilterCount(filters)} pop={pop}
+      search={search} onSearch={setSearch} groupKey={groupKey} filterCount={chipCount} onClearFilters={clearFilters}
+      filtersRef={loading ? undefined : filRef} pop={pop}
       onStopGroup={() => setGroupKey("none")} jump={loading ? null : jump}
       onPin={togglePin} />
   );
@@ -1281,8 +1323,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               density and pin) is retired: the toolbar is the list's only control row. */}
           {listHead(false)}
           <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
-          <ContactFiltersPanel filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
-            showing={visibleFacts.length} msTitle={scoped?.title?.trim() || null} />
+          {afOn ? (
+            <ContactAppliedRow chips={appliedChips} showing={visibleFacts.length} total={factsAll.length} pinned={fullOn} rowRef={afRef}
+              onClearAll={clearFilters}
+              onMore={() => { const b = filRef.current; if (b && pop.open !== "filters") pop.toggle("filters", b); }} />
+          ) : null}
+          <ContactFilterMenu filters={filters} onFilters={setFilters} facts={factsAll} pool={inPool} pop={pop}
+            showing={visibleFacts.length} total={factsAll.length} />
           <div className="cl14-list" data-cl14="list">
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
