@@ -605,6 +605,31 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     ro.observe(row);
     return () => ro.disconnect();
   }, [afOn, showList, fullOn]);
+  /* v19 §I — THE LIST HAS NO FOOTER: THE CARD RUNS TO THE PAGE'S FOOT. With more rows than the page holds the last row
+     ends the card and the card ends the scroll (contactV19.css drops the page's foot air). With fewer — a search, a
+     filter, a short list — the card still meets the page's bottom edge (square, nothing beneath it) rather than ending
+     mid-page: its min-height is the scroll area's height less the card's own top in the scrolled content, measured, and
+     re-measured whenever the scroll area or the group above it changes size. Desktop only (the phone keeps its flow). */
+  useLayoutEffect(() => {
+    const card = wsRef.current;
+    const sc = card?.closest<HTMLElement>(".wpg-scroll");
+    if (!card || !sc || !(active && showList)) return undefined;
+    const group = card.closest<HTMLElement>(".clv-group");
+    const write = () => {
+      if (!window.matchMedia?.("(min-width: 768px)").matches) { card.style.minHeight = ""; return; }
+      const top = card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+      const pad = parseFloat(getComputedStyle(sc).paddingBottom) || 0;
+      const h = Math.floor(sc.clientHeight - top - pad);
+      const v = h > 0 ? `${h}px` : "";
+      if (card.style.minHeight !== v) card.style.minHeight = v;
+    };
+    write();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(write);
+    ro.observe(sc);
+    if (group) ro.observe(group);
+    return () => { ro.disconnect(); };
+  }, [active, showList, fullOn]);
   /* when the SET of filters changes, the list goes back to its top (the toolbar at the top of the scroll area) — only if
      it has scrolled past it, and quietly, so a live menu stays open */
   const filterSig = JSON.stringify([filters, search.trim(), glance]);
