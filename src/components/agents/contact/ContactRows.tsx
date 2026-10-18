@@ -25,6 +25,8 @@ import { dayMonth } from "../../../lib/dates";
 import type { CardAct, CardPrimary } from "../../../lib/agentCard";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { ContactPeek } from "./ContactPeek";
+import { AddContact, CopyEmail, DateAdded, Website } from "./ContactCells";
+import { CONTACT_FS, fitContactColumns, type ContactColumnFit } from "../../../lib/contactColumns";
 import { nextStep } from "../../../lib/rowActions";
 
 export interface ContactRowsProps {
@@ -56,8 +58,9 @@ export interface ContactRowsProps {
 const Line2: React.FC<{ line: RowDateLine | null }> = ({ line }) =>
   line ? <span className={`clv-qd${line.over ? " clv-qd--over" : ""}`} data-clv="qd">{line.text}</span> : null;
 
-/** v14 §6 — the Contact list's four columns, v131's table grammar: Agent · What they want · Replies · Query status */
-export const CONTACT_COLS = "minmax(200px, 1.3fr) minmax(0, 2fr) 120px minmax(170px, 1fr)";
+/** v19 §C — the columns before they are measured (the measurement replaces them before paint): Agent · Date added ·
+ *  Website · Email · Replies · Query status */
+export const CONTACT_COLS = "minmax(0, 1fr) auto auto auto auto auto";
 
 /** "1 Nov" — a reopening date as the replies column names it (the one short-month formatter, lib/dates) */
 const reopenDay = (iso: string | undefined): string | null => {
@@ -137,7 +140,9 @@ const Row: React.FC<{
   onPeek?: (open: boolean, via: PeekVia) => void;
   /** v18 §D — a "+ Add" pill in the peek opens Edit profile on that field */
   onEdit?: (tab: AgentCardTab, focus?: AgentCardField) => void;
-}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog, peek = false, onPeek, onEdit }) => {
+  /** v19 §C — website and email share one column, stacked (they do not both fit side by side) */
+  stacked?: boolean;
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog, peek = false, onPeek, onEdit, stacked = false }) => {
   const track = stageTrack(x);
   const tone = discTone(x);
   const a = x.agent;
@@ -208,6 +213,9 @@ const Row: React.FC<{
     return () => ro.disconnect();
   }, [wish]);
 
+  const email = (a.email ?? "").trim(), site = (a.website ?? "").trim();
+  const webCell = site ? <Website url={site} /> : <AddContact kind="website" onPress={() => onEdit?.("who", "website")} />;
+  const mailCell = email ? <CopyEmail email={email} /> : <AddContact kind="email" onPress={() => onEdit?.("who", "email")} />;
   return (
     /* ⚠️ A div WITH role=button, NOT A <button> (v13 P4): the row holds real controls — the add pills and the
        tray's two buttons — and a button may not contain another interactive element. */
@@ -237,7 +245,7 @@ const Row: React.FC<{
       /* v18 §D: opening the agent closes this row's peek (and any peek still waiting to open) */
       onClick={(e) => {
         /* v18.3.3 §B/§C — the contact details and the next step answer their own clicks; empty space still opens the card */
-        if ((e.target as HTMLElement).closest('[data-cl183="peek-pill"], [data-cl1833="next"]')) return;
+        if ((e.target as HTMLElement).closest('[data-cl183="peek-pill"], [data-cl1833="next"], .cl19-c [data-cl19]')) return;
         window.clearTimeout(hoverT.current); if (peek) onPeek?.(false, "click"); onOpen(e.currentTarget.getBoundingClientRect());
       }}
       onMouseEnter={() => {
@@ -257,8 +265,6 @@ const Row: React.FC<{
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(e.currentTarget.getBoundingClientRect()); }
       }}
     >
-      {/* v17 §D — the surname letter, in the margin of the first row of each letter (the ungrouped A to Z list) */}
-      {letter ? <span className="cl17-ml" data-cl17="margin-letter" aria-hidden="true">{letter}</span> : null}
       <span className="clv-rwho">
         <AgentDisc initials={agentInitials(a)} standing={standingOf(tone)} className="clv-ini" attrs={{ "data-cl17": "disc" }} />
         <span className="clv-rwn">
@@ -266,23 +272,17 @@ const Row: React.FC<{
           {whoBits.length > 0 && <i className="clv-ragy"><Marked text={whoBits.join(" · ")} q={highlight} /></i>}
         </span>
       </span>
-      {/* What they want: the wishlist on ONE line, the genre chips under it */}
-      <span className="clv-rfit" data-clv="dos">
-        {wish ? (
-          <p className={`clv-rwish${long ? " is-long" : ""}`} ref={wishRef} data-clv="wish"><span className="clv-mq">{wish}</span></p>
-        ) : (
-          <AddPill probe="torn-wish" label="+ Add their wishlist" onPress={onAddWishlist} />
-        )}
-        {x.genres.length > 0 ? (
-          <span className="clv-gch" data-clv="gch">
-            {genres.map((g) => (
-              <span key={g} className={genreHit(g) ? "clv-hit" : undefined}>{g}</span>
-            ))}
-          </span>
-        ) : (
-          <AddPill probe="torn" label="+ Add genres" onPress={onAddGenres} />
-        )}
-      </span>
+      {/* v19 §C — Date added, then Website and Email: two columns, or one stacked column when they do not both fit.
+          Each answers its own click; none opens the card. A missing one is "Add …", the card at that field. */}
+      <span className="cl19-c cl19-cd"><DateAdded agent={a} /></span>
+      {stacked ? (
+        <span className="cl19-c cl19-cs" data-cl19="contacts">{webCell}{mailCell}</span>
+      ) : (
+        <>
+          <span className="cl19-c cl19-cw">{webCell}</span>
+          <span className="cl19-c cl19-ce">{mailCell}</span>
+        </>
+      )}
       {/* Replies: "~N wks" over the door */}
       <span className="clv-rrep" data-clv="rep">
         {weeks ? <b>~{weeks} wks</b> : <b className="unk">Not stated</b>}
@@ -424,44 +424,94 @@ export const ContactRows: React.FC<ContactRowsProps & {
   const col = (label: string, k: SortKey | null, align?: "end"): ListColumn => ({
     label, align,
     sort: k && sort ? {
-      on: sort.key === k, reversed: sort.key === k && sort.reversed, ariaSort: true,
+      on: sort.key === k, reversed: sort.key === k && sort.reversed, ariaSort: true, idleMark: true,
       onPress: () => (sort.key === k ? sort.onReverse() : sort.onSort(k)),
     } : undefined,
   });
-  const columns = [col("Agent", "surname"), col("What they want", null), col("Replies", "reply"), col("Query status", "status", "end")];
+  /* v19 §C — the columns' widths: each as wide as its longest entry (or heading), Agent takes the slack, website and
+     email stack when they do not both fit. Measured before paint and on every resize; the decision is the lib's. */
+  const [fit, setFit] = useState<ContactColumnFit>({ stacked: false, fs: CONTACT_FS, count: 6, cols: "minmax(0, 1fr) auto auto auto auto auto" });
+  const fitRef = useRef(fit);
+  fitRef.current = fit;
+  const measure = () => {
+    const root = listRef.current;
+    const labels = root?.querySelector<HTMLElement>(".lt-labels");
+    if (!root || !labels || labels.clientWidth === 0) return;
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-clv="row"]')];
+    if (!rows.length) return;
+    const cs = getComputedStyle(labels);
+    const avail = labels.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    const gap = parseFloat(cs.columnGap) || 20;
+    const range = document.createRange();
+    const textW = (el: Element | null) => { if (!el) return 0; range.selectNodeContents(el); return range.getBoundingClientRect().width; };
+    const head = (name: string) => textW(labels.querySelector(`[data-lt-col="${name}"]`));
+    /* the headings are one monospaced face: a missing heading's width is its length in that face's advance */
+    const rep = labels.querySelector('[data-lt-col="Replies"]');
+    const adv = rep ? textW(rep) / Math.max(1, (rep.textContent ?? "").length) : 7.8;
+    const mono = (t: string) => t.length * adv;
+    const maxOf = (sel: string, w: (e: HTMLElement) => number) => rows.reduce((m, r) => Math.max(m, ...[...r.querySelectorAll<HTMLElement>(sel)].map(w), 0), 0);
+    const fsNow = fitRef.current.fs;
+    const norm = (e: HTMLElement) => e.getBoundingClientRect().width * (CONTACT_FS / fsNow);
+    const who = maxOf(".clv-rwho", (e) => {
+      const disc = e.querySelector<HTMLElement>(".clv-ini")?.getBoundingClientRect().width ?? 40;
+      return disc + 11 + Math.max(textW(e.querySelector(".clv-rwn b")), textW(e.querySelector(".clv-ragy")));
+    });
+    const next = fitContactColumns({
+      avail, gap, agentFloor: Math.min(who, 230),
+      date: maxOf('.cl19-cd [data-cl19="date"]', norm), dateHead: head("Date added"),
+      web: maxOf('[data-cl19="website"], [data-cl19="add-website"]', norm), webHead: mono("Website"),
+      email: maxOf('[data-cl19="email"], [data-cl19="add-email"]', norm), emailHead: mono("Email"),
+      bothHead: mono("Website and email"),
+      replies: Math.max(maxOf(".clv-rrep > *", (e) => e.getBoundingClientRect().width), head("Replies")),
+      status: Math.max(maxOf(".clv-rq > *", (e) => e.getBoundingClientRect().width), head("Query status")),
+    });
+    const cur = fitRef.current;
+    if (next.cols !== cur.cols || next.stacked !== cur.stacked || next.fs !== cur.fs) setFit(next);
+  };
+  useLayoutEffect(measure);
+  useEffect(() => {
+    const root = listRef.current;
+    if (!root || typeof ResizeObserver === "undefined") return undefined;
+    let raf = 0;
+    const ro = new ResizeObserver(() => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; measure(); }); });
+    ro.observe(root);
+    void document.fonts?.ready.then(() => measure());
+    return () => { ro.disconnect(); if (raf) cancelAnimationFrame(raf); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const columns = [
+    col("Agent", "surname"), col("Date added", "added"),
+    ...(fit.stacked ? [col("Website and email", null)] : [col("Website", null), col("Email", null)]),
+    col("Replies", "reply"), col("Query status", "status", "end"),
+  ];
   const countOf = (g: ContactGroup) => (totals ? `${g.ids.length} of ${totals.get(g.label) ?? g.ids.length}` : `${g.ids.length} ${g.ids.length === 1 ? "agent" : "agents"}`);
-  /* v17 §D — the margin letters: in the UNGROUPED list in surname order, the first row of each letter carries it.
-     Grouped by letter the dividers do that job; in any other order the letters would be scattered. */
-  const margin = ungrouped && (!sort || sort.key === "surname");
-  let lastLetter: string | null = null;
+  /* v19 §C — the v17 margin letters are retired (the mock draws none; the toolbar's A to Z row does their job) */
   const rowsOf = (g: ContactGroup) => g.ids.map((id) => {
     const x = byId.get(id);
     if (!x) return null;
-    const initial = surnameInitial(x.agent);
-    const letter = margin && initial !== lastLetter ? initial : null;
-    lastLetter = initial;
     return (
       <Row
         key={id} x={x} nowMs={nowMs} genreHit={genreHit} current={openId === id} fresh={newId === id} hideYourMove={hideYourMove}
         focused={focusId === id} highlight={highlight}
         onOpen={(from) => onOpen(id, from)} tray={trayFor(x)} onAct={(act) => onAct(id, act)}
         onAddGenres={() => onAddGenres(id)} onAddWishlist={() => onAddWishlist(id)}
-        letter={letter} onLog={onLog ? () => onLog(id) : undefined}
+        onLog={onLog ? () => onLog(id) : undefined}
         peek={peekId === id} onPeek={onEdit ? onPeekFor(id) : undefined}
         onEdit={onEdit ? (tab, focus) => onEdit(id, tab, focus) : undefined}
+        stacked={fit.stacked}
       />
     );
   });
   return (
-    <div ref={listRef} className={`clv-list${compact ? " clv-list--compact" : ""}${margin ? " cl17-margin" : ""}`} data-clv="list" data-cl17-margin={margin ? "" : undefined} data-density={compact ? "compact" : "comfortable"}>
+    <div ref={listRef} className={`clv-list${compact ? " clv-list--compact" : ""}`} data-clv="list" data-density={compact ? "compact" : "comfortable"}
+      data-cl19-stacked={fit.stacked ? "" : undefined} style={{ "--cl19-fs": `${fit.fs}px` } as React.CSSProperties}>
       {ungrouped ? (
         /* v16 §C — no grouping: ONE panel, the labels and then every row, no dividers */
-        <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
+        <ListPanel cols={fit.cols} columns={columns} data-clv="panel">
           {groups.map((g) => <React.Fragment key={g.key}>{rowsOf(g)}</React.Fragment>)}
         </ListPanel>
       ) : byLetter ? (
         /* Letter: ONE panel — the labels, then each letter's divider and its rows as siblings */
-        <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
+        <ListPanel cols={fit.cols} columns={columns} data-clv="panel">
           {groups.map((g) => (
             <React.Fragment key={g.label}>
               <ListDivider letter={g.label} count={countOf(g)} data-clv="band" data-letter={/^[A-Z#]$/.test(g.label) ? g.label : undefined} />
@@ -472,7 +522,7 @@ export const ContactRows: React.FC<ContactRowsProps & {
       ) : (
         /* any other grouping — v18.3 §E: ONE panel, ONE headings row at the top (it sticks), each group only its own
            band over its rows. Clicking a heading sorts within every group, as before. */
-        <ListPanel cols={CONTACT_COLS} columns={columns} data-clv="panel">
+        <ListPanel cols={fit.cols} columns={columns} data-clv="panel">
           {groups.map((g) => (
             <section className="clv-grp" key={g.label} data-clv="grp">
               <ListGroupHeader tone="powder" title={g.label} count={countOf(g)} data-clv="band" />

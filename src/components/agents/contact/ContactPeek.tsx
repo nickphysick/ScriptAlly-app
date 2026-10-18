@@ -14,9 +14,8 @@ import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { materialWords } from "../../../lib/agentPanel";
 import { materialRowsFromAgent } from "../../../lib/agentMaterials";
 
-/** "agency.co.uk" for a website, without the scheme or a trailing slash */
-export const domainOf = (url: string): string => url.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "");
-const hrefOf = (url: string): string => (/^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`);
+import { copyText, domainOf, hrefOf } from "./ContactCells";
+export { copyText, domainOf };
 
 /** the first social handle on record: the repeatable list first, then the mirrored platform fields */
 export function socialOf(a: Pick<Agent, "socials" | "twitter" | "bluesky" | "instagram">): string | null {
@@ -35,18 +34,6 @@ export function sendThem(a: Pick<Agent, "materialsWanted">): string | null {
 
 type Edit = (tab: AgentCardTab, focus?: AgentCardField) => void;
 
-
-/** Copies `text`: the Clipboard API, falling back to a selected textarea and `execCommand("copy")` (an insecure
-    origin, or a browser that refuses the API) */
-export async function copyText(text: string): Promise<boolean> {
-  try { if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); return true; } } catch { /* fall back */ }
-  try {
-    const ta = document.createElement("textarea");
-    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0"; ta.style.pointerEvents = "none";
-    document.body.appendChild(ta); ta.select();
-    const ok = document.execCommand("copy"); ta.remove(); return ok;
-  } catch { return false; }
-}
 
 /** the copy glyph: two overlapping rounded squares */
 const CopyIcon: React.FC = () => (

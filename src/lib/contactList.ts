@@ -145,7 +145,7 @@ export const matchesCards = (sel: ReadonlySet<ContactCardKey>, s: ContactStandin
 /* ══ phase 3 — the list: row facts, the date line, filters, groups and sorts (v11 §4–6) ═════ */
 import { STAGE_NAME } from "./qcSummary";
 import { countryName } from "./territory";
-import { formatDate } from "./dates";
+import { dayMonth, formatDate } from "./dates";
 
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
@@ -519,7 +519,7 @@ export function contactGroups(
 
 /* ── sorting (v14 §4) — within groups when grouped ── */
 
-export type SortKey = "surname" | "agency" | "reply" | "activity" | "status";
+export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added";
 /** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
   { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },
@@ -527,7 +527,23 @@ export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [st
   { key: "reply", label: "Response time", line: "Unknown last, either way", dir: ["Fastest first", "Slowest first"] },
   { key: "activity", label: "Recent activity", line: "The latest change to each agent's query", dir: ["Most recent first", "Oldest first"] },
   { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
+  /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
+  { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
 ];
+
+/** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
+export function addedMs(a: Pick<Agent, "dateAdded">): number | null {
+  const t = typeof a.dateAdded === "string" ? Date.parse(a.dateAdded) : NaN;
+  return Number.isFinite(t) ? t : null;
+}
+
+/** v19 §C — "12 May" and "2026", the row's Date added cell in two parts (the year is set lighter); null for no date */
+export function addedParts(a: Pick<Agent, "dateAdded">): { dm: string; y: string } | null {
+  const t = addedMs(a);
+  if (t == null) return null;
+  const d = new Date(t);
+  return { dm: dayMonth(t), y: String(d.getFullYear()) };
+}
 
 /**
  * Sort within groups. ⚠️ REVERSED KEEPS THE MISSING LAST (the house law): reversing a list whose tail is
@@ -542,7 +558,7 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   const active = (x: AgentFacts) => x.lastMs ?? null;
   const rank = (x: AgentFacts) => STATUS_GROUP_ORDER.indexOf(x.status14);
   const missing: Partial<Record<SortKey, (x: AgentFacts) => boolean>> = {
-    reply: (x) => weeks(x) == null, activity: (x) => active(x) == null,
+    reply: (x) => weeks(x) == null, activity: (x) => active(x) == null, added: (x) => addedMs(x.agent) == null,
   };
   switch (key) {
     case "surname": by.sort(sur); break;
@@ -550,6 +566,7 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
     case "reply": by.sort((a, b) => (weeks(a) ?? 999) - (weeks(b) ?? 999) || sur(a, b)); break;
     case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || sur(a, b)); break;
     case "status": by.sort((a, b) => rank(a) - rank(b) || sur(a, b)); break;
+    case "added": by.sort((a, b) => (addedMs(b.agent) ?? -Infinity) - (addedMs(a.agent) ?? -Infinity) || sur(a, b)); break;
   }
   if (!reversed) return by;
   const gone = missing[key];

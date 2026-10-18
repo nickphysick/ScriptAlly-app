@@ -215,3 +215,72 @@ html.cl19-vt::view-transition-old(root) { animation: 220ms ease both cl19-vt-out
 html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8, .3, 1) both cl19-vt-in; }
 @keyframes cl19-vt-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes cl19-vt-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── §C · THE COLUMNS, THE HEADINGS AND THE ROWS. Agent · Date added · Website · Email · Replies · Query status; the
+   widths are measured (ContactRows → lib/contactColumns): each column its longest entry, Agent the slack, website and
+   email stacked into one column when they do not both fit, the contact type then stepping down 0.5px at a time
+   (`--cl19-fs`, never below 12). Every rule is scoped to `.cl19-card`, so it outranks the v14–v18.3 layers. ── */
+.clv-group .cl19-card { --cl1833-av: 40px; }
+/* the headings: one face, ink at 85%, solid white with a 1px rule; they stick under the toolbar, and under the
+   applied-filters row when it shows (`--cl19-af-h`, its measured height; Part F sets it) */
+.clv-group .cl19-card .lt-labels.lth { column-gap: 20px; padding: 0 40px 0 78px; background: #fff; border-bottom: 1px solid rgba(var(--cl19-ink), 0.12); }
+@media (min-width: 768px) {
+  .clv-group .cl19-card .lt-labels.lth { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px) + var(--cl19-af-h, 0px)); }
+}
+.clv-group .cl19-card .lt-labels.lth .lt-lab {
+  font: 500 10.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(var(--cl19-ink), 0.85); white-space: nowrap;
+}
+.clv-group .cl19-card .lt-labels.lth .lt-lab i { color: inherit; font-style: normal; }
+.clv-group .cl19-card .lt-labels.lth .lt-lab .lt-idle { opacity: 0.32; }
+.clv-group .cl19-card .lt-labels.lth button.lt-lab:not(.on):hover::after { content: none; }
+.clv-group .cl19-card .lt-labels.lth button.lt-lab:not(.on):hover .lt-idle { opacity: 0.6; }
+
+/* the rows: 70 at 1512 with one line of agency; the same inset as the headings */
+.clv-group .cl19-card .clv-row {
+  min-height: 70px; padding: 14px 40px 10px 78px; column-gap: 20px; font-family: var(--sp-serif);
+}
+.clv-group .cl19-card .clv-row::after { left: 0; right: 0; background: rgba(var(--cl19-ink), 0.08); }
+.clv-group .cl19-card .clv-row .clv-ini { width: 40px; height: 40px; }
+.clv-group .cl19-card .clv-row .clv-rwn b {
+  font: 400 19px/22.8px var(--sp-type) !important; letter-spacing: -0.015em; color: rgb(var(--cl19-ink));
+}
+.clv-group .cl19-card .clv-row .clv-ragy {
+  margin-top: 2px; font: italic 400 14px/20px var(--sp-serif) !important; color: rgba(var(--cl19-ink), 0.58);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Replies and Query status: as on dev; they never wrap, so the measured width is their own */
+.clv-group .cl19-card .clv-row > .clv-rrep { justify-self: start; white-space: nowrap; }
+.clv-group .cl19-card .clv-row > .clv-rq { white-space: nowrap; }
+
+/* Date added · Website · Email */
+.clv-group .cl19-card .cl19-c {
+  min-width: 0; font: 400 var(--cl19-fs, 15px)/1.4 var(--sp-serif); color: rgb(var(--cl19-ink)); white-space: nowrap;
+}
+.clv-group .cl19-card .cl19-cs { display: flex; flex-direction: column; align-items: flex-start; }
+.cl19-c .cl19-dt, .cl19-c .cl19-web, .cl19-c .cl19-em, .cl19-c .cl19-miss {
+  display: inline-block; font: inherit; white-space: nowrap; vertical-align: top;
+}
+/* brand.tsx names bare spans as the sans at runtime: every element in these cells states the serif */
+.clv-group .cl19-card .cl19-c :is(span, a, button, i) { font-family: var(--sp-serif) !important; }
+.cl19-c .cl19-yr { color: rgba(28, 19, 15, 0.45); }
+.cl19-c .cl19-web { color: inherit; text-decoration: none; }
+.cl19-c .cl19-ext { display: inline-block; margin-left: 4px; font: normal 400 13px/1 var(--sp-serif); color: #2a3a52; opacity: 0; }
+.cl19-c .cl19-web:hover .cl19-ext, .cl19-c .cl19-web:focus-visible .cl19-ext { opacity: 1; }
+.cl19-c .cl19-web:focus-visible, .cl19-c .cl19-em:focus-visible, .cl19-c .cl19-miss:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
+.cl19-c .cl19-em { position: relative; cursor: pointer; }
+.cl19-c .cl19-em:is(:hover, :focus-visible) .cl19-et { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.4); text-underline-offset: 3px; }
+/* the copy: "✓ Copied" over the address, which stays laid out (hidden) so the column keeps its width */
+.cl19-c .cl19-em[data-done] .cl19-et { visibility: hidden; }
+.cl19-c .cl19-copied { position: absolute; left: 0; top: 0; font-style: italic; color: #2f6b4f; white-space: nowrap; }
+/* stacked: the email under the website, at 72% ink */
+.cl19-c.cl19-cs .cl19-em { color: rgba(28, 19, 15, 0.72); }
+/* a missing website or email: "Add …" in ink with its icon (the icon at 45%), navy and underlined on hover */
+.cl19-c .cl19-miss {
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: rgb(28, 19, 15);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.cl19-c .cl19-miss svg { flex: none; width: 14px; height: 14px; color: rgba(28, 19, 15, 0.45); }
+.cl19-c .cl19-miss:hover { color: #2a3a52; }
+.cl19-c .cl19-miss:hover svg { color: #2a3a52; }
+.cl19-c .cl19-miss:hover span { text-decoration: underline; text-underline-offset: 3px; }

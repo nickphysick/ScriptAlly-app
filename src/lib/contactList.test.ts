@@ -115,7 +115,7 @@ describe("where you stand — the page-local union over the QC's own rows", () =
 import {
   ACTION_GROUPS, type ContactFilters, NOT_RECORDED, dropOptions, STATUS_CHOICES, STATUS_GROUP_ORDER, type StatusKey, actionOf,
   agentFacts, contactFilterCount, contactGroups, emptyContactFilters, facetCounts, genreTallies, OPEN_CHOICES,
-  matchesContactFilters, rowDateLine, sortFacts, standingQuery,
+  matchesContactFilters, rowDateLine, sortFacts, standingQuery, addedMs, addedParts,
 } from "./contactList";
 import { genreKey } from "./genreMatch";
 import { QueryStatus } from "../types";
@@ -285,8 +285,9 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
     if (labels.includes(NOT_RECORDED)) expect(labels[labels.length - 1]).toBe(NOT_RECORDED);
     expect(labels.some((l) => /England|Scotland|Wales/.test(l))).toBe(false);
   });
-  it("the five sorts, each with its direction words", () => {
-    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status"]);
+  it("the six sorts, each with its direction words (v19 §C adds Date added)", () => {
+    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status", "Date added"]);
+    expect(SORT_OPTIONS_V12.find((o) => o.key === "added")?.dir).toEqual(["Newest first", "Oldest first"]);
     expect(SORT_OPTIONS_V12[0].dir).toEqual(["A to Z", "Z to A"]);
   });
   it("agency ignores a leading The", () => {
@@ -391,5 +392,28 @@ describe("v14 §7.8 — the helpful dead end: each drop's count is what that dro
     expect(opts[0].n).toBe(facts.length);
     const none = dropOptions(facts, { ...emptyContactFilters(), genres: ["no-such-genre-a", "no-such-genre-b"], genreMode: "all" }, "", search, label);
     expect(none).toEqual([]);
+  });
+});
+
+describe("v19 §C/§J — Date added: the record's own dateAdded, newest first, no date last either way", () => {
+  const mk = (id: string, name: string, dateAdded: string) => ({ agent: { id, name, agency: "", dateAdded } }) as unknown as Parameters<typeof sortFacts>[0][number];
+  const facts = [
+    mk("a", "Ada Reed", "2026-05-12T10:00:00.000Z"),
+    mk("b", "Ben Cole", "2026-09-22T10:00:00.000Z"),
+    mk("c", "Cy Ames", ""),
+    mk("d", "Di Moss", "2026-01-18T10:00:00.000Z"),
+    mk("e", "Ed Lowe", "not a date"),
+  ];
+  it("first click: newest first; the two with no readable date last, by surname", () => {
+    expect(sortFacts(facts, "added").map((x) => x.agent.id)).toEqual(["b", "a", "d", "c", "e"]);
+  });
+  it("reversed: oldest first, and the undated STILL last", () => {
+    expect(sortFacts(facts, "added", true).map((x) => x.agent.id)).toEqual(["d", "a", "b", "c", "e"]);
+  });
+  it("the cell's two parts: day and month, then the year; nothing for a missing or unreadable date", () => {
+    expect(addedParts({ dateAdded: "2026-05-12T10:00:00.000Z" })).toEqual({ dm: "12 May", y: "2026" });
+    expect(addedParts({ dateAdded: "" })).toBeNull();
+    expect(addedParts({ dateAdded: "nonsense" })).toBeNull();
+    expect(addedMs({ dateAdded: "2026-05-12T10:00:00.000Z" })).toBe(Date.parse("2026-05-12T10:00:00.000Z"));
   });
 });

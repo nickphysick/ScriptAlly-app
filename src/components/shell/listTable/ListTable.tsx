@@ -58,7 +58,8 @@ export interface ListColumn {
   label: string;
   /** a sortable column: pressing it sorts by it, pressing again turns the order round */
   /** `ariaSort` (opt-in) also states the order on the active heading as `aria-sort`, for a list whose headings are its only sort control */
-  sort?: { on: boolean; reversed: boolean; onPress: () => void; ariaSort?: boolean };
+  /** `idleMark` (opt-in, Contact list v19 §C) shows a faint ⇅ on a sortable heading that is not the active one */
+  sort?: { on: boolean; reversed: boolean; onPress: () => void; ariaSort?: boolean; idleMark?: boolean };
   align?: "end";
 }
 
@@ -94,7 +95,7 @@ export const ListLabels: React.FC<{ columns: ListColumn[]; stuck: boolean; label
           aria-label={`Sort by ${c.label.toLowerCase()}${c.sort.on ? (c.sort.reversed ? ", reversed" : "") : ""}`}
           onClick={c.sort.onPress}
         >
-          {c.label}{c.sort.on ? <i aria-hidden="true">{c.sort.reversed ? " ↑" : " ↓"}</i> : null}
+          {c.label}{c.sort.on ? <i aria-hidden="true">{c.sort.reversed ? " ↑" : " ↓"}</i> : c.sort.idleMark ? <i className="lt-idle" aria-hidden="true"> ⇅</i> : null}
         </button>
       ) : (
         <span key={c.label} className={`lt-lab${c.align === "end" ? " end" : ""}`} data-lt-col={c.label}>{c.label}</span>

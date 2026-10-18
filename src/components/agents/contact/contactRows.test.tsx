@@ -23,10 +23,28 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
   it("no row carries a state edge any more (§6: no coloured row edges)", () => {
     expect(html(false)).not.toContain("data-edge");
   });
-  it("missing wishlist and genres are the dashed add pills, saying what to add", () => {
+  /* RE-POINTED (v19 §C): "What they want" left the row — its wishlist and genres are the open row's strip (Part D). The
+     row's own columns are now Date added, Website and Email. */
+  it("v19 §C: no What they want cell; the Date added cell, and Add website / Add email where they are missing", () => {
     const h = html(false);
-    expect(h).toMatch(/class="clv-miss"[^>]*data-clv="torn-wish"[^>]*>\+ Add their wishlist</);
-    expect(h).toMatch(/class="clv-miss"[^>]*data-clv="torn"[^>]*>\+ Add genres</);
+    expect(h).not.toContain('data-clv="dos"');
+    expect(h).not.toContain("+ Add their wishlist");
+    expect(h).toMatch(/data-cl19="add-website"[^>]*>.*Add website</);
+    expect(h).toMatch(/data-cl19="add-email"[^>]*>.*Add email</);
+    expect(h).toContain('data-cl19="date"');
+  });
+  it("v19 §C: the date reads day and month, then the year in its own span; the email copies and says so", async () => {
+    const withAll = { ...(facts as object), agent: { ...(agent as object), dateAdded: "2026-05-12T10:00:00.000Z", email: "ada@reed.co.uk", website: "https://www.reed.co.uk/" } } as never;
+    const h = renderToStaticMarkup(React.createElement(ContactRows, {
+      groups: [{ label: "R", ids: ["a1"] }] as never, byId: new Map([["a1", withAll]]), nowMs: 0, genreHit: () => false,
+      openId: null, onOpen: () => {}, onAddGenres: () => {}, onAddWishlist: () => {}, onAct: () => {},
+      trayFor: () => ({ label: "Log a query", act: "log" as const }),
+    }));
+    expect(h).toMatch(/data-cl19="date">12 May <span class="cl19-yr">2026<\/span>/);
+    expect(h).toMatch(/data-cl19="email" role="button" tabindex="0" title="Copy email" aria-label="Copy email ada@reed.co.uk"/);
+    expect(h).toMatch(/data-cl19="website" href="https:\/\/www.reed.co.uk\/" target="_blank"/);
+    expect(h).toContain(">reed.co.uk<");
+    expect(h).not.toContain("cl17-ml");
   });
   it("replies: an unstated window reads Not stated over the door", () => {
     expect(html(false)).toMatch(/<b class="unk">Not stated<\/b><small>Open to queries<\/small>/);
