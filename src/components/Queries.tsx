@@ -113,7 +113,9 @@ import { stripSent } from "../lib/qcStrip";
 import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
-import { PageGuide, type GuideStep } from "./shell/PageGuide";
+import { PageChecklist, type ChecklistTarget, type FlowCard } from "./shell/guide/PageChecklist";
+import { QC_ALL_DONE, QC_AFTER_FIRST, QC_CHECKLIST, QC_GUIDE_FINISHED_PATH, QC_GUIDE_HIDDEN_PATH, QC_GUIDE_SEEN_PATH, QC_NEEDS_A_QUERY, qcGuideDonePath, qcGuideOf, type QcGuideKey } from "../lib/pageChecklist";
+import { setGuideWalk } from "../lib/guideWalk";
 
 /**
  * §4b — THE QUERY CENTRE'S THREE STEPS. Step one's title and both its sentences are the
@@ -121,29 +123,6 @@ import { PageGuide, type GuideStep } from "./shell/PageGuide";
  * to its voice and to §4b's own description of them ("the list and its hover", "the Birds-eye
  * view"). Nothing here states a number or a name the page does not.
  */
-const QC_GUIDE: readonly GuideStep[] = [
-  {
-    title: "Your desk, in three bands",
-    body: [
-      "The desk at the top counts what's with you, with agents, and closed. Click a section to see all of them in the cards below it.",
-      "The desk only chooses the cards. The list underneath always shows every query, whatever the desk says.",
-    ],
-  },
-  {
-    title: "Every query, one row",
-    body: [
-      "The list is every query. Hover a row for its next action; click it for the full record.",
-      "Find, Filter, Group and Sort narrow what you are looking at — the band above the rows says how it is grouped.",
-    ],
-  },
-  {
-    title: "The Birds-eye view",
-    body: [
-      "The tab at the bottom right, or B, opens every live query on one set of dates.",
-      "A bar runs in its stage's colour up to today. Past the due date, a dashed tick marks the day it was due and a beacon marks today.",
-    ],
-  },
-];
 import { QcBirdsDrawer } from "./queries/centre/QcBirdsDrawer";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList132";
@@ -213,7 +192,7 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
+import { closeQueryDrawer, currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, nextDoor, primaryDoor } from "../lib/queryActions/entry";
@@ -260,7 +239,7 @@ import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
 import { formatQueryMaterial, materialLabel, materialToken, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
@@ -528,7 +507,7 @@ export const Queries: React.FC<{
     editActivity,
     updateAgent,
     updateQueryStatus,
-    logNudge, setQueryPackage} = useScriptAllyDb();
+    logNudge, setQueryPackage, updateUserPaths} = useScriptAllyDb();
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
@@ -5643,6 +5622,103 @@ export const Queries: React.FC<{
     />
   ) : null;
 
+
+  /* ══ v139 §A — THE PAGE GUIDE: the shared one (Contact list v18.3 F), with the Query Centre's five items ══
+     ⚠️ THE TICKS ARE READ FROM APP STATE AND REAL EVENTS, NEVER FROM THE GUIDE'S OWN BUTTONS (v18.3 F §F.4): a query
+     on the account (any, imported included), the list narrowed by two characters of search, a filter or a status glyph,
+     a real query's panel open, the Birds-eye drawer open. Each is written once per account, by leaf. "resp" is Part B's
+     practice query reaching its last card. */
+  const qcGuide = qcGuideOf(currentUser);
+  const guideAsked = useRef(new Set<QcGuideKey>());
+  const tickGuide = useRef<(k: QcGuideKey) => void>(() => {});
+  tickGuide.current = (k) => {
+    if (!currentUser || qcGuide.hidden || qcGuide.done[k] || guideAsked.current.has(k)) return;
+    guideAsked.current.add(k);
+    void updateUserPaths(qcGuideDonePath(k)).catch(() => { guideAsked.current.delete(k); });
+  };
+  const hasQueries = queries.length > 0;
+  /* item 1 is already true for an account with any query; it is written too, so the tick survives every later state */
+  useEffect(() => { if (routeActive && collectionsReady && hasQueries) tickGuide.current("log"); }, [routeActive, collectionsReady, hasQueries]);
+  const narrowed = qcFind.trim().length >= 2 || qc138FilterCount(qcF138) > 0 || qcFilter !== "all";
+  useEffect(() => { if (routeActive && narrowed) tickGuide.current("find"); }, [routeActive, narrowed]);
+  const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
+  useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
+  useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
+  const guideDone = useMemo(() => ({ ...qcGuide.done, ...(hasQueries ? { log: true } : {}) }), [qcGuide.done, hasQueries]);
+  /* all five done in an EARLIER visit: the pill does not come back (read once, when the account first loads here) */
+  const finishedAtLoad = useRef<boolean | null>(null);
+  if (finishedAtLoad.current === null && currentUser) finishedAtLoad.current = qcGuide.finished;
+  const allGuideDone = QC_CHECKLIST.every((it) => guideDone[it.key]);
+  useEffect(() => { if (allGuideDone && currentUser && !qcGuide.finished) void updateUserPaths(QC_GUIDE_FINISHED_PATH); }, [allGuideDone, currentUser, qcGuide.finished, updateUserPaths]);
+  const markQcGuideSeen = useCallback(() => { if (!qcGuide.seen) void updateUserPaths(QC_GUIDE_SEEN_PATH); }, [qcGuide.seen, updateUserPaths]);
+  const hideQcGuide = useCallback(() => { void updateUserPaths(QC_GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  const guideOff = useMemo<Partial<Record<QcGuideKey, string>>>(
+    () => (collectionsReady && !hasQueries ? Object.fromEntries(QC_NEEDS_A_QUERY.map((k) => [k, QC_AFTER_FIRST])) : {}),
+    [collectionsReady, hasQueries],
+  );
+  const [guideFlow, setGuideFlow] = useState<FlowCard | null>(null);
+  const [guideOpenNonce, setGuideOpenNonce] = useState(0);
+  const reopenGuide = useCallback(() => setGuideOpenNonce((n) => n + 1), []);
+  useEffect(() => { setGuideWalk(!!guideFlow); }, [guideFlow]);
+  useEffect(() => () => setGuideWalk(false), []);
+
+  /* the control each item shows, as it is now. A pinned list hides its header: the header's targets unpin first. */
+  const guideTarget = useCallback((k: QcGuideKey): ChecklistTarget => {
+    const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    const unpinned = <T,>(read: () => T): T => { if (qcPin.full) flushSync(() => qcPin.setFull(false)); return read(); };
+    switch (k) {
+      case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
+      case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters. You can also tap a status glyph at the top of the page." };
+      case "open": {
+        const row = vis(".qc138-sheet [data-qcv='row']");
+        const q = row ? queries.find((x) => x.id === row.dataset.id) : undefined;
+        const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+        const first = ((ag?.name || ag?.agency || "").trim().split(/\s+/)[0]) || "the first";
+        return { el: row, text: `Click ${first}'s row, or any row. The query opens in a panel on the right, with its whole story.` };
+      }
+      case "birds": return { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Click here, or press B from anywhere on the page." };
+      default: return { el: null, text: "" };
+    }
+  }, [queries, agents, qcPin]);
+
+  /* item 1's second card: the journey it opened. The step is armed by pressing the item; the drawer opening for a log
+     journey within a few seconds moves the spotlight to it. Saving logs the query (item 1 is ticked by the data);
+     closing without saving returns to the checklist, unticked. */
+  const guideQueries = useRef(queries);
+  guideQueries.current = queries;
+  const logArmed = useRef(0);
+  const logCount = useRef(0);
+  const onGuideStart = useCallback((k: QcGuideKey): boolean => {
+    if (k === "log") { logArmed.current = Date.now(); logCount.current = queries.length; }
+    return false;
+  }, [queries.length]);
+  useEffect(() => subscribeDrawer((r) => {
+    if (r?.mode === "log" && logArmed.current && Date.now() - logArmed.current < 15000) {
+      logArmed.current = 0;
+      const leave = () => { setGuideFlow(null); closeQueryDrawer(); reopenGuide(); };
+      setGuideFlow({
+        id: "log-2",
+        target: () => document.querySelector<HTMLElement>(".qad-root.is-open [data-qad-drawer='log']"),
+        kicker: "Query Centre · Step 1 of 5",
+        title: "Log a query",
+        body: "Choose the agent and the date you sent it, then save. If you're just looking, press Cancel.",
+        place: "left",
+        passThrough: true,
+        onBack: leave,
+        onEscape: leave,
+      });
+      return;
+    }
+    if (!r) {
+      setGuideFlow((f) => {
+        if (f?.id !== "log-2") return f;
+        const before = logCount.current;
+        window.setTimeout(() => { if (guideQueries.current.length <= before) reopenGuide(); }, 900);
+        return null;
+      });
+    }
+  }), [reopenGuide]);
+
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
@@ -7178,7 +7254,12 @@ export const Queries: React.FC<{
             * menu's "Show the page guide" is the way back once it has been dismissed. Its own
             * placement keeps it off the rail's header, which is what its third step is about.
             */}
-          {!showGridSkeleton && <PageGuide page="queries" steps={QC_GUIDE} />}
+          {/* v139 §A — the old bottom-right guide is retired; the shared page guide (v18.3 F) takes its place */}
+          <PageChecklist page="Query Centre" items={QC_CHECKLIST} done={guideDone} seen={qcGuide.seen}
+            hidden={qcGuide.hidden || !!finishedAtLoad.current}
+            active={routeActive} ready={collectionsReady && !showGridSkeleton} targetFor={guideTarget}
+            onSeen={markQcGuideSeen} onHide={hideQcGuide} art="/images/active-query-hawk.png"
+            disabled={guideOff} allDone={QC_ALL_DONE} flow={guideFlow} onStart={onGuideStart} openNonce={guideOpenNonce} />
 
           {/* §1 (log-sheet) — FORM MODE: the same drawer, widened, wearing the sheet's chrome.
               The modes are exclusive by construction: openCreate stashes and clears the

@@ -556,7 +556,8 @@
     "design-refs/todo-list-v5-2/screens/19-task-hover-another-1280.png": "8b40c67356e7db44f521253180d479b1820aa68ef036d098bbe1531170897bb4",
     "design-refs/todo-list-v5-2/screens/19-task-hover-another-1512.png": "30aca2575c4b9f6cfdb4f6efe033216bedd2c4c8fe81fc31a57524868c4fa4d2",
     "design-refs/todo-list-v5-2/screens/20-task-pinned-1280.png": "c7be1e476dc3f97f9e2824d0de948c7e25a6c119c36d356dd8c213a65b7cd12c",
-    "design-refs/todo-list-v5-2/screens/20-task-pinned-1512.png": "9e07a1a8c81bcec799c75ff85fcc2157ae4dbdc845b7f2753a4a39024aea3452"
+    "design-refs/todo-list-v5-2/screens/20-task-pinned-1512.png": "9e07a1a8c81bcec799c75ff85fcc2157ae4dbdc845b7f2753a4a39024aea3452",
+    "design-refs/query-centre-v139/query-centre-v139.html": "dc7b4286ad93e645212d7d7936337c8b41f0642f7bf99c31aa2e59966065288f"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
