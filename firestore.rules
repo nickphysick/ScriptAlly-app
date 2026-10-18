@@ -62,6 +62,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 64))
         // board-optimise P5: the four desk behaviours as one map (the safe hasAny pattern)
         && (!data.keys().hasAny(['todoPrefs']) || data.todoPrefs is map)
+        // Discover v1: the Scout's tuning (lens + three switches), one map, written leaf by leaf
+        && (!data.keys().hasAny(['discoverPrefs']) || data.discoverPrefs is map)
         && data.subscriptionStatus is string && (
           data.subscriptionStatus == 'active' ||
           data.subscriptionStatus == 'trialing' ||
@@ -785,6 +787,42 @@ service cloud.firestore {
 
     // TaskFlag — the user's stance on a derived task. Deterministic id; components stored as fields.
     // All optional dates are ISO strings; snoozeCount is a non-negative int.
+    // Discover v1 — the writer's decision about one community agent (the document id IS the community agent's id).
+    // "passed" carries `until` (a year on); "added" never does. "Skip for now" is never stored.
+    function isValidScoutDecision(d) {
+      return d.keys().hasOnly(['decision', 'at', 'manuscriptId', 'until'])
+        && d.keys().hasAll(['decision', 'at', 'manuscriptId'])
+        && d.decision is string && (d.decision == 'added' || d.decision == 'passed')
+        && d.at is string && d.at.size() <= 64
+        && d.manuscriptId is string && d.manuscriptId.size() <= 128
+        && (d.decision == 'passed'
+              ? (d.keys().hasAny(['until']) && d.until is string && d.until.size() <= 64)
+              : !d.keys().hasAny(['until']));
+    }
+
+    // Discover v1 — a writer's share of one agent to the community catalogue: PUBLIC fields only (decision 2) plus
+    // who, which and when. Never queries, notes, ratings or anything the writer typed about the agent.
+    function isValidAgentSubmission(d) {
+      return d.keys().hasOnly(['userId', 'sourceAgentId', 'createdAt', 'name', 'agency', 'website', 'city', 'country',
+                               'genres', 'mswlNotes', 'submissionMethod', 'materialsWanted', 'responseTimeWeeks', 'noResponseMeansNo'])
+        && d.keys().hasAll(['userId', 'sourceAgentId', 'createdAt'])
+        && d.userId is string && d.userId.size() <= 128
+        && d.sourceAgentId is string && d.sourceAgentId.size() <= 128
+        && d.createdAt is string && d.createdAt.size() <= 64
+        && (d.keys().hasAny(['name']) || d.keys().hasAny(['agency']))
+        && (!d.keys().hasAny(['name']) || (d.name is string && d.name.size() <= 256))
+        && (!d.keys().hasAny(['agency']) || (d.agency is string && d.agency.size() <= 256))
+        && (!d.keys().hasAny(['website']) || (d.website is string && d.website.size() <= 256))
+        && (!d.keys().hasAny(['city']) || (d.city is string && d.city.size() <= 128))
+        && (!d.keys().hasAny(['country']) || (d.country is string && d.country.size() <= 64))
+        && (!d.keys().hasAny(['genres']) || (d.genres is list && d.genres.size() <= 32))
+        && (!d.keys().hasAny(['mswlNotes']) || (d.mswlNotes is string && d.mswlNotes.size() <= 4000))
+        && (!d.keys().hasAny(['submissionMethod']) || (d.submissionMethod is string && d.submissionMethod.size() <= 64))
+        && (!d.keys().hasAny(['materialsWanted']) || (d.materialsWanted is list && d.materialsWanted.size() <= 32))
+        && (!d.keys().hasAny(['responseTimeWeeks']) || (d.responseTimeWeeks is number && d.responseTimeWeeks >= 0 && d.responseTimeWeeks <= 104))
+        && (!d.keys().hasAny(['noResponseMeansNo']) || d.noResponseMeansNo is bool);
+    }
+
     function isValidTaskFlag(data, userId) {
       return data.keys().hasOnly(['id', 'userId', 'taskType', 'queryId', 'agentId', 'rule', 'snoozedUntil', 'snoozeCount', 'committedDate', 'skippedAt', 'resolvedAt'])
         && data.id is string && data.id.size() <= 400
@@ -811,7 +849,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'discoverPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion'])
         /**
          * ⚠️ A CLIENT MAY NOT CHANGE ITS OWN `plan` — THIS LINE IS THE WHOLE GUARD.
          *
@@ -1112,6 +1150,21 @@ service cloud.firestore {
         );
       }
 
+      // ROUTE: scoutDecisions — Discover v1. The writer's "added" / "passed" about one community agent (owner-only).
+      // "Bring back" deletes the document; Undo deletes it too.
+      match /scoutDecisions/{agentId} {
+        allow get, list, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(agentId) && isValidScoutDecision(incoming());
+      }
+
+      // ROUTE: scoutShares — Discover v1. The writer's own echo of an agent they shared (the submission itself is
+      // admin-read only, so this is how the page knows). Keyed by the writer's agent id; created once, never edited.
+      match /scoutShares/{sourceAgentId} {
+        allow get, list, delete: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(sourceAgentId)
+          && incoming().keys().hasOnly(['at']) && incoming().at is string && incoming().at.size() <= 64;
+      }
+
       // ROUTE: taskFlags — the user's stance on derived tasks (owner-only). Deterministic-id docs.
       match /taskFlags/{flagId} {
         allow get, delete: if isOwner(userId);
@@ -1157,6 +1210,18 @@ service cloud.firestore {
     // signal that several writers independently invented the same genre. A user may only create
     // their OWN suggestion (never read others' — privacy); only the admin reads the queue and
     // promotes/dismisses. Distinct-user count is derived admin-side by grouping on normalisedLabel.
+    // ROUTE: agentSubmissions — Discover v1. A writer offers an agent from their own list to the community catalogue.
+    // CREATE ONLY, by the writer named in the document, at the deterministic id `{uid}_{sourceAgentId}` — so a second
+    // submission of the same agent by the same writer is an UPDATE, which only the admin may make. Reading the queue,
+    // checking an agent and promoting it to communityAgents are the admin's acts (the verification tool is not built).
+    match /agentSubmissions/{subId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if isSignedIn() && isValidId(subId)
+        && incoming().userId == request.auth.uid
+        && subId == request.auth.uid + '_' + incoming().sourceAgentId
+        && isValidAgentSubmission(incoming());
+    }
+
     match /genreSuggestions/{suggestionId} {
       allow read: if isAdmin();
       allow create: if isSignedIn()
