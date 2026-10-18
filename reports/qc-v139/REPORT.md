@@ -123,7 +123,13 @@ is not shot: the harness account has queries (A3 is a unit lock).
 
 ## Deploy
 
-See the end of this file.
+Dev moved while this pack was built, from To-do v5.2 (`index-5Q6l_Tb7.js`) to **Discover v1**
+(`…-td52-dv1` 0fde90b5, `index-DugmnfsH.js`; a dev build of that tip reproduces it exactly). v139 is merged onto it as
+**`dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241-db601-cl1831b-cl1832-cl1833-cx28-qhnet-td52-dv1-qc139`
+at 86bf9272**; the only conflict was `design-refs/.refhashes.json` (both sides' entries kept). On the merged tree: tsc
+clean, 613 of 613 test files, and QC139 A1, B3 and C2 green on its build. Built from a clean detached checkout, the
+served hash re-checked immediately before the deploy, and deployed to dev on 18 Oct: **`index-CXIRYhLt.js`**.
+Not merged to main.
 
 ## For Nick
 
