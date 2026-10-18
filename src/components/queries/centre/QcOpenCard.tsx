@@ -78,7 +78,10 @@ export const QcOpenCard: React.FC<{
    * nothing ("none"); opened over any other page it is one muted caption under the head ("caption").
    */
   manuscript?: "none" | "caption";
-}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none", backTo = null }) => {
+  /** v139 §B — the page guide's practice query: a PRACTICE tag in the masthead, faint stripes on it, and the tab it is
+   *  left on is not remembered */
+  practice?: boolean;
+}> = ({ row, nowMs, packages = [], onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount, onDoor, onDeleteQuery, manuscript = "none", backTo = null, practice = false }) => {
   const [askDelete, setAskDelete] = useState(false);
   const [tab, setTab] = useState<PanelTab>(readTab);
   /* v138.2 §C — "Open the full timeline →" asks for Tracking even when this card is already open */
@@ -89,7 +92,7 @@ export const QcOpenCard: React.FC<{
   }, []);
   /* opened from the agent's panel there is no Agent tab: a remembered "agent" reads as Tracking there */
   const shownTab: PanelTab = backTo && tab === "agent" ? "tracking" : tab;
-  const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
+  const pickTab = (t: PanelTab) => { setTab(t); if (practice) return; try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLButtonElement>(null);
   const closeMore = useCallback(() => setMoreOpen(false), []);
@@ -120,7 +123,7 @@ export const QcOpenCard: React.FC<{
     : [row.dayN != null ? `Day ${row.dayN}` : null, row.sentMs != null ? `queried ${dayOf(row.sentMs, nowMs)}` : null].filter(Boolean).join(" \u00b7 ") || null;
 
   return (
-    <FramedCard as="aside" container={false} probe="open" className="qcv-open qcv-own" frameClassName="qcv-open-fr"
+    <FramedCard as="aside" container={false} probe="open" className={`qcv-open qcv-own${practice ? " qcv-open--practice" : ""}`} frameClassName="qcv-open-fr"
       label={`${row.agentName}, ${row.agency}`}
       rest={{ "data-status": row.status, "data-id": row.id, "data-court": court, "data-over": over ? "true" : undefined, "data-tab": shownTab }}>
       {/* Query panel v2 §A — the masthead: navy, the court's colour along its top edge, and nothing in small capitals.
@@ -130,6 +133,7 @@ export const QcOpenCard: React.FC<{
         <div className="qcv-open-who">
           <AgentDisc initials={row.initials} standing={row.court === "closed" ? "closed" : "querying"} className="qcv-open-ini" />
           <div className="qcv-open-whotx">
+            {practice ? <span className="qcv-open-ptag" data-qc139="ptag">PRACTICE</span> : null}
             <h2 className="qcv-open-nm">{row.agentName}</h2>
             <span className="qcv-open-ag">{row.agency}</span>
           </div>

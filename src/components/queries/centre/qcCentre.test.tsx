@@ -122,7 +122,9 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
      response" from the shell's menu with nothing open). The law is unchanged: ONE host element. */
   it("the panel is mounted once, for a chosen query or the response picker, and the modal and the narrow drawer are gone", () => {
     expect(page.split("<QueryPanelHost").length - 1).toBe(1);
-    expect(page).toContain("{((qcOpenCardNode && cardQueryId) || picking) && (");
+    /* v139 — retargeted, same law: the ONE host's condition gained the practice query (Pip's panel uses this host
+       rather than a second one), so it is still one mount for a chosen query, the picker, or Pip */
+    expect(page).toContain("{(pipShown || (qcOpenCardNode && cardQueryId) || picking) && (");
     expect(page).not.toContain("<QcQueryModal");
     expect(page).not.toContain("qcDocked === false && (");
   });

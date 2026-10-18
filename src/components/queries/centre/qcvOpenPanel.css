@@ -75,3 +75,14 @@
 }
 .qsp .qcv-open-back:hover { color: #f4eee5; text-decoration: underline; text-underline-offset: 3px; }
 .qsp .qcv-open-back:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
+
+/* ── v139 §B — the practice query's panel: a PRACTICE tag over the name, faint stripes on the masthead ── */
+.qcv-open--practice .qcv-open-mast {
+  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 10px, transparent 10px 20px);
+}
+.qcv-open--practice .qcv-open-ptag {
+  display: inline-block; width: max-content; margin-bottom: 4px; padding: 2px 6px; border-radius: 3px;
+  border: 1px solid rgba(247, 227, 218, 0.6); color: #f7e3da;
+  font: 600 9px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em;
+}
+.qc139-pagent { margin: 18px 4px; font: 400 15px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); }

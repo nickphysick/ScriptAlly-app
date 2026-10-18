@@ -72,6 +72,7 @@ import { NotesLab } from "./components/notes/NotesLab";
 import { ContactListLab } from "./components/agents/ContactListLab";
 import { OnbLab } from "./components/onboarding/OnbLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
+import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
@@ -809,7 +810,8 @@ function AppContent() {
 
       {/* Query actions v1 — THE query drawer and its undo bar, mounted once for the workspace.
           Every surface opens it through `openQueryDrawer(…)` (lib/queryActions/drawerStore). */}
-      <QueryDrawer />
+      {/* v139 §B — the drawer alone sees the practice query, through its own copy of the context */}
+      <PracticeOverlay><QueryDrawer /></PracticeOverlay>
       <UndoBar />
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}

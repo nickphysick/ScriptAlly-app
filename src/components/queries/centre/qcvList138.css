@@ -601,3 +601,24 @@
     .qc138-sheet .qc138-tlw { margin-top: 10px; }
   }
 }
+
+/* ── v139 §B — the practice band: white, a rust ring, faint blush stripes, the stamp; and Pip's row ── */
+.qc138-sheet .qc139-pband {
+  cursor: default; --qc138-c: #a2452a; background: #fff;
+  background-image: repeating-linear-gradient(135deg, rgba(247, 227, 218, 0.55) 0 10px, transparent 10px 20px);
+  box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.45);
+}
+.qc138-sheet .qc139-pband .qc138-gart { visibility: hidden; }
+.qc138-sheet .qc139-pband .qc138-gt { color: #8f4529; }
+.qc138-sheet .qc139-stamp {
+  font: 600 9.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: #a2452a;
+  border: 1.5px solid #a2452a; border-radius: 4px; padding: 3px 7px; transform: rotate(-3deg); background: #fff;
+}
+.qc138-sheet .qc139-practice .qc138-row { background: #fffaf6; box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.25); }
+.qc138-sheet .qc139-practice .qc138-disc { background: #fff !important; color: #a2452a !important; box-shadow: inset 0 0 0 1.5px #a2452a; }
+.qc138-sheet .qc139-practice { animation: qc139-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.qc138-sheet .qc139-practice.out { animation: none; transition: opacity 0.35s, transform 0.35s; opacity: 0; transform: translateY(-8px); }
+@keyframes qc139-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .qc138-sheet .qc139-practice, .qc138-sheet .qc139-practice.out { animation: none; transition: none; transform: none; }
+}

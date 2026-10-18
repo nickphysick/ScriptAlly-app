@@ -387,11 +387,14 @@ export interface QcList138Props {
   /** group keys folded at first sight (Part D: Closed) */
   folded: ReadonlySet<string>;
   onFold: (key: string) => void;
+  /** v139 §B — the page guide's practice query: its own band above every group, whatever the grouping or sort, and in
+   *  no count. `leaving` fades it out as it is cleared. */
+  practice?: { row: QcRow; leaving: boolean } | null;
 }
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -615,6 +618,21 @@ export const QcList138: React.FC<QcList138Props> = ({
           builds drop the branch, since MODE is replaced at build time */}
       {import.meta.env.MODE !== "production" ? <PeekLab nowMs={nowMs} /> : null}
       <div className="qc138-body" data-qcv="list">
+        {/* v139 §B — the practice band: first, always; never counted (the title, the bands' counts and the glyphs read
+            the page's own rows, and Pip is not one of them) */}
+        {practice ? (
+          <div className={`qc138-grp qc139-practice${practice.leaving ? " out" : ""}`} data-qc139="practice" data-group="practice">
+            <div className="qc138-band qc139-pband" data-qc139="practice-band">
+              <span className="qc138-gart" aria-hidden="true" />
+              <b className="qc138-gt">Practice</b>
+              <span className="qc139-stamp" data-qc139="stamp">PRACTICE</span>
+              <span className="qc138-gh">Only on this screen · not saved to your account</span>
+            </div>
+            <div role="listbox" aria-label="Practice: 1 query" className="qc138-rows">
+              {renderRow(practice.row)}
+            </div>
+          </div>
+        ) : null}
         {groups.length === 0 && deadEnd ? deadEnd : null}
         {groups.map((g) => {
           const tone = toneOf(g);
