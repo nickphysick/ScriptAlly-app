@@ -129,8 +129,16 @@ describe("SB4 — the eyebrows are ruled (source half; rendered half in the meas
 describe("SB9 — no key opens the menu", () => {
   it("the registry has no entry for it, and `n` is still only Comparable titles' add", () => {
     for (const sc of Object.values(SHORTCUTS)) expect(sc.bound).not.toContain("SidebarCapture");
-    const nBound = Object.values(SHORTCUTS).filter((sc) => sc.chords.some((c) => c.key.toLowerCase() === "n"));
-    expect(nBound.map((sc) => sc.bound)).toEqual(["src/components/manuscripts/ComparableTitlesPage.tsx"]);
+    /* RE-POINTED (Discover v1, 18 Oct): the claim is that `n` is never a GLOBAL or SHELL key — so it cannot open this
+       menu — not that exactly one page uses it. Discover's "Not for me" is `n` on its own page, as Comparable titles'
+       add is on its. Every `n` binding must be page-scoped and bound outside the shell. */
+    const nBound = Object.values(SHORTCUTS).filter((sc) => sc.chords.some((c) => c.key.toLowerCase() === "n" && !c.mod));
+    expect(nBound.length, "no `n` binding left — the claim below would pass vacuously").toBeGreaterThan(0);
+    for (const sc of nBound) {
+      expect(sc.scope, `${sc.bound} binds \`n\` everywhere — a global n would collide with the capture menu's own keys`).not.toBe("Everywhere");
+      expect(sc.bound, "a shell file binds `n`").not.toMatch(/components\/shell\//);
+    }
+    expect(nBound.map((sc) => sc.bound).sort()).toEqual(["src/components/agents/discover1/DvPicks.tsx", "src/components/manuscripts/ComparableTitlesPage.tsx"]);
   });
   it("the component binds no global key and advertises none", () => {
     expect(SRC).not.toMatch(/aria-keyshortcuts|matchesShortcut|SHORTCUTS/);

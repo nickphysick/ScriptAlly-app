@@ -13,7 +13,7 @@
  *    absent from the bundle (lock E1 greps `dist/`).
  * ⚠️ PRO: the pill only. There is no Pro gate on this route today and none is invented here (the report says so).
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { DISCOVER_LIVE } from "../../../lib/discoverShared";
 import { notifyPrefs } from "../../../lib/accountPrefs";
@@ -22,6 +22,12 @@ import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { AppFooter } from "../../shell/AppFooter";
 import { DvEmptyHeader, DvHeader, type HeaderTitle } from "./DvHeader";
+import { DvPicks, type DecideKind, type Leaving } from "./DvPicks";
+import { DvHowModal, DvPassedModal, DvToast, DvTune, type ToastState } from "./DvLayers";
+import { decisionDoc, type ScoutPick } from "../../../lib/scout";
+import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { bookGenres } from "../../../lib/genreMatch";
+import { countryName } from "../../../lib/territory";
 import { useScout, type Fixture } from "./useScout";
 import "./discover1.css";
 
@@ -74,7 +80,15 @@ function useScoutBook(): string | null {
 
 /* ── LIVE ────────────────────────────────────────────────────────────────── */
 
-const LivePage: React.FC<{ fixtureState: ReviewState | null; onNavigate: Nav }> = ({ fixtureState }) => {
+/** How long the add's toast offers Undo — and so how long the catalogue's +1 is held (lib/scoutStore). */
+export const TOAST_MS = 6500;
+/** The stamp shows for this long before the card leaves (the mock's 800ms). */
+const STAMP_MS = 800;
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+type LeavingPick = Leaving & { pick: ScoutPick };
+
+const LivePage: React.FC<{ fixtureState: ReviewState | null; onNavigate: Nav }> = ({ fixtureState, onNavigate }) => {
   /* the fixture and its in-memory store are made once per visit */
   const [aid] = useState(() => {
     /* ⚠️ THE MODE CHECK FIRST, so a production build folds the aid away */
@@ -85,10 +99,109 @@ const LivePage: React.FC<{ fixtureState: ReviewState | null; onNavigate: Nav }> 
     return { fixture, memory: memoryIO(fixture.decisions), holdMs };
   });
   const s = useScout(aid);
+  const ms = s.manuscript;
+
+  const [leaving, setLeaving] = useState<LeavingPick | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const toastSeq = useRef(0);
+  const say = (t: Omit<ToastState, "id">) => setToast({ ...t, id: ++toastSeq.current });
+  const [tune, setTune] = useState(false);
+  const [how, setHow] = useState<{ step?: number } | null>(null);
+  const [passedOpen, setPassedOpen] = useState(false);
+
+  /* ⚠️ A HELD +1 IS SENT WHEN THE PAGE IS LEFT OR THE TAB HIDES — the add stood */
+  useEffect(() => {
+    const io = s.io;
+    if (!io) return;
+    const flush = () => io.flushIncrements();
+    window.addEventListener("pagehide", flush);
+    return () => { window.removeEventListener("pagehide", flush); flush(); };
+  }, [s.io]);
+
+  const shown: ScoutPick[] = leaving ? [leaving.pick, ...s.queue.filter((p) => p.agent.id !== leaving.pick.agent.id)] : s.queue;
+
+  const decide = async (kind: DecideKind) => {
+    const pick = s.queue[0];
+    if (!pick || leaving || !s.io || !ms) return;
+    const ca = pick.agent;
+    const name = ca.name || ca.agency;
+    const started = Date.now();
+    if (kind === "skip") {
+      setLeaving({ id: ca.id, kind, pick });
+      await wait(260);
+      s.setSkipped((xs) => [...xs.filter((x) => x !== ca.id), ca.id]);
+      s.setLeadId(null);
+      setLeaving(null);
+      say({ msg: `Skipped ${name} — they’ll come round again.` });
+      return;
+    }
+    /* the decision document as it stood (an expired pass is a real document) — Undo puts it back */
+    const before = s.decisions.find((d) => d.id === ca.id);
+    setLeaving({ id: ca.id, kind, pick });
+    let agentId: string | null = null;
+    if (kind === "add") {
+      const r = await s.io.add(ca, ms.title);
+      /* ⚠️ `in`, NOT `r.ok`: strictNullChecks is off here, so a boolean discriminant does not narrow */
+      if ("error" in r) { setLeaving(null); say({ msg: r.error }); return; }
+      agentId = r.agentId;
+    }
+    try {
+      await s.io.writeDecision({ id: ca.id, ...decisionDoc(kind === "add" ? "added" : "passed", Date.now(), ms.id) });
+    } catch {
+      if (agentId) await s.io.undoAdd(agentId, ca.id, before).catch(() => {});
+      setLeaving(null);
+      say({ msg: "That didn’t save. Check your connection and try again." });
+      return;
+    }
+    if (agentId) s.io.scheduleIncrement(ca.id, TOAST_MS + 500);
+    await wait(Math.max(0, STAMP_MS - (Date.now() - started)));
+    setLeaving(null);
+    s.setDecidedHere((n) => n + 1);
+    s.setLeadId(null);
+    const io = s.io;
+    const undo = async () => {
+      setToast(null);
+      if (agentId) await io.undoAdd(agentId, ca.id, before);
+      else await io.restoreDecision(ca.id, before);
+      s.setDecidedHere((n) => Math.max(0, n - 1));
+      s.setLeadId(ca.id);
+    };
+    if (kind === "add") {
+      say({
+        msg: `Added ${name} to your contact list.`, undo,
+        action: { label: "Log a query", run: () => { setToast(null); openQueryDrawer(aid.fixture ? { mode: "log" } : { mode: "log", agentId: agentId!, manuscriptId: ms.id }); } },
+      });
+    } else {
+      say({ msg: `Passed on ${name}. You can look again later.`, undo });
+    }
+  };
+
+  const bringBack = async (id: string) => {
+    const row = s.passed.find((r) => r.agent.id === id);
+    await s.io?.bringBack(id);
+    setPassedOpen(false);
+    say({ msg: `${row ? row.agent.name || row.agent.agency : "That agent"} is back in your picks.` });
+  };
+
   const title: HeaderTitle = s.loading ? { kind: "loading" }
     : s.view === "live" ? { kind: "count", n: s.queue.length } : s.view === "done" ? { kind: "done" } : { kind: "none" };
   return (
-    <DvHeader title={title} msTitle={s.manuscript?.title ?? null} tally={s.loading ? null : s.tally}
-      onTune={() => {}} onShare={() => {}} onHow={() => {}} onPassed={() => {}} />
+    <>
+      <DvHeader title={title} msTitle={ms?.title ?? null} tally={s.loading ? null : s.tally}
+        onTune={() => setTune(true)} onShare={() => {}} onHow={() => setHow({})} onPassed={() => setPassedOpen(true)} />
+      {s.loading ? null : (
+        <DvPicks queue={shown} view={leaving ? "live" : s.view} manuscript={ms} prefs={s.prefs} lens={s.lens} skipped={s.skipped}
+          passedCount={s.passed.length} leaving={leaving} pickIdx={s.decidedHere + 1} pickTotal={s.decidedHere + shown.length}
+          onDecide={(k) => { void decide(k); }} onLead={(id) => s.setLeadId(id)} onTune={() => setTune(true)}
+          onHow={(step) => setHow({ step })} onPassed={() => setPassedOpen(true)} onShare={() => {}} />
+      )}
+      <DvTune open={tune} onClose={() => setTune(false)} prefs={s.prefs} lens={s.lens} lenses={s.lenses} hasLocations={s.hasLocations}
+        homeName={countryName(s.homeCountry) ?? null} genres={bookGenres(ms)} ageCategory={ms?.ageCategory ?? null} msTitle={ms?.title ?? null}
+        onLens={(l) => { void s.setPref("lens", l); }} onSwitch={(k, v) => { void s.setPref(k, v); }}
+        onManuscripts={() => { setTune(false); onNavigate("manuscripts"); }} />
+      <DvPassedModal open={passedOpen} rows={s.passed} onBringBack={(id) => { void bringBack(id); }} onClose={() => setPassedOpen(false)} />
+      <DvHowModal open={!!how} step={how?.step} onClose={() => setHow(null)} />
+      <DvToast toast={toast} ms={TOAST_MS} onDone={() => setToast(null)} />
+    </>
   );
 };

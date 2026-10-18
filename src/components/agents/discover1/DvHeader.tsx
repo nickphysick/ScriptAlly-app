@@ -140,7 +140,7 @@ export const DvEmptyHeader: React.FC<{
     <div className="dv1-aep" data-dv1="panel">
       <div className="dv1-aet">
         <p className="dv1-aek" data-dv1="eyebrow">{DV_EYEBROW}<ProTag /></p>
-        <h1 data-page-title="" data-dv1="title" tabIndex={-1}>The Scout is<br />out looking</h1>
+        <h1 className="dv1-aeh" data-page-title="" data-dv1="title" tabIndex={-1}>The Scout is<br />out looking</h1>
         <p className="dv1-aepp" data-dv1="lede">
           As writers join, their agent lists build one shared catalogue. Every agent in it is checked by hand before the Scout
           brings you the ones who want a book like {msTitle ? <span className="dv1-mono" data-dv1="ms">{msTitle}</span> : "yours"} — with the reasons they fit.

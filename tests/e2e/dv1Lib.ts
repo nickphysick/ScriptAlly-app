@@ -13,10 +13,12 @@
  * ⚠️ EVERY LOCK HAS ITS NAMED BREAK: in-page breaks are `MUTATIONS[lock]`, applied when `DV1_MUTATE=<lock>`; source
  *    breaks are edits made and undone in the measurement worktree. `DV1_BASE=1` names the ledger of a red-first run.
  */
-import { expect, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { openRoute, liftMotionSuppression } from "./measure";
+import { execSync } from "node:child_process";
+import { openRoute, liftMotionSuppression, KILL_MOTION } from "./measure";
+import { assertLocalBundleIsDev } from "./bundleGuard";
 
 export const DIR = "reports/discover-v1";
 export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -122,3 +124,63 @@ export async function openMock(page: Page, column: number, height: number, state
   }
   return w;
 }
+
+/* ── the owned Pro account (seedDiscoverV1.mjs) ───────────────────────────── */
+
+export const DV1_EMAIL = "dv1@scriptally.test";
+export const DV1_MS = "dv1-ms";
+const pw = (): string => {
+  if (process.env.SA_E2E_PASSWORD) return process.env.SA_E2E_PASSWORD;
+  for (const line of readFileSync(resolve(".env.local"), "utf8").split("\n")) { const m = /^\s*SA_E2E_PASSWORD\s*=\s*(.*)$/.exec(line); if (m) return m[1].trim().replace(/^["']|["']$/g, ""); }
+  throw new Error("No SA_E2E_PASSWORD");
+};
+export const seedOwned = (args = "") => execSync(`node tests/e2e/seedDiscoverV1.mjs ${args}`, { cwd: process.cwd(), stdio: "pipe", timeout: 240_000 }).toString();
+/** the account's Discover state, canonical JSON — the last line the seeder prints */
+export const dumpOwned = (extra = ""): Record<string, unknown> => JSON.parse(seedOwned(`--dump ${extra}`).trim().split("\n").filter((l) => l.startsWith("{")).pop()!);
+
+/** A context signed in as the owned account, on the real live face (`__SA_DV_LIVE`), with its book active. */
+export async function ownedPage(browser: Browser, baseURL: string, vp: VP): Promise<{ ctx: BrowserContext; page: Page }> {
+  await assertLocalBundleIsDev();
+  /* ⚠️ A FRESH SIGN-IN EVERY TIME: a restored storageState came back signed out (Firebase keeps its session in
+     IndexedDB) and read as a page that never rendered — the house harness signs in per run for the same reason */
+  const ctx = await browser.newContext({ viewport: vp, baseURL });
+  const page: Page | null = await ctx.newPage();
+  await page.goto("/#/signin");
+  await page.locator("#au-email").fill(DV1_EMAIL);
+  await page.locator("#au-pw").fill(pw());
+  await page.getByRole("button", { name: /^Sign in$/ }).last().click();
+  /* ⚠️ NOT `.ws-window`: since onboarding v5 the sign-in screen wears the shell's own classes, so that check passes on
+     the form itself. The sidebar is the workspace's alone, and the URL leaves #/signin once the sign-in lands. */
+  await page.waitForURL((u) => !u.hash.includes("signin"), { timeout: 45_000 });
+  await expect(page.locator("#ws-sidebar").first()).toBeVisible({ timeout: 45_000 });
+  /* ⚠️ THE SHELL SHOWS BEFORE FIREBASE HAS WRITTEN THE SESSION TO IndexedDB — navigate now and the next page loads
+     signed out. Wait for the persisted user. */
+  await page.waitForFunction(() => new Promise<boolean>((res) => {
+    const req = indexedDB.open("firebaseLocalStorageDb");
+    req.onerror = () => res(false);
+    req.onsuccess = () => {
+      try {
+        const tx = req.result.transaction("firebaseLocalStorage", "readonly");
+        const all = tx.objectStore("firebaseLocalStorage").getAll();
+        all.onsuccess = () => res((all.result as { fbase_key?: string }[]).some((r) => String(r.fbase_key).startsWith("firebase:authUser")));
+        all.onerror = () => res(false);
+      } catch { res(false); }
+    };
+  }), null, { timeout: 20_000, polling: 250 });
+  await page!.addInitScript((id) => {
+    (window as unknown as Record<string, unknown>).__SA_DV_LIVE = 1;
+    try { localStorage.setItem("scriptally_active_manuscript_id", id); } catch { /* */ }
+  }, DV1_MS);
+  await page!.goto("/agents/discover");
+  await page!.addStyleTag({ content: KILL_MOTION });
+  await page!.addScriptTag({ content: LIB });
+  await page!.waitForFunction(() => {
+    const r = [...document.querySelectorAll('[data-dv1="page"]')].find((e) => e.getBoundingClientRect().height > 0);
+    return !!r && r.getAttribute("data-face") === "live" && !r.querySelector('[data-dv1="header"][data-loading]') && !!r.querySelector('[data-dv1="picks"]');
+  }, null, { timeout: 45_000 });
+  await page!.waitForTimeout(400);
+  return { ctx: ctx!, page: page! };
+}
+
+/** the lead's name, then the queue's, in order */
+export const ORDER = `(() => { const { q, qa } = window.__dv1(); return [q('[data-dv1="lead-name"]')?.textContent?.trim() ?? null, ...qa('[data-dv1="queue-row"] .who b').map((b) => b.textContent.trim())]; })()`;

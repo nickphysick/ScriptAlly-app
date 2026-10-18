@@ -83,18 +83,21 @@ export function useScout(opts: { fixture: Fixture | null; memory: ScoutIO | null
   };
 
   const homeCountry = getHomeCountry(db.currentUser);
+  const lenses = useMemo(() => availableLenses(catalogue), [catalogue]);
+  /* a stored lens the catalogue cannot back (too few reply times, no locations) reads as "best" — its radio is not
+     offered, and a header naming an order nobody can choose would be a fact about nothing */
+  const lens = lenses.includes(prefs.lens) ? prefs.lens : "best";
   const nowMs = useMemo(() => Date.now(), [decisions]); // one clock per derivation pass
-  const input: ScoutInput = { catalogue, agents, manuscript, decisions, prefs, nowMs, homeCountry };
+  const input: ScoutInput = { catalogue, agents, manuscript, decisions, prefs: { ...prefs, lens }, nowMs, homeCountry };
 
   const derived = useMemo(() => pickQueue(input),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [catalogue, agents, manuscript, decisions, prefs.lens, prefs.openOnly, prefs.notOnList, prefs.ukIreland, nowMs, homeCountry]);
+    [catalogue, agents, manuscript, decisions, lens, prefs.openOnly, prefs.notOnList, prefs.ukIreland, nowMs, homeCountry]);
   const tally = useMemo(() => scoutTally(input, derived),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [derived, decisions, catalogue, manuscript, nowMs]);
   const passed = useMemo(() => passedList(decisions, catalogue, nowMs), [decisions, catalogue, nowMs]);
   const part = useMemo(() => yourPart(catalogue, agents, shared), [catalogue, agents, shared]);
-  const lenses = useMemo(() => availableLenses(catalogue), [catalogue]);
   const hasLocations = useMemo(() => locationCoverage(catalogue) > 0, [catalogue]);
 
   /* the session's order */
@@ -118,7 +121,7 @@ export function useScout(opts: { fixture: Fixture | null; memory: ScoutIO | null
   const view: ScoutView = queue.length > 0 ? "live" : tally.decided > 0 ? "done" : "none";
 
   return {
-    io, uid, loading, view, manuscript, catalogue, agents, decisions, shared, prefs, setPref, lenses, hasLocations, homeCountry,
+    io, uid, loading, view, manuscript, catalogue, agents, decisions, shared, prefs, setPref, lens, lenses, hasLocations, homeCountry,
     queue, derived, tally, passed, part, decidedHere, setDecidedHere, skipped, setSkipped, setLeadId,
   };
 }
