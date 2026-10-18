@@ -20,6 +20,7 @@ import { LENS_LABEL, LENS_NOTE, type DiscoverPrefs, type PassedRow } from "../..
 import { agentInitials } from "../../../lib/agentDisplay";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { DV_FACE } from "./DvHeader";
+import { AgentDisc } from "../../shared/AgentDisc";
 
 const X = <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2 2 12" /></svg>;
 
@@ -102,7 +103,7 @@ export const DvPassedModal: React.FC<{ open: boolean; rows: PassedRow[]; onBring
       <p>Agents stay here for a year, then the Scout stops offering them. Bring one back and it rejoins your picks.</p>
       {rows.map(({ agent }) => (
         <div key={agent.id} className="dv1-qrow" data-dv1="passed-row" data-id={agent.id}>
-          <span className="av poss" aria-hidden="true">{agentInitials(agent)}</span>
+          <AgentDisc initials={agentInitials(agent)} standing="none" size={36} className="av" />
           <span className="who"><b>{agent.name || agent.agency}</b><small>{[agent.name ? agent.agency : null, agent.city].filter(Boolean).join(" · ")}</small></span>
           <button type="button" className="dv1-lnk" data-dv1="bring-back" onClick={() => onBringBack(agent.id)}>Bring back</button>
         </div>

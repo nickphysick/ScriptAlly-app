@@ -25,7 +25,10 @@ export const OPEN_HEADER = ["/queries"] as const;
    390 still reads it. */
 export const LIGHT_HEADER: readonly string[] = ["/agents", "/queries", "/todo"];
 export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"], [data-qc138="header"], [data-qc138="empty-header"], [data-td5="header"], [data-td5="empty-panel"]';
-export const WORKSPACE = ["/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"] as const;
+/* RE-POINTED (Discover v1, 18 Oct): /agents/discover LEFT this list — its header is page-local (OWN_HEADER_ROUTES), the
+   light two-state header or the navy panel, never the shared panel P1 measures; DV1 B1 holds it. It contributed 26 of the
+   base run's 351 readings, so the floor (320) still stands at 325 without it. */
+export const WORKSPACE = ["/queries/analytics", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"] as const;
 /** routes that must not change */
 export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 export const PANEL_BG = "rgb(45, 58, 80)";

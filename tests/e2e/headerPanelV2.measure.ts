@@ -50,7 +50,9 @@ test("P1 P4 P5 P7 · the panel on every workspace route", async ({ page }) => {
       L.check("P5 the drawing lies inside the panel on all four sides", w, a.l >= h.l - 0.5 && a.r <= h.r + 0.5 && a.t >= h.t - 0.5 && a.b <= h.b + 0.5, `art ${SHOW(a)} · panel ${SHOW(h)}`);
       L.check("P5 its vertical centre is the panel's (±3)", w, near((a.t + a.b) / 2, (h.t + h.b) / 2, 3), `${((a.t + a.b) / 2).toFixed(1)} vs ${((h.t + h.b) / 2).toFixed(1)}`);
     }
-    if (vp.width === 1280) L.check("P7 no horizontal overflow at 1280", w, r.overflowX <= 1 || (route === "/agents/discover" && near(r.overflowX, DISCOVER_OVERFLOW_1280, 2)), `${r.overflowX}${route === "/agents/discover" ? ` (as built before the pack: ${DISCOVER_OVERFLOW_1280})` : ""}`);
+    /* RE-POINTED (Discover v1): the old Discover page's pre-existing 1280 overflow exemption went with the page; Discover
+       left WORKSPACE (hp2Lib) and DV1 holds its own page */
+    if (vp.width === 1280) L.check("P7 no horizontal overflow at 1280", w, r.overflowX <= 1, `${r.overflowX}`);
     if (vp.width === 1280) L.check("P7 the panel ends inside the page sheet", w, !!r.hd && !!r.win && r.hd.r <= r.win.r + 0.5 && r.hd.l >= r.win.l - 0.5, r.hd && r.win ? `panel ${r.hd.l.toFixed(0)}–${r.hd.r.toFixed(0)} · sheet ${r.win.l.toFixed(0)}–${r.win.r.toFixed(0)}` : "—");
   }
   L.check("P5 population: several routes carry a drawing", "all", withArt >= 8, `${withArt} readings with a drawing`);
@@ -58,9 +60,6 @@ test("P1 P4 P5 P7 · the panel on every workspace route", async ({ page }) => {
   L.done(SIZES.length * WORKSPACE.length * 8);
 });
 const PHONE_AS_BUILT: Record<string, number> = { "/manuscripts/comps": 396, "/manuscripts/packages": 396 };
-/** Discover's cards overflow its scroller sideways at 1280 on the commit before this pack (measured there); the header
-    is not the cause. P7 holds it to that figure rather than to zero, and holds the panel inside the sheet. */
-const DISCOVER_OVERFLOW_1280 = Number(process.env.HP2_DISCOVER_OVF ?? 39);
 
 test("P7 · no horizontal overflow at 390", async ({ page }) => {
   const L = new Ledger(process.env.HP2_MUTATE === "P7" ? "P7-390" : "P7-390");

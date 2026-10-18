@@ -65,7 +65,7 @@ const ComingSoon: React.FC<{ onNavigate: Nav }> = () => {
   const figs = catalogueFigures();
   return (
     <>
-      <DvEmptyHeader msTitle={msTitle} notified={notified} onNotify={toggle} onHow={() => setHow(true)}>
+      <DvEmptyHeader msTitle={msTitle} titleLoading={!db.collectionsReady} notified={notified} onNotify={toggle} onHow={() => setHow(true)}>
         <DvSteps headingId="dv1SoonH" />
         <div className="dv1-sofar" data-dv1="so-far">
           <div>
