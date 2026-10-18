@@ -100,7 +100,7 @@ export const DvCatalogue: React.FC<{ figures: CatalogueFigures; part: YourPart; 
   const any = hasAnyFigure(figures);
   const n = (v: number | null) => (v == null ? null : v.toLocaleString("en-GB"));
   return (
-    <section className="dv1-band" aria-labelledby="dv1CatH" data-dv1="catalogue">
+    <section className="dv1-catband" aria-labelledby="dv1CatH" data-dv1="catalogue">
       <div className="dv1-bandin">
         <div className="dv1-sh">
           <h2 id="dv1CatH">The community catalogue</h2>

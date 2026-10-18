@@ -94,10 +94,10 @@ describe("pick reasons — facts, with absent figures omitted", () => {
     const r = pickReasons(p, ms);
     expect(r.genreHits).toEqual(["Literary Fiction"]);
     expect(r.words).toEqual(expect.arrayContaining(["family", "memory"]));
-    expect(communityLine(r)).toEqual({ lists: "23 writers' contact lists", queried: "queried 14 times" });
+    expect(communityLine(r)).toEqual({ lists: "23 writers’ contact lists", queried: "queried 14 times" });
   });
   it("a zero clause goes, and both zero means no line", () => {
-    expect(communityLine({ lists: 3, queried: null })).toEqual({ lists: "3 writers' contact lists", queried: null });
+    expect(communityLine({ lists: 3, queried: null })).toEqual({ lists: "3 writers’ contact lists", queried: null });
     expect(communityLine({ lists: null, queried: null })).toBeNull();
   });
 });

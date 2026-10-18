@@ -97,7 +97,7 @@ export const DvHeader: React.FC<{
   onPassed: () => void;
 }> = ({ title, msTitle, tally, onTune, onShare, onHow, onPassed }) => {
   const loading = title.kind === "loading";
-  const label = title.kind === "count" ? `${title.n} ${considerWords(title.n)}` : title.kind === "done" ? "You're up to date"
+  const label = title.kind === "count" ? `${title.n} ${considerWords(title.n)}` : title.kind === "done" ? "You’re up to date"
     : title.kind === "none" ? "Nothing to consider yet" : "Discover";
   return (
     <header className="dv1-hd" data-dv1="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
@@ -148,7 +148,7 @@ export const DvEmptyHeader: React.FC<{
         </p>
         <div className="dv1-aeb">
           <button type="button" className={`dv1-b1${notified ? " is-done" : ""}`} data-dv1="notify" aria-pressed={notified} onClick={onNotify}>
-            {notified ? <><svg className="dv1-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" /></svg>We'll tell you</> : "Tell me when it's ready"}
+            {notified ? <><svg className="dv1-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" /></svg>We’ll tell you</> : "Tell me when it’s ready"}
           </button>
           <button type="button" className="dv1-b2" data-dv1="how" onClick={onHow}>How the Scout works</button>
         </div>

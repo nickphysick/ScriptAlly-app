@@ -363,3 +363,93 @@ test("D2 · the catalogue band draws no figure, no digit and no dash while its s
   }
   L.done(12);
 });
+
+/* ── E2 · "Tell me when it's ready" writes notifyPrefs.discover as ONE leaf and reads back (the owned account) ── */
+test("E2 · Tell me when it's ready writes one leaf and reads back", async ({ browser, baseURL }) => {
+  const L = new Ledger("E2");
+  seedOwned();
+  const { ctx, page } = await ownedPage(browser, baseURL!, SIZES[0], "soon");
+  try {
+    const btn = page.locator('[data-dv1="notify"]');
+    L.check("E2", "it starts unset", (await btn.getAttribute("aria-pressed")) === "false" && /Tell me when it’s ready/.test((await btn.textContent()) ?? ""), (await btn.textContent()) ?? "");
+    await btn.click();
+    await page.waitForTimeout(1500);
+    const a = dumpOwned() as Record<string, any>;
+    L.check("E2", "the leaf is on", a.notifyPrefs?.discover === true, JSON.stringify(a.notifyPrefs));
+    L.check("E2", "Settings' two keys are untouched", a.notifyPrefs?.nudges === false && a.notifyPrefs?.weeklyDigest === true, JSON.stringify(a.notifyPrefs));
+    L.check("E2", "the button says so", (await btn.getAttribute("aria-pressed")) === "true" && /We’ll tell you/.test((await btn.textContent()) ?? ""), (await btn.textContent()) ?? "");
+    await page.reload();
+    await page.waitForSelector('[data-dv1="notify"]');
+    await page.waitForFunction(() => document.querySelector('[data-dv1="notify"]')?.getAttribute("aria-pressed") === "true", null, { timeout: 15_000 }).catch(() => {});
+    L.check("E2", "it reads back after a reload", (await page.locator('[data-dv1="notify"]').getAttribute("aria-pressed")) === "true", "");
+    await page.locator('[data-dv1="notify"]').click();
+    await page.waitForTimeout(1500);
+    const b = dumpOwned() as Record<string, any>;
+    L.check("E2", "pressed again, the leaf is off and the others still stand", b.notifyPrefs?.discover === false && b.notifyPrefs?.nudges === false && b.notifyPrefs?.weeklyDigest === true, JSON.stringify(b.notifyPrefs));
+    L.check("E2", "the live face never mounted while the flag is off", (await page.locator('[data-dv1="header"]').count()) === 0, "");
+  } finally { await ctx.close(); seedOwned(); }
+  L.done(7);
+});
+
+/* ── B1 (empty) · the coming-soon panel and steps card against the ref ── */
+const AE_APP: Record<string, string> = { hd: '[data-dv1="coming-soon"]', panel: '[data-dv1="panel"]', eyebrow: '[data-dv1="coming-soon"] [data-dv1="eyebrow"]', title: '[data-dv1="coming-soon"] h1', lede: '[data-dv1="lede"]', notify: '[data-dv1="notify"]', how: '[data-dv1="coming-soon"] .dv1-b2', disc: ".dv1-disc", steps: '[data-dv1="coming-soon"] [data-dv1="steps"]' };
+const AE_REF: Record<string, string> = { hd: ".ae", panel: ".ae-panel", eyebrow: ".ae-k", title: ".ae-panel h1", lede: ".ae-p", notify: "#dvNotify", how: ".ae-b .b2", disc: ".ae-art .dv-disc", steps: ".ae .ae-hw" };
+for (const vp of SIZES) test(`B1 · the coming-soon panel against the ref at ${vp.width}`, async ({ page }) => {
+  const L = new Ledger(`B1-empty-${vp.width}`);
+  await openDiscover(page, vp, "empty");
+  const app = (await page.evaluate(READ(AE_APP))) as Boxes;
+  const col = await appColumn(page);
+  await openMock(page, col, vp.height, "empty");
+  const ref = (await page.evaluate(READ(AE_REF))) as Boxes;
+  /* ⚠️ THE LEDE'S WRAP IS A FONT FACT: the mock embeds its own build of Source Serif 4, the app loads Google's, and the
+     same 463px measure breaks the same sentence one line apart at 1280. So everything below the lede is read against
+     the lede's bottom, and the disc against the panel's centre — the design's relations, not the font's line count. */
+  for (const k of Object.keys(AE_APP)) {
+    const a = app[k], r = ref[k];
+    L.check("B1", `${vp.width} ${k} present`, a && r, `${JSON.stringify(a)} vs ${JSON.stringify(r)}`);
+    if (!a || !r) continue;
+    L.check("B1", `${vp.width} ${k} font size`, near(a.fs, r.fs, 0.1), `${a.fs} vs ref ${r.fs}`);
+    L.check("B1", `${vp.width} ${k} x`, near(a.x, r.x, 2), `${a.x.toFixed(1)} vs ref ${r.x.toFixed(1)}`);
+    if (k !== "lede") L.check("B1", `${vp.width} ${k} w`, near(a.w, r.w, 2), `${a.w.toFixed(1)} vs ref ${r.w.toFixed(1)}`);
+    if (["panel", "eyebrow", "title", "lede"].includes(k)) L.check("B1", `${vp.width} ${k} y`, near(a.y, r.y, 2), `${a.y.toFixed(1)} vs ref ${r.y.toFixed(1)}`);
+    if (["eyebrow", "title", "notify", "how", "disc"].includes(k)) L.check("B1", `${vp.width} ${k} h`, near(a.h, r.h, 2), `${a.h.toFixed(1)} vs ref ${r.h.toFixed(1)}`);
+  }
+  const rel = (b: Boxes) => ({
+    notify: b.notify!.y - (b.lede!.y + b.lede!.h), how: b.how!.y - (b.lede!.y + b.lede!.h),
+    panelBelowButtons: b.panel!.y + b.panel!.h - (b.notify!.y + b.notify!.h),
+    discCentre: b.disc!.y + b.disc!.h / 2 - (b.panel!.y + b.panel!.h / 2),
+    steps: b.steps!.y - (b.panel!.y + b.panel!.h),
+  });
+  if (app.notify && app.lede && app.panel && app.disc && app.steps && ref.notify && ref.lede && ref.panel && ref.disc && ref.steps) {
+    const A = rel(app), R = rel(ref);
+    for (const k of Object.keys(A) as (keyof typeof A)[]) L.check("B1", `${vp.width} ${k} (relative)`, near(A[k], R[k], 2), `${A[k].toFixed(1)} vs ref ${R[k].toFixed(1)}`);
+  } else L.check("B1", `${vp.width} the relative readings`, false, "a box is missing");
+  L.done(40);
+});
+
+/* ── C1 (tray) · the picks tray against the ref, read from the section head down ──
+   ⚠️ ADDED AFTER A CLASS COLLISION: the catalogue section and the lead card's slate band once shared `.dv1-band`, which
+   gave the lead's band the section's 72px margin and paper ground and spilled the section's heading over the lead
+   card's buttons. Nothing measured the tray then; this does. */
+const TRAY_APP: Record<string, string> = { hd: ".dv1-sh", trust: '[data-dv1="trust"]', tray: '[data-dv1="tray"]', lead: '[data-dv1="lead"]', band: '[data-dv1="band"]', who: ".dv1-who", why: '[data-dv1="why"]', facts: '[data-dv1="facts"]', acts: ".dv1-acts", queue: '[data-dv1="queue"]', keys: '[data-dv1="keys"]' };
+const TRAY_REF: Record<string, string> = { hd: "#dvPicks .cx-sh", trust: ".dv-trust", tray: ".dv-tray", lead: ".dv-lead", band: ".dv-band", who: ".dv-who", why: ".dv-why", facts: ".dv-facts", acts: ".dv-acts", queue: ".dv-queue", keys: ".dv-keys" };
+for (const vp of SIZES) test(`C1 · the picks tray against the ref at ${vp.width}`, async ({ page }) => {
+  const L = new Ledger(`C1-tray-${vp.width}`);
+  await openDiscover(page, vp, "live");
+  await mutate(page, "C1T");
+  const app = (await page.evaluate(READ(TRAY_APP))) as Boxes;
+  const col = await appColumn(page);
+  await openMock(page, col, vp.height, "live");
+  const ref = (await page.evaluate(READ(TRAY_REF))) as Boxes;
+  for (const k of Object.keys(TRAY_APP)) {
+    const a = app[k], r = ref[k];
+    L.check("C1", `${vp.width} ${k} present`, a && r, "");
+    if (!a || !r) continue;
+    for (const d of ["x", "w"] as const) L.check("C1", `${vp.width} ${k} ${d}`, near(a[d], r[d], 1.5), `${a[d].toFixed(1)} vs ref ${r[d].toFixed(1)}`);
+    /* heights and offsets down to the why box; the fixture's own wish-list words decide the why box's height, and
+       everything below it follows */
+    if (["trust", "tray", "lead", "band", "who", "why", "queue"].includes(k)) L.check("C1", `${vp.width} ${k} y`, near(a.y, r.y, 1.5), `${a.y.toFixed(1)} vs ref ${r.y.toFixed(1)}`);
+    if (["hd", "trust", "band", "who", "acts", "keys"].includes(k)) L.check("C1", `${vp.width} ${k} h`, near(a.h, r.h, 1.5), `${a.h.toFixed(1)} vs ref ${r.h.toFixed(1)}`);
+  }
+  L.done(40);
+});

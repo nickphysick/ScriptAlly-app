@@ -49,6 +49,8 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   B1: { css: `.dv1-rg { width: auto !important; height: auto !important; } .dv1-rg svg { width: auto !important; height: auto !important; } .dv1-hd[data-loading] .dv1-rg svg { display: none !important; }` },
   /* a stroke on the empty ring: the "none" state draws an arc anyway */
   B2: { js: `(() => { const fix = () => { for (const svg of document.querySelectorAll('[data-dv1="ring"] svg')) { if (svg.querySelector('[data-dv1="ring-arc"]')) continue; const c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); for (const [k, v] of [["data-dv1", "ring-arc"], ["cx", "42"], ["cy", "42"], ["r", "36"], ["fill", "none"], ["stroke", "#2a3a52"], ["stroke-width", "8"], ["stroke-linecap", "round"], ["stroke-dasharray", "0 226.19"]]) c.setAttribute(k, v); svg.appendChild(c); } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); fix(); })()` },
+  /* the class collision restored: the catalogue section's rules on the lead card's slate band */
+  C1T: { css: `.dv1-band { position: relative !important; margin-top: 72px !important; padding: 56px 0 64px !important; }` },
   /* the facts' reflow by viewport instead of the card */
   C1: { css: `@container dv1lead (max-width: 665px) { .dv1-facts { grid-template-columns: 1fr 1.25fr 1fr !important; } .dv1-facts > div:nth-child(2) { grid-column: auto !important; order: 0 !important; } } @media (max-width: 1360px) { .dv1-facts { grid-template-columns: 1fr 1fr !important; } .dv1-facts > div:nth-child(2) { grid-column: 1 / -1 !important; order: 3 !important; } }` },
 };
@@ -122,6 +124,10 @@ export async function openMock(page: Page, column: number, height: number, state
     await page.evaluate((s) => (document.querySelector(`.stsw [data-st="${s}"]`) as HTMLElement).click(), state);
     await page.waitForTimeout(200);
   }
+  /* ⚠️ MOTION OFF BEFORE ANY READING: the mock's lead card enters with a 0.42s rise, and a box read mid-flight is the
+     animation's, not the layout's (it put the ref's lead 1.8px low at 1280) */
+  await page.addStyleTag({ content: "*, *::before, *::after { animation: none !important; transition: none !important; }" });
+  await page.waitForTimeout(100);
   return w;
 }
 
@@ -139,7 +145,7 @@ export const seedOwned = (args = "") => execSync(`node tests/e2e/seedDiscoverV1.
 export const dumpOwned = (extra = ""): Record<string, unknown> => JSON.parse(seedOwned(`--dump ${extra}`).trim().split("\n").filter((l) => l.startsWith("{")).pop()!);
 
 /** A context signed in as the owned account, on the real live face (`__SA_DV_LIVE`), with its book active. */
-export async function ownedPage(browser: Browser, baseURL: string, vp: VP): Promise<{ ctx: BrowserContext; page: Page }> {
+export async function ownedPage(browser: Browser, baseURL: string, vp: VP, face: "live" | "soon" = "live"): Promise<{ ctx: BrowserContext; page: Page }> {
   await assertLocalBundleIsDev();
   /* ⚠️ A FRESH SIGN-IN EVERY TIME: a restored storageState came back signed out (Firebase keeps its session in
      IndexedDB) and read as a page that never rendered — the house harness signs in per run for the same reason */
@@ -167,17 +173,18 @@ export async function ownedPage(browser: Browser, baseURL: string, vp: VP): Prom
       } catch { res(false); }
     };
   }), null, { timeout: 20_000, polling: 250 });
-  await page!.addInitScript((id) => {
-    (window as unknown as Record<string, unknown>).__SA_DV_LIVE = 1;
+  await page!.addInitScript(({ id, live }) => {
+    if (live) (window as unknown as Record<string, unknown>).__SA_DV_LIVE = 1;
     try { localStorage.setItem("scriptally_active_manuscript_id", id); } catch { /* */ }
-  }, DV1_MS);
+  }, { id: DV1_MS, live: face === "live" });
   await page!.goto("/agents/discover");
   await page!.addStyleTag({ content: KILL_MOTION });
   await page!.addScriptTag({ content: LIB });
-  await page!.waitForFunction(() => {
+  await page!.waitForFunction((f) => {
     const r = [...document.querySelectorAll('[data-dv1="page"]')].find((e) => e.getBoundingClientRect().height > 0);
-    return !!r && r.getAttribute("data-face") === "live" && !r.querySelector('[data-dv1="header"][data-loading]') && !!r.querySelector('[data-dv1="picks"]');
-  }, null, { timeout: 45_000 });
+    if (!r || r.getAttribute("data-face") !== f) return false;
+    return f === "soon" ? !!r.querySelector('[data-dv1="coming-soon"]') : !r.querySelector('[data-dv1="header"][data-loading]') && !!r.querySelector('[data-dv1="picks"]');
+  }, face, { timeout: 45_000 });
   await page!.waitForTimeout(400);
   return { ctx: ctx!, page: page! };
 }

@@ -17,42 +17,36 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { DISCOVER_LIVE } from "../../../lib/discoverShared";
 import { notifyPrefs } from "../../../lib/accountPrefs";
-import { memoryIO, reviewFixture, reviewHoldMs, reviewLive, reviewState, type ReviewState } from "../../../lib/discoverReviewAid";
+import { devAid, type DevAid } from "../../../lib/discoverReviewAid";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { AppFooter } from "../../shell/AppFooter";
 import { DvEmptyHeader, DvHeader, type HeaderTitle } from "./DvHeader";
 import { DvPicks, type DecideKind, type Leaving } from "./DvPicks";
-import { DvHowModal, DvPassedModal, DvToast, DvTune, type ToastState } from "./DvLayers";
+import { DvHowModal, DvPassedModal, DvSteps, DvToast, DvTune, type ToastState } from "./DvLayers";
 import { DvCatalogue, DvShareNotice, DvShareSheet } from "./DvShare";
-import { catalogueFigures, decisionDoc, type ScoutPick } from "../../../lib/scout";
+import { catalogueFigures, decisionDoc, hasAnyFigure, type ScoutPick } from "../../../lib/scout";
 import type { Agent } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { bookGenres } from "../../../lib/genreMatch";
 import { countryName } from "../../../lib/territory";
-import { useScout, type Fixture } from "./useScout";
+import { useScout } from "./useScout";
 import "./discover1.css";
 
 type Nav = (tab: string, sub?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
 
-/** What the page should be: the prod gate, unless a dev build's review aid says otherwise. */
-function useFace(): { face: "soon" | "live"; fixtureState: ReviewState | null } {
-  /* ⚠️ THE MODE CHECK IS AT THE CALL SITE so the bundler can drop the aid (see the file header) */
-  const aidState = import.meta.env.MODE !== "production" ? reviewState() : null;
-  const aidLive = import.meta.env.MODE !== "production" ? reviewLive() : false;
-  if (aidState === "empty") return { face: "soon", fixtureState: null };
-  if (aidState) return { face: "live", fixtureState: aidState };
-  if (aidLive) return { face: "live", fixtureState: null };
-  return { face: DISCOVER_LIVE ? "live" : "soon", fixtureState: null };
-}
+const NO_AID: DevAid = { face: null, fixture: null, memory: null, holdMs: 0 };
 
 export const DiscoverPage: React.FC<{ onNavigate?: Nav }> = ({ onNavigate }) => {
-  const { face, fixtureState } = useFace();
+  /* ⚠️ THE MODE CHECK IS AT THE CALL SITE, AS A TERNARY ON THE BUILD CONSTANT — a production build folds this to
+     NO_AID and the aid's module is absent from the bundle (lock E1 greps it). Read once per visit. */
+  const [aid] = useState<DevAid>(() => (import.meta.env.MODE !== "production" ? devAid() : NO_AID));
+  const face: "soon" | "live" = aid.face ?? (DISCOVER_LIVE ? "live" : "soon");
   const nav: Nav = onNavigate ?? (() => {});
   return (
     <WorkspacePageGrid className="dv1-wpg" scrollLabel="Discover" masthead={null}>
       <div className="dv1-page" data-dv1="page" data-face={face}>
-        {face === "soon" ? <ComingSoon onNavigate={nav} /> : <LivePage fixtureState={fixtureState} onNavigate={nav} />}
+        {face === "soon" ? <ComingSoon onNavigate={nav} /> : <LivePage aid={aid} onNavigate={nav} />}
         <AppFooter onNavigate={nav} />
       </div>
     </WorkspacePageGrid>
@@ -67,7 +61,29 @@ const ComingSoon: React.FC<{ onNavigate: Nav }> = () => {
   const notified = notifyPrefs(db.currentUser?.notifyPrefs).discover;
   /* ⚠️ ONE LEAF, `notifyPrefs.discover` — the whole map would drop Settings' other two keys */
   const toggle = () => { void db.updateUserPaths({ "notifyPrefs.discover": !notified }); };
-  return <DvEmptyHeader msTitle={msTitle} notified={notified} onNotify={toggle} onHow={() => {}} />;
+  const [how, setHow] = useState(false);
+  const figs = catalogueFigures();
+  return (
+    <>
+      <DvEmptyHeader msTitle={msTitle} notified={notified} onNotify={toggle} onHow={() => setHow(true)}>
+        <DvSteps headingId="dv1SoonH" />
+        <div className="dv1-sofar" data-dv1="so-far">
+          <div>
+            <h3>The catalogue so far.</h3>
+            {/* ⚠️ NO FIGURE HAS A READABLE SOURCE YET (decision 8), so this says so in words — no number, no dash, no zero */}
+            <p data-dv1="so-far-line">The count goes here once it’s ready to share. The Scout opens when there are enough verified agents in your genre to be useful.</p>
+          </div>
+          {hasAnyFigure(figs) ? (
+            <div className="dv1-figs" data-dv1="cat-figures">
+              {figs.contributed != null ? <div className="dv1-fig"><b>{figs.contributed.toLocaleString("en-GB")}</b><span>agents contributed by writers</span></div> : null}
+              {figs.verified != null ? <div className="dv1-fig"><b>{figs.verified.toLocaleString("en-GB")}</b><span>verified so far</span></div> : null}
+            </div>
+          ) : null}
+        </div>
+      </DvEmptyHeader>
+      <DvHowModal open={how} onClose={() => setHow(false)} />
+    </>
+  );
 };
 
 /** The sidebar's book title, for the coming-soon paragraph (the live page reads it through useScout). */
@@ -90,16 +106,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type LeavingPick = Leaving & { pick: ScoutPick };
 
-const LivePage: React.FC<{ fixtureState: ReviewState | null; onNavigate: Nav }> = ({ fixtureState, onNavigate }) => {
-  /* the fixture and its in-memory store are made once per visit */
-  const [aid] = useState(() => {
-    /* ⚠️ THE MODE CHECK FIRST, so a production build folds the aid away */
-    if (import.meta.env.MODE === "production") return { fixture: null as Fixture | null, memory: null, holdMs: 0 };
-    const holdMs = reviewHoldMs();
-    if (!fixtureState) return { fixture: null as Fixture | null, memory: null, holdMs };
-    const fixture = reviewFixture(fixtureState);
-    return { fixture, memory: memoryIO(fixture.decisions), holdMs };
-  });
+const LivePage: React.FC<{ aid: DevAid; onNavigate: Nav }> = ({ aid, onNavigate }) => {
   const s = useScout(aid);
   const ms = s.manuscript;
 
