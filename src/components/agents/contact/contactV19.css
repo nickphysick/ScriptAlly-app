@@ -325,3 +325,86 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-strip .cl19-wish:hover .clv-mq { display: inline-block; }
 .cl19-strip .cl19-wish:not(:hover) .clv-mq { display: inline; }
 .cl19-strip .clv-miss { margin: 0; }
+
+/* ── §E · GROUP BY, THE GROUP BANDS AND THE JUMP ROW ──────────────────────────────────────────────────────────────
+   The chip is the applied-chip pattern: grouped, the wrapper turns powder with an inset 1.5px navy ring and holds a
+   separate ✕ (Stop grouping) beside the menu's button; the button inside goes clear so the two read as one chip. */
+.cl19-grpw { display: inline-flex; align-items: center; flex: none; height: 34px; border-radius: 8px; }
+.cl19-grpw[data-on] { box-sizing: border-box; padding-right: 6px; background: #e6edf6; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl19-grpw[data-on] .cl19-grp { background: transparent; box-shadow: none; padding-right: 0; }
+.cl19-grpw[data-on] .cl19-grp:hover:not(:disabled) { background: transparent; }
+.cl19-grp .cl19-l--on { display: inline-flex; align-items: center; gap: 8px; }
+.cl19-grp .cl19-gby { font: 400 13px/1 var(--sp-type) !important; color: #2a3a52; letter-spacing: 0.01em; }
+.cl19-grp .cl19-l--on b { font: 700 14.5px/20px var(--sp-serif) !important; color: rgb(28, 19, 15); }
+.cl19-grpx {
+  box-sizing: border-box; flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; margin: 0 0 0 10px;
+  padding: 0; border: 0; border-radius: 50%; background: #2a3a52; color: #fff; cursor: pointer;
+}
+.cl19-grpx:hover:not(:disabled) { background: #1f2c40; }
+.cl19-grpx:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* the jump row: a button per group — its mark and count, the current one white with a navy ring and its name */
+.cl19-jump { gap: 2px; overflow: hidden; height: 36px; }
+.cl19-jump button[data-cl19="jump-group"] {
+  box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; margin: 0; padding: 0 9px;
+  border: 0; border-radius: 8px; background: transparent; color: #2a3a52; cursor: pointer; white-space: nowrap;
+  font: 400 14.5px/1 var(--sp-type) !important;
+}
+.cl19-jump button[data-cl19="jump-group"] .cl19-jl { font: inherit !important; display: none; }
+.cl19-jump button[data-cl19="jump-group"] i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+.cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.28); }
+.cl19-jump button[data-cl19="jump-group"][aria-current="true"] .cl19-jl { display: inline; }
+.cl19-jump button[data-cl19="jump-group"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.cl19-jump button[data-cl19="jump-group"] .cl19-gm { margin-right: 2px; }
+/* give way: (1) the current group's name goes, (2) the groups that do not fit whole go into "+N more" */
+.cl19-tb:is([data-fit="1"], [data-fit="2"]) .cl19-jump button[aria-current="true"] .cl19-jl { display: none; }
+.cl19-jump button[data-over] { display: none; }
+.cl19-jmore {
+  box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; margin: 0 0 0 4px; padding: 0 12px;
+  border: 0; border-radius: 999px; background: #fff; color: #2a3a52; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 14px/1 var(--sp-type) !important;
+}
+.cl19-jmore[hidden] { display: none; }
+.cl19-jmore:hover, .cl19-jmore[aria-expanded="true"] { background: #edf1f7; }
+.cl19-jmore:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-jmore svg { color: rgba(28, 19, 15, 0.5); }
+/* its menu (portalled to body: every value stated, no page token) */
+.cl19-jpop {
+  position: fixed; z-index: 9000; box-sizing: border-box; min-width: 240px; max-height: min(60vh, 420px); overflow: auto; padding: 6px;
+  border-radius: 14px; background: #fff; box-shadow: 0 18px 40px -14px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.1);
+}
+.cl19-jpop button {
+  box-sizing: border-box; display: flex; align-items: center; gap: 9px; width: 100%; margin: 0; padding: 9px 12px; border: 0; border-radius: 9px;
+  background: transparent; color: #2a3a52; cursor: pointer; text-align: left; font: 400 15px/1.2 var(--sp-type) !important;
+}
+.cl19-jpop button span:not(.cl19-gm) { flex: 1; font: inherit !important; }
+.cl19-jpop button i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-jpop button:hover { background: #edf1f7; }
+.cl19-jpop button[aria-current="true"] { background: #e6edf6; }
+.cl19-jpop button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* a group's mark: the StatusDot (ink), a drawn mark, or a flag */
+.cl19-gm { display: inline-grid; place-items: center; flex: none; color: rgb(28, 19, 15); line-height: 0; }
+.cl19-gm .cl19-gm-svg[data-ghost] { color: rgba(28, 19, 15, 0.55); }
+.cl19-gm .cl19-flag { display: block; width: 18px; height: 13.5px; border-radius: 2px; background-size: cover; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14); }
+.cl19-gm .cl19-flag--none { box-sizing: border-box; background: transparent; box-shadow: none; border: 1.3px dashed rgba(28, 19, 15, 0.35); }
+.cl19-gb .cl19-gm { width: 22px; height: 22px; }
+.cl19-gb .cl19-gm .cl19-flag { width: 24px; height: 18px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 1px 2px rgba(28, 19, 15, 0.12); }
+.cl19-gb .cl19-gm .cl19-flag--none { border-width: 1.5px; box-shadow: none; }
+
+/* the strong band: 50 tall, powder, a 2px navy rule on top and a 1px rule at 16% navy beneath; it sticks under the
+   column headings (40 tall) until its section leaves */
+.clv-group .cl19-card .cl19-gb {
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; height: 50px; margin: 0; padding: 0 0 0 28px;
+  background: #e6edf6; border-top: 2px solid #2a3a52; border-bottom: 1px solid rgba(42, 58, 82, 0.16);
+  position: sticky; z-index: 6; top: calc(var(--cl17-pin-h, 0px) + var(--lt-stick, 0px) + var(--cl19-af-h, 0px) + var(--cl19-lh, 40px));
+}
+.clv-group .cl19-card .cl19-gb .cl19-gbl { font: 400 19px/1 var(--sp-type) !important; color: #1f2c40; white-space: nowrap; }
+.clv-group .cl19-card .cl19-gb .cl19-gbn {
+  box-sizing: border-box; display: inline-flex; align-items: center; height: 18px; padding: 3px 9px; border-radius: 999px;
+  background: #2a3a52; color: rgb(244, 238, 229); font: 400 12px/1 var(--sp-type) !important; font-style: normal; letter-spacing: 0.02em; white-space: nowrap;
+}
+/* the band's top rule ends a group: the row above it draws no rule of its own */
+.clv-group .cl19-card .cl19-grp-s > .clv-row:last-child::after { display: none; }
+.clv-group[data-loading] .cl19-gb { opacity: 0; }

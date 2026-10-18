@@ -424,15 +424,29 @@ export function dropOptions(
 }
 
 /* ── grouping (v14 §4) — a PARTITION of the already-sorted list ── */
-/* v16 §C: "none" is the default — one list, A to Z by surname, no dividers */
-export type GroupKey = "none" | "letter" | "status" | "action" | "country";
+/* v16 §C: "none" is the default — one list, A to Z by surname, no dividers.
+   v19 §E: the menu reads Letter · Status · Action required · Country · Priority, then (below a rule) No grouping;
+   only Letter carries a line. Priority groups by the agent's own star rating (`Agent.starRating`), five stars first
+   and the unrated last. Every key from before is kept. */
+export type GroupKey = "none" | "letter" | "status" | "action" | "country" | "priority";
 export const GROUP_OPTIONS: { key: GroupKey; label: string; line?: string }[] = [
-  { key: "none", label: "No grouping", line: "One list, in the order you sort it" },
-  { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z index" },
-  { key: "status", label: "Status", line: "Furthest along first; closed last" },
-  { key: "action", label: "Action required", line: "What each agent needs from you" },
-  { key: "country", label: "Country", line: "Where the agent is based" },
+  { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z strip" },
+  { key: "status", label: "Status" },
+  { key: "action", label: "Action required" },
+  { key: "country", label: "Country" },
+  { key: "priority", label: "Priority" },
+  { key: "none", label: "No grouping" },
 ];
+/** Priority's groups, in order: the stated rating, then nobody's rating */
+export type PriorityKey = "p5" | "p4" | "p3" | "p2" | "p1" | "unrated";
+export const PRIORITY_GROUPS: { key: PriorityKey; label: string }[] = [
+  { key: "p5", label: "5 stars" }, { key: "p4", label: "4 stars" }, { key: "p3", label: "3 stars" },
+  { key: "p2", label: "2 stars" }, { key: "p1", label: "1 star" }, { key: "unrated", label: "Not rated" },
+];
+export const priorityOf = (x: Pick<AgentFacts, "agent">): PriorityKey => {
+  const r = x.agent.starRating;
+  return r && r >= 1 && r <= 5 ? (`p${r}` as PriorityKey) : "unrated";
+};
 /** Action required's groups, in order. Ruling Q6: Revise & resubmit is "Send the revision" (your move);
  *  Resubmitted waits on the agent; Signed has nothing to do. */
 export type ActionKey = "offer" | "partial" | "full" | "revision" | "nudge" | "ready" | "waiting" | "shut" | "nothing";
@@ -507,11 +521,13 @@ export function contactGroups(
     if (key === "letter") put(surnameInitial(x.agent), x.agent.id);
     else if (key === "status") put(x.status14, x.agent.id);
     else if (key === "action") put(actionOf(x, takes), x.agent.id);
+    else if (key === "priority") put(priorityOf(x), x.agent.id);
     else put(countryOf(x), x.agent.id);
   }
   if (key === "letter") return [...buckets.keys()].sort((a, b) => a.localeCompare(b)).map((k) => ({ label: k, key: k, ids: buckets.get(k)! }));
   if (key === "status") return STATUS_GROUP_ORDER.filter((k) => buckets.has(k)).map((k) => ({ label: STATUS_LABEL[k], key: k, ids: buckets.get(k)! }));
   if (key === "action") return ACTION_GROUPS.filter((g) => buckets.has(g.key)).map((g) => ({ label: g.label, key: g.key, ids: buckets.get(g.key)! }));
+  if (key === "priority") return PRIORITY_GROUPS.filter((g) => buckets.has(g.key)).map((g) => ({ label: g.label, key: g.key, ids: buckets.get(g.key)! }));
   return [...buckets.keys()]
     .sort((a, b) => (a === NOT_RECORDED ? 1 : b === NOT_RECORDED ? -1 : a.localeCompare(b)))
     .map((k) => ({ label: k, key: k, ids: buckets.get(k)! }));

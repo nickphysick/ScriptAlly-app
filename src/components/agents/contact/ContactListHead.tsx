@@ -18,7 +18,9 @@
  *    At ≤1440px Find folds to a 42px icon button and opens to 240px OVER the letter row (CSS: focus, or a search held).
  *    Group by and Filters never shrink and never lose their labels.
  */
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { ContactGroupMark } from "./ContactGroupMark";
 import { LETTERS } from "./ContactLetters";
 import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
 import { GROUP_OPTIONS, type GroupKey } from "../../../lib/contactList";
@@ -87,6 +89,59 @@ export interface ContactBand {
   onAdd: () => void;
 }
 
+/** v19 §E — one group's jump: its mark, its name (shown on the current one) and how many rows it holds */
+export interface ContactJumpGroup { key: string; label: string; n: number }
+export interface ContactJump {
+  groups: ContactJumpGroup[];
+  /** the group the scroll is in (its band at or above the headings' foot) */
+  current: string | null;
+  onJump: (key: string) => void;
+}
+
+const CROSS = (
+  <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
+    <path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+  </svg>
+);
+
+/** "+N more ⌄"'s menu: the hidden groups with their marks and counts (the mock's `.jr-pop`), 6 under the button */
+const JumpMore: React.FC<{
+  anchor: HTMLElement; groupKey: GroupKey; groups: ContactJumpGroup[]; current: string | null; onPick: (k: string) => void; onClose: () => void;
+}> = ({ anchor, groupKey, groups, current, onPick, onClose }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  useLayoutEffect(() => {
+    const r = anchor.getBoundingClientRect();
+    const w = ref.current?.offsetWidth ?? 240;
+    setPos({ top: r.bottom + 6, left: Math.max(12, Math.min(r.left, window.innerWidth - w - 12)) });
+  }, [anchor]);
+  React.useEffect(() => {
+    ref.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
+    const down = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (ref.current?.contains(t) || anchor.contains(t)) return;
+      onClose();
+    };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopImmediatePropagation(); onClose(); anchor.focus({ preventScroll: true }); } };
+    document.addEventListener("pointerdown", down, true);
+    document.addEventListener("keydown", key, true);
+    return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("keydown", key, true); };
+  }, [anchor, onClose]);
+  return createPortal(
+    <div className="cl19-jpop" data-cl19="jump-menu" role="menu" aria-label="More groups" ref={ref}
+      style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
+      {groups.map((g) => (
+        <button key={g.key} type="button" role="menuitem" data-cl19="jump-menu-item" data-gkey={g.key} aria-current={current === g.key ? "true" : undefined}
+          onClick={() => { onClose(); onPick(g.key); }}>
+          <ContactGroupMark groupKey={groupKey} gkey={g.key} label={g.label} size={16} />
+          <span>{g.label}</span><i>{g.n}</i>
+        </button>
+      ))}
+    </div>,
+    document.body,
+  );
+};
+
 export const ContactListHead: React.FC<{
   pinned: boolean;
   loading?: boolean;
@@ -102,24 +157,64 @@ export const ContactListHead: React.FC<{
   search: string;
   onSearch: (v: string) => void;
   groupKey: GroupKey;
+  /** v19 §E — the chip's ✕: back to ungrouped, the sort left as it is */
+  onStopGroup: () => void;
+  /** v19 §E — the jump row, when grouped by anything but Letter */
+  jump: ContactJump | null;
   filterCount: number;
   pop: PopoverState<ContactPop>;
   onPin: () => void;
-}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, filterCount, pop, onPin }) => {
+}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, pop, onPin }) => {
   const tbRef = useRef<HTMLDivElement>(null);
   const showLetters = groupKey === "none" || groupKey === "letter";
   const groupName = groupKey === "none" ? null : GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? null;
 
-  /* ── the give-way pass: the smallest `data-fit` at which nothing in the row is clipped ── */
-  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "");
+  const grpRef = useRef<HTMLButtonElement>(null);
+  const jumpRef = useRef<HTMLElement>(null);
+  /* v19 §E — "+N more": the index from which the jump row's groups go into the menu (null: all fit) */
+  const [cut, setCut] = useState<number | null>(null);
+  const [moreAt, setMoreAt] = useState<HTMLElement | null>(null);
+  const jumpGroups = jump?.groups ?? [];
+  const jumpSig = jumpGroups.map((g) => `${g.key}:${g.n}`).join(",") + "|" + (jump?.current ?? "");
+
+  /* ── the give-way pass: the smallest `data-fit` at which nothing in the row is clipped ──
+     Letters: 1 hides the letters with no agents, 2 tightens them. The jump row (v19 §E): 1 hides the current group's
+     label, 2 then puts the groups that do not fit WHOLE into "+N more" — set on each button as `data-over` (never
+     React state, so it cannot re-render the page), with the count handed to the one "+N more" button. */
+  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "") + jumpSig;
   useLayoutEffect(() => {
     const tb = tbRef.current;
     if (!tb) return undefined;
     const fit = () => {
       if (tb.clientWidth === 0) return;
+      const nav = jumpRef.current;
+      const btns = nav ? Array.from(nav.querySelectorAll<HTMLElement>("button[data-cl19='jump-group']")) : [];
+      btns.forEach((b) => b.removeAttribute("data-over"));
+      nav?.removeAttribute("data-cut");
       for (let lv = 0; lv <= 2; lv += 1) {
         tb.setAttribute("data-fit", String(lv));
-        if (tb.scrollWidth <= tb.clientWidth + 0.5) return;
+        if (lv === 2 && nav && btns.length) {
+          /* the room the jump row has: what the toolbar leaves once everything else has its width */
+          const over = tb.scrollWidth - tb.clientWidth;
+          const room = nav.offsetWidth - Math.max(0, over);
+          const gap = parseFloat(getComputedStyle(nav).columnGap) || 0;
+          const more = nav.querySelector<HTMLElement>("[data-cl19='jump-more']");
+          const mw = (more?.offsetWidth || 104) + gap;
+          let used = 0;
+          let c = btns.length;
+          for (let i = 0; i < btns.length; i += 1) {
+            used += btns[i].offsetWidth + (i ? gap : 0);
+            const rest = btns.length - i - 1;
+            if (used + (rest ? mw : 0) > room + 0.5) { c = i; break; }
+          }
+          if (c < btns.length) {
+            btns.slice(c).forEach((b) => b.setAttribute("data-over", ""));
+            nav.setAttribute("data-cut", "");
+          }
+          setCut(c < btns.length ? c : null);
+          return;
+        }
+        if (tb.scrollWidth <= tb.clientWidth + 0.5) { if (lv < 2) setCut(null); return; }
       }
     };
     fit();
@@ -130,6 +225,17 @@ export const ContactListHead: React.FC<{
     void document.fonts?.ready.then(fit);
     return () => ro.disconnect();
   }, [sig]);
+  /* the "+N more" button's own width can differ from the estimate: once it renders, never leave a group cut off */
+  useLayoutEffect(() => {
+    const tb = tbRef.current;
+    const nav = jumpRef.current;
+    if (!tb || !nav || cut === null) return;
+    if (tb.scrollWidth <= tb.clientWidth + 0.5 || cut <= 0) return;
+    const btns = Array.from(nav.querySelectorAll<HTMLElement>("button[data-cl19='jump-group']"));
+    btns[cut - 1]?.setAttribute("data-over", "");
+    setCut(cut - 1);
+  }, [cut]);
+  const hidden = cut === null ? [] : jumpGroups.slice(cut);
 
   return (
     <div className="cl19-head" ref={headRef} data-cl19="head" data-pinned={pinned ? "" : undefined}>
@@ -181,8 +287,28 @@ export const ContactListHead: React.FC<{
             })}
           </nav>
         ) : (
-          /* Part E's jump row takes this place when the list is grouped by anything but Letter */
-          <nav className="cl19-jump" data-cl19="jump" aria-label="Jump to a group" />
+          /* v19 §E — the jump row: one button per group (its mark and count; the current one also its name) */
+          <nav className="cl19-jump" ref={jumpRef} data-cl19="jump" aria-label="Jump to a group">
+            {jumpGroups.map((g) => {
+              const on = jump?.current === g.key;
+              return (
+                <button key={g.key} type="button" data-cl19="jump-group" data-gkey={g.key} aria-current={on ? "true" : undefined}
+                  aria-label={`${g.label}, ${g.n} ${g.n === 1 ? "agent" : "agents"}`} title={g.label} disabled={loading}
+                  onClick={() => jump?.onJump(g.key)}>
+                  <ContactGroupMark groupKey={groupKey} gkey={g.key} label={g.label} size={16} />
+                  <span className="cl19-jl">{g.label}</span><i>{g.n}</i>
+                </button>
+              );
+            })}
+            <button type="button" className="cl19-jmore" data-cl19="jump-more" aria-haspopup="menu" aria-expanded={!!moreAt}
+              hidden={!hidden.length} onClick={(e) => setMoreAt((cur) => (cur ? null : e.currentTarget))}>
+              +{hidden.length} more {CARET}
+            </button>
+            {moreAt && hidden.length ? (
+              <JumpMore anchor={moreAt} groupKey={groupKey} groups={hidden} current={jump?.current ?? null}
+                onPick={(k) => jump?.onJump(k)} onClose={() => setMoreAt(null)} />
+            ) : null}
+          </nav>
         )}
         <span className="cl19-sp" aria-hidden="true" />
         <div className="cl19-tools" data-cl19="tools">
@@ -192,13 +318,21 @@ export const ContactListHead: React.FC<{
               <input value={search} onChange={(e) => onSearch(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" disabled={loading} />
             </label>
           </span>
-          <button type="button" className="cl19-ctl cl19-grp" data-cl19="group" data-cl18="group" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
-            aria-label={groupName ? `Grouped by ${groupName}. Change grouping` : "Group the list"} disabled={loading}
-            onClick={(e) => pop.toggle("group", e.currentTarget)}>
-            <span className="cl19-ic">{LIST_ICON}</span>
-            {groupName ? <span className="cl19-l">Grouped by <b data-ltb="group-name">{groupName}</b></span> : <span className="cl19-l">Group by</span>}
-            <span className="cl19-caret">{CARET}</span>
-          </button>
+          {/* v19 §E — Group by, the applied-chip pattern: grouped, the chip turns powder with a navy ring and carries a
+              separate ✕ (Stop grouping) that never opens the menu */}
+          <span className="cl19-grpw" data-cl19="group-chip" data-on={groupName ? "" : undefined}>
+            <button type="button" ref={grpRef} className="cl19-ctl cl19-grp" data-cl19="group" data-cl18="group" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
+              aria-label={groupName ? `Grouped by ${groupName}. Change grouping` : "Group the list"} disabled={loading}
+              onClick={(e) => pop.toggle("group", e.currentTarget)}>
+              <span className="cl19-ic">{LIST_ICON}</span>
+              {groupName ? <span className="cl19-l cl19-l--on"><span className="cl19-gby">Grouped by</span><b data-ltb="group-name">{groupName}</b></span> : <span className="cl19-l">Group by</span>}
+              <span className="cl19-caret">{CARET}</span>
+            </button>
+            {groupName ? (
+              <button type="button" className="cl19-grpx" data-cl19="group-stop" aria-label="Stop grouping" title="Stop grouping" disabled={loading}
+                onClick={() => { if (pop.open === "group") pop.close(); onStopGroup(); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS}</button>
+            ) : null}
+          </span>
           <button type="button" className="cl19-ctl cl19-fil" data-cl19="filters" data-cl18="filters" data-n={filterCount} aria-haspopup="dialog"
             aria-expanded={pop.open === "filters"} disabled={loading} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
             <span className="cl19-ic">{FILTER_ICON}</span><span className="cl19-l">Filters</span>

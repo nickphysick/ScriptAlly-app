@@ -10,7 +10,7 @@
  * The page owns the state and the ONE popover (the strip's dropdowns share it), so at most one is ever open.
  */
 import React from "react";
-import { PopOption, PopSection, Popover, type PopoverState } from "../../shell/ListPills";
+import { PopOption, PopRule, PopSection, Popover, type PopoverState } from "../../shell/ListPills";
 import { type GroupKey, GROUP_OPTIONS } from "../../../lib/contactList";
 
 /** every popover the list's controls own — the bar's one and the strip's dropdowns */
@@ -36,9 +36,13 @@ export const GroupMenu: React.FC<{ groupKey: GroupKey; onGroup: (k: GroupKey) =>
   pop.open === "group" && pop.anchor?.closest('[data-cl18="list-header"]') ? (
     <Popover k="group" anchor={pop.anchor} width={280} label="Group the list">
       <PopSection title="Group the list by">
+        {/* v19 §E — Letter · Status · Action required · Country · Priority, then a rule and No grouping */}
         {GROUP_OPTIONS.map((g) => (
-          <PopOption key={g.key} k={`group:${g.key}`} kind="radio" on={groupKey === g.key} label={g.label} line={g.line}
-            onPick={() => { onGroup(g.key); pop.close(); }} />
+          <React.Fragment key={g.key}>
+            {g.key === "none" ? <PopRule /> : null}
+            <PopOption k={`group:${g.key}`} kind="radio" on={groupKey === g.key} label={g.label} line={g.line}
+              onPick={() => { onGroup(g.key); pop.close(); }} />
+          </React.Fragment>
         ))}
       </PopSection>
     </Popover>

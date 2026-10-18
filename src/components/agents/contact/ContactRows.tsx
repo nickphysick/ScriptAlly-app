@@ -19,7 +19,8 @@ import { ListDivider, ListGroupHeader, ListPanel, type ListColumn } from "../../
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
-import { AgentFacts, ContactGroup, RowDateLine, type SortKey, rowDateLine, surnameInitial } from "../../../lib/contactList";
+import { ContactGroupMark } from "./ContactGroupMark";
+import { AgentFacts, ContactGroup, type GroupKey, RowDateLine, type SortKey, rowDateLine, surnameInitial } from "../../../lib/contactList";
 import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { dayMonth } from "../../../lib/dates";
@@ -308,17 +309,36 @@ const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPre
 /** v18.3.3 §D — what asked a row's peek to open or close */
 export type PeekVia = "pointer" | "key" | "focus" | "click";
 
+/** v19 §E — THE STRONG BAND: 50 tall, powder #e6edf6, a 2px navy rule on top and a 1px rule beneath; the group's mark,
+ *  its name in the typewriter at 19px and a navy pill counting the rows showing ("1 agent" / "N agents"). */
+export const ContactGroupBand: React.FC<{ groupKey: GroupKey; g: ContactGroup }> = ({ groupKey, g }) => {
+  const n = g.ids.length;
+  const isLetter = groupKey === "letter";
+  return (
+    <div className="cl19-gb" data-cl19="gband" data-clv="band" data-gkey={g.key ?? g.label}
+      data-letter={isLetter && /^[A-Z#]$/.test(g.label) ? g.label : undefined}>
+      {isLetter ? null : <ContactGroupMark groupKey={groupKey} gkey={g.key ?? g.label} label={g.label} size={22} />}
+      <b className="cl19-gbl" data-cl19="gband-label">{g.label}</b>
+      <em className="cl19-gbn" data-cl19="gband-count" data-cl13="gcount">{n} {n === 1 ? "agent" : "agents"}</em>
+    </div>
+  );
+};
+
 export interface ContactSortControl { key: SortKey; reversed: boolean; onSort: (k: SortKey) => void; onReverse: () => void }
 
 export const ContactRows: React.FC<ContactRowsProps & {
-  byLetter?: boolean; ungrouped?: boolean; sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
+  byLetter?: boolean; ungrouped?: boolean;
+  /** v19 §E — the page's grouping. Given, every grouping draws the strong band (ContactGroupBand) over its own section;
+   *  absent (the exhibit), the older dividers and powder bands stay as they were. */
+  groupKey?: GroupKey;
+  sort?: ContactSortControl; focusId?: string | null; highlight?: string; compact?: boolean;
   /** v17 §D — "+ Log a query" on a row */
   onLog?: (agentId: string) => void;
   /** v18 §D — a peek's "+ Add" pill: Edit profile on that field */
   onEdit?: (agentId: string, tab: AgentCardTab, focus?: AgentCardField) => void;
 }> = ({
   groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen,
-  byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false, onLog, onEdit,
+  byLetter = true, ungrouped = false, groupKey, sort, focusId = null, highlight = "", compact = false, onLog, onEdit,
 }) => {
   /* v18 §D — one peek at a time */
   const [peekId, setPeekId] = useState<string | null>(null);
@@ -465,6 +485,18 @@ export const ContactRows: React.FC<ContactRowsProps & {
         /* v16 §C — no grouping: ONE panel, the labels and then every row, no dividers */
         <ListPanel cols={fit.cols} columns={columns} data-clv="panel">
           {groups.map((g) => <React.Fragment key={g.key}>{rowsOf(g)}</React.Fragment>)}
+        </ListPanel>
+      ) : groupKey ? (
+        /* v19 §E — every grouping (Letter included): ONE panel, ONE headings row at the top (it sticks), each group a
+           section opening on its strong band, which sticks under the headings until its section leaves. The count is
+           the rows showing. No other divider is drawn. */
+        <ListPanel cols={fit.cols} columns={columns} data-clv="panel">
+          {groups.map((g) => (
+            <section className="clv-grp cl19-grp-s" key={g.key ?? g.label} data-clv="grp" data-cl19="group-section" data-gkey={g.key ?? g.label}>
+              <ContactGroupBand groupKey={groupKey} g={g} />
+              {rowsOf(g)}
+            </section>
+          ))}
         </ListPanel>
       ) : byLetter ? (
         /* Letter: ONE panel — the labels, then each letter's divider and its rows as siblings */

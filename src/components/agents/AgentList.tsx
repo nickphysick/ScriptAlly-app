@@ -338,12 +338,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
   const groupCtx = useMemo(() => ({ takes: takesFact }), [takesFact]);
   const groups = useMemo(() => contactGroups(groupKey, visibleFacts, groupCtx), [groupKey, visibleFacts, groupCtx]);
-  /* "n of m" on a group heading while the list is filtered: each group's size over every agent */
-  const filtered = visibleFacts.length < factsAll.length;
-  const groupTotals = useMemo(
-    () => new Map(contactGroups(groupKey, factsAll, groupCtx).map((g) => [g.label, g.ids.length])),
-    [groupKey, factsAll, groupCtx],
-  );
+  /* v19 §E — a band counts the rows showing; the v13 "n of m" heading is retired with the powder bands */
   const factsById = useMemo(
     () => new Map(visibleFacts.map((x) => [x.agent.id, x])),
     [visibleFacts],
@@ -471,11 +466,58 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (groupKey === "letter") {
       const col = mainColRef.current;
       const band = col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`)).find((b) => b.getBoundingClientRect().height > 0) : null;
-      if (band) landUnder(band);
+      /* v19 §E — the band sticks inside its section, so the section's top is where the band starts */
+      if (band) landUnder(band.closest<HTMLElement>('[data-cl19="group-section"]') ?? band);
       return;
     }
     jumpToLetter(letter);
   }, [groupKey, jumpToLetter, landUnder]);
+  /* v19 §E — THE JUMP ROW (grouped by anything but Letter): one button per group, the current group following the
+     scroll (the last section whose top has reached the stuck headings' foot), a click landing that group's band at
+     the headings' foot. Read per frame from the boxes, as the letters are. */
+  const [markedGroup, setMarkedGroup] = useState<string | null>(null);
+  const jumping = groupKey !== "none" && groupKey !== "letter";
+  useEffect(() => {
+    if (!active || !jumping) { setMarkedGroup(null); return; }
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const col = mainColRef.current;
+      const secs = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-cl19="group-section"]')).filter((x) => x.offsetHeight > 0) : [];
+      if (!col || !secs.length) { setMarkedGroup((m) => (m === null ? m : null)); return; }
+      const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
+      const scroller = col.closest<HTMLElement>(".wpg-scroll");
+      if (!scroller) return;
+      const line = scroller.getBoundingClientRect().top + (labels ? (parseFloat(getComputedStyle(labels).top) || 0) + labels.offsetHeight : 12) + 2;
+      let cur: HTMLElement = secs[0];
+      for (const x of secs) { if (x.getBoundingClientRect().top <= line) cur = x; else break; }
+      /* at the list's foot a short last group can never reach the line: the scroll has nowhere further to go, so the
+         group whose band is on screen last is the one being read */
+      if (scroller.scrollTop > 0 && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2) {
+        const bottom = scroller.getBoundingClientRect().bottom;
+        for (const x of secs) if (x.getBoundingClientRect().top < bottom - 50) cur = x;
+      }
+      const k = cur.dataset.gkey ?? null;
+      setMarkedGroup((m) => (m === k ? m : k));
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
+    raf = requestAnimationFrame(read);
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => {
+      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [active, jumping, groupKey, sortKey, reversed, visibleFacts]);
+  const jumpToGroup = useCallback((key: string) => {
+    const col = mainColRef.current;
+    const sec = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-cl19="group-section"]')).find((x) => x.dataset.gkey === key && x.offsetHeight > 0) : null;
+    if (sec) landUnder(sec);
+  }, [landUnder]);
+  const jump = useMemo(() => (jumping ? {
+    groups: groups.map((g) => ({ key: g.key ?? g.label, label: g.label, n: g.ids.length })),
+    current: markedGroup ?? (groups[0] ? groups[0].key ?? groups[0].label : null),
+    onJump: jumpToGroup,
+  } : null), [jumping, groups, markedGroup, jumpToGroup]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
   /* the current letter: the per-frame reader's, else (at the list's top) the first row's own */
   const firstInitial = useMemo(() => (visibleFacts.length ? surnameInitial(groups[0] ? (factsById.get(groups[0].ids[0])?.agent ?? visibleFacts[0].agent) : visibleFacts[0].agent) : null), [visibleFacts, groups, factsById]);
@@ -1094,6 +1136,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       } : null}
       counts={stripCounts} current={currentLetter} onPick={pickLetter}
       search={search} onSearch={setSearch} groupKey={groupKey} filterCount={contactFilterCount(filters)} pop={pop}
+      onStopGroup={() => setGroupKey("none")} jump={loading ? null : jump}
       onPin={togglePin} />
   );
   return (
@@ -1264,7 +1307,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           ) : (
             <ContactRows
               groups={shownGroups}
-              totals={filtered ? groupTotals : null}
               byId={factsById}
               nowMs={nowMs}
               genreHit={bookHit}
@@ -1274,6 +1316,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                  v16 §C: no grouping is one panel with no dividers */
               byLetter={groupKey === "letter"}
               ungrouped={groupKey === "none"}
+              /* v19 §E — every grouping draws the strong band over its own section */
+              groupKey={groupKey}
               /* §6: the sortable column labels drive the page's own sort */
               sort={{ key: sortKey, reversed, onSort: setSortKey, onReverse: () => setReversed((r) => !r) }}
               /* §7.7 the keyboard's ring · §7.3 the Find text marked · §7.6 the density */

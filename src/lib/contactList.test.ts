@@ -9,7 +9,7 @@ import { joinGenres } from "./genreNoun";
 import { bookGenres } from "./genreMatch";
 import { describe, expect, it } from "vitest";
 import {
-  GROUP_OPTIONS, SORT_OPTIONS as SORT_OPTIONS_V12, RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent,
+  GROUP_OPTIONS, PRIORITY_GROUPS, priorityOf, SORT_OPTIONS as SORT_OPTIONS_V12, RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent,
   letterCounts, railHeight, surnameInitial, surnameOf,
 } from "./contactList";
 
@@ -240,8 +240,19 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
   ];
   const xRows = buildQcRows([...QUERIES, ...extra], CONTACT_FIXTURE_AGENTS, [], NOW);
   const xFacts = CONTACT_FIXTURE_AGENTS.map((a) => agentFacts(a, xRows, MS.id));
-  it("the five groupings, No grouping first (v16 §C: the list opens ungrouped)", () => {
-    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["No grouping", "Letter", "Status", "Action required", "Country"]);
+  it("v19 §E: the six groupings in the menu's order, No grouping last; only Letter carries a line", () => {
+    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["Letter", "Status", "Action required", "Country", "Priority", "No grouping"]);
+    expect(GROUP_OPTIONS.filter((g) => g.line).map((g) => g.line)).toEqual(["Surname initial, with the A\u2013Z strip"]);
+  });
+  it("v19 §E: Priority groups by the agent's star rating, five first, the unrated last", () => {
+    const rated = xFacts.map((x, i) => ({ ...x, agent: { ...x.agent, starRating: (i % 3 === 0 ? undefined : ((i % 5) + 1)) as 1 | 2 | 3 | 4 | 5 | undefined } }));
+    const g = contactGroups("priority", sortFacts(rated, "surname"));
+    const keys = g.map((x) => x.key);
+    expect(keys).toEqual(PRIORITY_GROUPS.map((p) => p.key).filter((k) => keys.includes(k)));
+    expect(keys[keys.length - 1]).toBe("unrated");
+    expect(keys.length, "population: several ratings").toBeGreaterThan(2);
+    expect(g.reduce((n, x) => n + x.ids.length, 0)).toBe(rated.length);
+    for (const grp of g) for (const id of grp.ids) expect(priorityOf(rated.find((x) => x.agent.id === id)!)).toBe(grp.key);
   });
   it("No grouping: one unlabelled group holding the ordered list as it was sorted; an empty list has no group", () => {
     const ordered = sortFacts(xFacts, "surname");
