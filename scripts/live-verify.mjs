@@ -121,23 +121,34 @@ const rules = async () => {
 /**
  * Live refuses sign-up (the console's User actions → "Enable create (sign-up)" unticked).
  *
- * ⚠️ IT CANNOT CREATE AN ACCOUNT, WHATEVER THE SWITCH SAYS. The probe asks Firebase Auth's public
- * sign-up endpoint (the same one the browser SDK uses, with the web key that ships in the bundle) to
- * create a throwaway address with a ONE-CHARACTER password:
- *   - switch off → refused with ADMIN_ONLY_OPERATION (or OPERATION_NOT_ALLOWED): PASS;
- *   - switch on  → refused with WEAK_PASSWORD, so still no account: FAIL, "sign-up is open".
- * Anything else is reported as it is. A success would need a valid password, which is never sent.
+ * ⚠️ THE PROBE IS AN ANONYMOUS SIGN-UP, AND THE FIRST VERSION'S WEAK PASSWORD WAS A MISTAKE.
+ * Firebase validates the password BEFORE it consults the sign-up switch. So a one-character password
+ * came back WEAK_PASSWORD with the switch on and with it off: a check that could never see the thing
+ * it was for. Measured 18 Oct, with the switch off: weak password → WEAK_PASSWORD, anonymous →
+ * ADMIN_ONLY_OPERATION.
+ *
+ * An anonymous request (no email, no password) reaches the switch:
+ *   - switch off → ADMIN_ONLY_OPERATION: PASS;
+ *   - switch on, anonymous provider off (as on live) → OPERATION_NOT_ALLOWED: FAIL, "sign-up is open";
+ *   - an account created (a localId came back) → FAIL, loudly.
+ * ⚠️ IT CREATES NOTHING ONLY WHILE ANONYMOUS SIGN-IN IS DISABLED ON LIVE, which it is (providers:
+ * Email/Password and Google only). If anonymous sign-in is ever enabled there, change this probe
+ * before running it.
  */
 const signup = async () => {
   const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Referer: `${APEX}/` },
-    body: JSON.stringify({ email: `signup-probe-${Date.now()}@example.invalid`, password: "x", returnSecureToken: false }),
+    body: JSON.stringify({ returnSecureToken: false }),
   });
   const body = await r.json().catch(() => ({}));
-  const code = String(body?.error?.message ?? (r.ok ? "CREATED" : r.status)).split(" ")[0];
-  line(code === "ADMIN_ONLY_OPERATION" || code === "OPERATION_NOT_ALLOWED", "signup · live refuses new accounts",
-    code === "WEAK_PASSWORD" ? "WEAK_PASSWORD: sign-up is OPEN (refused only for the probe's password)" : code);
+  if (body?.localId) {
+    line(false, "signup · live refuses new accounts", `AN ANONYMOUS ACCOUNT WAS CREATED (${body.localId}). Delete it in Authentication → Users.`);
+    return;
+  }
+  const code = String(body?.error?.message ?? r.status).split(" ")[0];
+  line(code === "ADMIN_ONLY_OPERATION", "signup · live refuses new accounts",
+    code === "OPERATION_NOT_ALLOWED" ? "OPERATION_NOT_ALLOWED: the sign-up switch is ON (only the anonymous provider refused)" : code);
 };
 
 const step = process.argv[2];

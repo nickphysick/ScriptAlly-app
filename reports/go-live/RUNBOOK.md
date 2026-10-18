@@ -160,7 +160,10 @@ node scripts/live-verify.mjs rules
 
 ---
 
-## 5 · Close sign-up on live (new, and it's the real lock)
+## 5 · Close sign-up on live (new, and it's the real lock) — ✅ DONE 18 Oct
+
+**Done on 18 Oct by Nick:** the switch was unticked and saved. `verify signup` then read
+`ADMIN_ONLY_OPERATION`, so live refuses new accounts.
 
 1. Open the Firebase console, project `gen-lang-client-0801391782`.
 2. Go to Authentication → **Settings** → **User actions**.
@@ -183,8 +186,9 @@ node scripts/live-verify.mjs signup
 
 **Good:** `PASS  signup · live refuses new accounts — ADMIN_ONLY_OPERATION`.
 
-- The probe never creates an account: it sends a one-character password.
-- If it says `WEAK_PASSWORD: sign-up is OPEN`, the switch is still ticked.
+- The probe is an anonymous sign-up request. While anonymous sign-in is disabled on live (it is), it
+  cannot create an account.
+- If it says `OPERATION_NOT_ALLOWED: the sign-up switch is ON`, the switch is still ticked.
 
 ---
 
