@@ -213,4 +213,9 @@ See `tests/e2e/RETIRED-discover-v1.md`.
   as unions: `plateRoutes.OWN_HEADER_ROUTES` with Analytics v21, `shortcuts.ts` with v138.6's pin, `sidebarCapture` SB9
   with To-do v5.1's `n`). Gates in that tree: tsc clean, Vitest 612 files / 9088 passed / 3 skipped. Built from a clean
   detached worktree of the pushed tip `0fde90b5` and deployed: dev now serves **`index-DugmnfsH.js`**.
+- **Then dev moved under me.** Another session built `…-td52-dv1-qc139` (Query Centre v139) on top of my first merge and
+  deployed it (`index-CXIRYhLt.js`). Deploying my later tip would have removed their work from dev, so my last two commits
+  were stacked on theirs as **`dev/…-td52-dv1-qc139-dv1b`** (`d06446e8`; the same two list unions; gates there: tsc clean,
+  Vitest 613 files / 9099 passed / 3 skipped), the served hash re-checked immediately before, and deployed from a clean
+  checkout: **dev serves `index-B4WIr-Ea.js`**. Smoke on the deployed site: B2, C2, D2, E2 and the panel's load lock, 7/7.
 - Prod hosting, functions and rules: untouched (Nick's).

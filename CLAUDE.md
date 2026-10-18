@@ -1973,7 +1973,7 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **Locks:** `tests/e2e/discoverV1.measure.ts` (B1 header and panel against the ref at 1512/1280, loading → loaded; B2; C1–C5; A3; D1; D2; E2), `tests/e2e/dv1BundleCheck.mjs` (E1, two-sided), `tests/rules/discover.rules.test.ts` (A1), `src/lib/scout.test.ts` (A2), `discoverCopy.test.tsx` (L1). Writing locks use the owned Pro account `dv1@scriptally.test` (`tests/e2e/seedDiscoverV1.mjs`; the harness is Free and `addAgent` caps Free at five). **D1 reads the share write from the browser's request and aborts it** — a real submission would sit in the admin's queue for ever. Proofs: `reports/discover-v1/mutation-proofs.jsonl`.
 
 ## Next session — start here
-**Discover v1 is DONE on branch `discover-v1` (Parts A–E), NOT merged; on dev via `dev/…-td52-dv1`.** Read `reports/discover-v1/REPORT.md` first: the prod rules blocks to deploy, the false premises, and dev's `ca-aoife-murphy.contributedByCount` left at 1 by a mutation proof (an admin reset).
+**Discover v1 is DONE on branch `discover-v1` (Parts A–E), NOT merged; on dev via `dev/…-td52-dv1-qc139-dv1b` (with Query Centre v139).** Read `reports/discover-v1/REPORT.md` first: the prod rules blocks to deploy, the false premises, and dev's `ca-aoife-murphy.contributedByCount` left at 1 by a mutation proof (an admin reset).
 
 **Contact list v17.1 (the amendment) is DONE on branch `contact-list-v17-1` (off the v17 integration branch at f4b26c99), NOT merged to `main`.** Read `reports/contact-list-v17-1/REPORT.md` first.
 
