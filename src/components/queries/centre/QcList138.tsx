@@ -30,6 +30,7 @@ import { nextLine, sentCell } from "../../../lib/qcRowLines";
 import { peekSummary, peekTone, YOUR_MOVE_STATUSES, type PeekEvent } from "../../../lib/qc138";
 import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } from "../../../lib/qcTl4";
 import { StageGlyph } from "./StageGlyph";
+import { bandArtOf, type BandArt, type BandBadge } from "../../../lib/qcBandArt";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -392,6 +393,24 @@ export interface QcList138Props {
   practice?: { row: QcRow; leaving: boolean } | null;
 }
 
+/** v139 §C — a band's own mark: the stage glyph in a white disc (a badge for a next action), or the package cube */
+const BADGE_ICON: Record<BandBadge, React.ReactNode> = {
+  star: <svg viewBox="0 0 12 12"><path d="M6 1.4l1.35 2.9 3.1.35-2.3 2.1.65 3.1L6 8.3 3.2 9.85l.65-3.1-2.3-2.1 3.1-.35z" fill="currentColor" /></svg>,
+  send: <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 8.5l5-5M4.5 3.5h4v4" /></svg>,
+  bang: <svg viewBox="0 0 12 12" fill="currentColor"><rect x="5.15" y="2.2" width="1.7" height="5" rx=".85" /><circle cx="6" cy="9.3" r="1" /></svg>,
+  x: <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3.8 3.8l4.4 4.4M8.2 3.8l-4.4 4.4" /></svg>,
+  clock: <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><circle cx="6" cy="6" r="3.8" /><path d="M6 3.9V6l1.4.9" /></svg>,
+  dots: <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="3.2" cy="6" r="1.05" /><circle cx="6" cy="6" r="1.05" /><circle cx="8.8" cy="6" r="1.05" /></svg>,
+};
+const BandMark: React.FC<{ art: BandArt }> = ({ art }) => art.kind === "package" ? (
+  <span className={`qc138-gart qc139-gart qc139-gart--pkg${art.none ? " none" : ""}`} data-qc139="band-art" data-kind="package" aria-hidden="true">{ICON.pkg}</span>
+) : (
+  <span className={`qc138-gart qc139-gart qc139-gart--glyph${art.grey ? " grey" : ""}`} data-qc139="band-art" data-kind="glyph" data-glyph={art.glyph} aria-hidden="true">
+    <StageGlyph k={art.glyph} className="qc139-gsvg" />
+    {art.badge ? <i className={`qc139-badge badge ${art.badgeTone ?? "navy"}`} data-qc139="badge" data-badge={art.badge}>{BADGE_ICON[art.badge]}</i> : null}
+  </span>
+);
+
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filtered, filtersSlot, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
   selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null,
@@ -440,7 +459,9 @@ export const QcList138: React.FC<QcList138Props> = ({
   const groupBtn = useRef<HTMLButtonElement>(null);
   const rows = groups.flatMap((g) => g.rows);
   useStuckBands(boxRef, `${groups.map((g) => `${g.key}:${g.rows.length}`).join("|")}|${[...folded].join(",")}|${density}`);
-  const groupLabel = GROUP_BY_OPTIONS.find((o) => o.key === groupBy)?.label ?? "Urgency";
+  /* v139 §C — "Who it's with" (was Urgency) reads in the title's own sentence: "grouped by who it's with" */
+  const groupOpt = GROUP_BY_OPTIONS.find((o) => o.key === groupBy);
+  const groupLabel = groupBy === "attention" ? groupOpt?.short ?? "who it's with" : groupOpt?.label ?? "who it's with";
   useEffect(() => {
     if (!groupOpen) return undefined;
     const down = (e: PointerEvent) => {
@@ -642,10 +663,20 @@ export const QcList138: React.FC<QcList138Props> = ({
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
               <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
-                <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
-                {TONE_ART[tone] ? (
-                  <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
-                ) : null}
+                {/* v139 §C — under Status, Next action and Package the band draws its own mark in the art slot, and never
+                    the default grouping's talon or hourglass (which used to appear on every non-urgency band) */}
+                {(() => {
+                  const art = bandArtOf(groupBy, g.key);
+                  if (art) return <BandMark art={art} />;
+                  return (
+                    <>
+                      <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
+                      {TONE_ART[tone] ? (
+                        <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
+                      ) : null}
+                    </>
+                  );
+                })()}
                 <b className="qc138-gt" data-qcv="gband-t">{label}</b>
                 <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
                 {g.hint ? <span className="qc138-gh" data-qcv="gband-h">{g.hint}</span> : <span className="qc138-gh" />}

@@ -116,6 +116,7 @@ import { useDeskWidth } from "./shell/useDeskWidth";
 import { PageChecklist, type ChecklistTarget, type FlowCard } from "./shell/guide/PageChecklist";
 import { QC_ALL_DONE, QC_AFTER_FIRST, QC_CHECKLIST, QC_GUIDE_FINISHED_PATH, QC_GUIDE_HIDDEN_PATH, QC_GUIDE_SEEN_PATH, QC_NEEDS_A_QUERY, qcGuideDonePath, qcGuideOf, type QcGuideKey } from "../lib/pageChecklist";
 import { setGuideWalk } from "../lib/guideWalk";
+import { bandToneOf } from "../lib/qcBandArt";
 import { PIP_AGENCY, PIP_AGENT_LINE, PIP_ID, PIP_NAME, currentPractice, endPractice, isPracticeId, startPractice, usePractice } from "../lib/practiceQuery";
 
 /**
@@ -3808,7 +3809,8 @@ export const Queries: React.FC<{
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
   /* v138 §C — a band's tint from its group (Part D settles the groups themselves) */
-  const qc138Tone = (g: { key: string }): BandTone => (g.key === "you" ? "you" : g.key === "closed" ? "closed" : "waiting");
+  /* v139 §C — under Status and Next action the band follows whose court it is; packages are powder */
+  const qc138Tone = (g: { key: string }): BandTone => bandToneOf(qcGroup, g.key);
   /* v138 §B — the filter row's counts, over the manuscript-scoped set (as v17's are over the whole list) */
   const qc138Counts = (() => {
     const stage = new Map<string, number>();
