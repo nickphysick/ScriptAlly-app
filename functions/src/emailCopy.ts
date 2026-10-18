@@ -81,9 +81,9 @@ export const WELCOME_PERKS: readonly string[] = [
 /* ══════════════ Shared ══════════════ */
 
 /**
- * ⚠️ A VISIBLE ADDRESS, NOT JUST A `Reply-To` HEADER. A reader cannot see a header — and replies
- * to the from-address are currently diverted, so trusting reply alone would break the "direct line
- * to the founder" promise silently. Someone who wants a person needs something they can read.
+ * ⚠️ A VISIBLE ADDRESS, NOT JUST A `Reply-To` HEADER. A reader cannot see a header, so trusting
+ * reply alone would leave the "direct line to the founder" promise resting on something invisible.
+ * Someone who wants a person needs something they can read.
  */
 export const contactLine = (supportEmail: string): string =>
   `Questions, or something to tell us? Write to ${supportEmail} — a person reads it.`;

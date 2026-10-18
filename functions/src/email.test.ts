@@ -115,9 +115,8 @@ describe("a send that fails never throws, and never loses the signup", () => {
 
 describe("the reply-to warning is emitted when it is unset", () => {
   /**
-   * ⚠️ THE FALLBACK IS SILENT-BUT-LOGGED FOR A REASON. Unset, replies go to the from-address,
-   * which is not currently delivering — and because the MX record was replaced by forwarding,
-   * bounce feedback does not reach Resend either. Nobody would find out without this line.
+   * THE FALLBACK IS LOGGED SO A MISSING KEY IS VISIBLE. Unset, replies go to the from-address,
+   * which is a real mailbox. (This mattered more when the old domain's mail was forwarded and lost.)
    */
   it("warns, and still sends", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => res(200, { id: "x" })));

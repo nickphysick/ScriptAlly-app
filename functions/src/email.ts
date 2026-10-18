@@ -81,8 +81,8 @@ export const sendEmail = async (
   const toHash = recipientHash(to);
   const started = Date.now();
 
-  /* ⚠️ LOGGED, NOT THROWN — see `replyToWarning`. In this state a reader's reply goes to an
-     address that is not currently delivering, and nothing else in the system would say so. */
+  /* LOGGED, NOT THROWN — see `replyToWarning`. A reply then goes to the from-address, which is a
+     real mailbox; the line only makes the missing key visible. */
   const warning = replyToWarning(env);
   if (warning) console.warn(JSON.stringify({ event: "email.config", warning }));
 

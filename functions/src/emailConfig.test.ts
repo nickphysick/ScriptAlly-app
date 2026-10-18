@@ -43,8 +43,8 @@ describe("the sender is configurable, and its default is deliberate", () => {
 describe("reply-to falls back rather than failing, and says so", () => {
   /**
    * ⚠️ NEVER THROW. A missing reply-to must not stop a confirmation going out — the signup is
-   * worth more than the reply route. The cost of the fallback is that a reader's reply lands on an
-   * address that is not currently delivering, which is what the warning exists to surface.
+   * worth more than the reply route. The fallback is the from-address, a real mailbox; the warning
+   * only makes the missing key visible in the logs.
    */
   it("an unset reply-to becomes the from-address", () => {
     const cfg = resolveMailConfig({});
@@ -55,7 +55,7 @@ describe("reply-to falls back rather than failing, and says so", () => {
     const w = replyToWarning({});
     expect(w).toBeTruthy();
     expect(w).toContain(REPLY_TO_ENV);
-    expect(w).toContain("not currently delivering");
+    expect(w).toBe(`${REPLY_TO_ENV} is unset — replies will go to the from-address.`);
   });
 
   it("a configured reply-to is used and raises no warning", () => {
@@ -175,10 +175,9 @@ describe("only the transport talks to Resend", () => {
 describe("a reader can always see a way to reach a person", () => {
   /**
    * ⚠️ A VISIBLE ADDRESS IN THE BODY, not just a `Reply-To` header. A reader cannot see a header,
-   * and replies to the from-address are currently diverted — so a writer who wants a human needs
-   * something they can read and copy.
+   * so a writer who wants a human needs something they can read and copy.
    */
-  it("there is a support address, and it is not the diverted from-address", () => {
+  it("there is a support address, and it is not the from-address", () => {
     expect(SUPPORT_EMAIL).toMatch(/^[^\s@]+@queryhawk\.net$/);
     expect(DEFAULT_FROM).not.toContain(SUPPORT_EMAIL);
   });
