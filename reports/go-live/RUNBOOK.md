@@ -241,7 +241,8 @@ allowing `https://queryhawk.net` while refusing `https://scriptally.ink`.
    "You're on the list."
 2. The confirmation email arrives at nick@ **from `Nick at QueryHawk <nick@queryhawk.net>`**.
 3. **Click its link.** It lands on queryhawk.net/founders showing **"You're in."** The address bar
-   drops the `?verified=…` straight away. A welcome email follows.
+   drops the `?verified=…` straight away. A welcome email follows. *(Once section 10 is done the
+   link lands on queryhawk.net/welcome instead; see 10.4.)*
 4. **Click the same link again.** It shows **"You're already in."**
 5. Tell Claude Code to check the counter:
    `curl -s https://queryhawk.net/api/waitlist` should now read `"count":1`, or one more than before
@@ -295,6 +296,73 @@ None of these could be read without credentials, so check each one:
 - **API key (hardening, not blocking).** Google Cloud console → APIs & Services → Credentials → the
   browser key → HTTP referrers. Allow `queryhawk.net`, `www.queryhawk.net`, `scriptally-app.web.app`
   and `gen-lang-client-0801391782.firebaseapp.com`.
+
+---
+
+## 10 · Founding welcome (the /welcome page) — branch `founding-welcome`
+
+The confirmation link stops landing on /founders and lands on its own page, `/welcome`, showing
+the writer's founding card with their number. The welcome email's first line becomes "You're
+Founding Writer No. 23." Three pieces go live, **in this order**, each with its own go:
+
+| # | What | Why this position |
+|---|---|---|
+| 10.1 | Hosting | Safe on its own. The old function still sends links to `/founders?verified=…`, and the new page sends those on to `/welcome?v=…`, which shows the right state without a number. |
+| 10.2 | Functions (`waitlist`) | Now new links carry a reference, and the page shows the number. The old function never sends a reference, so the page never asks it for one. |
+| 10.3 | Backfill | Gives anyone who confirmed before 10.2 a stored number. Run after 10.2, so no old-function confirmation can land behind it. |
+
+Run from the `founding-welcome` worktree once it's merged into `release/live-1` (preflight `4b`
+refuses any other branch), with `cd /Users/nickphysick/ScriptAlly-live`.
+
+**10.1 · Hosting**
+
+```bash
+npm run build && node scripts/live-preflight.mjs
+firebase deploy --only hosting --project prod
+```
+
+**Verify:** `node scripts/live-verify.mjs hosting` (every line `PASS`), then
+`curl -s -o /dev/null -w "%{http_code}\n" https://queryhawk.net/welcome` gives `200`.
+
+**10.2 · Functions**
+
+```bash
+firebase deploy --only functions:waitlist --project prod
+```
+
+**Verify:**
+
+- `curl -sI "https://queryhawk.net/api/waitlist/verify?token=nothing"` shows
+  `location: /welcome?v=unknown` (it was `/founders?verified=unknown`).
+- `curl -s "https://queryhawk.net/api/waitlist/welcome?r=nothing"` gives `{"ok":false}`, as JSON.
+- `node scripts/live-verify.mjs all`: every line `PASS`.
+
+**10.3 · Backfill.** Dry run first. It prints what it would assign, by document id, never an
+address, and writes nothing:
+
+```bash
+node scripts/backfill-founding-numbers.mjs --project gen-lang-client-0801391782 --database ai-studio-ae82196c-c59e-40b9-b209-9fb02f67ade6
+```
+
+It needs Application Default Credentials (`gcloud auth application-default login`). If the dry run
+lists nobody, stop there. If it lists writers, check the numbers follow the order they confirmed,
+then run the same line with `--apply`. **A second run must say there is nothing to do.**
+
+**10.4 · One real test** (the section 7 test, with the new landing)
+
+1. Join at https://queryhawk.net/founders with `nick+welcome@queryhawk.net`.
+2. Click the confirmation link. It lands on **queryhawk.net/welcome**:
+   - "Welcome, Founding Writer." and a card with your number, padded (`001`);
+   - the address bar shows just `/welcome`.
+3. The welcome email's first line reads "You're Founding Writer No. 1." (or your number).
+4. Answer the three quick taps and press **Send to Nick**: "Thank you, that's really useful."
+5. Click the confirmation link again: "You're already in." and the same number.
+6. Remove the test entry and give the place back exactly as in section 7. Deleting the document
+   also deletes your answers.
+
+**Rollback:** hosting from Release history (section 8). The function by redeploying `waitlist`
+from `release/live-1` as it was before the merge. The backfill's numbers can stay: the old
+function never reads them.
 
 ---
 
