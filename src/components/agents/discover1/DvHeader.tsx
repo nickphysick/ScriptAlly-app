@@ -131,11 +131,13 @@ export const DvHeader: React.FC<{
 /** The EMPTY state's header: the navy panel. The rest of the coming-soon page renders as its children. */
 export const DvEmptyHeader: React.FC<{
   msTitle: string | null;
+  /** the books have not answered yet: the title's span is drawn blank, so it does not arrive late and move the panel */
+  titleLoading?: boolean;
   notified: boolean;
   onNotify: () => void;
   onHow: () => void;
   children?: React.ReactNode;
-}> = ({ msTitle, notified, onNotify, onHow, children }) => (
+}> = ({ msTitle, titleLoading = false, notified, onNotify, onHow, children }) => (
   <section className="dv1-ae" data-dv1="coming-soon" data-own-header="" aria-label="Discover, before the Scout is live">
     <div className="dv1-aep" data-dv1="panel">
       <div className="dv1-aet">
@@ -143,7 +145,7 @@ export const DvEmptyHeader: React.FC<{
         <h1 className="dv1-aeh" data-page-title="" data-dv1="title" tabIndex={-1}>The Scout is<br />out looking</h1>
         <p className="dv1-aepp" data-dv1="lede">
           As writers join, their agent lists build one shared catalogue. Every agent in it is checked by hand before the Scout
-          brings you the ones who want a book like {msTitle ? <span className="dv1-mono" data-dv1="ms">{msTitle}</span> : "yours"} — with the reasons they fit.
+          brings you the ones who want a book like {titleLoading ? <span className="dv1-mono" data-blank="" aria-hidden="true">your manuscript</span> : msTitle ? <span className="dv1-mono" data-dv1="ms">{msTitle}</span> : "yours"} — with the reasons they fit.
           Nothing joins your contact list without you.
         </p>
         <div className="dv1-aeb">

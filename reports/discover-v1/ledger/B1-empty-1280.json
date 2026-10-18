@@ -1,0 +1,296 @@
+[
+ {
+  "lock": "B1",
+  "where": "1280 hd present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":0,\"w\":942.09375,\"h\":1529.9375,\"fs\":15} vs {\"x\":0,\"y\":0,\"w\":941.65625,\"h\":1662.328125,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":28,\"w\":942.09375,\"h\":554.578125,\"fs\":15} vs {\"x\":0,\"y\":28,\"w\":941.65625,\"h\":586.96875,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel y",
+  "ok": true,
+  "detail": "28.0 vs ref 28.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow present",
+  "ok": true,
+  "detail": "{\"x\":52,\"y\":72,\"w\":463.5,\"h\":18,\"fs\":12} vs {\"x\":52,\"y\":72,\"w\":463.25,\"h\":18,\"fs\":12}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow font size",
+  "ok": true,
+  "detail": "12 vs ref 12"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow x",
+  "ok": true,
+  "detail": "52.0 vs ref 52.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow w",
+  "ok": true,
+  "detail": "463.5 vs ref 463.3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow y",
+  "ok": true,
+  "detail": "72.0 vs ref 72.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow h",
+  "ok": true,
+  "detail": "18.0 vs ref 18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title present",
+  "ok": true,
+  "detail": "{\"x\":52,\"y\":108,\"w\":463.5,\"h\":116.625,\"fs\":54} vs {\"x\":52,\"y\":108,\"w\":463.25,\"h\":116.625,\"fs\":54}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title font size",
+  "ok": true,
+  "detail": "54 vs ref 54"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title x",
+  "ok": true,
+  "detail": "52.0 vs ref 52.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title w",
+  "ok": true,
+  "detail": "463.5 vs ref 463.3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title y",
+  "ok": true,
+  "detail": "108.0 vs ref 108.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title h",
+  "ok": true,
+  "detail": "116.6 vs ref 116.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 lede present",
+  "ok": true,
+  "detail": "{\"x\":52,\"y\":246.625,\"w\":463.5,\"h\":155.953125,\"fs\":19} vs {\"x\":52,\"y\":246.625,\"w\":463.25,\"h\":186.34375,\"fs\":19}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 lede font size",
+  "ok": true,
+  "detail": "19 vs ref 19"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 lede x",
+  "ok": true,
+  "detail": "52.0 vs ref 52.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 lede y",
+  "ok": true,
+  "detail": "246.6 vs ref 246.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 notify present",
+  "ok": true,
+  "detail": "{\"x\":52,\"y\":432.578125,\"w\":242.03125,\"h\":47,\"fs\":17} vs {\"x\":52,\"y\":462.96875,\"w\":242.03125,\"h\":48,\"fs\":17}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 notify font size",
+  "ok": true,
+  "detail": "17 vs ref 17"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 notify x",
+  "ok": true,
+  "detail": "52.0 vs ref 52.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 notify w",
+  "ok": true,
+  "detail": "242.0 vs ref 242.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 notify h",
+  "ok": true,
+  "detail": "47.0 vs ref 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how present",
+  "ok": true,
+  "detail": "{\"x\":52,\"y\":491.578125,\"w\":217.359375,\"h\":47,\"fs\":17} vs {\"x\":52,\"y\":522.96875,\"w\":217.359375,\"h\":48,\"fs\":17}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how font size",
+  "ok": true,
+  "detail": "17 vs ref 17"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how x",
+  "ok": true,
+  "detail": "52.0 vs ref 52.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how w",
+  "ok": true,
+  "detail": "217.4 vs ref 217.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how h",
+  "ok": true,
+  "detail": "47.0 vs ref 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 disc present",
+  "ok": true,
+  "detail": "{\"x\":555.5,\"y\":133.984375,\"w\":342.59375,\"h\":342.59375,\"fs\":15} vs {\"x\":555.25,\"y\":150.28125,\"w\":342.40625,\"h\":342.40625,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 disc font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 disc x",
+  "ok": true,
+  "detail": "555.5 vs ref 555.3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 disc w",
+  "ok": true,
+  "detail": "342.6 vs ref 342.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 disc h",
+  "ok": true,
+  "detail": "342.6 vs ref 342.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 steps present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":622.578125,\"w\":942.09375,\"h\":653.765625,\"fs\":15} vs {\"x\":0,\"y\":654.96875,\"w\":941.65625,\"h\":679.359375,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 steps font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 steps x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 steps w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 notify (relative)",
+  "ok": true,
+  "detail": "30.0 vs ref 30.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how (relative)",
+  "ok": true,
+  "detail": "89.0 vs ref 90.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panelBelowButtons (relative)",
+  "ok": true,
+  "detail": "103.0 vs ref 104.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 discCentre (relative)",
+  "ok": true,
+  "detail": "-0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 steps (relative)",
+  "ok": true,
+  "detail": "40.0 vs ref 40.0"
+ }
+]

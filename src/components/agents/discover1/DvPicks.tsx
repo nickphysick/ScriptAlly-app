@@ -23,6 +23,7 @@ import { bookGenreHit, bookGenres } from "../../../lib/genreMatch";
 import { escapeDepth } from "../../../lib/escapeStack";
 import { matchesShortcut, shortcutBlocked, SHORTCUTS } from "../../../lib/shortcuts";
 import { DV_FACE } from "./DvHeader";
+import { AgentDisc } from "../../shared/AgentDisc";
 import "flag-icons/css/flag-icons.min.css";
 
 export type DecideKind = "add" | "pass" | "skip";
@@ -89,7 +90,10 @@ const LeadCard: React.FC<{
       </div>
       <div className="dv1-body">
         <div className="dv1-who">
-          <span className="dv1-av" aria-hidden="true">{agentInitials(a)}</span>
+          {/* ⚠️ AN AgentDisc, STANDING "none": the app's disc law (Query Centre v138 J1) — every initials circle is an
+              AgentDisc painted by the agent's standing with the writer, and a pick is not on the list yet. The mock's
+              navy-for-strong would say "querying"; the fit is the pill's job. */}
+          <AgentDisc initials={agentInitials(a)} standing="none" size={58} className="dv1-av" />
           <div className="dv1-id">
             <h3 className="dv1-nm" id="dv1LeadN" data-dv1="lead-name">{a.name || a.agency}</h3>
             {a.name && a.agency ? <p className="dv1-ag">{a.agency}</p> : null}
@@ -197,7 +201,7 @@ export const DvPicks: React.FC<{
               <div className="dv1-qh">Coming up<small data-dv1="queue-n">{rest.length ? `${rest.length} more` : "none"}</small></div>
               {rest.length ? rest.map((q) => (
                 <button key={q.agent.id} type="button" className="dv1-qrow" data-dv1="queue-row" data-id={q.agent.id} disabled={busy} onClick={() => p.onLead(q.agent.id)}>
-                  <span className={`av${q.fit === "possible" ? " poss" : ""}`} aria-hidden="true">{agentInitials(q.agent)}</span>
+                  <AgentDisc initials={agentInitials(q.agent)} standing="none" size={36} className="av" />
                   <span className="who"><b>{q.agent.name || q.agent.agency}</b><small>{[q.agent.name ? q.agent.agency : null, q.agent.city].filter(Boolean).join(" · ")}</small></span>
                   {p.skipped.includes(q.agent.id) ? <span className="dv1-fit skip">Skipped</span> : <FitTag p={q} />}
                 </button>

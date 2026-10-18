@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "A3",
+  "where": "the add wrote an agent and a decision",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "and its +1 is held while Undo is offered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "after Undo the account is byte-identical",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "the agent is the lead again",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "and past the toast's life, still byte-identical (no late +1)",
+  "ok": true,
+  "detail": ""
+ }
+]

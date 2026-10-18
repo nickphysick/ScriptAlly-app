@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D1",
+  "where": "the notice counts the three agents not in the catalogue",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "the privacy line is the mock's, verbatim",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "the foot says a share cannot be taken back",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "nothing is ticked to begin with (opt-in)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "the row shows what will be sent, and not the private note",
+  "ok": true,
+  "detail": "NameImogen TarrantAgencyTarrant & LowWebsitetarrantlow.co.ukGenresLiterary FictionWish listQuiet literary fiction about place.How to submitEmailMaterialsQuery L"
+ },
+ {
+  "lock": "D1",
+  "where": "the write was seen",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "D1",
+  "where": "the submission's id is uid_source",
+  "ok": true,
+  "detail": "TIdUIyXvVHTVR4YsPktS4SiGunC3_dv1-mine-a"
+ },
+ {
+  "lock": "D1",
+  "where": "every field written is a public one",
+  "ok": true,
+  "detail": "userId,sourceAgentId,createdAt,name,agency,website,genres,mswlNotes,submissionMethod,materialsWanted,responseTimeWeeks,noResponseMeansNo"
+ },
+ {
+  "lock": "D1",
+  "where": "the note, the rating and the email are not in it",
+  "ok": true,
+  "detail": "userId,sourceAgentId,createdAt,name,agency,website,genres,mswlNotes,submissionMethod,materialsWanted,responseTimeWeeks,noResponseMeansNo"
+ },
+ {
+  "lock": "D1",
+  "where": "the echo rides in the same write",
+  "ok": true,
+  "detail": "projects/scriptally-dev/databases/(default)/documents/agentSubmissions/TIdUIyXvVHTVR4YsPktS4SiGunC3_dv1-mine-a projects/scriptally-dev/databases/(default)/documents/users/TIdUIyXvVHTVR4YsPktS4SiGunC3/scoutShares/dv1-mine-a"
+ },
+ {
+  "lock": "D1",
+  "where": "the parse read every field the row showed",
+  "ok": true,
+  "detail": "userId,sourceAgentId,createdAt,name,agency,website,genres,mswlNotes,submissionMethod,materialsWanted,responseTimeWeeks,noResponseMeansNo"
+ },
+ {
+  "lock": "D1",
+  "where": "nothing landed: no echo",
+  "ok": true,
+  "detail": "{}"
+ }
+]

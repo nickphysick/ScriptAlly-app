@@ -146,7 +146,11 @@
 /* ⚠️ TWO CLASSES: brand.tsx forces `h1:not(.wsh-title)` (0-1-1) with !important, injected last — a 0-1-1 rule here loses */
 .dv1-aep h1.dv1-aeh { margin: 0; font: 400 64px/1.08 var(--dv1-type) !important; color: #f8f3ea; outline: none; }
 .dv1-aepp { margin: 22px 0 0; max-width: 34em; font: 400 19px/1.6 var(--dv1-serif) !important; color: rgba(244, 238, 229, 0.86); }
+/* ⚠️ THE TITLE SPAN IS DRAWN FROM FIRST PAINT (a transparent placeholder until the books load): Special Elite's taller
+   ascent grows the lede's line box, so a span arriving late moved the panel 4px at 1280 (headerPanelV2 P6 found it). The
+   mock draws that taller line, so the line box stays and the span is simply there from the start. */
 .dv1-aepp .dv1-mono { font-family: var(--dv1-type) !important; color: #f8f3ea; }
+.dv1-aepp .dv1-mono[data-blank] { color: transparent; }
 .dv1-aeb { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
 .dv1-aeb button { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/normal var(--dv1-type) !important; padding: 14px 20px; border-radius: 9px; cursor: pointer; box-shadow: none; }
 .dv1-aeb .dv1-b1 { background: var(--dv1-cream); color: var(--dv1-ink); border: 1px solid var(--dv1-cream); }
@@ -216,7 +220,8 @@
 .dv1-ver svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
 .dv1-body { padding: 26px 30px 24px; }
 .dv1-who { display: flex; align-items: flex-start; gap: 18px; }
-.dv1-av { flex: none; width: 58px; height: 58px; border-radius: 50%; background: var(--dv1-navy); color: var(--dv1-cream); display: grid; place-items: center; font: 400 20px/1 var(--dv1-type) !important; }
+/* the disc is an AgentDisc (its standing paints it); this rule only places it and sets its face */
+.dv1-av { flex: none; font: 400 20px/1 var(--dv1-type) !important; }
 .dv1-id { min-width: 0; flex: 1; }
 .dv1-lead h3.dv1-nm { margin: 0; font: 600 27px/1.15 "Playfair Display", Georgia, serif !important; color: var(--dv1-ink); }
 .dv1-ag { margin: 5px 0 0; font: 500 10.5px/normal var(--dv1-mono) !important; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dv1-i58); }
@@ -276,8 +281,7 @@
 .dv1-qrow:hover:not(:disabled) { background: #f8f4ee; }
 .dv1-qrow:disabled { cursor: default; }
 .dv1-qrow:focus-visible { outline: 2px solid var(--dv1-navy); outline-offset: -2px; }
-.dv1-qrow .av { width: 36px; height: 36px; border-radius: 50%; background: var(--dv1-navy); color: var(--dv1-cream); display: grid; place-items: center; font: 400 13px/1 var(--dv1-type); }
-.dv1-qrow .av.poss { background: #fff; color: var(--dv1-navy); box-shadow: inset 0 0 0 1.5px var(--dv1-navy); }
+.dv1-qrow .av { font: 400 13px/1 var(--dv1-type) !important; }
 .dv1-qrow .who { min-width: 0; }
 .dv1-qrow b { display: block; font: 400 16px/normal var(--dv1-type); color: var(--dv1-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dv1-qrow small { display: block; font: 400 13px/normal var(--dv1-serif); color: var(--dv1-i58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }

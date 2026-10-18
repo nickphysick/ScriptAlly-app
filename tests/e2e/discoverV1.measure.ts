@@ -453,3 +453,27 @@ for (const vp of SIZES) test(`C1 · the picks tray against the ref at ${vp.width
   }
   L.done(40);
 });
+
+/* ── B1 (empty, load) · the coming-soon panel is the same box first seen and settled ──
+   ⚠️ ADDED WHEN DISCOVER LEFT headerPanelV2's LIST: that suite's P6 had found the panel growing 4px at 1280 when the
+   book's title arrived after first paint, and nothing else watched this page for it. */
+for (const vp of SIZES) test(`B1 · the coming-soon panel does not move when the books arrive at ${vp.width}`, async ({ page }) => {
+  const L = new Ledger(`B1-empty-load-${vp.width}`);
+  await openDiscover(page, vp, "soon");
+  const box = `(() => { const e = [...document.querySelectorAll('[data-dv1="coming-soon"]')].find((x) => x.getBoundingClientRect().height > 0); if (!e) return null; const p = e.querySelector('[data-dv1="panel"]').getBoundingClientRect(); const s = e.getBoundingClientRect(); const sc = e.closest(".wpg-scroll").getBoundingClientRect(); return { pt: p.top - sc.top, ph: p.height, sh: s.height, blank: !!e.querySelector('[data-blank]'), sct: sc.top }; })()`;
+  /* ⚠️ THE PANEL'S TOP IS READ AGAINST ITS OWN SCROLLER: the shell above it settles on its own clock (its bar/strip), and a
+     move there is not this page's */
+  /* a full reload: the books load from nothing, and the first box is read as early as it exists */
+  await page.reload();
+  let first: { pt: number; ph: number; sh: number; blank: boolean; sct: number } | null = null;
+  for (let i = 0; i < 120 && !first; i++) { first = await page.evaluate(box) as typeof first; if (!first) await page.waitForTimeout(25); }
+  await page.waitForTimeout(3500);
+  const last = await page.evaluate(box) as typeof first;
+  L.check("B1", `${vp.width} read both`, !!first && !!last, JSON.stringify({ first, last }));
+  if (first && last) {
+    L.check("B1", `${vp.width} panel top held, within its scroller`, near(first.pt, last.pt, 1), `${first.pt} → ${last.pt} (the scroller itself ${first.sct} → ${last.sct})`);
+    L.check("B1", `${vp.width} panel height held`, near(first.ph, last.ph, 1), `${first.ph} → ${last.ph}${first.blank ? " (first read had the blank title)" : ""}`);
+    L.check("B1", `${vp.width} the settled panel names the book`, !last.blank, "");
+  }
+  L.done(4);
+});
