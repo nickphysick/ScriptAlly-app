@@ -77,9 +77,21 @@ export class FirestoreTargetError extends Error {
  * have been doing. The message names the variable, the project and the value, because whoever
  * meets it will be reading a stack trace in Cloud Logging with no other context.
  */
+/**
+ * Set by `firebase deploy` (and nothing else) while it loads the functions to discover them.
+ *
+ * ⚠️ DURING THAT ANALYSIS THE USER .env FILES ARE NOT LOADED (firebase-tools passes only the project
+ * and this marker), so FIRESTORE_DATABASE_ID is unset even when functions/.env.<projectId> sets it.
+ * No database is touched during analysis, so the guard stands down then. Only the exact string
+ * "true" does it. At runtime the env file is loaded, and the guard below applies in full. Found by
+ * the first live deploy since the guard existed (18 Oct).
+ */
+export const CONTROL_API_ENV = "FUNCTIONS_CONTROL_API";
+
 export const resolveDatabaseId = (env: NodeJS.ProcessEnv): string => {
   const configured = env[DATABASE_ID_ENV]?.trim();
   const databaseId = configured || DEFAULT_DATABASE_ID;
+  if (env[CONTROL_API_ENV] === "true") return databaseId;
   const projectId = projectIdFrom(env);
 
   if (
