@@ -57,8 +57,10 @@ const remember = (key: string, on: boolean) => {
 };
 
 /** v138.6 — the pin for a list page: `useFullScreenList` on that page's key, restored on the first frame, with F */
-export function usePinList(page: PinPage, o: { routeActive: boolean; scroller: () => HTMLElement | null }): FullScreenList {
-  return useFullScreenList({ storageKey: PIN_KEYS[page], legacyKey: LEGACY_PIN_KEYS[page], routeActive: o.routeActive, scroller: o.scroller, pin: PIN_SHORTCUT[page] });
+/* Contact list v19 §A — `holdSidebar: false` leaves the sidebar as the writer left it while pinned (the Contact list's
+   pinned list is the whole sheet beside an open sidebar); every other caller keeps the default hold */
+export function usePinList(page: PinPage, o: { routeActive: boolean; scroller: () => HTMLElement | null; holdSidebar?: boolean }): FullScreenList {
+  return useFullScreenList({ storageKey: PIN_KEYS[page], legacyKey: LEGACY_PIN_KEYS[page], routeActive: o.routeActive, scroller: o.scroller, pin: PIN_SHORTCUT[page], holdSidebar: o.holdSidebar });
 }
 
 export function useFullScreenList(o: {
@@ -68,6 +70,8 @@ export function useFullScreenList(o: {
   pin?: Shortcut;
   /** a key the state was stored under before (read when `storageKey` has nothing) */
   legacyKey?: string;
+  /** hold the shell's sidebar at its icons while on (default true) */
+  holdSidebar?: boolean;
 }): FullScreenList {
   const location = useLocation();
   const navigate = useNavigate();
@@ -114,7 +118,7 @@ export function useFullScreenList(o: {
      in a LAYOUT effect, before the first paint, and a restored pin with no transition. */
   const firstHold = useRef(true);
   useLayoutEffect(() => {
-    if (!o.pin || !full) return undefined;
+    if (!o.pin || !full || o.holdSidebar === false) return undefined;
     const instant = firstHold.current && (pendingRestore || restoring.current);
     firstHold.current = false;
     restoring.current = false;

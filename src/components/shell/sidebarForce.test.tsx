@@ -44,7 +44,8 @@ describe("the sidebar hold", () => {
     const hook = readFileSync("src/components/shell/useFullScreenList.ts", "utf8");
     /* RETARGETED (v138.6 §A): a pin holds in a layout effect (before the first paint) and a plain full screen
        (Comparable titles) as before; both only while `full` */
-    expect(hook).toContain("if (!o.pin || !full) return undefined;");
+    /* Contact list v19 §A: a pin may opt out of the hold (`holdSidebar: false`, the Contact list); the default holds */
+    expect(hook).toContain("if (!o.pin || !full || o.holdSidebar === false) return undefined;");
     expect(hook).toContain("return holdSidebarCollapsed({ instant });");
     expect(hook).toContain("useEffect(() => (!o.pin && full ? holdSidebarCollapsed() : undefined), [full, o.pin]);");
     expect(hook).toContain("ESC_LEVEL.pageMode");

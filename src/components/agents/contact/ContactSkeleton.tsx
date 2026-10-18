@@ -55,10 +55,9 @@ export const ContactSkeleton: React.FC<{
   return (
     <>
       <div className="clv-main">
-        <section className="cl14-ws cl16-list" aria-hidden="true">
-          {/* v17 §B — the sheet's top row at its loaded height; the count and the tools wait for data */}
-          {/* v18 §B — the list header at its loaded height; the sentence and the tools wait for data */}
-          <div className="cl18-lh" data-cl18="list-header-skel"><p className="cl18-says">{"\u00a0"}</p>{controls}</div>
+        <section className="cl14-ws cl16-list cl19-card" aria-hidden="true">
+          {/* v19 §A — the list's own head (the toolbar) at its loaded height, inert; the letters and tools wait for data */}
+          {controls}
           <div className="cl14-list">
           <div>
             <ContactRows

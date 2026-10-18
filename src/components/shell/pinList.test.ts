@@ -18,7 +18,14 @@ describe("QC138.6 A1 · one pin for both lists", () => {
     it(`${page}: uses usePinList("${page}") and PinListButton`, () => {
       const src = code(file) + (page === "queries" ? code("src/components/queries/centre/QcList138.tsx") : "");
       expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
-      expect(src).toMatch(/<PinListButton\b/);
+      /* RETARGETED (Contact list v19 §A): the Contact list's pin is the toolbar's own navy "Pin list" / "Unpin" button
+         (ContactListHead), drawn by the page's one head component; the Query Centre keeps the shared circle */
+      if (page === "agents") {
+        expect(src).toMatch(/<ContactListHead\b/);
+        const head = code("src/components/agents/contact/ContactListHead.tsx");
+        expect(head).toMatch(/data-pin-list=""/);
+        expect(head).toMatch(/aria-pressed=\{pinned\}/);
+      } else expect(src).toMatch(/<PinListButton\b/);
     });
     it(`${page}: holds no sidebar, binds no pin key and writes no pinned state of its own`, () => {
       const src = code(file);

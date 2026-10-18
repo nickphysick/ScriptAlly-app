@@ -11,6 +11,7 @@
  *
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
+import { flushSync } from "react-dom";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
@@ -56,14 +57,14 @@ import { ContactLightHeader } from "./contact/ContactLightHeader";
 import {
   type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
   contactCensus, contactGroups, dropOptions, emptyContactFilters, facetCounts, genreTallies,
-  letterCounts, matchesContactFilters, sortFacts,
+  letterCounts, matchesContactFilters, sortFacts, surnameInitial,
 } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { ContactFind, GroupMenu, type ContactPop } from "./contact/ContactListControls";
-import { ContactFiltersButton, ContactFiltersPanel } from "./contact/ContactFilterStrip";
-import { CountTo, useReflow } from "./contact/ContactTouches";
+import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
+import { ContactFiltersPanel } from "./contact/ContactFilterStrip";
+import { useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
 import { usePopover } from "../shell/ListPills";
 import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
@@ -74,7 +75,7 @@ import "./contact/contactV13.css";
 import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
-import { LetterTabs } from "./contact/ContactLetters";
+import { ContactListHead } from "./contact/ContactListHead";
 import { AgentPanelNew } from "./panel/AgentPanelNew";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
@@ -85,7 +86,6 @@ import { emitAgentCardEvent, closeAgentCard } from "../../lib/agentCardStore";
 import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from "../../lib/queryPanelStore";
 import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
-import { PinListButton } from "../shell/PinListButton";
 import "../shell/listToolbar.css"; /* v18.3 §E — the list toolbar and headings, shared with the Query Centre */
 import { useStickyStack } from "../shell/stickyStack";
 import { fitsGenre } from "../../lib/contactStrip";
@@ -98,7 +98,6 @@ import { countryName } from "../../lib/territory";
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
-import { AppFooter } from "../shell/AppFooter";
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { CONTACT_CHECKLIST, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, contactGuideOf, guideDonePath, type ContactGuideKey } from "../../lib/pageChecklist";
@@ -180,7 +179,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => remembered?.sort ?? "surname");
   const [reversed, setReversed] = useState<boolean>(() => remembered?.reversed ?? false);
   /* v14 §5 — the row density (Phase 6 draws its toggle); remembered with the rest */
-  const [density, setDensity] = useState<Density>(() => remembered?.density ?? "comfortable");
+  /* v19 §B — the density toggle left the toolbar (Find · Group by · Filters · Pin), so the list is always
+     comfortable: a remembered "compact" with no control to undo it would strand the writer */
+  const density: Density = "comfortable";
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
   useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, glance }); }, [filters, search, groupKey, sortKey, reversed, density, glance]);
@@ -193,7 +194,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v138.6 §A/§C — the pin is the shared hook (`usePinList("agents")`, the Query Centre's too): remembered per page
      (`sa.pinList.agents`; v16's `sa.contactsFull` is read once and moved), restored on the first frame, and the hook
      owns F. The URL still carries it and Esc still leaves it last. */
-  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller });
+  /* v19 §A — the pin no longer holds the sidebar at its icons: pinned, the list is the whole sheet and the sidebar
+     stays as the writer left it (the mock's pinned state) */
+  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, holdSidebar: false });
+  /* v19 §A — pin and unpin in one view transition (old out 220ms, new in 300ms); instant under reduced motion or
+     where the browser has none. */
+  const togglePin = useCallback(() => {
+    const next = !full;
+    const doc = document as Document & { startViewTransition?: (cb: () => Promise<void>) => { finished: Promise<void> } };
+    if (!doc.startViewTransition || prefersReducedMotion()) { setFull(next); return; }
+    document.documentElement.classList.add("cl19-vt");
+    /* the router renders the change in a transition, so the callback waits until the group actually wears (or has
+       shed) `data-full` before the new view is captured — never a capture of the old page */
+    const vt = doc.startViewTransition(() => new Promise<void>((resolve) => {
+      flushSync(() => setFull(next));
+      const until = performance.now() + 400;
+      const check = () => {
+        const g = mainColRef.current?.closest(".clv-group");
+        if (!g || g.hasAttribute("data-full") === next || performance.now() > until) resolve();
+        else window.setTimeout(check, 16); /* rendering is held during the update callback, so no rAF */
+      };
+      check();
+    }));
+    void vt.finished.finally(() => document.documentElement.classList.remove("cl19-vt"));
+  }, [full, setFull]);
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -344,28 +368,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
   const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
-  /* v13 §5 — the controls, one component in two places; the page holds their state and the ONE popover */
-  /* v18 §B — THE LIST HEADER'S TOOLS, right of its sentence: search, the one Filters button, density, full screen. The
-     loading skeleton draws the same nodes, so the header holds its height while the page settles. */
-  const listTools = (loading: boolean) => (
-    <span className="cl18-lt ltb-r" data-cl18="tools">
-      {/* v18.2 §C — no "/" keycap in the search: the / key still finds */}
-      <ContactFind find={search} onFind={setSearch} disabled={loading} />
-      <ContactFiltersButton filters={filters} pop={pop} disabled={loading} />
-      <span className="cl18-dens ltb-dens" role="group" aria-label="Row density" data-cl14="density" data-cl18="density">
-        {(["comfortable", "compact"] as const).map((d) => (
-          <button key={d} type="button" className={density === d ? "on" : undefined} aria-pressed={density === d} data-cl14-dens={d}
-            aria-label={d === "comfortable" ? "Comfortable" : "Compact"} title={d === "comfortable" ? "Comfortable" : "Compact"} disabled={loading} onClick={() => setDensity(d)}>
-            <svg width="14" height="12" viewBox="0 0 14 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-              {d === "comfortable" ? <path d="M1 2h12M1 6h12M1 10h12" /> : <path d="M1 1.5h12M1 4.5h12M1 7.5h12M1 10.5h12" />}
-            </svg>
-          </button>
-        ))}
-      </span>
-      {/* v138.6 §C — the shared pin button (the Query Centre's too); the pin is the shared hook's */}
-      <PinListButton pinned={full} onToggle={() => setFull(!full)} attrs={{ "data-cl16": "full" }} />
-    </span>
-  );
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
   const wsRef = useRef<HTMLElement | null>(null);
 
@@ -481,6 +483,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => cancelAnimationFrame(raf);
   }, [groupKey, sortKey, reversed, jumpToLetter]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
+  /* the current letter: the per-frame reader's, else (at the list's top) the first row's own */
+  const firstInitial = useMemo(() => (visibleFacts.length ? surnameInitial(groups[0] ? (factsById.get(groups[0].ids[0])?.agent ?? visibleFacts[0].agent) : visibleFacts[0].agent) : null), [visibleFacts, groups, factsById]);
+  const currentLetter = markedLetter ?? firstInitial;
+  /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
+  const yourMoveN = useMemo(() => factsAll.filter((x) => x.standing.kind === "open" && x.standing.yourMove).length, [factsAll]);
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
    * never restated here. See `contactListState` for why there are three of them and why the
@@ -510,6 +517,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showList = pageState === "list" && !showEmpty;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
+  /* v19 §A — the folder tab and the sheet lip go navy while this list is pinned and on screen, and ONLY then: a
+     layout effect, so the tab never paints navy over an unpinned page (or cream over a pinned one) */
+  useLayoutEffect(() => {
+    if (!(active && fullOn)) return undefined;
+    document.documentElement.setAttribute("data-cl19-pinned", "");
+    return () => document.documentElement.removeAttribute("data-cl19-pinned");
+  }, [active, fullOn]);
   /* v138.6 §C — the pinned row (v17 C) is retired: the navy list header is the sticky row. One writer measures the
      stack (the lip's cover and the header's height) while this page is on screen over a list. */
   useStickyStack(lhRef, active && showList);
@@ -797,7 +811,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     const row = () => vis(".aglist [data-clv='row'][data-agent-card]");
     switch (k) {
       case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
-      case "search": return { el: vis(".aglist .cl18-lh [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      case "search": return { el: vis(".aglist [data-cl19='toolbar'] [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
       case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
       case "edit": {
         const edit = vis("[data-ap='panel'] [data-ap='edit']");
@@ -1076,6 +1090,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return out;
   }, [panelQ, panelAgent, panelFacts, navigate, actInPanel]);
 
+  /** v19 §A/§B — the list's head (the band, pinned, and the toolbar), the same markup pinned and unpinned; the
+   *  loading skeleton draws it inert */
+  const listHead = (loading: boolean) => (
+    <ContactListHead pinned={loading ? full : fullOn} loading={loading} headRef={loading ? undefined : lhRef}
+      band={!loading && fullOn ? {
+        total: factsAll.length, model: glanceM, glance, onGlance: (k) => setGlance((g) => (g === k ? null : k)),
+        yourMove: yourMoveN, health: pageState === "list" ? health : null, onHealth: openHk, onAdd: openAdd,
+      } : null}
+      counts={stripCounts} current={currentLetter} onPick={pickLetter}
+      search={search} onSearch={setSearch} groupKey={groupKey} filterCount={contactFilterCount(filters)} pop={pop}
+      onPin={togglePin} />
+  );
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -1186,14 +1212,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onGroup={(k) => setGlance((g) => (g === k ? null : k))}
             addRef={addBtnRef} onAdd={openAdd}
             health={pageState === "list" ? health : null} onHealth={openHk}
-            letters={<LetterTabs variant="top" counts={stripCounts} current={markedLetter} onPick={pickLetter} loading={pageState !== "list"} />}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
             {/* v17 §C — the pin line: the header's foot */}
             <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
           </ContactLightHeader>
         )}
         {pageState === "settling" && (
-          <ContactSkeleton controls={listTools(true)} />
+          <ContactSkeleton controls={listHead(true)} />
         )}
         <div className="clv-main" ref={mainColRef}>
 
@@ -1207,42 +1232,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             1600, centred): the ink control bar, the white filter row with the count at its right, the letter tabs,
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
-        <section className="cl14-ws cl16-list" data-cl14="ws" data-cl16="list" ref={wsRef} aria-label="The full list">
+        <section className="cl14-ws cl16-list cl19-card" data-cl14="ws" data-cl16="list" data-cl19="card" ref={wsRef} aria-label="The full list">
           {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
               control bar is gone: search and the filters are in the header. */}
           {/* v18 §B — THE LIST HEADER: the top of the list sheet, slate. One sentence, left (the group name opens the
               grouping menu); search, Filters, density and full screen, right. */}
           {/* v138.6 §C — THE STICKY ROW: the navy header in a wrapper that sticks under the sheet's lip, filled with the
               sheet's colour (the Query Centre's own construction) */}
-          <div className="cl18-lhw" data-cl18="list-header-wrap">
-          {/* v18.3 §E — THE TOOLBAR (shell/listToolbar.css, shared with the Query Centre): the count, then the grouping
-              chip on the left; every control on the right 36 tall. Sorting is on the column headings only. */}
-          <div className="cl18-lh ltb" data-cl18="list-header" data-cl17="sheet-row" ref={lhRef}>
-            <div className="ltb-l">
-              <p className="cl18-says ltb-count" data-cl18="sentence" data-cl16="showing" data-cl17="showing" role="status">
-                {visibleFacts.length === factsAll.length && !anyActive ? (
-                  <>Showing all <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> {factsAll.length === 1 ? "agent" : "agents"}</>
-                ) : (
-                  <>Showing <b data-cl14="shown"><CountTo value={visibleFacts.length} /></b> of <b data-cl16="total">{factsAll.length}</b></>
-                )}
-                {visibleFacts.length === factsAll.length && !anyActive ? null : (
-                  <button type="button" className="cl18-clear" data-cl14="clear-all" data-cl17="clear-all" onClick={clearFilters}>Clear all</button>
-                )}
-              </p>
-              <span className="ltb-chipw">
-                <button type="button" className="cl18-gn ltb-chip" data-cl18="group" data-ltb="chip" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
-                  onClick={(e) => pop.toggle("group", e.currentTarget)}>
-                  <i>Grouped by</i> <b data-ltb="group-name">{groupKey === "none" ? "None" : (GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? "None")}</b>
-                  <span className="ltb-caret" aria-hidden="true">⌄</span>
-                </button>
-              </span>
-            </div>
-            {listTools(false)}
-            <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
-            <ContactFiltersPanel filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
-              showing={visibleFacts.length} msTitle={scoped?.title?.trim() || null} />
-          </div>
-          </div>
+          {/* v19 §A/§B — THE HEAD: the band (pinned only) and the toolbar, sticky at the scroll area's top; the column
+              headings stick directly under it. The old list bar ("Showing all N agents · Grouped by …", its own Find,
+              density and pin) is retired: the toolbar is the list's only control row. */}
+          {listHead(false)}
+          <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
+          <ContactFiltersPanel filters={filters} onFilters={setFilters} counts={counts} tallies={tallies} pop={pop}
+            showing={visibleFacts.length} msTitle={scoped?.title?.trim() || null} />
           <div className="cl14-list" data-cl14="list">
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
@@ -1282,7 +1285,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               /* §7.7 the keyboard's ring · §7.3 the Find text marked · §7.6 the density */
               focusId={kfId}
               highlight={search.trim()}
-              compact={density === "compact"}
+              compact={false}
               openId={openId}
               newId={newId}
               onOpen={onOpen}
@@ -1335,9 +1338,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </div>
         )}
         </div>
-        {/* v13 §9 — THE APP FOOTER, the group's last row (the Query Centre's arrangement), so its content
-            box is the column's. Over a list only: the empty state stays as v12 built it (§1.10). */}
-        {showList && <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} />}
+        {/* v19 §A — no app footer under the list: the list card runs to the page's foot with nothing beneath it */}
         </div>
         </>
         )}
