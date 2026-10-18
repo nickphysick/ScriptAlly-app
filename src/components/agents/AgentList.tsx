@@ -67,7 +67,7 @@ import { ContactAppliedRow, ContactFilterMenu, genreWords, type AppliedChip } fr
 import { useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
 import { quietScroll, usePopover } from "../shell/ListPills";
-import { type Density, readListMemory, writeListMemory } from "../../lib/contactListMemory";
+import { CONTACT_PIN_STORE, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
@@ -163,28 +163,26 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      state took the exhibit's. `CountCards` is deleted; the strip indexes, it never filters. */
   const addBtnRef = useRef<HTMLButtonElement>(null);
 
-  /* v13 §5 — REMEMBERED FOR THE VISIT: filters, search, grouping, sort and direction are read from
-     sessionStorage (`sa.contactList`) on mount and written on every change, so a reload or a return
-     to the page puts the list back as it was; a fresh session starts from the defaults. A search
-     handed in from the shell wins over a remembered one. */
-  const remembered = useMemo(() => readListMemory(), []);
-  const [filters, setFilters] = useState<ContactFilters>(() => remembered?.filters ?? emptyContactFilters());
+  /* v19 §G — WHAT THE LIST REMEMBERS (lib/contactListMemory). Per device (localStorage `qh.cl.view`): the grouping, the
+     sort and its direction, and the pin (the pin hook reads and writes it through `CONTACT_PIN_STORE`). For the visit
+     (sessionStorage): the filters, the "At a glance" group, the search and the scroll position. A first visit opens
+     unpinned, ungrouped, A to Z by surname, at the top, every row closed. A search handed in from the shell wins over a
+     remembered one. There is no "Reset view": ungrouping is the chip's ✕, sorting is on the headings. */
+  const rememberedView = useMemo(() => readListView(), []);
+  const rememberedVisit = useMemo(() => readListVisit(), []);
+  const [filters, setFilters] = useState<ContactFilters>(() => rememberedVisit?.filters ?? emptyContactFilters());
   /* v16 §B — THE "AT A GLANCE" GROUP the list is filtered to (Not queried · Querying · Closed), or null. It sits
      BESIDE the chips: both apply, a chip change leaves it alone, and "Clear all" clears both. */
-  const [glance, setGlance] = useState<GlanceKey | null>(() => remembered?.glance ?? null);
-  const [search, setSearch] = useState(() => searchQuery?.trim() || remembered?.search || "");
-  /* v16 §C: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill), and the
-     choice is remembered with the rest (sessionStorage `sa.contactList.v4`: for the visit, as the pill's was) */
-  const [groupKey, setGroupKey] = useState<GroupKey>(() => remembered?.group ?? "none");
-  const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => remembered?.sort ?? "surname");
-  const [reversed, setReversed] = useState<boolean>(() => remembered?.reversed ?? false);
-  /* v14 §5 — the row density (Phase 6 draws its toggle); remembered with the rest */
-  /* v19 §B — the density toggle left the toolbar (Find · Group by · Filters · Pin), so the list is always
-     comfortable: a remembered "compact" with no control to undo it would strand the writer */
-  const density: Density = "comfortable";
+  const [glance, setGlance] = useState<GlanceKey | null>(() => rememberedVisit?.glance ?? null);
+  const [search, setSearch] = useState(() => searchQuery?.trim() || rememberedVisit?.search || "");
+  /* v16 §C / v19 baked 2: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill) */
+  const [groupKey, setGroupKey] = useState<GroupKey>(() => rememberedView.group);
+  const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => rememberedView.sort);
+  const [reversed, setReversed] = useState<boolean>(() => rememberedView.reversed);
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
-  useEffect(() => { writeListMemory({ filters, search, group: groupKey, sort: sortKey, reversed, density, glance }); }, [filters, search, groupKey, sortKey, reversed, density, glance]);
+  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
+  useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
      carries it (`?full=1`, so a reload and Back respect it), the sidebar is held at its icons through `sidebarForce`
@@ -196,7 +194,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      owns F. The URL still carries it and Esc still leaves it last. */
   /* v19 §A — the pin no longer holds the sidebar at its icons: pinned, the list is the whole sheet and the sidebar
      stays as the writer left it (the mock's pinned state) */
-  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, holdSidebar: false });
+  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, holdSidebar: false, store: CONTACT_PIN_STORE });
   /* v19 §A — pin and unpin in one view transition (old out 220ms, new in 300ms); instant under reduced motion or
      where the browser has none. */
   const togglePin = useCallback(() => {
@@ -278,6 +276,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * with the key still in sessionStorage. `Agents` has ACCEPTED an `active` prop this whole time
    * and threw it away; it is threaded now, which is what makes "the page arrived" observable.
    */
+  const revealed = useRef(false);
   useLayoutEffect(() => {
     if (!active) return;
     let id: string | null = null;
@@ -285,6 +284,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (!id || agents.length === 0) return;        // hold the key until the list can answer
     try { sessionStorage.removeItem("sa.agentReveal"); } catch { /* private mode */ }
     if (!agents.some((a) => a.id === id)) return;  // stale id — consumed, nothing to show
+    revealed.current = true; /* v19 §G — the reveal's scroll wins over the visit's remembered one */
     const card = document.querySelector<HTMLElement>(`[data-agent-card="${id}"]`);
     card?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -366,14 +366,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const wsRef = useRef<HTMLElement | null>(null);
   /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
   const filRef = useRef<HTMLButtonElement | null>(null);
-
-  const resetList = useCallback(() => {
-    setFilters(emptyContactFilters());
-    setSearch("");
-    setGlance(null);
-    setGroupKey("none");
-    setSortKey("surname");
-  }, [setSortKey, setFilters]);
 
   /* ── v12 §4 / v13 §6: the marked letter ───────────────────────────────────
    * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
@@ -554,6 +546,33 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showList = pageState === "list" && !showEmpty;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
+  /* v19 §G — THE SCROLL POSITION, FOR THE VISIT. Saved (once a frame) while the list is on screen; put back once when the
+     list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
+     handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
+  const scrollPending = useRef<number | null>(rememberedVisit?.scroll || null);
+  const wasActive = useRef(active);
+  useLayoutEffect(() => {
+    const back = active && !wasActive.current;
+    wasActive.current = active;
+    if (!active || !showList) return;
+    const sc = fullScroller();
+    if (!sc) return;
+    if (revealed.current) { revealed.current = false; scrollPending.current = null; return; }
+    if (back && scrollPending.current === null && sc.scrollTop === 0) scrollPending.current = readListVisit()?.scroll || null;
+    const y = scrollPending.current;
+    scrollPending.current = null;
+    if (y) sc.scrollTop = y;
+  }, [active, showList, fullScroller]);
+  useEffect(() => {
+    if (!active || !showList) return undefined;
+    const sc = fullScroller();
+    if (!sc) return undefined;
+    let raf = 0;
+    const save = () => { raf = 0; writeListVisit({ scroll: sc.scrollTop }); };
+    const on = () => { if (!raf) raf = requestAnimationFrame(save); };
+    sc.addEventListener("scroll", on, { passive: true });
+    return () => { sc.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
+  }, [active, showList, fullScroller]);
   /* ── v19 §F — THE APPLIED-FILTERS ROW: one chip per filter, per search and for the band's group, in that order the
      search first. The Filters chip counts the filters (and the band's group) but never the search. */
   const appliedChips = useMemo<AppliedChip[]>(() => {
@@ -1272,7 +1291,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
         {!sandbox && (
           <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guide.done} seen={guide.seen} hidden={guide.hidden}
-            active={active} ready={showList} targetFor={guideTarget} onSeen={markGuideSeen} onHide={hideGuide}
+            /* v19 §G — the pill waits for the list: nothing of the guide shows over the loading skeleton */
+            active={active && pageState !== "settling"} ready={showList} targetFor={guideTarget} onSeen={markGuideSeen} onHide={hideGuide}
             art="/images/contact-list-scout.webp" />
         )}
 

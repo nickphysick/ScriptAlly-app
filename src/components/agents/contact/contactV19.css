@@ -574,3 +574,23 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-af-more { padding: 0 12px; color: #2a3a52; }
 .cl19-af-clear { flex: none; font: 400 13.5px/19px var(--sp-serif) !important; }
 .cl19-af-c:focus-visible, .cl19-af-clear:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── v19 §G — THE LIST'S LOADING SKELETON: the toolbar, the headings and rows, over the list area, until the list is ready.
+   The rows are the page's own rows (ContactSkeleton) drawn as their SHAPES — the disc, the name and agency lines and each
+   column's first mark — rather than whole grey blocks, and the headings row keeps its height with its words hidden (the
+   loaded headings are fitted to the real columns, which a placeholder cannot know). Every box is the box that replaces it:
+   the toolbar 52, the headings 40, each row its own height. Under reduced motion the shapes hold still. ── */
+.clv-group[data-loading] .cl19-card .clv-row {
+  background: transparent !important; border-radius: 0; animation: none;
+}
+.clv-group[data-loading] .cl19-card .clv-row :is(.clv-ini, .clv-rwn b, .clv-ragy, .cl19-dt, .cl19-c > *, .clv-rrep > :first-child, .clv-rq > :first-child) {
+  visibility: visible; color: transparent !important; border-color: transparent !important; box-shadow: none !important;
+  text-decoration: none !important; border-radius: 6px;
+  background: linear-gradient(90deg, #ebe8e3 0, #f4f2ef 40%, #ebe8e3 80%) 0 0 / 200% 100% !important;
+  animation: cl13Shim 1.3s linear infinite;
+}
+.clv-group[data-loading] .cl19-card .clv-row .clv-ini.clv-ini.clv-ini { border-radius: 50%; }
+.clv-group[data-loading] .cl19-card .lt-labels.lth > * { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .clv-group[data-loading] .cl19-card .clv-row :is(.clv-ini, .clv-rwn b, .clv-ragy, .cl19-dt, .cl19-c > *, .clv-rrep > :first-child, .clv-rq > :first-child) { animation: none; }
+}

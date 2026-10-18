@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Contact list v13 §8 — THE LOADING BEAT. While the agents load, the page draws the desk (v15), the
- * next-step section, the "Your agents" bar's text, the A–Z strip and five rows as shimmering shapes;
+ * next-step section, the "Your agents" bar's text, the A–Z strip and twelve rows as shimmering shapes (v19 §G: the toolbar, the headings and rows, row-shaped);
  * the perched art, the pills, the tabs and the Housekeeping tab appear only with data.
  *
  * ⚠️ NOTHING JUMPS WHEN THE DATA ARRIVES BECAUSE THESE ARE THE PAGE'S OWN COMPONENTS (lock 12). Each
@@ -23,11 +23,13 @@ import { agentFacts, contactGroups, sortFacts } from "../../../lib/contactList";
 import { ContactRows } from "./ContactRows";
 import type { CardPrimary } from "../../../lib/agentCard";
 
-/* ONE line, so a placeholder row sits at the row's own 80 floor at every width (a two-line wishlist
+/* ONE line, so a placeholder row sits at the row's own floor at every width (a two-line wishlist
    made it 86 at 1280, measured) */
 const WISH = "Character-led suspense.";
-/** five rows under one letter */
-const PLACEHOLDERS: Agent[] = ["Abbot", "Ashby", "Arden", "Avery", "Aston"].map((surname, i) => ({
+/** v19 §G — twelve rows under one letter: enough to run the skeleton's card past the fold at every width, as the loaded
+ *  list's card does, so the card's foot never rises and falls as the list arrives */
+const SURNAMES = ["Abbot", "Ashby", "Arden", "Avery", "Aston", "Allen", "Archer", "Ames", "Ayres", "Alder", "Astley", "Aird"];
+const PLACEHOLDERS: Agent[] = SURNAMES.map((surname, i) => ({
   id: `sk-${i}`,
   name: `Agent ${surname}`,
   agency: `${surname} Literary`,
@@ -37,6 +39,9 @@ const PLACEHOLDERS: Agent[] = ["Abbot", "Ashby", "Arden", "Avery", "Aston"].map(
   mswlNotes: WISH,
   materialsWanted: ["Query letter", "Synopsis"],
   submissionStatus: "Open",
+  /* v19 §G — a date, a typical email and no website, so the columns the skeleton fits are near the loaded list's */
+  dateAdded: "2026-02-01T00:00:00.000Z",
+  email: `${surname.toLowerCase()}@example.com`,
 }) as unknown as Agent);
 
 const noop = () => {};

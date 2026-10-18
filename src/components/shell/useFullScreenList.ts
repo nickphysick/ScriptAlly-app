@@ -59,8 +59,11 @@ const remember = (key: string, on: boolean) => {
 /** v138.6 — the pin for a list page: `useFullScreenList` on that page's key, restored on the first frame, with F */
 /* Contact list v19 §A — `holdSidebar: false` leaves the sidebar as the writer left it while pinned (the Contact list's
    pinned list is the whole sheet beside an open sidebar); every other caller keeps the default hold */
-export function usePinList(page: PinPage, o: { routeActive: boolean; scroller: () => HTMLElement | null; holdSidebar?: boolean }): FullScreenList {
-  return useFullScreenList({ storageKey: PIN_KEYS[page], legacyKey: LEGACY_PIN_KEYS[page], routeActive: o.routeActive, scroller: o.scroller, pin: PIN_SHORTCUT[page], holdSidebar: o.holdSidebar });
+/* Contact list v19 §G — `store` lets a page keep its pinned flag in its own record (the Contact list's `qh.cl.view`);
+   given one, the page's `PIN_KEYS` entry and its legacy key are not read or written (the store migrates them itself) */
+export interface PinStore { read: () => boolean; write: (on: boolean) => void }
+export function usePinList(page: PinPage, o: { routeActive: boolean; scroller: () => HTMLElement | null; holdSidebar?: boolean; store?: PinStore }): FullScreenList {
+  return useFullScreenList({ storageKey: PIN_KEYS[page], legacyKey: o.store ? undefined : LEGACY_PIN_KEYS[page], routeActive: o.routeActive, scroller: o.scroller, pin: PIN_SHORTCUT[page], holdSidebar: o.holdSidebar, store: o.store });
 }
 
 export function useFullScreenList(o: {
@@ -72,6 +75,8 @@ export function useFullScreenList(o: {
   legacyKey?: string;
   /** hold the shell's sidebar at its icons while on (default true) */
   holdSidebar?: boolean;
+  /** where the device remembers it, in place of `localStorage[storageKey]` */
+  store?: PinStore;
 }): FullScreenList {
   const location = useLocation();
   const navigate = useNavigate();
@@ -83,8 +88,11 @@ export function useFullScreenList(o: {
   if (o.pin && o.legacyKey && typeof localStorage !== "undefined") {
     try { if (localStorage.getItem(o.storageKey) === null && localStorage.getItem(o.legacyKey) === "1") { localStorage.setItem(o.storageKey, "1"); localStorage.removeItem(o.legacyKey); } } catch { /* */ }
   }
+  const store = o.store;
+  const isRemembered = () => (store ? store.read() : remembered(o.storageKey));
+  const doRemember = (on: boolean) => { if (store) store.write(on); else remember(o.storageKey, on); };
   const param = new URLSearchParams(location.search).get(FULL_PARAM) === "1";
-  const full = o.routeActive && (param || (pendingRestore && remembered(o.storageKey)));
+  const full = o.routeActive && (param || (pendingRestore && isRemembered()));
   const restoring = useRef(false);
   const back = useRef(0);
   const scroller = useRef(o.scroller);
@@ -100,17 +108,18 @@ export function useFullScreenList(o: {
   const setFull = useCallback((on: boolean) => {
     if (!o.routeActive || on === full) return;
     if (on) back.current = scroller.current()?.scrollTop ?? 0;
-    remember(o.storageKey, on);
+    doRemember(on);
     go(on, !on);
-  }, [full, go, o.routeActive, o.storageKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [full, go, o.routeActive, o.storageKey, store]);
 
   /* the device remembers: arriving on the route with no parameter puts it back (once per arrival) */
   useEffect(() => {
     if (!o.routeActive) { arrivedKey.current = null; return; }
     if (arrivedKey.current === location.key) return;
     arrivedKey.current = location.key;
-    if (!param && remembered(o.storageKey)) { restoring.current = true; go(true, true); }
-    else if (param) remember(o.storageKey, true);
+    if (!param && isRemembered()) { restoring.current = true; go(true, true); }
+    else if (param) doRemember(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [o.routeActive, location.key]);
 
