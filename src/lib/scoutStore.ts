@@ -16,8 +16,53 @@
  */
 import { collection, deleteDoc, doc, increment, onSnapshot, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Agent } from "../types";
+import type { Agent, CommunityAgent } from "../types";
 import { buildSubmission, submissionId, type ScoutDecision } from "./scout";
+import { communityAgentFields } from "./discoverShared";
+
+/* ── The page's one door to storage ──────────────────────────────────────── */
+
+/**
+ * Everything the page reads and writes, behind one interface — the Firestore store below, or the dev review aid's
+ * in-memory one (`lib/discoverReviewAid`), so a fixture review can never write to an account.
+ */
+export interface ScoutIO {
+  subscribe(onDecisions: (ds: ScoutDecision[]) => void, onShares: (ids: Set<string>) => void): () => void;
+  writeDecision(d: ScoutDecision): Promise<void>;
+  restoreDecision(caId: string, before: ScoutDecision | undefined): Promise<void>;
+  bringBack(caId: string): Promise<void>;
+  /** Add the community agent to the writer's list; the new agent's id, or the refusal's words. */
+  add(ca: CommunityAgent, msTitle: string | null): Promise<{ ok: true; agentId: string } | { ok: false; error: string }>;
+  undoAdd(agentId: string, caId: string, before: ScoutDecision | undefined): Promise<void>;
+  scheduleIncrement(caId: string, ms: number): void;
+  cancelIncrement(caId: string): void;
+  flushIncrements(): void;
+  share(agents: readonly Agent[], nowMs: number): Promise<{ shared: string[]; failed: string[] }>;
+  setPrefs(paths: Record<string, unknown>): Promise<void>;
+}
+
+type AddAgentFn = (a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string }) => Promise<{ success: boolean; error?: string; id?: string }>;
+
+/** The id the add will use — chosen here so Undo knows it without reading anything back. */
+const newAgentId = (): string => "agent-" + Math.random().toString(36).slice(2, 11);
+
+export function firestoreIO(uid: string, addAgent: AddAgentFn, updateUserPaths: (p: Record<string, unknown>) => Promise<void>): ScoutIO {
+  return {
+    subscribe: (d, s) => subscribeScout(uid, d, s),
+    writeDecision: (d) => writeDecision(uid, d),
+    restoreDecision: (caId, before) => restoreDecision(uid, caId, before),
+    bringBack: (caId) => bringBack(uid, caId),
+    add: async (ca, msTitle) => {
+      const id = newAgentId();
+      const r = await addAgent({ ...communityAgentFields(ca, msTitle), id });
+      return r.success ? { ok: true, agentId: r.id ?? id } : { ok: false, error: r.error ?? "The agent could not be added." };
+    },
+    undoAdd: (agentId, caId, before) => undoAdd(uid, agentId, caId, before),
+    scheduleIncrement, cancelIncrement, flushIncrements,
+    share: (agents, nowMs) => shareAgents(uid, agents, nowMs),
+    setPrefs: (paths) => updateUserPaths(paths),
+  };
+}
 
 /* ── Subscriptions ───────────────────────────────────────────────────────── */
 

@@ -189,7 +189,7 @@ export function pickReasons(p: ScoutPick, manuscript: Manuscript | null): PickRe
 export function communityLine(r: Pick<PickReasons, "lists" | "queried">): { lists: string | null; queried: string | null } | null {
   if (r.lists == null && r.queried == null) return null;
   return {
-    lists: r.lists == null ? null : `${r.lists} ${r.lists === 1 ? "writer's contact list" : "writers' contact lists"}`,
+    lists: r.lists == null ? null : `${r.lists} ${r.lists === 1 ? "writer’s contact list" : "writers’ contact lists"}`,
     queried: r.queried == null ? null : `queried ${r.queried} ${r.queried === 1 ? "time" : "times"}`,
   };
 }

@@ -29,7 +29,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
   { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
   { name: "Contact list",        route: "/agents",               cls: "agl-wpg"  },
-  { name: "Discover",            route: "/agents/discover",      cls: "dv-wpg"   },
+  { name: "Discover",            route: "/agents/discover",      cls: "dv1-wpg"   },
   { name: "Manuscripts",         route: "/manuscripts",          cls: "msv-wpg"  },
   { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },

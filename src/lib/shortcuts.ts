@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Query Centre" | "Responses" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Query Centre", "Responses", "The agent card"];
+export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -70,6 +70,13 @@ export const SHORTCUTS = {
   contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   /* v16 §E, v138.6 §C — the pin: owned by the shared pin hook (usePinList), not by the page; Escape leaves it last */
   contactsFull:     { chords: [k("f")], label: "Pin the list", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  /* Discover v1 — the Scout's picks: they act on the lead card, and stand down in a field, over a modal and while any
+     escape-stack layer is open (the Tune drawer, the passed list, the query drawer) */
+  discoverAdd:      { chords: [k("a")], label: "Add the lead pick to your contact list", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverPass:     { chords: [k("n")], label: "Not for me", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverSkip:     { chords: [k("s")], label: "Skip for now", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverNext:     { chords: [k("j")], label: "Next pick", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverPrev:     { chords: [k("k")], label: "Previous pick", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
   /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
   /* v138.6 §A — the pin: owned by the shared pin hook (usePinList), not by the page */
   qcPin:            { chords: [k("f")], label: "Pin the list", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },

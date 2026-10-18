@@ -40,7 +40,9 @@ export const BAND_ROUTES: readonly string[] = [];
    and its empty page's navy panel; TD5 A1 and G1 hold them (tests/e2e/todoV5.measure.ts). */
 /* /queries/analytics joined with Analytics v21 (16 Oct): the centred light header is page-local (`data-own-header`), and
    its empty page's navy panel too; AN21 A1 and I1 hold them. The phone keeps v17's band. */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics"];
+/* /agents/discover joined with Discover v1 (18 Oct): the light two-state header when live and the navy panel while coming
+   soon, both page-local (`data-own-header`); DV1 B1 and E1 hold them (tests/e2e/discoverV1.measure.ts). */
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics", "/agents/discover"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The

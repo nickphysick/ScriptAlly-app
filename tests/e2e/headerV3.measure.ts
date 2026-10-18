@@ -37,7 +37,8 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /* To-do list v5 (15 Oct): /todo LEFT the NUMBER pages — its header is page-local ("{n} tasks in your tray", OWN_HEADER_ROUTES);
    TD5 A1 holds it, n against the sidebar badge. Its WORDS entry and its tile check went with it. */
 export const NUMBER = ["/todo/corkboard"] as const;
-export const TITLE = ["/queries", "/agents", "/queries/analytics", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
+/* Discover v1 (18 Oct): /agents/discover LEFT the TITLE pages — its header is page-local (OWN_HEADER_ROUTES); DV1 B1 holds it. */
+export const TITLE = ["/queries", "/agents", "/queries/analytics", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */
