@@ -1236,23 +1236,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-fwlede strong { color: var(--mk-nearblack); font-weight: 600; }
 
-/* The confirmation states (/founders?verified=…). They take the hero column in place of the form
-   and counter, in the page's own language: the eyebrow, a mono chip, the hero headline, the lede.
-   No new fonts and no new colours, only existing tokens. The chip is the mono eyebrow's type in a
-   hairline pill. */
-.mk-fwchip {
-  align-self: flex-start;
-  font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--mk-stamp);
-  border: 1px solid var(--mk-hair); border-radius: 999px; padding: 6px 12px; margin: 0 0 18px;
-}
-/* Focus lands here on arrival, because it is the page's news. Keyboard users keep a visible ring;
-   the programmatic focus draws none. */
-.mk-fw .mk-fwvh:focus { outline: none; }
-.mk-fw .mk-fwvh:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
-.mk-fwvform { margin-top: 26px; }
-.mk-fwcol .mk-fwvform .mk-claimform { max-width: 520px; }
-
 /* ⚠️ THE HERO'S FORM IS `.mk-claimform` — THE BANNER'S — AND `.mk-fwform` IS DELETED. The brief
    said "the same form", and two rules that merely look alike are how two surfaces come to
    disagree about a radius. Only the WIDTH is this page's business, and it is a wrapper-scoped

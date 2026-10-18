@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e",
@@ -515,10 +515,11 @@
     "design-refs/comps-v28/ref-shelf-1280@2x.png": "b739b6d3fe155deac34d56e16a125c76d8681c91c6bb20140190972128ce62d8",
     "design-refs/comps-v28/ref-shelf-1512@2x.png": "3651b78e875c3be5caf40d9239269c3018d1824db517bb004e8cd5469b8f91c1",
     "design-refs/comps-v28/ref-top-1280@2x.png": "ecfff4cc57835f163ce43b3e1fd4db4820d9ded6b516a3e6557e799feae4710e",
-    "design-refs/comps-v28/ref-top-1512@2x.png": "31dd5f611cb2982d49c3f616bcc78a46255b749b8c45464d91ac395a72053f80"
+    "design-refs/comps-v28/ref-top-1512@2x.png": "31dd5f611cb2982d49c3f616bcc78a46255b749b8c45464d91ac395a72053f80",
+    "design-refs/founding-welcome/founding-welcome-v1.html": "02adb390ae619794d67588b8bb659202e6c1e150c3256dbd2178101a7f450c19"
   },
   "superseded": {
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
     "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }

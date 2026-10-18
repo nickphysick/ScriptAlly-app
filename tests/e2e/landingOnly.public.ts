@@ -74,17 +74,17 @@ test.describe("C1 · the public pages render, and nothing else ever does", () =>
   }
 });
 
-test("C2 · /founders?verified=already shows the already state, then drops the parameter", async ({ page }) => {
+test("C2 · /founders?verified=already goes on to /welcome, which drops its parameters", async ({ page }) => {
   await page.goto("/founders?verified=already");
-  const state = page.locator('[data-verified="already"]');
+  const state = page.locator('[data-welcome="already"]');
   await expect(state).toBeVisible();
   await expect(state.locator("h1")).toHaveText("You're already in.");
   await page.waitForTimeout(300);
   const url = new URL(page.url());
   const focused = await page.evaluate(() => document.activeElement?.textContent ?? null);
-  readings["verified=already"] = { search: url.search, focused };
-  expect(url.pathname).toBe("/founders");
-  expect(url.searchParams.has("verified"), "the parameter is removed").toBe(false);
+  readings["verified=already"] = { path: url.pathname, search: url.search, focused };
+  expect(url.pathname).toBe("/welcome");
+  expect(url.search, "the parameters are removed").toBe("");
   expect(focused, "focus is on the headline").toBe("You're already in.");
 });
 

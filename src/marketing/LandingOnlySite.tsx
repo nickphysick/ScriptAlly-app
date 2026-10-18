@@ -22,6 +22,7 @@ import { PricingPage } from "./PricingPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
+import { WelcomePage } from "./WelcomePage";
 import { LegalPage } from "./LegalPage";
 
 type Navigate = (tab: string, subPageName?: string) => void;
@@ -31,6 +32,7 @@ export const MarketingPage: React.FC<{ path: string; onNavigate: Navigate }> = (
   : path === "/about" ? <AboutPage onNavigate={onNavigate} />
   : path === "/contact" ? <ContactPage onNavigate={onNavigate} />
   : path === "/founders" ? <FoundersPage onNavigate={onNavigate} />
+  : path === "/welcome" ? <WelcomePage onNavigate={onNavigate} />
   : path === "/terms" ? <LegalPage doc="terms" onNavigate={onNavigate} />
   : path === "/privacy" ? <LegalPage doc="privacy" onNavigate={onNavigate} />
   : <Landing onNavigate={onNavigate} />;

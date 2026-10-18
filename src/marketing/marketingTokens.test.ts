@@ -1271,6 +1271,11 @@ describe("the feature rows set their own type, and nothing else uses its familie
        `--clv-serif`, because a cross-PAGE `var()` read is the `--mk-hero-ground` trap: one sheet's
        refactor silently unstyling another page. The typewriter face there is READ (`var(--sp-type)`).
        An eighth file naming either face is still a decision this fails on. */
+    /* ⚠️ AN EIGHTH (founding welcome, 18 Oct), AND IT IS PUBLIC, NOT SIGNED-IN. The /welcome page's
+       card prints the writer's founding number in the typewriter face, as Direction A of
+       design-refs/founding-welcome/founding-welcome-v1.html draws it. ONE declaration, on
+       `.mk-wel-card .mk-wel-cardno`, in the page's own sheet (`marketing/welcome.css`); the number
+       inside inherits it. A ninth file naming either face is still a decision this fails on. */
     expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
       .toEqual([
         "components/agents/contact/contactV11.css",
@@ -1279,6 +1284,7 @@ describe("the feature rows set their own type, and nothing else uses its familie
         "components/manuscripts/v12/msv12.css",
         "components/shell/primitives.css",
         "components/todo/taskPane.css",
+        "marketing/welcome.css",
       ]);
     const prim = decls(readFileSync(resolve(src, "components/shell/primitives.css"), "utf8"));
     const primOwners = [...prim.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
