@@ -105,6 +105,9 @@ export default defineConfig({
   },
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
+    /* PUBLIC: a stranger's view. No sign-in and no saved session, so it can measure a build that
+       has no sign-in at all (the landing-only production build). Files end `.public.ts`. */
+    { name: "public", testMatch: /.*\.public\.ts/ },
     {
       name: "measure",
       testMatch: /.*\.measure\.ts/,

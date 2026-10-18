@@ -1,0 +1,80 @@
+{
+  "render /": {
+    "path": "/",
+    "auth": false,
+    "shell": false,
+    "frames": 32
+  },
+  "render /founders": {
+    "path": "/founders",
+    "auth": false,
+    "shell": false,
+    "frames": 32
+  },
+  "render /pricing": {
+    "path": "/pricing",
+    "auth": false,
+    "shell": false,
+    "frames": 33
+  },
+  "render /about": {
+    "path": "/about",
+    "auth": false,
+    "shell": false,
+    "frames": 32
+  },
+  "render /contact": {
+    "path": "/contact",
+    "auth": false,
+    "shell": false,
+    "frames": 32
+  },
+  "redirect /dashboard": {
+    "final": "/",
+    "auth": false,
+    "shell": false,
+    "frames": 49
+  },
+  "redirect /agents": {
+    "final": "/",
+    "auth": false,
+    "shell": false,
+    "frames": 47
+  },
+  "redirect /x": {
+    "final": "/",
+    "auth": false,
+    "shell": false,
+    "frames": 46
+  },
+  "redirect /#/login": {
+    "final": "/",
+    "auth": false,
+    "shell": false,
+    "frames": 44
+  },
+  "redirect /#/signup": {
+    "final": "/",
+    "auth": false,
+    "shell": false,
+    "frames": 45
+  },
+  "verified=already": {
+    "search": "",
+    "focused": "You're already in."
+  },
+  "chrome 1440": {
+    "/": [],
+    "/founders": [],
+    "/pricing": [],
+    "/about": [],
+    "/contact": []
+  },
+  "chrome 390": {
+    "/": [],
+    "/founders": [],
+    "/pricing": [],
+    "/about": [],
+    "/contact": []
+  }
+}
