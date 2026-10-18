@@ -18,7 +18,9 @@ import { join } from "node:path";
 const ROOT = process.cwd();
 const PROJECT = "prod"; // .firebaserc alias for gen-lang-client-0801391782
 const PROD_ENV_FILE = "functions/.env.gen-lang-client-0801391782";
-const BRANCH = "release/live-1";
+/* landing-live until it is merged into release/live-1, then release/live-1. Either is safe, because
+   checks 0 and 3e refuse a build that is not landing-only whichever branch it came from. */
+const BRANCHES = ["landing-live", "release/live-1"];
 const LIVE_TITLE = "QueryHawk: Query With Confidence";
 /** Every lab hash App.tsx routes; `#/plans` is the DEV hash, not the `/plans` path. Kept equal to
  *  `LAB_HASHES` in src/lib/prodBuild.test.ts (that file's P1 is the same claim, at build time). */
@@ -126,7 +128,8 @@ if (!existsSync(join(distDir, "index.html"))) {
 const diff = sh("git", ["diff", "--name-only", "HEAD"]).trim();
 line(diff === "", "4a · no uncommitted change to a tracked file", diff ? diff.split("\n").join(", ") : "");
 const branch = sh("git", ["rev-parse", "--abbrev-ref", "HEAD"]).trim();
-line(branch === BRANCH, "4b · HEAD is " + BRANCH, branch === BRANCH ? sh("git", ["rev-parse", "--short", "HEAD"]).trim() : `on ${branch}`);
+line(BRANCHES.includes(branch), "4b · HEAD is " + BRANCHES.join(" or "),
+  BRANCHES.includes(branch) ? `${branch} ${sh("git", ["rev-parse", "--short", "HEAD"]).trim()}` : `on ${branch}`);
 
 console.log(failed ? `\nPREFLIGHT FAILED — ${failed} check(s). Do not deploy.` : "\nPREFLIGHT PASSED.");
 process.exit(failed ? 1 : 0);
