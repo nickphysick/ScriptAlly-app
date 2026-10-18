@@ -247,6 +247,9 @@ interface DbContextType {
   packages: SubmissionPackage[];
   agents: Agent[];
   communityAgents: CommunityAgent[];
+  /** ADDITIVE (Discover v1): the community catalogue read has answered — with the catalogue, or with the local seed
+   *  fallback. Optional so a page smoke's hand-made context need not state it; absent reads as answered. */
+  communityAgentsReady?: boolean;
   queries: Query[];
   activities: Activity[];
   journalEntries: JournalEntry[];
@@ -548,6 +551,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [packages, setPackages] = useState<SubmissionPackage[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [communityAgents, setCommunityAgents] = useState<CommunityAgent[]>([]);
+  const [communityAgentsReady, setCommunityAgentsReady] = useState<boolean>(false);
   const [queries, setQueries] = useState<Query[]>([]);
   // Boot-state flags that drive the clean dashboard load:
   //  · authReady   — false until the first onAuthStateChanged resolves (and, for a signed-in user,
@@ -892,8 +896,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   useEffect(() => {
     if (!currentUser) {
       setCommunityAgents(localSeedCommunityAgents);
+      setCommunityAgentsReady(true);
       return;
     }
+    setCommunityAgentsReady(false);
 
     const fetchCommunityAgents = async () => {
       try {
@@ -908,6 +914,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // Fallback to local seeds
         setCommunityAgents(localSeedCommunityAgents);
       }
+      setCommunityAgentsReady(true);
     };
 
     fetchCommunityAgents();
@@ -3915,6 +3922,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         packages,
         agents,
         communityAgents,
+        communityAgentsReady,
         queries,
         activities,
         journalEntries,

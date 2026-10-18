@@ -19,7 +19,7 @@ import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
-import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
+import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
@@ -725,7 +725,7 @@ function AppContent() {
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
         <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
-          <DiscoverNewAgents onNavigate={handleNavigate} />
+          <DiscoverPage onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
           <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />

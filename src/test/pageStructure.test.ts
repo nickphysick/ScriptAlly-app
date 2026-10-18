@@ -28,7 +28,7 @@ export const PAGE_SOURCES = [
   "components/QueryAnalytics.tsx",
   "components/Agents.tsx",
   "components/agents/AgentList.tsx",
-  "components/DiscoverNewAgents.tsx",
+  "components/agents/discover1/DiscoverPage.tsx",
   "components/AllManuscripts.tsx",
   "components/manuscripts/ComparableTitlesPage.tsx",
   "components/SubmissionPackages.tsx",

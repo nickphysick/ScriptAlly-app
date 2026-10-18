@@ -46,7 +46,7 @@ const ROUTES = [
   { name: "Query Centre", route: "/queries", root: ".qc-wpg" },
   { name: "Analytics", route: "/queries/analytics", root: ".qa-wpg" },
   { name: "Contact list", route: "/agents", root: ".agl-wpg" },
-  { name: "Discover", route: "/agents/discover", root: ".dv-wpg" },
+  { name: "Discover", route: "/agents/discover", root: ".dv1-wpg" },
   { name: "Manuscripts", route: "/manuscripts", root: ".msv-wpg" },
   { name: "Comparable titles", route: "/manuscripts/comps", root: ".ct-wpg" },
   { name: "Submission packages", route: "/manuscripts/packages", root: ".pkgw-wpg" },

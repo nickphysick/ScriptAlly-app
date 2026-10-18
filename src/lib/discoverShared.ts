@@ -4,7 +4,7 @@
  *
  * What Discover shares with the pages that link to it (Contact list v14, ruling Q4): the one gate, and the
  * one mapping from a community agent to the fields `addAgent` takes. Both used to live inside
- * `DiscoverNewAgents.tsx`; a second page reading them is the reason they moved, not a second copy.
+ * the retired `DiscoverNewAgents.tsx` (Discover v1 replaced it); a second page reading them is the reason they moved.
  */
 import type { Agent, CommunityAgent } from "../types";
 

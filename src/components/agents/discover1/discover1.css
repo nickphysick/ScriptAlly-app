@@ -1,0 +1,158 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Discover v1 (ref design-refs/discover-v1/discover-v1.html). Everything is `dv1-`, page-local.
+ *
+ * ⚠️ THE MOCK'S BREAKPOINTS ARE VIEWPORT QUERIES; HERE THEY ARE CONTAINER WIDTHS, MEASURED AT EACH BOUNDARY IN THE
+ *    MOCK (a viewport query fires at the wrong width once the sidebar collapses). Header steps: 56px title above a
+ *    header of 1256, 50 down to 1026, 40 at 1025 and below, one column at 857 and below. The lead card's facts go to
+ *    two columns at a CARD of 665 or less — the widest two-column card the mock draws (window 1360) — and the tray's
+ *    queue narrows to 340 at a tray of 1025 or less.
+ * ⚠️ HEADINGS STATE THEIR FACE WITH `!important`: brand.tsx forces h1/h2/h3 at runtime, injected last.
+ * ⚠️ NO `.ws-*`, `.ph*` or `.wpg*` SELECTOR, and the root states no inline padding (the grid's gutter is
+ *    `padding-inline` on the scroller's direct children; a shorthand here would zero it).
+ */
+
+.dv1-page :where(span, p, div, label, li, ul, ol, b, i, em, a, button, input, section, article, aside, header, small, h4, h5) {
+  font-family: inherit;
+}
+.dv1-page {
+  --dv1-ink: var(--sp-ink);
+  --dv1-i72: rgba(28, 19, 15, 0.72);
+  --dv1-i58: rgba(28, 19, 15, 0.58);
+  --dv1-i45: rgba(28, 19, 15, 0.45);
+  --dv1-i30: rgba(28, 19, 15, 0.3);
+  --dv1-i14: rgba(28, 19, 15, 0.14);
+  --dv1-i08: rgba(28, 19, 15, 0.08);
+  --dv1-navy: var(--sp-anthracite);
+  --dv1-navy2: #2c3a53;
+  --dv1-rust: #a0452e;
+  --dv1-blush: #f6e2d8;
+  --dv1-paper: #fbf9f5;
+  --dv1-slate: #5f7b93;
+  --dv1-slate2: #4e6a82;
+  --dv1-sage: #4e7d60;
+  --dv1-sand: #f7efe3;
+  --dv1-cream: #f4eee5;
+  --dv1-type: var(--sp-type);
+  --dv1-serif: var(--sp-serif);
+  --dv1-mono: var(--font-mono);
+
+  box-sizing: border-box;
+  min-width: 0;
+  color: var(--dv1-ink);
+  font-family: var(--dv1-serif);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.dv1-page *, .dv1-page *::before, .dv1-page *::after { box-sizing: border-box; }
+.dv1-page button { font-family: inherit; }
+.dv1-page :focus-visible { outline: 2px solid var(--dv1-navy); outline-offset: 2px; }
+
+/* ── the light header ─────────────────────────────────────────────────── */
+.dv1-hd {
+  position: relative; isolation: isolate; container: dv1hd / inline-size;
+  padding: 44px 0 40px; border-bottom: 1px solid rgba(28, 19, 15, 0.12); margin-bottom: 8px;
+}
+.dv1-hrow { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.dv1-ht { min-width: 0; }
+.dv1-k { margin: 0 0 14px; font: 400 12px/normal var(--dv1-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: var(--dv1-rust); white-space: nowrap; }
+.dv1-pro {
+  display: inline-block; margin-left: 14px; padding: 3px 8px 2px; border-radius: 5px; vertical-align: 2px;
+  font: 600 9px/normal var(--dv1-mono) !important; letter-spacing: 0.18em; background: #e2e7ef; color: var(--dv1-navy);
+}
+.dv1-hd h1.dv1-title { margin: 0; font: 400 56px/1.12 var(--dv1-type) !important; letter-spacing: -0.01em; color: var(--dv1-ink); white-space: nowrap; outline: none; }
+.dv1-hd h1.dv1-title span, .dv1-hd h1.dv1-title b { font: inherit !important; }
+.dv1-hd .dv1-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
+.dv1-by { display: flex; align-items: center; gap: 14px; margin: 12px 0 0; font: 400 21px/normal var(--dv1-type) !important; color: #3a2e27; white-space: nowrap; }
+.dv1-by > i { flex: 0 0 52px; height: 1px; background: rgba(28, 19, 15, 0.3); }
+.dv1-by em { font: italic 400 22px/normal var(--dv1-serif) !important; color: #6b5f56; margin-right: -4px; }
+.dv1-by .dv1-ms { font: inherit !important; }
+.dv1-hb { display: flex; gap: 12px; margin-top: 26px; }
+.dv1-hb button { box-sizing: border-box; height: 48px; display: inline-flex; align-items: center; font: 400 18px/normal var(--dv1-type) !important; padding: 15px 24px; border-radius: 9px; cursor: pointer; white-space: nowrap; }
+.dv1-hb .dv1-p1 { background: var(--dv1-navy); color: #fff; border: 1px solid var(--dv1-navy); }
+.dv1-hb .dv1-p1:hover:not(:disabled) { background: #1b2433; }
+.dv1-hb .dv1-p2 { background: #fff; color: var(--dv1-ink); border: 1px solid rgba(28, 19, 15, 0.18); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06); }
+.dv1-hb button:disabled { cursor: default; }
+.dv1-hwl {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 9px; margin-top: 18px;
+  font: 400 15.5px/normal var(--dv1-serif) !important; color: var(--dv1-i72);
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--dv1-i30);
+}
+.dv1-hwl:hover { color: var(--dv1-ink); text-decoration-color: var(--dv1-ink); }
+.dv1-hwl:focus-visible { outline: 2px solid var(--dv1-navy); outline-offset: 4px; border-radius: 4px; }
+.dv1-hwl i { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dv1-i45); display: grid; place-items: center; font: 600 10.5px/1 var(--dv1-mono) !important; font-style: normal; text-decoration: none; }
+
+/* the card */
+.dv1-card { flex: none; display: flex; background: #fff; border: 1px solid rgba(28, 19, 15, 0.1); border-radius: 16px; box-shadow: 0 2px 4px rgba(28, 19, 15, 0.04), 0 18px 36px -24px rgba(28, 19, 15, 0.3); }
+.dv1-c1 { padding: 20px 22px 14px; min-width: 236px; }
+.dv1-bar { display: flex; gap: 3px; height: 9px; margin-bottom: 6px; }
+.dv1-bar i { display: block; min-width: 0; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.dv1-c1 ul { list-style: none; margin: 0; padding: 0; }
+.dv1-c1 li { white-space: nowrap; display: flex; align-items: center; gap: 12px; padding: 7px 0; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 400 16px/normal var(--dv1-type) !important; color: #2b211c; }
+.dv1-c1 li:first-child { border-top: 0; }
+.dv1-sq { flex: none; width: 11px; height: 11px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3); }
+.dv1-c1 li b { font-weight: 400; font-size: 22px; min-width: 26px; text-align: right; }
+.dv1-sg--rv { background: var(--dv1-navy); }
+.dv1-sg--ad { background: #cfe0d5; }
+.dv1-sg--pa { background: #e4e1db; }
+.dv1-pf { all: unset; cursor: pointer; display: flex; align-items: center; gap: 12px; flex: 1; border-radius: 6px; margin: 0 -8px; padding: 0 8px; font: inherit !important; }
+.dv1-pf:hover:not(:disabled) { background: #f7f3ee; }
+.dv1-pf:disabled { cursor: default; }
+.dv1-pf:focus-visible { outline: 2px solid var(--dv1-navy); outline-offset: 0; }
+.dv1-hd[data-loading] .dv1-c1 li b, .dv1-hd[data-loading] .dv1-rs { color: transparent; text-decoration-color: transparent; border-radius: 6px; background: rgba(28, 19, 15, 0.07); }
+.dv1-c2 { border-left: 1px solid rgba(28, 19, 15, 0.08); padding: 16px 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 170px; }
+.dv1-rg { position: relative; display: block; width: 84px; height: 84px; }
+.dv1-rg svg { width: 84px; height: 84px; display: block; }
+.dv1-rp { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; font: 400 24px/1 var(--dv1-type) !important; }
+.dv1-rp span { display: inline-flex; align-items: baseline; font: inherit !important; }
+.dv1-rp small { font-size: 12px; }
+.dv1-rl { white-space: nowrap; margin: 10px 0 0; font: 400 15px/normal var(--dv1-type) !important; color: var(--dv1-ink); text-align: center; }
+.dv1-rs { white-space: nowrap; margin: 3px 0 0; font: italic 400 13.5px/normal var(--dv1-serif) !important; color: var(--dv1-i58); text-align: center; text-decoration: underline; text-decoration-color: var(--dv1-i30); text-underline-offset: 3px; }
+
+@container dv1hd (max-width: 1256px) {
+  .dv1-hd h1.dv1-title { font-size: 50px !important; }
+  .dv1-hrow { gap: 32px; }
+  .dv1-c1 { min-width: 206px; }
+  .dv1-c2 { min-width: 150px; }
+}
+@container dv1hd (max-width: 1025px) {
+  .dv1-hd h1.dv1-title { font-size: 40px !important; }
+  .dv1-by { font-size: 18px !important; }
+  .dv1-c1 li { font-size: 14.5px !important; }
+  .dv1-c1 li b { font-size: 19px; }
+  .dv1-hb button { font-size: 16px !important; padding: 13px 20px; }
+  .dv1-c1 { min-width: 190px; padding: 16px 18px 10px; }
+  .dv1-c2 { min-width: 136px; padding: 14px 16px; }
+}
+@container dv1hd (max-width: 857px) {
+  .dv1-hrow { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── the empty header: the navy panel ─────────────────────────────────── */
+.dv1-ae { padding: 28px 0 80px; container: dv1ae / inline-size; }
+.dv1-aep {
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: center; gap: 40px;
+  background: var(--dv1-navy2); border-radius: 20px; padding: 52px 56px 52px 64px; color: var(--dv1-cream); overflow: hidden;
+}
+.dv1-aet { min-width: 0; }
+.dv1-aek { margin: 0 0 18px; font: 400 12px/normal var(--dv1-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: #e0a188; }
+.dv1-aek .dv1-pro { background: rgba(244, 238, 229, 0.14); color: var(--dv1-cream); }
+.dv1-aep h1 { margin: 0; font: 400 64px/1.08 var(--dv1-type) !important; color: #f8f3ea; outline: none; }
+.dv1-aepp { margin: 22px 0 0; max-width: 34em; font: 400 19px/1.6 var(--dv1-serif) !important; color: rgba(244, 238, 229, 0.86); }
+.dv1-aepp .dv1-mono { font-family: var(--dv1-type) !important; color: #f8f3ea; }
+.dv1-aeb { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.dv1-aeb button { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/normal var(--dv1-type) !important; padding: 14px 20px; border-radius: 9px; cursor: pointer; box-shadow: none; }
+.dv1-aeb .dv1-b1 { background: var(--dv1-cream); color: var(--dv1-ink); border: 1px solid var(--dv1-cream); }
+.dv1-aeb .dv1-b1.is-done { background: #cfe0d5; border-color: #cfe0d5; }
+.dv1-aeb .dv1-b2 { background: transparent; color: var(--dv1-cream); border: 1px solid rgba(244, 238, 229, 0.55); }
+.dv1-tick { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dv1-aeart { min-width: 0; }
+.dv1-disc { width: 100%; max-width: 400px; aspect-ratio: 1; margin-left: auto; border-radius: 50%; background: #e8dccf; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+.dv1-disc img { width: 84%; display: block; margin-bottom: -2%; }
+/* the mock's 1440 window is a panel of 1100 (1099.8 there, 1100.8 one pixel wider) */
+@container dv1ae (max-width: 1100px) {
+  .dv1-aep h1 { font-size: 54px !important; }
+  .dv1-aep { padding: 44px 44px 44px 52px; }
+}

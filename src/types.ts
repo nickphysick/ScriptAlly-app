@@ -143,6 +143,9 @@ export interface User {
      path. Readers go through `notifyPrefs()`, which is total. Nothing sends email yet — see
      lib/accountPrefs. */
   notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean };
+  /* Discover v1: the Scout's tuning — a lens and three switches, written leaf by leaf. Read through
+     `discoverPrefs()` (lib/scout), which is total. */
+  discoverPrefs?: { lens?: string; openOnly?: boolean; notOnList?: boolean; ukIreland?: boolean };
   /* ⚠️ ITS OWN FIELD, NOT A KEY IN `notifyPrefs` — a consent RECORD, with the moment it was made.
      UK PECR wants affirmative, evidenced and withdrawable; absent === never granted, and nothing
      but a person clicking may create it. Withdrawal REWRITES it with granted:false rather than

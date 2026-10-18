@@ -68,7 +68,7 @@ describe("Smart Import states the entitlement the server actually enforces", () 
 });
 
 /* ⚠️ TWO ROWS THAT ARE NOT GATED, AND MUST NOT BE ADVERTISED AS IF THEY WERE. Neither
-   SubmissionPackages.tsx nor DiscoverNewAgents.tsx references isProUser or UserPlan.PRO, and the
+   SubmissionPackages.tsx nor discover1/DiscoverPage.tsx references isProUser or UserPlan.PRO, and the
    locked marketing copy lists submission packages under FREE. The old PlansPage table claimed
    both as Pro-only. If either becomes Pro, the gate goes in the code first and this test is what
    fails to remind whoever changes the table. */

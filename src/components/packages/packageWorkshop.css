@@ -618,7 +618,7 @@
 .pkgw-propill {
   display: inline-flex; align-items: center; gap: 5px;
   font-family: 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase;
-  /* the value, not a `var()` on a retired token — see the note in discover.css */
+  /* the value, not a `var()` on a retired token — see the note in the retired discover.css (Discover v1) */
   font-size: 8px;
   color: var(--pkg-pro); background: var(--pkg-pro-fill); border: 1px solid var(--pkg-pro-edge);
   border-radius: 99px; padding: 4px 10px;
