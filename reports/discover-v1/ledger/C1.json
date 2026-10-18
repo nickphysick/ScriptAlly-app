@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 expanded: 741px card → 3 columns",
+  "ok": true,
+  "detail": "3 columns"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 expanded: 582px card → 2 columns",
+  "ok": true,
+  "detail": "2 columns"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the wish list spans the card",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 collapsed: the card grew",
+  "ok": true,
+  "detail": "582 → 704"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 collapsed: 704px card → 3 columns, at the same window",
+  "ok": true,
+  "detail": "3 columns"
+ },
+ {
+  "lock": "C1",
+  "where": "the collapsed reading entered the three-column branch",
+  "ok": true,
+  "detail": "704.09375"
+ }
+]

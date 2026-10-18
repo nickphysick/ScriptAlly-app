@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C4",
+  "where": "the page's order is the derivation's (best)",
+  "ok": true,
+  "detail": "Aoife Murphy, Georgina Tate, Isobel Grant, Priya Anand, Simone Laurent, Valentina Cruz, Helena Marsh | Aoife Murphy, Georgina Tate, Isobel Grant, Priya Anand, Simone Laurent, Valentina Cruz, Helena Marsh"
+ },
+ {
+  "lock": "C4",
+  "where": "the lens leaf changed",
+  "ok": true,
+  "detail": "{\"keptByLeafWrites\":\"yes\",\"lens\":\"fast\",\"notOnList\":true,\"openOnly\":true,\"ukIreland\":false}"
+ },
+ {
+  "lock": "C4",
+  "where": "a key the page does not know survived (no whole-map write)",
+  "ok": true,
+  "detail": "{\"keptByLeafWrites\":\"yes\",\"lens\":\"fast\",\"notOnList\":true,\"openOnly\":true,\"ukIreland\":false}"
+ },
+ {
+  "lock": "C4",
+  "where": "the other three leaves are untouched",
+  "ok": true,
+  "detail": "{\"keptByLeafWrites\":\"yes\",\"lens\":\"fast\",\"notOnList\":true,\"openOnly\":true,\"ukIreland\":false}"
+ },
+ {
+  "lock": "C4",
+  "where": "after the change the page's order is the derivation's (fast)",
+  "ok": true,
+  "detail": "Aoife Murphy, Helena Marsh, Isobel Grant, Priya Anand, Simone Laurent, Georgina Tate, Valentina Cruz | Aoife Murphy, Helena Marsh, Isobel Grant, Priya Anand, Simone Laurent, Georgina Tate, Valentina Cruz"
+ },
+ {
+  "lock": "C4",
+  "where": "the lens changed the order",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "the section head names the lens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "a switch writes its own leaf",
+  "ok": true,
+  "detail": "{\"keptByLeafWrites\":\"yes\",\"lens\":\"fast\",\"notOnList\":true,\"openOnly\":false,\"ukIreland\":false}"
+ },
+ {
+  "lock": "C4",
+  "where": "the expired pass is back in the queue (A2 on the real page)",
+  "ok": true,
+  "detail": "Aoife Murphy, Georgina Tate, Isobel Grant, Priya Anand, Simone Laurent, Valentina Cruz, Helena Marsh"
+ }
+]

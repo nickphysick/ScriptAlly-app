@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B2",
+  "where": "live the rows are numbers",
+  "ok": true,
+  "detail": "{\"review\":6,\"added\":9,\"passed\":5,\"title\":6,\"pct\":\"70%\",\"sub\":\"14 of 20 decided\",\"arcs\":1,\"dash\":\"158.34 226.19\"}"
+ },
+ {
+  "lock": "B2",
+  "where": "live title = To review",
+  "ok": true,
+  "detail": "6 vs 6"
+ },
+ {
+  "lock": "B2",
+  "where": "live the percentage is decided ÷ total",
+  "ok": true,
+  "detail": "70% vs 14/20"
+ },
+ {
+  "lock": "B2",
+  "where": "live the line is \"x of y decided\"",
+  "ok": true,
+  "detail": "14 of 20 decided"
+ },
+ {
+  "lock": "B2",
+  "where": "live an arc iff something is decided",
+  "ok": true,
+  "detail": "1 arc(s)"
+ },
+ {
+  "lock": "B2",
+  "where": "done the rows are numbers",
+  "ok": true,
+  "detail": "{\"review\":0,\"added\":15,\"passed\":5,\"title\":null,\"pct\":\"100%\",\"sub\":\"20 of 20 decided\",\"arcs\":1,\"dash\":\"226.19 226.19\"}"
+ },
+ {
+  "lock": "B2",
+  "where": "done the percentage is decided ÷ total",
+  "ok": true,
+  "detail": "100% vs 20/20"
+ },
+ {
+  "lock": "B2",
+  "where": "done the line is \"x of y decided\"",
+  "ok": true,
+  "detail": "20 of 20 decided"
+ },
+ {
+  "lock": "B2",
+  "where": "done an arc iff something is decided",
+  "ok": true,
+  "detail": "1 arc(s)"
+ },
+ {
+  "lock": "B2",
+  "where": "none the rows are numbers",
+  "ok": true,
+  "detail": "{\"review\":0,\"added\":0,\"passed\":0,\"title\":null,\"pct\":\"—\",\"sub\":\"nothing to decide yet\",\"arcs\":0,\"dash\":null}"
+ },
+ {
+  "lock": "B2",
+  "where": "none nothing at all: the centre is a dash",
+  "ok": true,
+  "detail": "—"
+ },
+ {
+  "lock": "B2",
+  "where": "none nothing at all: no arc is drawn",
+  "ok": true,
+  "detail": "0 arc(s), dash null"
+ },
+ {
+  "lock": "B2",
+  "where": "none nothing at all: the line says so",
+  "ok": true,
+  "detail": "nothing to decide yet"
+ },
+ {
+  "lock": "B2",
+  "where": "every state was entered",
+  "ok": true,
+  "detail": "live,done,none"
+ }
+]

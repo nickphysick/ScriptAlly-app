@@ -694,6 +694,10 @@ test.describe("Query Centre v138", () => {
     const ALLOWED: Record<string, string> = { none: "rgb(244, 238, 229)", querying: "rgb(42, 58, 82)", closed: "rgb(179, 172, 165)" };
     for (const route of ["/dashboard", "/queries", "/agents", "/agents/discover"]) {
       await page.addInitScript(() => { try { for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ } });
+      /* RE-POINTED (Discover v1, 18 Oct): Discover's discs are on its LIVE face (the picks), which prod gates behind
+         DISCOVER_LIVE; the coming-soon face draws none, by design. The dev review aid's fixture puts the live face on
+         screen, so the law is held where the circles are. */
+      if (route === "/agents/discover") await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_DV_STATE = "live"; });
       await openRoute(page, route, SIZES[0]);
       await page.waitForTimeout(2500);
       if (route === "/queries") { await page.evaluate(LIB); await unfoldClosed(page); await page.waitForTimeout(300); }

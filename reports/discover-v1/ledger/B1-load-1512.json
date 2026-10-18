@@ -1,0 +1,290 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 the loading face was entered",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd y held",
+  "ok": true,
+  "detail": "0.0 → 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd h held",
+  "ok": true,
+  "detail": "328.0 → 328.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd x held",
+  "ok": true,
+  "detail": "0.0 → 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd w held",
+  "ok": true,
+  "detail": "1159.3 → 1159.3"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow y held",
+  "ok": true,
+  "detail": "44.0 → 44.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow h held",
+  "ok": true,
+  "detail": "18.0 → 18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title y held",
+  "ok": true,
+  "detail": "76.0 → 76.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title h held",
+  "ok": true,
+  "detail": "56.0 → 56.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 byline present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 byline y held",
+  "ok": true,
+  "detail": "144.0 → 144.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 byline h held",
+  "ok": true,
+  "detail": "30.0 → 30.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 tune present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 tune y held",
+  "ok": true,
+  "detail": "200.0 → 200.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 tune h held",
+  "ok": true,
+  "detail": "48.0 → 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 tune x held",
+  "ok": true,
+  "detail": "0.0 → 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 tune w held",
+  "ok": true,
+  "detail": "185.6 → 185.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 share present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 share y held",
+  "ok": true,
+  "detail": "200.0 → 200.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 share h held",
+  "ok": true,
+  "detail": "48.0 → 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 share x held",
+  "ok": true,
+  "detail": "197.6 → 197.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 share w held",
+  "ok": true,
+  "detail": "195.6 → 195.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how y held",
+  "ok": true,
+  "detail": "266.0 → 266.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how h held",
+  "ok": true,
+  "detail": "21.0 → 21.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 card present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 card y held",
+  "ok": true,
+  "detail": "83.0 → 83.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 card h held",
+  "ok": true,
+  "detail": "165.0 → 165.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 card x held",
+  "ok": true,
+  "detail": "740.2 → 740.2"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 card w held",
+  "ok": true,
+  "detail": "419.1 → 419.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 counts present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 counts y held",
+  "ok": true,
+  "detail": "84.0 → 84.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 counts h held",
+  "ok": true,
+  "detail": "163.0 → 163.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 counts x held",
+  "ok": true,
+  "detail": "741.2 → 741.2"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 counts w held",
+  "ok": true,
+  "detail": "255.5 → 255.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ringCol present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ringCol y held",
+  "ok": true,
+  "detail": "84.0 → 84.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ringCol h held",
+  "ok": true,
+  "detail": "163.0 → 163.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ringCol x held",
+  "ok": true,
+  "detail": "996.7 → 996.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ringCol w held",
+  "ok": true,
+  "detail": "161.5 → 161.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ring present in both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ring y held",
+  "ok": true,
+  "detail": "100.0 → 100.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ring h held",
+  "ok": true,
+  "detail": "84.0 → 84.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ring x held",
+  "ok": true,
+  "detail": "1036.0 → 1036.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ring w held",
+  "ok": true,
+  "detail": "84.0 → 84.0"
+ }
+]

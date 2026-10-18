@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "C5",
+  "where": "the modal lists exactly the live pass",
+  "ok": true,
+  "detail": "Patrick Doherty"
+ },
+ {
+  "lock": "C5",
+  "where": "focus went to ✕",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "Bring back deleted the decision",
+  "ok": true,
+  "detail": "ca-priya-anand"
+ },
+ {
+  "lock": "C5",
+  "where": "the expired pass was left alone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "the agent rejoined the queue",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "the modal closed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "Not for you reads 0 and cannot be pressed",
+  "ok": true,
+  "detail": ""
+ }
+]
