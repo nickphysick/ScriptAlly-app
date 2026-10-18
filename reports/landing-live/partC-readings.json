@@ -3,7 +3,7 @@
     "path": "/",
     "auth": false,
     "shell": false,
-    "frames": 32
+    "frames": 33
   },
   "render /founders": {
     "path": "/founders",
@@ -15,7 +15,7 @@
     "path": "/pricing",
     "auth": false,
     "shell": false,
-    "frames": 33
+    "frames": 32
   },
   "render /about": {
     "path": "/about",
@@ -33,7 +33,7 @@
     "final": "/",
     "auth": false,
     "shell": false,
-    "frames": 49
+    "frames": 47
   },
   "redirect /agents": {
     "final": "/",
@@ -45,13 +45,13 @@
     "final": "/",
     "auth": false,
     "shell": false,
-    "frames": 46
+    "frames": 47
   },
   "redirect /#/login": {
     "final": "/",
     "auth": false,
     "shell": false,
-    "frames": 44
+    "frames": 46
   },
   "redirect /#/signup": {
     "final": "/",

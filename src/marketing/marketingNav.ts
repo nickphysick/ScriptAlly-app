@@ -29,7 +29,9 @@ export function marketingNavState(
 ): MarketingNavState {
   /* LANDING-ONLY: there is no app to log in to or open, so the nav offers neither, whoever is
      looking. The founding offer is the one call to action. */
-  if (landingOnly) {
+  /* `LANDING_ONLY ||` is for the build, not the logic: a constant `true` lets the minifier drop the
+     signed-in branch below, so the landing-only bundle contains no "Open dashboard" at all. */
+  if (LANDING_ONLY || landingOnly) {
     return { mode: "anon", primaryLabel: "Become a Founding Writer", showLogIn: false, avatarInitial: null };
   }
   if (!user) {

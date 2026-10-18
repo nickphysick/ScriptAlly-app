@@ -51,6 +51,11 @@ const parseEnv = (text) => {
 };
 const readEnv = (f) => (existsSync(join(ROOT, f)) ? parseEnv(readFileSync(join(ROOT, f), "utf8")) : null);
 
+/* ── 0 · landing-only ── */
+const clientEnv = readEnv(".env.production") ?? {};
+line(clientEnv.VITE_LANDING_ONLY === "true", "0 · VITE_LANDING_ONLY=true in .env.production",
+  "queryhawk.net serves the public site and the waitlist only");
+
 /* ── 1 · the functions' environment for live ── */
 const prodEnv = readEnv(PROD_ENV_FILE);
 const bareEnv = readEnv("functions/.env") ?? {};
@@ -95,6 +100,10 @@ if (!existsSync(join(distDir, "index.html"))) {
   line(title === LIVE_TITLE, "3b · <title>", title ?? "none");
   const ink = text.filter(([, s]) => /scriptally\.ink/i.test(s)).map(([n]) => n);
   line(ink.length === 0, "3c · no scriptally.ink in dist/", ink.join(", "));
+  /* A landing-only build drops the sign-in screen and the nav's app links at build time. */
+  const doors = ["Log in", "Open dashboard", "Open QueryHawk", "Create account", "Sign up with Google"]
+    .filter((d) => text.some(([, s]) => s.includes(d)));
+  line(doors.length === 0, "3e · dist/ has no way into the app (landing-only)", doors.join(", "));
   /* ⚠️ "BUILT FROM THIS TREE" IS PROVED BY BUILDING IT AGAIN. The build is deterministic, so a
      fresh production build of the working tree must name the same entry assets. A stale dist/
      (an older commit, or a dev build) names different ones. */

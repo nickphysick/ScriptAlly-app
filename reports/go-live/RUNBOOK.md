@@ -1,10 +1,14 @@
-# Go live on queryhawk.net: the runbook
+# Go live on queryhawk.net: the runbook (landing-only)
+
+queryhawk.net goes live as **the public site and the founding waitlist, and nothing else**. Visitors
+can read every public page and join the waitlist. They cannot sign in, create an account or reach
+the app. You keep using the app on dev, at dev.queryhawk.net.
 
 Run these yourself, one step at a time. After each step, tell Claude Code which step you ran, and
-it will run the matching verify and report.
+it will run the matching check and report.
 
-**Where to run them.** Use the worktree at `/Users/nickphysick/ScriptAlly-live`, on branch
-`release/live-1`. Its tip is `e98e8b5b` plus this runbook and the report.
+**Where to run them.** Use the worktree at `/Users/nickphysick/ScriptAlly-landing`, on branch
+`landing-live`.
 
 **Every command names `--project prod`.** A bare `firebase deploy` would resolve `.firebaserc`'s
 default, which is also prod. Naming it keeps every line readable for what it does.
@@ -13,47 +17,56 @@ default, which is also prod. Naming it keeps every line readable for what it doe
 > page in front of a back end that isn't there. It also deploys only `smartImportMap`.
 
 ```bash
-cd /Users/nickphysick/ScriptAlly-live
+cd /Users/nickphysick/ScriptAlly-landing
 ```
 
 ---
 
 ## 0 · Before anything
 
-Create `functions/.env.gen-lang-client-0801391782` with exactly these lines. The database id comes
-from `.env.production`; the rest come from the domain move. Nothing in it is secret, so it can be
-committed to `release/live-1` afterwards if you like.
+1. **Check the landing-only switch is on.** `.env.production` must contain:
 
-```
-FIRESTORE_DATABASE_ID=ai-studio-ae82196c-c59e-40b9-b209-9fb02f67ade6
-WAITLIST_FROM="Nick at QueryHawk <nick@queryhawk.net>"
-WAITLIST_REPLY_TO=nick@queryhawk.net
-WAITLIST_CONTACT_EMAIL=hello@queryhawk.net
-WAITLIST_PUBLIC_URL=https://queryhawk.net
-```
+   ```
+   VITE_LANDING_ONLY=true
+   ```
 
-- If you'd rather keep the reply-to untracked, leave `WAITLIST_REPLY_TO` out of this file and put
-  it in `functions/.env` instead.
-- Don't add `RETENTION_LIVE`. Without it, the nightly waitlist retention job only logs what it
-  would delete.
+   It's there on this branch. The preflight checks it too, as line `0`.
 
-Then build and run the preflight:
+2. **Create `functions/.env.gen-lang-client-0801391782`** with exactly these lines. The database id
+   comes from `.env.production`; the rest come from the domain move. Nothing in it is secret, so it
+   can be committed afterwards if you like.
 
-```bash
-npm run build
-```
+   ```
+   FIRESTORE_DATABASE_ID=ai-studio-ae82196c-c59e-40b9-b209-9fb02f67ade6
+   WAITLIST_FROM="Nick at QueryHawk <nick@queryhawk.net>"
+   WAITLIST_REPLY_TO=nick@queryhawk.net
+   WAITLIST_CONTACT_EMAIL=hello@queryhawk.net
+   WAITLIST_PUBLIC_URL=https://queryhawk.net
+   ```
 
-```bash
-node scripts/live-preflight.mjs
-```
+   - If you'd rather keep the reply-to untracked, leave `WAITLIST_REPLY_TO` out of this file and put
+     it in `functions/.env` instead.
+   - Don't add `RETENTION_LIVE`. Without it, the nightly retention job only logs what it would
+     delete.
 
-**Good:** every check is `PASS` except the two `2 · secret …` lines. Those turn green after step 1.
+3. **Build, then run the preflight:**
+
+   ```bash
+   npm run build
+   ```
+
+   ```bash
+   node scripts/live-preflight.mjs
+   ```
+
+   **Good:** every check is `PASS` except the two `2 · secret …` lines. Those turn green after
+   step 1.
 
 ---
 
-## 1 · Secrets
+## 1 · Secrets (the waitlist's two, nothing else)
 
-The waitlist function needs **two** secrets. Live has neither (it holds only `ANTHROPIC_API_KEY`).
+The waitlist function needs exactly two secrets, and live has neither.
 
 First the Resend key. Paste the key when prompted. A separate prod key from the Resend dashboard,
 limited to sending, is better than reusing dev's.
@@ -68,14 +81,6 @@ Then the IP-hash salt. It's random, never needs to be known, and nobody types it
 openssl rand -hex 32 | firebase functions:secrets:set WAITLIST_IP_SALT --project prod --data-file -
 ```
 
-`ANTHROPIC_API_KEY` already exists on live. **The AI functions wait until you confirm the Anthropic
-key has been rotated** (CLAUDE.md "Loose ends": the key was pasted into a chat once). After
-rotating, set the new value with:
-
-```bash
-firebase functions:secrets:set ANTHROPIC_API_KEY --project prod
-```
-
 **Verify:**
 
 ```bash
@@ -86,41 +91,24 @@ node scripts/live-preflight.mjs
 
 ---
 
-## 2 · Functions
-
-Deploy the go-live set, named one by one:
+## 2 · Functions (the waitlist only)
 
 ```bash
-firebase deploy --only functions:waitlist,functions:waitlistRetention,functions:sendContactMessage,functions:sendBetaFeedback,functions:sendWeeklyPulse --project prod
+firebase deploy --only functions:waitlist --project prod
 ```
 
-What each one is for:
-
-| Function | Why it's in the set |
-|---|---|
-| `waitlist` | The founding sign-up. |
-| `waitlistRetention` | Nightly job, dry run only. The first deploy may ask to enable Cloud Scheduler; say yes. |
-| `sendContactMessage` | Not called today, because the contact form uses mailto. Deployed so switching the transport needs no deploy. |
-| `sendBetaFeedback` | The feedback dock, on every signed-in page. **Without it the writer sees the bare word "internal".** |
-| `sendWeeklyPulse` | The founding-writer panel on the dashboard. **The pack's list left it out, but every signed-in writer can reach it.** |
-
-**Optional, and only after the Anthropic key is rotated.** Run this line to deploy the AI functions:
+**Optional second line,** safe to run now:
 
 ```bash
-firebase deploy --only functions:smartImportMap,functions:extractFromEmail,functions:assistAgentData --project prod
+firebase deploy --only functions:waitlistRetention --project prod
 ```
 
-| Function | Without a fresh deploy |
-|---|---|
-| `smartImportMap` | Live has a **July** copy. Per CLAUDE.md that copy reads the wrong database (it calls `admin.firestore()` → `(default)`, which prod lacks), so it fails. The import page and onboarding's import branch then show "We couldn't read that one", which wrongly blames the writer's file. |
-| `extractFromEmail` | Pro only. Live has the same broken July copy. Shows "Couldn't reach the importer — please try again in a moment." |
-| `assistAgentData` | Pro only, not deployed. Housekeeping's "Find these for me" shows "Couldn't reach assisted fill — enter these manually." |
+- `waitlistRetention` is a nightly job (03:17 London) that tidies the waitlist.
+- Without `RETENTION_LIVE=true` it deletes nothing: it only logs what it *would* delete, so you can
+  read a few runs before trusting it.
+- The first deploy may ask to enable Cloud Scheduler; say yes.
 
-Leave these two out, because nothing calls them:
-
-- `suggestComps`: the Scout is mounted nowhere.
-- `redeemInviteCode`: the invite gate is off. Deploy it only on the day you turn the gate on, or
-  every sign-up would be refused with a false "That code isn't one of ours" message.
+Everything else waits for the app to open (see the last section).
 
 **Verify:**
 
@@ -128,58 +116,67 @@ Leave these two out, because nothing calls them:
 node scripts/live-verify.mjs functions
 ```
 
-**Good:** five `PASS` lines, one per function. The `INFO` line lists the optional ones and whether
-they're deployed.
+**Good:** `PASS  functions · waitlist deployed`. The `INFO` line lists the rest and whether they're
+deployed. They aren't needed now.
 
 ---
 
 ## 3 · Firestore indexes
 
-**Nothing to run.** Live and dev both have zero composite indexes (`firebase firestore:indexes` on
-each, 17 Oct), so live lacks none.
+**Nothing to run.** Live and dev both have zero composite indexes, and the waitlist needs none.
 
-> ⚠️ **Know this about live's database.** It is the **ENTERPRISE** edition; dev is STANDARD. The
-> 5 July build has been running against it, so it isn't new, but query behaviour on live isn't
-> guaranteed to match dev's. If a page that works on dev is empty or slow on live, look there first.
+> ⚠️ **Know this about live's database.** It is the **ENTERPRISE** edition; dev is STANDARD. It
+> matters once the app opens, not for the waitlist.
 
 ---
 
 ## 4 · Rules
 
-Storage is provisioned on live: the bucket `gen-lang-client-0801391782.firebasestorage.app` exists
-(it answers 403, not 404). So rules can go straight out. Keep `--debug`, because the release time
-it prints is the only proof the rules landed.
+Landing-only reads no Firestore from the browser: the waitlist writes through the function, which
+bypasses rules. So this step isn't needed for the waitlist. Run it anyway now, because it tightens
+access and it's the state the app will open into. Storage is provisioned on live (the bucket
+answers 403), so both rule sets go out together. Keep `--debug`, because the release time it prints
+is the only proof the rules landed.
 
 ```bash
 firebase deploy --only firestore:rules,storage --project prod --debug 2>&1 | tee /tmp/live-rules.log
 ```
 
-Read the release time:
-
 ```bash
 grep -iE "updateTime|releases/" /tmp/live-rules.log | tail -4
 ```
 
-**Good:** the releases for `cloud.firestore/ai-studio-ae82196c-…` and for `firebase.storage/…`
-both show today's `updateTime`.
+**Good:** the releases for `cloud.firestore/ai-studio-ae82196c-…` and `firebase.storage/…` show
+today's `updateTime`.
 
-**Wait about a minute** before verifying. Rules take seconds to propagate, and an early probe can
-report a false denial.
+Wait about a minute (rules take seconds to propagate), then:
 
 ```bash
 node scripts/live-verify.mjs rules
 ```
 
-**Good:** `users/…` is **denied** (403), and the `test/connection` control is **allowed** (200 or
-404). These two lines pass under the July rules too. Which ruleset is live is shown only by the
-release time above.
-
-> ⚠️ **Between this step and step 5,** the old 5 July page is still live but running against the
-> new rules. Keep the gap short.
+**Good:** `users/…` is **denied** (403), and the `test/connection` control is **allowed** (200 or 404).
 
 ---
 
-## 5 · Hosting
+## 5 · Close sign-up on live (new, and it's the real lock)
+
+1. Open the Firebase console, project `gen-lang-client-0801391782`.
+2. Go to Authentication → **Settings** → **User actions**.
+3. **Untick "Enable create (sign-up)"**.
+4. Press **Save**.
+
+**This switch, not the hidden sign-in screen, is what actually stops new accounts.** The landing-only
+build shows no way to sign up, but anyone who knows how can still call Firebase Auth's sign-up API
+directly with the public web key. With this switch off, Firebase refuses them.
+
+- Existing accounts are unaffected.
+- On 18 Oct this switch was **on**.
+- **To reopen later:** the same place, tick "Enable create (sign-up)", Save.
+
+---
+
+## 6 · Hosting
 
 Rebuild and re-check in one go, so nothing can move between the two:
 
@@ -187,7 +184,11 @@ Rebuild and re-check in one go, so nothing can move between the two:
 npm run build && node scripts/live-preflight.mjs
 ```
 
-**Good:** `PREFLIGHT PASSED.` Check `3d` proves `dist/` is this tree's production build.
+**Good:** `PREFLIGHT PASSED.`
+
+- `0` confirms landing-only.
+- `3d` proves `dist/` is this tree's production build.
+- `3e` proves the build carries no way into the app.
 
 ```bash
 firebase deploy --only hosting --project prod
@@ -201,12 +202,11 @@ node scripts/live-verify.mjs hosting
 
 **Good:** every line `PASS`:
 
-- the title is "QueryHawk: Query With Confidence";
-- the page is `no-cache`;
-- an asset is `immutable`;
-- www gives a 301 to the apex;
-- `scriptally-app.web.app` serves the same title;
-- `/pricing` returns the app shell.
+- the title is right, the page is `no-cache` and an asset is `immutable`;
+- www gives a 301 to the apex, and `scriptally-app.web.app` serves the same title;
+- `/pricing`, **`/dashboard` and `/#/login` all serve the landing's page**;
+- **the served bundle contains no "Log in", "Open dashboard", "Open QueryHawk", "Create account"
+  or "Sign up with Google"**.
 
 **Then:**
 
@@ -217,79 +217,101 @@ node scripts/live-verify.mjs all
 **Good:** every line `PASS`. That includes `waitlist · GET answers JSON, not the SPA` and CORS
 allowing `https://queryhawk.net` while refusing `https://scriptally.ink`.
 
-Anyone who had the July page open needs one reload. Readers who arrive after this point get the
-new page at once, because `index.html` is now `no-cache`.
+---
+
+## 7 · One real test
+
+1. On https://queryhawk.net/founders, join with `nick+golive@queryhawk.net`. The page should say
+   "You're on the list."
+2. The confirmation email arrives at nick@ **from `Nick at QueryHawk <nick@queryhawk.net>`**.
+3. **Click its link.** It lands on queryhawk.net/founders showing **"You're in."** The address bar
+   drops the `?verified=…` straight away. A welcome email follows.
+4. **Click the same link again.** It shows **"You're already in."**
+5. Tell Claude Code to check the counter:
+   `curl -s https://queryhawk.net/api/waitlist` should now read `"count":1`, or one more than before
+   your test.
+
+**Then remove the test entry and give the place back:**
+
+1. Firebase console → Firestore Database → database `ai-studio-ae82196c-…` → `waitlist` → document
+   `b52dcf191e498df34c1b3bfcc4812ab173bcd5fe7cfb23062fbb57bc39a7ffa2` (the SHA-256 of the address)
+   → **Delete document**.
+2. Fix the counter. Deleting the entry doesn't decrement it.
+   - **If no real writer has confirmed since you started:** delete `counters/waitlist` too. It is
+     recreated at zero on the next sign-up, and prod's counter must start at zero.
+   - **If someone has:** open `counters/waitlist` and reduce `verifiedCount` by exactly 1 instead.
+3. **Confirm it went back:** `curl -s https://queryhawk.net/api/waitlist` shows the count from
+   before your test.
 
 ---
 
-## 6 · One real test
-
-1. On https://queryhawk.net/founders, join with `nick+golive@queryhawk.net`.
-2. The page should say "You're on the list."
-3. The confirmation must arrive at nick@ **from `Nick at QueryHawk <nick@queryhawk.net>`**.
-4. **Hover over its link; don't click it.** It must start with
-   `https://queryhawk.net/api/waitlist/verify?token=`.
-5. Then tell Claude Code to read the send's log line (`email.send`, `outcome: "sent"`).
-
-Remove the test entry afterwards:
-
-- Firebase console → Firestore Database → database `ai-studio-ae82196c-…` → `waitlist` → document
-  `b52dcf191e498df34c1b3bfcc4812ab173bcd5fe7cfb23062fbb57bc39a7ffa2` (the SHA-256 of the address)
-  → Delete document.
-- If you didn't click the link, the counter was never touched and that is all.
-- **If you did click it,** the place was counted. If no real writer has verified in the meantime,
-  also delete `counters/waitlist`. It is recreated at zero on the next sign-up, and prod's counter
-  must start at zero.
-
-**Also check one existing account.** Live already holds 25 users from the July build. Sign in with
-your own live account, if you have one:
-
-- the dashboard loads;
-- one query opens;
-- an edit saves.
-
-New rules validate whole documents, so a July-shaped document can have its writes refused silently.
-This is the one test that would show it.
-
----
-
-## 7 · Rollback
+## 8 · Rollback
 
 | What | How |
 |---|---|
 | Hosting | Firebase console → Hosting → `scriptally-app` → Release history → the previous release's ⋯ → **Rollback**. |
-| Functions | No previous version exists for the new five. Remove them with `firebase functions:delete waitlist waitlistRetention sendContactMessage sendBetaFeedback sendWeeklyPulse --region europe-west2 --project prod`. To redeploy one from an earlier commit, use a throwaway worktree, never `git checkout --` in a shared checkout: `git worktree add /tmp/qh-fn <commit> && cp functions/.env.gen-lang-client-0801391782 /tmp/qh-fn/functions/ && cd /tmp/qh-fn && npm --prefix functions ci && firebase deploy --only functions:<name> --project prod`. |
+| Functions | `firebase functions:delete waitlist waitlistRetention --region europe-west2 --project prod` removes them (live had no previous version of either). |
 | Rules | Firebase console → Firestore Database → Rules → history → the previous version → **Restore**. Storage → Rules works the same way. |
+| Sign-up | Re-tick "Enable create (sign-up)" (step 5). |
 
 ---
 
-## 8 · By hand, in the consoles
+## 9 · By hand, in the consoles
 
 None of these could be read without credentials, so check each one:
 
-- **OAuth consent screen app name.** Google Cloud console → `gen-lang-client-0801391782` → APIs &
-  Services → OAuth consent screen (Branding). If it still says ScriptAlly or AI Studio, change it
-  to QueryHawk. Google sign-in shows this name.
-- **Auth email templates.** Firebase console → Authentication → Templates.
-  - Set the sender name to QueryHawk.
-  - Set the from address to `noreply@queryhawk.net`, which needs Firebase's DNS records for the
-    custom domain.
-  - Set the action URL. The default `gen-lang-client-0801391782.firebaseapp.com/__/auth/action`
-    works as is.
-  - These govern the password reset and the verification email.
-- **Sign-in providers.** Firebase console → Authentication → Sign-in method. Email/Password and
-  Google must both be enabled, because the build offers both.
+- **Auth email templates.** Firebase console → Authentication → Templates. Set the sender name to
+  QueryHawk. These matter once accounts open, not for the waitlist; the waitlist sends its own
+  email through Resend.
 - **Authorised domains.** `queryhawk.net`, `www.queryhawk.net` and `scriptally-app.web.app` are
   there. Four AI Studio `ais-…-340588666666.europe-west2.run.app` entries are left over; remove
   them.
+- **OAuth consent screen app name.** Google Cloud console → `gen-lang-client-0801391782` → APIs &
+  Services → OAuth consent screen (Branding). If it still says ScriptAlly or AI Studio, change it to
+  QueryHawk before Google sign-in opens.
 - **App Check.**
   1. Create a reCAPTCHA Enterprise key for `queryhawk.net` and `www.queryhawk.net`.
   2. Register the web app in App Check.
   3. Put the site key in `.env.production`'s `VITE_APP_CHECK_SITE_KEY`, rebuild and redeploy
      hosting.
 
-  Until then App Check is inert on live: requests carry no token, nothing is rejected, and the
-  waitlist logs them as unverified.
-- **API key (hardening, not blocking).** Google Cloud console → APIs & Services → Credentials →
-  the browser key → HTTP referrers. Allow `queryhawk.net`, `www.queryhawk.net`,
-  `scriptally-app.web.app` and `gen-lang-client-0801391782.firebaseapp.com`.
+  Until then App Check is inert: the waitlist logs requests as unverified and rejects none.
+- **API key (hardening, not blocking).** Google Cloud console → APIs & Services → Credentials → the
+  browser key → HTTP referrers. Allow `queryhawk.net`, `www.queryhawk.net`, `scriptally-app.web.app`
+  and `gen-lang-client-0801391782.firebaseapp.com`.
+
+---
+
+## After the app opens (not now)
+
+When you decide to open the app on queryhawk.net:
+
+1. **Reopen the front door.**
+   - Remove `VITE_LANDING_ONLY=true` from `.env.production`.
+   - Rebuild, run the preflight (expect line `0` to say landing-only is off, and `3e` to find the
+     sign-in screen, which is now correct), and redeploy hosting.
+   - Re-tick "Enable create (sign-up)" (step 5).
+2. **Secrets.** `ANTHROPIC_API_KEY` already exists on live, but rotate it first: it was pasted into
+   a chat once (CLAUDE.md "Loose ends"). After rotating:
+
+   ```bash
+   firebase functions:secrets:set ANTHROPIC_API_KEY --project prod
+   ```
+3. **Functions the app uses:**
+
+   ```bash
+   firebase deploy --only functions:sendBetaFeedback,functions:sendWeeklyPulse --project prod
+   ```
+
+   then, after the key is rotated:
+
+   ```bash
+   firebase deploy --only functions:smartImportMap,functions:extractFromEmail,functions:assistAgentData --project prod
+   ```
+
+   - `sendContactMessage`: only once the contact form's transport is switched from mailto.
+   - `redeemInviteCode`: only on the day the invite gate is turned on.
+   - `suggestComps`: nothing calls it.
+4. **Check one July account.** Live holds 25 accounts from the July build. Sign in to yours and make
+   sure the dashboard loads, a query opens and an edit saves. The new rules validate whole
+   documents, so a July-shaped document can have its writes refused silently.

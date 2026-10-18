@@ -13,6 +13,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
+import { LANDING_ONLY } from "../lib/siteMode";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 
@@ -197,12 +198,14 @@ export const MarketingShell: React.FC<{
             ))}
           </div>
           <div className="mk-navright">
-            {nav.showLogIn && (
+            {!LANDING_ONLY && nav.showLogIn && (
               <button type="button" className="mk-login" onClick={() => { window.location.hash = "#/login"; }}>
                 Log in
               </button>
             )}
-            {nav.mode === "anon" ? (
+            {/* Landing-only folds this to the anon branch at build time, so the bundle carries no
+                "Open dashboard" (and no Log in above) for verify to find. */}
+            {LANDING_ONLY || nav.mode === "anon" ? (
               <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
                 {nav.primaryLabel}
               </button>
@@ -238,7 +241,7 @@ export const MarketingShell: React.FC<{
                 {l.label}
               </button>
             ))}
-            {nav.showLogIn && (
+            {!LANDING_ONLY && nav.showLogIn && (
               <button type="button" onClick={pick(() => { window.location.hash = "#/login"; })}>
                 Log in
               </button>

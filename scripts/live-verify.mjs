@@ -19,9 +19,14 @@ const WWW = "https://www.queryhawk.net";
 const SITE = "https://scriptally-app.web.app";
 const LIVE_TITLE = "QueryHawk: Query With Confidence";
 const PROJECT_ID = "gen-lang-client-0801391782";
-/** The go-live set (runbook step 2). The optional second line's functions are reported, not required. */
-const REQUIRED_FUNCTIONS = ["waitlist", "waitlistRetention", "sendContactMessage", "sendBetaFeedback", "sendWeeklyPulse"];
-const OPTIONAL_FUNCTIONS = ["smartImportMap", "extractFromEmail", "assistAgentData", "suggestComps", "redeemInviteCode"];
+/** Landing-only go-live needs the waitlist alone (runbook step 2). The rest are reported, not
+ *  required: waitlistRetention is the optional dry-run job, and everything else waits for the app
+ *  to open. */
+const REQUIRED_FUNCTIONS = ["waitlist"];
+const OPTIONAL_FUNCTIONS = ["waitlistRetention", "sendContactMessage", "sendBetaFeedback", "sendWeeklyPulse",
+  "smartImportMap", "extractFromEmail", "assistAgentData", "suggestComps", "redeemInviteCode"];
+/** Text that only exists when the app is reachable. A landing-only bundle drops all of it at build time. */
+const APP_DOORS = ["Log in", "Open dashboard", "Open QueryHawk", "Create account", "Sign up with Google"];
 
 const env = Object.fromEntries(readFileSync(".env.production", "utf8").split("\n")
   .map((l) => l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean).map((m) => [m[1], m[2]]));
@@ -56,6 +61,20 @@ const hosting = async () => {
   const d = await get(`${APEX}/pricing`);
   const dh = await d.text();
   line(d.status === 200 && titleOf(dh) === LIVE_TITLE && dh.includes('id="root"'), "hosting · deep link /pricing returns the app shell", String(d.status));
+  /* LANDING-ONLY. A server sees no hash, and every path serves the same page, so what decides
+     whether /dashboard or /#/login shows the app is the JavaScript. Both must serve the landing's
+     page, and that page's bundle must contain no way into the app at all. */
+  for (const p of ["/dashboard", "/#/login"]) {
+    const r2 = await get(`${APEX}${p}`);
+    const h2 = await r2.text();
+    line(r2.status === 200 && titleOf(h2) === LIVE_TITLE && h2.match(/\/assets\/index-[\w-]+\.js/)?.[0] === asset,
+      `hosting · ${p} serves the landing's page`, `${r2.status} ${titleOf(h2)}`);
+  }
+  if (asset) {
+    const js = await (await get(`${APEX}${asset}`)).text();
+    const doors = APP_DOORS.filter((d2) => js.includes(d2));
+    line(doors.length === 0, "hosting · the served bundle has no way into the app (landing-only)", doors.length ? `found: ${doors.join(", ")}` : asset);
+  }
 };
 
 const functions = async () => {
