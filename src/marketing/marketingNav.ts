@@ -6,6 +6,8 @@
  * Logged in  : white "Open dashboard" button + avatar chip — the landing never redirects.
  */
 
+import { LANDING_ONLY } from "../lib/siteMode";
+
 export interface MarketingNavUser {
   name?: string;
   email?: string;
@@ -21,7 +23,15 @@ export interface MarketingNavState {
   avatarInitial: string | null;
 }
 
-export function marketingNavState(user: MarketingNavUser | null | undefined): MarketingNavState {
+export function marketingNavState(
+  user: MarketingNavUser | null | undefined,
+  landingOnly: boolean = LANDING_ONLY,
+): MarketingNavState {
+  /* LANDING-ONLY: there is no app to log in to or open, so the nav offers neither, whoever is
+     looking. The founding offer is the one call to action. */
+  if (landingOnly) {
+    return { mode: "anon", primaryLabel: "Become a Founding Writer", showLogIn: false, avatarInitial: null };
+  }
   if (!user) {
     /* ⚠️ THE ANON CTA IS THE FOUNDING OFFER UNTIL LAUNCH, NOT `Start tracking — it's free`. There
        is no self-serve product behind that label yet, so a chrome button offering one is a door to

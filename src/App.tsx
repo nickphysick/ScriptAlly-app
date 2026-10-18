@@ -37,12 +37,8 @@ import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
-import { Landing } from "./marketing/Landing";
-import { PricingPage } from "./marketing/PricingPage";
-import { AboutPage } from "./marketing/AboutPage";
-import { ContactPage } from "./marketing/ContactPage";
-import { FoundersPage } from "./marketing/FoundersPage";
-import { LegalPage } from "./marketing/LegalPage";
+import { LandingOnlySite, MarketingPage } from "./marketing/LandingOnlySite";
+import { LANDING_ONLY, AUTH_HASH } from "./lib/siteMode";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
@@ -405,6 +401,14 @@ function AppContent() {
 
   const isStatusDotDemo = useStatusDotDemoRoute();
   const hash = useHash();
+  /* LANDING-ONLY: a sign-in hash is cleared from the address bar. replaceState fires no
+     hashchange, so one is dispatched to bring useHash's state in line; without it, `/` would keep
+     re-reading a hash that is no longer in the URL. */
+  useEffect(() => {
+    if (!LANDING_ONLY || !AUTH_HASH.test(hash)) return;
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  }, [hash]);
   // Dev-only review surface — never reachable in the production build (import.meta.env.DEV is
   // false there). In prod the #/status-dots hash simply falls through to the normal app/landing.
   if (isStatusDotDemo && import.meta.env.DEV) {
@@ -467,6 +471,12 @@ function AppContent() {
   }
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
   // landing/auth view. Stops the old "calmer place to query" landing flashing on a hard refresh.
+  // ── LANDING-ONLY (production, queryhawk.net): the public site and nothing else. Ahead of the
+  // boot splash and the auth check, so no visitor ever sees a sign-in screen, not even for a frame.
+  if (LANDING_ONLY) {
+    return <LandingOnlySite path={path} hash={hash} onNavigate={handleNavigate} />;
+  }
+
   if (!authReady) {
     return (
       <div
@@ -512,13 +522,7 @@ function AppContent() {
     }
     return (
       <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
-        {path === "/pricing" ? <PricingPage onNavigate={handleNavigate} />
-          : path === "/about" ? <AboutPage onNavigate={handleNavigate} />
-          : path === "/contact" ? <ContactPage onNavigate={handleNavigate} />
-          : path === "/founders" ? <FoundersPage onNavigate={handleNavigate} />
-          : path === "/terms" ? <LegalPage doc="terms" onNavigate={handleNavigate} />
-          : path === "/privacy" ? <LegalPage doc="privacy" onNavigate={handleNavigate} />
-          : <Landing onNavigate={handleNavigate} />}
+        <MarketingPage path={path} onNavigate={handleNavigate} />
       </MarketingShell>
     );
   }
