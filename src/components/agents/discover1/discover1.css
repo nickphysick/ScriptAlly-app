@@ -405,3 +405,52 @@
 .dv1-hwn { margin: 36px auto 0; max-width: 64ch; font: italic 400 15px/1.5 var(--dv1-serif); color: rgba(28, 19, 15, 0.58); }
 @container dv1hw (max-width: 1100px) { .dv1-hw h2 { font-size: 34px !important; } .dv1-steps { gap: 36px; } .dv1-steps li + li::before { left: -30px; } }
 @container dv1hw (max-width: 857px) { .dv1-hw { padding: 44px 28px 40px; } .dv1-steps { gap: 28px; } .dv1-steps li + li::before { left: -26px; top: 80px; } .dv1-steps h3 { font-size: 19px !important; } .dv1-steps p { font-size: 15px; } }
+
+/* ── the share notice ─────────────────────────────────────────────────── */
+.dv1-note-b { display: flex; align-items: center; gap: 16px; margin: 30px 0 0; padding: 14px 16px 14px 18px; border-radius: 14px; background: var(--dv1-blush); color: #7c3a2a; }
+.dv1-note-b .pd { width: 36px; height: 36px; border-radius: 50%; background: #fff; display: grid; place-items: center; flex: none; }
+.dv1-note-b p { margin: 0; font: 400 16px/1.45 var(--dv1-serif) !important; color: #5b2a1f; }
+.dv1-note-b p b { font-weight: 600; }
+
+/* ── the catalogue band: full-bleed paper, clipped to its own height ─── */
+.dv1-band { position: relative; margin-top: 72px; padding: 56px 0 64px; z-index: 0; }
+.dv1-band::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--dv1-paper); box-shadow: 0 0 0 100vmax var(--dv1-paper); clip-path: inset(0 -100vmax); }
+.dv1-band .dv1-sh { margin-bottom: 16px; }
+.dv1-cat { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 34px; align-items: start; }
+/* no figures to draw: Your part stands alone, at a reading width */
+.dv1-cat.dv1-cat--solo { grid-template-columns: minmax(0, 640px); }
+.dv1-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.dv1-fig { background: #fff; border: 1px solid var(--dv1-i14); border-radius: 14px; padding: 18px 20px 16px; }
+.dv1-fig b { display: block; font: 400 40px/1 var(--dv1-type) !important; color: var(--dv1-ink); }
+.dv1-fig span { display: block; margin-top: 8px; font: 400 15px/normal var(--dv1-serif) !important; color: var(--dv1-i72); }
+.dv1-fig small { display: block; margin-top: 6px; font: 500 10px/normal var(--dv1-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dv1-i45); }
+.dv1-you { background: var(--dv1-navy2); color: var(--dv1-cream); border-radius: 16px; padding: 24px 26px 22px; }
+.dv1-you h3 { margin: 0; font: 400 24px/normal var(--dv1-type) !important; color: #f8f3ea; }
+.dv1-you p { margin: 12px 0 0; font: 400 15.5px/1.55 var(--dv1-serif) !important; color: rgba(244, 238, 229, 0.82); }
+.dv1-you ul { list-style: none; margin: 18px 0 0; padding: 0; }
+.dv1-you li { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; border-top: 1px solid rgba(244, 238, 229, 0.14); font: 400 15px/normal var(--dv1-serif) !important; color: rgba(244, 238, 229, 0.86); }
+.dv1-you li b { font: 400 24px/1 var(--dv1-type) !important; min-width: 34px; text-align: right; color: #f8f3ea; }
+.dv1-you li.wait b { color: #f3c9b8; }
+.dv1-you .b { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.dv1-you .dv1-b.p { background: var(--dv1-cream); color: #1c130f; }
+.dv1-you .dv1-b.p:hover { background: #fff; }
+.dv1-you small { display: block; margin-top: 14px; font: italic 400 13px/1.5 var(--dv1-serif) !important; color: rgba(244, 238, 229, 0.6); }
+.dv1-loop { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; margin: 34px auto 0; font: 400 15px/normal var(--dv1-type) !important; color: var(--dv1-i72); }
+.dv1-loop span { display: inline-flex; align-items: center; gap: 10px; }
+.dv1-loop i { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--dv1-navy); color: var(--dv1-cream); font: 400 12px/1 var(--dv1-type); font-style: normal; }
+.dv1-arw { width: 22px; height: 12px; fill: none; stroke: var(--dv1-rust); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+@container dv1sec (max-width: 857px) { .dv1-cat { grid-template-columns: 1fr; } }
+
+/* ── the share sheet ──────────────────────────────────────────────────── */
+.dv1-disc-ic { display: grid; place-items: center; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.7); }
+.dv1-disc-ic svg { width: 24px; height: 24px; fill: none; stroke: #f4eee5; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.dv1-privacy { margin: 4px 0 18px; font: italic 400 14.5px/1.5 var(--dv1-serif); color: var(--dv1-i72); }
+.dv1-sempty { margin: 0; padding: 14px 16px; border-radius: 10px; border: 1px dashed var(--dv1-i14); font: italic 400 15px/normal var(--dv1-serif); color: var(--dv1-i58); }
+.dv1-share { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px var(--dv1-i08); margin-bottom: 10px; cursor: pointer; }
+.dv1-share[aria-checked="true"] { box-shadow: inset 0 0 0 1.5px var(--dv1-navy); }
+.dv1-share input { margin: 4px 0 0; accent-color: #2a3a52; }
+.dv1-share .body { min-width: 0; flex: 1; }
+.dv1-share b { display: block; font: 400 16px/normal var(--dv1-type); color: var(--dv1-ink); }
+.dv1-share dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 14px; margin: 8px 0 0; }
+.dv1-share dt { font: 500 9.5px/1.8 var(--dv1-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dv1-i45); }
+.dv1-share dd { margin: 0; font: 400 14px/1.45 var(--dv1-serif); color: var(--dv1-i72); overflow-wrap: anywhere; }

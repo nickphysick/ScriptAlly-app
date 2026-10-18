@@ -24,7 +24,9 @@ import { AppFooter } from "../../shell/AppFooter";
 import { DvEmptyHeader, DvHeader, type HeaderTitle } from "./DvHeader";
 import { DvPicks, type DecideKind, type Leaving } from "./DvPicks";
 import { DvHowModal, DvPassedModal, DvToast, DvTune, type ToastState } from "./DvLayers";
-import { decisionDoc, type ScoutPick } from "../../../lib/scout";
+import { DvCatalogue, DvShareNotice, DvShareSheet } from "./DvShare";
+import { catalogueFigures, decisionDoc, type ScoutPick } from "../../../lib/scout";
+import type { Agent } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { bookGenres } from "../../../lib/genreMatch";
 import { countryName } from "../../../lib/territory";
@@ -108,6 +110,20 @@ const LivePage: React.FC<{ fixtureState: ReviewState | null; onNavigate: Nav }> 
   const [tune, setTune] = useState(false);
   const [how, setHow] = useState<{ step?: number } | null>(null);
   const [passedOpen, setPassedOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const share = async (agents: Agent[]) => {
+    if (!s.io || !agents.length) return;
+    setSharing(true);
+    const r = await s.io.share(agents, Date.now());
+    setSharing(false);
+    setShareOpen(false);
+    const k = r.shared.length;
+    /* ⚠️ NO UNDO: the submission cannot be taken back by the client (the sheet said so before the press) */
+    say({ msg: r.failed.length
+      ? `${k ? `Shared ${k}. ` : ""}${r.failed.length} could not be shared — check your connection and try again.`
+      : `Shared ${k} ${k === 1 ? "agent" : "agents"}. ${k === 1 ? "It joins" : "They join"} the catalogue once checked by hand.` });
+  };
 
   /* ⚠️ A HELD +1 IS SENT WHEN THE PAGE IS LEFT OR THE TAB HIDES — the add stood */
   useEffect(() => {
@@ -188,19 +204,22 @@ const LivePage: React.FC<{ fixtureState: ReviewState | null; onNavigate: Nav }> 
   return (
     <>
       <DvHeader title={title} msTitle={ms?.title ?? null} tally={s.loading ? null : s.tally}
-        onTune={() => setTune(true)} onShare={() => {}} onHow={() => setHow({})} onPassed={() => setPassedOpen(true)} />
+        onTune={() => setTune(true)} onShare={() => setShareOpen(true)} onHow={() => setHow({})} onPassed={() => setPassedOpen(true)} />
+      {s.loading ? null : <DvShareNotice n={s.part.notShared} onShare={() => setShareOpen(true)} />}
       {s.loading ? null : (
         <DvPicks queue={shown} view={leaving ? "live" : s.view} manuscript={ms} prefs={s.prefs} lens={s.lens} skipped={s.skipped}
           passedCount={s.passed.length} leaving={leaving} pickIdx={s.decidedHere + 1} pickTotal={s.decidedHere + shown.length}
           onDecide={(k) => { void decide(k); }} onLead={(id) => s.setLeadId(id)} onTune={() => setTune(true)}
-          onHow={(step) => setHow({ step })} onPassed={() => setPassedOpen(true)} onShare={() => {}} />
+          onHow={(step) => setHow({ step })} onPassed={() => setPassedOpen(true)} onShare={() => setShareOpen(true)} />
       )}
+      {s.loading ? null : <DvCatalogue figures={catalogueFigures()} part={s.part} onShare={() => setShareOpen(true)} />}
       <DvTune open={tune} onClose={() => setTune(false)} prefs={s.prefs} lens={s.lens} lenses={s.lenses} hasLocations={s.hasLocations}
         homeName={countryName(s.homeCountry) ?? null} genres={bookGenres(ms)} ageCategory={ms?.ageCategory ?? null} msTitle={ms?.title ?? null}
         onLens={(l) => { void s.setPref("lens", l); }} onSwitch={(k, v) => { void s.setPref(k, v); }}
         onManuscripts={() => { setTune(false); onNavigate("manuscripts"); }} />
       <DvPassedModal open={passedOpen} rows={s.passed} onBringBack={(id) => { void bringBack(id); }} onClose={() => setPassedOpen(false)} />
       <DvHowModal open={!!how} step={how?.step} onClose={() => setHow(null)} />
+      <DvShareSheet open={shareOpen} candidates={s.part.candidates} uid={s.uid ?? "dvfx"} busy={sharing} onClose={() => setShareOpen(false)} onShare={(a) => { void share(a); }} />
       <DvToast toast={toast} ms={TOAST_MS} onDone={() => setToast(null)} />
     </>
   );

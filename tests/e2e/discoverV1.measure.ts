@@ -296,3 +296,70 @@ function diff(a: unknown, b: unknown): string {
   const A = a as Record<string, unknown>, B = b as Record<string, unknown>;
   return Object.keys({ ...A, ...B }).filter((k) => JSON.stringify(A[k]) !== JSON.stringify(B[k])).map((k) => `${k}: ${JSON.stringify(A[k]).slice(0, 120)} → ${JSON.stringify(B[k]).slice(0, 120)}`).join(" | ");
 }
+
+/* ── D1 · the share sends only decision 2's fields — the write itself is read, and never allowed to land ── */
+const ALLOWED = ["userId", "sourceAgentId", "createdAt", "name", "agency", "website", "city", "country", "genres", "mswlNotes", "submissionMethod", "materialsWanted", "responseTimeWeeks", "noResponseMeansNo"];
+test("D1 · sharing sends only the public fields, and says it cannot be taken back", async ({ browser, baseURL }) => {
+  const L = new Ledger("D1");
+  seedOwned();
+  const { ctx, page } = await ownedPage(browser, baseURL!, SIZES[0]);
+  const bodies: string[] = [];
+  try {
+    L.check("D1", "the notice counts the three agents not in the catalogue", (await page.locator('[data-dv1="share-notice"] b').textContent())?.trim() === "3 agents on your contact list", "");
+    await page.locator('[data-dv1="share"]').click();
+    await page.waitForSelector('[data-hdr="dv1-share"]');
+    L.check("D1", "the privacy line is the mock's, verbatim", (await page.locator('[data-dv1="privacy"]').textContent())?.trim() === "Only the agent’s public details are shared — name, agency, what they ask for. Never your queries, your notes or your ratings.", "");
+    L.check("D1", "the foot says a share cannot be taken back", /can’t be taken back/.test((await page.locator('[data-dv1="share-foot"]').textContent()) ?? ""), "");
+    L.check("D1", "nothing is ticked to begin with (opt-in)", (await page.locator('[data-dv1="share-pick"]:checked').count()) === 0, "");
+    const row = page.locator('[data-dv1="share-row"][data-id="dv1-mine-a"]');
+    const shown = (await row.locator('[data-dv1="share-fields"]').textContent()) ?? "";
+    L.check("D1", "the row shows what will be sent, and not the private note", /Tarrant & Low/.test(shown) && !/festival/i.test(shown), shown.slice(0, 160));
+    /* ⚠️ THE WRITE IS READ AND ABORTED: a submission cannot be removed by a client, so a real one would sit in the
+       admin's queue for ever. The app keeps no persistent cache, so an aborted write cannot land later. */
+    await page.route("**/google.firestore.v1.Firestore/Write/channel**", async (r) => {
+      const b = r.request().postData() ?? "";
+      if (/agentSubmissions/.test(decodeURIComponent(b.replace(/\+/g, " ")))) { bodies.push(b); return r.abort(); }
+      return r.continue();
+    });
+    await row.locator('[data-dv1="share-pick"]').check();
+    await page.locator('[data-dv1="share-send"]').click();
+    await page.waitForFunction(() => true, null, { timeout: 1000 }).catch(() => {});
+    for (let i = 0; i < 40 && bodies.length === 0; i++) await page.waitForTimeout(250);
+    L.check("D1", "the write was seen", bodies.length > 0, String(bodies.length));
+    /* ⚠️ PARSED, NOT REGEXED: a lazy pattern over the JSON stopped at the first array value and read only the first
+       seven fields — a field appended after it (where a mutation would put `notes`) went unchecked */
+    const json = decodeURIComponent((bodies[0] ?? "").replace(/\+/g, " "));
+    type W = { update?: { name: string; fields: Record<string, unknown> } };
+    const writes: W[] = [];
+    for (const [k, v] of new URLSearchParams(bodies[0] ?? "")) if (/^req\d+___data__$/.test(k)) { try { writes.push(...((JSON.parse(v) as { writes?: W[] }).writes ?? [])); } catch { /* not a write */ } }
+    const sub = writes.find((w) => w.update?.name.includes("/agentSubmissions/"));
+    const m = sub ? [sub.update!.name, sub.update!.name.split("/agentSubmissions/")[1]] : null;
+    const top = sub ? Object.keys(sub.update!.fields) : [];
+    L.check("D1", "the submission's id is uid_source", !!m && m[1].endsWith("_dv1-mine-a"), m ? m[1] : json.slice(0, 200));
+    L.check("D1", "every field written is a public one", top.length > 0 && top.every((k) => ALLOWED.includes(k)), top.join(","));
+    L.check("D1", "the note, the rating and the email are not in it", !/festival/i.test(json) && !top.includes("notes") && !top.includes("starRating") && !top.includes("email"), top.join(","));
+    L.check("D1", "the echo rides in the same write", writes.some((w) => /\/scoutShares\/dv1-mine-a$/.test(w.update?.name ?? "")), writes.map((w) => w.update?.name).join(" "));
+    L.check("D1", "the parse read every field the row showed", top.length >= 10, top.join(","));
+  } finally { await page.unrouteAll({ behavior: "ignoreErrors" }).catch(() => {}); await ctx.close(); }
+  const after = dumpOwned() as Record<string, any>;
+  L.check("D1", "nothing landed: no echo", Object.keys(after.scoutShares).length === 0, JSON.stringify(after.scoutShares));
+  seedOwned();
+  L.done(12);
+});
+
+/* ── D2 · no catalogue figure renders while catalogueFigures() is null ── */
+test("D2 · the catalogue band draws no figure, no digit and no dash while its source is absent", async ({ page }) => {
+  const L = new Ledger("D2");
+  for (const state of ["live", "done", "none"] as const) {
+    await openDiscover(page, SIZES[0], state);
+    const r = await page.evaluate(`(() => { const { q } = window.__dv1(); const band = q('[data-dv1="catalogue"]'); if (!band) return null;
+      const clone = band.cloneNode(true); clone.querySelectorAll('[data-dv1="your-part"], [data-dv1="loop"]').forEach((e) => e.remove());
+      return { figs: band.querySelectorAll('[data-dv1="cat-figures"], .dv1-fig, .dv1-gen').length, text: clone.textContent.trim(), you: !!band.querySelector('[data-dv1="your-part"]'), loop: !!band.querySelector('[data-dv1="loop"]') }; })()`) as { figs: number; text: string; you: boolean; loop: boolean } | null;
+    L.check("D2", `${state} the band is drawn`, !!r, "");
+    if (!r) continue;
+    L.check("D2", `${state} no figure element`, r.figs === 0, String(r.figs));
+    L.check("D2", `${state} outside Your part and the loop, no digit and no dash`, !/[0-9—–]/.test(r.text) && !/(^|\s)-(\s|$)/.test(r.text), r.text);
+    L.check("D2", `${state} the heading, Your part and the loop remain`, r.you && r.loop && /The community catalogue/.test(r.text), r.text);
+  }
+  L.done(12);
+});
