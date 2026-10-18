@@ -7,9 +7,10 @@
  * is the lib's (`agentFacts`, `rowDateLine`); a status is drawn only by `StatusDot`; missing data is the dashed slate
  * add pill, which opens the editor at that field; no colour encodes time pressure, and no row carries a coloured edge.
  *
- * ⚠️ THE PILLS DO THEIR OWN JOB AND DO NOT OPEN THE ROW: Add opens the card at the gap. There is no hover tray
- * (v18.3.3 §B): the open row's details line carries the card's one next step (a send, a nudge, Remind me…) as a link in
- * the Query status column, unless the status cell already offers it; clicking the row opens the card.
+ * ⚠️ THE CONTROLS IN A ROW DO THEIR OWN JOB AND DO NOT OPEN THE CARD (v19 §C/§D): the email copies, the website opens
+ * in a new tab, every "Add …" opens the card at that field. There is no hover tray and no next step in the row (the
+ * agent card keeps it). The open row is one strip — genres and the wishlist (ContactPeek). Clicking empty space in a
+ * row opens the card.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { STAGE_TRACK, discTone, stageTrack } from "../../../lib/contactStage";
@@ -27,7 +28,6 @@ import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { ContactPeek } from "./ContactPeek";
 import { AddContact, CopyEmail, DateAdded, Website } from "./ContactCells";
 import { CONTACT_FS, fitContactColumns, type ContactColumnFit } from "../../../lib/contactColumns";
-import { nextStep } from "../../../lib/rowActions";
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
@@ -45,14 +45,13 @@ export interface ContactRowsProps {
   newId?: string | null;
   /** the row's own box rides with the open, so the agent card grows out of it (Agent card v1 §2) */
   onOpen: (agentId: string, from?: DOMRect) => void;
-  onAddGenres: (agentId: string) => void;
-  /** the wishlist torn slip's door — the profile at its wishlist section (v12 §6) */
-  onAddWishlist: (agentId: string) => void;
-  /** v13 §6 — the hover tray's next step: the card's own primary (`primaryFor`), so the row and the
-   *  card cannot offer different verbs. A ghost primary (a way OUT, not a next step) is not offered. */
-  trayFor: (x: AgentFacts) => CardPrimary;
-  /** the tray's step, straight to its journey without the card */
-  onAct: (agentId: string, act: CardAct) => void;
+  /* v19 §D — the four below are no longer read by the rows: the strip's add links open the card through `onEdit`, and
+     the next step left the row (the agent card keeps it; the page's L key still reads `trayFor`). Optional, so the
+     exhibit and the loading cover keep compiling unchanged. */
+  onAddGenres?: (agentId: string) => void;
+  onAddWishlist?: (agentId: string) => void;
+  trayFor?: (x: AgentFacts) => CardPrimary;
+  onAct?: (agentId: string, act: CardAct) => void;
 }
 
 const Line2: React.FC<{ line: RowDateLine | null }> = ({ line }) =>
@@ -67,25 +66,6 @@ const reopenDay = (iso: string | undefined): string | null => {
   const t = iso ? Date.parse(iso) : NaN;
   return Number.isFinite(t) ? dayMonth(t) : null;
 };
-
-/**
- * v14 §6 — THE WISHLIST MARQUEE. One line; when it does not fit it fades at the right edge, and on row hover
- * it scrolls to its end and back at ~28px a second after a 0.5s pause. ⚠️ Run by the Web Animations API, never a
- * CSS keyframe reading a custom property: a `var()` inside `@keyframes` fails silently in this setup (house rule).
- * Off under reduced motion. The overflow is measured on hover, so a resize never leaves a stale distance.
- */
-function startMarquee(p: HTMLElement | null): Animation | null {
-  if (!p || typeof window === "undefined") return null;
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return null;
-  const sp = p.querySelector<HTMLElement>(".clv-mq");
-  if (!sp || typeof sp.animate !== "function") return null;
-  const over = sp.scrollWidth - p.clientWidth;
-  if (over <= 2) return null;
-  const dist = over + 6;
-  return sp.animate([{ transform: "translateX(0)" }, { transform: `translateX(${-dist}px)` }], {
-    duration: Math.max(3000, (dist / 28) * 1000), delay: 500, iterations: Infinity, direction: "alternate", easing: "linear",
-  });
-}
 
 /** §7.3 — the Find text marked (#f6dccd) in a row's name and agency; case-insensitive, every match */
 export function Marked({ text, q }: { text: string; q: string }) {
@@ -103,17 +83,6 @@ export function Marked({ text, q }: { text: string; q: string }) {
   return <>{out}</>;
 }
 
-/** the dashed slate link pill (§6) — "+ Add their wishlist" / "+ Add genres"; it opens the editor at that field */
-const AddPill: React.FC<{ probe: string; label: string; onPress: () => void }> = ({ probe, label, onPress }) => (
-  <span
-    className="clv-miss" role="button" tabIndex={0} data-clv={probe}
-    onClick={(e) => { e.stopPropagation(); onPress(); }}
-    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onPress(); } }}
-  >
-    {label}
-  </span>
-);
-
 const Row: React.FC<{
   x: AgentFacts;
   nowMs: number;
@@ -126,12 +95,6 @@ const Row: React.FC<{
   /** §7.3 — the Find text, marked in the name and agency */
   highlight?: string;
   onOpen: (from: DOMRect) => void;
-  onAddGenres: () => void;
-  onAddWishlist: () => void;
-  tray: CardPrimary;
-  onAct: (act: CardAct) => void;
-  /** v17 §D — the surname letter this row opens, shown in the margin; null on every other row */
-  letter?: string | null;
   /** v17 §D — "+ Log a query": opens the agent panel at the Log a query journey, with this agent chosen */
   onLog?: () => void;
   /** v18 §D — this row's peek is open (one row at a time: the list holds which) */
@@ -142,7 +105,7 @@ const Row: React.FC<{
   onEdit?: (tab: AgentCardTab, focus?: AgentCardField) => void;
   /** v19 §C — website and email share one column, stacked (they do not both fit side by side) */
   stacked?: boolean;
-}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onAddGenres, onAddWishlist, tray, onAct, letter = null, onLog, peek = false, onPeek, onEdit, stacked = false }) => {
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onLog, peek = false, onPeek, onEdit, stacked = false }) => {
   const track = stageTrack(x);
   const tone = discTone(x);
   const a = x.agent;
@@ -152,66 +115,72 @@ const Row: React.FC<{
   const genres = [...x.genres].sort((g1, g2) => Number(genreHit(g2)) - Number(genreHit(g1)));
   /* "Agency · London" — the agency only when the name is not itself the agency, then the place */
   const whoBits = [a.agency.trim() && a.name.trim() ? a.agency.trim() : null, x.loc].filter(Boolean);
-  const wish = (a.mswlNotes ?? "").trim();
   /* §6 — a CLOSED agent: their door is shut and nothing is queried, or everything with them has closed.
      Grey disc, softer name; no coloured edge for anyone. */
   const shut = (x.standing.kind === "none" && x.door === "closed") || x.stand === "closed";
   const weeks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
   const reopens = x.door === "closed" ? reopenDay(a.reopensOn) : null;
-  const wishRef = useRef<HTMLParagraphElement>(null);
-  const mq = useRef<Animation | null>(null);
-  const stopMq = () => { mq.current?.cancel(); mq.current = null; };
-  useEffect(() => stopMq, []);
   /* v18 §D — the peek opens after 450ms of continuous hover and closes when the pointer leaves the row. The row's main
      line height is read before it opens, so the hover tray stays on that line while the row grows. */
   const rowRef = useRef<HTMLDivElement>(null);
   const hoverT = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(hoverT.current), []);
+  /* v19 §D — the height the row has as the strip starts to open (mid-close, that is where it is now), and the main
+     line's own height, which a close shrinks back to */
+  const startH = useRef(0);
+  const mainH = useRef(0);
   const openPeek = (v: boolean, via: PeekVia) => {
     const el = rowRef.current;
     if (v && el && !peek) {
+      startH.current = el.getBoundingClientRect().height;
+      if (!shown) mainH.current = startH.current;
       el.style.setProperty("--cl18-mh", `${el.offsetHeight}px`);
     }
     onPeek?.(v, via);
   };
-  useEffect(() => { if (peek) stopMq(); }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
-  /* v18.3.3 §B — the labels the Query status cell offers as actions, read from what it rendered, as the peek opens and
-     before it paints, so the next step never repeats one (not even for a frame) */
-  const [statusLabels, setStatusLabels] = useState<readonly string[]>([]);
+  /* v19 §D — THE STRIP'S MOTION. Opening: the row's height grows over 300ms (cubic-bezier(.2,.8,.2,1)), `overflow:
+     hidden` only while it animates; the strip fades in from −6px over 260ms, 60ms in. Closing: the strip STAYS while the
+     height shrinks over 220ms (cubic-bezier(.4,0,.2,1)) and fades over 160ms, then leaves. `shown` holds the strip
+     through the close; `data-peek` (what the list's "always closes" controller decides) drops at once. No other row
+     moves except by this height. Instant under reduced motion. Web Animations, so no keyframe reads a custom property. */
+  const [shown, setShown] = useState(peek);
+  if (peek && !shown) setShown(true);
+  const strip = peek || shown;
+  const stripRef = useRef<HTMLDivElement>(null);
+  const anims = useRef<Animation[]>([]);
+  const stopAnims = () => { for (const k of anims.current) k.cancel(); anims.current = []; if (rowRef.current) rowRef.current.style.overflow = ""; };
+  useEffect(() => stopAnims, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const wasPeek = useRef(peek);
   useLayoutEffect(() => {
-    if (!peek || !rowRef.current) return;
-    const cell = rowRef.current.querySelector<HTMLElement>(".clv-rq");
-    const next = cell ? [...cell.querySelectorAll<HTMLElement>("button, a, [role='button']")].map((e) => (e.textContent ?? "").trim()).filter(Boolean) : [];
-    setStatusLabels((prev) => (prev.length === next.length && prev.every((l, i) => l === next[i]) ? prev : next));
-  });
-  const nextLabel = nextStep(tray, statusLabels);
-  /* v18.3.3 §A — once open (before paint): the details line sits 16 under the agent block. Its margin cannot change the
-     main track (the line is in row 2), so one read of where it would sit settles it. */
-  useLayoutEffect(() => {
-    const el = rowRef.current;
-    if (!peek || !el) return;
-    const line = el.querySelector<HTMLElement>(".cl1833-pk"), who = el.querySelector<HTMLElement>(".clv-rwn") ?? el.querySelector<HTMLElement>(".clv-rwho");
-    if (!line || !who) return;
-    const m0 = parseFloat(getComputedStyle(line).marginTop) || 0;
-    const mt = Math.max(2, m0 + (who.getBoundingClientRect().bottom + 16 - line.getBoundingClientRect().top));
-    el.style.setProperty("--cl1833-mt", `${Math.round(mt * 100) / 100}px`);
-  }, [peek]);
-  /* the fade at the right edge says "there is more"; measured after layout and on resize */
-  const [long, setLong] = useState(false);
-  useLayoutEffect(() => {
-    const p = wishRef.current;
-    if (!p) return undefined;
-    const measure = () => {
-      const sp = p.querySelector<HTMLElement>(".clv-mq");
-      const next = !!sp && sp.scrollWidth - p.clientWidth > 2;
-      setLong((cur) => (cur === next ? cur : next));
-    };
-    measure();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(measure);
-    ro.observe(p);
-    return () => ro.disconnect();
-  }, [wish]);
+    const el = rowRef.current, was = wasPeek.current;
+    wasPeek.current = peek;
+    if (!el || was === peek) return;
+    const still = typeof el.animate !== "function" || !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (peek) {
+      stopAnims();
+      if (still) return;
+      const to = el.getBoundingClientRect().height, from = startH.current || mainH.current || to;
+      el.style.overflow = "hidden";
+      const grow = el.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 300, easing: "cubic-bezier(.2,.8,.2,1)" });
+      grow.onfinish = () => { el.style.overflow = ""; };
+      anims.current = [grow];
+      const st = stripRef.current;
+      if (st) anims.current.push(st.animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }],
+        { duration: 260, delay: 60, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }));
+      return;
+    }
+    if (still) { stopAnims(); setShown(false); return; }
+    const from = el.getBoundingClientRect().height, to = mainH.current || from;
+    for (const k of anims.current) k.cancel();
+    el.style.overflow = "hidden";
+    const shrink = el.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 220, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+    shrink.onfinish = () => setShown(false);
+    anims.current = [shrink];
+    const st = stripRef.current;
+    if (st) anims.current.push(st.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: "ease", fill: "forwards" }));
+  }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* the strip has left: put the row's own height back */
+  useLayoutEffect(() => { if (!strip) stopAnims(); }, [strip]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const email = (a.email ?? "").trim(), site = (a.website ?? "").trim();
   const webCell = site ? <Website url={site} /> : <AddContact kind="website" onPress={() => onEdit?.("who", "website")} />;
@@ -224,7 +193,7 @@ const Row: React.FC<{
       role="button"
       tabIndex={0}
       data-peek={peek ? "" : undefined}
-      data-first-letter={letter ? "" : undefined}
+      data-cl19-open={strip ? "" : undefined}
       aria-expanded={onPeek ? peek : undefined}
       className={`clv-row${fresh ? " clv-row--new" : ""}${focused ? " kf" : ""}`}
       data-clv="row"
@@ -232,7 +201,6 @@ const Row: React.FC<{
       data-agent-card={a.id}
       /* v16 §C: the surname's initial — what a letter tab scrolls to in the ungrouped list */
       data-initial={surnameInitial(a)}
-      data-cl17-letter={letter ?? undefined}
       data-disc={tone}
       data-shut={shut || undefined}
       data-stand={x.stand}
@@ -244,15 +212,14 @@ const Row: React.FC<{
       aria-current={current || undefined}
       /* v18 §D: opening the agent closes this row's peek (and any peek still waiting to open) */
       onClick={(e) => {
-        /* v18.3.3 §B/§C — the contact details and the next step answer their own clicks; empty space still opens the card */
-        if ((e.target as HTMLElement).closest('[data-cl183="peek-pill"], [data-cl1833="next"], .cl19-c [data-cl19]')) return;
+        /* v19 §C/§D — the contact cells and the strip's add links answer their own clicks; empty space still opens the card */
+        if ((e.target as HTMLElement).closest('.cl19-c [data-cl19], [data-cl19="strip"] [role="button"]')) return;
         window.clearTimeout(hoverT.current); if (peek) onPeek?.(false, "click"); onOpen(e.currentTarget.getBoundingClientRect());
       }}
       onMouseEnter={() => {
-        stopMq(); if (!peek) mq.current = startMarquee(wishRef.current);
         window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true, "pointer"), 450);
       }}
-      onMouseLeave={() => { stopMq(); window.clearTimeout(hoverT.current); if (peek) openPeek(false, "pointer"); }}
+      onMouseLeave={() => { window.clearTimeout(hoverT.current); if (peek) openPeek(false, "pointer"); }}
       /* v18.3.3 §D — a row opened from the keyboard closes when focus leaves it (the list ignores this for a row the
          pointer opened, which closes when the pointer leaves) */
       onBlur={(e) => { if (peek && !e.currentTarget.contains(e.relatedTarget as Node | null)) openPeek(false, "focus"); }}
@@ -318,17 +285,8 @@ const Row: React.FC<{
           </>
         )}
       </span>
-      {/* v18.3.2 A — NOTHING IN THE ROW HIDES ON HOVER: the hover tray over the Query status cell is gone. A row with its
-          peek closed shows no actions; they live on the peek's line (B). */}
-      {peek ? (
-        <ContactPeek agent={a} onEdit={(tab, focus) => onEdit?.(tab, focus)}
-          next={nextLabel ? (
-            /* v18.3.3 §B — the next step: the status's own primary action as a link, styled as the status cell's
-               "+ Log a query" (it IS that class), running the handler the tray's button ran */
-            <button type="button" className="cl17-log cl1833-next" data-cl1833="next"
-              onClick={(e) => { e.stopPropagation(); onAct(tray.act); }} onKeyDown={(e) => e.stopPropagation()}>{nextLabel}</button>
-          ) : null} />
-      ) : null}
+      {/* v19 §D — the open row: one powder strip under the main line (genres · divider · wishlist) */}
+      {strip ? <ContactPeek agent={a} genres={genres} genreHit={genreHit} onEdit={(tab, focus) => onEdit?.(tab, focus)} stripRef={stripRef} /> : null}
     </div>
   );
 };
@@ -359,7 +317,7 @@ export const ContactRows: React.FC<ContactRowsProps & {
   /** v18 §D — a peek's "+ Add" pill: Edit profile on that field */
   onEdit?: (agentId: string, tab: AgentCardTab, focus?: AgentCardField) => void;
 }> = ({
-  groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen, onAddGenres, onAddWishlist, trayFor, onAct,
+  groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen,
   byLetter = true, ungrouped = false, sort, focusId = null, highlight = "", compact = false, onLog, onEdit,
 }) => {
   /* v18 §D — one peek at a time */
@@ -492,8 +450,7 @@ export const ContactRows: React.FC<ContactRowsProps & {
       <Row
         key={id} x={x} nowMs={nowMs} genreHit={genreHit} current={openId === id} fresh={newId === id} hideYourMove={hideYourMove}
         focused={focusId === id} highlight={highlight}
-        onOpen={(from) => onOpen(id, from)} tray={trayFor(x)} onAct={(act) => onAct(id, act)}
-        onAddGenres={() => onAddGenres(id)} onAddWishlist={() => onAddWishlist(id)}
+        onOpen={(from) => onOpen(id, from)}
         onLog={onLog ? () => onLog(id) : undefined}
         peek={peekId === id} onPeek={onEdit ? onPeekFor(id) : undefined}
         onEdit={onEdit ? (tab, focus) => onEdit(id, tab, focus) : undefined}

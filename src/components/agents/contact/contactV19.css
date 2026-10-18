@@ -284,3 +284,44 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-c .cl19-miss:hover { color: #2a3a52; }
 .cl19-c .cl19-miss:hover svg { color: #2a3a52; }
 .cl19-c .cl19-miss:hover span { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── §D · THE OPEN ROW: one powder strip under the main line, from the name's left edge (the disc's 40 + 11) to the
+   Query status column's right edge. The row keeps its own colour — white, the hover's #fdfbf8 while the pointer is
+   on it — whether the strip was opened by the pointer or the keyboard (v18's per-status tints and raise are undone).
+   `data-cl19-open` holds the strip's room through the close, so nothing jumps as `data-peek` drops; the height and
+   the strip's fade are Web Animations in ContactRows. ── */
+.clv-group .cl19-card .clv-row[data-peek]:not(.kf),
+.clv-group .cl19-card .clv-row[data-peek][data-disc]:not(.kf) {
+  z-index: auto; border-radius: 0; box-shadow: none; background: #fff;
+}
+.clv-group .cl19-card .clv-row:hover:not(.kf),
+.clv-group .cl19-card .clv-row[data-peek][data-disc]:hover:not(.kf) { background: #fdfbf8; }
+.clv-group .cl19-card .clv-row[aria-current="true"] { box-shadow: inset 3px 0 0 #2a3a52; }
+.clv-group .cl19-card .clv-row[data-cl19-open] { grid-template-rows: auto auto; padding-bottom: 24px; }
+.cl19-strip {
+  grid-column: 1 / -1; box-sizing: border-box; display: flex; align-items: center; min-width: 0;
+  margin: 21px 0 0 51px; padding: 10px 18px; border-radius: 12px; background: #edf1f7;
+  cursor: default; text-align: left; white-space: nowrap;
+}
+.cl19-strip .cl19-sg { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.cl19-strip .cl19-pill {
+  display: inline-flex; align-items: center; gap: 4px; height: 23px; padding: 0 10px; box-sizing: border-box;
+  border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06);
+  font: 400 12.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); white-space: nowrap;
+}
+/* the fit mark: a tick and an ink ring, as the row's chips wore it */
+.cl19-strip .cl19-pill.clv-hit { color: rgb(28, 19, 15); box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.85); }
+.cl19-strip .cl19-pill.clv-hit::before { content: "\2713"; font-size: 11px; }
+.cl19-strip .cl19-sdiv { flex: none; width: 1px; height: 18px; margin: 0 18px; background: rgba(28, 19, 15, 0.16); }
+.cl19-strip .cl19-wish {
+  flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 400 14.5px/20px var(--sp-type) !important; letter-spacing: -0.01em; color: rgb(28, 19, 15);
+}
+.cl19-strip .cl19-wish::before { content: "\201C"; }
+.cl19-strip .cl19-wish::after { content: "\201D"; }
+.cl19-strip .cl19-wish .clv-mq { font: inherit !important; }
+/* on hover the text is one moving block (a transform needs a box), so the ellipsis gives way to the scroll */
+.cl19-strip .cl19-wish:hover { text-overflow: clip; }
+.cl19-strip .cl19-wish:hover .clv-mq { display: inline-block; }
+.cl19-strip .cl19-wish:not(:hover) .clv-mq { display: inline; }
+.cl19-strip .clv-miss { margin: 0; }

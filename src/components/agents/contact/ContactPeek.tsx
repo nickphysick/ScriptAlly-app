@@ -2,122 +2,86 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v18 §D — THE ROW PEEK, opened after 450ms of hover (or Space on a focused row). v18.3 §C: it shows only
- * how to reach the agent (email, website, social); v18's index card (wishlist, genres, facts, notes) is retired.
+ * Contact list v19 §D — THE OPEN ROW: ONE POWDER STRIP under the row's main line, opened after 450ms of hover (or
+ * Space on a focused row). It runs from the left edge of the name to the right edge of the Query status column and
+ * holds, on one line: the genres as white pills (a genre that fits the current manuscript keeps the fit mark), a 1px
+ * divider, then the wishlist in Special Elite inside ink curly quotes — ending in "…" when it overflows, and scrolling
+ * to show the rest while the pointer is on it. A missing piece is v14's add link, opening the card at that field.
  *
- * ⚠️ A CLICK ON A DETAIL NEVER OPENS THE ROW: each detail stops its own click and keys, so the email (which copies,
- *    v18.3.3 §C), the links and the "Add …" items do only what they say.
+ * It replaces v18.3.3 §A's details line: the contact details are the row's own columns now (Part C), and the social
+ * handle and the next step left the row (they remain in the agent card).
+ *
+ * ⚠️ AN ADD LINK NEVER OPENS THE CARD AT THE ROW: it stops its own click and keys and opens the card AT ITS FIELD.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import type { Agent } from "../../../types";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
-import { materialWords } from "../../../lib/agentPanel";
-import { materialRowsFromAgent } from "../../../lib/agentMaterials";
-
-import { copyText, domainOf, hrefOf } from "./ContactCells";
-export { copyText, domainOf };
-
-/** the first social handle on record: the repeatable list first, then the mirrored platform fields */
-export function socialOf(a: Pick<Agent, "socials" | "twitter" | "bluesky" | "instagram">): string | null {
-  const s = (a.socials ?? []).find((x) => (x.handle ?? "").trim());
-  if (s) return s.handle.trim();
-  return [a.twitter, a.bluesky, a.instagram].map((v) => (v ?? "").trim()).find(Boolean) ?? null;
-}
-
-/** what to send, as the panel's index card words it ("Query letter · Synopsis · First 10 pages") */
-export function sendThem(a: Pick<Agent, "materialsWanted">): string | null {
-  const rows = materialRowsFromAgent(a.materialsWanted).filter((r) => r.on);
-  if (!rows.length) return null;
-  return rows.map(materialWords).join(" · ");
-}
-
+export { copyText, domainOf } from "./ContactCells";
 
 type Edit = (tab: AgentCardTab, focus?: AgentCardField) => void;
 
+/**
+ * v14 §6 — THE WISHLIST MARQUEE, moved here with the wishlist. While the pointer is on it, a wishlist that does not
+ * fit scrolls to its end and back at ~28px a second after a 0.5s pause. ⚠️ Run by the Web Animations API, never a CSS
+ * keyframe reading a custom property: a `var()` inside `@keyframes` fails silently in this setup (house rule). Off
+ * under reduced motion. The overflow is measured on hover, so a resize never leaves a stale distance.
+ */
+export function startMarquee(p: HTMLElement | null): Animation | null {
+  if (!p || typeof window === "undefined") return null;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return null;
+  const sp = p.querySelector<HTMLElement>(".clv-mq");
+  if (!sp || typeof sp.animate !== "function") return null;
+  const over = sp.scrollWidth - p.clientWidth;
+  if (over <= 2) return null;
+  const dist = over + 6;
+  return sp.animate([{ transform: "translateX(0)" }, { transform: `translateX(${-dist}px)` }], {
+    duration: Math.max(3000, (dist / 28) * 1000), delay: 500, iterations: Infinity, direction: "alternate", easing: "linear",
+  });
+}
 
-/** the copy glyph: two overlapping rounded squares */
-const CopyIcon: React.FC = () => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
-    <rect x="5.5" y="5.5" width="8" height="8" rx="1.6" /><path d="M10.5 3.6V3.9A1.4 1.4 0 0 0 9.1 2.5H4A1.5 1.5 0 0 0 2.5 4v5.1a1.4 1.4 0 0 0 1.4 1.4h.2" />
-  </svg>
+/** v14's add link (the dashed slate pill): it opens the card at that field and nothing else */
+const AddLink: React.FC<{ probe: string; label: string; onPress: () => void }> = ({ probe, label, onPress }) => (
+  <span
+    className="clv-miss" role="button" tabIndex={0} data-clv={probe}
+    onClick={(e) => { e.stopPropagation(); onPress(); }}
+    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onPress(); } }}
+  >
+    {label}
+  </span>
 );
 
-/**
- * v18.3.3 §C — THE EMAIL IS THE COPY BUTTON. Hover or focus turns its disc navy with the copy glyph; a click, Enter or
- * Space copies the FULL address (the text may be shortened with "…") and reads "Copied" for 1400ms. It never opens the
- * card: it stops its own click and keys, and the row's click handler ignores it as well.
- */
-const CopyEmail: React.FC<{ email: string }> = ({ email }) => {
-  const [done, setDone] = useState(false);
-  const t = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(t.current), []);
-  const go = () => {
-    void copyText(email);
-    setDone(true); window.clearTimeout(t.current); t.current = window.setTimeout(() => setDone(false), 1400);
-  };
-  return (
-    <span className="cl1833-it cl1833-em" data-cl183="peek-pill" data-k="email" role="button" tabIndex={0}
-      aria-label={`Copy email ${email}`} data-done={done ? "" : undefined} title={email}
-      onClick={(e) => { e.stopPropagation(); go(); }}
-      onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }}>
-      <i className="cl183-pd"><span className="cl1833-ic"><PkIcon kind="mail" /></span><span className="cl1833-ic cl1833-cp"><CopyIcon /></span></i>
-      <span className="cl183-pt" aria-live="polite">{done ? "Copied" : email}</span>
-    </span>
-  );
-};
-
-const PkIcon: React.FC<{ kind: "mail" | "web" | "at" }> = ({ kind }) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {kind === "mail" ? <><rect x="2" y="3.5" width="12" height="9" rx="1.4" /><path d="m2.5 4.3 5.5 4.4 5.5-4.4" /></>
-      : kind === "web" ? <><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2.2 2 9.8 0 12M8 2c-2 2.2-2 9.8 0 12" /></>
-      : <><circle cx="8" cy="8" r="2.6" /><path d="M10.6 8v1.1a1.9 1.9 0 0 0 3.8 0V8a6.4 6.4 0 1 0-2.5 5.1" /></>}
-  </svg>
-);
-
-/**
- * Contact list v18.3.3 §A — THE OPEN ROW SITS ON THE ROW'S OWN COLUMNS: one line of contact details laid on the row's
- * grid (a subgrid), no pill shells. The email sits in the Agent column (its disc centred under the avatar, its text on
- * the name's left edge); the website in What they want; the social handle from Replies, running into Query status and
- * stopping 24px short of the next step (§B), which the row passes in as `next`. A missing detail is "Add …" in italic
- * that opens Edit profile on that field.
- *
- * ⚠️ EACH DETAIL STOPS ITS OWN CLICK; THE LINE DOES NOT. Empty space in the open row still opens the card (as the row
- *    does), and the row's own click handler also ignores the details and the next step (belt and braces).
- */
 export const ContactPeek: React.FC<{
   agent: Agent;
+  /** the agent's genres, the manuscript's own first */
+  genres: readonly string[];
+  /** a genre that fits the current manuscript (the fit mark) */
+  genreHit: (g: string) => boolean;
   onEdit: Edit;
-  /** §B — the next step, at the Query status cell's right edge on this line; none when the cell already offers it */
-  next?: React.ReactNode;
-}> = ({ agent: a, onEdit, next }) => {
-  const email = (a.email ?? "").trim();
-  const site = (a.website ?? "").trim();
-  const social = socialOf(a);
-  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
-  const missing = (k: string, kind: "mail" | "web" | "at", label: string, go: () => void) => (
-    <button type="button" className="cl1833-it is-add" data-cl183="peek-pill" data-k={k} data-missing=""
-      onClick={(e) => { e.stopPropagation(); go(); }} onKeyDown={stop}>
-      <i className="cl183-pd"><PkIcon kind={kind} /></i><span className="cl183-pt">{label}</span>
-    </button>
-  );
+  /** the strip's own box, so the row can move it in and out */
+  stripRef?: React.Ref<HTMLDivElement>;
+}> = ({ agent: a, genres, genreHit, onEdit, stripRef }) => {
+  const wish = (a.mswlNotes ?? "").trim();
+  const wishRef = useRef<HTMLParagraphElement>(null);
+  const mq = useRef<Animation | null>(null);
+  const stop = () => { mq.current?.cancel(); mq.current = null; };
+  useEffect(() => stop, []);
   return (
-    <div className="cl183-pk cl1833-pk" data-cl18="peek" data-cl183="peek">
-      {email ? (
-        <CopyEmail email={email} />
-      ) : missing("email", "mail", "Add their email", () => onEdit("who", "email"))}
-      {site ? (
-        <a className="cl1833-it cl1833-web" data-cl183="peek-pill" data-k="website" href={hrefOf(site)} target="_blank" rel="noopener noreferrer" onClick={stop}>
-          <i className="cl183-pd"><PkIcon kind="web" /></i><span className="cl183-pt cl183-dom" title={domainOf(site)}>{domainOf(site)}</span><span className="cl183-ext" data-cl183="ext" aria-hidden="true">↗</span>
-        </a>
-      ) : missing("website", "web", "Add their website", () => onEdit("who", "website"))}
-      <span className="cl1833-tail" data-cl1833="tail">
-        {social ? (
-          <span className="cl1833-it cl1833-soc" data-cl183="peek-pill" data-k="social" onClick={stop}>
-            <i className="cl183-pd"><PkIcon kind="at" /></i><span className="cl183-pt" title={social}>{social}</span>
-          </span>
-        ) : missing("social", "at", "Add a social handle", () => onEdit("who"))}
-        {next}
+    <div className="cl19-strip" data-cl19="strip" data-cl18="peek" data-cl183="peek" ref={stripRef}>
+      <span className="cl19-sg" data-cl19="genres">
+        {genres.length > 0
+          ? genres.map((g) => <span key={g} className={`cl19-pill${genreHit(g) ? " clv-hit" : ""}`} data-fit={genreHit(g) || undefined}>{g}</span>)
+          : <AddLink probe="torn" label="+ Add genres" onPress={() => onEdit("want", "genres")} />}
       </span>
+      <i className="cl19-sdiv" aria-hidden="true" />
+      {wish ? (
+        <p className="cl19-wish" ref={wishRef} data-cl19="wish" title={wish}
+          onMouseEnter={() => { stop(); mq.current = startMarquee(wishRef.current); }}
+          onMouseLeave={stop}>
+          <span className="clv-mq">{wish}</span>
+        </p>
+      ) : (
+        <AddLink probe="torn-wish" label="+ Add their wishlist" onPress={() => onEdit("want", "wishlist")} />
+      )}
     </div>
   );
 };

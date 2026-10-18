@@ -50,7 +50,8 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
     expect(html(false)).toMatch(/<b class="unk">Not stated<\/b><small>Open to queries<\/small>/);
   });
   /* RE-POINTED (v18.3.2 A, v18.3.3 B): there is no hover tray and no "Open card"; the row's next step lives on the open
-     row's details line, which a static render never opens (the next-step rule is held by lib/rowActions.test.ts) */
+     row's details line, which a static render never opens. v19 §D: the next step left the row entirely (the agent card
+     keeps it), and lib/rowActions with it */
   it("the row is a div role=button (it holds real buttons)", () => {
     expect(html(false)).toMatch(/<div role="button" tabindex="0" class="clv-row"/);
   });
