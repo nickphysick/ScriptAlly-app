@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C2",
+  "where": "the first card reads Pick 1 of n",
+  "ok": true,
+  "detail": "Pick 1 of 6 (title 6)"
+ },
+ {
+  "lock": "C2",
+  "where": "the stamp shows at once, on the same card",
+  "ok": true,
+  "detail": "{\"name\":\"Eleanor Whitcombe\",\"pick\":\"Pick 1 of 6\",\"stampOn\":true,\"stamp\":\"Added to your list\",\"out\":true,\"title\":\"5\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "the card slides out before the next rises",
+  "ok": true,
+  "detail": "{\"name\":\"Eleanor Whitcombe\",\"pick\":\"Pick 1 of 6\",\"stampOn\":true,\"stamp\":\"Added to your list\",\"out\":true,\"title\":\"5\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "the next card rises with Pick 2 of n",
+  "ok": true,
+  "detail": "Pick 2 of 6"
+ },
+ {
+  "lock": "C2",
+  "where": "the title counts one fewer",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C2",
+  "where": "the toast offers Log a query and Undo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "a pass counts too: Pick 3 of n",
+  "ok": true,
+  "detail": "Pick 3 of 6"
+ },
+ {
+  "lock": "C2",
+  "where": "a skip is not a decision: still Pick 3 of n",
+  "ok": true,
+  "detail": "Pick 3 of 6 · Sam Ferrier"
+ }
+]

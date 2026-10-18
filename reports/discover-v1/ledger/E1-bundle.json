@@ -1,0 +1,58 @@
+[
+ {
+  "check": "production lacks __SA_DV_STATE",
+  "ok": true
+ },
+ {
+  "check": "production lacks __SA_DV_LIVE",
+  "ok": true
+ },
+ {
+  "check": "production lacks __SA_DV_HOLD_MS",
+  "ok": true
+ },
+ {
+  "check": "production lacks dvfx-",
+  "ok": true
+ },
+ {
+  "check": "production lacks Eleanor Whitcombe",
+  "ok": true
+ },
+ {
+  "check": "production lacks Fixture Agency",
+  "ok": true
+ },
+ {
+  "check": "development has __SA_DV_STATE",
+  "ok": true
+ },
+ {
+  "check": "development has __SA_DV_LIVE",
+  "ok": true
+ },
+ {
+  "check": "development has __SA_DV_HOLD_MS",
+  "ok": true
+ },
+ {
+  "check": "development has dvfx-",
+  "ok": true
+ },
+ {
+  "check": "development has Eleanor Whitcombe",
+  "ok": true
+ },
+ {
+  "check": "development has Fixture Agency",
+  "ok": true
+ },
+ {
+  "check": "production carries the coming-soon page (out looking)",
+  "ok": true
+ },
+ {
+  "check": "production carries the coming-soon page (Tell me when it)",
+  "ok": true
+ }
+]

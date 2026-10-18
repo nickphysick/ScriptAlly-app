@@ -1,0 +1,374 @@
+[
+ {
+  "lock": "B1",
+  "where": "1280 hd present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":0,\"w\":942.09375,\"h\":316.796875,\"fs\":15} vs {\"x\":0,\"y\":0,\"w\":941.65625,\"h\":316.796875,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd y",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd h",
+  "ok": true,
+  "detail": "316.8 vs ref 316.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 hd font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":44,\"w\":411.734375,\"h\":18,\"fs\":12} vs {\"x\":0,\"y\":44,\"w\":411.71875,\"h\":18,\"fs\":12}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow y",
+  "ok": true,
+  "detail": "44.0 vs ref 44.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow h",
+  "ok": true,
+  "detail": "18.0 vs ref 18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 eyebrow font size",
+  "ok": true,
+  "detail": "12 vs ref 12"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":76,\"w\":411.734375,\"h\":44.796875,\"fs\":40} vs {\"x\":0,\"y\":76,\"w\":411.71875,\"h\":44.796875,\"fs\":40}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title y",
+  "ok": true,
+  "detail": "76.0 vs ref 76.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title h",
+  "ok": true,
+  "detail": "44.8 vs ref 44.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 title font size",
+  "ok": true,
+  "detail": "40 vs ref 40"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 byline present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":132.796875,\"w\":411.734375,\"h\":30,\"fs\":18} vs {\"x\":0,\"y\":132.796875,\"w\":411.71875,\"h\":30,\"fs\":18}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 byline x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 byline y",
+  "ok": true,
+  "detail": "132.8 vs ref 132.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 byline h",
+  "ok": true,
+  "detail": "30.0 vs ref 30.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 byline font size",
+  "ok": true,
+  "detail": "18 vs ref 18"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 tune present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":188.796875,\"w\":162.5625,\"h\":48,\"fs\":16} vs {\"x\":0,\"y\":188.796875,\"w\":162.5625,\"h\":48,\"fs\":16}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 tune x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 tune y",
+  "ok": true,
+  "detail": "188.8 vs ref 188.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 tune h",
+  "ok": true,
+  "detail": "48.0 vs ref 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 tune w",
+  "ok": true,
+  "detail": "162.6 vs ref 162.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 tune font size",
+  "ok": true,
+  "detail": "16 vs ref 16"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 share present",
+  "ok": true,
+  "detail": "{\"x\":174.5625,\"y\":188.796875,\"w\":171.453125,\"h\":48,\"fs\":16} vs {\"x\":174.5625,\"y\":188.796875,\"w\":171.453125,\"h\":48,\"fs\":16}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 share x",
+  "ok": true,
+  "detail": "174.6 vs ref 174.6"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 share y",
+  "ok": true,
+  "detail": "188.8 vs ref 188.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 share h",
+  "ok": true,
+  "detail": "48.0 vs ref 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 share w",
+  "ok": true,
+  "detail": "171.5 vs ref 171.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 share font size",
+  "ok": true,
+  "detail": "16 vs ref 16"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":254.796875,\"w\":223.75,\"h\":21,\"fs\":15.5} vs {\"x\":0,\"y\":254.796875,\"w\":226.84375,\"h\":21,\"fs\":15.5}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how y",
+  "ok": true,
+  "detail": "254.8 vs ref 254.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how h",
+  "ok": true,
+  "detail": "21.0 vs ref 21.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 how font size",
+  "ok": true,
+  "detail": "15.5 vs ref 15.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card present",
+  "ok": true,
+  "detail": "{\"x\":557.140625,\"y\":79.390625,\"w\":384.953125,\"h\":161,\"fs\":15} vs {\"x\":556.703125,\"y\":79.390625,\"w\":384.953125,\"h\":161,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card x",
+  "ok": true,
+  "detail": "557.1 vs ref 556.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card y",
+  "ok": true,
+  "detail": "79.4 vs ref 79.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card h",
+  "ok": true,
+  "detail": "161.0 vs ref 161.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card w",
+  "ok": true,
+  "detail": "385.0 vs ref 385.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 counts present",
+  "ok": true,
+  "detail": "{\"x\":558.140625,\"y\":80.390625,\"w\":233.421875,\"h\":159,\"fs\":15} vs {\"x\":557.703125,\"y\":80.390625,\"w\":233.421875,\"h\":159,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 counts x",
+  "ok": true,
+  "detail": "558.1 vs ref 557.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 counts y",
+  "ok": true,
+  "detail": "80.4 vs ref 80.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 counts h",
+  "ok": true,
+  "detail": "159.0 vs ref 159.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 counts w",
+  "ok": true,
+  "detail": "233.4 vs ref 233.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 counts font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ringCol present",
+  "ok": true,
+  "detail": "{\"x\":791.5625,\"y\":80.390625,\"w\":149.53125,\"h\":159,\"fs\":15} vs {\"x\":791.125,\"y\":80.390625,\"w\":149.53125,\"h\":159,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ringCol x",
+  "ok": true,
+  "detail": "791.6 vs ref 791.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ringCol y",
+  "ok": true,
+  "detail": "80.4 vs ref 80.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ringCol h",
+  "ok": true,
+  "detail": "159.0 vs ref 159.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ringCol w",
+  "ok": true,
+  "detail": "149.5 vs ref 149.5"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ringCol font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ring present",
+  "ok": true,
+  "detail": "{\"x\":824.828125,\"y\":94.390625,\"w\":84,\"h\":84,\"fs\":15} vs {\"x\":824.390625,\"y\":94.390625,\"w\":84,\"h\":84,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ring x",
+  "ok": true,
+  "detail": "824.8 vs ref 824.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ring y",
+  "ok": true,
+  "detail": "94.4 vs ref 94.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ring h",
+  "ok": true,
+  "detail": "84.0 vs ref 84.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ring w",
+  "ok": true,
+  "detail": "84.0 vs ref 84.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 ring font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ }
+]

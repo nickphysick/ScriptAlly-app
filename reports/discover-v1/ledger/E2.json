@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "E2",
+  "where": "it starts unset",
+  "ok": true,
+  "detail": "Tell me when it’s ready"
+ },
+ {
+  "lock": "E2",
+  "where": "the leaf is on",
+  "ok": true,
+  "detail": "{\"discover\":true,\"nudges\":false,\"weeklyDigest\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "Settings' two keys are untouched",
+  "ok": true,
+  "detail": "{\"discover\":true,\"nudges\":false,\"weeklyDigest\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "the button says so",
+  "ok": true,
+  "detail": "We’ll tell you"
+ },
+ {
+  "lock": "E2",
+  "where": "it reads back after a reload",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E2",
+  "where": "pressed again, the leaf is off and the others still stand",
+  "ok": true,
+  "detail": "{\"discover\":false,\"nudges\":false,\"weeklyDigest\":true}"
+ },
+ {
+  "lock": "E2",
+  "where": "the live face never mounted while the flag is off",
+  "ok": true,
+  "detail": ""
+ }
+]

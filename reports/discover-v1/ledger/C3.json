@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C3",
+  "where": "J makes the next pick the lead",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "K brings the last pick to the lead",
+  "ok": true,
+  "detail": "Marguerite Delacroix"
+ },
+ {
+  "lock": "C3",
+  "where": "in a field, A/N/S/J do nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "the field received the letters",
+  "ok": true,
+  "detail": "ansj"
+ },
+ {
+  "lock": "C3",
+  "where": "under the drawer, the keys do nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "Escape closed the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "S skips once the layer is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "A stamps the lead",
+  "ok": true,
+  "detail": ""
+ }
+]
