@@ -1,0 +1,23 @@
+qcV138:  2 failed  15 passed (7.4m) 
+  ✗ D2 · 1512 tints — rgb(246, 226, 216) | rgb(226, 231, 239) | rgb(235, 231, 226)
+  ✗ D2 · 1280 tints — rgb(246, 226, 216) | rgb(226, 231, 239) | rgb(235, 231, 226)
+qcV1381:  1 skipped  6 passed (1.2m) 
+qcV1382:  1 failed  3 passed (1.6m) 
+  ✗ D1 · 1512 last card lower at 100ms — 0.00 0.00 0.00
+  ✗ D1 · 1280 last card lower at 166ms — 0.00 0.00 0.00
+      38 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+qcV1383:  4 passed (1.6m) 
+qcV1384:  6 passed (1.7m) 
+qcV1385:  12 passed (4.2m) 
+qcV1386:  10 passed (4.3m) 
+contactV18:  3 skipped  12 passed (3.8m) 
+contactV181:  1 failed  1 skipped  7 passed (3.8m) 
+  ✗ B5 · the capture was taken today — 2026-10-15T23:02:51.609Z
+contactV182:  1 failed  22 passed (7.9m) 
+  ✗ C5 · no keycap on /agents — F
+  ✗ C5 · no keycap in the drawer — F
+contactV183:  1 failed  22 passed (9.1m) 
+  ✗ CL1833-E1 · @1512 msv12-agent-4: the next step is there — undefined
+  ✗ CL1833-E1 · @1280 msv12-agent-4: the next step is there — undefined
+queryPanelV2:  1 failed  1 skipped  9 passed (7.7m) 
+rs2:  18 passed (5.8m) 

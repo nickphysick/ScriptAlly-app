@@ -440,7 +440,9 @@ test("QC12 · a your-move row's tray is action · Edit · Close; a waiting row's
   expect(seen.anyMore, "the ⋯ is back").toBe(false);
 });
 
-test("QC13 · the guide shows on first visit, not after ×, and comes back from the help menu", async ({ page }) => {
+/* RETIRED by Query Centre v139 (18 Oct): the bottom-right page guide this measured is gone from the Query Centre; the
+   shared page guide (the pill left of "?") replaces it, measured by QC139 A1–B5 (tests/e2e/qcV139.measure.ts). */
+test.skip("QC13 · the guide shows on first visit, not after ×, and comes back from the help menu", async ({ page }) => {
   const KEY = "sa.guide.queries";
   /**
    * ⚠️ THE KEY IS CLEARED ONCE, ON THE FIRST DOCUMENT ONLY. An init script runs on EVERY navigation,

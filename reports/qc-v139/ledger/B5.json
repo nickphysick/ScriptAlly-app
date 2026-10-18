@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "B5",
+  "where": "Pip is on screen",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B5",
+  "where": "title excludes Pip",
+  "ok": false,
+  "detail": "Showing all 87 queriesGrouped by who it's with⌄/FiltersPin the listF → Showing all 88 queriesGrouped by who it's with⌄/FiltersPin the listF"
+ },
+ {
+  "lock": "B5",
+  "where": "glyphs excludes Pip",
+  "ok": false,
+  "detail": "q:39,pr:7,ps:7,fr:8,fs:7,of:2,cl:17 → q:40,pr:7,ps:7,fr:8,fs:7,of:2,cl:17"
+ },
+ {
+  "lock": "B5",
+  "where": "tab excludes Pip",
+  "ok": true,
+  "detail": "Birds-eye view: 36 overdue, 18 upcoming. Press B to open. → Birds-eye view: 36 overdue, 18 upcoming. Press B to open."
+ },
+ {
+  "lock": "B5",
+  "where": "chart excludes Pip",
+  "ok": false,
+  "detail": "SENT · THIS WEEK 0 queries 12 WKS AGO 42 IN ALL NOW → SENT · THIS WEEK 0 queries 12 WKS AGO 43 IN ALL NOW"
+ },
+ {
+  "lock": "B5",
+  "where": "todo excludes Pip",
+  "ok": true,
+  "detail": "To-do list52 → To-do list52"
+ },
+ {
+  "lock": "B5",
+  "where": "the bands' counts exclude Pip",
+  "ok": false,
+  "detail": "you:52 queries,waiting:18 queries,closed:17 queries → you:52 queries,waiting:19 queries,closed:17 queries"
+ },
+ {
+  "lock": "B5",
+  "where": "mid-journey, the title excludes Pip",
+  "ok": false,
+  "detail": "Showing all 88 queriesGrouped by who it's with⌄/FiltersPin the listF q:40,pr:7,ps:7,fr:8,fs:7,of:2,cl:17"
+ },
+ {
+  "lock": "B5",
+  "where": "the filters' counts exclude Pip",
+  "ok": true,
+  "detail": "Filters → Filters"
+ },
+ {
+  "lock": "B5",
+  "where": "Pip is not in the Birds-eye drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B5",
+  "where": "Pip is not in the Contact list",
+  "ok": true,
+  "detail": ""
+ }
+]

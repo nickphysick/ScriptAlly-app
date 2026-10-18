@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 the title",
+  "ok": false,
+  "detail": "Showing all 87 queries Grouped by Status ⌄ / Filters Pin the list F"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 a saved Urgency opens on Who it's with (the talon's band)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the menu",
+  "ok": true,
+  "detail": "Who it's with|Status|Next action|Submission package|No grouping"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the title",
+  "ok": false,
+  "detail": "Showing all 87 queries Grouped by Status ⌄ / Filters Pin the list F"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 a saved Urgency opens on Who it's with (the talon's band)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the menu",
+  "ok": true,
+  "detail": "Who it's with|Status|Next action|Submission package|No grouping"
+ }
+]

@@ -1,0 +1,68 @@
+mutation A1 (page-side): exit 1
+  ✗ A1 · 1512 no old page guide — {"el":1,"copy":true}
+  ✗ A1 · 1280 no old page guide — {"el":1,"copy":true}
+      34 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+mutation A3 (unit): exit 1
+   × A3 · the empty account > Find, Open and Birds-eye wait for the first query; Log and Record a response do not 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 10 passed (11)
+mutation A2: exit 1
+  1 failed
+  1 passed (1.4m)
+  ✗ A2 · find written by the event — {"done":{"log":true},"seen":true}
+  ✗ A2 · find ticked after a reload — {"log":true,"find":false,"open":false,"resp":false,"birds":false}
+  ✗ A2 · find written by the event — {"done":{"log":true},"seen":true}
+  ✗ A2 · find ticked after a reload — {"log":true,"find":false,"open":false,"resp":false,"birds":false}
+  ✗ A2 · open written by the event — {"done":{"log":true},"seen":true}
+  ✗ A2 · open ticked after a reload — {"log":true,"find":false,"open":false,"resp":false,"birds":false}
+  ✗ A2 · birds written by the event — {"done":{"log":true},"seen":true}
+  ✗ A2 · birds ticked after a reload — {"log":true,"find":false,"open":false,"resp":false,"birds":false}
+mutation B1: exit 1
+  5 failed
+  1 passed (2.3m)
+  ✗ B1 · saved, the last card — pip-3,pip-4,pip-5,pip-6
+  ✗ B1 · no write names a query, an activity or Pip — count=1&ofs=2&req0___data__={"streamToken":"EAEZEGhCAoH0tbU=","writes":[{"update":{"name":"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2/q
+      34 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  ✗ B1 · saved, the last card — pip-3,pip-4,pip-5
+  ✗ B1 · no write names a query, an activity or Pip — count=1&ofs=2&req0___data__={"streamToken":"EAEZEGhCAoH0tbU=","writes":[{"update":{"name":"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2/q
+      34 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  ✗ B1 · saved, the last card — pip-3,pip-4,pip-5
+  ✗ B1 · no write names a query, an activity or Pip — count=1&ofs=2&req0___data__={"streamToken":"EAEZEGhCAoH0tbU=","writes":[{"update":{"name":"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2/q
+mutation B2: exit 1
+  1 failed
+  1 passed (6.4m)
+mutation B3: exit 1
+  1 failed
+  1 passed (47.5s)
+  ✗ B3 · 1512 item 4 ticked — {"done":{"log":true},"seen":true}
+  ✗ B3 · 1280 item 4 ticked — {"seen":true,"done":{"log":true}}
+      34 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+mutation B4: exit 1
+  1 failed
+  1 passed (53.9s)
+  ✗ B4 · Esc at card 3: no band — 
+  ✗ B4 · the journey's Finish later: no band — 
+      34 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+mutation B5: exit 1
+  1 failed
+  1 did not run
+mutation C1: exit 1
+  1 failed
+  1 passed (36.8s)
+  ✗ C1 · 1512 the title — Showing all 87 queries Grouped by Status ⌄ / Filters Pin the list F
+  ✗ C1 · 1512 a saved Urgency opens on Who it's with (the talon's band) — 
+  ✗ C1 · 1280 the title — Showing all 87 queries Grouped by Status ⌄ / Filters Pin the list F
+  ✗ C1 · 1280 a saved Urgency opens on Who it's with (the talon's band) — 
+      34 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+mutation C2: exit 1
+  1 failed
+  1 passed (51.4s)
+  ✗ C2 · 1512 Status: each a glyph svg and no img — [{"key":"Queried","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"key":"Partial Requested","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"key":"Partial Sent","kin
+  ✗ C2 · 1512 Next action: a badge on every band but the closed ones — ["offer:false","revision:false","full:false","partial:false","nudge:false","close:false","wait:false","Rejected:false","No Response:false","Withdrawn:false"]
+  ✗ C2 · 1512 Next action: no img — 
+  ✗ C2 · 1512 Package: every band's art is the package icon — [{"key":"pkg:Agents with MSWL","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"key":"pkg:Autumn round","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"ke
+  ✗ C2 · 1280 Status: each a glyph svg and no img — [{"key":"Queried","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"key":"Partial Requested","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"key":"Partial Sent","kin
+  ✗ C2 · 1280 Next action: a badge on every band but the closed ones — ["offer:false","revision:false","full:false","partial:false","nudge:false","close:false","wait:false","Rejected:false","No Response:false","Withdrawn:false"]
+  ✗ C2 · 1280 Next action: no img — 
+  ✗ C2 · 1280 Package: every band's art is the package icon — [{"key":"pkg:Agents with MSWL","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"key":"pkg:Autumn round","kind":null,"svg":true,"img":1,"badge":false,"left":12},{"ke
+?? src/lib/qc139Guide.test.tsx

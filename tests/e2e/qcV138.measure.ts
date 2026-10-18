@@ -379,7 +379,9 @@ test.describe("Query Centre v138", () => {
         return [...g.querySelectorAll<HTMLElement>('[data-qcv="gband"]')].map((b) => ({ k: b.dataset.group, bg: getComputedStyle(b).backgroundColor, ex: b.getAttribute("aria-expanded") }));
       });
       L.check("D2", `${w} order`, r.map((b) => b.k).join(",") === "you,waiting,closed", r.map((b) => b.k).join(","));
-      L.check("D2", `${w} tints`, r[0]?.bg === "rgb(246, 226, 216)" && r[1]?.bg === "rgb(226, 231, 239)" && r[2]?.bg === "rgb(236, 232, 227)", r.map((b) => b.bg).join(" | "));
+      L.check("D2", `${w} tints`, r[0]?.bg === "rgb(246, 226, 216)" && r[1]?.bg === "rgb(226, 231, 239)" && r[2]?.bg === "rgb(235, 231, 226)", r.map((b) => b.bg).join(" | "));
+      /* ↑ v139 §C — retargeted: the closed band is #ebe7e2 now (the pack's value for the closed tone under every grouping);
+         it was #ece8e3 */
       L.check("D2", `${w} closed folded`, r[2]?.ex === "false", `${r[2]?.ex}`);
       const s = await page.evaluate(async () => {
         const { g, sc } = (window as never as { __qc: () => { g: HTMLElement; sc: HTMLElement } }).__qc();

@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 no old page guide",
+  "ok": false,
+  "detail": "{\"el\":1,\"copy\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the pill",
+  "ok": true,
+  "detail": "Query Centre: Getting started 1/5"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the shared component's pill",
+  "ok": true,
+  "detail": "pck-pill"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no old page guide",
+  "ok": false,
+  "detail": "{\"el\":1,\"copy\":true}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the pill",
+  "ok": true,
+  "detail": "Query Centre: Getting started 1/5"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the shared component's pill",
+  "ok": true,
+  "detail": "pck-pill"
+ },
+ {
+  "lock": "A1",
+  "where": "/agents draws the same pill",
+  "ok": true,
+  "detail": "pck-pill"
+ }
+]

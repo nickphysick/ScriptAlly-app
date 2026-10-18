@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 Status: bands",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Status: each a glyph svg and no img",
+  "ok": false,
+  "detail": "[{\"key\":\"Queried\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Partial Requested\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Partial Sent\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Full Requested\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Full Sent\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Revise & Resubmit\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Offer\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Rejected\",\"kind\":null,\"svg\":true,\"img\":0,\"badge\":false,\"left\":12},{\"key\":\"No Response\",\"kind\":null,\"svg\":true,\"img\":0,\"badge\":false,\"left\":12},{\"key\":\"Withdrawn\",\"kind\":null,\"svg\":true,\"img\":0,\"badge\":false,\"left\":12}]"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Next action: a badge on every band but the closed ones",
+  "ok": false,
+  "detail": "[\"offer:false\",\"revision:false\",\"full:false\",\"partial:false\",\"nudge:false\",\"close:false\",\"wait:false\",\"Rejected:false\",\"No Response:false\",\"Withdrawn:false\"]"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Next action: no img",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Package: every band's art is the package icon",
+  "ok": false,
+  "detail": "[{\"key\":\"pkg:Agents with MSWL\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Autumn round\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Comps-led variant\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:First round\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Light\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Original\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Prologue-led\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Standard\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:The Complete Autumn Submission Bundle for Literary Agents\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:none\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12}]"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Status: the art's left edge is the default's (±1)",
+  "ok": true,
+  "detail": "default 12 · 12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Next action: the art's left edge is the default's (±1)",
+  "ok": true,
+  "detail": "default 12 · 12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Package: the art's left edge is the default's (±1)",
+  "ok": true,
+  "detail": "default 12 · 12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Status: bands",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Status: each a glyph svg and no img",
+  "ok": false,
+  "detail": "[{\"key\":\"Queried\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Partial Requested\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Partial Sent\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Full Requested\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Full Sent\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Revise & Resubmit\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Offer\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"Rejected\",\"kind\":null,\"svg\":true,\"img\":0,\"badge\":false,\"left\":12},{\"key\":\"No Response\",\"kind\":null,\"svg\":true,\"img\":0,\"badge\":false,\"left\":12},{\"key\":\"Withdrawn\",\"kind\":null,\"svg\":true,\"img\":0,\"badge\":false,\"left\":12}]"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Next action: a badge on every band but the closed ones",
+  "ok": false,
+  "detail": "[\"offer:false\",\"revision:false\",\"full:false\",\"partial:false\",\"nudge:false\",\"close:false\",\"wait:false\",\"Rejected:false\",\"No Response:false\",\"Withdrawn:false\"]"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Next action: no img",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Package: every band's art is the package icon",
+  "ok": false,
+  "detail": "[{\"key\":\"pkg:Agents with MSWL\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Autumn round\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Comps-led variant\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:First round\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Light\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Original\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Prologue-led\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:Standard\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:The Complete Autumn Submission Bundle for Literary Agents\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12},{\"key\":\"pkg:none\",\"kind\":null,\"svg\":true,\"img\":1,\"badge\":false,\"left\":12}]"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Status: the art's left edge is the default's (±1)",
+  "ok": true,
+  "detail": "default 12 · 12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Next action: the art's left edge is the default's (±1)",
+  "ok": true,
+  "detail": "default 12 · 12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Package: the art's left edge is the default's (±1)",
+  "ok": true,
+  "detail": "default 12 · 12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0"
+ }
+]
