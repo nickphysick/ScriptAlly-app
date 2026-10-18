@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * THE CONTACT LIST'S TOUCHES (v14 §7): the live count, the A–Z rail, and the bar's density toggle and key sheet.
- * The other touches live where they act — the reflow and the dead end on the page (AgentList), the search mark and
+ * The other touches live where they act — the dead end on the page (AgentList), the arrival on the rows, the search mark and
  * the keyboard focus ring on the rows (ContactRows), the lifting labels on the shared table (shell/listTable).
  *
  * ⚠️ EVERY MOTION HERE IS OFF UNDER REDUCED MOTION, read at the moment it would run, never cached.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -44,18 +44,6 @@ export const CountTo: React.FC<{ value: number }> = ({ value }) => {
 
 /* ⚠️ RETIRED (Contact list v18 §B): the density pill and the key sheet (`ContactBarExtras`). The list header's density
    buttons replace the first; the key sheet has no place in the slate header. */
-/** §7.2 — THE GENTLE REFLOW: the first 14 rows fade and rise 8px, staggered 22ms. Never on first load; off under
- *  reduced motion. The Web Animations API, so no keyframe has to read a custom property. */
-export function useReflow(container: React.RefObject<HTMLElement | null>, key: string): void {
-  const first = useRef(true);
-  useLayoutEffect(() => {
-    if (first.current) { first.current = false; return; }
-    if (reducedMotion()) return;
-    const rows = container.current ? [...container.current.querySelectorAll<HTMLElement>('[data-clv="row"]')].slice(0, 14) : [];
-    rows.forEach((r, i) => {
-      if (typeof r.animate !== "function") return;
-      r.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
-        { duration: 420, delay: i * 22, easing: "cubic-bezier(.2,.7,.2,1)", fill: "backwards" });
-    });
-  }, [key]);
-}
+/* ⚠️ RETIRED (Contact list v19 §H): `useReflow`, §7.2's gentle reflow (the first 14 rows rising 8px, 22ms apart, on a
+   filter, group, sort or Find change). The list's one arrival in ContactRows (`arrival`) replaces it for every change,
+   the load and the pin included. */

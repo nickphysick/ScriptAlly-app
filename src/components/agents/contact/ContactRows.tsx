@@ -106,7 +106,10 @@ const Row: React.FC<{
   onEdit?: (tab: AgentCardTab, focus?: AgentCardField) => void;
   /** v19 §C — website and email share one column, stacked (they do not both fit side by side) */
   stacked?: boolean;
-}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onLog, peek = false, onPeek, onEdit, stacked = false }) => {
+  /** v19 §H — the list's register of each row's dwell: when a held hover lets go with the pointer already on a row, the
+   *  list starts that row's dwell (its mouseenter came while hover was held) */
+  dwellers?: Map<string, () => void>;
+}> = ({ x, nowMs, genreHit, current, fresh, hideYourMove = false, focused = false, highlight = "", onOpen, onLog, peek = false, onPeek, onEdit, stacked = false, dwellers }) => {
   const track = stageTrack(x);
   const tone = discTone(x);
   const a = x.agent;
@@ -180,6 +183,13 @@ const Row: React.FC<{
     const st = stripRef.current;
     if (st) anims.current.push(st.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: "ease", fill: "forwards" }));
   }, [peek]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!dwellers) return undefined;
+    const id = a.id;
+    const fn = () => { window.clearTimeout(hoverT.current); if (onPeek) hoverT.current = window.setTimeout(() => openPeek(true, "pointer"), 450); };
+    dwellers.set(id, fn);
+    return () => { if (dwellers.get(id) === fn) dwellers.delete(id); };
+  });
   /* the strip has left: put the row's own height back */
   useLayoutEffect(() => { if (!strip) stopAnims(); }, [strip]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -336,9 +346,14 @@ export const ContactRows: React.FC<ContactRowsProps & {
   onLog?: (agentId: string) => void;
   /** v18 §D — a peek's "+ Add" pill: Edit profile on that field */
   onEdit?: (agentId: string, tab: AgentCardTab, focus?: AgentCardField) => void;
+  /** v19 §H — THE ARRIVAL: a new `key` (the list's load, and every grouping, sort, filter, search, clearing and pin) plays
+   *  the one arrival once the list is fully built, before it is painted; `before` runs first (the page puts back a
+   *  remembered scroll there, so the rows that animate are the rows on screen). Absent (the loading cover, the exhibit),
+   *  nothing arrives. */
+  arrival?: { key: string; before?: () => void };
 }> = ({
   groups, totals = null, byId, nowMs, genreHit, openId, hideYourMove = false, newId = null, onOpen,
-  byLetter = true, ungrouped = false, groupKey, sort, focusId = null, highlight = "", compact = false, onLog, onEdit,
+  byLetter = true, ungrouped = false, groupKey, sort, focusId = null, highlight = "", compact = false, onLog, onEdit, arrival,
 }) => {
   /* v18 §D — one peek at a time */
   const [peekId, setPeekId] = useState<string | null>(null);
@@ -349,6 +364,17 @@ export const ContactRows: React.FC<ContactRowsProps & {
   const listRef = useRef<HTMLDivElement>(null);
   const peekRef = useRef<{ id: string; via: PeekVia } | null>(null);
   const ptr = useRef<{ x: number; y: number } | null>(null);
+  /* v19 §H — HOVER IS HELD AFTER A CHANGE UNTIL THE POINTER MOVES. `held` is set by the arrival with the pointer's
+     position then (null when the list has never seen it: the first move only records where it is); a move of more than
+     2px from there lets go. While held the list wears `data-hover-hold` (no hover wash) and no dwell opens a row. */
+  const held = useRef(false);
+  const heldAt = useRef<{ x: number; y: number } | null>(null);
+  const dwellers = useRef(new Map<string, () => void>());
+  const releaseHold = () => {
+    held.current = false; heldAt.current = null; listRef.current?.removeAttribute("data-hover-hold");
+    const under = rowUnderPointer();
+    if (under) dwellers.current.get(under)?.();
+  };
   const rowUnderPointer = (): string | null | undefined => {
     const p = ptr.current;
     if (!p) return undefined; // no pointer known: nothing to judge by
@@ -361,7 +387,11 @@ export const ContactRows: React.FC<ContactRowsProps & {
     if (open) {
       /* a dwell's open lands only if the pointer is still on that row — a scroll, a leave or a blur since the timer
          was set means it is not the intended row any more */
-      if (via === "pointer") { const under = rowUnderPointer(); if (under !== undefined && under !== id) return; }
+      if (via === "pointer") {
+        /* v19 §H — after a change, a row under a still pointer does not open: hover waits for the pointer to move */
+        if (held.current) return;
+        const under = rowUnderPointer(); if (under !== undefined && under !== id) return;
+      }
       setPeek({ id, via });
       return;
     }
@@ -379,7 +409,15 @@ export const ContactRows: React.FC<ContactRowsProps & {
       if (rowUnderPointer() !== cur.id) setPeek(null);
     };
     const soon = () => { if (!raf) raf = requestAnimationFrame(check); };
-    const move = (e: PointerEvent) => { ptr.current = { x: e.clientX, y: e.clientY }; soon(); };
+    const move = (e: PointerEvent) => {
+      ptr.current = { x: e.clientX, y: e.clientY };
+      if (held.current) {
+        const at = heldAt.current;
+        if (!at || at.x < 0) heldAt.current = { x: e.clientX, y: e.clientY };
+        else if (Math.abs(e.clientX - at.x) > 2 || Math.abs(e.clientY - at.y) > 2) releaseHold();
+      }
+      soon();
+    };
     const gone = () => { ptr.current = { x: -1, y: -1 }; if (peekRef.current?.via === "pointer") setPeek(null); };
     const out = (e: PointerEvent | MouseEvent) => { if (!e.relatedTarget) gone(); };
     const blur = () => { if (peekRef.current) setPeek(null); };
@@ -411,7 +449,11 @@ export const ContactRows: React.FC<ContactRowsProps & {
   const [fit, setFit] = useState<ContactColumnFit>({ stacked: false, fs: CONTACT_FS, count: 6, cols: "minmax(0, 1fr) auto auto auto auto auto" });
   const fitRef = useRef(fit);
   fitRef.current = fit;
+  /** v19 §H — true while a measurement has just asked for new columns: the arrival waits for the re-render that applies
+   *  them, so the list it starts from is the finished one */
+  const fitBusy = useRef(false);
   const measure = () => {
+    fitBusy.current = false;
     const root = listRef.current;
     const labels = root?.querySelector<HTMLElement>(".lt-labels");
     if (!root || !labels || labels.clientWidth === 0) return;
@@ -444,9 +486,50 @@ export const ContactRows: React.FC<ContactRowsProps & {
       status: Math.max(maxOf(".clv-rq > *", (e) => e.getBoundingClientRect().width), head("Query status")),
     });
     const cur = fitRef.current;
-    if (next.cols !== cur.cols || next.stacked !== cur.stacked || next.fs !== cur.fs) setFit(next);
+    if (next.cols !== cur.cols || next.stacked !== cur.stacked || next.fs !== cur.fs) { fitBusy.current = true; setFit(next); }
   };
   useLayoutEffect(measure);
+  /* ── v19 §H — THE ARRIVAL. Every list change (load, grouping, sort, filter, search, clearing, pinning) lands the same
+     way: the list is FULLY BUILT before its first paint (the columns are fitted in the layout pass above, and this waits
+     for the re-render that applies them — nothing is decorated a frame later), then the rows ON SCREEN arrive top-down,
+     each from translateY(−8px) and opacity 0 to rest over 300ms on cubic-bezier(.2,.8,.2,1), 24ms apart, the stagger
+     capped at the 18th row; the group bands fade only, over 220ms (a transform on a sticky element flickers). Rows off
+     screen do not animate. A row still arriving from the change before keeps its animation rather than starting again
+     (typing in Find would otherwise blink the list on every key). `fill: backwards` only, so once the arrival ends
+     nothing holds a style and nothing moves. Reduced motion: no animation; the list appears in place. Web Animations,
+     so no keyframe reads a custom property. ── */
+  const arriving = useRef(new WeakMap<Element, Animation>());
+  const arrivedKey = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    if (!arrival || fitBusy.current || arrivedKey.current === arrival.key) return;
+    arrivedKey.current = arrival.key;
+    arrival.before?.();
+    const root = listRef.current;
+    if (!root) return;
+    /* every row closed, and hover held until the pointer moves */
+    if (peekRef.current) setPeek(null);
+    held.current = true;
+    heldAt.current = ptr.current ? { ...ptr.current } : null;
+    root.setAttribute("data-hover-hold", "");
+    if (typeof root.animate !== "function" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const sc = root.closest<HTMLElement>(".wpg-scroll");
+    const view = sc ? sc.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+    let i = 0;
+    for (const el of root.querySelectorAll<HTMLElement>('[data-clv="row"], [data-clv="band"]')) {
+      const b = el.getBoundingClientRect();
+      if (b.height === 0 || b.bottom <= view.top) continue;
+      if (b.top >= view.bottom) break;
+      const band = el.dataset.clv === "band";
+      const delay = Math.min(i, 17) * 24;
+      i += 1;
+      const was = arriving.current.get(el);
+      if (was && was.playState === "running") continue;
+      arriving.current.set(el, band
+        ? el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay, easing: "ease", fill: "backwards" })
+        : el.animate([{ opacity: 0, transform: "translateY(-8px)" }, { opacity: 1, transform: "none" }],
+          { duration: 300, delay, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }));
+    }
+  });
   useEffect(() => {
     const root = listRef.current;
     if (!root || typeof ResizeObserver === "undefined") return undefined;
@@ -474,7 +557,7 @@ export const ContactRows: React.FC<ContactRowsProps & {
         onLog={onLog ? () => onLog(id) : undefined}
         peek={peekId === id} onPeek={onEdit ? onPeekFor(id) : undefined}
         onEdit={onEdit ? (tab, focus) => onEdit(id, tab, focus) : undefined}
-        stacked={fit.stacked}
+        stacked={fit.stacked} dwellers={dwellers.current}
       />
     );
   });

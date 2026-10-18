@@ -594,3 +594,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 @media (prefers-reduced-motion: reduce) {
   .clv-group[data-loading] .cl19-card .clv-row :is(.clv-ini, .clv-rwn b, .clv-ragy, .cl19-dt, .cl19-c > *, .clv-rrep > :first-child, .clv-rq > :first-child) { animation: none; }
 }
+
+/* ── v19 §H — HOVER IS HELD AFTER A LIST CHANGE until the pointer moves (ContactRows sets `data-hover-hold`): a row under
+   a still pointer keeps its rest colour and does not open. ── */
+.clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(.kf):not([data-peek]) { background: #fff; }

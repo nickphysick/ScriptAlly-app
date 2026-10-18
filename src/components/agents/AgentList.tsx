@@ -64,7 +64,6 @@ import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
 import { ContactAppliedRow, ContactFilterMenu, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
-import { useReflow } from "./contact/ContactTouches";
 import { escapeDepth } from "../../lib/escapeStack";
 import { quietScroll, usePopover } from "../shell/ListPills";
 import { CONTACT_PIN_STORE, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
@@ -355,8 +354,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      every render-time reader (the trayFor assignment below), never beside the handler — the TDZ order rule. */
   const rowKeys = useRef({ kfId, displayIds, factsById, trayFor: null as null | ((x: AgentFacts) => CardPrimary), onOpen: null as null | ((id: string, r?: DOMRect) => void), act: null as null | ((id: string, a: CardAct) => void) });
   rowKeys.current = { ...rowKeys.current, kfId, displayIds, factsById };
-  /* §7.2 — the gentle reflow, on any filter, group, sort or Find change (never on first load) */
-  useReflow(gridRef, JSON.stringify([filters, groupKey, sortKey, reversed, search.trim()]));
   const shownGroups = groups;
   const visible = visibleFacts;
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
@@ -550,18 +547,26 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
      handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
   const scrollPending = useRef<number | null>(rememberedVisit?.scroll || null);
+  /* the first draw: the list's arrival calls this before it picks the rows on screen (v19 §H), so the rows that animate
+     are the ones the reader comes back to */
+  const restoreScroll = useCallback(() => {
+    const y = scrollPending.current;
+    scrollPending.current = null;
+    if (revealed.current) { revealed.current = false; return; }
+    const sc = fullScroller();
+    if (y && sc) sc.scrollTop = y;
+  }, [fullScroller]);
+  /* coming back to the route: a scroller the browser reset to its top is put back */
   const wasActive = useRef(active);
   useLayoutEffect(() => {
     const back = active && !wasActive.current;
     wasActive.current = active;
-    if (!active || !showList) return;
+    if (!back || !showList) return;
     const sc = fullScroller();
     if (!sc) return;
-    if (revealed.current) { revealed.current = false; scrollPending.current = null; return; }
-    if (back && scrollPending.current === null && sc.scrollTop === 0) scrollPending.current = readListVisit()?.scroll || null;
-    const y = scrollPending.current;
-    scrollPending.current = null;
-    if (y) sc.scrollTop = y;
+    if (revealed.current) { revealed.current = false; return; }
+    const y = readListVisit()?.scroll || 0;
+    if (y && sc.scrollTop === 0) sc.scrollTop = y;
   }, [active, showList, fullScroller]);
   useEffect(() => {
     if (!active || !showList) return undefined;
@@ -1391,6 +1396,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               focusId={kfId}
               highlight={search.trim()}
               compact={false}
+              /* v19 §H — one arrival for every change to what the list shows or how: load (the first draw), grouping,
+                 sort, filters, the summary card's group, Find and the pin */
+              arrival={{ key: JSON.stringify([groupKey, sortKey, reversed, filters, search.trim(), glance, fullOn]), before: restoreScroll }}
               openId={openId}
               newId={newId}
               onOpen={onOpen}
