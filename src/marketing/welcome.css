@@ -82,8 +82,10 @@
 }
 .mk-wel-herotext { display: flex; flex-direction: column; min-width: 0; outline: none; }
 .mk-wel .mk-wel-h1 { font-size: 64px; line-height: 1.08; margin: 18px 0 18px; }
-.mk-wel .mk-wel-h1:focus { outline: none; }
-.mk-wel .mk-wel-h1:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
+/* Focus is moved here on arrival so a screen reader starts on the news. It is `tabIndex={-1}`, never
+   a tab stop, and Chromium counts that programmatic focus as :focus-visible, so a ring here would
+   box the headline for every visitor. No ring. */
+.mk-wel .mk-wel-h1:focus, .mk-wel .mk-wel-h1:focus-visible { outline: none; }
 .mk-wel-lede { font: 400 19px/1.55 "Source Sans Pro", system-ui, sans-serif; color: var(--mk-body); max-width: 30em; margin: 0; }
 .mk-wel-sub { margin-top: 22px; font: 500 13px "JetBrains Mono", monospace; color: var(--mk-muted); letter-spacing: .02em; }
 .mk-wel-form { margin-top: 22px; max-width: 460px; }

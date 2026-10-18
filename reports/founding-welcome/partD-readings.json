@@ -1,0 +1,155 @@
+{
+  "links": {
+    "verified": "/welcome?v=verified&r=<ref>",
+    "already": "/welcome?v=already&r=<ref>",
+    "expired": "/welcome?v=expired",
+    "unknown": "/welcome?v=unknown",
+    "waiting": "/welcome?v=waiting&r=<ref>"
+  },
+  "api": [
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET  → 200",
+    "GET  → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET  → 200",
+    "GET  → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "GET /welcome → 200",
+    "POST /welcome/answers → 200"
+  ],
+  "verified@1440": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "already@1440": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "waiting@1440": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "expired@1440": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "unknown@1440": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "stable@1440": {
+    "before": {
+      "x": 763.21875,
+      "y": 215.0625,
+      "w": 448.765625,
+      "h": 282.953125,
+      "rect": 450.1083984375
+    },
+    "after": {
+      "x": 763.21875,
+      "y": 215.0625,
+      "w": 448.765625,
+      "h": 282.953125,
+      "rect": 456.4912109375
+    }
+  },
+  "motion@1440": {
+    "endTime": 1450.0000000000002,
+    "reduced": {
+      "animations": 0,
+      "sealOpacity": "1",
+      "sealTransform": "matrix(0.970296, -0.241922, 0.241922, 0.970296, 0, 0)",
+      "cardTransform": "matrix(0.99961, -0.0279216, 0.0279216, 0.99961, 0, 0)"
+    }
+  },
+  "verified@390": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "already@390": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "waiting@390": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "expired@390": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "unknown@390": {
+    "focused": "H1",
+    "ring": "none",
+    "overflow": 0,
+    "hasAt": false,
+    "title": "Welcome — QueryHawk"
+  },
+  "stable@390": {
+    "before": {
+      "x": 18,
+      "y": 486.40625,
+      "w": 354,
+      "h": 223.1875,
+      "rect": 355.03857421875
+    },
+    "after": {
+      "x": 18,
+      "y": 486.40625,
+      "w": 354,
+      "h": 223.1875,
+      "rect": 360.09375
+    }
+  },
+  "motion@390": {
+    "endTime": 1450.0000000000002,
+    "reduced": {
+      "animations": 0,
+      "sealOpacity": "1",
+      "sealTransform": "matrix(0.970296, -0.241922, 0.241922, 0.970296, 0, 0)",
+      "cardTransform": "matrix(0.99961, -0.0279216, 0.0279216, 0.99961, 0, 0)"
+    }
+  },
+  "answers": {
+    "stage": "in-the-thick",
+    "queried": "11-50",
+    "tracker": "spreadsheet",
+    "answeredAt": true
+  }
+}
