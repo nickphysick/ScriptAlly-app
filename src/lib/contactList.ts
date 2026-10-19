@@ -150,6 +150,10 @@ import { formatDate } from "./dates";
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
   formatDate(new Date(ms), { day: "numeric", month: "short" });
+const dmyY = (ms: number): string =>
+  formatDate(new Date(ms), { day: "numeric", month: "short", year: "numeric" });
+/** v19.2 §D — past the expected date by more than this many days, the line stops counting ("Overdue since …") */
+export const LONG_OVER = 30;
 
 /** The agent's STANDING QUERY — what the row's right column speaks about. The furthest-along
  *  live one (the board's own law), else the latest close, else null. One rule, stated once. */
@@ -201,8 +205,13 @@ export function rowDateLine(q: QcRow, nowMs: number): RowDateLine | null {
       ? { text: `Send by ${dmy(q.expectedMs)} · ${days}d over`, over: true }
       : { text: `Send by ${dmy(q.expectedMs)} · ${days}d left`, over: false };
   }
-  /* the agent's court: a future date is a reply coming; a past one is past the expected date —
-     the fact, never an appraisal (no "overdue", no "late") */
+  /* the agent's court: a future date is a reply coming; a past one is past the expected date. v19.2 §D: up to
+     LONG_OVER days it reads "Expected 3 Sep · 18d over"; beyond that a count of days says nothing useful, so it reads
+     "Overdue since 15 May" (the year added when it is not this year's) — Nick's wording, the same ink. */
+  if (past && days > LONG_OVER) {
+    const y = new Date(q.expectedMs).getFullYear() === new Date(nowMs).getFullYear();
+    return { text: `Overdue since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
+  }
   return past
     ? { text: `Expected ${dmy(q.expectedMs)} · ${days}d over`, over: true }
     : { text: `Reply by ${dmy(q.expectedMs)} · in ${days}d`, over: false };
