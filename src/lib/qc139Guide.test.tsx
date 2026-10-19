@@ -4,7 +4,7 @@
  *
  * Query Centre v139 — the unit half of the QC139 locks.
  *
- * A3 empty: with no queries, Find, Open and Birds-eye wait for the first query; Log and Record a response stay
+ * A3 empty: with no queries, Find, Pin the list (v140 §G), Open and Birds-eye wait for the first query; Log and Record a response stay
  *    available (the practice query does not depend on the writer's data). The shared harness account cannot be emptied
  *    of its queries, so this is asserted here, against the page's own derivation and the checklist's rendering of it.
  * The practice store: Pip arrives as the pack states, `practiceRespond` applies the real path's plan in memory, and he
@@ -31,8 +31,8 @@ const read = (p: string) => readFileSync(p, "utf8");
 const DAY = 86_400_000;
 
 describe("A3 · the empty account", () => {
-  it("Find, Open and Birds-eye wait for the first query; Log and Record a response do not", () => {
-    expect([...QC_NEEDS_A_QUERY].sort()).toEqual(["birds", "find", "open"]);
+  it("Find, Pin the list, Open and Birds-eye wait for the first query; Log and Record a response do not", () => {
+    expect([...QC_NEEDS_A_QUERY].sort()).toEqual(["birds", "find", "open", "pin"]);
     expect(QC_NEEDS_A_QUERY).not.toContain("resp");
     expect(QC_NEEDS_A_QUERY).not.toContain("log");
     expect(QC_AFTER_FIRST).toBe("After your first query");
@@ -51,15 +51,25 @@ describe("A3 · the empty account", () => {
   });
 });
 
-describe("the guide's five items and its words", () => {
+describe("the guide's six items and its words (v140 §G adds Pin the list, third)", () => {
   it("in order, with the pack's copy", () => {
     expect(QC_CHECKLIST.map((i) => [i.key, i.title, i.line])).toEqual([
       ["log", "Log a query", "Who you sent it to, and when."],
       ["find", "Find a query", "Search by agent or agency, filter, or tap a status at the top."],
+      ["pin", "Pin the list", "Turn the list into the whole page while you work."],
       ["open", "Open a query", "Its whole story, in one panel."],
       ["resp", "Record a response", "Try it on a practice query. Nothing is saved."],
       ["birds", "See the Birds-eye view", "Every live query on one timeline. Press B."],
     ]);
+    expect(QC_CHECKLIST).toHaveLength(6);
+    /* v140 §G — the eyebrows count six: the log card is Step 1, Pip's walkthrough (Record a response) Step 5 */
+    expect(QC_CHECKLIST.findIndex((it) => it.key === "resp") + 1).toBe(5);
+    const page = read("src/components/Queries.tsx");
+    expect(page).not.toMatch(/Step \d of 5/);
+    expect(page).toContain("kicker: `Query Centre · Step 1 of ${QC_CHECKLIST.length}`");
+    expect(page).toContain('Step ${QC_CHECKLIST.findIndex((it) => it.key === "resp") + 1} of ${QC_CHECKLIST.length}');
+    /* the tick is read from the pin's real state, never from the guide's own buttons */
+    expect(page).toMatch(/if \(qcPin\.full && !was\.full && !was\.known && routeActive\) tickGuide\.current\("pin"\)/);
     expect(QC_ALL_DONE).toEqual({ title: "All done", line: "You know your way round the Query Centre. This checklist goes away next time you visit." });
   });
   it("the state is the account's, under todoPrefs.queries.guide", () => {

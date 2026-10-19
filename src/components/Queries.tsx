@@ -100,7 +100,7 @@ import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
-import { usePinList } from "./shell/useFullScreenList";
+import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
 import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
@@ -5683,6 +5683,18 @@ export const Queries: React.FC<{
   const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
   useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
   useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
+  /* v140 §G — "Pin the list" ticks when the writer pins (the button or F, walkthrough or not), never for a remembered pin
+     put back on arrival. ⚠️ THE DISCRIMINATOR IS THE DEVICE'S PIN RECORD AS IT WAS ONE RENDER BEFORE THE LIST PINNED: a
+     restore pins a list the device already remembers as pinned, while the writer's press is what writes it. (Reading
+     "was the page already on screen", as the Contact list does, ticked every pinned reload here: the restore lands a
+     render after the route.) The guide never pins. */
+  const pinKnown = (() => { try { return localStorage.getItem(PIN_KEYS.queries) === "1"; } catch { return false; } })();
+  const wasQcPin = useRef({ full: qcPin.full, known: pinKnown });
+  useEffect(() => {
+    const was = wasQcPin.current;
+    wasQcPin.current = { full: qcPin.full, known: pinKnown };
+    if (qcPin.full && !was.full && !was.known && routeActive) tickGuide.current("pin");
+  }, [qcPin.full, pinKnown, routeActive]);
   const guideDone = useMemo(() => ({ ...qcGuide.done, ...(hasQueries ? { log: true } : {}) }), [qcGuide.done, hasQueries]);
   /* all five done in an EARLIER visit: the pill does not come back (read once, when the account first loads here) */
   const finishedAtLoad = useRef<boolean | null>(null);
@@ -5708,6 +5720,12 @@ export const Queries: React.FC<{
     switch (k) {
       case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
       case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters. You can also tap a status glyph at the top of the page." };
+      /* v140 §G — the toolbar's Pin button, unpinned first (pinned, it reads Unpin list and the page is not the one the
+         card describes) */
+      case "pin": return unpinned(() => ({
+        el: vis(".qc138-sheet button[data-qc140='pin']"), keyCap: "F",
+        text: <>Press <b>Pin list</b> and the list becomes the whole page: the sidebar tucks away and the counts move into a band at the top. Press it again, or Esc, to put things back.</>,
+      }));
       case "open": {
         const row = vis(".qc138-sheet [data-qcv='row']");
         const q = row ? queries.find((x) => x.id === row.dataset.id) : undefined;
@@ -5740,7 +5758,7 @@ export const Queries: React.FC<{
       setGuideFlow({
         id: "log-2",
         target: () => document.querySelector<HTMLElement>(".qad-root.is-open [data-qad-drawer='log']"),
-        kicker: "Query Centre · Step 1 of 5",
+        kicker: `Query Centre · Step 1 of ${QC_CHECKLIST.length}`,
         title: "Log a query",
         body: "Choose the agent and the date you sent it, then save. If you're just looking, press Cancel.",
         place: "left",
@@ -5856,7 +5874,7 @@ export const Queries: React.FC<{
     if (!walk || !practice) return null;
     const of = walk === "journey" || walk === "done" ? Math.max(1, jStep.of) + 3 : 6;
     const dots = (k: number) => ({ k, n: of });
-    const kick = (k: number) => `Query Centre · Step 4 of 5 · ${k} of ${of}`;
+    const kick = (k: number) => `Query Centre · Step ${QC_CHECKLIST.findIndex((it) => it.key === "resp") + 1} of ${QC_CHECKLIST.length} · ${k} of ${of}`;
     const early = () => endWalk("early");
     const base = { onBack: early, onEscape: early };
     if (walk === "band") return {

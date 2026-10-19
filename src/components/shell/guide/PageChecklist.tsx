@@ -29,7 +29,8 @@ import "./pageChecklist.css";
 
 export interface ChecklistTarget {
   el: HTMLElement | null;
-  text: string;
+  /** the card's sentence; a node where a control's name is set in bold (Query Centre v140 §G: "Press **Pin list** …") */
+  text: React.ReactNode;
   /** a key that does the same as the target (Query Centre v139: the Birds-eye tab's B), drawn as a key cap */
   keyCap?: string;
 }
@@ -186,7 +187,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   /* ── the spotlight ── */
   const [geo, setGeo] = useState<{ path: string; hole: { left: number; top: number; width: number; height: number; r: number } } | null>(null);
   const [cardAt, setCardAt] = useState<{ left: number; top: number; up: boolean } | null>(null);
-  const spotText = useRef("");
+  const spotText = useRef<React.ReactNode>("");
   const spotKey = useRef<string | null>(null);
   const { targetFor } = p;
 

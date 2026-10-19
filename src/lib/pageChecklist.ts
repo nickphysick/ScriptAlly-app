@@ -103,18 +103,21 @@ export const GUIDE_HIDDEN_PATH: UserPaths = { [`${BASE}.hidden`]: true };
 
 /* ── the Query Centre's state (v139) ── */
 
-export type QcGuideKey = "log" | "find" | "open" | "resp" | "birds";
+export type QcGuideKey = "log" | "find" | "pin" | "open" | "resp" | "birds";
 
 export const QC_CHECKLIST: readonly ChecklistItem<QcGuideKey>[] = [
   { key: "log", title: "Log a query", line: "Who you sent it to, and when." },
   { key: "find", title: "Find a query", line: "Search by agent or agency, filter, or tap a status at the top." },
+  /* Query Centre v140 §G — the third of six: its spotlight is the toolbar's Pin button, and it ticks when the list is pinned */
+  { key: "pin", title: "Pin the list", line: "Turn the list into the whole page while you work." },
   { key: "open", title: "Open a query", line: "Its whole story, in one panel." },
   { key: "resp", title: "Record a response", line: "Try it on a practice query. Nothing is saved." },
   { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline. Press B." },
 ];
 
 /** With no queries yet, the items that need one (§A): the practice query does not, so "resp" is never here. */
-export const QC_NEEDS_A_QUERY: readonly QcGuideKey[] = ["find", "open", "birds"];
+/* v140 §G — "pin" too: with no queries the page draws its empty state, which has no list and so no Pin button */
+export const QC_NEEDS_A_QUERY: readonly QcGuideKey[] = ["find", "pin", "open", "birds"];
 export const QC_AFTER_FIRST = "After your first query";
 
 export const QC_ALL_DONE = {
@@ -124,7 +127,7 @@ export const QC_ALL_DONE = {
 
 const QC_BASE = "todoPrefs.queries.guide";
 
-/** `finished`: all five were done in an earlier visit — the pill does not come back (v18.3 F). */
+/** `finished`: all six (five before v140) were done in an earlier visit — the pill does not come back (v18.3 F). */
 export interface QcGuideState extends GuideState<QcGuideKey> { finished: boolean }
 
 export function qcGuideOf(user: User | null | undefined): QcGuideState {

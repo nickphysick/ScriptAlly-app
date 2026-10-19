@@ -106,6 +106,9 @@
 .pck-ck { font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: #a2452a; }
 .pck-card b { font: 400 16px/1.25 var(--sp-type) !important; color: #1c130f; }
 .pck-ci { font: 400 14.5px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.8); }
+/* Query Centre v140 §G — a control's name inside the sentence, in the sentence's own face at 600 (brand.tsx names a
+   family on bare b at runtime, so the face is restated with !important and two classes) */
+.pck-card .pck-ci b { font: 600 14.5px/1.45 var(--sp-serif) !important; color: #1c130f; }
 .pck-back {
   all: unset; cursor: pointer; width: max-content; margin-top: 6px; font: 400 13px/1.2 var(--sp-serif) !important; color: #2d3a50;
   text-decoration: underline; text-underline-offset: 3px;
