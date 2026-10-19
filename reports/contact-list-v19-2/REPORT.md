@@ -115,4 +115,13 @@ temporary fixtures, removed afterwards.
 
 ## Deploy
 
-_Filled in below._
+- **The base for the merge:** by deploy time dev served `index-BH-rXrRP.js` from `dev/…-cl19-cl191-qc140`
+  (`fb31b9a6`), another session's Query Centre v140. So the integration branch `dev/…-cl191-qc140-cl192` was cut from
+  that and `contact-list-v19-2` merged in.
+- **The one conflict:** `design-refs/.refhashes.json`, resolved as the union of both sides' entries. The checker printed
+  unchanged (656).
+- **Gates on the merged tree** (`f758e550`): tsc and the build clean, Vitest 9143 passed (only `email.test` red).
+- **Locks on the merged build:** CL192 9/9, CL191 9/9, CL19 15/15 and QC140 15/15.
+- **The deploy:** built from a clean detached worktree; the served hash was re-checked just before deploying. Hosting
+  only, to dev, which now serves **`index-BS8qdecw.js`**.
+- Not merged to main. Prod is Nick's.
