@@ -42,7 +42,7 @@ Branch `query-centre-v140-1` (worktree `~/ScriptAlly-qc1401`). Built 19 Oct 2026
 
 ## 5. Locks: QC1401
 
-Each lock was red on the base build (`index-BH-rXrRP.js`), red under its named break, then green on the branch and on the integration build.
+Each lock was red on the base build (`index-BH-rXrRP.js`), red under its named break, then green on the branch and on the integration build (§6).
 
 | Lock | Base (fb31b9a6) | Break | Green |
 |---|---|---|---|
@@ -59,4 +59,30 @@ Each lock was red on the base build (`index-BH-rXrRP.js`), red under its named b
 
 ## 6. Integration and dev
 
-INTEGRATION
+**Dev moved while the locks ran.** The first integration branch, `dev/…-cl191-qc140-qc1401` (a fast-forward to `148c6ed5`, bundle `index-D3feW9qh.js`), passed its gates and locks. Then the deploy's last check found dev serving `index-BS8qdecw.js`: another session had deployed Contact list v19.2 from `dev/…-qc140-cl192` (`f758e550`) in the meantime. The deploy stopped and nothing was published from the first branch, which stays on the remote unused.
+
+- **What dev served at deploy time:** `dev/…-cl191-qc140-cl192` at `f758e550` (Contact list v19.2 on top of v140). A build of `f758e550` reproduced `index-BS8qdecw.js`.
+- **Integration branch:** `dev/…-cl191-qc140-cl192-qc1401`, cut from `f758e550`.
+  - It merges `query-centre-v140-1` cleanly (merge commit `1e56a0d6`).
+  - A second merge brings in QC139 B2's wait: tip `0d94cf1e`, pushed.
+- **Gates there:** tsc 0, `vite build` 0 (no errors or warnings), `build:dev` 0, Vitest 617/617 files (9,155 passed, 3 skipped).
+- **Locks there (`index-DSAY7Z_7.js`):**
+
+| Suite | Result |
+|---|---|
+| QC1401 | 5/5 (A1, A2, B1 at both sizes, plus auth) |
+| QC140 | 15/15 |
+| QC138.6 | 10/10 |
+| CL19 | 15/15 |
+| CL19.1 | 9/9 |
+| QC139 | 13/14 on the run, then 14/14 (see below) |
+
+- **QC139 B2, explained:**
+  - **What failed:** B2 read the practice journey's drawer the instant Pip's third card showed. On this build it found nothing at that moment, even when run alone. Every later check in the same case passed, including all five answers clicked inside that drawer.
+  - **What was measured:** the drawer mounts **21–38ms** after the card.
+  - **The fix (`a27be9c3`):** the read waits up to 5s, and the wait is recorded as its own reading. B2 is now 10/10 on two consecutive runs.
+  - **Cause:** a read taken too early, not a fault. Nothing in v140.1 touches the drawer.
+- **QC139 B1, explained:** on the first (`…-qc1401`) build, B1 went red because the account's counts moved during the run: four Queried queries were there at the start and gone by the end (56 → 52). The account was back to 87 straight afterwards, and B1 passes alone (6/6). Nothing in v140.1 writes queries; the export only reads.
+- **The guide's state was put back after every run.** Once, the final restore hit Firebase's password-verification quota (`auth/quota-exceeded`). The state was then put back through the admin API to exactly what was recorded before the run, `{"seen":true,"done":{"log":true,"find":true,"open":true}}`, and read back to confirm.
+- **Deployed to dev only**, from a clean detached checkout of `0d94cf1e`, as hosting only, after re-checking that dev still served `index-BS8qdecw.js`. **Dev now serves `index-DSAY7Z_7.js`.**
+- **Not merged to main. Prod untouched.**
