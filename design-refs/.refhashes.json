@@ -656,7 +656,14 @@
     "design-refs/contact-list-v19-2/screens/02-unpinned-imported-1280@2x.png": "8c22621431500e33e828333937466e51a94c3ad66a1ff5a743894f17bcfd8ca4",
     "design-refs/contact-list-v19-2/screens/02-unpinned-imported-1512@2x.png": "967b3c7583c127e12360708849cdba492f52f2c04e5e6f189b00a5e451fb94c2",
     "design-refs/contact-list-v19-2/screens/03-pinned-overdue-1280@2x.png": "e2158124f9881c3d7ac1d330ee84b9a344cd12037c31bb71b40d818be625ee9b",
-    "design-refs/contact-list-v19-2/screens/03-pinned-overdue-1512@2x.png": "6278d1687b6fd8f8acb6a619d24aaaca1207ba3306dd0cdb488529cd57b1da3a"
+    "design-refs/contact-list-v19-2/screens/03-pinned-overdue-1512@2x.png": "6278d1687b6fd8f8acb6a619d24aaaca1207ba3306dd0cdb488529cd57b1da3a",
+    "design-refs/header-rules-v1-1/query-centre-header-rules-v1-1.html": "0197c614a9b7d4d4d6e7d488c19e236eabb0faa9fb3815894c1934fcac62c63e",
+    "design-refs/header-rules-v1-1/screens/01-qc-rules-1280.png": "3070116696af73f94e00883ab968c0cf4140c6e295399ca8b95e3a5d8ac3e8bf",
+    "design-refs/header-rules-v1-1/screens/02-qc-rules-1440.png": "70e0e7c9d4760b3a64988a1a0ed11ea0b8db77d034612baebbbd60335de95a1c",
+    "design-refs/header-rules-v1-1/screens/03-qc-rules-1512.png": "ed94836c22c3b1019414be3f5b14be163b4b091dcea1653ae2d2e40aed0f2b7d",
+    "design-refs/header-rules-v1-1/screens/04-qc-rules-1920.png": "a5555d575449ea94316dd14041a74f8e9b39b3aaeedc4968d28835a8976bef78",
+    "design-refs/header-rules-v1-1/screens/05-qc-full-1280.png": "83514ca982cd0dc75fa40f4c0673eaa4cc0d91094cac3fdabd5ee28c840a8373",
+    "design-refs/header-rules-v1-1/screens/06-qc-full-1512.png": "c7d3cc26b7ae9a3fdc4b6c93dc42b6ee580ea0d67bb8a167733980148ca8b3d5"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
