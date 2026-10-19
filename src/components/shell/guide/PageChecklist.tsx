@@ -26,6 +26,8 @@ import {
   type ChecklistItem, type DoneMap, cardPlace, dimPath, doneCount, holeFor, nextUndone, scrollDelta,
 } from "../../../lib/pageChecklist";
 import "./pageChecklist.css";
+import { AnchoredPortal, useAnchoredPopover } from "../useAnchoredPopover";
+import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../../lib/popoverLayer";
 
 export interface ChecklistTarget {
   el: HTMLElement | null;
@@ -119,7 +121,6 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   const pillRef = useRef<HTMLButtonElement | null>(null);
   const popRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const [pillBox, setPillBox] = useState<{ right: number; bottom: number } | null>(null);
 
   const shown = p.active && !p.hidden && (!all || lingering || !!p.allDone);
 
@@ -142,19 +143,14 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     return () => window.clearTimeout(t);
   }, [shown, p.seen, p.ready, onSeen]);
 
-  /* the pill's box, for the popover and the note, which are fixed to the window */
-  const readPill = useCallback(() => {
-    const el = pillRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    if (r.height > 0) setPillBox({ right: window.innerWidth - r.right, bottom: r.bottom });
-  }, []);
-  useLayoutEffect(() => {
-    if (!open && !note) return undefined;
-    readPill();
-    window.addEventListener("resize", readPill);
-    return () => window.removeEventListener("resize", readPill);
-  }, [open, note, readPill]);
+  /* Help system v1, Part A — the popover and the note live in the one pop-up layer, placed from the pill; one top-bar
+     pop-up at a time (opening the Help menu closes this, and this closes it) */
+  const noteRef = useRef<HTMLDivElement | null>(null);
+  const popPlace = useAnchoredPopover(pillRef, popRef, open, { align: "end", gap: 12 });
+  const notePlace = useAnchoredPopover(pillRef, noteRef, !!note, { align: "end", gap: 12 });
+  useEffect(() => { if (open) claimTopbar("checklist"); else releaseTopbar("checklist"); }, [open]);
+  useEffect(() => onTopbarClaim((id) => { if (id !== "checklist") { setOpen(false); setSure(false); setNote(null); } }), []);
+
 
   /* the popover: an outside press closes it; Escape closes it before anything under it hears the key */
   useEffect(() => {
@@ -322,9 +318,9 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     </button>
   );
 
-  const popover = open && pillBox ? (
-    <div ref={popRef} className="pck-pop" role="dialog" aria-label={`${p.page}: Getting started`} data-pck="popover"
-      style={{ top: pillBox.bottom + 12, right: pillBox.right }}>
+  const popover = open ? (
+    <div ref={popRef} className={`pck-pop${reduced() ? " pck-still" : ""}`} role="dialog" aria-label={`${p.page}: Getting started`} data-pck="popover"
+      style={popPlace.style}>
       <div className="pck-fr">
         <div className="pck-h">
           <div className="pck-ht">
@@ -407,8 +403,8 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     </div>
   ) : null;
 
-  const noteEl = note && pillBox ? (
-    <div className="pck-note" role="status" data-pck="note" style={{ top: pillBox.bottom + 12, right: pillBox.right }}>
+  const noteEl = note ? (
+    <div ref={noteRef} className={`pck-note${reduced() ? " pck-still" : ""}`} role="status" data-pck="note" style={notePlace.style}>
       <span className="pck-ok" aria-hidden="true">✓</span>
       <span className="pck-nt"><b>{items.find((i) => i.key === note.key)?.title}</b>
         <small>{p.page} · {n} of {items.length} done</small></span>
@@ -421,7 +417,8 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   return (
     <>
       {createPortal(pill, slot)}
-      {(popover || spotlight || noteEl || flowEl) && createPortal(<div className={`pck-layer${reduced() ? " pck-still" : ""}`}>{popover}{spotlight}{flowEl}{noteEl}</div>, document.body)}
+      {(popover || noteEl) && <AnchoredPortal>{popover}{noteEl}</AnchoredPortal>}
+      {(spotlight || flowEl) && createPortal(<div className={`pck-layer${reduced() ? " pck-still" : ""}`}>{spotlight}{flowEl}</div>, document.body)}
     </>
   );
 }

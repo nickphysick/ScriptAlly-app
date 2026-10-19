@@ -63,6 +63,8 @@ import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 import { setBarSlot } from "../../lib/barSlot";
+import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
+import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -303,10 +305,17 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     setGuidePage(registeredPageGuide());
     return subscribePageGuide(() => setGuidePage(registeredPageGuide()));
   }, []);
+  /* Help system v1, Part A — the menu lives in the one pop-up layer, placed from the "?"; one top-bar pop-up at a time */
+  const helpPlace = useAnchoredPopover(helpBtnRef, helpMenuRef, helpOpen, { align: "end", gap: 8 });
+  useEffect(() => { if (helpOpen) claimTopbar("help"); else releaseTopbar("help"); }, [helpOpen]);
+  useEffect(() => onTopbarClaim((id) => { if (id !== "help") setHelpOpen(false); }), []);
   /* the house dismissal idiom: pointerdown outside, Escape, and the trigger counts as inside */
   useEffect(() => {
     if (!helpOpen) return;
-    const away = (e: PointerEvent) => { if (!helpWrapRef.current?.contains(e.target as Node)) setHelpOpen(false); };
+    const away = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (!helpWrapRef.current?.contains(t) && !helpMenuRef.current?.contains(t)) setHelpOpen(false);
+    };
     /* Escape closes and hands focus back to the "?" (follow-up 2, §2) */
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") { setHelpOpen(false); helpBtnRef.current?.focus(); } };
     document.addEventListener("pointerdown", away);
@@ -1046,10 +1055,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   >
                     <span aria-hidden="true">?</span>
                   </button>
-                  {helpOpen && (
+                  {helpOpen && (<AnchoredPortal>
                     <div
                       ref={helpMenuRef}
                       className="ws-helpmenu sa-pop" role="menu" aria-label="Help" data-shell="help-menu"
+                      style={helpPlace.style}
                       onKeyDown={(e) => { moveInMenu(e, helpMenuRef.current); }}
                     >
                       <p className="sa-peb" aria-hidden="true">Help</p>
@@ -1068,7 +1078,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                         {HELP_ICONS.kb}<span>Keyboard shortcuts</span><kbd className="sa-kc">?</kbd>
                       </button>
                     </div>
-                  )}
+                  </AnchoredPortal>)}
                 </span>
               </div>
           </header>

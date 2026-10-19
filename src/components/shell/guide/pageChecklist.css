@@ -34,11 +34,11 @@
   animation: pck-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .pck-pop::before {
-  content: ""; position: absolute; right: 22px; top: -6px; width: 12px; height: 12px; background: #fbeee8; transform: rotate(45deg);
+  content: ""; position: absolute; right: var(--pop-caret, 22px); top: -6px; width: 12px; height: 12px; background: #fbeee8; transform: rotate(45deg);
   box-shadow: -1px -1px 0 rgba(28, 19, 15, 0.1);
 }
 @keyframes pck-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-.pck-fr { position: relative; border: 1px solid rgba(165, 131, 123, 0.7); border-radius: 11px; overflow: hidden; background: #fff; }
+.pck-fr { position: relative; border: 1px solid rgba(165, 131, 123, 0.7); border-radius: 11px; overflow: hidden auto; max-height: calc(var(--pop-max, 100vh) - 16px); background: #fff; }
 .pck-h { padding: 12px 10px 12px 14px; background: #fbeee8; border-bottom: 1px solid rgba(162, 69, 42, 0.18); }
 .pck-ht { display: flex; align-items: center; gap: 12px; }
 .pck-art { flex: none; width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(28, 19, 15, 0.22)); }

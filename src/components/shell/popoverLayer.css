@@ -1,0 +1,15 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Help system v1, Part A — the one pop-up layer (`lib/popoverLayer`). Fixed over the window, inert itself; its children
+ * take the pointer. z 80: above every page element and the floating tab (55), below the shortcuts sheet (90) and the
+ * phone sheets (1000).
+ */
+#qh-popovers {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 80;
+}
+#qh-popovers > * { pointer-events: auto; }
