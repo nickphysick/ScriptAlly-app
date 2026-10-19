@@ -16,3 +16,38 @@ describe("sheetText — the Firebase-free conversion", () => {
     expect(viaSmartImport).toBe(bufferToCsv);
   });
 });
+
+// ── Fix 1 (Smart Import eval, Phase 6): every tab ─────────────────────────────────────────────
+import * as XLSX from "xlsx";
+import { SHEET_HEADING } from "./sheetText";
+
+function book(sheets: [string, unknown[][]][]): Uint8Array {
+  const wb = XLSX.utils.book_new();
+  for (const [name, rows] of sheets) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), name);
+  return new Uint8Array(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
+}
+
+describe("bufferToCsv reads every sheet with data in it", () => {
+  it("includes a second tab, each introduced by its name", () => {
+    const text = bufferToCsv(book([["Active", [["Agent", "Status"], ["Clara Voss", "Queried"]]], ["Archive", [["Agent", "Status"], ["Tomas Vidal", "pass"]]]]));
+    expect(text).toBe(`${SHEET_HEADING("Active")}\nAgent,Status\nClara Voss,Queried\n${SHEET_HEADING("Archive")}\nAgent,Status\nTomas Vidal,pass`);
+  });
+
+  it("finds data behind a cover sheet", () => {
+    const text = bufferToCsv(book([["Read me", [["How I use this tracker"]]], ["Queries", [["Agent"], ["Clara Voss"]]]]));
+    expect(text).toContain("Clara Voss");
+    expect(text.indexOf(SHEET_HEADING("Read me"))).toBeLessThan(text.indexOf(SHEET_HEADING("Queries")));
+  });
+
+  it("skips empty sheets, and gives a workbook with ONE sheet of data no heading at all", () => {
+    const text = bufferToCsv(book([["Queries", [["Agent"], ["Clara Voss"]]], ["Notes", []], ["Blank", [["", ""], ["", ""]]]]));
+    expect(text).toBe("Agent\nClara Voss");
+    expect(text).not.toContain("###");
+  });
+
+  it("leaves a .csv byte-identical to the first-sheet-only conversion", () => {
+    const csv = new TextEncoder().encode("Agent,Agency\nClara Voss,Pemberton\n");
+    const wb = XLSX.read(csv, { type: "array", raw: true });
+    expect(bufferToCsv(csv)).toBe(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]));
+  });
+});
