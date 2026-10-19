@@ -28,7 +28,9 @@ EOF
   if ! npm run build:dev > "reports/qc-v140/runs/mut-$name-build.log" 2>&1; then
     cp "$bak" "$file"; echo "{\"lock\":\"$lock\",\"break\":\"$name\",\"red\":null,\"note\":\"build failed\"}" >> "$OUT"; return
   fi
-  SA_E2E_BASE_URL=http://127.0.0.1:$PORT npx playwright test tests/e2e/qcV140.measure.ts --reporter=line --workers=1 -g "$lock ·" > "reports/qc-v140/runs/mut-$name.log" 2>&1
+  # QC140_MUTATE names the break so its ledger is written as mut-src-<name>-<lock>.json, never over a clean run's
+  # (no page-side break is keyed src-*, so this adds nothing to the page)
+  QC140_MUTATE="src-$name" SA_E2E_BASE_URL=http://127.0.0.1:$PORT npx playwright test tests/e2e/qcV140.measure.ts --reporter=line --workers=1 -g "$lock ·" > "reports/qc-v140/runs/mut-$name.log" 2>&1
   local code=$?
   cp "$bak" "$file"
   local first=$(grep -m1 -E "✗" "reports/qc-v140/runs/mut-$name.log" | sed 's/"/\\"/g' | cut -c1-200)
