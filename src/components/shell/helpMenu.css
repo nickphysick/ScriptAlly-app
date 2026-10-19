@@ -1,0 +1,101 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Help system v1, Part B — the Help menu, design A "Page card" (design-refs/help-system-v1). The card is the checklist's
+ * construction: white, radius 16, padding 7, and an inner frame of 1px #a5837b at 70%, radius 11, clipping its contents.
+ * A 12px caret under the "?". Values are the mock's.
+ *
+ * ⚠️ brand.tsx names a family on bare h5/b/span at runtime, so every face here is stated with two classes and
+ *    `!important`, the house claw-back.
+ */
+.hm {
+  box-sizing: border-box; width: 340px; padding: 7px; border-radius: 16px; background: #ffffff; color: #1c130f;
+  box-shadow: 0 18px 50px rgba(20, 14, 10, 0.28), 0 2px 6px rgba(20, 14, 10, 0.12);
+  font: 400 15px/1.5 var(--sp-serif);
+  animation: hm-in 0.12s ease-out;
+}
+@keyframes hm-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+/* the caret, 12px, under the "?" (`--pop-caret` from useAnchoredPopover) */
+.hm::before {
+  content: ""; position: absolute; top: -6px; right: var(--pop-caret, 12px); width: 12px; height: 12px; border-radius: 2px;
+  background: #fbeee8; transform: rotate(45deg);
+}
+.hm .hm-frame {
+  position: relative; box-sizing: border-box; border: 1px solid rgba(165, 131, 123, 0.7); border-radius: 11px; overflow: hidden auto;
+  max-height: calc(var(--pop-max, 100vh) - 16px); background: #ffffff;
+}
+
+/* the header: blush, the eyebrow, the page's guide */
+.hm .hm-head { background: #fbeee8; padding: 12px 14px 14px; border-bottom: 1px solid rgba(162, 69, 42, 0.16); }
+.hm .hm-eyb {
+  margin: 0; font: 500 10px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #a2452a;
+}
+.hm .hm-eyb + * { margin-top: 10px; }
+.hm .hm-guide { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; }
+.hm .hm-ring { position: relative; width: 40px; height: 40px; }
+.hm .hm-ring svg { display: block; }
+.hm .hm-ring b {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font: 400 12px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: #a2452a;
+}
+.hm .hm-gt h5 { margin: 0; font: 600 15px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.hm .hm-gt p { margin: 1px 0 0; font: 400 12.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.hm .hm-go {
+  all: unset; box-sizing: border-box; cursor: pointer; padding: 6px 10px; border-radius: 8px; background: #2d3a52; color: #ffffff;
+  font: 400 12.5px/1.3 var(--sp-serif) !important; white-space: nowrap;
+}
+.hm .hm-go:hover { background: #3b4a66; }
+.hm .hm-go:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+
+/* sections */
+.hm .hm-sec { padding: 6px; }
+.hm .hm-sec + .hm-sec { border-top: 1px solid rgba(28, 19, 15, 0.12); }
+.hm .hm-sl {
+  display: block; padding: 6px 10px 4px; font: 400 9.5px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important;
+  letter-spacing: 0.16em; color: rgba(28, 19, 15, 0.45);
+}
+.hm .hm-row {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px;
+  border-radius: 8px; font: 400 14.5px/1.4 var(--sp-serif) !important; color: #1c130f; text-align: left;
+}
+.hm .hm-row:hover, .hm .hm-row:focus-visible { background: #fbf9f5; }
+.hm .hm-row:focus-visible { box-shadow: inset 0 0 0 2px rgba(45, 58, 82, 0.35); }
+.hm .hm-row .t { flex: 1; min-width: 0; font: inherit !important; }
+.hm .hm-i { flex: none; width: 18px; height: 18px; color: rgba(28, 19, 15, 0.62); }
+.hm .hm-i--arrow { width: 14px; height: 14px; }
+.hm .hm-row .mt, .hm .hm-row .hm-key {
+  font: 400 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.45); border: 0; background: none;
+}
+.hm .hm-bdg {
+  font: 600 10px/1.5 var(--font-mono, "JetBrains Mono", monospace) !important; background: #a2452a; color: #ffffff; border-radius: 999px;
+  padding: 1px 7px;
+}
+/* an article row: 14px, ink 60%, ink on hover; a 15px document icon */
+.hm .hm-row.hm-art { font-size: 14px !important; color: rgba(28, 19, 15, 0.6); padding: 6px 10px; }
+.hm .hm-row.hm-art:hover, .hm .hm-row.hm-art:focus-visible { color: #1c130f; }
+.hm .hm-row.hm-art .hm-i { width: 15px; height: 15px; opacity: 0.7; }
+/* the restart row, in the header */
+.hm .hm-head .hm-again { padding: 4px 6px; margin-left: -6px; width: calc(100% + 12px); font-size: 14px !important; font-weight: 500 !important; }
+.hm .hm-head .hm-again:hover, .hm .hm-head .hm-again:focus-visible { background: rgba(255, 255, 255, 0.6); }
+
+/* the foot: PAGE GUIDES and the switch */
+.hm .hm-foot {
+  display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid rgba(28, 19, 15, 0.12);
+  background: #fbf9f5; color: rgba(28, 19, 15, 0.62);
+}
+.hm .hm-fl { font: 400 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; }
+.hm .hm-sw {
+  all: unset; box-sizing: border-box; cursor: pointer; position: relative; width: 34px; height: 20px; border-radius: 999px; background: #2d3a52;
+}
+.hm .hm-sw::after {
+  content: ""; position: absolute; top: 3px; left: 17px; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; transition: left 0.2s;
+}
+.hm .hm-sw[aria-checked="false"] { background: #c9c3b9; }
+.hm .hm-sw[aria-checked="false"]::after { left: 3px; }
+.hm .hm-sw:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm, .hm .hm-sw::after { animation: none; transition: none; }
+}

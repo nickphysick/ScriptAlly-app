@@ -45,8 +45,7 @@ import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
-import { ShortcutsSheet, OPEN_SHORTCUTS_EVENT } from "./ShortcutsSheet";
-import { moveInMenu } from "../../lib/menuKeys";
+import { ShortcutsSheet } from "./ShortcutsSheet";
 import "./shellMenus.css";
 import { SidebarCapture } from "./SidebarCapture";
 import {
@@ -65,6 +64,7 @@ import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../..
 import { setBarSlot } from "../../lib/barSlot";
 import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
+import { HelpMenu } from "./HelpMenu";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -75,15 +75,6 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
    asset. The v2 brand is TYPE (a Playfair "S" in an ink square), so there is no ink ratio to
    compensate for and nothing to keep the number in step with. */
 
-/** The Help menu's three marks — the reference's own paths (book · map · keyboard), 16px, 1.6 stroke. */
-const helpIcon = (d: React.ReactNode) => (
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
-);
-const HELP_ICONS = {
-  book: helpIcon(<><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" /><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" /></>),
-  map: helpIcon(<><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z" /><path d="M9 4v14M15 6v14" /></>),
-  kb: helpIcon(<><rect x="2.5" y="6" width="19" height="12" rx="2" /><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" /></>),
-};
 
 export interface WorkspaceShellProps {
   /** The IA — owned by the caller, never by this component. */
@@ -309,6 +300,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const helpPlace = useAnchoredPopover(helpBtnRef, helpMenuRef, helpOpen, { align: "end", gap: 8 });
   useEffect(() => { if (helpOpen) claimTopbar("help"); else releaseTopbar("help"); }, [helpOpen]);
   useEffect(() => onTopbarClaim((id) => { if (id !== "help") setHelpOpen(false); }), []);
+  /* Part B — a route change closes it */
+  useEffect(() => { setHelpOpen(false); }, [pathname]);
   /* the house dismissal idiom: pointerdown outside, Escape, and the trigger counts as inside */
   useEffect(() => {
     if (!helpOpen) return;
@@ -1055,29 +1048,17 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   >
                     <span aria-hidden="true">?</span>
                   </button>
+                  {/* Help system v1, Part B — the "Page card" menu (shell/HelpMenu), in the one pop-up layer */}
                   {helpOpen && (<AnchoredPortal>
-                    <div
-                      ref={helpMenuRef}
-                      className="ws-helpmenu sa-pop" role="menu" aria-label="Help" data-shell="help-menu"
-                      style={helpPlace.style}
-                      onKeyDown={(e) => { moveInMenu(e, helpMenuRef.current); }}
-                    >
-                      <p className="sa-peb" aria-hidden="true">Help</p>
-                      <button type="button" role="menuitem" className="sa-mi" data-shell="help-centre"
-                        onClick={() => { setHelpOpen(false); onOpenHelp(); }}>
-                        {HELP_ICONS.book}<span>Help centre</span>
-                      </button>
-                      {guidePage && (
-                        <button type="button" role="menuitem" className="sa-mi" data-shell="guide-again"
-                          onClick={() => { setHelpOpen(false); requestPageGuide(); }}>
-                          {HELP_ICONS.map}<span>Show the page guide</span>
-                        </button>
-                      )}
-                      <button type="button" role="menuitem" className="sa-mi" data-shell="help-shortcuts"
-                        onClick={() => { setHelpOpen(false); window.dispatchEvent(new Event(OPEN_SHORTCUTS_EVENT)); }}>
-                        {HELP_ICONS.kb}<span>Keyboard shortcuts</span><kbd className="sa-kc">?</kbd>
-                      </button>
-                    </div>
+                    <HelpMenu
+                      menuRef={helpMenuRef} style={helpPlace.style}
+                      pageName={pageName?.name ?? null}
+                      legacyGuide={!!guidePage}
+                      onLegacyGuide={requestPageGuide}
+                      onClose={(focusHelp) => { setHelpOpen(false); if (focusHelp) helpBtnRef.current?.focus(); }}
+                      onGo={go}
+                      onFeedback={onOpenFeedback}
+                    />
                   </AnchoredPortal>)}
                 </span>
               </div>
