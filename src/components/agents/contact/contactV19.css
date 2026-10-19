@@ -650,3 +650,12 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: none; }
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: rgb(244, 238, 229); box-shadow: none; }
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:focus-visible { outline-color: rgb(244, 238, 229); }
+
+/* ── v19.2 §A · BREATHING ROOM, unpinned only. The eyebrow's top sits 36 under the sheet's top edge (was 14 — the
+   header's own margin, v18 §A) and the list card's top 44 under the hero's lowest element (was 22). Both values are
+   the Contact list's own rules, not the shared hero frame (pageHeroFrame.css sets only the horizontal inset), so
+   nothing outside this page moves. Pinned has no hero and keeps its own 22 (`.clv-group[data-full] > .clv-main`). */
+@media (min-width: 768px) {
+  .clv-group:not([data-full]) > .cl17-hd { margin-top: 36px; }
+  .clv-group:not([data-full]) > .cl17-hd ~ .clv-main.clv-main { margin-top: 44px; }
+}
