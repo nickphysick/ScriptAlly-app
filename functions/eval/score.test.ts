@@ -118,6 +118,36 @@ describe("scoreFixture", () => {
     expect(s.pass).toBe(false);
   });
 
+  it("never lets one unnamed row take another's: date-exact pairs are made for every row first", () => {
+    // Two rows with no name and no agency. The model filed the first one's method as an agency, so it
+    // no longer shares the empty key; the second still does. The first must NOT be handed the second's row.
+    const blank = (label: string, status: string, sentDate: string) =>
+      ({ label, agentName: "", agency: "", status, sentDate, timeline: [], reasons: ["needs-identifying"] });
+    const exp: ExpectedFile = { id: "t", queries: [blank("q15", "Full Sent", "2024-03-16"), blank("q17", "Full Requested", "2024-06-09")] };
+    const r = {
+      agents: [{ ref: "a1", name: "", agency: "QueryManager" }, { ref: "a2", name: "", agency: "" }],
+      queries: [
+        { agentRef: "a1", status: "Full Sent", sentDate: "2024-03-16", timeline: [], reasons: ["needs-identifying"] },
+        { agentRef: "a2", status: "Full Requested", sentDate: "2024-06-09", timeline: [], reasons: ["needs-identifying"] },
+      ],
+    };
+    const s = scoreFixture(exp, r);
+    expect(s.wrong.map((w) => [w.query, w.field])).toEqual([["q15", "agency"]]);
+    expect(s.ambiguous).toEqual([]);
+    expect(s.dropped).toEqual([]);
+  });
+
+  it("reports, rather than guesses, a pick among several same-key rows that the date does not decide", () => {
+    const blank = (label: string, sentDate: string) =>
+      ({ label, agentName: "", agency: "", status: "Rejected", sentDate, timeline: [], reasons: [] });
+    const exp: ExpectedFile = { id: "t", queries: [blank("q1", "2024-01-01"), blank("q2", "2024-02-02")] };
+    const row = (d: string) => ({ agentRef: "a1", status: "Rejected", sentDate: d, timeline: [], reasons: [] });
+    const r = { agents: [{ ref: "a1", name: "", agency: "" }], queries: [row("2024-05-05"), row("2024-06-06")] };
+    const s = scoreFixture(exp, r);
+    expect(s.ambiguous).toEqual(["q1"]);
+    expect(s.pass).toBe(false);
+  });
+
   it("scores a website only where the truth states one", () => {
     const exp: ExpectedFile = { id: "t", queries: [{ ...EXPECTED.queries[0], website: "https://www.pemberton.co.uk" }] };
     const r = { agents: [{ ...perfect().agents[0], website: "<https://www.pemberton.co.uk/>" }], queries: [perfect().queries[0]] };

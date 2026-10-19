@@ -33,9 +33,10 @@ describe("the runner", () => {
   });
 
   it("keeps layouts out of the clean reference row", () => {
-    expect(knobKeys({ layout: "standard", knobs: [] })).toEqual(["(no knobs)"]);
-    expect(knobKeys({ layout: "events", knobs: [] })).toEqual(["layout:events"]);
-    expect(knobKeys({ layout: "standard", knobs: ["slang"] })).toEqual(["slang"]);
+    expect(knobKeys({ layout: "standard", knobs: [], rows: 10 })).toEqual(["(no knobs)"]);
+    expect(knobKeys({ layout: "events", knobs: [], rows: 10 })).toEqual(["layout:events"]);
+    expect(knobKeys({ layout: "standard", knobs: ["slang"], rows: 50 })).toEqual(["slang"]);
+    expect(knobKeys({ layout: "standard", knobs: [], rows: 300 })).toEqual(["size:300"]);
   });
 
   it("measures conversion coverage: a website dropped by the conversion is not visible", () => {

@@ -4,13 +4,15 @@
  *
  * ROW ACCOUNTING FIRST. Every expected query is matched to at most one actual query; an expected
  * query with no partner is DROPPED, an actual query with no partner is INVENTED. Matching runs in
- * three passes, each stricter about what it may assume:
- *   1. the same normalised agent name AND agency;
- *   2. the same name OR the same agency (a name filed as an agency, an annotation kept in a name),
- *      with the sent date breaking ties;
- *   3. neither name nor agency agrees, but the sent date and status do, uniquely.
- * Where more than one candidate survives every tie-break the match is reported as AMBIGUOUS — the
- * first candidate is taken so the fields can still be compared, and the fixture cannot pass.
+ * four passes, each looser about what it may assume, and each run over EVERY expected query before
+ * the next begins:
+ *   1. the same normalised agent name AND agency AND sent date;
+ *   2. the same name and agency, any date;
+ *   3. the same name OR the same agency (a name filed as an agency, an annotation kept in a name),
+ *      with the sent date required where more than one row qualifies;
+ *   4. neither name nor agency agrees, but the sent date and status do, uniquely.
+ * Where the choice is not decided by the date the match is reported as AMBIGUOUS — the first
+ * candidate is taken so the fields can still be compared, and the fixture cannot pass.
  * Nothing is ever guessed silently.
  *
  * THEN FIELDS, on every matched pair: agentName, agency, website (only where the expected answer
@@ -97,40 +99,46 @@ export function scoreFixture(expected: ExpectedFile, result: any | null): Fixtur
   const ambiguous: string[] = [];
   const key = (name: string, agency: string) => `${norm(name)}|${norm(agency)}`;
 
-  /** Take one candidate, narrowing by sent date then status; report if still more than one. */
+  /** Take one of `cands`. Several candidates are narrowed by sent date, then status; if that does not
+   *  leave exactly one, the match is reported AMBIGUOUS (the first is still taken so fields compare). */
   const take = (ei: number, cands: ActualQuery[], e: ExpectedQuery): boolean => {
     if (!cands.length) return false;
     let pool = cands;
     if (pool.length > 1) { const d = pool.filter((a) => a.sentDate === e.sentDate); if (d.length) pool = d; }
     if (pool.length > 1) { const s = pool.filter((a) => statusOk(e, a.status)); if (s.length) pool = s; }
-    if (pool.length > 1) ambiguous.push(e.label);
+    if (pool.length > 1 || (cands.length > 1 && pool[0].sentDate !== e.sentDate)) ambiguous.push(e.label);
     pairs.set(ei, pool[0]);
     free.delete(pool[0].index);
     return true;
   };
   const open = () => actual.filter((a) => free.has(a.index));
+  const unpaired = () => expected.queries.map((e, ei) => ({ e, ei })).filter(({ ei }) => !pairs.has(ei));
 
-  // Pass 1 — exact name + agency.
-  expected.queries.forEach((e, ei) => {
+  // Pass 1 — the same name AND agency AND sent date. Done for EVERY expected query before anything
+  // looser, so one query can never take another's row just because it was listed first.
+  for (const { e, ei } of unpaired()) {
+    take(ei, open().filter((a) => key(a.agentName, a.agency) === key(e.agentName, e.agency) && a.sentDate === e.sentDate), e);
+  }
+  // Pass 2 — the same name and agency, any date. Several left to choose from is reported ambiguous.
+  for (const { e, ei } of unpaired()) {
     take(ei, open().filter((a) => key(a.agentName, a.agency) === key(e.agentName, e.agency)), e);
-  });
-  // Pass 2 — the name or the agency agrees (and is not blank).
-  expected.queries.forEach((e, ei) => {
-    if (pairs.has(ei)) return;
+  }
+  // Pass 3 — the name OR the agency agrees (and is not blank), and so does the date — or it is the
+  // only such row.
+  for (const { e, ei } of unpaired()) {
     const cands = open().filter((a) =>
       (norm(e.agentName) && norm(a.agentName) === norm(e.agentName)) || (norm(e.agency) && norm(a.agency) === norm(e.agency)));
     if (cands.length > 1) {
       const dated = cands.filter((a) => a.sentDate === e.sentDate);
-      if (!dated.length) return; // several share an agency and none shares the date: not this query
-      take(ei, dated, e);
+      if (dated.length) take(ei, dated, e);
     } else take(ei, cands, e);
-  });
-  // Pass 3 — nothing about the agent agrees, but the date and status do, uniquely.
-  expected.queries.forEach((e, ei) => {
-    if (pairs.has(ei) || !e.sentDate) return;
+  }
+  // Pass 4 — nothing about the agent agrees, but the date and status do, uniquely.
+  for (const { e, ei } of unpaired()) {
+    if (!e.sentDate) continue;
     const cands = open().filter((a) => a.sentDate === e.sentDate && statusOk(e, a.status));
     if (cands.length === 1) take(ei, cands, e);
-  });
+  }
 
   const byField = Object.fromEntries(FIELDS.map((f) => [f, { compared: 0, correct: 0 }])) as FixtureScore["byField"];
   const wrong: WrongField[] = [];

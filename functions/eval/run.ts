@@ -36,6 +36,9 @@ import { FIXTURE_DIR, REAL_DIR, repoRoot, type ExpectedFile, type Manifest, type
 // refuse is refused here too rather than scored as though it had been sent.
 const MAX_CHARS = 200_000;
 const MAX_LINES = 600;
+/** The callable's own timeout (smartImport.ts: timeoutSeconds 90). A call slower than this would
+ *  have failed in production with the writer seeing an error, whatever the model eventually said. */
+export const CALLABLE_TIMEOUT_MS = 90_000;
 const MODEL_REASONS = new Set(["status-direction", "status-wording", "check-name", "needs-identifying"]);
 
 export interface Args {
@@ -47,10 +50,12 @@ export interface Args {
   confirmSpend: boolean;
   label: string | null;
   real: boolean;
+  /** Re-score a saved report's raw results with the current scorer — no model call, no spend. */
+  rescore: string | null;
 }
 
 export function parseArgs(argv: string[]): Args {
-  const a: Args = { split: "dev", only: null, runs: 1, concurrency: 4, dryRun: false, confirmSpend: false, label: null, real: true };
+  const a: Args = { split: "dev", only: null, runs: 1, concurrency: 4, dryRun: false, confirmSpend: false, label: null, real: true, rescore: null };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i], v = () => { const x = argv[++i]; if (x === undefined) throw new Error(`${k} needs a value`); return x; };
     if (k === "--split") { const s = v(); if (!["dev", "holdout", "all"].includes(s)) throw new Error(`--split must be dev, holdout or all`); a.split = s as Args["split"]; }
@@ -61,6 +66,7 @@ export function parseArgs(argv: string[]): Args {
     else if (k === "--confirm-spend") a.confirmSpend = true;
     else if (k === "--label") a.label = v().replace(/[^a-z0-9-]+/gi, "-");
     else if (k === "--no-real") a.real = false;
+    else if (k === "--rescore") a.rescore = v();
     else throw new Error(`Unknown flag ${k}`);
   }
   return a;
@@ -165,6 +171,9 @@ interface RunRecord {
   usage: MapUsage;
   costUsd: number;
   score: FixtureScore;
+  /** The assembled result exactly as mapSheet returned it (synthetic fixtures only), so a later
+   *  scorer can re-score it without paying again. */
+  rawResult?: any;
 }
 
 interface FixtureResult {
@@ -207,9 +216,10 @@ function redact(r: FixtureResult): FixtureResult {
 
 /** The rows a fixture contributes to in the by-knob table: its layout (when not the standard one),
  *  then each knob; a standard fixture with no knobs is the clean reference. */
-export function knobKeys(r: { layout: string; knobs: string[] }): string[] {
+export function knobKeys(r: { layout: string; knobs: string[]; rows: number }): string[] {
   const keys = r.layout !== "standard" ? [`layout:${r.layout}`] : [];
   keys.push(...r.knobs);
+  if (r.rows > 50 && !r.knobs.length && r.layout === "standard") keys.push(`size:${r.rows}`);
   return keys.length ? keys : ["(no knobs)"];
 }
 
@@ -237,6 +247,8 @@ function summary(results: FixtureResult[], args: Args, stamp: string): string {
   L.push(`| All (${results.length}) | ${acc(results).s} | ${passed(results)}/${results.length} |`, "");
   L.push(`Total spend: **${usd(totalCost)}** · tokens in ${sum(results, (x) => x.usage.inputTokens)} · out ${sum(results, (x) => x.usage.outputTokens)} · cache read ${sum(results, (x) => x.usage.cacheReadTokens)} · cache write ${sum(results, (x) => x.usage.cacheWriteTokens)}`);
   if (ms.length) L.push(`Time per call: median ${ms[Math.floor(ms.length / 2)]} ms · max ${ms[ms.length - 1]} ms`);
+  const slow = results.filter((r) => r.runs.some((x) => x.ms > CALLABLE_TIMEOUT_MS));
+  L.push(`Calls slower than the callable's 90 s timeout: **${slow.length}**${slow.length ? ` (${slow.map((r) => r.id).join(", ")}) — in production these fail with an error, whatever the model returned; the scores above do not count that` : ""}`);
   L.push("");
 
   L.push("## By field (expected-to-pass fixtures, first run)", "", "| Field | Accuracy | Correct / compared |", "|---|---|---|");
@@ -303,9 +315,36 @@ export function spendDecision(estimateUsd: number, args: Pick<Args, "dryRun" | "
   return estimateUsd > SPEND_CEILING_USD && !args.confirmSpend ? "refuse" : "run";
 }
 
+/** Re-score a saved report with the current scorer and expected answers. Writes a sibling report
+ *  folder suffixed -rescored; spends nothing. A real file's raw result is never saved, so it is kept
+ *  as originally scored. */
+function rescore(root: string, args: Args) {
+  const src = join(root, args.rescore!);
+  const saved = JSON.parse(readFileSync(join(src, "results.json"), "utf8"));
+  const manifest: Manifest = JSON.parse(readFileSync(join(root, FIXTURE_DIR, "manifest.json"), "utf8"));
+  const results: FixtureResult[] = saved.results.map((r: FixtureResult) => {
+    if (r.real) return r;
+    const entry = manifest.fixtures.find((f) => f.id === r.id);
+    if (!entry) throw new Error(`${r.id} is not in the manifest`);
+    const expected: ExpectedFile = JSON.parse(readFileSync(join(root, entry.expected), "utf8"));
+    const runs = r.runs.map((x) => {
+      if (x.rawResult === undefined && x.failure === null) throw new Error(`${r.id}: no raw result saved — this report predates --rescore and cannot be re-scored`);
+      return { ...x, score: scoreFixture(expected, x.failure ? null : x.rawResult) };
+    });
+    return { ...r, runs, disagreements: disagreements(runs.map((x: RunRecord) => x.score)) };
+  });
+  const dir = `${src.replace(/\/+$/, "")}-rescored`;
+  mkdirSync(dir, { recursive: true });
+  const a = { ...saved.args, label: saved.args.label };
+  writeFileSync(join(dir, "results.json"), JSON.stringify({ ...saved, rescoredFrom: args.rescore, results }, null, 1) + "\n");
+  writeFileSync(join(dir, "summary.md"), `> Re-scored from \`${args.rescore}\` with the current scorer — no model calls.\n\n` + summary(results, a, saved.stamp));
+  console.log(`Report: ${join(dir, "summary.md")}`);
+}
+
 export async function main(argv = process.argv.slice(2)) {
   const args = parseArgs(argv);
   const root = repoRoot();
+  if (args.rescore) return rescore(root, args);
   const fixtures = loadFixtures(root, args);
   if (!fixtures.length) throw new Error("No fixtures selected.");
 
@@ -357,7 +396,8 @@ export async function main(argv = process.argv.slice(2)) {
       const client = realClient ?? stubClient(oracleReply(p.fx.expected));
       const out = await mapSheet(client, p.text);
       rec = { run, failure: out.failure, attempts: out.attempts, stopReason: out.stopReason, ms: out.ms, usage: out.usage,
-        costUsd: costUsd(MODEL, out.usage), score: scoreFixture(p.fx.expected, out.result) };
+        costUsd: costUsd(MODEL, out.usage), score: scoreFixture(p.fx.expected, out.result),
+        ...(p.fx.real ? {} : { rawResult: out.result }) };
     }
     results[i].runs.push(rec);
     console.log(`[${++done}/${jobs.length}] ${p.fx.entry.id}${args.runs > 1 ? ` run ${run + 1}` : ""}: ${rec.failure ?? (rec.score.pass ? "pass" : "fail")} ${pct(rec.score.fieldsCorrect, rec.score.fieldsCompared)}`);
