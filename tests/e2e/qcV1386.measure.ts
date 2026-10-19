@@ -30,7 +30,7 @@ const near = (a: unknown, b: number, t: number) => typeof a === "number" && Numb
    labelled button (no PinListButton, no tooltip) and no longer holds the sidebar at its icons (`holdsRail`). */
 interface PageDef { key: "queries" | "agents"; route: string; group: string; pin: string; head: string; heads: string; band: string | null; hd: string; filters: string; find: string; rows: string; panel: string; stack: string; stackTop: number; holdsRail: boolean }
 const PAGES: PageDef[] = [
-  { key: "queries", route: "/queries", group: ".qcv-group[data-v138]", pin: '[data-qc138="pin"]', head: '[data-qc138="top"]', heads: '[data-qc138="headings"]', band: '[data-qcv="gband"]', hd: '[data-qc138="header"]', filters: '[data-qc138="filters-btn"]', find: '[data-qc138="search"] input', rows: '[data-qcv="row"]', panel: '[data-qc138="filters-panel"]', stack: '[data-qc138="top"]', stackTop: 12, holdsRail: true },
+  { key: "queries", route: "/queries", group: ".qcv-group[data-v138]", pin: '[data-qc138="pin"]', head: '[data-qc138="top"]', heads: '[data-qc138="headings"]', band: '[data-qcv="gband"]', hd: '[data-qc138="header"]', filters: '[data-qc140="filters"]', find: '[data-qc140="find"] input', rows: '[data-qcv="row"]', panel: '[data-qc140="filter-menu"]', stack: '[data-qc138="top"]', stackTop: 12, holdsRail: true },
   { key: "agents", route: "/agents", group: ".clv-group", pin: '[data-cl16="full"]', head: '[data-cl18="list-header"]', heads: ".lt-panel > .lt-labels", band: null, hd: '[data-cl17="header"]', filters: '[data-cl18="filters"]', find: '[data-cl13-find="banner"] input', rows: '[data-clv="row"]', panel: '[data-cl19="filter-menu"]', stack: '[data-cl19="head"]', stackTop: 0, holdsRail: false },
 ];
 
@@ -93,7 +93,9 @@ test.describe("QC138.6", () => {
     for (const p of PAGES) {
       await open(page, p, SIZES[0], "A1");
       const r = await page.evaluate((s) => { const b = [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().width > 0); return b ? { plb: b.classList.contains("plb") && b.hasAttribute("data-pin-list"), own: b.hasAttribute("data-pin-list") && b.getAttribute("data-cl19") === "pin", keys: b.getAttribute("aria-keyshortcuts") } : null; }, vis(p, p.pin));
-      L.check("A1", `${p.key} ${p.key === "agents" ? "the toolbar's pin (v19 §A)" : "PinListButton"}`, p.key === "agents" ? r?.own : r?.plb, JSON.stringify(r));
+      /* Query Centre v140 §A: the Query Centre's pin is its toolbar's own too (data-qc140="pin"), as the Contact list's became in v19 */
+      const qc = await page.evaluate((s) => !![...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().width > 0 && e.dataset.qc140 === "pin" && e.hasAttribute("data-pin-list")), vis(p, p.pin));
+      L.check("A1", `${p.key} the toolbar's own pin (${p.key === "agents" ? "v19" : "v140"} §A)`, p.key === "agents" ? r?.own : qc, JSON.stringify(r));
       L.check("A1", `${p.key} aria-keyshortcuts F`, r?.keys === "F", `${r?.keys}`);
     }
     L.done(4);
@@ -201,8 +203,9 @@ test.describe("QC138.6", () => {
       await open(page, p, SIZES[0], "A5");
       const read = () => page.evaluate((s) => {
         const b = [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().width > 0)!;
-        const t = b.querySelector<HTMLElement>("[data-pin-tip]")!;
-        return { label: t.querySelector(".plb-tl")?.textContent, key: t.querySelector("kbd")?.textContent, op: getComputedStyle(t).opacity, title: b.getAttribute("title") };
+        /* Query Centre v140 §A: the toolbar's Pin draws its own tip (.qc140-tip: the words, then the F key cap) */
+        const t = b.querySelector<HTMLElement>(".qc140-tip")!;
+        return { label: [...t.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim(), key: t.querySelector("kbd")?.textContent, op: getComputedStyle(t).opacity, title: b.getAttribute("title") };
       }, vis(p, p.pin));
       await page.locator(vis(p, p.pin)).first().hover(); await page.waitForTimeout(300);
       const a = await read();
@@ -236,7 +239,10 @@ test.describe("QC138.6", () => {
         return { sheetTop: sheet.top, hTop: h.top, hBottom: h.bottom, hdTop: hd.top, hdBottom: hd.bottom, bandTop: band ? band.top : null, sheetL: sheet.left, sheetR: sheet.right, hL: h.left, hR: h.right };
       }, [p.group, p.stack, p.heads, p.band] as const);
       const w = `${p.key} ${vp.width}${pin ? " pinned" : ""}`;
-      L.check("B1", `${w} the sticky header ${p.stackTop} under the sheet`, near(r.hTop - r.sheetTop, p.stackTop, 1), (r.hTop - r.sheetTop).toFixed(1));
+      /* Query Centre v140 §C: pinned, the Query Centre's band (72) is flush to the sheet and the toolbar sits directly
+         under it; unpinned the toolbar is 12 under the sheet as before */
+      const top = p.key === "queries" && pin ? 72 : p.stackTop;
+      L.check("B1", `${w} the sticky header ${top} under the sheet`, near(r.hTop - r.sheetTop, top, 1), (r.hTop - r.sheetTop).toFixed(1));
       L.check("B1", `${w} headings at the header's bottom`, near(r.hdTop, r.hBottom, 1), `${r.hdTop.toFixed(1)} vs ${r.hBottom.toFixed(1)}`);
       if (p.band) L.check("B1", `${w} the current band at the headings' bottom`, r.bandTop !== null && near(r.bandTop, r.hdBottom, 1), `${r.bandTop?.toFixed(1)} vs ${r.hdBottom.toFixed(1)}`);
       /* nothing shows between the sheet's top and the header: the strip is the same with the rows hidden */
