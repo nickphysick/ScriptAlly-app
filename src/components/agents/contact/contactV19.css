@@ -56,6 +56,13 @@
     background: var(--ink-sheet, var(--ws-page));
   }
   .clv-group .cl16-list .cl19-head[data-pinned] { margin-top: 0; padding-top: 0; background: var(--cl19-navy); }
+  /* v19.1 §E — the illustration runs from the band's top down onto the toolbar, and nothing may cut it. Nothing CLIPS it
+     (no ancestor's overflow): what cut it was the sheet's lip — the 12px sticky strip at the scroll area's top (z 19,
+     shell/sheetLip.css), which painted over the hawk's head. Pinned, the head sits at the same top, opaque navy, so it
+     takes the lip's own level and, coming later, paints over it; it already sits above the column headings (7), the
+     applied-filters row (8) and the group bands (6), so the art's foot passes over the headings' top edge (never their
+     words, which start 13px lower). */
+  .clv-group .cl16-list .cl19-head[data-pinned] { z-index: 19; }
 }
 
 /* ── the toolbar ── */
