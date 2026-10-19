@@ -9,6 +9,7 @@
  */
 import * as XLSX from "xlsx";
 import { readSheetBook } from "./sheetCells";
+import { bufferToCsv } from "./sheetText";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { QueryStatus } from "../types";
 import { SmartImportResult, ParsedQuery } from "../types/smartImport";
@@ -21,12 +22,9 @@ export async function fileToCsv(file: File): Promise<string> {
   return bufferToCsv(await file.arrayBuffer());
 }
 
-/** The sheet as the text Smart Import is sent. */
-export function bufferToCsv(buf: ArrayBuffer | Uint8Array): string {
-  const wb = readSheetBook(XLSX, buf);
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  return XLSX.utils.sheet_to_csv(ws); // also handles .csv
-}
+/** The sheet as the text Smart Import is sent — lives in the Firebase-free sheetText module so the
+ *  evaluation harness converts through the same function; re-exported here for every caller. */
+export { bufferToCsv };
 
 /** One raw record sampled straight from the uploaded sheet — DISPLAY-ONLY, for the scatter-settle
  *  loader so the writer sees their actual cells the instant they upload, while the real (cloud)
