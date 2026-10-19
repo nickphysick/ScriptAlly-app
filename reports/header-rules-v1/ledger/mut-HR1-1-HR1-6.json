@@ -1,0 +1,506 @@
+[
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1280 found the content",
+  "ok": true,
+  "detail": "[data-cl19='toolbar']"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1280 found the content",
+  "ok": true,
+  "detail": ".qcv-group > .qcv-page"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1280 found the content",
+  "ok": true,
+  "detail": ".a21-desk"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 367, stack 323)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1280 found the content",
+  "ok": true,
+  "detail": ".rsp-pos"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 409, stack 365)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1280 found the content",
+  "ok": true,
+  "detail": ".dv1-hd + *"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 309, stack 265)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1280 found the content",
+  "ok": true,
+  "detail": ".pk4-hd .pk4-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 365, stack 321)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1280 found the content",
+  "ok": true,
+  "detail": ".td5-hd .td5-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1280 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1440 found the content",
+  "ok": true,
+  "detail": "[data-cl19='toolbar']"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1440 found the content",
+  "ok": true,
+  "detail": ".qcv-group > .qcv-page"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1440 found the content",
+  "ok": true,
+  "detail": ".a21-desk"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 309, stack 265)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1440 found the content",
+  "ok": true,
+  "detail": ".rsp-pos"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 365, stack 321)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1440 found the content",
+  "ok": true,
+  "detail": ".dv1-hd + *"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 309, stack 265)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1440 found the content",
+  "ok": true,
+  "detail": ".pk4-hd .pk4-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1440 found the content",
+  "ok": true,
+  "detail": ".td5-hd .td5-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1440 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1512 found the content",
+  "ok": true,
+  "detail": "[data-cl19='toolbar']"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1512 found the content",
+  "ok": true,
+  "detail": ".qcv-group > .qcv-page"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1512 found the content",
+  "ok": true,
+  "detail": ".a21-desk"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 309, stack 265)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1512 found the content",
+  "ok": true,
+  "detail": ".rsp-pos"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 365, stack 321)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1512 found the content",
+  "ok": true,
+  "detail": ".dv1-hd + *"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1512 found the content",
+  "ok": true,
+  "detail": ".pk4-hd .pk4-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1512 found the content",
+  "ok": true,
+  "detail": ".td5-hd .td5-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1512 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 265, stack 221)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1920 found the content",
+  "ok": true,
+  "detail": "[data-cl19='toolbar']"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "contacts 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1920 found the content",
+  "ok": true,
+  "detail": ".qcv-group > .qcv-page"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "queries 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1920 found the content",
+  "ok": true,
+  "detail": ".a21-desk"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "analytics 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1920 found the content",
+  "ok": true,
+  "detail": ".rsp-pos"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "responses 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1920 found the content",
+  "ok": true,
+  "detail": ".dv1-hd + *"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "discover 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1920 found the content",
+  "ok": true,
+  "detail": ".pk4-hd .pk4-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "packages 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1920 found the content",
+  "ok": true,
+  "detail": ".td5-hd .td5-fr"
+ },
+ {
+  "lock": "HR1-6",
+  "where": "todo 1920 content − stack bottom = 44",
+  "ok": true,
+  "detail": "44.00 (content 287, stack 243)"
+ }
+]

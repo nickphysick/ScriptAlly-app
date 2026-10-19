@@ -1,0 +1,506 @@
+[
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1280 eyebrow top 36",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1280 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1280 eyebrow top 36",
+  "ok": false,
+  "detail": "92"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1280 nothing else above 34",
+  "ok": false,
+  "detail": "div.qc138-srow phf-row @14.0 | div.qc138-gl @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1280 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1280 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1280 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1280 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1280 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1280 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1280 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1280 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1280 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1280 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1280 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1440 eyebrow top 36",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1440 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1440 eyebrow top 36",
+  "ok": false,
+  "detail": "92"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1440 nothing else above 34",
+  "ok": false,
+  "detail": "div.qc138-srow phf-row @14.0 | div.qc138-gl @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1440 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1440 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1440 eyebrow top 36",
+  "ok": false,
+  "detail": "38.28"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1440 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1440 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1440 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1440 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1440 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1440 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1440 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1440 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1512 eyebrow top 36",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1512 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1512 eyebrow top 36",
+  "ok": false,
+  "detail": "93.55"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1512 nothing else above 34",
+  "ok": false,
+  "detail": "div.qc138-srow phf-row @14.0 | div.qc138-gl @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1512 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1512 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1512 eyebrow top 36",
+  "ok": false,
+  "detail": "38.28"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1512 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1512 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1512 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1512 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1512 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1512 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1512 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1512 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1920 eyebrow top 36",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "contacts 1920 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1920 eyebrow top 36",
+  "ok": false,
+  "detail": "92"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "queries 1920 nothing else above 34",
+  "ok": false,
+  "detail": "div.qc138-srow phf-row @14.0 | div.qc138-gl @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0 | button.qc138-sg @14.0"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1920 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "analytics 1920 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1920 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "responses 1920 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1920 eyebrow top 36",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "discover 1920 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1920 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "packages 1920 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1920 found the hero (header, eyebrow, title, actions)",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":false,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1920 eyebrow top 36",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-2",
+  "where": "todo 1920 nothing else above 34",
+  "ok": true,
+  "detail": ""
+ }
+]

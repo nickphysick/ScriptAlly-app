@@ -1,0 +1,578 @@
+[
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1280 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1280 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1280 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1280 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1280 centred on the stack",
+  "ok": true,
+  "detail": "176.5 vs 176.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1280 centred on the stack",
+  "ok": true,
+  "detail": "197.5 vs 197.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1280 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1280 centred on the stack",
+  "ok": true,
+  "detail": "147.5 vs 147.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1280 centred on the stack",
+  "ok": true,
+  "detail": "175.5 vs 175.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1280 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1280 right inset on H6",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1280 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1440 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1440 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1440 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1440 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1440 centred on the stack",
+  "ok": true,
+  "detail": "147.5 vs 147.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1440 centred on the stack",
+  "ok": true,
+  "detail": "175.5 vs 175.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1440 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1440 centred on the stack",
+  "ok": true,
+  "detail": "147.5 vs 147.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1440 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1440 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1440 right inset on H6",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1440 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1512 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1512 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1512 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1512 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1512 centred on the stack",
+  "ok": true,
+  "detail": "147.5 vs 147.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1512 centred on the stack",
+  "ok": true,
+  "detail": "175.5 vs 175.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1512 width is --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1512 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1512 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1512 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1512 right inset on H6",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1512 centred on the stack",
+  "ok": true,
+  "detail": "125.5 vs 125.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "contacts 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.5 vs 136.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1920 width is --hero-right-w",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "queries 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.5 vs 136.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1920 width is --hero-right-w",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "analytics 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.5 vs 136.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "responses 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.5 vs 136.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1920 width is --hero-right-w",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "discover 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.5 vs 136.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "packages 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.49 vs 136.5"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1920 found the right item",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1920 right inset on H6",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-5",
+  "where": "todo 1920 centred on the stack",
+  "ok": true,
+  "detail": "136.5 vs 136.5"
+ }
+]

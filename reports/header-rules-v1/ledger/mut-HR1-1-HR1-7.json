@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1280 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1280 eyebrow identical",
+  "ok": true,
+  "detail": "243.02,42 vs 243.02,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1280 title identical",
+  "ok": true,
+  "detail": "243.02,69 vs 243.02,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1280 content top: discover's title wraps (decision 5), stack 265 against 221",
+  "ok": true,
+  "detail": "content 265 vs 309"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1280 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1280 eyebrow identical",
+  "ok": true,
+  "detail": "243.02,42 vs 243.02,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1280 title identical",
+  "ok": true,
+  "detail": "243.02,69 vs 243.02,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1280 content top: analytics's title wraps (decision 5), stack 323 against 221",
+  "ok": true,
+  "detail": "content 265 vs 367"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1440 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1440 eyebrow identical",
+  "ok": true,
+  "detail": "243.02,42 vs 243.02,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1440 title identical",
+  "ok": true,
+  "detail": "243.02,69 vs 243.02,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1440 content top: discover's title wraps (decision 5), stack 265 against 221",
+  "ok": true,
+  "detail": "content 265 vs 309"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1440 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1440 eyebrow identical",
+  "ok": true,
+  "detail": "243.02,42 vs 243.02,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1440 title identical",
+  "ok": true,
+  "detail": "243.02,69 vs 243.02,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1440 content top: analytics's title wraps (decision 5), stack 265 against 221",
+  "ok": true,
+  "detail": "content 265 vs 309"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1512 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1512 eyebrow identical",
+  "ok": true,
+  "detail": "243.02,42 vs 243.02,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1512 title identical",
+  "ok": true,
+  "detail": "243.02,69 vs 243.02,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1512 content top identical",
+  "ok": true,
+  "detail": "265 vs 265"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1512 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1512 eyebrow identical",
+  "ok": true,
+  "detail": "243.02,42 vs 243.02,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1512 title identical",
+  "ok": true,
+  "detail": "243.02,69 vs 243.02,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1512 content top: analytics's title wraps (decision 5), stack 265 against 221",
+  "ok": true,
+  "detail": "content 265 vs 309"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1920 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1920 eyebrow identical",
+  "ok": true,
+  "detail": "267.73,42 vs 267.73,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1920 title identical",
+  "ok": true,
+  "detail": "267.73,69 vs 267.73,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "contacts/discover 1920 content top identical",
+  "ok": true,
+  "detail": "287 vs 287"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1920 both found",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1920 eyebrow identical",
+  "ok": true,
+  "detail": "267.73,42 vs 267.73,42"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1920 title identical",
+  "ok": true,
+  "detail": "267.73,69 vs 267.73,69"
+ },
+ {
+  "lock": "HR1-7",
+  "where": "queries/analytics 1920 content top identical",
+  "ok": true,
+  "detail": "287 vs 287"
+ }
+]

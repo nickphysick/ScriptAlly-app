@@ -1,0 +1,398 @@
+[
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[289,133.8,942.1,260],[326,182.7,374.3,51],[326,294.8,305.7,44]],\"b\":[[289,111.8,942.1,260],[326,160.7,374.3,51],[326,272.8,305.7,44]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1280 [data-ms21='header']",
+  "ok": false,
+  "detail": "289,133.8,942.1,260 vs 289,111.8,942.1,260"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1280 [data-ms21='header'] h1",
+  "ok": false,
+  "detail": "326,182.7,374.3,51 vs 326,160.7,374.3,51"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1280 [data-ms21='header'] [data-probe='actions']",
+  "ok": false,
+  "detail": "326,294.8,305.7,44 vs 326,272.8,305.7,44"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[289,105.8,942.1,313.7],[289,149.8,366.6,18],[289,181.8,366.6,44.8],[811.9,188.4,419.1,151.4]],\"b\":[[289,111.8,942.1,313.7],[289,155.8,366.6,18],[289,187.8,366.6,44.8],[811.9,194.4,419.1,151.4]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1280 [data-slh='header']",
+  "ok": false,
+  "detail": "289,105.8,942.1,313.7 vs 289,111.8,942.1,313.7"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1280 [data-slh='eyebrow']",
+  "ok": false,
+  "detail": "289,149.8,366.6,18 vs 289,155.8,366.6,18"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1280 [data-slh='header'] h1",
+  "ok": false,
+  "detail": "289,181.8,366.6,44.8 vs 289,187.8,366.6,44.8"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1280 [data-slh='card']",
+  "ok": false,
+  "detail": "811.9,188.4,419.1,151.4 vs 811.9,194.4,419.1,151.4"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[282,105.8,956,134.2],[282,126.5,376.4,14],[282,146.5,376.4,51.1],[900.3,154.4,337.7,40]],\"b\":[[282,105.8,956,134.2],[282,126.5,376.4,14],[282,146.5,376.4,51.1],[900.3,154.4,337.7,40]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1280 [data-d58='header']",
+  "ok": true,
+  "detail": "282,105.8,956,134.2 vs 282,105.8,956,134.2"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1280 [data-d58='eyebrow']",
+  "ok": true,
+  "detail": "282,126.5,376.4,14 vs 282,126.5,376.4,14"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1280 [data-d58='title']",
+  "ok": true,
+  "detail": "282,146.5,376.4,51.1 vs 282,146.5,376.4,51.1"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1280 [data-d58='buttons']",
+  "ok": true,
+  "detail": "900.3,154.4,337.7,40 vs 900.3,154.4,337.7,40"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "calendar 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[289,133.8,942.1,181],[326,162.8,230.5,51]],\"b\":[[289,133.8,942.1,181],[326,162.8,230.5,51]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "calendar 1280 header[data-probe='page-header']",
+  "ok": true,
+  "detail": "289,133.8,942.1,181 vs 289,133.8,942.1,181"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "calendar 1280 header[data-probe='page-header'] h1",
+  "ok": true,
+  "detail": "326,162.8,230.5,51 vs 326,162.8,230.5,51"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "corkboard 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[289,133.8,942.1,260],[326,189.1,574.1,143.3]],\"b\":[[289,133.8,942.1,260],[326,189.1,574.1,143.3]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "corkboard 1280 header.hp3",
+  "ok": true,
+  "detail": "289,133.8,942.1,260 vs 289,133.8,942.1,260"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "corkboard 1280 header.hp3 h1",
+  "ok": true,
+  "detail": "326,189.1,574.1,143.3 vs 326,189.1,574.1,143.3"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "discover coming soon 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[289,105.8,942.1,1529.9],[341,213.8,463.5,116.6]],\"b\":[[289,105.8,942.1,1529.9],[341,213.8,463.5,116.6]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "discover coming soon 1280 [data-dv1='coming-soon']",
+  "ok": true,
+  "detail": "289,105.8,942.1,1529.9 vs 289,105.8,942.1,1529.9"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "discover coming soon 1280 [data-dv1='coming-soon'] h1",
+  "ok": true,
+  "detail": "341,213.8,463.5,116.6 vs 341,213.8,463.5,116.6"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[68,105.8,1204,72],[68,177.8,1204,72],[68,249.8,1204,40]],\"b\":[[68,105.8,1204,72],[68,177.8,1204,72],[68,249.8,1204,40]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1280 [data-qc140='band']",
+  "ok": true,
+  "detail": "68,105.8,1204,72 vs 68,105.8,1204,72"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1280 [data-qc140='toolbar']",
+  "ok": true,
+  "detail": "68,177.8,1204,72 vs 68,177.8,1204,72"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1280 [data-qc138='headings']",
+  "ok": true,
+  "detail": "68,249.8,1204,40 vs 68,249.8,1204,40"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "contacts pinned 1280 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[248,105.8,1024,118],[248,171.8,1024,52]],\"b\":[[248,105.8,1024,118],[248,171.8,1024,52]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "contacts pinned 1280 [data-cl19='head']",
+  "ok": true,
+  "detail": "248,105.8,1024,118 vs 248,105.8,1024,118"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "contacts pinned 1280 [data-cl19='toolbar']",
+  "ok": true,
+  "detail": "248,171.8,1024,52 vs 248,171.8,1024,52"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[296.4,133.8,1159.3,260],[333.4,182.7,374.3,51],[333.4,294.8,305.7,44]],\"b\":[[296.4,111.8,1159.3,260],[333.4,160.7,374.3,51],[333.4,272.8,305.7,44]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1512 [data-ms21='header']",
+  "ok": false,
+  "detail": "296.4,133.8,1159.3,260 vs 296.4,111.8,1159.3,260"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1512 [data-ms21='header'] h1",
+  "ok": false,
+  "detail": "333.4,182.7,374.3,51 vs 333.4,160.7,374.3,51"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "manuscripts 1512 [data-ms21='header'] [data-probe='actions']",
+  "ok": false,
+  "detail": "333.4,294.8,305.7,44 vs 333.4,272.8,305.7,44"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[296.4,105.8,1159.3,331.3],[296.4,149.8,416.5,18],[296.4,181.8,416.5,56],[992.2,188.5,463.5,168.7]],\"b\":[[296.4,111.8,1159.3,331.3],[296.4,155.8,416.5,18],[296.4,187.8,416.5,56],[992.2,194.5,463.5,168.7]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1512 [data-slh='header']",
+  "ok": false,
+  "detail": "296.4,105.8,1159.3,331.3 vs 296.4,111.8,1159.3,331.3"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1512 [data-slh='eyebrow']",
+  "ok": false,
+  "detail": "296.4,149.8,416.5,18 vs 296.4,155.8,416.5,18"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1512 [data-slh='header'] h1",
+  "ok": false,
+  "detail": "296.4,181.8,416.5,56 vs 296.4,187.8,416.5,56"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "comps 1512 [data-slh='card']",
+  "ok": false,
+  "detail": "992.2,188.5,463.5,168.7 vs 992.2,194.5,463.5,168.7"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[298,105.8,1156,146.6],[298,129.1,423.4,14],[298,149.1,423.4,57.5],[970.2,159.8,483.8,42]],\"b\":[[298,105.8,1156,146.6],[298,129.1,423.4,14],[298,149.1,423.4,57.5],[970.2,159.8,483.8,42]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1512 [data-d58='header']",
+  "ok": true,
+  "detail": "298,105.8,1156,146.6 vs 298,105.8,1156,146.6"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1512 [data-d58='eyebrow']",
+  "ok": true,
+  "detail": "298,129.1,423.4,14 vs 298,129.1,423.4,14"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1512 [data-d58='title']",
+  "ok": true,
+  "detail": "298,149.1,423.4,57.5 vs 298,149.1,423.4,57.5"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "dashboard 1512 [data-d58='buttons']",
+  "ok": true,
+  "detail": "970.2,159.8,483.8,42 vs 970.2,159.8,483.8,42"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "calendar 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[296.4,133.8,1159.3,181],[333.4,162.8,230.5,51]],\"b\":[[296.4,133.8,1159.3,181],[333.4,162.8,230.5,51]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "calendar 1512 header[data-probe='page-header']",
+  "ok": true,
+  "detail": "296.4,133.8,1159.3,181 vs 296.4,133.8,1159.3,181"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "calendar 1512 header[data-probe='page-header'] h1",
+  "ok": true,
+  "detail": "333.4,162.8,230.5,51 vs 333.4,162.8,230.5,51"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "corkboard 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[296.4,133.8,1159.3,260],[333.4,214,635.3,93.6]],\"b\":[[296.4,133.8,1159.3,260],[333.4,214,635.3,93.6]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "corkboard 1512 header.hp3",
+  "ok": true,
+  "detail": "296.4,133.8,1159.3,260 vs 296.4,133.8,1159.3,260"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "corkboard 1512 header.hp3 h1",
+  "ok": true,
+  "detail": "333.4,214,635.3,93.6 vs 333.4,214,635.3,93.6"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "discover coming soon 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[296.4,105.8,1159.3,1483.8],[360.4,222.4,574.6,138.2]],\"b\":[[296.4,105.8,1159.3,1483.8],[360.4,222.4,574.6,138.2]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "discover coming soon 1512 [data-dv1='coming-soon']",
+  "ok": true,
+  "detail": "296.4,105.8,1159.3,1483.8 vs 296.4,105.8,1159.3,1483.8"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "discover coming soon 1512 [data-dv1='coming-soon'] h1",
+  "ok": true,
+  "detail": "360.4,222.4,574.6,138.2 vs 360.4,222.4,574.6,138.2"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[68,105.8,1436,72],[68,177.8,1436,72],[68,249.8,1436,40]],\"b\":[[68,105.8,1436,72],[68,177.8,1436,72],[68,249.8,1436,40]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1512 [data-qc140='band']",
+  "ok": true,
+  "detail": "68,105.8,1436,72 vs 68,105.8,1436,72"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1512 [data-qc140='toolbar']",
+  "ok": true,
+  "detail": "68,177.8,1436,72 vs 68,177.8,1436,72"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "queries pinned 1512 [data-qc138='headings']",
+  "ok": true,
+  "detail": "68,249.8,1436,40 vs 68,249.8,1436,40"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "contacts pinned 1512 found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[248,105.8,1256,118],[248,171.8,1256,52]],\"b\":[[248,105.8,1256,118],[248,171.8,1256,52]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "contacts pinned 1512 [data-cl19='head']",
+  "ok": true,
+  "detail": "248,105.8,1256,118 vs 248,105.8,1256,118"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "contacts pinned 1512 [data-cl19='toolbar']",
+  "ok": true,
+  "detail": "248,171.8,1256,52 vs 248,171.8,1256,52"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "phone /queries found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[28,171,334,46.2]],\"b\":[[28,171,334,46.2]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "phone /queries h1",
+  "ok": true,
+  "detail": "28,171,334,46.2 vs 28,171,334,46.2"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "phone /agents found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[68,164,398.7,44]],\"b\":[[68,164,398.7,44]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "phone /agents h1",
+  "ok": true,
+  "detail": "68,164,398.7,44 vs 68,164,398.7,44"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "phone /queries/analytics found on the base and here",
+  "ok": true,
+  "detail": "{\"a\":[[49,172,292,73.4]],\"b\":[[49,172,292,73.4]]}"
+ },
+ {
+  "lock": "HR1-8",
+  "where": "phone /queries/analytics h1",
+  "ok": true,
+  "detail": "49,172,292,73.4 vs 49,172,292,73.4"
+ }
+]

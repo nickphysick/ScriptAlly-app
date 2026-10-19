@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1280 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1280 art left 14",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1280 art top = eyebrow top",
+  "ok": true,
+  "detail": "36 vs 36"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1280 art bottom = stack bottom",
+  "ok": true,
+  "detail": "215 vs 215"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1280 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1280 art left 14",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1280 art top = eyebrow top",
+  "ok": false,
+  "detail": "97.06 vs 92"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1280 art bottom = stack bottom",
+  "ok": false,
+  "detail": "271.94 vs 269"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1440 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1440 art left 14",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1440 art top = eyebrow top",
+  "ok": true,
+  "detail": "36 vs 36"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1440 art bottom = stack bottom",
+  "ok": true,
+  "detail": "215 vs 215"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1440 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1440 art left 14",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1440 art top = eyebrow top",
+  "ok": false,
+  "detail": "97.06 vs 92"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1440 art bottom = stack bottom",
+  "ok": false,
+  "detail": "271.94 vs 269"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1512 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1512 art left 14",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1512 art top = eyebrow top",
+  "ok": true,
+  "detail": "36 vs 36"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1512 art bottom = stack bottom",
+  "ok": true,
+  "detail": "215 vs 215"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1512 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1512 art left 14",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1512 art top = eyebrow top",
+  "ok": false,
+  "detail": "72 vs 93.55"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1512 art bottom = stack bottom",
+  "ok": false,
+  "detail": "302.11 vs 270.546875"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1920 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1920 art left 14",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1920 art top = eyebrow top",
+  "ok": true,
+  "detail": "36 vs 36"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "contacts 1920 art bottom = stack bottom",
+  "ok": true,
+  "detail": "237 vs 237"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1920 found the art",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1920 art left 14",
+  "ok": false,
+  "detail": "38"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1920 art top = eyebrow top",
+  "ok": false,
+  "detail": "73.44 vs 92"
+ },
+ {
+  "lock": "HR1-4",
+  "where": "queries 1920 art bottom = stack bottom",
+  "ok": false,
+  "detail": "303.55 vs 275"
+ }
+]
