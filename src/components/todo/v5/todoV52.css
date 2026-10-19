@@ -18,6 +18,9 @@
   --cal-w: 404px; --cal-dayw: 158px; --cal-hair: rgba(28, 19, 15, 0.08); --cal-ink45: rgba(28, 19, 15, 0.62);
   display: block; width: var(--cal-w); align-self: stretch; overflow: hidden;
   contain: size; container-type: size; container-name: calc;
+  /* header rules v1.1: the calendar is the stack's height by construction (it stretches to the row and contains its
+     size), so it takes none of the overhang a taller card needs — a negative margin would stretch it past the row */
+  margin-block: 0;
 }
 .ws-app.sheet-wide .td5-hd .td5-card.td52-cal { --cal-w: 496px; --cal-dayw: 212px; }
 .td52-calin { display: grid; grid-template-columns: var(--cal-dayw) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; }

@@ -13,8 +13,12 @@
  *    ring, re-read for tasks). Its figures are `lib/todoCleared`'s and the board's.
  */
 import React from "react";
+import "../../shell/pageHeroFrame.css";
 import type { TrayKind } from "../../../lib/todoTray";
 import { TRAY_KINDS } from "../../../lib/todoTray";
+
+/** header rules v1.1 — the title wraps rather than stepping down (decision 5) */
+const HERO_RULES_WRAP = true;
 
 export const TODO_EYEBROW = "— TO-DO LIST —";
 export const TODO_SHADOW = "/images/hawk-shadow.png?v=1";
@@ -93,6 +97,9 @@ export const TrayHeader: React.FC<{
     if (!row || !h1) return undefined;
     const fit = () => {
       h1.removeAttribute("data-fit");
+      /* header rules v1.1 (decision 5): a title too long for its column wraps at its size and the stack grows; it is
+         never shrunk. The fit below is kept, unreached, for the record of what v5.2 did. */
+      if (HERO_RULES_WRAP) return;
       const card = row.querySelector<HTMLElement>('[data-td5="card"]');
       const gap = 40;
       const avail = row.clientWidth - (card && getComputedStyle(card).gridColumnStart === "3" ? card.offsetWidth + gap : 0);
@@ -121,7 +128,7 @@ export const TrayHeader: React.FC<{
     ? (urgent.overdue || urgent.today ? [urgent.overdue ? `${urgent.overdue} overdue` : "", urgent.today ? `${urgent.today} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today")
     : "";
   return (
-    <header className="td5-hd" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+    <header className="td5-hd phf" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
       <img className="td5-shadow" data-td5="shadow" alt="" aria-hidden="true" src={TODO_SHADOW} />
       <div className="td5-tr" data-td5="header-row" ref={rowRef}>
         <div className="td5-tb" data-td5="title-block">

@@ -28,43 +28,45 @@
 .ws-app.sheet-wide .td5-root { --td5-bandh: 56px; }
 
 /* ── the group: at the LIST's width (24px from the page sheet's edges, at most 1600, centred) ── */
-.td5-group { --td5-w: min(1600px, calc(var(--hsheet-w) - 48px)); position: relative; min-width: 0; }
+.td5-group { --td5-w: var(--hero-w); position: relative; min-width: 0; } /* header rules v1.1: the shared hero width */
 .td5-group > .td5-hd, .td5-group > .td5-sheet, .td5-group > .td5-emptypage {
   box-sizing: border-box; width: var(--td5-w); margin-left: calc(50% - var(--td5-w) / 2);
 }
 
 /* ═════════ §A · THE HEADER (Contact list v17.1's values) ═════════ */
+/* header rules v1.1 — the shared hero geometry (shell/pageHeroFrame.css, the Contact list's own): --hero-top under the
+   sheet's top, the row in by the shared inset (`.phf` on the header), the title block and buttons at the shared text
+   column (--hero-text-x, though there is no art: decision 1), the card's right edge on the inset, centred on the
+   stack. The title wraps where it cannot fit beside the card, at its size (decision 5) — it no longer steps down. */
 .td5-hd {
-  position: relative; isolation: isolate; container: td5hd / inline-size; margin-top: 30px;
-  --td5-inset: max(40px, calc((100% - 900px) / 2)); --td5-sh-x: -60px;
+  position: relative; isolation: isolate; container: td5hd / inline-size; margin-top: var(--hero-top);
+  --td5-inset: var(--phf-inset); --td5-sh-x: -60px;
 }
-.ws-app.sheet-wide .td5-hd { --td5-inset: max(64px, calc((100% - 1080px) / 2)); --td5-sh-x: -70px; }
+.ws-app.sheet-wide .td5-hd { --td5-sh-x: -70px; }
 .td5-hd .td5-tr {
-  display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto; grid-template-rows: auto auto;
-  row-gap: 24px; align-items: center; margin-inline: var(--td5-inset);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 24px;
+  row-gap: var(--hero-act-gap); align-items: center; margin-inline: var(--td5-inset);
 }
-.ws-app.sheet-wide .td5-hd .td5-tr { row-gap: 40px; }
-.td5-hd .td5-tb { grid-column: 1; grid-row: 1; min-width: 0; }
-.td5-hd .td5-tr > .td5-acts { grid-column: 1; grid-row: 2; }
-.td5-hd .td5-card { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+.td5-hd .td5-tb { grid-column: 1; grid-row: 1; min-width: 0; margin-left: calc(var(--hero-text-x) - var(--hero-frame-x) - var(--td5-inset)); }
+.td5-hd .td5-tr > .td5-acts { grid-column: 1; grid-row: 2; margin-left: calc(var(--hero-text-x) - var(--hero-frame-x) - var(--td5-inset)); }
+.td5-hd .td5-card { grid-column: 2; grid-row: 1 / span 2; align-self: center; margin-block: -40px; }
 .td5-hd .td5-shadow {
   position: absolute; left: calc(var(--td5-inset) + var(--td5-sh-x)); top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
   opacity: 0.15; transform: rotate(-4deg); filter: blur(1.5px); pointer-events: none; user-select: none;
 }
 .ws-app.sheet-wide .td5-hd .td5-shadow { width: 460px; }
-.td5-hd .td5-ey { display: block; margin: 0 0 15px; font: 500 12px/1 var(--font-mono) !important; letter-spacing: 0.24em; color: var(--td5-rust); white-space: nowrap; }
-.td5-hd h1.td5-title { margin: 0; font: 400 44px/1 var(--sp-type) !important; color: var(--td5-ink); white-space: nowrap; outline: none; }
-.ws-app.sheet-wide .td5-hd h1.td5-title { font-size: 50px !important; }
+.td5-hd .td5-ey { display: block; margin: 0 0 var(--hero-ey-gap); font: 500 12px/var(--hero-ey-lh) var(--font-mono) !important; letter-spacing: 0.24em; color: var(--td5-rust); white-space: nowrap; }
+.td5-hd h1.td5-title { margin: 0; font: 400 var(--hero-title-size)/1 var(--sp-type) !important; color: var(--td5-ink); white-space: normal; outline: none; }
 .td5-hd h1.td5-title span { font: inherit !important; }
 .td5-hd .td5-title .td5-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
-.td5-hd .td5-by { display: flex; align-items: center; gap: 12px; margin-top: 12px; min-width: 0; }
+.td5-hd .td5-by { display: flex; align-items: center; gap: 12px; margin-top: var(--hero-by-gap); min-width: 0; }
 .td5-hd .td5-by::before { content: ""; flex: none; width: 40px; height: 1px; background: rgba(28, 19, 15, 0.3); }
 .td5-hd .td5-by::after { content: ""; flex: 1 1 0; max-width: 160px; height: 1px; background: rgba(28, 19, 15, 0.3); }
-.td5-hd .td5-by .td5-byt { font: italic 400 20px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.td5-hd .td5-by .td5-byt { font: italic 400 20px/var(--hero-by-lh) var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .td5-hd .td5-by .td5-ms { font: 400 20px/1 var(--sp-type) !important; font-style: normal !important; color: inherit; }
 .td5-hd .td5-acts { display: flex; gap: 12px; }
 .td5-root .td5-b1, .td5-root .td5-b2 {
-  box-sizing: border-box; height: 46px; padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
+  box-sizing: border-box; height: var(--hero-act-h); padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
   display: inline-flex; align-items: center; gap: 8px; font: 400 17px/1 var(--sp-type) !important;
 }
 .td5-root .td5-b1 { background: var(--td5-navy); color: var(--td5-cr); }
@@ -126,13 +128,14 @@
 @container td5hd (max-width: 899.98px) {
   .td5-hd, .ws-app.sheet-wide .td5-hd { --td5-inset: 0px; }
   .td5-hd .td5-tr, .ws-app.sheet-wide .td5-hd .td5-tr { grid-template-columns: minmax(0, 1fr); row-gap: 22px; }
-  .td5-hd .td5-card { grid-column: 1; grid-row: 3; justify-self: start; }
+  .td5-hd .td5-tb, .td5-hd .td5-tr > .td5-acts { margin-left: 0; }
+  .td5-hd .td5-card { grid-column: 1; grid-row: 3; justify-self: start; margin-block: 0; }
 }
 
 /* ═════════ §C · THE FILTER ROW (v17.1 §B/§E's values): 26 under the header, a 1px rule, 18 of padding ═════════ */
 .td5-hd .td5-fr {
   display: flex; align-items: center; gap: 8px; min-width: 0;
-  margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(28, 19, 15, 0.14);
+  margin-top: var(--hero-gap-below); padding-top: 18px; border-top: 1px solid rgba(28, 19, 15, 0.14); /* header rules v1.1: the content, 44 under the stack */
 }
 .ws-app.sheet-wide .td5-hd .td5-fr { gap: 10px; }
 .td5-fr .td5-find {
