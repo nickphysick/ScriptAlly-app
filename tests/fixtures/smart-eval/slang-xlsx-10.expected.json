@@ -1,0 +1,101 @@
+{
+ "id": "slang-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Seb Faraday / Greenhouse Partners",
+   "agentName": "Seb Faraday",
+   "agency": "Greenhouse Partners",
+   "status": "No Response",
+   "sentDate": "2025-01-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Clara Raman / Everly Associates",
+   "agentName": "Clara Raman",
+   "agency": "Everly Associates",
+   "status": "Queried",
+   "sentDate": "2024-07-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Gregory Marsh / Greenhouse Partners",
+   "agentName": "Gregory Marsh",
+   "agency": "Greenhouse Partners",
+   "status": "Full Sent",
+   "statusAccept": [
+    "Full Requested",
+    "Full Sent"
+   ],
+   "sentDate": "2025-03-08",
+   "timeline": [],
+   "reasons": [
+    "status-direction"
+   ]
+  },
+  {
+   "label": "q4 Hannah Faraday / Hollis Agency",
+   "agentName": "Hannah Faraday",
+   "agency": "Hollis Agency",
+   "status": "Queried",
+   "sentDate": "2025-03-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Malik Llewellyn / Everly Associates",
+   "agentName": "Malik Llewellyn",
+   "agency": "Everly Associates",
+   "status": "Rejected",
+   "sentDate": "2023-10-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Imogen Tremayne / Everly Associates",
+   "agentName": "Imogen Tremayne",
+   "agency": "Everly Associates",
+   "status": "Queried",
+   "sentDate": "2023-08-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Dev Hale / Greenhouse Partners",
+   "agentName": "Dev Hale",
+   "agency": "Greenhouse Partners",
+   "status": "Queried",
+   "sentDate": "2023-12-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Seb Ibbotson / Greenhouse Partners",
+   "agentName": "Seb Ibbotson",
+   "agency": "Greenhouse Partners",
+   "status": "Rejected",
+   "sentDate": "2023-11-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Clara Kaur / Everly Associates",
+   "agentName": "Clara Kaur",
+   "agency": "Everly Associates",
+   "status": "Withdrawn",
+   "sentDate": "2025-09-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Tomas Rook / Hollis Agency",
+   "agentName": "Tomas Rook",
+   "agency": "Hollis Agency",
+   "status": "Full Requested",
+   "sentDate": "2024-02-20",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

@@ -1,0 +1,95 @@
+{
+ "id": "serials-csv-10",
+ "queries": [
+  {
+   "label": "q1 Seb Ibbotson / Ashgrove Agency",
+   "agentName": "Seb Ibbotson",
+   "agency": "Ashgrove Agency",
+   "status": "Full Sent",
+   "sentDate": "2023-10-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Gregory Rook / Pemberton Management",
+   "agentName": "Gregory Rook",
+   "agency": "Pemberton Management",
+   "status": "Rejected",
+   "sentDate": "2024-02-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Rosalind Ashdown / Pemberton Management",
+   "agentName": "Rosalind Ashdown",
+   "agency": "Pemberton Management",
+   "status": "Rejected",
+   "sentDate": "2024-02-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Gregory Marsh / Larkspur Associates",
+   "agentName": "Gregory Marsh",
+   "agency": "Larkspur Associates",
+   "status": "No Response",
+   "sentDate": "2023-08-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Imogen Achebe / Penfallow Agency",
+   "agentName": "Imogen Achebe",
+   "agency": "Penfallow Agency",
+   "status": "Rejected",
+   "sentDate": "2024-07-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Esme Nkemelu / Ashgrove Agency",
+   "agentName": "Esme Nkemelu",
+   "agency": "Ashgrove Agency",
+   "status": "Queried",
+   "sentDate": "2023-07-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Saoirse Whitlock / Pemberton Management",
+   "agentName": "Saoirse Whitlock",
+   "agency": "Pemberton Management",
+   "status": "Rejected",
+   "sentDate": "2024-03-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Callum Tremayne / Pemberton Management",
+   "agentName": "Callum Tremayne",
+   "agency": "Pemberton Management",
+   "status": "Partial Requested",
+   "sentDate": "2025-08-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Callum Okafor / Pemberton Management",
+   "agentName": "Callum Okafor",
+   "agency": "Pemberton Management",
+   "status": "Rejected",
+   "sentDate": "2025-08-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Clara Nkemelu / Ashgrove Agency",
+   "agentName": "Clara Nkemelu",
+   "agency": "Ashgrove Agency",
+   "status": "Queried",
+   "sentDate": "2025-09-26",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

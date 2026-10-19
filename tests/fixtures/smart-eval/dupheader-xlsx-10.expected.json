@@ -1,0 +1,95 @@
+{
+ "id": "dupheader-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Marianne Penrose / Everly & Co",
+   "agentName": "Marianne Penrose",
+   "agency": "Everly & Co",
+   "status": "Queried",
+   "sentDate": "2024-02-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Callum Kaur / Copperfield Agency",
+   "agentName": "Callum Kaur",
+   "agency": "Copperfield Agency",
+   "status": "Withdrawn",
+   "sentDate": "2025-03-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Theo Fennimore / Copperfield Agency",
+   "agentName": "Theo Fennimore",
+   "agency": "Copperfield Agency",
+   "status": "Full Requested",
+   "sentDate": "2025-04-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Ezra Faraday / Pemberton Agency",
+   "agentName": "Ezra Faraday",
+   "agency": "Pemberton Agency",
+   "status": "Queried",
+   "sentDate": "2024-07-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Hannah Penrose / Copperfield Associates",
+   "agentName": "Hannah Penrose",
+   "agency": "Copperfield Associates",
+   "status": "Rejected",
+   "sentDate": "2023-02-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Gregory Fennimore / Copperfield Associates",
+   "agentName": "Gregory Fennimore",
+   "agency": "Copperfield Associates",
+   "status": "Queried",
+   "sentDate": "2024-03-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Ezra Ibbotson / Pemberton Agency",
+   "agentName": "Ezra Ibbotson",
+   "agency": "Pemberton Agency",
+   "status": "Queried",
+   "sentDate": "2024-05-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Tamsin Whitlock / Everly & Co",
+   "agentName": "Tamsin Whitlock",
+   "agency": "Everly & Co",
+   "status": "No Response",
+   "sentDate": "2025-07-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Gregory Hale / Copperfield Agency",
+   "agentName": "Gregory Hale",
+   "agency": "Copperfield Agency",
+   "status": "Queried",
+   "sentDate": "2024-08-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Rory Kaur / Pemberton Agency",
+   "agentName": "Rory Kaur",
+   "agency": "Pemberton Agency",
+   "status": "Queried",
+   "sentDate": "2023-10-21",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

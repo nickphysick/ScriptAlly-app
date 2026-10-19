@@ -1,0 +1,138 @@
+{
+ "id": "events-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Clara Moreau / Greenhouse Literary Agency",
+   "agentName": "Clara Moreau",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2024-07-17",
+   "timeline": [
+    {
+     "type": "Rejected",
+     "date": "2024-08-26"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q2 Hugo Ibbotson / Copperfield Associates",
+   "agentName": "Hugo Ibbotson",
+   "agency": "Copperfield Associates",
+   "status": "Queried",
+   "sentDate": "2024-03-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Rosalind Achebe / Kite & Co",
+   "agentName": "Rosalind Achebe",
+   "agency": "Kite & Co",
+   "status": "No Response",
+   "sentDate": "2024-11-06",
+   "timeline": [
+    {
+     "type": "No Response",
+     "date": "2024-12-01"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q4 Ezra Kaur / Kite & Co",
+   "agentName": "Ezra Kaur",
+   "agency": "Kite & Co",
+   "status": "Full Requested",
+   "sentDate": "2023-07-20",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2023-07-29"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q5 Rory Kaur / Copperfield Associates",
+   "agentName": "Rory Kaur",
+   "agency": "Copperfield Associates",
+   "status": "Queried",
+   "sentDate": "2023-02-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Clara Nkemelu / Greenhouse Literary Agency",
+   "agentName": "Clara Nkemelu",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Queried",
+   "sentDate": "2023-06-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Imogen Llewellyn / Greenhouse Literary Agency",
+   "agentName": "Imogen Llewellyn",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Queried",
+   "sentDate": "2023-11-21",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Tomas Ibbotson / Copperfield Associates",
+   "agentName": "Tomas Ibbotson",
+   "agency": "Copperfield Associates",
+   "status": "Rejected",
+   "sentDate": "2024-08-16",
+   "timeline": [
+    {
+     "type": "Rejected",
+     "date": "2024-08-29"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q9 Owen Marsh / Kite & Co",
+   "agentName": "Owen Marsh",
+   "agency": "Kite & Co",
+   "status": "Rejected",
+   "sentDate": "2023-08-23",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2023-10-04"
+    },
+    {
+     "type": "Full Sent",
+     "date": "2023-11-09"
+    },
+    {
+     "type": "Rejected",
+     "date": "2023-12-10"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q10 Priya Marsh / Greenhouse Literary Agency",
+   "agentName": "Priya Marsh",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Queried",
+   "sentDate": "2024-10-22",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

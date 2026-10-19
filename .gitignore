@@ -44,3 +44,8 @@ run-artifacts/*-deploy.txt
 # `.env` is where a personal reply-to address lives, while `.env.<projectId>` stays tracked for the
 # values that are safe to publish (a database id, a public host). See functions/.env.example.
 functions/.env
+
+# ── Smart Import evaluation: real writers' trackers (PRIVACY) ──
+# A real file and its <name>.expected.json go here to be included in eval runs. Never committed;
+# the eval report counts them and redacts every value it would print about them.
+tests/fixtures/smart-eval/real/

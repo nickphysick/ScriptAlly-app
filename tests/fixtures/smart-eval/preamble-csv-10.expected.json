@@ -1,0 +1,95 @@
+{
+ "id": "preamble-csv-10",
+ "queries": [
+  {
+   "label": "q1 Malik Ostrander / Everly Literary Agency",
+   "agentName": "Malik Ostrander",
+   "agency": "Everly Literary Agency",
+   "status": "No Response",
+   "sentDate": "2025-07-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Yusuf Doyle / Hollis Partners",
+   "agentName": "Yusuf Doyle",
+   "agency": "Hollis Partners",
+   "status": "No Response",
+   "sentDate": "2023-08-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Lena Penrose / Copperfield & Co",
+   "agentName": "Lena Penrose",
+   "agency": "Copperfield & Co",
+   "status": "Rejected",
+   "sentDate": "2023-06-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Esme Ibbotson / Quill & Co",
+   "agentName": "Esme Ibbotson",
+   "agency": "Quill & Co",
+   "status": "Withdrawn",
+   "sentDate": "2024-10-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Marianne Quigley / Hollis Partners",
+   "agentName": "Marianne Quigley",
+   "agency": "Hollis Partners",
+   "status": "Queried",
+   "sentDate": "2024-04-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Gregory Nkemelu / Quill & Co",
+   "agentName": "Gregory Nkemelu",
+   "agency": "Quill & Co",
+   "status": "Queried",
+   "sentDate": "2023-05-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Priya Rook / Copperfield & Co",
+   "agentName": "Priya Rook",
+   "agency": "Copperfield & Co",
+   "status": "Rejected",
+   "sentDate": "2023-07-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Clara Hale / Copperfield & Co",
+   "agentName": "Clara Hale",
+   "agency": "Copperfield & Co",
+   "status": "Partial Requested",
+   "sentDate": "2024-02-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Hannah Whitlock / Everly Literary Agency",
+   "agentName": "Hannah Whitlock",
+   "agency": "Everly Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2025-05-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Jamal Llewellyn / Quill & Co",
+   "agentName": "Jamal Llewellyn",
+   "agency": "Quill & Co",
+   "status": "Queried",
+   "sentDate": "2023-10-18",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

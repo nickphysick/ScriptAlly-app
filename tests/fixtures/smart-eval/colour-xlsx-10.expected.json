@@ -1,0 +1,95 @@
+{
+ "id": "colour-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Esme Moreau / Ashgrove Literary Agency",
+   "agentName": "Esme Moreau",
+   "agency": "Ashgrove Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2025-04-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Felix Sato / Hollis Agency",
+   "agentName": "Felix Sato",
+   "agency": "Hollis Agency",
+   "status": "Queried",
+   "sentDate": "2024-09-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Seb Sato / Copperfield Partners",
+   "agentName": "Seb Sato",
+   "agency": "Copperfield Partners",
+   "status": "Offer",
+   "sentDate": "2023-02-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Imogen Doyle / Copperfield Partners",
+   "agentName": "Imogen Doyle",
+   "agency": "Copperfield Partners",
+   "status": "Rejected",
+   "sentDate": "2023-07-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Owen Salt / Hollis Agency",
+   "agentName": "Owen Salt",
+   "agency": "Hollis Agency",
+   "status": "No Response",
+   "sentDate": "2023-11-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Rory Kaur / Ashgrove Literary Agency",
+   "agentName": "Rory Kaur",
+   "agency": "Ashgrove Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2024-07-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Orla Harrow / Kite Partners",
+   "agentName": "Orla Harrow",
+   "agency": "Kite Partners",
+   "status": "Offer",
+   "sentDate": "2025-01-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Tamsin Sato / Kite Partners",
+   "agentName": "Tamsin Sato",
+   "agency": "Kite Partners",
+   "status": "Rejected",
+   "sentDate": "2025-04-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Priya Ibbotson / Kite Partners",
+   "agentName": "Priya Ibbotson",
+   "agency": "Kite Partners",
+   "status": "Queried",
+   "sentDate": "2024-01-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Bea Doyle / Ashgrove Literary Agency",
+   "agentName": "Bea Doyle",
+   "agency": "Ashgrove Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2025-09-14",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

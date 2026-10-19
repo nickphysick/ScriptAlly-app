@@ -1,0 +1,95 @@
+{
+ "id": "tabscover-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Imogen Ibbotson / Greenhouse Partners",
+   "agentName": "Imogen Ibbotson",
+   "agency": "Greenhouse Partners",
+   "status": "Queried",
+   "sentDate": "2023-08-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Bea Lindqvist / Quill Management",
+   "agentName": "Bea Lindqvist",
+   "agency": "Quill Management",
+   "status": "Queried",
+   "sentDate": "2024-10-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Hannah Kaur / Bellwether Literary",
+   "agentName": "Hannah Kaur",
+   "agency": "Bellwether Literary",
+   "status": "Queried",
+   "sentDate": "2024-01-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Jamal Brennan / Ashgrove & Co",
+   "agentName": "Jamal Brennan",
+   "agency": "Ashgrove & Co",
+   "status": "Full Requested",
+   "sentDate": "2024-02-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Callum Vidal / Greenhouse Partners",
+   "agentName": "Callum Vidal",
+   "agency": "Greenhouse Partners",
+   "status": "Queried",
+   "sentDate": "2024-12-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Felix Kaur / Ashgrove & Co",
+   "agentName": "Felix Kaur",
+   "agency": "Ashgrove & Co",
+   "status": "Full Requested",
+   "sentDate": "2023-01-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Nadia Lindqvist / Greenhouse Partners",
+   "agentName": "Nadia Lindqvist",
+   "agency": "Greenhouse Partners",
+   "status": "Queried",
+   "sentDate": "2025-09-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Hugo Quigley / Ashgrove & Co",
+   "agentName": "Hugo Quigley",
+   "agency": "Ashgrove & Co",
+   "status": "Offer",
+   "sentDate": "2023-11-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Clara Tremayne / Quill Management",
+   "agentName": "Clara Tremayne",
+   "agency": "Quill Management",
+   "status": "Rejected",
+   "sentDate": "2023-08-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Rory Webb / Greenhouse Partners",
+   "agentName": "Rory Webb",
+   "agency": "Greenhouse Partners",
+   "status": "Partial Requested",
+   "sentDate": "2024-04-06",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

@@ -1,0 +1,159 @@
+{
+ "id": "wide-csv-10",
+ "queries": [
+  {
+   "label": "q1 Malik Okafor / Juniper Agency",
+   "agentName": "Malik Okafor",
+   "agency": "Juniper Agency",
+   "status": "Queried",
+   "sentDate": "2023-04-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Imogen Okafor / Hollis Literary Agency",
+   "agentName": "Imogen Okafor",
+   "agency": "Hollis Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2025-04-19",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2025-05-25"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q3 Seb Raman / Dunmore Partners",
+   "agentName": "Seb Raman",
+   "agency": "Dunmore Partners",
+   "status": "Queried",
+   "sentDate": "2023-01-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Callum Carter / Juniper Agency",
+   "agentName": "Callum Carter",
+   "agency": "Juniper Agency",
+   "status": "No Response",
+   "sentDate": "2024-06-08",
+   "timeline": [
+    {
+     "type": "No Response",
+     "date": "2024-07-03"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q5 Yusuf Brennan / Juniper Agency",
+   "agentName": "Yusuf Brennan",
+   "agency": "Juniper Agency",
+   "status": "No Response",
+   "sentDate": "2023-09-10",
+   "timeline": [
+    {
+     "type": "No Response",
+     "date": "2023-09-29"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q6 Hannah Okafor / Juniper Agency",
+   "agentName": "Hannah Okafor",
+   "agency": "Juniper Agency",
+   "status": "Full Sent",
+   "sentDate": "2024-05-16",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-05-30"
+    },
+    {
+     "type": "Full Sent",
+     "date": "2024-06-24"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q7 Gregory Lindqvist / Hollis Literary Agency",
+   "agentName": "Gregory Lindqvist",
+   "agency": "Hollis Literary Agency",
+   "status": "Full Sent",
+   "sentDate": "2023-04-04",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2023-04-26"
+    },
+    {
+     "type": "Full Sent",
+     "date": "2023-06-03"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q8 Hannah Hale / Juniper Agency",
+   "agentName": "Hannah Hale",
+   "agency": "Juniper Agency",
+   "status": "Partial Requested",
+   "sentDate": "2025-03-15",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2025-03-30"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q9 Bea Llewellyn / Juniper Agency",
+   "agentName": "Bea Llewellyn",
+   "agency": "Juniper Agency",
+   "status": "Partial Requested",
+   "sentDate": "2023-11-01",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2023-12-09"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q10 Bea Brennan / Juniper Agency",
+   "agentName": "Bea Brennan",
+   "agency": "Juniper Agency",
+   "status": "Rejected",
+   "sentDate": "2025-07-25",
+   "timeline": [
+    {
+     "type": "Rejected",
+     "date": "2025-08-06"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  }
+ ]
+}

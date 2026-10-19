@@ -1,0 +1,109 @@
+{
+ "id": "notesdates-csv-10",
+ "queries": [
+  {
+   "label": "q1 Tamsin Kaur / Marlow Literary Agency",
+   "agentName": "Tamsin Kaur",
+   "agency": "Marlow Literary Agency",
+   "status": "No Response",
+   "sentDate": "2024-07-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Seb Hale / Copperfield Associates",
+   "agentName": "Seb Hale",
+   "agency": "Copperfield Associates",
+   "status": "No Response",
+   "sentDate": "2024-09-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Priya Faraday / Marlow Literary Agency",
+   "agentName": "Priya Faraday",
+   "agency": "Marlow Literary Agency",
+   "status": "Queried",
+   "sentDate": "2025-08-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Clara Vidal / Wren Associates",
+   "agentName": "Clara Vidal",
+   "agency": "Wren Associates",
+   "status": "Partial Sent",
+   "sentDate": "2023-12-29",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2024-02-10"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q5 Seb Achebe / Fairweather Literary Agency",
+   "agentName": "Seb Achebe",
+   "agency": "Fairweather Literary Agency",
+   "status": "Queried",
+   "sentDate": "2023-05-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Imogen Tremayne / Wren Associates",
+   "agentName": "Imogen Tremayne",
+   "agency": "Wren Associates",
+   "status": "Full Requested",
+   "sentDate": "2025-02-03",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2025-02-18"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q7 Freya Whitlock / Copperfield Associates",
+   "agentName": "Freya Whitlock",
+   "agency": "Copperfield Associates",
+   "status": "Queried",
+   "sentDate": "2025-04-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Callum Voss / Marlow Literary Agency",
+   "agentName": "Callum Voss",
+   "agency": "Marlow Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2025-07-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Marianne Harrow / Marlow Literary Agency",
+   "agentName": "Marianne Harrow",
+   "agency": "Marlow Literary Agency",
+   "status": "No Response",
+   "sentDate": "2023-07-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Callum Tremayne / Wren Associates",
+   "agentName": "Callum Tremayne",
+   "agency": "Wren Associates",
+   "status": "Partial Requested",
+   "sentDate": "2023-11-04",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

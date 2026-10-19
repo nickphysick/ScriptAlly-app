@@ -1,0 +1,107 @@
+{
+ "id": "agentnotes-csv-10",
+ "queries": [
+  {
+   "label": "q1 (no name) / Fairweather & Co",
+   "agentName": "",
+   "agency": "Fairweather & Co",
+   "status": "Rejected",
+   "sentDate": "2025-06-15",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q2 (no name) / Fairweather & Co",
+   "agentName": "",
+   "agency": "Fairweather & Co",
+   "status": "Rejected",
+   "sentDate": "2023-09-17",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q3 (no name) / Fairweather & Co",
+   "agentName": "",
+   "agency": "Fairweather & Co",
+   "status": "Queried",
+   "sentDate": "2024-04-08",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q4 Freya Quigley / Harwood Partners",
+   "agentName": "Freya Quigley",
+   "agency": "Harwood Partners",
+   "status": "Full Requested",
+   "sentDate": "2024-11-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Ines Achebe / Juniper Literary",
+   "agentName": "Ines Achebe",
+   "agency": "Juniper Literary",
+   "status": "Rejected",
+   "sentDate": "2025-05-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Queried",
+   "sentDate": "2025-07-22",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q7 Ezra Moreau / Fairweather & Co",
+   "agentName": "Ezra Moreau",
+   "agency": "Fairweather & Co",
+   "status": "Queried",
+   "sentDate": "2024-11-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 (no name) / Juniper Literary",
+   "agentName": "",
+   "agency": "Juniper Literary",
+   "status": "Queried",
+   "sentDate": "2023-12-16",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q9 Marianne Ashdown / Larkspur Associates",
+   "agentName": "Marianne Ashdown",
+   "agency": "Larkspur Associates",
+   "status": "Queried",
+   "sentDate": "2024-04-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 (no name) / Larkspur Associates",
+   "agentName": "",
+   "agency": "Larkspur Associates",
+   "status": "Queried",
+   "sentDate": "2024-08-14",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,101 @@
+{
+ "id": "slang-csv-10",
+ "queries": [
+  {
+   "label": "q1 Malik Lindqvist / Hollis Management",
+   "agentName": "Malik Lindqvist",
+   "agency": "Hollis Management",
+   "status": "Rejected",
+   "sentDate": "2025-02-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Gregory Faraday / Hollis Management",
+   "agentName": "Gregory Faraday",
+   "agency": "Hollis Management",
+   "status": "Rejected",
+   "sentDate": "2023-05-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Imogen Marsh / Inkwell Partners",
+   "agentName": "Imogen Marsh",
+   "agency": "Inkwell Partners",
+   "status": "Queried",
+   "sentDate": "2023-01-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Callum Fennimore / Larkspur Associates",
+   "agentName": "Callum Fennimore",
+   "agency": "Larkspur Associates",
+   "status": "Queried",
+   "sentDate": "2025-09-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Rosalind Ashdown / Larkspur Associates",
+   "agentName": "Rosalind Ashdown",
+   "agency": "Larkspur Associates",
+   "status": "Rejected",
+   "sentDate": "2023-05-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Imogen Okafor / Hollis Management",
+   "agentName": "Imogen Okafor",
+   "agency": "Hollis Management",
+   "status": "Full Requested",
+   "statusAccept": [
+    "Full Requested",
+    "Full Sent"
+   ],
+   "sentDate": "2025-01-04",
+   "timeline": [],
+   "reasons": [
+    "status-direction"
+   ]
+  },
+  {
+   "label": "q7 Dev Quigley / Larkspur Associates",
+   "agentName": "Dev Quigley",
+   "agency": "Larkspur Associates",
+   "status": "Queried",
+   "sentDate": "2024-02-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Hannah Raman / Harwood Partners",
+   "agentName": "Hannah Raman",
+   "agency": "Harwood Partners",
+   "status": "Queried",
+   "sentDate": "2025-06-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Theo Ostrander / Harwood Partners",
+   "agentName": "Theo Ostrander",
+   "agency": "Harwood Partners",
+   "status": "Partial Sent",
+   "sentDate": "2024-07-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Yusuf Nkemelu / Larkspur Associates",
+   "agentName": "Yusuf Nkemelu",
+   "agency": "Larkspur Associates",
+   "status": "Queried",
+   "sentDate": "2024-08-28",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

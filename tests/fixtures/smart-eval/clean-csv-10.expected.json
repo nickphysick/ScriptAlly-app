@@ -1,0 +1,95 @@
+{
+ "id": "clean-csv-10",
+ "queries": [
+  {
+   "label": "q1 Felix Marsh / Bellwether Associates",
+   "agentName": "Felix Marsh",
+   "agency": "Bellwether Associates",
+   "status": "Queried",
+   "sentDate": "2023-06-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Rory Penrose / Bellwether Associates",
+   "agentName": "Rory Penrose",
+   "agency": "Bellwether Associates",
+   "status": "Queried",
+   "sentDate": "2023-08-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Tomas Brennan / Harwood Management",
+   "agentName": "Tomas Brennan",
+   "agency": "Harwood Management",
+   "status": "Rejected",
+   "sentDate": "2023-06-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Gregory Brennan / Harwood Management",
+   "agentName": "Gregory Brennan",
+   "agency": "Harwood Management",
+   "status": "No Response",
+   "sentDate": "2024-04-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Malik Ashdown / Bellwether Associates",
+   "agentName": "Malik Ashdown",
+   "agency": "Bellwether Associates",
+   "status": "Offer",
+   "sentDate": "2024-10-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Malik Kaur / Marlow Literary",
+   "agentName": "Malik Kaur",
+   "agency": "Marlow Literary",
+   "status": "Rejected",
+   "sentDate": "2025-05-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Hannah Achebe / Marlow Literary",
+   "agentName": "Hannah Achebe",
+   "agency": "Marlow Literary",
+   "status": "No Response",
+   "sentDate": "2023-08-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Orla Raman / Harwood Management",
+   "agentName": "Orla Raman",
+   "agency": "Harwood Management",
+   "status": "Full Requested",
+   "sentDate": "2024-02-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Hugo Achebe / Marlow Literary",
+   "agentName": "Hugo Achebe",
+   "agency": "Marlow Literary",
+   "status": "Queried",
+   "sentDate": "2025-01-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Kwame Ibbotson / Copperfield Literary",
+   "agentName": "Kwame Ibbotson",
+   "agency": "Copperfield Literary",
+   "status": "Revise & Resubmit",
+   "sentDate": "2024-04-07",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

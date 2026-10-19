@@ -1,0 +1,95 @@
+{
+ "id": "merged-xlsx-10",
+ "queries": [
+  {
+   "label": "q6 Bea Ashdown / Copperfield Agency",
+   "agentName": "Bea Ashdown",
+   "agency": "Copperfield Agency",
+   "status": "No Response",
+   "sentDate": "2024-03-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Rosalind Ostrander / Kite Literary",
+   "agentName": "Rosalind Ostrander",
+   "agency": "Kite Literary",
+   "status": "Queried",
+   "sentDate": "2024-07-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Bea Whitlock / Kite Literary",
+   "agentName": "Bea Whitlock",
+   "agency": "Kite Literary",
+   "status": "Queried",
+   "sentDate": "2025-09-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Hannah Quigley / Kite Literary",
+   "agentName": "Hannah Quigley",
+   "agency": "Kite Literary",
+   "status": "No Response",
+   "sentDate": "2024-05-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q1 Orla Doyle / Larkspur & Co",
+   "agentName": "Orla Doyle",
+   "agency": "Larkspur & Co",
+   "status": "Full Requested",
+   "sentDate": "2024-12-21",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Callum Nkemelu / Larkspur & Co",
+   "agentName": "Callum Nkemelu",
+   "agency": "Larkspur & Co",
+   "status": "Rejected",
+   "sentDate": "2025-02-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Lena Brennan / Larkspur & Co",
+   "agentName": "Lena Brennan",
+   "agency": "Larkspur & Co",
+   "status": "Queried",
+   "sentDate": "2023-04-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Yusuf Rook / Penfallow Partners",
+   "agentName": "Yusuf Rook",
+   "agency": "Penfallow Partners",
+   "status": "Full Sent",
+   "sentDate": "2023-12-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Gregory Sato / Penfallow Partners",
+   "agentName": "Gregory Sato",
+   "agency": "Penfallow Partners",
+   "status": "Rejected",
+   "sentDate": "2023-10-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Hugo Vidal / Penfallow Partners",
+   "agentName": "Hugo Vidal",
+   "agency": "Penfallow Partners",
+   "status": "Full Requested",
+   "sentDate": "2024-03-28",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}
