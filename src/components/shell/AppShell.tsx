@@ -586,6 +586,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           already draws. The seam is kept so a shell-level toast can take it the day one exists. */}
       <FeedbackDock
         uid={currentUser?.id}
+        email={currentUser?.email ?? null}
         open={feedbackOpen}
         onOpenChange={setFeedbackOpen}
         onReceipt={() => {}}

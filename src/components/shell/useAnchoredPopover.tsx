@@ -109,8 +109,8 @@ export function useAnchoredPopover(
   return { style, placement, replace };
 }
 
-/** Renders its children into the one pop-up layer. */
+/** Renders its children into the one pop-up layer — or in place where there is no document (a string render). */
 export const AnchoredPortal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const layer = popoverLayer();
-  return layer ? createPortal(children, layer) : null;
+  return layer ? createPortal(children, layer) : <>{children}</>;
 };

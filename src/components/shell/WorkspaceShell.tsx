@@ -65,6 +65,7 @@ import { setBarSlot } from "../../lib/barSlot";
 import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
 import { HelpMenu } from "./HelpMenu";
+import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -302,6 +303,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   useEffect(() => onTopbarClaim((id) => { if (id !== "help") setHelpOpen(false); }), []);
   /* Part B — a route change closes it */
   useEffect(() => { setHelpOpen(false); }, [pathname]);
+  /* Part E — the feedback panel opens beside whichever Give feedback button is on screen, and names the page by its
+     NAME; both are registered here, so the panel never reads the page it sits over */
+  const fbAnchors = useRef(new Map<HTMLElement, () => void>());
+  const fbAnchor = useCallback((el: HTMLElement | null) => {
+    if (el) { if (!fbAnchors.current.has(el)) fbAnchors.current.set(el, registerFeedbackAnchor(el)); return; }
+    for (const [node, off] of fbAnchors.current) if (!node.isConnected) { off(); fbAnchors.current.delete(node); }
+  }, []);
   /* the house dismissal idiom: pointerdown outside, Escape, and the trigger counts as inside */
   useEffect(() => {
     if (!helpOpen) return;
@@ -604,6 +612,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
+  useEffect(() => { setFeedbackPage(pageName?.name ?? null); }, [pageName?.name]);
 
   return (
     /* ⚠️ THE COLLAPSED STATE IS ANNOUNCED ON THE APP, NOT ONLY ON THE PANEL. `sb-collapsed` lives on
@@ -801,15 +810,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <span className="ws-fbm">FOUNDING MEMBER</span>
                 <b className="ws-fbh">Shape QueryHawk</b>
                 <span className="ws-fbl">A snag, or a wish? Tell us.</span>
-                <button type="button" className="ws-fbtn" data-probe="feedback" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
+                <button ref={fbAnchor} type="button" className="ws-fbtn" data-probe="feedback" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
                   {FEEDBACK_ICON}<span>Give feedback</span>
                 </button>
               </div>
-              <button type="button" className="ws-fbb" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
+              <button ref={fbAnchor} type="button" className="ws-fbb" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
                 {FEEDBACK_ICON}<span className="ws-fbb-l">Give feedback</span><em>BETA</em>
               </button>
               <button
-                type="button" className="ws-fbi" onClick={onOpenFeedback} aria-expanded={feedbackOpen}
+                ref={fbAnchor} type="button" className="ws-fbi" onClick={onOpenFeedback} aria-expanded={feedbackOpen}
                 aria-label={FEEDBACK_FAB}
                 {...railTipFor(FEEDBACK_FAB, undefined, undefined, 120, sidebar.collapsed)}
               >
