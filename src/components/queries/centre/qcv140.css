@@ -17,7 +17,7 @@
   .qc138-sheet .qc140-tb {
     position: relative; box-sizing: border-box; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px;
     height: 64px; padding: 0 14px 0 20px; overflow: visible;
-    background: #2d3a50; border-radius: 20px 20px 0 0; color: #f4eee5;
+    background: #2a3a52; border-radius: 18px 18px 0 0; color: #f4eee5;
   }
   .qc138-sheet .qc140-tb[data-pinned] { height: 72px; }
 
@@ -36,6 +36,8 @@
   .qc138-sheet .qc140-jb .qc140-jt { font: inherit !important; color: inherit; }
   .qc138-sheet .qc140-jb i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(244, 238, 229, 0.55); }
   .qc138-sheet .qc140-jb[data-over] { display: none; }
+  .qc138-sheet .qc140-jb { --qc140-jbg: #2a3a52; }
+  .qc138-sheet .qc140-jb:hover:not(:disabled) { background: rgba(244, 238, 229, 0.12); }
   .qc138-sheet .qc140-jb:focus-visible, .qc138-sheet .qc140-jmore:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
   .qc138-sheet .qc140-jmore {
     box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; margin: 0; padding: 0 11px;
@@ -43,14 +45,14 @@
     font: 400 14.5px/1 var(--sp-serif) !important;
   }
   .qc138-sheet .qc140-jmore[hidden] { display: none; }
+  .qc138-sheet .qc140-jmore .qc140-cv { color: inherit; }
 
   /* the marks: the glyph 16 in a 17 box with its 11px badge top right; the art in a 22 disc; the package cube */
   .qc140-jg { position: relative; flex: none; display: inline-grid; place-items: center; width: 17px; height: 17px; color: currentColor; line-height: 0; }
   .qc140-jg .qc140-jsvg { width: 16px; height: 16px; }
-  .qc140-jg--glyph { margin-right: 3px; }
   .qc140-jg.grey { opacity: 0.6; }
   .qc140-jg .qc140-jbd {
-    position: absolute; top: -5px; right: -6px; box-sizing: border-box; display: grid; place-items: center; width: 11px; height: 11px;
+    position: absolute; top: -5px; right: -5px; box-sizing: border-box; display: grid; place-items: center; width: 11px; height: 11px;
     border-radius: 50%; color: #fff; box-shadow: 0 0 0 1.5px var(--qc140-jbg, #2a3a52);
   }
   .qc140-jg .qc140-jbd svg { width: 8px; height: 8px; }
@@ -136,12 +138,11 @@
     .qc138-sheet .qc140-find { width: 210px; }
   }
   @container qc140tb (max-width: 1000px) {
-    .qc138-sheet .qc140-pin { gap: 0; padding: 0 11px; }
+    .qc138-sheet .qc140-pin { gap: 0; width: 46px; padding: 0; justify-content: center; }
     .qc138-sheet .qc140-pin .qc140-pin-l,
     .qc138-sheet .qc140-fil .qc140-cl {
       position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
     }
-    .qc138-sheet .qc140-fil { padding-left: 13px; }
   }
 }
 
@@ -171,3 +172,24 @@
 }
 .lpop.qc140-gpop > button:hover { background: #f6f3ee; }
 .lpop.qc140-gpop > button[aria-checked="true"] { background: #f2f4f8; font-weight: 600 !important; }
+
+/* ── v140 §B · UNPINNED (as Contact list v19.1 §F): the list is a white card with all four corners at 18 and 22px of
+   page below it; the toolbar is navy with no rule beneath and follows the card's top corners. The jump row is cream on
+   navy (counts at 55%, a 12% cream wash on hover); the current button is a cream tile with navy text and glyph; "+N
+   more" is outlined in 35% cream. Find, Group by and Filters are white with no ring (their applied states are Part A's);
+   Pin is cream with navy text and icon, white on hover. Pinned, Part C restyles all of this. ── */
+@media (min-width: 768px) {
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet { border-radius: 18px; margin-bottom: 22px; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-tb { border-bottom: 0; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"],
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore[aria-current="true"] { --qc140-jbg: #f4eee5; background: #f4eee5; color: #2a3a52; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"] i { color: rgba(42, 58, 82, 0.55); }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"] .qc140-jg--art img { background: #fff; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore { box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35); }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore:hover,
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore[aria-expanded="true"] { background: rgba(244, 238, 229, 0.12); }
+  .qcv-group[data-v138]:not([data-full]) .qc140-find,
+  .qcv-group[data-v138]:not([data-full]) .qc140-chipw:not([data-on]) { box-shadow: none; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-pin { background: #f4eee5; color: #2a3a52; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-pin:hover:not(:disabled) { background: #fff; }
+}
