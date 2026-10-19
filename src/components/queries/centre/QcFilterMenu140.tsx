@@ -24,7 +24,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { quietScroll, type PopoverState } from "../../shell/ListPills";
 import { SENT_NONE, emptyQc138Filters, qc138FilterCount, type Qc138Filters } from "../../../lib/qc138";
-import { QUICK_PICKS, STAND_ROWS, standOn, toggleStand, type QuickKey } from "../../../lib/qc140";
+import { QUICK_PICKS, STAND_ROWS, exportLabel, standOn, toggleStand, type QuickKey } from "../../../lib/qc140";
 import { glyphOfStatus } from "../../../lib/qcBandArt";
 import type { SentOption } from "./QcFilters138";
 import { StageGlyph } from "./StageGlyph";
@@ -57,6 +57,9 @@ export interface Qc140FilterModel {
   stageCounts: ReadonlyMap<string, number>;
   sent: readonly SentOption[];
   moreN: Record<"dueWeek" | "past" | "missing" | "overYear", number>;
+  /** v140.1 §A — anything narrowing the list (a filter, a quick pick, the search), and the export of what it shows */
+  filtered: boolean;
+  onExport: () => void;
 }
 
 const MORE_ROWS: { key: "dueWeek" | "past" | "missing" | "overYear"; label: string; line: string }[] = [
@@ -67,7 +70,7 @@ const MORE_ROWS: { key: "dueWeek" | "past" | "missing" | "overYear"; label: stri
 ];
 
 export const QcFilterMenu140: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc140FilterModel }> = ({ pop, model }) => {
-  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN } = model;
+  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, filtered, onExport } = model;
   const anchor = pop.open === "filters" ? pop.anchor : null;
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -181,7 +184,11 @@ export const QcFilterMenu140: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc1
         </section>
       </div>
       <footer className="qc140-fm-f" data-qc140="filter-foot">
-        <button type="button" className="qc140-fm-clear" data-qc140="filter-clear" disabled={!anyOn} onClick={() => set(emptyQc138Filters())}>Clear all</button>
+        <span className="qc140-fm-fl">
+          <button type="button" className="qc140-fm-clear" data-qc140="filter-clear" disabled={!anyOn} onClick={() => set(emptyQc138Filters())}>Clear all</button>
+          {/* v140.1 §A — Export CSV, back on the desktop: exactly the rows the list shows, in its order, through the one exporter */}
+          <button type="button" className="qc140-fm-export" data-qc140="filter-export" disabled={showing === 0} onClick={onExport}>{exportLabel(showing, total, filtered)}</button>
+        </span>
         <button type="button" className="qc140-fm-show" data-qc140="filter-show" onClick={close}>Show {showing} {plural(showing)}</button>
       </footer>
     </div>,
