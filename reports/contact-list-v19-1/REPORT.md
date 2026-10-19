@@ -98,4 +98,10 @@ shift) produces.
 
 ## Deploy
 
-_Filled in below._
+- **The base:** dev still served `d6d63ba2` (`index-LypZ-ruq.js`), and this branch is cut from it, so the merge was a
+  fast-forward with no conflicts.
+- **Integration branch:** `dev/…-dv1b-cl19-cl191` at `2f17874f`. The gates and locks ran on `5933376d`; the commits
+  after it add only this report and two images.
+- **The deploy:** built from a clean, detached worktree; the served hash was re-checked just before deploying.
+  Hosting only, to dev, which now serves **`index-bC-f_N1T.js`**.
+- Not merged to main. Prod is Nick's.
