@@ -16,6 +16,7 @@
  */
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
+import { isYourMoveRow } from "./queryCentreGroups";
 
 export type GlyphKey = "q" | "pr" | "ps" | "fr" | "fs" | "of" | "cl";
 
@@ -93,11 +94,16 @@ export interface Qc138Filters {
   past: boolean;
   missing: boolean;
   overYear: boolean;
+  /** v140 §D — the two quick picks with no field of their own: Your move (`isYourMoveRow`) and Waiting to hear back (an
+   *  agent-court query not past its date). Overdue is `past` and Offers is `offers`. */
+  you: boolean;
+  waiting: boolean;
 }
-export const emptyQc138Filters = (): Qc138Filters => ({ stages: [], dueWeek: false, offers: false, sent: [], past: false, missing: false, overYear: false });
+export const emptyQc138Filters = (): Qc138Filters => ({ stages: [], dueWeek: false, offers: false, sent: [], past: false, missing: false, overYear: false, you: false, waiting: false });
 /** how many facets are on (the glyph row's stage counts as one) */
 export const qc138FilterCount = (f: Qc138Filters): number =>
-  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
+  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0)
+  + (f.you ? 1 : 0) + (f.waiting ? 1 : 0);
 export const moreCount = (f: Qc138Filters): number => (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
 /** v138.5 §E — the Filters button's badge: how many of the panel's five groups (Stage, Due this week, Offers, What
     you sent, More filters) have something set. More filters counts once however many of its switches are on. */
@@ -178,6 +184,8 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
   if (skip !== "past" && f.past && !r.pastExpected) return false;
   if (skip !== "missing" && f.missing && !nothingRecorded(r)) return false;
   if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
+  if (skip !== "you" && f.you && !isYourMoveRow(r)) return false;
+  if (skip !== "waiting" && f.waiting && !(r.court === "agent" && !r.pastExpected)) return false;
   return true;
 }
 

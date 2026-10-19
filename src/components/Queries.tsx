@@ -95,16 +95,20 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { useQcListKeys } from "./queries/centre/useQcListKeys";
-import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
+import { readQcView, readQcVisit, writeQcView, writeQcVisit } from "../lib/qcViewMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
-import { usePinList } from "./shell/useFullScreenList";
+import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
-import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
-import { QcFilters138, QcFiltersButton138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
+import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
+import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
+import { QcBand140 } from "./queries/centre/QcBand140";
+import { isYourMoveRow } from "../lib/queryCentreGroups";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
@@ -137,7 +141,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
-  inScope, matchesFilter, matchesFind, sortRows,
+  inScope, matchesFilter, matchesFind, sortRows, STAGE_NAME,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
@@ -2377,10 +2381,15 @@ export const Queries: React.FC<{
   const [qcFilter, setQcFilter] = useState<QcFilter>("all");
   /** The list's grouping. Urgency by default (v132 follow-up, 8 Oct — supersedes the 3 Oct "No grouping"
    *  default), and remembered on this device beside density (lib/qcListMemory). */
-  const [qcGroup, setQcGroupState] = useState<GroupBy>(() => readQcListMemory().group);
-  const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcListMemory({ ...readQcListMemory(), group: g }); }, []);
-  /** §2 — the Find field in the list head. Page-local, like the group and the sort. */
-  const [qcFind, setQcFind] = useState("");
+  /* v140 §F — what the list remembers: per device (`qh.qc.view`: grouping, sort, density) and for the visit
+     (`qh.qc.filters`: the filters and quick picks, the search, the unpinned scroll). Both are read HERE, in the state
+     initialisers, so the list's first render already carries them — nothing appears and then jumps. */
+  const qcRemView = useMemo(() => readQcView(), []);
+  const qcRemVisit = useMemo(() => readQcVisit(), []);
+  const [qcGroup, setQcGroupState] = useState<GroupBy>(() => qcRemView.group);
+  const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcView({ group: g }); }, []);
+  /** §2 — the Find field in the list head; remembered for the visit (v140 §F). */
+  const [qcFind, setQcFind] = useState(() => qcRemVisit?.search ?? "");
 
   /**
    * §3 (v95) · WHAT IS NEXT ON EACH QUERY, from the To-do list's own derivation.
@@ -2415,8 +2424,8 @@ export const Queries: React.FC<{
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
   /* v132 §2/§4 — row density, the workspace's own control, remembered on this device under its own
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
-  const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
-  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ ...readQcListMemory(), density: d }); }, []);
+  const [qcDensity, setQcDensityState] = useState<QcDensity>(() => qcRemView.density);
+  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcView({ density: d }); }, []);
   /* v138.1 §F — the search lives in the list sheet's navy row. v138.6 §B: that row is the sticky row and the old
      pinned bar (with its mirrored search) is retired, so "/" (useQcListKeys) has the one field to focus. */
   const qcSheetFindRef = useRef<HTMLInputElement>(null);
@@ -2430,12 +2439,17 @@ export const Queries: React.FC<{
    */
   const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
   /** v138 §A — the stage filter: a set of statuses, shared by the glyph row and the Stage pill. Empty = every stage. */
-  const [qcF138, setQcF138] = useState<Qc138Filters>(emptyQc138Filters);
+  const [qcF138, setQcF138] = useState<Qc138Filters>(() => qcRemVisit?.filters ?? emptyQc138Filters());
   const qcStages = qcF138.stages;
   const pickGlyph = (k: GlyphKey) => setQcF138((f) => ({ ...f, stages: pressGlyph(f.stages, k) }));
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
-  const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
+  const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
+  /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
+  const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
+  /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
+  useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
+  useEffect(() => { writeQcVisit({ filters: qcF138, search: qcFind }); }, [qcF138, qcFind]);
   /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
   const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());
   const [qcBulk, setQcBulk] = useState<{ mode: "nudge" | "resp" | "close"; ids: string[] } | null>(null);
@@ -2463,6 +2477,13 @@ export const Queries: React.FC<{
      name. */
   const qcPin = usePinList("queries", { routeActive: routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
   const qcFull = qcPin.full;
+  /* v140 §C — the folder tab and the sheet lip go navy to join the band while this list is pinned and on screen, and
+     ONLY then: a layout effect, so the tab never paints navy over an unpinned page (Contact list v19's own rule) */
+  useLayoutEffect(() => {
+    if (!(routeActive && qcDesk && qcFull)) return undefined;
+    document.documentElement.setAttribute("data-qc140-pinned", "");
+    return () => document.documentElement.removeAttribute("data-qc140-pinned");
+  }, [routeActive, qcDesk, qcFull]);
   /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
      ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
      const is a temporal-dead-zone throw. */
@@ -3805,6 +3826,21 @@ export const Queries: React.FC<{
     : sortRows(qcFiltered, qcSort);
   /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
   const qcGlyphCounts = glyphCounts(qcScoped);
+  /* v140 §D — the applied row's chips: one per active filter (lib/qc140), the older sentence filter and the strip's court
+     when either is set (both still narrow the list), and the search, shown as "…" and never counted on the Filters chip */
+  const qc140Chips: Qc140Chip[] = [
+    ...appliedChips(qcF138, (k) => qcPackageOf(k)?.packageName ?? "Package no longer on file").map((c) => ({ key: c.key, label: c.label, status: c.status, off: () => setQcF138((f) => c.off(f)) })),
+    ...(qcFilter !== "all" ? [{ key: "sentence", label: qcFilter === "you" ? "With you" : qcFilter === "agent" ? "With the agent" : qcFilter === "offers" ? "Offers" : qcFilter === "past" ? "Past expected" : qcFilter === "closed" ? "Closed" : qcFilter.startsWith("stage:") ? STAGE_NAME[qcFilter.slice(6) as QueryStatus] ?? "Stage" : qcFilter === "court:agent" ? "With agents" : qcFilter === "court:closed" ? "Closed" : "With you", off: () => setQcFilter("all") }] : []),
+    ...(qcCourtOn ? [{ key: `court:${qcCourtOn}`, label: qcCourtOn === "you" ? "Your move" : qcCourtOn === "agent" ? "With agents" : "Closed", off: () => setQcCzCourt(null) }] : []),
+    ...(qcFind.trim() ? [{ key: "find", label: `“${qcFind.trim()}”`, off: () => setQcFind("") }] : []),
+  ];
+  /* v140 §D — the quick picks' counts, over the scoped rows */
+  const qc140QuickN = {
+    you: qcScoped.filter((r) => isYourMoveRow(r)).length,
+    over: qcScoped.filter((r) => r.pastExpected).length,
+    wait: qcScoped.filter((r) => waitingRow(r)).length,
+    offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
+  };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
@@ -5647,6 +5683,18 @@ export const Queries: React.FC<{
   const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
   useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
   useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
+  /* v140 §G — "Pin the list" ticks when the writer pins (the button or F, walkthrough or not), never for a remembered pin
+     put back on arrival. ⚠️ THE DISCRIMINATOR IS THE DEVICE'S PIN RECORD AS IT WAS ONE RENDER BEFORE THE LIST PINNED: a
+     restore pins a list the device already remembers as pinned, while the writer's press is what writes it. (Reading
+     "was the page already on screen", as the Contact list does, ticked every pinned reload here: the restore lands a
+     render after the route.) The guide never pins. */
+  const pinKnown = (() => { try { return localStorage.getItem(PIN_KEYS.queries) === "1"; } catch { return false; } })();
+  const wasQcPin = useRef({ full: qcPin.full, known: pinKnown });
+  useEffect(() => {
+    const was = wasQcPin.current;
+    wasQcPin.current = { full: qcPin.full, known: pinKnown };
+    if (qcPin.full && !was.full && !was.known && routeActive) tickGuide.current("pin");
+  }, [qcPin.full, pinKnown, routeActive]);
   const guideDone = useMemo(() => ({ ...qcGuide.done, ...(hasQueries ? { log: true } : {}) }), [qcGuide.done, hasQueries]);
   /* all five done in an EARLIER visit: the pill does not come back (read once, when the account first loads here) */
   const finishedAtLoad = useRef<boolean | null>(null);
@@ -5672,6 +5720,12 @@ export const Queries: React.FC<{
     switch (k) {
       case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
       case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters. You can also tap a status glyph at the top of the page." };
+      /* v140 §G — the toolbar's Pin button, unpinned first (pinned, it reads Unpin list and the page is not the one the
+         card describes) */
+      case "pin": return unpinned(() => ({
+        el: vis(".qc138-sheet button[data-qc140='pin']"), keyCap: "F",
+        text: <>Press <b>Pin list</b> and the list becomes the whole page: the sidebar tucks away and the counts move into a band at the top. Press it again, or Esc, to put things back.</>,
+      }));
       case "open": {
         const row = vis(".qc138-sheet [data-qcv='row']");
         const q = row ? queries.find((x) => x.id === row.dataset.id) : undefined;
@@ -5704,7 +5758,7 @@ export const Queries: React.FC<{
       setGuideFlow({
         id: "log-2",
         target: () => document.querySelector<HTMLElement>(".qad-root.is-open [data-qad-drawer='log']"),
-        kicker: "Query Centre · Step 1 of 5",
+        kicker: `Query Centre · Step 1 of ${QC_CHECKLIST.length}`,
         title: "Log a query",
         body: "Choose the agent and the date you sent it, then save. If you're just looking, press Cancel.",
         place: "left",
@@ -5820,7 +5874,7 @@ export const Queries: React.FC<{
     if (!walk || !practice) return null;
     const of = walk === "journey" || walk === "done" ? Math.max(1, jStep.of) + 3 : 6;
     const dots = (k: number) => ({ k, n: of });
-    const kick = (k: number) => `Query Centre · Step 4 of 5 · ${k} of ${of}`;
+    const kick = (k: number) => `Query Centre · Step ${QC_CHECKLIST.findIndex((it) => it.key === "resp") + 1} of ${QC_CHECKLIST.length} · ${k} of ${of}`;
     const early = () => endWalk("early");
     const base = { onBack: early, onEscape: early };
     if (walk === "band") return {
@@ -7317,24 +7371,29 @@ export const Queries: React.FC<{
                   shown={qcVisible.length}
                   filtered={qc138Filtered}
                   stickyOn={routeActive && qcDesk}
-                  filtersSlot={(
-                    <QcFiltersButton138 filters={qcF138} disabled={showGridSkeleton}
-                      onClearAll={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}>
-                      <QcFilters138
-                        filters={qcF138}
-                        onFilters={setQcF138}
-                        pop={qc138Pop}
-                        stageCounts={qc138Counts.stage}
-                        dueWeekN={qc138Counts.dueWeek}
-                        offersN={qc138Counts.offers}
-                        sentOptions={qc138Counts.sent}
-                        moreN={qc138Counts.more}
-                        showing={qcVisible.length}
-                        msTitle={qcLineTitle}
-                        disabled={showGridSkeleton}
-                      />
-                    </QcFiltersButton138>
+                  /* v140 §A/§D — the Filters chip (its count: one per applied chip, search not counted; its ✕ clears every
+                     filter), its menu, and the applied-filters row under the toolbar */
+                  filterCount={qc140Chips.filter((c) => c.key !== "find").length}
+                  onClearFilters={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}
+                  loading={showGridSkeleton}
+                  filtersMenu={(pop) => (
+                    <QcFilterMenu140 pop={pop} model={{
+                      filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
+                      quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
+                      moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more },
+                    }} />
                   )}
+                  /* v140 §C — the pinned band, over the rows the list is built from (the manuscript-scoped set; Pip is
+                     never one of them). Its disc is the "Past their reply date" filter (`past`), the Overdue quick
+                     pick's own state; "+ Log a query" opens the real log journey. */
+                  band={qcFull ? (
+                    <QcBand140 fig={bandFigures(qcScoped, qcNow138)} overdueOn={qcF138.past} loading={showGridSkeleton}
+                      onOverdue={() => setQcF138((f) => ({ ...f, past: !f.past }))}
+                      onLog={() => onNavigate?.("queries", "Log a query")} />
+                  ) : null}
+                  applied={qc140Chips.length ? (
+                    <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll} />
+                  ) : null}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
                   density={qcDensity}
@@ -7354,6 +7413,15 @@ export const Queries: React.FC<{
                     return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number, status: r0.kind ? null : r0.status }));
                   }}
                   entering={qc138In === "run"}
+                  /* v140 §F — the arrival plays on the load (the rows' first appearance) and on every grouping, filter
+                     or search change; never on a sort or a pin. Held 760ms until the page's load entrance has run. */
+                  arrival={{
+                    key: JSON.stringify([qcGroup, qcF138, qcFind.trim(), qcFilter, qcCzCourt, qcScope, !showGridSkeleton && qcVisible.length > 0]),
+                    /* ⚠️ "not done", not "run": the list's layout effect runs before this page's, so on the load the
+                       entrance is still "wait" when the arrival starts */
+                    delayMs: qc138In === "done" ? 0 : 760,
+                  }}
+                  scrollMemory={qcScrollMemory}
                   /* v138.1 §F — nothing matches: the dead end sits INSIDE the sheet, so the navy row and its search stay */
                   deadEnd={qcVisible.length === 0 ? (
                     <QcDeadEnd find={qcFind} book={qcLineTitle}
@@ -7373,7 +7441,7 @@ export const Queries: React.FC<{
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
-                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
+                  groups={qcGroup === "none" ? [{ key: "all", label: "", rows: qcVisible }] : qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
                   /* v139 §B — the practice band, and Pip's row opening his own panel */
                   practice={practice && pipRow ? { row: pipRow, leaving: pipLeaving } : null}
                   selectedId={pipOpen ? PIP_ID : selectedQueryId} onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}

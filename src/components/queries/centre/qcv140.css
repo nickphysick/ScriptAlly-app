@@ -1,0 +1,459 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v140 §A — THE LIST'S TOOLBAR (QcToolbar140): one row, 64 tall unpinned and 72 pinned, never wrapping —
+ * the jump row (flex 1), Find, Group by, Filters, Pin. Every control 40 tall with 11px corners, 10 apart.
+ *
+ * ⚠️ THE GIVE-WAY IS A CONTAINER QUERY ON THE TOOLBAR'S OWN WIDTH (`qc140tb`, on its wrapper), never the viewport:
+ *    the sidebar changes the toolbar's width and not the window's. ≤1120: the chip drops "Grouped by", Find goes 270 →
+ *    210. ≤1000: Pin and Filters drop their labels (the count badge and ✕ stay).
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FACE, with `!important`: brand.tsx injects a family on bare span/button/kbd/b at
+ *    runtime, which a class rule without it loses to.
+ */
+@media (min-width: 768px) {
+  .qc138-sheet .qc140-stk { position: relative; }
+  .qc138-sheet .qc140-tbw { container: qc140tb / inline-size; position: relative; }
+  .qc138-sheet .qc140-tb {
+    position: relative; box-sizing: border-box; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px;
+    height: 64px; padding: 0 14px 0 20px; overflow: visible;
+    background: #2a3a52; border-radius: 18px 18px 0 0; color: #f4eee5;
+  }
+  .qc138-sheet .qc140-tb[data-pinned] { height: 72px; }
+
+  /* ── the jump row ── */
+  .qc138-sheet .qc140-jr {
+    flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 3px; height: 40px; overflow: hidden;
+  }
+  .qc138-sheet .qc140-jcol {
+    flex: none; margin: 0 8px 0 4px; font: 500 10.5px/1 var(--sp-mono) !important; letter-spacing: 0.14em; color: rgba(244, 238, 229, 0.6);
+  }
+  .qc138-sheet .qc140-jb {
+    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 7px; height: 34px; margin: 0; padding: 0 10px;
+    border: 0; border-radius: 9px; background: transparent; color: #f4eee5; cursor: pointer; white-space: nowrap;
+    font: 400 15px/1 var(--sp-type) !important;
+  }
+  .qc138-sheet .qc140-jb .qc140-jt { font: inherit !important; color: inherit; }
+  .qc138-sheet .qc140-jb i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(244, 238, 229, 0.55); }
+  .qc138-sheet .qc140-jb[data-over] { display: none; }
+  .qc138-sheet .qc140-jb { --qc140-jbg: #2a3a52; }
+  .qc138-sheet .qc140-jb:hover:not(:disabled) { background: rgba(244, 238, 229, 0.12); }
+  .qc138-sheet .qc140-jb:focus-visible, .qc138-sheet .qc140-jmore:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+  .qc138-sheet .qc140-jmore {
+    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; margin: 0; padding: 0 11px;
+    border: 0; border-radius: 9px; background: transparent; color: #f4eee5; cursor: pointer; white-space: nowrap;
+    font: 400 14.5px/1 var(--sp-serif) !important;
+  }
+  .qc138-sheet .qc140-jmore[hidden] { display: none; }
+  .qc138-sheet .qc140-jmore .qc140-cv { color: inherit; }
+
+  /* the marks: the glyph 16 in a 17 box with its 11px badge top right; the art in a 22 disc; the package cube */
+  .qc140-jg { position: relative; flex: none; display: inline-grid; place-items: center; width: 17px; height: 17px; color: currentColor; line-height: 0; }
+  .qc140-jg .qc140-jsvg { width: 16px; height: 16px; }
+  .qc140-jg.grey { opacity: 0.6; }
+  .qc140-jg .qc140-jbd {
+    position: absolute; top: -5px; right: -5px; box-sizing: border-box; display: grid; place-items: center; width: 11px; height: 11px;
+    border-radius: 50%; color: #fff; box-shadow: 0 0 0 1.5px var(--qc140-jbg, #2a3a52);
+  }
+  .qc140-jg .qc140-jbd svg { width: 8px; height: 8px; }
+  .qc140-jg .qc140-jbd.rust { background: #b0603e; }
+  .qc140-jg .qc140-jbd.grey { background: #9a938b; }
+  .qc140-jg .qc140-jbd.navy { background: #5b6f8f; }
+  .qc140-jo .qc140-jg .qc140-jbd.navy { background: #2a3a52; }
+  .qc140-jg--art { width: 22px; height: 22px; }
+  .qc140-jg--art img { box-sizing: border-box; width: 22px; height: 22px; padding: 1px; border-radius: 50%; background: #f4eee5; object-fit: contain; }
+  .qc140-jg--icon svg { width: 15px; height: 15px; }
+  .qc140-jg--pkg { width: 18px; height: 18px; border-radius: 50%; background: #ece6f6; color: #54468a; }
+  .qc140-jg--pkg svg { width: 12px; height: 12px; }
+  .qc140-jg--pkg.none { background: transparent; box-shadow: inset 0 0 0 1.2px rgba(236, 230, 246, 0.6); color: #ece6f6; }
+
+  /* ── Find: a white field, 270 (210 when narrow), the / key cap ── */
+  .qc138-sheet .qc140-find {
+    box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 8px; width: 270px; height: 40px; margin: 0; padding: 0 10px 0 12px;
+    border-radius: 11px; background: #fff; color: rgba(28, 19, 15, 0.4); cursor: text;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12);
+  }
+  .qc138-sheet .qc140-find svg { flex: none; }
+  .qc138-sheet .qc140-find input {
+    flex: 1 1 0; min-width: 0; height: 23px; margin: 0; padding: 0; border: 0; outline: 0; background: none; color: #1c130f; text-overflow: ellipsis;
+    font: 400 15.5px/23px var(--sp-serif) !important;
+  }
+  .qc138-sheet .qc140-find input::placeholder { color: rgba(28, 19, 15, 0.5); }
+  .qc138-sheet .qc140-find kbd {
+    flex: none; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 18px; padding: 0 6px;
+    border: 1px solid rgba(28, 19, 15, 0.1); border-radius: 5px; background: #f5f1ea; color: rgba(28, 19, 15, 0.55);
+    font: 600 11px/1 var(--sp-mono) !important;
+  }
+  .qc138-sheet .qc140-find:focus-within { box-shadow: 0 0 0 2px #f4eee5; }
+
+  /* ── the chips: Group by and Filters, white; applied, powder with a 1.5px navy ring and a separate ✕ ── */
+  .qc138-sheet .qc140-chipw { flex: none; display: inline-flex; align-items: center; height: 40px; border-radius: 11px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12); }
+  .qc138-sheet .qc140-chipw[data-on] { padding-right: 9px; background: #e6edf6; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+  .qc138-sheet .qc140-chip {
+    box-sizing: border-box; display: inline-flex; align-items: center; gap: 9px; height: 40px; margin: 0; padding: 0 12px 0 14px;
+    border: 0; border-radius: 11px; background: transparent; color: #1c130f; cursor: pointer; white-space: nowrap;
+    font: 400 15.5px/1 var(--sp-serif) !important;
+  }
+  .qc138-sheet .qc140-chipw[data-on] .qc140-chip { padding-right: 0; }
+  .qc138-sheet .qc140-chip:focus-visible, .qc138-sheet .qc140-x:focus-visible, .qc138-sheet .qc140-pin:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  .qc138-sheet .qc140-chip .qc140-ic { flex: none; color: #2a3a52; }
+  .qc138-sheet .qc140-chip .qc140-cv { flex: none; color: rgba(28, 19, 15, 0.55); }
+  .qc138-sheet .qc140-chip .qc140-gby { font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.6); }
+  .qc138-sheet .qc140-chip b { font: 400 15.5px/1 var(--sp-type) !important; color: #1c130f; }
+  .qc138-sheet .qc140-chip .qc140-cl { font: inherit !important; color: inherit; }
+  .qc138-sheet .qc140-chip .qc140-n {
+    box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px;
+    border-radius: 11px; background: #2a3a52; color: #f4eee5; font: 500 12px/1 var(--sp-mono) !important; font-style: normal;
+  }
+  .qc138-sheet .qc140-x {
+    box-sizing: border-box; flex: none; display: grid; place-items: center; width: 22px; height: 22px; margin: 0 0 0 9px; padding: 0;
+    border: 0; border-radius: 50%; background: #2a3a52; color: #f4eee5; cursor: pointer;
+  }
+  .qc138-sheet .qc140-x:hover { background: #1f2c40; }
+
+  /* ── Pin ── */
+  .qc138-sheet .qc140-pin {
+    position: relative; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; margin: 0; padding: 0 16px 0 13px;
+    border: 0; border-radius: 11px; background: #fff; color: #2a3a52; cursor: pointer; white-space: nowrap;
+    font: 400 15.5px/1 var(--sp-serif) !important;
+  }
+  .qc138-sheet .qc140-pin .qc140-pin-ic { flex: none; transform: rotate(-30deg); }
+  .qc138-sheet .qc140-pin[aria-pressed="true"] .qc140-pin-ic { transform: rotate(-45deg); }
+  .qc138-sheet .qc140-pin .qc140-pin-l { font: inherit !important; color: inherit; }
+  .qc138-sheet .qc140-pin .qc140-tip {
+    position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px;
+    background: #1c130f; color: #f4eee5; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.12s ease;
+    font: 400 13.5px/1.2 var(--sp-serif) !important;
+  }
+  .qc138-sheet .qc140-pin .qc140-tip kbd {
+    display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; border-radius: 4px;
+    background: rgba(244, 238, 229, 0.16); color: #f4eee5; font: 600 11px/1 var(--sp-mono) !important;
+  }
+  .qc138-sheet .qc140-pin:hover .qc140-tip, .qc138-sheet .qc140-pin:focus-visible .qc140-tip { opacity: 1; transition-delay: 0.4s; }
+  @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc140-pin .qc140-tip { transition: none; } }
+
+  /* ── the give-way ── */
+  @container qc140tb (max-width: 1120px) {
+    .qc138-sheet .qc140-chip .qc140-gby { display: none; }
+    .qc138-sheet .qc140-find { width: 210px; }
+  }
+  @container qc140tb (max-width: 1000px) {
+    .qc138-sheet .qc140-pin { gap: 0; width: 46px; padding: 0; justify-content: center; }
+    .qc138-sheet .qc140-pin .qc140-pin-l,
+    .qc138-sheet .qc140-fil .qc140-cl {
+      position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+    }
+  }
+}
+
+/* ── the menus (portalled to body: every value stated, no page token) ── */
+.lpop.qc140-jpop, .lpop.qc140-gpop {
+  position: fixed; z-index: 60; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px; overflow: auto;
+  border-radius: 14px; background: #fff; color: #1c130f; max-height: min(60vh, 460px);
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 24px 44px -18px rgba(28, 19, 15, 0.45);
+}
+.lpop.qc140-jpop { min-width: 280px; }
+.lpop.qc140-gpop { width: 330px; padding: 10px 8px 8px; }
+.qc140-mh { padding: 6px 12px 8px; font: 500 9.5px/1.4 var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.qc140-jo {
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; margin: 0; padding: 9px 12px; border: 0; border-radius: 10px;
+  background: transparent; color: #1c130f; cursor: pointer; text-align: left;
+}
+.qc140-jo b { flex: 1 1 auto; font: 400 16px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.qc140-jo i { font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.5); }
+.qc140-jo .qc140-jg { --qc140-jbg: #fff; color: #1c130f; }
+.qc140-jo .qc140-jg--art img { background: #f4eee5; }
+.qc140-jo .qc140-jg--pkg.none { color: #54468a; box-shadow: inset 0 0 0 1.2px rgba(84, 70, 138, 0.35); }
+.qc140-jo:hover, .qc140-jo[aria-current="true"] { background: #f2f4f8; }
+.qc140-jo:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+/* ── v140 §B · UNPINNED (as Contact list v19.1 §F): the list is a white card with all four corners at 18 and 22px of
+   page below it; the toolbar is navy with no rule beneath and follows the card's top corners. The jump row is cream on
+   navy (counts at 55%, a 12% cream wash on hover); the current button is a cream tile with navy text and glyph; "+N
+   more" is outlined in 35% cream. Find, Group by and Filters are white with no ring (their applied states are Part A's);
+   Pin is cream with navy text and icon, white on hover. Pinned, Part C restyles all of this. ── */
+@media (min-width: 768px) {
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet { border-radius: 18px; margin-bottom: 22px; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-tb { border-bottom: 0; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"],
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore[aria-current="true"] { --qc140-jbg: #f4eee5; background: #f4eee5; color: #2a3a52; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"] i { color: rgba(42, 58, 82, 0.55); }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"] .qc140-jg--art img { background: #fff; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore { box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35); }
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore:hover,
+  .qcv-group[data-v138]:not([data-full]) .qc140-jmore[aria-expanded="true"] { background: rgba(244, 238, 229, 0.12); }
+  .qcv-group[data-v138]:not([data-full]) .qc140-find,
+  .qcv-group[data-v138]:not([data-full]) .qc140-chipw:not([data-on]) { box-shadow: none; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-pin { background: #f4eee5; color: #2a3a52; }
+  .qcv-group[data-v138]:not([data-full]) .qc140-pin:hover:not(:disabled) { background: #fff; }
+}
+
+/* ── v140 §D · THE GROUP BY MENU: radio rows with a one-line italic description, No grouping after a hairline, then
+   the ROWS line (Comfortable / Compact) ── */
+.qc140-go {
+  box-sizing: border-box; display: grid; grid-template-columns: 18px 1fr; column-gap: 12px; align-items: center; width: 100%; margin: 0;
+  padding: 9px 12px; border: 0; border-radius: 10px; background: transparent; color: #1c130f; cursor: pointer; text-align: left;
+}
+.qc140-go .qc140-rd { grid-row: 1 / span 2; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.45); }
+.qc140-go[aria-checked="true"] .qc140-rd { box-shadow: inset 0 0 0 1.5px #1c130f, inset 0 0 0 4.5px #fff, inset 0 0 0 9px #1c130f; }
+.qc140-go b { font: 400 16px/22px var(--sp-serif) !important; color: #1c130f; }
+.qc140-go small { font: italic 400 13.5px/19px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.qc140-go:hover { background: #f6f3ee; }
+.qc140-go:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+.qc140-hr { margin: 4px 10px; border: 0; border-top: 1px solid rgba(28, 19, 15, 0.1); }
+.qc140-rows { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px 4px; }
+.qc140-rl { font: 500 9.5px/1 var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.qc140-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: #f3efe8; }
+.qc140-seg button {
+  box-sizing: border-box; height: 30px; margin: 0; padding: 5px 11px; border: 0; border-radius: 8px; background: transparent;
+  color: rgba(28, 19, 15, 0.65); cursor: pointer; font: 400 14px/20px var(--sp-serif) !important;
+}
+.qc140-seg button[aria-checked="true"] { background: #fff; color: #1c130f; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.15); }
+.qc140-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+
+/* ── v140 §D · THE FILTERS MENU (v19 layout A): 760 wide or the viewport less 40; a navy header, Most used on a powder
+   band, two columns that scroll inside the menu, an oat footer ── */
+.lpop.qc140-fm {
+  position: fixed; z-index: 60; box-sizing: border-box; display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  border-radius: 18px; background: #fff; color: #1c130f;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 30px 60px -24px rgba(28, 19, 15, 0.5);
+}
+.qc140-fm button { font-family: var(--sp-serif) !important; }
+.qc140-fm h4 { margin: 0 0 10px; font: 500 10px/13px var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.qc140-fm-h { flex: none; display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 22px 16px; background: #2a3a52; color: #f4eee5; }
+.qc140-fm-h b { display: block; font: 400 22px/22px var(--sp-type) !important; color: #f4eee5; }
+.qc140-fm-h span { display: block; margin-top: 4px; font: 400 15px/21px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.8); }
+.qc140-fm-h em { font-style: normal; font-weight: 700; color: #f4eee5; }
+.qc140-fm-x {
+  box-sizing: border-box; display: grid; place-items: center; width: 32px; height: 32px; margin: 0; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: #f4eee5; cursor: pointer;
+}
+.qc140-fm-x svg { width: 12px; height: 12px; }
+.qc140-fm-x:hover { background: rgba(244, 238, 229, 0.12); }
+.qc140-fm-x:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+.qc140-fm-q { flex: none; padding: 16px 22px 18px; background: #e9eef5; }
+.qc140-fm-qg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qc140-qp {
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; min-height: 69px; margin: 0; padding: 12px 16px 12px 12px; border: 0;
+  border-radius: 13px; background: #fff; color: #1c130f; text-align: left; cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 4px 10px -6px rgba(28, 19, 15, 0.35);
+}
+.qc140-qp:hover:not(:disabled):not(.on) { background: #f8f9fb; }
+.qc140-qp:disabled { opacity: 0.4; cursor: default; }
+.qc140-qp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc140-qic { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #eef1f5; color: #2a3a52; }
+.qc140-qt { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.qc140-qt b { font: 400 16.5px/23px var(--sp-serif) !important; color: #1c130f; }
+.qc140-qt small { margin-top: 3px; font: italic 400 13.5px/19px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.qc140-qp i { flex: none; font: 400 15px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.6); }
+.qc140-qp.on { background: #2a3a52; }
+.qc140-qp.on .qc140-qic { background: #f4eee5; color: #2a3a52; }
+.qc140-qp.on .qc140-qt b, .qc140-qp.on i { color: #f4eee5; }
+.qc140-qp.on .qc140-qt small { color: rgba(244, 238, 229, 0.75); }
+.qc140-fm-b {
+  flex: 0 1 auto; min-height: 0; overflow: auto; display: grid; grid-template-columns: 1.05fr 1fr; column-gap: 26px; align-items: start;
+  max-height: max(240px, min(420px, calc(100vh - 470px))); padding: 18px 22px 10px;
+}
+.qc140-fm-more { margin-top: 14px !important; }
+.qc140-fck, .qc140-fsw {
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 38px; margin: 0; padding: 8px 2px; border: 0;
+  border-radius: 8px; background: transparent; color: #1c130f; text-align: left; cursor: pointer;
+}
+.qc140-fck:hover:not(:disabled), .qc140-fsw:hover { background: #f6f7f9; }
+.qc140-fck:disabled { opacity: 0.4; cursor: default; }
+.qc140-fck:focus-visible, .qc140-fsw:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+.qc140-fck > b { flex: 1 1 auto; min-width: 0; font: 400 16px/22px var(--sp-serif) !important; color: #1c130f; }
+.qc140-fck i, .qc140-fsw i { flex: none; margin-left: auto; font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.5); }
+.qc140-bx { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); }
+.qc140-bx.on { background: #2a3a52; box-shadow: none; }
+.qc140-fgl { flex: none; display: grid; place-items: center; width: 22px; height: 18px; color: #1c130f; }
+.qc140-fgl svg { width: 18px; height: 18px; }
+.qc140-flab { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.qc140-flab b { font: 400 16px/22px var(--sp-serif) !important; color: #1c130f; }
+.qc140-flab small { font: italic 400 13px/17px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.qc140-sw { flex: none; position: relative; width: 34px; height: 20px; border-radius: 10px; background: rgba(28, 19, 15, 0.18); transition: background 0.12s ease; }
+.qc140-sw > span { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.3); transition: transform 0.12s ease; }
+.qc140-fsw.on .qc140-sw { background: #2a3a52; }
+.qc140-fsw.on .qc140-sw > span { transform: translateX(14px); }
+@media (prefers-reduced-motion: reduce) { .qc140-sw, .qc140-sw > span { transition: none; } }
+.qc140-fm-f { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; background: #f5efe6; border-top: 1px solid rgba(28, 19, 15, 0.08); }
+.qc140-fm-clear {
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #1c130f; font-size: 15.5px !important; line-height: 21px;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.35);
+}
+.qc140-fm-clear:disabled { color: rgba(28, 19, 15, 0.35); cursor: default; text-decoration: none; }
+.qc140-fm-show {
+  box-sizing: border-box; height: 44px; margin: 0; padding: 0 22px; border: 0; border-radius: 22px; background: #2a3a52; color: #f4eee5;
+  cursor: pointer; font-size: 16px !important; line-height: 1 !important;
+}
+.qc140-fm-show:hover { background: #1f2c40; }
+.qc140-fm-clear:focus-visible, .qc140-fm-show:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── v140 §D · THE APPLIED ROW: under the toolbar (in the sticky stack, so the headings stick under it), powder with a 1px
+   rule at the top ── */
+@media (min-width: 768px) {
+  .qc138-sheet .qc140-af {
+    position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 8px; min-height: 54px; padding: 10px 18px 12px;
+    background: #eef2f7; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.07); color: #1c130f;
+  }
+  .qc138-sheet .qc140-af-n { flex: none; margin-right: 6px; font: 400 15px/21px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.65); }
+  .qc138-sheet .qc140-af-n b { font: inherit !important; font-weight: 700 !important; color: #1c130f; }
+  .qc138-sheet .qc140-af-chips { flex: 1 1 auto; min-width: 0; display: flex; gap: 8px; overflow: hidden; }
+  .qc138-sheet .qc140-af-c {
+    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 32px; margin: 0; padding: 0 10px 0 13px;
+    border: 0; border-radius: 16px; background: #fff; color: #1c130f; cursor: pointer; white-space: nowrap;
+    box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 15px/1 var(--sp-serif) !important;
+  }
+  .qc138-sheet .qc140-af-c .qc140-af-l { font: inherit !important; }
+  .qc138-sheet .qc140-af-c .qc140-af-g { display: inline-grid; place-items: center; width: 14px; height: 14px; color: #1c130f; }
+  .qc138-sheet .qc140-af-c .qc140-af-g svg { width: 14px; height: 14px; }
+  .qc138-sheet .qc140-af-c > svg { color: rgba(28, 19, 15, 0.55); }
+  .qc138-sheet .qc140-af-c:hover { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+  .qc138-sheet .qc140-af-clear {
+    flex: none; margin: 0 0 0 auto; padding: 0; border: 0; background: none; cursor: pointer; color: #1c130f;
+    font: 400 15px/21px var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.35);
+  }
+  .qc138-sheet .qc140-af-c:focus-visible, .qc138-sheet .qc140-af-clear:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+}
+
+/* ── v140 §C · PINNED (as Contact list v19's pinned list): flush to the sheet, edge to edge, no top gap, square
+   corners. The sticky stack is the navy band and the cream toolbar (and the applied row when it shows), then the white
+   headings, then the current group band. The band's content, the toolbar's jump row and the applied row start 196 in,
+   to clear the desk hawk, which hangs 22 from the sheet's left across the band and the toolbar, above both.
+   ⚠️ `--qc138-pin-h` IS THE STACK'S OWN HEIGHT HERE: the stack starts at the sheet's top with no lip cover above it
+      (the lip turns navy over the band instead). ── */
+.qcv-group { --qc140-inset: 196px; }
+@media (min-width: 768px) {
+  .qcv-group[data-v138][data-full] { --qc138-pin-h: var(--stk-head-h, 144px); }
+  .wpg-scroll:has(> .qcv-group[data-v138][data-full]) { --wpg-scroll-pad: calc(var(--stk-head-h, 144px) + 40px + 64px); }
+  /* 0-6-0: beats `.qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw` and the v138.5 pinned 22px */
+  .qcv-group.qc13[data-v138][data-full] > .qcv-page.qcw {
+    width: var(--hsheet-w); margin: 0 0 0 calc(50% - var(--hsheet-w) / 2);
+  }
+  .qcv-group[data-v138][data-full] .qc138-sheet { border-radius: 0; box-shadow: none; margin-bottom: 0; }
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc138-topw { margin-top: 0; padding-top: 0; background: #2a3a52; }
+  .qcv-group[data-v138][data-full] .qc140-stk { container: qc140stk / inline-size; }
+
+  /* ── the band ── */
+  .qc138-sheet .qc140-band {
+    position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 22px; height: 72px; margin: 0;
+    padding: 0 22px 0 var(--qc140-inset); background: #2a3a52; color: #f4eee5; white-space: nowrap;
+  }
+  .qc138-sheet .qc140-bart {
+    /* the drawing's natural aspect (440 × 405): 137 × 126, never stretched, never clipped */
+    position: absolute; z-index: 3; left: 22px; top: 6px; width: auto; height: 126px; max-width: none; aspect-ratio: 440 / 405;
+    pointer-events: none; user-select: none;
+  }
+  .qc138-sheet .qc140-bn { display: inline-flex; align-items: baseline; gap: 9px; flex: none; margin: 0; }
+  .qc138-sheet .qc140-bn b { font: 400 38px/38px var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc140-bn span { font: 400 19px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.82); }
+  .qc138-sheet .qc140-od {
+    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 10px; height: 38px; margin: 0; padding: 0 12px 0 10px;
+    border: 0; border-radius: 10px; background: transparent; color: #f4eee5; cursor: pointer;
+  }
+  .qc138-sheet .qc140-od span { font: 400 16px/1 var(--sp-serif) !important; color: inherit; }
+  .qc138-sheet .qc140-od i {
+    display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; box-sizing: border-box; border-radius: 13px;
+    background: #d9805f; color: #fff; font: 400 14px/1 var(--sp-type) !important; font-style: normal;
+  }
+  .qc138-sheet .qc140-od[data-n="0"] i { background: rgba(244, 238, 229, 0.18); }
+  .qc138-sheet .qc140-od:hover:not(:disabled) { background: rgba(244, 238, 229, 0.1); }
+  .qc138-sheet .qc140-od[aria-pressed="true"] { background: rgba(244, 238, 229, 0.16); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.45); }
+  .qc138-sheet .qc140-od:focus-visible, .qc138-sheet .qc140-blog:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  .qc138-sheet .qc140-hb { display: inline-flex; align-items: center; gap: 12px; flex: none; padding-left: 22px; box-shadow: -1px 0 0 rgba(244, 238, 229, 0.16); }
+  .qc138-sheet .qc140-ring { display: block; flex: none; width: 40px; height: 40px; }
+  .qc138-sheet .qc140-bt { display: flex; flex-direction: column; }
+  .qc138-sheet .qc140-bt b { font: 400 18px/19.8px var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc140-bt small { font: italic 400 13.5px/19px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.72); }
+  .qc138-sheet .qc140-bsp { flex: 1 1 0; min-width: 0; }
+  .qc138-sheet .qc140-wk { display: inline-flex; align-items: center; gap: 12px; flex: none; }
+  .qc138-sheet .qc140-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 26px; }
+  .qc138-sheet .qc140-bars i { display: block; width: 4px; border-radius: 1px; background: rgba(244, 238, 229, 0.45); }
+  .qc138-sheet .qc140-bars i[data-cur] { background: #d9805f; }
+  .qc138-sheet .qc140-blog {
+    box-sizing: border-box; flex: none; height: 44px; margin: 0; padding: 0 20px; border: 0; border-radius: 12px; background: #fff; color: #1c130f;
+    cursor: pointer; font: 400 17px/1 var(--sp-type) !important;
+  }
+  .qc138-sheet .qc140-blog:hover { background: #f7f4ee; }
+  /* this week goes when the toolbar is 1300 or narrower; the two spacers then share its room */
+  @container qc140stk (max-width: 1300px) {
+    .qc138-sheet .qc140-wk { display: none; }
+  }
+
+  /* ── the toolbar: cream, a 1px ink-8% rule under it; the jump row in ink from 196 in ── */
+  .qcv-group[data-v138][data-full] .qc140-tb {
+    border-radius: 0; padding-left: var(--qc140-inset); background: #f4f0e9; color: #1c130f;
+    border-bottom: 1px solid rgba(28, 19, 15, 0.08);
+  }
+  .qcv-group[data-v138][data-full] .qc140-jcol { color: rgba(28, 19, 15, 0.6); }
+  .qcv-group[data-v138][data-full] .qc140-jb,
+  .qcv-group[data-v138][data-full] .qc140-jmore { --qc140-jbg: #f4f0e9; color: #1c130f; }
+  .qcv-group[data-v138][data-full] .qc140-jb i { color: rgba(28, 19, 15, 0.42); }
+  .qcv-group[data-v138][data-full] .qc140-jb:hover:not(:disabled) { background: rgba(28, 19, 15, 0.06); }
+  .qcv-group[data-v138][data-full] .qc140-jb[aria-current="true"],
+  .qcv-group[data-v138][data-full] .qc140-jmore[aria-current="true"] {
+    --qc140-jbg: #fff; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16), 0 1px 2px rgba(28, 19, 15, 0.08);
+  }
+  .qcv-group[data-v138][data-full] .qc140-jmore { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+  .qcv-group[data-v138][data-full] .qc140-jmore:hover,
+  .qcv-group[data-v138][data-full] .qc140-jmore[aria-expanded="true"] { background: rgba(28, 19, 15, 0.06); }
+  .qcv-group[data-v138][data-full] .qc140-jg--pkg.none { color: #54468a; box-shadow: inset 0 0 0 1.2px rgba(84, 70, 138, 0.35); }
+  .qcv-group[data-v138][data-full] .qc140-jb:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-jmore:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-chip:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-x:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-pin:focus-visible { outline: 2px solid #2a3a52; }
+  /* Find, Group by and Filters: white with their 1px ring (the applied chips keep their powder and navy ring) */
+  .qcv-group[data-v138][data-full] .qc140-find,
+  .qcv-group[data-v138][data-full] .qc140-chipw:not([data-on]) { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  .qcv-group[data-v138][data-full] .qc140-find:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+  /* Unpin: navy, cream text */
+  .qcv-group[data-v138][data-full] .qc140-pin { background: #2a3a52; color: #f4eee5; }
+  .qcv-group[data-v138][data-full] .qc140-pin:hover:not(:disabled) { background: #1f2c40; }
+
+  /* ── the headings: white, a 1px ink-10% rule under them ── */
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc138-heads { background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+
+  /* ── the applied row starts 196 in, like the jump row ── */
+  .qc138-sheet .qc140-af[data-pinned] { padding-left: var(--qc140-inset); }
+}
+
+/* ── the folder tab and the sheet's lip, pinned only, on this page only: navy, joined to the band (Contact list v19's
+   rule, its own flag). `html[data-qc140-pinned]` is set by Queries.tsx while this list is on screen and pinned. ── */
+@media (min-width: 768px) {
+  html[data-qc140-pinned] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
+  html[data-qc140-pinned] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
+  html[data-qc140-pinned] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  html[data-qc140-pinned] .qc-wpg .wpg-scroll > .sheet-lip { background: #2a3a52; box-shadow: none; }
+}
+
+/* ── v140 §E · THE COLUMNS: one template for the headings, the rows, the peek label and the drawer. Agent is capped at
+   264 so it never takes the slack; Next move (`1fr`) takes all of it. The mock sizes What you sent and the gap against
+   its FRAME (the main column beside the sidebar); here both are read off the sheet's own width (`qc138sheet`), because
+   a container query cannot see the main column and the shell's own box is not a container. The frame is the sheet plus
+   its inset: 56 unpinned (the window's 8 and the page's 24 + 24) and 8 pinned (the window's alone) — measured at 1280
+   and 1512, sidebar open and shut. So the gap thresholds 1150 / 1350 of frame are 1094 / 1294 of sheet unpinned and
+   1142 / 1342 pinned. The Next move + Due subgrid inherits the row's gap (`column-gap: normal` on a subgrid).
+   ⚠️ AT 1280 WITH THE SIDEBAR OPEN THE MINIMA FILL THE SHEET EXACTLY: 190 + 92 + 160 + 150 + 150 + 64 + 5 × 18 = 896,
+   the rows' inner width, while 15% of that frame is 154.8 — so What you sent is `minmax(150px, var(--sent-w))`: the
+   grid gives it its 15% wherever there is room and takes it back to 150 where there is not (the mock's own card is 8
+   wider; it draws no window inset). Nothing here may grow a minimum. ── */
+@media (min-width: 768px) {
+  .qcv-group .qc138-sheet {
+    --qc140-fo: 56px;
+    --sent-w: clamp(150px, calc((100cqw + var(--qc140-fo)) * 0.15), 240px);
+    --qc138-cols: minmax(190px, 264px) minmax(92px, 118px) minmax(160px, 204px) minmax(150px, var(--sent-w)) minmax(150px, 1fr) 64px;
+    --qc138-gap: 18px;
+  }
+  .qcv-group[data-full] .qc138-sheet { --qc140-fo: 8px; }
+  @container qc138sheet (min-width: 1094px) { .qcv-group:not([data-full]) .qc138-sheet > * { --qc138-gap: 32px; } }
+  @container qc138sheet (min-width: 1294px) { .qcv-group:not([data-full]) .qc138-sheet > * { --qc138-gap: 44px; } }
+  @container qc138sheet (min-width: 1142px) { .qcv-group[data-full] .qc138-sheet > * { --qc138-gap: 32px; } }
+  @container qc138sheet (min-width: 1342px) { .qcv-group[data-full] .qc138-sheet > * { --qc138-gap: 44px; } }
+}
+
+/* ── v140 §F · NO FOOTER UNDER THE LIST, pinned or not: the app footer (`AppFooter`, this route's `footer`) and the
+   ledger's Export CSV foot stand down on the desktop list. Display, not unmounting: the phone keeps both, and the other
+   routes' footers are their own elements. ── */
+@media (min-width: 768px) {
+  .qcv-group[data-v138] > .af, .qcv-group[data-v138] .qcv-foot { display: none; }
+}

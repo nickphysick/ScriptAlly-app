@@ -19,13 +19,20 @@ describe("QC138.6 A1 · one pin for both lists", () => {
       const src = code(file) + (page === "queries" ? code("src/components/queries/centre/QcList138.tsx") : "");
       expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
       /* RETARGETED (Contact list v19 §A): the Contact list's pin is the toolbar's own navy "Pin list" / "Unpin" button
-         (ContactListHead), drawn by the page's one head component; the Query Centre keeps the shared circle */
+         (ContactListHead), drawn by the page's one head component */
       if (page === "agents") {
         expect(src).toMatch(/<ContactListHead\b/);
         const head = code("src/components/agents/contact/ContactListHead.tsx");
         expect(head).toMatch(/data-pin-list=""/);
         expect(head).toMatch(/aria-pressed=\{pinned\}/);
-      } else expect(src).toMatch(/<PinListButton\b/);
+      } else {
+        /* RETARGETED (Query Centre v140 §A/§B): the Query Centre's pin is the toolbar's own cream "Pin list" / "Unpin"
+           button (QcToolbar140), drawn by the list's one toolbar component, as the Contact list's is */
+        expect(src).toMatch(/<QcToolbar140\b/);
+        const bar = code("src/components/queries/centre/QcToolbar140.tsx");
+        expect(bar).toMatch(/data-pin-list=""/);
+        expect(bar).toMatch(/aria-pressed=\{pinned\}/);
+      }
     });
     it(`${page}: holds no sidebar, binds no pin key and writes no pinned state of its own`, () => {
       const src = code(file);
