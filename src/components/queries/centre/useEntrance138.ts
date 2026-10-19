@@ -9,7 +9,7 @@
  * ⚠️ TWO EFFECTS, THE SPLIT IS DELIBERATE (useQcLoad's lesson): one effect that both starts the run and arms its
  *    timer clears that timer in its own cleanup when the state it set re-runs it.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 export const ENTRANCE_138_MS = 1700;
 export type Entrance138 = "wait" | "run" | "done";
@@ -18,7 +18,9 @@ const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(p
 
 export function useEntrance138(ready: boolean): Entrance138 {
   const [state, setState] = useState<Entrance138>("wait");
-  useEffect(() => {
+  /* v140 §F — a LAYOUT effect: the attribute is on before the list's first paint, so the sheet never shows for one frame
+     at rest and then drops back to the entrance's start (a 26px jump the frame after the rows appear) */
+  useLayoutEffect(() => {
     if (!ready || state !== "wait") return;
     setState(reduced() ? "done" : "run");
   }, [ready, state]);

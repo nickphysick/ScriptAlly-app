@@ -95,7 +95,7 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { useQcListKeys } from "./queries/centre/useQcListKeys";
-import { readQcListMemory, writeQcListMemory } from "../lib/qcListMemory";
+import { readQcView, readQcVisit, writeQcView, writeQcVisit } from "../lib/qcViewMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
@@ -103,7 +103,7 @@ import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { usePinList } from "./shell/useFullScreenList";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
-import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
+import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
 import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
 import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
@@ -2381,10 +2381,15 @@ export const Queries: React.FC<{
   const [qcFilter, setQcFilter] = useState<QcFilter>("all");
   /** The list's grouping. Urgency by default (v132 follow-up, 8 Oct — supersedes the 3 Oct "No grouping"
    *  default), and remembered on this device beside density (lib/qcListMemory). */
-  const [qcGroup, setQcGroupState] = useState<GroupBy>(() => readQcListMemory().group);
-  const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcListMemory({ ...readQcListMemory(), group: g }); }, []);
-  /** §2 — the Find field in the list head. Page-local, like the group and the sort. */
-  const [qcFind, setQcFind] = useState("");
+  /* v140 §F — what the list remembers: per device (`qh.qc.view`: grouping, sort, density) and for the visit
+     (`qh.qc.filters`: the filters and quick picks, the search, the unpinned scroll). Both are read HERE, in the state
+     initialisers, so the list's first render already carries them — nothing appears and then jumps. */
+  const qcRemView = useMemo(() => readQcView(), []);
+  const qcRemVisit = useMemo(() => readQcVisit(), []);
+  const [qcGroup, setQcGroupState] = useState<GroupBy>(() => qcRemView.group);
+  const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcView({ group: g }); }, []);
+  /** §2 — the Find field in the list head; remembered for the visit (v140 §F). */
+  const [qcFind, setQcFind] = useState(() => qcRemVisit?.search ?? "");
 
   /**
    * §3 (v95) · WHAT IS NEXT ON EACH QUERY, from the To-do list's own derivation.
@@ -2419,8 +2424,8 @@ export const Queries: React.FC<{
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
   /* v132 §2/§4 — row density, the workspace's own control, remembered on this device under its own
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
-  const [qcDensity, setQcDensityState] = useState<QcDensity>(() => readQcListMemory().density);
-  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcListMemory({ ...readQcListMemory(), density: d }); }, []);
+  const [qcDensity, setQcDensityState] = useState<QcDensity>(() => qcRemView.density);
+  const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcView({ density: d }); }, []);
   /* v138.1 §F — the search lives in the list sheet's navy row. v138.6 §B: that row is the sticky row and the old
      pinned bar (with its mirrored search) is retired, so "/" (useQcListKeys) has the one field to focus. */
   const qcSheetFindRef = useRef<HTMLInputElement>(null);
@@ -2434,12 +2439,17 @@ export const Queries: React.FC<{
    */
   const [qcCzCourt, setQcCzCourt] = useState<TileCourt | null>(null);
   /** v138 §A — the stage filter: a set of statuses, shared by the glyph row and the Stage pill. Empty = every stage. */
-  const [qcF138, setQcF138] = useState<Qc138Filters>(emptyQc138Filters);
+  const [qcF138, setQcF138] = useState<Qc138Filters>(() => qcRemVisit?.filters ?? emptyQc138Filters());
   const qcStages = qcF138.stages;
   const pickGlyph = (k: GlyphKey) => setQcF138((f) => ({ ...f, stages: pressGlyph(f.stages, k) }));
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
-  const [qcSort138, setQcSort138] = useState<Qc138Sort>(DEFAULT_SORT_138);
+  const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
+  /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
+  const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
+  /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
+  useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
+  useEffect(() => { writeQcVisit({ filters: qcF138, search: qcFind }); }, [qcF138, qcFind]);
   /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
   const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());
   const [qcBulk, setQcBulk] = useState<{ mode: "nudge" | "resp" | "close"; ids: string[] } | null>(null);
@@ -7385,6 +7395,13 @@ export const Queries: React.FC<{
                     return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number, status: r0.kind ? null : r0.status }));
                   }}
                   entering={qc138In === "run"}
+                  /* v140 §F — the arrival plays on the load (the rows' first appearance) and on every grouping, filter
+                     or search change; never on a sort or a pin. Held 760ms while the page's load entrance runs. */
+                  arrival={{
+                    key: JSON.stringify([qcGroup, qcF138, qcFind.trim(), qcFilter, qcCzCourt, qcScope, !showGridSkeleton && qcVisible.length > 0]),
+                    delayMs: qc138In === "run" ? 760 : 0,
+                  }}
+                  scrollMemory={qcScrollMemory}
                   /* v138.1 §F — nothing matches: the dead end sits INSIDE the sheet, so the navy row and its search stay */
                   deadEnd={qcVisible.length === 0 ? (
                     <QcDeadEnd find={qcFind} book={qcLineTitle}

@@ -390,11 +390,22 @@ export interface QcList138Props {
   /** v139 §B — the page guide's practice query: its own band above every group, whatever the grouping or sort, and in
    *  no count. `leaving` fades it out as it is cleared. */
   practice?: { row: QcRow; leaving: boolean } | null;
+  /** v140 §F — THE ARRIVAL: a new `key` (the list's load, and every grouping, filter and search change) plays one
+   *  arrival over the bands and rows on screen, once the list is built and before it is painted. `delayMs` holds it
+   *  back (the page-load entrance, while the sheet itself is still rising). */
+  arrival?: { key: string; delayMs?: number };
+  /** v140 §F — the unpinned scroll position, for the visit: read once for the list's first draw (a reload within the
+   *  visit) and again when the route comes back with its scroller at the top; written as the list scrolls unpinned. */
+  scrollMemory?: { read: () => number; write: (y: number) => void };
 }
+
+/** v140 §F — the arrival's values: 420ms on cubic-bezier(.2,.8,.2,1) from −10px and transparent, 24ms apart, the
+ *  stagger capped at the 17th item */
+export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: -10, step: 24, items: 17 } as const;
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -438,6 +449,68 @@ export const QcList138: React.FC<QcList138Props> = ({
   const tip = useTip(boxRef);
   const rows = groups.flatMap((g) => g.rows);
   useStuckBands(boxRef, `${groups.map((g) => `${g.key}:${g.rows.length}`).join("|")}|${[...folded].join(",")}|${density}`);
+  /* ── v140 §F — THE SCROLL, FOR THE VISIT (unpinned only). Read once at mount; put back on the list's first draw
+     (inside the arrival's layout effect, before paint and before the arrival picks the rows on screen, so the rows that
+     arrive are the ones the reader comes back to). A first draw while pinned drops it: it is the unpinned position. ── */
+  const scrollPending = useRef<number | null>(scrollMemory ? scrollMemory.read() || null : null);
+  const scroller = () => boxRef.current?.closest<HTMLElement>(".wpg-scroll") ?? null;
+  const restoreScroll = () => {
+    const y = scrollPending.current;
+    scrollPending.current = null;
+    const sc = scroller();
+    if (y && sc && !full) sc.scrollTop = y;
+  };
+  /* coming back to the route: a scroller the browser reset to its top (display: none loses it) is put back */
+  const wasOn = useRef(stickyOn);
+  useLayoutEffect(() => {
+    const back = stickyOn && !wasOn.current;
+    wasOn.current = stickyOn;
+    if (!back || full || !scrollMemory || scrollPending.current != null) return;
+    const sc = scroller();
+    const y = scrollMemory.read();
+    if (sc && y && sc.scrollTop === 0) sc.scrollTop = y;
+  });
+  useEffect(() => {
+    if (!stickyOn || full || !scrollMemory || loading) return undefined;
+    const sc = scroller();
+    if (!sc) return undefined;
+    let raf = 0;
+    const save = () => { raf = 0; scrollMemory.write(sc.scrollTop); };
+    const on = () => { if (!raf) raf = requestAnimationFrame(save); };
+    sc.addEventListener("scroll", on, { passive: true });
+    return () => { sc.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
+  }, [stickyOn, full, loading, scrollMemory]);
+  /* ── v140 §F — THE ARRIVAL. The bands and rows ON SCREEN come in from the top, in list order, each from translateY(−10px)
+     and opacity 0 over 420ms, 24ms apart, the stagger capped at the 17th; off screen nothing animates. A row still
+     arriving from the change before keeps its animation (typing in Find would otherwise blink the list on every key).
+     `fill: backwards` only, so once it ends nothing holds a style. Reduced motion: nothing moves. Web Animations, so no
+     keyframe reads a custom property (and the QC138 entrance's own CSS animations are not what this is). ── */
+  const arriving = useRef(new WeakMap<Element, Animation>());
+  const arrivedKey = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    if (!arrival || arrivedKey.current === arrival.key) return;
+    arrivedKey.current = arrival.key;
+    if (scrollPending.current != null && !loading && rows.length) restoreScroll();
+    const root = boxRef.current?.querySelector<HTMLElement>(".qc138-body");
+    if (!root || typeof root.animate !== "function" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const sc = scroller();
+    const view = sc ? sc.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+    let i = 0;
+    for (const el of root.querySelectorAll<HTMLElement>('[data-qcv="row"], [data-qcv="gband"], [data-qc139="practice-band"]')) {
+      const b = el.getBoundingClientRect();
+      if (b.height === 0 || b.bottom <= view.top) continue;
+      if (b.top >= view.bottom) break;
+      const delay = (arrival.delayMs ?? 0) + Math.min(i, ARRIVAL_140.items - 1) * ARRIVAL_140.step;
+      i += 1;
+      const was = arriving.current.get(el);
+      if (was && was.playState === "running") continue;
+      el.setAttribute("data-qc140-arrive", "");
+      const a = el.animate([{ opacity: 0, transform: `translateY(${ARRIVAL_140.from}px)` }, { opacity: 1, transform: "none" }],
+        { duration: ARRIVAL_140.ms, delay, easing: ARRIVAL_140.easing, fill: "backwards" });
+      a.onfinish = a.oncancel = () => el.removeAttribute("data-qc140-arrive");
+      arriving.current.set(el, a);
+    }
+  });
   /* v140 §A — the jump row: a button per group (its band's mark, its label, its count), or, ungrouped, one per month of
      the sort column's date, in list order */
   const jumps: Qc140Jump[] = groupBy === "none"

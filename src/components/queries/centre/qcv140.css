@@ -450,3 +450,10 @@
   @container qc138sheet (min-width: 1142px) { .qcv-group[data-full] .qc138-sheet > * { --qc138-gap: 32px; } }
   @container qc138sheet (min-width: 1342px) { .qcv-group[data-full] .qc138-sheet > * { --qc138-gap: 44px; } }
 }
+
+/* ── v140 §F · NO FOOTER UNDER THE LIST, pinned or not: the app footer (`AppFooter`, this route's `footer`) and the
+   ledger's Export CSV foot stand down on the desktop list. Display, not unmounting: the phone keeps both, and the other
+   routes' footers are their own elements. ── */
+@media (min-width: 768px) {
+  .qcv-group[data-v138] > .af, .qcv-group[data-v138] .qcv-foot { display: none; }
+}
