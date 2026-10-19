@@ -19,8 +19,8 @@
    title block alike, with no restatement here. */
 .cl17-hd .cl17-tr {
   position: relative;
-  --cl182-ill-w: calc(var(--cl182-ill-h, 0px) * 1.123);
-  --cl182-pull: calc(var(--phf-inset) + (var(--hsheet-w) - var(--cl17-w)) / 2 - 14px);
+  --cl182-ill-w: calc(var(--cl182-ill-h, 0px) * var(--hero-art-ratio));
+  --cl182-pull: calc(var(--phf-inset) + (var(--hsheet-w) - var(--cl17-w)) / 2 - var(--hero-art-x));
   /* the middle column may close to nothing: the title block grows by the archivist, the card does not move */
   grid-template-columns: max-content minmax(0, 1fr) auto;
 }
@@ -29,7 +29,7 @@
   height: var(--cl182-ill-h, 0px); width: auto; max-width: none; aspect-ratio: 720 / 641;
   filter: drop-shadow(0 10px 14px rgba(28, 19, 15, 0.12)); pointer-events: none; user-select: none;
 }
-.cl17-hd .cl17-tr > .cl17-tb, .cl17-hd .cl17-tr > .cl17-acts { margin-left: calc(var(--cl182-ill-w) + 28px - var(--cl182-pull)); }
+.cl17-hd .cl17-tr > .cl17-tb, .cl17-hd .cl17-tr > .cl17-acts { margin-left: calc(var(--cl182-ill-w) + var(--hero-art-gap) - var(--cl182-pull)); }
 /* below 1100px of window the archivist goes and v18's alignment comes back */
 @media (max-width: 1099.98px) {
   .cl17-hd .cl17-tr > .cl182-ill { display: none; }

@@ -656,8 +656,9 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
    the Contact list's own rules, not the shared hero frame (pageHeroFrame.css sets only the horizontal inset), so
    nothing outside this page moves. Pinned has no hero and keeps its own 22 (`.clv-group[data-full] > .clv-main`). */
 @media (min-width: 768px) {
-  .clv-group:not([data-full]) > .cl17-hd { margin-top: 36px; }
-  .clv-group:not([data-full]) > .cl17-hd ~ .clv-main.clv-main { margin-top: 44px; }
+  /* header rules v1.1: the shared hero top and gap below (shell/pageHeroFrame.css) */
+  .clv-group:not([data-full]) > .cl17-hd { margin-top: var(--hero-top); }
+  .clv-group:not([data-full]) > .cl17-hd ~ .clv-main.clv-main { margin-top: var(--hero-gap-below); }
 }
 
 /* ── v19.2 §B · THE REPLIES CELL: the reply time alone for an open agent; a closed one adds "Closed till 1 Nov" (or

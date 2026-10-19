@@ -14,7 +14,7 @@
 
 /* ── §A · THE LIGHT HEADER. The group's first row, at the LIST's width (24px from the page sheet's edges, at
    most 1600, centred), 30px under the sheet's top edge. ── */
-.clv-group { --cl17-w: min(1600px, calc(var(--hsheet-w) - 48px)); }
+.clv-group { --cl17-w: var(--hero-w); } /* header rules v1.1: the shared hero width (shell/pageHeroFrame.css) */
 .clv-group > .cl17-hd {
   grid-column: 1 / -1; grid-row: 1; justify-self: start; box-sizing: border-box; min-width: 0;
   position: relative; isolation: isolate;
@@ -33,9 +33,8 @@
 .ws-app.sheet-wide .cl17-hd { --cl17-sh-x: -70px; }
 .cl17-hd .cl17-tr {
   display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto; grid-template-rows: auto auto;
-  row-gap: 24px; align-items: center; margin-inline: var(--cl17-inset);
+  row-gap: var(--hero-act-gap); align-items: center; margin-inline: var(--cl17-inset);
 }
-.ws-app.sheet-wide .cl17-hd .cl17-tr { row-gap: 40px; }
 .cl17-hd .cl17-tb { grid-column: 1; grid-row: 1; min-width: 0; }
 .cl17-hd .cl17-tr > .cl17-acts { grid-column: 1; grid-row: 2; }
 .cl17-hd .cl17-card { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
@@ -48,23 +47,22 @@
 .ws-app.sheet-wide .cl17-hd .cl17-shadow { width: 460px; }
 
 .cl17-hd .cl17-ey {
-  display: block; margin: 0 0 15px; font: 500 12px/1 var(--font-mono) !important; letter-spacing: 0.24em; color: #a2452a; white-space: nowrap;
+  display: block; margin: 0 0 var(--hero-ey-gap); font: 500 12px/var(--hero-ey-lh) var(--font-mono) !important; letter-spacing: 0.24em; color: #a2452a; white-space: nowrap;
 }
 .cl17-hd h1.cl17-title {
-  margin: 0; font: 400 44px/1 var(--sp-type) !important; letter-spacing: 0; color: #1c130f; white-space: nowrap; outline: none;
+  margin: 0; font: 400 var(--hero-title-size)/1 var(--sp-type) !important; letter-spacing: 0; color: #1c130f; white-space: nowrap; outline: none;
 }
-.ws-app.sheet-wide .cl17-hd h1.cl17-title { font-size: 50px !important; }
 .cl17-hd h1.cl17-title span { font: inherit !important; }
 .cl17-hd .cl17-title .cl17-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
 /* the byline: a 40px rule, "for {title}", and a rule that takes what is left (160 at most) */
-.cl17-hd .cl17-by { display: flex; align-items: center; gap: 12px; margin-top: 12px; min-width: 0; }
+.cl17-hd .cl17-by { display: flex; align-items: center; gap: 12px; margin-top: var(--hero-by-gap); min-width: 0; }
 .cl17-hd .cl17-by::before { content: ""; flex: none; width: 40px; height: 1px; background: rgba(28, 19, 15, 0.3); }
 .cl17-hd .cl17-by::after { content: ""; flex: 1 1 0; max-width: 160px; height: 1px; background: rgba(28, 19, 15, 0.3); }
-.cl17-hd .cl17-by .cl17-byt { font: italic 400 20px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cl17-hd .cl17-by .cl17-byt { font: italic 400 20px/var(--hero-by-lh) var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cl17-hd .cl17-by .cl17-ms { font: 400 20px/1 var(--sp-type) !important; font-style: normal !important; color: inherit; }
 .cl17-hd .cl17-acts { display: flex; gap: 12px; }
 .cl17-hd .cl17-acts button {
-  box-sizing: border-box; height: 46px; padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
+  box-sizing: border-box; height: var(--hero-act-h); padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
   font: 400 17px/1 var(--sp-type) !important;
 }
 .cl17-hd .cl17-acts .cl17-b1 { background: #2d3a50; color: #f4eee5; }
