@@ -10,7 +10,8 @@
  *   Email    the address IS the copy button (v18.3.3 §C, moved here from the open row): click, Enter or Space copies
  *            the FULL address; for 1400ms the address is replaced IN PLACE by "✓ Copied" in green italics. The
  *            address stays laid out underneath, hidden, so the column never changes width.
- *   Missing  "Add email" / "Add website" with its icon, opening today's add flow (the agent card at that field).
+ *   Missing  blank at rest; "+ Add email" / "+ Add website" while the row is hovered or focused (v19.1 §A), opening
+ *            today's add flow (the agent card at that field).
  */
 import React, { useEffect, useRef, useState } from "react";
 import type { Agent } from "../../../types";
@@ -74,9 +75,12 @@ export const CopyEmail: React.FC<{ email: string }> = ({ email }) => {
   );
 };
 
+/** v19.1 §A — a missing website or email: the cell is BLANK at rest. "+ Add website" / "+ Add email" shows only while
+ *  the row is hovered or has focus inside it (contactV19.css). The button stays laid out and focusable — only its words
+ *  (`.cl19-mt`) are `visibility: hidden` — so it keeps its place in the tab order and nothing moves when it shows. */
 export const AddContact: React.FC<{ kind: "email" | "website"; onPress: () => void }> = ({ kind, onPress }) => (
-  <button type="button" className="cl19-miss" data-cl19={`add-${kind}`}
+  <button type="button" className="cl19-miss" data-cl19={`add-${kind}`} aria-label={kind === "email" ? "Add email" : "Add website"}
     onClick={(e) => { e.stopPropagation(); onPress(); }} onKeyDown={(e) => e.stopPropagation()}>
-    <CellIcon kind={kind === "email" ? "mail" : "web"} /><span>{kind === "email" ? "Add email" : "Add website"}</span>
+    <span className="cl19-mt">{kind === "email" ? "+ Add email" : "+ Add website"}</span>
   </button>
 );

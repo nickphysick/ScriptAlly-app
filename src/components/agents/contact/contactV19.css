@@ -275,15 +275,22 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-c .cl19-copied { position: absolute; left: 0; top: 0; font-style: italic; color: #2f6b4f; white-space: nowrap; }
 /* stacked: the email under the website, at 72% ink */
 .cl19-c.cl19-cs .cl19-em { color: rgba(28, 19, 15, 0.72); }
-/* a missing website or email: "Add …" in ink with its icon (the icon at 45%), navy and underlined on hover */
+/* v19.1 §A — a missing website or email: blank at rest. While the row is hovered or anything in it has focus, "+ Add
+   website" / "+ Add email" shows: body serif 14px, navy, no icon, a navy underline at 35% offset 4px that goes full colour
+   on hover. Hidden is `visibility: hidden` on the WORDS only — the button stays laid out (the row never shifts) and stays
+   focusable (a hidden button would leave the tab order); focusing it is focus inside the row, so it shows. */
 .cl19-c .cl19-miss {
-  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: rgb(28, 19, 15);
-  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52;
+  font-size: 14px; line-height: 20px;
 }
-.cl19-c .cl19-miss svg { flex: none; width: 14px; height: 14px; color: rgba(28, 19, 15, 0.45); }
-.cl19-c .cl19-miss:hover { color: #2a3a52; }
-.cl19-c .cl19-miss:hover svg { color: #2a3a52; }
-.cl19-c .cl19-miss:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.cl19-c .cl19-miss .cl19-mt {
+  visibility: hidden; font: inherit; color: inherit;
+  text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px;
+}
+.clv-row:is(:hover, :focus-within) .cl19-c .cl19-miss .cl19-mt { visibility: visible; }
+.cl19-c .cl19-miss:hover .cl19-mt { text-decoration-color: #2a3a52; }
+/* a list change holds hover until the pointer moves (§H): the words stay hidden under a still pointer too */
+.clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(:focus-within) .cl19-miss .cl19-mt { visibility: hidden; }
 
 /* ── §D · THE OPEN ROW: one powder strip under the main line, from the name's left edge (the disc's 40 + 11) to the
    Query status column's right edge. The row keeps its own colour — white, the hover's #fdfbf8 while the pointer is

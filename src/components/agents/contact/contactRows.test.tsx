@@ -29,8 +29,10 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
     const h = html(false);
     expect(h).not.toContain('data-clv="dos"');
     expect(h).not.toContain("+ Add their wishlist");
-    expect(h).toMatch(/data-cl19="add-website"[^>]*>.*Add website</);
-    expect(h).toMatch(/data-cl19="add-email"[^>]*>.*Add email</);
+    expect(h).toMatch(/data-cl19="add-website"[^>]*><span class="cl19-mt">\+ Add website<\/span>/);
+    expect(h).toMatch(/data-cl19="add-email"[^>]*><span class="cl19-mt">\+ Add email<\/span>/);
+    /* v19.1 §A: no icon in a missing cell */
+    expect(h).not.toMatch(/data-cl19="add-(website|email)"[^>]*><svg/);
     expect(h).toContain('data-cl19="date"');
   });
   it("v19 §C: the date reads day and month, then the year in its own span; the email copies and says so", async () => {
