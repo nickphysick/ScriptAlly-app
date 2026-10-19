@@ -129,7 +129,8 @@ test.describe("Query Centre v139", () => {
       }));
       L.check("A1", `${vp.width} no old page guide`, old.el === 0 && !old.copy, JSON.stringify(old));
       const t = await pillText(page);
-      L.check("A1", `${vp.width} the pill`, /^Query Centre: Getting started [0-5]\/5$/.test(t ?? ""), `${t}`);
+      /* Query Centre v140 §G: six items now ("Pin the list" is third) */
+      L.check("A1", `${vp.width} the pill`, /^Query Centre: Getting started [0-6]\/6$/.test(t ?? ""), `${t}`);
       const cls = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-pck='pill']")].find((e) => e.getBoundingClientRect().height > 0)?.className ?? "");
       L.check("A1", `${vp.width} the shared component's pill`, /\bpck-pill\b/.test(cls), cls);
     }
@@ -353,8 +354,9 @@ test.describe("Query Centre v139", () => {
     await page.addInitScript(() => { try { localStorage.setItem("sa.qcList.v1", JSON.stringify({ v: 2, density: "comfortable", group: "attention" })); } catch { /* */ } });
     for (const vp of SIZES) {
       await open(page, vp, "C1", { seen: true });
-      const title = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qc138='top']")].find((e) => e.getBoundingClientRect().height > 0)?.innerText.replace(/\s+/g, " ") ?? "");
-      L.check("C1", `${vp.width} the title`, /grouped by who it’s with|grouped by who it's with/i.test(title), title);
+      /* Query Centre v140 §A retired the title; the Group by chip names the grouping (and drops "Grouped by" at 1280) */
+      const title = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qc140='group']")].find((e) => e.getBoundingClientRect().height > 0)?.innerText.replace(/\s+/g, " ") ?? "");
+      L.check("C1", `${vp.width} the Group by chip`, /who it’s with|who it's with/i.test(title), title);
       L.check("C1", `${vp.width} a saved Urgency opens on Who it's with (the talon's band)`, await vis(page, ".qc138-sheet [data-qcv='gband'][data-group='you'] [data-qcv='gband-art']"), "");
       await page.locator(".qc138-sheet [data-ltb='group-name']").first().click();
       await page.waitForTimeout(300);
