@@ -237,7 +237,13 @@ test.describe("Query Centre v139", () => {
     /* Pip's */
     L.check("B2", "Pip arrives", await startPip(page), "");
     L.check("B2", "the journey opens", await toAnswers(page), "");
+    /* the drawer mounts its step list a moment after Pip's third card shows; read it once it is there (up to 5s), and
+       record how long that took, so a slow drawer is a number in the ledger rather than a flake */
+    const t0 = Date.now();
+    await page.waitForFunction(() => !!document.querySelector(".qad-root.is-open [data-qad-drawer]"), null, { timeout: 5000 }).catch(() => {});
+    const waited = Date.now() - t0;
     const s = await stepsOf();
+    L.check("B2", "the drawer is up within 5s of the third card", waited < 5000, `${waited}ms`);
     L.check("B2", "the real response drawer, stepped into the panel", s.drawer === "resp" && s.stepper, JSON.stringify(s));
     for (const k of ["partial", "full", "pass", "offer", "rr"]) {
       await page.locator(".qad-root.is-open button", { hasText: ANSWER[k] }).first().click();
@@ -246,7 +252,7 @@ test.describe("Query Centre v139", () => {
       L.check("B2", `${k}: the same steps`, !!real[k] && p === real[k], `real "${real[k]}" · practice "${p}"`);
     }
     await page.keyboard.press("Escape");
-    L.done(9);
+    L.done(10);
   });
 
   test("B3 · flow: band → row → Record a response → one card per step → saved → cleared and ticked", async ({ page }) => {
