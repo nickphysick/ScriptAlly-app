@@ -151,4 +151,10 @@ Each re-point carries its one-line reason in the code.
 
 ## Deploy
 
-_Filled in below by the deploying session._
+- **The base:** dev still served `d06446e8` (`index-B4WIr-Ea.js`), and this branch is cut from it, so the merge was a
+  fast-forward with no conflicts.
+- **Integration branch:** `dev/…-cx28-qhnet-td52-dv1-qc139-dv1b-cl19` at `d6d63ba2`. That is the commit the gates and
+  locks above ran on, so they were not re-run.
+- **The deploy:** built from a clean, detached worktree and deployed to dev, hosting only. The served hash was
+  re-checked just before deploying. Dev serves **`index-LypZ-ruq.js`**.
+- Not merged to main. Prod is Nick's.
