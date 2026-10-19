@@ -3824,6 +3824,9 @@ export const Queries: React.FC<{
         nextLabel: (r) => nextDoor(r)?.label ?? null,
       })
     : sortRows(qcFiltered, qcSort);
+  /* v140.1 §A — the rows in the order the desktop list draws them: its groups, each in the headings' sort, flattened
+     (one source with the list, so an export is the list as shown) */
+  const qcListOrder = () => (qcGroup === "none" ? qcVisible : qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName).flatMap((g) => g.rows));
   /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
   const qcGlyphCounts = glyphCounts(qcScoped);
   /* v140 §D — the applied row's chips: one per active filter (lib/qc140), the older sentence filter and the strip's court
@@ -7381,6 +7384,8 @@ export const Queries: React.FC<{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
                       quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
                       moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more },
+                      filtered: qc140Chips.length > 0,
+                      onExport: () => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`),
                     }} />
                   )}
                   /* v140 §C — the pinned band, over the rows the list is built from (the manuscript-scoped set; Pip is

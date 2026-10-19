@@ -102,6 +102,13 @@ export const QUICK_PICKS: readonly QuickPick[] = [
   { key: "offers", title: "Offers", line: "Waiting on your answer", field: "offers" },
 ];
 
+/**
+ * v140.1 §A — the Filters menu's export button: "↓ Export all {N} queries" while nothing narrows the list, otherwise
+ * "↓ Export {v} queries", where {v} is the same count "Show {v} queries" uses. The button is disabled at 0.
+ */
+export const exportLabel = (showing: number, total: number, filtered: boolean): string =>
+  !filtered ? `↓ Export all ${total} ${total === 1 ? "query" : "queries"}` : `↓ Export ${showing} ${showing === 1 ? "query" : "queries"}`;
+
 /** "Waiting to hear back": an agent-court query not past its date */
 export const waitingRow = (r: { court: string; pastExpected: boolean }): boolean => r.court === "agent" && !r.pastExpected;
 

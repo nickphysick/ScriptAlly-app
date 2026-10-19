@@ -287,6 +287,15 @@
 }
 .qc140-fm-show:hover { background: #1f2c40; }
 .qc140-fm-clear:focus-visible, .qc140-fm-show:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* v140.1 §A — the footer's left: Clear all, then the export, a quiet text button in the body serif */
+.qc140-fm-fl { display: flex; align-items: center; gap: 24px; min-width: 0; }
+.qc140-fm-export {
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #1c130f; font-family: inherit; font-size: 15.5px !important; line-height: 21px;
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(28, 19, 15, 0.35); white-space: nowrap;
+}
+.qc140-fm-export:hover:not(:disabled) { text-decoration-color: #1c130f; }
+.qc140-fm-export:disabled { color: rgba(28, 19, 15, 0.35); cursor: default; text-decoration: none; }
+.qc140-fm-export:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
 /* ── v140 §D · THE APPLIED ROW: under the toolbar (in the sticky stack, so the headings stick under it), powder with a 1px
    rule at the top ── */
