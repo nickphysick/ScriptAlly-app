@@ -32,6 +32,29 @@ export function fillMergedRanges(sheet: XLSX.WorkSheet): void {
   }
 }
 
+/** Only these link targets are written into the text; mailto:, file:, internal sheet references
+ *  and anything else are dropped. */
+const WEB_LINK = /^https?:\/\/\S+$/i;
+
+/**
+ * A HYPERLINK'S TARGET IS PART OF WHAT THE CELL SAYS. Writers link an agent's name to the agency's
+ * website and keep no website column, so the target is the only place the site is recorded — and
+ * the CSV kept the name and dropped the link. Where a cell carries an http(s) link, its text becomes
+ * `<text> <url>` (or just the url when the text is the url already). Mutates.
+ */
+export function appendLinkTargets(sheet: XLSX.WorkSheet): void {
+  for (const key of Object.keys(sheet)) {
+    if (key[0] === "!") continue;
+    const cell = sheet[key] as XLSX.CellObject;
+    const target = cell?.l?.Target?.trim();
+    if (!target || !WEB_LINK.test(target)) continue;
+    const text = String(cell.w ?? cell.v ?? "").trim();
+    cell.t = "s";
+    cell.v = !text || text === target ? `<${target}>` : `${text} <${target}>`;
+    delete cell.w;
+  }
+}
+
 /** The heading a sheet's text carries when a workbook has more than one sheet with data in it. */
 export const SHEET_HEADING = (name: string) => `### Sheet: ${name}`;
 
@@ -54,7 +77,12 @@ const isEmptyCsv = (csv: string) => /^[,\s]*$/.test(csv);
  */
 export function bufferToCsv(buf: ArrayBuffer | Uint8Array): string {
   const wb = readSheetBook(XLSX, buf);
-  for (const name of wb.SheetNames) if (wb.Sheets[name]) fillMergedRanges(wb.Sheets[name]);
+  for (const name of wb.SheetNames) {
+    const ws = wb.Sheets[name];
+    if (!ws) continue;
+    fillMergedRanges(ws);
+    appendLinkTargets(ws);
+  }
   const parts = wb.SheetNames
     .map((name) => ({ name, csv: wb.Sheets[name] ? XLSX.utils.sheet_to_csv(wb.Sheets[name]) : "" }))
     .filter((p) => !isEmptyCsv(p.csv));

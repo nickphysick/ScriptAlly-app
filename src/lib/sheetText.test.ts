@@ -78,3 +78,28 @@ describe("bufferToCsv carries a merged range's value into every cell it covers",
     expect(bufferToCsv(buf)).toBe("Agent,Agency\nClara Voss,\nJamal Carter,");
   });
 });
+
+// ── Fix 3 (Smart Import eval, Phase 6): hyperlinks ────────────────────────────────────────────
+describe("bufferToCsv keeps a web link's target", () => {
+  const linked = (cells: [string, string | undefined][]) => {
+    const ws = XLSX.utils.aoa_to_sheet([["Agent"], ...cells.map(([t]) => [t])]);
+    cells.forEach(([, url], i) => { if (url) (ws[XLSX.utils.encode_cell({ r: i + 1, c: 0 })] as any).l = { Target: url }; });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Queries");
+    return new Uint8Array(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
+  };
+
+  it("appends an http(s) target to the cell's text", () => {
+    expect(bufferToCsv(linked([["Clara Voss", "https://www.pemberton.co.uk"], ["Jamal Carter", undefined]])))
+      .toBe("Agent\nClara Voss <https://www.pemberton.co.uk>\nJamal Carter");
+  });
+
+  it("drops every other kind of target", () => {
+    const text = bufferToCsv(linked([["Clara Voss", "mailto:clara@pemberton.co.uk"], ["Owen Hale", "file:///C:/notes.docx"], ["Ines", "#Archive!A1"]]));
+    expect(text).toBe("Agent\nClara Voss\nOwen Hale\nInes");
+  });
+
+  it("does not repeat a url that is already the cell's text", () => {
+    expect(bufferToCsv(linked([["https://www.quill.co.uk", "https://www.quill.co.uk"]]))).toBe("Agent\n<https://www.quill.co.uk>");
+  });
+});
