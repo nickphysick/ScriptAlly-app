@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "C4",
+  "where": "1512 @0 the drawing is there",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @900 the drawing is there",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @0 the drawing is there",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @900 the drawing is there",
+  "ok": false,
+  "detail": ""
+ }
+]

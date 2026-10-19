@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 unpinned five controls",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 unpinned one line (every top within 2px)",
+  "ok": true,
+  "detail": "443.9,443.9,443.9,443.9,443.9"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 unpinned height",
+  "ok": true,
+  "detail": "64"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 unpinned controls 40 tall",
+  "ok": true,
+  "detail": "40,40,40,40,40"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 unpinned no old title, Sort, density toggle or Full screen",
+  "ok": true,
+  "detail": "{\"title\":false,\"sort\":false,\"density\":false,\"full\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 pinned five controls",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 pinned one line (every top within 2px)",
+  "ok": true,
+  "detail": "193.3,193.3,193.3,193.3,193.3"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 pinned height",
+  "ok": true,
+  "detail": "72"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 pinned controls 40 tall",
+  "ok": true,
+  "detail": "40,40,40,40,40"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 pinned no old title, Sort, density toggle or Full screen",
+  "ok": true,
+  "detail": "{\"title\":false,\"sort\":false,\"density\":false,\"full\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 unpinned five controls",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 unpinned one line (every top within 2px)",
+  "ok": true,
+  "detail": "440.8,440.8,440.8,440.8,440.8"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 unpinned height",
+  "ok": true,
+  "detail": "64"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 unpinned controls 40 tall",
+  "ok": true,
+  "detail": "40,40,40,40,40"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 unpinned no old title, Sort, density toggle or Full screen",
+  "ok": true,
+  "detail": "{\"title\":false,\"sort\":false,\"density\":false,\"full\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 pinned five controls",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 pinned one line (every top within 2px)",
+  "ok": true,
+  "detail": "193.3,193.3,193.3,193.3,193.3"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 pinned height",
+  "ok": true,
+  "detail": "72"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 pinned controls 40 tall",
+  "ok": true,
+  "detail": "40,40,40,40,40"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 pinned no old title, Sort, density toggle or Full screen",
+  "ok": true,
+  "detail": "{\"title\":false,\"sort\":false,\"density\":false,\"full\":false}"
+ }
+]

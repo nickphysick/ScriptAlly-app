@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "C4",
+  "where": "1512 @0 the drawing is there",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @0 its natural aspect (±1%)",
+  "ok": true,
+  "detail": "1.086 vs 1.086"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @0 no ancestor clips it",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @0 it covers no control",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @0 it covers no heading text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @900 the drawing is there",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @900 its natural aspect (±1%)",
+  "ok": true,
+  "detail": "1.086 vs 1.086"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @900 no ancestor clips it",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @900 it covers no control",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1512 @900 it covers no heading text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @0 the drawing is there",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @0 its natural aspect (±1%)",
+  "ok": true,
+  "detail": "1.086 vs 1.086"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @0 no ancestor clips it",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @0 it covers no control",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @0 it covers no heading text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @900 the drawing is there",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @900 its natural aspect (±1%)",
+  "ok": true,
+  "detail": "1.086 vs 1.086"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @900 no ancestor clips it",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @900 it covers no control",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C4",
+  "where": "1280 @900 it covers no heading text",
+  "ok": true,
+  "detail": "[]"
+ }
+]

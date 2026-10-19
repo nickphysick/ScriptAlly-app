@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512 {N} queries",
+  "ok": true,
+  "detail": "87 vs 87"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 heard back",
+  "ok": true,
+  "detail": "52% heard back vs 52%"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 asked for more",
+  "ok": true,
+  "detail": "31 asked for more vs 31"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 overdue = the reply-date switch's count",
+  "ok": true,
+  "detail": "35 vs 35"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 pressing it shows that many",
+  "ok": true,
+  "detail": "35 vs 35"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 {N} queries",
+  "ok": true,
+  "detail": "87 vs 87"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 heard back",
+  "ok": true,
+  "detail": "52% heard back vs 52%"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 asked for more",
+  "ok": true,
+  "detail": "31 asked for more vs 31"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 overdue = the reply-date switch's count",
+  "ok": true,
+  "detail": "35 vs 35"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 pressing it shows that many",
+  "ok": true,
+  "detail": "35 vs 35"
+ }
+]

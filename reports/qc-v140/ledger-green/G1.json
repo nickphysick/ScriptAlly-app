@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "G1",
+  "where": "the pill reads /6",
+  "ok": true,
+  "detail": "Query Centre: Getting started 2/6"
+ },
+ {
+  "lock": "G1",
+  "where": "unpinned to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "no walkthrough running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "F pinned the list",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "G1",
+  "where": "Pin the list ticked",
+  "ok": true,
+  "detail": "{\"done\":{\"pin\":true,\"log\":true,\"find\":true},\"seen\":true}"
+ }
+]

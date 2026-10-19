@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512 {N} queries",
+  "ok": false,
+  "detail": " vs 87"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 heard back",
+  "ok": false,
+  "detail": " vs 52%"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 asked for more",
+  "ok": false,
+  "detail": " vs 31"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 overdue = the reply-date switch's count",
+  "ok": false,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "C3",
+  "where": "1512 pressing it shows that many",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 {N} queries",
+  "ok": false,
+  "detail": " vs 87"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 heard back",
+  "ok": false,
+  "detail": " vs 52%"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 asked for more",
+  "ok": false,
+  "detail": " vs 31"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 overdue = the reply-date switch's count",
+  "ok": false,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "C3",
+  "where": "1280 pressing it shows that many",
+  "ok": true,
+  "detail": "null vs null"
+ }
+]

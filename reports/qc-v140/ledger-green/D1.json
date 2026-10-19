@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "D1",
+  "where": "Overdue pick on → the reply-date switch on",
+  "ok": true,
+  "detail": "{\"over\":\"true\",\"past\":\"true\",\"offersQ\":\"false\",\"chips\":[\"qp:over\"]}"
+ },
+ {
+  "lock": "D1",
+  "where": "one chip for it",
+  "ok": true,
+  "detail": "[\"qp:over\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "the switch off → the pick off",
+  "ok": true,
+  "detail": "{\"over\":\"false\",\"past\":\"false\",\"offersQ\":\"false\",\"chips\":[]}"
+ },
+ {
+  "lock": "D1",
+  "where": "Offers pick on → one chip",
+  "ok": true,
+  "detail": "{\"over\":\"false\",\"past\":\"false\",\"offersQ\":\"true\",\"chips\":[\"qp:offers\"]}"
+ },
+ {
+  "lock": "D1",
+  "where": "the Offers pick writes today's offers toggle",
+  "ok": true,
+  "detail": "offers"
+ },
+ {
+  "lock": "D1",
+  "where": "the Overdue pick writes the past switch",
+  "ok": true,
+  "detail": "past"
+ },
+ {
+  "lock": "D1",
+  "where": "pinned: the band's disc on → the switch and the pick on, one chip",
+  "ok": true,
+  "detail": "disc true {\"over\":\"true\",\"past\":\"true\",\"offersQ\":\"false\",\"chips\":[\"qp:over\"]}"
+ }
+]
