@@ -17,6 +17,7 @@
  * ⚠️ ALSO CHANGES IS COMPUTED, NEVER DESCRIBED (decision 14): the notes are `alsoChanges` — the dry
  * run through the real engine — shown inside the tab that causes them and counted in the foot.
  */
+import { Term } from "../../shell/Term";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SubmissionMethod, type Agent } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -85,7 +86,7 @@ export interface AgentCardEditorProps {
 }
 
 /** One labelled row of the form, the mock's `.ac-f`. */
-const F: React.FC<{ label: string; children: React.ReactNode; vl?: React.ReactNode; vlKey?: string }> = ({ label, children, vl, vlKey }) => (
+const F: React.FC<{ label: React.ReactNode; children: React.ReactNode; vl?: React.ReactNode; vlKey?: string }> = ({ label, children, vl, vlKey }) => (
   <div className="ae-f">
     <label>{label}</label>
     <div className="ae-fl">
@@ -459,7 +460,7 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
               />
             </F>
             {/* v18.3 §D — "Response policy": the same field (noResponseMeansNo) and the same values, in plain words */}
-            <F label="Response policy" vlKey="nrn" vl={d.nrn == null ? <span>Not stated yet</span> : undefined}>
+            <F label={<Term id="responsePolicy">Response policy</Term>} vlKey="nrn" vl={d.nrn == null ? <span>Not stated yet</span> : undefined}>
               <Seg<"yes" | "no">
                 ae="nrn" label="Response policy"
                 value={d.nrn == null ? null : d.nrn ? "yes" : "no"}

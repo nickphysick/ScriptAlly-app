@@ -15,6 +15,7 @@
  *    and takes focus from the pinned row's "back to the top".
  */
 import React, { useLayoutEffect, useRef } from "react";
+import { Term } from "../../shell/Term";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import { RING, RING_C, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
@@ -125,7 +126,9 @@ export const ContactSummaryCard: React.FC<{
         {/* v19.2 §G — the card ends at "List health": the gap count is stated once, on "Fill in the gaps N" (the
             ring's accessible name still says it) */}
         <span className="cl17-ht">
-          <b data-cl17="health-title">List health</b>
+          {/* Help system v1 D — "List health" is a defined word; inside the button it opens on hover and focus only */}
+          <b data-cl17="health-title"><Term id="listHealth" onDark={false}
+            example={health ? [`You have `, { b: `${health.gaps} ${health.gaps === 1 ? "gap" : "gaps"}` }, ` across ${model.cells.reduce((t, c) => t + c.n, 0)} agents. Press the ring to fill them.`] : undefined}>List health</Term></b>
         </span>
       </button>
     ) : null}

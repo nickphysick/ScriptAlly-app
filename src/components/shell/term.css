@@ -1,0 +1,50 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Help system v1, Part D — a defined word and its card (design-refs/help-system-v1, screens 06 and 07). Values are the
+ * mock's. The card lives in the one pop-up layer; its faces are restated with `!important` (brand.tsx's runtime rule).
+ */
+.qh-term {
+  text-decoration: underline dotted rgba(28, 19, 15, 0.42); text-decoration-thickness: 1.5px; text-underline-offset: 3px;
+  cursor: help; border-radius: 3px; transition: background-color 0.12s, text-decoration-color 0.12s;
+}
+.qh-term:hover, .qh-term.on, .qh-term:focus-visible { text-decoration-color: #a2452a; background: rgba(245, 226, 218, 0.55); outline: none; }
+.qh-term--dark { text-decoration-color: rgba(243, 239, 231, 0.55); }
+.qh-term--dark:hover, .qh-term--dark.on, .qh-term--dark:focus-visible { text-decoration-color: #f5e2da; background: rgba(245, 226, 218, 0.15); }
+
+.qh-def {
+  box-sizing: border-box; width: 300px; padding: 6px; border-radius: 14px; background: #ffffff; color: #1c130f;
+  box-shadow: 0 14px 36px rgba(20, 14, 10, 0.22), 0 1px 3px rgba(20, 14, 10, 0.1);
+  animation: qh-def-in 0.14s ease;
+  text-align: left; white-space: normal; letter-spacing: normal; text-transform: none;
+}
+@keyframes qh-def-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.qh-def .qh-def-fr {
+  border: 1px solid rgba(165, 131, 123, 0.6); border-radius: 10px; padding: 12px 14px 10px;
+  max-height: calc(var(--pop-max, 100vh) - 14px); overflow: auto;
+}
+.qh-def .qh-def-eb {
+  font: 500 9.5px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.45);
+}
+.qh-def .qh-def-t {
+  display: flex; align-items: center; gap: 8px; margin: 2px 0 6px; font: 400 18px/1.3 var(--sp-type) !important; color: #1c130f;
+}
+.qh-def .qh-def-t span { font: inherit !important; }
+.qh-def .qh-def-b { margin: 0; font: 400 13.5px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.qh-def .qh-def-ex {
+  margin-top: 8px; padding: 7px 9px; border-radius: 7px; background: #fbf9f5;
+  font: 400 12.5px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62);
+}
+.qh-def .qh-def-ex b { font: 600 12.5px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.qh-def .qh-def-ft {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(28, 19, 15, 0.12);
+}
+.qh-def .qh-def-ft a { font: 600 12.5px/1.3 var(--sp-serif) !important; color: #a2452a; text-decoration: none; }
+.qh-def .qh-def-ft a:hover, .qh-def .qh-def-ft a:focus-visible { text-decoration: underline; text-underline-offset: 2px; outline: none; }
+.qh-def .qh-def-ft span { font: 400 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .qh-term, .qh-def { transition: none; animation: none; }
+}
