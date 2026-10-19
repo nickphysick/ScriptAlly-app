@@ -18,6 +18,8 @@ import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
 import { SENT_NONE, type Qc138Filters, type Qc138SortKey } from "./qc138";
 import type { GroupBy } from "./qcCalView";
+import { placeOf } from "./responses";
+import { sentWeeks, type SentWeek } from "./qcSentWeeks";
 
 /* ── the jump row ─────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -142,4 +144,45 @@ export function appliedChips(f: Qc138Filters, sentName: (k: string) => string): 
   if (f.missing) out.push({ key: "more:missing", label: "Missing materials", off: (g) => ({ ...g, missing: false }) });
   if (f.overYear) out.push({ key: "more:overYear", label: "Over a year", off: (g) => ({ ...g, overYear: false }) });
   return out;
+}
+
+/* ── the pinned band (§C) ─────────────────────────────────────────────────────────────────────────────────────── */
+
+export interface BandRow { status: QueryStatus; pastExpected: boolean; sentMs: number | null }
+export interface BandFigures {
+  /** every query on the list (the manuscript-scoped set; the practice query is never one of them) */
+  total: number;
+  /** an agent-court query past its expected date: the "Past their reply date" filter's set */
+  overdue: number;
+  /** asked for more (requested, sent, R&R, offer) + passed, over every query on the list, as a whole percentage */
+  heardPct: number;
+  /** asked for more: lib/responses' "more" placement */
+  more: number;
+  /** passed: lib/responses' "passed" placement */
+  passed: number;
+  /** the last eight Monday weeks, oldest first, this week last (lib/qcSentWeeks, the hero chart's weeks) */
+  weeks: SentWeek[];
+  thisWeek: number;
+  weekBefore: number;
+}
+export const BAND_WEEKS = 8;
+/**
+ * The band's figures, from the rows the list is built from. ⚠️ Heard back reads `placeOf` and nothing else: a No reply
+ * is a "noReply" placement and is NOT heard back; Queried, Withdrawn and Signed have no placement.
+ */
+export function bandFigures(rows: readonly BandRow[], nowMs: number): BandFigures {
+  let more = 0, passed = 0, overdue = 0;
+  for (const r of rows) {
+    const g = placeOf(r.status)?.group;
+    if (g === "more") more++;
+    else if (g === "passed") passed++;
+    if (r.pastExpected) overdue++;
+  }
+  const total = rows.length;
+  const weeks = sentWeeks(rows.map((r) => r.sentMs), nowMs, BAND_WEEKS);
+  return {
+    total, overdue, more, passed,
+    heardPct: total ? Math.round(((more + passed) / total) * 100) : 0,
+    weeks, thisWeek: weeks[weeks.length - 1]?.n ?? 0, weekBefore: weeks[weeks.length - 2]?.n ?? 0,
+  };
 }

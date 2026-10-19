@@ -348,6 +348,8 @@ export interface QcList138Props {
   filtersMenu?: (pop: PopoverState<Qc140Pop>) => React.ReactNode;
   /** v140 §D — the applied-filters row, under the toolbar while anything narrows the list */
   applied?: React.ReactNode;
+  /** v140 §C — the pinned band (QcBand140), drawn above the toolbar while the list is pinned */
+  band?: React.ReactNode;
   /** the list is still loading: the toolbar's controls wait */
   loading?: boolean;
   sort: Qc138Sort;
@@ -391,7 +393,7 @@ export interface QcList138Props {
 }
 
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
+  groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
   selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
@@ -552,7 +554,10 @@ export const QcList138: React.FC<QcList138Props> = ({
           anything narrows the list: `useStickyStack` measures the two together, so the headings and the current group
           band stick under both. */}
       <div className="qc138-topw" data-qc138="top-wrap">
-        <div className="qc140-stk" data-qc140="stack" ref={topRef}>
+        <div className="qc140-stk" data-qc140="stack" data-pinned={full ? "" : undefined} ref={topRef}>
+          {/* v140 §C — pinned, the navy band sits above the toolbar inside the sticky stack, so the headings and the
+              current group band stick under both */}
+          {full ? band : null}
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
             jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}

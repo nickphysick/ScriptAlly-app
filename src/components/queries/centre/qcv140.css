@@ -314,3 +314,114 @@
   }
   .qc138-sheet .qc140-af-c:focus-visible, .qc138-sheet .qc140-af-clear:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 }
+
+/* ── v140 §C · PINNED (as Contact list v19's pinned list): flush to the sheet, edge to edge, no top gap, square
+   corners. The sticky stack is the navy band and the cream toolbar (and the applied row when it shows), then the white
+   headings, then the current group band. The band's content, the toolbar's jump row and the applied row start 196 in,
+   to clear the desk hawk, which hangs 22 from the sheet's left across the band and the toolbar, above both.
+   ⚠️ `--qc138-pin-h` IS THE STACK'S OWN HEIGHT HERE: the stack starts at the sheet's top with no lip cover above it
+      (the lip turns navy over the band instead). ── */
+.qcv-group { --qc140-inset: 196px; }
+@media (min-width: 768px) {
+  .qcv-group[data-v138][data-full] { --qc138-pin-h: var(--stk-head-h, 144px); }
+  .wpg-scroll:has(> .qcv-group[data-v138][data-full]) { --wpg-scroll-pad: calc(var(--stk-head-h, 144px) + 40px + 64px); }
+  /* 0-6-0: beats `.qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw` and the v138.5 pinned 22px */
+  .qcv-group.qc13[data-v138][data-full] > .qcv-page.qcw {
+    width: var(--hsheet-w); margin: 0 0 0 calc(50% - var(--hsheet-w) / 2);
+  }
+  .qcv-group[data-v138][data-full] .qc138-sheet { border-radius: 0; box-shadow: none; margin-bottom: 0; }
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc138-topw { margin-top: 0; padding-top: 0; background: #2a3a52; }
+  .qcv-group[data-v138][data-full] .qc140-stk { container: qc140stk / inline-size; }
+
+  /* ── the band ── */
+  .qc138-sheet .qc140-band {
+    position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 22px; height: 72px; margin: 0;
+    padding: 0 22px 0 var(--qc140-inset); background: #2a3a52; color: #f4eee5; white-space: nowrap;
+  }
+  .qc138-sheet .qc140-bart {
+    /* the drawing's natural aspect (440 × 405): 137 × 126, never stretched, never clipped */
+    position: absolute; z-index: 3; left: 22px; top: 6px; width: auto; height: 126px; max-width: none; aspect-ratio: 440 / 405;
+    pointer-events: none; user-select: none;
+  }
+  .qc138-sheet .qc140-bn { display: inline-flex; align-items: baseline; gap: 9px; flex: none; margin: 0; }
+  .qc138-sheet .qc140-bn b { font: 400 38px/38px var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc140-bn span { font: 400 19px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.82); }
+  .qc138-sheet .qc140-od {
+    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 10px; height: 38px; margin: 0; padding: 0 12px 0 10px;
+    border: 0; border-radius: 10px; background: transparent; color: #f4eee5; cursor: pointer;
+  }
+  .qc138-sheet .qc140-od span { font: 400 16px/1 var(--sp-serif) !important; color: inherit; }
+  .qc138-sheet .qc140-od i {
+    display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; box-sizing: border-box; border-radius: 13px;
+    background: #d9805f; color: #fff; font: 400 14px/1 var(--sp-type) !important; font-style: normal;
+  }
+  .qc138-sheet .qc140-od[data-n="0"] i { background: rgba(244, 238, 229, 0.18); }
+  .qc138-sheet .qc140-od:hover:not(:disabled) { background: rgba(244, 238, 229, 0.1); }
+  .qc138-sheet .qc140-od[aria-pressed="true"] { background: rgba(244, 238, 229, 0.16); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.45); }
+  .qc138-sheet .qc140-od:focus-visible, .qc138-sheet .qc140-blog:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  .qc138-sheet .qc140-hb { display: inline-flex; align-items: center; gap: 12px; flex: none; padding-left: 22px; box-shadow: -1px 0 0 rgba(244, 238, 229, 0.16); }
+  .qc138-sheet .qc140-ring { display: block; flex: none; width: 40px; height: 40px; }
+  .qc138-sheet .qc140-bt { display: flex; flex-direction: column; }
+  .qc138-sheet .qc140-bt b { font: 400 18px/19.8px var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc140-bt small { font: italic 400 13.5px/19px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.72); }
+  .qc138-sheet .qc140-bsp { flex: 1 1 0; min-width: 0; }
+  .qc138-sheet .qc140-wk { display: inline-flex; align-items: center; gap: 12px; flex: none; }
+  .qc138-sheet .qc140-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 26px; }
+  .qc138-sheet .qc140-bars i { display: block; width: 4px; border-radius: 1px; background: rgba(244, 238, 229, 0.45); }
+  .qc138-sheet .qc140-bars i[data-cur] { background: #d9805f; }
+  .qc138-sheet .qc140-blog {
+    box-sizing: border-box; flex: none; height: 44px; margin: 0; padding: 0 20px; border: 0; border-radius: 12px; background: #fff; color: #1c130f;
+    cursor: pointer; font: 400 17px/1 var(--sp-type) !important;
+  }
+  .qc138-sheet .qc140-blog:hover { background: #f7f4ee; }
+  /* this week goes when the toolbar is 1300 or narrower; the two spacers then share its room */
+  @container qc140stk (max-width: 1300px) {
+    .qc138-sheet .qc140-wk { display: none; }
+  }
+
+  /* ── the toolbar: cream, a 1px ink-8% rule under it; the jump row in ink from 196 in ── */
+  .qcv-group[data-v138][data-full] .qc140-tb {
+    border-radius: 0; padding-left: var(--qc140-inset); background: #f4f0e9; color: #1c130f;
+    border-bottom: 1px solid rgba(28, 19, 15, 0.08);
+  }
+  .qcv-group[data-v138][data-full] .qc140-jcol { color: rgba(28, 19, 15, 0.6); }
+  .qcv-group[data-v138][data-full] .qc140-jb,
+  .qcv-group[data-v138][data-full] .qc140-jmore { --qc140-jbg: #f4f0e9; color: #1c130f; }
+  .qcv-group[data-v138][data-full] .qc140-jb i { color: rgba(28, 19, 15, 0.42); }
+  .qcv-group[data-v138][data-full] .qc140-jb:hover:not(:disabled) { background: rgba(28, 19, 15, 0.06); }
+  .qcv-group[data-v138][data-full] .qc140-jb[aria-current="true"],
+  .qcv-group[data-v138][data-full] .qc140-jmore[aria-current="true"] {
+    --qc140-jbg: #fff; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16), 0 1px 2px rgba(28, 19, 15, 0.08);
+  }
+  .qcv-group[data-v138][data-full] .qc140-jmore { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+  .qcv-group[data-v138][data-full] .qc140-jmore:hover,
+  .qcv-group[data-v138][data-full] .qc140-jmore[aria-expanded="true"] { background: rgba(28, 19, 15, 0.06); }
+  .qcv-group[data-v138][data-full] .qc140-jg--pkg.none { color: #54468a; box-shadow: inset 0 0 0 1.2px rgba(84, 70, 138, 0.35); }
+  .qcv-group[data-v138][data-full] .qc140-jb:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-jmore:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-chip:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-x:focus-visible,
+  .qcv-group[data-v138][data-full] .qc140-pin:focus-visible { outline: 2px solid #2a3a52; }
+  /* Find, Group by and Filters: white with their 1px ring (the applied chips keep their powder and navy ring) */
+  .qcv-group[data-v138][data-full] .qc140-find,
+  .qcv-group[data-v138][data-full] .qc140-chipw:not([data-on]) { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  .qcv-group[data-v138][data-full] .qc140-find:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+  /* Unpin: navy, cream text */
+  .qcv-group[data-v138][data-full] .qc140-pin { background: #2a3a52; color: #f4eee5; }
+  .qcv-group[data-v138][data-full] .qc140-pin:hover:not(:disabled) { background: #1f2c40; }
+
+  /* ── the headings: white, a 1px ink-10% rule under them ── */
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc138-heads { background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+
+  /* ── the applied row starts 196 in, like the jump row ── */
+  .qc138-sheet .qc140-af[data-pinned] { padding-left: var(--qc140-inset); }
+}
+
+/* ── the folder tab and the sheet's lip, pinned only, on this page only: navy, joined to the band (Contact list v19's
+   rule, its own flag). `html[data-qc140-pinned]` is set by Queries.tsx while this list is on screen and pinned. ── */
+@media (min-width: 768px) {
+  html[data-qc140-pinned] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
+  html[data-qc140-pinned] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
+  html[data-qc140-pinned] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  html[data-qc140-pinned] .qc-wpg .wpg-scroll > .sheet-lip { background: #2a3a52; box-shadow: none; }
+}

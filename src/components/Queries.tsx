@@ -106,7 +106,8 @@ import { sentWeeks } from "../lib/qcSentWeeks";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
 import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
-import { appliedChips, waitingRow } from "../lib/qc140";
+import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
+import { QcBand140 } from "./queries/centre/QcBand140";
 import { isYourMoveRow } from "../lib/queryCentreGroups";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
@@ -2466,6 +2467,13 @@ export const Queries: React.FC<{
      name. */
   const qcPin = usePinList("queries", { routeActive: routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
   const qcFull = qcPin.full;
+  /* v140 §C — the folder tab and the sheet lip go navy to join the band while this list is pinned and on screen, and
+     ONLY then: a layout effect, so the tab never paints navy over an unpinned page (Contact list v19's own rule) */
+  useLayoutEffect(() => {
+    if (!(routeActive && qcDesk && qcFull)) return undefined;
+    document.documentElement.setAttribute("data-qc140-pinned", "");
+    return () => document.documentElement.removeAttribute("data-qc140-pinned");
+  }, [routeActive, qcDesk, qcFull]);
   /* v132 §4 — the list's keys (/, J K, Enter, L, Esc), desktop only and only while this page is on screen.
      ⚠️ Declared BELOW everything it reads (qcFind, qcFindRef, qcDesk): a render-time read of a later
      const is a temporal-dead-zone throw. */
@@ -7347,6 +7355,14 @@ export const Queries: React.FC<{
                       moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more },
                     }} />
                   )}
+                  /* v140 §C — the pinned band, over the rows the list is built from (the manuscript-scoped set; Pip is
+                     never one of them). Its disc is the "Past their reply date" filter (`past`), the Overdue quick
+                     pick's own state; "+ Log a query" opens the real log journey. */
+                  band={qcFull ? (
+                    <QcBand140 fig={bandFigures(qcScoped, qcNow138)} overdueOn={qcF138.past} loading={showGridSkeleton}
+                      onOverdue={() => setQcF138((f) => ({ ...f, past: !f.past }))}
+                      onLog={() => onNavigate?.("queries", "Log a query")} />
+                  ) : null}
                   applied={qc140Chips.length ? (
                     <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll} />
                   ) : null}
