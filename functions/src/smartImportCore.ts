@@ -1,0 +1,166 @@
+/**
+ * Smart Import mapping — the pure core of the call the smartImportMap callable makes.
+ *
+ * The callable owns auth, the size checks and the entitlement gate; this module owns ONE thing: the
+ * request to the model and what its reply is turned into. It was lifted out of smartImport.ts so the
+ * evaluation harness (functions/eval/) can make exactly the request production makes, through the
+ * same parse-and-repair, without going near Firebase, the entitlement subdoc or the Functions secret.
+ *
+ * Imports only the prompt, the assembler and the MODEL constant — all side-effect free — so it is
+ * unit-testable with a fake client and runnable from a plain node process.
+ *
+ * The behaviour is the callable's, unchanged: temperature 0, MAX_OUTPUT_TOKENS, one strict retry on
+ * a reply with no JSON object in it, NO retry on a reply that is JSON-shaped but unparseable (almost
+ * always truncation at the ceiling — a second large call would not help).
+ */
+import { SYSTEM_PROMPT } from "./smartImportPrompt";
+import { assembleResult } from "./assembleImport";
+import { MODEL } from "./emailImportCore";
+
+/** Output ceiling — a runaway guard, NOT the speed lever (the slimmed, omit-empty output contract is).
+ *  Sized to a realistic large import: the compact output averages ~45–55 tokens per imported row (a
+ *  terse agent + query object with empties omitted), so 12k comfortably covers ~220–250 rows. Beyond
+ *  that an import could truncate — surfaced as "malformed" and NOT retried (a second big call won't
+ *  help); that's the signal to raise this. Sonnet 4.6 allows far more headroom if ever needed. */
+export const MAX_OUTPUT_TOKENS = 12000;
+
+/** The reminder appended to the system prompt on the one strict retry. */
+export const STRICT_SUFFIX = "\n\nReturn ONLY the JSON object — no prose, no explanation, no code fences.";
+
+/** The slice of the Anthropic client this module uses — so a test can hand it a fake. */
+export interface MapClient {
+  messages: { create(args: any): Promise<any> };
+}
+
+export type MapFailure = "nonjson" | "badjson" | "api";
+
+export interface MapUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+}
+
+export interface MapOutcome {
+  /** The assembled result on success; null on any failure. */
+  result: any | null;
+  /** Why it failed, or null on success. */
+  failure: MapFailure | null;
+  /** Summed over every attempt that returned a message. */
+  usage: MapUsage;
+  /** Wall-clock for the whole mapping, retry included. */
+  ms: number;
+  /** How many requests were made (1, or 2 when the strict retry ran). */
+  attempts: number;
+  /** The `stop_reason` of the last message received, when there was one. */
+  stopReason?: string | null;
+}
+
+export interface MapOpts {
+  /** Where progress lines go. The callable passes console; the harness passes nothing. Duration and
+   *  outcome only — never the payload, user data or key. */
+  log?: (msg: string) => void;
+  logError?: (msg: string, cause?: unknown) => void;
+  now?: () => number;
+}
+
+/** Concatenate the text blocks of an Anthropic message into one string. */
+export function extractText(msg: { content: any[] }): string {
+  return msg.content.filter((b: any) => b.type === "text").map((b: any) => b.text ?? "").join("");
+}
+
+export type ParseOutcome =
+  | { ok: true; value: any }
+  | { ok: false; kind: "nonjson" } // no JSON object at all (prose/refusal) — worth one stricter retry
+  | { ok: false; kind: "badjson" }; // an object IS present but won't parse (truncated/malformed) — no retry
+
+/** In-process repair + parse: strip code fences and any prose either side by taking from the first "{"
+ *  to the last "}", then JSON.parse. Distinguishes a genuinely non-JSON reply (no object structure —
+ *  prose/refusal, worth a stricter retry) from a JSON-shaped-but-unparseable reply (truncated/malformed
+ *  — a second large call won't help, so we don't make one). */
+export function parseReply(text: string): ParseOutcome {
+  const s = text.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+  const first = s.indexOf("{");
+  const last = s.lastIndexOf("}");
+  if (first === -1 || last <= first) return { ok: false, kind: "nonjson" };
+  try { return { ok: true, value: JSON.parse(s.slice(first, last + 1)) }; }
+  catch { return { ok: false, kind: "badjson" }; }
+}
+
+/** The request body for one mapping call. `strict` appends the JSON-only reminder (retry only). */
+export function mappingRequest(sheetText: string, strict: boolean) {
+  return {
+    model: MODEL,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    temperature: 0,
+    system: strict ? SYSTEM_PROMPT + STRICT_SUFFIX : SYSTEM_PROMPT,
+    messages: [{ role: "user", content: sheetText }],
+  };
+}
+
+/** Map one sheet's text. Never throws: every failure comes back as `failure`. */
+export async function mapSheet(client: MapClient, sheetText: string, opts: MapOpts = {}): Promise<MapOutcome> {
+  const log = opts.log ?? (() => {});
+  const logError = opts.logError ?? (() => {});
+  const now = opts.now ?? Date.now;
+
+  const usage: MapUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
+  const addUsage = (msg: any) => {
+    const u = msg?.usage ?? {};
+    usage.inputTokens += u.input_tokens ?? 0;
+    usage.outputTokens += u.output_tokens ?? 0;
+    usage.cacheReadTokens += u.cache_read_input_tokens ?? 0;
+    usage.cacheWriteTokens += u.cache_creation_input_tokens ?? 0;
+  };
+
+  // Bracket the call with timing so the speed-up is visible and a future timeout can't be silent
+  // (you'd see "started" with no "mapped …ms"). Duration only — never the payload, user data or key.
+  const startedMs = now();
+  log("smartImportMap: mapping call started");
+  let attempts = 0;
+  const done = (result: any | null, failure: MapFailure | null, stopReason?: string | null): MapOutcome =>
+    ({ result, failure, usage, ms: now() - startedMs, attempts, stopReason });
+
+  let msg: any;
+  try {
+    attempts++;
+    msg = await client.messages.create(mappingRequest(sheetText, false));
+  } catch (e) {
+    // Log the underlying cause (status, message) — the caller only ever surfaces a generic error.
+    logError("Anthropic mapping call failed:", e);
+    return done(null, "api");
+  }
+  addUsage(msg);
+
+  // Repair-and-parse the reply in-process (handles chatty wrappers with no second call).
+  const first = parseReply(extractText(msg));
+  if (first.ok) {
+    log(`smartImportMap: mapped in ${now() - startedMs}ms`);
+    return done(assembleResult(first.value), null, msg?.stop_reason);
+  }
+  if (first.kind === "badjson") {
+    // A JSON object was present but wouldn't parse — almost always truncation at the token ceiling.
+    // A second full call won't fix that (raise MAX_OUTPUT_TOKENS instead), so fail fast, no retry.
+    logError(`smartImportMap: reply JSON-shaped but unparseable (likely truncated) after ${now() - startedMs}ms`);
+    return done(null, "badjson", msg?.stop_reason);
+  }
+
+  // first.kind === "nonjson": the reply had no JSON object (prose/refusal) — ONE stricter retry.
+  let retryMsg: any;
+  try {
+    attempts++;
+    retryMsg = await client.messages.create(mappingRequest(sheetText, true));
+  } catch (e) {
+    logError("Anthropic mapping retry call failed:", e);
+    return done(null, "api");
+  }
+  addUsage(retryMsg);
+  const second = parseReply(extractText(retryMsg));
+  if (second.ok) {
+    log(`smartImportMap: mapped on retry in ${now() - startedMs}ms`);
+    return done(assembleResult(second.value), null, retryMsg?.stop_reason);
+  }
+  // Still unusable. Log cause + duration only (no payload / user data / key).
+  logError(`smartImportMap: mapping unusable after retry (${second.kind}) after ${now() - startedMs}ms`);
+  return done(null, second.kind, retryMsg?.stop_reason);
+}
