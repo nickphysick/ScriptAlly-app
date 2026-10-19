@@ -7396,10 +7396,12 @@ export const Queries: React.FC<{
                   }}
                   entering={qc138In === "run"}
                   /* v140 §F — the arrival plays on the load (the rows' first appearance) and on every grouping, filter
-                     or search change; never on a sort or a pin. Held 760ms while the page's load entrance runs. */
+                     or search change; never on a sort or a pin. Held 760ms until the page's load entrance has run. */
                   arrival={{
                     key: JSON.stringify([qcGroup, qcF138, qcFind.trim(), qcFilter, qcCzCourt, qcScope, !showGridSkeleton && qcVisible.length > 0]),
-                    delayMs: qc138In === "run" ? 760 : 0,
+                    /* ⚠️ "not done", not "run": the list's layout effect runs before this page's, so on the load the
+                       entrance is still "wait" when the arrival starts */
+                    delayMs: qc138In === "done" ? 0 : 760,
                   }}
                   scrollMemory={qcScrollMemory}
                   /* v138.1 §F — nothing matches: the dead end sits INSIDE the sheet, so the navy row and its search stay */

@@ -488,7 +488,9 @@ export const QcList138: React.FC<QcList138Props> = ({
   const arriving = useRef(new WeakMap<Element, Animation>());
   const arrivedKey = useRef<string | null>(null);
   useLayoutEffect(() => {
-    if (!arrival || arrivedKey.current === arrival.key) return;
+    /* ⚠️ only while the list is the page on screen: every page stays mounted, so the data can land while /queries is
+       hidden; the key is then kept for the moment the route is opened, which is the reader's "load" */
+    if (!arrival || !stickyOn || arrivedKey.current === arrival.key) return;
     arrivedKey.current = arrival.key;
     if (scrollPending.current != null && !loading && rows.length) restoreScroll();
     const root = boxRef.current?.querySelector<HTMLElement>(".qc138-body");
