@@ -300,7 +300,7 @@
   /* below 900px of sheet (a 1024 window with the sidebar open) What you sent goes, with its heading: at five
      columns the headings would run into each other */
   @container qc138sheet (max-width: 899.98px) {
-    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) minmax(130px, 0.85fr) 56px; }
+    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) minmax(130px, 0.85fr) 64px; }
     .qc138-sheet .qc138-snt, .qc138-sheet .qc138-h[data-k="sent"] { display: none; }
   }
 }

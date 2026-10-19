@@ -494,7 +494,7 @@ export const QcList138: React.FC<QcList138Props> = ({
             {picked ? null : <span className="qc138-pickbox" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" /></svg></span>}
           </button>
           <span className="qc138-agt">
-            <b data-qcv="row-name">{hl(r.agentName)}</b>
+            <b data-qcv="row-name" title={r.agentName}>{hl(r.agentName)}</b>
             <small data-qcv="row-agency">{hl(r.agency)}</small>
           </span>
         </div>

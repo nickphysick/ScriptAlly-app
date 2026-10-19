@@ -425,3 +425,28 @@
   html[data-qc140-pinned] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
   html[data-qc140-pinned] .qc-wpg .wpg-scroll > .sheet-lip { background: #2a3a52; box-shadow: none; }
 }
+
+/* ── v140 §E · THE COLUMNS: one template for the headings, the rows, the peek label and the drawer. Agent is capped at
+   264 so it never takes the slack; Next move (`1fr`) takes all of it. The mock sizes What you sent and the gap against
+   its FRAME (the main column beside the sidebar); here both are read off the sheet's own width (`qc138sheet`), because
+   a container query cannot see the main column and the shell's own box is not a container. The frame is the sheet plus
+   its inset: 56 unpinned (the window's 8 and the page's 24 + 24) and 8 pinned (the window's alone) — measured at 1280
+   and 1512, sidebar open and shut. So the gap thresholds 1150 / 1350 of frame are 1094 / 1294 of sheet unpinned and
+   1142 / 1342 pinned. The Next move + Due subgrid inherits the row's gap (`column-gap: normal` on a subgrid).
+   ⚠️ AT 1280 WITH THE SIDEBAR OPEN THE MINIMA FILL THE SHEET EXACTLY: 190 + 92 + 160 + 150 + 150 + 64 + 5 × 18 = 896,
+   the rows' inner width, while 15% of that frame is 154.8 — so What you sent is `minmax(150px, var(--sent-w))`: the
+   grid gives it its 15% wherever there is room and takes it back to 150 where there is not (the mock's own card is 8
+   wider; it draws no window inset). Nothing here may grow a minimum. ── */
+@media (min-width: 768px) {
+  .qcv-group .qc138-sheet {
+    --qc140-fo: 56px;
+    --sent-w: clamp(150px, calc((100cqw + var(--qc140-fo)) * 0.15), 240px);
+    --qc138-cols: minmax(190px, 264px) minmax(92px, 118px) minmax(160px, 204px) minmax(150px, var(--sent-w)) minmax(150px, 1fr) 64px;
+    --qc138-gap: 18px;
+  }
+  .qcv-group[data-full] .qc138-sheet { --qc140-fo: 8px; }
+  @container qc138sheet (min-width: 1094px) { .qcv-group:not([data-full]) .qc138-sheet > * { --qc138-gap: 32px; } }
+  @container qc138sheet (min-width: 1294px) { .qcv-group:not([data-full]) .qc138-sheet > * { --qc138-gap: 44px; } }
+  @container qc138sheet (min-width: 1142px) { .qcv-group[data-full] .qc138-sheet > * { --qc138-gap: 32px; } }
+  @container qc138sheet (min-width: 1342px) { .qcv-group[data-full] .qc138-sheet > * { --qc138-gap: 44px; } }
+}
