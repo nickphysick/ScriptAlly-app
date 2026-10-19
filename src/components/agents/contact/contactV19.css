@@ -290,13 +290,15 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
    on it — whether the strip was opened by the pointer or the keyboard (v18's per-status tints and raise are undone).
    `data-cl19-open` holds the strip's room through the close, so nothing jumps as `data-peek` drops; the height and
    the strip's fade are Web Animations in ContactRows. ── */
-.clv-group .cl19-card .clv-row[data-peek]:not(.kf),
-.clv-group .cl19-card .clv-row[data-peek][data-disc]:not(.kf) {
+.clv-group .cl19-card .clv-row[data-peek]:not(.kf):not([aria-current="true"]),
+.clv-group .cl19-card .clv-row[data-peek][data-disc]:not(.kf):not([aria-current="true"]) {
   z-index: auto; border-radius: 0; box-shadow: none; background: #fff;
 }
-.clv-group .cl19-card .clv-row:hover:not(.kf),
-.clv-group .cl19-card .clv-row[data-peek][data-disc]:hover:not(.kf) { background: #fdfbf8; }
-.clv-group .cl19-card .clv-row[aria-current="true"] { box-shadow: inset 3px 0 0 #2a3a52; }
+.clv-group .cl19-card .clv-row:hover:not(.kf):not([aria-current="true"]),
+.clv-group .cl19-card .clv-row[data-peek][data-disc]:hover:not(.kf):not([aria-current="true"]) { background: #fdfbf8; }
+/* the selected row (its agent open in the panel) keeps its #f7f3ed tint and ink edge while hovered or open */
+.clv-group .cl19-card .clv-row[aria-current="true"],
+.clv-group .cl19-card .clv-row[aria-current="true"][data-disc] { background: #f7f3ed; box-shadow: inset 3px 0 0 #2a3a52; }
 .clv-group .cl19-card .clv-row[data-cl19-open] { grid-template-rows: auto auto; padding-bottom: 24px; }
 .cl19-strip {
   grid-column: 1 / -1; box-sizing: border-box; display: flex; align-items: center; min-width: 0;
@@ -597,4 +599,4 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 
 /* ── v19 §H — HOVER IS HELD AFTER A LIST CHANGE until the pointer moves (ContactRows sets `data-hover-hold`): a row under
    a still pointer keeps its rest colour and does not open. ── */
-.clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(.kf):not([data-peek]) { background: #fff; }
+.clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(.kf):not([data-peek]):not([aria-current="true"]) { background: #fff; }

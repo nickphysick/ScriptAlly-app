@@ -125,7 +125,9 @@ test.describe("QC138.6", () => {
       if (p.key === "agents") {
         /* the agent panel takes Esc first */
         await clickPin(page, p);
-        await page.locator(vis(p, p.rows)).first().click(); await page.waitForTimeout(900);
+        /* Contact list v19: a row's centre now holds its Website/Email cell, whose "Add website" opens the editor at that
+           field (focus in an input, where the first Esc leaves the field) — so the row is opened by its name */
+        await page.locator(vis(p, p.rows)).first().locator(".clv-rwn b").click(); await page.waitForTimeout(900);
         const open1 = await page.locator(".qsp.apn").count();
         L.check("A2", "agents: the agent panel opened", open1 > 0, `${open1}`);
         await page.keyboard.press("Escape"); await page.waitForTimeout(800);
