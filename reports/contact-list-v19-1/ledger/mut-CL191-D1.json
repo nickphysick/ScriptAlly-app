@@ -1,0 +1,290 @@
+[
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned the population: rows, sparse websites and emails",
+  "ok": true,
+  "detail": "52 rows · 0 websites · 27 emails"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned Agent ≤ its widest name / agency line (232.2, rj-agent-3) or heading (54.4) + 8, floor 230 (= 240.2) ±2",
+  "ok": false,
+  "detail": "Agent 315 · template 315px 94px 93px 232px 99px 157px"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned Agent ≤ 330",
+  "ok": true,
+  "detail": "315"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned no gap between columns over 56",
+  "ok": true,
+  "detail": "rows 20 · headings 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned the headings and rows share one gap",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned one heading per column",
+  "ok": true,
+  "detail": "6 vs 6"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned heading 1 starts on its column's left ±1",
+  "ok": true,
+  "detail": "350.0 vs 350.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned heading 2 starts on its column's left ±1",
+  "ok": true,
+  "detail": "685.0 vs 685.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned heading 3 starts on its column's left ±1",
+  "ok": true,
+  "detail": "799.0 vs 799.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned heading 4 starts on its column's left ±1",
+  "ok": true,
+  "detail": "912.0 vs 912.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned heading 5 starts on its column's left ±1",
+  "ok": true,
+  "detail": "1164.0 vs 1164.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 unpinned heading 6 starts on its column's left ±1",
+  "ok": true,
+  "detail": "1283.0 vs 1283.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned the population: rows, sparse websites and emails",
+  "ok": true,
+  "detail": "52 rows · 0 websites · 27 emails"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned Agent ≤ its widest name / agency line (232.2, rj-agent-3) or heading (54.4) + 8, floor 230 (= 240.2) ±2",
+  "ok": false,
+  "detail": "Agent 363 · template 363px 94px 93px 232px 99px 157px"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned Agent ≤ 330",
+  "ok": false,
+  "detail": "363"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned no gap between columns over 56",
+  "ok": true,
+  "detail": "rows 20 · headings 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned the headings and rows share one gap",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned one heading per column",
+  "ok": true,
+  "detail": "6 vs 6"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned heading 1 starts on its column's left ±1",
+  "ok": true,
+  "detail": "326.0 vs 326.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned heading 2 starts on its column's left ±1",
+  "ok": true,
+  "detail": "709.0 vs 709.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned heading 3 starts on its column's left ±1",
+  "ok": true,
+  "detail": "823.0 vs 823.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned heading 4 starts on its column's left ±1",
+  "ok": true,
+  "detail": "936.0 vs 936.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned heading 5 starts on its column's left ±1",
+  "ok": true,
+  "detail": "1188.0 vs 1188.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1512 pinned heading 6 starts on its column's left ±1",
+  "ok": true,
+  "detail": "1307.0 vs 1307.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned the population: rows, sparse websites and emails",
+  "ok": true,
+  "detail": "52 rows · 0 websites · 27 emails"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned Agent ≤ its widest name / agency line (232.2, rj-agent-3) or heading (54.4) + 8, floor 230 (= 240.2) ±2",
+  "ok": true,
+  "detail": "Agent 233 · template 233px 94px 195px 99px 157px"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned Agent ≤ 330",
+  "ok": true,
+  "detail": "233"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned no gap between columns over 56",
+  "ok": true,
+  "detail": "rows 20 · headings 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned the headings and rows share one gap",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned one heading per column",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned heading 1 starts on its column's left ±1",
+  "ok": true,
+  "detail": "350.0 vs 350.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned heading 2 starts on its column's left ±1",
+  "ok": true,
+  "detail": "603.0 vs 603.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned heading 3 starts on its column's left ±1",
+  "ok": true,
+  "detail": "717.0 vs 717.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned heading 4 starts on its column's left ±1",
+  "ok": true,
+  "detail": "932.0 vs 932.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 unpinned heading 5 starts on its column's left ±1",
+  "ok": true,
+  "detail": "1051.0 vs 1051.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned the population: rows, sparse websites and emails",
+  "ok": true,
+  "detail": "52 rows · 0 websites · 27 emails"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned Agent ≤ its widest name / agency line (232.2, rj-agent-3) or heading (54.4) + 8, floor 230 (= 240.2) ±2",
+  "ok": false,
+  "detail": "Agent 250 · template 250px 94px 226px 99px 157px"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned Agent ≤ 330",
+  "ok": true,
+  "detail": "250"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned no gap between columns over 56",
+  "ok": true,
+  "detail": "rows 20 · headings 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned the headings and rows share one gap",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned one heading per column",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned heading 1 starts on its column's left ±1",
+  "ok": true,
+  "detail": "326.0 vs 326.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned heading 2 starts on its column's left ±1",
+  "ok": true,
+  "detail": "596.0 vs 596.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned heading 3 starts on its column's left ±1",
+  "ok": true,
+  "detail": "710.0 vs 710.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned heading 4 starts on its column's left ±1",
+  "ok": true,
+  "detail": "956.0 vs 956.0"
+ },
+ {
+  "lock": "CL191-D1",
+  "where": "@1280 pinned heading 5 starts on its column's left ±1",
+  "ok": true,
+  "detail": "1075.0 vs 1075.0"
+ }
+]

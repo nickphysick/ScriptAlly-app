@@ -166,7 +166,7 @@ const readParity = (page: Page, ids: { mail: string | null; web: string | null; 
   for (const [k, e] of Object.entries(els)) {
     if (!e) { out[k] = null; continue; }
     const c = getComputedStyle(e) as unknown as Record<string, string>;
-    out[k] = { ...Object.fromEntries(props.map((p) => [p, c[p]])), height: e.getBoundingClientRect().height.toFixed(2) };
+    out[k] = { ...Object.fromEntries(props.map((p) => [p, c[p]])), height: e.getBoundingClientRect().height.toFixed(2), kind: e.dataset.cl19 ?? "" };
   }
   return out;
 }, { ids, props: PARITY_PROPS as unknown as string[] });
@@ -200,12 +200,22 @@ test("CL19-P1 · parity: the toolbar, its controls, the headings and a row's cel
          (14 against 14.5). Their size is held to the position's own measured fit (--cl19-fs), and everything else to
          the other position's. */
       const SCALING = ["date", "website", "email"];
+      /* v19.1 §F — the unpinned toolbar is navy by design, so the controls' rings (Find, Group by, Filters) and the Pin's
+         colours differ between the positions; the toolbar's own background and the letters' colours are not read here
+         (CL191-F1 holds both positions to their values). Everything else stays literal. */
+      const BY_DESIGN: Record<string, string[]> = { find: ["boxShadow"], group: ["boxShadow"], filters: ["boxShadow"], pin: ["color"] };
       for (const k of keys) {
         const a = un[k], b = pi[k];
         L.check(`${w} ${k}: present in both positions`, !!a && !!b, `${!!a} · ${!!b}`);
         if (!a || !b) continue;
         if (k.startsWith("heading") && heads(un) !== heads(pi)) continue;
         for (const p of [...PARITY_PROPS, "height"]) {
+          if (BY_DESIGN[k]?.includes(p)) continue;
+          /* v19.1 §A — a missing website or email's "+ Add" link is a fixed 14px in both positions: it does not scale */
+          if (SCALING.includes(k) && p === "fontSize" && /^add-/.test(a.kind) && /^add-/.test(b.kind)) {
+            L.check(`${w} ${k}: the "+ Add" link is 14px in both positions`, a[p] === "14px" && b[p] === "14px", `${a[p]} unpinned · ${b[p]} pinned`);
+            continue;
+          }
           if (SCALING.includes(k) && (p === "fontSize" || p === "height") && un.__fit?.fs !== pi.__fit?.fs) {
             if (p === "fontSize") L.check(`${w} ${k}: its size is each position's own fit`, a[p] === `${parseFloat(un.__fit?.fs ?? "")}px` && b[p] === `${parseFloat(pi.__fit?.fs ?? "")}px`, `${a[p]} (fit ${un.__fit?.fs}) unpinned · ${b[p]} (fit ${pi.__fit?.fs}) pinned`);
             continue;
@@ -219,7 +229,7 @@ test("CL19-P1 · parity: the toolbar, its controls, the headings and a row's cel
   L.done(150);
 });
 
-test("CL19-P2 · unpinned: the hero, no old bars, the cream folder tab with no navy curve, a square card that meets the page's foot", async ({ page }) => {
+test("CL19-P2 · unpinned: the hero, no old bars, the cream folder tab with no navy curve, a card rounded at the foot with 22px of page below (v19.1 §F)", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("CL19-P2");
   await withGuide(async () => {
@@ -248,7 +258,8 @@ test("CL19-P2 · unpinned: the hero, no old bars, the cream folder tab with no n
       L.check(`${w} the sheet is the route's cream rgb(242, 238, 232)`, r.sheetBg === "rgb(242, 238, 232)", `${r.sheetBg}`);
       L.check(`${w} the folder tab is the sheet's colour`, !!r.tabBg && r.tabBg === r.sheetBg, `${r.tabBg} vs ${r.sheetBg}`);
       L.check(`${w} no navy inverted corner (the fillet is the sheet's colour)`, !!r.flFill && r.flFill === r.sheetBg, `${r.flFill}`);
-      L.check(`${w} the card's bottom corners are square`, r.bl === "0px" && r.br === "0px", `${r.bl} · ${r.br}`);
+      /* v19.1 §F re-points this: unpinned, the card's bottom corners round (18) — CL191-F1 holds all four */
+      L.check(`${w} the card's bottom corners are 18px (v19.1 §F)`, r.bl === "18px" && r.br === "18px", `${r.bl} · ${r.br}`);
       /* no condensed sticky bar: scrolled, the only things held at the scroll area's top are the toolbar and the headings */
       await scrollTo(page, 900);
       const s = await page.evaluate(() => {
@@ -285,7 +296,8 @@ test("CL19-P2 · unpinned: the hero, no old bars, the cream folder tab with no n
         return { last: last?.getBoundingClientRect().bottom ?? null, card: card?.getBoundingClientRect().bottom ?? null, sc: sc ? sc.getBoundingClientRect().top + sc.clientHeight : null, after };
       });
       L.check(`${w} the last row ends on the card's foot ±1`, near((e.last ?? NaN) - (e.card ?? NaN), 0, 1), `${e.last?.toFixed(1)} vs ${e.card?.toFixed(1)}`);
-      L.check(`${w} the card ends on the page's foot ±1`, near((e.card ?? NaN) - (e.sc ?? NaN), 0, 1), `${e.card?.toFixed(1)} vs ${e.sc?.toFixed(1)}`);
+      /* v19.1 §F re-points this: unpinned, 22px of page lies below the card */
+      L.check(`${w} the card ends 22 ±1 above the page's foot (v19.1 §F)`, near((e.sc ?? NaN) - (e.card ?? NaN), 22, 1), `${e.card?.toFixed(1)} vs ${e.sc?.toFixed(1)}`);
       L.check(`${w} nothing beneath the card`, e.after === 0, `${e.after}`);
     }
   });
@@ -488,7 +500,7 @@ test("CL19-C3 · copy: clicking an email copies the full address, '✓ Copied' f
 });
 
 /* ───────────────────────── D · the open row ───────────────────────── */
-test("CL19-D1 · strip: powder, genres before the wishlist in Special Elite, no social and no next step, the row's ground unchanged", async ({ page }) => {
+test("CL19-D1 · strip: cream (v19.1 §G), genres before the wishlist in Special Elite, no social and no next step, the row's ground unchanged", async ({ page }) => {
   test.setTimeout(400_000);
   const L = new Ledger("CL19-D1");
   /* the population: rows with genres AND a wishlist, from the data, so the order claim is always entered */
@@ -522,7 +534,8 @@ test("CL19-D1 · strip: powder, genres before the wishlist in Special Elite, no 
         };
       }, id);
       if (!r.open) { L.check(`${w} ${id}: the row opened on a 450ms hover`, false, "closed"); continue; }
-      L.check(`${w} ${id}: the strip is rgb(237, 241, 247)`, r.sbg === "rgb(237, 241, 247)", `${r.sbg}`);
+      /* v19.1 §G re-points this: the strip is cream, never the group header's powder (CL191-G1) */
+      L.check(`${w} ${id}: the strip is rgb(246, 241, 232) (v19.1 §G)`, r.sbg === "rgb(246, 241, 232)", `${r.sbg}`);
       L.check(`${w} ${id}: no social handle`, r.social === 0, `${r.social}`);
       L.check(`${w} ${id}: no next-step link`, r.next === 0, `${r.next}`);
       L.check(`${w} ${id}: the row's background is unchanged`, r.bg === bg0, `${bg0} → ${r.bg}`);
@@ -826,7 +839,7 @@ test("CL19-H1 · arrival: after a regroup no row's text or box changes between t
 });
 
 /* ───────────────────────── I · the list's end ───────────────────────── */
-test("CL19-I1 · end: no footer in either position; the last row ends on the card's content bottom; a short list's card still meets the page's foot", async ({ page }) => {
+test("CL19-I1 · end: no footer in either position; the last row ends on the card's content bottom; a short list's card still runs to the page's foot (22px short unpinned, v19.1 §F)", async ({ page }) => {
   test.setTimeout(400_000);
   const L = new Ledger("CL19-I1");
   const readEnd = (p: Page) => p.evaluate(() => {
@@ -852,7 +865,9 @@ test("CL19-I1 · end: no footer in either position; the last row ends on the car
         L.check(`${w} long list: rows (the population)`, (a?.rows ?? 0) > 20, `${a?.rows}`);
         L.check(`${w} no footer element`, a?.foot === 0, `${a?.foot}`);
         L.check(`${w} long list: the last row's bottom is the card's content bottom ±1`, near((a?.last ?? NaN) - (a?.content ?? NaN), 0, 1), `${a?.last?.toFixed(1)} vs ${a?.content.toFixed(1)}`);
-        L.check(`${w} long list: the card meets the page's foot ±1`, near((a?.card ?? NaN) - (a?.page ?? NaN), 0, 1), `${a?.card.toFixed(1)} vs ${a?.page.toFixed(1)}`);
+        /* v19.1 §F re-points this: unpinned the card stops 22px above the page's foot; pinned it meets it, as v19 */
+        const foot = pos === "unpinned" ? 22 : 0;
+        L.check(`${w} long list: the card ends ${foot} ±1 above the page's foot`, near((a?.page ?? NaN) - (a?.card ?? NaN), foot, 1), `${a?.card.toFixed(1)} vs ${a?.page.toFixed(1)}`);
         /* a short list: one agent */
         const first = (await rowIds(page))[0];
         const name = await page.evaluate((id) => ([...document.querySelectorAll<HTMLElement>(`.aglist [data-agent-card="${id}"] .clv-rwn b`)].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "").trim(), first);
@@ -862,7 +877,7 @@ test("CL19-I1 · end: no footer in either position; the last row ends on the car
         const b = await readEnd(page);
         L.check(`${w} short list: a few rows (the population)`, (b?.rows ?? 0) >= 1 && (b?.rows ?? 99) <= 3, `${b?.rows} for "${name}"`);
         L.check(`${w} short list: no footer element`, b?.foot === 0, `${b?.foot}`);
-        L.check(`${w} short list: the card still meets the page's foot ±1`, near((b?.card ?? NaN) - (b?.page ?? NaN), 0, 1), `${b?.card.toFixed(1)} vs ${b?.page.toFixed(1)}`);
+        L.check(`${w} short list: the card still ends ${foot} ±1 above the page's foot`, near((b?.page ?? NaN) - (b?.card ?? NaN), foot, 1), `${b?.card.toFixed(1)} vs ${b?.page.toFixed(1)}`);
         L.check(`${w} short list: the last row is inside the card`, (b?.last ?? Infinity) <= (b?.content ?? -Infinity) + 1, `${b?.last?.toFixed(1)} vs ${b?.content.toFixed(1)}`);
         if (pos === "pinned") await setPin(page, L, false, `${w} unpin`);
       }

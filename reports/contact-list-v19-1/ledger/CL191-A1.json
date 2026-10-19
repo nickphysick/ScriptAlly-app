@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 rows with no email on screen (the population)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 email: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 email: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 email: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 email: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 email: hovered, it reads \"+ Add email\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add email\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 website: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 website: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 website: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 website: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12 website: hovered, it reads \"+ Add website\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add website\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12: the row had not opened when read (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-12: the row's height is identical at rest and hovered",
+  "ok": true,
+  "detail": "74.25 → 74.25"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 email: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 email: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 email: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 email: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 email: hovered, it reads \"+ Add email\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add email\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 website: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 website: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 website: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 website: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06 website: hovered, it reads \"+ Add website\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add website\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06: the row had not opened when read (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1512 cv25-agent-06: the row's height is identical at rest and hovered",
+  "ok": true,
+  "detail": "75 → 75"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 rows with no email on screen (the population)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 email: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 email: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 email: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 email: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 email: hovered, it reads \"+ Add email\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add email\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 website: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 website: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 website: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 website: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12 website: hovered, it reads \"+ Add website\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add website\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12: the row had not opened when read (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-12: the row's height is identical at rest and hovered",
+  "ok": true,
+  "detail": "74.25 → 74.25"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 email: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 email: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 email: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 email: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 email: hovered, it reads \"+ Add email\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add email\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 website: the words are their own element (.cl19-mt)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 website: at rest the add link is visibility:hidden",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 website: at rest nothing else is drawn (no icon, no text, no dash)",
+  "ok": true,
+  "detail": "icon 0 · other 0"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 website: hovered, it is visible",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06 website: hovered, it reads \"+ Add website\", 14px navy",
+  "ok": true,
+  "detail": "\"+ Add website\" 14px rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06: the row had not opened when read (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL191-A1",
+  "where": "@1280 cv25-agent-06: the row's height is identical at rest and hovered",
+  "ok": true,
+  "detail": "75 → 75"
+ }
+]

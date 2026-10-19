@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 scrolled as asked (precondition)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 its box keeps the natural aspect ratio ±1% (720×641)",
+  "ok": true,
+  "detail": "137×122 · 0.9997"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 no ancestor's clip cuts it",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 nothing paints over it (18 points across its top rows, middle and foot)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 it hides no heading's text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 its foot is in the toolbar row or at most 8px past it",
+  "ok": true,
+  "detail": "227.8 vs toolbar 223.8"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 0 about 137 × 122 at 1512 (screen 05) ±3",
+  "ok": true,
+  "detail": "137×122"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 scrolled as asked (precondition)",
+  "ok": true,
+  "detail": "600"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 its box keeps the natural aspect ratio ±1% (720×641)",
+  "ok": true,
+  "detail": "137×122 · 0.9997"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 no ancestor's clip cuts it",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 nothing paints over it (18 points across its top rows, middle and foot)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 it hides no heading's text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 its foot is in the toolbar row or at most 8px past it",
+  "ok": true,
+  "detail": "227.8 vs toolbar 223.8"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1512 scroll 600 about 137 × 122 at 1512 (screen 05) ±3",
+  "ok": true,
+  "detail": "137×122"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 0 scrolled as asked (precondition)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 0 its box keeps the natural aspect ratio ±1% (720×641)",
+  "ok": true,
+  "detail": "117×104 · 1.0016"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 0 no ancestor's clip cuts it",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 0 nothing paints over it (18 points across its top rows, middle and foot)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 0 it hides no heading's text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 0 its foot is in the toolbar row or at most 8px past it",
+  "ok": true,
+  "detail": "227.8 vs toolbar 223.8"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 600 scrolled as asked (precondition)",
+  "ok": true,
+  "detail": "600"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 600 its box keeps the natural aspect ratio ±1% (720×641)",
+  "ok": true,
+  "detail": "117×104 · 1.0016"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 600 no ancestor's clip cuts it",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 600 nothing paints over it (18 points across its top rows, middle and foot)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 600 it hides no heading's text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-E1",
+  "where": "@1280 scroll 600 its foot is in the toolbar row or at most 8px past it",
+  "ok": true,
+  "detail": "227.8 vs toolbar 223.8"
+ }
+]
