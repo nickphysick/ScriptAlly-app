@@ -118,7 +118,8 @@ import { QcRecent } from "./queries/centre/QcRecent";
 import { DESK_LABEL, deskSections } from "../lib/qcDesk";
 import { useDeskWidth } from "./shell/useDeskWidth";
 import { PageChecklist, type ChecklistTarget, type FlowCard } from "./shell/guide/PageChecklist";
-import { QC_ALL_DONE, QC_AFTER_FIRST, QC_CHECKLIST, QC_GUIDE_FINISHED_PATH, QC_GUIDE_HIDDEN_PATH, QC_GUIDE_SEEN_PATH, QC_NEEDS_A_QUERY, qcGuideDonePath, qcGuideOf, type QcGuideKey } from "../lib/pageChecklist";
+import { QC_ALL_DONE, QC_AFTER_FIRST, QC_CHECKLIST, QC_GUIDE_FINISHED_PATH, QC_GUIDE_HIDDEN_PATH, QC_GUIDE_SEEN_PATH, QC_GUIDE_UNHIDE_PATH, QC_NEEDS_A_QUERY, nextGuideAfter, qcGuideDonePath, qcGuideOf, type QcGuideKey } from "../lib/pageChecklist";
+import { readSkipped } from "../lib/guideHub";
 import { setGuideWalk } from "../lib/guideWalk";
 import { bandToneOf } from "../lib/qcBandArt";
 import { PIP_AGENCY, PIP_AGENT_LINE, PIP_ID, PIP_NAME, currentPractice, endPractice, isPracticeId, startPractice, usePractice } from "../lib/practiceQuery";
@@ -5706,6 +5707,8 @@ export const Queries: React.FC<{
   useEffect(() => { if (allGuideDone && currentUser && !qcGuide.finished) void updateUserPaths(QC_GUIDE_FINISHED_PATH); }, [allGuideDone, currentUser, qcGuide.finished, updateUserPaths]);
   const markQcGuideSeen = useCallback(() => { if (!qcGuide.seen) void updateUserPaths(QC_GUIDE_SEEN_PATH); }, [qcGuide.seen, updateUserPaths]);
   const hideQcGuide = useCallback(() => { void updateUserPaths(QC_GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  /* Help system v1 B — the Help menu's "Show the page guide again" clears "hidden" */
+  const unhideQcGuide = useCallback(() => { guideAsked.current.clear(); void updateUserPaths(QC_GUIDE_UNHIDE_PATH); }, [updateUserPaths]);
   const guideOff = useMemo<Partial<Record<QcGuideKey, string>>>(
     () => (collectionsReady && !hasQueries ? Object.fromEntries(QC_NEEDS_A_QUERY.map((k) => [k, QC_AFTER_FIRST])) : {}),
     [collectionsReady, hasQueries],
@@ -7497,10 +7500,17 @@ export const Queries: React.FC<{
             */}
           {/* v139 §A — the old bottom-right guide is retired; the shared page guide (v18.3 F) takes its place */}
           <PageChecklist page="Query Centre" items={QC_CHECKLIST} done={guideDone} seen={qcGuide.seen}
-            hidden={qcGuide.hidden || !!finishedAtLoad.current}
+            /* Help system v1 — "hidden" and "finished in an earlier visit" are separate now: the Help menu restores the one
+               and opens the other */
+            hidden={qcGuide.hidden} finished={!!finishedAtLoad.current}
             active={routeActive} ready={collectionsReady && !showGridSkeleton} targetFor={guideTarget}
             onSeen={markQcGuideSeen} onHide={hideQcGuide} art="/images/active-query-hawk.png"
-            disabled={guideOff} allDone={QC_ALL_DONE} flow={guideFlowShown} onStart={onGuideStart} openNonce={guideOpenNonce} />
+            disabled={guideOff} allDone={QC_ALL_DONE} flow={guideFlowShown} onStart={onGuideStart} openNonce={guideOpenNonce}
+            /* Help system v1 C.3 — never over a task: the query drawer, an open query's panel (by a row or a deep link to
+               ?q=), the Birds-eye drawer, or the search holding text; and nothing opens by itself with no queries yet */
+            quiet={qaOpen || !!qcOpenCardNode || beOpen || qcFind.trim().length > 0}
+            empty={collectionsReady && !hasQueries} onUnhide={unhideQcGuide}
+            nextGuide={nextGuideAfter("Query Centre", currentUser, readSkipped)} />
 
           {/* §1 (log-sheet) — FORM MODE: the same drawer, widened, wearing the sheet's chrome.
               The modes are exclusive by construction: openCreate stashes and clears the

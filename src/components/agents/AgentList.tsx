@@ -99,7 +99,8 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
-import { CONTACT_CHECKLIST, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, contactGuideOf, guideDonePath, type ContactGuideKey } from "../../lib/pageChecklist";
+import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
+import { readSkipped } from "../../lib/guideHub";
 import { ContactSkeleton } from "./contact/ContactSkeleton";
 import "./agentList.css";
 
@@ -941,6 +942,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [full, active]);
   const markGuideSeen = useCallback(() => { if (!guide.seen) void updateUserPaths(GUIDE_SEEN_PATH); }, [guide.seen, updateUserPaths]);
   const hideGuide = useCallback(() => { void updateUserPaths(GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  /* Help system v1 B — the Help menu's "Show the page guide again" clears "hidden" */
+  const unhideGuide = useCallback(() => { guideAsked.current.clear(); void updateUserPaths(GUIDE_UNHIDE_PATH); }, [updateUserPaths]);
+  /* Help system v1 C.5 — CREDIT WHAT IS ALREADY DONE: an agent on file (added by hand or imported, before the guide
+     existed) ticks "Add an agent" — shown at once, and written so the tick survives an empty list later */
+  const hasAgents = agents.length > 0;
+  useEffect(() => { if (collectionsReady && hasAgents) tickGuide.current("add"); }, [collectionsReady, hasAgents]);
+  const guideDone = useMemo(() => ({ ...guide.done, ...(hasAgents ? { add: true } : {}) }), [guide.done, hasAgents]);
+  const guideOff = useMemo<Partial<Record<ContactGuideKey, string>>>(
+    () => (collectionsReady && !hasAgents ? Object.fromEntries(CONTACT_NEEDS_AN_AGENT.map((k) => [k, CONTACT_ADD_FIRST])) : {}),
+    [collectionsReady, hasAgents],
+  );
   /* the control each item shows, on this page, as it is now */
   const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
     const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
@@ -1332,10 +1344,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {active && cardReq?.host === "panel" && cardReq.agentId === null && <AgentPanelNew />}
         {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
         {!sandbox && (
-          <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guide.done} seen={guide.seen} hidden={guide.hidden}
+          <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guideDone} seen={guide.seen} hidden={guide.hidden}
             /* v19 §G — the pill waits for the list: nothing of the guide shows over the loading skeleton */
-            active={active && pageState !== "settling"} ready={showList} targetFor={guideTarget} onSeen={markGuideSeen} onHide={hideGuide}
-            art="/images/contact-list-scout.webp" />
+            active={active && pageState !== "settling"} ready={showList || (showEmpty && collectionsReady)} targetFor={guideTarget} onSeen={markGuideSeen} onHide={hideGuide}
+            art="/images/contact-list-scout.webp"
+            /* Help system v1 C.3 — never over a task: an agent's panel open (by a row or a deep link to ?agent=), the agent
+               card or its editor, Housekeeping, or the search holding text; and nothing opens by itself on the empty page */
+            quiet={!!panelParam || !!cardReq || hkOpen || search.trim().length > 0}
+            empty={showEmpty} disabled={guideOff} onUnhide={unhideGuide}
+            nextGuide={nextGuideAfter("Contact list", currentUser, readSkipped)} />
         )}
 
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}

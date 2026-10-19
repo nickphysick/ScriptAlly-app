@@ -44,9 +44,12 @@ describe("A3 · the empty account", () => {
   });
   it("the checklist draws a disabled item with its own line, not pressable, and no arrow", () => {
     const pc = read("src/components/shell/guide/PageChecklist.tsx");
-    expect(pc).toMatch(/disabled=\{!!off\[it\.key\] && !done\[it\.key\]\}/);
-    expect(pc).toMatch(/off\[it\.key\] && !done\[it\.key\] \? off\[it\.key\] : it\.line/);
-    expect(pc).toMatch(/off\[it\.key\] && !done\[it\.key\] \? <span \/> : <span className="pck-go"/);
+    /* Help system v1 retarget — the same law, spelt once: an item is BLOCKED while the page says it cannot be done
+       and it is not done (a real save or a skip, `eff`); a blocked row is disabled, shows its own line and no arrow */
+    expect(pc).toMatch(/const blocked = !!off2\[it\.key\] && !eff\[it\.key\];/);
+    expect(pc).toMatch(/disabled=\{blocked\}/);
+    expect(pc).toMatch(/blocked \? off2\[it\.key\] : it\.line/);
+    expect(pc).toMatch(/blocked \? <span \/> : <span className="pck-go"/);
     expect(read("src/components/shell/guide/pageChecklist.css")).toMatch(/\.pck-l li\.is-off \.pck-tx small \{ font-style: italic/);
   });
 });

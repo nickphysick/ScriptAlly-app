@@ -8,22 +8,37 @@
  * under 70), the spotlight above the popover and the note.
  */
 
-/* ── the pill: 36 tall, blush, a rust ring, 10px before the "?" ── */
+/* ── the pill (Help system v1 C.1, "the ring"): 36 tall, radius 18, blush, a 1px rust-28% inset ring (50% on hover and
+   while open), padding 0 14px 0 8px, gap 9; a 24px ring (4px stroke, white track, rust arc), "{Page} guide" in the serif
+   with the page name at 600, "{n} of {N}" in JetBrains Mono 600 11px rust. The five bars are retired. ── */
 .pck-pill {
-  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; height: 36px;
-  margin-right: 10px; padding: 0 14px 0 12px; border-radius: 18px; background: #fbeee8; color: #1c130f;
+  all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 9px; height: 36px;
+  margin-right: 10px; padding: 0 14px 0 8px; border-radius: 18px; background: #fbeee8; color: #1c130f; white-space: nowrap;
   box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.28); transition: background 0.15s, box-shadow 0.15s;
 }
-.pck-pill:hover, .pck-pill.open { background: #f8e2d8; box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.5); }
-.pck-pill:focus-visible { outline: 2px solid #e7a184; outline-offset: 2px; }
-.pck-pbars { display: inline-flex; gap: 2px; }
-.pck-pbars i { width: 6px; height: 14px; border-radius: 2px; background: rgba(162, 69, 42, 0.2); }
-.pck-pbars i.on { background: #a2452a; }
-.pck-pill .pck-pt { font: 400 14px/1 var(--sp-serif) !important; white-space: nowrap; color: #1c130f; }
+.pck-pill:hover, .pck-pill.open { box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.5); }
+.pck-pill:focus-visible { outline: 2px solid #a2452a; outline-offset: 3px; }
+.pck-pill .gr-ring { flex: none; display: block; }
+.pck-pill .gr-arc { transition: stroke-dasharray 0.7s cubic-bezier(0.3, 0.7, 0.3, 1); }
+.pck-pill .pck-pt { font: 400 14px/1 var(--sp-serif) !important; color: #1c130f; }
 .pck-pill .pck-pt b { font: inherit !important; font-weight: 600 !important; }
-.pck-pill .pck-pn { font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: #a2452a; }
-/* at 1440 and below: no bars (§F.1 — a window width, as stated, not the sheet's compact switch) */
-@media (max-width: 1440px) { .pck-pbars { display: none; } .pck-pill { gap: 8px; padding: 0 12px; } }
+.pck-pill .pck-pn { font: normal 600 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: #a2452a; }
+/* finished in this visit: sage, a sage-ink ring, "{Page}: Learned ✓" */
+.pck-pill.all { background: #e0e5dd; box-shadow: inset 0 0 0 1px rgba(75, 97, 81, 0.35); }
+.pck-pill.all .pck-pn { color: #4b6151; }
+/* below 1100px of window the words go: the ring and the count */
+@media (max-width: 1099px) { .pck-pill .pck-pt { display: none; } .pck-pill { padding: 0 12px 0 8px; } }
+/* C.2 — the bump (1 → 1.08 → 1, 420ms) and the one-off pulse (two soft blush rings spreading 12px, 1.6s each) */
+.pck-pill.bump { animation: pck-bump 0.42s ease; }
+@keyframes pck-bump { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+.pck-pill.pulse { animation: pck-pulse 1.6s ease 2; }
+@keyframes pck-pulse {
+  0% { box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.5), 0 0 0 0 rgba(245, 226, 218, 0.75); }
+  70% { box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.5), 0 0 0 12px rgba(245, 226, 218, 0); }
+  100% { box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.28), 0 0 0 0 rgba(245, 226, 218, 0); }
+}
+/* the live region: read, never seen */
+.pck-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .pck-layer { position: relative; z-index: 95; }
 
@@ -38,6 +53,13 @@
   box-shadow: -1px -1px 0 rgba(28, 19, 15, 0.1);
 }
 @keyframes pck-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+/* C.2 — closing shrinks it into the pill: scale(.06) towards the caret over 380ms, fading */
+.pck-pop.shrink {
+  animation: pck-shrink 0.38s cubic-bezier(0.5, 0, 0.75, 0) forwards; pointer-events: none;
+  transform-origin: calc(100% - var(--pop-caret, 22px) - 6px) -12px;
+}
+@keyframes pck-shrink { to { transform: scale(0.06); opacity: 0; } }
+.pck-pop:focus { outline: none; }
 .pck-fr { position: relative; border: 1px solid rgba(165, 131, 123, 0.7); border-radius: 11px; overflow: hidden auto; max-height: calc(var(--pop-max, 100vh) - 16px); background: #fff; }
 .pck-h { padding: 12px 10px 12px 14px; background: #fbeee8; border-bottom: 1px solid rgba(162, 69, 42, 0.18); }
 .pck-ht { display: flex; align-items: center; gap: 12px; }
@@ -52,6 +74,21 @@
 .pck-bar i.on { background: #a2452a; }
 
 .pck-l { list-style: none; margin: 0; padding: 4px 8px 0; }
+.pck-l li { position: relative; }
+/* C.5 — SKIP and LEARN MORE (or Undo) at the row's top right, over a paper ground, on hover or focus; nothing moves */
+.pck-acts {
+  position: absolute; right: 6px; top: 11px; display: flex; gap: 10px; align-items: center; padding: 2px 0 2px 10px; background: #fbf9f5; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.pck-l li:hover .pck-acts, .pck-l li:focus-within .pck-acts { opacity: 1; pointer-events: auto; }
+.pck-act {
+  all: unset; cursor: pointer; font: 400 10px/1.4 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.08em;
+  color: #a2452a; border-bottom: 1px dotted currentColor;
+}
+.pck-act:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-l li:hover button:not(.pck-act) { background: #fbf9f5; }
+.pck-tx .pck-sk { font: 400 13px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); }
+.pck-l li.is-skip .pck-tick { background: #fbf9f5; border: 1.5px solid rgba(45, 58, 80, 0.45); color: #2d3a50; }
 .pck-l li + li { border-top: 1px solid rgba(28, 19, 15, 0.07); }
 .pck-l button {
   all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; grid-template-columns: 24px 1fr auto; gap: 12px;
@@ -117,9 +154,27 @@
 
 /* ── the note, under the pill, after a step is done ── */
 .pck-note {
-  position: fixed; z-index: 96; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: #fff;
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 40px -18px rgba(28, 19, 15, 0.55); animation: pck-in 0.2s;
+  position: fixed; z-index: 96; display: flex; align-items: center; gap: 12px; padding: 10px 12px 13px; border-radius: 12px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 40px -18px rgba(28, 19, 15, 0.55); animation: pck-in 0.2s; overflow: hidden;
+  transform-origin: top right;
 }
+/* C.4 — the 6s clock: a 3px rust line along the foot; paused (hover or focus) it turns ink 45% */
+.pck-clock { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #a2452a; transform-origin: left; }
+.pck-note.paused .pck-clock { background: rgba(28, 19, 15, 0.45); }
+/* at 0 it folds up into the pill */
+.pck-note.leave { animation: pck-fold 0.45s ease forwards; pointer-events: none; }
+@keyframes pck-fold { to { transform: translateY(-40px) scale(0.15); opacity: 0; } }
+.pck-note .pck-nx {
+  all: unset; cursor: pointer; align-self: flex-start; width: 22px; height: 22px; margin: -2px -4px 0 0; border-radius: 6px; display: grid; place-items: center;
+  font: 400 12px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); background: none; padding: 0;
+}
+.pck-note .pck-nx:hover { background: rgba(28, 19, 15, 0.06); color: #1c130f; }
+/* the last item's note: sage, no clock; stays until closed */
+.pck-note--final { background: #e0e5dd; align-items: flex-start; max-width: 340px; padding-bottom: 12px; }
+.pck-note--final .pck-ok { background: #4b6151; }
+.pck-note--final .pck-nt { gap: 4px; }
+.pck-note--final .pck-nl { font: 400 12.5px/1.4 var(--sp-serif) !important; letter-spacing: 0 !important; text-transform: none !important; color: rgba(28, 19, 15, 0.62) !important; }
+.pck-note--final .pck-nt button { margin: 6px 0 0; width: max-content; }
 .pck-ok { width: 26px; height: 26px; border-radius: 50%; background: #2d3a50; color: #f4eee5; display: grid; place-items: center; font: 600 13px/1 var(--sp-serif) !important; }
 .pck-nt { display: flex; flex-direction: column; gap: 2px; }
 .pck-nt b { font: 500 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; }
@@ -132,7 +187,9 @@
 .pck-all { margin-left: 6px; font: italic 400 13.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
 
 @media (prefers-reduced-motion: reduce) {
-  .pck-pill, .pck-pop, .pck-dim, .pck-note, .pck-tick, .pck-go, .pck-bar i { transition: none; animation: none; }
+  .pck-pill, .pck-pop, .pck-dim, .pck-note, .pck-tick, .pck-go, .pck-bar i, .pck-acts, .pck-pill .gr-arc { transition: none; animation: none; }
+  .pck-pill.bump, .pck-pill.pulse, .pck-pop.shrink, .pck-note.leave { animation: none; }
+  .pck-clock { display: none; }
   .pck-l li.just .pck-tick { animation: none; }
 }
 
@@ -161,8 +218,6 @@
 .pck-l li.is-off .pck-tx small { font-style: italic !important; }
 .pck-l li.is-off .pck-tick { border-color: rgba(45, 58, 80, 0.2); }
 
-/* all done: the header says so, and the pill turns sage for the rest of the visit */
+/* all done: the header says so (the pill's sage is with the pill's rules above) */
 .pck-fin { margin: 14px 14px 2px; font: 400 15px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); }
-.pck-pill.all { background: #e6efe9; box-shadow: inset 0 0 0 1px rgba(47, 90, 68, 0.25); }
-.pck-pill.all .pck-pn { color: #2f5a44; }
-.pck-pill.all .pck-pbars i.on { background: #2f5a44; }
+
