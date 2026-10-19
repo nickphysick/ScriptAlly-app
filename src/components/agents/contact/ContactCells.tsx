@@ -47,10 +47,14 @@ export const CellIcon: React.FC<{ kind: "mail" | "web" }> = ({ kind }) => (
 );
 
 /** the Date added cell: "12 May 2026", all ink (v19.1 §C — the grey year is retired); nothing when the record has no
- *  readable date */
-export const DateAdded: React.FC<{ agent: Pick<Agent, "dateAdded"> }> = ({ agent }) => {
+ *  readable date. v19.2 §E — an agent the record says was imported (`importedNeedsReview`, set by Smart import and the
+ *  template, which share commitSmartImport, and by the email import) reads "Imported" under the date, so a list of
+ *  import days does not read as a list of days each agent was found. The column is measured from the date line alone. */
+export const DateAdded: React.FC<{ agent: Pick<Agent, "dateAdded" | "importedNeedsReview"> }> = ({ agent }) => {
   const t = addedLabel(agent);
-  return t ? <span className="cl19-dt" data-cl19="date">{t}</span> : <span className="cl19-dt" data-cl19="date" data-none="" />;
+  const date = t ? <span className="cl19-dt" data-cl19="date">{t}</span> : <span className="cl19-dt" data-cl19="date" data-none="" />;
+  if (agent.importedNeedsReview !== true) return date;
+  return <>{date}<small className="cl192-imp" data-cl192="imported">Imported</small></>;
 };
 
 export const Website: React.FC<{ url: string }> = ({ url }) => (

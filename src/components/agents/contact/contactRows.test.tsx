@@ -49,6 +49,17 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
     expect(h).toContain(">reed.co.uk<");
     expect(h).not.toContain("cl17-ml");
   });
+  it("v19.2 §E: an imported agent reads Imported under its date; a hand-added one does not", () => {
+    const render = (extra: object) => renderToStaticMarkup(React.createElement(ContactRows, {
+      groups: [{ label: "R", ids: ["a1"] }] as never,
+      byId: new Map([["a1", { ...(facts as object), agent: { ...(agent as object), dateAdded: "2026-06-25T10:00:00.000Z", ...extra } } as never]]),
+      nowMs: 0, genreHit: () => false, openId: null, onOpen: () => {}, onAddGenres: () => {}, onAddWishlist: () => {}, onAct: () => {},
+      trayFor: () => ({ label: "Log a query", act: "log" as const }),
+    }));
+    expect(render({ importedNeedsReview: true })).toContain('data-cl19="date">25 Jun 2026</span><small class="cl192-imp" data-cl192="imported">Imported</small>');
+    expect(render({})).not.toContain("Imported");
+    expect(render({ importedNeedsReview: false })).not.toContain("Imported");
+  });
   /* RE-POINTED (v19.2 §B): an open agent's door goes unsaid; only a closed one says so, in rust */
   it("replies: an unstated window reads Not stated, and an open door says nothing under it", () => {
     expect(html(false)).toMatch(/<span class="clv-rrep" data-clv="rep"><b class="unk">Not stated<\/b><\/span>/);
