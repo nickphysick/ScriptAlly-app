@@ -18,6 +18,7 @@
  * ⚠️ DESKTOP ONLY. The phone (≤ 760) keeps v17's band, which the page mounts instead (decision 5).
  */
 import React from "react";
+import "../shell/pageHeroFrame.css";
 import { STANDING_FILL, type StandingRow, type V21 } from "../../lib/analyticsV21";
 
 export const AN_EYEBROW = "— ANALYTICS —";
@@ -96,7 +97,7 @@ export const A21Header: React.FC<{
 }> = ({ loading, sent, replies, msTitle, rows, inside, onRecord, onRead, onRing }) => {
   const t = headTitle(sent, replies);
   return (
-    <header className="a21-lh" data-a21="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+    <header className="a21-lh phf" data-a21="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
       <img className="a21-shadow" data-a21="shadow" alt="" aria-hidden="true" src={`${AN_SHADOW.src}?v=${AN_SHADOW.version}`} />
       <div className="a21-row" data-a21="header-row">
         <div className="a21-tb" data-a21="title-block">

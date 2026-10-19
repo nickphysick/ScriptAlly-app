@@ -12,28 +12,44 @@
 
 /* ══════════════ A · the light header (desktop) ══════════════ */
 @media (min-width: 761px) {
+  /* header rules v1.1 — the hero is on the shared frame and tokens (shell/pageHeroFrame.css), the Contact list's own
+     geometry: --hero-w wide and centred on the sheet (this page's column is centred on it, so 50% is the sheet's
+     middle), --hero-top under the sheet's top, the row in by the shared inset (`.phf` on the header), the text column
+     at --hero-text-x. The rule under the header and its 44/40 padding are gone: the Query Centre, its pair under the
+     same folder tab, has neither, and the content starts --hero-gap-below under the stack. */
   .a21-lh {
-    --a21-inset: max(0px, calc((100% - 1120px) / 2)); --a21-sh-x: -60px;
+    --a21-inset: var(--phf-inset); --a21-sh-x: -60px;
     position: relative; isolation: isolate; box-sizing: border-box; min-width: 0;
-    padding: 44px 0 40px; margin-bottom: 8px; border-bottom: 1px solid rgba(28, 19, 15, 0.12);
+    width: var(--hero-w); margin: var(--hero-top) 0 0 calc(50% - var(--hero-w) / 2); padding: 0; border-bottom: 0;
   }
-  .ws-app.sheet-wide .a21-lh { --a21-inset: max(0px, calc((100% - 1340px) / 2)); --a21-sh-x: -70px; }
+  .ws-app.sheet-wide .a21-lh { --a21-sh-x: -70px; }
   .a21-lh .a21-shadow {
     position: absolute; left: calc(var(--a21-inset) + var(--a21-sh-x)); top: -40px; z-index: -1; width: 400px; height: auto; max-width: none;
     opacity: 0.15; transform: rotate(-4deg); filter: blur(1.5px); pointer-events: none; user-select: none;
   }
   .ws-app.sheet-wide .a21-lh .a21-shadow { width: 460px; }
-  .a21-lh .a21-row { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-inline: var(--a21-inset); min-width: 0; }
-  .a21-lh .a21-tb { min-width: 0; }
-  .a17-page .a21-lh .a21-k { margin: 0 0 14px; font: 400 12px/1.5 var(--font-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: #a0452e; white-space: nowrap; }
-  .a17-page .a21-lh h1.a21-h1 { margin: 0; font: 400 56px/1.12 var(--sp-type) !important; letter-spacing: -0.01em; color: var(--sp-ink); white-space: nowrap; outline: none; }
+  .a21-lh .a21-row {
+    display: grid; grid-template-columns: minmax(min-content, 1fr) var(--hero-right-w); column-gap: 24px; align-items: center; margin-inline: var(--a21-inset); min-width: 0;
+  }
+  .a21-lh .a21-tb { min-width: 0; grid-column: 1; margin-left: calc(var(--hero-text-x) - var(--hero-frame-x) - var(--phf-inset)); }
+  /* the card is centred on the stack; where it is taller than the stack it overhangs both ways and never pushes the
+     stack down (the negative block margins take it out of the row's height). It keeps its own content width. */
+  /* the card is the shared right item's width (--hero-right-w): at its own content width (345–408) the buttons and
+     the card did not fit the compact 900 column beside the shared text column, and the buttons ran under the card */
+  .a21-lh .a21-card { grid-column: 2; margin-block: -40px; box-sizing: border-box; width: var(--hero-right-w); min-width: 0; }
+  .a21-lh .a21-card .a21-c1 { flex: 1 1 auto; }
+  .a17-page .a21-lh .a21-k { margin: 0 0 var(--hero-ey-gap); font: 400 12px/var(--hero-ey-lh) var(--font-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: #a0452e; white-space: nowrap; }
+  /* decision 5: a title too long for the space beside the card wraps, at the same size, and the stack grows */
+  .a17-page .a21-lh h1.a21-h1 { margin: 0; font: 400 var(--hero-title-size)/1 var(--sp-type) !important; letter-spacing: -0.01em; color: var(--sp-ink); white-space: normal; outline: none; }
   .a17-page .a21-lh h1.a21-h1 span, .a17-page .a21-lh h1.a21-h1 b { font: inherit !important; }
   .a21-lh .a21-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
-  .a17-page .a21-lh .a21-by { display: flex; align-items: center; gap: 14px; margin: 12px 0 0; font: 400 21px/1.3 var(--sp-type) !important; color: #3a2e27; white-space: nowrap; }
+  .a17-page .a21-lh .a21-by { display: flex; align-items: center; gap: 14px; margin: var(--hero-by-gap) 0 0; font: 400 21px/var(--hero-by-lh) var(--sp-type) !important; color: #3a2e27; white-space: nowrap; }
   .a21-lh .a21-by i { flex: 0 0 52px; height: 1px; background: rgba(28, 19, 15, 0.3); }
-  .a17-page .a21-lh .a21-by em { font: italic 400 22px/1.3 var(--sp-serif) !important; color: #6b5f56; margin-right: -4px; }
-  .a21-lh .a21-b { display: flex; gap: 12px; margin-top: 26px; }
-  .a17-page .a21-lh .a21-b button { font: 400 18px/1.2 var(--sp-type) !important; padding: 15px 24px; border-radius: 9px; cursor: pointer; white-space: nowrap; }
+  .a17-page .a21-lh .a21-by em { font: italic 400 22px/var(--hero-by-lh) var(--sp-serif) !important; color: #6b5f56; margin-right: -4px; }
+  /* ⚠️ At a 1280 window the row is 896 wide and needs 953 (the 179 art slot, 418 of buttons, 24, the 332 card): the
+     buttons wrap rather than run under the card. Reported for a ruling: shorter labels or a narrower card fit it. */
+  .a21-lh .a21-b { display: flex; flex-wrap: wrap; gap: 12px; margin-top: var(--hero-act-gap); }
+  .a17-page .a21-lh .a21-b button { box-sizing: border-box; height: var(--hero-act-h); font: 400 18px/1 var(--sp-type) !important; padding: 0 24px; border-radius: 9px; cursor: pointer; white-space: nowrap; }
   .a21-lh .a21-b .a21-p1 { background: #2a3a52; color: #fff; border: 1px solid #2a3a52; }
   .a21-lh .a21-b .a21-p1:hover { background: #1c130f; border-color: #1c130f; }
   .a21-lh .a21-b .a21-p2 { background: #fff; color: var(--sp-ink); border: 1px solid rgba(28, 19, 15, 0.18); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06); }
@@ -66,31 +82,27 @@
   .a17-page .a21-card .a21-ring b.a21-full { font-size: 21px !important; }
   .a21-lh[data-loading] .a21-c1 ul { min-height: 120px; }
 }
-@media (min-width: 761px) and (max-width: 1680px) {
-  .a17-page .a21-lh h1.a21-h1 { font-size: 50px !important; }
-  .a21-lh .a21-row { gap: 32px; }
-  .a21-card .a21-c1 { min-width: 206px; }
-  .a21-card .a21-c2 { min-width: 150px; }
-}
-@media (min-width: 761px) and (max-width: 1360px) {
-  .a17-page .a21-lh h1.a21-h1 { font-size: 40px !important; }
-  .a17-page .a21-lh .a21-by { font-size: 18px !important; }
-  .a17-page .a21-card .a21-rl { font-size: 13.5px !important; }
-  .a17-page .a21-card .a21-rs { font-size: 12.5px !important; }
-  .a17-page .a21-card li { font-size: 14.5px !important; }
-  .a17-page .a21-card li b { font-size: 19px !important; }
-  .a17-page .a21-lh .a21-b button { font-size: 16px !important; padding: 13px 20px; }
-  .a21-card .a21-c1 { min-width: 190px; padding: 16px 18px 10px; }
-  .a21-card .a21-c2 { min-width: 136px; padding: 14px 16px; }
-  .a21-card .a21-ring { width: 74px; height: 74px; }
-  .a17-page .a21-card .a21-ring b { font-size: 23px !important; }
-  .a17-page .a21-card .a21-ring b.a21-full { font-size: 18px !important; }
+/* header rules v1.1 — the card's compact sizes follow the shell's switch (a sheet narrower than 1440), not the window */
+@media (min-width: 761px) {
+  .ws-app:not(.sheet-wide) .a21-card .a21-c1 { min-width: 190px; padding: 16px 18px 10px; }
+  .ws-app:not(.sheet-wide) .a21-card .a21-c2 { min-width: 136px; padding: 14px 16px; }
+  .ws-app:not(.sheet-wide) .a21-card .a21-ring { width: 74px; height: 74px; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-card .a21-rl { font-size: 13.5px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-card .a21-rs { font-size: 12.5px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-card li { font-size: 14.5px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-card li b { font-size: 19px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-card .a21-ring b { font-size: 23px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-card .a21-ring b.a21-full { font-size: 18px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-lh .a21-by { font-size: 18px !important; }
+  .ws-app:not(.sheet-wide) .a17-page .a21-lh .a21-b button { font-size: 16px !important; padding: 0 20px; }
 }
 /* at 1180px of WINDOW and below, the card drops under the buttons. ⚠️ The prompt says "of header width"; the
    mock's rule is a viewport query, and at a 1512 window the app's header is ~1160 wide, so a header-width rule
    would drop the card in the reference's own 1512 screenshot. */
 @media (min-width: 761px) and (max-width: 1180px) {
-  .a21-lh .a21-row { flex-direction: column; align-items: flex-start; }
+  .a21-lh .a21-row { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  .a21-lh .a21-tb { margin-left: 0; }
+  .a21-lh .a21-card { grid-column: 1; margin-block: var(--hero-act-gap) 0; }
 }
 
 /* ══════════════ B · the desk (desktop; the phone keeps v17's strip) ══════════════ */
@@ -99,7 +111,7 @@
   .a17-page .a17-glance { display: none; }
   .a21-lh { margin-bottom: 0; }
   /* compact first; the full sheet's values follow */
-  .a21-desk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 56px; }
+  .a21-desk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: var(--hero-gap-below); }
   .ws-app.sheet-wide .a21-desk { gap: 24px; }
   .a21-dj {
     background: #fdfcfa; border-radius: 18px; padding: 14px 16px 10px; display: flex; flex-direction: column; min-width: 0; cursor: pointer;
