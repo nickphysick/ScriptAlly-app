@@ -168,6 +168,14 @@ export function standingQuery(rows: readonly QcRow[]): QcRow | null {
   return last;
 }
 
+/** v19.2 §C — the Replies cell's words: "~6 weeks", "~1 week"; null for an absent or zero window (the cell then
+ *  reads "Not stated"). Spelled out, never "wks". The number is the STORED one: nothing records whether a stored
+ *  window was entered or was the Smart Import review's old 6-week fill (retired 11 Oct, 92bd6485), so none is hidden. */
+export function replyWeeksLabel(weeks: number | null | undefined): string | null {
+  if (typeof weeks !== "number" || !Number.isFinite(weeks) || weeks <= 0) return null;
+  return `~${weeks} ${weeks === 1 ? "week" : "weeks"}`;
+}
+
 /** The row's second line (v11 §6.2) — five shapes, every date the engine's own. */
 export interface RowDateLine {
   text: string;

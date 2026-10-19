@@ -20,7 +20,7 @@ import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { ContactGroupMark } from "./ContactGroupMark";
-import { AgentFacts, ContactGroup, type GroupKey, RowDateLine, type SortKey, rowDateLine, surnameInitial } from "../../../lib/contactList";
+import { AgentFacts, ContactGroup, type GroupKey, RowDateLine, type SortKey, replyWeeksLabel, rowDateLine, surnameInitial } from "../../../lib/contactList";
 import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { dayMonth } from "../../../lib/dates";
@@ -261,9 +261,9 @@ const Row: React.FC<{
           <span className="cl19-c cl19-ce">{mailCell}</span>
         </>
       )}
-      {/* Replies: "~N wks" over the door */}
+      {/* Replies: "~6 weeks" (v19.2 §C, spelled out), or "Not stated"; a closed door under it */}
       <span className="clv-rrep" data-clv="rep">
-        {weeks ? <b>~{weeks} wks</b> : <b className="unk">Not stated</b>}
+        {weeks ? <b>{replyWeeksLabel(weeks)}</b> : <b className="unk">Not stated</b>}
         {/* v19.2 §B — an open agent's door goes unsaid (it is true of nearly every row); a closed one says so in
             rust, with the reopening date when it is known. "Not known" stays: it is not a claim that they are open. */}
         {x.door === "unknown"
