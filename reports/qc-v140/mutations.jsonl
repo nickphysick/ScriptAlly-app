@@ -1,0 +1,18 @@
+{"lock":"A2","break":"drop-badge","red":false,"first":""}
+{"lock":"A3","break":"offset-left","red":true,"first":"  ✗ A3 · 1512 unpinned every visible button ends inside the row — {\"rowW\":420.625,\"inside\":false,\"shown\":[\"Queried\",\"Partial Requested\",\"Partial Sent\",\"Full Requested\",\"Full Sent\""}
+{"lock":"A4","break":"ignore-stack","red":true,"first":"  ✗ A4 · 1512 m:2026-01: its first row lands under the stack — 190.859375 vs 221.8"}
+{"lock":"C3","break":"noreply-heard","red":true,"first":"  ✗ C3 · 1512 heard back — 54% heard back vs 52%"}
+{"lock":"D1","break":"own-state","red":false,"first":""}
+{"lock":"D2","break":"esc-pin-first","red":true,"first":"  ✗ D2 · 1512 Esc closed the menu — "}
+{"lock":"E1","break":"agent-grows","red":true,"first":"  ✗ E1 · 1512 pinned Agent ≤ 264 — 301.484375"}
+{"lock":"F1","break":"restore-after-paint","red":false,"first":""}
+{"lock":"G1","break":"tick-guide-button","red":true,"first":"  ✗ G1 · Pin the list ticked — {\"seen\":true,\"done\":{\"log\":true,\"find\":true}}"}
+{"lock":"A1","break":"page:A1","red":true,"first":"  ✗ A1 · 1512 unpinned one line (every top within 2px) — 431.9,481.9,481.9,481.9,481.9"}
+{"lock":"B1","break":"page:B1","red":true,"first":"  ✗ B1 · 1512 toolbar navy — rgb(255, 255, 255)"}
+{"lock":"C1","break":"page:C1","red":true,"first":"  ✗ C1 · 1512 the list's left is the sheet's (±1) — {\"sheetL\":68,\"sheetT\":105.75,\"listL\":92,\"bandT\":129.75}"}
+{"lock":"C2","break":"page:C2","red":true,"first":"  ✗ C2 · 1512 no court words — 87queries35overdue52% heard back31 asked for more0 this week0 the week before+ Log a queryYour move 52 · Waiting 18 · Closed 17"}
+{"lock":"C4","break":"page:C4","red":true,"first":"  ✗ C4 · 1512 @0 no ancestor clips it — qc140-band"}
+{"lock":"A2","break":"drop-badge","red":true,"first":"  ✗ A2 · 1512 no two neighbouring badged groups share a mark — of|- q|- fr|- pr|- q|- q|- q|-"}
+{"lock":"D1","break":"own-state","red":true,"first":"  ✗ D1 · Overdue pick on → the reply-date switch on — {\"over\":\"true\",\"past\":\"false\",\"offersQ\":\"false\",\"chips\":[\"more:dueWeek\"]}"}
+{"lock":"D1","break":"band-own-state","red":true,"first":"  ✗ D1 · pinned: the band's disc on → the switch and the pick on, one chip — disc false {\"over\":\"true\",\"past\":\"true\",\"offersQ\":\"false\",\"chips\":[\"qp:over\"]}"}
+{"lock":"F1","break":"restore-after-paint","red":true,"first":"  ✗ F1 · 1512 grouping restored at the first frame — Grouped byWho it's with"}

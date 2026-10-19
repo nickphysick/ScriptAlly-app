@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 unpinned six columns",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 unpinned Agent ≤ 264",
+  "ok": false,
+  "detail": "291.96875"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 unpinned every column ≥ its minimum",
+  "ok": false,
+  "detail": "292.0,90.0,148.0,217.4,224.6,56.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 unpinned gaps between First queried, Where it stands and What you sent ≥ 32",
+  "ok": false,
+  "detail": "20.0,20.0,20.0,20.0,20.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 unpinned a truncated agent name carries its full name in title",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 pinned six columns",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 pinned Agent ≤ 264",
+  "ok": false,
+  "detail": "375.390625"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 pinned every column ≥ its minimum",
+  "ok": false,
+  "detail": "375.4,90.0,148.0,249.8,288.8,56.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 pinned gaps between First queried, Where it stands and What you sent ≥ 32",
+  "ok": false,
+  "detail": "20.0,20.0,20.0,20.0,20.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 pinned a truncated agent name carries its full name in title",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 unpinned six columns",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 unpinned Agent ≤ 264",
+  "ok": true,
+  "detail": "182"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 unpinned every column ≥ its minimum",
+  "ok": false,
+  "detail": "182.0,90.0,148.0,180.0,140.0,56.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 unpinned the Due dial ends inside the card",
+  "ok": true,
+  "detail": "1208 vs 1248"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 unpinned a truncated agent name carries its full name in title",
+  "ok": false,
+  "detail": "[{\"over\":true,\"title\":null,\"text\":\"Tamsin Probewell\"}]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 pinned six columns",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 pinned Agent ≤ 264",
+  "ok": false,
+  "detail": "267.859375"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 pinned every column ≥ its minimum",
+  "ok": false,
+  "detail": "267.9,90.0,148.0,208.1,206.1,56.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 pinned the Due dial ends inside the card",
+  "ok": true,
+  "detail": "1208 vs 1248"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 pinned a truncated agent name carries its full name in title",
+  "ok": true,
+  "detail": "[]"
+ }
+]

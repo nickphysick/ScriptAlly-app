@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 buttons",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 every button has visible text",
+  "ok": true,
+  "detail": "[\"Offer\\n2\",\"Revision owed\\n1\",\"Full owed7\",\"Partial owed7\",\"Nudge due10\",\"Close?31\",\"Waiting on the agent12\",\"Passed14\",\"No reply2\",\"Withdrawn1\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 no two neighbouring badged groups share a mark",
+  "ok": true,
+  "detail": "of|star q|dots fr|send pr|send q|bang q|x q|dots"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 each button's mark is its band's",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 the badge is drawn on the badged groups",
+  "ok": true,
+  "detail": "offer:of|star revision:q|dots full:fr|send partial:pr|send nudge:q|bang close:q|x wait:q|dots Rejected:cl|- No Response:cl|- Withdrawn:cl|-"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 every \"Jump to\" item has text",
+  "ok": true,
+  "detail": "[\"Full owed\\n7\",\"Partial owed\\n7\",\"Nudge due\\n10\",\"Consider closing\\n31\",\"Waiting on the agent\\n12\",\"Passed\\n14\",\"Closed with no reply\\n2\",\"Withdrawn\\n1\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 buttons",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 every button has visible text",
+  "ok": true,
+  "detail": "[\"Offer\\n2\",\"Revision owed\\n1\",\"Full owed7\",\"Partial owed7\",\"Nudge due10\",\"Close?31\",\"Waiting on the agent12\",\"Passed14\",\"No reply2\",\"Withdrawn1\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 no two neighbouring badged groups share a mark",
+  "ok": true,
+  "detail": "of|star q|dots fr|send pr|send q|bang q|x q|dots"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 each button's mark is its band's",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 the badge is drawn on the badged groups",
+  "ok": true,
+  "detail": "offer:of|star revision:q|dots full:fr|send partial:pr|send nudge:q|bang close:q|x wait:q|dots Rejected:cl|- No Response:cl|- Withdrawn:cl|-"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 every \"Jump to\" item has text",
+  "ok": true,
+  "detail": "[\"Full owed\\n7\",\"Partial owed\\n7\",\"Nudge due\\n10\",\"Consider closing\\n31\",\"Waiting on the agent\\n12\",\"Passed\\n14\",\"Closed with no reply\\n2\",\"Withdrawn\\n1\"]"
+ }
+]

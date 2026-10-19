@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "A3",
+  "where": "1512 unpinned every visible button ends inside the row",
+  "ok": true,
+  "detail": "{\"rowW\":420.625,\"inside\":true,\"shown\":[\"Queried\",\"Partial Requested\"],\"folded\":[\"Partial Sent\",\"Full Requested\",\"Full Sent\",\"Revise & Resubmit\",\"Offer\",\"Rejected\",\"No Response\",\"Withdrawn\"],\"total\":10,\"bands\":10,\"more\":8}"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 unpinned visible + folded = the groups",
+  "ok": true,
+  "detail": "2+8 / 10 / bands 10"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 unpinned \"+N more\" counts the folded",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 unpinned the menu lists exactly the folded",
+  "ok": true,
+  "detail": "Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn vs Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 pinned every visible button ends inside the row",
+  "ok": true,
+  "detail": "{\"rowW\":478.09375,\"inside\":true,\"shown\":[\"Queried\",\"Partial Requested\"],\"folded\":[\"Partial Sent\",\"Full Requested\",\"Full Sent\",\"Revise & Resubmit\",\"Offer\",\"Rejected\",\"No Response\",\"Withdrawn\"],\"total\":10,\"bands\":10,\"more\":8}"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 pinned visible + folded = the groups",
+  "ok": true,
+  "detail": "2+8 / 10 / bands 10"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 pinned \"+N more\" counts the folded",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 pinned the menu lists exactly the folded",
+  "ok": true,
+  "detail": "Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn vs Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 pinned and unpinned fold alike for one row width (±1)",
+  "ok": true,
+  "detail": "rows 421/478 · folded 8/8"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 unpinned every visible button ends inside the row",
+  "ok": true,
+  "detail": "{\"rowW\":451.328125,\"inside\":true,\"shown\":[\"Queried\",\"Partial Requested\"],\"folded\":[\"Partial Sent\",\"Full Requested\",\"Full Sent\",\"Revise & Resubmit\",\"Offer\",\"Rejected\",\"No Response\",\"Withdrawn\"],\"total\":10,\"bands\":10,\"more\":8}"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 unpinned visible + folded = the groups",
+  "ok": true,
+  "detail": "2+8 / 10 / bands 10"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 unpinned \"+N more\" counts the folded",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 unpinned the menu lists exactly the folded",
+  "ok": true,
+  "detail": "Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn vs Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 pinned every visible button ends inside the row",
+  "ok": true,
+  "detail": "{\"rowW\":246.09375,\"inside\":true,\"shown\":[\"Queried\"],\"folded\":[\"Partial Requested\",\"Partial Sent\",\"Full Requested\",\"Full Sent\",\"Revise & Resubmit\",\"Offer\",\"Rejected\",\"No Response\",\"Withdrawn\"],\"total\":10,\"bands\":10,\"more\":9}"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 pinned visible + folded = the groups",
+  "ok": true,
+  "detail": "1+9 / 10 / bands 10"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 pinned \"+N more\" counts the folded",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 pinned the menu lists exactly the folded",
+  "ok": true,
+  "detail": "Partial Requested,Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn vs Partial Requested,Partial Sent,Full Requested,Full Sent,Revise & Resubmit,Offer,Rejected,No Response,Withdrawn"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 pinned and unpinned fold alike for one row width (±1)",
+  "ok": true,
+  "detail": "rows 451/246 · folded 8/9"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 Next action: inside the row",
+  "ok": true,
+  "detail": "{\"shown\":2,\"folded\":8,\"total\":10}"
+ }
+]

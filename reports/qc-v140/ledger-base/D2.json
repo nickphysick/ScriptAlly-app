@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 the menu opened",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 Esc closed the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 still pinned",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1512 a second Esc unpins",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1280 the menu opened",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1280 Esc closed the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1280 still pinned",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "1280 a second Esc unpins",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 band navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 toolbar cream",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 headings white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the list's left is the sheet's (±1)",
+  "ok": true,
+  "detail": "{\"sheetL\":68,\"sheetT\":105.75,\"listL\":68,\"bandT\":105.75}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the band sits at the sheet's top at scroll 0",
+  "ok": true,
+  "detail": "{\"sheetL\":68,\"sheetT\":105.75,\"listL\":68,\"bandT\":105.75}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 toolbar cream",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 headings white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the list's left is the sheet's (±1)",
+  "ok": true,
+  "detail": "{\"sheetL\":68,\"sheetT\":105.75,\"listL\":68,\"bandT\":105.75}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the band sits at the sheet's top at scroll 0",
+  "ok": true,
+  "detail": "{\"sheetL\":68,\"sheetT\":105.75,\"listL\":68,\"bandT\":105.75}"
+ }
+]

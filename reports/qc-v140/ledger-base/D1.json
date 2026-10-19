@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "Overdue pick on → the reply-date switch on",
+  "ok": false,
+  "detail": "{\"chips\":[]}"
+ },
+ {
+  "lock": "D1",
+  "where": "one chip for it",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "D1",
+  "where": "the switch off → the pick off",
+  "ok": false,
+  "detail": "{\"chips\":[]}"
+ },
+ {
+  "lock": "D1",
+  "where": "Offers pick on → one chip",
+  "ok": false,
+  "detail": "{\"chips\":[]}"
+ },
+ {
+  "lock": "D1",
+  "where": "the Offers pick writes today's offers toggle",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "D1",
+  "where": "the Overdue pick writes the past switch",
+  "ok": false,
+  "detail": "null"
+ }
+]
