@@ -264,9 +264,13 @@ const Row: React.FC<{
       {/* Replies: "~N wks" over the door */}
       <span className="clv-rrep" data-clv="rep">
         {weeks ? <b>~{weeks} wks</b> : <b className="unk">Not stated</b>}
+        {/* v19.2 §B — an open agent's door goes unsaid (it is true of nearly every row); a closed one says so in
+            rust, with the reopening date when it is known. "Not known" stays: it is not a claim that they are open. */}
         {x.door === "unknown"
           ? <small data-clv="door-unknown" title="Whether they are open to queries is not known">{DOOR_NOT_KNOWN}</small>
-          : <small>{x.door === "open" ? "Open to queries" : reopens ? `Closed till ${reopens}` : "Closed to queries"}</small>}
+          : x.door === "closed"
+            ? <em className="cl192-shut" data-cl192="rep-closed">{reopens ? `Closed till ${reopens}` : "Closed to queries"}</em>
+            : null}
       </span>
       {/* v17 §D — QUERY STATUS. A queried agent: the stage, a four-bar track of how far it got, then the date. An
           agent not queried yet: "+ Log a query" (the panel's journey), or why not if they are closed to queries. */}

@@ -49,8 +49,20 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
     expect(h).toContain(">reed.co.uk<");
     expect(h).not.toContain("cl17-ml");
   });
-  it("replies: an unstated window reads Not stated over the door", () => {
-    expect(html(false)).toMatch(/<b class="unk">Not stated<\/b><small>Open to queries<\/small>/);
+  /* RE-POINTED (v19.2 §B): an open agent's door goes unsaid; only a closed one says so, in rust */
+  it("replies: an unstated window reads Not stated, and an open door says nothing under it", () => {
+    expect(html(false)).toMatch(/<span class="clv-rrep" data-clv="rep"><b class="unk">Not stated<\/b><\/span>/);
+    expect(html(false)).not.toMatch(/open to queries/i);
+  });
+  it("v19.2 §B: a closed agent reads Closed till {date} when it reopens, else Closed to queries", () => {
+    const render = (extra: object) => renderToStaticMarkup(React.createElement(ContactRows, {
+      groups: [{ label: "R", ids: ["a1"] }] as never,
+      byId: new Map([["a1", { ...(facts as object), door: "closed", agent: { ...(agent as object), ...extra } } as never]]),
+      nowMs: 0, genreHit: () => false, openId: null, onOpen: () => {}, onAddGenres: () => {}, onAddWishlist: () => {}, onAct: () => {},
+      trayFor: () => ({ label: "Log a query", act: "log" as const }),
+    }));
+    expect(render({ reopensOn: "2026-11-01" })).toContain('<em class="cl192-shut" data-cl192="rep-closed">Closed till 1 Nov</em>');
+    expect(render({})).toContain('<em class="cl192-shut" data-cl192="rep-closed">Closed to queries</em>');
   });
   /* RE-POINTED (v18.3.2 A, v18.3.3 B): there is no hover tray and no "Open card"; the row's next step lives on the open
      row's details line, which a static render never opens. v19 §D: the next step left the row entirely (the agent card
