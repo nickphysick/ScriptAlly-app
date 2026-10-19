@@ -218,7 +218,10 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
 
   /* ── C.3 when it opens by itself: once per page, 1.2s after the page is ready, one per browser session, never over a
      task (`quiet`, which also holds it off for the rest of this visit) and never on an empty page ── */
-  if (p.active && p.quiet) visit.current.quietSeen = true;
+  /* ⚠️ THE LATCH IS TAKEN ONLY ONCE THE PAGE IS READY: while it loads, a page's own state passes through values that
+     look like a task (a panel being restored, a drawer store not yet answered), and latching on those held the guide off
+     for a visit nobody had started. A deep link to a record is still quiet when the page is ready. */
+  if (p.active && p.ready && p.quiet) visit.current.quietSeen = true;
   const { onSeen } = p;
   useEffect(() => {
     if (!shown || p.seen || !p.ready || all || p.empty) return undefined;
@@ -269,11 +272,18 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   const doneSig = items.filter((it) => done[it.key]).map((it) => it.key).join(",");
   const prevDone = useRef<string | null>(null);
   const prevAll = useRef<boolean | null>(null);
+  const prevReady = useRef(false);
   useEffect(() => {
     const was = prevDone.current;
     prevDone.current = doneSig;
     const wasAll = prevAll.current;
     prevAll.current = all;
+    /* ⚠️ THE RENDER IN WHICH THE PAGE BECOMES READY ONLY TAKES THE BASELINE. Work credited from the data (an agent on
+       file ticks "Add an agent") arrives in that same render, and compared with the render before it would read as a
+       tick landing — a note on arrival for something the writer did weeks ago. */
+    const wasReady = prevReady.current;
+    prevReady.current = p.ready && p.active;
+    if (!wasReady) return;
     /* ⚠️ THE BASELINE IS TAKEN ONCE THE PAGE IS READY: work credited as the data arrives (an agent already on file, a
        query already logged) is not a tick landing, and must not raise a note on arrival */
     if (was === null || wasAll === null || !p.active || !p.ready) return;
