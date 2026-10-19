@@ -223,7 +223,8 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .clv-group .cl19-card { --cl1833-av: 40px; }
 /* the headings: one face, ink at 85%, solid white with a 1px rule; they stick under the toolbar, and under the
    applied-filters row when it shows (`--cl19-af-h`, its measured height; Part F sets it) */
-.clv-group .cl19-card .lt-labels.lth { column-gap: 20px; padding: 0 40px 0 78px; background: #fff; border-bottom: 1px solid rgba(var(--cl19-ink), 0.12); }
+/* v19.1 §D — the gap is the fitted one (`--cl19-gap` on the list, from lib/contactColumns), shared by headings and rows */
+.clv-group .cl19-card .lt-labels.lth { column-gap: var(--cl19-gap, 20px); padding: 0 40px 0 78px; background: #fff; border-bottom: 1px solid rgba(var(--cl19-ink), 0.12); }
 @media (min-width: 768px) {
   .clv-group .cl19-card .lt-labels.lth { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px) + var(--cl19-af-h, 0px)); }
 }
@@ -238,7 +239,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 
 /* the rows: 70 at 1512 with one line of agency; the same inset as the headings */
 .clv-group .cl19-card .clv-row {
-  min-height: 70px; padding: 14px 40px 10px 78px; column-gap: 20px; font-family: var(--sp-serif);
+  min-height: 70px; padding: 14px 40px 10px 78px; column-gap: var(--cl19-gap, 20px); font-family: var(--sp-serif);
 }
 .clv-group .cl19-card .clv-row::after { left: 0; right: 0; background: rgba(var(--cl19-ink), 0.08); }
 .clv-group .cl19-card .clv-row .clv-ini { width: 40px; height: 40px; }

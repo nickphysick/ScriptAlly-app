@@ -28,7 +28,7 @@ import type { CardAct, CardPrimary } from "../../../lib/agentCard";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { ContactPeek } from "./ContactPeek";
 import { AddContact, CopyEmail, DateAdded, Website } from "./ContactCells";
-import { CONTACT_FS, fitContactColumns, type ContactColumnFit } from "../../../lib/contactColumns";
+import { CONTACT_FS, CONTACT_GAP, fitContactColumns, type ContactColumnFit } from "../../../lib/contactColumns";
 
 export interface ContactRowsProps {
   groups: ContactGroup[];
@@ -444,9 +444,10 @@ export const ContactRows: React.FC<ContactRowsProps & {
       onPress: () => (sort.key === k ? sort.onReverse() : sort.onSort(k)),
     } : undefined,
   });
-  /* v19 §C — the columns' widths: each as wide as its longest entry (or heading), Agent takes the slack, website and
-     email stack when they do not both fit. Measured before paint and on every resize; the decision is the lib's. */
-  const [fit, setFit] = useState<ContactColumnFit>({ stacked: false, fs: CONTACT_FS, count: 6, cols: "minmax(0, 1fr) auto auto auto auto auto" });
+  /* v19 §C, v19.1 §D — the columns' widths: Agent by its own rule (230–330), the rest each as wide as its longest entry
+     (or heading), the spare shared between the gaps; website and email stack when they do not both fit. Measured
+     before paint and on every resize; the decision is the lib's. */
+  const [fit, setFit] = useState<ContactColumnFit>({ stacked: false, fs: CONTACT_FS, count: 6, gap: CONTACT_GAP, cols: "minmax(0, 1fr) auto auto auto auto auto" });
   const fitRef = useRef(fit);
   fitRef.current = fit;
   /** v19 §H — true while a measurement has just asked for new columns: the arrival waits for the re-render that applies
@@ -461,7 +462,6 @@ export const ContactRows: React.FC<ContactRowsProps & {
     if (!rows.length) return;
     const cs = getComputedStyle(labels);
     const avail = labels.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
-    const gap = parseFloat(cs.columnGap) || 20;
     const range = document.createRange();
     const textW = (el: Element | null) => { if (!el) return 0; range.selectNodeContents(el); return range.getBoundingClientRect().width; };
     const head = (name: string) => textW(labels.querySelector(`[data-lt-col="${name}"]`));
@@ -480,10 +480,13 @@ export const ContactRows: React.FC<ContactRowsProps & {
     };
     const who = maxOf(".clv-rwho", (e) => {
       const disc = e.querySelector<HTMLElement>(".clv-ini")?.getBoundingClientRect().width ?? 40;
-      return disc + 11 + Math.max(textW(e.querySelector(".clv-rwn b")), textW(e.querySelector(".clv-ragy")));
+      /* the agency · location line ellipsises when its column is narrow, so its range would read the clipped width:
+         its scrollWidth is the whole line */
+      const agy = e.querySelector<HTMLElement>(".clv-ragy");
+      return disc + 11 + Math.max(textW(e.querySelector(".clv-rwn b")), agy ? Math.max(textW(agy), agy.scrollWidth) : 0);
     });
     const next = fitContactColumns({
-      avail, gap, agentFloor: Math.min(who, 230),
+      avail, gap: CONTACT_GAP, agent: who, agentHead: head("Agent"),
       date: maxOf('.cl19-cd [data-cl19="date"]', norm), dateHead: head("Date added"),
       /* v19.1 §B — a value's TEXT at 15px (the lib adds its icon, which does not scale); v19.1 §A — a missing one's
          "+ Add" link, at its fixed 14px */
@@ -494,7 +497,7 @@ export const ContactRows: React.FC<ContactRowsProps & {
       status: Math.max(maxOf(".clv-rq > *", (e) => e.getBoundingClientRect().width), head("Query status")),
     });
     const cur = fitRef.current;
-    if (next.cols !== cur.cols || next.stacked !== cur.stacked || next.fs !== cur.fs) { fitBusy.current = true; setFit(next); }
+    if (next.cols !== cur.cols || next.stacked !== cur.stacked || next.fs !== cur.fs || next.gap !== cur.gap) { fitBusy.current = true; setFit(next); }
   };
   useLayoutEffect(measure);
   /* ── v19 §H — THE ARRIVAL. Every list change (load, grouping, sort, filter, search, clearing, pinning) lands the same
@@ -571,7 +574,7 @@ export const ContactRows: React.FC<ContactRowsProps & {
   });
   return (
     <div ref={listRef} className={`clv-list${compact ? " clv-list--compact" : ""}`} data-clv="list" data-density={compact ? "compact" : "comfortable"}
-      data-cl19-stacked={fit.stacked ? "" : undefined} style={{ "--cl19-fs": `${fit.fs}px` } as React.CSSProperties}>
+      data-cl19-stacked={fit.stacked ? "" : undefined} style={{ "--cl19-fs": `${fit.fs}px`, "--cl19-gap": `${fit.gap}px` } as React.CSSProperties}>
       {ungrouped ? (
         /* v16 §C — no grouping: ONE panel, the labels and then every row, no dividers */
         <ListPanel cols={fit.cols} columns={columns} data-clv="panel">
