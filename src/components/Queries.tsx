@@ -104,7 +104,8 @@ import { usePinList } from "./shell/useFullScreenList";
 import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
-import { QcFilters138, QcFiltersButton138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
+import { QcFiltersPanel140 } from "./queries/centre/QcToolbar140";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
@@ -7317,9 +7318,12 @@ export const Queries: React.FC<{
                   shown={qcVisible.length}
                   filtered={qc138Filtered}
                   stickyOn={routeActive && qcDesk}
-                  filtersSlot={(
-                    <QcFiltersButton138 filters={qcF138} disabled={showGridSkeleton}
-                      onClearAll={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}>
+                  /* v140 §A — the Filters chip: its count (search not counted), its ✕ and its menu */
+                  filterCount={qc138FilterCount(qcF138) + (qcFilter !== "all" ? 1 : 0) + (qcCzCourt ? 1 : 0)}
+                  onClearFilters={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}
+                  loading={showGridSkeleton}
+                  filtersMenu={(pop) => (
+                    <QcFiltersPanel140 anchor={pop.anchor} onClearAll={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}>
                       <QcFilters138
                         filters={qcF138}
                         onFilters={setQcF138}
@@ -7333,7 +7337,7 @@ export const Queries: React.FC<{
                         msTitle={qcLineTitle}
                         disabled={showGridSkeleton}
                       />
-                    </QcFiltersButton138>
+                    </QcFiltersPanel140>
                   )}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
@@ -7373,7 +7377,7 @@ export const Queries: React.FC<{
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
-                  groups={qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
+                  groups={qcGroup === "none" ? [{ key: "all", label: "", rows: qcVisible }] : qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName)}
                   /* v139 §B — the practice band, and Pip's row opening his own panel */
                   practice={practice && pipRow ? { row: pipRow, leaving: pipLeaving } : null}
                   selectedId={pipOpen ? PIP_ID : selectedQueryId} onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} nowMs={Date.now()}
