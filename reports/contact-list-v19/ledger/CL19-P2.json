@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 unpinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 the hero shows, above the list card",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 no old list bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 no rolodex tabs",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 the sheet is the route's cream rgb(242, 238, 232)",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 the folder tab is the sheet's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 no navy inverted corner (the fillet is the sheet's colour)",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 the card's bottom corners are square",
+  "ok": true,
+  "detail": "0px · 0px"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 scrolled: the hero is behind (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 scrolled: the toolbar sticks at the top of the scroll area (under the shell's sheet lip) ±1",
+  "ok": true,
+  "detail": "12.0 vs lip 12.0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 scrolled: the headings stick directly under it ±1",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 scrolled: nothing else is held at the top (no condensed bar)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 the last row ends on the card's foot ±1",
+  "ok": true,
+  "detail": "891.5 vs 891.5"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 the card ends on the page's foot ±1",
+  "ok": true,
+  "detail": "891.5 vs 891.8"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1512 nothing beneath the card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 unpinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 the hero shows, above the list card",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 no old list bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 no rolodex tabs",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 the sheet is the route's cream rgb(242, 238, 232)",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 the folder tab is the sheet's colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 no navy inverted corner (the fillet is the sheet's colour)",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 the card's bottom corners are square",
+  "ok": true,
+  "detail": "0px · 0px"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 scrolled: the hero is behind (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 scrolled: the toolbar sticks at the top of the scroll area (under the shell's sheet lip) ±1",
+  "ok": true,
+  "detail": "12.0 vs lip 12.0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 scrolled: the headings stick directly under it ±1",
+  "ok": true,
+  "detail": "0.0"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 scrolled: nothing else is held at the top (no condensed bar)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 the last row ends on the card's foot ±1",
+  "ok": true,
+  "detail": "791.5 vs 791.5"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 the card ends on the page's foot ±1",
+  "ok": true,
+  "detail": "791.5 vs 791.8"
+ },
+ {
+  "lock": "CL19-P2",
+  "where": "@1280 nothing beneath the card",
+  "ok": true,
+  "detail": "0"
+ }
+]

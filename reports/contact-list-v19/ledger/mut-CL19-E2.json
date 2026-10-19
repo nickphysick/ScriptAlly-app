@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status one jump button per group (the population)",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"offer\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"l\":294,\"r\":388.078125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"fs\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fs\",\"l\":390.078125,\"r\":515.15625,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"fr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fr\",\"l\":517.15625,\"r\":683.484375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"ps\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"ps\",\"l\":685.484375,\"r\":833.1875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"pr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"pr\",\"l\":835.1875,\"r\":1024.140625,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"queried\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"queried\",\"l\":1026.140625,\"r\":1140.953125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"none\" is whole inside the jump row, clear of the tools",
+  "ok": false,
+  "detail": "{\"k\":\"none\",\"l\":1142.953125,\"r\":1293.28125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":false}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"closed\" is whole inside the jump row, clear of the tools",
+  "ok": false,
+  "detail": "{\"k\":\"closed\",\"l\":1295.28125,\"r\":1399.125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":false}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned one jump button per group (the population)",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"offer\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"l\":396,\"r\":490.078125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"fs\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fs\",\"l\":492.078125,\"r\":617.15625,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"fr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fr\",\"l\":619.15625,\"r\":785.484375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"ps\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"ps\",\"l\":787.484375,\"r\":935.1875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"pr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"pr\",\"l\":937.1875,\"r\":1126.140625,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"queried\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"queried\",\"l\":1128.140625,\"r\":1242.953125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"none\" is whole inside the jump row, clear of the tools",
+  "ok": false,
+  "detail": "{\"k\":\"none\",\"l\":1244.953125,\"r\":1395.28125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":false}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"closed\" is whole inside the jump row, clear of the tools",
+  "ok": false,
+  "detail": "{\"k\":\"closed\",\"l\":1397.28125,\"r\":1501.125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":false}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered Open to submissions: \"[data-cl19='quick'][data-qp='open']:not([disabled])\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered one jump button per group (the population)",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"offer\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"l\":-305,\"r\":-210.921875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"fs\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fs\",\"l\":-208.921875,\"r\":-83.84375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"fr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fr\",\"l\":-81.84375,\"r\":84.484375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"ps\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"ps\",\"l\":86.484375,\"r\":234.1875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"pr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"pr\",\"l\":236.1875,\"r\":425.140625,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"queried\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"queried\",\"l\":427.140625,\"r\":541.953125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"none\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"none\",\"l\":543.953125,\"r\":694.28125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"closed\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"closed\",\"l\":696.28125,\"r\":800.125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "the \"+N more\" branch was entered in at least one state",
+  "ok": false,
+  "detail": "0"
+ }
+]

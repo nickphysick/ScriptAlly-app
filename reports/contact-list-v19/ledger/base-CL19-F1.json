@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 the manuscript in scope is known (precondition)",
+  "ok": true,
+  "detail": "cv25-ms"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 you: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 ready: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 wait: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 open: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: Ready to query: \"[data-cl19='quick'][data-qp='ready']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: choices that would give zero exist (the population)",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: every choice that would give some is enabled",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: off: \"[data-cl19='quick'][data-qp='ready']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: Open to submissions: \"[data-cl19='quick'][data-qp='open']:not([disabled])\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: a status: \"[data-cl19='stand']:not([disabled]):not(.on)\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: the row shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: one chip per filter and one for the search (3)",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: every chip is shown or behind \"+N more\"",
+  "ok": true,
+  "detail": "0 vs +0"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: the chip's count excludes the search (2)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 Clear all: \"[data-cl19='applied-clear']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 Clear all: no applied row, no search, no filters",
+  "ok": false,
+  "detail": "{\"row\":false,\"search\":null,\"chipOn\":false}"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 Clear all: every row is back",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 the manuscript in scope is known (precondition)",
+  "ok": true,
+  "detail": "cv25-ms"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 you: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 ready: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 wait: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 open: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: Ready to query: \"[data-cl19='quick'][data-qp='ready']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: choices that would give zero exist (the population)",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: every choice that would give some is enabled",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: off: \"[data-cl19='quick'][data-qp='ready']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: Open to submissions: \"[data-cl19='quick'][data-qp='open']:not([disabled])\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: a status: \"[data-cl19='stand']:not([disabled]):not(.on)\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: the row shows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: one chip per filter and one for the search (3)",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: every chip is shown or behind \"+N more\"",
+  "ok": true,
+  "detail": "0 vs +0"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: the chip's count excludes the search (2)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 Clear all: \"[data-cl19='applied-clear']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 Clear all: no applied row, no search, no filters",
+  "ok": false,
+  "detail": "{\"row\":false,\"search\":null,\"chipOn\":false}"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 Clear all: every row is back",
+  "ok": true,
+  "detail": "52 vs 52"
+ }
+]

@@ -82,7 +82,9 @@ test.describe("QC138.5", () => {
     const L = new Ledger("A1");
     for (const vp of SIZES) {
       await open(page, "/agents", vp, "", ".clv-group");
-      const strip = await box(page, ".clv-group .cl18-tabs");
+      /* RE-POINTED by Contact list v19: the A to Z tabs above the hero are retired; the hero's own header row
+         ([data-cl17="header-row"], shell/pageHeroFrame.css's inset) is the edge they shared */
+      const strip = await box(page, ".clv-group [data-cl17='header-row']");
       await open(page, "/queries", vp, "A1");
       const sr = await box(page, `${G} [data-qc138="status-row"]`);
       const hg = await box(page, `${G} [data-qc138="header-row"]`);

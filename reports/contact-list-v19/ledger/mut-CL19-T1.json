@@ -1,0 +1,314 @@
+[
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "35"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1464.0 vs 1480.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":63.609375,\"clip\":false,\"inside\":true,\"text\":\"Group by\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":44.203125,\"clip\":false,\"inside\":true,\"text\":\"Filters\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "37"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1464.0 vs 1480.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":124.71875,\"clip\":false,\"inside\":true,\"text\":\"Grouped byStatus\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":44.203125,\"clip\":false,\"inside\":true,\"text\":\"Filters\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered three filters on (precondition)",
+  "ok": true,
+  "detail": "\"3\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "37"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1464.0 vs 1480.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":124.71875,\"clip\":false,\"inside\":true,\"text\":\"Grouped byStatus\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":53.96875,\"clip\":false,\"inside\":true,\"text\":\"Filtered\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered three filters on (precondition)",
+  "ok": true,
+  "detail": "\"3\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "37"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1488.0 vs 1504.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":124.71875,\"clip\":false,\"inside\":true,\"text\":\"Grouped byStatus\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":53.96875,\"clip\":false,\"inside\":true,\"text\":\"Filtered\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "35"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1238.0 vs 1248.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":63.609375,\"clip\":false,\"inside\":true,\"text\":\"Group by\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":44.203125,\"clip\":false,\"inside\":true,\"text\":\"Filters\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "37"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1238.0 vs 1248.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":124.71875,\"clip\":false,\"inside\":true,\"text\":\"Grouped byStatus\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":44.203125,\"clip\":false,\"inside\":true,\"text\":\"Filters\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered three filters on (precondition)",
+  "ok": true,
+  "detail": "\"3\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "37"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1238.0 vs 1248.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":124.71875,\"clip\":false,\"inside\":true,\"text\":\"Grouped byStatus\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":53.96875,\"clip\":false,\"inside\":true,\"text\":\"Filtered\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered three filters on (precondition)",
+  "ok": true,
+  "detail": "\"3\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "37"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the Pin's right is inside the toolbar",
+  "ok": true,
+  "detail": "1262.0 vs 1272.0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the toolbar's content does not overflow it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered Group by's label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":124.71875,\"clip\":false,\"inside\":true,\"text\":\"Grouped byStatus\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered Filters' label is whole and visible",
+  "ok": true,
+  "detail": "{\"w\":53.96875,\"clip\":false,\"inside\":true,\"text\":\"Filtered\"}"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the page has no horizontal overflow",
+  "ok": true,
+  "detail": "0 · 0"
+ }
+]

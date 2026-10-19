@@ -44,14 +44,8 @@ class Ledger {
 
 /** one named break per lock, in the page; `src` locks are broken in the source (see the header) */
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
-  /* the counts read from the unfiltered list: the first reading of every tab is held whatever the filter does */
-  A1: { js: `(() => { const held = {}; for (const b of document.querySelectorAll('[data-cl18="tab"]')) held[b.dataset.l] = b.querySelector('[data-cl18="tab-n"]')?.textContent ?? ""; const fix = () => { for (const b of document.querySelectorAll('[data-cl18="tab"]')) { const s = b.querySelector('[data-cl18="tab-n"]'); if (s && s.textContent !== held[b.dataset.l]) { s.textContent = held[b.dataset.l]; b.dataset.n = held[b.dataset.l] || "0"; b.disabled = !held[b.dataset.l]; } } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["data-n", "disabled"] }); })()` },
   /* an interval that re-sets the pinned row's top */
   A3: { js: `(() => { let n = 0; setInterval(() => { const p = document.querySelector('[data-cl17="pinned"]'); if (p) p.style.top = (n++ % 2 ? 3 : 0) + "px"; }, 120); })()` },
-  /* the filter row left in the page header */
-  B1: { js: `(() => { const h = [...document.querySelectorAll('.aglist [data-cl17="header"]')].find((e) => e.getBoundingClientRect().height > 0); if (h) { const d = document.createElement("div"); d.setAttribute("data-cl17", "filter-row"); d.style.height = "56px"; h.appendChild(d); } })()` },
-  /* the strip inset to the rows */
-  C1: { css: `.clv-group .cl16-list .lt-labels { margin-inline: 24px !important; }` },
   /* the cream fill restored */
   C2: { css: `.cl16-list .clv-row .sa-disc.clv-ini[data-disc="none"] { background: #f4eee5 !important; border-style: solid !important; }` },
   /* the frame drawn inside the panel */
@@ -74,72 +68,14 @@ const open = async (page: Page, vp: { width: number; height: number }, lock: str
 const vis = (page: Page, sel: string) => page.locator(sel).filter({ visible: true }).first();
 const scrollTo = (page: Page, top: number) => setScroll16(page, top);
 
-/* ───────────────────────── A1 · strip ───────────────────────── */
-test("A1 · strip: 26 tabs above the title, none in the list, counts follow the list", async ({ page }) => {
-  const L = new Ledger("A1");
-  for (const vp of SIZES) {
-    await open(page, vp, "A1"); const w = `@${vp.width}`;
-    const read = () => page.evaluate(() => {
-      const g = [...document.querySelectorAll<HTMLElement>(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const list = g.querySelector<HTMLElement>(".cl16-list");
-      const hd = g.querySelector<HTMLElement>('[data-cl17="header"]');
-      const tabs = [...(hd?.querySelectorAll<HTMLButtonElement>('[data-cl18="tab"]') ?? [])];
-      const rows = [...g.querySelectorAll<HTMLElement>('[data-clv="row"][data-initial]')];
-      const by: Record<string, number> = {};
-      for (const r of rows) by[r.dataset.initial!] = (by[r.dataset.initial!] ?? 0) + 1;
-      const title = hd?.querySelector('[data-cl17="title"]')?.getBoundingClientRect();
-      return {
-        inList: list ? list.querySelectorAll('.clv-idxwrap, .clv-ixtab, [data-cl18="tab"]').length : -1,
-        n: tabs.length, above: tabs.every((t) => title && t.getBoundingClientRect().bottom <= title.top),
-        bad: tabs.filter((t) => Number(t.dataset.n) !== (by[t.dataset.l!] ?? 0) || t.disabled !== ((by[t.dataset.l!] ?? 0) === 0)).map((t) => `${t.dataset.l}:${t.dataset.n}/${by[t.dataset.l!] ?? 0}${t.disabled ? "d" : ""}`),
-        rows: rows.length,
-      };
-    });
-    const r = await read();
-    L.check(`no letter tabs inside the list sheet ${w}`, r.inList === 0, `${r.inList}`);
-    L.check(`26 tabs in the header, above the title ${w}`, r.n === 26 && r.above, `${r.n} · above ${r.above}`);
-    L.check(`each count is the visible rows for its letter, a letter with none disabled ${w}`, r.bad.length === 0, r.bad.join(" "));
-    /* a filter changes the counts: the search narrows the list */
-    await vis(page, '.aglist [data-cl18="list-header"] [data-cl13-find="banner"] input').fill("ar"); await page.waitForTimeout(700);
-    const f = await read();
-    L.check(`filtered (${f.rows} rows): each count is still the visible rows ${w}`, f.rows < r.rows && f.bad.length === 0, `${f.rows} of ${r.rows} · ${f.bad.join(" ")}`);
-    await vis(page, '.aglist [data-cl18="list-header"] [data-cl13-find="banner"] input').fill(""); await page.waitForTimeout(400);
-  }
-  L.done(8);
-});
-
-/* ───────────────────────── A2 · jump ───────────────────────── */
-const landing = (page: Page, L: string) => page.evaluate((L) => {
-  const g = [...document.querySelectorAll<HTMLElement>(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0)!;
-  const row = g.querySelector<HTMLElement>(`[data-clv="row"][data-initial="${L}"]`);
-  const lab = g.querySelector<HTMLElement>(".lt-panel > .lt-labels");
-  const s = g.querySelector('[data-cl18="sentence"]')?.textContent ?? "";
-  /* v18.3 §E: the grouping is named by the toolbar's chip, not the sentence */
-  const chip = (g.querySelector('[data-ltb="group-name"]')?.textContent ?? "").trim();
-  return { row: row?.getBoundingClientRect().top ?? null, lab: lab?.getBoundingClientRect().bottom ?? null, sentence: s.replace(/\s+/g, " ").trim(), chip };
-}, L);
-test("A2 · jump: M lands under the headings, and a grouped list switches to A to Z first", async ({ page }) => {
-  const L = new Ledger("A2");
-  for (const vp of SIZES) {
-    await open(page, vp, "A2"); const w = `@${vp.width}`;
-    await vis(page, '.aglist [data-cl18="tab"][data-l="M"]').click(); await page.waitForTimeout(1600);
-    const a = await landing(page, "M");
-    L.check(`M's first row is under the headings (±2) ${w}`, a.row !== null && a.lab !== null && near(a.row, a.lab, 2), `${a.row?.toFixed(1)} vs ${a.lab?.toFixed(1)}`);
-    await scrollTo(page, 0); await page.waitForTimeout(300);
-    await vis(page, '.aglist [data-cl18="group"]').click(); await page.waitForTimeout(300);
-    await page.locator('[data-opt="group:status"]').click(); await page.waitForTimeout(600);
-    const g0 = await landing(page, "M");
-    /* RE-POINTED (v18.3 §E): the chip reads "Grouped by Status" */
-    L.check(`precondition: grouped by status ${w}`, g0.chip === "Status", g0.chip);
-    await vis(page, '.aglist [data-cl18="tab"][data-l="M"]').click(); await page.waitForTimeout(1800);
-    const b = await landing(page, "M");
-    L.check(`it switched to A to Z, ungrouped ${w}`, b.chip === "None", b.chip);
-    L.check(`and M landed the same way (±2) ${w}`, b.row !== null && b.lab !== null && near(b.row, b.lab, 2), `${b.row?.toFixed(1)} vs ${b.lab?.toFixed(1)}`);
-  }
-  L.done(8);
-});
+/* RETIRED by Contact list v19 (reports/contact-list-v19/REPORT.md): A1 (26 counted tabs above the title) and A2 (a tab
+   jump, and a grouped list switching to A to Z first) held the A to Z tabs above the hero. v19 retires them: the only A to Z
+   is the list toolbar's (CL19-P2 asserts the tabs absent; QC138.6 C1 holds the M jump on the toolbar's letters), and grouped
+   by anything but Letter the toolbar shows the jump row instead (CL19-E2). Their mutations and ledgers go with them. */
 
 /* ───────────────────────── A3 · spy ───────────────────────── */
+/* RE-POINTED by Contact list v19 §B: the strip is the toolbar's A to Z ([data-cl19="letter"], the current one aria-current);
+   the claim (the current letter is the row at the line, and the sticky header holds one box) is unchanged. */
 test("A3 · spy: stepping 1px over 600px, both strips name the row at the line; the pinned row holds one box", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("A3");
@@ -157,7 +93,7 @@ test("A3 · spy: stepping 1px over 600px, both strips name the row at the line; 
         const line = sc.getBoundingClientRect().top + (parseFloat(getComputedStyle(lab).top) || 0) + lab.offsetHeight + 2;
         let cur: string | null = null;
         for (const row of g.querySelectorAll<HTMLElement>('[data-clv="row"][data-initial]')) { if (row.getBoundingClientRect().top <= line) cur = row.dataset.initial ?? null; else break; }
-        const top = g.querySelector('[data-cl18="tab"][aria-current="true"]')?.getAttribute("data-l") ?? null;
+        const top = g.querySelector('[data-cl19="letter"][aria-current="true"]')?.getAttribute("data-l") ?? null;
         /* RETARGETED (Query Centre v138.6 §C): the pinned row and its compact letters are deleted, so the top strip is
            the one strip; the box check moves to the slate header, the sticky row (one box while stuck) */
         if (top !== cur) bad.push(`${i}:${cur}/${top}`);
@@ -174,96 +110,11 @@ test("A3 · spy: stepping 1px over 600px, both strips name the row at the line; 
   L.done(6);
 });
 
-/* ───────────────────────── B1 · header ───────────────────────── */
-test("B1 · header: slate, one sentence that follows the filters, the four tools on one line, no filter row above", async ({ page }) => {
-  const L = new Ledger("B1");
-  for (const vp of SIZES) {
-    await open(page, vp, "B1"); const w = `@${vp.width}`;
-    const read = () => page.evaluate(() => {
-      const g = [...document.querySelectorAll<HTMLElement>(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const lh = g.querySelector<HTMLElement>('[data-cl18="list-header"]');
-      const hd = g.querySelector<HTMLElement>('[data-cl17="header"]');
-      const s = lh?.querySelector<HTMLElement>('[data-cl18="sentence"]');
-      const tools = lh ? ['[data-cl13-find="banner"]', '[data-cl18="filters"]', '[data-cl18="density"]', '[data-cl16="full"]'].map((q) => lh.querySelector<HTMLElement>(q)) : [];
-      const tops = tools.map((t) => (t ? t.getBoundingClientRect().top + t.getBoundingClientRect().height / 2 : NaN));
-      return {
-        bg: lh ? getComputedStyle(lh).backgroundColor : null, sentence: (s?.textContent ?? "").replace(/\s+/g, " ").trim(),
-        lines: s ? Math.round(s.getBoundingClientRect().height / parseFloat(getComputedStyle(s).lineHeight)) : null,
-        tools: tools.filter(Boolean).length, spread: Math.max(...tops) - Math.min(...tops),
-        filterRow: hd ? hd.querySelectorAll('[data-cl17="filter-row"], [data-cl14="frow"], [data-cl17="pill"]').length : -1,
-        rows: g.querySelectorAll('[data-clv="row"]').length,
-      };
-    });
-    const r = await read();
-    L.check(`the list header is rgb(62, 81, 112) ${w}`, r.bg === "rgb(62, 81, 112)", `${r.bg}`);
-    /* RE-POINTED (v18.3 §E): the sentence is the count alone; the grouping is the chip's */
-    L.check(`"Showing all {N} agents" ${w}`, r.sentence === `Showing all ${r.rows} agents`, `"${r.sentence}"`);
-    L.check(`no filter row in the page header ${w}`, r.filterRow === 0, `${r.filterRow}`);
-    L.check(`search, Filters, density and full screen in the header, on one line ${w}`, r.tools === 4 && r.spread < 2 && r.lines === 1, `${r.tools} tools · spread ${r.spread.toFixed(1)} · ${r.lines} line(s)`);
-    await vis(page, '.aglist [data-cl18="filters"]').click(); await page.waitForTimeout(300);
-    await page.locator('[data-cl18="filters-panel"] [data-opt="open:open"]').click(); await page.waitForTimeout(500);
-    await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-    const f = await read();
-    /* RE-POINTED (v18.3 §E): the grouping left the sentence for the chip */
-    L.check(`filtered: "Showing {n} of {N}" with Clear all ${w}`, new RegExp(`^Showing ${f.rows} of ${r.rows} ?Clear all$`).test(f.sentence), `"${f.sentence}"`);
-    await vis(page, '.aglist [data-cl18="list-header"] [data-cl17="clear-all"]').click(); await page.waitForTimeout(400);
-  }
-  L.done(10);
-});
-
-/* ───────────────────────── B2 · filters ───────────────────────── */
-test("B2 · filters: the panel drives v17's filter state; Show n; the button's count; Escape returns focus", async ({ page }) => {
-  const L = new Ledger("B2");
-  for (const vp of SIZES) {
-    await open(page, vp, "B2"); const w = `@${vp.width}`;
-    await vis(page, '.aglist [data-cl18="filters"]').click(); await page.waitForTimeout(300);
-    await page.locator('[data-cl18="filters-panel"] [data-opt="open:open"]').click(); await page.waitForTimeout(500);
-    const r = await page.evaluate(() => {
-      const g = [...document.querySelectorAll<HTMLElement>(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const rows = [...g.querySelectorAll<HTMLElement>('[data-clv="row"]')];
-      const key = Object.keys(sessionStorage).find((k) => k.startsWith("sa.contactList.v"));
-      const mem = key ? JSON.parse(sessionStorage.getItem(key) ?? "{}") : {};
-      return {
-        rows: rows.length, open: rows.filter((x) => x.dataset.door === "open").length, store: mem?.filters?.open ?? null,
-        show: document.querySelector('[data-cl18="filters-show"]')?.textContent?.trim() ?? "",
-        n: g.querySelector<HTMLElement>('[data-cl18="filters"]')?.dataset.n ?? null,
-      };
-    });
-    L.check(`the list shows only agents open to queries ${w}`, r.rows > 0 && r.rows === r.open, `${r.open} of ${r.rows}`);
-    L.check(`the stored filter state says open (v17's own state) ${w}`, r.store === "open", `${r.store}`);
-    L.check(`"Show {n} agents" is the visible rows ${w}`, r.show === `Show ${r.rows} ${r.rows === 1 ? "agent" : "agents"}`, `"${r.show}"`);
-    L.check(`the Filters button counts one set filter ${w}`, r.n === "1", `${r.n}`);
-    await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-    const focus = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.getAttribute("data-cl18"));
-    L.check(`Escape closes it and returns focus to the button ${w}`, focus === "filters" && (await page.locator('[data-cl18="filters-panel"]').count()) === 0, `${focus}`);
-    await vis(page, '.aglist [data-cl18="list-header"] [data-cl17="clear-all"]').click(); await page.waitForTimeout(400);
-  }
-  L.done(10);
-});
-
-/* ───────────────────────── C1 · headings ───────────────────────── */
-test("C1 · headings: the Query Centre's strip at the sheet's full width, each heading over its column", async ({ page }) => {
-  const L = new Ledger("C1");
-  for (const vp of SIZES) {
-    await open(page, vp, "C1"); const w = `@${vp.width}`;
-    const r = await page.evaluate(() => {
-      const g = [...document.querySelectorAll<HTMLElement>(".aglist .clv-group")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const sheet = g.querySelector<HTMLElement>(".cl16-list")!.getBoundingClientRect();
-      const lab = g.querySelector<HTMLElement>(".lt-panel > .lt-labels")!;
-      const lr = lab.getBoundingClientRect();
-      const heads = [...lab.querySelectorAll<HTMLElement>(".lt-lab")].map((e) => e.getBoundingClientRect());
-      const row = g.querySelector<HTMLElement>('[data-clv="row"]')!;
-      const cells = ['.clv-rwho', '.clv-rfit', '.clv-rrep', '.clv-rq'].map((q) => row.querySelector<HTMLElement>(q)!.getBoundingClientRect());
-      return { bg: getComputedStyle(lab).backgroundColor, l: lr.left, r: lr.right, sl: sheet.left, sr: sheet.right,
-        off: heads.map((h, i) => (i === 3 ? h.right - cells[i].right : h.left - cells[i].left)) };
-    });
-    /* RE-POINTED (v18.3 §E): the headings are the table's own white header row */
-    L.check(`the strip is white ${w}`, r.bg === "rgb(255, 255, 255)", `${r.bg}`);
-    L.check(`at the sheet's full width (±1) ${w}`, near(r.l, r.sl, 1) && near(r.r, r.sr, 1), `${r.l.toFixed(1)}–${r.r.toFixed(1)} vs ${r.sl.toFixed(1)}–${r.sr.toFixed(1)}`);
-    L.check(`each heading within 2px of its column ${w}`, r.off.every((d) => Math.abs(d) <= 2), r.off.map((d) => d.toFixed(1)).join(" · "));
-  }
-  L.done(6);
-});
+/* RETIRED by Contact list v19 (reports/contact-list-v19/REPORT.md): B1 (the slate list header: "Showing all N agents",
+   search, Filters, density and full screen), B2 (v18's Filters panel) and C1 (the headings over v18's four columns, What
+   they want among them) held what v19 replaces: the one toolbar (CL19-T1, CL19-P1), the Filters chip, menu and applied row
+   (CL19-F1) and the columns Agent, Date added, Website, Email, Replies, Query status (CL19-C1). The density toggle is
+   retired (the list is comfortable). Their mutations and ledgers go with them. */
 
 /* ───────────────────────── C2 · disc ───────────────────────── */
 test("C2 · disc: a not-queried disc is a dotted ring with no fill", async ({ page }) => {

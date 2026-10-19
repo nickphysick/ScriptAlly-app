@@ -1,0 +1,326 @@
+[
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 the manuscript in scope is known (precondition)",
+  "ok": true,
+  "detail": "cv25-ms"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 you: the card's count is the data's (4)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 you: the list is the data's population (4)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 ready: the card's count is the data's (34)",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 ready: the list is the data's population (34)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 wait: the card's count is the data's (7)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 wait: the list is the data's population (7)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 open: the card's count is the data's (48)",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 open: the list is the data's population (48)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: choices that would give zero exist (the population)",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: qp:you (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: qp:wait (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:queried (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:pr (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:ps (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:fr (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:fs (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:offer (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: status:closed (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: g:crime (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 zero: every choice that would give some is enabled",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: the row shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: one chip per filter and one for the search (3)",
+  "ok": true,
+  "detail": "[{\"k\":\"search\",\"t\":\"“a”\",\"shown\":true},{\"k\":\"status\",\"t\":\"Status: Not queried\",\"shown\":true},{\"k\":\"open\",\"t\":\"Open to submissions\",\"shown\":true}]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: every chip is shown or behind \"+N more\"",
+  "ok": true,
+  "detail": "0 vs +0"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 applied: the chip's count excludes the search (2)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 Clear all: no applied row, no search, no filters",
+  "ok": true,
+  "detail": "{\"row\":false,\"search\":\"\",\"chipOn\":false}"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1512 Clear all: every row is back",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 the manuscript in scope is known (precondition)",
+  "ok": true,
+  "detail": "cv25-ms"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 you: the card's count is the data's (4)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 you: the list is the data's population (4)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 ready: the card's count is the data's (34)",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 ready: the list is the data's population (34)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 wait: the card's count is the data's (7)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 wait: the list is the data's population (7)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 open: the card's count is the data's (48)",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 open: the list is the data's population (48)",
+  "ok": true,
+  "detail": "missing  · extra "
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: choices that would give zero exist (the population)",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: qp:you (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: qp:wait (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:queried (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:pr (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:ps (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:fr (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:fs (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:offer (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: status:closed (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: g:crime (0) is disabled",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 zero: every choice that would give some is enabled",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: the row shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: one chip per filter and one for the search (3)",
+  "ok": true,
+  "detail": "[{\"k\":\"search\",\"t\":\"“a”\",\"shown\":true},{\"k\":\"status\",\"t\":\"Status: Not queried\",\"shown\":true},{\"k\":\"open\",\"t\":\"Open to submissions\",\"shown\":true}]"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: every chip is shown or behind \"+N more\"",
+  "ok": true,
+  "detail": "0 vs +0"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 applied: the chip's count excludes the search (2)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 Clear all: no applied row, no search, no filters",
+  "ok": true,
+  "detail": "{\"row\":false,\"search\":\"\",\"chipOn\":false}"
+ },
+ {
+  "lock": "CL19-F1",
+  "where": "@1280 Clear all: every row is back",
+  "ok": true,
+  "detail": "52 vs 52"
+ }
+]

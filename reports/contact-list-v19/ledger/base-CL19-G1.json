@@ -1,0 +1,230 @@
+[
+ {
+  "lock": "CL19-G1",
+  "where": "@1512: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 sort by Date added: \".lt-labels.lth [data-lt-col='Date added']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 set: Status, Date added ↓, pinned (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"None\",\"sort\":\"Agent ↓\",\"pinned\":false,\"filters\":null,\"n\":0,\"search\":null,\"scroll\":null,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload: the grouping survives",
+  "ok": false,
+  "detail": "None"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload: the sort survives",
+  "ok": false,
+  "detail": "Agent ↓"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload: the pin survives",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 Open to submissions: \"[data-cl19='quick'][data-qp='open']:not([disabled])\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 set: a filter, a search and a scroll (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"None\",\"sort\":\"Agent ↓\",\"pinned\":false,\"filters\":null,\"n\":0,\"search\":null,\"scroll\":null,\"open\":0,\"at\":420}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload in the visit: the filter survives",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload in the visit: the search survives",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload in the visit: the scroll survives ±40",
+  "ok": false,
+  "detail": "null → null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: the grouping, sort and pin are kept",
+  "ok": false,
+  "detail": "{\"group\":\"None\",\"sort\":\"Agent ↓\",\"pinned\":false,\"filters\":null,\"n\":0,\"search\":null,\"scroll\":null,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: unfiltered",
+  "ok": true,
+  "detail": "null · 0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: no search",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: at the top",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: every row closed",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 sort by Date added: \".lt-labels.lth [data-lt-col='Date added']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 set: Status, Date added ↓, pinned (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"None\",\"sort\":\"Agent ↓\",\"pinned\":false,\"filters\":null,\"n\":0,\"search\":null,\"scroll\":null,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload: the grouping survives",
+  "ok": false,
+  "detail": "None"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload: the sort survives",
+  "ok": false,
+  "detail": "Agent ↓"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload: the pin survives",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 Open to submissions: \"[data-cl19='quick'][data-qp='open']:not([disabled])\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 set: a filter, a search and a scroll (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"None\",\"sort\":\"Agent ↓\",\"pinned\":false,\"filters\":null,\"n\":0,\"search\":null,\"scroll\":null,\"open\":0,\"at\":420}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload in the visit: the filter survives",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload in the visit: the search survives",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload in the visit: the scroll survives ±40",
+  "ok": false,
+  "detail": "null → null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: the grouping, sort and pin are kept",
+  "ok": false,
+  "detail": "{\"group\":\"None\",\"sort\":\"Agent ↓\",\"pinned\":false,\"filters\":null,\"n\":0,\"search\":null,\"scroll\":null,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: unfiltered",
+  "ok": true,
+  "detail": "null · 0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: no search",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: at the top",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: every row closed",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status the first painted frame was caught, with rows and bands on screen",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status cv25-agent-08 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-08\",\"y\":142,\"h\":70,\"w\":1208,\"t\":\"TE Tom Ellery Ellery & Finch 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"cv25-agent-08\",\"y\":142,\"h\":70,\"w\":1208,\"t\":\"TE Tom Ellery Ellery & Finch 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Offer\",\"cols\":\"323,94,107,210,86,116\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status cv25-agent-10 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-10\",\"y\":262,\"h\":70,\"w\":1208,\"t\":\"AK Aisha Kapoor The Lantern Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"cv25-agent-10\",\"y\":262,\"h\":70,\"w\":1208,\"t\":\"AK Aisha Kapoor The Lantern Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Full sent\",\"cols\":\"323,94,107,210,86,116\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status cv25-agent-09 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-09\",\"y\":382,\"h\":70,\"w\":1208,\"t\":\"JM Jonathan Marsh The Marsh Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"cv25-agent-09\",\"y\":382,\"h\":70,\"w\":1208,\"t\":\"JM Jonathan Marsh The Marsh Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Full requested\",\"cols\":\"323,94,107,210,86,133\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status cv25-agent-05 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-05\",\"y\":502,\"h\":70,\"w\":1208,\"t\":\"SD Sophie Dunn Ashgrove Literary 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"cv25-agent-05\",\"y\":502,\"h\":70,\"w\":1208,\"t\":\"SD Sophie Dunn Ashgrove Literary 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Partial sent\",\"cols\":\"323,94,107,210,86,116\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status nothing changed after the first painted frame",
+  "ok": false,
+  "detail": "4 of 8 changed"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country the first painted frame was caught, with rows and bands on screen",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country clv-fx-reopen is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"clv-fx-reopen\",\"y\":142,\"h\":70,\"w\":1208,\"t\":\"TK Tomas Keller Keller Rights · Berlin 11 Oct 2026 Add website Add email ~8 wks CLOSED TILL 1 NOV\",\"cols\":\"323,94,107,210,98,0\"} → {\"k\":\"clv-fx-reopen\",\"y\":142,\"h\":70,\"w\":1208,\"t\":\"TK Tomas Keller Keller Rights · Berlin 11 Oct 2026 Add website Add email ~8 wks CLOSED TILL 1 NOV Closed till 1 Nov\",\"cols\":\"323,94,107,210,98,108\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country seed-cal-near is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-near\",\"y\":262,\"h\":70,\"w\":1208,\"t\":\"WA Wren Ashcombe Ashcombe Literary · London 8 Feb 2026 Add website wren@example.com ~8 wks OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"seed-cal-near\",\"y\":262,\"h\":70,\"w\":1208,\"t\":\"WA Wren Ashcombe Ashcombe Literary · London 8 Feb 2026 Add website wren@example.com ~8 wks OPEN TO QUERIES + Log a query\",\"cols\":\"323,94,107,210,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country seed-cal-soon is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-soon\",\"y\":332,\"h\":70,\"w\":1208,\"t\":\"HB Hester Blaine Blaine & Vole · London 8 Feb 2026 Add website hester@example.com ~12 wks OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"seed-cal-soon\",\"y\":332,\"h\":70,\"w\":1208,\"t\":\"HB Hester Blaine Blaine & Vole · London 8 Feb 2026 Add website hester@example.com ~12 wks OPEN TO QUERIES + Log a query\",\"cols\":\"323,94,107,210,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country seed-cal-passed20 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-passed20\",\"y\":402,\"h\":70,\"w\":1208,\"t\":\"CB Cormac Bligh Bligh & Sons · London 8 Feb 2026 Add website cormac@example.com ~4 wks OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"seed-cal-passed20\",\"y\":402,\"h\":70,\"w\":1208,\"t\":\"CB Cormac Bligh Bligh & Sons · London 8 Feb 2026 Add website cormac@example.com ~4 wks OPEN TO QUERIES + Log a query\",\"cols\":\"323,94,107,210,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country seed-agent-12 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-agent-12\",\"y\":472,\"h\":70,\"w\":1208,\"t\":\"NB Noah Bright Bright Literary · London 17 May 2026 Add website noah@example.com ~8 wks OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"seed-agent-12\",\"y\":472,\"h\":70,\"w\":1208,\"t\":\"NB Noah Bright Bright Literary · London 17 May 2026 Add website noah@example.com ~8 wks OPEN TO QUERIES + Log a query\",\"cols\":\"323,94,107,210,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country seed-cal-bang is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-bang\",\"y\":542,\"h\":70,\"w\":1208,\"t\":\"AC Alasdair Crewe Crewe Literary · London 8 Feb 2026 Add website alasdair@example.com ~16 wks OPEN TO QUERIES\",\"cols\":\"323,94,107,210,86,0\"} → {\"k\":\"seed-cal-bang\",\"y\":542,\"h\":70,\"w\":1208,\"t\":\"AC Alasdair Crewe Crewe Literary · London 8 Feb 2026 Add website alasdair@example.com ~16 wks OPEN TO QUERIES + Log a query\",\"cols\":\"323,94,107,210,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country nothing changed after the first painted frame",
+  "ok": false,
+  "detail": "6 of 8 changed"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → status the first painted frame was caught, with rows and bands on screen",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → status cv25-agent-08 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-08\",\"y\":142,\"h\":70,\"w\":976,\"t\":\"TE Tom Ellery Ellery & Finch 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"230,94,198,86,0\"} → {\"k\":\"cv25-agent-08\",\"y\":142,\"h\":70,\"w\":976,\"t\":\"TE Tom Ellery Ellery & Finch 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Offer\",\"cols\":\"230,94,198,86,116\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → status cv25-agent-10 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-10\",\"y\":262,\"h\":70,\"w\":976,\"t\":\"AK Aisha Kapoor The Lantern Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"230,94,198,86,0\"} → {\"k\":\"cv25-agent-10\",\"y\":262,\"h\":70,\"w\":976,\"t\":\"AK Aisha Kapoor The Lantern Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Full sent\",\"cols\":\"230,94,198,86,116\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → status cv25-agent-09 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"cv25-agent-09\",\"y\":382,\"h\":70,\"w\":976,\"t\":\"JM Jonathan Marsh The Marsh Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES\",\"cols\":\"230,94,198,86,0\"} → {\"k\":\"cv25-agent-09\",\"y\":382,\"h\":70,\"w\":976,\"t\":\"JM Jonathan Marsh The Marsh Agency 1 Feb 2026 Add website Add email Not stated OPEN TO QUERIES Full requested\",\"cols\":\"230,94,198,86,133\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → status nothing changed after the first painted frame",
+  "ok": false,
+  "detail": "3 of 7 changed"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country the first painted frame was caught, with rows and bands on screen",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country clv-fx-reopen is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"clv-fx-reopen\",\"y\":142,\"h\":70,\"w\":976,\"t\":\"TK Tomas Keller Keller Rights · Berlin 11 Oct 2026 Add website Add email ~8 wks CLOSED TILL 1 NOV\",\"cols\":\"230,94,198,98,0\"} → {\"k\":\"clv-fx-reopen\",\"y\":142,\"h\":70,\"w\":976,\"t\":\"TK Tomas Keller Keller Rights · Berlin 11 Oct 2026 Add website Add email ~8 wks CLOSED TILL 1 NOV Closed till 1 Nov\",\"cols\":\"230,94,198,98,108\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country seed-cal-near is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-near\",\"y\":262,\"h\":70,\"w\":976,\"t\":\"WA Wren Ashcombe Ashcombe Literary · London 8 Feb 2026 Add website wren@example.com ~8 wks OPEN TO QUERIES\",\"cols\":\"230,94,198,86,0\"} → {\"k\":\"seed-cal-near\",\"y\":262,\"h\":70,\"w\":976,\"t\":\"WA Wren Ashcombe Ashcombe Literary · London 8 Feb 2026 Add website wren@example.com ~8 wks OPEN TO QUERIES + Log a query\",\"cols\":\"230,94,198,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country seed-cal-soon is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-soon\",\"y\":332,\"h\":70,\"w\":976,\"t\":\"HB Hester Blaine Blaine & Vole · London 8 Feb 2026 Add website hester@example.com ~12 wks OPEN TO QUERIES\",\"cols\":\"230,94,198,86,0\"} → {\"k\":\"seed-cal-soon\",\"y\":332,\"h\":70,\"w\":976,\"t\":\"HB Hester Blaine Blaine & Vole · London 8 Feb 2026 Add website hester@example.com ~12 wks OPEN TO QUERIES + Log a query\",\"cols\":\"230,94,198,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country seed-cal-passed20 is the same at the first frame and 1000ms later",
+  "ok": false,
+  "detail": "{\"k\":\"seed-cal-passed20\",\"y\":402,\"h\":70,\"w\":976,\"t\":\"CB Cormac Bligh Bligh & Sons · London 8 Feb 2026 Add website cormac@example.com ~4 wks OPEN TO QUERIES\",\"cols\":\"230,94,198,86,0\"} → {\"k\":\"seed-cal-passed20\",\"y\":402,\"h\":70,\"w\":976,\"t\":\"CB Cormac Bligh Bligh & Sons · London 8 Feb 2026 Add website cormac@example.com ~4 wks OPEN TO QUERIES + Log a query\",\"cols\":\"230,94,198,86,96\"}"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country nothing changed after the first painted frame",
+  "ok": false,
+  "detail": "4 of 6 changed"
+ }
+]

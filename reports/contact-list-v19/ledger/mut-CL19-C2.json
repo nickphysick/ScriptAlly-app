@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "CL19-C2",
+  "where": "the agents carry a date added (precondition)",
+  "ok": true,
+  "detail": "52 of 52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "the data has more than one date (the order is a real claim)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: every row is an agent on file",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: newest first",
+  "ok": false,
+  "detail": "row 7 (cv25-agent-12) is 2026-02-01 after 2026-02-01"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: the first row is the newest on file",
+  "ok": false,
+  "detail": "2026-02-01T09:00:00.000Z vs 2026-10-19T01:08:10.864Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: the heading says ↓",
+  "ok": true,
+  "detail": "Date added ↓"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: every row is an agent on file",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: oldest first",
+  "ok": false,
+  "detail": "row 2 (clv-fx-never) is 2026-10-11 after 2026-10-19"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: the first row is the oldest on file",
+  "ok": false,
+  "detail": "2026-10-19T01:08:10.864Z vs 2026-02-01T09:00:00.000Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: the heading says ↑",
+  "ok": true,
+  "detail": "Date added ↑"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: every row is an agent on file",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: newest first",
+  "ok": false,
+  "detail": "row 7 (cv25-agent-12) is 2026-02-01 after 2026-02-01"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: the first row is the newest on file",
+  "ok": false,
+  "detail": "2026-02-01T09:00:00.000Z vs 2026-10-19T01:08:10.864Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: the heading says ↓",
+  "ok": true,
+  "detail": "Date added ↓"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: every row is an agent on file",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: oldest first",
+  "ok": false,
+  "detail": "row 2 (clv-fx-never) is 2026-10-11 after 2026-10-19"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: the first row is the oldest on file",
+  "ok": false,
+  "detail": "2026-10-19T01:08:10.864Z vs 2026-02-01T09:00:00.000Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: the heading says ↑",
+  "ok": true,
+  "detail": "Date added ↑"
+ }
+]

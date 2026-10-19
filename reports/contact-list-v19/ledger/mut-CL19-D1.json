@@ -1,0 +1,404 @@
+[
+ {
+  "lock": "CL19-D1",
+  "where": "agents with genres and a wishlist exist (precondition)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 msv12-agent-4: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 msv12-agent-4: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 msv12-agent-4: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 msv12-agent-4: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-near: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-near: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-near: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-near: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-12: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-12: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-12: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-12: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-06: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-06: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-06: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-06: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-soon: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-soon: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-soon: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-soon: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: the genres come before the wishlist",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: the wishlist is in Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: the genres come before the wishlist",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: the wishlist is in Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 rows with genres and a wishlist were opened (the population)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 msv12-agent-4: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 msv12-agent-4: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 msv12-agent-4: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 msv12-agent-4: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-near: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-near: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-near: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-near: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-12: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-12: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-12: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-12: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-06: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-06: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-06: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-06: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-soon: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-soon: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-soon: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-soon: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: the genres come before the wishlist",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: the wishlist is in Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: the strip is rgb(237, 241, 247)",
+  "ok": true,
+  "detail": "rgb(237, 241, 247)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: no social handle",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: no next-step link",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: the row's background is unchanged",
+  "ok": true,
+  "detail": "rgb(253, 251, 248) → rgb(253, 251, 248)"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: the genres come before the wishlist",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: the wishlist is in Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 rows with genres and a wishlist were opened (the population)",
+  "ok": true,
+  "detail": "2"
+ }
+]

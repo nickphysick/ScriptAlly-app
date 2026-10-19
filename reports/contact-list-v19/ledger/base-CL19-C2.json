@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "CL19-C2",
+  "where": "the agents carry a date added (precondition)",
+  "ok": true,
+  "detail": "52 of 52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "the data has more than one date (the order is a real claim)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: \".lt-labels.lth [data-lt-col='Date added']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: every row is an agent on file",
+  "ok": false,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: newest first",
+  "ok": false,
+  "detail": "row 2 (seed-cal-near) is 2026-02-08 after 2026-02-01"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: the first row is the newest on file",
+  "ok": false,
+  "detail": "2026-02-01T09:00:00.000Z vs 2026-10-19T01:08:10.864Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 1: the heading says ↓",
+  "ok": false,
+  "detail": "Agent ↓"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: \".lt-labels.lth [data-lt-col='Date added']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: every row is an agent on file",
+  "ok": false,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: oldest first",
+  "ok": false,
+  "detail": "row 3 (cv25-agent-12) is 2026-02-01 after 2026-02-08"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: the first row is the oldest on file",
+  "ok": true,
+  "detail": "2026-02-01T09:00:00.000Z vs 2026-02-01T09:00:00.000Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1512 click 2: the heading says ↑",
+  "ok": false,
+  "detail": "Agent ↓"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: \".lt-labels.lth [data-lt-col='Date added']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: every row is an agent on file",
+  "ok": false,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: newest first",
+  "ok": false,
+  "detail": "row 2 (seed-cal-near) is 2026-02-08 after 2026-02-01"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: the first row is the newest on file",
+  "ok": false,
+  "detail": "2026-02-01T09:00:00.000Z vs 2026-10-19T01:08:10.864Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 1: the heading says ↓",
+  "ok": false,
+  "detail": "Agent ↓"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: \".lt-labels.lth [data-lt-col='Date added']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: every row is an agent on file",
+  "ok": false,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: oldest first",
+  "ok": false,
+  "detail": "row 3 (cv25-agent-12) is 2026-02-01 after 2026-02-08"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: the first row is the oldest on file",
+  "ok": true,
+  "detail": "2026-02-01T09:00:00.000Z vs 2026-02-01T09:00:00.000Z"
+ },
+ {
+  "lock": "CL19-C2",
+  "where": "@1280 click 2: the heading says ↑",
+  "ok": false,
+  "detail": "Agent ↓"
+ }
+]

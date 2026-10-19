@@ -278,6 +278,8 @@ test.describe("Contact list v17", () => {
     L.done(8);
   });
 
+  /* RE-POINTED by Contact list v19 §C: the margin letters are retired (the mock draws none), so "each letter's first row shows
+     its letter" becomes "no row shows one"; grouped by letter, the bands still do the job. The disc claims are unchanged. */
   test("D1 · discs and letters: three disc colours; a margin letter on each letter's first row, and none when grouped by letter", async ({ page }) => {
     const L = new Ledger("D1");
     for (const vp of SIZES) {
@@ -297,7 +299,9 @@ test.describe("Contact list v17", () => {
       L.check(`${w} a not-queried disc has no fill`, /^rgba\(0, 0, 0, 0\)/.test(r.none), `${r.none}`);
       L.check(`${w} a querying disc is #2a3a52 with cream initials`, r.live === "rgb(42, 58, 82) rgb(244, 238, 229)", `${r.live}`);
       L.check(`${w} a closed disc is #b3aca5 with #2b2622 initials`, r.closed === "rgb(179, 172, 165) rgb(43, 38, 34)", `${r.closed}`);
-      L.check(`${w} ungrouped: each letter's first row shows its letter and no other row does`, r.wrong.length === 0 && r.letters.join("") === r.firsts.join("") && r.firsts.length > 4 && r.firsts.length < r.rows, `${r.letters.join("")} vs ${r.firsts.join("")} · wrong ${r.wrong.slice(0, 5).join(" ")} · ${r.rows} rows`);
+      await page.evaluate(MUT === "D1" ? MUTATIONS.D1.js! : "0");
+      const u = await read();
+      L.check(`${w} ungrouped: no margin letters (v19 §C)`, u.letters.length === 0 && u.rows > 4, `${u.letters.join("")} · ${u.rows} rows`);
       /* grouped by letter: the dividers do the job */
       await page.locator('.aglist [data-cl18="group"]').filter({ visible: true }).first().click(); /* RE-POINTED (v18 §B): the sentence's group name */ await page.waitForTimeout(250);
       await page.locator('[data-lpop="group"] [data-opt="group:letter"]').click(); await page.waitForTimeout(700);

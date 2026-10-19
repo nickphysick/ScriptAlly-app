@@ -24,10 +24,14 @@ const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as co
 const MUT = process.env.QC1386_MUTATE ?? "";
 const near = (a: unknown, b: number, t: number) => typeof a === "number" && Number.isFinite(a) && Math.abs(a - b) <= t;
 
-interface PageDef { key: "queries" | "agents"; route: string; group: string; pin: string; head: string; heads: string; band: string | null; hd: string; filters: string; find: string; rows: string }
+/* RE-POINTED by Contact list v19 (reports/contact-list-v19/REPORT.md): the Contact list's filter panel is v19's menu
+   (`panel`); its sticky stack is the list head ([data-cl19="head"]: the band pinned, the toolbar always), held at the
+   scroll area's top (`stack`, `stackTop` 0) where the Query Centre's sits 12 under the sheet; its pin is the toolbar's
+   labelled button (no PinListButton, no tooltip) and no longer holds the sidebar at its icons (`holdsRail`). */
+interface PageDef { key: "queries" | "agents"; route: string; group: string; pin: string; head: string; heads: string; band: string | null; hd: string; filters: string; find: string; rows: string; panel: string; stack: string; stackTop: number; holdsRail: boolean }
 const PAGES: PageDef[] = [
-  { key: "queries", route: "/queries", group: ".qcv-group[data-v138]", pin: '[data-qc138="pin"]', head: '[data-qc138="top"]', heads: '[data-qc138="headings"]', band: '[data-qcv="gband"]', hd: '[data-qc138="header"]', filters: '[data-qc138="filters-btn"]', find: '[data-qc138="search"] input', rows: '[data-qcv="row"]' },
-  { key: "agents", route: "/agents", group: ".clv-group", pin: '[data-cl16="full"]', head: '[data-cl18="list-header"]', heads: ".lt-panel > .lt-labels", band: null, hd: '[data-cl17="header"]', filters: '[data-cl18="filters"]', find: '[data-cl13-find="banner"] input', rows: '[data-clv="row"]' },
+  { key: "queries", route: "/queries", group: ".qcv-group[data-v138]", pin: '[data-qc138="pin"]', head: '[data-qc138="top"]', heads: '[data-qc138="headings"]', band: '[data-qcv="gband"]', hd: '[data-qc138="header"]', filters: '[data-qc138="filters-btn"]', find: '[data-qc138="search"] input', rows: '[data-qcv="row"]', panel: '[data-qc138="filters-panel"]', stack: '[data-qc138="top"]', stackTop: 12, holdsRail: true },
+  { key: "agents", route: "/agents", group: ".clv-group", pin: '[data-cl16="full"]', head: '[data-cl18="list-header"]', heads: ".lt-panel > .lt-labels", band: null, hd: '[data-cl17="header"]', filters: '[data-cl18="filters"]', find: '[data-cl13-find="banner"] input', rows: '[data-clv="row"]', panel: '[data-cl19="filter-menu"]', stack: '[data-cl19="head"]', stackTop: 0, holdsRail: false },
 ];
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
@@ -52,7 +56,7 @@ class Ledger {
 }
 
 /** clears both pages' remembered pins, so every case starts unpinned */
-const CLEAR = `try { for (const k of ["sa.pinList.queries", "sa.pinList.agents", "sa.contactsFull"]) localStorage.removeItem(k); } catch { /* */ }`;
+const CLEAR = `try { for (const k of ["sa.pinList.queries", "sa.pinList.agents", "sa.contactsFull", "qh.cl.view"]) localStorage.removeItem(k); } catch { /* */ }`;
 
 async function open(page: Page, p: PageDef, vp: { width: number; height: number }, lock: string, opts: { keepPins?: boolean } = {}) {
   await page.addInitScript(() => { try { for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ } });
@@ -88,8 +92,8 @@ test.describe("QC138.6", () => {
     const L = new Ledger("A1");
     for (const p of PAGES) {
       await open(page, p, SIZES[0], "A1");
-      const r = await page.evaluate((s) => { const b = [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().width > 0); return b ? { plb: b.classList.contains("plb") && b.hasAttribute("data-pin-list"), keys: b.getAttribute("aria-keyshortcuts") } : null; }, vis(p, p.pin));
-      L.check("A1", `${p.key} PinListButton`, r?.plb, JSON.stringify(r));
+      const r = await page.evaluate((s) => { const b = [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().width > 0); return b ? { plb: b.classList.contains("plb") && b.hasAttribute("data-pin-list"), own: b.hasAttribute("data-pin-list") && b.getAttribute("data-cl19") === "pin", keys: b.getAttribute("aria-keyshortcuts") } : null; }, vis(p, p.pin));
+      L.check("A1", `${p.key} ${p.key === "agents" ? "the toolbar's pin (v19 §A)" : "PinListButton"}`, p.key === "agents" ? r?.own : r?.plb, JSON.stringify(r));
       L.check("A1", `${p.key} aria-keyshortcuts F`, r?.keys === "F", `${r?.keys}`);
     }
     L.done(4);
@@ -112,7 +116,7 @@ test.describe("QC138.6", () => {
       /* pinned, with the Filters panel open: Esc closes the panel only; a second Esc unpins */
       await clickPin(page, p);
       await page.locator(vis(p, p.filters)).first().click(); await page.waitForTimeout(500);
-      const panel = p.key === "queries" ? '[data-qc138="filters-panel"]' : '[data-cl18="filters-panel"]';
+      const panel = p.panel;
       L.check("A2", `${p.key} the Filters panel opened`, await page.locator(panel).count() > 0, "");
       await page.keyboard.press("Escape"); await page.waitForTimeout(500);
       L.check("A2", `${p.key} Esc closes the panel, still pinned`, (await page.locator(panel).count()) === 0 && (await pinned(page, p)) === "true", `panel ${await page.locator(panel).count()} · pinned ${await pinned(page, p)}`);
@@ -153,7 +157,8 @@ test.describe("QC138.6", () => {
       await page.reload(); await page.locator(p.group).first().waitFor({ timeout: 30_000 }); await page.waitForTimeout(2500);
       const r = await page.evaluate(() => ({ w: (window as never as { __w: number[] }).__w, hd: (window as never as { __hd: boolean[] }).__hd }));
       L.check("A3", `${p.key} loads pinned`, (await pinned(page, p)) === "true", `${await pinned(page, p)}`);
-      L.check("A3", `${p.key} the rail on every frame from the first (no sidebar transition)`, r.w.length > 10 && r.w.every((x) => near(x, rail, 1)), `${[...new Set(r.w)].join(",")} over ${r.w.length} frames`);
+      const want = p.holdsRail ? rail : r.w[0];
+      L.check("A3", `${p.key} ${p.holdsRail ? "the rail" : "the sidebar as it is"} on every frame from the first (no sidebar transition)`, r.w.length > 10 && r.w.every((x) => near(x, want, 1)), `${[...new Set(r.w)].join(",")} over ${r.w.length} frames`);
       L.check("A3", `${p.key} no header flash`, r.hd.every((x) => !x), `${r.hd.filter(Boolean).length} frames with the header`);
       /* each page keeps its own: the other page is not pinned */
       const other = PAGES.find((o) => o !== p)!;
@@ -189,7 +194,8 @@ test.describe("QC138.6", () => {
   test("A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("A5");
-    for (const p of PAGES) {
+    /* v19 §A: the Contact list's pin is a labelled button ("Pin list" / "Unpin"), with no tooltip; this is the Query Centre's */
+    for (const p of PAGES.filter((x) => x.key === "queries")) {
       await open(page, p, SIZES[0], "A5");
       const read = () => page.evaluate((s) => {
         const b = [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().width > 0)!;
@@ -207,7 +213,7 @@ test.describe("QC138.6", () => {
       L.check("A5", `${p.key} pinned: no native title`, b.title === null, `${b.title}`);
       await page.locator(vis(p, p.pin)).first().click(); await page.waitForTimeout(600);
     }
-    L.done(8);
+    L.done(4);
   });
 
   test("B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through", async ({ page }) => {
@@ -220,15 +226,15 @@ test.describe("QC138.6", () => {
       const r = await page.evaluate(([g, hs, hds, bs]) => {
         const grp = [...document.querySelectorAll<HTMLElement>(g as string)].find((e) => e.getBoundingClientRect().width > 0)!;
         const sheet = [...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().width > 0)!.getBoundingClientRect();
-        const h = grp.querySelector<HTMLElement>(hs as string)!.getBoundingClientRect();
+        const h = [...grp.querySelectorAll<HTMLElement>(hs as string)].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
         const hd = grp.querySelector<HTMLElement>(hds as string)!.getBoundingClientRect();
         /* the current band: the stuck one, the last whose top sits at the headings' bottom or above */
         let band: DOMRect | null = null;
         if (bs) for (const b of grp.querySelectorAll<HTMLElement>(bs as string)) { const r = b.getBoundingClientRect(); if (r.height > 0 && r.top <= hd.bottom + 1) band = r; }
         return { sheetTop: sheet.top, hTop: h.top, hBottom: h.bottom, hdTop: hd.top, hdBottom: hd.bottom, bandTop: band ? band.top : null, sheetL: sheet.left, sheetR: sheet.right, hL: h.left, hR: h.right };
-      }, [p.group, p.head, p.heads, p.band] as const);
+      }, [p.group, p.stack, p.heads, p.band] as const);
       const w = `${p.key} ${vp.width}${pin ? " pinned" : ""}`;
-      L.check("B1", `${w} navy header 12 under the sheet`, near(r.hTop - r.sheetTop, 12, 1), (r.hTop - r.sheetTop).toFixed(1));
+      L.check("B1", `${w} the sticky header ${p.stackTop} under the sheet`, near(r.hTop - r.sheetTop, p.stackTop, 1), (r.hTop - r.sheetTop).toFixed(1));
       L.check("B1", `${w} headings at the header's bottom`, near(r.hdTop, r.hBottom, 1), `${r.hdTop.toFixed(1)} vs ${r.hBottom.toFixed(1)}`);
       if (p.band) L.check("B1", `${w} the current band at the headings' bottom`, r.bandTop !== null && near(r.bandTop, r.hdBottom, 1), `${r.bandTop?.toFixed(1)} vs ${r.hdBottom.toFixed(1)}`);
       /* nothing shows between the sheet's top and the header: the strip is the same with the rows hidden */
@@ -295,7 +301,8 @@ test.describe("QC138.6", () => {
     const p = PAGES[1];
     for (const vp of SIZES) {
       await open(page, p, vp, "C1");
-      await page.locator(vis(p, '[data-cl18="tab"][data-l="M"]')).first().click();
+      /* RE-POINTED by v19 §B: the only A to Z is the list toolbar's */
+      await page.locator(vis(p, '[data-cl19="letter"][data-l="M"]')).first().click();
       await page.waitForTimeout(1600);
       const r = await page.evaluate((g) => {
         const grp = [...document.querySelectorAll<HTMLElement>(g)].find((e) => e.getBoundingClientRect().width > 0)!;

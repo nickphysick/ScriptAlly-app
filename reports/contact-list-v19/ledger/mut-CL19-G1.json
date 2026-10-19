@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 set: Status, Date added ↓, pinned (precondition)",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"Date added ↓\",\"pinned\":true,\"filters\":false,\"n\":0,\"search\":\"\",\"scroll\":0,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload: the grouping survives",
+  "ok": true,
+  "detail": "Status"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload: the sort survives",
+  "ok": true,
+  "detail": "Date added ↓"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload: the pin survives",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 set: a filter, a search and a scroll (precondition)",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"Date added ↓\",\"pinned\":true,\"filters\":true,\"n\":1,\"search\":\"a\",\"scroll\":420,\"open\":0,\"at\":420}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload in the visit: the filter survives",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload in the visit: the search survives",
+  "ok": true,
+  "detail": "a"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 reload in the visit: the scroll survives ±40",
+  "ok": true,
+  "detail": "420 → 420"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: the grouping, sort and pin are kept",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"Date added ↓\",\"pinned\":true,\"filters\":true,\"n\":1,\"search\":\"a\",\"scroll\":420,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: unfiltered",
+  "ok": false,
+  "detail": "true · 1"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: no search",
+  "ok": false,
+  "detail": "a"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: at the top",
+  "ok": false,
+  "detail": "420"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1512 new visit: every row closed",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 set: Status, Date added ↓, pinned (precondition)",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"Date added ↓\",\"pinned\":true,\"filters\":true,\"n\":1,\"search\":\"a\",\"scroll\":0,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload: the grouping survives",
+  "ok": true,
+  "detail": "Status"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload: the sort survives",
+  "ok": true,
+  "detail": "Date added ↓"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload: the pin survives",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 set: a filter, a search and a scroll (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"Status\",\"sort\":\"Date added ↓\",\"pinned\":true,\"filters\":false,\"n\":0,\"search\":\"a\",\"scroll\":420,\"open\":0,\"at\":420}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload in the visit: the filter survives",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload in the visit: the search survives",
+  "ok": true,
+  "detail": "a"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 reload in the visit: the scroll survives ±40",
+  "ok": true,
+  "detail": "420 → 420"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: the grouping, sort and pin are kept",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"Date added ↓\",\"pinned\":true,\"filters\":false,\"n\":0,\"search\":\"a\",\"scroll\":420,\"open\":0}"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: unfiltered",
+  "ok": true,
+  "detail": "false · 0"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: no search",
+  "ok": false,
+  "detail": "a"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: at the top",
+  "ok": false,
+  "detail": "420"
+ },
+ {
+  "lock": "CL19-G1",
+  "where": "@1280 new visit: every row closed",
+  "ok": true,
+  "detail": "0"
+ }
+]

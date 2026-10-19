@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → status open the menu: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1512 → country open the menu: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → status open the menu: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-H1",
+  "where": "@1280 → country open the menu: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ }
+]

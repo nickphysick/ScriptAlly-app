@@ -54,12 +54,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   A2: { css: `.hk83-ptw { position: static !important; } .hk8-head.hk82 { position: relative !important; } .hk8-howpop.hk83-key { left: auto !important; right: 0 !important; }` },
   A4: { css: `.hk8-drawer, [data-hk8-drawer], .hkd, aside:has([data-hk8="head"]) { z-index: 1 !important; }` },
   B1: { js: `(() => { const fix = () => { if (!document.querySelector('[data-ftab="housekeeping"]')) { const b = document.createElement("button"); b.dataset.ftab = "housekeeping"; b.textContent = "Housekeeping"; b.style.cssText = "position:fixed;right:30px;bottom:30px;z-index:50"; document.body.appendChild(b); } }; fix(); setInterval(fix, 200); })()` },
-  B2: { css: `@media (min-width: 768px) { .clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main { margin-top: 22px !important; } }` },
-  /* v18.3.3 — CL1833-E4 (the click guard) and CL1833-E5 (the scroll re-check) are broken in src; the report names each */
-  "CL1833-E1": { css: `.cl183-pk.cl1833-pk { display: flex !important; gap: 8px; } .cl1833-pk .cl1833-it, .cl1833-pk .cl1833-em { margin-left: 0 !important; } .cl1833-pk > .cl1833-tail { display: contents !important; }` },
-  "CL1833-E2": { css: `.cl183-pk.cl1833-pk { margin-top: 2px !important; }` },
-  "CL1833-E3": { js: `(() => { const fix = () => { for (const r of document.querySelectorAll('.aglist [data-clv="row"][data-peek]')) { if (r.querySelector('[data-mut]')) continue; const b = document.createElement("button"); b.dataset.mut = "1"; b.textContent = "Open card"; b.style.cssText = "position:absolute;right:48px;top:8px;z-index:3"; r.style.position = "relative"; r.appendChild(b); } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-peek"] }); })()` },
-  E1: { js: `(() => { new MutationObserver(() => { const s = [...document.querySelectorAll('.cl18-lh .ltb-search')].find((e) => e.getBoundingClientRect().height > 0); const m = [...document.querySelectorAll('.lpop, [role="menu"]')].find((e) => e.getBoundingClientRect().height > 0 && /Group the list by/i.test(e.textContent || "")); if (s && m && !m.dataset.mut) { m.dataset.mut = "1"; m.style.setProperty("left", s.getBoundingClientRect().left + "px", "important"); m.style.setProperty("position", "fixed", "important"); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); })()` },
+  /* v18.3.3 — CL1833-E5 (the scroll re-check) is broken in src; the report names it. E1 to E4 retired by v19. */
   E2: { css: `.lth.lth { background: transparent !important; }` },
   F1: { js: `(() => { const go = () => { const p = document.querySelector('[data-pck="pill"]'); const side = [...document.querySelectorAll('.ws-panel, aside, nav')].find((e) => e.getBoundingClientRect().height > 300 && e.getBoundingClientRect().left < 50); if (p && side && p.parentElement !== side) side.appendChild(p); }; setInterval(go, 150); go(); })()` },
   F2: { js: `(() => { window.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest('[data-pck="item"][data-k="open"] button'); if (!b) return; setTimeout(() => { const r = [...document.querySelectorAll(".aglist [data-clv='row'][data-agent-card]")].find((x) => x.getBoundingClientRect().height > 0); r && r.click(); }, 50); }, true); })()` },
@@ -214,18 +209,20 @@ test("A3 · complete: with every reply time settled, no Reply time section; one 
   L.done(5);
 });
 
+/* RE-POINTED by v19: "the pinned row" was v18.3's navy list bar (.cl18-lh); v19's is the list head ([data-cl19="head"],
+   the toolbar), which sticks at the scroll area's top once the hero is behind. The law (the drawer is in front) is unchanged. */
 test("A4 · front: the drawer is in front of the pinned row", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("A4");
   for (const vp of SIZES) {
     const w = `@${vp.width}`;
     await open(page, vp, "A4");
-    await page.evaluate(() => { const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!; const lh = [...document.querySelectorAll<HTMLElement>(".cl18-lh")].find((e) => e.getBoundingClientRect().height > 0)!; sc.scrollTop += lh.getBoundingClientRect().top - sc.getBoundingClientRect().top + 900; });
+    await page.evaluate(() => { const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!; const lh = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl19='head']")].find((e) => e.getBoundingClientRect().height > 0)!; sc.scrollTop += lh.getBoundingClientRect().top - sc.getBoundingClientRect().top + 900; });
     await page.waitForTimeout(500);
     await openHome(page);
     await shot(page, `04-hk-over-pinned-row-${vp.width}`);
     const r = await page.evaluate(() => {
-      const lh = [...document.querySelectorAll<HTMLElement>(".cl18-lh")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
+      const lh = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl19='head']")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
       const head = document.querySelector<HTMLElement>('[data-hk8="head"]')!;
       let d: HTMLElement | null = head; while (d && getComputedStyle(d).position !== "fixed") d = d.parentElement;
       const dr = (d ?? head).getBoundingClientRect();
@@ -270,273 +267,22 @@ test("B1 · 'Fill in the gaps' with the open gaps' count; no Discover in the hea
   L.done(10);
 });
 
-test("B2 · spacing 14 / 34 / 54, the last equal to the Query Centre's", async ({ page }) => {
-  test.setTimeout(300_000);
-  const L = new Ledger("B2");
-  const gaps = (sel: { hd: string; strip: string; row: string; navy: string }) => page.evaluate((s) => {
-    const v = (q: string) => [...document.querySelectorAll<HTMLElement>(q)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const sc = v(".wpg-scroll"); if (sc) sc.scrollTop = 0;
-    const sheet = v(".ws-window")!.getBoundingClientRect(), hd = v(s.hd);
-    const strip = hd?.querySelector<HTMLElement>(s.strip)?.getBoundingClientRect(), row = hd?.querySelector<HTMLElement>(s.row)?.getBoundingClientRect(), navy = v(s.navy)?.getBoundingClientRect();
-    return strip && row && navy ? { a: strip.top - sheet.top, b: row.top - strip.bottom, c: navy.top - row.bottom } : null;
-  }, sel);
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await open(page, vp, "B2");
-    const cl = await gaps({ hd: ".cl17-hd", strip: ".cl18-tabs", row: ".cl17-tr", navy: ".cl18-lh" });
-    await shot(page, `01-page-${vp.width}`);
-    await openRoute(page, "/queries"); await page.setViewportSize(vp); await page.waitForTimeout(2500);
-    await mutate(page, "B2");
-    const qc = await gaps({ hd: ".qc138-hd", strip: '[data-qc138="status-row"]', row: '[data-qc138="header-row"]', navy: ".qc138-top" });
-    L.check(`${w} both pages measured`, !!cl && !!qc, JSON.stringify({ cl, qc }));
-    if (cl && qc) {
-      L.check(`${w} strip top − sheet top = 14 ±2`, near(cl.a, 14, 2), cl.a.toFixed(1));
-      L.check(`${w} title row top − strip bottom = 34 ±2`, near(cl.b, 34, 2), cl.b.toFixed(1));
-      L.check(`${w} navy top − title row bottom = 54 ±2`, near(cl.c, 54, 2), cl.c.toFixed(1));
-      L.check(`${w} …and equals the Query Centre's (${qc.c.toFixed(1)}) ±2`, near(cl.c, qc.c, 2), cl.c.toFixed(1));
-    }
-  }
-  L.done(10);
-});
+/* RETIRED by v19 (reports/contact-list-v19/REPORT.md): B2 measured 14 / 34 / 54 from the sheet to the A to Z tabs above the
+   hero (.cl18-tabs), to the title row and to the navy list bar (.cl18-lh). v19 retires both the tabs and the bar: the list
+   card sits 22px under the hero, its toolbar is the only A to Z (CL19-P2). Its ledgers are deleted with it. */
 
-/* ───────────────────────── C · the row peek ───────────────────────── */
-/* RE-POINTED by v18.3.3: the ground and the first pill's left are CL1833-E2's and -E1's now (the details sit on the row's own
-   columns, the email under the avatar), and a missing detail is a transparent disc in a faint ring, no longer dashed. */
-test("C1 · peek: three contact details in order, a missing one a ringed transparent disc, nothing else", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("C1");
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await open(page, vp, "C1");
-    const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).slice(0, 14).map((e) => e.dataset.agentCard!));
-    let seenMissing = 0, seenFull = 0, peeks = 0;
-    for (const id of ids) {
-      const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
-      await row.scrollIntoViewIfNeeded(); await row.hover(); await page.waitForTimeout(750);
-      const p = await page.evaluate((id) => {
-        const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
-        const closed = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].find((e) => e.getBoundingClientRect().height > 0 && !e.hasAttribute("data-peek"))!;
-        const pills = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')];
-        const name = el.querySelector<HTMLElement>(".clv-name, [data-clv='name'], h3, b")!;
-        const pk = el.querySelector<HTMLElement>(".cl183-pk");
-        const site = pills.find((x) => x.dataset.k === "website");
-        return {
-          open: el.hasAttribute("data-peek"), bg: getComputedStyle(el).backgroundColor, closedBg: getComputedStyle(closed).backgroundColor,
-          ks: pills.map((x) => x.dataset.k), firstL: pills[0]?.getBoundingClientRect().left ?? null, nameL: name.getBoundingClientRect().left,
-          missing: pills.filter((x) => x.hasAttribute("data-missing")).map((x) => { const d = x.querySelector<HTMLElement>(".cl183-pd"); const c = d ? getComputedStyle(d) : null; return { k: x.dataset.k, dashed: !!c && c.backgroundColor === "rgba(0, 0, 0, 0)" && /inset/.test(c.boxShadow) && !/rgba\([^)]*, 0\)/.test(c.boxShadow) }; }),
-          extra: !!pk && /wishlist|looking for|note/i.test([...pk.querySelectorAll("p, blockquote, .clv-wish, [data-cl18='wish']")].map((e) => e.textContent).join(" ")),
-          rel: site && !site.hasAttribute("data-missing") ? (site.closest("a") ?? site.querySelector("a") ?? site).getAttribute("rel") : "n/a",
-        };
-      }, id);
-      if (!p.open) continue;
-      peeks += 1;
-      L.check(`${w} ${id}: exactly the three pills, in order`, JSON.stringify(p.ks) === JSON.stringify(["email", "website", "social"]), JSON.stringify(p.ks));
-      for (const m of p.missing) L.check(`${w} ${id}: the missing ${m.k} is a transparent disc in a ring`, m.dashed, `${m.dashed}`);
-      L.check(`${w} ${id}: no wishlist or notes text`, !p.extra, `${p.extra}`);
-      if (p.rel !== "n/a") { seenFull += 1; L.check(`${w} ${id}: the website's rel has noopener`, /noopener/.test(p.rel ?? ""), `${p.rel}`); }
-      if (p.missing.some((m) => m.k === "email" || m.k === "social")) seenMissing += 1;
-      await page.mouse.move(5, 5); await page.waitForTimeout(250);
-      if (peeks >= 6 && seenMissing && seenFull) break;
-    }
-    L.check(`${w} peeks were opened`, peeks > 0, `${peeks}`);
-    L.check(`${w} a missing email or social was seen (the missing branch)`, seenMissing > 0, `${seenMissing}`);
-  }
-  L.done(14);
-});
+/* RETIRED by v19 (reports/contact-list-v19/REPORT.md): C1 (v18.3's three peek pills) and CL1833-E1 to E4 (v18.3.3's details
+   line on the row's own columns: the columns, its 16/16 rhythm, the next-step link and the email that copied from the line)
+   described an open row v19 replaces: the contact details are the row's Website and Email columns, and the open row is one
+   powder strip of genres and the wishlist. CL19-C1 holds the columns, CL19-C3 the email that copies, CL19-D1 the strip.
+   Their mutations and ledgers are deleted with them. CL1833-E5 ("always closes") is kept and still passes. */
 
-/* RETIRED by v18.3.3 (reports/contact-list-v18-3/REPORT.md): C2 (v18.3.1's pill spacing, 16/18 under and above a pill
-   row) and C2d (v18's Copy chip; v18.3.1 called it C3) described a peek that is gone. CL1833-E2 holds the details line's
-   16/16 and the ↗; CL1833-E4 holds the email that copies itself. Their ledgers are deleted with them. */
-
-/* ───────────────────────── v18.3.3 · the open row on the row's own columns ───────────────────────── */
-/* THE FIXTURE: three rows on the active manuscript (Harbour of Glass). "full" is Theo Abara (Full requested: stage, bar,
-   YOUR MOVE, date) with three long contact details so 1280 must shorten them; the harness has no query at Offer on
-   this manuscript, so a Full-requested row stands in. "sparse" is Sun-hee Park (Full sent) with a website only.
-   "not-queried" is the bare fixture. Every field written is read first and put back exactly (absent means deleted). */
-const FULL = "msv12-agent-4", SPARSE = "msv12-agent-5";
-const CONTACT = ["email", "website", "socials", "twitter", "bluesky", "instagram"] as const;
-const withRows = async (fn: () => Promise<void>) => {
-  const { db, uid } = await harnessDb();
-  const ref = (id: string) => doc(db, "users", uid, "agents", id);
-  const before: Record<string, Record<string, unknown>> = {};
-  for (const id of [FULL, SPARSE]) { const d = (await getDoc(ref(id))).data() ?? {}; before[id] = Object.fromEntries(CONTACT.map((k) => [k, d[k]])); }
-  try {
-    await updateDoc(ref(FULL), { email: "theo.abara@abaragrantliteraryagency.co.uk", website: "https://www.abaragrantliteraryagency.co.uk", socials: [{ platform: "bluesky", handle: "@theo.abara.literary.bsky.social" }] });
-    await updateDoc(ref(SPARSE), { website: "https://parkliterary.example" });
-    await fn();
-  } finally {
-    for (const id of [FULL, SPARSE]) await updateDoc(ref(id), Object.fromEntries(CONTACT.map((k) => [k, before[id][k] === undefined ? deleteField() : before[id][k]])));
-  }
-};
+/* ───────────────────────── v18.3.3 · the open row always closes ───────────────────────── */
 const hoverRow = async (page: Page, id: string, wait: number) => {
   const row = page.locator(`.aglist [data-clv='row'][data-agent-card="${id}"]`).filter({ visible: true }).first();
   await row.scrollIntoViewIfNeeded(); await page.mouse.move(5, 5); await page.waitForTimeout(350);
   const b = await row.boundingBox(); await page.mouse.move(b!.x + 60, b!.y + 20); await page.waitForTimeout(wait);
 };
-/** one read of an open row: its tracks, the agent block, and every item on the details line */
-const readLine = (page: Page, id: string) => page.evaluate((id) => {
-  const el = [...document.querySelectorAll<HTMLElement>(`.aglist [data-clv='row'][data-agent-card="${id}"]`)].find((e) => e.getBoundingClientRect().height > 0)!;
-  const box = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, h: r.height, cx: r.left + r.width / 2, cy: r.top + r.height / 2 }; };
-  const cs = getComputedStyle(el), rb = el.getBoundingClientRect();
-  const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat), gap = parseFloat(cs.columnGap) || 0;
-  let x = rb.left + parseFloat(cs.paddingLeft); const lefts: number[] = []; for (const t of tracks) { lefts.push(x); x += t + gap; }
-  const items = [...el.querySelectorAll<HTMLElement>('[data-cl183="peek-pill"]')].map((e) => {
-    const ics = getComputedStyle(e), d = e.querySelector<HTMLElement>(".cl183-pd"), t = e.querySelector<HTMLElement>(".cl183-pt");
-    return {
-      k: e.dataset.k ?? "", missing: e.hasAttribute("data-missing"), box: box(e), disc: box(d), text: box(t),
-      bg: ics.backgroundColor, bw: ics.borderTopWidth, bs: ics.borderTopStyle, sh: ics.boxShadow,
-      discBg: d ? getComputedStyle(d).backgroundColor : null, discSh: d ? getComputedStyle(d).boxShadow : null,
-      sw: t?.scrollWidth ?? 0, cw: t?.clientWidth ?? 0, title: t?.getAttribute("title") ?? e.getAttribute("title"), txt: (t?.textContent ?? "").trim(),
-    };
-  });
-  const next = el.querySelector<HTMLElement>('[data-cl1833="next"]');
-  const ext = el.querySelector<HTMLElement>('[data-cl183="ext"]');
-  const statusLabels = [...el.querySelectorAll<HTMLElement>(".clv-rq button, .clv-rq a, .clv-rq [role='button']")].filter((b) => b.getBoundingClientRect().height > 0).map((b) => (b.textContent ?? "").trim());
-  return {
-    peek: el.hasAttribute("data-peek"), row: box(el), bg: cs.backgroundColor, lefts, statusR: lefts[lefts.length - 1] + tracks[tracks.length - 1],
-    name: box(el.querySelector(".clv-rwn b")), av: box(el.querySelector(".clv-ini")), agent: box(el.querySelector(".clv-rwn")), line: box(el.querySelector(".cl183-pk")),
-    items, next: next && { ...box(next)!, label: (next.textContent ?? "").trim() }, statusLabels,
-    ext: ext && { fs: getComputedStyle(ext).fontSize, col: getComputedStyle(ext).color },
-  };
-}, id);
-const visibleOpenCard = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("button, a, [role='button']")].filter((b) => b.getBoundingClientRect().height > 0 && /^\s*open card\s*$/i.test(b.textContent ?? "")).length);
-const norm = (s: string) => s.replace(/^\s*\+\s*/, "").replace(/\s+/g, " ").trim().toLowerCase();
-
-test("CL1833-E1 · columns: email under the avatar and the name, website on its column, social on Replies, the next step on the status's right", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("CL1833-E1");
-  await withRows(async () => {
-    for (const vp of SIZES) {
-      const w = `@${vp.width}`;
-      await open(page, vp, "CL1833-E1");
-      for (const id of [FULL, SPARSE]) {
-        await hoverRow(page, id, 900);
-        const r = await readLine(page, id);
-        L.check(`${w} ${id}: the row is open with its three details (precondition)`, r.peek && r.items.length === 3, `${r.peek} · ${r.items.map((i) => i.k)}`);
-        const it = (k: string) => r.items.find((i) => i.k === k);
-        const em = it("email"), web = it("website"), soc = it("social");
-        if (em && r.av) L.check(`${w} ${id}: the email's disc is centred under the avatar ±1`, near(em.disc?.cx, r.av.cx, 1), `${em.disc?.cx.toFixed(1)} vs ${r.av.cx.toFixed(1)}`);
-        if (em && !em.missing && r.name) L.check(`${w} ${id}: the email's text starts on the name's left ±1`, near(em.text?.l, r.name.l, 1), `${em.text?.l.toFixed(1)} vs ${r.name.l.toFixed(1)}`);
-        if (web) L.check(`${w} ${id}: the website's disc is on What they want's left ±1`, near(web.disc?.l, r.lefts[1], 1), `${web.disc?.l.toFixed(1)} vs ${r.lefts[1].toFixed(1)}`);
-        if (soc) L.check(`${w} ${id}: the social disc is on Replies' left ±1`, near(soc.disc?.l, r.lefts[2], 1), `${soc.disc?.l.toFixed(1)} vs ${r.lefts[2].toFixed(1)}`);
-        if (id === FULL) {
-          L.check(`${w} ${id}: the next step is there`, !!r.next, `${r.next?.label}`);
-          if (r.next) L.check(`${w} ${id}: the next step's right is the status cell's right ±1`, near(r.next.r, r.statusR, 1), `${r.next.r.toFixed(1)} vs ${r.statusR.toFixed(1)}`);
-          if (r.next && soc?.box) L.check(`${w} ${id}: the social stops ≥24 short of the next step`, r.next.l - soc.box.r >= 23.5, (r.next.l - soc.box.r).toFixed(1));
-          const short = r.items.filter((i) => i.sw > i.cw + 1);
-          for (const i of short) L.check(`${w} ${id}: the shortened ${i.k} carries its full value as a title`, !!i.title && i.title === i.txt && (i.k !== "email" || i.title === "theo.abara@abaragrantliteraryagency.co.uk"), `${i.title} · ${i.txt}`);
-          if (vp.width === 1280) L.check(`${w} ${id}: the long email is shortened here (the branch is entered)`, !!em && em.sw > em.cw + 1, `${em?.sw} > ${em?.cw}`);
-        }
-      }
-    }
-  });
-  L.done(18);
-});
-
-test("CL1833-E2 · rhythm: one centre, 16 above and 16 below, a 124 row at 1512, no shells, no ground change, nothing else moves", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("CL1833-E2");
-  const tops = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => ({ id: e.dataset.agentCard!, t: e.getBoundingClientRect().top, h: e.getBoundingClientRect().height })));
-  await withRows(async () => {
-    for (const vp of SIZES) {
-      const w = `@${vp.width}`;
-      await open(page, vp, "CL1833-E2");
-      for (const id of [FULL, SPARSE, BARE]) {
-        await hoverRow(page, id, 200);
-        const before = await tops(); const resting = await readLine(page, id);
-        await page.waitForTimeout(800);
-        const r = await readLine(page, id); const after = await tops();
-        L.check(`${w} ${id}: the row is open (precondition)`, r.peek && r.items.length === 3, `${r.peek}`);
-        if (!r.peek || !r.line || !r.agent || !r.row) continue;
-        const cs = [...r.items.map((i) => i.box?.cy ?? NaN), ...(r.next ? [r.next.cy] : [])];
-        L.check(`${w} ${id}: every item shares one centre ±1`, cs.every((c) => near(c, cs[0], 1)), JSON.stringify(cs.map((c) => c.toFixed(1))));
-        for (const i of r.items) L.check(`${w} ${id}: the ${i.k} has no shell (transparent, no border, no ring)`, i.bg === "rgba(0, 0, 0, 0)" && (i.bw === "0px" || i.bs === "none") && i.sh === "none", `${i.bg} · ${i.bw} ${i.bs} · ${i.sh}`);
-        L.check(`${w} ${id}: the ground does not change as it opens`, r.bg === resting.bg, `${resting.bg} → ${r.bg}`);
-        if (vp.width === 1512) {
-          L.check(`${w} ${id}: 16 ±1 from the agent block's bottom to the line's top`, near(r.line.t - r.agent.b, 16, 1), (r.line.t - r.agent.b).toFixed(1));
-          L.check(`${w} ${id}: 16 ±1 from the line's bottom to the row's bottom`, near(r.row.b - r.line.b, 16, 1), (r.row.b - r.line.b).toFixed(1));
-          if (id === FULL) L.check(`${w} ${id}: the full row is 124 ±2`, near(r.row.h, 124, 2), r.row.h.toFixed(1));
-        }
-        const i = before.findIndex((b) => b.id === id), grow = after[i].h - before[i].h;
-        L.check(`${w} ${id}: the rows above do not move`, before.slice(0, i).every((b, k) => near(after[k].t, b.t, 0.5)), "");
-        L.check(`${w} ${id}: the row below moves by exactly the growth`, i + 1 >= before.length || near(after[i + 1].t - before[i + 1].t, grow, 0.5), i + 1 < before.length ? `${(after[i + 1].t - before[i + 1].t).toFixed(1)} vs ${grow.toFixed(1)}` : "last");
-        if (r.ext) L.check(`${w} ${id}: the website's ↗ is 13px navy #2d3a50`, r.ext.fs === "13px" && r.ext.col === "rgb(45, 58, 80)", JSON.stringify(r.ext));
-      }
-    }
-  });
-  L.done(40);
-});
-
-test("CL1833-E3 · next step: no Open card anywhere, styled as '+ Log a query', never an action the status cell offers", async ({ page }) => {
-  test.setTimeout(900_000);
-  const L = new Ledger("CL1833-E3");
-  await withRows(async () => {
-    await open(page, SIZES[0], "CL1833-E3");
-    /* the reference: a not-queried row's "+ Log a query" */
-    const ref = await page.evaluate(() => {
-      const b = [...document.querySelectorAll<HTMLElement>(".aglist .clv-rq [data-cl17='log']")].find((e) => e.getBoundingClientRect().height > 0);
-      if (!b) return null; const c = getComputedStyle(b);
-      return { ff: c.fontFamily, fs: c.fontSize, col: c.color, dc: c.textDecorationColor, off: c.textUnderlineOffset, dl: c.textDecorationLine };
-    });
-    L.check("a '+ Log a query' to compare with (precondition)", !!ref, JSON.stringify(ref));
-    const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => e.dataset.agentCard!));
-    L.check("rows to sweep (the population)", ids.length >= 20, `${ids.length}`);
-    let notQueried = 0, withNext = 0, styled = 0;
-    for (const id of ids) {
-      await hoverRow(page, id, 800);
-      const r = await readLine(page, id);
-      if (!r.peek) { L.check(`${id}: the row opened`, false, "closed"); continue; }
-      L.check(`${id}: no visible "Open card"`, (await visibleOpenCard(page)) === 0, `${await visibleOpenCard(page)}`);
-      const status = r.statusLabels.map(norm), nx = r.next ? norm(r.next.label) : null;
-      L.check(`${id}: the next step is not one of the status cell's actions`, !nx || !status.includes(nx), JSON.stringify({ nx, status }));
-      if (status.includes("log a query")) { notQueried += 1; L.check(`${id}: not queried: no next step`, !r.next, `${r.next?.label}`); }
-      if (r.next) {
-        withNext += 1;
-        if (ref && styled < 3) {
-          styled += 1;
-          const c = await page.evaluate((id) => { const b = [...document.querySelectorAll<HTMLElement>(`.aglist [data-agent-card="${id}"] [data-cl1833="next"]`)].find((e) => e.getBoundingClientRect().height > 0)!; const s = getComputedStyle(b); return { ff: s.fontFamily, fs: s.fontSize, col: s.color, dc: s.textDecorationColor, off: s.textUnderlineOffset, dl: s.textDecorationLine }; }, id);
-          L.check(`${id}: the next step is styled exactly as '+ Log a query'`, JSON.stringify(c) === JSON.stringify(ref), `${JSON.stringify(c)} vs ${JSON.stringify(ref)}`);
-        }
-      }
-    }
-    L.check("both branches swept (not-queried rows and rows with a next step)", notQueried > 0 && withNext > 0, `${notQueried} · ${withNext}`);
-    await page.mouse.move(5, 5);
-  });
-  L.done(30);
-});
-
-test("CL1833-E4 · copy: the email copies the full address, reads 'Copied', never opens the card, reverts; Enter does the same", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("CL1833-E4");
-  const ADDR = "theo.abara@abaragrantliteraryagency.co.uk";
-  await withRows(async () => {
-    for (const vp of SIZES) {
-      const w = `@${vp.width}`;
-      await open(page, vp, "CL1833-E4");
-      await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-      const email = page.locator(`.aglist [data-agent-card="${FULL}"] [data-cl183="peek-pill"][data-k="email"]`).filter({ visible: true }).first();
-      const panels = () => page.locator('[data-ap="panel"]').filter({ visible: true }).count();
-      const textNow = () => page.evaluate((id) => { const e = [...document.querySelectorAll<HTMLElement>(`.aglist [data-agent-card="${id}"] [data-k="email"] .cl183-pt`)].find((x) => x.getBoundingClientRect().height > 0); return (e?.textContent ?? "").trim(); }, FULL);
-      for (const how of ["click", "Enter"] as const) {
-        await hoverRow(page, FULL, 900);
-        await page.evaluate(() => navigator.clipboard.writeText("—"));
-        if (!(await email.count())) { L.check(`${w} ${how}: the email is there (precondition)`, false, "missing"); continue; }
-        if (how === "click") await email.click(); else { await email.focus(); await page.keyboard.press("Enter"); }
-        await page.waitForTimeout(150);
-        const clip = await page.evaluate(() => navigator.clipboard.readText());
-        L.check(`${w} ${how}: the clipboard holds the full address`, clip === ADDR, clip);
-        L.check(`${w} ${how}: it reads "Copied"`, (await textNow()) === "Copied", await textNow());
-        L.check(`${w} ${how}: the card does not open`, (await panels()) === 0, `${await panels()}`);
-        const t0 = Date.now(); let back = false;
-        while (Date.now() - t0 < 1600) { if ((await textNow()) === ADDR) { back = true; break; } await page.waitForTimeout(50); }
-        L.check(`${w} ${how}: it reverts within 1600ms`, back, `${Date.now() - t0}ms · ${await textNow()}`);
-        await closeAll(page); await page.mouse.move(5, 5); await page.waitForTimeout(300);
-      }
-    }
-  });
-  L.done(16);
-});
-
 test("CL1833-E5 · closes: a scroll with every pointer event suppressed, a small scroll keeps it, blur, leaving early, and the keyboard", async ({ page }) => {
   test.setTimeout(400_000);
   const L = new Ledger("CL1833-E5");
@@ -675,53 +421,9 @@ test("D2 · policy: 'Response policy' with its two values, writing noResponseMea
 });
 
 /* ───────────────────────── E · the list header and headings ───────────────────────── */
-const navyRead = (page: Page, row: string) => page.evaluate((row) => {
-  const n = [...document.querySelectorAll<HTMLElement>(row)].find((e) => e.getBoundingClientRect().height > 0)!;
-  const r = n.querySelector<HTMLElement>(".ltb-r");
-  const ctl = r ? [...r.querySelectorAll<HTMLElement>(":scope > *")].flatMap((c) => c.matches(".ltb-search, .ltb-ctl, .ltb-dens, .plb, .ltb-round") ? [c] : [...c.querySelectorAll<HTMLElement>(".ltb-search, .ltb-ctl, .ltb-dens, .plb, .ltb-round")]) : [];
-  const chip = n.querySelector<HTMLElement>(".ltb-chip");
-  return {
-    h: n.getBoundingClientRect().height, ctl: ctl.map((c) => Math.round(c.getBoundingClientRect().height * 10) / 10),
-    sort: [...n.querySelectorAll<HTMLElement>("*")].some((e) => e.children.length === 0 && /\bSort\b/.test(e.textContent ?? "") && e.getBoundingClientRect().height > 0),
-    chip: chip ? chip.textContent!.replace(/\s+/g, " ").replace("⌄", "").trim() : null, chipL: chip?.getBoundingClientRect().left ?? null,
-  };
-}, row);
-const menuLeft = (page: Page) => page.evaluate(() => {
-  const m = [...document.querySelectorAll<HTMLElement>('.lpop, [role="menu"], .qc138-gmenu')].find((e) => e.getBoundingClientRect().height > 0 && /group/i.test(e.textContent ?? ""));
-  return m ? m.getBoundingClientRect().left : null;
-});
-
-test("E1 · toolbar: 64 tall, every right control 36, no 'Sort', 'Grouped by {Group}' with its menu under the chip — on both pages", async ({ page }) => {
-  test.setTimeout(300_000);
-  const L = new Ledger("E1");
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await open(page, vp, "E1");
-    await page.locator(".cl18-lh").filter({ visible: true }).first().scrollIntoViewIfNeeded();
-    const c = await navyRead(page, ".cl18-lh");
-    await click(page, L, "[data-ltb='chip']", `${w} Contact list`); await page.waitForTimeout(400);
-    await shot(page, `07-group-menu-${vp.width}`);
-    const cm = await menuLeft(page);
-    await page.keyboard.press("Escape"); await page.waitForTimeout(200);
-    await openRoute(page, "/queries"); await page.setViewportSize(vp); await page.waitForTimeout(2500);
-    await mutate(page, "E1");
-    await page.locator(".qc138-top").filter({ visible: true }).first().scrollIntoViewIfNeeded();
-    const q = await navyRead(page, ".qc138-top");
-    await shot(page, `x-qc-toolbar-${vp.width}`);
-    await click(page, L, ".qc138-top .ltb-chip", `${w} Query Centre`); await page.waitForTimeout(400);
-    const qm = await menuLeft(page);
-    await page.keyboard.press("Escape"); await page.waitForTimeout(200);
-    for (const [pg, r, ml] of [["Contact list", c, cm], ["Query Centre", q, qm]] as const) {
-      L.check(`${w} ${pg}: the navy row is 64 ±1`, near(r.h, 64, 1), `${r.h}`);
-      L.check(`${w} ${pg}: right-hand controls found`, r.ctl.length >= 4, JSON.stringify(r.ctl));
-      L.check(`${w} ${pg}: every right-hand control is 36 ±1`, r.ctl.length > 0 && r.ctl.every((h) => near(h, 36, 1)), JSON.stringify(r.ctl));
-      L.check(`${w} ${pg}: nothing in it reads "Sort"`, !r.sort, `${r.sort}`);
-      L.check(`${w} ${pg}: the chip reads "Grouped by {Group}"`, /^Grouped by \S/.test(r.chip ?? ""), `${r.chip}`);
-      L.check(`${w} ${pg}: its menu's left is the chip's ±2`, near(ml, r.chipL ?? NaN, 2), `${ml} vs ${r.chipL}`);
-    }
-  }
-  L.done(24);
-});
+/* RETIRED by v19 (reports/contact-list-v19/REPORT.md): E1 held v18.3's navy list bar at 64 tall with 36px controls and its
+   chip "[data-ltb=chip]". v19's toolbar is 52 tall with 34px controls and never wraps (CL19-T1); its Group by chip and the
+   "Grouped by" reading are CL19-E1's. E2 (the headings) and E3 (sorting inside groups) are re-pointed below. */
 
 test("E2 · headings: opaque white while stuck, each label within 1px of its column — on both pages", async ({ page }) => {
   test.setTimeout(300_000);
@@ -774,11 +476,12 @@ test("E2 · headings: opaque white while stuck, each label within 1px of its col
   L.done(16);
 });
 
+/* RE-POINTED by v19: the grouping chip is v19's Group by (button.cl19-grp); the claim is unchanged. */
 test("E3 · grouped: one headings row; clicking Replies sorts every group", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("E3");
   await open(page, SIZES[0], "E3");
-  if (!(await click(page, L, "[data-ltb='chip']", "the grouping chip")) || !(await click(page, L, '[data-opt="group:status"]', "Status"))) { L.done(1); return; }
+  if (!(await click(page, L, "button.cl19-grp", "the grouping chip")) || !(await click(page, L, '[data-opt="group:status"]', "Status"))) { L.done(1); return; }
   await page.waitForTimeout(800);
   await shot(page, "08-grouped-status-1512");
   const n = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".clv-group .lt-labels")].filter((e) => e.getBoundingClientRect().height > 0).length);
@@ -798,8 +501,7 @@ test("E3 · grouped: one headings row; clicking Replies sorts every group", asyn
   const labOn = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".clv-group .lt-labels .lt-lab.on")].map((e) => e.textContent?.trim()));
   L.check("Replies is now the sort column", labOn.some((t) => /Replies/i.test(t ?? "")), JSON.stringify(labOn));
   for (const [i, g] of sorted.entries()) if (g.n > 1) L.check(`group ${i + 1}'s rows are in reply-time order`, g.ok, JSON.stringify(g.ws));
-  await page.locator("[data-ltb='chip']").filter({ visible: true }).first().click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
-  await page.locator('[data-opt="group:none"]').click({ timeout: 5000 }).catch(() => {});
+  await page.locator("[data-cl19='group-stop']").filter({ visible: true }).first().click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
   await page.locator(".clv-group .lt-labels .lt-lab").first().click().catch(() => {});
   L.done(4);
 });
@@ -807,6 +509,8 @@ test("E3 · grouped: one headings row; clicking Replies sorts every group", asyn
 /* ───────────────────────── F · the page guide ───────────────────────── */
 const centreY = (page: Page, sel: string) => page.evaluate((s) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); if (!e) return null; const r = e.getBoundingClientRect(); return r.top + r.height / 2; }, sel);
 
+/* RE-POINTED by v19 §K: the checklist has six tasks ("Pin the list" is the third), so the count reads n/6 and "all done"
+   includes the pin. The claims are unchanged. */
 test("F1 · pill: left of the '?', centred with the bar, its words and count; gone after Hide it and after all five", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("F1");
@@ -832,7 +536,7 @@ test("F1 · pill: left of the '?', centred with the bar, its words and count; go
       L.check(`${w} it sits left of the "?" with 10 ±1 between`, r.leftOfHelp && near(r.gap, 10, 1), `${r.gap}`);
       L.check(`${w} its centre equals Search's, Log a query's and the "?"'s ±1`, r.ys.every((y) => near(y, r.ys[0] ?? NaN, 1)), JSON.stringify(r.ys));
       L.check(`${w} it reads "Contact list: Getting started"`, r.text === "Contact list: Getting started", `${r.text}`);
-      L.check(`${w} and "2/5"`, r.n === "2/5", `${r.n}`);
+      L.check(`${w} and "2/6"`, r.n === "2/6", `${r.n}`);
       /* Hide it */
       await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(300);
       await click(page, L, "[data-pck='off']", "step"); await page.waitForTimeout(200);
@@ -843,14 +547,16 @@ test("F1 · pill: left of the '?', centred with the bar, its words and count; go
       await page.reload(); await page.waitForTimeout(3000);
       L.check(`${w} …and stays absent after a reload`, (await page.locator("[data-pck='pill']").count()) === 0, "");
       /* all five */
-      guideSet("--clear"); guideSet("--seen"); guideSet("--done add,search,open,edit,hk");
+      guideSet("--clear"); guideSet("--seen"); guideSet("--done add,search,pin,open,edit,hk");
       await page.reload(); await page.waitForTimeout(3000);
-      L.check(`${w} with all five done the pill is absent`, (await page.locator("[data-pck='pill']").count()) === 0, "");
+      L.check(`${w} with all six done the pill is absent`, (await page.locator("[data-pck='pill']").count()) === 0, "");
     }
   } finally { guideRestore(g0); }
   L.done(18);
 });
 
+/* RE-POINTED by v19: six steps (§K's "Pin the list" third, its target the toolbar's Pin), and Find is the toolbar's
+   ([data-cl19="find"]); the old list bar's Find is retired. The claims are unchanged. */
 test("F2 · show: a checklist row changes nothing, closes the checklist, and shows the dim with a hole around the target and the step card", async ({ page }) => {
   test.setTimeout(400_000);
   const L = new Ledger("F2");
@@ -859,11 +565,14 @@ test("F2 · show: a checklist row changes nothing, closes the checklist, and sho
     guideSet("--clear"); guideSet("--seen");
     await open(page, SIZES[0], "F2");
     await page.waitForTimeout(600);
-    const targets: Record<string, string> = { add: ".aglist [data-cl17='add']", search: ".aglist .cl18-lh [data-cl17='find']", open: ".aglist [data-clv='row'][data-agent-card]", edit: ".aglist [data-clv='row'][data-agent-card]", hk: ".aglist [data-cl183='fill']" };
-    for (const [i, k] of ["add", "search", "open", "edit", "hk"].entries()) {
+    const targets: Record<string, string> = { add: ".aglist [data-cl17='add']", search: ".aglist [data-cl19='find']", pin: ".aglist [data-cl19='pin']", open: ".aglist [data-clv='row'][data-agent-card]", edit: ".aglist [data-clv='row'][data-agent-card]", hk: ".aglist [data-cl183='fill']" };
+    for (const [i, k] of ["add", "search", "pin", "open", "edit", "hk"].entries()) {
       await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(350);
       if (k === "add") await shot(page, "13-guide-open-1512");
-      await click(page, L, `[data-pck='item'][data-k='${k}'] button`, k); await page.waitForTimeout(700);
+      await click(page, L, `[data-pck='item'][data-k='${k}'] button`, k);
+      /* v19: with six items the "open" item sits over the first row, and a still pointer there opens that row's strip
+         after the 450ms dwell (by design), growing it past the hole that was cut for it. The pointer leaves first. */
+      await page.mouse.move(5, 5); await page.waitForTimeout(700);
       await shot(page, `14-guide-step-${i + 1}-${k}-1512`);
       const r = await page.evaluate((sel) => {
         const te = [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0);
@@ -875,21 +584,22 @@ test("F2 · show: a checklist row changes nothing, closes the checklist, and sho
           step: card?.querySelector(".pck-ck")?.textContent ?? null,
           contains: !!hole && !!t && hole.left <= t.left + 0.5 && hole.top <= t.top + 0.5 && hole.left + hole.width >= t.right - 0.5 && hole.top + hole.height >= t.bottom - 0.5,
           panel: !!document.querySelector('[data-ap="panel"], [data-ap="panel-new"]'), drawer: !!document.querySelector('[data-hk8="head"]'),
-          find: (document.querySelector<HTMLInputElement>(".aglist .cl18-lh [data-cl17='find'] input")?.value ?? "") === "",
+          find: (document.querySelector<HTMLInputElement>(".aglist .cl19-findw input")?.value ?? "") === "",
+          pinned: document.querySelector<HTMLElement>(".aglist [data-cl19='pin']")?.getAttribute("aria-pressed") === "true",
         };
       }, targets[k]);
       L.check(`${k}: the checklist closed`, !r.pop, `${r.pop}`);
       L.check(`${k}: the dim shows`, r.dim, `${r.dim}`);
-      L.check(`${k}: the step card shows "Step ${i + 1} of 5"`, r.card && /Step\s+\d\s+of\s+5/i.test(r.step ?? "") && r.step!.includes(`${i + 1}`), `${r.step}`);
+      L.check(`${k}: the step card shows "Step ${i + 1} of 6"`, r.card && /Step\s+\d\s+of\s+6/i.test(r.step ?? "") && r.step!.includes(`${i + 1}`), `${r.step}`);
       L.check(`${k}: the hole contains the target`, r.contains, `${r.contains}`);
-      L.check(`${k}: no panel opened, no drawer, no search typed`, !r.panel && !r.drawer && r.find, JSON.stringify(r));
+      L.check(`${k}: no panel opened, no drawer, no search typed, not pinned`, !r.panel && !r.drawer && r.find && !r.pinned, JSON.stringify(r));
       await click(page, L, "[data-pck='back']", "step"); await page.waitForTimeout(300);
       await page.keyboard.press("Escape"); await page.waitForTimeout(250);
     }
     const g = JSON.parse(guideNow() || "null");
     L.check("nothing was ticked by the guide's own buttons", !g?.done || Object.keys(g.done).length === 0, JSON.stringify(g));
   } finally { guideRestore(g0); }
-  L.done(26);
+  L.done(31);
 });
 
 test("F3 · end: a real click on the spotlit row opens the panel and ends the spotlight within 200ms", async ({ page }) => {
@@ -936,7 +646,9 @@ test("F4 · done: a row click ticks Open, two characters tick Search, a saved ed
     L.check("a saved edit ticks Edit (stored)", (await done()).edit === true, JSON.stringify(await done()));
     await closeAll(page);
     /* search, by two characters */
-    const f = page.locator(".aglist .cl18-lh [data-cl17='find'] input").filter({ visible: true }).first();
+    /* RE-POINTED by v19: Find is the toolbar's (the old list bar's is retired); at ≤1440 it opens on a click */
+    await page.locator(".aglist .cl19-findw label.cl19-find").filter({ visible: true }).first().click().catch(() => {});
+    const f = page.locator(".aglist .cl19-findw input").filter({ visible: true }).first();
     await f.fill("Th"); await page.waitForTimeout(1200);
     L.check("two characters tick Search (stored)", (await done()).search === true, JSON.stringify(await done()));
     await f.fill(""); await page.waitForTimeout(300);
@@ -946,7 +658,7 @@ test("F4 · done: a row click ticks Open, two characters tick Search, a saved ed
     const ui = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-pck='item']")].map((e) => [e.dataset.k, e.dataset.done === "true"])));
     L.check("after a reload the checklist shows Open, Search and Edit done", ui.open && ui.search && ui.edit && !ui.add && !ui.hk, JSON.stringify(ui));
     const cnt = await page.locator("[data-pck='count']").first().textContent({ timeout: 8000 }).catch(() => null);
-    L.check("the pill reads 3/5", cnt === "3/5", `${cnt}`);
+    L.check("the pill reads 3/6 (v19 §K: six tasks)", cnt === "3/6", `${cnt}`);
     await page.keyboard.press("Escape");
   } finally { reseed(); guideRestore(g0); }
   L.done(6);

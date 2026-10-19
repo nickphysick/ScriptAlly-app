@@ -373,13 +373,15 @@ test.describe("Contact list v16", () => {
       const w = `${vp.width}`;
       const r = await readRows(page);
       L.check("C3", `${w} one panel, no group labels`, r.bands === 0 && r.panels === 1 && r.names.length > 5, `${r.bands} bands · ${r.panels} panels · ${r.names.length} rows`);
-      L.check("C3", `${w} ungrouped: the grouping chip reads "None" (v18.3 §E)`, r.group === "None", `"${r.group}"`);
+      /* RE-POINTED by v19 §E: ungrouped, the chip reads "Group by" and names no group (it read "Grouped by None") */
+      L.check("C3", `${w} ungrouped: the grouping chip names no group (v19 §E)`, r.group === "", `"${r.group}"`);
       const sur = r.names.map(surname);
       L.check("C3", `${w} rows are A to Z by surname`, sur.every((x, i) => i === 0 || sur[i - 1].localeCompare(x) <= 0), sur.slice(0, 8).join(" · "));
       L.check("C3", `${w} the order is not a single letter (the claim has something to order)`, new Set(r.initials).size > 4, `${new Set(r.initials).size} initials`);
       L.check("C3", `${w} no sort pill in the bar`, r.sortPill === 0, `${r.sortPill} sort controls`);
       const by = (c: string) => r.labs.find((l) => l.col === c);
-      L.check("C3", `${w} Agent, Replies and Query status sort; What they want does not`, by("Agent")?.tag === "BUTTON" && by("Replies")?.tag === "BUTTON" && by("Query status")?.tag === "BUTTON" && by("What they want")?.tag !== "BUTTON", r.labs.map((l) => `${l.col}:${l.tag}`).join(" · "));
+      /* RE-POINTED by v19 §C: "What they want" left the row; Date added sorts, Website and Email do not */
+      L.check("C3", `${w} Agent, Date added, Replies and Query status sort; Website and Email do not`, ["Agent", "Date added", "Replies", "Query status"].every((c) => by(c)?.tag === "BUTTON") && r.labs.filter((l) => /Website|Email/.test(l.col)).every((l) => l.tag !== "BUTTON") && r.labs.some((l) => /Website|Email/.test(l.col)), r.labs.map((l) => `${l.col}:${l.tag}`).join(" · "));
       L.check("C3", `${w} the active heading states the order`, by("Agent")?.sort === "ascending" && /↓/.test(by("Agent")?.text ?? "") && r.labs.filter((l) => l.sort).length === 1 && !/[↓↑]/.test(by("Replies")?.text ?? ""), r.labs.map((l) => `${l.col}:${l.sort}:${l.text}`).join(" · "));
       await lab("Replies").click(); await page.waitForTimeout(700);
       const a = await readRows(page);
@@ -638,7 +640,10 @@ test.describe("Contact list v16", () => {
     L.done(34);
   });
 
-  test("E2 · refit: 400ms after full screen turns on, with the sidebar's own motion, the list is the new sheet less 48", async ({ page }) => {
+  /* RETIRED by Contact list v19 §A (reports/contact-list-v19/REPORT.md): "full screen" is retired for the pin, and a pinned
+     list takes the sheet's whole width (no 24 inset, no 48 refit) with the sidebar left as it is; CL19-P3 holds the pinned
+     band and CL19-I1 the pinned card. Its ledgers go with it. */
+  test.skip("E2 · refit: 400ms after full screen turns on, with the sidebar's own motion, the list is the new sheet less 48", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("E2");
     for (const vp of SIZES16) {

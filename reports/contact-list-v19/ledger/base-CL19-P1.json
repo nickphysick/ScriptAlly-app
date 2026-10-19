@@ -1,0 +1,746 @@
+[
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 unpinned to begin with (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 the list pins (precondition)",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 the population: a row with an email",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 the headings: six side by side, five stacked, in each position",
+  "ok": false,
+  "detail": "4 (false) · 4 (false)"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 toolbar: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 find: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 group: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 filters: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 pin: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: fontFamily is the same",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif unpinned · \"Source Serif 4\", Georgia, serif pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: fontSize is the same",
+  "ok": true,
+  "detail": "17px unpinned · 17px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: color is the same",
+  "ok": true,
+  "detail": "rgb(28, 19, 15) unpinned · rgb(28, 19, 15) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 name: height is the same",
+  "ok": true,
+  "detail": "23.80 unpinned · 23.80 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: fontFamily is the same",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif unpinned · \"Source Serif 4\", Georgia, serif pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: fontSize is the same",
+  "ok": true,
+  "detail": "13.5px unpinned · 13.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.58) unpinned · rgba(28, 19, 15, 0.58) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 agency: height is the same",
+  "ok": true,
+  "detail": "18.89 unpinned · 18.89 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 date: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 website: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 email: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: fontFamily is the same",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace unpinned · \"Special Elite\", \"Courier New\", Courier, monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: fontSize is the same",
+  "ok": true,
+  "detail": "14.5px unpinned · 14.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: color is the same",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) unpinned · rgb(42, 58, 82) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 status: height is the same",
+  "ok": true,
+  "detail": "18.84 unpinned · 18.84 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.85) unpinned · rgba(28, 19, 15, 0.85) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 1 (Agent): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.5) unpinned · rgba(28, 19, 15, 0.5) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 2 (What they want): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.5) unpinned · rgba(28, 19, 15, 0.5) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 3 (Replies): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.5) unpinned · rgba(28, 19, 15, 0.5) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1512 heading 4 (Query status): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 unpinned to begin with (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 the list pins (precondition)",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 the population: a row with an email",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 the headings: six side by side, five stacked, in each position",
+  "ok": false,
+  "detail": "4 (false) · 4 (false)"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 toolbar: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 find: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 group: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 filters: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 pin: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: fontFamily is the same",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif unpinned · \"Source Serif 4\", Georgia, serif pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: fontSize is the same",
+  "ok": true,
+  "detail": "17px unpinned · 17px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: color is the same",
+  "ok": true,
+  "detail": "rgb(28, 19, 15) unpinned · rgb(28, 19, 15) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 name: height is the same",
+  "ok": true,
+  "detail": "23.80 unpinned · 23.80 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: fontFamily is the same",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif unpinned · \"Source Serif 4\", Georgia, serif pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: fontSize is the same",
+  "ok": true,
+  "detail": "13.5px unpinned · 13.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.58) unpinned · rgba(28, 19, 15, 0.58) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 agency: height is the same",
+  "ok": true,
+  "detail": "18.89 unpinned · 18.89 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 date: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 website: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 email: present in both positions",
+  "ok": false,
+  "detail": "false · false"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: fontFamily is the same",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace unpinned · \"Special Elite\", \"Courier New\", Courier, monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: fontSize is the same",
+  "ok": true,
+  "detail": "14.5px unpinned · 14.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: color is the same",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) unpinned · rgb(42, 58, 82) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 status: height is the same",
+  "ok": true,
+  "detail": "18.84 unpinned · 18.84 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.85) unpinned · rgba(28, 19, 15, 0.85) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 1 (Agent): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.5) unpinned · rgba(28, 19, 15, 0.5) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 2 (What they want): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.5) unpinned · rgba(28, 19, 15, 0.5) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 3 (Replies): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): present in both positions",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): fontFamily is the same",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", monospace unpinned · \"JetBrains Mono\", monospace pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): fontSize is the same",
+  "ok": true,
+  "detail": "10.5px unpinned · 10.5px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): color is the same",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.5) unpinned · rgba(28, 19, 15, 0.5) pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): borderRadius is the same",
+  "ok": true,
+  "detail": "0px unpinned · 0px pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): boxShadow is the same",
+  "ok": true,
+  "detail": "none unpinned · none pinned"
+ },
+ {
+  "lock": "CL19-P1",
+  "where": "@1280 heading 4 (Query status): height is the same",
+  "ok": true,
+  "detail": "12.59 unpinned · 12.59 pinned"
+ }
+]
