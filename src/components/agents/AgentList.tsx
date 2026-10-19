@@ -607,8 +607,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [afOn, showList, fullOn]);
   /* v19 §I — THE LIST HAS NO FOOTER: THE CARD RUNS TO THE PAGE'S FOOT. With more rows than the page holds the last row
      ends the card and the card ends the scroll (contactV19.css drops the page's foot air). With fewer — a search, a
-     filter, a short list — the card still meets the page's bottom edge (square, nothing beneath it) rather than ending
-     mid-page: its min-height is the scroll area's height less the card's own top in the scrolled content, measured, and
+     filter, a short list — the card still runs to the page's foot rather than ending mid-page (v19.1 §F: unpinned it
+     stops 22px short, rounded, the scroll area's foot padding; pinned it meets the foot square): its min-height is the
+     scroll area's height less the card's own top in the scrolled content and that padding, measured, and
      re-measured whenever the scroll area or the group above it changes size. Desktop only (the phone keeps its flow). */
   useLayoutEffect(() => {
     const card = wsRef.current;

@@ -34,8 +34,13 @@
   /* flow-root: the head's -12 cover margin must not collapse through the card's top (it pulled the card's edge 12px
      up, leaving a strip of sheet colour under a hairline) */
   .clv-group .cl16-list.cl19-card { display: flow-root; }
-  /* nothing beneath the card: the page's own foot air goes, so the card meets the page's foot */
-  .agl-wpg .wpg-scroll:has(.clv-group .cl19-card) { padding-bottom: 0; }
+  /* nothing beneath the card. v19.1 §F: unpinned, the card's four corners round (18) and 22px of page lies below it —
+     the scroll area's foot padding, which AgentList's measured min-height already subtracts, so a short list's card
+     still ends 22 above the page's foot; pinned, the card meets the foot square, as v19. `overflow: clip` rounds the
+     rows into the bottom corners (it makes no scroll container, so nothing sticky changes). */
+  .agl-wpg .wpg-scroll:has(.clv-group .cl19-card) { padding-bottom: 22px; }
+  .agl-wpg .wpg-scroll:has(.clv-group[data-full] .cl19-card) { padding-bottom: 0; }
+  .clv-group:not([data-full]) .cl16-list.cl19-card { border-radius: 18px; overflow: clip; }
 
   /* pinned: no hero, the card takes the sheet's full width and starts at its top */
   .clv-group[data-full] > .clv-main.clv-main {
@@ -622,3 +627,25 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 /* ── v19 §H — HOVER IS HELD AFTER A LIST CHANGE until the pointer moves (ContactRows sets `data-hover-hold`): a row under
    a still pointer keeps its rest colour and does not open. ── */
 .clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(.kf):not([data-peek]):not([aria-current="true"]) { background: #fff; }
+
+/* ── v19.1 §F · UNPINNED, THE LIST'S TOOLBAR IS NAVY (screens 01–04). Pinned is unchanged: every rule below names the head
+   that is NOT pinned. The bar is the pinned band's navy with no rule beneath; the letters cream (#f4eee5), the empty
+   ones at 28%, the current one a cream tile with navy text, hover a 12% cream wash; Find, Group by and Filters keep
+   their white fill and lose their ring (the applied-chip states — powder and a navy ring — are untouched); Pin is
+   cream with navy text and icon, white on hover; the jump row's group buttons are white without a ring. Focus rings
+   that were navy turn cream, or they would vanish into the bar. ── */
+.cl19-head:not([data-pinned]) .cl19-tb { background: #2a3a52; border-bottom: 0; }
+.cl19-head:not([data-pinned]) .cl19-az button { color: rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) .cl19-az button:hover:not(:disabled) { background: rgba(244, 238, 229, 0.12); }
+.cl19-head:not([data-pinned]) .cl19-az button[aria-current="true"] { background: rgb(244, 238, 229); color: #2a3a52; box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-az button:disabled { color: rgba(244, 238, 229, 0.28); }
+.cl19-head:not([data-pinned]) .cl19-az button:focus-visible { outline-color: rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) :is(.cl19-ctl, .cl19-find) { box-shadow: none; }
+.cl19-head:not([data-pinned]) :is(.cl19-ctl, .cl19-pin, .cl19-grpx):focus-visible { outline-color: rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) .cl19-find:focus-within { box-shadow: 0 0 0 2px rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) .cl19-pin { background: rgb(244, 238, 229); color: #2a3a52; }
+.cl19-head:not([data-pinned]) .cl19-pin:hover:not(:disabled) { background: #fff; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"],
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: rgb(244, 238, 229); box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:focus-visible { outline-color: rgb(244, 238, 229); }
