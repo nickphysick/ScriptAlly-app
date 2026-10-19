@@ -472,6 +472,12 @@ export const ContactRows: React.FC<ContactRowsProps & {
     const maxOf = (sel: string, w: (e: HTMLElement) => number) => rows.reduce((m, r) => Math.max(m, ...[...r.querySelectorAll<HTMLElement>(sel)].map(w), 0), 0);
     const fsNow = fitRef.current.fs;
     const norm = (e: HTMLElement) => e.getBoundingClientRect().width * (CONTACT_FS / fsNow);
+    const raw = (e: HTMLElement) => e.getBoundingClientRect().width;
+    /* the text after the icon: the box less the icon and its gap (measured), normalised to 15px */
+    const text = (e: HTMLElement) => {
+      const b = e.getBoundingClientRect(), ic = e.querySelector(".cl19-ci")?.getBoundingClientRect();
+      return (b.right - (ic ? ic.right + 6 : b.left)) * (CONTACT_FS / fsNow);
+    };
     const who = maxOf(".clv-rwho", (e) => {
       const disc = e.querySelector<HTMLElement>(".clv-ini")?.getBoundingClientRect().width ?? 40;
       return disc + 11 + Math.max(textW(e.querySelector(".clv-rwn b")), textW(e.querySelector(".clv-ragy")));
@@ -479,8 +485,10 @@ export const ContactRows: React.FC<ContactRowsProps & {
     const next = fitContactColumns({
       avail, gap, agentFloor: Math.min(who, 230),
       date: maxOf('.cl19-cd [data-cl19="date"]', norm), dateHead: head("Date added"),
-      web: maxOf('[data-cl19="website"], [data-cl19="add-website"]', norm), webHead: mono("Website"),
-      email: maxOf('[data-cl19="email"], [data-cl19="add-email"]', norm), emailHead: mono("Email"),
+      /* v19.1 §B — a value's TEXT at 15px (the lib adds its icon, which does not scale); v19.1 §A — a missing one's
+         "+ Add" link, at its fixed 14px */
+      web: maxOf('[data-cl19="website"]', text), webHead: mono("Website"), webAdd: maxOf('[data-cl19="add-website"]', raw),
+      email: maxOf('[data-cl19="email"]', text), emailHead: mono("Email"), emailAdd: maxOf('[data-cl19="add-email"]', raw),
       bothHead: mono("Website and email"),
       replies: Math.max(maxOf(".clv-rrep > *", (e) => e.getBoundingClientRect().width), head("Replies")),
       status: Math.max(maxOf(".clv-rq > *", (e) => e.getBoundingClientRect().width), head("Query status")),

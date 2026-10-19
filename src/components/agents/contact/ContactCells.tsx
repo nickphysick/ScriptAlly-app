@@ -6,6 +6,8 @@
  * and email stacked in one, when the two do not both fit). They answer their own clicks and never open the card:
  * each stops its click and keys, and the row's click handler ignores them as well (`data-cl19` below).
  *
+ *   Both     v19.1 §B: a 15px navy icon (globe / envelope) 6px before the text; no underline at rest, a navy one at 35%
+ *            (offset 4px) on hover.
  *   Website  serif, ink; a 13px navy ↗ shows on hover (it keeps its room, so nothing moves); opens in a new tab.
  *   Email    the address IS the copy button (v18.3.3 §C, moved here from the open row): click, Enter or Space copies
  *            the FULL address; for 1400ms the address is replaced IN PLACE by "✓ Copied" in green italics. The
@@ -36,8 +38,9 @@ export async function copyText(text: string): Promise<boolean> {
 /** how long "✓ Copied" stands in for the address */
 export const COPIED_MS = 1400;
 
+/** v19.1 §B — 15px, navy at 70% (contactV19.css), 6px before the text */
 export const CellIcon: React.FC<{ kind: "mail" | "web" }> = ({ kind }) => (
-  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg className="cl19-ci" data-cl19={kind === "mail" ? "email-icon" : "website-icon"} viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {kind === "mail" ? <><rect x="2" y="3.5" width="12" height="9" rx="1.4" /><path d="m2.5 4.3 5.5 4.4 5.5-4.4" /></>
       : <><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2.2 2 9.8 0 12M8 2c-2 2.2-2 9.8 0 12" /></>}
   </svg>
@@ -52,7 +55,7 @@ export const DateAdded: React.FC<{ agent: Pick<Agent, "dateAdded"> }> = ({ agent
 export const Website: React.FC<{ url: string }> = ({ url }) => (
   <a className="cl19-web" data-cl19="website" href={hrefOf(url)} target="_blank" rel="noopener noreferrer"
     onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-    <span className="cl19-wt">{domainOf(url)}</span><i className="cl19-ext" aria-hidden="true">↗</i>
+    <CellIcon kind="web" /><span className="cl19-wt">{domainOf(url)}</span><i className="cl19-ext" aria-hidden="true">↗</i>
   </a>
 );
 
@@ -69,8 +72,11 @@ export const CopyEmail: React.FC<{ email: string }> = ({ email }) => {
       data-done={done ? "" : undefined}
       onClick={(e) => { e.stopPropagation(); go(); }}
       onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }}>
-      <span className="cl19-et">{email}</span>
-      {done ? <span className="cl19-copied" data-cl19="copied" aria-live="polite">✓ Copied</span> : null}
+      <CellIcon kind="mail" />
+      <span className="cl19-ew">
+        <span className="cl19-et">{email}</span>
+        {done ? <span className="cl19-copied" data-cl19="copied" aria-live="polite">✓ Copied</span> : null}
+      </span>
     </span>
   );
 };

@@ -264,12 +264,20 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 /* brand.tsx names bare spans as the sans at runtime: every element in these cells states the serif */
 .clv-group .cl19-card .cl19-c :is(span, a, button, i) { font-family: var(--sp-serif) !important; }
 .cl19-c .cl19-yr { color: rgba(28, 19, 15, 0.45); }
+/* v19.1 §B — website and email: a 15px icon, navy at 70%, 6px before the text; the text in ink with no underline at
+   rest and a navy one at 35% (offset 4px) on hover. The icon takes no part in the type's scaling (contactColumns adds
+   its 22px to the column). */
+.cl19-c .cl19-web, .cl19-c .cl19-em { display: inline-flex; align-items: center; }
+.cl19-c .cl19-ci { flex: none; width: 15px; height: 15px; margin-right: 6px; color: rgba(42, 58, 82, 0.7); }
 .cl19-c .cl19-web { color: inherit; text-decoration: none; }
+.cl19-c :is(.cl19-wt, .cl19-et) { text-decoration: none; }
+.cl19-c .cl19-web:is(:hover, :focus-visible) .cl19-wt,
+.cl19-c .cl19-em:is(:hover, :focus-visible) .cl19-et { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px; }
 .cl19-c .cl19-ext { display: inline-block; margin-left: 4px; font: normal 400 13px/1 var(--sp-serif); color: #2a3a52; opacity: 0; }
 .cl19-c .cl19-web:hover .cl19-ext, .cl19-c .cl19-web:focus-visible .cl19-ext { opacity: 1; }
 .cl19-c .cl19-web:focus-visible, .cl19-c .cl19-em:focus-visible, .cl19-c .cl19-miss:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
-.cl19-c .cl19-em { position: relative; cursor: pointer; }
-.cl19-c .cl19-em:is(:hover, :focus-visible) .cl19-et { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.4); text-underline-offset: 3px; }
+.cl19-c .cl19-em { cursor: pointer; }
+.cl19-c .cl19-ew { position: relative; display: inline-block; }
 /* the copy: "✓ Copied" over the address, which stays laid out (hidden) so the column keeps its width */
 .cl19-c .cl19-em[data-done] .cl19-et { visibility: hidden; }
 .cl19-c .cl19-copied { position: absolute; left: 0; top: 0; font-style: italic; color: #2f6b4f; white-space: nowrap; }
