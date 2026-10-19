@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B1",
+  "where": "1280 the guide's pill is up (five of six done)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 the Pin step opened from the checklist",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 \"pin button\"",
+  "ok": true,
+  "detail": "QUERY CENTRE · STEP 3 OF 6 Pin the list Press the pin button, or F, and the list becomes the whole page: the sidebar tuc"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 \"F\" named in the text",
+  "ok": true,
+  "detail": "[\"Pin the list\",\"pin\",\"F\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 never \"Pin list\"",
+  "ok": true,
+  "detail": "QUERY CENTRE · STEP 3 OF 6 Pin the list Press the pin button, or F, and the list becomes the whole page: the sidebar tuc"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 the F key cap is still on the card",
+  "ok": true,
+  "detail": "[\"F\"]"
+ }
+]

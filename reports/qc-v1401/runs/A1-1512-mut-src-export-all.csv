@@ -1,0 +1,88 @@
+﻿Agent,Agency,Agent email,Manuscript,Status,Date sent,Days since sent,Sent via,Materials included,Personalisation note,Response deadline,Nudge date,Last status change,Guidelines URL,Notes,Query ID
+Tom Ellery,Curtis Vane,tom@example.com,The Smoke Test,Rejected,19/07/2026,92,Email,"Covering letter, Synopsis",,13/09/2026,,17/09/2026,,,cor-closed
+Marcus Reed,Reed & Partners,marcus@example.com,The Smoke Test,Partial requested,29/07/2026,82,Email,"Covering letter, Synopsis",,23/09/2026,,07/09/2026,,,cor-move-a
+Priya Nair,Northbank Literary,priya@example.com,The Smoke Test,Queried,03/08/2026,77,Email,"Covering letter, Synopsis",,28/09/2026,,03/08/2026,,,cor-move-b
+Joan Whitfield,Whitfield Agency,joan@example.com,The Smoke Test,Rejected,09/07/2026,102,Email,"Covering letter, Synopsis",,03/09/2026,,27/09/2026,,,cor-move-c
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Smoke Test,Partial sent,08/08/2026,72,Email,"Covering letter, Synopsis",,03/10/2026,,02/09/2026,,,cor-pair
+Sam Okoro,Okoro Bell,sam@example.com,The Smoke Test,Full sent,04/07/2026,107,Email,"Covering letter, Synopsis",,29/08/2026,,09/09/2026,,,cor-undo
+Eleanor Whitfield,Greenfield Literary,,Murphy's Day Out,Rejected,14/03/2026,219,Email,"Covering letter, Synopsis",,,,14/03/2026,,,cv25-q-01
+William Tan,Penrose & Lyle,,Murphy's Day Out,Rejected,11/04/2026,191,Email,"Covering letter, Synopsis",,,,11/04/2026,,,cv25-q-02
+Priya Raman,Raman & Rowe,,Murphy's Day Out,Queried,01/07/2026,110,Email,"Covering letter, Synopsis",,,,01/07/2026,,,cv25-q-03
+Daniel O’Rourke,Inkwell & Stone,,Murphy's Day Out,Queried,20/06/2026,121,Email,"Covering letter, Synopsis",,,,20/06/2026,,,cv25-q-04
+Sophie Dunn,Ashgrove Literary,,Murphy's Day Out,Partial sent,03/06/2026,138,Email,"Covering letter, Synopsis",,,,03/06/2026,,,cv25-q-05
+Clara Beaumont,Harbour Lane,,Murphy's Day Out,Partial requested,02/09/2026,47,Email,"Covering letter, Synopsis",,,,02/09/2026,,,cv25-q-06
+Marcus Reed,Bloomsbury Quill,,Murphy's Day Out,Partial requested,10/09/2026,39,Email,"Covering letter, Synopsis",,,,10/09/2026,,,cv25-q-07
+Tom Ellery,Ellery & Finch,,Murphy's Day Out,Offer,22/08/2026,58,Email,"Covering letter, Synopsis",,,,22/08/2026,,,cv25-q-08
+Jonathan Marsh,The Marsh Agency,,Murphy's Day Out,Full requested,24/09/2026,25,Email,"Covering letter, Synopsis",,,,24/09/2026,,,cv25-q-09
+Aisha Kapoor,The Lantern Agency,,Murphy's Day Out,Full sent,03/06/2026,138,Email,"Covering letter, Synopsis",,,,03/06/2026,,,cv25-q-10
+Hester Quinn,Quinn Literary,,Murphy's Day Out,Partial sent,12/07/2026,99,Email,"Covering letter, Synopsis",,,,12/07/2026,,,cv25-q-11
+George Ashworth,Ashworth Literary,,Murphy's Day Out,Rejected,20/08/2026,60,Email,"Covering letter, Synopsis",,,,20/08/2026,,,cv25-q-12
+Nadia Hussain,Northgate Literary,,Murphy's Day Out,Queried,30/09/2026,19,Email,"Covering letter, Synopsis",,,,30/09/2026,,,cv25-q-13
+Fenella Strand,Brightwater Books,,Murphy's Day Out,Queried,28/09/2026,21,Email,"Covering letter, Synopsis",,,,28/09/2026,,,cv25-q-14
+Mira Kovic,Old Harbour Literary,,Harbour of Glass,Queried,05/09/2026,44,Email,"Covering letter, Synopsis",,01/01/2026,,05/09/2026,,,msv12-q-1
+Douglas Renner,Renner & Frost,,Harbour of Glass,Queried,08/09/2026,41,Email,"Covering letter, Synopsis",,20/10/2026,,08/09/2026,,,msv12-q-2
+Edda Voss,Voss Literary,,Harbour of Glass,Partial requested,06/09/2026,43,Email,"Covering letter, Synopsis",,18/10/2026,,12/09/2026,,,msv12-q-3
+Theo Abara,Abara Grant Agency,,Harbour of Glass,Full requested,07/09/2026,42,Email,"Covering letter, Synopsis",,,,19/09/2026,,,msv12-q-4
+Sun-hee Park,Meridian Line,,Harbour of Glass,Full sent,01/07/2026,110,Email,"Covering letter, Synopsis",,,,24/07/2026,,,msv12-q-5
+Rosa Quintana,Quintana Books,,Harbour of Glass,Rejected,03/03/2026,230,Email,"Covering letter, Synopsis",,,,03/03/2026,,,msv12-q-6
+Mira Kovic,Old Harbour Literary,,Harbour of Glass,Queried,10/03/2026,223,Email,"Covering letter, Synopsis",,01/01/2026,,10/03/2026,,,msv12-q-7
+Douglas Renner,Renner & Frost,,Harbour of Glass,No response,05/03/2026,228,Email,"Covering letter, Synopsis",,16/04/2026,,05/03/2026,,,msv12-q-8
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Smoke Test,Queried,20/09/2026,28,Email,"Covering letter, Synopsis",,15/11/2026,,20/09/2026,,,probe-dangling-pkg
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Smoke Test,Queried,23/09/2026,26,Email,"Covering letter, Synopsis",,18/11/2026,,23/09/2026,,,probe-goalstress-today
+,,,,Queried,20/09/2026,28,Email,,,,,20/09/2026,,,probe-un-both
+,,,The Smoke Test,Queried,20/09/2026,28,Email,,,,,20/09/2026,,,probe-un-noagent
+Elinor Hale,Cavendish & Roe,elinor@example.com,,Queried,20/09/2026,28,Email,"Covering letter, Synopsis",,15/11/2026,,20/09/2026,,,probe-un-noms
+Imogen Rackham,Rackham & Hale,rej-agent-1@example.test,The Smoke Test,Rejected,12/08/2026,67,Email,Covering letter,,07/10/2026,,12/08/2026,,,rej-query-1
+Tobias Hark,Hark Literary,tobias@example.com,The Smoke Test,Full requested,13/07/2026,98,Email,"Covering letter, Synopsis",,07/09/2026,,21/09/2026,,,rj-dupe
+Tamsin Probewell,Probe & Nightingale,tamsin@example.com,The Smoke Test,Queried,29/06/2026,112,Email,"Covering letter, Synopsis",,10/08/2026,,29/06/2026,,,rj-nudge
+Imogen Vale,Vale & Wick,imogen@example.com,The Smoke Test,Full requested,23/07/2026,88,Email,"Covering letter, Synopsis",,03/09/2026,,12/09/2026,,,rj-send
+Alasdair Crewe,Crewe Literary,alasdair@example.com,The Smoke Test,Queried,19/08/2026,61,Email,"Covering letter, Synopsis",,09/12/2026,25/09/2026,19/08/2026,,,seed-cal-bang-q
+Wren Ashcombe,Ashcombe Literary,wren@example.com,The Smoke Test,Queried,09/08/2026,71,Email,"Covering letter, Synopsis",,04/10/2026,,09/08/2026,,,seed-cal-near-q
+Cormac Bligh,Bligh & Sons,cormac@example.com,The Smoke Test,Queried,11/08/2026,69,Email,"Covering letter, Synopsis",,08/09/2026,,11/08/2026,,,seed-cal-passed20-q
+Ottoline Frayn,Frayn Agency,ottoline@example.com,The Smoke Test,Full requested,18/04/2024,914,Email,"Covering letter, Synopsis",,16/05/2024,,20/09/2026,,,seed-cal-passed865-q
+Hester Blaine,Blaine & Vole,hester@example.com,The Smoke Test,Queried,08/09/2026,41,Email,"Covering letter, Synopsis",,01/12/2026,12/10/2026,08/09/2026,,,seed-cal-soon-q
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Smoke Test,Queried,25/07/2026,86,Email,"Covering letter, Synopsis",,19/09/2026,,25/07/2026,,,seed-pkgq-1
+Peter Vance,Vance Associates,peter@example.com,The Smoke Test,Partial sent,24/07/2026,87,Email,"Covering letter, Synopsis",,18/09/2026,,07/08/2026,,,seed-pkgq-10
+Tom Ellery,Curtis Vane,tom@example.com,The Smoke Test,Queried,27/07/2026,84,Email,"Covering letter, Synopsis",,21/09/2026,,27/07/2026,,,seed-pkgq-2
+Marcus Reed,Reed & Partners,marcus@example.com,The Smoke Test,Full requested,25/06/2026,116,Email,"Covering letter, Synopsis",,20/08/2026,,23/08/2026,,,seed-pkgq-3
+Priya Nair,Northbank Literary,priya@example.com,The Smoke Test,Partial requested,30/06/2026,111,Email,"Covering letter, Synopsis",,25/08/2026,,23/08/2026,,,seed-pkgq-4
+Joan Whitfield,Whitfield Agency,joan@example.com,The Smoke Test,Rejected,15/06/2026,126,Email,"Covering letter, Synopsis",,10/08/2026,,29/06/2026,,,seed-pkgq-5
+Sam Okoro,Okoro Bell,sam@example.com,The Smoke Test,Rejected,17/06/2026,124,Email,"Covering letter, Synopsis",,12/08/2026,,01/07/2026,,,seed-pkgq-6
+Rachel Lin,Lin Literary,rachel@example.com,The Smoke Test,Queried,04/08/2026,76,Email,"Covering letter, Synopsis",,29/09/2026,,04/08/2026,,,seed-pkgq-7
+David Marsh,Marsh & Co,david@example.com,The Smoke Test,Rejected,10/07/2026,101,Email,"Covering letter, Synopsis",,04/09/2026,,24/07/2026,,,seed-pkgq-8
+Ana Duarte,Duarte Words,ana@example.com,The Smoke Test,Full sent,19/07/2026,92,Email,"Covering letter, Synopsis",,13/09/2026,,02/08/2026,,,seed-pkgq-9
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Smoke Test,Queried,16/09/2026,33,Email,"Covering letter, Synopsis",,11/11/2026,,16/09/2026,,,seed-query-1
+Peter Vance,Vance Associates,peter@example.com,The Smoke Test,Full sent,08/02/2026,253,Email,"Covering letter, Synopsis",,31/05/2026,,17/08/2026,,,seed-query-10
+Iris Kwan,Kwan & Hall,iris@example.com,The Smoke Test,Revise & Resubmit,08/07/2026,103,Email,"Covering letter, Synopsis",,02/09/2026,,23/08/2026,,,seed-query-11
+Noah Bright,Bright Literary,noah@example.com,The Smoke Test,Offer,10/06/2026,131,Email,"Covering letter, Synopsis",,30/09/2026,,14/08/2026,,,seed-query-12
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Smoke Test,Rejected,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,05/08/2026,,,seed-query-13
+Tom Ellery,Curtis Vane,tom@example.com,The Smoke Test,Rejected,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,20/08/2026,,,seed-query-14
+Marcus Reed,Reed & Partners,marcus@example.com,The Smoke Test,Rejected,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,05/08/2026,,,seed-query-15
+Priya Nair,Northbank Literary,priya@example.com,The Smoke Test,Rejected,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,05/08/2026,,,seed-query-16
+Joan Whitfield,Whitfield Agency,joan@example.com,The Smoke Test,Withdrawn,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,05/08/2026,,,seed-query-17
+Sam Okoro,Okoro Bell,sam@example.com,The Smoke Test,No response,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,05/08/2026,,,seed-query-18
+Rachel Lin,Lin Literary,rachel@example.com,The Smoke Test,Queried,05/01/2026,287,Email,"Covering letter, Synopsis",,02/03/2026,,05/01/2026,,,seed-query-19
+Tom Ellery,Curtis Vane,tom@example.com,The Smoke Test,Queried,01/09/2026,48,Email,"Covering letter, Synopsis",,27/10/2026,,01/09/2026,,,seed-query-2
+David Marsh,Marsh & Co,david@example.com,The Smoke Test,Partial requested,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,19/08/2026,,,seed-query-20
+Ana Duarte,Duarte Words,ana@example.com,The Smoke Test,Full sent,27/05/2026,145,Email,"Covering letter, Synopsis",,16/09/2026,,22/07/2026,,,seed-query-21
+Bea Halloran,Halloran & Fitch,bea@example.com,The Smoke Test,Queried,19/08/2026,61,Email,Covering letter,,01/01/2026,,19/08/2026,,,seed-query-22
+Rufus Oyelaran,Oyelaran Books,rufus@example.com,The Smoke Test,Partial sent,22/07/2026,89,Email,Covering letter,,30/09/2026,,19/08/2026,,,seed-query-23
+Marcus Reed,Reed & Partners,marcus@example.com,The Smoke Test,Queried,09/08/2026,71,Email,"Covering letter, Synopsis",,04/10/2026,,09/08/2026,,,seed-query-3
+Priya Nair,Northbank Literary,priya@example.com,The Smoke Test,Queried,06/08/2026,74,Email,"Covering letter, Synopsis",,01/01/2026,,06/08/2026,,,seed-query-4
+Joan Whitfield,Whitfield Agency,joan@example.com,The Smoke Test,Queried,29/07/2026,82,Email,"Covering letter, Synopsis",,23/09/2026,,29/07/2026,,,seed-query-5
+Sam Okoro,Okoro Bell,sam@example.com,The Smoke Test,Queried,18/07/2026,93,Email,"Covering letter, Synopsis",,12/09/2026,,18/07/2026,,,seed-query-6
+Rachel Lin,Lin Literary,rachel@example.com,The Smoke Test,Partial requested,05/08/2026,75,Email,"Covering letter, Synopsis",,30/09/2026,,21/08/2026,,,seed-query-7
+David Marsh,Marsh & Co,david@example.com,The Smoke Test,Partial sent,25/07/2026,86,Email,"Covering letter, Synopsis",,17/10/2026,,22/08/2026,,,seed-query-8
+Ana Duarte,Duarte Words,ana@example.com,The Smoke Test,Full requested,08/07/2026,103,Email,"Covering letter, Synopsis",,30/09/2026,,21/08/2026,,,seed-query-9
+Elinor Hale,Cavendish & Roe,elinor@example.com,The Quiet Second,Queried,01/06/2026,140,Email,"Covering letter, Synopsis",,27/07/2026,,01/06/2026,,,seed-query-ms2-a
+Tom Ellery,Curtis Vane,tom@example.com,The Quiet Second,Full sent,01/06/2026,140,Email,"Covering letter, Synopsis",,27/07/2026,,01/06/2026,,,seed-query-ms2-b
+Tobias Quint,Quint Literary,thin-ag-chase@example.test,The Quiet Fixture,Queried,22/07/2026,88,Email,Covering letter,,19/08/2026,,22/07/2026,,,thin-q-chase
+Rosalind Vale,Vale & Marchetti,thin-ag-close@example.test,The Quiet Fixture,Queried,16/08/2025,428,Email,"Covering letter, Synopsis",,27/09/2025,,16/08/2025,,,thin-q-close
+Rosalind Vale,Vale & Marchetti,thin-ag-close@example.test,The Quiet Fixture,Queried,04/03/2026,228,Email,,,15/04/2026,,21/08/2026,,,thin-q-cohort-1
+Tobias Quint,Quint Literary,thin-ag-chase@example.test,The Quiet Fixture,Queried,13/03/2026,219,Email,,,10/04/2026,,21/08/2026,,,thin-q-cohort-2
+Imogen Farr,Farr & Boyd,thin-ag-remind@example.test,The Quiet Fixture,Queried,22/03/2026,210,Email,,,17/05/2026,,21/08/2026,,,thin-q-cohort-3
+Devendra Rao,Rao Agency,thin-ag-gap@example.test,The Quiet Fixture,Queried,31/03/2026,201,Email,,,09/06/2026,,21/08/2026,,,thin-q-cohort-4
+Rosalind Vale,Vale & Marchetti,thin-ag-close@example.test,The Quiet Fixture,Queried,09/04/2026,192,Email,,,21/05/2026,,21/08/2026,,,thin-q-cohort-5
+Tobias Quint,Quint Literary,thin-ag-chase@example.test,The Quiet Fixture,Queried,18/04/2026,183,Email,,,16/05/2026,,21/08/2026,,,thin-q-cohort-6
+Devendra Rao,Rao Agency,thin-ag-gap@example.test,The Quiet Fixture,Partial sent,06/08/2026,73,Email,,,15/10/2026,,29/08/2026,,,thin-q-gap-solo
+Imogen Farr,Farr & Boyd,thin-ag-remind@example.test,The Quiet Fixture,Queried,21/08/2026,58,Email,Covering letter,,16/10/2026,18/09/2026,21/08/2026,,,thin-q-remind

@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 the label reads \"Export {v} queries\"",
+  "ok": true,
+  "detail": "↓ Export 14 queries · Show 14 queries"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 a narrowed set (fewer than all)",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 today's file name",
+  "ok": true,
+  "detail": "QueryHawk_Filtered_Queries_2026-10-19.csv"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 today's columns",
+  "ok": true,
+  "detail": "[\"Agent\",\"Agency\",\"Agent email\",\"Manuscript\",\"Status\",\"Date sent\",\"Days since sent\",\"Sent via\",\"Materials included\",\"Personalisation note\",\"Response deadline\",\"Nudge date\",\"Last status change\",\"Guidelines URL\",\"Notes\",\"Query ID\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 exactly {v} data rows",
+  "ok": false,
+  "detail": "87 vs 14"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the list shows {v} rows",
+  "ok": true,
+  "detail": "14 vs 14"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the CSV's query ids are the list's, in order",
+  "ok": false,
+  "detail": "cor-closed,cor-move-a,cor-move-b,cor-move-c vs msv12-q-2,seed-query-2,seed-query-1,probe-dangling-pkg"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 the CSV's agent names are the list's, in order",
+  "ok": false,
+  "detail": "first difference at 0: \"Tom Ellery\" vs \"Douglas Renner\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the label reads \"Export {v} queries\"",
+  "ok": true,
+  "detail": "↓ Export 14 queries · Show 14 queries"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 a narrowed set (fewer than all)",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 today's file name",
+  "ok": true,
+  "detail": "QueryHawk_Filtered_Queries_2026-10-19.csv"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 today's columns",
+  "ok": true,
+  "detail": "[\"Agent\",\"Agency\",\"Agent email\",\"Manuscript\",\"Status\",\"Date sent\",\"Days since sent\",\"Sent via\",\"Materials included\",\"Personalisation note\",\"Response deadline\",\"Nudge date\",\"Last status change\",\"Guidelines URL\",\"Notes\",\"Query ID\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 exactly {v} data rows",
+  "ok": false,
+  "detail": "87 vs 14"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the list shows {v} rows",
+  "ok": true,
+  "detail": "14 vs 14"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the CSV's query ids are the list's, in order",
+  "ok": false,
+  "detail": "cor-closed,cor-move-a,cor-move-b,cor-move-c vs msv12-q-2,seed-query-2,seed-query-1,probe-dangling-pkg"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 the CSV's agent names are the list's, in order",
+  "ok": false,
+  "detail": "first difference at 0: \"Tom Ellery\" vs \"Douglas Renner\""
+ }
+]
