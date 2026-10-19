@@ -24,7 +24,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { usePopover, type PopoverState } from "../../shell/ListPills";
+import { quietScroll, usePopover, type PopoverState } from "../../shell/ListPills";
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import "./qcv140.css";
@@ -86,6 +86,17 @@ export function jumpTo(root: HTMLElement | null, j: Qc140Jump): void {
   sc.scrollTo({ top: Math.max(0, Math.round(top)), behavior: calm ? "auto" : "smooth" });
 }
 
+/** the Filters menu's height before the scroll area is capped (header, Most used, the area at its cap, footer) */
+const FILTER_MENU_EST = 720;
+/** scroll the list, instantly and quietly, so its toolbar is stuck at the top of the scroller */
+function stickToolbar(root: HTMLElement | null): void {
+  const sc = scrollerOf(root);
+  if (!root || !sc) return;
+  const d = root.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+  if (d <= 1) return;
+  quietScroll(() => sc.scrollTo({ top: sc.scrollTop + d, behavior: "auto" }));
+}
+
 /** "+N more"'s menu: the folded jumps, with their marks, full labels and counts, 8 under the button */
 const JumpMenu: React.FC<{ anchor: HTMLElement; items: Qc140Jump[]; current: string | null; onPick: (j: Qc140Jump) => void }> = ({ anchor, items, current, onPick }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -111,8 +122,23 @@ const JumpMenu: React.FC<{ anchor: HTMLElement; items: Qc140Jump[]; current: str
   );
 };
 
-/** A · the Group by menu (Part D dresses it); A keeps the five groupings so the chip opens something real */
-const GroupMenu: React.FC<{ anchor: HTMLElement; groupBy: GroupBy; onGroup: (g: GroupBy) => void; close: () => void }> = ({ anchor, groupBy, onGroup, close }) => {
+/** §D — each grouping's one-line description in the Group by menu */
+export const GROUP_LINE: Readonly<Record<GroupBy, string>> = {
+  attention: "Your move, waiting, closed",
+  status: "Where each query stands",
+  action: "What happens next, and when",
+  package: "What you sent",
+  none: "One list, in the order you sort by",
+};
+
+/**
+ * §D — THE GROUP BY MENU: 330 wide, under the chip and right-aligned to it, 8 below. Radio rows with a one-line
+ * italic description (No grouping after a hairline), then a hairline and the ROWS line: Comfortable / Compact, the
+ * list's density, moved here from the old header.
+ */
+const GroupMenu: React.FC<{ anchor: HTMLElement; groupBy: GroupBy; onGroup: (g: GroupBy) => void; density: QcDensity; onDensity: (d: QcDensity) => void; close: () => void }> = ({
+  anchor, groupBy, onGroup, density, onDensity, close,
+}) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   useLayoutEffect(() => {
@@ -121,13 +147,38 @@ const GroupMenu: React.FC<{ anchor: HTMLElement; groupBy: GroupBy; onGroup: (g: 
     setPos({ top: r.bottom + 8, left: Math.max(16, Math.min(r.right - w, window.innerWidth - w - 16)) });
   }, [anchor]);
   useEffect(() => { ref.current?.querySelector<HTMLElement>("[aria-checked='true']")?.focus({ preventScroll: true }); }, []);
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    const items = [...(ref.current?.querySelectorAll<HTMLElement>("button") ?? [])];
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    if (!items.length) return;
+    e.preventDefault();
+    items[(i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus();
+  };
   return createPortal(
-    <div className="lpop qc140-gpop" data-lpop="group" data-qc140="group-menu" data-qc138="group-menu" role="menu" aria-label="Group the list by" ref={ref}
+    <div className="lpop qc140-gpop" data-lpop="group" data-qc140="group-menu" data-qc138="group-menu" role="menu" aria-label="Group the list by" ref={ref} onKeyDown={onKey}
       style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
+      <div className="qc140-mh">Group the list by</div>
       {GROUP_BY_OPTIONS.map((o) => (
-        <button key={o.key} type="button" role="menuitemradio" aria-checked={groupBy === o.key} data-qc140="group-opt" data-g={o.key}
-          onClick={() => { onGroup(o.key); close(); anchor.focus({ preventScroll: true }); }}>{o.label}</button>
+        <React.Fragment key={o.key}>
+          {o.key === "none" ? <hr className="qc140-hr" /> : null}
+          <button type="button" role="menuitemradio" aria-checked={groupBy === o.key} className="qc140-go" data-qc140="group-opt" data-g={o.key}
+            onClick={() => { onGroup(o.key); close(); anchor.focus({ preventScroll: true }); }}>
+            <span className="qc140-rd" aria-hidden="true" /><b>{o.label}</b><small>{GROUP_LINE[o.key]}</small>
+          </button>
+        </React.Fragment>
       ))}
+      <hr className="qc140-hr" />
+      <div className="qc140-rows" data-qc140="rows">
+        <span className="qc140-rl">Rows</span>
+        <span className="qc140-seg" role="radiogroup" aria-label="Rows">
+          {(["comfortable", "compact"] as const).map((d) => (
+            <button key={d} type="button" role="radio" aria-checked={density === d} data-qc140="rows-opt" data-d={d} onClick={() => onDensity(d)}>
+              {d === "comfortable" ? "Comfortable" : "Compact"}
+            </button>
+          ))}
+        </span>
+      </div>
     </div>,
     document.body,
   );
@@ -159,7 +210,6 @@ export interface QcToolbar140Props {
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
   rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin,
 }) => {
-  void density; void onDensity;
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLElement>(null);
   const grpRef = useRef<HTMLButtonElement>(null);
@@ -274,11 +324,17 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
               onClick={() => { if (pop.open === "group") pop.close(); onGroup("attention"); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS140}</button>
           )}
         </span>
-        {pop.open === "group" && pop.anchor ? <GroupMenu anchor={pop.anchor} groupBy={groupBy} onGroup={onGroup} close={pop.close} /> : null}
+        {pop.open === "group" && pop.anchor ? <GroupMenu anchor={pop.anchor} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity} close={pop.close} /> : null}
         <span className="qc140-chipw" data-qc140="filters-chip" data-on={filterCount ? "" : undefined}>
           <button type="button" ref={filRef} className="qc140-chip qc140-fil" data-qc140="filters" data-qc138="filters-btn" data-lp="qc140-filters" data-n={filterCount}
             aria-haspopup="dialog" aria-expanded={pop.open === "filters"} aria-label={filterCount ? `Filters: ${filterCount} applied` : "Filters"} disabled={loading}
-            onClick={(e) => pop.toggle("filters", e.currentTarget)}>
+            onClick={(e) => {
+              const btn = e.currentTarget;
+              /* §D — the Filters menu is tall: opening it where it would run past the window first scrolls the list so
+                 the toolbar sticks at the top (a quiet scroll, which the popover does not close on) */
+              if (pop.open !== "filters" && btn.getBoundingClientRect().bottom + 8 + FILTER_MENU_EST > window.innerHeight) stickToolbar(rootRef.current);
+              pop.toggle("filters", btn);
+            }}>
             {FILTER_ICON}<span className="qc140-cl">{filterCount ? "Filtered" : "Filters"}</span>
             {filterCount ? <em className="qc140-n" data-qc140="filters-n">{filterCount}</em> : null}
           </button>
@@ -295,27 +351,5 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
         </button>
       </div>
     </div>
-  );
-};
-
-/** A · the Filters chip's panel: the v138.5 filters (the same pills and dropdowns) under the chip, right-aligned to it,
- *  until Part D's menu replaces it */
-export const QcFiltersPanel140: React.FC<{ anchor: HTMLElement | null; onClearAll: () => void; children: React.ReactNode }> = ({ anchor, onClearAll, children }) => {
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
-  useLayoutEffect(() => {
-    if (!anchor) return;
-    const r = anchor.getBoundingClientRect();
-    setPos({ top: r.bottom + 8, right: Math.max(16, window.innerWidth - r.right) });
-  }, [anchor]);
-  if (!anchor || !pos) return null;
-  return createPortal(
-    <div className="lpop qc138-fpanel" data-lpop="filters" data-qc140="filter-menu" data-qc138="filters-panel" role="dialog" aria-label="Filter queries" style={{ top: pos.top, right: pos.right }}>
-      <div className="qc138-fph">
-        <b>Filter queries</b>
-        <button type="button" className="qc138-fpc" data-qc138="filters-clear" onClick={onClearAll}>Clear all</button>
-      </div>
-      {children}
-    </div>,
-    document.body,
   );
 };

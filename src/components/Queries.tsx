@@ -105,7 +105,9 @@ import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
 import { sentWeeks } from "../lib/qcSentWeeks";
 import { DEFAULT_SORT_138, SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
-import { QcFiltersPanel140 } from "./queries/centre/QcToolbar140";
+import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
+import { appliedChips, waitingRow } from "../lib/qc140";
+import { isYourMoveRow } from "../lib/queryCentreGroups";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
@@ -138,7 +140,7 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
-  inScope, matchesFilter, matchesFind, sortRows,
+  inScope, matchesFilter, matchesFind, sortRows, STAGE_NAME,
   type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
@@ -3806,6 +3808,21 @@ export const Queries: React.FC<{
     : sortRows(qcFiltered, qcSort);
   /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
   const qcGlyphCounts = glyphCounts(qcScoped);
+  /* v140 §D — the applied row's chips: one per active filter (lib/qc140), the older sentence filter and the strip's court
+     when either is set (both still narrow the list), and the search, shown as "…" and never counted on the Filters chip */
+  const qc140Chips: Qc140Chip[] = [
+    ...appliedChips(qcF138, (k) => qcPackageOf(k)?.packageName ?? "Package no longer on file").map((c) => ({ key: c.key, label: c.label, status: c.status, off: () => setQcF138((f) => c.off(f)) })),
+    ...(qcFilter !== "all" ? [{ key: "sentence", label: qcFilter === "you" ? "With you" : qcFilter === "agent" ? "With the agent" : qcFilter === "offers" ? "Offers" : qcFilter === "past" ? "Past expected" : qcFilter === "closed" ? "Closed" : qcFilter.startsWith("stage:") ? STAGE_NAME[qcFilter.slice(6) as QueryStatus] ?? "Stage" : qcFilter === "court:agent" ? "With agents" : qcFilter === "court:closed" ? "Closed" : "With you", off: () => setQcFilter("all") }] : []),
+    ...(qcCourtOn ? [{ key: `court:${qcCourtOn}`, label: qcCourtOn === "you" ? "Your move" : qcCourtOn === "agent" ? "With agents" : "Closed", off: () => setQcCzCourt(null) }] : []),
+    ...(qcFind.trim() ? [{ key: "find", label: `“${qcFind.trim()}”`, off: () => setQcFind("") }] : []),
+  ];
+  /* v140 §D — the quick picks' counts, over the scoped rows */
+  const qc140QuickN = {
+    you: qcScoped.filter((r) => isYourMoveRow(r)).length,
+    over: qcScoped.filter((r) => r.pastExpected).length,
+    wait: qcScoped.filter((r) => waitingRow(r)).length,
+    offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
+  };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
@@ -7318,27 +7335,21 @@ export const Queries: React.FC<{
                   shown={qcVisible.length}
                   filtered={qc138Filtered}
                   stickyOn={routeActive && qcDesk}
-                  /* v140 §A — the Filters chip: its count (search not counted), its ✕ and its menu */
-                  filterCount={qc138FilterCount(qcF138) + (qcFilter !== "all" ? 1 : 0) + (qcCzCourt ? 1 : 0)}
+                  /* v140 §A/§D — the Filters chip (its count: one per applied chip, search not counted; its ✕ clears every
+                     filter), its menu, and the applied-filters row under the toolbar */
+                  filterCount={qc140Chips.filter((c) => c.key !== "find").length}
                   onClearFilters={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}
                   loading={showGridSkeleton}
                   filtersMenu={(pop) => (
-                    <QcFiltersPanel140 anchor={pop.anchor} onClearAll={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}>
-                      <QcFilters138
-                        filters={qcF138}
-                        onFilters={setQcF138}
-                        pop={qc138Pop}
-                        stageCounts={qc138Counts.stage}
-                        dueWeekN={qc138Counts.dueWeek}
-                        offersN={qc138Counts.offers}
-                        sentOptions={qc138Counts.sent}
-                        moreN={qc138Counts.more}
-                        showing={qcVisible.length}
-                        msTitle={qcLineTitle}
-                        disabled={showGridSkeleton}
-                      />
-                    </QcFiltersPanel140>
+                    <QcFilterMenu140 pop={pop} model={{
+                      filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
+                      quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
+                      moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more },
+                    }} />
                   )}
+                  applied={qc140Chips.length ? (
+                    <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll} />
+                  ) : null}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
                   density={qcDensity}
