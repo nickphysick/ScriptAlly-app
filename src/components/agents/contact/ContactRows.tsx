@@ -296,7 +296,7 @@ const Row: React.FC<{
           </>
         )}
       </span>
-      {/* v19 §D — the open row: one powder strip under the main line (genres · divider · wishlist) */}
+      {/* v19 §D — the open row: one strip under the main line (genres · divider · wishlist), cream since v19.1 §G */}
       {strip ? <ContactPeek agent={a} genres={genres} genreHit={genreHit} onEdit={(tab, focus) => onEdit?.(tab, focus)} stripRef={stripRef} /> : null}
     </div>
   );
