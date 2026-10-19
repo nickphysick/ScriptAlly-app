@@ -87,14 +87,22 @@ export function parseReply(text: string): ParseOutcome {
   catch { return { ok: false, kind: "badjson" }; }
 }
 
-/** The request body for one mapping call. `strict` appends the JSON-only reminder (retry only). */
+/**
+ * The request body for one mapping call. `strict` appends the JSON-only reminder (retry only).
+ *
+ * PROMPT CACHING. The system prompt is the same ~1.8k tokens on every import — above Sonnet 4.6's
+ * 1,024-token minimum — so it is sent as one text block marked `cache_control: ephemeral` and every
+ * import within five minutes of another reads it from cache at a tenth of the input price. The text
+ * is unchanged. The strict retry's text differs (the reminder is appended), so it is its own block
+ * and simply misses the cache; it is rare.
+ */
 export function mappingRequest(sheetText: string, strict: boolean) {
   return {
     model: MODEL,
     max_tokens: MAX_OUTPUT_TOKENS,
     temperature: 0,
-    system: strict ? SYSTEM_PROMPT + STRICT_SUFFIX : SYSTEM_PROMPT,
-    messages: [{ role: "user", content: sheetText }],
+    system: [{ type: "text" as const, text: strict ? SYSTEM_PROMPT + STRICT_SUFFIX : SYSTEM_PROMPT, cache_control: { type: "ephemeral" as const } }],
+    messages: [{ role: "user" as const, content: sheetText }],
   };
 }
 

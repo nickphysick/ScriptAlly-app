@@ -1,0 +1,353 @@
+{
+ "stamp": "2026-10-19T21-58-32",
+ "model": "claude-sonnet-4-6",
+ "args": {
+  "split": "dev",
+  "only": "links-*",
+  "runs": 1,
+  "concurrency": 4,
+  "dryRun": false,
+  "confirmSpend": false,
+  "label": "fix3-links",
+  "real": true,
+  "rescore": null
+ },
+ "results": [
+  {
+   "id": "links-xlsx-10",
+   "real": false,
+   "split": "dev",
+   "layout": "links",
+   "knobs": [
+    "links"
+   ],
+   "format": "xlsx",
+   "rows": 10,
+   "expectedToFail": true,
+   "failReason": "the website is only the agent name's link target, which the conversion drops",
+   "conversion": {
+    "chars": 1023,
+    "lines": 11,
+    "refused": null,
+    "coverage": {
+     "facts": 30,
+     "visible": 30,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 7362,
+     "usage": {
+      "inputTokens": 2724,
+      "outputTokens": 678,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.018342,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 80,
+      "fieldsCorrect": 80,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 10,
+        "correct": 10
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 Freya Okafor / Juniper Associates": {
+        "agentName": "freya okafor",
+        "agency": "juniper associates",
+        "website": "juniperassociates.co.uk",
+        "status": "No Response",
+        "sentDate": "2023-04-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Clara Achebe / Juniper Associates": {
+        "agentName": "clara achebe",
+        "agency": "juniper associates",
+        "website": "juniperassociates.co.uk",
+        "status": "Partial Requested",
+        "sentDate": "2023-02-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Felix Nkemelu / Larkspur Associates": {
+        "agentName": "felix nkemelu",
+        "agency": "larkspur associates",
+        "website": "larkspurassociates.co.uk",
+        "status": "Full Requested",
+        "sentDate": "2024-10-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Kwame Marsh / Larkspur Associates": {
+        "agentName": "kwame marsh",
+        "agency": "larkspur associates",
+        "website": "larkspurassociates.co.uk",
+        "status": "Rejected",
+        "sentDate": "2025-08-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Tomas Raman / Larkspur Associates": {
+        "agentName": "tomas raman",
+        "agency": "larkspur associates",
+        "website": "larkspurassociates.co.uk",
+        "status": "Queried",
+        "sentDate": "2023-05-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Rosalind Kaur / Inkwell Literary Agency": {
+        "agentName": "rosalind kaur",
+        "agency": "inkwell literary agency",
+        "website": "inkwellliteraryagency.co.uk",
+        "status": "Full Requested",
+        "sentDate": "2024-09-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Theo Penrose / Juniper Associates": {
+        "agentName": "theo penrose",
+        "agency": "juniper associates",
+        "website": "juniperassociates.co.uk",
+        "status": "Full Sent",
+        "sentDate": "2025-06-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Tomas Voss / Larkspur Partners": {
+        "agentName": "tomas voss",
+        "agency": "larkspur partners",
+        "website": "larkspurpartners.co.uk",
+        "status": "Rejected",
+        "sentDate": "2024-10-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Bea Salt / Larkspur Associates": {
+        "agentName": "bea salt",
+        "agency": "larkspur associates",
+        "website": "larkspurassociates.co.uk",
+        "status": "Full Requested",
+        "sentDate": "2024-11-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Clara Castellane / Juniper Associates": {
+        "agentName": "clara castellane",
+        "agency": "juniper associates",
+        "website": "juniperassociates.co.uk",
+        "status": "Queried",
+        "sentDate": "2024-05-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Freya Okafor",
+        "agency": "Juniper Associates",
+        "website": "https://www.juniperassociates.co.uk"
+       },
+       {
+        "ref": "a2",
+        "name": "Clara Achebe",
+        "agency": "Juniper Associates",
+        "website": "https://www.juniperassociates.co.uk"
+       },
+       {
+        "ref": "a3",
+        "name": "Felix Nkemelu",
+        "agency": "Larkspur Associates",
+        "website": "https://www.larkspurassociates.co.uk"
+       },
+       {
+        "ref": "a4",
+        "name": "Kwame Marsh",
+        "agency": "Larkspur Associates",
+        "website": "https://www.larkspurassociates.co.uk"
+       },
+       {
+        "ref": "a5",
+        "name": "Tomas Raman",
+        "agency": "Larkspur Associates",
+        "website": "https://www.larkspurassociates.co.uk"
+       },
+       {
+        "ref": "a6",
+        "name": "Rosalind Kaur",
+        "agency": "Inkwell Literary Agency",
+        "website": "https://www.inkwellliteraryagency.co.uk"
+       },
+       {
+        "ref": "a7",
+        "name": "Theo Penrose",
+        "agency": "Juniper Associates",
+        "website": "https://www.juniperassociates.co.uk"
+       },
+       {
+        "ref": "a8",
+        "name": "Tomas Voss",
+        "agency": "Larkspur Partners",
+        "website": "https://www.larkspurpartners.co.uk"
+       },
+       {
+        "ref": "a9",
+        "name": "Bea Salt",
+        "agency": "Larkspur Associates",
+        "website": "https://www.larkspurassociates.co.uk"
+       },
+       {
+        "ref": "a10",
+        "name": "Clara Castellane",
+        "agency": "Juniper Associates",
+        "website": "https://www.juniperassociates.co.uk"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "No Response",
+        "sentDate": "2023-04-06",
+        "sentDateRaw": "2023-04-06",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "Partial Requested",
+        "sentDate": "2023-02-01",
+        "sentDateRaw": "2023-02-01",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a3",
+        "status": "Full Requested",
+        "sentDate": "2024-10-16",
+        "sentDateRaw": "2024-10-16",
+        "timeline": [],
+        "reasons": [],
+        "notes": "referred by Dana"
+       },
+       {
+        "agentRef": "a4",
+        "status": "Rejected",
+        "sentDate": "2025-08-16",
+        "sentDateRaw": "2025-08-16",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Queried",
+        "sentDate": "2023-05-06",
+        "sentDateRaw": "2023-05-06",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Full Requested",
+        "sentDate": "2024-09-10",
+        "sentDateRaw": "2024-09-10",
+        "timeline": [],
+        "reasons": [],
+        "notes": "comps: The Salt Path"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Full Sent",
+        "sentDate": "2025-06-28",
+        "sentDateRaw": "2025-06-28",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Rejected",
+        "sentDate": "2024-10-06",
+        "sentDateRaw": "2024-10-06",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a9",
+        "status": "Full Requested",
+        "sentDate": "2024-11-07",
+        "sentDateRaw": "2024-11-07",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Queried",
+        "sentDate": "2024-05-01",
+        "sentDateRaw": "2024-05-01",
+        "timeline": [],
+        "reasons": []
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  }
+ ]
+}

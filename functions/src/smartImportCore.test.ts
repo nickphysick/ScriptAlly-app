@@ -39,7 +39,7 @@ describe("mapSheet", () => {
       model: MODEL,
       max_tokens: MAX_OUTPUT_TOKENS,
       temperature: 0,
-      system: SYSTEM_PROMPT,
+      system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: "Agent,Agency\nClara Voss,Pemberton" }],
     });
     // Assembled: the parser ran over sentDateRaw.
@@ -52,8 +52,8 @@ describe("mapSheet", () => {
     const out = await mapSheet(c, "x");
     expect(out.failure).toBeNull();
     expect(out.attempts).toBe(2);
-    expect(c.calls[1].system).toBe(SYSTEM_PROMPT + STRICT_SUFFIX);
-    expect(c.calls[0].system).toBe(SYSTEM_PROMPT);
+    expect(c.calls[1].system[0].text).toBe(SYSTEM_PROMPT + STRICT_SUFFIX);
+    expect(c.calls[0].system[0].text).toBe(SYSTEM_PROMPT);
     expect(out.usage.inputTokens).toBe(200);
     expect(out.result.queries).toHaveLength(1);
   });
@@ -86,8 +86,18 @@ describe("mapSheet", () => {
   });
 
   it("builds the strict request only for the retry", () => {
-    expect(mappingRequest("x", false).system).toBe(SYSTEM_PROMPT);
-    expect(mappingRequest("x", true).system.endsWith(STRICT_SUFFIX)).toBe(true);
+    expect(mappingRequest("x", false).system[0].text).toBe(SYSTEM_PROMPT);
+    expect(mappingRequest("x", true).system[0].text.endsWith(STRICT_SUFFIX)).toBe(true);
+  });
+
+  it("marks the system prompt for caching, as ONE block whose text is the prompt unchanged", () => {
+    for (const strict of [false, true]) {
+      const sys = mappingRequest("x", strict).system;
+      expect(sys).toHaveLength(1);
+      expect(sys[0].cache_control).toEqual({ type: "ephemeral" });
+    }
+    // Nothing volatile in the cached prefix: two requests for different sheets share it byte for byte.
+    expect(JSON.stringify(mappingRequest("sheet A", false).system)).toBe(JSON.stringify(mappingRequest("sheet B", false).system));
   });
 });
 

@@ -1,0 +1,1670 @@
+{
+ "stamp": "2026-10-19T21-59-39",
+ "model": "claude-sonnet-4-6",
+ "args": {
+  "split": "dev",
+  "only": "clean-csv-10,preamble-csv-10,totals-csv-10,slang-csv-10,agentnotes-csv-10",
+  "runs": 1,
+  "concurrency": 1,
+  "dryRun": false,
+  "confirmSpend": false,
+  "label": "phase7-cache",
+  "real": true,
+  "rescore": null
+ },
+ "results": [
+  {
+   "id": "clean-csv-10",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [],
+   "format": "csv",
+   "rows": 10,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 645,
+    "lines": 11,
+    "refused": null,
+    "coverage": {
+     "facts": 20,
+     "visible": 20,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 5680,
+     "usage": {
+      "inputTokens": 267,
+      "outputTokens": 520,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 2314
+     },
+     "costUsd": 0.0172785,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 70,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 Felix Marsh / Bellwether Associates": {
+        "agentName": "felix marsh",
+        "agency": "bellwether associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-06-25",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Rory Penrose / Bellwether Associates": {
+        "agentName": "rory penrose",
+        "agency": "bellwether associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-08-14",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Tomas Brennan / Harwood Management": {
+        "agentName": "tomas brennan",
+        "agency": "harwood management",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-06-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Gregory Brennan / Harwood Management": {
+        "agentName": "gregory brennan",
+        "agency": "harwood management",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2024-04-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Malik Ashdown / Bellwether Associates": {
+        "agentName": "malik ashdown",
+        "agency": "bellwether associates",
+        "website": "",
+        "status": "Offer",
+        "sentDate": "2024-10-27",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Malik Kaur / Marlow Literary": {
+        "agentName": "malik kaur",
+        "agency": "marlow literary",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-05-14",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Hannah Achebe / Marlow Literary": {
+        "agentName": "hannah achebe",
+        "agency": "marlow literary",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-08-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Orla Raman / Harwood Management": {
+        "agentName": "orla raman",
+        "agency": "harwood management",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-02-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Hugo Achebe / Marlow Literary": {
+        "agentName": "hugo achebe",
+        "agency": "marlow literary",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-01-24",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Kwame Ibbotson / Copperfield Literary": {
+        "agentName": "kwame ibbotson",
+        "agency": "copperfield literary",
+        "website": "",
+        "status": "Revise & Resubmit",
+        "sentDate": "2024-04-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Felix Marsh",
+        "agency": "Bellwether Associates"
+       },
+       {
+        "ref": "a2",
+        "name": "Rory Penrose",
+        "agency": "Bellwether Associates"
+       },
+       {
+        "ref": "a3",
+        "name": "Tomas Brennan",
+        "agency": "Harwood Management"
+       },
+       {
+        "ref": "a4",
+        "name": "Gregory Brennan",
+        "agency": "Harwood Management"
+       },
+       {
+        "ref": "a5",
+        "name": "Malik Ashdown",
+        "agency": "Bellwether Associates"
+       },
+       {
+        "ref": "a6",
+        "name": "Malik Kaur",
+        "agency": "Marlow Literary"
+       },
+       {
+        "ref": "a7",
+        "name": "Hannah Achebe",
+        "agency": "Marlow Literary"
+       },
+       {
+        "ref": "a8",
+        "name": "Orla Raman",
+        "agency": "Harwood Management"
+       },
+       {
+        "ref": "a9",
+        "name": "Hugo Achebe",
+        "agency": "Marlow Literary"
+       },
+       {
+        "ref": "a10",
+        "name": "Kwame Ibbotson",
+        "agency": "Copperfield Literary"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Queried",
+        "sentDate": "2023-06-25",
+        "sentDateRaw": "25/06/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "wrong ms?? think i sent the old one"
+       },
+       {
+        "agentRef": "a2",
+        "status": "Queried",
+        "sentDate": "2023-08-14",
+        "sentDateRaw": "14/08/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a3",
+        "status": "Rejected",
+        "sentDate": "2023-06-01",
+        "sentDateRaw": "01/06/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "No Response",
+        "sentDate": "2024-04-07",
+        "sentDateRaw": "07/04/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Offer",
+        "sentDate": "2024-10-27",
+        "sentDateRaw": "27/10/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Rejected",
+        "sentDate": "2025-05-14",
+        "sentDateRaw": "14/05/2025",
+        "timeline": [],
+        "reasons": [],
+        "notes": "comps: The Salt Path"
+       },
+       {
+        "agentRef": "a7",
+        "status": "No Response",
+        "sentDate": "2023-08-22",
+        "sentDateRaw": "22/08/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Full Requested",
+        "sentDate": "2024-02-10",
+        "sentDateRaw": "10/02/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "comps: The Salt Path"
+       },
+       {
+        "agentRef": "a9",
+        "status": "Queried",
+        "sentDate": "2025-01-24",
+        "sentDateRaw": "24/01/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Revise & Resubmit",
+        "sentDate": "2024-04-07",
+        "sentDateRaw": "07/04/2024",
+        "timeline": [],
+        "reasons": []
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  },
+  {
+   "id": "preamble-csv-10",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [
+    "preamble"
+   ],
+   "format": "csv",
+   "rows": 10,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 728,
+    "lines": 14,
+    "refused": null,
+    "coverage": {
+     "facts": 20,
+     "visible": 20,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 6207,
+     "usage": {
+      "inputTokens": 308,
+      "outputTokens": 544,
+      "cacheReadTokens": 2314,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.0097782,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 70,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 Malik Ostrander / Everly Literary Agency": {
+        "agentName": "malik ostrander",
+        "agency": "everly literary agency",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2025-07-15",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Yusuf Doyle / Hollis Partners": {
+        "agentName": "yusuf doyle",
+        "agency": "hollis partners",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-08-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Lena Penrose / Copperfield & Co": {
+        "agentName": "lena penrose",
+        "agency": "copperfield & co",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-06-29",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Esme Ibbotson / Quill & Co": {
+        "agentName": "esme ibbotson",
+        "agency": "quill & co",
+        "website": "",
+        "status": "Withdrawn",
+        "sentDate": "2024-10-26",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Marianne Quigley / Hollis Partners": {
+        "agentName": "marianne quigley",
+        "agency": "hollis partners",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-04-30",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Gregory Nkemelu / Quill & Co": {
+        "agentName": "gregory nkemelu",
+        "agency": "quill & co",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-05-09",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Priya Rook / Copperfield & Co": {
+        "agentName": "priya rook",
+        "agency": "copperfield & co",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-07-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Clara Hale / Copperfield & Co": {
+        "agentName": "clara hale",
+        "agency": "copperfield & co",
+        "website": "",
+        "status": "Partial Requested",
+        "sentDate": "2024-02-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Hannah Whitlock / Everly Literary Agency": {
+        "agentName": "hannah whitlock",
+        "agency": "everly literary agency",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-05-15",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Jamal Llewellyn / Quill & Co": {
+        "agentName": "jamal llewellyn",
+        "agency": "quill & co",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-10-18",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Malik Ostrander",
+        "agency": "Everly Literary Agency"
+       },
+       {
+        "ref": "a2",
+        "name": "Yusuf Doyle",
+        "agency": "Hollis Partners"
+       },
+       {
+        "ref": "a3",
+        "name": "Lena Penrose",
+        "agency": "Copperfield & Co"
+       },
+       {
+        "ref": "a4",
+        "name": "Esme Ibbotson",
+        "agency": "Quill & Co"
+       },
+       {
+        "ref": "a5",
+        "name": "Marianne Quigley",
+        "agency": "Hollis Partners"
+       },
+       {
+        "ref": "a6",
+        "name": "Gregory Nkemelu",
+        "agency": "Quill & Co"
+       },
+       {
+        "ref": "a7",
+        "name": "Priya Rook",
+        "agency": "Copperfield & Co"
+       },
+       {
+        "ref": "a8",
+        "name": "Clara Hale",
+        "agency": "Copperfield & Co"
+       },
+       {
+        "ref": "a9",
+        "name": "Hannah Whitlock",
+        "agency": "Everly Literary Agency"
+       },
+       {
+        "ref": "a10",
+        "name": "Jamal Llewellyn",
+        "agency": "Quill & Co"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "No Response",
+        "sentDate": "2025-07-15",
+        "sentDateRaw": "15/07/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "No Response",
+        "sentDate": "2023-08-12",
+        "sentDateRaw": "12/08/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a3",
+        "status": "Rejected",
+        "sentDate": "2023-06-29",
+        "sentDateRaw": "29/06/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "wrong ms?? think i sent the old one"
+       },
+       {
+        "agentRef": "a4",
+        "status": "Withdrawn",
+        "sentDate": "2024-10-26",
+        "sentDateRaw": "26/10/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "loved the list"
+       },
+       {
+        "agentRef": "a5",
+        "status": "Queried",
+        "sentDate": "2024-04-30",
+        "sentDateRaw": "30/04/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Queried",
+        "sentDate": "2023-05-09",
+        "sentDateRaw": "09/05/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "personalised"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Rejected",
+        "sentDate": "2023-07-10",
+        "sentDateRaw": "10/07/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "loved the list"
+       },
+       {
+        "agentRef": "a8",
+        "status": "Partial Requested",
+        "sentDate": "2024-02-04",
+        "sentDateRaw": "04/02/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "QM form"
+       },
+       {
+        "agentRef": "a9",
+        "status": "Full Requested",
+        "sentDate": "2025-05-15",
+        "sentDateRaw": "15/05/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Queried",
+        "sentDate": "2023-10-18",
+        "sentDateRaw": "18/10/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "QM form"
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  },
+  {
+   "id": "totals-csv-10",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [
+    "totals"
+   ],
+   "format": "csv",
+   "rows": 10,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 573,
+    "lines": 14,
+    "refused": null,
+    "coverage": {
+     "facts": 20,
+     "visible": 20,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 5849,
+     "usage": {
+      "inputTokens": 269,
+      "outputTokens": 493,
+      "cacheReadTokens": 2314,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.0088962,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 70,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 Lena Salt / Kite Partners": {
+        "agentName": "lena salt",
+        "agency": "kite partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-12-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Seb Lindqvist / Greenhouse & Co": {
+        "agentName": "seb lindqvist",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-07-30",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Orla Brennan / Quill & Co": {
+        "agentName": "orla brennan",
+        "agency": "quill & co",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2025-06-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Priya Rook / Kite Partners": {
+        "agentName": "priya rook",
+        "agency": "kite partners",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-04-21",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Jamal Llewellyn / Dunmore & Co": {
+        "agentName": "jamal llewellyn",
+        "agency": "dunmore & co",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-07-30",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Jamal Salt / Quill & Co": {
+        "agentName": "jamal salt",
+        "agency": "quill & co",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-06-13",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Theo Doyle / Dunmore & Co": {
+        "agentName": "theo doyle",
+        "agency": "dunmore & co",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-06-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Felix Quigley / Kite Partners": {
+        "agentName": "felix quigley",
+        "agency": "kite partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-11-15",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Orla Castellane / Greenhouse & Co": {
+        "agentName": "orla castellane",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-12-17",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Gregory Harrow / Greenhouse & Co": {
+        "agentName": "gregory harrow",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Revise & Resubmit",
+        "sentDate": "2024-04-02",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Lena Salt",
+        "agency": "Kite Partners"
+       },
+       {
+        "ref": "a2",
+        "name": "Seb Lindqvist",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a3",
+        "name": "Orla Brennan",
+        "agency": "Quill & Co"
+       },
+       {
+        "ref": "a4",
+        "name": "Priya Rook",
+        "agency": "Kite Partners"
+       },
+       {
+        "ref": "a5",
+        "name": "Jamal Llewellyn",
+        "agency": "Dunmore & Co"
+       },
+       {
+        "ref": "a6",
+        "name": "Jamal Salt",
+        "agency": "Quill & Co"
+       },
+       {
+        "ref": "a7",
+        "name": "Theo Doyle",
+        "agency": "Dunmore & Co"
+       },
+       {
+        "ref": "a8",
+        "name": "Felix Quigley",
+        "agency": "Kite Partners"
+       },
+       {
+        "ref": "a9",
+        "name": "Orla Castellane",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a10",
+        "name": "Gregory Harrow",
+        "agency": "Greenhouse & Co"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Rejected",
+        "sentDate": "2023-12-07",
+        "sentDateRaw": "07/12/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "Queried",
+        "sentDate": "2024-07-30",
+        "sentDateRaw": "30/07/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a3",
+        "status": "No Response",
+        "sentDate": "2025-06-06",
+        "sentDateRaw": "06/06/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "No Response",
+        "sentDate": "2023-04-21",
+        "sentDateRaw": "21/04/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Full Requested",
+        "sentDate": "2025-07-30",
+        "sentDateRaw": "30/07/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Queried",
+        "sentDate": "2023-06-13",
+        "sentDateRaw": "13/06/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a7",
+        "status": "Full Requested",
+        "sentDate": "2025-06-06",
+        "sentDateRaw": "06/06/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Rejected",
+        "sentDate": "2024-11-15",
+        "sentDateRaw": "15/11/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a9",
+        "status": "Rejected",
+        "sentDate": "2023-12-17",
+        "sentDateRaw": "17/12/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Revise & Resubmit",
+        "sentDate": "2024-04-02",
+        "sentDateRaw": "02/04/2024",
+        "timeline": [],
+        "reasons": []
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  },
+  {
+   "id": "agentnotes-csv-10",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [
+    "agentNotes"
+   ],
+   "format": "csv",
+   "rows": 10,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 678,
+    "lines": 11,
+    "refused": null,
+    "coverage": {
+     "facts": 13,
+     "visible": 13,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 6982,
+     "usage": {
+      "inputTokens": 273,
+      "outputTokens": 598,
+      "cacheReadTokens": 2314,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.010483200000000002,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 70,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 (no name) / Fairweather & Co": {
+        "agentName": "",
+        "agency": "fairweather & co",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-06-15",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 (no name) / Fairweather & Co": {
+        "agentName": "",
+        "agency": "fairweather & co",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-09-17",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 (no name) / Fairweather & Co": {
+        "agentName": "",
+        "agency": "fairweather & co",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-04-08",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Freya Quigley / Harwood Partners": {
+        "agentName": "freya quigley",
+        "agency": "harwood partners",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-11-05",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Ines Achebe / Juniper Literary": {
+        "agentName": "ines achebe",
+        "agency": "juniper literary",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-05-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 (no name) / (no agency)": {
+        "agentName": "",
+        "agency": "",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-07-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Ezra Moreau / Fairweather & Co": {
+        "agentName": "ezra moreau",
+        "agency": "fairweather & co",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-11-25",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 (no name) / Juniper Literary": {
+        "agentName": "",
+        "agency": "juniper literary",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-12-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Marianne Ashdown / Larkspur Associates": {
+        "agentName": "marianne ashdown",
+        "agency": "larkspur associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-04-15",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 (no name) / Larkspur Associates": {
+        "agentName": "",
+        "agency": "larkspur associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-08-14",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "agency": "Fairweather & Co",
+        "issues": [
+         "check-name"
+        ]
+       },
+       {
+        "ref": "a2",
+        "agency": "Fairweather & Co",
+        "issues": [
+         "check-name"
+        ]
+       },
+       {
+        "ref": "a3",
+        "agency": "Fairweather & Co",
+        "issues": [
+         "check-name"
+        ]
+       },
+       {
+        "ref": "a4",
+        "name": "Freya Quigley",
+        "agency": "Harwood Partners"
+       },
+       {
+        "ref": "a5",
+        "name": "Ines Achebe",
+        "agency": "Juniper Literary"
+       },
+       {
+        "ref": "a6"
+       },
+       {
+        "ref": "a7",
+        "name": "Ezra Moreau",
+        "agency": "Fairweather & Co"
+       },
+       {
+        "ref": "a8",
+        "agency": "Juniper Literary",
+        "issues": [
+         "check-name"
+        ]
+       },
+       {
+        "ref": "a9",
+        "name": "Marianne Ashdown",
+        "agency": "Larkspur Associates"
+       },
+       {
+        "ref": "a10",
+        "agency": "Larkspur Associates",
+        "issues": [
+         "check-name"
+        ]
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Rejected",
+        "sentDate": "2025-06-15",
+        "sentDateRaw": "15/06/2025",
+        "timeline": [],
+        "reasons": [
+         "check-name"
+        ],
+        "notes": "agent TBC"
+       },
+       {
+        "agentRef": "a2",
+        "status": "Rejected",
+        "sentDate": "2023-09-17",
+        "sentDateRaw": "17/09/2023",
+        "timeline": [],
+        "reasons": [
+         "check-name"
+        ],
+        "notes": "via website, no name"
+       },
+       {
+        "agentRef": "a3",
+        "status": "Queried",
+        "sentDate": "2024-04-08",
+        "sentDateRaw": "08/04/2024",
+        "timeline": [],
+        "reasons": [
+         "check-name"
+        ],
+        "notes": "via website, no name; referred by Dana"
+       },
+       {
+        "agentRef": "a4",
+        "status": "Full Requested",
+        "sentDate": "2024-11-05",
+        "sentDateRaw": "05/11/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "wrong ms?? think i sent the old one"
+       },
+       {
+        "agentRef": "a5",
+        "status": "Rejected",
+        "sentDate": "2025-05-28",
+        "sentDateRaw": "28/05/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Queried",
+        "sentDate": "2025-07-22",
+        "sentDateRaw": "22/07/2025",
+        "timeline": [],
+        "reasons": [
+         "needs-identifying"
+        ],
+        "notes": "submitted via QueryManager"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Queried",
+        "sentDate": "2024-11-25",
+        "sentDateRaw": "25/11/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Queried",
+        "sentDate": "2023-12-16",
+        "sentDateRaw": "16/12/2023",
+        "timeline": [],
+        "reasons": [
+         "check-name"
+        ],
+        "notes": "via website, no name; QM form"
+       },
+       {
+        "agentRef": "a9",
+        "status": "Queried",
+        "sentDate": "2024-04-15",
+        "sentDateRaw": "15/04/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Queried",
+        "sentDate": "2024-08-14",
+        "sentDateRaw": "14/08/2024",
+        "timeline": [],
+        "reasons": [
+         "check-name"
+        ],
+        "notes": "via website, no name; referred by Dana"
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  },
+  {
+   "id": "slang-csv-10",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [
+    "slang"
+   ],
+   "format": "csv",
+   "rows": 10,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 589,
+    "lines": 11,
+    "refused": null,
+    "coverage": {
+     "facts": 20,
+     "visible": 20,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 5843,
+     "usage": {
+      "inputTokens": 255,
+      "outputTokens": 515,
+      "cacheReadTokens": 2314,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.0091842,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 70,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 Malik Lindqvist / Hollis Management": {
+        "agentName": "malik lindqvist",
+        "agency": "hollis management",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-02-09",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Gregory Faraday / Hollis Management": {
+        "agentName": "gregory faraday",
+        "agency": "hollis management",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-05-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Imogen Marsh / Inkwell Partners": {
+        "agentName": "imogen marsh",
+        "agency": "inkwell partners",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-01-27",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Callum Fennimore / Larkspur Associates": {
+        "agentName": "callum fennimore",
+        "agency": "larkspur associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-09-20",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Rosalind Ashdown / Larkspur Associates": {
+        "agentName": "rosalind ashdown",
+        "agency": "larkspur associates",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-05-23",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Imogen Okafor / Hollis Management": {
+        "agentName": "imogen okafor",
+        "agency": "hollis management",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-01-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Dev Quigley / Larkspur Associates": {
+        "agentName": "dev quigley",
+        "agency": "larkspur associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-02-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Hannah Raman / Harwood Partners": {
+        "agentName": "hannah raman",
+        "agency": "harwood partners",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-06-15",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Theo Ostrander / Harwood Partners": {
+        "agentName": "theo ostrander",
+        "agency": "harwood partners",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2024-07-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Yusuf Nkemelu / Larkspur Associates": {
+        "agentName": "yusuf nkemelu",
+        "agency": "larkspur associates",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-08-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Malik Lindqvist",
+        "agency": "Hollis Management"
+       },
+       {
+        "ref": "a2",
+        "name": "Gregory Faraday",
+        "agency": "Hollis Management"
+       },
+       {
+        "ref": "a3",
+        "name": "Imogen Marsh",
+        "agency": "Inkwell Partners"
+       },
+       {
+        "ref": "a4",
+        "name": "Callum Fennimore",
+        "agency": "Larkspur Associates"
+       },
+       {
+        "ref": "a5",
+        "name": "Rosalind Ashdown",
+        "agency": "Larkspur Associates"
+       },
+       {
+        "ref": "a6",
+        "name": "Imogen Okafor",
+        "agency": "Hollis Management"
+       },
+       {
+        "ref": "a7",
+        "name": "Dev Quigley",
+        "agency": "Larkspur Associates"
+       },
+       {
+        "ref": "a8",
+        "name": "Hannah Raman",
+        "agency": "Harwood Partners"
+       },
+       {
+        "ref": "a9",
+        "name": "Theo Ostrander",
+        "agency": "Harwood Partners"
+       },
+       {
+        "ref": "a10",
+        "name": "Yusuf Nkemelu",
+        "agency": "Larkspur Associates"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Rejected",
+        "sentDate": "2025-02-09",
+        "sentDateRaw": "09/02/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "Rejected",
+        "sentDate": "2023-05-01",
+        "sentDateRaw": "01/05/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a3",
+        "status": "Queried",
+        "sentDate": "2023-01-27",
+        "sentDateRaw": "27/01/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "Queried",
+        "sentDate": "2025-09-20",
+        "sentDateRaw": "20/09/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Rejected",
+        "sentDate": "2023-05-23",
+        "sentDateRaw": "23/05/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Full Sent",
+        "sentDate": "2025-01-04",
+        "sentDateRaw": "04/01/2025",
+        "timeline": [],
+        "reasons": [
+         "status-direction"
+        ],
+        "notes": "referred by Dana"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Queried",
+        "sentDate": "2024-02-22",
+        "sentDateRaw": "22/02/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Queried",
+        "sentDate": "2025-06-15",
+        "sentDateRaw": "15/06/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a9",
+        "status": "Partial Sent",
+        "sentDate": "2024-07-10",
+        "sentDateRaw": "10/07/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "referred by Dana"
+       },
+       {
+        "agentRef": "a10",
+        "status": "Queried",
+        "sentDate": "2024-08-28",
+        "sentDateRaw": "28/08/2024",
+        "timeline": [],
+        "reasons": []
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  }
+ ]
+}
