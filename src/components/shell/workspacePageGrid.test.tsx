@@ -389,8 +389,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
   it("⚠️ nothing between the window and the content states a width of its own", () => {
     const CHAIN: [string, string, string[]][] = [
       ["Contact list", "components/agents/agentList.css", [".aglist", ".aglist .agl-page", ".aglist .agl-inner", ".aglist .agl-wpg"]],
-      /* Discover v1 (18 Oct): the page root and the header — no width of their own; the grid pays the column */
-      ["Discover", "components/agents/discover1/discover1.css", [".dv1-page", ".dv1-hd", ".dv1-ae"]],
+      /* Discover v1 (18 Oct): the page root — no width of its own; the grid pays the column. Header rules v1.1 (19 Oct):
+         `.dv1-hd` left this chain on purpose. It is the shared hero frame now (--hero-w, centred on the sheet), as the
+         Contact list's header (`.cl17-hd`) and Analytics' (`.a21-lh`) are, and none of the three is in this chain. */
+      ["Discover", "components/agents/discover1/discover1.css", [".dv1-page", ".dv1-ae"]],
       ["Manuscripts", "components/manuscripts/manuscripts.css", [".msv1", ".msv-wpg", ".msv-wrap"]],
       /* comps v2 (27 Sep): the page's own group under `.cpv-page`, the scroller's direct child */
       ["Comparable titles", "components/manuscripts/compsV2.css", [".cpv-page", ".cpv-group", ".cpv-main"]],

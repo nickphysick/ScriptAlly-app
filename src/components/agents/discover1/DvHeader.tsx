@@ -17,6 +17,7 @@
  * ⚠️ THE TITLE KEEPS `data-page-title` (the hook the shell reads for "has the title scrolled past?").
  */
 import React from "react";
+import "../../shell/pageHeroFrame.css";
 import type { ScoutTally } from "../../../lib/scout";
 import { considerWords } from "../../../lib/scout";
 
@@ -100,7 +101,7 @@ export const DvHeader: React.FC<{
   const label = title.kind === "count" ? `${title.n} ${considerWords(title.n)}` : title.kind === "done" ? "You’re up to date"
     : title.kind === "none" ? "Nothing to consider yet" : "Discover";
   return (
-    <header className="dv1-hd" data-dv1="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+    <header className="dv1-hd phf" data-dv1="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
       <div className="dv1-hrow">
         <div className="dv1-ht" data-dv1="title-block">
           <p className="dv1-k" data-dv1="eyebrow">{DV_EYEBROW}<ProTag /></p>

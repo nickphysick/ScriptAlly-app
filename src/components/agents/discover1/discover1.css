@@ -55,26 +55,46 @@
 .dv1-page :focus-visible { outline: 2px solid var(--dv1-navy); outline-offset: 2px; }
 
 /* ── the light header ─────────────────────────────────────────────────── */
+/* header rules v1.1 — on the shared frame and tokens (shell/pageHeroFrame.css), the Contact list's own geometry:
+   --hero-w wide and centred on the sheet (this page's column is centred on it), --hero-top under the sheet's top,
+   the row in by the shared inset (`.phf` on the header), the text column at --hero-text-x. The rule under the
+   header and its 44/40 padding are gone (the Contact list, Discover's pair under the same folder tab, has neither),
+   and the content starts --hero-gap-below under the stack. The card is the shared right item's width, centred on
+   the stack, overhanging it rather than pushing it. */
 .dv1-hd {
   position: relative; isolation: isolate; container: dv1hd / inline-size;
-  padding: 44px 0 40px; border-bottom: 1px solid rgba(28, 19, 15, 0.12); margin-bottom: 8px;
+  padding: 0; border-bottom: 0; margin-bottom: 0;
 }
-.dv1-hrow { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
-.dv1-ht { min-width: 0; }
-.dv1-k { margin: 0 0 14px; font: 400 12px/normal var(--dv1-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: var(--dv1-rust); white-space: nowrap; }
+@media (min-width: 768px) {
+  .dv1-hd { box-sizing: border-box; width: var(--hero-w); margin: var(--hero-top) 0 0 calc(50% - var(--hero-w) / 2); }
+  .dv1-page .dv1-hd + * { margin-top: var(--hero-gap-below); }
+}
+.dv1-hrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--hero-right-w); column-gap: 24px; align-items: center;
+  margin-inline: var(--phf-inset);
+}
+.dv1-ht { position: relative; min-width: 0; grid-column: 1; margin-left: calc(var(--hero-text-x) - var(--hero-frame-x) - var(--phf-inset)); }
+/* the "How the Scout finds agents" link hangs under the buttons, out of the flow, in the top of the gap below the hero
+   (12 + its ~20 within the 44): the stack ends at the actions (H7), and nothing moves */
+.dv1-hd .dv1-ht > .dv1-hwl { position: absolute; left: 0; top: 100%; margin: 12px 0 0; white-space: nowrap; }
+.dv1-hd .dv1-card { grid-column: 2; margin-block: -40px; box-sizing: border-box; width: var(--hero-right-w); min-width: 0; }
+.dv1-hd .dv1-card .dv1-c1 { flex: 1 1 auto; }
+/* the eyebrow holds the PRO tag, which would stretch an inline line box: the box is the shared 12, the tag centred in it */
+.dv1-k { display: flex; align-items: center; height: var(--hero-ey-lh); margin: 0 0 var(--hero-ey-gap); font: 400 12px/var(--hero-ey-lh) var(--dv1-mono) !important; letter-spacing: 0.32em; text-transform: uppercase; color: var(--dv1-rust); white-space: nowrap; }
 .dv1-pro {
   display: inline-block; margin-left: 14px; padding: 3px 8px 2px; border-radius: 5px; vertical-align: 2px;
   font: 600 9px/normal var(--dv1-mono) !important; letter-spacing: 0.18em; background: #e2e7ef; color: var(--dv1-navy);
 }
-.dv1-hd h1.dv1-title { margin: 0; font: 400 56px/1.12 var(--dv1-type) !important; letter-spacing: -0.01em; color: var(--dv1-ink); white-space: nowrap; outline: none; }
+/* decision 5: a title too long for the space beside the card wraps, at the same size, and the stack grows */
+.dv1-hd h1.dv1-title { margin: 0; font: 400 var(--hero-title-size)/1 var(--dv1-type) !important; letter-spacing: -0.01em; color: var(--dv1-ink); white-space: normal; outline: none; }
 .dv1-hd h1.dv1-title span, .dv1-hd h1.dv1-title b { font: inherit !important; }
 .dv1-hd .dv1-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
-.dv1-by { display: flex; align-items: center; gap: 14px; margin: 12px 0 0; font: 400 21px/normal var(--dv1-type) !important; color: #3a2e27; white-space: nowrap; }
+.dv1-by { display: flex; align-items: center; gap: 14px; margin: var(--hero-by-gap) 0 0; font: 400 21px/var(--hero-by-lh) var(--dv1-type) !important; color: #3a2e27; white-space: nowrap; }
 .dv1-by > i { flex: 0 0 52px; height: 1px; background: rgba(28, 19, 15, 0.3); }
-.dv1-by em { font: italic 400 22px/normal var(--dv1-serif) !important; color: #6b5f56; margin-right: -4px; }
+.dv1-by em { font: italic 400 22px/var(--hero-by-lh) var(--dv1-serif) !important; color: #6b5f56; margin-right: -4px; }
 .dv1-by .dv1-ms { font: inherit !important; }
-.dv1-hb { display: flex; gap: 12px; margin-top: 26px; }
-.dv1-hb button { box-sizing: border-box; height: 48px; display: inline-flex; align-items: center; font: 400 18px/normal var(--dv1-type) !important; padding: 15px 24px; border-radius: 9px; cursor: pointer; white-space: nowrap; }
+.dv1-hb { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: var(--hero-act-gap); }
+.dv1-hb button { box-sizing: border-box; height: var(--hero-act-h); display: inline-flex; align-items: center; font: 400 18px/normal var(--dv1-type) !important; padding: 0 24px; border-radius: 9px; cursor: pointer; white-space: nowrap; }
 .dv1-hb .dv1-p1 { background: var(--dv1-navy); color: #fff; border: 1px solid var(--dv1-navy); }
 .dv1-hb .dv1-p1:hover:not(:disabled) { background: #1b2433; }
 .dv1-hb .dv1-p2 { background: #fff; color: var(--dv1-ink); border: 1px solid rgba(28, 19, 15, 0.18); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06); }
@@ -115,23 +135,17 @@
 .dv1-rl { white-space: nowrap; margin: 10px 0 0; font: 400 15px/normal var(--dv1-type) !important; color: var(--dv1-ink); text-align: center; }
 .dv1-rs { white-space: nowrap; margin: 3px 0 0; font: italic 400 13.5px/normal var(--dv1-serif) !important; color: var(--dv1-i58); text-align: center; text-decoration: underline; text-decoration-color: var(--dv1-i30); text-underline-offset: 3px; }
 
-@container dv1hd (max-width: 1256px) {
-  .dv1-hd h1.dv1-title { font-size: 50px !important; }
-  .dv1-hrow { gap: 32px; }
-  .dv1-c1 { min-width: 206px; }
-  .dv1-c2 { min-width: 150px; }
-}
-@container dv1hd (max-width: 1025px) {
-  .dv1-hd h1.dv1-title { font-size: 40px !important; }
-  .dv1-by { font-size: 18px !important; }
-  .dv1-c1 li { font-size: 14.5px !important; }
-  .dv1-c1 li b { font-size: 19px; }
-  .dv1-hb button { font-size: 16px !important; padding: 13px 20px; }
-  .dv1-c1 { min-width: 190px; padding: 16px 18px 10px; }
-  .dv1-c2 { min-width: 136px; padding: 14px 16px; }
-}
+/* header rules v1.1 — the compact sizes follow the shell's switch (a sheet narrower than 1440), not the header's width */
+.ws-app:not(.sheet-wide) .dv1-by { font-size: 18px !important; }
+.ws-app:not(.sheet-wide) .dv1-c1 li { font-size: 14.5px !important; }
+.ws-app:not(.sheet-wide) .dv1-c1 li b { font-size: 19px; }
+.ws-app:not(.sheet-wide) .dv1-hb button { font-size: 16px !important; padding: 0 20px; }
+.ws-app:not(.sheet-wide) .dv1-c1 { min-width: 190px; padding: 16px 18px 10px; }
+.ws-app:not(.sheet-wide) .dv1-c2 { min-width: 136px; padding: 14px 16px; }
 @container dv1hd (max-width: 857px) {
-  .dv1-hrow { flex-direction: column; align-items: flex-start; }
+  .dv1-hrow { grid-template-columns: minmax(0, 1fr); justify-items: start; margin-inline: 0; }
+  .dv1-ht { margin-left: 0; }
+  .dv1-hd .dv1-card { grid-column: 1; margin-block: var(--hero-act-gap) 0; }
 }
 
 /* ── the empty header: the navy panel ─────────────────────────────────── */
