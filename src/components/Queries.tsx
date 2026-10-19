@@ -5727,7 +5727,8 @@ export const Queries: React.FC<{
          card describes) */
       case "pin": return unpinned(() => ({
         el: vis(".qc138-sheet button[data-qc140='pin']"), keyCap: "F",
-        text: <>Press <b>Pin list</b> and the list becomes the whole page: the sidebar tucks away and the counts move into a band at the top. Press it again, or Esc, to put things back.</>,
+        /* v140.1 §B — names the button, not its label: at a toolbar of 1000px or less the Pin shows only its icon */
+        text: <>Press the <b>pin</b> button, or <b>F</b>, and the list becomes the whole page: the sidebar tucks away and the counts move into a band at the top. Press it again, or Esc, to put things back.</>,
       }));
       case "open": {
         const row = vis(".qc138-sheet [data-qcv='row']");
