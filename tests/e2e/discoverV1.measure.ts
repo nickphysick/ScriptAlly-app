@@ -34,17 +34,14 @@ for (const vp of SIZES) {
     const col = await appColumn(page);
     await openMock(page, col, vp.height, "live");
     const ref = (await page.evaluate(READ(REF))) as Boxes;
+    /* header rules v1.1 (19 Oct): the header's geometry is the shared hero's now — the Contact list's, held by
+       tests/e2e/hr1.measure.ts (HR1-2 top, HR1-3 column, HR1-5 card, HR1-6 gap, HR1-7 against the Contact list) — not
+       this page's v1 mock. What stays here is that every part of the mock's header is on the page. */
     for (const k of Object.keys(APP)) {
       const a = app[k], r = ref[k];
       L.check("B1", `${vp.width} ${k} present`, a && r, `${JSON.stringify(a)} vs ${JSON.stringify(r)}`);
-      if (!a || !r) continue;
-      L.check("B1", `${vp.width} ${k} x`, near(a.x, r.x, 1.5), `${a.x.toFixed(1)} vs ref ${r.x.toFixed(1)}`);
-      L.check("B1", `${vp.width} ${k} y`, near(a.y, r.y, 1.5), `${a.y.toFixed(1)} vs ref ${r.y.toFixed(1)}`);
-      L.check("B1", `${vp.width} ${k} h`, near(a.h, r.h, 1.5), `${a.h.toFixed(1)} vs ref ${r.h.toFixed(1)}`);
-      if (!["title", "byline", "eyebrow", "how"].includes(k)) L.check("B1", `${vp.width} ${k} w`, near(a.w, r.w, 1.5), `${a.w.toFixed(1)} vs ref ${r.w.toFixed(1)}`);
-      L.check("B1", `${vp.width} ${k} font size`, near(a.fs, r.fs, 0.1), `${a.fs} vs ref ${r.fs}`);
     }
-    L.done(50);
+    L.done(Object.keys(APP).length);
   });
 
   test(`B1 · loading → loaded moves nothing at ${vp.width}`, async ({ page }) => {

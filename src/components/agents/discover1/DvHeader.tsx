@@ -108,7 +108,10 @@ export const DvHeader: React.FC<{
           <h1 className="dv1-title" data-page-title="" data-dv1="title" tabIndex={-1} aria-label={label}>
             <span aria-hidden="true">
               {title.kind === "count" ? <><b data-dv1="title-n">{title.n}</b> {considerWords(title.n)}</>
-                : title.kind === "loading" ? <span className="dv1-blank" data-dv1="title-blank">00 agents to consider</span>
+                /* header rules v1.1: the placeholder is one digit wide, the width of the loaded title for a count under ten.
+                   At a 1512 window the column beside the card is too tight for "00 agents to consider" on one line, and
+                   the header shrank by a line as the data landed. */
+                : title.kind === "loading" ? <span className="dv1-blank" data-dv1="title-blank">0 agents to consider</span>
                 : label}
             </span>
           </h1>

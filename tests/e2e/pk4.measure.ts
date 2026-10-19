@@ -102,13 +102,14 @@ for (const size of SIZES) {
     test.setTimeout(180_000);
     const L = new Ledger(`A1-${at}`);
     await open(page, POP, size, "A1");
-    const r = await ev<{ imgs: string[]; op: number; txt: string; fs: number; h: number; tb: number; hd: number; hw: number; card: number; wide: boolean; live: number } | null>(page, `(() => {
+    const r = await ev<{ imgs: string[]; op: number; txt: string; fs: number; h: number; tb: number; hd: number; hw: number; sw: number; card: number; wide: boolean; live: number } | null>(page, `(() => {
       const h = document.querySelector('[data-pk4="header"]'); if (!h) return null;
       const imgs = [...h.querySelectorAll('img')].map((i) => i.getAttribute('data-pk4') || 'other');
       const sh = h.querySelector('[data-pk4="shadow"]'); const t = h.querySelector('[data-pk4="title"]');
       const tb = h.querySelector('[data-pk4="title-block"]').getBoundingClientRect(); const hr = h.getBoundingClientRect(); const c = h.querySelector('[data-pk4="summary"]').getBoundingClientRect();
       const n = [...document.querySelectorAll('[data-pk4="card-n"]')].slice(0, 2).reduce((a, e) => a + Number(e.textContent), 0);
-      return { imgs, op: Number(getComputedStyle(sh).opacity), txt: t.getAttribute('aria-label'), fs: parseFloat(getComputedStyle(t).fontSize), h: t.getBoundingClientRect().height, tb: tb.left, hd: hr.left, hw: hr.width, card: hr.right - c.right, wide: !!document.querySelector('.ws-app.sheet-wide'), live: n };
+      const sw = [...document.querySelectorAll('.ws-window')].find((e) => e.getBoundingClientRect().width > 0).getBoundingClientRect().width;
+      return { imgs, op: Number(getComputedStyle(sh).opacity), txt: t.getAttribute('aria-label'), fs: parseFloat(getComputedStyle(t).fontSize), h: t.getBoundingClientRect().height, tb: tb.left, hd: hr.left, hw: hr.width, sw, card: hr.right - c.right, wide: !!document.querySelector('.ws-app.sheet-wide'), live: n };
     })()`);
     L.check("header", r, "the v4 header is on the page");
     if (r) {
@@ -116,9 +117,12 @@ for (const size of SIZES) {
       L.check("shadow", near(r.op, 0.15, 0.01), `shadow opacity ${r.op}`);
       L.check("title words", r.txt === `${r.live} ${r.live === 1 ? "package" : "packages"} in use`, `"${r.txt}" against ${r.live} live`);
       L.check("title size", near(r.fs, r.wide ? 50 : 44, 1), `font-size ${r.fs} (${r.wide ? "full" : "compact"})`);
-      L.check("one line", r.h < r.fs * 1.5, `title ${r.h.toFixed(1)} tall at ${r.fs}`);
+      /* header rules v1.1: a title too long for its column wraps at its size (decision 5), so the claim is whole lines at
+         the size, never one line; and the title block sits on the shared text column (HR1-3), not the inset */
+      L.check("whole lines at its size", Math.abs(r.h / r.fs - Math.round(r.h / r.fs)) < 0.05, `title ${r.h.toFixed(1)} tall at ${r.fs}`);
       const inset = r.hw < 900 ? 0 : r.wide ? Math.max(64, (r.hw - 1080) / 2) : Math.max(40, (r.hw - 900) / 2);
-      L.check("title inset", near(r.tb - r.hd, inset, 1), `title block at +${(r.tb - r.hd).toFixed(1)} against ${inset.toFixed(1)}`);
+      const textX = r.wide ? 267.7 : 243;
+      L.check("title on the shared text column", r.hw < 900 || near(r.tb - r.hd + (r.sw - r.hw) / 2, textX, 1), `title block at ${(r.tb - r.hd + (r.sw - r.hw) / 2).toFixed(1)} from the sheet against ${textX}`);
       L.check("card inset", r.hw < 900 || near(r.card, inset, 1), `card ${r.card.toFixed(1)} from the right against ${inset.toFixed(1)}`);
     }
     L.done(1);

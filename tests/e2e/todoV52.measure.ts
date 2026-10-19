@@ -63,7 +63,9 @@ test("TD52 A1 — the populated header's height equals the base's; the card take
     await page.waitForTimeout(300);
     const h = await headerHeight(page);
     const b = base[String(vp.width)];
-    L.check(`${w} the header is the base's height (±1)`, !!b && near(h.header, b.header, 1), `${h.header?.toFixed(1)} vs ${b?.header?.toFixed(1)}`);
+    /* header rules v1.1: the header's height is the shared hero's now (a 36 top, the 179 / 201 stack, 44 to the filter
+       row), not v5.2's 264 — HR1-2 and HR1-6 hold it. What stays here: it was found, and it is no shorter than the base. */
+    L.check(`${w} the header is at least the base's height (header rules v1.1 own the rest)`, !!b && h.header >= b.header - 1, `${h.header?.toFixed(1)} vs ${b?.header?.toFixed(1)}`);
     L.check(`${w} the card is the calendar`, await page.evaluate(() => !!(window as unknown as { __td5: () => { q: (s: string) => HTMLElement | null } }).__td5().q('[data-td5="card"][data-td52="cal"]')), "");
     L.check(`${w} the card's box is the header row's height (±1)`, near(h.card, h.row ?? -1, 1), `${h.card?.toFixed(1)} vs ${h.row?.toFixed(1)}`);
   }
@@ -623,7 +625,8 @@ test("TD52 F1 — the h1 reads Part B's overdue and today counts, the overdue pa
     /* the failure is not an overlap: the title's column is max-content, so a title too wide PUSHES the card out of the row */
     const gapOk = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); const h = q('[data-td5="title"]')!.getBoundingClientRect(), c = q('[data-td5="card"]')!.getBoundingClientRect(), r = q('[data-td5="header-row"]')!.getBoundingClientRect(); return { right: h.right, card: c.left, cardR: c.right, rowR: r.right, fs: getComputedStyle(q('[data-td5="title"]')!).fontSize, hd: q('[data-td5="header"]')!.getBoundingClientRect().height }; });
     L.check(`${w} a long title fits its column: the card stays inside the row`, gapOk.cardR <= gapOk.rowR + 0.5 && gapOk.right <= gapOk.card, JSON.stringify(gapOk));
-    L.check(`${w} …and the header keeps its height`, near(gapOk.hd, hd0, 1), `${gapOk.hd} vs ${hd0}`);
+    /* header rules v1.1 (decision 5): a long title wraps at its size and the header grows; it is never shrunk to fit */
+    L.check(`${w} …and the title keeps its size (it wraps, it never shrinks)`, near(parseFloat(gapOk.fs), 44, 0.5), `${gapOk.fs} (header ${hd0} → ${gapOk.hd})`);
     await page.setViewportSize(vp);
     if (r.o) L.check(`${w} the overdue part is rust`, r.rust === "rgb(162, 69, 42)", String(r.rust));
   }
