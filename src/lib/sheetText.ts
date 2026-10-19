@@ -12,6 +12,26 @@
 import * as XLSX from "xlsx";
 import { readSheetBook } from "./sheetCells";
 
+/**
+ * MERGED CELLS CARRY THEIR VALUE INTO EVERY CELL THEY COVER. A writer who merges one agency down the
+ * rows of its three agents sees the agency on every row; the file stores it once, in the range's
+ * top-left cell, and every other cell is empty — so the CSV said the agency for the first agent and
+ * nothing for the rest. Copying the top-left cell across the range gives each row what the writer
+ * sees. A range whose top-left cell is empty is left alone (there is nothing to carry). Mutates.
+ */
+export function fillMergedRanges(sheet: XLSX.WorkSheet): void {
+  for (const m of sheet["!merges"] ?? []) {
+    const top = sheet[XLSX.utils.encode_cell(m.s)] as XLSX.CellObject | undefined;
+    if (!top || top.v === undefined || top.v === "") continue;
+    for (let r = m.s.r; r <= m.e.r; r++) {
+      for (let c = m.s.c; c <= m.e.c; c++) {
+        if (r === m.s.r && c === m.s.c) continue;
+        sheet[XLSX.utils.encode_cell({ r, c })] = { ...top };
+      }
+    }
+  }
+}
+
 /** The heading a sheet's text carries when a workbook has more than one sheet with data in it. */
 export const SHEET_HEADING = (name: string) => `### Sheet: ${name}`;
 
@@ -34,6 +54,7 @@ const isEmptyCsv = (csv: string) => /^[,\s]*$/.test(csv);
  */
 export function bufferToCsv(buf: ArrayBuffer | Uint8Array): string {
   const wb = readSheetBook(XLSX, buf);
+  for (const name of wb.SheetNames) if (wb.Sheets[name]) fillMergedRanges(wb.Sheets[name]);
   const parts = wb.SheetNames
     .map((name) => ({ name, csv: wb.Sheets[name] ? XLSX.utils.sheet_to_csv(wb.Sheets[name]) : "" }))
     .filter((p) => !isEmptyCsv(p.csv));

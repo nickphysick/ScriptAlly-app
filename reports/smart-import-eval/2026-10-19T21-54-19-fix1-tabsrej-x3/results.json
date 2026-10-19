@@ -1,0 +1,976 @@
+{
+ "stamp": "2026-10-19T21-54-19",
+ "model": "claude-sonnet-4-6",
+ "args": {
+  "split": "dev",
+  "only": "tabsrej-xlsx-10",
+  "runs": 3,
+  "concurrency": 4,
+  "dryRun": false,
+  "confirmSpend": false,
+  "label": "fix1-tabsrej-x3",
+  "real": true,
+  "rescore": null
+ },
+ "results": [
+  {
+   "id": "tabsrej-xlsx-10",
+   "real": false,
+   "split": "dev",
+   "layout": "tabsRejections",
+   "knobs": [
+    "tabs"
+   ],
+   "format": "xlsx",
+   "rows": 10,
+   "expectedToFail": true,
+   "failReason": "rejections live on their own tab, with no status column, which the conversion never reads",
+   "conversion": {
+    "chars": 745,
+    "lines": 14,
+    "refused": null,
+    "coverage": {
+     "facts": 20,
+     "visible": 20,
+     "ratio": 1
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 5975,
+     "usage": {
+      "inputTokens": 2602,
+      "outputTokens": 533,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.015801,
+     "score": {
+      "pass": true,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 70,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q2 Rory Kaur / Juniper Partners": {
+        "agentName": "rory kaur",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-07-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Callum Salt / Inkwell Literary": {
+        "agentName": "callum salt",
+        "agency": "inkwell literary",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-05-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Hannah Fennimore / Greenhouse & Co": {
+        "agentName": "hannah fennimore",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-05-02",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Tamsin Kaur / Inkwell Literary": {
+        "agentName": "tamsin kaur",
+        "agency": "inkwell literary",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-03-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Hannah Ibbotson / Ashgrove Management": {
+        "agentName": "hannah ibbotson",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-03-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Gregory Penrose / Greenhouse & Co": {
+        "agentName": "gregory penrose",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2024-03-31",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Marianne Kaur / Juniper Partners": {
+        "agentName": "marianne kaur",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2023-10-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Felix Doyle / Ashgrove Management": {
+        "agentName": "felix doyle",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-01-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q1 Clara Lindqvist / Juniper Partners": {
+        "agentName": "clara lindqvist",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-10-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Nadia Nkemelu / Ashgrove Management": {
+        "agentName": "nadia nkemelu",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-11-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Rory Kaur",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a2",
+        "name": "Callum Salt",
+        "agency": "Inkwell Literary"
+       },
+       {
+        "ref": "a3",
+        "name": "Hannah Fennimore",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a4",
+        "name": "Tamsin Kaur",
+        "agency": "Inkwell Literary"
+       },
+       {
+        "ref": "a5",
+        "name": "Hannah Ibbotson",
+        "agency": "Ashgrove Management"
+       },
+       {
+        "ref": "a6",
+        "name": "Gregory Penrose",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a7",
+        "name": "Marianne Kaur",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a8",
+        "name": "Felix Doyle",
+        "agency": "Ashgrove Management"
+       },
+       {
+        "ref": "a9",
+        "name": "Clara Lindqvist",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a10",
+        "name": "Nadia Nkemelu",
+        "agency": "Ashgrove Management"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Full Requested",
+        "sentDate": "2024-07-28",
+        "sentDateRaw": "2024-07-28",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "Full Requested",
+        "sentDate": "2025-05-10",
+        "sentDateRaw": "2025-05-10",
+        "timeline": [],
+        "reasons": [],
+        "notes": "loved the list"
+       },
+       {
+        "agentRef": "a3",
+        "status": "Full Sent",
+        "sentDate": "2025-05-02",
+        "sentDateRaw": "2025-05-02",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "Full Sent",
+        "sentDate": "2025-03-16",
+        "sentDateRaw": "2025-03-16",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Queried",
+        "sentDate": "2024-03-01",
+        "sentDateRaw": "2024-03-01",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Partial Sent",
+        "sentDate": "2024-03-31",
+        "sentDateRaw": "2024-03-31",
+        "timeline": [],
+        "reasons": [],
+        "notes": "comps: The Salt Path"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Partial Sent",
+        "sentDate": "2023-10-04",
+        "sentDateRaw": "2023-10-04",
+        "timeline": [],
+        "reasons": [],
+        "notes": "wrong ms?? think i sent the old one"
+       },
+       {
+        "agentRef": "a8",
+        "status": "No Response",
+        "sentDate": "2023-01-04",
+        "sentDateRaw": "2023-01-04",
+        "timeline": [],
+        "reasons": [],
+        "notes": "QM form"
+       },
+       {
+        "agentRef": "a9",
+        "status": "Rejected",
+        "sentDate": "2023-10-22",
+        "sentDateRaw": "2023-10-22",
+        "timeline": [],
+        "reasons": [],
+        "notes": "form rejection"
+       },
+       {
+        "agentRef": "a10",
+        "status": "Rejected",
+        "sentDate": "2023-11-12",
+        "sentDateRaw": "2023-11-12",
+        "timeline": [],
+        "reasons": [],
+        "notes": "nice personal note"
+       }
+      ]
+     }
+    },
+    {
+     "run": 1,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 5810,
+     "usage": {
+      "inputTokens": 2602,
+      "outputTokens": 529,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.015741,
+     "score": {
+      "pass": false,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [
+       {
+        "query": "q10 Felix Doyle / Ashgrove Management",
+        "field": "status",
+        "expected": "No Response",
+        "actual": "Queried"
+       }
+      ],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 69,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 9
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q2 Rory Kaur / Juniper Partners": {
+        "agentName": "rory kaur",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-07-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Callum Salt / Inkwell Literary": {
+        "agentName": "callum salt",
+        "agency": "inkwell literary",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-05-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Hannah Fennimore / Greenhouse & Co": {
+        "agentName": "hannah fennimore",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-05-02",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Tamsin Kaur / Inkwell Literary": {
+        "agentName": "tamsin kaur",
+        "agency": "inkwell literary",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-03-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Hannah Ibbotson / Ashgrove Management": {
+        "agentName": "hannah ibbotson",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-03-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Gregory Penrose / Greenhouse & Co": {
+        "agentName": "gregory penrose",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2024-03-31",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Marianne Kaur / Juniper Partners": {
+        "agentName": "marianne kaur",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2023-10-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Felix Doyle / Ashgrove Management": {
+        "agentName": "felix doyle",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-01-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q1 Clara Lindqvist / Juniper Partners": {
+        "agentName": "clara lindqvist",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-10-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Nadia Nkemelu / Ashgrove Management": {
+        "agentName": "nadia nkemelu",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-11-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Rory Kaur",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a2",
+        "name": "Callum Salt",
+        "agency": "Inkwell Literary"
+       },
+       {
+        "ref": "a3",
+        "name": "Hannah Fennimore",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a4",
+        "name": "Tamsin Kaur",
+        "agency": "Inkwell Literary"
+       },
+       {
+        "ref": "a5",
+        "name": "Hannah Ibbotson",
+        "agency": "Ashgrove Management"
+       },
+       {
+        "ref": "a6",
+        "name": "Gregory Penrose",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a7",
+        "name": "Marianne Kaur",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a8",
+        "name": "Felix Doyle",
+        "agency": "Ashgrove Management"
+       },
+       {
+        "ref": "a9",
+        "name": "Clara Lindqvist",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a10",
+        "name": "Nadia Nkemelu",
+        "agency": "Ashgrove Management"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Full Requested",
+        "sentDate": "2024-07-28",
+        "sentDateRaw": "2024-07-28",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "Full Requested",
+        "sentDate": "2025-05-10",
+        "sentDateRaw": "2025-05-10",
+        "timeline": [],
+        "reasons": [],
+        "notes": "loved the list"
+       },
+       {
+        "agentRef": "a3",
+        "status": "Full Sent",
+        "sentDate": "2025-05-02",
+        "sentDateRaw": "2025-05-02",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "Full Sent",
+        "sentDate": "2025-03-16",
+        "sentDateRaw": "2025-03-16",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Queried",
+        "sentDate": "2024-03-01",
+        "sentDateRaw": "2024-03-01",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Partial Sent",
+        "sentDate": "2024-03-31",
+        "sentDateRaw": "2024-03-31",
+        "timeline": [],
+        "reasons": [],
+        "notes": "comps: The Salt Path"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Partial Sent",
+        "sentDate": "2023-10-04",
+        "sentDateRaw": "2023-10-04",
+        "timeline": [],
+        "reasons": [],
+        "notes": "wrong ms?? think i sent the old one"
+       },
+       {
+        "agentRef": "a8",
+        "status": "Queried",
+        "sentDate": "2023-01-04",
+        "sentDateRaw": "2023-01-04",
+        "timeline": [],
+        "reasons": [],
+        "notes": "QM form"
+       },
+       {
+        "agentRef": "a9",
+        "status": "Rejected",
+        "sentDate": "2023-10-22",
+        "sentDateRaw": "2023-10-22",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Rejected",
+        "sentDate": "2023-11-12",
+        "sentDateRaw": "2023-11-12",
+        "timeline": [],
+        "reasons": [],
+        "notes": "nice personal note"
+       }
+      ]
+     }
+    },
+    {
+     "run": 2,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 5811,
+     "usage": {
+      "inputTokens": 2602,
+      "outputTokens": 529,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.015741,
+     "score": {
+      "pass": false,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [
+       {
+        "query": "q10 Felix Doyle / Ashgrove Management",
+        "field": "status",
+        "expected": "No Response",
+        "actual": "Queried"
+       }
+      ],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 69,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 10
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 9
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q2 Rory Kaur / Juniper Partners": {
+        "agentName": "rory kaur",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-07-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Callum Salt / Inkwell Literary": {
+        "agentName": "callum salt",
+        "agency": "inkwell literary",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-05-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Hannah Fennimore / Greenhouse & Co": {
+        "agentName": "hannah fennimore",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-05-02",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Tamsin Kaur / Inkwell Literary": {
+        "agentName": "tamsin kaur",
+        "agency": "inkwell literary",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2025-03-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Hannah Ibbotson / Ashgrove Management": {
+        "agentName": "hannah ibbotson",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-03-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Gregory Penrose / Greenhouse & Co": {
+        "agentName": "gregory penrose",
+        "agency": "greenhouse & co",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2024-03-31",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Marianne Kaur / Juniper Partners": {
+        "agentName": "marianne kaur",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Partial Sent",
+        "sentDate": "2023-10-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Felix Doyle / Ashgrove Management": {
+        "agentName": "felix doyle",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-01-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q1 Clara Lindqvist / Juniper Partners": {
+        "agentName": "clara lindqvist",
+        "agency": "juniper partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-10-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Nadia Nkemelu / Ashgrove Management": {
+        "agentName": "nadia nkemelu",
+        "agency": "ashgrove management",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-11-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Rory Kaur",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a2",
+        "name": "Callum Salt",
+        "agency": "Inkwell Literary"
+       },
+       {
+        "ref": "a3",
+        "name": "Hannah Fennimore",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a4",
+        "name": "Tamsin Kaur",
+        "agency": "Inkwell Literary"
+       },
+       {
+        "ref": "a5",
+        "name": "Hannah Ibbotson",
+        "agency": "Ashgrove Management"
+       },
+       {
+        "ref": "a6",
+        "name": "Gregory Penrose",
+        "agency": "Greenhouse & Co"
+       },
+       {
+        "ref": "a7",
+        "name": "Marianne Kaur",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a8",
+        "name": "Felix Doyle",
+        "agency": "Ashgrove Management"
+       },
+       {
+        "ref": "a9",
+        "name": "Clara Lindqvist",
+        "agency": "Juniper Partners"
+       },
+       {
+        "ref": "a10",
+        "name": "Nadia Nkemelu",
+        "agency": "Ashgrove Management"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Full Requested",
+        "sentDate": "2024-07-28",
+        "sentDateRaw": "2024-07-28",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a2",
+        "status": "Full Requested",
+        "sentDate": "2025-05-10",
+        "sentDateRaw": "2025-05-10",
+        "timeline": [],
+        "reasons": [],
+        "notes": "loved the list"
+       },
+       {
+        "agentRef": "a3",
+        "status": "Full Sent",
+        "sentDate": "2025-05-02",
+        "sentDateRaw": "2025-05-02",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "Full Sent",
+        "sentDate": "2025-03-16",
+        "sentDateRaw": "2025-03-16",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Queried",
+        "sentDate": "2024-03-01",
+        "sentDateRaw": "2024-03-01",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Partial Sent",
+        "sentDate": "2024-03-31",
+        "sentDateRaw": "2024-03-31",
+        "timeline": [],
+        "reasons": [],
+        "notes": "comps: The Salt Path"
+       },
+       {
+        "agentRef": "a7",
+        "status": "Partial Sent",
+        "sentDate": "2023-10-04",
+        "sentDateRaw": "2023-10-04",
+        "timeline": [],
+        "reasons": [],
+        "notes": "wrong ms?? think i sent the old one"
+       },
+       {
+        "agentRef": "a8",
+        "status": "Queried",
+        "sentDate": "2023-01-04",
+        "sentDateRaw": "2023-01-04",
+        "timeline": [],
+        "reasons": [],
+        "notes": "QM form"
+       },
+       {
+        "agentRef": "a9",
+        "status": "Rejected",
+        "sentDate": "2023-10-22",
+        "sentDateRaw": "2023-10-22",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Rejected",
+        "sentDate": "2023-11-12",
+        "sentDateRaw": "2023-11-12",
+        "timeline": [],
+        "reasons": [],
+        "notes": "nice personal note"
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": [
+    {
+     "field": "status",
+     "query": "q10 Felix Doyle / Ashgrove Management",
+     "values": [
+      "\"No Response\"",
+      "\"Queried\""
+     ]
+    }
+   ]
+  }
+ ]
+}

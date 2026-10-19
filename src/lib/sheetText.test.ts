@@ -51,3 +51,30 @@ describe("bufferToCsv reads every sheet with data in it", () => {
     expect(bufferToCsv(csv)).toBe(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]));
   });
 });
+
+// ── Fix 2 (Smart Import eval, Phase 6): merged cells ──────────────────────────────────────────
+describe("bufferToCsv carries a merged range's value into every cell it covers", () => {
+  const merged = (merges: XLSX.Range[], rows: unknown[][]) => {
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!merges"] = merges;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Queries");
+    return new Uint8Array(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
+  };
+
+  it("gives every row of a merged agency its agency", () => {
+    const buf = merged([{ s: { r: 1, c: 1 }, e: { r: 3, c: 1 } }],
+      [["Agent", "Agency"], ["Clara Voss", "Pemberton"], ["Jamal Carter", ""], ["Owen Hale", ""], ["Tomas Vidal", "Quill"]]);
+    expect(bufferToCsv(buf)).toBe("Agent,Agency\nClara Voss,Pemberton\nJamal Carter,Pemberton\nOwen Hale,Pemberton\nTomas Vidal,Quill");
+  });
+
+  it("fills a range across columns as well as down rows", () => {
+    const buf = merged([{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }], [["My tracker", "", ""], ["a", "b", "c"]]);
+    expect(bufferToCsv(buf).split("\n")[0]).toBe("My tracker,My tracker,My tracker");
+  });
+
+  it("leaves a range alone whose top-left cell is empty", () => {
+    const buf = merged([{ s: { r: 1, c: 1 }, e: { r: 2, c: 1 } }], [["Agent", "Agency"], ["Clara Voss", ""], ["Jamal Carter", ""]]);
+    expect(bufferToCsv(buf)).toBe("Agent,Agency\nClara Voss,\nJamal Carter,");
+  });
+});
