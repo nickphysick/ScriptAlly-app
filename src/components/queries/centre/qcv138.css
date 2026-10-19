@@ -15,34 +15,47 @@
    centred). v138.5: 14px under the sheet's top edge; the status row, then 22 below it the header grid. Both come in
    from the sheet's edges by the shared page hero frame's inset (shell/pageHeroFrame.css, `.phf`), the Contact
    list's own, so their edges line up with its letter strip and card. ── */
-.qcv-group { --qc138-w: min(1600px, calc(var(--hsheet-w) - 48px)); }
+/* header rules v1.1 — the hero's width, top and gap below are the shared tokens (shell/pageHeroFrame.css), the
+   Contact list's own values; the status row is no longer rendered here (the Filters menu's "Where it stands" does
+   its job), and the eyebrow is the first thing under the sheet's top. */
+.qcv-group { --qc138-w: var(--hero-w); }
 .qcv-group > .qc138-hd {
   grid-column: 1 / -1; grid-row: 1; justify-self: start; box-sizing: border-box; min-width: 0;
   position: relative; isolation: isolate; container: qc138hd / inline-size;
   margin: 14px 0 0; padding: 0;
 }
 @media (min-width: 768px) {
-  .qcv-group > .qc138-hd { width: var(--qc138-w); margin-left: calc(50% - var(--qc138-w) / 2); }
+  .qcv-group > .qc138-hd { width: var(--qc138-w); margin-left: calc(50% - var(--qc138-w) / 2); margin-top: var(--hero-top); }
 }
 .qc138-hd .qc138-srow { margin-bottom: 22px; }
 /* hawk auto · title block max-content · spacer · chart; 22 apart, everything centred on one line.
    ⚠️ NOTHING HERE MAY CREATE A STACKING CONTEXT (no transform, no isolation, no z-index): the hawk shadow (§D)
       paints over the chart card at rest and under it on hover, and both are this grid's descendants. */
+/* header rules v1.1 — title block · spacer · right item, as the Contact list's row: the title block's left is the
+   shared text column (--hero-text-x from the sheet's edge), the right item's right edge the row's inset, and the
+   right item is as tall as the stack and centred on it. The hawk is laid out like the Contact list's archivist: out
+   of the grid, its left --hero-art-x from the sheet's edge, as tall as the stack, contained and anchored left.
+   `--qc138-row-x` is where this row starts from the sheet's left edge (the frame's start plus the inset).
+   ⚠️ NOTHING HERE MAY CREATE A STACKING CONTEXT (no transform, no isolation, no z-index): the hawk shadow (§D)
+      paints over the chart card at rest and under it on hover, and both are this grid's descendants. */
 .qc138-hd .qc138-hg {
   position: relative; /* §D: the hawk shadow is laid out on it; no z-index, so no stacking context */
-  display: grid; grid-template-columns: auto max-content minmax(20px, 1fr) minmax(260px, 420px);
-  column-gap: 22px; align-items: center;
+  --qc138-row-x: calc(var(--hero-frame-x) + var(--phf-inset));
+  display: grid; grid-template-columns: max-content minmax(0, 1fr) var(--hero-right-w);
+  column-gap: 0; align-items: center;
 }
-/* the desk hawk hangs into the inset: its left margin is the inset less 6px */
 .qc138-hd .qc138-hawk {
-  display: block; width: 250px; height: auto; max-width: none; position: relative; z-index: 3;
-  margin: -20px 0 -30px calc(6px - var(--phf-inset)); pointer-events: none; user-select: none;
+  display: block; position: absolute; z-index: 3; top: 0; left: calc(var(--hero-art-x) - var(--qc138-row-x));
+  width: var(--hero-art-w); height: var(--hero-art-h); max-width: none; object-fit: contain; object-position: left center;
+  pointer-events: none; user-select: none;
 }
-.qc138-hd .qc138-bt { position: relative; z-index: 3; min-width: 0; }
-.qc138-hd .qc138-hsp { display: block; min-width: 0; }
-.qc138-hd .qc138-cc { position: relative; min-width: 0; }
-@container qc138hd (max-width: 1180px) {
-  .qc138-hd .qc138-hawk { width: 190px; margin-top: -14px; margin-bottom: -22px; }
+.qc138-hd .qc138-bt { position: relative; z-index: 3; min-width: 0; grid-column: 1; margin-left: calc(var(--hero-text-x) - var(--qc138-row-x)); }
+.qc138-hd .qc138-hsp { display: block; min-width: 0; grid-column: 2; }
+.qc138-hd .qc138-cc { position: relative; min-width: 0; grid-column: 3; }
+/* below 1100px of window the hawk goes and the title block starts at the row's inset, as the Contact list's does */
+@media (max-width: 1099.98px) {
+  .qc138-hd .qc138-hawk { display: none; }
+  .qc138-hd .qc138-bt { margin-left: 0; }
 }
 
 /* ── v138.5 §C · THE WEEKLY CHART: a white card as tall as the title block (`--qc138-bt-h`, the one writer in
@@ -105,22 +118,21 @@
 @media (prefers-reduced-motion: reduce) { .qc138-hd .qc138-wk { transition: none; } }
 
 .qc138-hd .qc138-ey {
-  display: block; margin: 0 0 15px; font: 500 12px/1 var(--font-mono) !important; letter-spacing: 0.24em; color: #a2452a; white-space: nowrap;
+  display: block; margin: 0 0 var(--hero-ey-gap); font: 500 12px/var(--hero-ey-lh) var(--font-mono) !important; letter-spacing: 0.24em; color: #a2452a; white-space: nowrap;
 }
 .qc138-hd h1.qc138-title {
-  margin: 0; font: 400 44px/1 var(--sp-type) !important; letter-spacing: 0; color: #1c130f; white-space: nowrap; outline: none;
+  margin: 0; font: 400 var(--hero-title-size)/1 var(--sp-type) !important; letter-spacing: 0; color: #1c130f; white-space: nowrap; outline: none;
 }
-.ws-app.sheet-wide .qc138-hd h1.qc138-title { font-size: 50px !important; }
 .qc138-hd h1.qc138-title span { font: inherit !important; }
 .qc138-hd .qc138-title .qc138-blank { display: inline-block; color: transparent; border-radius: 8px; background: rgba(28, 19, 15, 0.08); }
-.qc138-hd .qc138-by { display: flex; align-items: center; gap: 12px; margin-top: 12px; min-width: 0; }
+.qc138-hd .qc138-by { display: flex; align-items: center; gap: 12px; margin-top: var(--hero-by-gap); min-width: 0; }
 .qc138-hd .qc138-by::before { content: ""; flex: none; width: 40px; height: 1px; background: rgba(28, 19, 15, 0.3); }
 .qc138-hd .qc138-by::after { content: ""; flex: 1 1 0; max-width: 160px; height: 1px; background: rgba(28, 19, 15, 0.3); }
-.qc138-hd .qc138-by .qc138-byt { font: italic 400 20px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.qc138-hd .qc138-by .qc138-byt { font: italic 400 20px/var(--hero-by-lh) var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .qc138-hd .qc138-by .qc138-ms { font: 400 20px/1 var(--sp-type) !important; font-style: normal !important; color: inherit; }
-.qc138-hd .qc138-acts { display: flex; gap: 12px; margin-top: 22px; }
+.qc138-hd .qc138-acts { display: flex; gap: 12px; margin-top: var(--hero-act-gap); }
 .qc138-hd .qc138-acts button {
-  box-sizing: border-box; height: 46px; padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
+  box-sizing: border-box; height: var(--hero-act-h); padding: 0 22px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;
   font: 400 17px/1 var(--sp-type) !important;
 }
 .qc138-hd .qc138-acts .qc138-b1 { background: #2d3a50; color: #f4eee5; }
@@ -169,7 +181,7 @@
 .qc138-hd .qc138-sentinel { display: block; height: 0; }
 /* the list follows under the header */
 @media (min-width: 768px) {
-  .qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw { margin-top: 54px; } /* v138.5: 54 from the header grid to the navy list header */
+  .qcv-group.qc13 > .qc138-hd ~ .qcv-page.qcw { margin-top: var(--hero-gap-below); } /* header rules v1.1: the shared gap below the hero */
 }
 
 /* ── v138.6 §B · the old pinned row (QcPinned138) is retired: the navy list header is the sticky row (qcvList138.css) ── */

@@ -45,10 +45,17 @@
   --hero-art-h: var(--hero-stack-h);
   --hero-art-w: calc(var(--hero-art-h) * var(--hero-art-ratio));
   --hero-text-x: calc(var(--hero-art-x) + var(--hero-art-w) + var(--hero-art-gap));
+  /* the right item's width where it has none of its own (the Query Centre's chart card, the light headers' summary
+     cards). ⚠️ The Contact list's own card states no width — it is its content's, 321 compact and 363 wide — and keeps
+     it; 332 / 370 are the header rules mock's, for the right items that have no intrinsic width. */
+  --hero-right-w: 332px;
+  /* where a page's hero frame starts, from the sheet's left edge: the frame is --hero-w, centred */
+  --hero-frame-x: calc((var(--hsheet-w) - var(--hero-w)) / 2);
 }
 .ws-app.sheet-wide {
   --hero-title-size: 50px;
   --hero-act-gap: 40px;
+  --hero-right-w: 370px;
 }
 .phf {
   container-type: inline-size;

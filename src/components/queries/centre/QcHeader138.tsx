@@ -94,10 +94,8 @@ export const QcHeader138: React.FC<{
   }, []);
   return (
   <header className="qc138-hd phf" data-qc138="header" data-qcv="open-header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-    {/* v138.5 §A — the status row, at the top, within the shared inset */}
-    <div className="qc138-srow phf-row" data-qc138="status-row">
-      <GlyphRow counts={loading ? null : counts} stages={stages} onGlyph={onGlyph} loading={loading} />
-    </div>
+    {/* header rules v1.1 (decision 4) — the status row is no longer rendered on this page: the Filters menu's "Where it
+        stands" does its job, and the eyebrow is the first thing under the sheet's top. GlyphRow stays, unmounted. */}
     {/* v138.5 §A — the header grid: hawk · title block · spacer · chart. The hawk hangs out into the inset. */}
     <div className="qc138-hg phf-row" data-qc138="header-row" ref={gridRef}>
       <img className="qc138-hawk" data-qc138="hawk" alt="" aria-hidden="true" draggable={false}
