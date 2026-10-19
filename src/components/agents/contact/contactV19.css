@@ -650,3 +650,31 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: none; }
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: rgb(244, 238, 229); box-shadow: none; }
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:focus-visible { outline-color: rgb(244, 238, 229); }
+
+/* ── v19.2 §A · BREATHING ROOM, unpinned only. The eyebrow's top sits 36 under the sheet's top edge (was 14 — the
+   header's own margin, v18 §A) and the list card's top 44 under the hero's lowest element (was 22). Both values are
+   the Contact list's own rules, not the shared hero frame (pageHeroFrame.css sets only the horizontal inset), so
+   nothing outside this page moves. Pinned has no hero and keeps its own 22 (`.clv-group[data-full] > .clv-main`). */
+@media (min-width: 768px) {
+  .clv-group:not([data-full]) > .cl17-hd { margin-top: 36px; }
+  .clv-group:not([data-full]) > .cl17-hd ~ .clv-main.clv-main { margin-top: 44px; }
+}
+
+/* ── v19.2 §B · THE REPLIES CELL: the reply time alone for an open agent; a closed one adds "Closed till 1 Nov" (or
+   "Closed to queries") under it in rust italic serif 13px — v18's rust, #a2452a. Not compact-hidden: it is a fact. */
+.clv-rrep .cl192-shut {
+  display: block; margin-top: 3px; font: italic 400 13px/1.3 var(--sp-serif) !important; color: #a2452a; white-space: nowrap;
+}
+
+/* ── v19.2 §C · "Not stated" — an absent (or zero) reply time — is ink at 55% (was 45). The stated window reads
+   "~6 weeks", spelled out (lib/contactList `replyWeeksLabel`). */
+.clv-group .clv-rrep b.unk { color: rgba(28, 19, 15, 0.55); }
+
+/* ── v19.2 §E · "Imported" under the Date added, serif italic 12.5px, ink at 50%. The cell is a flex column sized to
+   its content, so the label adds a line and never a width: the column is measured from the date line (contactColumns'
+   `date` reads `[data-cl19="date"]`) and the label is narrower than any date besides. */
+.clv-group .cl19-card .cl19-cd { display: flex; flex-direction: column; align-items: flex-start; }
+.clv-group .cl19-card .cl19-cd .cl192-imp {
+  display: block; margin-top: 1px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(var(--cl19-ink), 0.5);
+  white-space: nowrap;
+}

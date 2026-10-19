@@ -491,7 +491,8 @@ test("E3 · grouped: one headings row; clicking Replies sorts every group", asyn
   const replies = page.locator(".clv-group .lt-labels .lt-lab").filter({ hasText: /Replies/i }).first();
   await replies.click({ timeout: 8000 }).catch(() => L.check("the Replies heading can be pressed", false, "missing")); await page.waitForTimeout(700);
   const sorted = await page.evaluate(() => {
-    const wk = (t: string) => { const m = t.match(/~?(\d+)\s*wks?/); return m ? Number(m[1]) : Infinity; };
+    /* v19.2 §C re-point: the reply time reads "~6 weeks" (was "~6 wks"); the old pattern read every row as Infinity, a vacuous green */
+    const wk = (t: string) => { const m = t.match(/~?(\d+)\s*(?:weeks?|wks?)/); return m ? Number(m[1]) : Infinity; };
     return [...document.querySelectorAll<HTMLElement>(".aglist .clv-grp")].filter((e) => e.getBoundingClientRect().height > 0).map((g) => {
       const ws = [...g.querySelectorAll<HTMLElement>("[data-clv='row']")].map((r) => wk(r.querySelector<HTMLElement>(".cl14-rep, [data-clv='replies'], .clv-rep")?.textContent ?? r.textContent ?? ""));
       const up = ws.every((v, i) => i === 0 || v >= ws[i - 1]), down = ws.every((v, i) => i === 0 || v <= ws[i - 1]);
@@ -612,7 +613,10 @@ test("F3 · end: a real click on the spotlit row opens the panel and ends the sp
     await page.waitForTimeout(600);
     await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(300);
     await click(page, L, "[data-pck='item'][data-k='open'] button", "open"); await page.waitForTimeout(700);
-    const box = await page.evaluate(() => { const r = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); return { x: r.left + r.width * 0.3, y: r.top + r.height / 2 }; });
+    /* v19.2 re-point: the click goes to the row's NAME, as every other contact lock's does. 30% across lands on the
+       Date added text, which answers its own click (`.cl19-c [data-cl19]`, since v19); this passed on v19.1 only
+       because the pointer, left on the checklist, happened to hover the first row open — v19.2 §A moved it 44px down */
+    const box = await page.evaluate(() => { const row = [...document.querySelectorAll<HTMLElement>(".aglist [data-clv='row'][data-agent-card]")].find((e) => e.getBoundingClientRect().height > 0)!; const r = row.querySelector<HTMLElement>(".clv-rwn b")!.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     L.check("the spotlight is on (precondition)", await page.locator("[data-pck='spot']").count() === 1, "");
     await page.mouse.click(box.x, box.y);
     const t0 = Date.now();

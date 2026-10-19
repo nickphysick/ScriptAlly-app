@@ -146,13 +146,7 @@
 .cl17-card .cl17-hl .cl17-ht { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .cl17-card .cl17-hl .cl17-ht b { font: 400 14px/1.1 var(--sp-type) !important; white-space: nowrap; }
 .ws-app.sheet-wide .cl17-card .cl17-hl .cl17-ht b { font-size: 15px !important; }
-.cl17-card .cl17-hl .cl17-ht em {
-  font: italic 400 12.5px/1.35 var(--sp-serif) !important; color: #a2452a; white-space: nowrap; min-height: 1.35em;
-  text-decoration: underline; text-decoration-color: rgba(162, 69, 42, 0.35); text-underline-offset: 3px;
-}
-.ws-app.sheet-wide .cl17-card .cl17-hl .cl17-ht em { font-size: 13.5px !important; }
-.cl17-card .cl17-hl:not(:disabled):hover .cl17-ht em { text-decoration-color: #a2452a; }
-.cl17-card .cl17-hl[data-full] .cl17-ht em { color: rgba(28, 19, 15, 0.6); text-decoration: none; }
+/* v19.2 §G — the card's "N gaps to fill" line is retired; the count is on "Fill in the gaps" alone */
 @media (prefers-reduced-motion: reduce) { .cl17-card .cl17-rg { transition: none; } }
 
 /* ── §B · THE FILTER ROW, in the header: 22 under the title row, above a 1px rule, 18 of padding over the row.

@@ -34,7 +34,7 @@ import { commitSmartImport } from "./smartImportCommit";
 import { commitEmailImport } from "./emailImportCommit";
 import { readTemplateBuffer } from "./templateImport";
 import { parseModel, modelToResult, seedUnidentifiedSetAside } from "./smartImportReviewModel";
-import { importedAgentDoc, fileRating } from "./importedAgent";
+import { importedAgentDoc, fileRating, matcherAgentDoc } from "./importedAgent";
 import { QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 
 const root = (...p: string[]) => resolve(process.cwd(), ...p);
@@ -136,7 +136,7 @@ describe("A1 · the email import", () => {
 
 describe("A1 · the column matcher", () => {
   const rows = readFileSync(root("tests/fixtures/import/matcher-agents.csv"), "utf8").trim().split("\n").slice(1).map((l) => l.split(","));
-  const docs = rows.map(([name, agency, email, rating]) => importedAgentDoc({ name, agency, email, starRating: rating }));
+  const docs = rows.map(([name, agency, email, rating]) => matcherAgentDoc({ name, agency, email, starRating: rating }));
 
   it("matcher-agents.csv: a rating is kept only when the cell holds 1 to 5", () => {
     expect(docs).toHaveLength(3);
@@ -160,9 +160,17 @@ describe("A1 · the column matcher", () => {
     }
   });
 
-  it("both of the matcher's agent writers build the agent with importedAgentDoc and state no value of their own", () => {
+  /* v19.2 §E follow-up: the matcher's agents are flagged as imported, so the Contact list reads "Imported" under
+     their date (red with the flag removed from matcherAgentDoc) */
+  it("every row is flagged as imported (importedNeedsReview: true)", () => {
+    for (const d of docs) expect(d.importedNeedsReview).toBe(true);
+    expect(matcherAgentDoc({ name: "Row Only" })).toEqual(importedAgentDoc({ name: "Row Only" }, { importedNeedsReview: true }));
+  });
+
+  it("both of the matcher's agent writers build the agent with matcherAgentDoc and state no value of their own", () => {
     const code = src("src/components/ImportCsv.tsx");
-    expect((code.match(/importedAgentDoc\(/g) ?? []).length, "the agents sheet and Create from this row").toBe(2);
+    expect((code.match(/matcherAgentDoc\(/g) ?? []).length, "the agents sheet and Create from this row").toBe(2);
+    expect(code).not.toMatch(/importedAgentDoc\(/);
     expect(code).not.toMatch(/SubmissionStatus\.OPEN/);
     expect(code).not.toMatch(/responseTimeWeeks\s*:/);
     expect(code).not.toMatch(/noResponseMeansNo\s*:/);

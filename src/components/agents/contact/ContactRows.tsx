@@ -20,7 +20,7 @@ import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { ContactGroupMark } from "./ContactGroupMark";
-import { AgentFacts, ContactGroup, type GroupKey, RowDateLine, type SortKey, rowDateLine, surnameInitial } from "../../../lib/contactList";
+import { AgentFacts, ContactGroup, type GroupKey, RowDateLine, type SortKey, replyWeeksLabel, rowDateLine, surnameInitial } from "../../../lib/contactList";
 import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { dayMonth } from "../../../lib/dates";
@@ -254,19 +254,27 @@ const Row: React.FC<{
           Each answers its own click; none opens the card. A missing one is "Add …", the card at that field. */}
       <span className="cl19-c cl19-cd"><DateAdded agent={a} /></span>
       {stacked ? (
-        <span className="cl19-c cl19-cs" data-cl19="contacts">{webCell}{mailCell}</span>
+        /* v19.2 §F — stacked, a row with an email and no website puts the email on line 1, level with the name, and the
+           hidden "+ Add website" on line 2 (still there for hover and focus, so nothing moves) */
+        <span className="cl19-c cl19-cs" data-cl19="contacts" data-mail-first={!site && email ? "" : undefined}>
+          {!site && email ? <>{mailCell}{webCell}</> : <>{webCell}{mailCell}</>}
+        </span>
       ) : (
         <>
           <span className="cl19-c cl19-cw">{webCell}</span>
           <span className="cl19-c cl19-ce">{mailCell}</span>
         </>
       )}
-      {/* Replies: "~N wks" over the door */}
+      {/* Replies: "~6 weeks" (v19.2 §C, spelled out), or "Not stated"; a closed door under it */}
       <span className="clv-rrep" data-clv="rep">
-        {weeks ? <b>~{weeks} wks</b> : <b className="unk">Not stated</b>}
+        {weeks ? <b>{replyWeeksLabel(weeks)}</b> : <b className="unk">Not stated</b>}
+        {/* v19.2 §B — an open agent's door goes unsaid (it is true of nearly every row); a closed one says so in
+            rust, with the reopening date when it is known. "Not known" stays: it is not a claim that they are open. */}
         {x.door === "unknown"
           ? <small data-clv="door-unknown" title="Whether they are open to queries is not known">{DOOR_NOT_KNOWN}</small>
-          : <small>{x.door === "open" ? "Open to queries" : reopens ? `Closed till ${reopens}` : "Closed to queries"}</small>}
+          : x.door === "closed"
+            ? <em className="cl192-shut" data-cl192="rep-closed">{reopens ? `Closed till ${reopens}` : "Closed to queries"}</em>
+            : null}
       </span>
       {/* v17 §D — QUERY STATUS. A queried agent: the stage, a four-bar track of how far it got, then the date. An
           agent not queried yet: "+ Log a query" (the panel's journey), or why not if they are closed to queries. */}

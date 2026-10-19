@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "CL192-G1",
+  "where": "@1512 the card and its List health are there; the account has gaps (precondition)",
+  "ok": true,
+  "detail": "List health 69%. 78 gaps to fill. Open Housekeeping"
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1512 the card has no \"gaps to fill\" text",
+  "ok": true,
+  "detail": "\"38Not queried11Querying3Closed69%List health\""
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1512 the card ends at \"List health\"",
+  "ok": true,
+  "detail": "\"69%List health\""
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1512 \"Fill in the gaps\" shows the count (78)",
+  "ok": true,
+  "detail": "\"Fill in the gaps78\" · 78"
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1512 the ring opens Housekeeping",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1280 the card and its List health are there; the account has gaps (precondition)",
+  "ok": true,
+  "detail": "List health 69%. 78 gaps to fill. Open Housekeeping"
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1280 the card has no \"gaps to fill\" text",
+  "ok": true,
+  "detail": "\"38Not queried11Querying3Closed69%List health\""
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1280 the card ends at \"List health\"",
+  "ok": true,
+  "detail": "\"69%List health\""
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1280 \"Fill in the gaps\" shows the count (78)",
+  "ok": true,
+  "detail": "\"Fill in the gaps78\" · 78"
+ },
+ {
+  "lock": "CL192-G1",
+  "where": "@1280 the ring opens Housekeeping",
+  "ok": true,
+  "detail": "true"
+ }
+]

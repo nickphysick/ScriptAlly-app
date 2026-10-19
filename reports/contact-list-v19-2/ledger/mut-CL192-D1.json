@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 the 400-day fixture's expected date is in another year (precondition)",
+  "ok": true,
+  "detail": "2025"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od10: \"Expected 9 Oct · 10d over\"",
+  "ok": true,
+  "detail": "\"Expected 9 Oct · 10d over\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od10: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od30: \"Expected 19 Sep · 30d over\"",
+  "ok": true,
+  "detail": "\"Expected 19 Sep · 30d over\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od30: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od31: \"Overdue since 18 Sep\"",
+  "ok": false,
+  "detail": "\"Expected 18 Sep · 31d over\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od31: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od400: \"Overdue since 14 Sep 2025\"",
+  "ok": true,
+  "detail": "\"Overdue since 14 Sep 2025\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od400: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od31: same colour and style as the 10-day line",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400 vs rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1512 od400: same colour and style as the 10-day line",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400 vs rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 the 400-day fixture's expected date is in another year (precondition)",
+  "ok": true,
+  "detail": "2025"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od10: \"Expected 9 Oct · 10d over\"",
+  "ok": true,
+  "detail": "\"Expected 9 Oct · 10d over\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od10: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od30: \"Expected 19 Sep · 30d over\"",
+  "ok": true,
+  "detail": "\"Expected 19 Sep · 30d over\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od30: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od31: \"Overdue since 18 Sep\"",
+  "ok": false,
+  "detail": "\"Expected 18 Sep · 31d over\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od31: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od400: \"Overdue since 14 Sep 2025\"",
+  "ok": true,
+  "detail": "\"Overdue since 14 Sep 2025\""
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od400: the overdue treatment (.clv-qd--over)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od31: same colour and style as the 10-day line",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400 vs rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400"
+ },
+ {
+  "lock": "CL192-D1",
+  "where": "@1280 od400: same colour and style as the 10-day line",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400 vs rgba(28, 19, 15, 0.6)|\"Source Serif 4\", Georgia, serif|italic|13px|400"
+ }
+]

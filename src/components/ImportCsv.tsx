@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
 import "./import/importMatcher.css";
-import { importedAgentDoc } from "../lib/importedAgent";
+import { matcherAgentDoc } from "../lib/importedAgent";
 import { saveImportNotice, type ImportNoticeRow } from "../lib/importNotice";
 import { findExistingAgent, isSameQuery } from "../lib/importDuplicates";
 import { writeImportedHistory } from "../lib/smartImportCommit";
@@ -336,7 +336,7 @@ export const ImportCsv: React.FC<{
         const id = "agent-fromrow-" + Math.random().toString(36).slice(2, 11);
         /* The row gave a name and nothing else, so the agent holds a name and nothing else. The
            builder writes the fields the rules require in their empty form (see importedAgent.ts). */
-        const res = await addAgent({ ...importedAgentDoc({ name: u.agentName }), id }, true);
+        const res = await addAgent({ ...matcherAgentDoc({ name: u.agentName }), id }, true);
         if (res.success) patch.agentId = id;
       }
       if (Object.keys(patch).length) {
@@ -413,7 +413,7 @@ export const ImportCsv: React.FC<{
            *
            * The last of them went with the import-truth pack: a rating of 3 for an empty cell,
            * "Open", an 8-week reply window, "no response means no", three materials and the genre
-           * "General Fiction". The agent is now built by `importedAgentDoc`, which holds what the
+           * "General Fiction". The agent is now built by `matcherAgentDoc` (importedAgentDoc, flagged), which holds what the
            * sheet gave and nothing else.
            */
           const agency = getMappedValue("agency");
@@ -428,7 +428,7 @@ export const ImportCsv: React.FC<{
 
           /* Only what the sheet gave. A rating is kept when the cell holds 1 to 5; nothing else is
              filled in: no status, no reply window, no reply rule, no materials, no genre. */
-          const agentData = importedAgentDoc({
+          const agentData = matcherAgentDoc({
             name, agency, email, website, genres, mswlNotes, notes,
             starRating: getMappedValue("starRating"),
           });

@@ -150,6 +150,10 @@ import { formatDate } from "./dates";
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
   formatDate(new Date(ms), { day: "numeric", month: "short" });
+const dmyY = (ms: number): string =>
+  formatDate(new Date(ms), { day: "numeric", month: "short", year: "numeric" });
+/** v19.2 §D — past the expected date by more than this many days, the line stops counting ("Overdue since …") */
+export const LONG_OVER = 30;
 
 /** The agent's STANDING QUERY — what the row's right column speaks about. The furthest-along
  *  live one (the board's own law), else the latest close, else null. One rule, stated once. */
@@ -166,6 +170,14 @@ export function standingQuery(rows: readonly QcRow[]): QcRow | null {
   let last = pool[0];
   for (const r of pool.slice(1)) if (r.lastMs > last.lastMs) last = r;
   return last;
+}
+
+/** v19.2 §C — the Replies cell's words: "~6 weeks", "~1 week"; null for an absent or zero window (the cell then
+ *  reads "Not stated"). Spelled out, never "wks". The number is the STORED one: nothing records whether a stored
+ *  window was entered or was the Smart Import review's old 6-week fill (retired 11 Oct, 92bd6485), so none is hidden. */
+export function replyWeeksLabel(weeks: number | null | undefined): string | null {
+  if (typeof weeks !== "number" || !Number.isFinite(weeks) || weeks <= 0) return null;
+  return `~${weeks} ${weeks === 1 ? "week" : "weeks"}`;
 }
 
 /** The row's second line (v11 §6.2) — five shapes, every date the engine's own. */
@@ -193,8 +205,13 @@ export function rowDateLine(q: QcRow, nowMs: number): RowDateLine | null {
       ? { text: `Send by ${dmy(q.expectedMs)} · ${days}d over`, over: true }
       : { text: `Send by ${dmy(q.expectedMs)} · ${days}d left`, over: false };
   }
-  /* the agent's court: a future date is a reply coming; a past one is past the expected date —
-     the fact, never an appraisal (no "overdue", no "late") */
+  /* the agent's court: a future date is a reply coming; a past one is past the expected date. v19.2 §D: up to
+     LONG_OVER days it reads "Expected 3 Sep · 18d over"; beyond that a count of days says nothing useful, so it reads
+     "Overdue since 15 May" (the year added when it is not this year's) — Nick's wording, the same ink. */
+  if (past && days > LONG_OVER) {
+    const y = new Date(q.expectedMs).getFullYear() === new Date(nowMs).getFullYear();
+    return { text: `Overdue since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
+  }
   return past
     ? { text: `Expected ${dmy(q.expectedMs)} · ${days}d over`, over: true }
     : { text: `Reply by ${dmy(q.expectedMs)} · in ${days}d`, over: false };

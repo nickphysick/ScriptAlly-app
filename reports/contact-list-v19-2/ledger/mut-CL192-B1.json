@@ -1,0 +1,206 @@
+[
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 the population: open rows and closed rows (two seeded closed, one with a reopening date)",
+  "ok": true,
+  "detail": "48 open · 6 closed"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 no open agent's row shows \"Open to queries\" (any case)",
+  "ok": false,
+  "detail": "[\"Not statedOpen to queries\",\"~8 weeksOpen to queries\",\"Not statedOpen to queries\"]"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 an open agent's Replies cell holds the reply time and nothing under it",
+  "ok": false,
+  "detail": "[\"Not statedOpen to queries\",\"~8 weeksOpen to queries\",\"Not statedOpen to queries\"]"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 zz192-shut: reads \"Closed till 28 Nov\"",
+  "ok": false,
+  "detail": "\"~6 weeksClosed till 28 Nov\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 zz192-shut: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 zz192-shutx: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~6 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 zz192-shutx: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 seed-agent-1: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 seed-agent-1: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 clv-fx-reopen: reads \"Closed till 1 Nov\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed till 1 Nov\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 clv-fx-reopen: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 seed-agent-11: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 seed-agent-11: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 seed-agent-6: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 seed-agent-6: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 the seeded \"Closed till …\" was read",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1512 the seeded \"Closed to queries\" was read",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 the population: open rows and closed rows (two seeded closed, one with a reopening date)",
+  "ok": true,
+  "detail": "48 open · 6 closed"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 no open agent's row shows \"Open to queries\" (any case)",
+  "ok": false,
+  "detail": "[\"Not statedOpen to queries\",\"~8 weeksOpen to queries\",\"Not statedOpen to queries\"]"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 an open agent's Replies cell holds the reply time and nothing under it",
+  "ok": false,
+  "detail": "[\"Not statedOpen to queries\",\"~8 weeksOpen to queries\",\"Not statedOpen to queries\"]"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 zz192-shut: reads \"Closed till 28 Nov\"",
+  "ok": false,
+  "detail": "\"~6 weeksClosed till 28 Nov\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 zz192-shut: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 zz192-shutx: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~6 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 zz192-shutx: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 seed-agent-1: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 seed-agent-1: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 clv-fx-reopen: reads \"Closed till 1 Nov\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed till 1 Nov\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 clv-fx-reopen: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 seed-agent-11: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 seed-agent-11: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 seed-agent-6: reads \"Closed to queries\"",
+  "ok": false,
+  "detail": "\"~8 weeksClosed to queries\""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 seed-agent-6: in rust rgb(162, 69, 42), italic serif 13px, under the reply time",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 the seeded \"Closed till …\" was read",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-B1",
+  "where": "@1280 the seeded \"Closed to queries\" was read",
+  "ok": false,
+  "detail": ""
+ }
+]

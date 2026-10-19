@@ -17,7 +17,7 @@
 import React, { useLayoutEffect, useRef } from "react";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
-import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
+import { RING, RING_C, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
 import "../../shell/pageHeroFrame.css"; /* v138.5 — the shared inset, before the page's own sheet */
 import "./contactV17.css";
 import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
@@ -122,9 +122,10 @@ export const ContactSummaryCard: React.FC<{
         disabled={loading || !health || !onHealth} onClick={onHealth}
         aria-label={health ? healthLabel(health) : "List health"}>
         <HealthRing pct={health ? health.pct : null} />
+        {/* v19.2 §G — the card ends at "List health": the gap count is stated once, on "Fill in the gaps N" (the
+            ring's accessible name still says it) */}
         <span className="cl17-ht">
           <b data-cl17="health-title">List health</b>
-          <em data-cl17="health-gaps">{health ? (health.gaps > 0 || health.pct === 100 ? gapLine(health.gaps) : "Some put off for later") : ""}</em>
         </span>
       </button>
     ) : null}
