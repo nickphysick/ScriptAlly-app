@@ -254,7 +254,11 @@ const Row: React.FC<{
           Each answers its own click; none opens the card. A missing one is "Add …", the card at that field. */}
       <span className="cl19-c cl19-cd"><DateAdded agent={a} /></span>
       {stacked ? (
-        <span className="cl19-c cl19-cs" data-cl19="contacts">{webCell}{mailCell}</span>
+        /* v19.2 §F — stacked, a row with an email and no website puts the email on line 1, level with the name, and the
+           hidden "+ Add website" on line 2 (still there for hover and focus, so nothing moves) */
+        <span className="cl19-c cl19-cs" data-cl19="contacts" data-mail-first={!site && email ? "" : undefined}>
+          {!site && email ? <>{mailCell}{webCell}</> : <>{webCell}{mailCell}</>}
+        </span>
       ) : (
         <>
           <span className="cl19-c cl19-cw">{webCell}</span>
