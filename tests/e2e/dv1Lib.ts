@@ -102,8 +102,10 @@ export async function openDiscover(page: Page, vp: VP, state: DvState, opts: { m
 export async function appColumn(page: Page): Promise<number> {
   return page.evaluate(() => {
     const { r } = (window as unknown as { __dv1: () => { r: HTMLElement } }).__dv1();
-    const first = r.querySelector('[data-dv1="header"], [data-dv1="coming-soon"]') as HTMLElement;
-    return first.getBoundingClientRect().width;
+    /* header rules v1.1: the header is the shared hero frame now (--hero-w, centred on the sheet), wider than the page's
+       column, so the column is read from the page root's content box — the width the header used to have */
+    const cs = getComputedStyle(r);
+    return r.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   });
 }
 

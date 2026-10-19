@@ -153,7 +153,9 @@ test.describe("Query Centre v139", () => {
     await page.keyboard.press("Escape");
     const cases: { k: string; act: (p: Page) => Promise<unknown> }[] = [
       { k: "find", act: async (p) => { await p.locator(".qc138-sheet [data-qc138='search'] input").first().fill("ma"); } },
-      { k: "find", act: async (p) => { await pressEl(p, "[data-qc138='glyph-btn'][data-k='q']"); } },
+      /* header rules v1.1 (decision 4): the stage-tab row is no longer rendered; its job is the Filters menu's "Where it
+         stands", so the second way to narrow the list is choosing Queried there */
+      { k: "find", act: async (p) => { await pressEl(p, ".qcv-group[data-v138] [data-qc140='filters']"); await p.waitForTimeout(500); await pressEl(p, "[data-qc140='stand'][data-k='q']"); await p.waitForTimeout(300); await pressEl(p, "[data-qc140='filter-close']"); } },
       { k: "open", act: async (p) => { await pressEl(p, ".qc138-sheet [data-qcv='row']"); } },
       { k: "birds", act: async (p) => { await p.keyboard.press("b"); } },
     ];
