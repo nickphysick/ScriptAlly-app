@@ -929,6 +929,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   };
   useEffect(() => { if (search.trim().length >= 2) tickGuide.current("search"); }, [search]);
   useEffect(() => { if (panelId) tickGuide.current("open"); }, [panelId]);
+  /* v19 §K — "Pin the list" ticks when the writer pins (the button or F): a change from unpinned to pinned on this page,
+     never a remembered pin put back on arrival */
+  const wasPin = useRef({ full, active });
+  useEffect(() => {
+    const was = wasPin.current;
+    wasPin.current = { full, active };
+    /* the page was already on screen and unpinned in the render before: a pin restored on arrival changes `active` too */
+    if (full && !was.full && active && was.active) tickGuide.current("pin");
+  }, [full, active]);
   const markGuideSeen = useCallback(() => { if (!guide.seen) void updateUserPaths(GUIDE_SEEN_PATH); }, [guide.seen, updateUserPaths]);
   const hideGuide = useCallback(() => { void updateUserPaths(GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
   /* the control each item shows, on this page, as it is now */
@@ -938,6 +947,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     switch (k) {
       case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
       case "search": return { el: vis(".aglist [data-cl19='toolbar'] [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      /* v19 §K — the toolbar's Pin button (pinned already, it reads Unpin: the spotlight still points at it) */
+      case "pin": return { el: vis(".aglist button.cl19-pin[data-cl19='pin']"), text: "Press the pin. The list becomes the whole page; press it again to come back." };
       case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
       case "edit": {
         const edit = vis("[data-ap='panel'] [data-ap='edit']");

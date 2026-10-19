@@ -75,11 +75,13 @@ export function scrollDelta(t: Box, view: { top: number; bottom: number }, aim =
 
 /* ── the Contact list's state ── */
 
-export type ContactGuideKey = "add" | "search" | "open" | "edit" | "hk";
+export type ContactGuideKey = "add" | "search" | "pin" | "open" | "edit" | "hk";
 
 export const CONTACT_CHECKLIST: readonly ChecklistItem<ContactGuideKey>[] = [
   { key: "add", title: "Add an agent", line: "One you'd love to query is a good start." },
   { key: "search", title: "Search for an agent", line: "Find anyone on your list by name or agency." },
+  /* Contact list v19 §K — the third of six: its spotlight is the toolbar's Pin button, and it ticks when the list is pinned */
+  { key: "pin", title: "Pin the list", line: "Turn the list into the whole page while you work." },
   { key: "open", title: "Open an agent's card", line: "Everything you know about them, in one place." },
   { key: "edit", title: "Edit an agent", line: "Fix a detail, or add what they're looking for." },
   { key: "hk", title: "Do some housekeeping", line: "Fill in one gap and watch List health climb." },

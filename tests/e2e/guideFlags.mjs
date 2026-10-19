@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * The Contact list's page guide state on the harness account (v18.3 §F): todoPrefs.contacts.guide
- *   { done: { add, search, open, edit, hk }, seen, hidden }
+ *   { done: { add, search, pin, open, edit, hk }, seen, hidden }   (v19 §K adds pin)
  *
  *   node tests/e2e/guideFlags.mjs                  # print it
  *   node tests/e2e/guideFlags.mjs --clear          # remove the whole guide map (one dotted leaf)
