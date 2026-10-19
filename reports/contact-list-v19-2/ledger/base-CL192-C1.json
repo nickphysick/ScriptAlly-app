@@ -1,0 +1,338 @@
+[
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 the population: Replies cells",
+  "ok": true,
+  "detail": "55"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 every value is \"~N weeks\", \"~1 week\" or \"Not stated\"",
+  "ok": false,
+  "detail": "[\"~1 wks\",\"~8 wks\",\"~12 wks\",\"~4 wks\"]"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 no Replies cell reads \"wks\"",
+  "ok": false,
+  "detail": "[\"~1 wksOpen to queries\",\"~8 wksOpen to queries\",\"~12 wksOpen to queries\"]"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 the absent/zero windows on screen (two seeded at least)",
+  "ok": true,
+  "detail": "22"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 msv12-agent-4 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 zz192-zero (window 0): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 zz192-none (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-12 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-06 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-05 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-08 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-13 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-10 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 clv-fx-stub0 (window 0): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-09 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-04 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 msv12-agent-5 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-11 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 msv12-agent-6 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-03 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-07 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-14 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 clv181-bare (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-02 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 clv-fx-never (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 cv25-agent-01 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 a one-week window reads \"~1 week\"",
+  "ok": false,
+  "detail": "\"~1 wks\""
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1512 each stated window reads its own number",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 the population: Replies cells",
+  "ok": true,
+  "detail": "55"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 every value is \"~N weeks\", \"~1 week\" or \"Not stated\"",
+  "ok": false,
+  "detail": "[\"~1 wks\",\"~8 wks\",\"~12 wks\",\"~4 wks\"]"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 no Replies cell reads \"wks\"",
+  "ok": false,
+  "detail": "[\"~1 wksOpen to queries\",\"~8 wksOpen to queries\",\"~12 wksOpen to queries\"]"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 the absent/zero windows on screen (two seeded at least)",
+  "ok": true,
+  "detail": "22"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 msv12-agent-4 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 zz192-zero (window 0): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 zz192-none (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-12 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-06 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-05 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-08 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-13 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-10 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 clv-fx-stub0 (window 0): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-09 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-04 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 msv12-agent-5 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-11 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 msv12-agent-6 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-03 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-07 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-14 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 clv181-bare (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-02 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 clv-fx-never (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 cv25-agent-01 (window null): \"Not stated\", no number, ink at 55%",
+  "ok": false,
+  "detail": "\"Not stated\" rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 a one-week window reads \"~1 week\"",
+  "ok": false,
+  "detail": "\"~1 wks\""
+ },
+ {
+  "lock": "CL192-C1",
+  "where": "@1280 each stated window reads its own number",
+  "ok": false,
+  "detail": "[]"
+ }
+]

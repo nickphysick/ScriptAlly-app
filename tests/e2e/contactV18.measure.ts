@@ -324,7 +324,7 @@ test("F4 · focus: Save waits for an answer, writes through the save path, Skip 
   const foot = await page.locator('[data-hkv="foot-text"]').textContent().catch(() => null);
   const after = await page.evaluate((id) => document.querySelector(`.aglist [data-agent-card="${id}"] .clv-rrep b`)?.textContent ?? "", agentId);
   L.check("the save went through the page's save path (its saved line and Undo)", !!foot && (await page.locator('[data-hkv="undo"]').count()) === 1, `"${foot}"`);
-  L.check("and the agent's row now shows the reply time", before !== after && /wks/.test(after), `${before} → ${after}`);
+  L.check("and the agent's row now shows the reply time", before !== after && /^~\d+ weeks?$/.test(after), `${before} → ${after}`); /* v19.2 §C re-point: "~N weeks", was "~N wks" */
   if (await page.locator('[data-hkv="undo"]').count()) { await page.locator('[data-hkv="undo"]').click(); await page.waitForTimeout(2500); }
   const undone = await page.evaluate((id) => document.querySelector(`.aglist [data-agent-card="${id}"] .clv-rrep b`)?.textContent ?? "", agentId);
   L.check("Undo restores what the save wrote", undone === before, `${after} → ${undone}`);
