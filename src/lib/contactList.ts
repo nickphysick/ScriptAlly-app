@@ -145,7 +145,7 @@ export const matchesCards = (sel: ReadonlySet<ContactCardKey>, s: ContactStandin
 /* ══ phase 3 — the list: row facts, the date line, filters, groups and sorts (v11 §4–6) ═════ */
 import { STAGE_NAME } from "./qcSummary";
 import { countryName } from "./territory";
-import { dayMonth, formatDate } from "./dates";
+import { formatDate } from "./dates";
 
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
@@ -633,12 +633,11 @@ export function addedMs(a: Pick<Agent, "dateAdded">): number | null {
   return Number.isFinite(t) ? t : null;
 }
 
-/** v19 §C — "12 May" and "2026", the row's Date added cell in two parts (the year is set lighter); null for no date */
-export function addedParts(a: Pick<Agent, "dateAdded">): { dm: string; y: string } | null {
+/** v19.1 §C — the row's Date added cell: "25 Jun 2026", day, short month and full year, all ink, through the app's one UK
+ *  formatter (lib/dates — never "Sept"); null for a missing or unreadable date */
+export function addedLabel(a: Pick<Agent, "dateAdded">): string | null {
   const t = addedMs(a);
-  if (t == null) return null;
-  const d = new Date(t);
-  return { dm: dayMonth(t), y: String(d.getFullYear()) };
+  return t == null ? null : formatDate(t, { day: "numeric", month: "short", year: "numeric" });
 }
 
 /**

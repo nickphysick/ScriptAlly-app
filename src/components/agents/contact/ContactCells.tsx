@@ -17,7 +17,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import type { Agent } from "../../../types";
-import { addedParts } from "../../../lib/contactList";
+import { addedLabel } from "../../../lib/contactList";
 
 /** "agency.co.uk" for a website, without the scheme, a leading www. or a trailing slash */
 export const domainOf = (url: string): string => url.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "");
@@ -46,10 +46,11 @@ export const CellIcon: React.FC<{ kind: "mail" | "web" }> = ({ kind }) => (
   </svg>
 );
 
-/** the Date added cell: "12 May" in ink, the year at 45%; nothing when the record has no readable date */
+/** the Date added cell: "12 May 2026", all ink (v19.1 §C — the grey year is retired); nothing when the record has no
+ *  readable date */
 export const DateAdded: React.FC<{ agent: Pick<Agent, "dateAdded"> }> = ({ agent }) => {
-  const p = addedParts(agent);
-  return p ? <span className="cl19-dt" data-cl19="date">{p.dm} <span className="cl19-yr">{p.y}</span></span> : <span className="cl19-dt" data-cl19="date" data-none="" />;
+  const t = addedLabel(agent);
+  return t ? <span className="cl19-dt" data-cl19="date">{t}</span> : <span className="cl19-dt" data-cl19="date" data-none="" />;
 };
 
 export const Website: React.FC<{ url: string }> = ({ url }) => (

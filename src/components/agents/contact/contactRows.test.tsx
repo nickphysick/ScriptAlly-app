@@ -35,14 +35,15 @@ describe("the row: no edge, the closed mark, the add pills, and a tray whose ste
     expect(h).not.toMatch(/data-cl19="add-(website|email)"[^>]*><svg/);
     expect(h).toContain('data-cl19="date"');
   });
-  it("v19 §C: the date reads day and month, then the year in its own span; the email copies and says so", async () => {
+  it("v19.1 §C: the date reads 12 May 2026 in one ink run; the email copies and says so", async () => {
     const withAll = { ...(facts as object), agent: { ...(agent as object), dateAdded: "2026-05-12T10:00:00.000Z", email: "ada@reed.co.uk", website: "https://www.reed.co.uk/" } } as never;
     const h = renderToStaticMarkup(React.createElement(ContactRows, {
       groups: [{ label: "R", ids: ["a1"] }] as never, byId: new Map([["a1", withAll]]), nowMs: 0, genreHit: () => false,
       openId: null, onOpen: () => {}, onAddGenres: () => {}, onAddWishlist: () => {}, onAct: () => {},
       trayFor: () => ({ label: "Log a query", act: "log" as const }),
     }));
-    expect(h).toMatch(/data-cl19="date">12 May <span class="cl19-yr">2026<\/span>/);
+    expect(h).toContain('data-cl19="date">12 May 2026</span>');
+    expect(h).not.toContain("cl19-yr");
     expect(h).toMatch(/data-cl19="email" role="button" tabindex="0" title="Copy email" aria-label="Copy email ada@reed.co.uk"/);
     expect(h).toMatch(/data-cl19="website" href="https:\/\/www.reed.co.uk\/" target="_blank"/);
     expect(h).toContain(">reed.co.uk<");

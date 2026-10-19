@@ -115,7 +115,7 @@ describe("where you stand — the page-local union over the QC's own rows", () =
 import {
   ACTION_GROUPS, type ContactFilters, NOT_RECORDED, dropOptions, STATUS_CHOICES, STATUS_GROUP_ORDER, type StatusKey, actionOf,
   agentFacts, contactFilterCount, contactGroups, emptyContactFilters, facetCounts, genreTallies, OPEN_CHOICES,
-  matchesContactFilters, rowDateLine, sortFacts, standingQuery, addedMs, addedParts,
+  matchesContactFilters, rowDateLine, sortFacts, standingQuery, addedMs, addedLabel,
 } from "./contactList";
 import { genreKey } from "./genreMatch";
 import { QueryStatus } from "../types";
@@ -421,10 +421,12 @@ describe("v19 §C/§J — Date added: the record's own dateAdded, newest first, 
   it("reversed: oldest first, and the undated STILL last", () => {
     expect(sortFacts(facts, "added", true).map((x) => x.agent.id)).toEqual(["d", "a", "b", "c", "e"]);
   });
-  it("the cell's two parts: day and month, then the year; nothing for a missing or unreadable date", () => {
-    expect(addedParts({ dateAdded: "2026-05-12T10:00:00.000Z" })).toEqual({ dm: "12 May", y: "2026" });
-    expect(addedParts({ dateAdded: "" })).toBeNull();
-    expect(addedParts({ dateAdded: "nonsense" })).toBeNull();
+  it("v19.1 §C: the cell reads \"12 May 2026\" — day, short month, full year, never \"Sept\"; nothing for a missing or unreadable date", () => {
+    expect(addedLabel({ dateAdded: "2026-05-12T10:00:00.000Z" })).toBe("12 May 2026");
+    expect(addedLabel({ dateAdded: "2026-09-25T10:00:00.000Z" })).toBe("25 Sep 2026");
+    for (let m = 0; m < 12; m++) expect(addedLabel({ dateAdded: new Date(Date.UTC(2026, m, 15)).toISOString() })).toMatch(/^\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$/);
+    expect(addedLabel({ dateAdded: "" })).toBeNull();
+    expect(addedLabel({ dateAdded: "nonsense" })).toBeNull();
     expect(addedMs({ dateAdded: "2026-05-12T10:00:00.000Z" })).toBe(Date.parse("2026-05-12T10:00:00.000Z"));
   });
 });

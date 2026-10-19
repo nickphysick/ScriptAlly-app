@@ -263,7 +263,6 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 }
 /* brand.tsx names bare spans as the sans at runtime: every element in these cells states the serif */
 .clv-group .cl19-card .cl19-c :is(span, a, button, i) { font-family: var(--sp-serif) !important; }
-.cl19-c .cl19-yr { color: rgba(28, 19, 15, 0.45); }
 /* v19.1 §B — website and email: a 15px icon, navy at 70%, 6px before the text; the text in ink with no underline at
    rest and a navy one at 35% (offset 4px) on hover. The icon takes no part in the type's scaling (contactColumns adds
    its 22px to the column). */
