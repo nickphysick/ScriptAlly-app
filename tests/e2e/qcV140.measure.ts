@@ -525,7 +525,8 @@ test.describe("Query Centre v140", () => {
     await page.locator(".qc138-sheet [data-qcv='row']").first().waitFor({ timeout: 30_000 });
     await page.waitForTimeout(2000);
     const pill = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-pck='pill']")].find((e) => e.getBoundingClientRect().height > 0)?.innerText.replace(/\s+/g, " ") ?? "");
-    L.check("G1", "the pill reads /6", /\/6$/.test(pill), pill);
+    /* RETARGETED by Help system v1 C.1: the count reads "n of 6" */
+    L.check("G1", "the pill reads of 6", /of 6$/.test(pill), pill);
     L.check("G1", "unpinned to start", !(await isPinned(page)), "");
     L.check("G1", "no walkthrough running", (await page.locator("[data-pck='flow'], [data-pck='spot']").count()) === 0, "");
     await page.locator("body").press("f");

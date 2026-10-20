@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "HS1-C1",
+  "where": "@1512 a ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1512 \"n of N\"",
+  "ok": true,
+  "detail": "5 of 6"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1512 no bars",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1512 finished: data-state done",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(224, 229, 221)\",\"state\":\"done\",\"text\":\"Contact list: Learned✓\"}"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1512 finished: background #e0e5dd",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1512 finished: \"Contact list: Learned ✓\"",
+  "ok": true,
+  "detail": "Contact list: Learned✓"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1280 a ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1280 \"n of N\"",
+  "ok": true,
+  "detail": "5 of 6"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1280 no bars",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1280 finished: data-state done",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(224, 229, 221)\",\"state\":\"done\",\"text\":\"Contact list: Learned✓\"}"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1280 finished: background #e0e5dd",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "HS1-C1",
+  "where": "@1280 finished: \"Contact list: Learned ✓\"",
+  "ok": true,
+  "detail": "Contact list: Learned✓"
+ }
+]

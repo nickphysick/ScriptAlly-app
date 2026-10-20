@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HS1-C2",
+  "where": "@1512 the Contact list's guide opened by itself",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C2",
+  "where": "@1512 the Query Centre's did not open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C2",
+  "where": "@1512 …and its pill pulsed",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "HS1-C2",
+  "where": "@1280 the Contact list's guide opened by itself",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C2",
+  "where": "@1280 the Query Centre's did not open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C2",
+  "where": "@1280 …and its pill pulsed",
+  "ok": true,
+  "detail": "4"
+ }
+]

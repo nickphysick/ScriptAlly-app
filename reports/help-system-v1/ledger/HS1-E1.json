@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HS1-E1",
+  "where": "@1512 four radio tiles",
+  "ok": true,
+  "detail": "{\"radios\":4,\"selects\":0}"
+ },
+ {
+  "lock": "HS1-E1",
+  "where": "@1512 no select",
+  "ok": true,
+  "detail": "{\"radios\":4,\"selects\":0}"
+ },
+ {
+  "lock": "HS1-E1",
+  "where": "@1512 the question follows the kind",
+  "ok": true,
+  "detail": "What would make QueryHawk better for you?"
+ },
+ {
+  "lock": "HS1-E1",
+  "where": "@1280 four radio tiles",
+  "ok": true,
+  "detail": "{\"radios\":4,\"selects\":0}"
+ },
+ {
+  "lock": "HS1-E1",
+  "where": "@1280 no select",
+  "ok": true,
+  "detail": "{\"radios\":4,\"selects\":0}"
+ },
+ {
+  "lock": "HS1-E1",
+  "where": "@1280 the question follows the kind",
+  "ok": true,
+  "detail": "What would make QueryHawk better for you?"
+ }
+]

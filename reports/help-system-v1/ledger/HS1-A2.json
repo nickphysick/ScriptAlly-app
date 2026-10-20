@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HS1-A2",
+  "where": "@1512 the checklist is open (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-A2",
+  "where": "@1512 only the Help menu is in the layer (opened from the keyboard)",
+  "ok": true,
+  "detail": "[\"help-menu\"]"
+ },
+ {
+  "lock": "HS1-A2",
+  "where": "@1512 only the Help menu is in the layer (opened by pointer)",
+  "ok": true,
+  "detail": "[\"help-menu\"]"
+ },
+ {
+  "lock": "HS1-A2",
+  "where": "@1280 the checklist is open (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-A2",
+  "where": "@1280 only the Help menu is in the layer (opened from the keyboard)",
+  "ok": true,
+  "detail": "[\"help-menu\"]"
+ },
+ {
+  "lock": "HS1-A2",
+  "where": "@1280 only the Help menu is in the layer (opened by pointer)",
+  "ok": true,
+  "detail": "[\"help-menu\"]"
+ }
+]

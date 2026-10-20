@@ -1,0 +1,24 @@
+HS1-E3     × HS1 E3 · stored and emailed > writes first, then emails feedback@queryhawk.net from feedback@, Reply-To the token email when a reply is wanted 8ms
+HS1-E3     ✓ HS1 E3 · stored and emailed > no reply wanted: no Reply-To, and no email stored 1ms
+HS1-E3     × HS1 E3 · stored and emailed > FEEDBACK_TO and FEEDBACK_FROM override the defaults 3ms
+HS1-E3     ✓ HS1 E3 · stored and emailed > the subject is [kind] page: the first 60 characters (severity only on a broken thing) 0ms
+HS1-E3     × HS1 E3 · stored and emailed > an email that fails (resolves not ok) still leaves the document, marked emailed: false, and the call ok 1ms
+HS1-E3     × HS1 E3 · stored and emailed > an email that throws still leaves the document, and the call resolves ok 2ms
+HS1-E3     × HS1 E3 · stored and emailed > a write that fails fails the call, and nothing is emailed 31ms
+HS1-E3     ✓ HS1 E4 · the uid and the email are the token's > a body carrying uid or email changes nothing stored 1ms
+HS1-E3     ✓ HS1 E4 · the uid and the email are the token's > a screenshot under the caller's own uid is kept; under another uid it is refused, and nothing is written 3ms
+HS1-E3     ✓ HS1 E4 · the uid and the email are the token's > a bad kind or an empty message is refused 0ms
+HS1-E3  ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+HS1-E3        Tests  5 failed | 5 passed (10)
+HS1-E4     ✓ HS1 E3 · stored and emailed > writes first, then emails feedback@queryhawk.net from feedback@, Reply-To the token email when a reply is wanted 2ms
+HS1-E4     ✓ HS1 E3 · stored and emailed > no reply wanted: no Reply-To, and no email stored 0ms
+HS1-E4     ✓ HS1 E3 · stored and emailed > FEEDBACK_TO and FEEDBACK_FROM override the defaults 0ms
+HS1-E4     ✓ HS1 E3 · stored and emailed > the subject is [kind] page: the first 60 characters (severity only on a broken thing) 0ms
+HS1-E4     ✓ HS1 E3 · stored and emailed > an email that fails (resolves not ok) still leaves the document, marked emailed: false, and the call ok 0ms
+HS1-E4     ✓ HS1 E3 · stored and emailed > an email that throws still leaves the document, and the call resolves ok 0ms
+HS1-E4     ✓ HS1 E3 · stored and emailed > a write that fails fails the call, and nothing is emailed 1ms
+HS1-E4     × HS1 E4 · the uid and the email are the token's > a body carrying uid or email changes nothing stored 4ms
+HS1-E4     ✓ HS1 E4 · the uid and the email are the token's > a screenshot under the caller's own uid is kept; under another uid it is refused, and nothing is written 0ms
+HS1-E4     ✓ HS1 E4 · the uid and the email are the token's > a bad kind or an empty message is refused 0ms
+HS1-E4  ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+HS1-E4        Tests  1 failed | 9 passed (10)

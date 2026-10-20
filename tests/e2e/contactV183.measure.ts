@@ -536,8 +536,9 @@ test("F1 · pill: left of the '?', centred with the bar, its words and count; go
       L.check(`${w} the pill is in the top bar`, r.has && r.inBar, JSON.stringify(r));
       L.check(`${w} it sits left of the "?" with 10 ±1 between`, r.leftOfHelp && near(r.gap, 10, 1), `${r.gap}`);
       L.check(`${w} its centre equals Search's, Log a query's and the "?"'s ±1`, r.ys.every((y) => near(y, r.ys[0] ?? NaN, 1)), JSON.stringify(r.ys));
-      L.check(`${w} it reads "Contact list: Getting started"`, r.text === "Contact list: Getting started", `${r.text}`);
-      L.check(`${w} and "2/6"`, r.n === "2/6", `${r.n}`);
+      /* RETARGETED by Help system v1 C.1 (the ring pill): the words are "{Page} guide" and the count "{n} of {N}" */
+      L.check(`${w} it reads "Contact list guide"`, r.text === "Contact list guide", `${r.text}`);
+      L.check(`${w} and "2 of 6"`, r.n === "2 of 6", `${r.n}`);
       /* Hide it */
       await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(300);
       await click(page, L, "[data-pck='off']", "step"); await page.waitForTimeout(200);
@@ -570,7 +571,8 @@ test("F2 · show: a checklist row changes nothing, closes the checklist, and sho
     for (const [i, k] of ["add", "search", "pin", "open", "edit", "hk"].entries()) {
       await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(350);
       if (k === "add") await shot(page, "13-guide-open-1512");
-      await click(page, L, `[data-pck='item'][data-k='${k}'] button`, k);
+      /* Help system v1 C.5 — a row also holds SKIP and LEARN MORE now: the row's own button is the direct child */
+      await click(page, L, `[data-pck='item'][data-k='${k}'] > button`, k);
       /* v19: with six items the "open" item sits over the first row, and a still pointer there opens that row's strip
          after the 450ms dwell (by design), growing it past the hole that was cut for it. The pointer leaves first. */
       await page.mouse.move(5, 5); await page.waitForTimeout(700);
@@ -598,7 +600,9 @@ test("F2 · show: a checklist row changes nothing, closes the checklist, and sho
       await page.keyboard.press("Escape"); await page.waitForTimeout(250);
     }
     const g = JSON.parse(guideNow() || "null");
-    L.check("nothing was ticked by the guide's own buttons", !g?.done || Object.keys(g.done).length === 0, JSON.stringify(g));
+    /* RETARGETED by Help system v1 C.5: "Add an agent" is CREDITED by the page from an agent on file, not by a guide
+       button; the law — the guide's own buttons tick nothing — is asserted over everything else */
+    L.check("nothing was ticked by the guide's own buttons", !g?.done || Object.keys(g.done).filter((k) => k !== "add").length === 0, JSON.stringify(g));
   } finally { guideRestore(g0); }
   L.done(31);
 });
@@ -612,7 +616,7 @@ test("F3 · end: a real click on the spotlit row opens the panel and ends the sp
     await open(page, SIZES[0], "F3");
     await page.waitForTimeout(600);
     await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(300);
-    await click(page, L, "[data-pck='item'][data-k='open'] button", "open"); await page.waitForTimeout(700);
+    await click(page, L, "[data-pck='item'][data-k='open'] > button", "open"); await page.waitForTimeout(700);
     /* v19.2 re-point: the click goes to the row's NAME, as every other contact lock's does. 30% across lands on the
        Date added text, which answers its own click (`.cl19-c [data-cl19]`, since v19); this passed on v19.1 only
        because the pointer, left on the checklist, happened to hover the first row open — v19.2 §A moved it 44px down */
@@ -656,13 +660,15 @@ test("F4 · done: a row click ticks Open, two characters tick Search, a saved ed
     await f.fill("Th"); await page.waitForTimeout(1200);
     L.check("two characters tick Search (stored)", (await done()).search === true, JSON.stringify(await done()));
     await f.fill(""); await page.waitForTimeout(300);
-    L.check("nothing else ticked", !(await done()).add && !(await done()).hk, JSON.stringify(await done()));
+    /* RETARGETED by Help system v1 C.5: "Add an agent" is CREDITED by any agent on file (the harness has agents), so it
+       is ticked and written by the page itself; the law — the guide's own buttons tick nothing — is unchanged */
+    L.check("nothing else ticked", !(await done()).pin && !(await done()).hk, JSON.stringify(await done()));
     await page.reload(); await page.waitForTimeout(3500);
     await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(400);
     const ui = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-pck='item']")].map((e) => [e.dataset.k, e.dataset.done === "true"])));
-    L.check("after a reload the checklist shows Open, Search and Edit done", ui.open && ui.search && ui.edit && !ui.add && !ui.hk, JSON.stringify(ui));
+    L.check("after a reload the checklist shows Open, Search and Edit done (and Add, credited)", ui.open && ui.search && ui.edit && ui.add && !ui.hk && !ui.pin, JSON.stringify(ui));
     const cnt = await page.locator("[data-pck='count']").first().textContent({ timeout: 8000 }).catch(() => null);
-    L.check("the pill reads 3/6 (v19 §K: six tasks)", cnt === "3/6", `${cnt}`);
+    L.check("the pill reads 4 of 6 (Help system v1: the count's words, and Add credited)", cnt === "4 of 6", `${cnt}`);
     await page.keyboard.press("Escape");
   } finally { reseed(); guideRestore(g0); }
   L.done(6);
@@ -677,7 +683,7 @@ test("F5 · next: after a step is done, the note under the pill says 'Next: {nex
     await open(page, SIZES[0], "F5");
     await page.waitForTimeout(800);
     await click(page, L, "[data-pck='pill']", "step"); await page.waitForTimeout(300);
-    await click(page, L, "[data-pck='item'][data-k='open'] button", "open"); await page.waitForTimeout(700);
+    await click(page, L, "[data-pck='item'][data-k='open'] > button", "open"); await page.waitForTimeout(700);
     const row = page.locator(".aglist [data-clv='row'][data-agent-card]").filter({ visible: true }).first();
     await row.click(); await page.waitForTimeout(1500);
     await shot(page, "15-guide-done-note-1512");
