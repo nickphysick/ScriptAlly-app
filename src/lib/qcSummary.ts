@@ -70,9 +70,9 @@ export function whereCounts(rows: readonly WhereRow[], nowMs: number): Record<Wh
 }
 /** the card's and the menu's words; `short` is the compact header's and the tight band's */
 export const WHERE_LABEL: Record<WhereKey, { label: string; compact: string; short: string; title: string }> = {
-  you: { label: "With you", compact: "With you", short: "With you", title: "Replies and requests waiting on you" },
+  you: { label: "With you", compact: "With you", short: "With you", title: "Replies to answer and nudges due" },
   agent: { label: "With the agent", compact: "With agents", short: "With agents", title: "With agents, inside their reply window" },
-  quiet: { label: "Gone quiet", compact: "Gone quiet", short: "Quiet", title: "Past the agent\u2019s reply window, with no reply yet" },
+  quiet: { label: "Gone quiet", compact: "Gone quiet", short: "Quiet", title: "Past the nudge window: worth closing?" },
   closed: { label: "Closed", compact: "Closed", short: "Closed", title: "Offers taken, passes and no-replies you\u2019ve closed" },
 };
 

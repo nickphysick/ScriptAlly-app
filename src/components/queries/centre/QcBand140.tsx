@@ -28,6 +28,8 @@ import type { BandFigures } from "../../../lib/qc140";
 import { sentWords138 } from "../../../lib/qc138";
 import { WHERE_KEYS, WHERE_LABEL, type WhereKey } from "../../../lib/qcSummary";
 import { WhereBar, WhereMark } from "./QcWhere141";
+/* v141.1 §B — With you and Gone quiet carry the card's tooltips on the band too (the nudge window is what they mean);
+   With the agent and Closed keep the band's own "{label}: {n}", which the pack leaves unchanged */
 
 /** the ring: r 15 on a 40 box, a 5px stroke; the arc starts at twelve o'clock */
 const RING_R = 15;
@@ -118,7 +120,7 @@ export const QcBand140: React.FC<{
             const on = where === k;
             return (
               <button key={k} type="button" className={on ? "on" : undefined} data-qc141="band-set" data-k={k} data-n={counts[k]} aria-pressed={on} disabled={loading}
-                title={`${WHERE_LABEL[k].label}: ${counts[k]}`} onClick={() => onWhere(k)}>
+                title={k === "you" || k === "quiet" ? WHERE_LABEL[k].title : `${WHERE_LABEL[k].label}: ${counts[k]}`} onClick={() => onWhere(k)}>
                 <WhereMark k={k} tone="band" /><b>{counts[k]}</b><span className="qc141-lf">{WHERE_LABEL[k].label}</span><span className="qc141-ls">{WHERE_LABEL[k].short}</span>
               </button>
             );
