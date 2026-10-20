@@ -22,6 +22,7 @@
  * ⚠️ ONE POPOVER AT A TIME: Group by, Filters and "+N more" share one `usePopover`, which closes on an outside press,
  *    and Escape closes the open one through the escape stack (ESC_LEVEL.page) — before the pin's Escape (pageMode).
  */
+import { DEFAULT_QC_GROUP } from "../../../lib/qcViewMemory";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { quietScroll, usePopover, type PopoverState } from "../../shell/ListPills";
@@ -279,7 +280,7 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
   const foldedJumps = jumps.filter((j) => folded.includes(j.key));
   const moreCurrent = !!current && folded.includes(current);
   const groupOpt = GROUP_BY_OPTIONS.find((o) => o.key === groupBy);
-  const def = groupBy === "attention";
+  const def = groupBy === DEFAULT_QC_GROUP; /* v141 §C — Status is the default: no "on" state, no ✕ */
   const go = (j: Qc140Jump) => { pop.close(); jumpTo(rootRef.current, j); };
 
   return (
@@ -320,8 +321,8 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
             {CARET}
           </button>
           {def ? null : (
-            <button type="button" className="qc140-x" data-qc140="group-reset" aria-label="Back to who it’s with" title="Back to who it’s with" disabled={loading}
-              onClick={() => { if (pop.open === "group") pop.close(); onGroup("attention"); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS140}</button>
+            <button type="button" className="qc140-x" data-qc140="group-reset" aria-label="Back to Status" title="Back to Status" disabled={loading}
+              onClick={() => { if (pop.open === "group") pop.close(); onGroup(DEFAULT_QC_GROUP); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS140}</button>
           )}
         </span>
         {pop.open === "group" && pop.anchor ? <GroupMenu anchor={pop.anchor} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity} close={pop.close} /> : null}

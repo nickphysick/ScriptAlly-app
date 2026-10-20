@@ -35,7 +35,9 @@ const STATUSES: readonly string[] = Object.values(QueryStatus);
 export const QC_VIEW_KEY = "qh.qc.view";
 export const QC_VIEW_VERSION = 1;
 export interface QcView { group: GroupBy; sort: Qc138Sort; density: QcDensity }
-export const DEFAULT_QC_VIEW = (): QcView => ({ group: "attention", sort: { ...DEFAULT_SORT_138 }, density: "comfortable" });
+/** v141 §C — the list opens grouped by Status (was "Who it's with", `attention`); a saved choice is still honoured */
+export const DEFAULT_QC_GROUP: GroupBy = "status";
+export const DEFAULT_QC_VIEW = (): QcView => ({ group: DEFAULT_QC_GROUP, sort: { ...DEFAULT_SORT_138 }, density: "comfortable" });
 
 /** a stored view made safe, field by field — null when it is not this version's shape at all */
 export function sanitiseQcView(raw: unknown): QcView | null {
