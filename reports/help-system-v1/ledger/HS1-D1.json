@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HS1-D1",
+  "where": "@1512 no card at 200ms",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-D1",
+  "where": "@1512 the card at 400ms",
+  "ok": true,
+  "detail": "{\"title\":\"List health\",\"link\":true}"
+ },
+ {
+  "lock": "HS1-D1",
+  "where": "@1512 …with its article link",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-D1",
+  "where": "@1280 no card at 200ms",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-D1",
+  "where": "@1280 the card at 400ms",
+  "ok": true,
+  "detail": "{\"title\":\"List health\",\"link\":true}"
+ },
+ {
+  "lock": "HS1-D1",
+  "where": "@1280 …with its article link",
+  "ok": true,
+  "detail": ""
+ }
+]

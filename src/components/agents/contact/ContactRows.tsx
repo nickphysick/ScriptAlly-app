@@ -23,6 +23,8 @@ import { ContactGroupMark } from "./ContactGroupMark";
 import { AgentFacts, ContactGroup, type GroupKey, RowDateLine, type SortKey, replyWeeksLabel, rowDateLine, surnameInitial } from "../../../lib/contactList";
 import { DOOR_NOT_KNOWN } from "../../../lib/agentList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
+import { statusTermId } from "../../../lib/glossary";
+import { Term } from "../../shell/Term";
 import { dayMonth } from "../../../lib/dates";
 import type { CardAct, CardPrimary } from "../../../lib/agentCard";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
@@ -290,7 +292,8 @@ const Row: React.FC<{
           <>
             <span className="clv-ql" data-cl17="stage">
               {x.q && <StatusDot status={x.q.status as QueryStatus} overrideSize={11} />}
-              {x.q ? STAGE_NAME[x.q.status as keyof typeof STAGE_NAME] ?? String(x.q.status) : ""}
+              {/* Help system v1 D — every status name is a defined word, its card drawing the row's own StatusDot */}
+              {x.q ? <Term id={statusTermId(x.q.status)} status={x.q.status}>{STAGE_NAME[x.q.status as keyof typeof STAGE_NAME] ?? String(x.q.status)}</Term> : ""}
             </span>
             {track ? (
               <span className="cl17-track" data-cl17="track" data-closed={track.closed || undefined} aria-hidden="true">
@@ -561,7 +564,8 @@ export const ContactRows: React.FC<ContactRowsProps & {
   const columns = [
     col("Agent", "surname"), col("Date added", "added"),
     ...(fit.stacked ? [col("Website and email", null)] : [col("Website", null), col("Email", null)]),
-    col("Replies", "reply"), col("Query status", "status", "end"),
+    /* Help system v1 D — "Replies" is a defined word (inside the sort button: hover and focus only) */
+    { ...col("Replies", "reply"), node: <Term id="replies">Replies</Term> }, col("Query status", "status", "end"),
   ];
   const countOf = (g: ContactGroup) => (totals ? `${g.ids.length} of ${totals.get(g.label) ?? g.ids.length}` : `${g.ids.length} ${g.ids.length === 1 ? "agent" : "agents"}`);
   /* v19 §C — the v17 margin letters are retired (the mock draws none; the toolbar's A to Z row does their job) */

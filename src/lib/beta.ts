@@ -14,6 +14,8 @@
  * render, never about what is permitted.
  */
 
+import { MONTHS_SHORT } from "./dates";
+
 /** Is this build a beta? Flip to false to leave beta. */
 export const BETA_MODE = true;
 
@@ -54,22 +56,25 @@ export const BETA_STRIP_REPORT_LINK = "tell us when you find one";
 
 export const BETA_STRIP_KNOWN_LINK = "What we already know about";
 
-/** The feedback dock's own copy. */
+/** The feedback panel's own copy (Help system v1, Part E — design-refs/help-system-v1, screens 08 to 11). */
 export const FEEDBACK_FAB = "Give feedback";
 export const FEEDBACK_HEADING = "Tell us what you found";
+export const FEEDBACK_SUBHEAD = "Every message reaches Nick, the founder.";
+export const FEEDBACK_CLOSE_LABEL = "Close. Your draft is kept";
 export const FEEDBACK_KIND_LABEL = "What kind of thing is it?";
-export const FEEDBACK_MESSAGE_LABEL = "What happened?";
-export const FEEDBACK_PLACEHOLDER =
-  "What were you doing, what did you expect, what happened instead?";
-export const FEEDBACK_SEND = "Send it";
-export const FEEDBACK_SENT_TITLE = "Got it";
-export const FEEDBACK_SENT_BODY =
-  "We read every one of these. If it needs a reply, you'll get one.";
+export const FEEDBACK_SEND = "Send to Nick";
+export const FEEDBACK_SENDING = "Sending…";
+export const FEEDBACK_SENT_TITLE = "Got it, thank you";
+export const FEEDBACK_SIGNATURE = "— Nick, founder";
+export const FEEDBACK_SEVERITY_LABEL = "How much is it in your way?";
+export const FEEDBACK_MAX = 4000;
+export const FEEDBACK_SHOT_MAX = 5 * 1024 * 1024;
 
 /**
  * ⚠️ THE FOUR KINDS INCLUDE ONE THAT IS NOT A COMPLAINT. "Something I liked" is in the list because
  * a feedback channel that only accepts faults teaches people it is a complaints box, and then it
  * only ever hears from the angriest tenth of them.
+ * ⚠️ KEPT IN STEP WITH THE FUNCTION'S `FEEDBACK_KINDS` (functions/src/betaFeedbackCore), which refuses anything else.
  */
 export const FEEDBACK_KINDS = [
   "Something's broken",
@@ -80,14 +85,31 @@ export const FEEDBACK_KINDS = [
 
 export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
 
-/**
- * ⚠️ WHAT THE DOCK CAPTURES, AND WHAT IT MUST NEVER. Route, viewport, user agent and the account's
- * uid — enough to reproduce a fault. NEVER page content, never a form's values, never a line of
- * anyone's manuscript. The panel says so where the writer can read it, because a context block
- * they cannot inspect is a context block they have to take on trust.
- */
-export const FEEDBACK_PRIVACY_NOTE =
-  "We send the page you're on, your browser and your account — never anything you've written.";
+/** The question follows the kind. */
+export const FEEDBACK_QUESTION: Record<FeedbackKind, { label: string; placeholder: string }> = {
+  "Something's broken": { label: "What happened?", placeholder: "What were you doing, what did you expect, and what happened instead?" },
+  "Something's confusing": { label: "What were you trying to do?", placeholder: "Tell us where you got stuck, or which word or screen didn't make sense." },
+  "An idea": { label: "What would make QueryHawk better for you?", placeholder: "Something you wish it did, or did differently." },
+  "Something I liked": { label: "What did you like?", placeholder: "Knowing what works tells us what to keep." },
+};
+
+/** Broken only, optional. Kept in step with the function's `FEEDBACK_SEVERITIES`. */
+export const FEEDBACK_SEVERITIES = ["Just noticed", "Slowing me down", "I can't carry on"] as const;
+export type FeedbackSeverity = (typeof FEEDBACK_SEVERITIES)[number];
+
+/** Broken or confusing only: the screenshot. */
+export const takesScreenshot = (k: FeedbackKind | null) => k === "Something's broken" || k === "Something's confusing";
+
+export const FEEDBACK_CONTEXT_SUMMARY = "Sent with it: the page, your browser and your account";
+export const FEEDBACK_NEVER = "Never anything you've written: no agents, queries, letters or manuscript.";
+export const FEEDBACK_ACCOUNT_LINE = "Linked, so we can look into it";
+
+/** The sent state's lines. */
+export function feedbackSentLines(o: { wantsReply: boolean; email: string | null; broken: boolean }): { lead: string; email?: string; tail: string } {
+  const tail = o.broken ? " Broken things go to the top of the list." : "";
+  if (o.wantsReply && o.email) return { lead: "If it needs a reply, it'll come to ", email: o.email, tail: ` from feedback@queryhawk.net.${tail}` };
+  return { lead: `You chose not to get a reply, so this one is just for us.${tail}`, tail: "" };
+}
 
 export interface FeedbackContext {
   route: string;
@@ -97,11 +119,35 @@ export interface FeedbackContext {
   appVersion?: string;
 }
 
-/** The three lines the panel shows back, in the ref's order. */
-export function feedbackContextLines(context: FeedbackContext): string[] {
-  return [
-    `PAGE · ${context.route}`,
-    `BROWSER · ${context.browser} · ${context.viewport}`,
-    `ACCOUNT · ${context.uid ? "attached automatically" : "not signed in"}`,
-  ];
+/**
+ * The browser in plain words — "Chrome 154 on a Mac" — from a user agent. Small and deliberate: the families a writer
+ * is likely to use, in the order their user agents need checking (Edge and Opera both claim Chrome; Chrome claims Safari).
+ */
+export function describeBrowser(ua: string): string {
+  const v = (re: RegExp) => { const m = re.exec(ua); return m ? m[1].split(".")[0] : ""; };
+  let name = "A browser";
+  let ver = "";
+  if (/Edg\//.test(ua)) { name = "Edge"; ver = v(/Edg\/([\d.]+)/); }
+  else if (/OPR\//.test(ua)) { name = "Opera"; ver = v(/OPR\/([\d.]+)/); }
+  else if (/Firefox\//.test(ua)) { name = "Firefox"; ver = v(/Firefox\/([\d.]+)/); }
+  else if (/CriOS\//.test(ua)) { name = "Chrome"; ver = v(/CriOS\/([\d.]+)/); }
+  else if (/Chrome\//.test(ua)) { name = "Chrome"; ver = v(/Chrome\/([\d.]+)/); }
+  else if (/Safari\//.test(ua) && /Version\//.test(ua)) { name = "Safari"; ver = v(/Version\/([\d.]+)/); }
+  let os = "";
+  if (/iPhone/.test(ua)) os = "an iPhone";
+  else if (/iPad/.test(ua)) os = "an iPad";
+  else if (/Android/.test(ua)) os = "Android";
+  else if (/CrOS/.test(ua)) os = "a Chromebook";
+  else if (/Mac OS X|Macintosh/.test(ua)) os = "a Mac";
+  else if (/Windows/.test(ua)) os = "Windows";
+  else if (/Linux/.test(ua)) os = "Linux";
+  return `${name}${ver ? ` ${ver}` : ""}${os ? ` on ${os}` : ""}`;
+}
+
+/** "Beta, 19 Oct" — the build's date (vite.config's `__QH_BUILD_DATE__`), or "Beta" where it is not defined (tests). */
+export function appVersionLabel(iso?: string): string {
+  if (!iso) return "Beta";
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return "Beta";
+  return `Beta, ${d.getUTCDate()} ${MONTHS_SHORT[d.getUTCMonth()]}`;
 }

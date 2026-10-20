@@ -1,0 +1,128 @@
+[
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts the page scrolled (precondition)",
+  "ok": true,
+  "detail": "scrollTop 400"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts help menu: its opener could be pressed",
+  "ok": true,
+  "detail": "covered or missing"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts help menu: open and on screen (precondition)",
+  "ok": true,
+  "detail": "[1150,98.75,340,448.5625]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts help menu: all five points hit the pop-up",
+  "ok": false,
+  "detail": "[false,true,true,true,true]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts Log a query menu: its opener could be pressed",
+  "ok": false,
+  "detail": "covered or missing"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts Log a query menu: open and on screen (precondition)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts Log a query menu: all five points hit the pop-up",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts checklist: its opener could be pressed",
+  "ok": false,
+  "detail": "covered or missing"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts checklist: open and on screen (precondition)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts checklist: all five points hit the pop-up",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned the page scrolled (precondition)",
+  "ok": true,
+  "detail": "scrollTop 400"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned help menu: its opener could be pressed",
+  "ok": true,
+  "detail": "covered or missing"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned help menu: open and on screen (precondition)",
+  "ok": true,
+  "detail": "[1150,98.75,340,448.5625]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned help menu: all five points hit the pop-up",
+  "ok": false,
+  "detail": "[false,false,true,true,true]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned Log a query menu: its opener could be pressed",
+  "ok": true,
+  "detail": "covered or missing"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned Log a query menu: open and on screen (precondition)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned Log a query menu: all five points hit the pop-up",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned checklist: its opener could be pressed",
+  "ok": false,
+  "detail": "covered or missing"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned checklist: open and on screen (precondition)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-A1",
+  "where": "@1512 contacts-pinned checklist: all five points hit the pop-up",
+  "ok": false,
+  "detail": "[]"
+ }
+]

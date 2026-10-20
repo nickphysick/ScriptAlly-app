@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "HS1-B1",
+  "where": "@1512 the menu is open (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1512 no Keyboard shortcuts",
+  "ok": false,
+  "detail": "Help · Contact list3/6Getting startedNext: Open an agent's cardContinueON THIS PAGEAdd an agent1 minWhat List health mea"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1512 the eyebrow names the page",
+  "ok": true,
+  "detail": "Help · Contact list"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1512 in order: eyebrow, guide, three articles, the four links, the switch",
+  "ok": true,
+  "detail": "[\"head\",\"eyebrow\",\"guide\",\"continue\",\"articles\",\"article\",\"article\",\"article\",\"links\",\"search\",\"news\",\"feedback\",\"centre\",\"switch\"]"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1512 the three articles are the page's",
+  "ok": true,
+  "detail": "[\"Add an agent1 min\",\"What List health measures2 min\",\"Pin the list30 sec\"]"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1512 the switch is on",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1280 the menu is open (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1280 no Keyboard shortcuts",
+  "ok": false,
+  "detail": "Help · Contact list3/6Getting startedNext: Open an agent's cardContinueON THIS PAGEAdd an agent1 minWhat List health mea"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1280 the eyebrow names the page",
+  "ok": true,
+  "detail": "Help · Contact list"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1280 in order: eyebrow, guide, three articles, the four links, the switch",
+  "ok": true,
+  "detail": "[\"head\",\"eyebrow\",\"guide\",\"continue\",\"articles\",\"article\",\"article\",\"article\",\"links\",\"search\",\"news\",\"feedback\",\"centre\",\"switch\"]"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1280 the three articles are the page's",
+  "ok": true,
+  "detail": "[\"Add an agent1 min\",\"What List health measures2 min\",\"Pin the list30 sec\"]"
+ },
+ {
+  "lock": "HS1-B1",
+  "where": "@1280 the switch is on",
+  "ok": true,
+  "detail": "true"
+ }
+]

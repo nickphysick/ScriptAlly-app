@@ -67,6 +67,19 @@ service firebase.storage {
     }
   }
 
+  // ══ Help system v1, E.2 — a feedback screenshot ══════════════════════════════════════════════════════════════
+  // A signed-in writer may CREATE one file under their own uid, an image, under 5 MB, and do nothing else: no read, no
+  // list, no update, no delete — for anyone, the writer included. Nick reads them in the console (admin bypasses rules);
+  // the callable refuses a path under any uid but the caller's, so a screenshot cannot be attached to someone else's report.
+  // ⚠️ ONLY `create` IS GRANTED: an `allow write` would also grant update and delete, and an overwrite of a file already
+  //    attached to a report would change the evidence after it was sent.
+  match /betaFeedback/{userId}/{fileName} {
+    allow create: if request.auth != null
+      && request.auth.uid == userId
+      && request.resource.size < 5 * 1024 * 1024
+      && request.resource.contentType.matches('image/.*');
+  }
+
   // ⚠️ DEFAULT DENY, STATED RATHER THAN INHERITED. Storage rules already deny an unmatched path,
   // but an explicit terminal clause is what stops the next person adding a broad `match /{a=**}`
   // above it and quietly opening the bucket. The same reason firestore.rules opens with one.

@@ -100,6 +100,11 @@ export function contactGuideOf(user: User | null | undefined): GuideState<Contac
 export const guideDonePath = (k: ContactGuideKey): UserPaths => ({ [`${BASE}.done.${k}`]: true });
 export const GUIDE_SEEN_PATH: UserPaths = { [`${BASE}.seen`]: true };
 export const GUIDE_HIDDEN_PATH: UserPaths = { [`${BASE}.hidden`]: true };
+/** Help system v1 B — "Show the page guide again" */
+export const GUIDE_UNHIDE_PATH: UserPaths = { [`${BASE}.hidden`]: false };
+/** Help system v1 C.3 — with no agents yet, the items that need one, and the line each shows instead */
+export const CONTACT_NEEDS_AN_AGENT: readonly ContactGuideKey[] = ["search", "pin", "open", "edit", "hk"];
+export const CONTACT_ADD_FIRST = "Add an agent first";
 
 /* ── the Query Centre's state (v139) ── */
 
@@ -139,4 +144,26 @@ export function qcGuideOf(user: User | null | undefined): QcGuideState {
 export const qcGuideDonePath = (k: QcGuideKey): UserPaths => ({ [`${QC_BASE}.done.${k}`]: true });
 export const QC_GUIDE_SEEN_PATH: UserPaths = { [`${QC_BASE}.seen`]: true };
 export const QC_GUIDE_HIDDEN_PATH: UserPaths = { [`${QC_BASE}.hidden`]: true };
+/** Help system v1 B — "Show the page guide again" */
+export const QC_GUIDE_UNHIDE_PATH: UserPaths = { [`${QC_BASE}.hidden`]: false };
 export const QC_GUIDE_FINISHED_PATH: UserPaths = { [`${QC_BASE}.finished`]: true };
+
+/* ── Help system v1 C.4 — the pages with a guide, in sidebar order, for the last note's "Your next guide is …" ── */
+
+/** Pages with a guide, in the sidebar's order (Queries before Agents). Skips on this device count as done. */
+export const GUIDE_PAGES: readonly { page: string; finished: (user: User | null | undefined, skipped: readonly string[]) => boolean }[] = [
+  {
+    page: "Query Centre",
+    finished: (u, sk) => { const g = qcGuideOf(u); return g.finished || QC_CHECKLIST.every((it) => g.done[it.key] || sk.includes(it.key)); },
+  },
+  {
+    page: "Contact list",
+    finished: (u, sk) => { const g = contactGuideOf(u); return CONTACT_CHECKLIST.every((it) => g.done[it.key] || sk.includes(it.key)); },
+  },
+];
+
+/** The first page with a guide that is not finished, other than `page`; null when every other guide is done. */
+export function nextGuideAfter(page: string, user: User | null | undefined, skippedOf: (page: string) => readonly string[]): string | null {
+  for (const g of GUIDE_PAGES) if (g.page !== page && !g.finished(user, skippedOf(g.page))) return g.page;
+  return null;
+}

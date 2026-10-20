@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "HS1-C4",
+  "where": "@1512 one note (precondition)",
+  "ok": true,
+  "detail": "[{\"add\":3247.5999999996275,\"gone\":9707.799999999814}]"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1512 present at 5.5s",
+  "ok": true,
+  "detail": "6460.200000000186"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1512 gone at 6.6s",
+  "ok": true,
+  "detail": "6460.200000000186"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1512 hovered from 1s: the note was hovered (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1512 hovered: still there at 8s",
+  "ok": false,
+  "detail": "{\"list\":[{\"add\":3887.2000000001863,\"gone\":10354.800000000745}],\"now\":11893.300000000745}"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1280 one note (precondition)",
+  "ok": true,
+  "detail": "[{\"add\":3135.600000000559,\"gone\":9598.5}]"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1280 present at 5.5s",
+  "ok": true,
+  "detail": "6462.899999999441"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1280 gone at 6.6s",
+  "ok": true,
+  "detail": "6462.899999999441"
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1280 hovered from 1s: the note was hovered (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C4",
+  "where": "@1280 hovered: still there at 8s",
+  "ok": false,
+  "detail": "{\"list\":[{\"add\":3971.4000000003725,\"gone\":10435.099999999627}],\"now\":11975.400000000373}"
+ }
+]

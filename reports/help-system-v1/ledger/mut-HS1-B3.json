@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "HS1-B3",
+  "where": "@1512 ↓ opens it",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1512 …with focus on the first item",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1512 End lands on the switch",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1512 Esc closes it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1512 …and focuses the ?",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1280 ↓ opens it",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1280 …with focus on the first item",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1280 End lands on the switch",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1280 Esc closes it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B3",
+  "where": "@1280 …and focuses the ?",
+  "ok": true,
+  "detail": ""
+ }
+]

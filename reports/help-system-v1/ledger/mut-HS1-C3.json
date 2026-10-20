@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "HS1-C3",
+  "where": "@1512 an agent to open (precondition)",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1512 a fresh session: no auto-open recorded yet (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1512 the agent panel is open (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1512 the checklist did not open",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1280 an agent to open (precondition)",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1280 a fresh session: no auto-open recorded yet (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1280 the agent panel is open (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C3",
+  "where": "@1280 the checklist did not open",
+  "ok": false,
+  "detail": ""
+ }
+]

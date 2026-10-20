@@ -37,7 +37,7 @@ const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const SEND_TIMEOUT_MS = 10_000;
 
 /** Which message this is. Renderers live in `emailTemplates.ts`; this file only sends. */
-export type EmailTemplate = "confirm" | "welcome";
+export type EmailTemplate = "confirm" | "welcome" | "feedback";
 
 /** What a renderer produces. Both parts are required — see the plain-text note below. */
 export interface RenderedEmail {
@@ -71,19 +71,35 @@ const recipientHash = (address: string): string =>
  * a confirmation it means "the document stands, tell the reader they are in, and the log says the
  * mail did not go".
  */
+/**
+ * Help system v1 E.2 — a sender and a reply route other than the waitlist's. `from` replaces the configured sender;
+ * `replyTo` replaces the configured reply route, and `null` sends with NO reply-to at all (feedback from a writer who
+ * asked for no reply must not route a reply anywhere). Omitted, both are the waitlist's, exactly as before.
+ */
+export interface SendOverrides {
+  from?: string;
+  replyTo?: string | null;
+}
+
 export const sendEmail = async (
   to: string,
   template: EmailTemplate,
   rendered: RenderedEmail,
   env: NodeJS.ProcessEnv = process.env,
+  overrides: SendOverrides = {},
 ): Promise<SendOutcome> => {
-  const cfg: MailConfig = resolveMailConfig(env);
+  const base: MailConfig = resolveMailConfig(env);
+  const cfg = {
+    ...base,
+    from: overrides.from || base.from,
+    replyTo: overrides.replyTo === undefined ? base.replyTo : overrides.replyTo ?? undefined,
+  };
   const toHash = recipientHash(to);
   const started = Date.now();
 
   /* ⚠️ LOGGED, NOT THROWN — see `replyToWarning`. In this state a reader's reply goes to an
      address that is not currently delivering, and nothing else in the system would say so. */
-  const warning = replyToWarning(env);
+  const warning = overrides.replyTo === undefined ? replyToWarning(env) : null;
   if (warning) console.warn(JSON.stringify({ event: "email.config", warning }));
 
   const key = RESEND_API_KEY.value();

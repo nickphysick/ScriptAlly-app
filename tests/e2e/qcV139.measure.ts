@@ -92,7 +92,8 @@ const figures = (page: Page) => page.evaluate(() => {
 const ANSWER: Record<string, string> = { partial: "Partial requested", full: "Full requested", rr: "Revise & resubmit", pass: "Pass", offer: "Offer" };
 async function startPip(page: Page) {
   await openList(page);
-  await page.locator("[data-pck='item'][data-k='resp'] button").click();
+  /* Help system v1 C.5 — a row also holds SKIP and LEARN MORE: the row's own button is the direct child */
+  await page.locator("[data-pck='item'][data-k='resp'] > button").click();
   return waitFlow(page, "pip-1");
 }
 async function toAnswers(page: Page) {
@@ -130,7 +131,8 @@ test.describe("Query Centre v139", () => {
       L.check("A1", `${vp.width} no old page guide`, old.el === 0 && !old.copy, JSON.stringify(old));
       const t = await pillText(page);
       /* Query Centre v140 §G: six items now ("Pin the list" is third) */
-      L.check("A1", `${vp.width} the pill`, /^Query Centre: Getting started [0-6]\/6$/.test(t ?? ""), `${t}`);
+      /* RETARGETED by Help system v1 C.1 (the ring pill): "{Page} guide {n} of {N}" */
+      L.check("A1", `${vp.width} the pill`, /^Query Centre guide ?[0-6] of 6$/.test(t ?? ""), `${t}`);
       const cls = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-pck='pill']")].find((e) => e.getBoundingClientRect().height > 0)?.className ?? "");
       L.check("A1", `${vp.width} the shared component's pill`, /\bpck-pill\b/.test(cls), cls);
     }

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HS1-C5",
+  "where": "@1512 the last note",
+  "ok": true,
+  "detail": "{\"has\":true,\"final\":true,\"bg\":\"rgb(224, 229, 221)\"}"
+ },
+ {
+  "lock": "HS1-C5",
+  "where": "@1512 …is sage",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "HS1-C5",
+  "where": "@1512 still there at 15s",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-C5",
+  "where": "@1280 the last note",
+  "ok": true,
+  "detail": "{\"has\":true,\"final\":true,\"bg\":\"rgb(224, 229, 221)\"}"
+ },
+ {
+  "lock": "HS1-C5",
+  "where": "@1280 …is sage",
+  "ok": true,
+  "detail": "rgb(224, 229, 221)"
+ },
+ {
+  "lock": "HS1-C5",
+  "where": "@1280 still there at 15s",
+  "ok": false,
+  "detail": ""
+ }
+]

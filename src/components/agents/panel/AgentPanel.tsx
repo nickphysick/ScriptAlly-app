@@ -19,6 +19,7 @@
  *    or another page's query panel claims it. A query opened FROM this panel is the same box changing hands, so
  *    that claim is not a reason to close.
  */
+import { Term } from "../../shell/Term";
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Activity, Agent, Query, QueryStatus } from "../../../types";
 import type { AgentFacts } from "../../../lib/contactList";
@@ -336,7 +337,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = (p) => {
                         <div className="apn-how" data-ap="how">
                           <div data-ap-how="send"><span>Send by</span>{sendBy ? <b>{sendBy}</b> : <Missing />}</div>
                           <div data-ap-how="replies"><span>Replies</span>{weeksOn ? <b>In about {weeksOn} week{weeksOn === 1 ? "" : "s"}</b> : <Missing word="Not stated" />}</div>
-                          <div data-ap-how="silence"><span>Response policy</span>{silence ? <b>{silence}</b> : <Missing word="Not stated" />}</div>
+                          <div data-ap-how="silence"><span><Term id="responsePolicy">Response policy</Term></span>{silence ? <b>{silence}</b> : <Missing word="Not stated" />}</div>
                         </div>
                       </section>
                       <section className="apn-sec" data-ap-sec="send">

@@ -8,7 +8,7 @@
  */
 export function menuRows(menu: HTMLElement | null): HTMLElement[] {
   if (!menu) return [];
-  return [...menu.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemradio"]')]
+  return [...menu.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]')]
     .filter((el) => el.getAttribute("aria-disabled") !== "true");
 }
 

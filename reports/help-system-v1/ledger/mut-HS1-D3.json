@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "HS1-D3",
+  "where": "@1512 status cells to read (precondition)",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1512 every status name is a Term",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1512 closed: the card draws the real StatusDot",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1512 partialRequested: the card draws the real StatusDot",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1512 partialSent: the card draws the real StatusDot",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1280 status cells to read (precondition)",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1280 every status name is a Term",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1280 closed: the card draws the real StatusDot",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1280 partialRequested: the card draws the real StatusDot",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "HS1-D3",
+  "where": "@1280 partialSent: the card draws the real StatusDot",
+  "ok": false,
+  "detail": "null"
+ }
+]
