@@ -24,7 +24,7 @@
 }
 
 /* ── 1 · the welcome: the ink panel asks, the card answers ── */
-.sf .o9-welv { display: grid; gap: 22px; max-width: 1240px; margin: 10px 0 0 clamp(0px, 1.2vw, 16px); }
+.sf .o9-welv { display: grid; gap: 22px; max-width: 1240px; margin: 10px auto 0; } /* centred (Part B) */
 .sf .o9-panel {
   display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: center;
   box-sizing: border-box; min-width: 0; padding: 34px 34px 34px 40px; border-radius: 14px;
@@ -54,7 +54,7 @@
 /* ── 2 · the acknowledgement, the passage, the title card ── */
 @keyframes o9-mark-in { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes o9-draw { to { stroke-dashoffset: 0; } }
-.sf .o9-solo { display: grid; gap: 24px; max-width: 860px; margin: 10px 0 0 clamp(0px, 1.2vw, 16px); }
+.sf .o9-solo { display: grid; gap: 24px; max-width: 860px; margin: 10px auto 0; } /* centred (Part B) */
 .sf .o9-ack { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .sf .o9-ackbox {
   flex: none; width: 50px; height: 50px; border-radius: 12px; background: var(--sp-anthracite);
@@ -72,9 +72,14 @@
 }
 .sf .o9-acklbl b { font-family: var(--sp-type); font-weight: 400; font-size: clamp(28px, 3vw, 40px); line-height: 1.3; color: var(--ink-on-light); }
 .sf .o9-ackchange { margin: 0 0 6px 6px; align-self: flex-end; color: var(--sf-ink72); }
-.sf .o9-beats { display: grid; gap: 10px; max-width: 60ch; cursor: default; }
-.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: rgba(28, 19, 15, .78); }
-.sf .o9-beat--lead { font-family: var(--sp-type); font-size: 27px; line-height: 1.3; color: var(--ink-on-light); }
+/* The passage's column is the card's width, so the text never looks narrower than the card below
+   it (Part B). Each beat keeps its OWN measure, in its own units on the element that sets its size:
+   60ch of the 18.5px serif for the beats, and for the lead a measure in em long enough for "Got it.
+   Your campaign is underway." on one line. The old 60ch sat on the container, so it was 60ch of the
+   container's 16px and broke the 27px lead over two lines. */
+.sf .o9-beats { display: grid; gap: 10px; cursor: default; }
+.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: rgba(28, 19, 15, .78); max-width: 60ch; }
+.sf .o9-beat--lead { font-family: var(--sp-type); font-size: 27px; line-height: 1.3; color: var(--ink-on-light); max-width: 30em; }
 .sf .o9-beat em { font-style: italic; font-weight: 600; color: var(--ink-on-light); }
 .sf .o9-beat span { font: inherit; color: inherit; }
 /* the letters still to come: laid out, not seen */

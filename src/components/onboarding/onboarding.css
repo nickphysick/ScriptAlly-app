@@ -354,7 +354,9 @@
 }
 
 /* ── A set-up step: an open title on the sheet, one white card beneath it ── */
-.sf .sf-col { max-width: 760px; margin: 10px 0 0 clamp(0px, 1.2vw, 16px); }
+/* Centred in the sheet (import review v1, Part B): every set-up step's column sits on the sheet's
+   centre line, not inset from its left. Below 900px it fills the sheet as before. */
+.sf .sf-col { max-width: 760px; margin: 10px auto 0; }
 .sf .sf-col--wide { max-width: 1280px; }
 .sf .sf-open { margin: 0 0 24px; }
 /* ⚠️ THREE CLASSES' WORTH AND `!important`: brand.tsx forces the brand face on a bare h1. */
