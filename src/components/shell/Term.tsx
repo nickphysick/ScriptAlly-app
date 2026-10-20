@@ -101,10 +101,13 @@ export const Term: React.FC<{
     const sc = (e: Event) => { if (cardRef.current && e.target instanceof Node && cardRef.current.contains(e.target)) return; hide(); };
     const key = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      e.stopImmediatePropagation(); e.preventDefault();
       hide();
-      const back = inControl ? termRef.current?.parentElement?.closest<HTMLElement>(CONTROL) : termRef.current;
-      back?.focus();
+      /* ⚠️ INSIDE A CONTROL THE KEY IS THE CONTROL'S TOO. A row opened from the keyboard closes on Escape (Contact list
+         v18.3.3), and its focus is what opened this card: swallowing the key here left the row open (CL1833-E5). The card
+         closes and the key goes on. A standalone term owns its Escape and returns focus to itself. */
+      if (inControl) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      termRef.current?.focus();
     };
     window.addEventListener("scroll", sc, true);
     window.addEventListener("keydown", key, true);

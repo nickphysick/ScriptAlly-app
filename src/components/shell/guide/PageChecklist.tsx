@@ -244,13 +244,19 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   useEffect(() => onTopbarClaim((id) => { if (id !== "checklist") { setOpen(false); setClosing(false); setSure(false); setNote(null); } }), []);
 
   /* ── C.2 close into the pill: the popover shrinks to the caret, then the pill bumps. Starting a step does not. ── */
+  const shrinkT = useRef<number | undefined>(undefined);
   const closePop = useCallback((focusPill: boolean) => {
     setSure(false);
     if (focusPill) pillRef.current?.focus();
     if (reduced() || !pillRef.current) { setOpen(false); return; }
     setClosing(true);
-    window.setTimeout(() => { setOpen(false); setClosing(false); bump(); }, SHRINK_MS);
+    window.clearTimeout(shrinkT.current);
+    shrinkT.current = window.setTimeout(() => { setOpen(false); setClosing(false); bump(); }, SHRINK_MS);
   }, [bump]);
+  /* ⚠️ A PRESS ON THE PILL DURING THE SHRINK KEEPS IT OPEN: the press means "open", and toggling a popover that is only
+     on its way out would shut it (CL183-F2 pressed the pill 250ms after Escape and found it closed) */
+  const cancelShrink = () => { window.clearTimeout(shrinkT.current); setClosing(false); };
+  useEffect(() => () => window.clearTimeout(shrinkT.current), []);
 
   /* the popover: an outside press closes it; Escape closes it before anything under it hears the key */
   useEffect(() => {
@@ -489,7 +495,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
       data-state={finished ? "done" : "live"}
       aria-haspopup="dialog" aria-expanded={open && !closing}
       aria-label={finished ? `${page} guide: learned` : `${page} guide, ${n} of ${items.length} done`}
-      onClick={() => { setNote(null); if (open) closePop(false); else { setSure(false); setOpen(true); } }}>
+      onClick={() => { setNote(null); if (open && closing) cancelShrink(); else if (open) closePop(false); else { setSure(false); setOpen(true); } }}>
       <GuideRing n={n} total={items.length} size={24} colour={finished ? "#4b6151" : "#a2452a"} track="#ffffff" className="pck-ring" />
       {finished
         ? <span className="pck-pt"><b>{page}:</b> Learned</span>

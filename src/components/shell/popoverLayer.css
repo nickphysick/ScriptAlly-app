@@ -6,9 +6,17 @@
  * take the pointer. z 80: above every page element and the floating tab (55), below the shortcuts sheet (90) and the
  * phone sheets (1000).
  */
+/* ⚠️ ZERO-SIZE, NOT `inset: 0` (a deliberate deviation from the pack). The layer's only jobs are its stacking context
+   and being last in <body>; its children are `position: fixed` to the window whatever the layer's size, so a box
+   covering the window adds nothing — except to every probe that reads paint order with pointer events forced on
+   (CL191-E1 found the transparent layer "over" the Contact list's illustration). A box with no area covers nothing. */
 #qh-popovers {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
   pointer-events: none;
   z-index: 80;
 }

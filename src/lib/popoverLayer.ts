@@ -4,7 +4,7 @@
  *
  * Help system v1, Part A — ONE POP-UP LAYER FOR THE TOP BAR.
  *
- *   the layer   `#qh-popovers`, the last child of <body>: fixed, inset 0, `pointer-events: none`, z-index 80 — above every
+ *   the layer   `#qh-popovers`, the last child of <body>: fixed, zero-size, `pointer-events: none`, z-index 80 — above every
  *               page element and the floating tab (55), below the shortcuts sheet (90) and the phone sheets (1000). Its
  *               children take `pointer-events: auto` (see popoverLayer.css).
  *   one open    a top-bar pop-up claims the bar when it opens; every other one hears the claim and closes itself.
