@@ -97,8 +97,17 @@ export const FEEDBACK_QUESTION: Record<FeedbackKind, { label: string; placeholde
 export const FEEDBACK_SEVERITIES = ["Just noticed", "Slowing me down", "I can't carry on"] as const;
 export type FeedbackSeverity = (typeof FEEDBACK_SEVERITIES)[number];
 
-/** Broken or confusing only: the screenshot. */
-export const takesScreenshot = (k: FeedbackKind | null) => k === "Something's broken" || k === "Something's confusing";
+/**
+ * ⚠️ THE SCREENSHOT IS OFF UNTIL FIREBASE STORAGE EXISTS ON THE PROJECT. `scriptally-dev` has a bucket name and a rules
+ * file but Storage was never set up ("Get Started" in the console), so the rule cannot deploy and every upload would fail
+ * — and a failed upload fails the whole send. The pack's rule: leave it out rather than fake it. Everything else is
+ * built (the drop zone, the paste, the upload path, the function's own-uid check, the Storage rule in storage.rules):
+ * set Storage up, deploy the rule, and flip this.
+ */
+export const FEEDBACK_SCREENSHOTS = false;
+
+/** Broken or confusing only: the screenshot (and only while FEEDBACK_SCREENSHOTS is on). */
+export const takesScreenshot = (k: FeedbackKind | null) => FEEDBACK_SCREENSHOTS && (k === "Something's broken" || k === "Something's confusing");
 
 export const FEEDBACK_CONTEXT_SUMMARY = "Sent with it: the page, your browser and your account";
 export const FEEDBACK_NEVER = "Never anything you've written: no agents, queries, letters or manuscript.";
