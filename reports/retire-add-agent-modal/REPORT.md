@@ -127,4 +127,14 @@ and Discover (the top-bar capture), at 1512 and 1280.
 
 ## Deploy
 
-_Filled in below._
+- **The merge:** dev had moved to `d0a5364a` (`index-Dbgped49.js`, other sessions' packs up to QC v141.1). The
+  integration branch `dev/…-qc141-silf-irf1-qc1411-raam` was cut from it and merged cleanly (`d4f53c8a`); no new
+  pop-up references came in.
+- **Gates on the merged tree:** tsc clean, both builds clean. Vitest 9362 passed. `functions/eval/run.test.ts` and one
+  `smartImportCore` test fail exactly as on dev's tip without this merge: a fresh worktree lacks `functions/`'s own
+  `@anthropic-ai/sdk`, so it is environmental, and no `functions/` file differs.
+- **Locks on the merged build:** ADD1 5/5 green, run before the deploy. CL192 and CL19 were still running at deploy
+  time, since both were already green on the branch.
+- **The deploy:** built from a clean detached worktree, with no pop-up strings in `dist`. The served hash was
+  re-checked, then hosting only, to dev, which now serves **`index-CU6ZOefw.js`**.
+- Not merged to main.
