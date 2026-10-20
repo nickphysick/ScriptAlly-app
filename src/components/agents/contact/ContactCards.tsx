@@ -50,7 +50,9 @@ const Card: React.FC<{
         if (e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(e.currentTarget.getBoundingClientRect()); }
       }}>
-      <AgentPaperCard variant="framed" data={data} onAdd={(k) => { const t = ADD_TARGET[k]; onEdit(t.tab, t.focus); }} />
+      {/* v20 §F — a card whose next step is the writer's (`stand === "you"`, the band's own "your move") wears the pink band */}
+      <AgentPaperCard variant="framed" data={data} tone={x.stand === "you" ? "pink" : undefined}
+        onAdd={(k) => { const t = ADD_TARGET[k]; onEdit(t.tab, t.focus); }} />
     </div>
   );
 };

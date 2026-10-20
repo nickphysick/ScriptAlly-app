@@ -215,3 +215,16 @@
   margin: 0 0 0 4px; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; font-size: 14px !important; line-height: 30px;
   text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, 0.4);
 }
+
+/* ── §F · THE JUMP ROW ON THE NAVY TOOLBAR (not full screen): the groups are cream on navy — the glyph cream, the label
+   at 72%, the count at 60% — with a 12% cream wash on hover; the current group stays the white tile with navy. Full
+   screen (the cream toolbar) is unchanged. StatusDot states its ink inline, so its colour is overridden on the svg. ── */
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:not([aria-current="true"]) { background: transparent; box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:not([aria-current="true"]) .cl19-gm,
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:not([aria-current="true"]) .cl19-gm svg { color: rgb(244, 238, 229) !important; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:not([aria-current="true"]) .cl19-jl { color: rgba(244, 238, 229, 0.72); }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:not([aria-current="true"]) i { color: rgba(244, 238, 229, 0.6); }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:not([aria-current="true"]):hover:not(:disabled) { background: rgba(244, 238, 229, 0.12); }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; color: #2a3a52; }
+/* a chosen chip in the filter strip is navy: its glyph turns cream with it */
+.cl20-chip.on .cl19-gm svg { color: rgb(244, 238, 229) !important; }
