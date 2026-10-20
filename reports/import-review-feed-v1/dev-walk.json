@@ -1,0 +1,52 @@
+{
+ "ack": {
+  "left": 118,
+  "right": 118,
+  "leadLines": 1
+ },
+ "summary": {
+  "agents": "8",
+  "queries": "8"
+ },
+ "readyAgents": 8,
+ "review": {
+  "head": "Ready to import 1 NOT IMPORTING 7 READY",
+  "out": "1",
+  "panelDoor": "Not known yet. Leave it if you're not sure.",
+  "panelWeeks": "Not set"
+ },
+ "queriesToImport": 7,
+ "loading": {
+  "cards": 5,
+  "sk": 5
+ },
+ "feed": {
+  "counts": {
+   "withYou": 3,
+   "closed": 1,
+   "withAgents": 2,
+   "agents": 7,
+   "queries": 7
+  },
+  "say": "You imported your list: 7 agents and 7 queries for Import Test Book.",
+  "groups": [
+   "2 with agents",
+   "3 with you",
+   "1 closed"
+  ],
+  "route": "Smart import",
+  "tag": "Imported",
+  "end": "That's the last 30 days. Your imported queries keep their own dates, so they show on their timelines in the Query Centre. ",
+  "sum": [
+   "0replies from agents",
+   "2things you did",
+   "0still need you"
+  ]
+ },
+ "courts": {
+  "you": 3,
+  "agent": 2,
+  "closed": 1
+ },
+ "errs": []
+}
