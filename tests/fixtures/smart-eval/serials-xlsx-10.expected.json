@@ -1,0 +1,95 @@
+{
+ "id": "serials-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Freya Fennimore / Ashgrove Partners",
+   "agentName": "Freya Fennimore",
+   "agency": "Ashgrove Partners",
+   "status": "Rejected",
+   "sentDate": "2024-09-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Seb Vidal / Pemberton Associates",
+   "agentName": "Seb Vidal",
+   "agency": "Pemberton Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-09-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Callum Vidal / Pemberton Associates",
+   "agentName": "Callum Vidal",
+   "agency": "Pemberton Associates",
+   "status": "Queried",
+   "sentDate": "2023-09-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Bea Rook / Pemberton Associates",
+   "agentName": "Bea Rook",
+   "agency": "Pemberton Associates",
+   "status": "No Response",
+   "sentDate": "2024-03-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Clara Castellane / Pemberton Associates",
+   "agentName": "Clara Castellane",
+   "agency": "Pemberton Associates",
+   "status": "No Response",
+   "sentDate": "2025-03-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Hannah Faraday / Ashgrove Partners",
+   "agentName": "Hannah Faraday",
+   "agency": "Ashgrove Partners",
+   "status": "Queried",
+   "sentDate": "2024-08-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Dev Voss / Pemberton Associates",
+   "agentName": "Dev Voss",
+   "agency": "Pemberton Associates",
+   "status": "Queried",
+   "sentDate": "2023-05-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Theo Fennimore / Ashgrove Partners",
+   "agentName": "Theo Fennimore",
+   "agency": "Ashgrove Partners",
+   "status": "Full Requested",
+   "sentDate": "2025-02-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Theo Carter / Hollis Partners",
+   "agentName": "Theo Carter",
+   "agency": "Hollis Partners",
+   "status": "Queried",
+   "sentDate": "2024-02-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Gregory Moreau / Ashgrove Partners",
+   "agentName": "Gregory Moreau",
+   "agency": "Ashgrove Partners",
+   "status": "Queried",
+   "sentDate": "2025-03-22",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

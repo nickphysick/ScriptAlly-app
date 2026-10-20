@@ -1,0 +1,95 @@
+{
+ "id": "totals-csv-10",
+ "queries": [
+  {
+   "label": "q1 Lena Salt / Kite Partners",
+   "agentName": "Lena Salt",
+   "agency": "Kite Partners",
+   "status": "Rejected",
+   "sentDate": "2023-12-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Seb Lindqvist / Greenhouse & Co",
+   "agentName": "Seb Lindqvist",
+   "agency": "Greenhouse & Co",
+   "status": "Queried",
+   "sentDate": "2024-07-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Orla Brennan / Quill & Co",
+   "agentName": "Orla Brennan",
+   "agency": "Quill & Co",
+   "status": "No Response",
+   "sentDate": "2025-06-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Priya Rook / Kite Partners",
+   "agentName": "Priya Rook",
+   "agency": "Kite Partners",
+   "status": "No Response",
+   "sentDate": "2023-04-21",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Jamal Llewellyn / Dunmore & Co",
+   "agentName": "Jamal Llewellyn",
+   "agency": "Dunmore & Co",
+   "status": "Full Requested",
+   "sentDate": "2025-07-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Jamal Salt / Quill & Co",
+   "agentName": "Jamal Salt",
+   "agency": "Quill & Co",
+   "status": "Queried",
+   "sentDate": "2023-06-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Theo Doyle / Dunmore & Co",
+   "agentName": "Theo Doyle",
+   "agency": "Dunmore & Co",
+   "status": "Full Requested",
+   "sentDate": "2025-06-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Felix Quigley / Kite Partners",
+   "agentName": "Felix Quigley",
+   "agency": "Kite Partners",
+   "status": "Rejected",
+   "sentDate": "2024-11-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Orla Castellane / Greenhouse & Co",
+   "agentName": "Orla Castellane",
+   "agency": "Greenhouse & Co",
+   "status": "Rejected",
+   "sentDate": "2023-12-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Gregory Harrow / Greenhouse & Co",
+   "agentName": "Gregory Harrow",
+   "agency": "Greenhouse & Co",
+   "status": "Revise & Resubmit",
+   "sentDate": "2024-04-02",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

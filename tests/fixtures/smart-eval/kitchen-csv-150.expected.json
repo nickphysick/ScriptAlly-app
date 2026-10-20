@@ -1,0 +1,1638 @@
+{
+ "id": "kitchen-csv-150",
+ "queries": [
+  {
+   "label": "q1 Nadia Sato / Fairweather Agency",
+   "agentName": "Nadia Sato",
+   "agency": "Fairweather Agency",
+   "status": "Queried",
+   "sentDate": "2024-09-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Ezra Voss / Dunmore Partners",
+   "agentName": "Ezra Voss",
+   "agency": "Dunmore Partners",
+   "status": "Rejected",
+   "sentDate": "2024-01-19",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2024-03-09"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q3 (no name) / Juniper Management",
+   "agentName": "",
+   "agency": "Juniper Management",
+   "status": "Rejected",
+   "sentDate": "2025-02-12",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q4 Yusuf Harrow / Quill Partners",
+   "agentName": "Yusuf Harrow",
+   "agency": "Quill Partners",
+   "status": "Rejected",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q5 Orla Harrow / Harwood Management",
+   "agentName": "Orla Harrow",
+   "agency": "Harwood Management",
+   "status": "Rejected",
+   "sentDate": "2025-06-17",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2025-08-06"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q6 (no name) / Gilchrist Management",
+   "agentName": "",
+   "agency": "Gilchrist Management",
+   "status": "Partial Requested",
+   "sentDate": "2025-03-06",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2025-03-27"
+    }
+   ],
+   "reasons": [
+    "check-name",
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q7 Marianne Doyle / Inkwell Partners",
+   "agentName": "Marianne Doyle",
+   "agency": "Inkwell Partners",
+   "status": "Queried",
+   "sentDate": "2025-03-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Queried",
+   "sentDate": "2025-08-12",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q9 Lena Raman / Everly Management",
+   "agentName": "Lena Raman",
+   "agency": "Everly Management",
+   "status": "Rejected",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q10 Bea Carter / Marlow Associates",
+   "agentName": "Bea Carter",
+   "agency": "Marlow Associates",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "no-date"
+   ]
+  },
+  {
+   "label": "q11 Callum Nkemelu / Gilchrist Management",
+   "agentName": "Callum Nkemelu",
+   "agency": "Gilchrist Management",
+   "status": "Rejected",
+   "sentDate": "2023-05-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q12 Ezra Webb / Kite Literary",
+   "agentName": "Ezra Webb",
+   "agency": "Kite Literary",
+   "status": "Queried",
+   "sentDate": "2023-08-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q13 Gregory Sato / Hollis Associates",
+   "agentName": "Gregory Sato",
+   "agency": "Hollis Associates",
+   "status": "Rejected",
+   "sentDate": "2023-04-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q14 (no name) / Dunmore Agency",
+   "agentName": "",
+   "agency": "Dunmore Agency",
+   "status": "Queried",
+   "sentDate": "2025-05-04",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q15 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Full Sent",
+   "statusAccept": [
+    "Full Requested",
+    "Full Sent"
+   ],
+   "sentDate": "2024-03-16",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying",
+    "status-direction"
+   ]
+  },
+  {
+   "label": "q16 (no name) / Fairweather Literary",
+   "agentName": "",
+   "agency": "Fairweather Literary",
+   "status": "Rejected",
+   "sentDate": "2024-09-11",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q17 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Full Requested",
+   "sentDate": "2024-06-09",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-06-16"
+    }
+   ],
+   "reasons": [
+    "needs-identifying",
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q18 (no name) / Everly Literary",
+   "agentName": "",
+   "agency": "Everly Literary",
+   "status": "Full Requested",
+   "sentDate": "2024-04-12",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q19 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-11-29",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q20 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-11-22",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q21 Nadia Quigley / Juniper Management",
+   "agentName": "Nadia Quigley",
+   "agency": "Juniper Management",
+   "status": "Revise & Resubmit",
+   "sentDate": "2023-07-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q22 Owen Marsh / Penfallow Literary",
+   "agentName": "Owen Marsh",
+   "agency": "Penfallow Literary",
+   "status": "Queried",
+   "sentDate": "2023-09-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q23 (no name) / Kite Literary",
+   "agentName": "",
+   "agency": "Kite Literary",
+   "status": "No Response",
+   "sentDate": "2024-09-07",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q24 Malik Doyle / Gilchrist Literary",
+   "agentName": "Malik Doyle",
+   "agency": "Gilchrist Literary",
+   "status": "Full Requested",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q25 Priya Moreau / Penfallow Literary",
+   "agentName": "Priya Moreau",
+   "agency": "Penfallow Literary",
+   "status": "Full Requested",
+   "sentDate": "2025-08-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q26 Gregory Webb / Inkwell Partners",
+   "agentName": "Gregory Webb",
+   "agency": "Inkwell Partners",
+   "status": "Partial Sent",
+   "sentDate": "2025-05-18",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2025-07-16"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q27 Nadia Voss / Larkspur Partners",
+   "agentName": "Nadia Voss",
+   "agency": "Larkspur Partners",
+   "status": "Rejected",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q28 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-03-16",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q29 Imogen Faraday / Copperfield Literary Agency",
+   "agentName": "Imogen Faraday",
+   "agency": "Copperfield Literary Agency",
+   "status": "Withdrawn",
+   "sentDate": "2024-04-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q30 Kwame Tremayne / Harwood Management",
+   "agentName": "Kwame Tremayne",
+   "agency": "Harwood Management",
+   "status": "Full Requested",
+   "sentDate": "2023-01-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q31 Bea Faraday / Gilchrist Literary",
+   "agentName": "Bea Faraday",
+   "agency": "Gilchrist Literary",
+   "status": "Queried",
+   "sentDate": "2023-07-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q32 (no name) / Greenhouse Associates",
+   "agentName": "",
+   "agency": "Greenhouse Associates",
+   "status": "Rejected",
+   "sentDate": "2024-04-02",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q33 Imogen Lindqvist / Inkwell Management",
+   "agentName": "Imogen Lindqvist",
+   "agency": "Inkwell Management",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q34 Gregory Quigley / Hollis Associates",
+   "agentName": "Gregory Quigley",
+   "agency": "Hollis Associates",
+   "status": "No Response",
+   "sentDate": "2024-07-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q35 Freya Moreau / Bellwether & Co",
+   "agentName": "Freya Moreau",
+   "agency": "Bellwether & Co",
+   "status": "Rejected",
+   "sentDate": "2023-07-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q36 Kwame Faraday / Wren Associates",
+   "agentName": "Kwame Faraday",
+   "agency": "Wren Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-08-05",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-09-15"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q37 Kwame Moreau / Kite Agency",
+   "agentName": "Kwame Moreau",
+   "agency": "Kite Agency",
+   "status": "Queried",
+   "sentDate": "2023-08-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q38 Clara Webb / Penfallow Literary",
+   "agentName": "Clara Webb",
+   "agency": "Penfallow Literary",
+   "status": "Queried",
+   "sentDate": "2023-03-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q39 Orla Doyle / Hollis Literary Agency",
+   "agentName": "Orla Doyle",
+   "agency": "Hollis Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2023-04-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q40 Kwame Sato / Gilchrist Literary",
+   "agentName": "Kwame Sato",
+   "agency": "Gilchrist Literary",
+   "status": "No Response",
+   "sentDate": "2024-04-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q41 Ezra Marsh / Quill Partners",
+   "agentName": "Ezra Marsh",
+   "agency": "Quill Partners",
+   "status": "Queried",
+   "sentDate": "2025-07-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q42 Priya Webb / Gilchrist Management",
+   "agentName": "Priya Webb",
+   "agency": "Gilchrist Management",
+   "status": "No Response",
+   "sentDate": "2025-07-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q43 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-04-30",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q44 (no name) / Greenhouse Associates",
+   "agentName": "",
+   "agency": "Greenhouse Associates",
+   "status": "Partial Requested",
+   "sentDate": "2025-05-17",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2025-06-16"
+    }
+   ],
+   "reasons": [
+    "check-name",
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q45 Dev Vidal / Penfallow Literary",
+   "agentName": "Dev Vidal",
+   "agency": "Penfallow Literary",
+   "status": "No Response",
+   "sentDate": "2023-03-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q46 (no name) / Dunmore Literary Agency",
+   "agentName": "",
+   "agency": "Dunmore Literary Agency",
+   "status": "Full Requested",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "check-name",
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q47 Saoirse Voss / Bellwether Literary",
+   "agentName": "Saoirse Voss",
+   "agency": "Bellwether Literary",
+   "status": "Partial Sent",
+   "sentDate": "2025-04-16",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2025-06-18"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q48 (no name) / Hollis Partners",
+   "agentName": "",
+   "agency": "Hollis Partners",
+   "status": "Rejected",
+   "sentDate": "2023-02-20",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q49 (no name) / Bellwether & Co",
+   "agentName": "",
+   "agency": "Bellwether & Co",
+   "status": "Rejected",
+   "sentDate": "2024-03-30",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q50 Freya Hale / Everly Literary",
+   "agentName": "Freya Hale",
+   "agency": "Everly Literary",
+   "status": "Partial Requested",
+   "sentDate": "2023-06-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q51 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Withdrawn",
+   "sentDate": "2024-02-19",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q52 Theo Quigley / Larkspur Partners",
+   "agentName": "Theo Quigley",
+   "agency": "Larkspur Partners",
+   "status": "Offer",
+   "sentDate": "2023-07-19",
+   "timeline": [
+    {
+     "type": "Offer",
+     "date": "2023-08-20"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q53 Callum Lindqvist / Inkwell Management",
+   "agentName": "Callum Lindqvist",
+   "agency": "Inkwell Management",
+   "status": "Rejected",
+   "sentDate": "2023-02-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q54 Theo Whitlock / Ashgrove Literary Agency",
+   "agentName": "Theo Whitlock",
+   "agency": "Ashgrove Literary Agency",
+   "status": "No Response",
+   "sentDate": "2024-01-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q55 Hannah Llewellyn / Hollis Associates",
+   "agentName": "Hannah Llewellyn",
+   "agency": "Hollis Associates",
+   "status": "Partial Requested",
+   "sentDate": "2023-12-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q56 Hugo Brennan / Juniper Literary",
+   "agentName": "Hugo Brennan",
+   "agency": "Juniper Literary",
+   "status": "Offer",
+   "sentDate": "2023-09-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q57 Tamsin Rook / Hollis Partners",
+   "agentName": "Tamsin Rook",
+   "agency": "Hollis Partners",
+   "status": "Partial Sent",
+   "sentDate": "2024-02-24",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2024-05-06"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q58 Seb Marsh / Ashgrove Literary Agency",
+   "agentName": "Seb Marsh",
+   "agency": "Ashgrove Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2025-01-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q59 Felix Sato / Ashgrove Literary Agency",
+   "agentName": "Felix Sato",
+   "agency": "Ashgrove Literary Agency",
+   "status": "Queried",
+   "sentDate": "2024-09-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q60 Theo Ibbotson / Larkspur & Co",
+   "agentName": "Theo Ibbotson",
+   "agency": "Larkspur & Co",
+   "status": "Rejected",
+   "sentDate": "2023-08-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q61 (no name) / Everly Management",
+   "agentName": "",
+   "agency": "Everly Management",
+   "status": "Rejected",
+   "sentDate": "2024-07-20",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q62 Esme Harrow / Hollis Management",
+   "agentName": "Esme Harrow",
+   "agency": "Hollis Management",
+   "status": "Partial Requested",
+   "sentDate": "2024-09-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q63 Gregory Fennimore / Blackthorn Partners",
+   "agentName": "Gregory Fennimore",
+   "agency": "Blackthorn Partners",
+   "status": "Rejected",
+   "sentDate": "2025-04-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q64 Orla Vidal / Larkspur Management",
+   "agentName": "Orla Vidal",
+   "agency": "Larkspur Management",
+   "status": "Rejected",
+   "sentDate": "2025-09-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q65 Freya Nkemelu / Pemberton Literary Agency",
+   "agentName": "Freya Nkemelu",
+   "agency": "Pemberton Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2023-11-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q66 Bea Castellane / Gilchrist & Co",
+   "agentName": "Bea Castellane",
+   "agency": "Gilchrist & Co",
+   "status": "Offer",
+   "sentDate": "2023-09-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q67 Gregory Carter / Larkspur Management",
+   "agentName": "Gregory Carter",
+   "agency": "Larkspur Management",
+   "status": "No Response",
+   "sentDate": "2025-01-31",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q68 Priya Castellane / Dunmore Agency",
+   "agentName": "Priya Castellane",
+   "agency": "Dunmore Agency",
+   "status": "Rejected",
+   "sentDate": "2024-10-23",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-11-03"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q69 Saoirse Sato / Marlow Literary",
+   "agentName": "Saoirse Sato",
+   "agency": "Marlow Literary",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "no-date"
+   ]
+  },
+  {
+   "label": "q70 Ezra Sato / Dunmore Partners",
+   "agentName": "Ezra Sato",
+   "agency": "Dunmore Partners",
+   "status": "Revise & Resubmit",
+   "sentDate": "2025-04-22",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2025-05-05"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q71 Felix Webb / Hollis Partners",
+   "agentName": "Felix Webb",
+   "agency": "Hollis Partners",
+   "status": "No Response",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "no-date"
+   ]
+  },
+  {
+   "label": "q72 Jamal Sato / Greenhouse Literary Agency",
+   "agentName": "Jamal Sato",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Partial Requested",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q73 Rosalind Harrow / Dunmore Agency",
+   "agentName": "Rosalind Harrow",
+   "agency": "Dunmore Agency",
+   "status": "Queried",
+   "sentDate": "2025-02-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q74 Clara Carter / Hollis Management",
+   "agentName": "Clara Carter",
+   "agency": "Hollis Management",
+   "status": "Full Requested",
+   "sentDate": "2023-01-05",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2023-01-21"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q75 Hannah Nkemelu / Greenhouse Literary Agency",
+   "agentName": "Hannah Nkemelu",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Full Sent",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "no-date"
+   ]
+  },
+  {
+   "label": "q76 Lena Lindqvist / Blackthorn Literary",
+   "agentName": "Lena Lindqvist",
+   "agency": "Blackthorn Literary",
+   "status": "Queried",
+   "sentDate": "2024-01-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q77 Orla Brennan / Hollis Partners",
+   "agentName": "Orla Brennan",
+   "agency": "Hollis Partners",
+   "status": "Queried",
+   "sentDate": "2025-06-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q78 Tomas Ibbotson / Gilchrist Agency",
+   "agentName": "Tomas Ibbotson",
+   "agency": "Gilchrist Agency",
+   "status": "Rejected",
+   "sentDate": "2023-03-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q79 Freya Marsh / Hollis Partners",
+   "agentName": "Freya Marsh",
+   "agency": "Hollis Partners",
+   "status": "Rejected",
+   "sentDate": "2025-04-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q80 Saoirse Salt / Pemberton Management",
+   "agentName": "Saoirse Salt",
+   "agency": "Pemberton Management",
+   "status": "Queried",
+   "sentDate": "2024-06-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q81 Felix Whitlock / Bellwether & Co",
+   "agentName": "Felix Whitlock",
+   "agency": "Bellwether & Co",
+   "status": "Offer",
+   "sentDate": "2023-05-29",
+   "timeline": [
+    {
+     "type": "Offer",
+     "date": "2023-07-22"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q82 Esme Llewellyn / Everly Management",
+   "agentName": "Esme Llewellyn",
+   "agency": "Everly Management",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q83 Rory Vidal / Quill Partners",
+   "agentName": "Rory Vidal",
+   "agency": "Quill Partners",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q84 Callum Webb / Dunmore Agency",
+   "agentName": "Callum Webb",
+   "agency": "Dunmore Agency",
+   "status": "No Response",
+   "sentDate": "2023-10-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q85 Tomas Rook / Dunmore Agency",
+   "agentName": "Tomas Rook",
+   "agency": "Dunmore Agency",
+   "status": "Full Sent",
+   "sentDate": "2024-12-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q86 Jamal Ostrander / Inkwell Partners",
+   "agentName": "Jamal Ostrander",
+   "agency": "Inkwell Partners",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "no-date"
+   ]
+  },
+  {
+   "label": "q87 Kwame Whitlock / Kite Agency",
+   "agentName": "Kwame Whitlock",
+   "agency": "Kite Agency",
+   "status": "Rejected",
+   "sentDate": "2023-07-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q88 Ines Brennan / Everly Literary",
+   "agentName": "Ines Brennan",
+   "agency": "Everly Literary",
+   "status": "Partial Sent",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q89 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Queried",
+   "sentDate": "2025-02-22",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q90 Ezra Whitlock / Blackthorn Literary",
+   "agentName": "Ezra Whitlock",
+   "agency": "Blackthorn Literary",
+   "status": "Withdrawn",
+   "sentDate": "2025-03-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q91 Hugo Whitlock / Inkwell Partners",
+   "agentName": "Hugo Whitlock",
+   "agency": "Inkwell Partners",
+   "status": "Withdrawn",
+   "sentDate": "2025-04-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q92 Dev Brennan / Blackthorn Literary",
+   "agentName": "Dev Brennan",
+   "agency": "Blackthorn Literary",
+   "status": "Queried",
+   "sentDate": "2025-08-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q93 Malik Rook / Inkwell Management",
+   "agentName": "Malik Rook",
+   "agency": "Inkwell Management",
+   "status": "Queried",
+   "sentDate": "2024-09-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q94 Marianne Marsh / Hollis Management",
+   "agentName": "Marianne Marsh",
+   "agency": "Hollis Management",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q95 Saoirse Faraday / Greenhouse Literary Agency",
+   "agentName": "Saoirse Faraday",
+   "agency": "Greenhouse Literary Agency",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q96 Malik Kaur / Bellwether Literary Agency",
+   "agentName": "Malik Kaur",
+   "agency": "Bellwether Literary Agency",
+   "status": "No Response",
+   "sentDate": "2025-03-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q97 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-02-07",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q98 (no name) / Gilchrist & Co",
+   "agentName": "",
+   "agency": "Gilchrist & Co",
+   "status": "No Response",
+   "sentDate": "2024-02-21",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q99 (no name) / Marlow Literary",
+   "agentName": "",
+   "agency": "Marlow Literary",
+   "status": "Full Requested",
+   "sentDate": "2024-09-21",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-10-04"
+    }
+   ],
+   "reasons": [
+    "check-name",
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q100 Seb Castellane / Dunmore Literary Agency",
+   "agentName": "Seb Castellane",
+   "agency": "Dunmore Literary Agency",
+   "status": "Withdrawn",
+   "sentDate": "2023-06-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q101 Owen Quigley / Marlow Literary",
+   "agentName": "Owen Quigley",
+   "agency": "Marlow Literary",
+   "status": "Rejected",
+   "sentDate": "2023-11-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q102 Clara Sato / Gilchrist & Co",
+   "agentName": "Clara Sato",
+   "agency": "Gilchrist & Co",
+   "status": "Queried",
+   "sentDate": "2025-04-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q103 Dev Tremayne / Penfallow Literary",
+   "agentName": "Dev Tremayne",
+   "agency": "Penfallow Literary",
+   "status": "Rejected",
+   "sentDate": "2024-09-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q104 Priya Ashdown / Everly Management",
+   "agentName": "Priya Ashdown",
+   "agency": "Everly Management",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q105 Ezra Raman / Inkwell Management",
+   "agentName": "Ezra Raman",
+   "agency": "Inkwell Management",
+   "status": "Queried",
+   "sentDate": "2024-11-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q106 Nadia Ostrander / Dunmore Literary Agency",
+   "agentName": "Nadia Ostrander",
+   "agency": "Dunmore Literary Agency",
+   "status": "Partial Sent",
+   "sentDate": "2025-09-04",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2025-10-31"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q107 Clara Nkemelu / Kite Associates",
+   "agentName": "Clara Nkemelu",
+   "agency": "Kite Associates",
+   "status": "Rejected",
+   "sentDate": "2023-06-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q108 Lena Rook / Gilchrist Management",
+   "agentName": "Lena Rook",
+   "agency": "Gilchrist Management",
+   "status": "No Response",
+   "sentDate": "2023-09-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q109 Kwame Kaur / Ashgrove Agency",
+   "agentName": "Kwame Kaur",
+   "agency": "Ashgrove Agency",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q110 Orla Webb / Larkspur Partners",
+   "agentName": "Orla Webb",
+   "agency": "Larkspur Partners",
+   "status": "Queried",
+   "sentDate": "2025-04-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q111 (no name) / Hollis Management",
+   "agentName": "",
+   "agency": "Hollis Management",
+   "status": "Partial Requested",
+   "sentDate": "2025-01-17",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2025-02-11"
+    }
+   ],
+   "reasons": [
+    "check-name",
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q112 Tomas Harrow / Juniper Management",
+   "agentName": "Tomas Harrow",
+   "agency": "Juniper Management",
+   "status": "Rejected",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q113 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Queried",
+   "sentDate": "2025-09-25",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q114 Lena Doyle / Everly Literary",
+   "agentName": "Lena Doyle",
+   "agency": "Everly Literary",
+   "status": "Withdrawn",
+   "sentDate": "2023-10-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q115 Freya Penrose / Dunmore Agency",
+   "agentName": "Freya Penrose",
+   "agency": "Dunmore Agency",
+   "status": "No Response",
+   "sentDate": "2025-06-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q116 Felix Llewellyn / Dunmore Partners",
+   "agentName": "Felix Llewellyn",
+   "agency": "Dunmore Partners",
+   "status": "Queried",
+   "sentDate": "2024-04-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q117 Hugo Salt / Quill Partners",
+   "agentName": "Hugo Salt",
+   "agency": "Quill Partners",
+   "status": "Full Requested",
+   "sentDate": "2023-02-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q118 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-09-29",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q119 Hannah Vidal / Everly Management",
+   "agentName": "Hannah Vidal",
+   "agency": "Everly Management",
+   "status": "Partial Requested",
+   "sentDate": "2025-05-06",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2025-05-17"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q120 Clara Castellane / Gilchrist Agency",
+   "agentName": "Clara Castellane",
+   "agency": "Gilchrist Agency",
+   "status": "Rejected",
+   "sentDate": "2023-06-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q121 Rosalind Nkemelu / Penfallow Literary",
+   "agentName": "Rosalind Nkemelu",
+   "agency": "Penfallow Literary",
+   "status": "Full Sent",
+   "sentDate": "2024-07-18",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-08-11"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q122 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Queried",
+   "sentDate": "2023-05-28",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q123 Bea Hale / Fairweather Agency",
+   "agentName": "Bea Hale",
+   "agency": "Fairweather Agency",
+   "status": "Rejected",
+   "sentDate": "2024-11-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q124 Malik Lindqvist / Harwood Management",
+   "agentName": "Malik Lindqvist",
+   "agency": "Harwood Management",
+   "status": "Queried",
+   "sentDate": "2023-06-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q125 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2025-03-28",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q126 Nadia Penrose / Quill Partners",
+   "agentName": "Nadia Penrose",
+   "agency": "Quill Partners",
+   "status": "Full Sent",
+   "sentDate": "2024-04-21",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-05-25"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q127 Ines Voss / Pemberton Literary Agency",
+   "agentName": "Ines Voss",
+   "agency": "Pemberton Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2023-11-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q128 Nadia Webb / Larkspur Management",
+   "agentName": "Nadia Webb",
+   "agency": "Larkspur Management",
+   "status": "Rejected",
+   "sentDate": "2024-07-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q129 Saoirse Fennimore / Wren Literary",
+   "agentName": "Saoirse Fennimore",
+   "agency": "Wren Literary",
+   "status": "Partial Requested",
+   "sentDate": "2023-10-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q130 Orla Carter / Bellwether & Co",
+   "agentName": "Orla Carter",
+   "agency": "Bellwether & Co",
+   "status": "Queried",
+   "sentDate": "2023-01-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q131 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Full Requested",
+   "sentDate": "2023-03-15",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2023-04-09"
+    }
+   ],
+   "reasons": [
+    "needs-identifying",
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q132 Nadia Marsh / Kite Literary",
+   "agentName": "Nadia Marsh",
+   "agency": "Kite Literary",
+   "status": "Rejected",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q133 Saoirse Marsh / Gilchrist Literary",
+   "agentName": "Saoirse Marsh",
+   "agency": "Gilchrist Literary",
+   "status": "Queried",
+   "sentDate": "2024-06-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q134 Jamal Webb / Kite Associates",
+   "agentName": "Jamal Webb",
+   "agency": "Kite Associates",
+   "status": "Partial Requested",
+   "sentDate": "2023-08-25",
+   "timeline": [
+    {
+     "type": "Partial Requested",
+     "date": "2023-09-13"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q135 Priya Voss / Bellwether Agency",
+   "agentName": "Priya Voss",
+   "agency": "Bellwether Agency",
+   "status": "No Response",
+   "sentDate": "2024-09-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q136 Theo Kaur / Bellwether Literary",
+   "agentName": "Theo Kaur",
+   "agency": "Bellwether Literary",
+   "status": "Full Requested",
+   "sentDate": "2023-07-24",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2023-08-18"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q137 Ezra Carter / Bellwether Literary Agency",
+   "agentName": "Ezra Carter",
+   "agency": "Bellwether Literary Agency",
+   "status": "Queried",
+   "sentDate": "2024-07-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q138 (no name) / (no agency)",
+   "agentName": "",
+   "agency": "",
+   "status": "Rejected",
+   "sentDate": "2024-12-28",
+   "timeline": [],
+   "reasons": [
+    "needs-identifying"
+   ]
+  },
+  {
+   "label": "q139 (no name) / Juniper Literary",
+   "agentName": "",
+   "agency": "Juniper Literary",
+   "status": "Rejected",
+   "sentDate": "2023-05-12",
+   "timeline": [],
+   "reasons": [
+    "check-name"
+   ]
+  },
+  {
+   "label": "q140 Felix Brennan / Hollis Management",
+   "agentName": "Felix Brennan",
+   "agency": "Hollis Management",
+   "status": "Rejected",
+   "sentDate": "2024-10-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q141 Orla Quigley / Kite Associates",
+   "agentName": "Orla Quigley",
+   "agency": "Kite Associates",
+   "status": "Rejected",
+   "sentDate": "2024-07-14",
+   "timeline": [
+    {
+     "type": "Partial Sent",
+     "date": "2024-08-25"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q142 Hannah Harrow / Larkspur & Co",
+   "agentName": "Hannah Harrow",
+   "agency": "Larkspur & Co",
+   "status": "Withdrawn",
+   "sentDate": "2025-07-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q143 Theo Ostrander / Fairweather Literary",
+   "agentName": "Theo Ostrander",
+   "agency": "Fairweather Literary",
+   "status": "Full Requested",
+   "sentDate": "2024-02-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q144 Clara Voss / Pemberton Management",
+   "agentName": "Clara Voss",
+   "agency": "Pemberton Management",
+   "status": "No Response",
+   "sentDate": "2023-05-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q145 Seb Ashdown / Marlow Associates",
+   "agentName": "Seb Ashdown",
+   "agency": "Marlow Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-04-12",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-05-07"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q146 Priya Fennimore / Larkspur Management",
+   "agentName": "Priya Fennimore",
+   "agency": "Larkspur Management",
+   "status": "Rejected",
+   "sentDate": "2024-07-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q147 Ines Nkemelu / Hollis Literary Agency",
+   "agentName": "Ines Nkemelu",
+   "agency": "Hollis Literary Agency",
+   "status": "Partial Requested",
+   "sentDate": "2025-08-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q148 Priya Harrow / Everly Literary",
+   "agentName": "Priya Harrow",
+   "agency": "Everly Literary",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q149 Esme Salt / Quill Partners",
+   "agentName": "Esme Salt",
+   "agency": "Quill Partners",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "no-date"
+   ]
+  },
+  {
+   "label": "q150 Lena Sato / Inkwell Management",
+   "agentName": "Lena Sato",
+   "agency": "Inkwell Management",
+   "status": "Rejected",
+   "sentDate": "2023-04-06",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

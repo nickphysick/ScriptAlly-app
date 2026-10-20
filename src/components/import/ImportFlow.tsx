@@ -20,6 +20,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
 import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords, RawRecordSample } from "../../lib/smartImport";
+import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../lib/importEstimate";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
@@ -111,6 +112,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   // Scatter-settle loader (extraction wait): the writer's raw cells sampled client-side (display only),
   // plus the "extraction done" signal that triggers the snap-and-crystallise settle.
   const [rawSample, setRawSample] = useState<RawRecordSample[]>([]);
+  /** The reading loader's foot bar: the file's row total, the server's count as it streams in, and
+   *  the phase (opening → reading → tidying, or retry). */
+  const [readProgress, setReadProgress] = useState<LoaderProgress>(PROGRESS_START);
   const [extractComplete, setExtractComplete] = useState(false);
   const [outcome, setOutcome] = useState<CommitOutcome | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
@@ -213,7 +217,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     // real extraction runs. Never feeds runSmartImport; a parse failure just leaves the loader plain.
     sampleRawRecords(file).then(setRawSample).catch(() => setRawSample([]));
     try {
-      const result: SmartImportResult = await runSmartImport(file);
+      setReadProgress(PROGRESS_START);
+      const result: SmartImportResult = await runSmartImport(file, (u) => setReadProgress((p) => applyImportUpdate(p, u)));
+      setReadProgress((p) => applyImportUpdate(p, { type: "result" }));
       if (takeRead(result) === "nothing") return;
       setExtractComplete(true); // loader snaps the cards in, crystallises them, then routes to Overview
     } catch (e: any) {
@@ -377,6 +383,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         total={validated ? resultQueries.length : rawSample.length}
         onProceed={() => setScreen("overview")}
         onTimeout={() => setScreen("fallback")}
+        progress={readProgress}
       />
     );
   }

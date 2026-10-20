@@ -258,7 +258,7 @@ export const OnbLab: React.FC = () => {
     );
   }
 
-  if (s === "reading") return imp(<LabReading hold={q.get("hold")} />, "none");
+  if (s === "reading") return imp(<LabReading hold={q.get("hold")} rows={Number(q.get("rows")) || null} speed={Number(q.get("speed")) || 1} stream={q.get("stream")} />, "none");
   if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} /></LabSetup>;
   if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;
   if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} rows={q.get("rows") ? Number(q.get("rows")) : null} />, "ask");

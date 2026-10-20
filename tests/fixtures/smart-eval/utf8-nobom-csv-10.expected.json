@@ -1,0 +1,95 @@
+{
+ "id": "utf8-nobom-csv-10",
+ "queries": [
+  {
+   "label": "q1 Inés Þórsdóttir / Højgaard Agency",
+   "agentName": "Inés Þórsdóttir",
+   "agency": "Højgaard Agency",
+   "status": "Queried",
+   "sentDate": "2024-03-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Małgorzata Müller / Éditions Agency",
+   "agentName": "Małgorzata Müller",
+   "agency": "Éditions Agency",
+   "status": "Queried",
+   "sentDate": "2025-05-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Noémie Øvergaard / Højgaard Agency",
+   "agentName": "Noémie Øvergaard",
+   "agency": "Højgaard Agency",
+   "status": "Queried",
+   "sentDate": "2025-06-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Dagný Ó Briain / Éditions Agency",
+   "agentName": "Dagný Ó Briain",
+   "agency": "Éditions Agency",
+   "status": "No Response",
+   "sentDate": "2024-08-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Chloé Dvořák / Ó Riordáin & Søn",
+   "agentName": "Chloé Dvořák",
+   "agency": "Ó Riordáin & Søn",
+   "status": "Partial Requested",
+   "sentDate": "2024-07-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Renée Øvergaard / Peñafiel & Søn",
+   "agentName": "Renée Øvergaard",
+   "agency": "Peñafiel & Søn",
+   "status": "Queried",
+   "sentDate": "2024-05-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Noémie Llwyd-Jönsson / Højgaard Agency",
+   "agentName": "Noémie Llwyd-Jönsson",
+   "agency": "Højgaard Agency",
+   "status": "Queried",
+   "sentDate": "2023-11-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Noémie Þórsdóttir / Éditions Agency",
+   "agentName": "Noémie Þórsdóttir",
+   "agency": "Éditions Agency",
+   "status": "Offer",
+   "sentDate": "2024-04-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Chloé Beaulé / Ó Riordáin & Søn",
+   "agentName": "Chloé Beaulé",
+   "agency": "Ó Riordáin & Søn",
+   "status": "Queried",
+   "sentDate": "2025-01-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Siân Dvořák / Højgaard Agency",
+   "agentName": "Siân Dvořák",
+   "agency": "Højgaard Agency",
+   "status": "Rejected",
+   "sentDate": "2023-08-09",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

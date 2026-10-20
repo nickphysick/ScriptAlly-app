@@ -1,0 +1,95 @@
+{
+ "id": "tabsrej-xlsx-10",
+ "queries": [
+  {
+   "label": "q2 Rory Kaur / Juniper Partners",
+   "agentName": "Rory Kaur",
+   "agency": "Juniper Partners",
+   "status": "Full Requested",
+   "sentDate": "2024-07-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Callum Salt / Inkwell Literary",
+   "agentName": "Callum Salt",
+   "agency": "Inkwell Literary",
+   "status": "Full Requested",
+   "sentDate": "2025-05-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Hannah Fennimore / Greenhouse & Co",
+   "agentName": "Hannah Fennimore",
+   "agency": "Greenhouse & Co",
+   "status": "Full Sent",
+   "sentDate": "2025-05-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Tamsin Kaur / Inkwell Literary",
+   "agentName": "Tamsin Kaur",
+   "agency": "Inkwell Literary",
+   "status": "Full Sent",
+   "sentDate": "2025-03-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Hannah Ibbotson / Ashgrove Management",
+   "agentName": "Hannah Ibbotson",
+   "agency": "Ashgrove Management",
+   "status": "Queried",
+   "sentDate": "2024-03-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Gregory Penrose / Greenhouse & Co",
+   "agentName": "Gregory Penrose",
+   "agency": "Greenhouse & Co",
+   "status": "Partial Sent",
+   "sentDate": "2024-03-31",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Marianne Kaur / Juniper Partners",
+   "agentName": "Marianne Kaur",
+   "agency": "Juniper Partners",
+   "status": "Partial Sent",
+   "sentDate": "2023-10-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Felix Doyle / Ashgrove Management",
+   "agentName": "Felix Doyle",
+   "agency": "Ashgrove Management",
+   "status": "No Response",
+   "sentDate": "2023-01-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q1 Clara Lindqvist / Juniper Partners",
+   "agentName": "Clara Lindqvist",
+   "agency": "Juniper Partners",
+   "status": "Rejected",
+   "sentDate": "2023-10-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Nadia Nkemelu / Ashgrove Management",
+   "agentName": "Nadia Nkemelu",
+   "agency": "Ashgrove Management",
+   "status": "Rejected",
+   "sentDate": "2023-11-12",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

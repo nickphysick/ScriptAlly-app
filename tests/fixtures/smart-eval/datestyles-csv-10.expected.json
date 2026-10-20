@@ -1,0 +1,97 @@
+{
+ "id": "datestyles-csv-10",
+ "queries": [
+  {
+   "label": "q1 Callum Hale / Harwood Agency",
+   "agentName": "Callum Hale",
+   "agency": "Harwood Agency",
+   "status": "Rejected",
+   "sentDate": "2025-08-31",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Lena Vidal / Pemberton Literary Agency",
+   "agentName": "Lena Vidal",
+   "agency": "Pemberton Literary Agency",
+   "status": "Queried",
+   "sentDate": "2024-10-31",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Jamal Penrose / Gilchrist Associates",
+   "agentName": "Jamal Penrose",
+   "agency": "Gilchrist Associates",
+   "status": "Queried",
+   "sentDate": null,
+   "timeline": [],
+   "reasons": [
+    "missing-day"
+   ]
+  },
+  {
+   "label": "q4 Ines Castellane / Harwood Agency",
+   "agentName": "Ines Castellane",
+   "agency": "Harwood Agency",
+   "status": "Full Sent",
+   "sentDate": "2023-03-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Orla Hale / Harwood Literary",
+   "agentName": "Orla Hale",
+   "agency": "Harwood Literary",
+   "status": "Full Sent",
+   "sentDate": "2023-09-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Hugo Doyle / Pemberton Literary Agency",
+   "agentName": "Hugo Doyle",
+   "agency": "Pemberton Literary Agency",
+   "status": "Queried",
+   "sentDate": "2025-08-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Nadia Kaur / Harwood Literary",
+   "agentName": "Nadia Kaur",
+   "agency": "Harwood Literary",
+   "status": "No Response",
+   "sentDate": "2024-12-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Tomas Castellane / Harwood Literary",
+   "agentName": "Tomas Castellane",
+   "agency": "Harwood Literary",
+   "status": "Full Sent",
+   "sentDate": "2025-04-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Rory Voss / Harwood Agency",
+   "agentName": "Rory Voss",
+   "agency": "Harwood Agency",
+   "status": "Rejected",
+   "sentDate": "2024-08-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Owen Penrose / Harwood Literary",
+   "agentName": "Owen Penrose",
+   "agency": "Harwood Literary",
+   "status": "Queried",
+   "sentDate": "2023-01-19",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

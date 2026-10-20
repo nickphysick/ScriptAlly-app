@@ -1,0 +1,95 @@
+{
+ "id": "whitespace-csv-10",
+ "queries": [
+  {
+   "label": "q1 Hugo Llewellyn / Ashgrove Agency",
+   "agentName": "Hugo Llewellyn",
+   "agency": "Ashgrove Agency",
+   "status": "Partial Requested",
+   "sentDate": "2024-11-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Lena Marsh / Quill Literary Agency",
+   "agentName": "Lena Marsh",
+   "agency": "Quill Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2024-11-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Hannah Lindqvist / Dunmore Literary Agency",
+   "agentName": "Hannah Lindqvist",
+   "agency": "Dunmore Literary Agency",
+   "status": "Full Sent",
+   "sentDate": "2023-08-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Dev Brennan / Quill Literary Agency",
+   "agentName": "Dev Brennan",
+   "agency": "Quill Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2023-02-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Felix Salt / Inkwell Partners",
+   "agentName": "Felix Salt",
+   "agency": "Inkwell Partners",
+   "status": "Queried",
+   "sentDate": "2024-05-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Malik Moreau / Ashgrove Agency",
+   "agentName": "Malik Moreau",
+   "agency": "Ashgrove Agency",
+   "status": "Full Requested",
+   "sentDate": "2023-03-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Marianne Fennimore / Ashgrove Agency",
+   "agentName": "Marianne Fennimore",
+   "agency": "Ashgrove Agency",
+   "status": "No Response",
+   "sentDate": "2024-04-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Malik Ostrander / Quill Literary Agency",
+   "agentName": "Malik Ostrander",
+   "agency": "Quill Literary Agency",
+   "status": "Partial Requested",
+   "sentDate": "2025-07-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Nadia Ostrander / Dunmore Literary Agency",
+   "agentName": "Nadia Ostrander",
+   "agency": "Dunmore Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2025-09-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Hugo Lindqvist / Ashgrove Agency",
+   "agentName": "Hugo Lindqvist",
+   "agency": "Ashgrove Agency",
+   "status": "Rejected",
+   "sentDate": "2025-03-30",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

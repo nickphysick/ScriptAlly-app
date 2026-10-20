@@ -1,0 +1,105 @@
+{
+ "id": "links-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Freya Okafor / Juniper Associates",
+   "agentName": "Freya Okafor",
+   "agency": "Juniper Associates",
+   "status": "No Response",
+   "sentDate": "2023-04-06",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.juniperassociates.co.uk"
+  },
+  {
+   "label": "q2 Clara Achebe / Juniper Associates",
+   "agentName": "Clara Achebe",
+   "agency": "Juniper Associates",
+   "status": "Partial Requested",
+   "sentDate": "2023-02-01",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.juniperassociates.co.uk"
+  },
+  {
+   "label": "q3 Felix Nkemelu / Larkspur Associates",
+   "agentName": "Felix Nkemelu",
+   "agency": "Larkspur Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-10-16",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.larkspurassociates.co.uk"
+  },
+  {
+   "label": "q4 Kwame Marsh / Larkspur Associates",
+   "agentName": "Kwame Marsh",
+   "agency": "Larkspur Associates",
+   "status": "Rejected",
+   "sentDate": "2025-08-16",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.larkspurassociates.co.uk"
+  },
+  {
+   "label": "q5 Tomas Raman / Larkspur Associates",
+   "agentName": "Tomas Raman",
+   "agency": "Larkspur Associates",
+   "status": "Queried",
+   "sentDate": "2023-05-06",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.larkspurassociates.co.uk"
+  },
+  {
+   "label": "q6 Rosalind Kaur / Inkwell Literary Agency",
+   "agentName": "Rosalind Kaur",
+   "agency": "Inkwell Literary Agency",
+   "status": "Full Requested",
+   "sentDate": "2024-09-10",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.inkwellliteraryagency.co.uk"
+  },
+  {
+   "label": "q7 Theo Penrose / Juniper Associates",
+   "agentName": "Theo Penrose",
+   "agency": "Juniper Associates",
+   "status": "Full Sent",
+   "sentDate": "2025-06-28",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.juniperassociates.co.uk"
+  },
+  {
+   "label": "q8 Tomas Voss / Larkspur Partners",
+   "agentName": "Tomas Voss",
+   "agency": "Larkspur Partners",
+   "status": "Rejected",
+   "sentDate": "2024-10-06",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.larkspurpartners.co.uk"
+  },
+  {
+   "label": "q9 Bea Salt / Larkspur Associates",
+   "agentName": "Bea Salt",
+   "agency": "Larkspur Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-11-07",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.larkspurassociates.co.uk"
+  },
+  {
+   "label": "q10 Clara Castellane / Juniper Associates",
+   "agentName": "Clara Castellane",
+   "agency": "Juniper Associates",
+   "status": "Queried",
+   "sentDate": "2024-05-01",
+   "timeline": [],
+   "reasons": [],
+   "website": "https://www.juniperassociates.co.uk"
+  }
+ ]
+}

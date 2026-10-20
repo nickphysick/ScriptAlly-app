@@ -1,0 +1,163 @@
+{
+ "id": "events-csv-10",
+ "queries": [
+  {
+   "label": "q1 Owen Quigley / Harwood Management",
+   "agentName": "Owen Quigley",
+   "agency": "Harwood Management",
+   "status": "Full Sent",
+   "sentDate": "2024-01-13",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-02-14"
+    },
+    {
+     "type": "Full Sent",
+     "date": "2024-03-07"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q2 Saoirse Whitlock / Fairweather Partners",
+   "agentName": "Saoirse Whitlock",
+   "agency": "Fairweather Partners",
+   "status": "Rejected",
+   "sentDate": "2024-08-14",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2024-08-31"
+    },
+    {
+     "type": "Full Sent",
+     "date": "2024-10-15"
+    },
+    {
+     "type": "Rejected",
+     "date": "2024-10-30"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q3 Tomas Ashdown / Harwood Partners",
+   "agentName": "Tomas Ashdown",
+   "agency": "Harwood Partners",
+   "status": "Queried",
+   "sentDate": "2025-04-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Malik Raman / Fairweather Partners",
+   "agentName": "Malik Raman",
+   "agency": "Fairweather Partners",
+   "status": "Queried",
+   "sentDate": "2024-05-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Saoirse Tremayne / Fairweather Partners",
+   "agentName": "Saoirse Tremayne",
+   "agency": "Fairweather Partners",
+   "status": "Rejected",
+   "sentDate": "2024-12-12",
+   "timeline": [
+    {
+     "type": "Rejected",
+     "date": "2024-12-30"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q6 Ines Voss / Harwood Management",
+   "agentName": "Ines Voss",
+   "agency": "Harwood Management",
+   "status": "Rejected",
+   "sentDate": "2023-10-28",
+   "timeline": [
+    {
+     "type": "Rejected",
+     "date": "2023-11-05"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q7 Ezra Faraday / Harwood Partners",
+   "agentName": "Ezra Faraday",
+   "agency": "Harwood Partners",
+   "status": "Rejected",
+   "sentDate": "2023-11-04",
+   "timeline": [
+    {
+     "type": "Rejected",
+     "date": "2023-11-16"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q8 Lena Rook / Fairweather Partners",
+   "agentName": "Lena Rook",
+   "agency": "Fairweather Partners",
+   "status": "Full Requested",
+   "sentDate": "2025-01-19",
+   "timeline": [
+    {
+     "type": "Full Requested",
+     "date": "2025-01-27"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q9 Imogen Fennimore / Harwood Partners",
+   "agentName": "Imogen Fennimore",
+   "agency": "Harwood Partners",
+   "status": "No Response",
+   "sentDate": "2023-01-13",
+   "timeline": [
+    {
+     "type": "No Response",
+     "date": "2023-02-26"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  },
+  {
+   "label": "q10 Ezra Harrow / Harwood Partners",
+   "agentName": "Ezra Harrow",
+   "agency": "Harwood Partners",
+   "status": "No Response",
+   "sentDate": "2023-03-15",
+   "timeline": [
+    {
+     "type": "No Response",
+     "date": "2023-04-15"
+    }
+   ],
+   "reasons": [
+    "two-dates"
+   ]
+  }
+ ]
+}

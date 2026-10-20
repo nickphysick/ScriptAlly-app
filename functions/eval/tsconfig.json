@@ -1,0 +1,18 @@
+{
+  // The evaluation harness: run with tsx, never deployed, never emitted. Typecheck it with
+  //   npx tsc --noEmit -p functions/eval/tsconfig.json
+  // It is outside functions/tsconfig.json on purpose (that one is the predeploy build), and it
+  // stays CommonJS like the rest of functions/ — no `import.meta` (TS1343).
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts"]
+}

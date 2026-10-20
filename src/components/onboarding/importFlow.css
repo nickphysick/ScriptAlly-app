@@ -91,19 +91,81 @@
   background: var(--sp-anthracite); color: var(--im-cream); display: grid; place-items: center; z-index: 40;
   box-shadow: 0 14px 36px -18px rgba(var(--im-text-rgb), .4);
 }
-/* the strip along the sheet's foot */
+/* the strip along the sheet's foot (loader v2, built to design-refs/onboarding/smart-import-loader-v2):
+   pip · where the read is (a FIXED 250px, so the bar never moves as the words change) · the bar ·
+   the time left, right-aligned. The words come from footBar() in src/lib/importEstimate.ts. */
 .sf .im-ssl-bar {
   flex: none; height: 52px; box-sizing: border-box; background: var(--im-paper); border-top: 1px solid rgba(var(--im-text-rgb), .1);
-  display: flex; align-items: center; gap: 16px; padding: 0 22px;
+  display: flex; align-items: center; gap: 18px; padding: 0 28px;
 }
 .sf .im-ssl-pip { width: 9px; height: 9px; border-radius: 50%; background: var(--sf-rust); flex: none; }
-.sf .im-ssl-txt { font-family: var(--sp-mono); font-size: 12.5px; color: var(--sf-ink72); white-space: nowrap; min-width: 190px; }
-.sf .im-ssl-track { flex: 1; max-width: 420px; height: 5px; border-radius: 3px; background: rgba(var(--im-text-rgb), .1); overflow: hidden; }
-.sf .im-ssl-track i { display: block; height: 100%; background: var(--sp-anthracite); border-radius: 3px; }
-.sf .im-ssl-cnt { font-family: var(--sp-mono); font-size: 11.5px; color: rgba(var(--im-text-rgb), .6); margin-left: auto; white-space: nowrap; }
+.sf .im-ssl-txt { flex: none; width: 250px; font-family: var(--sp-mono); font-size: 13px; color: var(--sf-ink72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sf .im-ssl-track { flex: 1; min-width: 0; max-width: 440px; height: 5px; border-radius: 3px; background: var(--im-stone); overflow: hidden; }
+.sf .im-ssl-track i { display: block; height: 100%; background: var(--sp-anthracite); border-radius: 3px; transition: width .35s linear; }
+/* before any row is in: an indeterminate highlight sweeping the track */
+@keyframes imSslShim { 0% { background-position: -160px 0; } 100% { background-position: 460px 0; } }
+.sf .im-ssl-track i.im-ssl-shim {
+  width: 100%; border-radius: 0; transition: none;
+  background: linear-gradient(90deg, var(--im-stone) 0, #cfc6ba 40%, var(--im-stone) 80%) no-repeat; background-size: 160px 100%;
+  animation: imSslShim 1.4s linear infinite;
+}
+.sf .im-ssl-left { flex: 1; min-width: 0; text-align: right; font-family: var(--sp-mono); font-size: 12.5px; color: rgba(var(--im-text-rgb), .62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (prefers-reduced-motion: reduce) {
+  .sf .im-ssl-track i { transition: none; }
+  .sf .im-ssl-track i.im-ssl-shim { animation: none; background: var(--im-stone); }
+}
 @media (max-width: 599.98px) {
   .sf .im-ssl-bar { gap: 10px; padding: 0 14px; }
-  .sf .im-ssl-txt { min-width: 0; font-size: 11.5px; }
+  .sf .im-ssl-txt { width: auto; flex: 0 1 auto; font-size: 11.5px; }
+  .sf .im-ssl-left { font-size: 11px; }
+}
+
+/* ── "Did you know?" — the tips card (loader v2; built to design-refs/onboarding/smart-import-loader-v2).
+   Bottom-left of the stage, above the scattered cards (z 10–15) and the forms (z 4), below the tick (40). */
+.sf .im-tip {
+  position: absolute; left: 28px; bottom: 22px; width: 476px; z-index: 30; box-sizing: border-box; display: flex;
+  background: #fff; border: 1px solid var(--im-stone); border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(var(--im-text-rgb), .16), 0 2px 6px rgba(var(--im-text-rgb), .06);
+  animation: imTipIn .45s cubic-bezier(.22, .8, .3, 1) both;
+}
+@keyframes imTipIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.sf .im-tip-art { width: 136px; flex: none; position: relative; border-radius: 15px 0 0 15px; background: var(--im-blush); }
+/* the illustration rises over the card's top edge */
+.sf .im-tip-art img { position: absolute; left: -14px; bottom: 14px; width: 168px; height: 168px; max-width: none; object-fit: contain; pointer-events: none; }
+.sf .im-tip-main { flex: 1; min-width: 0; box-sizing: border-box; padding: 18px 20px 0 22px; display: flex; flex-direction: column; gap: 10px; }
+.sf .im-tip-head { display: flex; align-items: center; justify-content: space-between; }
+.sf .im-tip-kick { font-family: var(--sp-mono); font-size: 10px; letter-spacing: .2em; color: #a2452a; }
+.sf .im-tip-num { font-family: var(--sp-mono); font-size: 10.5px; color: rgba(var(--im-text-rgb), .55); }
+.sf .im-tip-stack { position: relative; height: 118px; }
+.sf .im-tip-one {
+  position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px;
+  opacity: 0; transform: translateY(6px); transition: opacity .5s ease, transform .5s ease;
+}
+.sf .im-tip-one.is-on { opacity: 1; transform: none; }
+/* brand.tsx forces every h2's face with !important, so the typewriter face is stated the same way */
+.sf .im-tip .im-tip-title { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 21px; line-height: 1.3; color: var(--im-ink); }
+.sf .im-tip .im-tip-body { margin: 0; font-size: 14.5px; line-height: 1.45; color: rgba(var(--im-text-rgb), .78); }
+.sf .im-tip-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid #efe9e1; margin: 0 -20px 0 -22px; padding: 0 12px 0 22px;
+}
+.sf .im-tip-dots { display: flex; gap: 5px; align-items: center; }
+.sf .im-tip-dots span { width: 6px; height: 6px; border-radius: 3px; background: var(--im-stone); transition: width .3s ease, background .3s ease; }
+.sf .im-tip-dots span.is-on { width: 18px; background: var(--sp-anthracite); }
+.sf .im-tip-next {
+  height: 44px; padding: 0 10px; border: 0; background: none; display: flex; align-items: center; gap: 6px; cursor: pointer;
+  color: var(--im-ink); font-family: inherit; font-weight: 600; font-size: 14px;
+}
+.sf .im-tip-next:hover { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) {
+  .sf .im-tip { animation: none; }
+  .sf .im-tip-one, .sf .im-tip-dots span { transition: none; }
+}
+/* Under 900px (the loader's static path) the card spans the stage above the foot bar. */
+@media (max-width: 899.98px) {
+  .sf .im-tip { left: 14px; right: 14px; bottom: 14px; width: auto; }
+  .sf .im-tip-art { width: 96px; }
+  .sf .im-tip-art img { width: 120px; height: 120px; left: -12px; bottom: 10px; }
 }
 
 /* ═══ Parts the summary and the review share ═══════════════════════════════════════════════════ */

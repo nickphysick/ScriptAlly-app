@@ -1,0 +1,95 @@
+{
+ "id": "usdates-csv-10",
+ "queries": [
+  {
+   "label": "q1 Freya Whitlock / Hollis Management",
+   "agentName": "Freya Whitlock",
+   "agency": "Hollis Management",
+   "status": "Full Requested",
+   "sentDate": "2024-03-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Hugo Faraday / Larkspur & Co",
+   "agentName": "Hugo Faraday",
+   "agency": "Larkspur & Co",
+   "status": "Queried",
+   "sentDate": "2023-04-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Lena Tremayne / Hollis Management",
+   "agentName": "Lena Tremayne",
+   "agency": "Hollis Management",
+   "status": "Partial Sent",
+   "sentDate": "2024-07-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Lena Webb / Everly Management",
+   "agentName": "Lena Webb",
+   "agency": "Everly Management",
+   "status": "Partial Sent",
+   "sentDate": "2025-05-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Seb Brennan / Hollis Management",
+   "agentName": "Seb Brennan",
+   "agency": "Hollis Management",
+   "status": "Rejected",
+   "sentDate": "2024-12-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Marianne Ashdown / Larkspur & Co",
+   "agentName": "Marianne Ashdown",
+   "agency": "Larkspur & Co",
+   "status": "Rejected",
+   "sentDate": "2024-03-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Felix Raman / Larkspur & Co",
+   "agentName": "Felix Raman",
+   "agency": "Larkspur & Co",
+   "status": "Full Sent",
+   "sentDate": "2024-05-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Rosalind Nkemelu / Larkspur & Co",
+   "agentName": "Rosalind Nkemelu",
+   "agency": "Larkspur & Co",
+   "status": "Full Requested",
+   "sentDate": "2023-06-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Ezra Ibbotson / Marlow Literary",
+   "agentName": "Ezra Ibbotson",
+   "agency": "Marlow Literary",
+   "status": "No Response",
+   "sentDate": "2024-08-31",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Owen Rook / Everly Management",
+   "agentName": "Owen Rook",
+   "agency": "Everly Management",
+   "status": "No Response",
+   "sentDate": "2023-10-26",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

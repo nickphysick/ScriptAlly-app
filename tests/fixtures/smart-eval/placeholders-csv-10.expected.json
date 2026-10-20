@@ -1,0 +1,95 @@
+{
+ "id": "placeholders-csv-10",
+ "queries": [
+  {
+   "label": "q1 Rosalind Castellane / Penfallow Associates",
+   "agentName": "Rosalind Castellane",
+   "agency": "Penfallow Associates",
+   "status": "Queried",
+   "sentDate": "2025-03-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Esme Achebe / Penfallow Associates",
+   "agentName": "Esme Achebe",
+   "agency": "Penfallow Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-06-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Theo Llewellyn / Penfallow Partners",
+   "agentName": "Theo Llewellyn",
+   "agency": "Penfallow Partners",
+   "status": "Withdrawn",
+   "sentDate": "2025-03-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Ines Lindqvist / Dunmore Associates",
+   "agentName": "Ines Lindqvist",
+   "agency": "Dunmore Associates",
+   "status": "Rejected",
+   "sentDate": "2024-02-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Rory Salt / Penfallow Associates",
+   "agentName": "Rory Salt",
+   "agency": "Penfallow Associates",
+   "status": "Rejected",
+   "sentDate": "2023-02-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Priya Ashdown / Dunmore Associates",
+   "agentName": "Priya Ashdown",
+   "agency": "Dunmore Associates",
+   "status": "Queried",
+   "sentDate": "2023-06-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Seb Ashdown / Penfallow & Co",
+   "agentName": "Seb Ashdown",
+   "agency": "Penfallow & Co",
+   "status": "Full Sent",
+   "sentDate": "2023-06-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Felix Voss / Penfallow & Co",
+   "agentName": "Felix Voss",
+   "agency": "Penfallow & Co",
+   "status": "No Response",
+   "sentDate": "2023-09-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Tomas Castellane / Penfallow & Co",
+   "agentName": "Tomas Castellane",
+   "agency": "Penfallow & Co",
+   "status": "Withdrawn",
+   "sentDate": "2025-07-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Owen Faraday / Penfallow Partners",
+   "agentName": "Owen Faraday",
+   "agency": "Penfallow Partners",
+   "status": "Queried",
+   "sentDate": "2024-06-12",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

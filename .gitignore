@@ -48,3 +48,8 @@ functions/.env
 # comps v28: the CX28 run ledger and its once-per-run marker (rewritten by every run; the kept copies are under reports/comps-v28/)
 reports/comps-v28/ledger.jsonl
 reports/comps-v28/.ledger-run
+
+# ── Smart Import evaluation: real writers' trackers (PRIVACY) ──
+# A real file and its <name>.expected.json go here to be included in eval runs. Never committed;
+# the eval report counts them and redacts every value it would print about them.
+tests/fixtures/smart-eval/real/

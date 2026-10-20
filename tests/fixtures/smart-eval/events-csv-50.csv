@@ -1,0 +1,104 @@
+Date,Agent,Agency,What happened
+17/01/2023,Priya Castellane,Greenhouse Agency,queried
+29/01/2023,Ines Sato,Inkwell Partners,queried
+06/02/2023,Priya Castellane,Greenhouse Agency,full requested
+15/02/2023,Owen Kaur,Quill Partners,queried
+23/02/2023,Ines Sato,Inkwell Partners,partial requested
+24/02/2023,Priya Castellane,Greenhouse Agency,sent full
+25/02/2023,Bea Castellane,Bellwether Literary Agency,queried
+11/03/2023,Owen Kaur,Quill Partners,full requested
+12/03/2023,Seb Sato,Quill Partners,queried
+13/03/2023,Ines Sato,Inkwell Partners,sent partial
+20/03/2023,Gregory Ostrander,Marlow Literary Agency,queried
+28/03/2023,Orla Rook,Marlow Management,queried
+04/04/2023,Priya Castellane,Greenhouse Agency,rejection
+05/04/2023,Owen Kaur,Quill Partners,sent full
+26/04/2023,Gregory Ostrander,Marlow Literary Agency,closed - no response
+26/04/2023,Lena Penrose,Larkspur Partners,queried
+03/05/2023,Saoirse Carter,Larkspur Partners,queried
+03/05/2023,Owen Kaur,Quill Partners,rejection
+09/05/2023,Yusuf Nkemelu,Greenhouse Agency,queried
+15/05/2023,Saoirse Carter,Larkspur Partners,full requested
+19/05/2023,Gregory Nkemelu,Ashgrove Associates,queried
+26/05/2023,Rory Ashdown,Ashgrove Literary,queried
+04/06/2023,Bea Penrose,Quill Agency,queried
+10/06/2023,Yusuf Nkemelu,Greenhouse Agency,full requested
+17/06/2023,Bea Penrose,Quill Agency,rejection
+23/06/2023,Saoirse Carter,Larkspur Partners,sent full
+23/06/2023,Rory Ashdown,Ashgrove Literary,rejection
+15/07/2023,Kwame Okafor,Quill Partners,queried
+23/07/2023,Yusuf Nkemelu,Greenhouse Agency,sent full
+24/07/2023,Saoirse Carter,Larkspur Partners,rejection
+04/08/2023,Owen Webb,Everly Partners,queried
+09/08/2023,Theo Salt,Bellwether Literary Agency,queried
+04/09/2023,Yusuf Nkemelu,Greenhouse Agency,R&R
+15/09/2023,Theo Salt,Bellwether Literary Agency,rejection
+26/09/2023,Rosalind Whitlock,Everly Partners,queried
+19/10/2023,Hannah Ostrander,Wren Literary,queried
+26/10/2023,Lena Webb,Wren Literary,queried
+01/11/2023,Priya Webb,Pemberton Partners,queried
+03/11/2023,Tomas Ashdown,Quill Partners,queried
+22/11/2023,Hannah Ostrander,Wren Literary,full requested
+24/11/2023,Tomas Ashdown,Quill Partners,full requested
+25/11/2023,Priya Webb,Pemberton Partners,full requested
+26/11/2023,Owen Moreau,Quill Partners,queried
+12/12/2023,Rory Quigley,Larkspur Partners,queried
+18/12/2023,Ines Okafor,Dunmore & Co,queried
+19/12/2023,Tomas Ashdown,Quill Partners,sent full
+21/12/2023,Hannah Ostrander,Wren Literary,sent full
+23/12/2023,Esme Salt,Marlow Literary Agency,queried
+30/12/2023,Owen Moreau,Quill Partners,full requested
+18/01/2024,Tomas Ashdown,Quill Partners,rejection
+24/01/2024,Owen Moreau,Quill Partners,sent full
+28/01/2024,Esme Salt,Marlow Literary Agency,partial requested
+31/01/2024,Ines Okafor,Dunmore & Co,partial requested
+02/02/2024,Esme Achebe,Copperfield Agency,queried
+03/02/2024,Rory Raman,Ashgrove Literary,queried
+11/02/2024,Esme Salt,Marlow Literary Agency,sent partial
+16/02/2024,Rory Raman,Ashgrove Literary,rejection
+05/03/2024,Esme Achebe,Copperfield Agency,rejection
+09/06/2024,Priya Vidal,Dunmore & Co,queried
+15/06/2024,Nadia Salt,Hollis Partners,queried
+01/07/2024,Imogen Raman,Copperfield Agency,queried
+10/07/2024,Priya Vidal,Dunmore & Co,full requested
+24/07/2024,Kwame Quigley,Marlow Literary Agency,queried
+25/07/2024,Nadia Salt,Hollis Partners,rejection
+11/08/2024,Kwame Quigley,Marlow Literary Agency,rejection
+14/08/2024,Imogen Raman,Copperfield Agency,full requested
+18/09/2024,Orla Webb,Everly Partners,queried
+19/09/2024,Imogen Raman,Copperfield Agency,sent full
+11/10/2024,Imogen Raman,Copperfield Agency,R&R
+02/11/2024,Orla Webb,Everly Partners,rejection
+28/11/2024,Kwame Ibbotson,Quill Partners,queried
+11/12/2024,Rory Penrose,Copperfield Agency,queried
+29/12/2024,Rory Penrose,Copperfield Agency,partial requested
+07/01/2025,Rory Penrose,Copperfield Agency,sent partial
+22/01/2025,Kwame Brennan,Everly Partners,queried
+23/01/2025,Ezra Voss,Greenhouse Agency,queried
+25/01/2025,Saoirse Nkemelu,Marlow Management,queried
+04/02/2025,Saoirse Nkemelu,Marlow Management,rejection
+13/02/2025,Ezra Voss,Greenhouse Agency,rejection
+16/02/2025,Kwame Brennan,Everly Partners,rejection
+03/03/2025,Clara Rook,Quill Agency,queried
+05/04/2025,Jamal Brennan,Hollis Partners,queried
+02/05/2025,Tomas Hale,Inkwell Partners,queried
+16/05/2025,Jamal Brennan,Hollis Partners,partial requested
+21/05/2025,Jamal Llewellyn,Ashgrove Associates,queried
+26/05/2025,Jamal Brennan,Hollis Partners,sent partial
+04/06/2025,Tamsin Marsh,Ashgrove Literary,queried
+17/06/2025,Jamal Llewellyn,Ashgrove Associates,full requested
+19/06/2025,Tamsin Ostrander,Marlow Management,queried
+20/06/2025,Rory Lindqvist,Everly Partners,queried
+29/06/2025,Lena Carter,Greenhouse Agency,queried
+05/07/2025,Tamsin Voss,Hollis Partners,queried
+06/07/2025,Seb Carter,Bellwether Literary Agency,queried
+11/07/2025,Tamsin Kaur,Marlow Management,queried
+17/07/2025,Tamsin Marsh,Ashgrove Literary,withdrew
+30/07/2025,Rory Lindqvist,Everly Partners,rejection
+30/07/2025,Jamal Llewellyn,Ashgrove Associates,sent full
+02/08/2025,Tamsin Voss,Hollis Partners,rejection
+03/08/2025,Theo Ashdown,Everly Partners,queried
+03/09/2025,Theo Ashdown,Everly Partners,rejection
+11/09/2025,Jamal Llewellyn,Ashgrove Associates,offer!
+21/09/2025,Nadia Ostrander,Hollis Partners,queried
+26/10/2025,Nadia Ostrander,Hollis Partners,partial requested

@@ -1,0 +1,95 @@
+{
+ "id": "unusualcols-csv-10",
+ "queries": [
+  {
+   "label": "q1 Priya Ashdown / Hollis & Co",
+   "agentName": "Priya Ashdown",
+   "agency": "Hollis & Co",
+   "status": "Rejected",
+   "sentDate": "2024-11-29",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Esme Ostrander / Everly Associates",
+   "agentName": "Esme Ostrander",
+   "agency": "Everly Associates",
+   "status": "Queried",
+   "sentDate": "2024-10-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Hannah Tremayne / Bellwether Literary Agency",
+   "agentName": "Hannah Tremayne",
+   "agency": "Bellwether Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2024-02-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Saoirse Whitlock / Larkspur Associates",
+   "agentName": "Saoirse Whitlock",
+   "agency": "Larkspur Associates",
+   "status": "Rejected",
+   "sentDate": "2023-02-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Hugo Achebe / Bellwether Literary Agency",
+   "agentName": "Hugo Achebe",
+   "agency": "Bellwether Literary Agency",
+   "status": "No Response",
+   "sentDate": "2024-02-10",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Hannah Brennan / Larkspur Associates",
+   "agentName": "Hannah Brennan",
+   "agency": "Larkspur Associates",
+   "status": "No Response",
+   "sentDate": "2024-07-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Callum Castellane / Bellwether Literary Agency",
+   "agentName": "Callum Castellane",
+   "agency": "Bellwether Literary Agency",
+   "status": "Rejected",
+   "sentDate": "2023-09-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Callum Kaur / Everly Associates",
+   "agentName": "Callum Kaur",
+   "agency": "Everly Associates",
+   "status": "Revise & Resubmit",
+   "sentDate": "2024-05-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Freya Fennimore / Larkspur Associates",
+   "agentName": "Freya Fennimore",
+   "agency": "Larkspur Associates",
+   "status": "Full Requested",
+   "sentDate": "2024-01-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Callum Hale / Bellwether Literary Agency",
+   "agentName": "Callum Hale",
+   "agency": "Bellwether Literary Agency",
+   "status": "Partial Requested",
+   "sentDate": "2024-11-23",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

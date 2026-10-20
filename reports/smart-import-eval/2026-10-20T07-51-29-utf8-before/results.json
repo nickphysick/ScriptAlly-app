@@ -1,0 +1,1789 @@
+{
+ "stamp": "2026-10-20T07-51-29",
+ "model": "claude-sonnet-4-6",
+ "args": {
+  "split": "dev",
+  "only": "utf8-nobom-*",
+  "runs": 1,
+  "concurrency": 4,
+  "dryRun": false,
+  "confirmSpend": false,
+  "label": "utf8-before",
+  "real": true,
+  "rescore": null
+ },
+ "results": [
+  {
+   "id": "utf8-nobom-csv-10",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [
+    "accents"
+   ],
+   "format": "csv",
+   "rows": 10,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 647,
+    "lines": 11,
+    "refused": null,
+    "coverage": {
+     "facts": 20,
+     "visible": 0,
+     "ratio": 0
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 7055,
+     "usage": {
+      "inputTokens": 438,
+      "outputTokens": 556,
+      "cacheReadTokens": 2314,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.0103482,
+     "score": {
+      "pass": false,
+      "expectedCount": 10,
+      "actualCount": 10,
+      "matched": 10,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [
+       {
+        "query": "q3 Noémie Øvergaard / Højgaard Agency",
+        "field": "agentName",
+        "expected": "Noémie Øvergaard",
+        "actual": "Noémie Övergaard"
+       },
+       {
+        "query": "q6 Renée Øvergaard / Peñafiel & Søn",
+        "field": "agentName",
+        "expected": "Renée Øvergaard",
+        "actual": "Renée Övergaard"
+       }
+      ],
+      "fieldsCompared": 70,
+      "fieldsCorrect": 68,
+      "byField": {
+       "agentName": {
+        "compared": 10,
+        "correct": 8
+       },
+       "agency": {
+        "compared": 10,
+        "correct": 10
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 10,
+        "correct": 10
+       },
+       "sentDate": {
+        "compared": 10,
+        "correct": 10
+       },
+       "timeline": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsMissing": {
+        "compared": 10,
+        "correct": 10
+       },
+       "reasonsSpurious": {
+        "compared": 10,
+        "correct": 10
+       }
+      },
+      "values": {
+       "q1 Inés Þórsdóttir / Højgaard Agency": {
+        "agentName": "inés þórsdóttir",
+        "agency": "højgaard agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-03-13",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Małgorzata Müller / Éditions Agency": {
+        "agentName": "małgorzata müller",
+        "agency": "éditions agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-05-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Noémie Øvergaard / Højgaard Agency": {
+        "agentName": "noémie övergaard",
+        "agency": "højgaard agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-06-24",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Dagný Ó Briain / Éditions Agency": {
+        "agentName": "dagný ó briain",
+        "agency": "éditions agency",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2024-08-19",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 Chloé Dvořák / Ó Riordáin & Søn": {
+        "agentName": "chloé dvořák",
+        "agency": "ó riordáin & søn",
+        "website": "",
+        "status": "Partial Requested",
+        "sentDate": "2024-07-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Renée Øvergaard / Peñafiel & Søn": {
+        "agentName": "renée övergaard",
+        "agency": "peñafiel & søn",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-05-10",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Noémie Llwyd-Jönsson / Højgaard Agency": {
+        "agentName": "noémie llwyd-jönsson",
+        "agency": "højgaard agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-11-09",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Noémie Þórsdóttir / Éditions Agency": {
+        "agentName": "noémie þórsdóttir",
+        "agency": "éditions agency",
+        "website": "",
+        "status": "Offer",
+        "sentDate": "2024-04-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 Chloé Beaulé / Ó Riordáin & Søn": {
+        "agentName": "chloé beaulé",
+        "agency": "ó riordáin & søn",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-01-13",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Siân Dvořák / Højgaard Agency": {
+        "agentName": "siân dvořák",
+        "agency": "højgaard agency",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-08-09",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Inés Þórsdóttir",
+        "agency": "Højgaard Agency"
+       },
+       {
+        "ref": "a2",
+        "name": "Małgorzata Müller",
+        "agency": "Éditions Agency"
+       },
+       {
+        "ref": "a3",
+        "name": "Noémie Övergaard",
+        "agency": "Højgaard Agency"
+       },
+       {
+        "ref": "a4",
+        "name": "Dagný Ó Briain",
+        "agency": "Éditions Agency"
+       },
+       {
+        "ref": "a5",
+        "name": "Chloé Dvořák",
+        "agency": "Ó Riordáin & Søn"
+       },
+       {
+        "ref": "a6",
+        "name": "Renée Övergaard",
+        "agency": "Peñafiel & Søn"
+       },
+       {
+        "ref": "a7",
+        "name": "Noémie Llwyd-Jönsson",
+        "agency": "Højgaard Agency"
+       },
+       {
+        "ref": "a8",
+        "name": "Noémie Þórsdóttir",
+        "agency": "Éditions Agency"
+       },
+       {
+        "ref": "a9",
+        "name": "Chloé Beaulé",
+        "agency": "Ó Riordáin & Søn"
+       },
+       {
+        "ref": "a10",
+        "name": "Siân Dvořák",
+        "agency": "Højgaard Agency"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Queried",
+        "sentDate": "2024-03-13",
+        "sentDateRaw": "13/03/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "met at the York festival – nice chat"
+       },
+       {
+        "agentRef": "a2",
+        "status": "Queried",
+        "sentDate": "2025-05-06",
+        "sentDateRaw": "06/05/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a3",
+        "status": "Queried",
+        "sentDate": "2025-06-24",
+        "sentDateRaw": "24/06/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "No Response",
+        "sentDate": "2024-08-19",
+        "sentDateRaw": "19/08/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Partial Requested",
+        "sentDate": "2024-07-10",
+        "sentDateRaw": "10/07/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a6",
+        "status": "Queried",
+        "sentDate": "2024-05-10",
+        "sentDateRaw": "10/05/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a7",
+        "status": "Queried",
+        "sentDate": "2023-11-09",
+        "sentDateRaw": "09/11/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Offer",
+        "sentDate": "2024-04-04",
+        "sentDateRaw": "04/04/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a9",
+        "status": "Queried",
+        "sentDate": "2025-01-13",
+        "sentDateRaw": "13/01/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a10",
+        "status": "Rejected",
+        "sentDate": "2023-08-09",
+        "sentDateRaw": "09/08/2023",
+        "timeline": [],
+        "reasons": []
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  },
+  {
+   "id": "utf8-nobom-csv-50",
+   "real": false,
+   "split": "dev",
+   "layout": "standard",
+   "knobs": [
+    "accents"
+   ],
+   "format": "csv",
+   "rows": 50,
+   "expectedToFail": false,
+   "conversion": {
+    "chars": 3427,
+    "lines": 51,
+    "refused": null,
+    "coverage": {
+     "facts": 100,
+     "visible": 0,
+     "ratio": 0
+    }
+   },
+   "runs": [
+    {
+     "run": 0,
+     "failure": null,
+     "attempts": 1,
+     "stopReason": "end_turn",
+     "ms": 34992,
+     "usage": {
+      "inputTokens": 2196,
+      "outputTokens": 2849,
+      "cacheReadTokens": 2314,
+      "cacheWriteTokens": 0
+     },
+     "costUsd": 0.0500172,
+     "score": {
+      "pass": false,
+      "expectedCount": 50,
+      "actualCount": 50,
+      "matched": 50,
+      "dropped": [],
+      "invented": [],
+      "ambiguous": [],
+      "wrong": [
+       {
+        "query": "q1 Björn Llwyd-Jönsson / Ó Riordáin Associés",
+        "field": "agency",
+        "expected": "Ó Riordáin Associés",
+        "actual": "Å RiordÃ¡in AssociÃ©s"
+       },
+       {
+        "query": "q2 Ömer Çelik / Højgaard Associés",
+        "field": "agency",
+        "expected": "Højgaard Associés",
+        "actual": "Højgaard AssociÃ©s"
+       },
+       {
+        "query": "q3 Inés Wiśniewska / Mëller Partners",
+        "field": "agency",
+        "expected": "Mëller Partners",
+        "actual": "Müller Partners"
+       },
+       {
+        "query": "q4 Søren Ó Briain / Mëller Literary",
+        "field": "agency",
+        "expected": "Mëller Literary",
+        "actual": "Müller Literary"
+       },
+       {
+        "query": "q5 François Gonçalves / Città Associés",
+        "field": "agency",
+        "expected": "Città Associés",
+        "actual": "Città AssociÃ©s"
+       },
+       {
+        "query": "q7 Dagný Beaulé / Mëller Literary",
+        "field": "agency",
+        "expected": "Mëller Literary",
+        "actual": "Müller Literary"
+       },
+       {
+        "query": "q10 Søren Wiśniewska / Città Associés",
+        "field": "agency",
+        "expected": "Città Associés",
+        "actual": "Città AssociÃ©s"
+       },
+       {
+        "query": "q11 Noémie Müller / Ó Riordáin Associés",
+        "field": "agency",
+        "expected": "Ó Riordáin Associés",
+        "actual": "Å RiordÃ¡in AssociÃ©s"
+       },
+       {
+        "query": "q12 Inés Dvořák / Mëller Literary",
+        "field": "agency",
+        "expected": "Mëller Literary",
+        "actual": "Müller Literary"
+       },
+       {
+        "query": "q16 Zoë Øvergaard / Brontë & Søn",
+        "field": "agentName",
+        "expected": "Zoë Øvergaard",
+        "actual": "Zoë Övergaard"
+       },
+       {
+        "query": "q18 Inés Çelik / Ó Riordáin Agency",
+        "field": "agency",
+        "expected": "Ó Riordáin Agency",
+        "actual": "Å RiordÃ¡in Agency"
+       },
+       {
+        "query": "q19 Søren Øvergaard / Højgaard Associés",
+        "field": "agentName",
+        "expected": "Søren Øvergaard",
+        "actual": "Søren Övergaard"
+       },
+       {
+        "query": "q19 Søren Øvergaard / Højgaard Associés",
+        "field": "agency",
+        "expected": "Højgaard Associés",
+        "actual": "Højgaard AssociÃ©s"
+       },
+       {
+        "query": "q20 Søren Müller / Mëller Associés",
+        "field": "agency",
+        "expected": "Mëller Associés",
+        "actual": "Müller AssociÃ©s"
+       },
+       {
+        "query": "q21 Małgorzata Çelik / Mëller Associés",
+        "field": "agency",
+        "expected": "Mëller Associés",
+        "actual": "Müller AssociÃ©s"
+       },
+       {
+        "query": "q22 Siân Müller / Mëller Associés",
+        "field": "agency",
+        "expected": "Mëller Associés",
+        "actual": "Müller AssociÃ©s"
+       },
+       {
+        "query": "q23 Inés Núñez / Ó Riordáin Agency",
+        "field": "agency",
+        "expected": "Ó Riordáin Agency",
+        "actual": "Å RiordÃ¡in Agency"
+       },
+       {
+        "query": "q24 Dagný Ó Briain / Città Associés",
+        "field": "agency",
+        "expected": "Città Associés",
+        "actual": "Città AssociÃ©s"
+       },
+       {
+        "query": "q25 Inés Gonçalves / Ó Riordáin Agency",
+        "field": "agency",
+        "expected": "Ó Riordáin Agency",
+        "actual": "Å RiordÃ¡in Agency"
+       },
+       {
+        "query": "q28 François Ångström / Ó Riordáin Agency",
+        "field": "agency",
+        "expected": "Ó Riordáin Agency",
+        "actual": "Å RiordÃ¡in Agency"
+       },
+       {
+        "query": "q29 Dagný Brontë / Città Associés",
+        "field": "agency",
+        "expected": "Città Associés",
+        "actual": "Città AssociÃ©s"
+       },
+       {
+        "query": "q30 Thérèse Ångström / Mëller Agency",
+        "field": "agency",
+        "expected": "Mëller Agency",
+        "actual": "Müller Agency"
+       },
+       {
+        "query": "q31 Ana-María Beaulé / Mëller Literary",
+        "field": "agency",
+        "expected": "Mëller Literary",
+        "actual": "Müller Literary"
+       },
+       {
+        "query": "q34 Noémie Çelik / Mëller Partners",
+        "field": "agency",
+        "expected": "Mëller Partners",
+        "actual": "Müller Partners"
+       },
+       {
+        "query": "q38 Ana-María Çelik / Mëller Literary",
+        "field": "agency",
+        "expected": "Mëller Literary",
+        "actual": "Müller Literary"
+       },
+       {
+        "query": "q43 Ana-María Þórsdóttir / Mëller Literary",
+        "field": "agency",
+        "expected": "Mëller Literary",
+        "actual": "Müller Literary"
+       },
+       {
+        "query": "q45 José Kovačević / Ó Riordáin Agency",
+        "field": "agency",
+        "expected": "Ó Riordáin Agency",
+        "actual": "Å RiordÃ¡in Agency"
+       },
+       {
+        "query": "q49 Chloé Wiśniewska / Højgaard Associés",
+        "field": "agency",
+        "expected": "Højgaard Associés",
+        "actual": "Højgaard AssociÃ©s"
+       },
+       {
+        "query": "q50 Siân Gonçalves / Brontë Associés",
+        "field": "agency",
+        "expected": "Brontë Associés",
+        "actual": "Brontë AssociÃ©s"
+       }
+      ],
+      "fieldsCompared": 350,
+      "fieldsCorrect": 321,
+      "byField": {
+       "agentName": {
+        "compared": 50,
+        "correct": 48
+       },
+       "agency": {
+        "compared": 50,
+        "correct": 23
+       },
+       "website": {
+        "compared": 0,
+        "correct": 0
+       },
+       "status": {
+        "compared": 50,
+        "correct": 50
+       },
+       "sentDate": {
+        "compared": 50,
+        "correct": 50
+       },
+       "timeline": {
+        "compared": 50,
+        "correct": 50
+       },
+       "reasonsMissing": {
+        "compared": 50,
+        "correct": 50
+       },
+       "reasonsSpurious": {
+        "compared": 50,
+        "correct": 50
+       }
+      },
+      "values": {
+       "q1 Björn Llwyd-Jönsson / Ó Riordáin Associés": {
+        "agentName": "björn llwyd-jönsson",
+        "agency": "å riordã¡in associã©s",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-08-24",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q2 Ömer Çelik / Højgaard Associés": {
+        "agentName": "ömer çelik",
+        "agency": "højgaard associã©s",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-03-31",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q3 Inés Wiśniewska / Mëller Partners": {
+        "agentName": "inés wiśniewska",
+        "agency": "müller partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-07-25",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q4 Søren Ó Briain / Mëller Literary": {
+        "agentName": "søren ó briain",
+        "agency": "müller literary",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2024-08-26",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q5 François Gonçalves / Città Associés": {
+        "agentName": "françois gonçalves",
+        "agency": "città associã©s",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2023-09-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q6 Dagný Kovačević / Zürich Literary": {
+        "agentName": "dagný kovačević",
+        "agency": "zürich literary",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-02-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q7 Dagný Beaulé / Mëller Literary": {
+        "agentName": "dagný beaulé",
+        "agency": "müller literary",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-09-01",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q8 Chloé Kovačević / Peñafiel & Søn": {
+        "agentName": "chloé kovačević",
+        "agency": "peñafiel & søn",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-11-20",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q9 François Brontë / Brontë & Søn": {
+        "agentName": "françois brontë",
+        "agency": "brontë & søn",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-05-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q10 Søren Wiśniewska / Città Associés": {
+        "agentName": "søren wiśniewska",
+        "agency": "città associã©s",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-03-23",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q11 Noémie Müller / Ó Riordáin Associés": {
+        "agentName": "noémie müller",
+        "agency": "å riordã¡in associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-11-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q12 Inés Dvořák / Mëller Literary": {
+        "agentName": "inés dvořák",
+        "agency": "müller literary",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2025-08-18",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q13 Ömer Müller / Brontë & Søn": {
+        "agentName": "ömer müller",
+        "agency": "brontë & søn",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-04-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q14 Siân Núñez / Brontë Agency": {
+        "agentName": "siân núñez",
+        "agency": "brontë agency",
+        "website": "",
+        "status": "Revise & Resubmit",
+        "sentDate": "2024-12-11",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q15 Björn Brontë / Città Agency": {
+        "agentName": "björn brontë",
+        "agency": "città agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-01-26",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q16 Zoë Øvergaard / Brontë & Søn": {
+        "agentName": "zoë övergaard",
+        "agency": "brontë & søn",
+        "website": "",
+        "status": "Full Requested",
+        "sentDate": "2024-11-25",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q17 Renée Kovačević / Brontë Agency": {
+        "agentName": "renée kovačević",
+        "agency": "brontë agency",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2024-02-19",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q18 Inés Çelik / Ó Riordáin Agency": {
+        "agentName": "inés çelik",
+        "agency": "å riordã¡in agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-03-24",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q19 Søren Øvergaard / Højgaard Associés": {
+        "agentName": "søren övergaard",
+        "agency": "højgaard associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-09-17",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q20 Søren Müller / Mëller Associés": {
+        "agentName": "søren müller",
+        "agency": "müller associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-11-13",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q21 Małgorzata Çelik / Mëller Associés": {
+        "agentName": "małgorzata çelik",
+        "agency": "müller associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-01-09",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q22 Siân Müller / Mëller Associés": {
+        "agentName": "siân müller",
+        "agency": "müller associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-09-18",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q23 Inés Núñez / Ó Riordáin Agency": {
+        "agentName": "inés núñez",
+        "agency": "å riordã¡in agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-11-24",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q24 Dagný Ó Briain / Città Associés": {
+        "agentName": "dagný ó briain",
+        "agency": "città associã©s",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-12-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q25 Inés Gonçalves / Ó Riordáin Agency": {
+        "agentName": "inés gonçalves",
+        "agency": "å riordã¡in agency",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-04-27",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q26 Ana-María Ångström / Zürich Literary": {
+        "agentName": "ana-maría ångström",
+        "agency": "zürich literary",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-09-02",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q27 Renée Wiśniewska / Brontë Agency": {
+        "agentName": "renée wiśniewska",
+        "agency": "brontë agency",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-08-11",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q28 François Ångström / Ó Riordáin Agency": {
+        "agentName": "françois ångström",
+        "agency": "å riordã¡in agency",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2024-10-03",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q29 Dagný Brontë / Città Associés": {
+        "agentName": "dagný brontë",
+        "agency": "città associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-06-14",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q30 Thérèse Ångström / Mëller Agency": {
+        "agentName": "thérèse ångström",
+        "agency": "müller agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-05-26",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q31 Ana-María Beaulé / Mëller Literary": {
+        "agentName": "ana-maría beaulé",
+        "agency": "müller literary",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-10-24",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q32 Noémie Ångström / Brontë Agency": {
+        "agentName": "noémie ångström",
+        "agency": "brontë agency",
+        "website": "",
+        "status": "Partial Requested",
+        "sentDate": "2023-09-18",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q33 Thérèse Çelik / Peñafiel & Søn": {
+        "agentName": "thérèse çelik",
+        "agency": "peñafiel & søn",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-08-22",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q34 Noémie Çelik / Mëller Partners": {
+        "agentName": "noémie çelik",
+        "agency": "müller partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-04-30",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q35 Dagný Ångström / Città Partners": {
+        "agentName": "dagný ångström",
+        "agency": "città partners",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-06-20",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q36 Renée Beaulé / Città Partners": {
+        "agentName": "renée beaulé",
+        "agency": "città partners",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-12-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q37 Søren Beaulé / Città Partners": {
+        "agentName": "søren beaulé",
+        "agency": "città partners",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-09-28",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q38 Ana-María Çelik / Mëller Literary": {
+        "agentName": "ana-maría çelik",
+        "agency": "müller literary",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-10-06",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q39 François Çelik / Brontë Agency": {
+        "agentName": "françois çelik",
+        "agency": "brontë agency",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-10-04",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q40 Małgorzata Lefèvre / Brontë & Søn": {
+        "agentName": "małgorzata lefèvre",
+        "agency": "brontë & søn",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-11-18",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q41 Søren Çelik / Brontë & Søn": {
+        "agentName": "søren çelik",
+        "agency": "brontë & søn",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2023-12-27",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q42 Chloé Llwyd-Jönsson / Città Agency": {
+        "agentName": "chloé llwyd-jönsson",
+        "agency": "città agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-04-26",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q43 Ana-María Þórsdóttir / Mëller Literary": {
+        "agentName": "ana-maría þórsdóttir",
+        "agency": "müller literary",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2023-10-07",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q44 Inés Müller / Città Partners": {
+        "agentName": "inés müller",
+        "agency": "città partners",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2024-04-08",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q45 José Kovačević / Ó Riordáin Agency": {
+        "agentName": "josé kovačević",
+        "agency": "å riordã¡in agency",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2025-05-12",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q46 Zoë Núñez / Peñafiel & Søn": {
+        "agentName": "zoë núñez",
+        "agency": "peñafiel & søn",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2024-12-05",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q47 Renée Ó Briain / Città Partners": {
+        "agentName": "renée ó briain",
+        "agency": "città partners",
+        "website": "",
+        "status": "No Response",
+        "sentDate": "2023-05-16",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q48 Dagný Müller / Zürich Literary": {
+        "agentName": "dagný müller",
+        "agency": "zürich literary",
+        "website": "",
+        "status": "Rejected",
+        "sentDate": "2025-05-05",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q49 Chloé Wiśniewska / Højgaard Associés": {
+        "agentName": "chloé wiśniewska",
+        "agency": "højgaard associã©s",
+        "website": "",
+        "status": "Queried",
+        "sentDate": "2024-03-21",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       },
+       "q50 Siân Gonçalves / Brontë Associés": {
+        "agentName": "siân gonçalves",
+        "agency": "brontë associã©s",
+        "website": "",
+        "status": "Full Sent",
+        "sentDate": "2024-08-13",
+        "timeline": [],
+        "reasonsMissing": [],
+        "reasonsSpurious": []
+       }
+      }
+     },
+     "rawResult": {
+      "agents": [
+       {
+        "ref": "a1",
+        "name": "Björn Llwyd-Jönsson",
+        "agency": "Å RiordÃ¡in AssociÃ©s"
+       },
+       {
+        "ref": "a2",
+        "name": "Ömer Çelik",
+        "agency": "Højgaard AssociÃ©s"
+       },
+       {
+        "ref": "a3",
+        "name": "Inés Wiśniewska",
+        "agency": "Müller Partners"
+       },
+       {
+        "ref": "a4",
+        "name": "Søren Ó Briain",
+        "agency": "Müller Literary"
+       },
+       {
+        "ref": "a5",
+        "name": "François Gonçalves",
+        "agency": "Città AssociÃ©s"
+       },
+       {
+        "ref": "a6",
+        "name": "Dagný Kovačević",
+        "agency": "Zürich Literary"
+       },
+       {
+        "ref": "a7",
+        "name": "Dagný Beaulé",
+        "agency": "Müller Literary"
+       },
+       {
+        "ref": "a8",
+        "name": "Chloé Kovačević",
+        "agency": "Peñafiel & Søn"
+       },
+       {
+        "ref": "a9",
+        "name": "François Brontë",
+        "agency": "Brontë & Søn"
+       },
+       {
+        "ref": "a10",
+        "name": "Søren Wiśniewska",
+        "agency": "Città AssociÃ©s"
+       },
+       {
+        "ref": "a11",
+        "name": "Noémie Müller",
+        "agency": "Å RiordÃ¡in AssociÃ©s"
+       },
+       {
+        "ref": "a12",
+        "name": "Inés Dvořák",
+        "agency": "Müller Literary"
+       },
+       {
+        "ref": "a13",
+        "name": "Ömer Müller",
+        "agency": "Brontë & Søn"
+       },
+       {
+        "ref": "a14",
+        "name": "Siân Núñez",
+        "agency": "Brontë Agency"
+       },
+       {
+        "ref": "a15",
+        "name": "Björn Brontë",
+        "agency": "Città Agency"
+       },
+       {
+        "ref": "a16",
+        "name": "Zoë Övergaard",
+        "agency": "Brontë & Søn"
+       },
+       {
+        "ref": "a17",
+        "name": "Renée Kovačević",
+        "agency": "Brontë Agency"
+       },
+       {
+        "ref": "a18",
+        "name": "Inés Çelik",
+        "agency": "Å RiordÃ¡in Agency"
+       },
+       {
+        "ref": "a19",
+        "name": "Søren Övergaard",
+        "agency": "Højgaard AssociÃ©s"
+       },
+       {
+        "ref": "a20",
+        "name": "Søren Müller",
+        "agency": "Müller AssociÃ©s"
+       },
+       {
+        "ref": "a21",
+        "name": "Małgorzata Çelik",
+        "agency": "Müller AssociÃ©s"
+       },
+       {
+        "ref": "a22",
+        "name": "Siân Müller",
+        "agency": "Müller AssociÃ©s"
+       },
+       {
+        "ref": "a23",
+        "name": "Inés Núñez",
+        "agency": "Å RiordÃ¡in Agency"
+       },
+       {
+        "ref": "a24",
+        "name": "Dagný Ó Briain",
+        "agency": "Città AssociÃ©s"
+       },
+       {
+        "ref": "a25",
+        "name": "Inés Gonçalves",
+        "agency": "Å RiordÃ¡in Agency"
+       },
+       {
+        "ref": "a26",
+        "name": "Ana-María Ångström",
+        "agency": "Zürich Literary"
+       },
+       {
+        "ref": "a27",
+        "name": "Renée Wiśniewska",
+        "agency": "Brontë Agency"
+       },
+       {
+        "ref": "a28",
+        "name": "François Ångström",
+        "agency": "Å RiordÃ¡in Agency"
+       },
+       {
+        "ref": "a29",
+        "name": "Dagný Brontë",
+        "agency": "Città AssociÃ©s"
+       },
+       {
+        "ref": "a30",
+        "name": "Thérèse Ångström",
+        "agency": "Müller Agency"
+       },
+       {
+        "ref": "a31",
+        "name": "Ana-María Beaulé",
+        "agency": "Müller Literary"
+       },
+       {
+        "ref": "a32",
+        "name": "Noémie Ångström",
+        "agency": "Brontë Agency"
+       },
+       {
+        "ref": "a33",
+        "name": "Thérèse Çelik",
+        "agency": "Peñafiel & Søn"
+       },
+       {
+        "ref": "a34",
+        "name": "Noémie Çelik",
+        "agency": "Müller Partners"
+       },
+       {
+        "ref": "a35",
+        "name": "Dagný Ångström",
+        "agency": "Città Partners"
+       },
+       {
+        "ref": "a36",
+        "name": "Renée Beaulé",
+        "agency": "Città Partners"
+       },
+       {
+        "ref": "a37",
+        "name": "Søren Beaulé",
+        "agency": "Città Partners"
+       },
+       {
+        "ref": "a38",
+        "name": "Ana-María Çelik",
+        "agency": "Müller Literary"
+       },
+       {
+        "ref": "a39",
+        "name": "François Çelik",
+        "agency": "Brontë Agency"
+       },
+       {
+        "ref": "a40",
+        "name": "Małgorzata Lefèvre",
+        "agency": "Brontë & Søn"
+       },
+       {
+        "ref": "a41",
+        "name": "Søren Çelik",
+        "agency": "Brontë & Søn"
+       },
+       {
+        "ref": "a42",
+        "name": "Chloé Llwyd-Jönsson",
+        "agency": "Città Agency"
+       },
+       {
+        "ref": "a43",
+        "name": "Ana-María Þórsdóttir",
+        "agency": "Müller Literary"
+       },
+       {
+        "ref": "a44",
+        "name": "Inés Müller",
+        "agency": "Città Partners"
+       },
+       {
+        "ref": "a45",
+        "name": "José Kovačević",
+        "agency": "Å RiordÃ¡in Agency"
+       },
+       {
+        "ref": "a46",
+        "name": "Zoë Núñez",
+        "agency": "Peñafiel & Søn"
+       },
+       {
+        "ref": "a47",
+        "name": "Renée Ó Briain",
+        "agency": "Città Partners"
+       },
+       {
+        "ref": "a48",
+        "name": "Dagný Müller",
+        "agency": "Zürich Literary"
+       },
+       {
+        "ref": "a49",
+        "name": "Chloé Wiśniewska",
+        "agency": "Højgaard AssociÃ©s"
+       },
+       {
+        "ref": "a50",
+        "name": "Siân Gonçalves",
+        "agency": "Brontë AssociÃ©s"
+       }
+      ],
+      "queries": [
+       {
+        "agentRef": "a1",
+        "status": "Rejected",
+        "sentDate": "2024-08-24",
+        "sentDateRaw": "24/08/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "fingers crossed 🤞"
+       },
+       {
+        "agentRef": "a2",
+        "status": "Rejected",
+        "sentDate": "2024-03-31",
+        "sentDateRaw": "31/03/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "met at the York festival – nice chat"
+       },
+       {
+        "agentRef": "a3",
+        "status": "Rejected",
+        "sentDate": "2024-07-25",
+        "sentDateRaw": "25/07/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a4",
+        "status": "No Response",
+        "sentDate": "2024-08-26",
+        "sentDateRaw": "26/08/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a5",
+        "status": "Full Sent",
+        "sentDate": "2023-09-04",
+        "sentDateRaw": "04/09/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a6",
+        "status": "Queried",
+        "sentDate": "2024-02-01",
+        "sentDateRaw": "01/02/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a7",
+        "status": "Queried",
+        "sentDate": "2023-09-01",
+        "sentDateRaw": "01/09/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a8",
+        "status": "Full Requested",
+        "sentDate": "2024-11-20",
+        "sentDateRaw": "20/11/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a9",
+        "status": "Rejected",
+        "sentDate": "2023-05-07",
+        "sentDateRaw": "07/05/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a10",
+        "status": "Rejected",
+        "sentDate": "2024-03-23",
+        "sentDateRaw": "23/03/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a11",
+        "status": "Queried",
+        "sentDate": "2023-11-12",
+        "sentDateRaw": "12/11/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a12",
+        "status": "Full Requested",
+        "sentDate": "2025-08-18",
+        "sentDateRaw": "18/08/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a13",
+        "status": "Queried",
+        "sentDate": "2023-04-06",
+        "sentDateRaw": "06/04/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a14",
+        "status": "Revise & Resubmit",
+        "sentDate": "2024-12-11",
+        "sentDateRaw": "11/12/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "'loved the opening' – asked for more"
+       },
+       {
+        "agentRef": "a15",
+        "status": "Queried",
+        "sentDate": "2025-01-26",
+        "sentDateRaw": "26/01/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a16",
+        "status": "Full Requested",
+        "sentDate": "2024-11-25",
+        "sentDateRaw": "25/11/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "fingers crossed 🤞"
+       },
+       {
+        "agentRef": "a17",
+        "status": "No Response",
+        "sentDate": "2024-02-19",
+        "sentDateRaw": "19/02/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a18",
+        "status": "Queried",
+        "sentDate": "2023-03-24",
+        "sentDateRaw": "24/03/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "re-sent after the typo – oops"
+       },
+       {
+        "agentRef": "a19",
+        "status": "Queried",
+        "sentDate": "2025-09-17",
+        "sentDateRaw": "17/09/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a20",
+        "status": "Queried",
+        "sentDate": "2024-11-13",
+        "sentDateRaw": "13/11/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a21",
+        "status": "Queried",
+        "sentDate": "2023-01-09",
+        "sentDateRaw": "09/01/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a22",
+        "status": "Queried",
+        "sentDate": "2024-09-18",
+        "sentDateRaw": "18/09/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a23",
+        "status": "Queried",
+        "sentDate": "2023-11-24",
+        "sentDateRaw": "24/11/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a24",
+        "status": "Rejected",
+        "sentDate": "2024-12-12",
+        "sentDateRaw": "12/12/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a25",
+        "status": "Rejected",
+        "sentDate": "2023-04-27",
+        "sentDateRaw": "27/04/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "fingers crossed 🤞"
+       },
+       {
+        "agentRef": "a26",
+        "status": "Queried",
+        "sentDate": "2024-09-02",
+        "sentDateRaw": "02/09/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a27",
+        "status": "No Response",
+        "sentDate": "2023-08-11",
+        "sentDateRaw": "11/08/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "re-sent after the typo – oops"
+       },
+       {
+        "agentRef": "a28",
+        "status": "No Response",
+        "sentDate": "2024-10-03",
+        "sentDateRaw": "03/10/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a29",
+        "status": "Queried",
+        "sentDate": "2023-06-14",
+        "sentDateRaw": "14/06/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a30",
+        "status": "Queried",
+        "sentDate": "2023-05-26",
+        "sentDateRaw": "26/05/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a31",
+        "status": "Queried",
+        "sentDate": "2024-10-24",
+        "sentDateRaw": "24/10/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a32",
+        "status": "Partial Requested",
+        "sentDate": "2023-09-18",
+        "sentDateRaw": "18/09/2023",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a33",
+        "status": "Rejected",
+        "sentDate": "2025-08-22",
+        "sentDateRaw": "22/08/2025",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       },
+       {
+        "agentRef": "a34",
+        "status": "Rejected",
+        "sentDate": "2025-04-30",
+        "sentDateRaw": "30/04/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a35",
+        "status": "Queried",
+        "sentDate": "2023-06-20",
+        "sentDateRaw": "20/06/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a36",
+        "status": "Queried",
+        "sentDate": "2023-12-07",
+        "sentDateRaw": "07/12/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a37",
+        "status": "Queried",
+        "sentDate": "2023-09-28",
+        "sentDateRaw": "28/09/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a38",
+        "status": "Rejected",
+        "sentDate": "2023-10-06",
+        "sentDateRaw": "06/10/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a39",
+        "status": "No Response",
+        "sentDate": "2023-10-04",
+        "sentDateRaw": "04/10/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a40",
+        "status": "Queried",
+        "sentDate": "2023-11-18",
+        "sentDateRaw": "18/11/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a41",
+        "status": "Queried",
+        "sentDate": "2023-12-27",
+        "sentDateRaw": "27/12/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a42",
+        "status": "Queried",
+        "sentDate": "2025-04-26",
+        "sentDateRaw": "26/04/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a43",
+        "status": "Rejected",
+        "sentDate": "2023-10-07",
+        "sentDateRaw": "07/10/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a44",
+        "status": "Rejected",
+        "sentDate": "2024-04-08",
+        "sentDateRaw": "08/04/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a45",
+        "status": "Queried",
+        "sentDate": "2025-05-12",
+        "sentDateRaw": "12/05/2025",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a46",
+        "status": "No Response",
+        "sentDate": "2024-12-05",
+        "sentDateRaw": "05/12/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a47",
+        "status": "No Response",
+        "sentDate": "2023-05-16",
+        "sentDateRaw": "16/05/2023",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a48",
+        "status": "Rejected",
+        "sentDate": "2025-05-05",
+        "sentDateRaw": "05/05/2025",
+        "timeline": [],
+        "reasons": [],
+        "notes": "met at the York festival – nice chat"
+       },
+       {
+        "agentRef": "a49",
+        "status": "Queried",
+        "sentDate": "2024-03-21",
+        "sentDateRaw": "21/03/2024",
+        "timeline": [],
+        "reasons": []
+       },
+       {
+        "agentRef": "a50",
+        "status": "Full Sent",
+        "sentDate": "2024-08-13",
+        "sentDateRaw": "13/08/2024",
+        "timeline": [],
+        "reasons": [],
+        "notes": "agent's wishlist: 'quiet literary'"
+       }
+      ]
+     }
+    }
+   ],
+   "disagreements": []
+  }
+ ]
+}

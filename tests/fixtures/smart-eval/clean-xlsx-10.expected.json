@@ -1,0 +1,95 @@
+{
+ "id": "clean-xlsx-10",
+ "queries": [
+  {
+   "label": "q1 Jamal Tremayne / Bellwether Literary",
+   "agentName": "Jamal Tremayne",
+   "agency": "Bellwether Literary",
+   "status": "Rejected",
+   "sentDate": "2023-06-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Hugo Harrow / Ashgrove & Co",
+   "agentName": "Hugo Harrow",
+   "agency": "Ashgrove & Co",
+   "status": "Rejected",
+   "sentDate": "2023-11-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Saoirse Castellane / Bellwether Literary",
+   "agentName": "Saoirse Castellane",
+   "agency": "Bellwether Literary",
+   "status": "Rejected",
+   "sentDate": "2023-03-21",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Imogen Achebe / Ashgrove & Co",
+   "agentName": "Imogen Achebe",
+   "agency": "Ashgrove & Co",
+   "status": "No Response",
+   "sentDate": "2024-09-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 Jamal Brennan / Bellwether Literary",
+   "agentName": "Jamal Brennan",
+   "agency": "Bellwether Literary",
+   "status": "Queried",
+   "sentDate": "2025-05-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Hannah Sato / Everly Management",
+   "agentName": "Hannah Sato",
+   "agency": "Everly Management",
+   "status": "Full Requested",
+   "sentDate": "2025-06-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Seb Rook / Ashgrove & Co",
+   "agentName": "Seb Rook",
+   "agency": "Ashgrove & Co",
+   "status": "Revise & Resubmit",
+   "sentDate": "2025-04-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Nadia Moreau / Wren Literary",
+   "agentName": "Nadia Moreau",
+   "agency": "Wren Literary",
+   "status": "Full Sent",
+   "sentDate": "2024-01-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 Dev Rook / Ashgrove & Co",
+   "agentName": "Dev Rook",
+   "agency": "Ashgrove & Co",
+   "status": "Queried",
+   "sentDate": "2024-12-15",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Theo Moreau / Bellwether Literary",
+   "agentName": "Theo Moreau",
+   "agency": "Bellwether Literary",
+   "status": "Queried",
+   "sentDate": "2023-02-09",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}
