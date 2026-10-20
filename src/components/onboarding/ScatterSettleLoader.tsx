@@ -22,6 +22,7 @@ import "./importFlow.css";
 import { SheenWave } from "./SheenWave";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
+import type { LoaderProgress } from "../../lib/importEstimate";
 
 
 export interface LoaderCard {
@@ -45,6 +46,9 @@ export interface ScatterSettleLoaderProps {
   onProceed: () => void;
   /** Hard-timeout / unrecoverable wait — the host exits to its fallback (never dead-ends onboarding). */
   onTimeout?: () => void;
+  /** The read's progress for the foot bar: row total, rows read, phase, and whether the server's
+   *  count is arriving. Absent (a host that predates it) reads as a read with no stream. */
+  progress?: LoaderProgress;
 }
 
 // Scatter slots — offsets (px) from the centre of the stage + a slight rotation + per-card drift

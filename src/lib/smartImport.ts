@@ -10,6 +10,8 @@
 import * as XLSX from "xlsx";
 import { readSheetBook } from "./sheetCells";
 import { bufferToCsv } from "./sheetText";
+import { countDataRows } from "./importEstimate";
+import { callWithProgress, type ImportUpdate, type StreamableCallable } from "./smartImportStream";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { QueryStatus } from "../types";
 import { SmartImportResult, ParsedQuery } from "../types/smartImport";
@@ -54,7 +56,10 @@ export function sampleRawFromBuffer(buf: ArrayBuffer | Uint8Array, max = 8): Raw
   });
 }
 
-export async function runSmartImport(file: File): Promise<SmartImportResult> {
+/** What the reading loader is told: the row total before the call, then the stream's updates. */
+export type SmartImportUpdate = { type: "start"; rowsTotal: number } | ImportUpdate;
+
+export async function runSmartImport(file: File, onUpdate?: (u: SmartImportUpdate) => void): Promise<SmartImportResult> {
   // Dev-only escape hatch: lets the review screen be exercised without a deployed function.
   // Set window.__SA_SMART_IMPORT_MOCK to a SmartImportResult in the console; never set in code.
   const mock = (window as any).__SA_SMART_IMPORT_MOCK as SmartImportResult | undefined;
@@ -67,8 +72,17 @@ export async function runSmartImport(file: File): Promise<SmartImportResult> {
   // The Firebase JS SDK's callable timeout defaults to 70s. The function's own is 300s, so this sits
   // just above it: a slow import fails with the SERVER's error, never the browser giving up first.
   const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
-  const res = await fn({ sheetText });
-  return res.data as SmartImportResult;
+  // The row total comes from the very text being sent, before the call — so the loader can say
+  // "150 rows · about 2 minutes" while the file is still being opened.
+  onUpdate?.({ type: "start", rowsTotal: countDataRows(sheetText) });
+  // Streamed, so the server's row count arrives on the way; the final result is the same object the
+  // plain call returned. stream() ignores the callable's timeout, so callWithProgress keeps it.
+  return callWithProgress(
+    fn as unknown as StreamableCallable<{ sheetText: string }, SmartImportResult>,
+    { sheetText },
+    (u) => onUpdate?.(u),
+    SMART_IMPORT_CALL_TIMEOUT_MS,
+  );
 }
 
 const VALID_STATUSES = new Set<string>(Object.values(QueryStatus));
