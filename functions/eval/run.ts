@@ -36,9 +36,10 @@ import { FIXTURE_DIR, REAL_DIR, repoRoot, type ExpectedFile, type Manifest, type
 // too rather than scored as though it had been sent.
 const MAX_CHARS = MAX_SHEET_CHARS;
 const MAX_LINES = MAX_SHEET_LINES;
-/** The callable's own timeout (smartImport.ts: timeoutSeconds 90). A call slower than this would
- *  have failed in production with the writer seeing an error, whatever the model eventually said. */
-export const CALLABLE_TIMEOUT_MS = 90_000;
+/** The callable's own timeout (smartImport.ts: timeoutSeconds 300 — 90 until the quick-fixes pack).
+ *  A call slower than this would have failed in production with the writer seeing an error, whatever
+ *  the model eventually said. A lock reads the function's value and holds this equal to it. */
+export const CALLABLE_TIMEOUT_MS = 300_000;
 const MODEL_REASONS = new Set(["status-direction", "status-wording", "check-name", "needs-identifying"]);
 
 export interface Args {
@@ -250,7 +251,7 @@ function summary(results: FixtureResult[], args: Args, stamp: string): string {
   L.push(`Total spend: **${usd(totalCost)}** · tokens in ${sum(results, (x) => x.usage.inputTokens)} · out ${sum(results, (x) => x.usage.outputTokens)} · cache read ${sum(results, (x) => x.usage.cacheReadTokens)} · cache write ${sum(results, (x) => x.usage.cacheWriteTokens)}`);
   if (ms.length) L.push(`Time per call: median ${ms[Math.floor(ms.length / 2)]} ms · max ${ms[ms.length - 1]} ms`);
   const slow = results.filter((r) => r.runs.some((x) => x.ms > CALLABLE_TIMEOUT_MS));
-  L.push(`Calls slower than the callable's 90 s timeout: **${slow.length}**${slow.length ? ` (${slow.map((r) => r.id).join(", ")}) — in production these fail with an error, whatever the model returned; the scores above do not count that` : ""}`);
+  L.push(`Calls slower than the callable's ${CALLABLE_TIMEOUT_MS / 1000} s timeout: **${slow.length}**${slow.length ? ` (${slow.map((r) => r.id).join(", ")}) — in production these fail with an error, whatever the model returned; the scores above do not count that` : ""}`);
   L.push("");
 
   L.push("## By field (expected-to-pass fixtures, first run)", "", "| Field | Accuracy | Correct / compared |", "|---|---|---|");

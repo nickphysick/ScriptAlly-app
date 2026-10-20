@@ -43,3 +43,11 @@ describe("the size cap is one number on both sides", () => {
     expect(src).not.toMatch(/>\s*600\b|200_000/);
   });
 });
+
+describe("the eval harness counts calls against the callable's real timeout", () => {
+  it("CALLABLE_TIMEOUT_MS equals the function's timeoutSeconds", () => {
+    const fn = Number(code("functions/src/smartImport.ts").match(/timeoutSeconds:\s*(\d+)/)![1]) * 1000;
+    const eval_ = Number(code("functions/eval/run.ts").match(/export const CALLABLE_TIMEOUT_MS = ([\d_]+);/)![1].replace(/_/g, ""));
+    expect(eval_).toBe(fn);
+  });
+});
