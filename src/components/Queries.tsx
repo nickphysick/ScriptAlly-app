@@ -7416,8 +7416,8 @@ export const Queries: React.FC<{
                      never one of them). Its disc is the "Past their reply date" filter (`past`), the Overdue quick
                      pick's own state; "+ Log a query" opens the real log journey. */
                   band={qcFull ? (
-                    <QcBand140 fig={qcBandFig} overdueOn={qcF138.past} loading={showGridSkeleton}
-                      onOverdue={() => setQcF138((f) => ({ ...f, past: !f.past }))}
+                    <QcBand140 fig={qcBandFig} counts={qcWhereN} where={qcF138.where} loading={showGridSkeleton}
+                      onWhere={(k) => qcPickWhere(k, false)}
                       onLog={() => onNavigate?.("queries", "Log a query")} />
                   ) : null}
                   applied={qc140Chips.length ? (

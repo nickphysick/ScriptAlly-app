@@ -120,3 +120,51 @@
 .qc140-jo .qc141-jmc { position: relative; display: grid; place-items: center; width: 32px; height: 24px; }
 .qc140-jo .qc141-jmc:empty { display: none; }
 .qc140-jo:has(.qc141-jmc:empty) { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* ── Part E · the pinned band (the mock's `.pband.b2`): "{N} queries sent" · the breakdown · heard back · + Log a query.
+   The count starts at the toolbar's inset (`--qc140-inset`), where the first jump item sits beneath it. ── */
+@media (min-width: 768px) {
+  .qc138-sheet .qc140-band.qc141-band { gap: 0; padding: 0 18px 0 var(--qc140-inset); }
+  .qc138-sheet .qc141-band > * { flex: 0 0 auto; }
+  .qc138-sheet .qc141-band .qc140-bn { padding-right: 26px; }
+  .qc138-sheet .qc141-band .qc140-bn b { font-size: 36px !important; line-height: 36px !important; }
+  .qc138-sheet .qc141-band .qc140-bn span { font-size: 18px !important; }
+  .qc138-sheet .qc141-bk {
+    flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 7px; padding: 0 26px;
+    box-shadow: -1px 0 0 rgba(244, 238, 229, 0.16), 1px 0 0 rgba(244, 238, 229, 0.16);
+  }
+  .qc138-sheet .qc141-bsb { display: flex; gap: 3px; height: 5px; }
+  .qc138-sheet .qc141-bsb .qc141-sg { display: block; border-radius: 3px; min-width: 6px; }
+  .qc138-sheet .qc141-bsb .qc141-sg--you, .qc141-m--b.qc141-m--you { background: #d9805f; }
+  .qc138-sheet .qc141-bsb .qc141-sg--agent, .qc141-m--b.qc141-m--agent { background: #9fb3cf; }
+  .qc138-sheet .qc141-bsb .qc141-sg--quiet, .qc141-m--b.qc141-m--quiet { background: repeating-linear-gradient(135deg, #8d8a86 0 3px, #b9b2a8 3px 6px); box-shadow: none; }
+  .qc138-sheet .qc141-bsb .qc141-sg--closed, .qc141-m--b.qc141-m--closed { background: rgba(244, 238, 229, 0.35); }
+  .qc138-sheet .qc141-rws { display: flex; gap: 4px; justify-content: space-between; }
+  .qc138-sheet .qc141-rws button {
+    box-sizing: border-box; display: inline-flex; align-items: baseline; gap: 8px; margin: -3px -9px; padding: 3px 9px; border: 0; border-radius: 8px;
+    background: transparent; cursor: pointer; white-space: nowrap; font: 400 15.5px/normal var(--sp-serif) !important; color: rgba(244, 238, 229, 0.85);
+  }
+  .qc138-sheet .qc141-rws button b { font: 400 21px/1 var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc141-rws button span { font: inherit !important; color: inherit; }
+  .qc138-sheet .qc141-rws .qc141-m--b { width: 9px; height: 9px; border-radius: 2px; align-self: center; }
+  .qc138-sheet .qc141-rws button:hover:not(:disabled) { background: rgba(244, 238, 229, 0.09); }
+  .qc138-sheet .qc141-rws button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+  .qc138-sheet .qc141-rws button.on { background: #f4eee5; color: #1c130f; }
+  .qc138-sheet .qc141-rws button.on b { color: #1c130f; }
+  .qc138-sheet .qc141-bk.pk .qc141-rws button:not(.on) { opacity: 0.5; }
+  .qc138-sheet .qc141-rws .qc141-ls { display: none; }
+  .qc138-sheet .qc141-band .qc140-hb { padding: 0 26px; box-shadow: none; }
+  .qc138-sheet .qc141-band .qc140-blog { margin-left: 0; }
+  /* tight: the short labels, no ring subline, the "queries sent" words smaller, the paddings tighter */
+  .qc138-sheet .qc141-band.tight .qc141-lf { display: none; }
+  .qc138-sheet .qc141-band.tight .qc141-ls { display: inline; }
+  .qc138-sheet .qc141-band.tight .qc140-hb small { display: none; }
+  .qc138-sheet .qc141-band.tight .qc140-bn span { font-size: 16px !important; }
+  .qc138-sheet .qc141-band.tight .qc141-bk, .qc138-sheet .qc141-band.tight .qc140-hb { padding: 0 18px; }
+  .qc138-sheet .qc141-band.tight .qc140-bn { padding-right: 18px; }
+  .qc138-sheet .qc141-band.tight .qc141-rws button { gap: 6px; font-size: 14.5px !important; }
+  .qc138-sheet .qc141-band.tight .qc140-blog { padding: 0 14px; font-size: 15.5px !important; }
+  /* tighter: the words go, the number stays */
+  .qc138-sheet .qc141-band.tighter .qc140-hb b { font-size: 16px !important; }
+  .qc138-sheet .qc141-band.tighter .qc140-bn span { display: none; }
+}
