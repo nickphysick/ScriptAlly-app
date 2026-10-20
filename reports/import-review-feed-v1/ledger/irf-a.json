@@ -106,5 +106,17 @@
   "where": "no 6 weeks shown",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "every control sits inside its own field",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3",
+  "where": "the door's note is under its control",
+  "ok": true,
+  "detail": "true"
  }
 ]

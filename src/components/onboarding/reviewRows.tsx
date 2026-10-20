@@ -229,7 +229,7 @@ const AgentDetails: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewAg
         {w == null ? (
           <div className="im-weeks">
             <span className="im-weeksunset" data-im="det-weeks-unset">{ROW_WORDS.weeksUnset}</span>
-            <button type="button" className="im-ghost" onClick={() => onPatch({ weeks: WEEKS_START })} data-im="det-weeks-set">{ROW_WORDS.setWeeks}</button>
+            <button type="button" className="im-ghostbtn" onClick={() => onPatch({ weeks: WEEKS_START })} data-im="det-weeks-set">{ROW_WORDS.setWeeks}</button>
           </div>
         ) : (
           <div className="im-weeks">

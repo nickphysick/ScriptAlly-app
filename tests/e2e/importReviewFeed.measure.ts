@@ -118,6 +118,14 @@ test("IRF-A the review list: navy band, Don't import in place with Undo, a panel
       open: p.querySelector('[data-im="det-open"]')?.getAttribute("aria-pressed"), closed: p.querySelector('[data-im="det-closed"]')?.getAttribute("aria-pressed"),
       note: p.querySelector('[data-im="det-doornote"]')?.textContent, unset: p.querySelector('[data-im="det-weeks-unset"]')?.textContent,
       slider: !!p.querySelector('input[type="range"]'), stars: /Agent fit/.test(p.textContent ?? ""), text: p.innerText,
+      /* GEOMETRY, which the attribute reads above cannot see: each detail's controls sit inside their
+         own field, and the door's note sits under its control (found by eye on dev: a class collision
+         put "Set a reply time" across the top of the panel). */
+      contained: [...p.querySelectorAll<HTMLElement>("[data-im^='det-'] button, [data-im^='det-'] input, [data-im='det-doornote']")].every((c) => {
+        const f = c.closest<HTMLElement>(".sf-field")!.getBoundingClientRect(), b = c.getBoundingClientRect();
+        return b.left >= f.left - 1 && b.right <= f.right + 1 && b.top >= f.top - 1 && b.bottom <= f.bottom + 1;
+      }),
+      noteUnder: (() => { const seg = p.querySelector(".im-seg")!.getBoundingClientRect(), n = p.querySelector("[data-im='det-doornote']")!.getBoundingClientRect(); return n.top >= seg.bottom - 1; })(),
     } : null;
   }, first);
   L.check("A3", "inset 82px from the row's left", panel?.inset === 82, `${panel?.inset}`);
@@ -127,8 +135,10 @@ test("IRF-A the review list: navy band, Don't import in place with Undo, a panel
   L.check("A3", "reply time Not set, no slider", panel?.unset === "Not set" && !panel?.slider, `${panel?.unset} ${panel?.slider}`);
   L.check("A3", "no Agent fit", panel?.stars === false, "");
   L.check("A3", "no 6 weeks shown", !/\b6 weeks\b/.test(panel?.text ?? ""), "");
+  L.check("A3", "every control sits inside its own field", panel?.contained === true, `${panel?.contained}`);
+  L.check("A3", "the door's note is under its control", panel?.noteUnder === true, `${panel?.noteUnder}`);
   await shot(page, "review-details-1440");
-  L.done(18);
+  L.done(20);
 });
 
 /* ═══ IRF-B · set-up steps centred ═════════════════════════════════════════════════════════════ */
