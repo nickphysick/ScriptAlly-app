@@ -30,7 +30,7 @@ import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } fr
 import { StageGlyph } from "./StageGlyph";
 import { bandArtOf } from "../../../lib/qcBandArt";
 import { BandMark, JumpMark, TONE_ART, TONE_ICON } from "./bandMarks";
-import { QcToolbar140, type Qc140Jump, type Qc140Pop } from "./QcToolbar140";
+import { QcToolbar140, type Qc140Jump, type Qc140JumpMode, type Qc140Pop } from "./QcToolbar140";
 import type { PopoverState } from "../../shell/ListPills";
 import { JUMP_COLUMN_LABEL, jumpColumn, jumpLabel, monthJumps } from "../../../lib/qc140";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
@@ -515,12 +515,21 @@ export const QcList138: React.FC<QcList138Props> = ({
   });
   /* v140 §A — the jump row: a button per group (its band's mark, its label, its count), or, ungrouped, one per month of
      the sort column's date, in list order */
+  /* v141 §D — two modes: GLYPH for Status and Who it's with (a 44 x 40 button, the glyph alone and a count badge, the
+     name on hover), NAME for Next action and Package (the name and count, no icon). The "+N more" menu draws a glyph
+     for every grouping but Package (every package shares one box, so its rows have none). Who it's with's Closed has
+     no art of its own, so it takes the closed glyph, the circle with a line. */
+  const jumpMode: Qc140JumpMode = groupBy === "none" ? "month" : groupBy === "status" || groupBy === "attention" ? "glyph" : "name";
+  const CLOSED_ART = { kind: "glyph", glyph: "cl", grey: false, badge: null, badgeTone: null } as const;
   const jumps: Qc140Jump[] = groupBy === "none"
     ? monthJumps(rows, jumpColumn(sort.key), nowMs).map((m) => ({ key: m.key, label: m.label, full: m.label, n: m.n, mark: null, to: { kind: "row", id: m.firstId } }))
     : groups.map((g) => {
         const tone = toneOf(g);
         const full = g.label || "All queries";
-        return { key: g.key, label: jumpLabel(groupBy, g.key, full), full, n: g.rows.length, mark: <JumpMark art={bandArtOf(groupBy, g.key)} tone={tone} />, to: { kind: "group", key: g.key } };
+        const art = groupBy === "attention" && g.key === "closed" ? CLOSED_ART : bandArtOf(groupBy, g.key);
+        const glyph = <JumpMark art={art} tone={tone} />;
+        return { key: g.key, label: jumpLabel(groupBy, g.key, full), full, n: g.rows.length,
+          mark: jumpMode === "glyph" ? glyph : null, menuMark: groupBy === "package" ? null : glyph, to: { kind: "group", key: g.key } };
       });
 
   const hl = (text: string): React.ReactNode => {
@@ -634,7 +643,7 @@ export const QcList138: React.FC<QcList138Props> = ({
               current group band stick under both */}
           {full ? band : null}
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
-            jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps}
+            jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps} jumpMode={jumpMode}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
             filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} />
           {applied}

@@ -22,6 +22,7 @@
  * ⚠️ ONE POPOVER AT A TIME: Group by, Filters and "+N more" share one `usePopover`, which closes on an outside press,
  *    and Escape closes the open one through the escape stack (ESC_LEVEL.page) — before the pin's Escape (pageMode).
  */
+import { DEFAULT_QC_GROUP } from "../../../lib/qcViewMemory";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { quietScroll, usePopover, type PopoverState } from "../../shell/ListPills";
@@ -32,6 +33,9 @@ import "./qcv140.css";
 export type Qc140Pop = "group" | "filters" | "jump";
 
 /** one jump: a group (its band) or, ungrouped, a month (its first row) */
+/** v141 §D — glyph (Status, Who it's with), name (Next action, Package) or month (ungrouped) */
+export type Qc140JumpMode = "glyph" | "name" | "month";
+
 export interface Qc140Jump {
   key: string;
   /** the button's words (Next action's short form) */
@@ -39,7 +43,10 @@ export interface Qc140Jump {
   /** the full name ("+N more"'s menu and the accessible name) */
   full: string;
   n: number;
+  /** the button's mark: the glyph in glyph mode, nothing in name and month mode */
   mark: React.ReactNode;
+  /** v141 §D — the "+N more" menu row's mark (its 32px column); absent means none (a package, a month) */
+  menuMark?: React.ReactNode;
   /** the group's key, or the first row's id for a month */
   to: { kind: "group"; key: string } | { kind: "row"; id: string };
 }
@@ -114,7 +121,7 @@ const JumpMenu: React.FC<{ anchor: HTMLElement; items: Qc140Jump[]; current: str
       {items.map((j) => (
         <button key={j.key} type="button" role="menuitem" className="qc140-jo" data-qc140="jump-item" data-gkey={j.key} aria-current={current === j.key ? "true" : undefined}
           onClick={() => onPick(j)}>
-          {j.mark}<b>{j.full}</b><i>{j.n}</i>
+          <span className="qc141-jmc" data-qc141="menu-mark">{j.menuMark ?? null}</span><b data-qc141="menu-name">{j.full}</b><i>{j.n}</i>
         </button>
       ))}
     </div>,
@@ -196,6 +203,7 @@ export interface QcToolbar140Props {
   /** ungrouped: the mono label for the sort column ("DUE", "QUERIED", "CHANGED") */
   jumpColumn: string | null;
   jumps: Qc140Jump[];
+  jumpMode?: Qc140JumpMode;
   find: string;
   onFind?: (v: string) => void;
   findRef?: React.Ref<HTMLInputElement>;
@@ -208,7 +216,7 @@ export interface QcToolbar140Props {
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, jumpMode = "name", find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLElement>(null);
@@ -216,7 +224,7 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
   const filRef = useRef<HTMLButtonElement>(null);
   const [folded, setFolded] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
-  const sig = jumps.map((j) => `${j.key}:${j.label}:${j.n}`).join("|") + `|${jumpColumn ?? ""}|${pinned ? "p" : ""}|${filterCount}|${groupBy}`;
+  const sig = jumps.map((j) => `${j.key}:${j.label}:${j.n}`).join("|") + `|${jumpColumn ?? ""}|${pinned ? "p" : ""}|${filterCount}|${groupBy}|${jumpMode}`;
 
   /* §A — the fold: every button whose right edge passes the row's width less 92 goes into "+N more" */
   useLayoutEffect(() => {
@@ -279,18 +287,20 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
   const foldedJumps = jumps.filter((j) => folded.includes(j.key));
   const moreCurrent = !!current && folded.includes(current);
   const groupOpt = GROUP_BY_OPTIONS.find((o) => o.key === groupBy);
-  const def = groupBy === "attention";
+  const def = groupBy === DEFAULT_QC_GROUP; /* v141 §C — Status is the default: no "on" state, no ✕ */
   const go = (j: Qc140Jump) => { pop.close(); jumpTo(rootRef.current, j); };
 
   return (
     <div className="qc140-tbw" data-qc140="toolbar-wrap">
       <div className="qc140-tb" data-qc140="toolbar" data-qc138="top" data-qcv="ws-head" data-pinned={pinned ? "" : undefined}>
-        <nav className="qc140-jr" ref={rowRef} data-qc140="jump" aria-label="Jump to">
+        <nav className={`qc140-jr qc141-jr--${jumpMode}`} ref={rowRef} data-qc140="jump" data-mode={jumpMode} aria-label="Jump to">
           {jumpColumn ? <span className="qc140-jcol" data-qc140="jump-col">{jumpColumn}</span> : null}
           {jumps.map((j) => (
             <button key={j.key} type="button" className="qc140-jb" data-qc140="jump-btn" data-gkey={j.key} aria-current={current === j.key ? "true" : undefined}
-              aria-label={`${j.full}, ${j.n} ${j.n === 1 ? "query" : "queries"}`} title={`${j.full} · ${j.n}`} disabled={loading} onClick={() => go(j)}>
-              {j.mark}<span className="qc140-jt">{j.label}</span><i>{j.n}</i>
+              aria-label={jumpMode === "glyph" ? `${j.full}, ${j.n}` : `${j.full}, ${j.n} ${j.n === 1 ? "query" : "queries"}`}
+              title={jumpMode === "glyph" ? undefined : `${j.full} · ${j.n}`} data-nm={j.full} disabled={loading} onClick={() => go(j)}>
+              {j.mark}<span className="qc140-jt">{j.label}</span><i data-qc141="jump-badge">{j.n}</i>
+              {jumpMode === "glyph" ? <span className="qc141-jtip" data-qc141="jump-tip" aria-hidden="true">{j.full}</span> : null}
             </button>
           ))}
           <button type="button" className="qc140-jmore" data-qc140="jump-more" data-n={foldedJumps.length} hidden={!foldedJumps.length}
@@ -320,8 +330,8 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
             {CARET}
           </button>
           {def ? null : (
-            <button type="button" className="qc140-x" data-qc140="group-reset" aria-label="Back to who it’s with" title="Back to who it’s with" disabled={loading}
-              onClick={() => { if (pop.open === "group") pop.close(); onGroup("attention"); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS140}</button>
+            <button type="button" className="qc140-x" data-qc140="group-reset" aria-label="Back to Status" title="Back to Status" disabled={loading}
+              onClick={() => { if (pop.open === "group") pop.close(); onGroup(DEFAULT_QC_GROUP); grpRef.current?.focus({ preventScroll: true }); }}>{CROSS140}</button>
           )}
         </span>
         {pop.open === "group" && pop.anchor ? <GroupMenu anchor={pop.anchor} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity} close={pop.close} /> : null}

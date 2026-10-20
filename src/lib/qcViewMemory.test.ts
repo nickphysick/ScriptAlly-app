@@ -36,14 +36,16 @@ describe("the view — per device (qh.qc.view)", () => {
     expect(QC_VIEW_KEY).toBe("qh.qc.view");
     expect(QC_VISIT_KEY).toBe("qh.qc.filters");
   });
-  it("a first visit: Who it's with, due first, comfortable", () => {
-    expect(readQcView()).toEqual({ group: "attention", sort: { key: "due", reversed: false }, density: "comfortable" });
+  /* v141 §C — the default grouping moved from "Who it's with" (attention) to Status */
+  it("a first visit: Status, due first, comfortable", () => {
+    expect(readQcView()).toEqual({ group: "status", sort: { key: "due", reversed: false }, density: "comfortable" });
   });
   it("round-trips grouping, sort and density", () => {
-    writeQcView({ group: "status" });
+    /* v141 §C — Status is the default now, so the round trip saves a grouping that is not (a saved choice is honoured) */
+    writeQcView({ group: "action" });
     writeQcView({ sort: { key: "agent", reversed: true } });
     writeQcView({ density: "compact" });
-    expect(readQcView()).toEqual({ group: "status", sort: { key: "agent", reversed: true }, density: "compact" });
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact" });
   });
   it("migrates sa.qcList.v1 once: its grouping and density move in, the old key goes", () => {
     g.window!.localStorage.setItem(QC_LIST_MEMORY_KEY, serialiseQcListMemory({ density: "compact", group: "package" }));

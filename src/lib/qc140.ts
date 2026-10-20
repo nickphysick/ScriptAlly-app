@@ -19,6 +19,7 @@ import { MONTHS_SHORT } from "./dates";
 import { SENT_NONE, type Qc138Filters, type Qc138SortKey } from "./qc138";
 import type { GroupBy } from "./qcCalView";
 import { placeOf } from "./responses";
+import { WHERE_LABEL } from "./qcSummary";
 import { sentWeeks, type SentWeek } from "./qcSentWeeks";
 
 /* ── the jump row ─────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -135,6 +136,7 @@ export function appliedChips(f: Qc138Filters, sentName: (k: string) => string): 
   if (f.past) out.push({ key: "qp:over", label: "Overdue", off: (g) => ({ ...g, past: false }) });
   if (f.waiting) out.push({ key: "qp:wait", label: "Waiting to hear back", off: (g) => ({ ...g, waiting: false }) });
   if (f.offers) out.push({ key: "qp:offers", label: "Offers", off: (g) => ({ ...g, offers: false }) });
+  if (f.where) out.push({ key: `where:${f.where}`, label: WHERE_LABEL[f.where].label, off: (g) => ({ ...g, where: null }) });
   const covered = new Set<QueryStatus>();
   for (const row of STAND_ROWS) {
     if (!standOn(f, row)) continue;

@@ -39,6 +39,37 @@ export function courtOf(status: QueryStatus): Court {
 export const isWithYou = (status: QueryStatus): boolean => courtOf(status) === "you";
 export const COURT_LABEL: Record<Court, string> = { you: "With you", agent: "With the agent", offer: "Offer", closed: "Closed" };
 
+/* ── Query Centre v141 · WHERE IT STANDS: the four sets ────────────────────────────────────────────────────────
+ * ⚠️ THE ONE SOURCE OF TRUTH for the hero's breakdown card, the pinned band's breakdown, the Filters menu's "Where it
+ *    stands" section and the QC141 locks. Four sets, disjoint, covering every query, so they always sum to the total:
+ *      you    — not closed, its court is the writer's (a request, an offer or a reply waiting on them);
+ *      agent  — the agent's court, NOT past the expected reply date;
+ *      quiet  — the agent's court, PAST it (`pastExpected`: the date the due ring and "Overdue since …" read);
+ *      closed — closed in any way, Withdrawn and Signed included (unlike `tileCourt`, which counts neither).
+ * ⚠️ "With you" is NOT the "Your move" quick pick: `isYourMoveRow` also takes agent-court queries past their date,
+ *    and those are "Gone quiet" here. Both stay as they are (Nick, v141).
+ */
+export type WhereKey = "you" | "agent" | "quiet" | "closed";
+export const WHERE_KEYS: readonly WhereKey[] = ["you", "agent", "quiet", "closed"];
+export function whereItStands(r: { status: QueryStatus | string; pastExpected: boolean }): WhereKey {
+  const c = courtOf(r.status as QueryStatus);
+  if (c === "you" || c === "offer") return "you";
+  if (c === "closed") return "closed";
+  return r.pastExpected ? "quiet" : "agent";
+}
+export function whereCounts(rows: readonly { status: QueryStatus | string; pastExpected: boolean }[]): Record<WhereKey, number> {
+  const out: Record<WhereKey, number> = { you: 0, agent: 0, quiet: 0, closed: 0 };
+  for (const r of rows) out[whereItStands(r)] += 1;
+  return out;
+}
+/** the card's and the menu's words; `short` is the compact header's and the tight band's */
+export const WHERE_LABEL: Record<WhereKey, { label: string; compact: string; short: string; title: string }> = {
+  you: { label: "With you", compact: "With you", short: "With you", title: "Replies and requests waiting on you" },
+  agent: { label: "With the agent", compact: "With agents", short: "With agents", title: "With agents, inside their reply window" },
+  quiet: { label: "Gone quiet", compact: "Gone quiet", short: "Quiet", title: "Past the agent\u2019s reply window, with no reply yet" },
+  closed: { label: "Closed", compact: "Closed", short: "Closed", title: "Offers taken, passes and no-replies you\u2019ve closed" },
+};
+
 /* ── stages, in the summary's order. R&R is a live status and gets a column only when one exists. ── */
 export const BASE_STAGES: readonly QueryStatus[] = [
   QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
