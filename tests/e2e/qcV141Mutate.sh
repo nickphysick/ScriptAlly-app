@@ -35,16 +35,17 @@ PY
   echo "$lock $name exit $code"
 }
 
+# v141.1 — the L1 and L2 breaks quote whereItStands with its clock (whereItStands(r, now)), as it now reads
 SUM=src/lib/qcSummary.ts
 F138=src/lib/qc138.ts
 WH=src/components/queries/centre/QcWhere141.tsx
 CSS=src/components/queries/centre/qcv141.css
 
 mutate L1 drop-closed "$SUM" \
-  'for (const r of rows) out[whereItStands(r)] += 1;' 'for (const r of rows) { const k = whereItStands(r); if (k !== "closed") out[k] += 1; }'
+  'for (const r of rows) out[whereItStands(r, nowMs)] += 1;' 'for (const r of rows) { const k = whereItStands(r, nowMs); if (k !== "closed") out[k] += 1; }'
 mutate L2 overdate-you-quiet "$F138" \
-  'if (skip !== "where" && f.where && whereItStands(r) !== f.where) return false;' \
-  'if (skip !== "where" && f.where && whereItStands(r) !== f.where && !(f.where === "quiet" && r.court === "you" && r.expectedMs != null && r.expectedMs <= now)) return false;'
+  'if (skip !== "where" && f.where && whereItStands(r, now) !== f.where) return false;' \
+  'if (skip !== "where" && f.where && whereItStands(r, now) !== f.where && !(f.where === "quiet" && r.court === "you" && r.expectedMs != null && r.expectedMs <= now)) return false;'
 mutate L3 card-own-state "$WH" \
   '}> = ({ counts, total, heard, heardPct, where, onPick }) => {' \
   '}> = ({ counts, total, heard, heardPct }) => { const [where, setW] = React.useState<WhereKey | null>(null); const onPick = (k: WhereKey) => setW((x) => (x === k ? null : k));'

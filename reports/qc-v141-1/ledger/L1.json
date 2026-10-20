@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L1",
+  "where": "population: With you holds both kinds (the writer's court and nudge-due agent-court rows)",
+  "ok": true,
+  "detail": "30 of 93"
+ },
+ {
+  "lock": "L1",
+  "where": "the quick pick's ids are the card's With you ids",
+  "ok": true,
+  "detail": "30 vs 30; only left:  · only right: "
+ },
+ {
+  "lock": "L1",
+  "where": "…and the rows': the writer's court plus every agent-court row whose Next move is Nudge",
+  "ok": true,
+  "detail": "30 vs 30; only left:  · only right: "
+ },
+ {
+  "lock": "L1",
+  "where": "card, band and menu state one With you count, and the quick pick's",
+  "ok": true,
+  "detail": "card 30 · band 30 · menu 30 · quick pick 30 · rows 30"
+ },
+ {
+  "lock": "L1",
+  "where": "card, band and menu agree on all four",
+  "ok": true,
+  "detail": "{\"you\":30,\"agent\":13,\"quiet\":33,\"closed\":17} · {\"you\":30,\"agent\":13,\"quiet\":33,\"closed\":17} · {\"you\":30,\"agent\":13,\"quiet\":33,\"closed\":17}"
+ }
+]

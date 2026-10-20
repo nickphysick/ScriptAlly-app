@@ -1,0 +1,5 @@
+{"lock":"L1","break":"v141-quiet","red":true,"first":"  ✗ L1 · …and the rows': the writer's court plus every agent-court row whose Next move is Nudge — 17 vs 30; only left:  · only right: q1411-at28 seed-query-5 cor-move-b seed-pkgq-7 seed-cal-near-q seed-query-3"}
+{"lock":"L2","break":"plus-one-day","red":true,"first":"  ✗ L2 · population: both sets, and the seeded edges in each — quiet 31 · agent-court you 15"}
+{"lock":"L3","break":"lte-at-reply-date","red":true,"first":"  ✗ L3 · 1512 q1411-at0 is agent — in you"}
+{"lock":"L3","break":"gte-at-window-end","red":true,"first":"  ✗ L3 · 1512 q1411-at28 is you — in quiet"}
+{"lock":"L4","break":"double-count","red":true,"first":"  ✗ L4 · the card's four sum to the total — {\"you\":30,\"agent\":13,\"quiet\":46,\"closed\":17} vs 93"}
