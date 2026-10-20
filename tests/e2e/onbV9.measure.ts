@@ -853,7 +853,8 @@ test.describe("G", () => {
       if (path === "remove") {
         expect([out.result.agents.length, out.result.queries.length, qn]).toEqual([2, 2, 2]);
         expect(out.notice?.count, "the removed row is in the skipped-rows notice").toBe(1);
-        expect(out.notice!.rows[0]).toMatchObject({ status: "Queried", sentDate: "2026-02-10", reason: "Row has no agent name or agency to identify it" });
+        /* RE-POINTED (import review v1, Nick's ruling): the writer removed it, so the reason is theirs */
+        expect(out.notice!.rows[0]).toMatchObject({ status: "Queried", sentDate: "2026-02-10", reason: "You chose not to import this" });
         expect(out.result.queries.length + out.notice!.count, "written + listed = the rows in the file").toBe(3);
       } else {
         expect([out.result.agents.length, out.result.queries.length, qn]).toEqual([3, 3, 3]);

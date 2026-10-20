@@ -509,20 +509,24 @@ test.describe("OB2", () => {
         const ready = () => page.evaluate(() => document.querySelector('[data-im="ready-chip"]')?.textContent ?? "");
         const first = await ids(); const ready0 = await ready();
         expect(first.length, "there are rows").toBe(5);
-        /* remove, Undo: back in its place */
+        /* RE-POINTED (import review v1): a row the writer chose not to import STAYS IN ITS PLACE, says
+           "Won't be imported" and carries its own Undo. The toast and the tray are retired. */
+        const out = (id: string) => page.evaluate((x) => document.querySelector(`[data-row-id="${x}"]`)?.getAttribute("data-out"), id);
+        /* Don't import, Undo: back in its place, never gone from it */
         await page.locator('[data-row-id="a3"] [data-im="row-remove"]').click();
-        expect(await ids()).not.toContain("a3");
+        expect(await ids(), "the row stays in its place").toEqual(first);
+        expect(await out("a3")).toBe("1");
         expect(await ready(), "the ready count fell by one").not.toBe(ready0);
-        await expect(page.locator('[data-im="toast"]')).toContainText("set aside");
-        await page.locator('[data-im="toast-undo"]').click();
-        expect(await ids(), "Undo puts the row back in its place").toEqual(first);
-        /* remove, restore from the tray: back */
+        expect(await page.locator('[data-im="toast"]').count(), "no toast").toBe(0);
+        await page.locator('[data-row-id="a3"] [data-im="row-undo"]').click();
+        expect(await out("a3"), "Undo brings it back").toBe("0");
+        /* a second one: the header counts it, and Undo puts it back */
         await page.locator('[data-row-id="a4"] [data-im="row-remove"]').click();
-        expect(await ids()).not.toContain("a4");
-        await page.locator('[data-im="tray-head"]').click();
-        await page.locator('[data-tray-id="a4"] [data-im="tray-restore"]').click();
+        expect(await page.locator('[data-im="out-count"]').textContent()).toBe("1 not importing");
+        expect(await page.locator('[data-im="tray"]').count(), "no tray").toBe(0);
+        await page.locator('[data-row-id="a4"] [data-im="row-undo"]').click();
         record(page, "V5", "afterRestore", { ids: await ids(), ready: await ready(), ready0 });
-        expect(await ids(), "the tray's Restore puts the row back in its place").toEqual(first);
+        expect(await ids(), "every row in its place").toEqual(first);
         expect(await ready()).toBe(ready0);
         expect(await page.locator('[data-im="reset"]').count(), "there is no Reset").toBe(0);
       });
@@ -540,7 +544,9 @@ test.describe("OB2", () => {
           const on = async (key: string) => showCard(page, key);
           await lab(page, "s=review&fx=review");
           await page.waitForSelector('[data-im="review"][data-step="agents"]');
-          await row("a1").getByTitle("Don't import").click();                                              // one removal
+          /* import review v1: the ✕ (titled "Don't import") is now the labelled "Don't import" pill —
+             the same control and the same removal, so the same selector by its handle */
+          await row("a1").locator('[data-im="row-remove"]').click();                                          // one removal
           await (await on("a-a8")).getByPlaceholder("Agency name").fill("Hale House");                      // agency saved
           await (await on("a-a8")).getByRole("button", { name: "Save agency" }).click();
           await (await on("a-a9")).getByRole("button", { name: "Carry on without an agency" }).click();     // agency waived

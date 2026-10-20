@@ -190,6 +190,9 @@
 
 /* ── the Smart Import hand-off: the card, and what happens next beside it ── */
 .sf .o9-conf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 28px; align-items: start; max-width: 1140px; }
+/* The confirm step's column IS its card row's width (Part B): the title and the row share one width
+   and one centre. In the 1280 wide column the 1140 row sat left of the column's centre. */
+.sf .sf-col[data-screen="confirm"] { max-width: 1140px; }
 .sf .o9-conf .sf-stepcard { min-width: 0; }
 .o9-d2 { animation-delay: .2s; }
 .sf .o9-how { display: grid; gap: 14px; min-width: 0; }

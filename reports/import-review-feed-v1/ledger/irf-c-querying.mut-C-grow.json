@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "C0",
+  "where": "the hold is real",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C0",
+  "where": "cards to measure",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C1",
+  "where": "chart-card carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "chart-card renders nothing inside",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C2",
+  "where": "chart-card no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "closed-hoop carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "closed-hoop renders nothing inside",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C2",
+  "where": "closed-hoop no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "agents-hoop carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "agents-hoop renders nothing inside",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C2",
+  "where": "agents-hoop no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "focus carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "focus renders nothing inside",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C2",
+  "where": "focus no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "panel carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "panel renders nothing inside",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C2",
+  "where": "panel no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "chart-card loading box = loaded box",
+  "ok": false,
+  "detail": "held 298,252 708×720 · loaded 298,252 708×388"
+ },
+ {
+  "lock": "C3",
+  "where": "closed-hoop loading box = loaded box",
+  "ok": false,
+  "detail": "held 298,278 341×720 · loaded 298,667 341×199"
+ },
+ {
+  "lock": "C3",
+  "where": "agents-hoop loading box = loaded box",
+  "ok": false,
+  "detail": "held 665,278 341×720 · loaded 665,667 341×199"
+ },
+ {
+  "lock": "C3",
+  "where": "focus loading box = loaded box",
+  "ok": false,
+  "detail": "held 1032,307 422×720 · loaded 1032,307 422×244"
+ },
+ {
+  "lock": "C3",
+  "where": "panel loading box = loaded box",
+  "ok": false,
+  "detail": "held 1032,1062 422×720 · loaded 1032,586 422×250"
+ }
+]
