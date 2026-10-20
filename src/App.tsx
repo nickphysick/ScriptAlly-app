@@ -26,7 +26,6 @@ import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
-import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
@@ -341,7 +340,6 @@ function AppContent() {
      routes to the Queries hub and hands it this SEED, which opens inline create mode there. A new
      object per invocation, so a repeat press with no seeds still fires the hub's effect. */
   const [createQuerySeed, setCreateQuerySeed] = useState<{ agentId: string | null; manuscriptId: string | null } | null>(null);
-  const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
   // Query actions v1.1 — the Pro paste-an-email lane, opened from the drawer's query picker. It
   // lived in RecordResponseScreen (retired); App hosts the EXISTING flow so it sits above everything.
@@ -786,13 +784,6 @@ function AppContent() {
             separate element and is untouched. */}
       </AppShell>
       </EditQueryHost>
-
-      {/* Focus Mode Overlay Dialog Form */}
-      <AddAgentFocusForm
-        isOpen={isAddAgentOpen}
-        onClose={() => setIsAddAgentOpen(false)}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
 
       <AddManuscriptFocusForm
         isOpen={isAddManuscriptOpen}

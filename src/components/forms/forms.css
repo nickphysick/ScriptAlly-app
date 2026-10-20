@@ -191,9 +191,6 @@
   resize: vertical;
 }
 
-/* two-up paired field row (short fields side by side) */
-.sa-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.sa-row2 > * { min-width: 0; }
 
 /* selection chips — a multi-select field (e.g. materials). Selected = the soft-pink token. */
 .sa-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
@@ -456,35 +453,12 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Add an Agent form — single scrolling sectioned layout.
-   Ported verbatim from design-reference scriptally-add-agent-full-v3.html.
+   Shared form controls first built for the retired add-agent pop-up (deleted when every "Add an
+   agent" moved to the slide-in new-agent panel). What remains is what other components still
+   render: the genre and country comboboxes and the fit stars (`sa-aa-`), the label suffix, the
+   segmented toggle and the week slider.
    Namespaced `sa-aa-` so these never collide with the shared chip/field rules.
    ────────────────────────────────────────────────────────────────────────── */
-
-/* header-band avatar: profile Lottie disc + overlapping plus badge */
-.sa-aa-avatar { position: relative; width: 34px; height: 34px; }
-.sa-aa-avatar .sa-aa-disc {
-  width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
-  display: flex; align-items: center; justify-content: center; background: #f5e2da;
-}
-.sa-aa-avatar .sa-aa-plus {
-  position: absolute; right: -5px; bottom: -3px;
-  width: 15px; height: 15px; border-radius: 50%;
-  background: #fdfaf5; border: 1px solid rgba(124, 58, 42, 0.2);
-  display: flex; align-items: center; justify-content: center;
-  color: #7c3a2a; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.12);
-}
-
-/* labelled section divider (mono burgundy-rose, hairline rule trailing) */
-.sa-section {
-  display: flex; align-items: center; gap: 8px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
-  color: #b58d7a;
-  margin: 18px 0 11px;
-}
-.sa-section::after { content: ''; flex: 1; height: 1px; background: #efe3d6; }
-.sa-section.first { margin-top: 2px; }
 
 /* "optional" / helper suffix on a label */
 .sa-label .sa-opt {
@@ -545,28 +519,6 @@
 .sa-wk-unk:hover .sa-wk-unktip { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .sa-wk-unktip { transition: none; } }
 
-/* materials wanted — pill toggle chips + revealed detail inputs */
-.sa-aa-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.sa-aa-chip {
-  font-size: 11px; color: #9c8878;
-  border: 0.5px solid #e0d5c8; border-radius: 20px;
-  padding: 6px 12px; background: #fff; cursor: pointer; user-select: none;
-  transition: all 0.15s;
-}
-.sa-aa-chip:hover { border-color: #c9a89e; }
-.sa-aa-chip.on { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; font-weight: 500; }
-.sa-aa-mat-details { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 9px; }
-.sa-aa-mat-d { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #9c8878; }
-.sa-aa-mat-d input {
-  width: 54px; text-align: center; background: #fff;
-  border: 0.5px solid #e0d5c8; border-radius: 7px; padding: 5px;
-  font-size: 12px; color: #3a1c14; outline: none;
-}
-.sa-aa-mat-d input::placeholder { color: #c8b8a8; }
-.sa-aa-mat-d input.wide { width: 92px; text-align: left; }
-.sa-aa-mat-d input.other-in { width: 248px; max-width: 100%; text-align: left; }
-.sa-aa-mat-d input:focus { border-color: #8a9e88; }
-.sa-aa-mat-opt { color: #bcae9e; font-style: italic; }
 
 /* genre combobox — chips inside the control + filtering menu */
 .sa-aa-combo { position: relative; }
@@ -635,8 +587,6 @@
 }
 
 /* agent fit — 5 stars + meaning badge */
-.sa-aa-fit-q { font-size: 12.5px; color: #6a5c50; margin-bottom: 9px; }
-.sa-aa-fit-note { font-size: 11px; font-style: italic; color: #b0a090; margin-top: 9px; line-height: 1.45; }
 .sa-aa-fit-rate { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .sa-aa-stars { display: flex; gap: 4px; }
 .sa-aa-star { cursor: pointer; line-height: 0; display: inline-flex; transition: transform 0.12s; background: none; border: 0; padding: 0; }
@@ -653,25 +603,6 @@
 }
 .sa-aa-fit-meaning.empty { background: transparent; border-color: transparent; color: #bcae9e; }
 
-/* socials repeater */
-.sa-aa-soc-row { display: flex; gap: 7px; align-items: center; margin-bottom: 7px; }
-.sa-aa-soc-row .sa-dd { width: 132px; flex-shrink: 0; }
-.sa-aa-soc-row .sa-dd .sa-field { margin-bottom: 0; }
-.sa-aa-soc-url { flex: 1; margin-bottom: 0 !important; }
-.sa-aa-soc-x {
-  flex-shrink: 0; width: 32px; height: 32px; border-radius: 7px;
-  border: 0.5px solid #e8d6cc; background: #fff; color: #b58d7a;
-  cursor: pointer; font-size: 16px; line-height: 1;
-}
-.sa-aa-soc-x:hover { background: #f7ebe5; color: #7c3a2a; }
-.sa-aa-add-soc {
-  width: 100%; border: 1px dashed #d8c5b6; background: transparent; border-radius: 9px;
-  padding: 10px; cursor: pointer; margin-top: 2px;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #9c8878;
-  transition: all 0.15s;
-}
-.sa-aa-add-soc:hover { border-color: #7c3a2a; color: #7c3a2a; background: #fbf2ec; }
 
 /* a field block with no trailing margin collapse when stacked in a section */
 .sa-fld { margin-bottom: 13px; }
