@@ -42,7 +42,9 @@ export type LoaderPhase = "opening" | "reading" | "tidying" | "retry";
 export interface LoaderProgress {
   /** The file's row count (countDataRows), known before the call. */
   rowsTotal: number;
-  /** Rows the server has read so far — capped at rowsTotal. */
+  /** Rows the server has counted so far — NOT capped: the counter is an estimate from the model's
+   *  output (half its records), so it can pass rowsTotal on a sheet where one row holds two agents or
+   *  countDataRows skipped blank rows. footBar decides what each part of the bar may claim from it. */
   rowsDone: number;
   phase: LoaderPhase;
   /** "live" while the server's row count is arriving (or may yet); "none" once it cannot — the
@@ -60,7 +62,7 @@ export function applyImportUpdate(
 ): LoaderProgress {
   switch (u.type) {
     case "start": return { ...PROGRESS_START, rowsTotal: u.rowsTotal };
-    case "rows": return { ...p, phase: "reading", stream: "live", rowsDone: Math.min(Math.max(0, u.rows), p.rowsTotal) };
+    case "rows": return { ...p, phase: "reading", stream: "live", rowsDone: Math.max(0, u.rows) };
     case "retry": return { ...p, phase: "retry", rowsDone: 0 };
     case "quiet": return p.phase === "opening" ? { ...p, stream: "none" } : p;
     case "plain": return { ...p, phase: "opening", stream: "none", rowsDone: 0 };
@@ -116,10 +118,48 @@ export function rungLabel(rung: number): string {
 export const stepRung = (prev: number | null, target: number) =>
   prev === null ? target : prev + Math.sign(target - prev);
 
-/** Seconds left: the estimate until the first 6 rows are in, then the observed pace. */
-export function secondsLeft(rowsTotal: number, rowsDone: number, elapsedS: number): number {
-  if (rowsDone < 6) return estSeconds(rowsTotal) - elapsedS;
-  return (rowsTotal - rowsDone) * (elapsedS / rowsDone) + 1;
+/** How long the label must have pointed the same way before it moves (the live run's flicker). */
+export const HOLD_S = 2;
+
+/** The time-left label's smoothing state: the rung shown, the rung it would move to next, and since
+ *  when that next rung has been the answer (on the read's clock, in seconds). */
+export interface TimeHold { rung: number; next: number | null; since: number }
+
+/**
+ * Hysteresis for the time-left label. It moves one rung towards the target, and only once that next
+ * rung has been the answer for HOLD_S seconds; the target returning to the shown rung cancels the move.
+ * On the live 150-row read the label flipped between neighbours every 0.1–0.5 s at each boundary —
+ * the pace sitting on an edge — and stepRung alone could not stop that.
+ */
+export function holdRung(prev: TimeHold | null, target: number, nowS: number): TimeHold {
+  if (!prev) return { rung: target, next: null, since: nowS };
+  if (target === prev.rung) return prev.next === null ? prev : { rung: prev.rung, next: null, since: nowS };
+  const next = stepRung(prev.rung, target);
+  if (prev.next !== next) return { rung: prev.rung, next, since: nowS };
+  return nowS - prev.since >= HOLD_S ? { rung: next, next: null, since: nowS } : prev;
+}
+
+/** Where the count first went above zero: the read's clock then, and the count it arrived at. */
+export interface FirstRow { atS: number; rows: number }
+
+/**
+ * Seconds left: the estimate until 6 rows are in, then the observed pace.
+ *
+ * The pace is measured FROM THE FIRST COUNTED ROW, so the start-up — the file going up, the model's
+ * first token, 3.2 s on the live run — is not spread across every row (it put "about 2½ minutes" on a
+ * 2-minute file at row 6). Without a first row (a caller that predates it) the pace runs from the
+ * read's start, as before. While under a quarter of the rows are in, the answer never exceeds what
+ * the original estimate has left: a few rows are too little evidence to tell a writer it will take
+ * longer than they were told.
+ */
+export function secondsLeft(rowsTotal: number, rowsDone: number, elapsedS: number, firstRow: FirstRow | null = null): number {
+  const fromEstimate = estSeconds(rowsTotal) - elapsedS;
+  if (rowsDone < 6) return fromEstimate;
+  const span = firstRow ? rowsDone - firstRow.rows : rowsDone;
+  if (span <= 0) return fromEstimate;
+  const pace = firstRow ? (elapsedS - firstRow.atS) / span : elapsedS / rowsDone;
+  const fromPace = (rowsTotal - rowsDone) * pace + 1;
+  return rowsDone < rowsTotal / 4 ? Math.min(fromPace, Math.max(0, fromEstimate)) : fromPace;
 }
 
 export interface FootInput {
@@ -129,16 +169,22 @@ export interface FootInput {
   sinceRetryS: number;
   /** The loader has finished its settle: every shown card has crystallised. */
   ready: boolean;
-  /** The time-left rung shown last (smoothing), or null. */
-  rung: number | null;
+  /** The time-left rung shown last, or null. Superseded by `hold`, which carries it. */
+  rung?: number | null;
+  /** The smoothing state returned last time (hysteresis), or null for a fresh countdown. */
+  hold?: TimeHold | null;
+  /** Where the count first went above zero, for the pace (secondsLeft). */
+  firstRow?: FirstRow | null;
 }
 export interface FootBar {
   left: string;
   right: string;
   /** Bar fill in %, or null for the indeterminate shimmer. */
   fill: number | null;
-  /** The rung now shown, to feed back in as `rung` next time (null when no countdown is shown). */
+  /** The rung now shown (null when no countdown is shown). */
   rung: number | null;
+  /** The smoothing state, to feed back in as `hold` next time (null when no countdown is shown). */
+  hold: TimeHold | null;
 }
 
 /** The ready line's left text — the loader's READY_TXT, held equal to it by a test. */
@@ -149,18 +195,30 @@ export function footBar(i: FootInput): FootBar {
   const { rowsTotal: N, rowsDone, phase, stream } = i.progress;
   const d = Math.min(rowsDone, N);
   const est = estSeconds(N);
-  const countdown = (sec: number) => { const r = stepRung(i.rung, leftRung(sec)); return { right: rungLabel(r), rung: r }; };
+  // The clock the hold is measured on: the read's own, which keeps running through a retry.
+  const prevHold = i.hold ?? (i.rung === null || i.rung === undefined ? null : { rung: i.rung, next: null, since: i.elapsedS });
+  const countdown = (sec: number) => { const h = holdRung(prevHold, leftRung(sec), i.elapsedS); return { right: rungLabel(h.rung), rung: h.rung, hold: h }; };
+  const none = { rung: null, hold: null };
+  // Until the file has been counted there is nothing true to say on the right: never "0 rows".
+  const known = N > 0;
 
-  if (i.ready) return { left: FOOT_READY, right: `${N} of ${N} rows read`, fill: 100, rung: null };
-  if (phase === "tidying") return { left: "Tidying records…", right: "almost there", fill: 100, rung: null };
+  if (i.ready) return { left: FOOT_READY, right: known ? `${N} of ${N} rows read` : "", fill: 100, ...none };
+  if (phase === "tidying") return { left: "Tidying records…", right: "almost there", fill: 100, ...none };
   if (phase === "retry") return { left: "Having another look…", ...countdown(est - i.sinceRetryS), fill: 2 };
   if (stream === "none") {
     // No count is coming: fill by the clock against the estimate, held at 90% until the result.
     const fill = Math.min(90, (i.elapsedS / est) * 100);
-    if (i.elapsedS >= est) return { left: "Reading your file…", right: "almost there", fill, rung: null };
+    if (!known) return { left: "Reading your file…", right: "", fill, ...none };
+    if (i.elapsedS >= est) return { left: "Reading your file…", right: "almost there", fill, ...none };
     return { left: "Reading your file…", ...countdown(est - i.elapsedS), fill };
   }
-  if (phase === "opening") return { left: "Opening your file…", right: `${N} rows · ${fmtEst(est)}`, fill: null, rung: null };
-  if (d === 0) return { left: "Reading your first rows…", right: `${N} rows · ${fmtEst(est)}`, fill: null, rung: null };
-  return { left: `Reading row ${d} of ${N}`, ...countdown(secondsLeft(N, d, i.elapsedS)), fill: 2 + (d / N) * 94 };
+  if (phase === "opening") return { left: "Opening your file…", right: known ? `${N} rows · ${fmtEst(est)}` : "", fill: null, ...none };
+  if (d === 0) return { left: "Reading your first rows…", right: known ? `${N} rows · ${fmtEst(est)}` : "", fill: null, ...none };
+  // The fill's span is max(N, count + 1), so while the stream runs the fraction is always below one:
+  // below N it is d / N exactly; at N and past it (the counter overshooting) it keeps creeping towards
+  // 96% and never reaches it. 100% is the result's alone (tidying, above) — the stream's end, never a
+  // count. And from N on there is no honest countdown left to give, so the time left says so.
+  const fill = 2 + (rowsDone / Math.max(N, rowsDone + 1)) * 94;
+  if (rowsDone >= N) return { left: `Reading row ${N} of ${N}`, right: "almost there", fill, ...none };
+  return { left: `Reading row ${d} of ${N}`, ...countdown(secondsLeft(N, d, i.elapsedS, i.firstRow ?? null)), fill };
 }
