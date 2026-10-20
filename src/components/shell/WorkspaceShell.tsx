@@ -25,6 +25,7 @@
 import { isLivingRoute } from "../../lib/livingRoutes";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { noteRoute } from "../../lib/routeTrail";
 import { MastheadSectionContext } from "./mastheadSection";
 import {
   Book, ChevronDown, ChevronsUpDown,
@@ -163,6 +164,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
+  /* Help Centre v1 — the trail the Help Centre reads to ring the page the writer came from */
+  useEffect(() => { noteRoute(pathname); }, [pathname]);
   const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);

@@ -24,6 +24,7 @@
 
 import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { ACCOUNT_SECTION_PATHS } from "../../lib/accountRoutes";
+import { routeBase } from "../../lib/helpPath";
 
 export interface ShellV2Page {
   key: string;
@@ -158,7 +159,7 @@ export function shellSectionKeyForPath(
   pathname: string
 ): "dashboard" | ShellV2Section["key"] | null {
   const hit = shellPageForPath(pathname);
-  if (!hit) return CRUMB_EXTRAS[pathname]?.rail ?? null;
+  if (!hit) return CRUMB_EXTRAS[routeBase(pathname)]?.rail ?? null;
   return hit.section ? hit.section.key : "dashboard";
 }
 
@@ -202,7 +203,7 @@ export function railClickPlan(
 export function shellCrumbForPath(
   pathname: string
 ): { section: string; page: string } | null {
-  const extra = CRUMB_EXTRAS[pathname];
+  const extra = CRUMB_EXTRAS[routeBase(pathname)];
   if (extra) return { section: extra.section, page: extra.page };
   const hit = shellPageForPath(pathname);
   if (!hit) return null;

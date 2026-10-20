@@ -45,6 +45,7 @@ import { FoundersPage } from "./marketing/FoundersPage";
 import { LegalPage } from "./marketing/LegalPage";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
+import { routeBase } from "./lib/helpPath";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath, todoRedirectFor } from "./lib/todoRoutes";
 import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
@@ -569,7 +570,7 @@ function AppContent() {
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
-  if (!WORKSPACE_PATHS.has(path)) {
+  if (!WORKSPACE_PATHS.has(routeBase(path))) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -776,7 +777,8 @@ function AppContent() {
         )}
         {routeKey === "help" && (
           <StagePage active>
-            <div className="sv2-focuscol"><HelpCentre /></div>
+            {/* Help Centre v1 — its own column (1120, 40px either side), not the 860px focus column */}
+            <HelpCentre />
           </StagePage>
         )}
         {routeKey === "import" && (

@@ -15,6 +15,7 @@
  * a route here without building it is the one way to reintroduce a dead link.
  */
 import { ACCOUNT_SECTION_PATHS } from "./accountRoutes";
+import { routeBase } from "./helpPath";
 
 /**
  * ⚠️⚠️ AMENDMENT 1 (G) — EVERY SIGNED-IN ROUTE IS A WORKSPACE ROUTE NOW, and the dashboard is the
@@ -67,6 +68,7 @@ export type ShellKind = "workspace" | "topnav";
  * both directions — the whole point of the rule is what it does in each.
  */
 export function shellForRoute(path: string, isDev: boolean): ShellKind {
+  path = routeBase(path);
   if (WORKSPACE_SHELL_PATHS.has(path)) return "workspace";
   if (TOPNAV_SHELL_PATHS.has(path)) return "topnav";
   if (isDev) {

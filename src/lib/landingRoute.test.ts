@@ -63,9 +63,11 @@ describe("Phase 4 · a first-ever load with empty persistence", () => {
 
   it("resolves to Dashboard on an unknown path", () => {
     /* the guard sits below every early return, so this is the last word for any path the
-       workspace does not name */
-    expect(code).toContain("if (!WORKSPACE_PATHS.has(path)) {");
-    const guard = code.slice(code.indexOf("if (!WORKSPACE_PATHS.has(path)) {"));
+       workspace does not name. Help Centre v1 retarget: the guard asks `routeBase(path)` so an article
+       (`/help/{slug}`) is the Help Centre; the law (an unnamed path lands on the Dashboard) is unchanged. */
+    const G = "if (!WORKSPACE_PATHS.has(routeBase(path))) {";
+    expect(code).toContain(G);
+    const guard = code.slice(code.indexOf(G));
     expect(guard.slice(0, 120)).toContain('<Navigate to="/dashboard" replace />');
   });
 

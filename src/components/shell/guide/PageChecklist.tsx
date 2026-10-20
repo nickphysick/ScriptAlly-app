@@ -37,7 +37,8 @@ import {
 import "./pageChecklist.css";
 import { GuideRing } from "./GuideRing";
 import {
-  autoOpenedThisSession, clearGuide, markAutoOpened, publishGuide, readSkipped, stampVisit, useGuidesOff, writeSkipped,
+  autoOpenedThisSession, clearGuide, markAutoOpened, publishGuide, readSkipped, stampLearned, stampVisit, takeGuideRequest, takeRestart,
+  useGuideRequest, useGuidesOff, writeSkipped,
 } from "../../../lib/guideHub";
 import { ITEM_ARTICLES, articleHref } from "../../../lib/helpArticles";
 import { AnchoredPortal, useAnchoredPopover } from "../useAnchoredPopover";
@@ -172,13 +173,16 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   /* opened from the Help menu (restore, or a finished guide opened again): the pill shows for the rest of the visit */
   const [reopened, setReopened] = useState(false);
   const [said, setSaid] = useState("");
+  /* Help Centre v1 — asked for from another route ("Show me in the app", "Start on {Page}", a card's Restart): the guide
+     shows for the rest of this visit even when it is hidden, finished, or every guide is switched off */
+  const [asked, setAsked] = useState(false);
   const pillRef = useRef<HTMLButtonElement | null>(null);
   const popRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const noteRef = useRef<HTMLDivElement | null>(null);
   const clockRef = useRef<HTMLSpanElement | null>(null);
 
-  const shown = p.active && !off && (!p.hidden || reopened) && (!finishedBefore || reopened);
+  const shown = p.active && (asked || (!off && (!p.hidden || reopened) && (!finishedBefore || reopened)));
 
   const say = (t: string) => { setSaid(""); window.setTimeout(() => setSaid(t), 30); };
 
@@ -194,8 +198,10 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   const visit = useRef({ pulsed: false, quietSeen: false });
   useEffect(() => {
     if (!p.active || p.hidden && !reopened) { setOpen(false); setClosing(false); setSpot(null); setNote(null); setSure(false); }
-    if (!p.active) { visit.current = { pulsed: false, quietSeen: false }; setReopened(false); }
+    if (!p.active) { visit.current = { pulsed: false, quietSeen: false }; setReopened(false); setAsked(false); }
   }, [p.active, p.hidden, reopened]);
+  /* every page stays mounted: skips cleared from the Help Centre (a card's Restart) are read again on arrival */
+  useEffect(() => { if (p.active) setSkipped(readSkipped(page)); }, [p.active, page]);
 
   /* ── C.2 the bump and the pulse ── */
   const bump = useCallback(() => replay(pillRef.current, "bump", 450), []);
@@ -297,6 +303,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     const fresh = items.find((it) => done[it.key] && !before.has(it.key));
     const finishedNow = all && !wasAll;
     if (!fresh && !finishedNow) return;
+    if (finishedNow) stampLearned(page);
     if (fresh) { setJust(fresh.key); window.setTimeout(() => setJust(null), 600); say(`${fresh.title} done. ${n} of ${items.length}.`); }
     setLeaving(false); setPaused(false);
     setNote({ key: (fresh?.key ?? items[items.length - 1].key) as K, final: finishedNow });
@@ -475,6 +482,41 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     return undefined;
   }, [p.active, page, n, items.length, nextItem, hubState, cmds]);
   useEffect(() => { if (!p.active) clearGuide(page); }, [p.active, page]);
+
+  /* ── Help Centre v1 — a request from another route, taken once this page is on screen AND ready ──
+     ⚠️ TAKEN AND ACTED ON IN TWO STEPS: taking it clears the store, which re-renders this effect away; the item waits
+        in `asking` until its control is in the DOM (a list still drawing its first rows), then its spotlight starts. */
+  const req = useGuideRequest(page);
+  const [asking, setAsking] = useState<{ key: K | null } | null>(null);
+  useEffect(() => {
+    if (!req || !p.active || !p.ready) return;
+    takeGuideRequest(req);
+    markAutoOpened();
+    setAsked(true); setReopened(true); setNote(null); setSure(false);
+    setAsking({ key: req.key as K | null });
+  }, [req, p.active, p.ready]);
+  useEffect(() => {
+    if (!p.active || !p.ready || !takeRestart(page)) return;
+    markAutoOpened();
+    setAsked(true); setReopened(true);
+    setAsking({ key: null });
+  }, [p.active, p.ready, page]);
+  useEffect(() => {
+    if (!asking || !slot) return undefined;
+    if (asking.key === null) { setAsking(null); setOpen(true); return undefined; }
+    const k = asking.key;
+    let tries = 0;
+    let t = 0;
+    const go = () => {
+      /* a page's own walkthrough (the Query Centre's practice response) needs no control on screen */
+      if (tries === 0 && onStart?.(k)) { setAsking(null); return; }
+      if (targetFor(k).el) { setAsking(null); startRef.current(k); return; }
+      if (++tries > 50) { setAsking(null); setOpen(true); return; }
+      t = window.setTimeout(go, 100);
+    };
+    t = window.setTimeout(go, 80);
+    return () => window.clearTimeout(t);
+  }, [asking, slot, targetFor, onStart]);
   useEffect(() => () => clearGuide(page), [page]);
 
   if (!slot || !shown) return null;
