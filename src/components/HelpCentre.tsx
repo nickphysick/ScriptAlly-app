@@ -20,13 +20,19 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import "./helpCentre.css";
 import { helpSlugOf } from "../lib/helpPath";
+import { articleBySlug } from "../content/help/articles";
 import { HelpHome } from "./help/HelpHome";
+import { ArticlePage } from "./help/HelpArticlePage";
 
 /* ════════════════════════════ the route ════════════════════════════ */
 
 export function HelpCentre(): React.ReactElement {
   const { pathname } = useLocation();
-  /* Part B: the home. An article's page arrives in Part C; until then every /help/{slug} is the home */
-  if (helpSlugOf(pathname)) return <Navigate to="/help" replace />;
+  const slug = helpSlugOf(pathname);
+  if (slug) {
+    const a = articleBySlug(slug);
+    if (!a) return <Navigate to="/help" replace />;
+    return <ArticlePage a={a} />;
+  }
   return <HelpHome />;
 }

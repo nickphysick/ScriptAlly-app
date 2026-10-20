@@ -117,3 +117,12 @@ describe("HS1 E4 · the uid and the email are the token's", () => {
     expect(() => feedbackRecord({ ...BODY, message: "   " }, AUTH)).toThrow(FeedbackError);
   });
 });
+
+describe("HC1-C3 (unit) · an article's 'Did this help? Not really'", () => {
+  it("is stored as kind Article with its page name", () => {
+    const r = feedbackRecord({ ...BODY, kind: "Article", pageName: "help/add-an-agent", message: "A screenshot would help" }, AUTH);
+    expect(r.kind).toBe("Article");
+    expect(r.pageName).toBe("help/add-an-agent");
+    expect(r.severity).toBe("");
+  });
+});
