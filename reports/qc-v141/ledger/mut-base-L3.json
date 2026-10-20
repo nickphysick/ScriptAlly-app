@@ -1,0 +1,106 @@
+[
+ {
+  "lock": "L3",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "36 gone quiet"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (a) the list is exactly that set",
+  "ok": false,
+  "detail": "70 vs 36"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (b) the Filters chip counts one",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 the card shows it pressed",
+  "ok": false
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (c) the band's Gone quiet is selected",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (d) Clear all: the band",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (d) Clear all: the chip",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (d) Clear all: the card",
+  "ok": false
+ },
+ {
+  "lock": "L3",
+  "where": "1280 (d) Clear all: the list",
+  "ok": true,
+  "detail": "70 vs 70"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "36 gone quiet"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (a) the list is exactly that set",
+  "ok": false,
+  "detail": "70 vs 36"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (b) the Filters chip counts one",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 the card shows it pressed",
+  "ok": false
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (c) the band's Gone quiet is selected",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (d) Clear all: the band",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (d) Clear all: the chip",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (d) Clear all: the card",
+  "ok": false
+ },
+ {
+  "lock": "L3",
+  "where": "1512 (d) Clear all: the list",
+  "ok": true,
+  "detail": "70 vs 70"
+ }
+]

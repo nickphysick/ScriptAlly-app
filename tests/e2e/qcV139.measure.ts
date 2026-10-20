@@ -361,7 +361,9 @@ test.describe("Query Centre v139", () => {
   test("C1 · rename: the menu reads Who it's with, the title grouped by who it's with, and a saved Urgency opens on it", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("C1");
-    await page.addInitScript(() => { try { localStorage.setItem("sa.qcList.v1", JSON.stringify({ v: 2, density: "comfortable", group: "attention" })); } catch { /* */ } });
+    /* v141 — the saved session carries a `qh.qc.view` (written at sign-in), so the old key was never read and this case
+       passed only because "Who it's with" was the default. Clearing the new key makes the migration actually run. */
+    await page.addInitScript(() => { try { localStorage.removeItem("qh.qc.view"); localStorage.setItem("sa.qcList.v1", JSON.stringify({ v: 2, density: "comfortable", group: "attention" })); } catch { /* */ } });
     for (const vp of SIZES) {
       await open(page, vp, "C1", { seen: true });
       /* Query Centre v140 §A retired the title; the Group by chip names the grouping (and drops "Grouped by" at 1280) */

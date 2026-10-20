@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L5",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "{\"name\":\"Status\",\"x\":false,\"on\":false,\"bands\":10}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 grouped by Status",
+  "ok": true,
+  "detail": "Status"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 no ✕ and no on state",
+  "ok": true,
+  "detail": "{\"name\":\"Status\",\"x\":false,\"on\":false,\"bands\":10}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 a saved Next action is restored",
+  "ok": true,
+  "detail": "Next action"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "{\"name\":\"Status\",\"x\":false,\"on\":false,\"bands\":10}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 grouped by Status",
+  "ok": true,
+  "detail": "Status"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 no ✕ and no on state",
+  "ok": true,
+  "detail": "{\"name\":\"Status\",\"x\":false,\"on\":false,\"bands\":10}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 a saved Next action is restored",
+  "ok": true,
+  "detail": "Next action"
+ }
+]

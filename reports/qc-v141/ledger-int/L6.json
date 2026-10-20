@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "L6",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "glyph · 10"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 Status: every button has a glyph and a badge",
+  "ok": true,
+  "detail": "Queried:svg:39 Partial Requested:svg:7 Partial Sent:svg:7 Full Requested:svg:7 Full Sent:svg:7 Revise & Resubmit:svg:1 Offer:svg:2 Rejected:svg:14 No Response:svg:2 Withdrawn:svg:1"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 Status: no two glyphs alike",
+  "ok": true,
+  "detail": "0 duplicate(s) among Queried, Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer, Rejected, No Response, Withdrawn"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 No response and Passed both drawn",
+  "ok": true,
+  "detail": "Queried, Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer, Rejected, No Response, Withdrawn"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 Package population",
+  "ok": true,
+  "detail": "{\"mode\":\"name\",\"n\":10,\"svgs\":0}"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 Package: no svg in any button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 Package menu population",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 Package: no svg in any menu row",
+  "ok": true,
+  "detail": "[0,0,0,0,0,0,0,0,0]"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "glyph · 10"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 Status: every button has a glyph and a badge",
+  "ok": true,
+  "detail": "Queried:svg:39 Partial Requested:svg:7 Partial Sent:svg:7 Full Requested:svg:7 Full Sent:svg:7 Revise & Resubmit:svg:1 Offer:svg:2 Rejected:svg:14 No Response:svg:2 Withdrawn:svg:1"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 Status: no two glyphs alike",
+  "ok": true,
+  "detail": "0 duplicate(s) among Queried, Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer, Rejected, No Response, Withdrawn"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 No response and Passed both drawn",
+  "ok": true,
+  "detail": "Queried, Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer, Rejected, No Response, Withdrawn"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 Package population",
+  "ok": true,
+  "detail": "{\"mode\":\"name\",\"n\":10,\"svgs\":0}"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 Package: no svg in any button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 Package menu population",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 Package: no svg in any menu row",
+  "ok": true,
+  "detail": "[0,0,0,0,0,0,0,0,0]"
+ }
+]

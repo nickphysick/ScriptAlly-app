@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "87 rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 you: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "17 shown vs 17 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 you: its count is the card's",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 agent: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "17 shown vs 17 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 agent: its count is the card's",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 quiet: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "36 shown vs 36 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 quiet: its count is the card's",
+  "ok": true,
+  "detail": "36 vs 36"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 closed: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "17 shown vs 17 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 closed: its count is the card's",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 every id in exactly one set",
+  "ok": true,
+  "detail": "87/87; in two or more: "
+ },
+ {
+  "lock": "L2",
+  "where": "1280 every set entered",
+  "ok": true,
+  "detail": "{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "87 rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 you: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "17 shown vs 17 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 you: its count is the card's",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 agent: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "17 shown vs 17 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 agent: its count is the card's",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 quiet: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "36 shown vs 36 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 quiet: its count is the card's",
+  "ok": true,
+  "detail": "36 vs 36"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 closed: the filter shows exactly the rows' own set",
+  "ok": true,
+  "detail": "17 shown vs 17 from the rows"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 closed: its count is the card's",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 every id in exactly one set",
+  "ok": true,
+  "detail": "87/87; in two or more: "
+ },
+ {
+  "lock": "L2",
+  "where": "1512 every set entered",
+  "ok": true,
+  "detail": "{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17}"
+ }
+]

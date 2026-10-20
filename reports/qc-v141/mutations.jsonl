@@ -1,0 +1,9 @@
+{"lock": "L1", "break": "drop-closed", "red": true, "first": "  \u2717 L1 \u00b7 1280 card sums to the total \u2014 {\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":0} = 70 vs 87"}
+{"lock": "L2", "break": "overdate-you-quiet", "red": true, "first": "  \u2717 L2 \u00b7 1280 quiet: the filter shows exactly the rows' own set \u2014 38 shown vs 36 from the rows"}
+{"lock": "L3", "break": "card-own-state", "red": true, "first": "  \u2717 L3 \u00b7 1280 (a) the list is exactly that set \u2014 87 vs 36"}
+{"lock": "L4", "break": "export-ignores", "red": true, "first": "  \u2717 L4 \u00b7 1280 the export names the set's count \u2014 \"\u2193 Export all 87 queries\" vs 36"}
+{"lock": "L5", "break": "default-attention", "red": true, "first": "  \u2717 L5 \u00b7 1280 grouped by Status \u2014 Who it's with"}
+{"lock": "L6", "break": "nr-shared", "red": true, "first": "  \u2717 L6 \u00b7 1280 Status: no two glyphs alike \u2014 1 duplicate(s) among Queried, Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer, Rejected, No Response, Withdrawn"}
+{"lock": "L7", "break": "no-column", "red": true, "first": "  \u2717 L7 \u00b7 1280 action: no glyph or badge meets its name \u2014 Full owed 7 mark 562/badge 567 vs name 557 \u2016 Partial owed 7 mark 562/badge 567 vs name 557 \u2016 Nudge due 11 mark 562/badge 567 vs name 557 \u2016 Consider clos"}
+{"lock": "L8", "break": "no-tight", "red": true, "first": "  \u2717 L8 \u00b7 1280 every set inside the breakdown, clear of the other children \u2014 outside: quiet closed \u00b7 over: quiet\u00d7qc140-hb closed\u00d7qc140-hb \u00b7 bk [440,861]"}
+{"lock": "L9", "break": "fixed-220", "red": true, "first": "  \u2717 L9 \u00b7 1280 no taller than the stack \u2014 220 vs stack 179 / token 179"}

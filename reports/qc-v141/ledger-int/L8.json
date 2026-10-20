@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L8",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "[\"qc140-bart\",\"qc140-bn\",\"qc141-bk\",\"qc140-hb\",\"qc140-blog\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 no two children overlap (fit tight)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L8",
+  "where": "1280 every child inside the band",
+  "ok": true,
+  "detail": "qc140-bart:227 qc140-bn:423 qc141-bk:899 qc140-hb:1123 qc140-blog:1254 / 1272"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 no two sets overlap",
+  "ok": true,
+  "detail": " you[441,547] agent[559,685] quiet[697,779] closed[791,881]"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 every set inside the breakdown, clear of the other children",
+  "ok": true,
+  "detail": "outside:  · over:  · bk [423,899]"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "[\"qc140-bart\",\"qc140-bn\",\"qc141-bk\",\"qc140-hb\",\"qc140-blog\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 no two children overlap (fit full)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L8",
+  "where": "1512 every child inside the band",
+  "ok": true,
+  "detail": "qc140-bart:227 qc140-bn:440 qc141-bk:1093 qc140-hb:1333 qc140-blog:1486 / 1504"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 no two sets overlap",
+  "ok": true,
+  "detail": " you[466,580] agent[616,770] quiet[806,934] closed[970,1067]"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 every set inside the breakdown, clear of the other children",
+  "ok": true,
+  "detail": "outside:  · over:  · bk [440,1093]"
+ }
+]

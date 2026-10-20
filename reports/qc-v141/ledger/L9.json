@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L9",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "{\"tok\":{\"w\":332,\"h\":179},\"card\":{\"w\":332,\"h\":179,\"right\":1208,\"top\":141.75,\"bottom\":320.75},\"rowRight\":1208,\"stack\":{\"h\":179,\"top\":141.75,\"bottom\":320.75}}"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 width = --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 right edge = the row's inset",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 no taller than the stack",
+  "ok": true,
+  "detail": "179 vs stack 179 / token 179"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 centred on the stack",
+  "ok": true,
+  "detail": "231.25 vs 231.25"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "{\"tok\":{\"w\":332,\"h\":179},\"card\":{\"w\":332,\"h\":179,\"right\":1326,\"top\":141.75,\"bottom\":320.75},\"rowRight\":1326,\"stack\":{\"h\":179,\"top\":141.75,\"bottom\":320.75}}"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 width = --hero-right-w",
+  "ok": true,
+  "detail": "332 vs 332"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 right edge = the row's inset",
+  "ok": true,
+  "detail": "1326 vs 1326"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 no taller than the stack",
+  "ok": true,
+  "detail": "179 vs stack 179 / token 179"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 centred on the stack",
+  "ok": true,
+  "detail": "231.25 vs 231.25"
+ }
+]

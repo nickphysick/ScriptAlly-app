@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L4",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 the export names the set's count",
+  "ok": false,
+  "detail": "\"↓ Export all 87 queries\" vs undefined"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 the menu's Where it stands shows it",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 the export names the set's count",
+  "ok": false,
+  "detail": "\"↓ Export all 87 queries\" vs undefined"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 the menu's Where it stands shows it",
+  "ok": false,
+  "detail": "undefined"
+ }
+]
