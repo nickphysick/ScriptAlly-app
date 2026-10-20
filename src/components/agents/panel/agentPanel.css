@@ -258,3 +258,10 @@
 .apn .apn-newline { margin: 6px 0 0; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.78); }
 .apn .ae-need { font: italic 400 14px/1.3 var(--sp-serif) !important; color: #8a3d27; }
 .apn .ae-will { font: 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+
+/* ── Retire the add-agent pop-up · OVER THE QUERY DRAWER: Log a query's "+ Add … as a new agent" opens this panel while
+   the drawer (z 70/71, its dock chip 72) is up, so the panel and its scrim rise above both, and it runs the full height
+   the drawer does rather than starting under the shell's bar. The parked chip (69) and the toasts (90) are unchanged. ── */
+.spanel.apn--over { z-index: 74; }
+.spanel-scrim:has(+ .spanel.apn--over) { z-index: 73; }
+@media (min-width: 900px) { .spanel.qsp.apn--over { top: 8px; } }

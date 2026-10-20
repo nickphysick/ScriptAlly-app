@@ -21,7 +21,11 @@ export const ADD_AGENT_LINE = "Name and agency are enough to start. Everything e
 /** ✕ is the editor's Escape, as Edit profile's is: a draft with answers asks before it goes */
 const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
 
-export const AgentPanelNew: React.FC = () => {
+/**
+ * Mounted ONCE, by the app-level `AgentCardHost`, so "Add an agent" opens it over whichever page is on screen.
+ * `over`: opened from Log a query's picker, it lies OVER the query drawer (agentPanel.css `.apn--over`).
+ */
+export const AgentPanelNew: React.FC<{ over?: boolean }> = ({ over = false }) => {
   /* the panel starts under the shell's bar: its bottom edge, measured, as the agent panel does */
   const [top, setTop] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -35,9 +39,9 @@ export const AgentPanelNew: React.FC = () => {
     return () => window.removeEventListener("resize", read);
   }, []);
   return (
-    <SidePanel label="Add an agent" step={false} dim className="qsp apn"
+    <SidePanel label="Add an agent" step={false} dim className={`qsp apn${over ? " apn--over" : ""}`}
       style={(top != null ? { "--qsp-top": `${top}px` } : {}) as React.CSSProperties}
-      attrs={{ "data-ap": "panel-new", "data-ap-acting": "new" }}>
+      attrs={{ "data-ap": "panel-new", "data-ap-acting": "new", "data-ap-over": over ? "drawer" : undefined }}>
       <div className="qad-root qad-root--panel is-open apn-actroot" data-ap="act" data-ap-act="new">
         <div className="qad-drawer qad-drawer--panel" role="group" aria-label="Add an agent">
           <QadHead onFrom={escape} eyebrow="NEW AGENT" title="Add an agent" onClose={escape}

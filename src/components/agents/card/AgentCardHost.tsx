@@ -36,7 +36,7 @@ import { Agent, SubmissionMethod, SubmissionStatus } from "../../../types";
 import { committedNotes, effectiveNotes, emptyNotesDraft } from "../../../lib/agentNotes";
 import {
   AgentCardField, AgentCardOptions, AgentCardTab, closeAgentCard, currentAgentCard, emitAgentCardEvent,
-  openAgentCard, openNewAgentCard, stepAgentCard, useAgentCardRequest,
+  completeNewAgent, openAgentCard, openNewAgentCard, stepAgentCard, useAgentCardRequest,
   type AgentCardOrigin,
 } from "../../../lib/agentCardStore";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
@@ -63,6 +63,9 @@ import { destroyManifest } from "../../../lib/cascade";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
 import { AgentCardEditor, type EditorSaveResult } from "./AgentCardEditor";
+import { AgentPanelNew } from "../panel/AgentPanelNew";
+import { ESC_LEVEL, EscapeRaise } from "../../../lib/escapeStack";
+import { useToast } from "../../toast/ToastProvider";
 import "../contact/contactV11.css";
 
 /** The shared manuscript-scope key — the same one the Contact list, Packages and Comps read. */
@@ -83,7 +86,7 @@ export interface AgentCardSandbox {
 if (import.meta.env.MODE === "development" && typeof window !== "undefined") {
   (window as unknown as { __saAgentCard?: unknown }).__saAgentCard = {
     open: (id: string, opts?: AgentCardOptions) => openAgentCard(id, opts),
-    openNew: () => openNewAgentCard(),
+    openNew: (opts?: Parameters<typeof openNewAgentCard>[0]) => openNewAgentCard(opts),
     close: () => closeAgentCard(),
     /** the live request — what a door actually asked for (its order, its tab, its origin) */
     current: () => currentAgentCard(),
@@ -93,7 +96,15 @@ if (import.meta.env.MODE === "development" && typeof window !== "undefined") {
 export const AgentCardHost: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox }) => {
   const req = useAgentCardRequest();
   if (!req) return null;
-  return <AgentCardSession key={req.seq} sandbox={sandbox} />;
+  /* RETIRE THE ADD-AGENT POP-UP — THE NEW-AGENT PANEL'S FRAME IS MOUNTED HERE, ONCE, for every page: the session
+     portals the editor into its act slot. It used to be the Contact list's alone, which is why every other page's
+     "Add an agent" fell back to the old centred pop-up. */
+  return (
+    <>
+      {req.host === "panel" && req.agentId === null && <AgentPanelNew over={req.over === "drawer"} />}
+      <AgentCardSession key={req.seq} sandbox={sandbox} />
+    </>
+  );
 };
 
 /** The row's box on screen now — the exit shrinks back into it. Rows carry `data-agent-card`. */
@@ -130,6 +141,7 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     agents, queries, manuscripts, activities, addAgent, addUserTask, deleteUserTask, addPersonalGenre,
     currentUser, collectionsReady, packages, taskFlags, deleteAgent, resolveTaskFlag,
   } = useScriptAllyDb();
+  const { showToast } = useToast();
 
   const scoped = useMemo(() => {
     let id: string | null = null;
@@ -334,10 +346,15 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       ...(wishlist ? { mswlCheckedAt: new Date().toISOString() } : {}),
     });
     if (!res.success || !res.id) return { ok: false, error: res.error ?? "Couldn’t add the agent." };
-    closeAgentCard();
-    emitAgentCardEvent({ type: "added", agentId: res.id });
+    /* the confirmation: on the Contact list the new row's ring and its panel say it; on every other page, the toast
+       the log-a-query add already used */
+    if (!sandbox?.contactListHere && pathname !== "/agents") {
+      showToast({ message: `Added ${d.name.trim() || d.agency.trim()} to your contact list` });
+    }
+    /* closes, tells the page ("added"), and hands the id to a flow waiting on it */
+    completeNewAgent(res.id);
     return { ok: true };
-  }, [addAgent]);
+  }, [addAgent, sandbox, pathname, showToast]);
 
   /**
    * A genre matching nothing on any list (ruling 1): its case is matched to a genre that already
@@ -474,6 +491,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     if (inPanel) {
       if (!panelSlot || !panelSlot.isConnected) return null;
       return createPortal(
+        /* over the query drawer, the editor and its popups hear Escape before the drawer does */
+        <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
         <div className="ac apn-edit" data-ap="edit">
           <AgentCardEditor
             variant="panel"
@@ -483,7 +502,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
             onSave={isNew ? (dd) => onCreateAgent(dd) : onEditorSave} onLeave={() => closeAgentCard()} onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
             onNewGenre={onNewGenre} onAddNote={onAddNote} onEditNote={onEditNote} onDeleteNote={onDeleteNote} bindLeave={editorLeave}
           />
-        </div>,
+        </div>
+        </EscapeRaise.Provider>,
         panelSlot,
       );
     }

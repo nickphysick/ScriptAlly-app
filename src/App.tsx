@@ -74,6 +74,7 @@ import { OnbLab } from "./components/onboarding/OnbLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
+import { openNewAgentCard } from "./lib/agentCardStore";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -373,15 +374,10 @@ function AppContent() {
       return;
     }
     if (subPageName === "Add an agent") {
-      /* Ruling (f), Contact list v11: ON /agents the capture opens the page's own add card —
-         two add surfaces on one page would be the two-asking-surfaces fault — and everywhere
-         else the app-level focus form is untouched. An event rather than a prop because the
-         page stays mounted on every route and already owns the card's state. */
-      if (window.location.pathname === "/agents") {
-        window.dispatchEvent(new CustomEvent("sa:contact-add"));
-        return;
-      }
-      setIsAddAgentOpen(true);
+      /* RETIRE THE ADD-AGENT POP-UP — on EVERY route the slide-in new-agent panel (v18.3 §D), through the ONE opener
+         the Contact list's own button uses; its frame is mounted app-level by AgentCardHost, so it opens over the
+         page you are on and nothing navigates. On /agents the page hears the same request (AgentList). */
+      openNewAgentCard({ from: "button", host: "panel" });
       return;
     }
     if (subPageName === "Record a response") {

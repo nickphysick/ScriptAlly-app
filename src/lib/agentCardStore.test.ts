@@ -8,7 +8,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import {
   closeAgentCard, currentAgentCard, openAgentCard, openNewAgentCard,
   subscribeAgentCard, emitAgentCardEvent, subscribeAgentCardEvents,
-  stepAgentCard, type AgentCardRequest,
+  stepAgentCard, completeNewAgent, type AgentCardRequest,
 } from "./agentCardStore";
 
 afterEach(() => closeAgentCard());
@@ -84,5 +84,62 @@ describe("the agent card's store", () => {
     off();
     emitAgentCardEvent({ type: "added", agentId: "ag-x" });
     expect(got).toEqual(["saved:ag-1", "added:ag-9"]);
+  });
+});
+
+/* Retire the add-agent pop-up: every door opens the ONE new-agent panel, a typed name carries in, and a flow waiting
+   on the new agent (Log a query's picker) is handed its id once the panel saves. */
+describe("the new-agent panel — prefill and hand-back", () => {
+  it("carries the typed name, the panel host, the drawer stacking and the hand-back on the request", () => {
+    const onCreated = () => {};
+    openNewAgentCard({ from: "button", host: "panel", over: "drawer", prefill: { name: "Priya Shah" }, onCreated });
+    const r = currentAgentCard()!;
+    expect(r.agentId).toBeNull();
+    expect(r.host).toBe("panel");
+    expect(r.over).toBe("drawer");
+    expect(r.prefill).toEqual({ name: "Priya Shah" });
+    expect(r.onCreated).toBe(onCreated);
+  });
+
+  it("a save closes the session, tells the page, then hands the id back — once", () => {
+    const handed: string[] = [];
+    const heard: string[] = [];
+    const off = subscribeAgentCardEvents((e) => heard.push(`${e.type}:${e.agentId}`));
+    openNewAgentCard({ host: "panel", onCreated: (id) => { handed.push(id); heard.push(`handed:${id}`); } });
+    completeNewAgent("ag-new");
+    expect(currentAgentCard(), "the session is over").toBeNull();
+    expect(handed).toEqual(["ag-new"]);
+    expect(heard, "the page hears the add before the waiting flow picks the agent").toEqual(["added:ag-new", "handed:ag-new"]);
+    completeNewAgent("ag-new");
+    expect(handed, "a second completion with nothing open hands nothing back").toEqual(["ag-new"]);
+    off();
+  });
+
+  it("a cancel hands nothing back", () => {
+    const handed: string[] = [];
+    openNewAgentCard({ host: "panel", prefill: { name: "Zed" }, onCreated: (id) => handed.push(id) });
+    closeAgentCard();
+    completeNewAgent("ag-late");
+    expect(handed).toEqual([]);
+  });
+
+  it("completes only a NEW-agent session — never an open agent's card", () => {
+    const heard: string[] = [];
+    const off = subscribeAgentCardEvents((e) => heard.push(e.type));
+    openAgentCard("ag-1", { host: "panel" });
+    completeNewAgent("ag-2");
+    expect(currentAgentCard()?.agentId).toBe("ag-1");
+    expect(heard).toEqual([]);
+    off();
+  });
+
+  it("a door opened afterwards replaces the waiting flow: only the live request is handed the id", () => {
+    const first: string[] = [];
+    const second: string[] = [];
+    openNewAgentCard({ host: "panel", onCreated: (id) => first.push(id) });
+    openNewAgentCard({ host: "panel", onCreated: (id) => second.push(id) });
+    completeNewAgent("ag-3");
+    expect(first).toEqual([]);
+    expect(second).toEqual(["ag-3"]);
   });
 });

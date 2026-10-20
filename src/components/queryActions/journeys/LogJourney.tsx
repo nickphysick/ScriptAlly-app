@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { collection, doc } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
-import { ComponentType, QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type QueryMaterial } from "../../../types";
+import { ComponentType, QueryStatus, SubmissionMethod, type Agent, type QueryMaterial } from "../../../types";
 import {
   addDays, dayDiff, dayIso, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
@@ -28,8 +28,8 @@ import {
   piecesChanged, sentPieces, summaryOf, summaryWith, type PackageCard,
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { openNewAgentCard } from "../../../lib/agentCardStore";
 import { SentChip } from "../SentHow";
-import { buildAgentMaterials, emptyMaterials } from "../../../lib/agentMaterials";
 import {
   Chip, Chips, DateField, Fl, Note, NoteLink, SampleControl, SampleLine, Seg, Toggle, Who, initialsOf,
 } from "../controls";
@@ -308,7 +308,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
         ) : (
           <>
             {again ? <Note kind="ok" tag="KEPT" style={{ marginBottom: 10 }}>{again.how === "individual" || again.pkg === "custom" ? "Same day, same way and the same pieces as your last query." : "Same day, same way and the same package as your last query."} Just choose the agent.</Note> : null}
-            <AgentPicker typed={typed} setTyped={setTyped} agents={agents} queried={new Set(forBook.map((q) => q.agentId))} onPick={pickAgent} book={book} />
+            <AgentPicker typed={typed} setTyped={setTyped} agents={agents} queried={new Set(forBook.map((q) => q.agentId))} onPick={pickAgent} />
           </>
         )}
         <Fl>MANUSCRIPT</Fl>
@@ -593,19 +593,33 @@ function matchSentences(first: string, ask: ReturnType<typeof guidelineAsk>, m: 
   return out;
 }
 
-/* ---------- the agent picker, and "+ Add … as a new agent" ---------- */
+/* ---------- the agent picker, and "+ Add … as a new agent" (the new-agent panel, over the drawer) ---------- */
 
-function AgentPicker({ typed, setTyped, agents, queried, onPick, book }: {
-  typed: string; setTyped: (v: string) => void; agents: Agent[]; queried: Set<string>; onPick: (a: Agent) => void; book: ReturnType<typeof bookOf>;
+function AgentPicker({ typed, setTyped, agents, queried, onPick }: {
+  typed: string; setTyped: (v: string) => void; agents: Agent[]; queried: Set<string>; onPick: (a: Agent) => void;
 }) {
   const [focus, setFocus] = useState(true);
-  const [adding, setAdding] = useState(false);
+  /* RETIRE THE ADD-AGENT POP-UP — "+ Add … as a new agent" opens THE new-agent panel, over this drawer, with the typed
+     name carried in; its save hands the new agent's id back here, and the agent is picked the moment the list holds it
+     (the store's update lands a beat after the write). A cancel hands nothing back, and the picker is as it was. */
+  const [waiting, setWaiting] = useState<string | null>(null);
+  useEffect(() => {
+    if (!waiting) return;
+    const made = agents.find((a) => a.id === waiting);
+    if (!made) return;
+    setWaiting(null);
+    onPick(made);
+  }, [waiting, agents, onPick]);
   const t = typed.trim().toLowerCase();
   const list = agents
     .filter((a) => !a.setAside)
     .filter((a) => !t || (a.name || "").toLowerCase().includes(t) || (a.agency || "").toLowerCase().includes(t))
     .slice(0, 5);
-  if (adding) return <NewAgentForm initialName={typed.trim()} onCancel={() => setAdding(false)} onSaved={(a) => { setAdding(false); onPick(a); }} book={book} />;
+  const addNew = () => openNewAgentCard({
+    from: "button", host: "panel", over: "drawer",
+    ...(typed.trim() ? { prefill: { name: typed.trim() } } : {}),
+    onCreated: (id) => setWaiting(id),
+  });
   return (
     <div className="qad-apick">
       <input className="qad-fin" autoFocus placeholder="Start typing an agent's name…" value={typed} data-qad-agent-input
@@ -620,70 +634,11 @@ function AgentPicker({ typed, setTyped, agents, queried, onPick, book }: {
               {queried.has(a.id) ? <span className="qad-tag">ALREADY QUERIED</span> : a.noResponseMeansNo ? <span className="qad-tag">NO REPLY MEANS NO</span> : null}
             </button>
           ))}
-          {t ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); setAdding(true); }} data-qad-new-agent>+ Add “{typed.trim()}” as a new agent</button> : null}
+          {t ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); addNew(); }} data-qad-new-agent>+ Add “{typed.trim()}” as a new agent</button> : null}
         </div>
       ) : null}
     </div>
   );
 }
-
-function NewAgentForm({ initialName, onCancel, onSaved, book }: { initialName: string; onCancel: () => void; onSaved: (a: Agent) => void; book: ReturnType<typeof bookOf> }) {
-  const db = useScriptAllyDb();
-  const [name, setName] = useState(initialName);
-  const [agency, setAgency] = useState("");
-  const [wks, setWks] = useState<string>("8");
-  const [via, setVia] = useState<SubmissionMethod>(SubmissionMethod.EMAIL);
-  const [nr, setNr] = useState(false);
-  const [ql, setQl] = useState(true);
-  const [syn, setSyn] = useState(false);
-  const [s, setS] = useState<Sample>({ unit: "pages", amt: 10, from: 1, sect: false, fu: null });
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  async function save() {
-    if (!name.trim() && !agency.trim()) { setErr("Add a name or an agency."); return; }
-    setBusy(true);
-    const st = emptyMaterials();
-    if (ql) st.selected.push("Query letter");
-    if (syn) st.selected.push("Synopsis");
-    if (s.unit !== "none") {
-      const pill = s.unit === "pages" ? "Sample pages" : s.unit === "words" ? "Sample words" : "Sample chapters";
-      st.selected.push(pill); st.counts[pill] = String(s.amt);
-    }
-    const w = parseInt(wks, 10);
-    const res = await db.addAgent({
-      name: name.trim(), agency: agency.trim(), email: "", website: "", genres: [], mswlNotes: "", notes: "",
-      submissionStatus: SubmissionStatus.OPEN, submissionMethod: via, materialsWanted: buildAgentMaterials(st),
-      ...(Number.isFinite(w) && w > 0 ? { responseTimeWeeks: w } : {}),
-      ...(nr ? { noResponseMeansNo: true } : {}),
-    } as never);
-    setBusy(false);
-    if (!res.success || !res.id) { setErr(res.error || "Couldn't add the agent."); return; }
-    const made = { ...(db.agents.find((a) => a.id === res.id) || {}), id: res.id, name: name.trim(), agency: agency.trim(), submissionMethod: via, responseTimeWeeks: Number.isFinite(w) && w > 0 ? w : undefined, noResponseMeansNo: nr || undefined, materialsWanted: buildAgentMaterials(st) } as Agent;
-    onSaved(made);
-  }
-  return (
-    <div className="qad-newag" data-qad-newagent>
-      <Fl>NAME</Fl>
-      <input className="qad-fin" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-      <Fl>AGENCY</Fl>
-      <input className="qad-fin" value={agency} onChange={(e) => setAgency(e.target.value)} />
-      <Fl>REPLY TIME</Fl>
-      <Chips options={[["4", "4 wks"], ["6", "6 wks"], ["8", "8 wks"], ["12", "12 wks"], ["0", "Not stated"]]} value={wks} onPick={setWks} />
-      <Fl>HOW THEY TAKE QUERIES</Fl>
-      <Chips<SubmissionMethod> options={VIA_ALL} value={via} onPick={setVia} />
-      <Toggle on={nr} onClick={() => setNr(!nr)}>No reply means no</Toggle>
-      <Fl>WHAT THEY ASK FOR</Fl>
-      <Toggle on={ql} onClick={() => setQl(!ql)}>Query letter</Toggle>
-      <Toggle on={syn} onClick={() => setSyn(!syn)}>Synopsis</Toggle>
-      <SampleControl sample={s} onChange={setS} book={book} allowNone />
-      {err ? <Note kind="warn" tag="CHECK">{err}</Note> : null}
-      <div className="acts">
-        <Chip on onClick={() => { if (!busy) void save(); }}>{busy ? "Adding…" : "Add to your Contact list"}</Chip>
-        <Chip onClick={onCancel}>Back</Chip>
-      </div>
-    </div>
-  );
-}
-const VIA_ALL: [SubmissionMethod, string][] = [[SubmissionMethod.EMAIL, "Email"], [SubmissionMethod.QUERY_MANAGER, "QueryManager"], [SubmissionMethod.ONLINE_FORM, "Online form"], [SubmissionMethod.POST, "Post"]];
 
 export { capFirst, Seg };
