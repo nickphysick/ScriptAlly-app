@@ -205,9 +205,6 @@
 .qad-sugg .it .qad-tag { margin-left: auto; }
 .qad-sugg .it .qad-av { width: 28px; height: 28px; font-size: 8px; }
 .qad-sugg .new { font-family: var(--qad-machine); font-size: 14px; border-top: 1px solid var(--qad-hair); margin-top: 4px; padding: 10px; width: 100%; text-align: left; border-left: 0; border-right: 0; border-bottom: 0; background: none; cursor: pointer; color: var(--qad-ink); }
-.qad-newag { margin-top: 12px; border-radius: 14px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.14); padding: 4px 14px 14px; }
-.qad-newag input.qad-fin { font-size: 16px; }
-.qad-newag .acts { display: flex; gap: 8px; margin-top: 14px; }
 
 /* timeline */
 .qad-plan { margin-top: 16px; border-radius: 14px; background: var(--qad-page); padding: 16px 18px 14px; }

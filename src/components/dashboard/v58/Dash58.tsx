@@ -479,9 +479,9 @@ export const Dash58: React.FC<Dash58Props> = ({
   };
   const toContacts = () => onNavigate("agents");
   /* "Log a query" on the queries door: with agents, the drawer's log journey; with none, the new-agent
-     card first (its own "Log a query" door then opens the drawer), as the hint says */
+     panel first (the one every "Add an agent" opens, over this page), as the hint says */
   const logFromDoor = () => {
-    if (agents.length === 0) openNewAgentCard({ from: "button" });
+    if (agents.length === 0) openNewAgentCard({ from: "button", host: "panel" });
     else openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
   };
 
@@ -543,7 +543,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   <QueriesDoor loading={loading} agents={loading ? (hasAgents ? 1 : 0) : agents.length} onLog={logFromDoor} />
                   {hasAgents
                     ? <AgentsSnap loading={loading} cov={cov} onReady={toContacts} />
-                    : <AgentsDoor loading={loading} onAdd={() => openNewAgentCard({ from: "button" })} onImport={() => onNavigate("import")} />}
+                    : <AgentsDoor loading={loading} onAdd={() => openNewAgentCard({ from: "button", host: "panel" })} onImport={() => onNavigate("import")} />}
                 </>
               ) : (
                 <>

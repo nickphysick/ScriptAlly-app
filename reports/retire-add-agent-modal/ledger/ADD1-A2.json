@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the Dashboard's agent total is drawn (precondition)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the header's Add an agent could be pressed",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the new-agent panel opened",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the agent could be saved",
+  "ok": true,
+  "detail": "filled true"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the URL never changed (open, fill, save, after)",
+  "ok": true,
+  "detail": "[\"/dashboard\"]"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the panel closed after the save",
+  "ok": true,
+  "detail": "still open"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the agent total rose by one",
+  "ok": true,
+  "detail": "52 → 53"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 without a reload (the page's own mark survived)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1512 the confirmation said so",
+  "ok": true,
+  "detail": "Added zzadd1-a2-1512 to your contact list✕"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the Dashboard's agent total is drawn (precondition)",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the top-bar capture could be pressed",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the new-agent panel opened",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the agent could be saved",
+  "ok": true,
+  "detail": "filled true"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the URL never changed (open, fill, save, after)",
+  "ok": true,
+  "detail": "[\"/dashboard\"]"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the panel closed after the save",
+  "ok": true,
+  "detail": "still open"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the agent total rose by one",
+  "ok": true,
+  "detail": "53 → 54"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 without a reload (the page's own mark survived)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "@1280 the confirmation said so",
+  "ok": true,
+  "detail": "Added zzadd1-a2-1280 to your contact list✕"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "the plan was restored exactly",
+  "ok": true,
+  "detail": "Free → Free"
+ },
+ {
+  "lock": "ADD1-A2",
+  "where": "every agent the lock made is gone",
+  "ok": true,
+  "detail": "52 → 52"
+ }
+]

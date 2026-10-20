@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "ADD1-A4",
+  "where": "the bundle is there (precondition)",
+  "ok": true,
+  "detail": "/Users/nickphysick/cl183-logs/basedist-raam/assets"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "it holds scripts (precondition)",
+  "ok": true,
+  "detail": "6 files"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "the eyebrow \"Building your list\" is in no built file",
+  "ok": false,
+  "detail": "index-D5wjLmfX.js"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "the line \"The right agent is out there\" is in no built file",
+  "ok": false,
+  "detail": "index-D5wjLmfX.js"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "the component name AddAgentFocusForm is in no built file",
+  "ok": false,
+  "detail": "index-D5wjLmfX.js"
+ }
+]

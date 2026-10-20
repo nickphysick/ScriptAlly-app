@@ -175,8 +175,20 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
   const activate = useCallback((item: PaletteItem) => {
     if (item.soon) return;
     closeAndReturn();
+    /* a capture opens a panel or a drawer over the page: it runs a tick later, AFTER focus is back on the palette's
+       opener, so the opener is what the new panel hands focus back to when it closes (retire the add-agent pop-up) */
+    if (item.run.kind === "capture") {
+      const run = item.run;
+      window.setTimeout(() => {
+        /* the field that opened the palette — on the desktop the bar's search, which closeAndReturn does not refocus */
+        const back = [desktopOpenerRef?.current, openerRef?.current].find((el) => el && el.getBoundingClientRect().height > 0);
+        back?.focus();
+        perform(run);
+      }, 0);
+      return;
+    }
     perform(item.run);
-  }, [closeAndReturn, perform]);
+  }, [closeAndReturn, perform, desktopOpenerRef, openerRef]);
 
   // Keyboard. Bound to the OVERLAY, not the window: the palette is modal, so it should not be
   // reaching for keys while it is shut.

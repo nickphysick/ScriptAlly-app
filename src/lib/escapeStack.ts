@@ -24,7 +24,7 @@
  * else (the "+ Other" genre input's lost draft in the retired pop-up form was exactly that).
  * With no layers it does nothing at all, so pages that own Escape for themselves keep it.
  */
-import { useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 
 export const ESC_LEVEL = {
   /** a page's own MODE (a full-screen list): Escape leaves it last, after every popover, drawer and dialog */
@@ -98,11 +98,19 @@ const stack = (): EscapeStack | null => {
  *  while any is (the Contact list's keyboard rows read it, v14 §7.7). */
 export const escapeDepth = (): number => stack()?.depth() ?? 0;
 
+/**
+ * A RAISED SUBTREE — the new-agent panel opened OVER the query drawer (Log a query's "+ Add … as a new agent"). Every
+ * layer inside it, the editor and its own popups alike, sits this many levels higher, so the editor hears Escape
+ * before the drawer underneath it and its popups still close before the editor. 0 everywhere else.
+ */
+export const EscapeRaise = createContext(0);
+
 export function useEscapeLayer(active: boolean, handle: () => void, level: number = ESC_LEVEL.card): void {
   const latest = useRef(handle);
   latest.current = handle;
+  const raised = level + useContext(EscapeRaise);
   useEffect(() => {
     if (!active) return;
-    return stack()?.push(() => latest.current(), level);
-  }, [active, level]);
+    return stack()?.push(() => latest.current(), raised);
+  }, [active, raised]);
 }

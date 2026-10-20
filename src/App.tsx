@@ -26,7 +26,6 @@ import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
-import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
@@ -75,6 +74,7 @@ import { OnbLab } from "./components/onboarding/OnbLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
+import { openNewAgentCard } from "./lib/agentCardStore";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -341,7 +341,6 @@ function AppContent() {
      routes to the Queries hub and hands it this SEED, which opens inline create mode there. A new
      object per invocation, so a repeat press with no seeds still fires the hub's effect. */
   const [createQuerySeed, setCreateQuerySeed] = useState<{ agentId: string | null; manuscriptId: string | null } | null>(null);
-  const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
   // Query actions v1.1 — the Pro paste-an-email lane, opened from the drawer's query picker. It
   // lived in RecordResponseScreen (retired); App hosts the EXISTING flow so it sits above everything.
@@ -374,15 +373,10 @@ function AppContent() {
       return;
     }
     if (subPageName === "Add an agent") {
-      /* Ruling (f), Contact list v11: ON /agents the capture opens the page's own add card —
-         two add surfaces on one page would be the two-asking-surfaces fault — and everywhere
-         else the app-level focus form is untouched. An event rather than a prop because the
-         page stays mounted on every route and already owns the card's state. */
-      if (window.location.pathname === "/agents") {
-        window.dispatchEvent(new CustomEvent("sa:contact-add"));
-        return;
-      }
-      setIsAddAgentOpen(true);
+      /* RETIRE THE ADD-AGENT POP-UP — on EVERY route the slide-in new-agent panel (v18.3 §D), through the ONE opener
+         the Contact list's own button uses; its frame is mounted app-level by AgentCardHost, so it opens over the
+         page you are on and nothing navigates. On /agents the page hears the same request (AgentList). */
+      openNewAgentCard({ from: "button", host: "panel" });
       return;
     }
     if (subPageName === "Record a response") {
@@ -792,13 +786,6 @@ function AppContent() {
             separate element and is untouched. */}
       </AppShell>
       </EditQueryHost>
-
-      {/* Focus Mode Overlay Dialog Form */}
-      <AddAgentFocusForm
-        isOpen={isAddAgentOpen}
-        onClose={() => setIsAddAgentOpen(false)}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
 
       <AddManuscriptFocusForm
         isOpen={isAddManuscriptOpen}

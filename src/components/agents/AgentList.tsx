@@ -75,7 +75,6 @@ import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { ContactListHead } from "./contact/ContactListHead";
-import { AgentPanelNew } from "./panel/AgentPanelNew";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
 import { firstNameOf } from "../../lib/agentPanel";
@@ -722,11 +721,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* only an add STARTED here moves the panel (a centred add on another page emits "added" too) */
   const addFromHere = useRef(false);
   const openAdd = useCallback(() => {
+    openNewAgentCard({ from: "button", host: "panel" });
+  }, []);
+  /* RETIRE THE ADD-AGENT POP-UP — every door opens the ONE new-agent panel through the store (the app-level host draws
+     its frame), so this page no longer needs its own door or event. What made an add "this page's" moves here: a new-agent
+     panel opened while this is the page on screen — from its own button, the top bar's capture, the palette — closes an
+     agent's panel and Housekeeping (one right-hand panel at a time), and the panel follows the add. A flow WAITING on the
+     new agent (Log a query's picker) keeps it, so the page does not take over. */
+  useLayoutEffect(() => {
+    if (!active || !cardReq || cardReq.agentId !== null || cardReq.host !== "panel" || cardReq.onCreated) return;
     addFromHere.current = true;
     if (panelIdRef.current) setPanelParam(null, "replace");
     setHkOpenRef.current(false);
-    openNewAgentCard({ from: "button", host: "panel" });
-  }, [setPanelParam]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening (the seq), never on a re-render
+  }, [active, cardReq?.seq]);
 
   /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
      Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
@@ -803,14 +811,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /** v13 §6 — a row's hover tray offers the card's own next step (one derivation: the card's button) */
   const trayFor = useCallback((x: AgentFacts) => primaryFor(x, cardQuery(cardRows(qcRows, x.agent.id, scoped?.id ?? null))), [qcRows, scoped]);
   rowKeys.current = { ...rowKeys.current, trayFor, onOpen: (id, r) => onOpen(id, r), act: actWithoutCard };
-
-  /* the app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
-     dispatches on /agents (ruling f); elsewhere the old focus form is untouched (ruling 3, 5 Oct). */
-  useEffect(() => {
-    if (!active) return;
-    window.addEventListener("sa:contact-add", openAdd);
-    return () => window.removeEventListener("sa:contact-add", openAdd);
-  }, [active, openAdd]);
 
   /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
      the notice withdrawing once the Undo has run, and a delete's row collapsing */
@@ -1341,7 +1341,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onFillIn={() => { const id = panelAgent.id; closePanel(); setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
           />
         )}
-        {active && cardReq?.host === "panel" && cardReq.agentId === null && <AgentPanelNew />}
         {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
         {!sandbox && (
           <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guideDone} seen={guide.seen} hidden={guide.hidden}
