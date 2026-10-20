@@ -91,19 +91,33 @@
   background: var(--sp-anthracite); color: var(--im-cream); display: grid; place-items: center; z-index: 40;
   box-shadow: 0 14px 36px -18px rgba(var(--im-text-rgb), .4);
 }
-/* the strip along the sheet's foot */
+/* the strip along the sheet's foot (loader v2, built to design-refs/onboarding/smart-import-loader-v2):
+   pip · where the read is (a FIXED 250px, so the bar never moves as the words change) · the bar ·
+   the time left, right-aligned. The words come from footBar() in src/lib/importEstimate.ts. */
 .sf .im-ssl-bar {
   flex: none; height: 52px; box-sizing: border-box; background: var(--im-paper); border-top: 1px solid rgba(var(--im-text-rgb), .1);
-  display: flex; align-items: center; gap: 16px; padding: 0 22px;
+  display: flex; align-items: center; gap: 18px; padding: 0 28px;
 }
 .sf .im-ssl-pip { width: 9px; height: 9px; border-radius: 50%; background: var(--sf-rust); flex: none; }
-.sf .im-ssl-txt { font-family: var(--sp-mono); font-size: 12.5px; color: var(--sf-ink72); white-space: nowrap; min-width: 190px; }
-.sf .im-ssl-track { flex: 1; max-width: 420px; height: 5px; border-radius: 3px; background: rgba(var(--im-text-rgb), .1); overflow: hidden; }
-.sf .im-ssl-track i { display: block; height: 100%; background: var(--sp-anthracite); border-radius: 3px; }
-.sf .im-ssl-cnt { font-family: var(--sp-mono); font-size: 11.5px; color: rgba(var(--im-text-rgb), .6); margin-left: auto; white-space: nowrap; }
+.sf .im-ssl-txt { flex: none; width: 250px; font-family: var(--sp-mono); font-size: 13px; color: var(--sf-ink72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sf .im-ssl-track { flex: 1; min-width: 0; max-width: 440px; height: 5px; border-radius: 3px; background: var(--im-stone); overflow: hidden; }
+.sf .im-ssl-track i { display: block; height: 100%; background: var(--sp-anthracite); border-radius: 3px; transition: width .35s linear; }
+/* before any row is in: an indeterminate highlight sweeping the track */
+@keyframes imSslShim { 0% { background-position: -160px 0; } 100% { background-position: 460px 0; } }
+.sf .im-ssl-track i.im-ssl-shim {
+  width: 100%; border-radius: 0; transition: none;
+  background: linear-gradient(90deg, var(--im-stone) 0, #cfc6ba 40%, var(--im-stone) 80%) no-repeat; background-size: 160px 100%;
+  animation: imSslShim 1.4s linear infinite;
+}
+.sf .im-ssl-left { flex: 1; min-width: 0; text-align: right; font-family: var(--sp-mono); font-size: 12.5px; color: rgba(var(--im-text-rgb), .62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (prefers-reduced-motion: reduce) {
+  .sf .im-ssl-track i { transition: none; }
+  .sf .im-ssl-track i.im-ssl-shim { animation: none; background: var(--im-stone); }
+}
 @media (max-width: 599.98px) {
   .sf .im-ssl-bar { gap: 10px; padding: 0 14px; }
-  .sf .im-ssl-txt { min-width: 0; font-size: 11.5px; }
+  .sf .im-ssl-txt { width: auto; flex: 0 1 auto; font-size: 11.5px; }
+  .sf .im-ssl-left { font-size: 11px; }
 }
 
 /* ═══ Parts the summary and the review share ═══════════════════════════════════════════════════ */

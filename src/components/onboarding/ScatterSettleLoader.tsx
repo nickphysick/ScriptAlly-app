@@ -22,7 +22,7 @@ import "./importFlow.css";
 import { SheenWave } from "./SheenWave";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
-import type { LoaderProgress } from "../../lib/importEstimate";
+import { footBar, type LoaderProgress } from "../../lib/importEstimate";
 
 
 export interface LoaderCard {
@@ -68,11 +68,12 @@ const GRID_ROW = 82;      // grid row pitch
 // ── Three-zone timing spine: Intro (fixed) → Work (elastic, loops till extraction) → Reveal (gated) ──
 const INTRO_MS = 1200;    // fixed intro beat (the squeeze-pop scatter entrance)
 const FLOOR_MS = 2800;    // Reveal floor: fast extraction is padded to here so the reveal never flashes
-const SLOW_AT_MS = 10000; // past this, the status text owns up to a larger import
 const TIMEOUT_MS = 315000; // hard wait ceiling → host fallback (never an infinite loop)
 const CRYST_STAGGER = 150; // ms between successive cards crystallising in place
-const WAIT_TXT = ["Reading your file…", "Parsing agents…", "Interpreting dates…", "Matching statuses…", "Tidying records…", "Almost there…"];
-const SLOW_TXT = "Larger import — almost there…";
+/* ⚠️ RETIRED IN LOADER V2: the rotating WAIT_TXT, SLOW_AT_MS and its "Larger import — almost there…",
+   the bar's 78% park, and the "{n} / {total}" count. A read of up to ~3½ minutes needs words that
+   are true, so the foot bar now says the row count, the estimate and the time left — footBar() in
+   src/lib/importEstimate.ts — from the server's own row count as it streams. */
 const SPARK_KINDS = ["q", "a", "p", "d"] as const;
 const SPARK_GLYPH: Record<typeof SPARK_KINDS[number], React.ReactNode> = {
   q: "?",
@@ -134,13 +135,13 @@ const formFields = (messy: string, kind: FormKind): [string, string] => {
 export const READY_TXT = "Ready";
 
 /** The timing spine, exported for lock R1 and for nothing else: no caller may set these. */
-export const SCATTER_TIMINGS = { INTRO_MS, FLOOR_MS, SLOW_AT_MS, TIMEOUT_MS, STATUS_INTERVAL_MS: 1300 } as const;
+export const SCATTER_TIMINGS = { INTRO_MS, FLOOR_MS, TIMEOUT_MS } as const;
 
 /** How far the outermost scattered card reaches from the stage's centre at full spread: the widest
  *  slot offset plus half a messy card. The stage scales the spread to its own box below this. */
 const FULL_SPREAD = 332 + CARD_W / 2;
 
-export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout }) => {
+export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, progress }) => {
   const reduced = prefersStatic();
   /* ⚠️ POSITIONS ARE MEASURED FROM THE STAGE, NOT THE WINDOW. The loader fills the frame's sheet
      now, which is narrower than the window by the sidebar, so the scatter is scaled to the stage's
@@ -162,14 +163,11 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   const n = cards.length;
   const [introDone, setIntroDone] = useState(reduced); // intro beat over → the Work zone (drift) begins
   const [minElapsed, setMinElapsed] = useState(false); // Reveal floor reached
-  const [slow, setSlow] = useState(false);             // a larger import — own up to the longer wait
   const [settling, setSettling] = useState(false);
   const [resolved, setResolved] = useState(0); // cards that have crystallised messy → clean (in place)
   const [arranged, setArranged] = useState(false); // crystallised cards moved into the tidy grid
   const [squeeze, setSqueeze] = useState(false);   // grid squeezes to centre (then fades into the tick)
   const [tick, setTick] = useState(false);         // the big sage tick lands — hands to the Overview
-  const [txtIdx, setTxtIdx] = useState(0);     // rotating status line during the wait
-  const [waitStarted, setWaitStarted] = useState(false); // kicks the bar's ease off the start line
   const [sparks, setSparks] = useState<{ id: number; kind: typeof SPARK_KINDS[number]; x: number; y: number }[]>([]);
   const sparkId = useRef(0);
   const [forms, setForms] = useState<{ id: number; kind: FormKind; messy: string; x: number; y: number; rot: number }[]>([]);
@@ -186,14 +184,24 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [reduced]);
 
-  // Larger-import status shift (both motion prefs) + a hard wait ceiling → the host's fallback, so a
-  // hung or error-bound extraction never spins forever. Both disarm the moment the data is back.
+  // A hard wait ceiling → the host's fallback, so a hung or error-bound extraction never spins
+  // forever. It disarms the moment the data is back.
   const timeoutRef = useRef(onTimeout); timeoutRef.current = onTimeout;
   useEffect(() => {
     if (complete) return; // data's back — the settle path owns the rest
-    const slowT = setTimeout(() => setSlow(true), SLOW_AT_MS);
     const killT = setTimeout(() => timeoutRef.current?.(), TIMEOUT_MS);
-    return () => { clearTimeout(slowT); clearTimeout(killT); };
+    return () => { clearTimeout(killT); };
+  }, [complete]);
+
+  // The foot bar's clock: seconds since the read began (and since a retry began), ticking once a
+  // second while the read runs so the time left counts down between row updates.
+  const startedAt = useRef(Date.now());
+  const retryAt = useRef<number | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    if (complete) return;
+    const id = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(id);
   }, [complete]);
 
   // Begin settling ONLY once extraction has actually returned (and, for the animated path, the cards
@@ -207,17 +215,6 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   useEffect(() => {
     if (!complete) { setSettling(false); setResolved(0); setArranged(false); setSqueeze(false); setTick(false); }
   }, [complete]);
-
-  // Kick the bar off the start line so its long ease toward ~78% animates (instead of rendering parked).
-  useEffect(() => { const id = requestAnimationFrame(() => setWaitStarted(true)); return () => cancelAnimationFrame(id); }, []);
-
-  // Rotating honest status text — cycles through the read→tidy phases until the settle begins (both
-  // motion preferences; this is the reduced-motion path's main sign of life).
-  useEffect(() => {
-    if (settling) return;
-    const id = setInterval(() => setTxtIdx((i) => (i + 1) % WAIT_TXT.length), SCATTER_TIMINGS.STATUS_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [settling]);
 
   // Process-sparks pop around the cards while we wait (animated path only) — a few at a time, never a swarm.
   useEffect(() => {
@@ -279,11 +276,25 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
 
   const remainder = Math.max(0, total - n);
   const allShownResolved = settling && resolved >= n;
-  const countShown = Math.min(resolved + (allShownResolved ? remainder : 0), total);
-  // Bar: eases to ~78% across the wait (never parked), then completes to 100% as cards resolve.
-  const barW = settling ? Math.round(78 + (resolved / Math.max(1, n)) * 22) : (waitStarted ? 78 : 4);
-  const barTransition = settling ? "width .45s ease" : "width 6s cubic-bezier(.25,.6,.4,1)";
-  const txt = allShownResolved ? READY_TXT : settling ? "Tidying records…" : slow ? SLOW_TXT : WAIT_TXT[txtIdx];
+
+  // The foot bar. A host that passes no progress (one that predates it) reads as a read with no
+  // stream, which runs on the clock against the estimate. The data being back is tidying whatever
+  // the host last said; the settle having finished is "Ready".
+  const p: LoaderProgress = progress ?? { rowsTotal: total, rowsDone: 0, phase: "opening", stream: "none" };
+  const phase = complete ? "tidying" : p.phase;
+  if (phase === "retry" && retryAt.current === null) retryAt.current = nowMs;
+  if (phase !== "retry") retryAt.current = null;
+  // Smoothing: the time-left label moves at most one rung between two updates (stepRung), except
+  // across a change of phase — a retry's fresh estimate is a new countdown, not a jump in the old one.
+  const rungRef = useRef<{ phase: string; rung: number | null }>({ phase, rung: null });
+  const bar = footBar({
+    progress: { ...p, phase },
+    elapsedS: Math.max(0, (nowMs - startedAt.current) / 1000),
+    sinceRetryS: retryAt.current === null ? 0 : Math.max(0, (nowMs - retryAt.current) / 1000),
+    ready: allShownResolved,
+    rung: rungRef.current.phase === phase ? rungRef.current.rung : null,
+  });
+  useEffect(() => { rungRef.current = { phase, rung: bar.rung }; }, [phase, bar.rung]);
 
   return (
     <div className="im-bare im-ssl" data-im="reading" data-im-state={tick ? "done" : settling ? "settling" : "work"}>
@@ -401,12 +412,21 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         )}
       </main>
 
-      {/* the strip at the sheet's foot — rust pip · rotating status · easing progress · count */}
-      <div className="im-ssl-bar" data-im="strip" role="status">
-        <span className="sa-sc-pip im-ssl-pip" />
-        <span key={txt} className="im-ssl-txt" data-im="status" style={{ animation: "saScAppear .25s ease" }}>{txt}</span>
-        <span className="im-ssl-track"><i style={{ width: `${barW}%`, transition: barTransition }} /></span>
-        <span className="im-ssl-cnt" data-im="count">{total > 0 ? `${countShown} / ${total}` : ""}</span>
+      {/* the strip at the sheet's foot — rust pip · where the read is · the bar · the time left.
+          ⚠️ The words change up to four times a second, so they are NOT the live region: a screen
+          reader is told the phase (opening, reading, tidying, ready) once, through the hidden line. */}
+      <div className="im-ssl-bar" data-im="strip">
+        <span className="sa-sc-pip im-ssl-pip" aria-hidden />
+        <span className="im-ssl-txt" data-im="status" aria-hidden>{bar.left}</span>
+        <span className="im-ssl-track" data-im="track" aria-hidden>
+          {bar.fill === null
+            ? <i className="im-ssl-shim" data-im="shimmer" />
+            : <i data-im="fill" style={{ width: `${bar.fill}%` }} />}
+        </span>
+        <span className="im-ssl-left" data-im="left" aria-hidden>{bar.right}</span>
+        <span className="sr-only" role="status">
+          {allShownResolved ? READY_TXT : phase === "tidying" ? "Tidying records" : phase === "opening" ? "Opening your file" : "Reading your file"}
+        </span>
       </div>
     </div>
   );

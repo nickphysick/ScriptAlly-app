@@ -18,9 +18,12 @@ describe("R1 — both loaders keep every timing", () => {
   /* The values on the baseline commit (5f5c503d), read off it before any edit — except TIMEOUT_MS,
      raised from 30000 to 315000 on Nick's ruling (Smart Import quick fixes, 20 Oct): measured imports
      run 40–200s, and the 30s ceiling sent writers to "couldn't read" while the server finished and
-     spent their import. It sits just above the callable's 310s (src/lib/smartImportTimeouts.test.ts). */
+     spent their import. It sits just above the callable's 310s (src/lib/smartImportTimeouts.test.ts).
+     And SLOW_AT_MS (10000) and STATUS_INTERVAL_MS (1300) are gone, retired by Smart Import loader v2
+     with the rotating status text and "Larger import — almost there…" they timed: the foot bar now
+     states the row count and the time left. The ending's timings below are unchanged. */
   it("the reading loader's spine", () => {
-    expect(SCATTER_TIMINGS).toEqual({ INTRO_MS: 1200, FLOOR_MS: 2800, SLOW_AT_MS: 10000, TIMEOUT_MS: 315000, STATUS_INTERVAL_MS: 1300 });
+    expect(SCATTER_TIMINGS).toEqual({ INTRO_MS: 1200, FLOOR_MS: 2800, TIMEOUT_MS: 315000 });
   });
   it("the importing loader's beats", () => {
     expect(IMPORTING_TIMINGS).toEqual({ MESSAGE_INTERVAL_MS: 950, LIFT_AT_MS: 600, PROCEED_AT_MS: 1300 });
