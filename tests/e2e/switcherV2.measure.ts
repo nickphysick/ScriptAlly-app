@@ -274,12 +274,10 @@ test("S7 · the shortcuts sheet: ? and the Help centre open it, and it lists the
     L.check("S7 · ? in a field does nothing", ctx, !(await sheetOpen()), "");
     await page.evaluate(() => document.getElementById("sw-probe-in")?.remove());
   }
-  await openApp(page, "/help", { width: 1440, height: 900 });
-  await page.locator('[data-probe="page-header"] .ph-secondary').filter({ hasText: "Keyboard shortcuts" }).first().click();
-  await page.waitForTimeout(250);
-  L.check("S7 · the Help centre's 'Keyboard shortcuts' opens it", { route: "/help", size: "1440", state: "sheet" }, await sheetOpen(), "");
-  await page.keyboard.press("Escape");
+  /* Help Centre v1 retired the Help centre's "Keyboard shortcuts" button (the "?" in the bar opens the Help menu, and
+     "?" on the keyboard opens this sheet, asserted above). The row that clicked it is retired with it, not rewritten:
+     HC1-H1 asserts the button is gone. */
   L.write();
-  expect(L.rows.length).toBe(SIZES.length * 5 + 1);
+  expect(L.rows.length).toBe(SIZES.length * 5);
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);
 });

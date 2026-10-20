@@ -1,0 +1,762 @@
+
+Running 103 tests using 1 worker
+
+[1/103] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/103] [measure] › tests/e2e/contactV183.measure.ts:103:1 › A1 · header: the score is the hero, one line, no 'How points work', every tile label whole
+[measure] › tests/e2e/contactV183.measure.ts:103:1 › A1 · header: the score is the hero, one line, no 'How points work', every tile label whole
+[A1] 16/16 green
+
+[3/103] [measure] › tests/e2e/contactV183.measure.ts:135:1 › A2 · key: under the points tile, left within 2, 8–12 below, in view, unclipped; Escape closes it with the drawer open
+[measure] › tests/e2e/contactV183.measure.ts:135:1 › A2 · key: under the points tile, left within 2, 8–12 below, in view, unclipped; Escape closes it with the drawer open
+[A2] 14/14 green
+
+[4/103] [measure] › tests/e2e/contactV183.measure.ts:169:1 › A3 · complete: with every reply time settled, no Reply time section; one gap brings it back
+[measure] › tests/e2e/contactV183.measure.ts:169:1 › A3 · complete: with every reply time settled, no Reply time section; one gap brings it back
+[A3] 8/8 green
+
+[5/103] [measure] › tests/e2e/contactV183.measure.ts:214:1 › A4 · front: the drawer is in front of the pinned row
+[measure] › tests/e2e/contactV183.measure.ts:214:1 › A4 · front: the drawer is in front of the pinned row
+[A4] 4/4 green
+
+[6/103] [measure] › tests/e2e/contactV183.measure.ts:241:1 › B1 · 'Fill in the gaps' with the open gaps' count; no Discover in the header; no floating tab; H opens Housekeeping
+[measure] › tests/e2e/contactV183.measure.ts:241:1 › B1 · 'Fill in the gaps' with the open gaps' count; no Discover in the header; no floating tab; H opens Housekeeping
+[B1] 10/10 green
+
+[7/103] [measure] › tests/e2e/contactV183.measure.ts:286:1 › CL1833-E5 · closes: a scroll with every pointer event suppressed, a small scroll keeps it, blur, leaving early, and the keyboard
+[measure] › tests/e2e/contactV183.measure.ts:286:1 › CL1833-E5 · closes: a scroll with every pointer event suppressed, a small scroll keeps it, blur, leaving early, and the keyboard
+[CL1833-E5] 18/18 green
+
+[8/103] [measure] › tests/e2e/contactV183.measure.ts:332:1 › D1 · add: the panel's act view, no centred card, Add disabled until a name, saves through addAgent, then the panel shows them
+[measure] › tests/e2e/contactV183.measure.ts:332:1 › D1 · add: the panel's act view, no centred card, Add disabled until a name, saves through addAgent, then the panel shows them
+[D1] the account is capped: the after-add branch was not entered
+
+[D1] cleanup: cleanupProbeAgent: deleted 0 agent(s), 0 activity line(s)
+
+[D1] 8/8 green
+
+[9/103] [measure] › tests/e2e/contactV183.measure.ts:388:1 › D2 · policy: 'Response policy' with its two values, writing noResponseMeansNo as before
+[measure] › tests/e2e/contactV183.measure.ts:388:1 › D2 · policy: 'Response policy' with its two values, writing noResponseMeansNo as before
+[D2] 5/5 green
+
+[10/103] [measure] › tests/e2e/contactV183.measure.ts:428:1 › E2 · headings: opaque white while stuck, each label within 1px of its column — on both pages
+[measure] › tests/e2e/contactV183.measure.ts:428:1 › E2 · headings: opaque white while stuck, each label within 1px of its column — on both pages
+[E2] 31/31 green
+
+[11/103] [measure] › tests/e2e/contactV183.measure.ts:480:1 › E3 · grouped: one headings row; clicking Replies sorts every group
+[measure] › tests/e2e/contactV183.measure.ts:480:1 › E3 · grouped: one headings row; clicking Replies sorts every group
+[E3] 8/8 green
+
+[12/103] [measure] › tests/e2e/contactV183.measure.ts:515:1 › F1 · pill: left of the '?', centred with the bar, its words and count; gone after Hide it and after all five
+[measure] › tests/e2e/contactV183.measure.ts:515:1 › F1 · pill: left of the '?', centred with the bar, its words and count; gone after Hide it and after all five
+[F1] 18/18 green
+
+[13/103] [measure] › tests/e2e/contactV183.measure.ts:562:1 › F2 · show: a checklist row changes nothing, closes the checklist, and shows the dim with a hole around the target and the step card
+[measure] › tests/e2e/contactV183.measure.ts:562:1 › F2 · show: a checklist row changes nothing, closes the checklist, and shows the dim with a hole around the target and the step card
+[F2] 31/31 green
+
+[14/103] [measure] › tests/e2e/contactV183.measure.ts:610:1 › F3 · end: a real click on the spotlit row opens the panel and ends the spotlight within 200ms
+[measure] › tests/e2e/contactV183.measure.ts:610:1 › F3 · end: a real click on the spotlit row opens the panel and ends the spotlight within 200ms
+[F3] 3/3 green
+
+[15/103] [measure] › tests/e2e/contactV183.measure.ts:637:1 › F4 · done: a row click ticks Open, two characters tick Search, a saved edit ticks Edit, each across a reload
+[measure] › tests/e2e/contactV183.measure.ts:637:1 › F4 · done: a row click ticks Open, two characters tick Search, a saved edit ticks Edit, each across a reload
+[F4] 6/6 green
+
+[16/103] [measure] › tests/e2e/contactV183.measure.ts:677:1 › F5 · next: after a step is done, the note under the pill says 'Next: {next}', and pressing it starts that spotlight
+[measure] › tests/e2e/contactV183.measure.ts:677:1 › F5 · next: after a step is done, the note under the pill says 'Next: {next}', and pressing it starts that spotlight
+[F5] 4/4 green
+
+[17/103] [measure] › tests/e2e/contactV191.measure.ts:151:1 › CL191-A1 · blank: a missing email's (and website's) add link is hidden at rest, visible while its row is hovered, the row's height unchanged
+[measure] › tests/e2e/contactV191.measure.ts:151:1 › CL191-A1 · blank: a missing email's (and website's) add link is hidden at rest, visible while its row is hovered, the row's height unchanged
+[CL191-A1] 38/38 green
+
+[18/103] [measure] › tests/e2e/contactV191.measure.ts:184:1 › CL191-A2 · focus: Tab reaches the hidden add link, which shows with a focus ring; Enter opens the add flow, not the card
+[measure] › tests/e2e/contactV191.measure.ts:184:1 › CL191-A2 · focus: Tab reaches the hidden add link, which shows with a focus ring; Enter opens the add flow, not the card
+[CL191-A2] 18/18 green
+
+[19/103] [measure] › tests/e2e/contactV191.measure.ts:255:1 › CL191-B1 · icons: each website and email has a 15px icon before its text, no underline at rest, and is ≥ 18px clear of the next column
+[measure] › tests/e2e/contactV191.measure.ts:255:1 › CL191-B1 · icons: each website and email has a 15px icon before its text, no underline at rest, and is ≥ 18px clear of the next column
+  @1512: 1 websites, 28 emails, stacked true; least clearance 55.0
+
+  @1280: 1 websites, 28 emails, stacked true; least clearance 22.5
+
+[CL191-B1] 234/234 green
+
+[20/103] [measure] › tests/e2e/contactV191.measure.ts:294:1 › CL191-C1 · date: every Date added reads '25 Jun 2026', and all its text is one colour
+[measure] › tests/e2e/contactV191.measure.ts:294:1 › CL191-C1 · date: every Date added reads '25 Jun 2026', and all its text is one colour
+  @1512: 52 dates, e.g. 1 Feb 2026 · 8 Feb 2026 · 1 Feb 2026
+
+  @1280: 52 dates, e.g. 1 Feb 2026 · 8 Feb 2026 · 1 Feb 2026
+
+[CL191-C1] 8/8 green
+
+[21/103] [measure] › tests/e2e/contactV191.measure.ts:317:1 › CL191-D1 · agent width: with sparse data Agent is no wider than its widest name or agency line + 8 (floor 230, ≤ 330); no gap over 56; the headings follow
+[measure] › tests/e2e/contactV191.measure.ts:317:1 › CL191-D1 · agent width: with sparse data Agent is no wider than its widest name or agency line + 8 (floor 230, ≤ 330); no gap over 56; the headings follow
+  @1512 unpinned: template 241px 94px 93px 232px 96px 126px · gap 41.6 · Agent needs 232.2 (rj-agent-3), heading 54.4
+
+  @1512 pinned: template 241px 94px 93px 232px 96px 126px · gap 51.2 · Agent needs 232.2 (rj-agent-3), heading 54.4
+
+  @1280 unpinned: template 241px 94px 220px 96px 126px · gap 20.25 · Agent needs 232.2 (rj-agent-3), heading 54.4
+
+  @1280 pinned: template 241px 94px 226px 96px 126px · gap 30.75 · Agent needs 232.2 (rj-agent-3), heading 54.4
+
+[CL191-D1] 48/48 green
+
+[22/103] [measure] › tests/e2e/contactV191.measure.ts:371:1 › CL191-E1 · illustration: pinned, the art keeps its aspect ratio, no ancestor clips it, nothing paints over it, it hides no heading's text
+[measure] › tests/e2e/contactV191.measure.ts:371:1 › CL191-E1 · illustration: pinned, the art keeps its aspect ratio, no ancestor clips it, nothing paints over it, it hides no heading's text
+[CL191-E1] 28/28 green
+
+[23/103] [measure] › tests/e2e/contactV191.measure.ts:450:1 › CL191-F1 · unpinned bar: navy toolbar, cream letters and Pin, white controls without a ring, a card rounded 18 on all four corners with 22px below it; pinned unchanged
+[measure] › tests/e2e/contactV191.measure.ts:450:1 › CL191-F1 · unpinned bar: navy toolbar, cream letters and Pin, white controls without a ring, a card rounded 18 on all four corners with 22px below it; pinned unchanged
+[CL191-F1] 42/42 green
+
+[24/103] [measure] › tests/e2e/contactV191.measure.ts:495:1 › CL191-G1 · strip: the open row's strip is cream rgb(246, 241, 232), unlike the group header; its divider ink at 12%
+[measure] › tests/e2e/contactV191.measure.ts:495:1 › CL191-G1 · strip: the open row's strip is cream rgb(246, 241, 232), unlike the group header; its divider ink at 12%
+[CL191-G1] 26/26 green
+
+[25/103] [measure] › tests/e2e/contactV192.measure.ts:132:1 › CL192-A1 · top: unpinned, the eyebrow's top is 36 ±2 below the content card's top
+[measure] › tests/e2e/contactV192.measure.ts:132:1 › CL192-A1 · top: unpinned, the eyebrow's top is 36 ±2 below the content card's top
+[CL192-A1] 6/6 green
+
+[26/103] [measure] › tests/e2e/contactV192.measure.ts:153:1 › CL192-A2 · gap: unpinned, the list card's top is 44 ±2 below the lower of the buttons and the counts card; pinned unchanged against v19.1
+[measure] › tests/e2e/contactV192.measure.ts:153:1 › CL192-A2 · gap: unpinned, the list card's top is 44 ±2 below the lower of the buttons and the counts card; pinned unchanged against v19.1
+[CL192-A2] 22/22 green
+
+[27/103] [measure] › tests/e2e/contactV192.measure.ts:196:1 › CL192-B1 · open: no open agent's row says 'Open to queries'; a closed one says 'Closed till …' or 'Closed to queries' in rust italic serif 13px
+[measure] › tests/e2e/contactV192.measure.ts:196:1 › CL192-B1 · open: no open agent's row says 'Open to queries'; a closed one says 'Closed till …' or 'Closed to queries' in rust italic serif 13px
+[CL192-B1] 34/34 green
+
+[28/103] [measure] › tests/e2e/contactV192.measure.ts:232:1 › CL192-C1 · reply: every Replies value reads '~N weeks' (or '~1 week') or 'Not stated', never 'wks'; an absent or zero window shows no number
+[measure] › tests/e2e/contactV192.measure.ts:232:1 › CL192-C1 · reply: every Replies value reads '~N weeks' (or '~1 week') or 'Not stated', never 'wks'; an absent or zero window shows no number
+[CL192-C1] 56/56 green
+
+[29/103] [measure] › tests/e2e/contactV192.measure.ts:260:1 › CL192-D1 · overdue: 10 and 30 days over read 'Expected … · Nd over'; 31 reads 'Overdue since …'; 400 adds the year; one style
+[measure] › tests/e2e/contactV192.measure.ts:260:1 › CL192-D1 · overdue: 10 and 30 days over read 'Expected … · Nd over'; 31 reads 'Overdue since …'; 400 adds the year; one style
+[CL192-D1] 22/22 green
+
+[30/103] [measure] › tests/e2e/contactV192.measure.ts:312:1 › CL192-E1 · imported: an imported agent shows 'Imported' under its date, a hand-added one doesn't; the Date added column's width is unchanged by the label
+[measure] › tests/e2e/contactV192.measure.ts:312:1 › CL192-E1 · imported: an imported agent shows 'Imported' under its date, a hand-added one doesn't; the Date added column's width is unchanged by the label
+[CL192-E1] 20/20 green
+
+[31/103] [measure] › tests/e2e/contactV192.measure.ts:356:1 › CL192-F1 · stacked: at 1280, a row with an email and no website has the email on the name's line (centres ±2), '+ Add website' under it
+[measure] › tests/e2e/contactV192.measure.ts:356:1 › CL192-F1 · stacked: at 1280, a row with an email and no website has the email on the name's line (centres ±2), '+ Add website' under it
+[CL192-F1] 57/57 green
+
+[32/103] [measure] › tests/e2e/contactV192.measure.ts:395:1 › CL192-G1 · gaps: the List health card has no 'gaps to fill' text; the Fill button still shows the count; the ring still opens Housekeeping
+[measure] › tests/e2e/contactV192.measure.ts:395:1 › CL192-G1 · gaps: the List health card has no 'gaps to fill' text; the Fill button still shows the count; the ring still opens Housekeeping
+[CL192-G1] 10/10 green
+
+[33/103] [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px
+[measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px
+[HS1-A1] 62/62 green
+
+[34/103] [measure] › tests/e2e/helpSystemV1.measure.ts:168:1 › HS1-A2 · one open: opening the Help menu while the checklist is open leaves only the menu
+[measure] › tests/e2e/helpSystemV1.measure.ts:168:1 › HS1-A2 · one open: opening the Help menu while the checklist is open leaves only the menu
+[HS1-A2] 6/6 green
+
+[35/103] [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order
+[measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order
+[HS1-B1] 12/12 green
+
+[36/103] [measure] › tests/e2e/helpSystemV1.measure.ts:242:1 › HS1-B2 · Continue closes the menu and spotlights the next undone item's target
+[measure] › tests/e2e/helpSystemV1.measure.ts:242:1 › HS1-B2 · Continue closes the menu and spotlights the next undone item's target
+[HS1-B2] 8/8 green
+
+[37/103] [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ?
+[measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ?
+[HS1-B3] 10/10 green
+
+[38/103] [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage
+[measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage
+[HS1-C1] 12/12 green
+
+[39/103] [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's
+[measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's
+[HS1-C2] 6/6 green
+
+[40/103] [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself
+[measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself
+[HS1-C3] 8/8 green
+
+[41/103] [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s
+[measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s
+[HS1-C4] 10/10 green
+
+[42/103] [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s
+[measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s
+[HS1-C5] 6/6 green
+
+[43/103] [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick
+[measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick
+[HS1-C6] 10/10 green
+
+[44/103] [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms
+[measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms
+[HS1-D1] 6/6 green
+
+[45/103] [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens)
+[measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens)
+[HS1-D2] 8/8 green
+
+[46/103] [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot
+[measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot
+[HS1-D3] 10/10 green
+
+[47/103] [measure] › tests/e2e/helpSystemV1.measure.ts:603:1 › HS1-E1 · four radio tiles and no select; An idea asks what would make QueryHawk better
+[measure] › tests/e2e/helpSystemV1.measure.ts:603:1 › HS1-E1 · four radio tiles and no select; An idea asks what would make QueryHawk better
+[HS1-E1] 6/6 green
+
+[48/103] [measure] › tests/e2e/helpSystemV1.measure.ts:621:1 › HS1-E2 · the draft: kept through a close and a reopen; a send clears it
+[measure] › tests/e2e/helpSystemV1.measure.ts:621:1 › HS1-E2 · the draft: kept through a close and a reopen; a send clears it
+[HS1-E2] 8/8 green
+
+[49/103] [measure] › tests/e2e/hr1.measure.ts:135:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs
+[50/103] [measure] › tests/e2e/hr1.measure.ts:219:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base
+  1) [measure] › tests/e2e/hr1.measure.ts:219:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+
+    Error: HR1-8: the reference is older than twelve hours; capture it again
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 43200000
+    Received:   49782926
+
+      249 |     expect(existsSync(REF), "HR1-8: capture the base reference first (HR1_CAPTURE=1 against the base preview)").toBe(true);
+      250 |     const ref = JSON.parse(readFileSync(REF, "utf8")) as { capturedAt: number; got: Record<string, (number[] | null)[]> };
+    > 251 |     expect(Date.now() - ref.capturedAt, "HR1-8: the reference is older than twelve hours; capture it again").toBeLessThan(12 * 3600_000);
+          |                                                                                                              ^
+      252 |     for (const c of cases) {
+      253 |       const a = ref.got[c.name], b = got[c.name];
+      254 |       L.check(`${c.name} found on the base and here`, !!a && !!b && a.every(Boolean) && b.every(Boolean), JSON.stringify({ a, b }));
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/hr1.measure.ts:251:110
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-c0f4a-ages-measure-as-on-the-base-measure/error-context.md
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-c0f4a-ages-measure-as-on-the-base-measure/error-context.md
+
+
+[51/103] [measure] › tests/e2e/qcV139.measure.ts:121:3 › Query Centre v139 › A1 · one guide: the old bottom-right guide is gone; the pill is the shared one
+[52/103] [measure] › tests/e2e/qcV139.measure.ts:147:3 › Query Centre v139 › A2 · real ticks: each event ticks its item with no checklist involved, and persists
+[53/103] [measure] › tests/e2e/qcV139.measure.ts:183:5 › Query Centre v139 › B1 · nothing written: the practice journey end to end (partial)
+[54/103] [measure] › tests/e2e/qcV139.measure.ts:183:5 › Query Centre v139 › B1 · nothing written: the practice journey end to end (full)
+[55/103] [measure] › tests/e2e/qcV139.measure.ts:183:5 › Query Centre v139 › B1 · nothing written: the practice journey end to end (pass)
+[56/103] [measure] › tests/e2e/qcV139.measure.ts:183:5 › Query Centre v139 › B1 · nothing written: the practice journey end to end (offer)
+[57/103] [measure] › tests/e2e/qcV139.measure.ts:183:5 › Query Centre v139 › B1 · nothing written: the practice journey end to end (rr)
+[58/103] [measure] › tests/e2e/qcV139.measure.ts:215:3 › Query Centre v139 › B2 · real screens: the practice journey is the real one, with the same steps per answer
+[59/103] [measure] › tests/e2e/qcV139.measure.ts:262:3 › Query Centre v139 › B3 · flow: band → row → Record a response → one card per step → saved → cleared and ticked
+[60/103] [measure] › tests/e2e/qcV139.measure.ts:298:3 › Query Centre v139 › B4 · early exit: Esc at card 3, and the journey's own way out, remove Pip and leave item 4 unticked
+[61/103] [measure] › tests/e2e/qcV139.measure.ts:329:3 › Query Centre v139 › B5 · never counted: during the walkthrough the page's figures exclude Pip; the Birds-eye drawer and the Contact list never show him
+[62/103] [measure] › tests/e2e/qcV139.measure.ts:361:3 › Query Centre v139 › C1 · rename: the menu reads Who it's with, the title grouped by who it's with, and a saved Urgency opens on it
+[63/103] [measure] › tests/e2e/qcV139.measure.ts:380:3 › Query Centre v139 › C2 · icons: Status glyphs, Next action badges, the package cube — and no hourglass
+[64/103] [measure] › tests/e2e/qcV140.measure.ts:97:3 › Query Centre v140 › A1 · one row: the toolbar never wraps; 64 unpinned, 72 pinned; the old header's controls are gone
+[65/103] [measure] › tests/e2e/qcV140.measure.ts:125:3 › Query Centre v140 › A2 · jump labels: Next action — every button and menu item has text; no two neighbours share a mark; each mark is its band's
+[66/103] [measure] › tests/e2e/qcV140.measure.ts:165:3 › Query Centre v140 › A3 · fold: buttons end inside the row; visible + folded = groups; the menu lists the folded; pinned and unpinned fold alike
+[67/103] [measure] › tests/e2e/qcV140.measure.ts:206:3 › Query Centre v140 › A4 · jump: a group lands its band, a month its first row, within 2px of the sticky stack's bottom
+[68/103] [measure] › tests/e2e/qcV140.measure.ts:241:3 › Query Centre v140 › B1 · unpinned bar: navy toolbar, 18px card corners, cream Pin, no ring on the controls
+[69/103] [measure] › tests/e2e/qcV140.measure.ts:263:3 › Query Centre v140 › C1 · pinned scheme: navy band, cream toolbar, white headings, flush to the sheet at the top
+[70/103] [measure] › tests/e2e/qcV140.measure.ts:285:3 › Query Centre v140 › C2 · no repeats: the band names none of Your move, Waiting, Closed
+[71/103] [measure] › tests/e2e/qcV140.measure.ts:297:3 › Query Centre v140 › C3 · figures: heard back, asked for more and overdue as lib/responses and the reply-date filter make them
+[72/103] [measure] › tests/e2e/qcV140.measure.ts:338:3 › Query Centre v140 › C4 · illustration: its aspect, nothing clips it, and it covers no control or heading
+[73/103] [measure] › tests/e2e/qcV140.measure.ts:377:3 › Query Centre v140 › D1 · one state: the Overdue pick is the reply-date switch; the Offers pick is the Offers toggle; one chip each
+[74/103] [measure] › tests/e2e/qcV140.measure.ts:424:3 › Query Centre v140 › D2 · escape: pinned with the Filters menu open, Esc closes the menu and the list stays pinned; a second Esc unpins
+[75/103] [measure] › tests/e2e/qcV140.measure.ts:442:3 › Query Centre v140 › E1 · columns: Agent ≤ 264, every column at least its minimum, the gaps ≥ 32 at 1512, the Due dial inside the card at 1280
+[measure] › tests/e2e/qcV140.measure.ts:442:3 › Query Centre v140 › E1 · columns: Agent ≤ 264, every column at least its minimum, the gaps ≥ 32 at 1512, the Due dial inside the card at 1280
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+  2) [measure] › tests/e2e/qcV140.measure.ts:442:3 › Query Centre v140 › E1 · columns: Agent ≤ 264, every column at least its minimum, the gaps ≥ 32 at 1512, the Due dial inside the card at 1280 
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries --restore '{"seen":true,"done":{"log":true,"find":true,"open":true,"pin":true,"resp":true,"birds":true}}'
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      38 | }
+      39 |
+    > 40 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      41 | let original = "null";
+      42 | test.beforeAll(() => { original = flags(""); });
+      43 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:40:30)
+        at open (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:55:3)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:447:13
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries --restore '{"seen":true,"done":{"log":true,"find":true,"open":true}}'
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      38 | }
+      39 |
+    > 40 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      41 | let original = "null";
+      42 | test.beforeAll(() => { original = flags(""); });
+      43 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:40:30)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:43:23
+
+    Error Context: test-results/qcV140.measure.ts-Query-Ce-ff8da-ial-inside-the-card-at-1280-measure/error-context.md
+
+    Error Context: test-results/qcV140.measure.ts-Query-Ce-ff8da-ial-inside-the-card-at-1280-measure/error-context.md
+
+
+[76/103] [measure] › tests/e2e/qcV140.measure.ts:467:3 › Query Centre v140 › F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame
+[measure] › tests/e2e/qcV140.measure.ts:467:3 › Query Centre v140 › F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+  3) [measure] › tests/e2e/qcV140.measure.ts:467:3 › Query Centre v140 › F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame 
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries --restore '{"seen":true,"done":{"log":true,"find":true,"open":true,"pin":true,"resp":true,"birds":true}}'
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      38 | }
+      39 |
+    > 40 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      41 | let original = "null";
+      42 | test.beforeAll(() => { original = flags(""); });
+      43 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:40:30)
+        at open (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:55:3)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:471:13
+
+    Error Context: test-results/qcV140.measure.ts-Query-Ce-ddc6a--at-the-first-painted-frame-measure/error-context.md
+
+    Error Context: test-results/qcV140.measure.ts-Query-Ce-ddc6a--at-the-first-painted-frame-measure/error-context.md
+
+
+[77/103] [measure] › tests/e2e/qcV140.measure.ts:519:3 › Query Centre v140 › G1 · guide: the pill reads /6; pressing F pins and ticks Pin the list with no walkthrough running
+[measure] › tests/e2e/qcV140.measure.ts:519:3 › Query Centre v140 › G1 · guide: the pill reads /6; pressing F pins and ticks Pin the list with no walkthrough running
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+  4) [measure] › tests/e2e/qcV140.measure.ts:519:3 › Query Centre v140 › G1 · guide: the pill reads /6; pressing F pins and ticks Pin the list with no walkthrough running 
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries 
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      38 | }
+      39 |
+    > 40 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      41 | let original = "null";
+      42 | test.beforeAll(() => { original = flags(""); });
+      43 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:40:30)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV140.measure.ts:535:26
+
+    Error Context: test-results/qcV140.measure.ts-Query-Ce-fba76-with-no-walkthrough-running-measure/error-context.md
+
+    Error Context: test-results/qcV140.measure.ts-Query-Ce-fba76-with-no-walkthrough-running-measure/error-context.md
+
+
+[78/103] [measure] › tests/e2e/qcV1401.measure.ts:89:3 › Query Centre v140.1 › A1 · export set: Queried + Waiting — the label's {v} is Show's {v}; the CSV has exactly those rows, in the list's order
+[measure] › tests/e2e/qcV1401.measure.ts:89:3 › Query Centre v140.1 › A1 · export set: Queried + Waiting — the label's {v} is Show's {v}; the CSV has exactly those rows, in the list's order
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+  5) [measure] › tests/e2e/qcV1401.measure.ts:89:3 › Query Centre v140.1 › A1 · export set: Queried + Waiting — the label's {v} is Show's {v}; the CSV has exactly those rows, in the list's order 
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries --restore '{"seen":true,"done":{"log":true,"find":true,"open":true,"pin":true,"resp":true,"birds":true}}'
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      37 | }
+      38 |
+    > 39 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      40 | let original = "null";
+      41 | test.beforeAll(() => { original = flags(""); });
+      42 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:39:30)
+        at open (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:51:3)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:93:13
+
+    Error Context: test-results/qcV1401.measure.ts-Query-C-a25d7-se-rows-in-the-list-s-order-measure/error-context.md
+
+    Error Context: test-results/qcV1401.measure.ts-Query-C-a25d7-se-rows-in-the-list-s-order-measure/error-context.md
+
+
+[79/103] [measure] › tests/e2e/qcV1401.measure.ts:129:3 › Query Centre v140.1 › A2 · states: no filters → 'Export all {N} queries'; a search matching nothing → disabled
+[measure] › tests/e2e/qcV1401.measure.ts:129:3 › Query Centre v140.1 › A2 · states: no filters → 'Export all {N} queries'; a search matching nothing → disabled
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+    return factory.create(code, {
+                   ^
+
+FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+    at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+    at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+    at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+  code: 'auth/quota-exceeded',
+  customData: { appName: '[DEFAULT]' }
+}
+
+Node.js v24.16.0
+
+  6) [measure] › tests/e2e/qcV1401.measure.ts:129:3 › Query Centre v140.1 › A2 · states: no filters → 'Export all {N} queries'; a search matching nothing → disabled 
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries 
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      37 | }
+      38 |
+    > 39 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      40 | let original = "null";
+      41 | test.beforeAll(() => { original = flags(""); });
+      42 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:39:30)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:41:35
+
+    Error: Command failed: node tests/e2e/guideFlags.mjs --page queries --restore 'null'
+    file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485
+        return factory.create(code, {
+                       ^
+
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+
+      37 | }
+      38 |
+    > 39 | const flags = (a: string) => execSync(`node tests/e2e/guideFlags.mjs --page queries ${a}`, { encoding: "utf8" }).trim().split("\n").pop()!;
+         |                              ^
+      40 | let original = "null";
+      41 | test.beforeAll(() => { original = flags(""); });
+      42 | test.afterAll(() => { flags(`--restore '${original}'`); });
+        at _errorWithCustomMessage (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async _performSignInRequest (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (file:///Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at async file:///Users/nickphysick/ScriptAlly-hc1/tests/e2e/guideFlags.mjs:33:18 {
+      code: 'auth/quota-exceeded',
+      customData: { appName: '[DEFAULT]' }
+    }
+
+    Node.js v24.16.0
+
+        at _errorWithCustomMessage (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:485:20)
+        at _performFetchWithErrorHandling (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:958:23)
+        at async _performSignInRequest (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:976:28)
+        at async _signInWithCredential (/Users/nickphysick/ScriptAlly-app/node_modules/@firebase/auth/dist/node-esm/totp-5d40279f.js:5695:22)
+        at flags (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:39:30)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/qcV1401.measure.ts:42:23
+
+    Error Context: test-results/qcV1401.measure.ts-Query-C-47ac1-matching-nothing-→-disabled-measure/error-context.md
+
+    Error Context: test-results/qcV1401.measure.ts-Query-C-47ac1-matching-nothing-→-disabled-measure/error-context.md
+
+
+[80/103] [measure] › tests/e2e/qcV1401.measure.ts:158:27 › Query Centre v140.1 › B1 · wording at 1512: the Pin step says 'pin button' and 'F', never 'Pin list'
+[81/103] [measure] › tests/e2e/qcV1401.measure.ts:158:27 › Query Centre v140.1 › B1 · wording at 1280: the Pin step says 'pin button' and 'F', never 'Pin list'
+[82/103] [measure] › tests/e2e/shellMenus.measure.ts:102:3 › shell menus › MS1 · the arrow opens the capture menu, 8px below the button, right edges together
+[measure] › tests/e2e/shellMenus.measure.ts:102:3 › shell menus › MS1 · the arrow opens the capture menu, 8px below the button, right edges together
+[ensureSignedIn] the sign-in was refused (the form is still up); waiting before pressing again
+
+[ensureSignedIn] the sign-in was refused (the form is still up); waiting before pressing again
+
+[83/103] [measure] › tests/e2e/shellMenus.measure.ts:123:3 › shell menus › MS2 · "?" opens the Help menu under it, right edges together, three rows
+[measure] › tests/e2e/shellMenus.measure.ts:123:3 › shell menus › MS2 · "?" opens the Help menu under it, right edges together, three rows
+[ensureSignedIn] the sign-in was refused (the form is still up); waiting before pressing again
+
+[84/103] [measure] › tests/e2e/shellMenus.measure.ts:165:3 › shell menus · the language › MS3 · every chooseable row and every search title is at least 4.5:1, from rendered pixels
+[85/103] [measure] › tests/e2e/shellMenus.measure.ts:201:3 › shell menus · the language › MS5 · in every menu, rows are 36 tall in Source Serif 4, and hover shows the wash and the edge
+[86/103] [measure] › tests/e2e/shellMenus.measure.ts:225:3 › shell menus · the language › MS6 · each menu 8px from its control on its nearer edge; your menu above the foot, 232 wide
+[87/103] [measure] › tests/e2e/shellMenus.measure.ts:250:3 › shell menus · the language › MS4 · every Add a manuscript entry is aria-disabled, tagged SOON, inert, and skipped by the arrow keys
+[88/103] [measure] › tests/e2e/shellMenus.measure.ts:284:3 › search › MS7 · 660 wide, centred on the sheet, 10 below the bar, an ink input band, no sans-serif
+[89/103] [measure] › tests/e2e/shellMenus.measure.ts:304:3 › search › MS8 · no "Queries Hub" in search; the eyebrows read START SOMETHING and GO TO
+[90/103] [measure] › tests/e2e/shellMenus.measure.ts:315:3 › search › MS9 · each Go-to row's icon is its sidebar row's, path for path
+[91/103] [measure] › tests/e2e/shellMenus.measure.ts:328:3 › search › MS10 · every keycap shown is a bound key
+[92/103] [measure] › tests/e2e/shellMenus.measure.ts:349:3 › your menu › MS11 · the plan sits on an ink tile and the lilac is gone
+[93/103] [measure] › tests/e2e/shellMenus.measure.ts:371:3 › settings › MS12 · the tab says ACCOUNT · Settings; Back to app once, in the bar; no Playfair in the sidebar
+[94/103] [measure] › tests/e2e/shellMenus.measure.ts:391:3 › settings › MS13 · content starts 56 from the sheet, two columns at every width, no Playfair/Inter/Source Sans
+[95/103] [measure] › tests/e2e/shellMenus.measure.ts:408:3 › settings › MS14 · toggles on #2d3a50; the input focus ring and halo; the primary button #2d3a50
+[96/103] [measure] › tests/e2e/shellMenus.measure.ts:430:3 › settings › MS15 · at 390px the Settings pages and the Query Centre are main's, pixel for pixel
+  7) [measure] › tests/e2e/shellMenus.measure.ts:430:3 › settings › MS15 · at 390px the Settings pages and the Query Centre are main's, pixel for pixel 
+
+    Error: reports/ink-shell-v1/menus/ms15-main-390/_account_profile.png: capture main's references first (MS15_CAPTURE=1 against main)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      455 |     for (const [k, v] of Object.entries(shots)) {
+      456 |       const f = `${dir}/${k.replace(/\//g, "_")}.png`;
+    > 457 |       expect(existsSync(f), `${f}: capture main's references first (MS15_CAPTURE=1 against main)`).toBe(true);
+          |                                                                                                    ^
+      458 |       expect(Date.now() - statSync(f).mtimeMs, `${f} is older than 12 hours — recapture from main`).toBeLessThan(12 * 3600e3);
+      459 |       expect(v.equals(readFileSync(f)), `${k} at 390 differs from main`).toBe(true);
+      460 |     }
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/shellMenus.measure.ts:457:100
+
+    Error Context: test-results/shellMenus.measure.ts-sett-c28bc--are-main-s-pixel-for-pixel-measure/error-context.md
+
+
+[97/103] [measure] › tests/e2e/switcherV2.measure.ts:39:3 › S1, S2, S3 · the tile and the menu at 1280
+[98/103] [measure] › tests/e2e/switcherV2.measure.ts:39:3 › S1, S2, S3 · the tile and the menu at 1440
+[99/103] [measure] › tests/e2e/switcherV2.measure.ts:102:1 › S4 · the keys
+[measure] › tests/e2e/switcherV2.measure.ts:102:1 › S4 · the keys
+LEDGER sw-keys: {"S4 · Enter opens, with focus on the active book":{"pass":2,"fail":0},"S4 · Escape closes and returns focus to the tile (after Enter)":{"pass":2,"fail":0},"S4 · Space opens, with focus on the active book":{"pass":2,"fail":0},"S4 · Escape closes and returns focus to the tile (after Space)":{"pass":2,"fail":0},"S4 · ArrowDown opens, with focus on the active book":{"pass":2,"fail":0},"S4 · Escape closes and returns focus to the tile (after ArrowDown)":{"pass":2,"fail":0},"S4 · Home is the first item, End the last":{"pass":2,"fail":0},"S4 · ↑ from the first wraps to the last":{"pass":2,"fail":0},"S4 · ↓ from the last wraps to the first":{"pass":2,"fail":0},"S4 · Tab closes without trapping focus":{"pass":2,"fail":0}}
+
+[100/103] [measure] › tests/e2e/switcherV2.measure.ts:137:1 › S5 · M opens the menu from the page, and nowhere it should not
+  8) [measure] › tests/e2e/switcherV2.measure.ts:137:1 › S5 · M opens the menu from the page, and nowhere it should not 
+
+    Test timeout of 900000ms exceeded.
+
+    Error: locator.click: Test timeout of 900000ms exceeded.
+    Call log:
+      - waiting for locator('.aglist input, [data-clv="find"] input, input[placeholder*="Find"]').filter({ visible: true }).first()
+
+
+      147 |     /* an input: the page's own find field */
+      148 |     const find = page.locator('.aglist input, [data-clv="find"] input, input[placeholder*="Find"]').filter({ visible: true }).first();
+    > 149 |     await find.click(); await page.keyboard.press("m"); await page.waitForTimeout(150);
+          |                ^
+      150 |     L.check("S5 · M in an input does nothing", ctx, !(await menuOpen(page)), "");
+      151 |     await find.fill("");
+      152 |     /* a textarea, placed on the page for the probe — the guard is by element kind */
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/switcherV2.measure.ts:149:16
+
+    Error Context: test-results/switcherV2.measure.ts-S5-·-af598-e-and-nowhere-it-should-not-measure/error-context.md
+
+
+[101/103] [measure] › tests/e2e/switcherV2.measure.ts:174:1 › S6 · switching: the key, the toast and the entrance; the active book is only a close
+[measure] › tests/e2e/switcherV2.measure.ts:174:1 › S6 · switching: the key, the toast and the entrance; the active book is only a close
+LEDGER sw-switch: {"S6 · picking another book writes the shared key":{"pass":1,"fail":0},"S6 · …shows 'Now showing {title}'":{"pass":1,"fail":0},"S6 · …and replays the stage page's entrance":{"pass":1,"fail":0},"S6 · picking the active book closes the menu, with no toast":{"pass":1,"fail":0},"S6 · …and no entrance":{"pass":1,"fail":0}}
+
+[102/103] [measure] › tests/e2e/switcherV2.measure.ts:218:1 › S8 · motion: stated durations, instant under reduced motion
+[measure] › tests/e2e/switcherV2.measure.ts:218:1 › S8 · motion: stated durations, instant under reduced motion
+LEDGER sw-motion: {"S8 · reduce: the menu's transitions are instant":{"pass":1,"fail":0},"S8 · reduce: the chevron's turn is instant":{"pass":1,"fail":0},"S8 · no preference: the menu fades 0.16s and drops 0.18s":{"pass":1,"fail":0},"S8 · no preference: the chevron is not instant":{"pass":1,"fail":0}}
+
+[103/103] [measure] › tests/e2e/switcherV2.measure.ts:247:1 › S7 · the shortcuts sheet: ? and the Help centre open it, and it lists the registry
+[measure] › tests/e2e/switcherV2.measure.ts:247:1 › S7 · the shortcuts sheet: ? and the Help centre open it, and it lists the registry
+LEDGER sw-sheet: {"S7 · ? opens the sheet":{"pass":2,"fail":0},"S7 · every registry entry is listed once, and nothing else is":{"pass":2,"fail":0},"S7 · each row's label, scope and keycaps are the registry's":{"pass":2,"fail":0},"S7 · Escape closes it and focus returns to where it was":{"pass":2,"fail":0},"S7 · ? in a field does nothing":{"pass":2,"fail":0}}
+
+  Slow test file: [measure] › tests/e2e/shellMenus.measure.ts (7.2m)
+  Slow test file: [measure] › tests/e2e/hr1.measure.ts (6.5m)
+  Slow test file: [measure] › tests/e2e/helpSystemV1.measure.ts (6.1m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  8 failed
+    [measure] › tests/e2e/hr1.measure.ts:219:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+    [measure] › tests/e2e/qcV140.measure.ts:442:3 › Query Centre v140 › E1 · columns: Agent ≤ 264, every column at least its minimum, the gaps ≥ 32 at 1512, the Due dial inside the card at 1280 
+    [measure] › tests/e2e/qcV140.measure.ts:467:3 › Query Centre v140 › F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame 
+    [measure] › tests/e2e/qcV140.measure.ts:519:3 › Query Centre v140 › G1 · guide: the pill reads /6; pressing F pins and ticks Pin the list with no walkthrough running 
+    [measure] › tests/e2e/qcV1401.measure.ts:89:3 › Query Centre v140.1 › A1 · export set: Queried + Waiting — the label's {v} is Show's {v}; the CSV has exactly those rows, in the list's order 
+    [measure] › tests/e2e/qcV1401.measure.ts:129:3 › Query Centre v140.1 › A2 · states: no filters → 'Export all {N} queries'; a search matching nothing → disabled 
+    [measure] › tests/e2e/shellMenus.measure.ts:430:3 › settings › MS15 · at 390px the Settings pages and the Query Centre are main's, pixel for pixel 
+    [measure] › tests/e2e/switcherV2.measure.ts:137:1 › S5 · M opens the menu from the page, and nowhere it should not 
+  2 skipped
+  2 did not run
+  91 passed (56.7m)
+RC=1

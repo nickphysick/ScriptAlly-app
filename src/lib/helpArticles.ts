@@ -5,10 +5,12 @@
  * Help system v1 — THE ARTICLE MAP: the help articles this pack links to, which three a page offers under "On this
  * page" in the Help menu, which one each guide item's "Learn more" opens, and the What's new entries.
  *
- * ⚠️ THE HELP CENTRE AND ITS ARTICLES ARE THE NEXT PROMPT'S (cc-prompt-help-centre-v1). Until an article exists, a link
- *    to it goes to /help, never to a route that 404s into the app's catch-all. `LIVE_ARTICLES` is the list of slugs that
- *    have a page; it is empty today, and the next prompt fills it as it writes each one.
+ * Help Centre v1 — THE INDEX IS BUILT FROM THE ARTICLES THEMSELVES (`content/help/articles.ts`): every written article
+ *    is live, its read time is computed from its words, and a slug a guide item or the Help menu names must be one of
+ *    them (lock HC1-C5). A link to a slug that is not written goes to /help, never to a route that 404s.
  */
+import { HELP_ARTICLE_LIST } from "../content/help/articles";
+import { readTime } from "../content/help/model";
 
 export interface HelpArticle {
   slug: string;
@@ -17,25 +19,12 @@ export interface HelpArticle {
   read: string;
 }
 
-export const HELP_ARTICLES: Record<string, HelpArticle> = {
-  "add-an-agent": { slug: "add-an-agent", title: "Add an agent", read: "1 min" },
-  "find-an-agent": { slug: "find-an-agent", title: "Find an agent", read: "1 min" },
-  "pin-the-list": { slug: "pin-the-list", title: "Pin the list", read: "30 sec" },
-  "open-an-agent": { slug: "open-an-agent", title: "Open an agent's card", read: "1 min" },
-  "edit-an-agent": { slug: "edit-an-agent", title: "Edit an agent", read: "1 min" },
-  "list-health": { slug: "list-health", title: "What List health measures", read: "2 min" },
-  "response-policy": { slug: "response-policy", title: "Response policy explained", read: "1 min" },
-  "expected-dates": { slug: "expected-dates", title: "How expected dates work", read: "2 min" },
-  "status-key": { slug: "status-key", title: "Status key: every ring explained", read: "3 min" },
-  "log-a-query": { slug: "log-a-query", title: "Log a query", read: "2 min" },
-  "find-a-query": { slug: "find-a-query", title: "Find a query", read: "1 min" },
-  "open-a-query": { slug: "open-a-query", title: "Open a query", read: "1 min" },
-  "record-a-response": { slug: "record-a-response", title: "Record a response", read: "1 min" },
-  "birds-eye-view": { slug: "birds-eye-view", title: "Birds-eye view", read: "2 min" },
-};
+export const HELP_ARTICLES: Record<string, HelpArticle> = Object.fromEntries(
+  HELP_ARTICLE_LIST.map((a) => [a.slug, { slug: a.slug, title: a.title, read: readTime(a) }]),
+);
 
-/** The slugs with a page in the Help Centre. Empty until the Help Centre prompt lands. */
-export const LIVE_ARTICLES: ReadonlySet<string> = new Set<string>();
+/** The slugs with a page in the Help Centre: every article written. */
+export const LIVE_ARTICLES: ReadonlySet<string> = new Set<string>(HELP_ARTICLE_LIST.map((a) => a.slug));
 
 /** Where an article link goes: its page if it exists, else the Help Centre. */
 export function articleHref(slug: string | undefined | null): string {

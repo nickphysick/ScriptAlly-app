@@ -148,19 +148,78 @@ export const QC_GUIDE_HIDDEN_PATH: UserPaths = { [`${QC_BASE}.hidden`]: true };
 export const QC_GUIDE_UNHIDE_PATH: UserPaths = { [`${QC_BASE}.hidden`]: false };
 export const QC_GUIDE_FINISHED_PATH: UserPaths = { [`${QC_BASE}.finished`]: true };
 
-/* ── Help system v1 C.4 — the pages with a guide, in sidebar order, for the last note's "Your next guide is …" ── */
+/* ── Help system v1 C.4 — the pages with a guide, in sidebar order, for the last note's "Your next guide is …" ──
+   Help Centre v1 — and for the Help Centre's guide cards: each page's route, its sidebar group, its items, and what is
+   done there. ⚠️ A CARD'S COUNT IS THE PILL'S COUNT (lock HC1-H2): the same done flags, the same credit for what is
+   already on file (an agent ticks "Add an agent", a query ticks "Log a query"), the same skips on this device. */
+
+/** What a card needs to know of the account's records: whether the page has anything on it yet. */
+export interface GuideCounts { agents: number; queries: number }
+
+export interface GuidePage {
+  page: string;
+  route: string;
+  /** the sidebar group the page sits in (the card's eyebrow) */
+  group: string;
+  items: readonly ChecklistItem[];
+  /** done flags as the page's pill reads them (saved ticks plus what is already on file) */
+  done: (user: User | null | undefined, c: GuideCounts) => DoneMap;
+  /** items that cannot be done yet (the page shows "Add an agent first" there) */
+  blocked: (c: GuideCounts) => readonly string[];
+  /** the account flag "finished in an earlier visit", where the page keeps one */
+  finishedFlag: (user: User | null | undefined) => boolean;
+  /** Restart: show the guide again and let it open by itself (never clears a done tick) */
+  restart: UserPaths;
+  finished: (user: User | null | undefined, skipped: readonly string[]) => boolean;
+}
 
 /** Pages with a guide, in the sidebar's order (Queries before Agents). Skips on this device count as done. */
-export const GUIDE_PAGES: readonly { page: string; finished: (user: User | null | undefined, skipped: readonly string[]) => boolean }[] = [
+export const GUIDE_PAGES: readonly GuidePage[] = [
   {
-    page: "Query Centre",
+    page: "Query Centre", route: "/queries", group: "Queries", items: QC_CHECKLIST,
+    done: (u, c) => ({ ...qcGuideOf(u).done, ...(c.queries > 0 ? { log: true } : {}) }),
+    blocked: (c) => (c.queries > 0 ? [] : QC_NEEDS_A_QUERY),
+    finishedFlag: (u) => qcGuideOf(u).finished,
+    restart: { [`${QC_BASE}.seen`]: false, [`${QC_BASE}.hidden`]: false, [`${QC_BASE}.finished`]: false },
     finished: (u, sk) => { const g = qcGuideOf(u); return g.finished || QC_CHECKLIST.every((it) => g.done[it.key] || sk.includes(it.key)); },
   },
   {
-    page: "Contact list",
+    page: "Contact list", route: "/agents", group: "Agents", items: CONTACT_CHECKLIST,
+    done: (u, c) => ({ ...contactGuideOf(u).done, ...(c.agents > 0 ? { add: true } : {}) }),
+    blocked: (c) => (c.agents > 0 ? [] : CONTACT_NEEDS_AN_AGENT),
+    finishedFlag: () => false,
+    restart: { [`${BASE}.seen`]: false, [`${BASE}.hidden`]: false },
     finished: (u, sk) => { const g = contactGuideOf(u); return CONTACT_CHECKLIST.every((it) => g.done[it.key] || sk.includes(it.key)); },
   },
 ];
+
+/** One Help Centre guide card. */
+export interface GuideCard {
+  page: string;
+  route: string;
+  group: string;
+  total: number;
+  /** done or skipped on this device, as the pill counts */
+  n: number;
+  /** per item, in order: counted */
+  segs: boolean[];
+  /** the first item, and the next one not counted and not blocked */
+  first: string;
+  next: string | null;
+  finished: boolean;
+}
+
+export function guideCard(g: GuidePage, user: User | null | undefined, c: GuideCounts, skipped: readonly string[]): GuideCard {
+  const done = g.done(user, c);
+  const segs = g.items.map((it) => !!done[it.key] || skipped.includes(it.key));
+  const n = segs.filter(Boolean).length;
+  const blocked = g.blocked(c);
+  const next = g.items.find((it, i) => !segs[i] && !blocked.includes(it.key))?.title ?? null;
+  return {
+    page: g.page, route: g.route, group: g.group, total: g.items.length, n, segs,
+    first: g.items[0].title, next, finished: n === g.items.length || g.finishedFlag(user),
+  };
+}
 
 /** The first page with a guide that is not finished, other than `page`; null when every other guide is done. */
 export function nextGuideAfter(page: string, user: User | null | undefined, skippedOf: (page: string) => readonly string[]): string | null {

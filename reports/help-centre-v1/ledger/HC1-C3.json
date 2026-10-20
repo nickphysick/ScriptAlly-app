@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "HC1-C3",
+  "where": "@1512 one send",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1512 kind Article",
+  "ok": true,
+  "detail": "{\"kind\":\"Article\",\"message\":\"A worked example would help\",\"severity\":\"\",\"wantsReply\":false,\"pageName\":\"help/list-health\",\"route\":\"/help/list-health\",\"viewport\":\"1512 × 900\",\"browser\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36\",\"browserName\":\"Chrome 151 on Windows\",\"appVersion\":\"Beta, 20 Oct\",\"screenshotPath\":\"\"}"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1512 pageName help/list-health",
+  "ok": true,
+  "detail": "{\"kind\":\"Article\",\"message\":\"A worked example would help\",\"severity\":\"\",\"wantsReply\":false,\"pageName\":\"help/list-health\",\"route\":\"/help/list-health\",\"viewport\":\"1512 × 900\",\"browser\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36\",\"browserName\":\"Chrome 151 on Windows\",\"appVersion\":\"Beta, 20 Oct\",\"screenshotPath\":\"\"}"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1512 the writer's words",
+  "ok": true,
+  "detail": "{\"kind\":\"Article\",\"message\":\"A worked example would help\",\"severity\":\"\",\"wantsReply\":false,\"pageName\":\"help/list-health\",\"route\":\"/help/list-health\",\"viewport\":\"1512 × 900\",\"browser\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36\",\"browserName\":\"Chrome 151 on Windows\",\"appVersion\":\"Beta, 20 Oct\",\"screenshotPath\":\"\"}"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1512 the panel offers four kinds",
+  "ok": true,
+  "detail": "[\"Something's broken\",\"Something's confusing\",\"An idea\",\"Something I liked\"]"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1512 and never Article",
+  "ok": true,
+  "detail": "[\"Something's broken\",\"Something's confusing\",\"An idea\",\"Something I liked\"]"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1280 one send",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1280 kind Article",
+  "ok": true,
+  "detail": "{\"kind\":\"Article\",\"message\":\"A worked example would help\",\"severity\":\"\",\"wantsReply\":false,\"pageName\":\"help/list-health\",\"route\":\"/help/list-health\",\"viewport\":\"1280 × 800\",\"browser\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36\",\"browserName\":\"Chrome 151 on Windows\",\"appVersion\":\"Beta, 20 Oct\",\"screenshotPath\":\"\"}"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1280 pageName help/list-health",
+  "ok": true,
+  "detail": "{\"kind\":\"Article\",\"message\":\"A worked example would help\",\"severity\":\"\",\"wantsReply\":false,\"pageName\":\"help/list-health\",\"route\":\"/help/list-health\",\"viewport\":\"1280 × 800\",\"browser\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36\",\"browserName\":\"Chrome 151 on Windows\",\"appVersion\":\"Beta, 20 Oct\",\"screenshotPath\":\"\"}"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1280 the writer's words",
+  "ok": true,
+  "detail": "{\"kind\":\"Article\",\"message\":\"A worked example would help\",\"severity\":\"\",\"wantsReply\":false,\"pageName\":\"help/list-health\",\"route\":\"/help/list-health\",\"viewport\":\"1280 × 800\",\"browser\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36\",\"browserName\":\"Chrome 151 on Windows\",\"appVersion\":\"Beta, 20 Oct\",\"screenshotPath\":\"\"}"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1280 the panel offers four kinds",
+  "ok": true,
+  "detail": "[\"Something's broken\",\"Something's confusing\",\"An idea\",\"Something I liked\"]"
+ },
+ {
+  "lock": "HC1-C3",
+  "where": "@1280 and never Article",
+  "ok": true,
+  "detail": "[\"Something's broken\",\"Something's confusing\",\"An idea\",\"Something I liked\"]"
+ }
+]

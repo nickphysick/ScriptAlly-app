@@ -10,6 +10,7 @@
  * Pure module: no React, no Firebase — App.tsx branches on tierForPath, and the tests lock
  * the resolution table.
  */
+import { routeBase } from "../lib/helpPath";
 import { ACCOUNT_SECTION_PATHS } from "../lib/accountRoutes";
 
 /**
@@ -44,6 +45,7 @@ export type RouteTier = "marketing" | "workspace" | null;
 /** Resolve a (trailing-slash-normalised) pathname to its tier; null = unknown → dashboard. */
 export function tierForPath(path: string): RouteTier {
   if (MARKETING_PATHS.has(path)) return "marketing";
-  if (WORKSPACE_PATHS.has(path)) return "workspace";
+  /* Help Centre v1 — an article (`/help/{slug}`) is the Help Centre to every exact-path table */
+  if (WORKSPACE_PATHS.has(routeBase(path))) return "workspace";
   return null;
 }

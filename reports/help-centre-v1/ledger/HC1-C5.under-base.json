@@ -1,0 +1,212 @@
+[
+ {
+  "lock": "HC1-C5",
+  "where": "add-an-agent is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "add-an-agent links to /help/add-an-agent",
+  "ok": true,
+  "detail": "/help/add-an-agent"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "find-an-agent is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "find-an-agent links to /help/find-an-agent",
+  "ok": true,
+  "detail": "/help/find-an-agent"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "pin-the-list is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "pin-the-list links to /help/pin-the-list",
+  "ok": true,
+  "detail": "/help/pin-the-list"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "open-an-agent is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "open-an-agent links to /help/open-an-agent",
+  "ok": true,
+  "detail": "/help/open-an-agent"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "edit-an-agent is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "edit-an-agent links to /help/edit-an-agent",
+  "ok": true,
+  "detail": "/help/edit-an-agent"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "list-health is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "list-health links to /help/list-health",
+  "ok": true,
+  "detail": "/help/list-health"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "log-a-query is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "log-a-query links to /help/log-a-query",
+  "ok": true,
+  "detail": "/help/log-a-query"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "find-a-query is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "find-a-query links to /help/find-a-query",
+  "ok": true,
+  "detail": "/help/find-a-query"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "open-a-query is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "open-a-query links to /help/open-a-query",
+  "ok": true,
+  "detail": "/help/open-a-query"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "record-a-response is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "record-a-response links to /help/record-a-response",
+  "ok": true,
+  "detail": "/help/record-a-response"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "birds-eye-view is live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "birds-eye-view links to /help/birds-eye-view",
+  "ok": true,
+  "detail": "/help/birds-eye-view"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/add-an-agent renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/find-an-agent renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/pin-the-list renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/open-an-agent renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/edit-an-agent renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/list-health renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/log-a-query renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/find-a-query renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/open-a-query renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/record-a-response renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "/help/birds-eye-view renders that article",
+  "ok": false,
+  "detail": "{\"p\":\"/dashboard\",\"slug\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "@1512 Search for an agent → Learn more → /help/find-an-agent",
+  "ok": false,
+  "detail": "{\"p\":\"/help\",\"t\":null}"
+ },
+ {
+  "lock": "HC1-C5",
+  "where": "@1280 Search for an agent → Learn more → /help/find-an-agent",
+  "ok": false,
+  "detail": "{\"p\":\"/help\",\"t\":null}"
+ }
+]

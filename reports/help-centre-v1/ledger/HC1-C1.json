@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 add-an-agent: \"✓ You've done this\" (an agent is on file)",
+  "ok": true,
+  "detail": "\"2 min read\\n·\\nUpdated 20 Oct 2026\\n·\\n✓ You've done this\""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 lands on the Contact list",
+  "ok": true,
+  "detail": "/agents"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 the spotlight is on \"Add an agent\"",
+  "ok": true,
+  "detail": "\"Add an agent\""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 its hole is round \"+ Add an agent\"",
+  "ok": true,
+  "detail": "{\"title\":\"Add an agent\",\"hole\":{\"left\":483.015625,\"top\":266.75,\"width\":181.78125,\"height\":62,\"r\":14},\"btn\":{\"left\":491.015625,\"top\":274.75,\"width\":165.78125,\"height\":46}}"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 find-an-agent before: \"Part of the Contact list guide\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 spotlight on \"Search for an agent\"",
+  "ok": true,
+  "detail": "\"Search for an agent\""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 showing it ticked nothing",
+  "ok": true,
+  "detail": "{\"done\":{\"add\":true},\"seen\":true}"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 typing ticks it",
+  "ok": true,
+  "detail": "{\"done\":{\"add\":true,\"search\":true},\"seen\":true}"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 find-an-agent after: \"✓ You've done this\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1512 and \"Show me again\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 add-an-agent: \"✓ You've done this\" (an agent is on file)",
+  "ok": true,
+  "detail": "\"2 min read\\n·\\nUpdated 20 Oct 2026\\n·\\n✓ You've done this\""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 lands on the Contact list",
+  "ok": true,
+  "detail": "/agents"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 the spotlight is on \"Add an agent\"",
+  "ok": true,
+  "detail": "\"Add an agent\""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 its hole is round \"+ Add an agent\"",
+  "ok": true,
+  "detail": "{\"title\":\"Add an agent\",\"hole\":{\"left\":483.015625,\"top\":266.75,\"width\":181.78125,\"height\":62,\"r\":14},\"btn\":{\"left\":491.015625,\"top\":274.75,\"width\":165.78125,\"height\":46}}"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 find-an-agent before: \"Part of the Contact list guide\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 spotlight on \"Search for an agent\"",
+  "ok": true,
+  "detail": "\"Search for an agent\""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 showing it ticked nothing",
+  "ok": true,
+  "detail": "{\"done\":{\"add\":true},\"seen\":true}"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 typing ticks it",
+  "ok": true,
+  "detail": "{\"done\":{\"search\":true,\"add\":true},\"seen\":true}"
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 find-an-agent after: \"✓ You've done this\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C1",
+  "where": "@1280 and \"Show me again\"",
+  "ok": true,
+  "detail": ""
+ }
+]

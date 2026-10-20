@@ -21,6 +21,7 @@
  * of local state, because "which section is expanded" genuinely is not in the URL.
  */
 import { isAccountPath } from "./accountRoutes";
+import { routeBase } from "./helpPath";
 
 /** A child row — always a real destination. A child with no route is a dead link, so there is no
  *  optional path here: absence is expressed by omitting the child. */
@@ -301,6 +302,6 @@ export function barPageName(
     return { section: gi > 0 ? sec.label : null, name };
   }
   if (isAccountPath(pathname)) return { section: "Account", name: "Settings" };
-  const n = OFF_NAV_NAMES[pathname.replace(/\/+$/, "") || "/"];
+  const n = OFF_NAV_NAMES[routeBase(pathname.replace(/\/+$/, "") || "/")];
   return n ? { section: null, name: n } : null;
 }

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "HC1-C4",
+  "where": "production never shows it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C4",
+  "where": "a dev build does",
+  "ok": true,
+  "detail": ""
+ }
+]

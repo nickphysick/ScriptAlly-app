@@ -17,6 +17,9 @@ export const FEEDBACK_KINDS = [
   "Something's confusing",
   "An idea",
   "Something I liked",
+  /* Help Centre v1 — "Did this help? Not really" on an article. The function accepts it; the feedback panel never offers
+     it (its four kinds are `src/lib/beta.ts`'s, lock HC1-C3). */
+  "Article",
 ] as const;
 export const FEEDBACK_SEVERITIES = ["Just noticed", "Slowing me down", "I can't carry on"] as const;
 

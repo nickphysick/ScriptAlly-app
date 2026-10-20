@@ -1,0 +1,25 @@
+
+Running 19 tests using 1 worker
+
+[1/19] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/19] [measure] › tests/e2e/qcV140.measure.ts:97:3 › Query Centre v140 › A1 · one row: the toolbar never wraps; 64 unpinned, 72 pinned; the old header's controls are gone
+[3/19] [measure] › tests/e2e/qcV140.measure.ts:125:3 › Query Centre v140 › A2 · jump labels: Next action — every button and menu item has text; no two neighbours share a mark; each mark is its band's
+[4/19] [measure] › tests/e2e/qcV140.measure.ts:165:3 › Query Centre v140 › A3 · fold: buttons end inside the row; visible + folded = groups; the menu lists the folded; pinned and unpinned fold alike
+[5/19] [measure] › tests/e2e/qcV140.measure.ts:206:3 › Query Centre v140 › A4 · jump: a group lands its band, a month its first row, within 2px of the sticky stack's bottom
+[6/19] [measure] › tests/e2e/qcV140.measure.ts:241:3 › Query Centre v140 › B1 · unpinned bar: navy toolbar, 18px card corners, cream Pin, no ring on the controls
+[7/19] [measure] › tests/e2e/qcV140.measure.ts:263:3 › Query Centre v140 › C1 · pinned scheme: navy band, cream toolbar, white headings, flush to the sheet at the top
+[8/19] [measure] › tests/e2e/qcV140.measure.ts:285:3 › Query Centre v140 › C2 · no repeats: the band names none of Your move, Waiting, Closed
+[9/19] [measure] › tests/e2e/qcV140.measure.ts:297:3 › Query Centre v140 › C3 · figures: heard back, asked for more and overdue as lib/responses and the reply-date filter make them
+[10/19] [measure] › tests/e2e/qcV140.measure.ts:338:3 › Query Centre v140 › C4 · illustration: its aspect, nothing clips it, and it covers no control or heading
+[11/19] [measure] › tests/e2e/qcV140.measure.ts:377:3 › Query Centre v140 › D1 · one state: the Overdue pick is the reply-date switch; the Offers pick is the Offers toggle; one chip each
+[12/19] [measure] › tests/e2e/qcV140.measure.ts:424:3 › Query Centre v140 › D2 · escape: pinned with the Filters menu open, Esc closes the menu and the list stays pinned; a second Esc unpins
+[13/19] [measure] › tests/e2e/qcV140.measure.ts:442:3 › Query Centre v140 › E1 · columns: Agent ≤ 264, every column at least its minimum, the gaps ≥ 32 at 1512, the Due dial inside the card at 1280
+[14/19] [measure] › tests/e2e/qcV140.measure.ts:467:3 › Query Centre v140 › F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame
+[15/19] [measure] › tests/e2e/qcV140.measure.ts:519:3 › Query Centre v140 › G1 · guide: the pill reads /6; pressing F pins and ticks Pin the list with no walkthrough running
+[16/19] [measure] › tests/e2e/qcV1401.measure.ts:89:3 › Query Centre v140.1 › A1 · export set: Queried + Waiting — the label's {v} is Show's {v}; the CSV has exactly those rows, in the list's order
+[17/19] [measure] › tests/e2e/qcV1401.measure.ts:129:3 › Query Centre v140.1 › A2 · states: no filters → 'Export all {N} queries'; a search matching nothing → disabled
+[18/19] [measure] › tests/e2e/qcV1401.measure.ts:158:27 › Query Centre v140.1 › B1 · wording at 1512: the Pin step says 'pin button' and 'F', never 'Pin list'
+[19/19] [measure] › tests/e2e/qcV1401.measure.ts:158:27 › Query Centre v140.1 › B1 · wording at 1280: the Pin step says 'pin button' and 'F', never 'Pin list'
+  Slow test file: [measure] › tests/e2e/qcV140.measure.ts (6.5m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  19 passed (7.9m)

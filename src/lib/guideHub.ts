@@ -129,3 +129,78 @@ export function stampVisit(page: string, now = Date.now()): boolean {
   try { localStorage.setItem(lastVisitKey(page), String(now)); } catch { /* none */ }
   return last !== null && now - last > PULSE_AFTER_MS;
 }
+
+/* ── Help Centre v1 — another route asks a page's guide to show one item, or to open ──
+   "Show me in the app" on an article, and "Start on {Page}" on a guide card, navigate to the page and leave a request
+   here. The page's `PageChecklist` takes it once its route is on screen AND its data is ready (`active && ready`), then
+   starts that item's spotlight (or opens the checklist). A request nobody takes in 30 seconds is dropped, so a page
+   visited later never acts on a stale press.
+   ⚠️ A REQUEST NEVER TICKS ANYTHING. The spotlight points; only the writer's own action marks the item done. */
+
+export interface GuideRequest {
+  page: string;
+  /** the item to spotlight; null opens the checklist */
+  key: string | null;
+  at: number;
+}
+export const GUIDE_REQUEST_TTL_MS = 30_000;
+let request: GuideRequest | null = null;
+const reqListeners = new Set<Listener>();
+const emitReq = () => [...reqListeners].forEach((l) => l());
+
+/** Ask `page`'s guide to spotlight `key` once that page is on screen and ready. */
+export function requestGuideStep(page: string, key: string): void {
+  request = { page, key, at: Date.now() };
+  emitReq();
+}
+/** Ask `page`'s guide to open its checklist once that page is on screen and ready. */
+export function requestGuideOpen(page: string): void {
+  request = { page, key: null, at: Date.now() };
+  emitReq();
+}
+/** The request waiting for `page` (null when none, or when it has gone stale). */
+export function pendingGuideRequest(page: string, now = Date.now()): GuideRequest | null {
+  if (!request || request.page !== page) return null;
+  if (now - request.at > GUIDE_REQUEST_TTL_MS) { request = null; return null; }
+  return request;
+}
+/** The page acted on it. */
+export function takeGuideRequest(req: GuideRequest): void {
+  if (request === req) { request = null; emitReq(); }
+}
+export function subscribeGuideRequest(l: Listener): () => void {
+  reqListeners.add(l);
+  return () => { reqListeners.delete(l); };
+}
+const requestSnap = () => request;
+export function useGuideRequest(page: string): GuideRequest | null {
+  const r = useSyncExternalStore(subscribeGuideRequest, requestSnap, () => null);
+  return r && r.page === page ? pendingGuideRequest(page) : null;
+}
+
+/* ── Help Centre v1 — the date a guide was finished on this device, and a restart waiting for the page ── */
+
+export const learnedKey = (page: string) => `sa.guide.${guideSlug(page)}.learned`;
+export const restartKey = (page: string) => `sa.guide.${guideSlug(page)}.restart`;
+
+/** ISO date the guide was finished in a visit on this device, or null (finished elsewhere, or before dates were kept). */
+export function readLearned(page: string): string | null {
+  try { const v = localStorage.getItem(learnedKey(page)); return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null; } catch { return null; }
+}
+export function stampLearned(page: string, now = new Date()): void {
+  const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  try { localStorage.setItem(learnedKey(page), iso); } catch { /* none */ }
+}
+/** "Restart" on a guide card: forget this device's skips and learned date, and show the guide on the page's next visit. */
+export function restartGuideLocal(page: string): void {
+  writeSkipped(page, []);
+  try { localStorage.removeItem(learnedKey(page)); localStorage.setItem(restartKey(page), "1"); } catch { /* none */ }
+}
+/** The page's next visit consumes the restart: true once. */
+export function takeRestart(page: string): boolean {
+  try {
+    if (localStorage.getItem(restartKey(page)) !== "1") return false;
+    localStorage.removeItem(restartKey(page));
+    return true;
+  } catch { return false; }
+}

@@ -32,7 +32,7 @@ const STATUS_EYEBROW = "Query status";
 export const GLOSSARY: Record<string, GlossaryEntry> = {
   listHealth: {
     id: "listHealth", eyebrow: "Contact list", title: "List health",
-    body: "How much of the useful detail on your agents is filled in: genres, wishlist, response policy, contact route. Each gap you fill helps QueryHawk tell you when queries are due and who suits your book.",
+    body: "How much of the useful detail on your agents is filled in: reply time, materials, genres, wishlist, and a reopening date for an agent closed to queries. Each gap you fill helps QueryHawk tell you when queries are due, and which agents take your genre.",
     article: "list-health",
   },
   replies: {
