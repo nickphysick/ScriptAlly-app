@@ -14,6 +14,7 @@ Branch `help-system-v1` (worktree `../ScriptAlly-help1`). Ref: `design-refs/help
 8. **The statuses the app shows are more than the eight listed.** The status column also shows Resubmitted and Signed, and the closed set as Passed, Closed with no reply and Withdrawn. Resubmitted and Signed have their own entries; the three closed outcomes share "Closed" and each card draws the row's own dot.
 9. **The base.** Dev serves the v140.1 integration `dev/…-cl192-qc1401` at `bbd9f309` (`index-DSAY7Z_7.js`). It carries Contact list v19.2's code and Query Centre v139, v140 and v140.1. `contact-list-v19-2`'s own tip (`d0333f9e`) is not an ancestor, but the only commit missing is its report's deploy note.
 10. The "?" **key** opens the shortcuts sheet directly; it was never the menu's trigger, so it is unchanged.
+11. **Firebase Storage is not set up on `scriptally-dev`, and my own §0.6 recon said it was.** I read a bucket name in the env files and a `storage` block in `firebase.dev.json` and took them for a working Storage; the deploy said otherwise: *"Firebase Storage has not been set up on project 'scriptally-dev'"*. So the Storage rule could not deploy, and any upload on dev would fail (and fail the whole send). Per the pack, **the screenshot is left out**, behind one constant, rather than faked (see Feedback). Everything else about it is built. (Manuscript attachments use the same Storage, so they presumably cannot work on dev either — noted, not checked.)
 
 ## What was built
 
@@ -84,8 +85,8 @@ Query statuses (eyebrow "Query status", each with its real StatusDot):
 
 ### Feedback
 
-- **The screenshot shipped.** Storage was already set up on dev (manuscript attachments, per-user paths). The client uploads to `betaFeedback/{uid}/{timestamp}.{ext}` before calling; the function refuses a path under any other uid.
-- **The Storage rule** (`storage.rules`):
+- **The screenshot did not ship.** Storage is not set up on dev (false premise 11). The drop zone, paste, upload path (`betaFeedback/{uid}/{timestamp}.{ext}`), the function's refusal of any path under another uid, and the Storage rule are all built; `FEEDBACK_SCREENSHOTS = false` in `lib/beta.ts` keeps the panel from offering it. To turn it on: set up Storage on the project in the console, deploy the rule, flip the constant.
+- **The Storage rule** (`storage.rules`, in the file, **not deployed**):
   ```
   match /betaFeedback/{userId}/{fileName} {
     allow create: if request.auth != null
@@ -109,7 +110,8 @@ Query statuses (eyebrow "Query status", each with its real StatusDot):
 
 - **Add `feedback@` as an alias on the queryhawk.net mailbox** in Namecheap Private Email, as hello@ was. Nothing new is needed in Resend: the domain is verified.
 - If you want feedback in a different inbox, set `FEEDBACK_TO` in `functions/.env.scriptally-dev` (and prod's file when it ships there).
-- Prod is untouched: the function, the Storage rule and hosting all went to dev only.
+- **To turn the screenshot on:** set up Firebase Storage on `scriptally-dev` (console → Storage → Get Started), then `firebase deploy --only storage --config firebase.dev.json --project scriptally-dev`, then set `FEEDBACK_SCREENSHOTS = true`.
+- Prod is untouched: the function and hosting went to dev only.
 
 ## Gates
 
