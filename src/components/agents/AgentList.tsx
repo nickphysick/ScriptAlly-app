@@ -386,7 +386,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /** v20 §A — the title row: Part C reads whether it has scrolled away under the stuck toolbar */
   const titleRef = useRef<HTMLDivElement | null>(null);
   /* v20 §C — HAS THE TITLE ROW SCROLLED AWAY under the stuck toolbar? Derived from the boxes on every scroll (once a frame),
-     never an observer's memory: gone when its bottom is at or above the toolbar's top. Only then (and in full screen)
+     never an observer's memory: gone when its bottom is at or above the STUCK toolbar's top. Only then (and in full screen)
      does the toolbar carry the Cards / List switch and Full screen. */
   const [titleGone, setTitleGone] = useState(false);
   /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
@@ -685,9 +685,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     let raf = 0;
     const read = () => {
       raf = 0;
-      const tr = titleRef.current, tb = lhRef.current?.querySelector<HTMLElement>('[data-cl19="toolbar"]');
-      if (!tr || !tb || tr.offsetHeight === 0) return;
-      const gone = tr.getBoundingClientRect().bottom <= tb.getBoundingClientRect().top + 0.5;
+      const tr = titleRef.current, head = lhRef.current, sc = tr?.closest<HTMLElement>(".wpg-scroll");
+      if (!tr || !head || !sc || tr.offsetHeight === 0) return;
+      /* where the toolbar sits once STUCK: the scroll area's top plus the head's cover (its top padding); the title row
+         is gone once its bottom has reached that line, never merely because it is above the toolbar at rest */
+      const stuckTop = sc.getBoundingClientRect().top + (parseFloat(getComputedStyle(head).paddingTop) || 0);
+      const gone = tr.getBoundingClientRect().bottom <= stuckTop + 0.5;
       setTitleGone((g) => (g === gone ? g : gone));
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(read); };
