@@ -174,3 +174,19 @@ Run on this build and, for comparison, on the unchanged base (`bbd9f309`), each 
 - `contactV183` F2, F3 and `qcV139` B1: a checklist row holds Skip and Learn more, so "the row's button" is the direct child (`> button`).
 - `shellMenus` MS2: the Help menu's rows are the Page card's (no Keyboard shortcuts; the four links in order). MS3 measures the Help menu's `.hm-row`s (article rows reported as secondary). MS5 exempts the Help menu: its rows are the pack's, not the house 36px menu row; HS1-B1 holds them.
 - QC140-A4 and QC140-G1 were red once on the first run and green on the final run with no change between: transient.
+
+## Integration and dev
+
+- **Dev moved during the pack.** At the start it served the v140.1 integration (`bbd9f309`, `index-DSAY7Z_7.js`); by deploy time it served the header-rules integration `dev/…-qc1401-hr1` at `904f9d9e` (`index-C67unNEy.js`, confirmed by building that tip). The integration branch was cut from that.
+- **Integration branch:** `dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24-cl1831-an241-db601-cl1831b-cl1832-cl1833-cx28-qhnet-td52-dv1-qc139-dv1b-cl19-cl191-qc140-cl192-qc1401-hr1-hs1`. One conflict, in `design-refs/.refhashes.json` (both sides enrolled refs; both kept, 664 refs check clean).
+- **Gates there** (`fabf7811`, clean checkout): tsc 0, tsc functions 0, both builds 0, Vitest 618 files / 9166 passed, 3 skipped.
+- **Locks there:** HS1 17/17 green (E1/E2 re-run after the screenshot change); L1 plus the header-rules locks (`hr1`, `contactV192`, `contactV191`, `qcV139`, `qcV140`, `qcV1401`, `contactV183`, `shellMenus`): 79 passed, 1 failed — MS15, red on the base too.
+- **Deployed to dev, from a clean checkout of the pushed tip:**
+  - `sendBetaFeedback` — created (it did not exist), europe-west2, Node 20, state ACTIVE, source hash `ced02eea4af337b07696fb3065dd85672e70037e`, from `0bb35eae` (its code is unchanged at `fabf7811`). `gcloud` is not installed here, so I could not read the Cloud Run revision name; the service is `sendbetafeedback`. Probed with an empty message signed in as the harness: refused with the function's own "Please tell us what happened." — **no real feedback was sent**, because feedback@ does not exist yet.
+  - Hosting — `index-D5wjLmfX.js`, from `fabf7811`.
+  - Storage rules — **not deployed**: Storage is not set up on the project (false premise 11).
+- Prod: nothing.
+
+## Shots
+
+`shots/NN-*-{1512,1280}@2x.png`, beside `design-refs/help-system-v1/screens/` 01–12, taken on dev (`index-D5wjLmfX.js`) by `tests/e2e/helpSystemV1Shots.measure.ts`. **They use the harness account, not Nick's**: I cannot sign in as Nick. The feedback send in 11 is answered by a route stub. 13 and 14 (Help Centre, article) belong to the next prompt.
