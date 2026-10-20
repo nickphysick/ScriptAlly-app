@@ -18,19 +18,28 @@ import { assembleResult } from "./assembleImport";
 import { MODEL } from "./emailImportCore";
 
 /** Output ceiling — a runaway guard, NOT the speed lever (the slimmed, omit-empty output contract is).
- *  Sized to a realistic large import: the compact output averages ~45–55 tokens per imported row (a
- *  terse agent + query object with empties omitted), so 12k comfortably covers ~220–250 rows. Beyond
- *  that an import could truncate — surfaced as "malformed" and NOT retried (a second big call won't
- *  help); that's the signal to raise this. Sonnet 4.6 allows far more headroom if ever needed. */
-export const MAX_OUTPUT_TOKENS = 12000;
+ *  MEASURED, not estimated (reports/smart-import-eval/): 35–70 output tokens per row, ~50 typical, so
+ *  12k truncated a 300-row sheet at row ~240. 32k covers 300 messy rows at 70 a row with half again
+ *  in hand. A reply that still reaches it is surfaced as "malformed" and NOT retried (a second big
+ *  call won't help). Above ~21.3k the SDK refuses a non-streaming request outright, which is why the
+ *  call below streams. */
+export const MAX_OUTPUT_TOKENS = 32000;
 
 /** The reminder appended to the system prompt on the one strict retry. */
 export const STRICT_SUFFIX = "\n\nReturn ONLY the JSON object — no prose, no explanation, no code fences.";
 
-/** The slice of the Anthropic client this module uses — so a test can hand it a fake. */
+/** The slice of the Anthropic client this module uses — so a test can hand it a fake.
+ *
+ *  STREAMED, because a 32k ceiling is past what the SDK (0.39) accepts non-streaming: it computes
+ *  3600 × max_tokens / 128000 seconds and throws above ten minutes, i.e. above ~21,333 tokens.
+ *  `finalMessage()` resolves to the same Message a non-streaming call returns — the same content
+ *  blocks, stop_reason and usage — and rejects on an API error, so everything below is unchanged. */
 export interface MapClient {
-  messages: { create(args: any): Promise<any> };
+  messages: { stream(args: any): { finalMessage(): Promise<any> } };
 }
+
+/** One mapping request, streamed to completion. */
+const call = (client: MapClient, args: any) => client.messages.stream(args).finalMessage();
 
 export type MapFailure = "nonjson" | "badjson" | "api";
 
@@ -132,7 +141,7 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   let msg: any;
   try {
     attempts++;
-    msg = await client.messages.create(mappingRequest(sheetText, false));
+    msg = await call(client, mappingRequest(sheetText, false));
   } catch (e) {
     // Log the underlying cause (status, message) — the caller only ever surfaces a generic error.
     logError("Anthropic mapping call failed:", e);
@@ -157,7 +166,7 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   let retryMsg: any;
   try {
     attempts++;
-    retryMsg = await client.messages.create(mappingRequest(sheetText, true));
+    retryMsg = await call(client, mappingRequest(sheetText, true));
   } catch (e) {
     logError("Anthropic mapping retry call failed:", e);
     return done(null, "api");

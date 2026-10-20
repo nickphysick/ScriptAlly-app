@@ -134,7 +134,7 @@ export function oracleReply(expected: ExpectedFile): string {
 }
 
 function stubClient(reply: string): MapClient {
-  return { messages: { create: async () => ({ content: [{ type: "text", text: reply }], stop_reason: "end_turn", usage: { input_tokens: 0, output_tokens: 0 } }) } };
+  return { messages: { stream: () => ({ finalMessage: async () => ({ content: [{ type: "text", text: reply }], stop_reason: "end_turn", usage: { input_tokens: 0, output_tokens: 0 } }) }) } };
 }
 
 /** Whether what the import needs to know survived the conversion at all — free to measure. */

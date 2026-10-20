@@ -15,9 +15,12 @@ const src = (f: string) => readFileSync(resolve(process.cwd(), "src/components/o
 const code = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
 describe("R1 — both loaders keep every timing", () => {
-  /* The values on the baseline commit (5f5c503d), read off it before any edit. */
+  /* The values on the baseline commit (5f5c503d), read off it before any edit — except TIMEOUT_MS,
+     raised from 30000 to 315000 on Nick's ruling (Smart Import quick fixes, 20 Oct): measured imports
+     run 40–200s, and the 30s ceiling sent writers to "couldn't read" while the server finished and
+     spent their import. It sits just above the callable's 310s (src/lib/smartImportTimeouts.test.ts). */
   it("the reading loader's spine", () => {
-    expect(SCATTER_TIMINGS).toEqual({ INTRO_MS: 1200, FLOOR_MS: 2800, SLOW_AT_MS: 10000, TIMEOUT_MS: 30000, STATUS_INTERVAL_MS: 1300 });
+    expect(SCATTER_TIMINGS).toEqual({ INTRO_MS: 1200, FLOOR_MS: 2800, SLOW_AT_MS: 10000, TIMEOUT_MS: 315000, STATUS_INTERVAL_MS: 1300 });
   });
   it("the importing loader's beats", () => {
     expect(IMPORTING_TIMINGS).toEqual({ MESSAGE_INTERVAL_MS: 950, LIFT_AT_MS: 600, PROCEED_AT_MS: 1300 });

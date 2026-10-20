@@ -12,16 +12,18 @@ function fakeClient(replies: (string | Error)[]): MapClient & { calls: any[] } {
   return {
     calls,
     messages: {
-      create: async (args: any) => {
-        calls.push(args);
-        const r = replies[i++];
-        if (r instanceof Error) throw r;
-        return {
-          content: [{ type: "text", text: r ?? "" }],
-          stop_reason: "end_turn",
-          usage: { input_tokens: 100, output_tokens: 20, cache_read_input_tokens: 7, cache_creation_input_tokens: 3 },
-        };
-      },
+      stream: (args: any) => ({
+        finalMessage: async () => {
+          calls.push(args);
+          const r = replies[i++];
+          if (r instanceof Error) throw r;
+          return {
+            content: [{ type: "text", text: r ?? "" }],
+            stop_reason: "end_turn",
+            usage: { input_tokens: 100, output_tokens: 20, cache_read_input_tokens: 7, cache_creation_input_tokens: 3 },
+          };
+        },
+      }),
     },
   };
 }
@@ -108,8 +110,9 @@ describe("the callable delegates to the core (locked)", () => {
     expect(src).toMatch(/import\s*\{\s*mapSheet\s*\}\s*from\s*"\.\/smartImportCore"/);
     expect(src).toMatch(/mapSheet\(client,\s*sheetText/);
   });
-  it("no longer calls messages.create itself, nor restates the request", () => {
+  it("no longer calls the model itself, nor restates the request", () => {
     expect(src).not.toContain("messages.create");
+    expect(src).not.toContain("messages.stream");
     expect(src).not.toContain("max_tokens");
     expect(src).not.toContain("SYSTEM_PROMPT");
   });
@@ -117,5 +120,26 @@ describe("the callable delegates to the core (locked)", () => {
     expect(src).toContain('reason: "pro_month_used"');
     expect(src).toContain('reason: "free_used"');
     expect(src.indexOf("await consume()")).toBeGreaterThan(src.indexOf("outcome.failure"));
+  });
+});
+
+describe("the 32k ceiling needs the streamed call (locked)", () => {
+  it("is above what the installed SDK accepts non-streaming, so the call must stay streamed", async () => {
+    const Anthropic = (await import("@anthropic-ai/sdk")).default;
+    const real: any = new Anthropic({ apiKey: "test-not-a-key" });
+    expect(MAX_OUTPUT_TOKENS).toBeGreaterThan(21_333);
+    expect(() => real._calculateNonstreamingTimeout(MAX_OUTPUT_TOKENS)).toThrow(/Streaming is strongly recommended/);
+    expect(typeof real.messages.stream).toBe("function");
+  });
+
+  it("a reply cut off at the ceiling is still badjson and still not retried", async () => {
+    let n = 0;
+    const c: MapClient = { messages: { stream: () => ({ finalMessage: async () => {
+      n++;
+      return { content: [{ type: "text", text: '{"agents":[{"ref":"a1"}],"queries":[{"agentRef":"a1","status":"Que' + "}" }], stop_reason: "max_tokens", usage: { input_tokens: 1, output_tokens: 32000 } };
+    } }) } };
+    const out = await mapSheet(c, "x");
+    expect(out).toMatchObject({ result: null, failure: "badjson", attempts: 1, stopReason: "max_tokens" });
+    expect(n).toBe(1);
   });
 });

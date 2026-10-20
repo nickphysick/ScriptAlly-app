@@ -43,9 +43,11 @@ function firstOfNextMonth(month: string): string {
 }
 
 export const smartImportMap = onCall(
-  // 90s is only a safety margin for an occasional large import — the slimmed output should return in
-  // low single-digit seconds. If the normal path ever needs more than this, something else is wrong.
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 90, memory: "512MiB" },
+  // 300s, measured rather than guessed (reports/smart-import-quickfixes/): a 150-row sheet took 88–104s
+  // and a 50-row messy one 43s, so the old 90s failed real files. The client's callable timeout is set
+  // just above this (src/lib/smartImport.ts, 310s) so the writer sees the server's error, not the
+  // browser's; the reading screen's loader ceiling is just above that again (315s).
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 300, memory: "512MiB" },
   async (req) => {
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");
     const uid = req.auth.uid;

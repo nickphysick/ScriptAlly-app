@@ -17,6 +17,8 @@ import { SmartImportResult, ParsedQuery } from "../types/smartImport";
 /** Caps mirrored from the function so oversize files fail fast, before the network. */
 export const MAX_SHEET_CHARS = 200_000;
 export const MAX_SHEET_ROWS = 600;
+/** The callable's client-side timeout — just above the function's 300s (functions/src/smartImport.ts). */
+export const SMART_IMPORT_CALL_TIMEOUT_MS = 310_000;
 
 export async function fileToCsv(file: File): Promise<string> {
   return bufferToCsv(await file.arrayBuffer());
@@ -59,7 +61,9 @@ export async function runSmartImport(file: File): Promise<SmartImportResult> {
   if (sheetText.length > MAX_SHEET_CHARS || sheetText.split("\n").length > MAX_SHEET_ROWS) {
     throw new Error("too-large");
   }
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "smartImportMap");
+  // The Firebase JS SDK's callable timeout defaults to 70s. The function's own is 300s, so this sits
+  // just above it: a slow import fails with the SERVER's error, never the browser giving up first.
+  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
   const res = await fn({ sheetText });
   return res.data as SmartImportResult;
 }

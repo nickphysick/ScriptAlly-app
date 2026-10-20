@@ -9,7 +9,7 @@ import { repoRoot, FIXTURE_DIR, type ExpectedFile, type Manifest } from "./types
 
 const root = repoRoot();
 const manifest: Manifest = JSON.parse(readFileSync(join(root, FIXTURE_DIR, "manifest.json"), "utf8"));
-const stub = (text: string): MapClient => ({ messages: { create: async () => ({ content: [{ type: "text", text }], usage: {} }) } });
+const stub = (text: string): MapClient => ({ messages: { stream: () => ({ finalMessage: async () => ({ content: [{ type: "text", text }], usage: {} }) }) } });
 
 describe("the runner", () => {
   it("parses its flags, defaulting to dev, one run, four at a time", () => {
