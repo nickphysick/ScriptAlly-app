@@ -78,8 +78,8 @@ The browser falls back to the plain call **only** when the stream failed with th
 | Fill ahead of `2 + d/N × 94` | **never**; 100% first appears at Tidying, after the result |
 
 **Two things the run showed that the lab could not.**
-- **The time left runs early and flickers.** It ends early, as the estimate was designed to: "a few seconds left" with 10 s to go, "about 10 seconds" with 14 s to go. But at each boundary the label flips between neighbouring values every 0.1–0.5 s: 1½ ↔ 2 minutes from 9–17 s, a minute ↔ 40 seconds at 39 s, 40 ↔ 30 seconds at 51 s, 30 ↔ 20 seconds at 65 s. It also climbs to "about 2½ minutes" at row 6 (7.1 s), where the estimate hands over to the observed pace, because that pace still includes the 3.2 s spent opening. `stepRung` stops jumps but has no hysteresis. **Not fixed — it wasn't asked for.** A proposed fix: only move a rung once the target has stayed on the new side for about 2 s, and work out the pace from the first count rather than from Read.
-- **For one frame (1.07 s) the right-hand text read "0 rows · a few seconds"**, before the `start` update carried the total. It is cosmetic and also not fixed.
+- **The time left runs early and flickers.** It ends early, as the estimate was designed to: "a few seconds left" with 10 s to go, "about 10 seconds" with 14 s to go. But at each boundary the label flips between neighbouring values every 0.1–0.5 s: 1½ ↔ 2 minutes from 9–17 s, a minute ↔ 40 seconds at 39 s, 40 ↔ 30 seconds at 51 s, 30 ↔ 20 seconds at 65 s. It also climbs to "about 2½ minutes" at row 6 (7.1 s), where the estimate hands over to the observed pace, because that pace still includes the 3.2 s spent opening. `stepRung` stops jumps but has no hysteresis. **Fixed in the follow-up below.**
+- **For one frame (1.07 s) the right-hand text read "0 rows · a few seconds"**, before the `start` update carried the total. **Fixed in the follow-up below.**
 
 **The first attempt measured the wrong build, and spent the allowance.** Between my hosting deploy and the run, another session deployed its own integration (`…-hc1-wf1`, `index-CFqysGNF.js`), which does not contain this branch. The browser therefore loaded the old loader, which gave up at 30 s and showed the fallback, while the server finished and **consumed the account's allowance anyway**: the quick-fixes gap, live. The entitlement doc was deleted afterwards (`firebase firestore:delete`, dev only), which puts the account back as it was. The run was then repeated once that session deployed `…-hc1-sil2-wf1` (`index-8VnU8F6o.js`), which contains this branch, and the driver now refuses to start unless dev serves the bundle it expects. **The function measured is the one deployed from `45782f0c`; the hosting measured is `index-8VnU8F6o.js`.**
 
@@ -100,6 +100,17 @@ The new unit case was proved red against the old scaling. L2's expected fill mov
 
 **Dev does not have this fix yet.** Dev's hosting is now another session's integration, and redeploying over it mid-session would race that session. It needs a fresh integration with this commit when that session is done.
 
+## The follow-up: the time left, fixed from the live run
+
+Four changes, each with a unit test that failed against `37b7391d` before it was made. The live run's own readings (`live-dev-150.json`) are replayed through `footBar` exactly as the loader drives it: one update per streamed count and one per second of the loader's clock, each fed the last result's state. That replay reproduces the live "about 2½ minutes" at 7.1 s on the old code, so it is the live run, not a model of it.
+
+1. **Flicker: hysteresis (`holdRung`, `HOLD_S = 2`).** The label moves one rung towards the target, and only once that next rung has been the answer for 2 s. The target coming back to the shown rung cancels the move. It still never moves more than one rung at a time. Replayed: **seven countdown labels, each shown once, in order** (1½ minutes → a minute → 40 → 30 → 20 → 10 seconds → a few seconds), against the old code's flips every 0.1–0.5 s.
+2. **Pace from the first counted row.** Seconds per row is `(now − first row's time) / (rows − rows at the first row)`, so the 3.2 s of start-up is no longer spread across every row. The estimate is used until 6 rows are in, as before. **While under a quarter of the rows are in, the answer never exceeds what the original estimate has left.** I chose "a quarter" for "early on": past it, a genuinely slow read is allowed to say so. Replayed: row 1 now reads "about 1½ minutes left" and it never shows 2½. The worst overstatement (the label's lower edge minus the time really left) fell from 51 s to 18 s.
+3. **The end: no allowance added.** Measured by each label's own band (`fmtLeft`'s edges), in the last 30 s the time really left is never past the label's upper edge: **0.0 s** now, and only 0.4 s before this change. The "about 10 s early" in the first write-up was the flicker plus the label read as a point value. "a few seconds left" now first shows 8 s before the end (it was 10). Tidying took 0.1 s on the live read (last count 90.72 s, result 90.84 s), so an allowance would add nothing. The end lock is a guard: it passes on the old code too, by this measure.
+4. **Never "0 rows".** Until the total is known (`rowsTotal` 0), the right-hand text is empty in every state that names the count: opening, the first rows, the clock-only read, and Ready.
+
+Loader: `ScatterSettleLoader` now keeps the hold per phase (in place of the rung) and records the first counted row on its own clock, cleared on a retry. Its locks L1–L6 still pass (9 of 9) against a local dev build.
+
 ## Deploy order
 
 **Hosting first still holds, on one condition.** The new browser code always calls the function streamed.
@@ -113,7 +124,6 @@ The new unit case was proved red against the old scaling. L2's expected fill mov
 
 ## Not done
 
-- The time-left flicker and the one-frame "0 rows" above: both found live, proposed, not built.
 - The overshoot fix is not on dev yet.
 - `p1-before.json`, a before-capture from the onboarding v5 e2e suite, still holds the old strip's HTML. It is a historical capture, so I left it alone.
 

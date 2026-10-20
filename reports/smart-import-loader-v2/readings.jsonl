@@ -46,3 +46,27 @@
 {"lock":"L5","name":"ms after the settle began","value":{"settle":3356.10000000149,"tick":2550.10000000149,"proceed":3549.89999999851}}
 {"lock":"L6","name":"shimmer animation","value":"none"}
 {"lock":"L6","name":"tips motion","value":{"card":"none","tip":"1e-05s"}}
+{"lock":"L1","name":"40@1440","value":"40 rows · about 30 seconds"}
+{"lock":"L1","name":"150@1440","value":"150 rows · about 2 minutes"}
+{"lock":"L1","name":"300@1440","value":"300 rows · about 3½ minutes"}
+{"lock":"L2","name":"samples@1440","value":{"n":51,"first":{"d":1,"style":4.35,"rendered":4.411764705882353},"last":{"d":40,"style":93.7073,"rendered":93.62745098039215}}}
+{"lock":"L1","name":"40@1280","value":"40 rows · about 30 seconds"}
+{"lock":"L1","name":"150@1280","value":"150 rows · about 2 minutes"}
+{"lock":"L1","name":"300@1280","value":"300 rows · about 3½ minutes"}
+{"lock":"L2","name":"samples@1280","value":{"n":53,"first":{"d":1,"style":4.35,"rendered":4.2682926829268295},"last":{"d":40,"style":93.7073,"rendered":93.59756097560977}}}
+{"lock":"L3","name":"distinct strip texts","value":40}
+{"lock":"L4","name":"boxes@1440","value":{"tip":{"x":276,"y":599.4873657226562,"w":476,"h":218.75},"strip":{"x":248,"y":840,"w":1184,"h":52},"stage":{"x":248,"y":64,"w":1184,"h":776},"vw":1440,"vh":900}}
+{"lock":"L4","name":"fit@1440","value":{"tip":"1 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1440","value":{"tip":"2 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1440","value":{"tip":"3 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1440","value":{"tip":"4 / 5","used":75,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1440","value":{"tip":"5 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"boxes@1280","value":{"tip":{"x":276,"y":499.487060546875,"w":476,"h":218.75},"strip":{"x":248,"y":740,"w":1024,"h":52},"stage":{"x":248,"y":64,"w":1024,"h":676},"vw":1280,"vh":800}}
+{"lock":"L4","name":"fit@1280","value":{"tip":"1 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1280","value":{"tip":"2 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1280","value":{"tip":"3 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1280","value":{"tip":"4 / 5","used":75,"room":118,"scroll":118}}
+{"lock":"L4","name":"fit@1280","value":{"tip":"5 / 5","used":96,"room":118,"scroll":118}}
+{"lock":"L5","name":"ms after the settle began","value":{"settle":3368.10000000149,"tick":2532.5,"proceed":3533.1999999955297}}
+{"lock":"L6","name":"shimmer animation","value":"none"}
+{"lock":"L6","name":"tips motion","value":{"card":"none","tip":"1e-05s"}}

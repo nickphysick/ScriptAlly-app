@@ -22,7 +22,7 @@ import "./importFlow.css";
 import { SheenWave } from "./SheenWave";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
-import { footBar, type LoaderProgress } from "../../lib/importEstimate";
+import { footBar, type FirstRow, type LoaderProgress, type TimeHold } from "../../lib/importEstimate";
 import { TIP_SHOW_AFTER_MS } from "../../lib/importTips";
 import { ImportTipsCard } from "./ImportTipsCard";
 
@@ -286,17 +286,24 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   const phase = complete ? "tidying" : p.phase;
   if (phase === "retry" && retryAt.current === null) retryAt.current = nowMs;
   if (phase !== "retry") retryAt.current = null;
-  // Smoothing: the time-left label moves at most one rung between two updates (stepRung), except
-  // across a change of phase — a retry's fresh estimate is a new countdown, not a jump in the old one.
-  const rungRef = useRef<{ phase: string; rung: number | null }>({ phase, rung: null });
+  // Smoothing: the time-left label moves one rung at a time and only once the next rung has held for
+  // HOLD_S (holdRung), except across a change of phase — a retry's fresh estimate is a new countdown,
+  // not a jump in the old one. The hold is read at render and written after it, like the rung was.
+  const elapsedS = Math.max(0, (nowMs - startedAt.current) / 1000);
+  const holdRef = useRef<{ phase: string; hold: TimeHold | null }>({ phase, hold: null });
+  // The pace runs from the first counted row (secondsLeft), on the same clock; a retry counts afresh.
+  const firstRowRef = useRef<FirstRow | null>(null);
+  if (phase !== "reading") firstRowRef.current = null;
+  else if (!firstRowRef.current && p.rowsDone >= 1) firstRowRef.current = { atS: elapsedS, rows: p.rowsDone };
   const bar = footBar({
     progress: { ...p, phase },
-    elapsedS: Math.max(0, (nowMs - startedAt.current) / 1000),
+    elapsedS,
     sinceRetryS: retryAt.current === null ? 0 : Math.max(0, (nowMs - retryAt.current) / 1000),
     ready: allShownResolved,
-    rung: rungRef.current.phase === phase ? rungRef.current.rung : null,
+    hold: holdRef.current.phase === phase ? holdRef.current.hold : null,
+    firstRow: firstRowRef.current,
   });
-  useEffect(() => { rungRef.current = { phase, rung: bar.rung }; }, [phase, bar.rung]);
+  useEffect(() => { holdRef.current = { phase, hold: bar.hold }; }, [phase, bar.hold]);
 
   // The "Did you know?" card: from TIP_SHOW_AFTER_MS into the read until it leaves reading or retry.
   // A read with no stream never reaches "reading" (nothing tells it a row is in), so for it the read
