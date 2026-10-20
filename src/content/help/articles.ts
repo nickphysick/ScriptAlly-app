@@ -26,7 +26,7 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     lede: "Every query you send gets one entry: who you sent it to, which book, when, and what went with it.",
     guide: { page: QC, key: "log" },
     steps: [
-      { title: "Open the drawer", body: "Press `+ Log a query` on the Query Centre, or use the capture button at the top of the sidebar. The drawer opens on the right." },
+      { title: "Open the drawer", body: "Press `+ Log a query` on the Query Centre, or `Log a query` in the top bar on any page. The drawer opens on the right." },
       { title: "Agent and book", body: "Choose the agent and the manuscript. If you already have a live query with them, or with someone at the same agency, the drawer says so." },
       { title: "Sending", body: "Set the date you sent it and how you sent it." },
       { title: "What you sent", body: "Attach a submission package, or choose the pieces one by one: query letter, synopsis, and how much of the book." },
