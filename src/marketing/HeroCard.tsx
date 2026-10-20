@@ -22,7 +22,7 @@
  * state, and is memoised. `split()` is idempotent because StrictMode runs the effect twice in dev.
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
@@ -340,15 +340,28 @@ const BackCard: React.FC<{ c: typeof BACKS[number] }> = ({ c }) => (
 export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> = React.memo(({ host }) => {
   const root = useRef<HTMLDivElement>(null);
 
-  /* Phase 1 of landing hero v3: the pile is static — the story's end state, finished by
-     `makeStory` (the odometer at 99, the feed scrolled to its foot). The opening and the story
-     arrive in phase 2. */
+  /* ⚠️ A LAYOUT EFFECT, SO THE ENTRANCE IS APPLIED BEFORE THE FIRST PAINT. With `fill: backwards` the
+     cards and the shadow hold their first keyframe through their delays — invisible at 0.1s — and a
+     plain effect would paint the resting pile for one frame before taking it away. */
+  useLayoutEffect(() => {
+    const el = root.current; if (!el || reduceMotion()) return;
+    return enter(el, host.current);
+  }, [host]);
+
   useEffect(() => {
     const el = root.current; if (!el) return;
     const story = makeStory(el);
-    void host; void enter;
-    return () => story.dispose();
-  }, [host]);
+    if (reduceMotion()) return () => story.dispose();
+    /* The story starts 1.7s after load, as the ref's `V4.start(1700)` — but its first act measures
+       the timeline's lines, so it waits for the fonts. If they are slower than that, it starts the
+       moment they arrive with whatever lead is left, never early. */
+    const born = performance.now();
+    let live = true;
+    const go = () => { if (live) story.start(Math.max(0, 1700 - (performance.now() - born))); };
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+    if (fonts?.ready) fonts.ready.then(go, go); else go();
+    return () => { live = false; story.dispose(); };
+  }, []);
 
   return (
     <div className="mk-hc-pile" ref={root} aria-hidden="true">
