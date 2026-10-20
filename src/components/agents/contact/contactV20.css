@@ -129,3 +129,19 @@
   .cl19-head[data-pinned] .cl20-vsi button .cl20-vsl { display: inline; }
 }
 .cl19-pin.cl20-tfs .cl19-pin-ic { transform: none; }
+
+/* ── §D · THE LIST'S GROUP HEADING, the cream "ledger" (replaces v19's powder band: its 2px navy rule, its 1px rule
+   beneath and the navy count pill are retired). 54 tall, #f4f0e9, no border and no shadow; the row directly above a
+   heading already draws no rule of its own (contactV19.css, the section's last row), so nothing doubles up. The mark's
+   slot is the disc column — the rows' left inset (78) and the disc's width (`--cl1833-av`) — so its centre is the
+   discs' centre; the name starts 11 after it, which is where a row's name starts. Sticky under the headings, as v19. ── */
+.clv-group .cl19-card .cl19-gb.cl20-lg {
+  height: 54px; gap: 0; padding: 0 0 0 78px; background: #f4f0e9; border: 0; box-shadow: none;
+}
+.cl20-lg .cl20-lgm { display: inline-flex; align-items: center; justify-content: center; flex: none; width: var(--cl1833-av, 40px); margin-right: 11px; }
+.cl20-lg .cl20-lgm .cl19-gm { width: 18px; height: 18px; }
+.clv-group .cl19-card .cl19-gb.cl20-lg .cl19-gbl { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; }
+.clv-group .cl19-card .cl19-gb.cl20-lg .cl19-gbn {
+  height: auto; margin-left: 12px; padding: 0; border-radius: 0; background: none; color: rgba(28, 19, 15, 0.6);
+  font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; letter-spacing: 0.14em; text-transform: uppercase;
+}

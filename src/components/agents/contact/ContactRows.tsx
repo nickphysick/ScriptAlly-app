@@ -330,15 +330,19 @@ const TrayBtn: React.FC<{ primary?: boolean; probe: string; label: string; onPre
 /** v18.3.3 §D — what asked a row's peek to open or close */
 export type PeekVia = "pointer" | "key" | "focus" | "click";
 
-/** v19 §E — THE STRONG BAND: 50 tall, powder #e6edf6, a 2px navy rule on top and a 1px rule beneath; the group's mark,
- *  its name in the typewriter at 19px and a navy pill counting the rows showing ("1 agent" / "N agents"). */
+/** v20 §D — THE LIST'S GROUP HEADING, the cream "ledger" (it replaces v19's powder strong band): 54 tall, #f4f0e9, no
+ *  rules and no shadow. The group's mark (18, in ink) sits in a slot the disc column's width, so it is centred on the
+ *  rows' discs; the name (typewriter 21) starts on the name column; "N AGENTS" (mono) follows it. Letter grouping draws
+ *  no mark and keeps the slot, so the letter still sits on the name column. */
 export const ContactGroupBand: React.FC<{ groupKey: GroupKey; g: ContactGroup }> = ({ groupKey, g }) => {
   const n = g.ids.length;
   const isLetter = groupKey === "letter";
   return (
-    <div className="cl19-gb" data-cl19="gband" data-clv="band" data-gkey={g.key ?? g.label}
+    <div className="cl19-gb cl20-lg" data-cl19="gband" data-cl20="ledger" data-clv="band" data-gkey={g.key ?? g.label}
       data-letter={isLetter && /^[A-Z#]$/.test(g.label) ? g.label : undefined}>
-      {isLetter ? null : <ContactGroupMark groupKey={groupKey} gkey={g.key ?? g.label} label={g.label} size={22} />}
+      <span className="cl20-lgm" data-cl20="ledger-mark">
+        {isLetter ? null : <ContactGroupMark groupKey={groupKey} gkey={g.key ?? g.label} label={g.label} size={18} />}
+      </span>
       <b className="cl19-gbl" data-cl19="gband-label">{g.label}</b>
       <em className="cl19-gbn" data-cl19="gband-count" data-cl13="gcount">{n} {n === 1 ? "agent" : "agents"}</em>
     </div>
