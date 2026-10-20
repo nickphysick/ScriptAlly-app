@@ -1,6 +1,6 @@
 # Smart Import loader v2 — the report
 
-20 October 2026 · branch `smart-import-loader-v2`, cut from `origin/main` at `de272e1a` · **merged to `main`; deployed to dev** (function from the integration `…-hc1-sil2` at `45782f0c`, hosting now serving another session's integration that contains this branch — see below) · live run on dev: one 150-row import.
+20 October 2026 · branch `smart-import-loader-v2`, cut from `origin/main` at `de272e1a` · **merged to `main`; deployed to dev**: the function from the integration `…-hc1-sil2` (`45782f0c`), and hosting from `…-qc141-silf` (`d984dc9c`, `index-CdPbB1Bc.js`) · two live 150-row runs on dev, both clean (see below).
 
 ## False premises and deviations — read first
 
