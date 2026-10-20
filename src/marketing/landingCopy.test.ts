@@ -12,8 +12,8 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
-  DOCUMENT_TITLE, FEATURE_ROWS, BAND_EYEBROW, BAND_HEADING,
+  HERO_H1, HERO_H1_LINES, HERO_SUB, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
+  DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
   VISION_HEADING, VISION_POINTS, VISION_LINK,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
@@ -28,48 +28,50 @@ describe("landing copy — verbatim locks", () => {
    * a lock on a string only catches an edit to the string; a lock on the export catches the
    * constant being reinstated from a diff.
    */
+  /* ⚠️ LANDING HERO v3 (20 Oct, ref design-refs/landing-hero-v3.html). The headline is the
+     sentence that used to be the band's eyebrow; the sub is two sentences, one per line, with the
+     brand as data. Retired with this edit: "The hunt begins.", the "expert querying companion" sub,
+     the band's question and `BAND_EYEBROW` itself — whose absence is asserted, so a diff cannot
+     restore it beside the headline. */
   it("the headline", () => {
-    expect(HERO_H1).toBe("The hunt begins.");
+    expect(HERO_H1).toBe("No more winging it.");
+    /* The two block lines it sets on ARE the sentence, so the heading's text is the copy. */
+    expect(HERO_H1_LINES).toEqual(["No more", "winging it."]);
+    expect(HERO_H1_LINES.join(" ")).toBe(HERO_H1);
   });
 
-  /**
-   * ⚠️ THE OLD HEADLINE MOVED DOWN THE PAGE RATHER THAN BEING DELETED, and both are asserted here
-   * so the two surfaces cannot drift back into stating the same sentence twice. That duplication is
-   * exactly what the move was for: the band's heading and the hero's headline were word for word
-   * identical for as long as both existed.
-   */
-  it("the band's eyebrow and heading", () => {
-    expect(BAND_EYEBROW).toBe("No more winging it.");
-    /* ⚠️ A QUESTION SINCE 18 SEP, AND THE MARK IS PART OF THE COPY. "QueryHawk gives a bird's-eye
-       view…" stated the benefit at the reader; this asks, and the feature rows below answer. */
-    expect(BAND_HEADING).toBe("Ready for a bird's-eye view of your entire querying campaign?");
+  it("the band's heading is a statement, and its eyebrow is retired", async () => {
+    expect(BAND_HEADING).toBe("A bird\u2019s-eye view of your entire querying campaign.");
     expect(HERO_H1).not.toBe(BAND_HEADING);
+    const copy = await import("./landingCopy");
+    expect("BAND_EYEBROW" in copy, "the eyebrow moved up to be the headline").toBe(false);
   });
 
   /**
-   * ⚠️ INVERTED, AND THAT IS THE POINT OF THE EDIT (18 Sep). This used to assert the eyebrow's
-   * sentence ALSO opened the hero sub — the duplication was in the brief, so the lock named both
-   * owners to stop it becoming three. The 18 Sep ref resolves it in the band's favour, so the claim
-   * is now that the phrase has exactly ONE home. Counted across every string the page renders
-   * rather than checked on the hero alone: asserting `!startsWith` would pass on a sub that had
-   * moved the sentence into its second clause.
+   * ⚠️ THE PHRASE HAS EXACTLY ONE HOME, AND IT IS THE HERO NOW. Counted across every string the page
+   * renders rather than checked on the hero alone, so a second owner anywhere fails.
    */
   it("says `No more winging it.` exactly once on the page", () => {
+    const PHRASE = "No more winging it.";
     const said = [
-      BAND_EYEBROW, BAND_HEADING,
+      BAND_HEADING,
       HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
       VISION_HEADING, VISION_LINK,
       ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
       ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt]),
-    ].filter((t) => t.includes(BAND_EYEBROW));
-    expect(said, `owners of the phrase: ${said.join(" | ")}`).toEqual([BAND_EYEBROW]);
+    ].filter((t) => t.includes(PHRASE));
+    expect(said, `owners of the phrase: ${said.join(" | ")}`).toEqual([HERO_H1]);
   });
 
-  it("the sub, word for word", () => {
-    expect(HERO_SUB).toBe(
-      "QueryHawk is your expert querying companion, ready to take you on a data-driven journey " +
-        "to land your manuscript in the right agent's hands.",
-    );
+  it("the sub, word for word: two sentences, the brand once, in the second", () => {
+    expect(HERO_SUB_LINES).toEqual([
+      "Hunting for literary agent representation?",
+      "Smarten your search with QueryHawk.",
+    ]);
+    expect(HERO_SUB).toBe(HERO_SUB_LINES.join(" "));
+    expect(HERO_SUB_BRAND).toBe("QueryHawk");
+    expect(HERO_SUB_LINES[0]).not.toContain(HERO_SUB_BRAND);
+    expect(HERO_SUB_LINES[1].split(HERO_SUB_BRAND)).toHaveLength(2);
   });
 
   /**
@@ -228,7 +230,7 @@ describe("landing copy — verbatim locks", () => {
    * invite the halo back, and a subtitle under a band header competes with the first row.
    */
   it("the band header is one plain string, and the ECG band's copy is retired", async () => {
-    expect(BAND_HEADING).toBe("Ready for a bird's-eye view of your entire querying campaign?");
+    expect(BAND_HEADING).toBe("A bird\u2019s-eye view of your entire querying campaign.");
     const copy = await import("./landingCopy");
     /* The trace's heading and its mono eyebrow went with the section that carried them. */
     expect("PULSE_HEADING" in copy, "PULSE_HEADING is retired").toBe(false);

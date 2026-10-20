@@ -239,7 +239,8 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
 const LOWER_READERS = [
   /* the five other pages' opening sections: paper white fading to the oat, as the hero does */
   ".mk-mission::before, .mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
-  ".mk-herowrap", ".mk-lower",
+  /* the status band continues the hero's lower ground into the oat (landing hero v3) */
+  ".mk-lower", ".mk-statband",
   /* the sheet itself: every page continues on the oat */
   ".mk-sheet",
 ].sort();
@@ -276,7 +277,10 @@ describe("two surfaces, and the step between them is real", () => {
      carries the whole transition — paper white to 62%, then a straight fade arriving at the oat
      exactly at its foot — so there is still ONE boundary treatment, and it lives on one element.
      The readers are named: a new one is a decision, not a diff. */
-  it("--mk-lower has one definition, and its readers are the lower surface, the hero's fade and the sheet", () => {
+  /* RE-POINTED (landing hero v3): the hero's own gradient ends on `--mk-hero-foot`, and the status
+     band — the ref's `.peek` — carries the fade from `--mk-band-top` into the oat over 220px. Still
+     ONE boundary treatment, now on the band, and the hero no longer reads `--mk-lower` at all. */
+  it("--mk-lower has one definition, and its readers are the lower surface, the band's fade and the sheet", () => {
     expect(marketing.match(/--mk-lower\s*:/g) ?? []).toHaveLength(1);
     const own = ruleFor(".mk-lower");
     expect(own).toMatch(/background-color:\s*var\(--mk-lower\)/);
@@ -284,9 +288,14 @@ describe("two surfaces, and the step between them is real", () => {
     expect(own).not.toMatch(/background:\s/);
     const hero = ruleFor(".mk-herowrap");
     expect(hero).toMatch(/background-color:\s*var\(--mk-hero-ground\)/);
-    expect(hero, "paper white holds to 62%, then fades to the oat at the foot")
-      .toMatch(/background-image:\s*linear-gradient\(180deg,\s*var\(--mk-hero-ground\) 62%,\s*var\(--mk-lower\) 100%\)/);
+    expect(hero, "the ref's hero gradient, paper to its foot")
+      .toMatch(/background-image:\s*linear-gradient\(180deg,\s*var\(--mk-hero-ground\) 0%,\s*var\(--mk-hero-foot\) 100%\)/);
     expect(hero, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
+    const band = ruleFor(".mk-statband");
+    expect(band, "the ref's .peek: the band's top colour into the oat over 220px")
+      .toMatch(/background-image:\s*linear-gradient\(180deg,\s*var\(--mk-band-top\),\s*var\(--mk-lower\) 220px\)/);
+    expect(band).toMatch(/background-color:\s*var\(--mk-lower\)/);
+    expect(band, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
     const readers = [...baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /var\(--mk-lower\)/.test(m[2])).map((m) => m[1].trim()).sort();
     expect(readers).toEqual(LOWER_READERS);
@@ -323,10 +332,13 @@ describe("two surfaces, and the step between them is real", () => {
    the band rather than left as a described-but-empty block: a describe with its cases removed reads
    as coverage that is merely quiet. */
 describe("no marketing rule reads a token that does not exist", () => {
+  /* ⚠️ THE CARD PILE'S SHEET IS PART OF THE SWEEP (landing hero v3): it READS the tier's faces and
+     declares none, so leaving it out would call `--mk-f-mono` unread and miss a bad read in it. */
+  const both = marketing + "\n" + decls(css("heroCard.css"));
   const declared = new Set(
-    [...marketing.matchAll(/(--mk-[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
+    [...both.matchAll(/(--mk-[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
   );
-  const read = [...marketing.matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1]);
+  const read = [...both.matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1]);
 
   it("reads at least the tokens we know about (the scan is not vacuous)", () => {
     expect(read.length).toBeGreaterThan(40);
@@ -551,7 +563,10 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
     const INSIDE = [".mk-statband", ".mk-featband", ".mk-vision", ".mk-claimband"];
     const painted = INSIDE.filter((sel) => /background(?:-color)?\s*:/.test(ruleFor(sel)));
-    expect(painted).toEqual([".mk-vision"]);
+    /* ⚠️ THE STATUS BAND IS THE SECOND, AND IT IS ARGUED FOR (landing hero v3): it continues the
+       hero's lower ground — the ref's `.peek` — so hero and band meet with no seam, and its fade ends
+       on the oat itself, so the band's foot IS the lower surface. */
+    expect(painted).toEqual([".mk-statband", ".mk-vision"]);
   });
 
   /**
@@ -582,220 +597,119 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
  * injects a rule at runtime that gives every bare h1, h2 and h3 the brand heading font with
  * !important. Two classes outrank its `h1:not(.wsh-title)`; a normal declaration would not.
  */
-describe("the hero is two columns, and its shadow overflows on purpose", () => {
-  it("two equal columns, centred, clipped, in the feature rows' own container", () => {
+/* ⚠️ THE CARD PILE'S OWN SHEET (landing hero v3). Read beside `marketing.css` wherever a claim is
+   about the tier's tokens or its faces, because the pile reads both. */
+const heroCard = decls(css("heroCard.css"));
+
+/**
+ * ⚠️ LANDING HERO v3 (20 Oct, ref design-refs/landing-hero-v3.html) REPLACED THE TWO-COLUMN HERO AND
+ * ITS SHADOW COLUMN, AND THIS DESCRIBE WITH THEM. Retired, by name: "two equal columns, centred,
+ * clipped, in the feature rows' own container"; "the art fills its column and the shadow is placed by
+ * rule"; "the headline: Special Elite 400, important, at a flat 56px"; "the sub and the two actions
+ * carry their own family"; "stacked, the copy comes first and the shadow sits behind it". Every one
+ * of them asserted a mechanism the new hero does not have. These are the source claims the new
+ * stylesheet can carry; where the copy and the card actually LAND — centred on each other, the band
+ * peeking in, the bird uncropped — is measured on a rendered page in `landingHeroV3.measure.ts`.
+ */
+describe("the hero is a 1280px frame scaled to the window, with the pile cast over it", () => {
+  it("the frame is 1280 wide and scaled about its corner; the wrapper is the scaled height", () => {
+    const wrap = ruleFor(".mk-herowrap");
+    expect(wrap).toMatch(/--mk-hero-h:\s*672px/);
+    expect(wrap).toMatch(/--mk-hero-k:\s*1;/);
+    expect(wrap).toMatch(/height:\s*calc\(var\(--mk-hero-h\) \* var\(--mk-hero-k\)\)/);
+    /* ⚠️ ABOVE THE BAND AND UNCLIPPED, so the pile's shadows and the bird's tip fall onto the band. */
+    expect(wrap).toMatch(/z-index:\s*2/);
+    expect(wrap, "nothing clips the hero").not.toMatch(/overflow/);
+    expect(wrap).toMatch(/background-color:\s*var\(--mk-hero-ground\)/);
+    expect(wrap, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
     const hero = ruleFor(".mk-hero");
-    expect(hero).toMatch(/grid-template-columns:\s*1fr 1fr/);
-    expect(hero).toMatch(/align-items:\s*center/);
-    /* ⚠️ `clip` ON ONE AXIS AND `visible` ON THE OTHER IS THE ONLY PAIR THAT DOES THIS, and the
-       obvious spelling does not work: `overflow-x: hidden` with `overflow-y: visible` FORCES the
-       visible axis to `auto`, which makes the hero a scroll container instead of letting the
-       shadow spill. Both halves are the lock — x still guarantees the art can never reach the
-       document's scroll width, y is what lets the shadow cross into the band. */
-    /* ⚠️ THE CLIP MOVED UP TO `html`/`body`, AND THE HERO NOW DECLARES NO `overflow` AT ALL. The
-       shadow is meant to spill off the right edge of the PAGE rather than out of its own column,
-       and any overflow value here makes the hero the box that clips it. `clip` rather than
-       `hidden` one level up, because `hidden` would make the document a scroll container — which
-       traps the sticky nav and breaks every in-page anchor. Scoped with `:has(.mk-scope)` so it
-       cannot follow a reader into the workspace, where the rail's peek panel and the timeline
-       drawer both escape their boxes on purpose. */
-    expect(hero, "the hero clips nothing — the page does").not.toMatch(/overflow/);
+    expect(hero).toMatch(/width:\s*1280px/);
+    expect(hero).toMatch(/transform-origin:\s*0 0/);
+    expect(hero).toMatch(/transform:\s*scale\(var\(--mk-hero-k\)\)/);
     const clip = /html:has\(\.mk-scope\), body:has\(\.mk-scope\)\s*\{([^}]*)\}/.exec(marketing);
     expect(clip, "html and body clip the x axis while a marketing page is mounted").toBeTruthy();
     expect(clip![1]).toMatch(/overflow-x:\s*clip/);
-    expect(clip![1], "`hidden` would make the document a scroll container").not.toMatch(/hidden/);
-    /* ⚠️ 520, NOT 660, AND THE NUMBER IS ARITHMETIC RATHER THAN TASTE. The row centres copy that
-       measures 308.8px at 1440, so slack = (min-height - 308.8) / 2 and band top = 88 +
-       min-height. Less slack therefore always means MORE band visible, never less; there is no
-       value that both closes the slack and shows only 100px of band. */
-    expect(hero).toMatch(/min-height:\s*520px/);
-    expect(hero).toMatch(/margin:\s*0 auto/);
-    /* ⚠️ READ OFF `.mk-rows` RATHER THAN PINNED AS LITERALS ON BOTH SIDES. The claim is that the
-       page has ONE gutter, not that it has two numbers that happen to be 1180 and 56 today — a lock
-       spelling them twice goes green the day someone moves the rows and forgets the hero. */
-    const rows = ruleFor(".mk-rows");
-    const cap = /--mk-rows-cap:\s*(\d+px)/.exec(rows)![1];
-    const gutter = /--mk-rows-gutter:\s*(\d+px)/.exec(rows)![1];
-    /* ⚠️ THE HERO HOLDS ITS OWN TWO AS TOKENS NOW (18 Sep), because the shadow's arithmetic reads
-       them — so the claim is no longer "the hero spells the same literal" but "the hero's cap IS the
-       rows' cap". Two derivations against each other; a lock spelling 1180 and 56 on both sides
-       goes green the day someone moves the rows and forgets the hero, which is the fault the
-       original note here was written about. */
-    const heroCap = /--mk-hero-cap:\s*(\d+px)/.exec(hero);
-    const heroPad = /--mk-hero-pad:\s*(\d+px)/.exec(hero);
-    expect(heroCap, "the hero declares its cap").toBeTruthy();
-    expect(heroPad, "the hero declares its gutter").toBeTruthy();
-    expect(heroCap![1], "the hero caps where the rows cap").toBe(cap);
-    expect(heroPad![1], "and gutters where they gutter").toBe(gutter);
-    /* ⚠️ AND THE WHITE BAND JOINS THEM. Three bands, one gutter — the vision section was drawn at
-       1440/120 in its ref and is built at the page's own container, so this is where that decision
-       is held. */
-    const vision = ruleFor(".mk-visionin");
-    expect(vision, "the vision band caps where the rows cap").toContain("max-width: " + cap);
-    expect(vision, "and gutters where they gutter").toMatch(
-      new RegExp("padding:\\s*\\d+px " + gutter + " \\d+px"),
-    );
+  });
+
+  it("the copy starts 175 in from the frame and is 560 wide", () => {
     const copy = ruleFor(".mk-herocopy");
-    expect(copy, "the container supplies the outer gutter now").toMatch(/padding:\s*0 40px 0 0/);
-    /* ⚠️ THE STACKING CONTEXT IS A DESKTOP CONCERN NOW, NOT A STACKED ONE. At 169% the shadow
-       grows LEFTWARD from a fixed right edge and reaches back across the copy column; the art is
-       the later grid item, so without this it paints a 20% wash over the headline. It moved up out
-       of the 900px block rather than being duplicated in both. */
-    expect(copy, "the words stay above the shadow at every width").toMatch(/z-index:\s*1/);
-    expect(copy).toMatch(/position:\s*relative/);
+    expect(copy).toMatch(/left:\s*175px/);
+    expect(copy).toMatch(/width:\s*560px/);
+    expect(copy).toMatch(/transform-origin:\s*0 0/);
   });
 
-  /**
-   * ⚠️ RETARGET, AND THE LOCK CHANGED KIND (18 Sep). It used to pin three drawn numbers — `left: 54%`,
-   * `width: 72%`, `translateY(-46%)` — each tuned by eye to one viewport. The shadow is positioned by
-   * a RULE now: never within a stated clearance of the headline's ink, never within a stated margin
-   * of the viewport's edge, and it shrinks rather than crossing either. So this asserts the rule's
-   * TERMS are all present and derived from one another; the rule's OUTCOME — the clearance in
-   * pixels, at four widths — is a rendered-page claim and lives in `heroShadow.measure.ts`, which is
-   * the only artefact that can see it.
-   */
-  it("the art fills its column and the shadow is placed by rule, not by a drawn number", () => {
-    expect(ruleFor(".mk-heroart")).toMatch(/height:\s*100%/);
-    const hero = ruleFor(".mk-hero");
-    /* Every term the rule reads is declared on the hero, which owns all of them. */
-    for (const t of ["--mk-hero-cap", "--mk-hero-pad", "--mk-hero-ink", "--mk-hero-clear", "--mk-hero-edge"]) {
-      expect(hero, `${t} is the hero's to declare`).toMatch(new RegExp(t.replace(/-/g, "\\-") + ":"));
-    }
-    /* ⚠️ THE CAP AND THE GUTTER ARE READ, NOT RESTATED. `max-width` and `padding` must consume the
-       same tokens the shadow's arithmetic does, or the two can disagree by a number nobody sees. */
-    expect(hero, "the cap is the token, not a literal beside it").toMatch(/max-width:\s*var\(--mk-hero-cap\)/);
-    expect(hero, "and so is the gutter").toMatch(/padding:\s*0 var\(--mk-hero-pad\)/);
-    const x = /--mk-hero-shadow-x:([\s\S]*?);/.exec(hero);
-    expect(x, "the shadow's left edge is derived once, on the hero").toBeTruthy();
-    for (const t of ["--mk-hero-cap", "--mk-hero-pad", "--mk-hero-ink", "--mk-hero-clear"]) {
-      expect(x![1], `the derivation reads ${t}`).toContain(t);
-    }
-    /* ⚠️ `cqw`, NOT `vw`, AND IT IS THE REASON THE WRAPPER EXISTS. `100vw` counts a classic
-       scrollbar; the shadow's right-hand margin is stated against what the reader can SEE. */
-    expect(x![1], "measured against the container, so a scrollbar is not counted as room").toContain("100cqw");
-    expect(x![1], "never vw — see .mk-herowrap").not.toContain("vw");
-    expect(ruleFor(".mk-herowrap"), "and something has to BE the container")
-      .toMatch(/container-type:\s*inline-size/);
-
-    const img = ruleFor(".mk-heroart img");
-    expect(img).toMatch(/position:\s*absolute/);
-    /* Left = the headline's ink plus the clearance, from the art column's own edge. */
-    expect(img, "placed off the headline's ink, not off a percentage")
-      .toMatch(/left:\s*calc\(var\(--mk-hero-ink\) \+ var\(--mk-hero-clear\) - 100%\)/);
-    expect(img, "anchored from one side only, or the two fight").not.toMatch(/right:/);
-    /* ⚠️ THE SHRINK IS THE HALF THAT MATTERS. `min()` is what makes the picture give way when the
-       two margins cannot both hold — without it the rule silently becomes "overlap the headline".
-       `max(0px, …)` keeps it a valid length at widths where nothing fits. */
-    const w = /width:([^;]*);/.exec(img);
-    expect(w, "the image states a width").toBeTruthy();
-    expect(w![1], "the ref's size is the ceiling").toContain("104%");
-    expect(w![1], "and the room left before the viewport's margin is the cap").toContain("min(");
-    expect(w![1], "…so it shrinks rather than overlapping").toContain("--mk-hero-shadow-x");
-    expect(w![1], "and never resolves to a negative length").toContain("max(0px");
-    expect(img, "the global image reset would cancel the width in silence").toMatch(/max-width:\s*none/);
-    /* Vertically centred, and `-50%` rather than the old optical `-46%`: the ref centres it. */
-    expect(img).toMatch(/top:\s*50%/);
-    expect(img).toMatch(/translateY\(-50%\)/);
-    expect(img).toMatch(/opacity:\s*0?\.18/);
-    /* ⚠️ IT REACHES ACROSS THE COPY COLUMN AT NARROW WIDTHS, so a 0.18 wash that ate a click on the
-       headline would be a bug nobody could see. */
-    expect(img).toMatch(/pointer-events:\s*none/);
-  });
-
-  it("the headline: Special Elite 400, important, at a flat 56px", () => {
+  it("the headline: the typewriter face, important, 78px/1.04, two block lines", () => {
     const h1 = ruleFor(".mk-hero .mk-herotitle");
-    expect(h1).toMatch(/font-family:\s*"Special Elite", cursive !important/);
+    expect(h1).toMatch(/font-family:\s*var\(--mk-f-display\) !important/);
+    expect(value(marketing, "--mk-f-display")).toMatch(/^"Special Elite"/);
     expect(h1).toMatch(/font-weight:\s*400/);
-    /* ⚠️ 74px AND `nowrap`, AND THE OVERFLOW IS THE DESIGN. Held on one line the headline is wider
-       than its 560px column, so it runs across the shadow beside it — intended, and the reason the
-       hero stopped clipping. The page cannot scroll sideways because `html`/`body` clip that axis.
-       It releases at 560px rather than spilling past a phone's viewport, where the clip would
-       simply eat it. */
-    expect(h1).toMatch(/font-size:\s*74px/);
-    expect(h1, "one line, across the shadow").toMatch(/white-space:\s*nowrap/);
-    expect(h1).toMatch(/line-height:\s*1\.14/);
-    expect(h1).toMatch(/letter-spacing:\s*-0\.01em/);
-    expect(h1).toMatch(/color:\s*var\(--mk-nearblack\)/);
-    /* ⚠️ THE 11ch MEASURE, THE cqw STEP-DOWN AND `.mk-hkeep` WENT TOGETHER, AND THEIR ABSENCE IS THE
-       ASSERTION. All three existed for one reason — keeping the held pair "querying campaign" inside
-       a column half the hero wide. On "The hunt begins." the same machinery stops being protection
-       and becomes the fault: an unbreakable "hunt begins." forces the break in front of it and
-       strands "The". Re-adding any one of them is the regression this catches. */
-    expect(h1, "no measure for a three-word headline to be stranded against").not.toMatch(/max-width/);
-    expect(h1, "and no container-query step-down").not.toMatch(/cqw/);
-    expect(marketing, "the held-pair rule went with the span that carried it").not.toMatch(/mk-hkeep/);
+    expect(h1).toMatch(/font-size:\s*78px/);
+    expect(h1).toMatch(/line-height:\s*1\.04/);
+    expect(h1).toMatch(/letter-spacing:\s*-\.02em/);
+    /* ⚠️ THE LINE SPANS INHERIT, OR brand.tsx's bare-span rule draws them in the app's sans. */
+    const hl = ruleFor(".mk-hero .mk-herotitle .mk-hl");
+    expect(hl).toMatch(/display:\s*block/);
+    expect(hl).toMatch(/font-family:\s*inherit/);
   });
 
-  it("the sub and the two actions carry their own family, because the injection sets theirs", () => {
+  it("the sub is the headline's face, quieter, with the brand on a rust highlighter", () => {
     const sub = ruleFor(".mk-herosub");
-    expect(sub).toMatch(/font-family:\s*"Source Serif 4", Georgia, serif/);
+    expect(sub).toMatch(/font-family:\s*var\(--mk-f-display\)/);
     expect(sub).toMatch(/font-size:\s*21px/);
-    expect(sub).toMatch(/line-height:\s*1\.65/);
-    /* ⚠️ THE MEASURE BELONGS TO THE COLUMN NOW, NOT THE PARAGRAPH. Two caps on one block is how
-       they come to disagree; `.mk-herocopy` carries the 560px and the sub simply fills it. */
-    expect(sub, "the column carries the measure").not.toMatch(/max-width/);
-    expect(ruleFor(".mk-herocopy")).toMatch(/max-width:\s*560px/);
-    expect(sub).toMatch(/color:\s*var\(--mk-nearblack\)/);
-    /* ⚠️ THE PAGE'S ONE DOMINANT ACTION, AND THE WEIGHT IS THE RANKING (18 Sep). `.mk-btn--navy` —
-       the nav, /pricing, the sign-up — keeps 1rem regular; this pill alone is 18px/600, so the ask
-       outranks the ways in. Asserted against the shared modifier rather than in isolation, because
-       "heavier than the others" is a relationship and a lock on one side of it cannot see the day
-       somebody levels them up. */
+    expect(sub).toMatch(/line-height:\s*1\.6/);
+    expect(sub).toMatch(/letter-spacing:\s*-\.005em/);
+    expect(sub).toMatch(/color:\s*rgba\(28, 19, 15, \.78\)/);
+    const b = ruleFor(".mk-herosub b");
+    expect(b, "the face has one weight").toMatch(/font-weight:\s*400/);
+    expect(b).toMatch(/color:\s*var\(--mk-nearblack\)/);
+    expect(b).toMatch(/box-shadow:\s*inset 0 -\.38em 0 rgba\(162, 69, 42, \.16\)/);
+  });
+
+  it("the two actions are the ref's, and the pill still outranks the chrome's navy", () => {
     const pill = ruleFor(".mk-heropill");
-    expect(pill).toMatch(/font-family:\s*"Source Serif 4"/);
+    expect(pill).toMatch(/font:\s*600 18px\/1 var\(--mk-f-serif\)/);
+    expect(value(marketing, "--mk-f-serif")).toMatch(/^"Source Serif 4"/);
     expect(pill).toMatch(/background:\s*var\(--mk-navy\)/);
-    expect(pill).toMatch(/color:\s*#ffffff/);
-    expect(pill).toMatch(/font-size:\s*18px/);
-    expect(pill).toMatch(/font-weight:\s*600/);
-    expect(pill).toMatch(/border-radius:\s*30px/);
-    expect(pill).toMatch(/padding:\s*17px 32px/);
+    expect(pill).toMatch(/padding:\s*19px 30px/);
+    expect(pill).toMatch(/border-radius:\s*999px/);
     const navy = ruleFor(".mk-btn--navy");
     expect(navy, "the chrome's navy is the same fill").toMatch(/background:\s*var\(--mk-navy\)/);
     expect(navy, "…and deliberately lighter than the hero's").toMatch(/font-size:\s*1rem/);
-    expect(navy, "no weight of its own, so it inherits the base button's").not.toMatch(/font-weight/);
-    /* ⚠️ RUST, NOT INK. Beside a navy pill an ink link reads as a second, quieter button; rust reads
-       as a different kind of thing. The two fills are the tier's grammar and must stay separable. */
     const link = ruleFor(".mk-herolink");
-    expect(link).toMatch(/font-family:\s*"Source Serif 4"/);
+    expect(link).toMatch(/font:\s*400 17px\/1 var\(--mk-f-serif\)/);
     expect(link).toMatch(/color:\s*var\(--mk-rust\)/);
-    expect(link).toMatch(/text-underline-offset:\s*5px/);
-    expect(link, "the underline is the hairline weight, so it never competes")
-      .toMatch(/text-decoration-color:\s*rgba\(162, 69, 42, \.45\)/);
-    expect(ruleFor(".mk-heroctas")).toMatch(/gap:\s*22px/);
+    expect(link).toMatch(/border-bottom:\s*1\.5px solid var\(--mk-rust\)/);
+    const ctas = ruleFor(".mk-heroctas");
+    expect(ctas).toMatch(/gap:\s*30px/);
+    expect(ctas).toMatch(/margin-top:\s*38px/);
   });
 
-  it("stacked, the copy comes first and the shadow sits behind it", () => {
-    const block = [...marketing.matchAll(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/g)]
+  it("the shadow is cast over the pile: multiplied, .2, blurred, turned, and it takes no clicks", () => {
+    const cast = /(?:^|\n)\.mk-lc-cast\s*\{([^}]*)\}/.exec(heroCard);
+    expect(cast, "the cast has its rule in the pile's sheet").toBeTruthy();
+    expect(cast![1]).toMatch(/mix-blend-mode:\s*multiply/);
+    expect(cast![1]).toMatch(/opacity:\s*\.2/);
+    expect(cast![1]).toMatch(/filter:\s*blur\(7px\)/);
+    expect(cast![1]).toMatch(/transform:\s*rotate\(-4deg\)/);
+    expect(cast![1]).toMatch(/width:\s*860px/);
+    expect(cast![1]).toMatch(/pointer-events:\s*none/);
+    expect(cast![1], "the global image reset would cap it in silence").toMatch(/max-width:\s*none/);
+  });
+
+  it("the shadow column and its clearance rule are retired, not left inert", () => {
+    for (const gone of ["mk-heroart", "--mk-hero-ink", "--mk-hero-clear", "--mk-hero-edge", "--mk-hero-shadow-x", "--mk-hero-cap", "--mk-hero-pad"]) {
+      expect(marketing, gone).not.toContain(gone);
+    }
+    expect(ruleFor(".mk-herowrap"), "the cqw container went with the column").not.toMatch(/container-type/);
+  });
+
+  it("below 900px it stacks, and the two outermost back cards are dropped", () => {
+    const block = [...marketing.matchAll(/@media \(max-width: 899\.98px\) \{([\s\S]*?)\n\}/g)]
       .find((m) => /\.mk-hero\s*\{/.test(m[1]));
-    expect(block, "a 900px block stacks the hero").toBeTruthy();
-    expect(block![1]).toMatch(/grid-template-columns:\s*1fr/);
-    /* ⚠️ RETARGET: the stacking context MOVED to the base rule (asserted above) rather than being
-       deleted. The shadow now reaches across the copy at every width, so a context declared only
-       inside this block would have left the desktop hero unprotected — the claim is unchanged and
-       its home is one rule further up. Restating it here would be the same decision in two
-       places, which is how the two come to disagree. */
-    expect(block![1], "stated once, on the base rule").not.toMatch(/\.mk-herocopy\s*\{[^}]*z-index/);
-    expect(block![1], "the shadow is behind the copy, not beneath it").toMatch(/\.mk-heroart\s*\{[^}]*position:\s*absolute/);
-    /* ⚠️ THE RULE'S BODY, NOT ITS FIRST DECLARATION. This used to read
-       `/\.mk-heroart img\s*\{\s*opacity:/` — which pinned `opacity` as the OPENING property and went
-       red the moment two more were added in front of it, over a change that made the rule more
-       correct rather than less. That is a lock on a spelling; the claim is what the rule does.
-       ⚠️ AND THE SQUARING-UP IS PART OF THE CLAIM NOW. Stacked, the art box IS the hero rather than a
-       half-width column, so the desktop -6%/112% pushed the shadow 22.5px past the viewport at 375 —
-       clipped rather than scrolling, but still art cut off at the page edge. */
-    const stackedArt = /\.mk-heroart img\s*\{([^}]*)\}/.exec(block![1]);
-    expect(stackedArt, "the stacked block sizes the art").toBeTruthy();
-    expect(stackedArt![1], "quiet enough to sit behind the words").toMatch(/opacity:\s*0?\.12/);
-    /* ⚠️ RETARGETED TO THE CLAIM, NOT THE SPELLING. This asserted `right: 0`, which was how the art
-       was squared up while the base rule anchored from the RIGHT. The base anchors from the LEFT
-       now (`left: 54%`), so `right: 0` alone would over-constrain the box — the browser keeps
-       `left` and the width, and the shadow lands 203px past a 375px viewport. Squaring it up is
-       therefore `left: 0; right: auto`, which is the same claim spelled the only way that works
-       against the new base. Measured at 375: the art's right edge is exactly 375.
-       A lock that fails over a change making its own claim MORE true is a lock on a spelling. */
-    expect(stackedArt![1], "anchored from one side only, or the two fight").toMatch(/left:\s*0/);
-    expect(stackedArt![1], "…and the other side released, or the width is over-constrained").toMatch(/right:\s*auto/);
-    expect(stackedArt![1], "full width, so it cannot run past a phone's right edge").toMatch(/width:\s*100%/);
+    expect(block, "a sub-900px block stacks the hero").toBeTruthy();
+    expect(block![1]).toMatch(/\.mk-hero\s*\{[^}]*transform:\s*none/);
+    expect(block![1]).toMatch(/\.mk-herocopy\s*\{[^}]*position:\s*static/);
+    expect(block![1]).toMatch(/\.mk-herobox \.mk-lc--o\s*\{\s*display:\s*none/);
   });
 });
 
@@ -1206,18 +1120,20 @@ describe("the feature rows set their own type, and nothing else uses its familie
       ".mk-frow h3",
       ".mk-fw .mk-fwcard h2",
       ".mk-fw .mk-fwh1",
-      ".mk-hero .mk-herotitle",
       ".mk-mission .mk-mission-main",
       ".mk-missionturn",
+      /* ⚠️ THE TIER'S FACES AS TOKENS (landing hero v3): `--mk-f-display` and `--mk-f-serif` on
+         `.mk-scope`, read by the hero, the band and the card pile's own sheet — which may then style
+         a typewriter card without being a second file that names the face. The hero's headline, its
+         sub and the band's heading READ the token, so they leave this list. */
+      ".mk-scope",
       ".mk-sechead h2",
-      ".mk-stateyebrow",
-      ".mk-stattitle",
       ".mk-vh3",
       ".mk-visionh2",
       ".mk-way .mk-wayh",
     ]);
     expect(ruleOwners("Source Serif 4").sort())
-      .toEqual([".mk-fcopy p", ".mk-herolink", ".mk-heropill", ".mk-herosub", ".mk-vbody", ".mk-visionmore"]);
+      .toEqual([".mk-fcopy p", ".mk-scope", ".mk-vbody", ".mk-visionmore"]);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
       d.isDirectory() ? walk(resolve(dir, d.name))
