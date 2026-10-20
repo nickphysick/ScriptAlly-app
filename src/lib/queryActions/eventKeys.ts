@@ -34,6 +34,7 @@ export const EVENT_LABEL: Record<EventKey, string> = {
   closed_agent_gone: "Closed to queries",
   late_reply_reopened: "Reopened",
   entry_corrected: "Entry corrected",
+  imported: "Imported",
 };
 
 export const LEGACY_KEY: Record<EventKey, string | null> = {
@@ -58,6 +59,7 @@ export const LEGACY_KEY: Record<EventKey, string | null> = {
   closed_agent_gone: "withdrawn",
   late_reply_reopened: null,
   entry_corrected: null,
+  imported: null,
 };
 
 export const isEventKey = (k: unknown): k is EventKey => typeof k === "string" && k in EVENT_LABEL;

@@ -107,14 +107,16 @@ describe("R1 · the same sheet, twice", () => {
     expect(split.duplicates.filter((d) => !d.query.sentDate).length).toBe(undated);
   });
 
-  it("the activity line counts what was written: one after the first import, none after the second", async () => {
+  /* RE-POINTED (import review v1, Part D): the summary line is the import's own event now. */
+  it("the import event counts what was written: one after the first import, none after the second", async () => {
     const result = await reviewed("template-iso.csv");
     const acc = account();
-    const isLine = (c: unknown[]) => typeof (c[1] as any)?.description === "string";
+    const isLine = (c: unknown[]) => (c[1] as any)?.eventKey === "imported";
     await acc.run(result);
     const lines = vi.mocked(setDoc).mock.calls.filter(isLine);
     expect(lines.length).toBe(1);
-    expect((lines[0][1] as any).description).toBe(`Template import · ${acc.agents.length} agents added, ${acc.queries.length} queries logged`);
+    expect((lines[0][1] as any).importCounts.agents).toBe(acc.agents.length);
+    expect((lines[0][1] as any).importCounts.queries).toBe(acc.queries.length);
     await acc.run(result);
     expect(vi.mocked(setDoc).mock.calls.filter(isLine).length).toBe(1);
   });

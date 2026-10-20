@@ -22,12 +22,9 @@ export function queryOriginLine(agent: { name: string; agency: string; agencyOnl
   return agentAgencyLine({ name: agent.name, agency: agent.agency });
 }
 
-/** Which import wrote the rows. */
+/** Which import wrote the rows. The old "Smart import · N agents added" summary line is retired: the
+ *  import writes one event of its own now (lib/importEvent), whose route names it. */
 export type ImportSource = "smart" | "template";
-const SOURCE_NAME: Record<ImportSource, string> = { smart: "Smart import", template: "Template import" };
-/** "Template import · 3 agents added, 3 queries logged" */
-export const importActivityLine = (source: ImportSource, agents: number, queries: number): string =>
-  `${SOURCE_NAME[source]} · ${agents} agents added, ${queries} queries logged`;
 
 /** Shown when the manuscript could not be created for a reason that is not the plan's limit. */
 export const MANUSCRIPT_ERROR = "Couldn't set up your manuscript. Nothing's lost. Try again, or use the Import page.";

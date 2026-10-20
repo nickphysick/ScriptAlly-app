@@ -34,6 +34,7 @@ import { eventShape, markSentOffered } from "./feedConversation";
 import { recordSpecFor } from "./todoCalendar";
 import { stageSentAt } from "./dashBreakdown";
 import type { State } from "./queryCardFacts";
+import { isImportActivity, importSentence, importGroupLine, IMPORT_ROUTE_LABEL, type ImportCounts, type ImportRoute } from "./importEvent";
 
 const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -102,6 +103,9 @@ export interface FeedEntry {
   need: { label: string } | null;
   /** a request since answered: the day the pages went, "28 Sep" */
   met: string | null;
+  /** import review v1: the import's own event (lib/importEvent) — its counts, group line and route.
+   *  Absent on every other entry. */
+  imported?: { counts: ImportCounts; groups: string[]; route: ImportRoute; routeLabel: string } | null;
 }
 
 export interface FeedDay {
@@ -410,6 +414,25 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     .map((x) => ({ a: x, t: new Date(x.date).getTime() }))
     .filter((x) => Number.isFinite(x.t) && x.t >= from && x.t <= nowMs)
     .sort((x, y) => y.t - x.t)) {
+    /* THE IMPORT'S EVENT (import review v1): about a manuscript, never a query, so it has no subject
+       and no status for the rows below to read. Its own branch, before the drops it would hit. */
+    if (isImportActivity(a)) {
+      const title = (i.manuscripts.find((m) => m.id === a.manuscriptId)?.title ?? "").trim();
+      const c = a.importCounts;
+      const d = new Date(t);
+      out.push({
+        id: a.id, at: t,
+        time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
+        dayLabel: dayLabelFor(t, i.now),
+        pill: EVENT_LABEL.imported, status: null, state: null, app: false,
+        say: importSentence(c, title), provenance: "", action: null, requery: null, queryId: null,
+        isNew: i.seenAt !== null && t > i.seenAt,
+        /* one "thing you did"; never "From agents" */
+        dir: "out", activityType: String(a.activityType), who: title, agency: "", need: null, met: null,
+        imported: { counts: c, groups: importGroupLine(c), route: a.importRoute, routeLabel: IMPORT_ROUTE_LABEL[a.importRoute] ?? "" },
+      });
+      continue;
+    }
     const shape = eventShape(a);
     const pill = feedPill(a);
     if (!pill) continue;

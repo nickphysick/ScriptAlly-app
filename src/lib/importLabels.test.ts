@@ -24,7 +24,7 @@ import { setDoc } from "firebase/firestore";
 import { commitSmartImport } from "./smartImportCommit";
 import { readTemplateBuffer } from "./templateImport";
 import { parseModel } from "./smartImportReviewModel";
-import { queryOriginLine, importActivityLine, MANUSCRIPT_ERROR, MANUSCRIPT_LIMIT_MESSAGE, manuscriptErrorLine } from "./importLabels";
+import { queryOriginLine, MANUSCRIPT_ERROR, MANUSCRIPT_LIMIT_MESSAGE, manuscriptErrorLine } from "./importLabels";
 
 const fx = (name: string) => new Uint8Array(readFileSync(resolve(process.cwd(), "tests/fixtures/import", name)));
 const code = (file: string) => readFileSync(resolve(process.cwd(), file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -50,7 +50,10 @@ describe("L1 · the agency line", () => {
   });
 });
 
-describe("L1 · the activity line names its path", () => {
+/* RE-POINTED (import review v1, Part D): the "Smart import · N agents added" summary line is retired
+   — nothing ever rendered it. The import writes ONE event of its own (lib/importEvent), and the route
+   it names is the path the host passed. */
+describe("L1 · the import's one event names its path", () => {
   beforeEach(() => vi.mocked(setDoc).mockClear());
   const run = async (source?: "smart" | "template") => {
     const parsed = await readTemplateBuffer(fx("template-iso.csv"));
@@ -58,19 +61,27 @@ describe("L1 · the activity line names its path", () => {
     const deps = { userId: "u1", existingAgents: [], manuscriptTitle: "The Salt Road",
       addAgent: vi.fn(async () => ({ success: true, id: `ag-${++n}` })), addQuery: vi.fn(async () => ({ success: true, id: `q-${++n}` })) } as any;
     await (source ? commitSmartImport(deps, parsed.result, "ms1", source) : commitSmartImport(deps, parsed.result, "ms1"));
-    const lines = vi.mocked(setDoc).mock.calls.map((c) => (c[1] as any)?.description).filter((d) => typeof d === "string");
-    expect(lines.length, "one activity line").toBe(1);
-    return lines[0] as string;
+    const events = vi.mocked(setDoc).mock.calls.map((c) => c[1] as any).filter((d) => d?.eventKey === "imported");
+    expect(events.length, "one import event").toBe(1);
+    expect(vi.mocked(setDoc).mock.calls.map((c) => (c[1] as any)?.description).filter((d) => typeof d === "string" && /^(Smart|Template) import · /.test(d)), "no old summary line").toEqual([]);
+    return events[0];
   };
-  it("the template path", async () => { expect(await run("template")).toBe("Template import · 5 agents added, 5 queries logged"); });
-  it("the Smart Import path", async () => { expect(await run("smart")).toBe("Smart import · 5 agents added, 5 queries logged"); });
-  it("unnamed, it is a Smart Import, as before", async () => { expect(await run()).toMatch(/^Smart import · /); });
+  it("the template path", async () => { expect((await run("template")).importRoute).toBe("template"); });
+  it("the Smart Import path", async () => { expect((await run("smart")).importRoute).toBe("smart"); });
+  it("unnamed, it is a Smart Import, as before", async () => { expect((await run()).importRoute).toBe("smart"); });
+  it("it is tied to the manuscript and counts what was written", async () => {
+    const ev = await run("template");
+    expect(ev.manuscriptId).toBe("ms1");
+    expect(ev.queryId).toBe("");
+    expect(ev.resultingStatus).toBeUndefined();
+    expect(ev.importCounts.agents).toBe(5);
+    expect(ev.importCounts.queries).toBe(5);
+  });
   it("the host passes the path it took", () => {
     const src = code("src/components/import/ImportFlow.tsx"); // where the handlers live since part 3
     expect(src).toMatch(/pickTemplateFile[\s\S]*?setImportSource\("template"\)/);
     expect(src).toMatch(/runMapping[\s\S]*?setImportSource\("smart"\)/);
     expect(src).toMatch(/commitSmartImport\([\s\S]*?importSource\s*\)/);
-    expect(importActivityLine("template", 1, 2)).toBe("Template import · 1 agents added, 2 queries logged");
   });
 });
 

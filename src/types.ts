@@ -921,7 +921,9 @@ export type EventKey =
   | "pass" | "offer" | "offer_call" | "offer_accepted" | "offer_declined" | "signed"
   | "nudge_sent"
   | "closed_no_reply" | "withdrawn" | "withdrawn_on_offer" | "closed_agent_gone"
-  | "late_reply_reopened" | "entry_corrected";
+  | "late_reply_reopened" | "entry_corrected"
+  /** import review v1: the import's one feed event (lib/importEvent) — about a manuscript, never a query */
+  | "imported";
 
 export enum ActivityType {
   STATUS_CHANGED = "Status Changed",

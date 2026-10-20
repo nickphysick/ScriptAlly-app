@@ -456,3 +456,25 @@
 }
 @keyframes d58-sk-shimmer { from { background-position: 110% 0; } to { background-position: -110% 0; } }
 @media (prefers-reduced-motion: reduce) { .d58-skcard :is(.os-band, .d58-fband, .d59-fwband) { animation: none; } }
+
+/* ── THE IMPORT'S ROW (import review v1, Part D; ref design-refs/onboarding/import-review-v1/feed-import.dc.html)
+   A white card under the day heading, unlike the flat rows around it: the one event that says what a whole
+   list did. Navy disc and tag; the counts bold, the manuscript in the typewriter face. */
+.d58-ev.d58-evimp {
+  --c: #2d3a50; --t: #2d3a50;
+  grid-template-columns: 40px minmax(0, 1fr); gap: 16px; margin: 6px 0; padding: 18px 20px;
+  border: 1px solid #e4ded6; border-radius: 12px; background: #ffffff;
+}
+.d58-day + .d58-ev.d58-evimp { border-top-color: #e4ded6; }
+.d58-evimp .d58-evimpdisc { width: 40px; height: 40px; margin: 0; background: #2d3a50; color: #f4eee5; }
+.d58-evimp .d58-evimpdisc > svg { width: 19px; height: 19px; }
+.d58-evimp .d58-evtag { font-weight: 600; color: #2d3a50; }
+.d58-evimp .d58-evsay { margin-top: 6px; font-size: 17px; line-height: 1.45; }
+.d58-evimp .d58-evsay b { font-weight: 600; }
+.d58-evimp .d58-evsay i { font-style: normal; font-family: var(--d58-type) !important; }
+.d58-evgroups { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 8px; font-family: var(--d58-mono) !important; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.62); }
+.d58-evgroups span { font-family: inherit !important; }
+.d58-evfoot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #efe9e1; }
+.d58-evfoot > span { font-family: var(--d58-mono) !important; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.d58-evsee { border: 0; background: none; padding: 0; cursor: pointer; font-family: var(--sp-serif) !important; font-weight: 600; font-size: 15px; color: var(--d58-ink); text-decoration: underline; text-underline-offset: 5px; }
+.d58-evsee:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
