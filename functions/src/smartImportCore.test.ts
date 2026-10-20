@@ -165,3 +165,99 @@ describe("the 32k ceiling needs the streamed call (locked)", () => {
     expect(n).toBe(1);
   });
 });
+
+// ── Loader v2, Phase 1: progress streamed from the reply ─────────────────────────────────────────
+import { streamHooks, PROGRESS_EVERY_MS } from "./smartImportCore";
+
+/** A client that streams each reply in `step`-character deltas, advancing a shared clock 100ms a delta. */
+function streamingClient(replies: string[], clock: { t: number }, step = 7, tick = 100): MapClient {
+  let i = 0;
+  return { messages: { stream: () => {
+    const text = replies[i++] ?? "";
+    let cb: ((d: string) => void) | null = null;
+    return {
+      on: (_e: "text", f: (d: string) => void) => { cb = f; },
+      finalMessage: async () => {
+        for (let k = 0; k < text.length; k += step) { clock.t += tick; cb?.(text.slice(k, k + step)); }
+        return { content: [{ type: "text", text }], stop_reason: "end_turn", usage: { input_tokens: 1, output_tokens: 1 } };
+      },
+    };
+  } } };
+}
+const ROWS = (n: number) => `{"agents":[${Array.from({ length: n }, (_, i) => `{"ref":"a${i}","name":"Agent ${i}","agency":"Ag"}`).join(",")}],"queries":[${Array.from({ length: n }, (_, i) => `{"agentRef":"a${i}","status":"Queried","sentDateRaw":"14/03/2024","timeline":[{"type":"Full Requested","rawDate":"20/3"}]}`).join(",")}]}`;
+
+describe("mapSheet reports progress as the reply streams", () => {
+  it("fires onProgress with rising counts, ending on the rows read", async () => {
+    const clock = { t: 0 };
+    const seen: number[] = [];
+    const out = await mapSheet(streamingClient([ROWS(12)], clock), "x", { now: () => clock.t, onProgress: (p) => seen.push(p.rows) });
+    expect(seen.length).toBeGreaterThan(3);
+    expect(seen[0]).toBe(0);                       // the first text is reported at once
+    for (let i = 1; i < seen.length; i++) expect(seen[i]).toBeGreaterThanOrEqual(seen[i - 1]);
+    expect(seen[seen.length - 1]).toBe(12);        // once at the end, with the final count
+    expect(out.result.queries).toHaveLength(12);
+  });
+
+  it("returns exactly the same outcome with or without the hook", async () => {
+    const a = await mapSheet(streamingClient([ROWS(5)], { t: 0 }), "x", { now: () => 0 });
+    const b = await mapSheet(streamingClient([ROWS(5)], { t: 0 }), "x", { now: () => 0, onProgress: () => {} });
+    expect(b).toEqual(a);
+  });
+
+  it("reports at most every PROGRESS_EVERY_MS, plus the first and the last", async () => {
+    // Fast deltas (60 chars every 10ms) change the count on almost every delta, so an unthrottled
+    // report would come 10ms apart.
+    const clock = { t: 0 };
+    const at: number[] = [];
+    await mapSheet(streamingClient([ROWS(60)], clock, 60, 10), "x", { now: () => clock.t, onProgress: () => at.push(clock.t) });
+    expect(at.length).toBeGreaterThan(4);
+    for (let i = 2; i < at.length - 1; i++) expect(at[i] - at[i - 1], `report ${i}`).toBeGreaterThanOrEqual(PROGRESS_EVERY_MS);
+  });
+
+  it("always reports the final count when the attempt ends, even inside the throttle window", async () => {
+    // A clock that never moves: only the first report and the end-of-attempt report can fire.
+    const seen: number[] = [];
+    await mapSheet(streamingClient([ROWS(12)], { t: 0 }), "x", { now: () => 0, onProgress: (p) => seen.push(p.rows) });
+    expect(seen).toEqual([0, 12]);
+  });
+
+  it("announces the strict retry, and the count starts again from 0", async () => {
+    const clock = { t: 0 };
+    const events: string[] = [];
+    const out = await mapSheet(streamingClient(["Sure — I can help with that.", ROWS(3)], clock), "x", {
+      now: () => clock.t, onProgress: (p) => events.push(`rows:${p.rows}`), onRetry: () => events.push("retry"),
+    });
+    expect(out.attempts).toBe(2);
+    const r = events.indexOf("retry");
+    expect(r).toBeGreaterThan(-1);
+    expect(events.slice(0, r).every((e) => e === "rows:0")).toBe(true); // prose reads as no rows
+    expect(events[r + 1]).toBe("rows:0");
+    expect(events[events.length - 1]).toBe("rows:3");
+  });
+});
+
+describe("the callable streams only when asked (locked)", () => {
+  it("adds NOTHING to mapSheet's options when the browser did not ask to stream", () => {
+    const sent: unknown[] = [];
+    expect(streamHooks(false, (c) => sent.push(c))).toEqual({});
+    expect(Object.keys(streamHooks(false, () => {}))).toEqual([]);
+  });
+  it("sends { rows } and { retry: true } when it did, and a failing send cannot throw", async () => {
+    const sent: unknown[] = [];
+    const h = streamHooks(true, (c) => { sent.push(c); return Promise.reject(new Error("socket closed")); });
+    h.onProgress!({ rows: 4 }); h.onRetry!();
+    expect(sent).toEqual([{ rows: 4 }, { retry: true }]);
+    const throwing = streamHooks(true, () => { throw new Error("gone"); });
+    expect(() => throwing.onProgress!({ rows: 1 })).not.toThrow();
+    await new Promise((r) => setTimeout(r, 0)); // the rejected send is swallowed, not unhandled
+  });
+  it("is how the callable passes progress, and the only change to its options", () => {
+    const src = readFileSync(resolve(process.cwd(), "functions/src/smartImport.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src).toMatch(/\.\.\.streamHooks\(req\.acceptsStreaming,\s*\(chunk\)\s*=>\s*response\?\.sendChunk\(chunk\)\)/);
+    expect(src).not.toMatch(/onProgress|onRetry|sendChunk\((?!chunk\))/);
+    // the return and the consume are where they were
+    expect(src.indexOf("await consume()")).toBeGreaterThan(src.indexOf("outcome.failure"));
+    expect(src).toMatch(/return outcome\.result;/);
+  });
+});

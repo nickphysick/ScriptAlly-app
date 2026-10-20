@@ -17,7 +17,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // The request itself — model, prompt, temperature, ceiling, parse-and-repair, the one strict retry —
 // lives in the pure core so the evaluation harness makes exactly this call (functions/eval/). The
 // MODEL is still the single constant shared with the email-import path (emailImportCore.MODEL).
-import { mapSheet, MAX_SHEET_CHARS, MAX_SHEET_LINES } from "./smartImportCore";
+import { mapSheet, streamHooks, MAX_SHEET_CHARS, MAX_SHEET_LINES } from "./smartImportCore";
 
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 
@@ -48,7 +48,7 @@ export const smartImportMap = onCall(
   // just above this (src/lib/smartImport.ts, 310s) so the writer sees the server's error, not the
   // browser's; the reading screen's loader ceiling is just above that again (315s).
   { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 300, memory: "512MiB" },
-  async (req) => {
+  async (req, response) => {
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");
     const uid = req.auth.uid;
 
@@ -101,9 +101,12 @@ export const smartImportMap = onCall(
 
     const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY.value() });
 
+    // Progress travels beside the answer, never instead of it: when the browser streams, the row
+    // count goes out as the reply is read; when it does not, streamHooks adds nothing at all.
     const outcome = await mapSheet(client, sheetText, {
       log: (m) => console.log(m),
       logError: (m, cause) => (cause === undefined ? console.error(m) : console.error(m, cause)),
+      ...streamHooks(req.acceptsStreaming, (chunk) => response?.sendChunk(chunk)),
     });
     if (outcome.failure === "api") {
       // The underlying cause was logged by mapSheet — the client only ever sees the generic error.

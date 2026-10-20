@@ -16,6 +16,7 @@
 import { SYSTEM_PROMPT } from "./smartImportPrompt";
 import { assembleResult } from "./assembleImport";
 import { MODEL } from "./emailImportCore";
+import { createRowCounter } from "./progressCounter";
 
 /** Output ceiling — a runaway guard, NOT the speed lever (the slimmed, omit-empty output contract is).
  *  MEASURED, not estimated (reports/smart-import-eval/): 35–70 output tokens per row, ~50 typical, so
@@ -50,16 +51,19 @@ export interface MapClient {
   messages: { stream(args: any): { finalMessage(): Promise<any>; on?(event: "text", cb: (delta: string) => void): unknown } };
 }
 
-/** One mapping request, streamed to completion. `onFirstText` fires once, at the first text delta
- *  (time to first output token); a client without `on` (a test fake) simply never reports it. */
-const call = (client: MapClient, args: any, onFirstText?: () => void) => {
+/** One mapping request, streamed to completion. `onText` sees every text delta as it arrives; a
+ *  client without `on` (a test fake) simply never reports any. */
+const call = (client: MapClient, args: any, onText?: (delta: string) => void) => {
   const stream = client.messages.stream(args);
-  if (onFirstText && typeof stream.on === "function") {
-    let seen = false;
-    stream.on("text", () => { if (!seen) { seen = true; onFirstText(); } });
-  }
+  if (onText && typeof stream.on === "function") stream.on("text", onText);
   return stream.finalMessage();
 };
+
+/** How often, at most, progress is reported while a reply streams. */
+export const PROGRESS_EVERY_MS = 250;
+
+/** A progress report: the rows read so far in the reply now streaming (see progressCounter). */
+export interface MapProgress { rows: number }
 
 export type MapFailure = "nonjson" | "badjson" | "api";
 
@@ -95,6 +99,29 @@ export interface MapOpts {
   log?: (msg: string) => void;
   logError?: (msg: string, cause?: unknown) => void;
   now?: () => number;
+  /** Rows read so far, as the reply streams: once at its first text, then at most every
+   *  PROGRESS_EVERY_MS while the count changes, then once when the attempt ends. Optional, and it
+   *  changes nothing about the request, the result or the failures. */
+  onProgress?: (p: MapProgress) => void;
+  /** Called once, just before the one strict retry; progress then starts again from 0. */
+  onRetry?: () => void;
+}
+
+/** What the callable streams to the browser while a reply is read. The final return value is
+ *  unchanged; these are extra messages beside it, and only when the browser asked to stream. */
+export type ImportChunk = { rows: number } | { retry: true };
+
+/**
+ * The progress hooks for one callable request. When the browser did not ask to stream this returns
+ * an EMPTY object — so mapSheet is called with exactly the options it always was, and the request,
+ * the result, the failures and when the import is charged are byte-for-byte what they were. When it
+ * did, rows go out as `{ rows }` and the strict retry is announced as `{ retry: true }`. A chunk that
+ * fails to send is dropped: progress must never be able to fail an import.
+ */
+export function streamHooks(acceptsStreaming: boolean, send: (chunk: ImportChunk) => unknown): Pick<MapOpts, "onProgress" | "onRetry"> {
+  if (!acceptsStreaming) return {};
+  const safe = (c: ImportChunk) => { try { void Promise.resolve(send(c)).catch(() => {}); } catch { /* dropped */ } };
+  return { onProgress: (p) => safe({ rows: p.rows }), onRetry: () => safe({ retry: true }) };
 }
 
 /** Concatenate the text blocks of an Anthropic message into one string. */
@@ -160,14 +187,32 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   log("smartImportMap: mapping call started");
   let attempts = 0;
   let firstTokenMs: number | null = null;
-  const firstText = () => { firstTokenMs = now() - startedMs; };
+
+  /** One attempt's text handler: time to first token, and the throttled row count. */
+  const watch = () => {
+    const counter = createRowCounter();
+    let seen = false, lastAt = 0, lastRows = -1;
+    const emit = (rows: number) => { lastAt = now(); lastRows = rows; opts.onProgress?.({ rows }); };
+    return {
+      onText: (delta: string) => {
+        if (!seen) { seen = true; firstTokenMs = now() - startedMs; }
+        if (!opts.onProgress) return;
+        counter.push(delta);
+        const rows = counter.counts().rows;
+        if (lastRows < 0 || (rows !== lastRows && now() - lastAt >= PROGRESS_EVERY_MS)) emit(rows);
+      },
+      end: () => { if (opts.onProgress && seen) emit(counter.counts().rows); },
+    };
+  };
   const done = (result: any | null, failure: MapFailure | null, stopReason?: string | null): MapOutcome =>
     ({ result, failure, usage, ms: now() - startedMs, attempts, stopReason, firstTokenMs });
 
   let msg: any;
+  const w1 = watch();
   try {
     attempts++;
-    msg = await call(client, mappingRequest(sheetText, false), firstText);
+    msg = await call(client, mappingRequest(sheetText, false), w1.onText);
+    w1.end();
   } catch (e) {
     // Log the underlying cause (status, message) — the caller only ever surfaces a generic error.
     logError("Anthropic mapping call failed:", e);
@@ -190,10 +235,13 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
 
   // first.kind === "nonjson": the reply had no JSON object (prose/refusal) — ONE stricter retry.
   let retryMsg: any;
+  opts.onRetry?.();
+  const w2 = watch();
   try {
     attempts++;
     firstTokenMs = null;
-    retryMsg = await call(client, mappingRequest(sheetText, true), firstText);
+    retryMsg = await call(client, mappingRequest(sheetText, true), w2.onText);
+    w2.end();
   } catch (e) {
     logError("Anthropic mapping retry call failed:", e);
     return done(null, "api");
