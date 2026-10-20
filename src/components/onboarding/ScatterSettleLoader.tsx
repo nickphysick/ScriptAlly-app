@@ -23,6 +23,8 @@ import { SheenWave } from "./SheenWave";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { footBar, type LoaderProgress } from "../../lib/importEstimate";
+import { TIP_SHOW_AFTER_MS } from "../../lib/importTips";
+import { ImportTipsCard } from "./ImportTipsCard";
 
 
 export interface LoaderCard {
@@ -296,6 +298,15 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   });
   useEffect(() => { rungRef.current = { phase, rung: bar.rung }; }, [phase, bar.rung]);
 
+  // The "Did you know?" card: from TIP_SHOW_AFTER_MS into the read until it leaves reading or retry.
+  // A read with no stream never reaches "reading" (nothing tells it a row is in), so for it the read
+  // is under way from the start — otherwise the longest unexplained waits would get no card at all.
+  const underWay = !complete && (phase === "reading" || phase === "retry" || p.stream === "none");
+  const underWayAt = useRef<number | null>(null);
+  if (underWay && underWayAt.current === null) underWayAt.current = nowMs;
+  if (!underWay) underWayAt.current = null;
+  const showTips = underWay && underWayAt.current !== null && nowMs - underWayAt.current >= TIP_SHOW_AFTER_MS;
+
   return (
     <div className="im-bare im-ssl" data-im="reading" data-im-state={tick ? "done" : settling ? "settling" : "work"}>
       <style>{`
@@ -403,6 +414,9 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
             + {remainder} more, tidied
           </div>
         )}
+
+        {/* "Did you know?" — while the file is read (motion follows the writer's preference only) */}
+        {showTips && <ImportTipsCard reduced={prefersReduced()} />}
 
         {/* the done beat — records squeeze to centre and resolve into the navy mark (hands to the summary) */}
         {tick && (
