@@ -63,9 +63,11 @@ describe("Phase 4 · a first-ever load with empty persistence", () => {
 
   it("resolves to Dashboard on an unknown path", () => {
     /* the guard sits below every early return, so this is the last word for any path the
-       workspace does not name */
-    expect(code).toContain("if (!WORKSPACE_PATHS.has(path)) {");
-    const guard = code.slice(code.indexOf("if (!WORKSPACE_PATHS.has(path)) {"));
+       workspace does not name. Help Centre v1 retarget: the guard asks `routeBase(path)` so an article
+       (`/help/{slug}`) is the Help Centre; the law (an unnamed path lands on the Dashboard) is unchanged. */
+    const G = "if (!WORKSPACE_PATHS.has(routeBase(path))) {";
+    expect(code).toContain(G);
+    const guard = code.slice(code.indexOf(G));
     expect(guard.slice(0, 120)).toContain('<Navigate to="/dashboard" replace />');
   });
 
@@ -107,12 +109,12 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
     expect(done).not.toMatch(/\belse\b/);
   });
 
-  it("⚠️ two onboarding exits choose the Contact list ON PURPOSE — the pack's premise, located", () => {
-    /* RE-POINTED (onboarding v9): "Just getting started" has ONE exit now. Its readiness answer sets
-       the manuscript's status on the title card, so ready-to-query and still-writing leave through
-       the same book step. With Branch B's manual add that is two call sites, where there were three. */
+  it("⚠️ no onboarding exit chooses the Contact list any more (Dashboard v60)", () => {
+    /* THE LAW, RESTATED (Dashboard v60): manual set-up exits land on the dashboard; the dashboard's
+       doors are the next step. The two exits that wrote "agents" ("Just getting started" and Branch
+       B's manual add) now write no hatch at all, because the dashboard is the absence of one. */
     const agents = onboarding.match(new RegExp(`sessionStorage\\.setItem\\("${KEY}", "agents"\\)`, "g")) ?? [];
-    expect(agents.length, "the Contact-list hatch is written by two exits").toBe(2);
+    expect(agents.length, "no exit writes the Contact-list hatch").toBe(0);
     /* and the other two go elsewhere, so "the hatch always means agents" is not the claim */
     expect(onboarding).toContain(`sessionStorage.setItem("${KEY}", "import")`);
     /* RE-POINTED (onboarding v5, baked decision 4): the "Smart Import already used" card no longer
@@ -129,7 +131,8 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
        dashboard silently, which is the one failure mode this key has */
     const values = [...onboarding.matchAll(new RegExp(`setItem\\("${KEY}", "([^"]+)"\\)`, "g"))]
       .map((m) => m[1]);
-    expect(values.length).toBeGreaterThan(2);
+    /* v60: only the import desk's exit writes one now */
+    expect(values.length).toBeGreaterThan(0);
     /* the bridge's own case labels — a hatch value with no case falls through to the dashboard
        silently, which is the one failure mode this key has */
     for (const v of new Set(values)) {

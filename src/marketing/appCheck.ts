@@ -18,7 +18,7 @@
  *
  * ⚠️ THE SITE KEY IS PUBLIC BY DESIGN and ships in the bundle — that is what a reCAPTCHA site key
  * is. It is nonetheless an ENV value rather than a literal, because the dev key is bound to
- * `scriptally-dev.web.app` and `localhost` and will not work on `scriptally.ink`; prod needs its
+ * `scriptally-dev.web.app` and `localhost` and will not work on `queryhawk.net`; prod needs its
  * own, created at promotion. A hardcoded key would be silently wrong on the day that matters.
  */
 

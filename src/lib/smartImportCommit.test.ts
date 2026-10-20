@@ -221,19 +221,20 @@ describe('commitSmartImport — orchestration', () => {
     expect(mockUpdateDoc.mock.calls.filter((c) => 'dateSent' in ((c[1] as any) ?? {}))).toEqual([]);
   });
 
-  it('collapses the dashboard feed into ONE "Smart import ·" summary (existing activity type)', async () => {
+  /* RE-POINTED (import review v1, Part D): the summary line is the import's own event now. */
+  it('collapses the dashboard feed into ONE import event (existing activity type, eventKey "imported")', async () => {
     const { deps } = makeDeps();
     const r = result(
       [agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob Lee', agency: 'Beta' })],
       [q({ agentRef: 'a1', status: QueryStatus.QUERIED }), q({ agentRef: 'a2', status: QueryStatus.FULL_SENT })]
     );
     await commitSmartImport(deps as any, r, 'ms1');
-    const summaries = mockSetDoc.mock.calls.filter(
-      (c) => typeof (c[1] as any)?.description === 'string' && (c[1] as any).description.startsWith('Smart import ·')
-    );
-    expect(summaries.length).toBe(1);
-    expect((summaries[0][1] as any).description).toBe('Smart import · 2 agents added, 2 queries logged');
-    expect((summaries[0][1] as any).activityType).toBe('Status Changed');
+    const events = mockSetDoc.mock.calls.map((c) => c[1] as any).filter((d) => d?.eventKey === 'imported');
+    expect(events.length).toBe(1);
+    expect(events[0].activityType).toBe('Status Changed');
+    expect(events[0].manuscriptId).toBe('ms1');
+    expect(events[0].importCounts).toEqual({ agents: 2, queries: 2, withAgents: 2, withYou: 0, closed: 0 });
+    expect(events[0].description).toBe('You imported your list: 2 agents and 2 queries for My Novel.');
   });
 });
 

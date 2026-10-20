@@ -14,14 +14,47 @@
  * ⚠️ THE TITLE KEEPS `data-page-title` (the hook anything asking "has the page's title scrolled past?" reads)
  *    and takes focus from the pinned row's "back to the top".
  */
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
+import { Term } from "../../shell/Term";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
-import { RING, RING_C, gapLine, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
+import { RING, RING_C, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
+import "../../shell/pageHeroFrame.css"; /* v138.5 — the shared inset, before the page's own sheet */
 import "./contactV17.css";
+import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
+import "./contactV182.css"; /* after v18: v18.2 restates the header's shadow, the card's layers and the tabs */
+import "./contactV183.css"; /* after v18.2: the second button and the ring */
 
 export const CONTACT_EYEBROW = "— CONTACT LIST —";
 export const CONTACT_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
+/** v18.2 §A — the archivist beside the title block (720 × 641, from the trimmed 922 × 821 master in design-refs) */
+export const CONTACT_ARCHIVIST = { src: "/images/contact-list-archivist.webp", version: 1 };
+
+/**
+ * v18.2 §A — the archivist is as tall as the title block (the eyebrow's top to the buttons' bottom). Its HEIGHT could
+ * be the grid area's in CSS, but the text beside it must start 28px past its right edge, and that edge is the height ×
+ * 1.123: a width that follows a height a sibling sets is a cycle no layout pass resolves (columns are sized before
+ * rows). So ONE ResizeObserver reads the text's own extent and writes `--cl182-ill-h` on the title row; nothing else
+ * writes it, and the illustration itself never drives layout (its size is read from the text, never the reverse).
+ */
+function useIllustrationHeight(row: React.RefObject<HTMLDivElement | null>) {
+  useLayoutEffect(() => {
+    const el = row.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const tb = el.querySelector<HTMLElement>(".cl17-tb");
+    const acts = el.querySelector<HTMLElement>(".cl17-acts");
+    if (!tb || !acts) return undefined;
+    const write = () => {
+      const h = acts.offsetTop + acts.offsetHeight - tb.offsetTop;
+      /* a zero reading is the page before layout (or hidden by a stage toggle): refused, never stored */
+      if (h > 0) { el.style.setProperty("--cl182-ill-h", `${h}px`); el.style.setProperty("--cl182-ill-t", `${tb.offsetTop}px`); }
+    };
+    write();
+    const ro = new ResizeObserver(write);
+    ro.observe(tb); ro.observe(acts);
+    return () => ro.disconnect();
+  }, [row]);
+}
 /** "41 agents on file" / "1 agent on file" */
 export const onFileWords = (n: number): string => (n === 1 ? "agent on file" : "agents on file");
 
@@ -40,17 +73,10 @@ export const HealthRing: React.FC<{ pct: number | null }> = ({ pct }) => {
           <circle data-cl17="ring-gaps" cx={c} cy={c} r={RING.r} fill="none" stroke="#a2452a" strokeOpacity={pct === null ? 0.12 : 0.85} strokeWidth={RING.w} />
         )}
         {pct !== null && arc.ink > 0 ? (
-          <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="butt"
+          <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="round"
             strokeDasharray={`${arc.ink} ${RING_C}`} transform={rot} />
         ) : null}
-        {pct !== null && arc.joins ? (
-          <>
-            <circle data-cl17="ring-join" cx={c} cy={c} r={RING.r} fill="none" stroke="#fff" strokeWidth={RING.w + 1}
-              strokeDasharray={`${RING.join} ${RING_C - RING.join}`} strokeDashoffset={RING.join / 2} transform={rot} />
-            <circle data-cl17="ring-join" cx={c} cy={c} r={RING.r} fill="none" stroke="#fff" strokeWidth={RING.w + 1}
-              strokeDasharray={`${RING.join} ${RING_C - RING.join}`} strokeDashoffset={-(arc.ink - RING.join / 2)} transform={rot} />
-          </>
-        ) : null}
+        {/* v18.3 §B — the two cream separator ticks are gone; the filled arc has a round cap */}
       </svg>
       <span className={`cl17-pc${pct === 100 ? " cl17-pc--full" : ""}`} data-cl17="ring-pct">
         {pct === null ? "" : <>{pct}<i>%</i></>}
@@ -93,13 +119,16 @@ export const ContactSummaryCard: React.FC<{
       ))}
     </div>
     {health !== undefined ? (
-      <button type="button" className="cl17-hl" data-cl17="health" data-full={health && health.gaps <= 0 ? "" : undefined}
+      <button type="button" className="cl17-hl" data-cl17="health" data-full={health && health.gaps <= 0 && health.pct === 100 ? "" : undefined}
         disabled={loading || !health || !onHealth} onClick={onHealth}
         aria-label={health ? healthLabel(health) : "List health"}>
-        <HealthRing pct={health ? (health.gaps <= 0 ? 100 : health.pct) : null} />
+        <HealthRing pct={health ? health.pct : null} />
+        {/* v19.2 §G — the card ends at "List health": the gap count is stated once, on "Fill in the gaps N" (the
+            ring's accessible name still says it) */}
         <span className="cl17-ht">
-          <b data-cl17="health-title">List health</b>
-          <em data-cl17="health-gaps">{health ? gapLine(health.gaps) : ""}</em>
+          {/* Help system v1 D — "List health" is a defined word; inside the button it opens on hover and focus only */}
+          <b data-cl17="health-title"><Term id="listHealth" onDark={false}
+            example={health ? [`You have `, { b: `${health.gaps} ${health.gaps === 1 ? "gap" : "gaps"}` }, ` across ${model.cells.reduce((t, c) => t + c.n, 0)} agents. Press the ring to fill them.`] : undefined}>List health</Term></b>
         </span>
       </button>
     ) : null}
@@ -123,12 +152,21 @@ export const ContactLightHeader: React.FC<{
   /** v17.1 — List health (Housekeeping's figures; null while loading) and its opener */
   health?: ListHealth | null;
   onHealth?: () => void;
+  /** v18 §A — the letter tabs, the first thing in the header */
+  letters?: React.ReactNode;
   /** Part B — the search and filter row, under the header's rule */
   children?: React.ReactNode;
-}> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, children }) => (
-  <header className="cl17-hd" data-cl17="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-    <img className="cl17-shadow" data-cl17="shadow" alt="" aria-hidden="true" src={`${CONTACT_SHADOW.src}?v=${CONTACT_SHADOW.version}`} />
-    <div className="cl17-tr" data-cl17="header-row">
+}> = ({ loading, total, msTitle, model, active, onGroup, addRef, onAdd, onDiscover, health, onHealth, letters, children }) => {
+  const rowRef = useRef<HTMLDivElement>(null);
+  useIllustrationHeight(rowRef);
+  return (
+  <header className="cl17-hd phf" data-cl17="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+    {letters}
+    <div className="cl17-tr" data-cl17="header-row" ref={rowRef}>
+      {/* v18.2 §A — the archivist left of the title block, and the hawk's shadow cast over the List health card; both
+          are the title row's, so they are placed against it */}
+      <img className="cl182-ill" data-cl182="archivist" alt="" src={`${CONTACT_ARCHIVIST.src}?v=${CONTACT_ARCHIVIST.version}`} />
+      <img className="cl17-shadow" data-cl17="shadow" alt="" aria-hidden="true" src={`${CONTACT_SHADOW.src}?v=${CONTACT_SHADOW.version}`} />
       <div className="cl17-tb" data-cl17="title-block">
         <span className="cl17-ey" data-cl17="eyebrow">{CONTACT_EYEBROW}</span>
         <h1 className="cl17-title" data-page-title="" data-cl17="title" tabIndex={-1}
@@ -144,10 +182,15 @@ export const ContactLightHeader: React.FC<{
       </div>
       <div className="cl17-acts" data-cl17="acts">
         <button type="button" className="cl17-b1" data-cl15="add" data-cl17="add" ref={addRef} disabled={loading} onClick={onAdd}>+ Add an agent</button>
-        {onDiscover ? <button type="button" className="cl17-b2" data-cl16="discover" data-cl17="discover" disabled={loading} onClick={onDiscover}>Discover agents</button> : null}
+        {/* v18.3 §B — "Discover agents" leaves the header (it stays in the sidebar); "Fill in the gaps" opens Housekeeping,
+            with the open gap count in a pill (hidden at zero; the button stays) */}
+        <button type="button" className="cl17-b2 cl183-fill" data-cl183="fill" disabled={loading || !onHealth} onClick={onHealth}>
+          Fill in the gaps{health && health.gaps > 0 ? <span className="cl183-fn" data-cl183="fill-n" aria-label={`${health.gaps} gaps`}>{health.gaps}</span> : null}
+        </button>
       </div>
       <ContactSummaryCard model={model} active={active} onGroup={onGroup} loading={loading} health={health ?? null} onHealth={onHealth} />
     </div>
     {children}
   </header>
-);
+  );
+};

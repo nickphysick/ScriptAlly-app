@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A3 the ring renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3 the arc is in proportion to insideShare (±1%)",
+  "where": "1512",
+  "ok": true,
+  "detail": "186.92 vs 186.92"
+ },
+ {
+  "lock": "A3 the figure is the share",
+  "where": "1512",
+  "ok": true,
+  "detail": "88%"
+ },
+ {
+  "lock": "A3 no rust stroke in the ring",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[\"#e5ded3\",\"rgb(229, 222, 211)\"],[\"#2a3a52\",\"rgb(42, 58, 82)\"]]"
+ },
+ {
+  "lock": "A3 the figure and % share one line",
+  "where": "1512",
+  "ok": true,
+  "detail": "27.0 / 27"
+ },
+ {
+  "lock": "A3 pressing it scrolls section 4 into view",
+  "where": "1512",
+  "ok": true,
+  "detail": "12 of 756"
+ },
+ {
+  "lock": "A3 the ring renders",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3 the arc is in proportion to insideShare (±1%)",
+  "where": "1280",
+  "ok": true,
+  "detail": "186.92 vs 186.92"
+ },
+ {
+  "lock": "A3 the figure is the share",
+  "where": "1280",
+  "ok": true,
+  "detail": "88%"
+ },
+ {
+  "lock": "A3 no rust stroke in the ring",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[\"#e5ded3\",\"rgb(229, 222, 211)\"],[\"#2a3a52\",\"rgb(42, 58, 82)\"]]"
+ },
+ {
+  "lock": "A3 the figure and % share one line",
+  "where": "1280",
+  "ok": true,
+  "detail": "23.0 / 23"
+ },
+ {
+  "lock": "A3 pressing it scrolls section 4 into view",
+  "where": "1280",
+  "ok": true,
+  "detail": "12 of 656"
+ }
+]

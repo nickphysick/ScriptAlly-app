@@ -27,7 +27,7 @@
  */
 import React, { useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
-import { hiddenItems, HiddenItem } from "../../lib/taskSettings";
+import { setAsideItems, setAsideLabel, setAsideMeta, type SetAsideItem } from "../../lib/taskSettings";
 import TagsPane from "./TagsSheet";
 import "./setAside.css";
 
@@ -47,23 +47,23 @@ export const SET_ASIDE_EMPTY =
 export const SET_ASIDE_FOOT = "Nothing here is deleted — only set aside.";
 
 export const SetAsidePanel: React.FC = () => {
-  const { currentUser, updateUserProfile, upsertTaskFlag, taskFlags, agents, queries } = useScriptAllyDb();
+  const { currentUser, updateUserProfile, upsertTaskFlag, taskFlags, agents, queries, activities } = useScriptAllyDb();
   const [pane, setPane] = useState<Pane>("aside");
 
   const muted = currentUser?.mutedTaskRules;
-  const hidden = hiddenItems(muted, taskFlags, agents, queries, Date.now());
+  const hidden = setAsideItems(currentUser, taskFlags, agents, queries, Date.now(), activities);
 
   /**
-   * ⚠️ THE RESTORE PATH IS THE RETIRED SHEET'S, UNCHANGED — a rule leaves `mutedTaskRules`, a flag
-   * has its `snoozedUntil` unset. No novel write: restoring is the exact inverse of the hiding,
-   * and inventing a second way to undo would be a second way to disagree about what hidden means.
+   * ⚠️ EACH KIND RESTORES THROUGH ITS OWN FIELD (To-do list v5.1 §I.7) — a rule leaves `mutedTaskRules`, a
+   * snooze has `snoozedUntil` cleared, a DISMISSAL has `skippedAt` cleared. The old path cleared `snoozedUntil` for
+   * everything, so a restored dismissal kept its `skippedAt` and stayed hidden.
    */
-  const restore = (item: HiddenItem) => {
+  const restore = (item: SetAsideItem) => {
     const r = item.restore;
     if ("rule" in r) {
       void updateUserProfile({ mutedTaskRules: (muted ?? []).filter((k) => k !== r.rule) });
     } else {
-      void upsertTaskFlag(r.flag, { snoozedUntil: null });
+      void upsertTaskFlag(r.flag, r.patch);
     }
   };
 
@@ -103,8 +103,8 @@ export const SetAsidePanel: React.FC = () => {
                 {hidden.map((h) => (
                   <li key={h.id} className={`sap-row sap-row--${h.kind}`}>
                     <span className="sap-rowmain">
-                      <span className="sap-label">{h.label}</span>
-                      <span className="sap-meta">{h.meta}</span>
+                      <span className="sap-label">{setAsideLabel(h)}</span>
+                      <span className="sap-meta">{setAsideMeta(h)}</span>
                     </span>
                     <button type="button" className="sap-restore" onClick={() => restore(h)}>
                       Restore

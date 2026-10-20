@@ -94,24 +94,41 @@ export const Readings: React.FC<{ items: V17Reading[] }> = ({ items }) => (
 /** One section: the open banner (perch · count · title · sentence), then the frame or the workspace. */
 export const Section: React.FC<{
   sec: number; banner: V17Banner; perchSrc?: string; readings?: V17Reading[]; ws?: boolean; children: React.ReactNode;
-}> = ({ sec, banner, perchSrc, readings, ws, children }) => (
-  <section className="a17-sect" data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`}>
-    <div className="a17-ban a17-rv" data-a17="ban">
-      <Slot className="a17-perch" probe="perch" artSrc={perchSrc} />
-      <div className="a17-bantxt">
-        <div className="a17-cnt">{banner.count}</div>
-        <h2 className="a17-tw" data-a17="ban-title">{banner.title}</h2>
-        <p>{banner.sentence}{banner.bold ? <><b>{banner.bold}</b>. Four things worth keeping in mind.</> : null}</p>
+  /** v21 §C — a full-width tint band on the desktop (sections 2, 4, 6 and 8) */
+  tint?: boolean;
+  /** v21 — a lede with rich runs, in place of the banner's plain sentence */
+  lede?: React.ReactNode;
+  /** v21 §F — the desktop's own layout for the section; the banner and frame then show on the phone only */
+  desktop?: React.ReactNode;
+  /** v21 §G — the workspace's ink bar and chip strip, at the top of the frame; on the desktop it stands in for the banner */
+  wsBar?: React.ReactNode;
+}> = ({ sec, banner, perchSrc, readings, ws, children, tint, lede, desktop, wsBar }) => {
+  const v17 = (
+    <>
+      <div className="a17-ban a17-rv" data-a17="ban">
+        <Slot className="a17-perch" probe="perch" artSrc={perchSrc} />
+        <div className="a17-bantxt">
+          <div className="a17-cnt">{banner.count}</div>
+          <h2 className="a17-tw" data-a17="ban-title">{banner.title}</h2>
+          <p>{lede ?? <>{banner.sentence}{banner.bold ? <><b>{banner.bold}</b>. Four things worth keeping in mind.</> : null}</>}</p>
+        </div>
       </div>
-    </div>
-    {ws ? children : (
-      <div className="a17-frame a17-rv d1" data-a17="frame">
-        <div className="a17-body">{children}</div>
-        {readings ? <Readings items={readings} /> : null}
-      </div>
-    )}
-  </section>
-);
+      {ws ? children : (
+        <div className="a17-frame a17-rv d1" data-a17="frame">
+          {wsBar}
+          <div className="a17-body">{children}</div>
+          {readings ? <Readings items={readings} /> : null}
+        </div>
+      )}
+    </>
+  );
+  return (
+    <section className={`a17-sect${tint ? " a21-tint" : ""}${desktop ? " a21-band" : ""}${wsBar ? " a21-wsect" : ""}`} data-a17="sec" data-sec={sec} id={`a17-sec-${sec}`} data-a21-tint={tint ? "" : undefined}>
+      {/* a section with its own desktop layout keeps v17's banner and frame for the phone alone */}
+      {desktop ? <><div className="a21-dk">{desktop}</div><div className="a21-mk">{v17}</div></> : v17}
+    </section>
+  );
+};
 
 /* ── at a glance ── */
 const Spark: React.FC<{ s: V17Glance["spark"] }> = ({ s }) => {
@@ -177,8 +194,8 @@ export const Glance: React.FC<{ cells: V17Glance[] }> = ({ cells }) => {
 };
 
 export const NAV_NAMES = (sent: number) => [
-  sent === 1 ? "Where the one query got to" : `Where the ${sent} queries got to`, "Queries sent", "Response rate", "Response window honesty",
-  "Wait times by stage", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers",
+  sent === 1 ? "Where the one query got to" : `Where the ${sent} queries got to`, "Queries sent", "Response rate", "Replies against the stated window",
+  "How long each step takes", "Firsts and records", "The campaign over time", "How things stand", "Reading the numbers",
 ];
 
 /**
@@ -275,18 +292,4 @@ export const Skeleton: React.FC = () => (
       </section>
     ))}
   </div>
-);
-
-/** One example row of the empty page: a faded, tagged figure built from invented queries. */
-export const ExampleRow: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section className="a17-sect a17-ex" data-a17="example">
-    <div className="a17-ban">
-      <div className="a17-perch" aria-hidden="true" />
-      <div className="a17-bantxt">
-        <div className="a17-cnt"><span className="a17-extag">Example</span></div>
-        <h2 className="a17-tw">{title}</h2>
-      </div>
-    </div>
-    <div className="a17-frame a17-exframe"><div className="a17-body">{children}</div></div>
-  </section>
 );

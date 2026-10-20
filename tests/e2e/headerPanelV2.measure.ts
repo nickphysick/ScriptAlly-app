@@ -50,17 +50,18 @@ test("P1 P4 P5 P7 · the panel on every workspace route", async ({ page }) => {
       L.check("P5 the drawing lies inside the panel on all four sides", w, a.l >= h.l - 0.5 && a.r <= h.r + 0.5 && a.t >= h.t - 0.5 && a.b <= h.b + 0.5, `art ${SHOW(a)} · panel ${SHOW(h)}`);
       L.check("P5 its vertical centre is the panel's (±3)", w, near((a.t + a.b) / 2, (h.t + h.b) / 2, 3), `${((a.t + a.b) / 2).toFixed(1)} vs ${((h.t + h.b) / 2).toFixed(1)}`);
     }
-    if (vp.width === 1280) L.check("P7 no horizontal overflow at 1280", w, r.overflowX <= 1 || (route === "/agents/discover" && near(r.overflowX, DISCOVER_OVERFLOW_1280, 2)), `${r.overflowX}${route === "/agents/discover" ? ` (as built before the pack: ${DISCOVER_OVERFLOW_1280})` : ""}`);
+    /* RE-POINTED (Discover v1): the old Discover page's pre-existing 1280 overflow exemption went with the page; Discover
+       left WORKSPACE (hp2Lib) and DV1 holds its own page */
+    if (vp.width === 1280) L.check("P7 no horizontal overflow at 1280", w, r.overflowX <= 1, `${r.overflowX}`);
     if (vp.width === 1280) L.check("P7 the panel ends inside the page sheet", w, !!r.hd && !!r.win && r.hd.r <= r.win.r + 0.5 && r.hd.l >= r.win.l - 0.5, r.hd && r.win ? `panel ${r.hd.l.toFixed(0)}–${r.hd.r.toFixed(0)} · sheet ${r.win.l.toFixed(0)}–${r.win.r.toFixed(0)}` : "—");
   }
-  L.check("P5 population: several routes carry a drawing", "all", withArt >= 8, `${withArt} readings with a drawing`);
+  /* RE-POINTED (Analytics v21): Analytics left the panel with its disc on the desktop, so 6 readings carry a drawing
+     where the base read 8 */
+  L.check("P5 population: several routes carry a drawing", "all", withArt >= 6, `${withArt} readings with a drawing`);
   L.check("P4 population: several routes carry an intro", "all", withIntro >= 6, `${withIntro} intros`);
   L.done(SIZES.length * WORKSPACE.length * 8);
 });
 const PHONE_AS_BUILT: Record<string, number> = { "/manuscripts/comps": 396, "/manuscripts/packages": 396 };
-/** Discover's cards overflow its scroller sideways at 1280 on the commit before this pack (measured there); the header
-    is not the cause. P7 holds it to that figure rather than to zero, and holds the panel inside the sheet. */
-const DISCOVER_OVERFLOW_1280 = Number(process.env.HP2_DISCOVER_OVF ?? 39);
 
 test("P7 · no horizontal overflow at 390", async ({ page }) => {
   const L = new Ledger(process.env.HP2_MUTATE === "P7" ? "P7-390" : "P7-390");
@@ -68,7 +69,7 @@ test("P7 · no horizontal overflow at 390", async ({ page }) => {
   await open(page, "/dashboard", SIZES[0]);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of WORKSPACE) {
-    if (LIGHT_HEADER.includes(route) && route !== "/todo") continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow); /todo's phone page keeps its panel
+    if (LIGHT_HEADER.includes(route) && route !== "/todo" && route !== "/queries/analytics") continue; // Contact list v17: no panel on /agents (contactV17 A3 holds its overflow); /todo's and Analytics' phone pages keep their panel
     await page.goto(route); await page.waitForTimeout(2600);
     const r = await page.evaluate(() => {
       const vis = (e: Element) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().height > 0;
@@ -162,51 +163,35 @@ test("P6 · no jump: the loading and loaded header boxes are equal", async ({ pa
   L.done(SIZES.length * WORKSPACE.length + 3);
 });
 
-/* ───────────────────────── P8 · the popover ───────────────────────── */
-test("P8 · the Set aside popover is above the header", async ({ page }) => {
+/* ───────────────────────── P8 · the Set aside door ───────────────────────── */
+/* RE-POINTED (To-do list v5.1, Part I.5): the header's Set aside no longer opens a popover over the header — it switches
+   the tray to its Set aside tab. The claim this lock kept is the same: pressing the door lands the writer on the set-aside
+   list, on screen, and nothing covers it. */
+test("P8 · the header's Set aside door opens the tray's Set aside tab, on screen", async ({ page }) => {
   const L = new Ledger("P8");
   await prepare(page);
   for (const vp of SIZES) {
     await open(page, "/todo", vp);
-    /* RE-POINTED (To-do list v5): the Set aside door is the light header's own button now (TD5 A1's header) */
     const btn = page.locator('.ws-window [data-td5="header"] [data-td5="aside"]:visible').first();
     L.check("P8 precondition: the header carries the Set aside door", `@${vp.width}`, (await btn.count()) === 1, `${await btn.count()}`);
     await btn.click({ timeout: 8000 }).catch(() => {}); await page.waitForTimeout(500);
     const r = await page.evaluate(() => {
-      const pop = [...document.querySelectorAll<HTMLElement>(".sap")].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      if (!pop) return null; const x = pop.getBoundingClientRect();
-      const pts = [[0.5, 0.5], [0.5, 0.12], [0.15, 0.5], [0.85, 0.85]].map(([fx, fy]) => { const px = x.left + x.width * fx, py = x.top + x.height * fy; const e = document.elementsFromPoint(px, py)[0]; return { on: px >= 0 && py >= 0 && px <= innerWidth && py <= innerHeight, in: !!e && pop.contains(e), top: e ? `${e.tagName.toLowerCase()}.${e.className.toString().split(" ")[0]}` : "nothing" }; });
-      return { box: { l: x.left, t: x.top, w: x.width, h: x.height }, pts };
+      const tab = [...document.querySelectorAll<HTMLElement>('.td5-root [data-td5="tab-aside"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      if (!tab) return null; const x = tab.getBoundingClientRect();
+      const px = x.left + x.width / 2, py = x.top + x.height / 2; const e = document.elementsFromPoint(px, py)[0];
+      return { sel: tab.getAttribute("aria-selected"), box: { l: x.left, t: x.top, w: x.width, h: x.height }, on: px >= 0 && py >= 0 && px <= innerWidth && py <= innerHeight, first: !!e && tab.contains(e), top: e ? `${e.tagName.toLowerCase()}.${e.className.toString().split(" ")[0]}` : "nothing" };
     });
-    L.check("P8 the popover opened and its centre is on screen", `@${vp.width}`, !!r && r.pts[0].on, r ? SHOW(r.box) : "no popover");
-    for (const [i, p] of (r?.pts ?? []).entries()) L.check("P8 the popover is first at the point", `@${vp.width} point ${i + 1}`, !p.on || p.in, `${p.top}${p.on ? "" : " (off screen, not read)"}`);
-    await page.keyboard.press("Escape");
+    L.check("P8 the Set aside tab is chosen", `@${vp.width}`, r?.sel === "true", r ? `aria-selected=${r.sel}` : "no tab");
+    L.check("P8 the tab's centre is on screen", `@${vp.width}`, !!r && r.on, r ? SHOW(r.box) : "no tab");
+    L.check("P8 the tab is first at its centre", `@${vp.width}`, !!r && r.first, r ? r.top : "no tab");
+    await page.locator('.td5-root [data-td5="tab-tray"]:visible').first().click({ timeout: 4000 }).catch(() => {});
   }
-  L.done(SIZES.length * 5);
+  L.done(SIZES.length * 4);
 });
 
 /* ───────────────────────── P9 · Analytics ───────────────────────── */
-test("P9 · Analytics: in the column, not 337, and the section tab navigates", async ({ page }) => {
-  const L = new Ledger("P9");
-  await prepare(page);
-  for (const vp of SIZES) {
-    await open(page, "/queries/analytics", vp);
-    const r = await readPanel(page); const w = `@${vp.width}`;
-    const colL = await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>('[data-a17="sec"], [data-a17="glance"], .a17-sect')].find((e) => e.getBoundingClientRect().height > 0); return s ? s.getBoundingClientRect().left : null; });
-    L.check("P9 the header's left edge is the content column's (±1)", w, !!r.hd && colL !== null && near(r.hd.l, colL, 1), `panel ${r.hd?.l.toFixed(1)} · column ${colL?.toFixed(1)}`);
-    L.check("P9 its height is not the band's 337", w, !!r.hd && Math.abs(r.hd.h - 337) > 5, `${r.hd?.h.toFixed(1)}`);
-    const sc = () => page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0 && e.scrollHeight > e.clientHeight + 4); return s ? s.scrollTop : -1; });
-    const before = await sc();
-    await page.locator('[data-a17="tab"]:visible [data-a17="tab-all"]').first().click({ timeout: 8000 }).catch(() => {}); await page.waitForTimeout(350);
-    const items = page.locator('[data-a17="tab"] [data-a17="tab-item"]:visible');
-    const n = await items.count();
-    if (n > 3) await items.nth(3).click({ timeout: 8000 }).catch(() => {});
-    await page.waitForTimeout(1200);
-    const after = await sc();
-    L.check("P9 the section tab opens its list and a section is reached", w, n >= 5 && before >= 0 && after > before + 200, `${n} items · scroll ${before} → ${after}`);
-  }
-  L.done(SIZES.length * 3);
-});
+/* RETIRED (Analytics v21, 16 Oct): Analytics' desktop header is no longer the panel (AN21 A1 holds the light header), and
+   its section tab is held by AN17-15 (tests/e2e/RETIRED-analytics-v21.md). */
 
 /* ───────────────────────── A1–A6 ───────────────────────── */
 const HERO = {
@@ -471,7 +456,8 @@ test.skip("D7 · the desk is the same boxes loading and loaded", async ({ page }
 test("floor · the run wrote the readings it claims", async () => {
   if (process.env.HP2_MUTATE || process.env.HP2_CAPTURE || process.env.HP2_NO_FLOOR) return;
   /* RE-POINTED (Contact list v16): the A, C and D ledgers are retired with their cases */
-  const names = ["P1-P7", "P7-390", "P2", "P6", "P8", "P9"];
+  /* RE-POINTED (Analytics v21): P9 is retired with Analytics' panel */
+  const names = ["P1-P7", "P7-390", "P2", "P6", "P8"];
   const counts = names.map((n) => (existsSync(`${DIR}/ledger/${n}.json`) ? (JSON.parse(readFileSync(`${DIR}/ledger/${n}.json`, "utf8")) as unknown[]).length : 0));
   const total = counts.reduce((s, v) => s + v, 0);
   writeFileSync(`${DIR}/ledger/_totals.json`, JSON.stringify(Object.fromEntries(names.map((n, i) => [n, counts[i]]).concat([["total", total]])), null, 1));

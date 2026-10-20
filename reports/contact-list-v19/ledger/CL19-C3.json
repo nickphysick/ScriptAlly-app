@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 a row with an email (precondition)",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 click: the clipboard holds the full address",
+  "ok": true,
+  "detail": "wren@example.com vs wren@example.com"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 click: \"✓ Copied\" shows in place",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 click: the card does not open",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 click: \"✓ Copied\" lasts 1400 ±200ms",
+  "ok": true,
+  "detail": "1478ms"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 Enter: the clipboard holds the full address",
+  "ok": true,
+  "detail": "wren@example.com vs wren@example.com"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 Enter: \"✓ Copied\" shows in place",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 Enter: the card does not open",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 Enter: \"✓ Copied\" lasts 1400 ±200ms",
+  "ok": true,
+  "detail": "1447ms"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 a row with an email (precondition)",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 click: the clipboard holds the full address",
+  "ok": true,
+  "detail": "wren@example.com vs wren@example.com"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 click: \"✓ Copied\" shows in place",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 click: the card does not open",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 click: \"✓ Copied\" lasts 1400 ±200ms",
+  "ok": true,
+  "detail": "1462ms"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 Enter: the clipboard holds the full address",
+  "ok": true,
+  "detail": "wren@example.com vs wren@example.com"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 Enter: \"✓ Copied\" shows in place",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 Enter: the card does not open",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 Enter: \"✓ Copied\" lasts 1400 ±200ms",
+  "ok": true,
+  "detail": "1443ms"
+ }
+]

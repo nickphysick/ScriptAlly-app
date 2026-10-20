@@ -1,0 +1,170 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v141 — the four sets' markers, the Filters menu's "Where it stands" section, the hero breakdown card
+ * and the pinned band's breakdown. Values ported from design-refs/query-centre-v141/query-centre-v141.html.
+ */
+
+/* ── the markers (the mock's .qsc .rw .m) ── */
+.qc141-m { flex: none; display: inline-block; width: 11px; height: 11px; border-radius: 3px; box-sizing: border-box; }
+.qc141-m--you { background: #a2452a; }
+.qc141-m--agent { background: #2a3a52; }
+.qc141-m--quiet { background: repeating-linear-gradient(135deg, #c9bfb1 0 3px, #e3dccf 3px 6px); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.qc141-m--closed { background: #cfc6b9; }
+
+/* ── the Filters menu's section (Part A) ── */
+.qc141-fw { flex: none; padding: 14px 22px 16px; border-bottom: 1px solid rgba(28, 19, 15, 0.08); }
+.qc141-fw-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.qc141-fw-o {
+  box-sizing: border-box; display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 40px; margin: 0; padding: 8px 12px;
+  border: 0; border-radius: 10px; background: #f6f3ee; color: #1c130f; text-align: left; cursor: pointer;
+}
+.qc141-fw-o:hover:not(:disabled):not(.on) { background: #efeae2; }
+.qc141-fw-o:disabled { opacity: 0.4; cursor: default; }
+.qc141-fw-o:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc141-fw-o b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/20px var(--sp-serif) !important; color: #1c130f; }
+.qc141-fw-o i { flex: none; font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.55); }
+.qc141-fw-o.on { background: #2a3a52; }
+.qc141-fw-o.on b, .qc141-fw-o.on i { color: #f4eee5; }
+.qc141-fw-o.on .qc141-m--agent { box-shadow: inset 0 0 0 1.5px #f4eee5; }
+
+/* ── Part B · the hero's breakdown card (the mock's .qsc). The wide header (`.ws-app.sheet-wide`, a sheet over 1440)
+   takes the mock's base values; the compact header (every other width) its `max-width: 1440px` values. ── */
+.qc138-hd .qc138-cc:has(.qc141-card) { align-self: center; }
+.qc141-card {
+  position: relative; z-index: 1; box-sizing: border-box; width: 100%; height: auto; max-height: var(--hero-stack-h);
+  background: #fff; border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 14px 28px -20px rgba(28, 19, 15, 0.35);
+  display: grid; grid-template-columns: minmax(0, 1fr) 1px 96px; column-gap: 14px; align-items: center; padding: 14px 16px 12px 18px;
+  transition: transform 0.22s cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 0.22s;
+}
+/* the Contact list's health card: up 3px, a deeper shadow (and, as the weekly chart did, in front of the hawk shadow) */
+.qc141-card:hover { z-index: 4; transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 22px 34px -20px rgba(28, 19, 15, 0.45); }
+@media (prefers-reduced-motion: reduce) { .qc141-card { transition: none; } .qc141-card:hover { transform: none; } }
+.qc141-cl { min-width: 0; }
+.qc141-sb { display: flex; gap: 4px; height: 10px; margin: 0 0 6px; }
+.qc141-sb .qc141-sg { display: block; border-radius: 6px; min-width: 10px; }
+.qc141-sg--you { background: #a2452a; }
+.qc141-sg--agent { background: #2a3a52; }
+.qc141-sg--quiet { background: repeating-linear-gradient(135deg, #c9bfb1 0 4px, #e3dccf 4px 8px); }
+.qc141-sg--closed { background: #cfc6b9; }
+.qc141-rw {
+  all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 12px 28px 1fr; align-items: center; column-gap: 9px;
+  width: 100%; padding: 6px 4px; border-top: 1px solid rgba(28, 19, 15, 0.09); border-radius: 6px;
+}
+.qc141-rw:first-of-type { border-top: 0; }
+.qc141-rw:hover { background: #f6f2ec; }
+.qc141-rw:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.qc141-rw:disabled { cursor: default; }
+.qc141-rw b { font: 400 22px/1 var(--sp-type) !important; color: #1c130f; text-align: right; }
+.qc141-rw .qc141-rl, .qc141-rw .qc141-rl span { font: 400 15px/1.15 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+.qc141-rw .qc141-lw { display: none; }
+.qc141-card.pk .qc141-rw:not(.on) { opacity: 0.45; }
+.qc141-rw.on { background: #f1ece4; }
+.qc141-rw.on .qc141-rl::after { content: " \00d7"; color: rgba(28, 19, 15, 0.45); font: inherit; }
+.qc141-dv { align-self: stretch; background: rgba(28, 19, 15, 0.1); }
+.qc141-rg { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.qc141-rg svg { width: 84px; height: 84px; }
+.qc141-rg b { font: 400 16px/normal var(--sp-type) !important; color: #1c130f; white-space: nowrap; text-align: center; }
+.qc141-rg small { display: block; margin-top: -4px; font: italic 400 12px/normal var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+.qc141-card[data-loading] b[data-qc141="card-n"] { min-width: 0.9em; min-height: 0.8em; border-radius: 4px; background: rgba(28, 19, 15, 0.07); }
+/* the wide header: the mock's base values, and the full "With the agent" */
+.ws-app.sheet-wide .qc141-card { grid-template-columns: minmax(0, 1fr) 1px 100px; column-gap: 20px; padding: 18px 20px 16px 22px; }
+.ws-app.sheet-wide .qc141-sb { margin-bottom: 8px; }
+.ws-app.sheet-wide .qc141-rw { grid-template-columns: 14px 34px 1fr; column-gap: 10px; }
+.ws-app.sheet-wide .qc141-rw .qc141-m { width: 11px; height: 11px; }
+.ws-app.sheet-wide .qc141-rw b { font-size: 25px !important; }
+.ws-app.sheet-wide .qc141-rw .qc141-rl, .ws-app.sheet-wide .qc141-rw .qc141-rl span { font-size: 16.5px !important; }
+.ws-app.sheet-wide .qc141-rw .qc141-lw { display: inline; }
+.ws-app.sheet-wide .qc141-rw .qc141-lc { display: none; }
+.ws-app.sheet-wide .qc141-rg svg { width: 92px; height: 92px; }
+
+/* ── Part D · the jump row's two modes (the mock's `.jr.gly` / `.jr.txt`) ── */
+@media (min-width: 768px) {
+  /* GLYPH (Status, Who it's with): a 44 x 40 button, the glyph alone at 23, the count as a badge top right */
+  .qc138-sheet .qc140-jr.qc141-jr--glyph { gap: 6px; overflow: visible; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jb {
+    position: relative; width: 44px; height: 40px; padding: 0; gap: 0; justify-content: center; border-radius: 11px;
+  }
+  .qc138-sheet .qc141-jr--glyph .qc140-jb .qc140-jt { display: none; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jg { width: 24px; height: 24px; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jg .qc140-jsvg { width: 23px; height: 23px; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jg--art { width: 28px; height: 28px; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jg--art img { width: 28px; height: 28px; margin: 0; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jg .qc140-jbd { display: none; }
+  .qc138-sheet .qc141-jr--glyph .qc140-jb i {
+    position: absolute; top: -1px; right: -1px; box-sizing: border-box; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: 9px; letter-spacing: 0; background: #f4eee5; box-shadow: 0 0 0 2px #2a3a52;
+    font: 600 10.5px/1 var(--sp-mono) !important; color: #2a3a52 !important;
+  }
+  /* the name, in a dark label beneath, on hover or keyboard focus */
+  .qc138-sheet .qc141-jtip {
+    position: absolute; left: 50%; top: calc(100% + 8px); z-index: 30; transform: translateX(-50%) translateY(-2px);
+    padding: 5px 9px; border-radius: 7px; background: #1c130f; color: #f4eee5; white-space: nowrap;
+    font: 400 13px/normal var(--sp-serif) !important; opacity: 0; pointer-events: none; transition: opacity 0.12s, transform 0.12s;
+  }
+  .qc138-sheet .qc141-jr--glyph .qc140-jb:hover .qc141-jtip, .qc138-sheet .qc141-jr--glyph .qc140-jb:focus-visible .qc141-jtip { opacity: 1; transform: translateX(-50%); }
+  @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc141-jtip { transition: none; } }
+  /* unpinned (the navy toolbar): the current button is cream with a navy glyph, its badge navy */
+  .qcv-group[data-v138]:not([data-full]) .qc141-jr--glyph .qc140-jb[aria-current="true"] i { background: #2a3a52; box-shadow: 0 0 0 2px #f4eee5; color: #f4eee5 !important; }
+  /* pinned (the cream toolbar): every badge navy with cream text */
+  .qcv-group[data-v138][data-full] .qc141-jr--glyph .qc140-jb i { background: #2a3a52; box-shadow: 0 0 0 2px #f4f0e9; color: #f4eee5 !important; }
+  /* NAME (Next action, Package): the name and count, no icon */
+  .qc138-sheet .qc141-jr--name .qc140-jb { padding: 0 12px; }
+}
+
+/* the "+N more" menu: a 32px glyph column, then the name, then the count; the glyph and its badge sit inside their
+   column, so nothing reaches the name. A row with no glyph (a package, a month) has no column. */
+.qc140-jo { display: grid !important; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 10px; }
+.qc140-jo .qc141-jmc { position: relative; display: grid; place-items: center; width: 32px; height: 24px; }
+.qc140-jo .qc141-jmc:empty { display: none; }
+.qc140-jo:has(.qc141-jmc:empty) { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* ── Part E · the pinned band (the mock's `.pband.b2`): "{N} queries sent" · the breakdown · heard back · + Log a query.
+   The count starts at the toolbar's inset (`--qc140-inset`), where the first jump item sits beneath it. ── */
+@media (min-width: 768px) {
+  .qc138-sheet .qc140-band.qc141-band { gap: 0; padding: 0 18px 0 var(--qc140-inset); }
+  .qc138-sheet .qc141-band > * { flex: 0 0 auto; }
+  .qc138-sheet .qc141-band .qc140-bn { padding-right: 26px; }
+  .qc138-sheet .qc141-band .qc140-bn b { font-size: 36px !important; line-height: 36px !important; }
+  .qc138-sheet .qc141-band .qc140-bn span { font-size: 18px !important; }
+  .qc138-sheet .qc141-bk {
+    flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 7px; padding: 0 26px;
+    box-shadow: -1px 0 0 rgba(244, 238, 229, 0.16), 1px 0 0 rgba(244, 238, 229, 0.16);
+  }
+  .qc138-sheet .qc141-bsb { display: flex; gap: 3px; height: 5px; }
+  .qc138-sheet .qc141-bsb .qc141-sg { display: block; border-radius: 3px; min-width: 6px; }
+  .qc138-sheet .qc141-bsb .qc141-sg--you, .qc141-m--b.qc141-m--you { background: #d9805f; }
+  .qc138-sheet .qc141-bsb .qc141-sg--agent, .qc141-m--b.qc141-m--agent { background: #9fb3cf; }
+  .qc138-sheet .qc141-bsb .qc141-sg--quiet, .qc141-m--b.qc141-m--quiet { background: repeating-linear-gradient(135deg, #8d8a86 0 3px, #b9b2a8 3px 6px); box-shadow: none; }
+  .qc138-sheet .qc141-bsb .qc141-sg--closed, .qc141-m--b.qc141-m--closed { background: rgba(244, 238, 229, 0.35); }
+  .qc138-sheet .qc141-rws { display: flex; gap: 4px; justify-content: space-between; }
+  .qc138-sheet .qc141-rws button {
+    box-sizing: border-box; display: inline-flex; align-items: baseline; gap: 8px; margin: -3px -9px; padding: 3px 9px; border: 0; border-radius: 8px;
+    background: transparent; cursor: pointer; white-space: nowrap; font: 400 15.5px/normal var(--sp-serif) !important; color: rgba(244, 238, 229, 0.85);
+  }
+  .qc138-sheet .qc141-rws button b { font: 400 21px/1 var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc141-rws button span { font: inherit !important; color: inherit; }
+  .qc138-sheet .qc141-rws .qc141-m--b { width: 9px; height: 9px; border-radius: 2px; align-self: center; }
+  .qc138-sheet .qc141-rws button:hover:not(:disabled) { background: rgba(244, 238, 229, 0.09); }
+  .qc138-sheet .qc141-rws button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+  .qc138-sheet .qc141-rws button.on { background: #f4eee5; color: #1c130f; }
+  .qc138-sheet .qc141-rws button.on b { color: #1c130f; }
+  .qc138-sheet .qc141-bk.pk .qc141-rws button:not(.on) { opacity: 0.5; }
+  .qc138-sheet .qc141-rws .qc141-ls { display: none; }
+  .qc138-sheet .qc141-band .qc140-hb { padding: 0 26px; box-shadow: none; }
+  .qc138-sheet .qc141-band .qc140-blog { margin-left: 0; }
+  /* tight: the short labels, no ring subline, the "queries sent" words smaller, the paddings tighter */
+  .qc138-sheet .qc141-band.tight .qc141-lf { display: none; }
+  .qc138-sheet .qc141-band.tight .qc141-ls { display: inline; }
+  .qc138-sheet .qc141-band.tight .qc140-hb small { display: none; }
+  .qc138-sheet .qc141-band.tight .qc140-bn span { font-size: 16px !important; }
+  .qc138-sheet .qc141-band.tight .qc141-bk, .qc138-sheet .qc141-band.tight .qc140-hb { padding: 0 18px; }
+  .qc138-sheet .qc141-band.tight .qc140-bn { padding-right: 18px; }
+  .qc138-sheet .qc141-band.tight .qc141-rws button { gap: 6px; font-size: 14.5px !important; }
+  .qc138-sheet .qc141-band.tight .qc140-blog { padding: 0 14px; font-size: 15.5px !important; }
+  /* tighter: the words go, the number stays */
+  .qc138-sheet .qc141-band.tighter .qc140-hb b { font-size: 16px !important; }
+  .qc138-sheet .qc141-band.tighter .qc140-bn span { display: none; }
+}

@@ -19,7 +19,7 @@ import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
-import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
+import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
@@ -45,6 +45,7 @@ import { FoundersPage } from "./marketing/FoundersPage";
 import { LegalPage } from "./marketing/LegalPage";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
+import { routeBase } from "./lib/helpPath";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath, todoRedirectFor } from "./lib/todoRoutes";
 import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
@@ -72,6 +73,7 @@ import { NotesLab } from "./components/notes/NotesLab";
 import { ContactListLab } from "./components/agents/ContactListLab";
 import { OnbLab } from "./components/onboarding/OnbLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
+import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
@@ -568,7 +570,7 @@ function AppContent() {
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
-  if (!WORKSPACE_PATHS.has(path)) {
+  if (!WORKSPACE_PATHS.has(routeBase(path))) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -725,7 +727,7 @@ function AppContent() {
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
         <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
-          <DiscoverNewAgents onNavigate={handleNavigate} />
+          <DiscoverPage onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
           <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
@@ -775,7 +777,8 @@ function AppContent() {
         )}
         {routeKey === "help" && (
           <StagePage active>
-            <div className="sv2-focuscol"><HelpCentre /></div>
+            {/* Help Centre v1 — its own column (1120, 40px either side), not the 860px focus column */}
+            <HelpCentre />
           </StagePage>
         )}
         {routeKey === "import" && (
@@ -809,7 +812,8 @@ function AppContent() {
 
       {/* Query actions v1 — THE query drawer and its undo bar, mounted once for the workspace.
           Every surface opens it through `openQueryDrawer(…)` (lib/queryActions/drawerStore). */}
-      <QueryDrawer />
+      {/* v139 §B — the drawer alone sees the practice query, through its own copy of the context */}
+      <PracticeOverlay><QueryDrawer /></PracticeOverlay>
       <UndoBar />
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}

@@ -150,6 +150,10 @@ import { formatDate } from "./dates";
 const DAY = 86_400_000;
 const dmy = (ms: number): string =>
   formatDate(new Date(ms), { day: "numeric", month: "short" });
+const dmyY = (ms: number): string =>
+  formatDate(new Date(ms), { day: "numeric", month: "short", year: "numeric" });
+/** v19.2 §D — past the expected date by more than this many days, the line stops counting ("Overdue since …") */
+export const LONG_OVER = 30;
 
 /** The agent's STANDING QUERY — what the row's right column speaks about. The furthest-along
  *  live one (the board's own law), else the latest close, else null. One rule, stated once. */
@@ -166,6 +170,14 @@ export function standingQuery(rows: readonly QcRow[]): QcRow | null {
   let last = pool[0];
   for (const r of pool.slice(1)) if (r.lastMs > last.lastMs) last = r;
   return last;
+}
+
+/** v19.2 §C — the Replies cell's words: "~6 weeks", "~1 week"; null for an absent or zero window (the cell then
+ *  reads "Not stated"). Spelled out, never "wks". The number is the STORED one: nothing records whether a stored
+ *  window was entered or was the Smart Import review's old 6-week fill (retired 11 Oct, 92bd6485), so none is hidden. */
+export function replyWeeksLabel(weeks: number | null | undefined): string | null {
+  if (typeof weeks !== "number" || !Number.isFinite(weeks) || weeks <= 0) return null;
+  return `~${weeks} ${weeks === 1 ? "week" : "weeks"}`;
 }
 
 /** The row's second line (v11 §6.2) — five shapes, every date the engine's own. */
@@ -193,8 +205,13 @@ export function rowDateLine(q: QcRow, nowMs: number): RowDateLine | null {
       ? { text: `Send by ${dmy(q.expectedMs)} · ${days}d over`, over: true }
       : { text: `Send by ${dmy(q.expectedMs)} · ${days}d left`, over: false };
   }
-  /* the agent's court: a future date is a reply coming; a past one is past the expected date —
-     the fact, never an appraisal (no "overdue", no "late") */
+  /* the agent's court: a future date is a reply coming; a past one is past the expected date. v19.2 §D: up to
+     LONG_OVER days it reads "Expected 3 Sep · 18d over"; beyond that a count of days says nothing useful, so it reads
+     "Overdue since 15 May" (the year added when it is not this year's) — Nick's wording, the same ink. */
+  if (past && days > LONG_OVER) {
+    const y = new Date(q.expectedMs).getFullYear() === new Date(nowMs).getFullYear();
+    return { text: `Overdue since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
+  }
   return past
     ? { text: `Expected ${dmy(q.expectedMs)} · ${days}d over`, over: true }
     : { text: `Reply by ${dmy(q.expectedMs)} · in ${days}d`, over: false };
@@ -339,10 +356,93 @@ export const QUERIED_CHOICES: { key: QueriedChoice; label: string }[] = [
 ];
 export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres";
 export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres"];
-/** how many controls are on — "Clear all" shows while this is above 0 */
-export const contactFilterCount = (f: ContactFilters): number =>
-  (f.status.length ? 1 : 0) + (f.action ? 1 : 0) + (f.open !== "either" ? 1 : 0) + (f.queried !== "either" ? 1 : 0)
-  + (f.mats ? 1 : 0) + (f.always ? 1 : 0) + (f.genres.length ? 1 : 0);
+/** how many filters are on — one per applied-filters chip (search is not a filter here and is never counted) */
+export const contactFilterCount = (f: ContactFilters): number => appliedFilters(f, (k) => k).length;
+
+/* ══ v19 §F — FILTERING: the quick picks, the applied-filters row and "what the list would show" ═══════════════════
+ * One model (`ContactFilters`) behind one menu and one row. A quick pick is a preset over that model, never a field
+ * of its own, so a pick and the controls it sets can never disagree:
+ *   - Your move            → `action` (the band's "your move" count reads the same fact: `stand === "you"`);
+ *   - Ready to query       → `queried: "no"` + `open: "open"` — the pack's definition, not lib/contactNextStep's
+ *                            `isReady` (which also asks that the agent's genres fit the book). Choosing it therefore
+ *                            also selects Open to submissions, and the applied row shows its two parts;
+ *   - Waiting to hear back → `status` exactly Queried, Partial sent and Full sent;
+ *   - Open to submissions  → `open: "open"`. */
+export type QuickPickKey = "you" | "ready" | "wait" | "open";
+export const WAITING_STATUSES: readonly StatusKey[] = ["queried", "ps", "fs"];
+export interface QuickPick { key: QuickPickKey; title: string; line: string; on: (f: ContactFilters) => boolean; set: (f: ContactFilters, on: boolean) => ContactFilters }
+export const QUICK_PICKS: readonly QuickPick[] = [
+  { key: "you", title: "Your move", line: "Agents waiting on you", on: (f) => f.action, set: (f, v) => ({ ...f, action: v }) },
+  {
+    key: "ready", title: "Ready to query", line: "Not queried yet and open now",
+    on: (f) => f.queried === "no" && f.open === "open",
+    set: (f, v) => ({ ...f, queried: v ? "no" : "either", open: v ? "open" : "either" }),
+  },
+  {
+    key: "wait", title: "Waiting to hear back", line: "Queried, or sent pages",
+    on: (f) => f.status.length === WAITING_STATUSES.length && WAITING_STATUSES.every((k) => f.status.includes(k)),
+    set: (f, v) => ({ ...f, status: v ? [...WAITING_STATUSES] : [] }),
+  },
+  { key: "open", title: "Open to submissions", line: "Taking queries now", on: (f) => f.open === "open", set: (f, v) => ({ ...f, open: v ? "open" : "either" }) },
+];
+
+/** the Submissions control: Any · Open · Closed (a door nobody has stated is in Any only) */
+export const SUBMISSION_CHOICES: { key: "either" | "open" | "closed"; label: string }[] = [
+  { key: "either", label: "Any" }, { key: "open", label: "Open" }, { key: "closed", label: "Closed" },
+];
+
+/** "Where your query stands": the pack's eight, plus Revise & resubmit, Resubmitted and Signed while anyone is there */
+export const STANDS_ROWS: readonly StatusKey[] = ["none", "queried", "pr", "ps", "fr", "fs", "offer", "closed"];
+export const STANDS_EXTRA: readonly StatusKey[] = ["rr", "resub", "signed"];
+export function standsRows(present: (k: StatusKey) => boolean, f: ContactFilters): StatusKey[] {
+  return STATUS_CHOICES.map((c) => c.key).filter((k) => STANDS_ROWS.includes(k) || (STANDS_EXTRA.includes(k) && (present(k) || f.status.includes(k))));
+}
+
+/** one applied filter: its words on the row, and the filters without it */
+export interface AppliedFilter { key: string; label: string; drop: (f: ContactFilters) => ContactFilters }
+/** every filter that is on, one chip each, in the menu's order (search and the band's group are the page's to add) */
+export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => string): AppliedFilter[] {
+  const out: AppliedFilter[] = [];
+  if (f.status.length) {
+    const first = STATUS_LABEL[f.status[0]];
+    out.push({ key: "status", label: `Status: ${first}${f.status.length > 1 ? ` +${f.status.length - 1}` : ""}`, drop: (g) => ({ ...g, status: [] }) });
+  }
+  if (f.action) out.push({ key: "action", label: "Your move", drop: (g) => ({ ...g, action: false }) });
+  if (f.open !== "either") {
+    const label = f.open === "open" ? "Open to submissions" : f.open === "closed" ? "Closed to submissions" : "Submissions not stated";
+    out.push({ key: "open", label, drop: (g) => ({ ...g, open: "either" }) });
+  }
+  if (f.queried !== "either") out.push({ key: "queried", label: f.queried === "yes" ? "Queried" : "Not queried yet", drop: (g) => ({ ...g, queried: "either" }) });
+  if (f.mats) out.push({ key: "mats", label: "Missing materials", drop: (g) => ({ ...g, mats: false }) });
+  if (f.always) out.push({ key: "always", label: "Always replies", drop: (g) => ({ ...g, always: false }) });
+  if (f.genres.length) {
+    out.push({
+      key: "genres", label: `Genre: ${genreLabel(f.genres[0])}${f.genres.length > 1 ? ` +${f.genres.length - 1}` : ""}`,
+      drop: (g) => ({ ...g, genres: [] }),
+    });
+  }
+  return out;
+}
+
+/** how many rows the list would show under `f` — the count every choice in the menu states */
+export const wouldShow = (facts: readonly AgentFacts[], f: ContactFilters, pool: (x: AgentFacts) => boolean): number =>
+  facts.reduce((n, x) => n + (pool(x) && matchesContactFilters(x, f) ? 1 : 0), 0);
+
+/** the genres on the list, largest first (then A to Z), each with its key, its words and how many agents carry it */
+export function genreList(facts: readonly AgentFacts[], label: (k: string, raw: string) => string): { key: string; label: string; n: number }[] {
+  const m = new Map<string, { label: string; n: number }>();
+  for (const x of facts) {
+    const seen = new Set<string>();
+    for (const raw of x.genres) {
+      const k = genreKey(raw);
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      const cur = m.get(k);
+      if (cur) cur.n += 1; else m.set(k, { label: label(k, raw), n: 1 });
+    }
+  }
+  return [...m.entries()].map(([key, v]) => ({ key, ...v })).sort((a, b) => b.n - a.n || a.label.localeCompare(b.label));
+}
 
 /* the one-line facts each filter reads */
 export const isActionRequired = (x: Pick<AgentFacts, "stand">) => x.stand === "you";
@@ -405,11 +505,8 @@ export function dropOptions(
 ): DropOption[] {
   const cands: Omit<DropOption, "n">[] = [];
   if (f.status.length) cands.push({ key: "status", label: f.status.length === 1 ? STATUS_LABEL[f.status[0]] : "Status", drop: (g) => ({ ...g, status: [] }) });
-  if (f.action) cands.push({ key: "action", label: "Action required", drop: (g) => ({ ...g, action: false }) });
-  if (f.open !== "either") cands.push({ key: "open", label: OPEN_CHOICES.find((c) => c.key === f.open)!.label, drop: (g) => ({ ...g, open: "either" }) });
-  if (f.queried !== "either") cands.push({ key: "queried", label: QUERIED_CHOICES.find((c) => c.key === f.queried)!.label, drop: (g) => ({ ...g, queried: "either" }) });
-  if (f.mats) cands.push({ key: "mats", label: "Missing materials", drop: (g) => ({ ...g, mats: false }) });
-  if (f.always) cands.push({ key: "always", label: "Always responds", drop: (g) => ({ ...g, always: false }) });
+  /* v19 §F — the same words as the applied-filters row */
+  for (const a of appliedFilters(f, genreLabel)) if (a.key !== "status" && a.key !== "genres") cands.push({ key: a.key, label: a.label, drop: a.drop });
   for (const gk of f.genres) cands.push({ key: `genre:${gk}`, label: genreLabel(gk), drop: (g) => ({ ...g, genres: g.genres.filter((x) => x !== gk) }) });
   const q = search.trim();
   if (q) cands.push({ key: "find", label: `\u201c${q}\u201d`, drop: (g) => g, clearsSearch: true });
@@ -424,15 +521,29 @@ export function dropOptions(
 }
 
 /* ── grouping (v14 §4) — a PARTITION of the already-sorted list ── */
-/* v16 §C: "none" is the default — one list, A to Z by surname, no dividers */
-export type GroupKey = "none" | "letter" | "status" | "action" | "country";
+/* v16 §C: "none" is the default — one list, A to Z by surname, no dividers.
+   v19 §E: the menu reads Letter · Status · Action required · Country · Priority, then (below a rule) No grouping;
+   only Letter carries a line. Priority groups by the agent's own star rating (`Agent.starRating`), five stars first
+   and the unrated last. Every key from before is kept. */
+export type GroupKey = "none" | "letter" | "status" | "action" | "country" | "priority";
 export const GROUP_OPTIONS: { key: GroupKey; label: string; line?: string }[] = [
-  { key: "none", label: "No grouping", line: "One list, in the order you sort it" },
-  { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z index" },
-  { key: "status", label: "Status", line: "Furthest along first; closed last" },
-  { key: "action", label: "Action required", line: "What each agent needs from you" },
-  { key: "country", label: "Country", line: "Where the agent is based" },
+  { key: "letter", label: "Letter", line: "Surname initial, with the A\u2013Z strip" },
+  { key: "status", label: "Status" },
+  { key: "action", label: "Action required" },
+  { key: "country", label: "Country" },
+  { key: "priority", label: "Priority" },
+  { key: "none", label: "No grouping" },
 ];
+/** Priority's groups, in order: the stated rating, then nobody's rating */
+export type PriorityKey = "p5" | "p4" | "p3" | "p2" | "p1" | "unrated";
+export const PRIORITY_GROUPS: { key: PriorityKey; label: string }[] = [
+  { key: "p5", label: "5 stars" }, { key: "p4", label: "4 stars" }, { key: "p3", label: "3 stars" },
+  { key: "p2", label: "2 stars" }, { key: "p1", label: "1 star" }, { key: "unrated", label: "Not rated" },
+];
+export const priorityOf = (x: Pick<AgentFacts, "agent">): PriorityKey => {
+  const r = x.agent.starRating;
+  return r && r >= 1 && r <= 5 ? (`p${r}` as PriorityKey) : "unrated";
+};
 /** Action required's groups, in order. Ruling Q6: Revise & resubmit is "Send the revision" (your move);
  *  Resubmitted waits on the agent; Signed has nothing to do. */
 export type ActionKey = "offer" | "partial" | "full" | "revision" | "nudge" | "ready" | "waiting" | "shut" | "nothing";
@@ -507,11 +618,13 @@ export function contactGroups(
     if (key === "letter") put(surnameInitial(x.agent), x.agent.id);
     else if (key === "status") put(x.status14, x.agent.id);
     else if (key === "action") put(actionOf(x, takes), x.agent.id);
+    else if (key === "priority") put(priorityOf(x), x.agent.id);
     else put(countryOf(x), x.agent.id);
   }
   if (key === "letter") return [...buckets.keys()].sort((a, b) => a.localeCompare(b)).map((k) => ({ label: k, key: k, ids: buckets.get(k)! }));
   if (key === "status") return STATUS_GROUP_ORDER.filter((k) => buckets.has(k)).map((k) => ({ label: STATUS_LABEL[k], key: k, ids: buckets.get(k)! }));
   if (key === "action") return ACTION_GROUPS.filter((g) => buckets.has(g.key)).map((g) => ({ label: g.label, key: g.key, ids: buckets.get(g.key)! }));
+  if (key === "priority") return PRIORITY_GROUPS.filter((g) => buckets.has(g.key)).map((g) => ({ label: g.label, key: g.key, ids: buckets.get(g.key)! }));
   return [...buckets.keys()]
     .sort((a, b) => (a === NOT_RECORDED ? 1 : b === NOT_RECORDED ? -1 : a.localeCompare(b)))
     .map((k) => ({ label: k, key: k, ids: buckets.get(k)! }));
@@ -519,7 +632,7 @@ export function contactGroups(
 
 /* ── sorting (v14 §4) — within groups when grouped ── */
 
-export type SortKey = "surname" | "agency" | "reply" | "activity" | "status";
+export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added";
 /** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
   { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },
@@ -527,7 +640,22 @@ export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [st
   { key: "reply", label: "Response time", line: "Unknown last, either way", dir: ["Fastest first", "Slowest first"] },
   { key: "activity", label: "Recent activity", line: "The latest change to each agent's query", dir: ["Most recent first", "Oldest first"] },
   { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
+  /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
+  { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
 ];
+
+/** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
+export function addedMs(a: Pick<Agent, "dateAdded">): number | null {
+  const t = typeof a.dateAdded === "string" ? Date.parse(a.dateAdded) : NaN;
+  return Number.isFinite(t) ? t : null;
+}
+
+/** v19.1 §C — the row's Date added cell: "25 Jun 2026", day, short month and full year, all ink, through the app's one UK
+ *  formatter (lib/dates — never "Sept"); null for a missing or unreadable date */
+export function addedLabel(a: Pick<Agent, "dateAdded">): string | null {
+  const t = addedMs(a);
+  return t == null ? null : formatDate(t, { day: "numeric", month: "short", year: "numeric" });
+}
 
 /**
  * Sort within groups. ⚠️ REVERSED KEEPS THE MISSING LAST (the house law): reversing a list whose tail is
@@ -542,7 +670,7 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   const active = (x: AgentFacts) => x.lastMs ?? null;
   const rank = (x: AgentFacts) => STATUS_GROUP_ORDER.indexOf(x.status14);
   const missing: Partial<Record<SortKey, (x: AgentFacts) => boolean>> = {
-    reply: (x) => weeks(x) == null, activity: (x) => active(x) == null,
+    reply: (x) => weeks(x) == null, activity: (x) => active(x) == null, added: (x) => addedMs(x.agent) == null,
   };
   switch (key) {
     case "surname": by.sort(sur); break;
@@ -550,6 +678,7 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
     case "reply": by.sort((a, b) => (weeks(a) ?? 999) - (weeks(b) ?? 999) || sur(a, b)); break;
     case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || sur(a, b)); break;
     case "status": by.sort((a, b) => rank(a) - rank(b) || sur(a, b)); break;
+    case "added": by.sort((a, b) => (addedMs(b.agent) ?? -Infinity) - (addedMs(a.agent) ?? -Infinity) || sur(a, b)); break;
   }
   if (!reversed) return by;
   const gone = missing[key];

@@ -10,6 +10,8 @@
  * ⚠️ THE STATUS IN THE HEAD IS THE REAL `StatusDot`.
  */
 import React from "react";
+import { overdueLabel } from "../../../lib/trayRows";
+import { londonToday } from "../../../lib/trayCalendar";
 import { StatusDot } from "../../StatusDot";
 import type { Dial, Fact, Stop, TrayItem } from "../../../lib/todoTray";
 import type { ClearedAct } from "../../../lib/todoCleared";
@@ -29,13 +31,15 @@ const PKG = (
 
 /** the due dial (v138's grammar): rust ring + halo once the date has passed, a navy arc for the share of the
  *  window gone otherwise, dashed with no date */
-export const DueDial: React.FC<{ dial: Dial; size: number }> = ({ dial, size }) => {
+export const DueDial: React.FC<{ dial: Dial; size: number; tag?: string | null; selected?: boolean; pressable?: boolean }> = ({ dial, size, tag = null, selected = false, pressable = false }) => {
   const r = size / 2 - 3;
+  /* v5.2 §F.5 — an overdue dial is spoken: "Overdue since 20 June" (its marks are presentational under role="img") */
+  const spoken = dial.kind === "late" && dial.ymd ? overdueLabel(dial.ymd, londonToday(Date.now())) : null;
   const c = 2 * Math.PI * r;
   const h = size / 2;
   return (
-    <span className="td5-dial" data-td5="dial" data-kind={dial.kind} data-big={size > 52 ? "" : undefined} data-small={size < 48 ? "" : undefined} data-frac={dial.frac.toFixed(3)}
-      style={{ width: size, height: size }} title={dial.title}>
+    <span className={`td5-dial${pressable ? " td52-press" : ""}`} data-td5="dial" data-kind={dial.kind} data-big={size > 52 ? "" : undefined} data-small={size < 48 ? "" : undefined} data-frac={dial.frac.toFixed(3)}
+      style={{ width: size, height: size }} title={dial.title} role={spoken ? "img" : undefined} aria-label={spoken ?? undefined}>
       <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
         {dial.kind === "none" ? (
           <circle cx={h} cy={h} r={r} fill="none" stroke="rgba(28,19,15,.22)" strokeWidth="1.5" strokeDasharray="2.5 3" />
@@ -50,6 +54,8 @@ export const DueDial: React.FC<{ dial: Dial; size: number }> = ({ dial, size }) 
         )}
       </svg>
       {dial.kind === "none" ? <small>no<br />date</small> : <><b>{dial.day}</b><small>{dial.mon}</small></>}
+      {/* v5.2 §F.3 — how late, on a tray dial (52 or smaller); never on the desk's 60 */}
+      {tag && size <= 52 ? <span className={`td52-age${selected ? " sel" : ""}`} data-td52="age" aria-hidden="true">{tag}</span> : null}
     </span>
   );
 };
@@ -75,23 +81,93 @@ export interface DeskCardProps {
   /** the commit sequence: the stamp's word while it plays */
   stamp: { word: string; navy: boolean } | null;
   phase: "rest" | "stamp" | "leave" | "rise";
+  /** v5.1 §E — a journey is open on this card: the body and foot give way to the journey's own (in `hostRef`) */
+  work?: boolean;
+  hostRef?: React.Ref<HTMLDivElement>;
+  /** v5.1 — "Set aside" or, for an own task, "Move it" (§I.3) */
+  asideLabel?: string;
+  /** v5.1 §F — an own task's "Edit" */
+  onEdit?: (() => void) | null;
+  /** v5.1 — a line above the who row: BACK (§I.5), SNOOZED/DISMISSED/SWITCHED OFF on the Set aside desk */
+  banner?: React.ReactNode;
+  /** v5.1 §I.5 — a set-aside card: its head band desaturated */
+  asided?: boolean;
+  /** v5.2 §H.4 — a desk save is in flight: the buttons are disabled and "Saving…" shows at the foot */
+  saving?: boolean;
+  /** v5.2 §J.2 — a journey is open on the card: the band says what you're doing and how far through it is */
+  doing?: { title: string; agent: string; steps: { k: number; n: number } | null; start: number; resumed: boolean } | null;
+  /** v5.1 — the foot replaced (the Set aside desk's own buttons) */
+  foot?: React.ReactNode;
+  /** v5.1 — something that sits over the card above its foot: the set-aside popover, the clash */
+  over?: React.ReactNode;
 }
 
-export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase }) => {
+/** v5.2 §J.2 + §J.4 — the band while working: the group's eyebrow, what you're doing (typed in on a start or a resume),
+ *  the agent, the journey's own steps, and a rust fill line at k/n. Keyed by the start, so a step change never retypes. */
+const reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const WorkingBand: React.FC<{ g: TrayItem["group"]; doing: NonNullable<DeskCardProps["doing"]> }> = ({ g, doing }) => {
+  const still = reducedMotion();
+  const full = `${doing.title}${doing.agent ? ` · ${doing.agent}` : ""}`;
+  const [typed, setTyped] = React.useState(still ? doing.title.length : 0);
+  const [agentOn, setAgentOn] = React.useState(still);
+  /* the title types once, on mount (a start or resume); a switch changes the words in place */
+  const firstTitle = React.useRef(doing.title);
+  React.useEffect(() => {
+    if (still) return undefined;
+    let i = 0, t = 0;
+    const step = () => {
+      i++; setTyped(i);
+      if (i < firstTitle.current.length) t = window.setTimeout(step, 34 + ((i * 7) % 31));
+      else t = window.setTimeout(() => setAgentOn(true), 350);
+    };
+    t = window.setTimeout(step, 34);
+    return () => window.clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const done = typed >= firstTitle.current.length;
+  const shown = done ? doing.title : doing.title.slice(0, typed);
+  const s = doing.steps;
+  const frac = s ? s.k / s.n : 0;
+  const [fill, setFill] = React.useState(still || doing.resumed ? frac : 0);
+  React.useEffect(() => { const r = requestAnimationFrame(() => setFill(frac)); return () => cancelAnimationFrame(r); }, [frac]);
+  return (
+    <div className="td5-chead td52-wband" data-td5="desk-head" data-td52="band" role="group" aria-label={full} style={{ background: g.tint, color: g.ink }}>
+      <span className="td52-wey" data-td52="band-eyebrow">{g.name}</span>
+      <span className="td52-wtt" data-td52="band-title" aria-hidden="true">
+        <span className={`td52-wtw${done ? "" : " typing"}`} data-td52="band-doing">{shown}</span>
+        {doing.agent ? <em className="td52-wag" data-td52="band-agent" style={{ visibility: agentOn || done && still ? "visible" : agentOn ? "visible" : "hidden" }}> · {doing.agent}</em> : null}
+      </span>
+      <span className="td5-sp" />
+      {s ? (
+        <span className="td52-wpg" data-td52="band-steps">
+          <span className="td52-wds" aria-hidden="true">{Array.from({ length: s.n }, (_, x) => <u key={x} className={x < s.k ? "d" : ""} />)}</span>
+          STEP {s.k} OF {s.n}
+        </span>
+      ) : null}
+      <i className="td52-fill" data-td52="fill" aria-hidden="true" style={{ width: `${(fill * 100).toFixed(3)}%` }} />
+    </div>
+  );
+};
+
+export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pastDays, pin, action, onAct, asideRef, onAside, onOpenQuery, stamp, phase, work = false, hostRef, asideLabel = "Set aside", onEdit = null, banner = null, asided = false, foot = null, over = null, saving = false, doing = null }) => {
   const g = item.group;
   return (
-    <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}>
+    <article className="td5-dcard" data-td5="desk-card" data-key={item.key} data-group={g.id} data-bucket={item.bucket} data-task-type={item.card.taskType ?? (item.card.userTaskId ? "own" : undefined)} data-query={item.query?.id} data-sweep={item.sweep ? String((item.card as { sweepOf?: number }).sweepOf ?? "") : undefined} data-phase={phase === "rest" ? undefined : phase === "stamp" ? undefined : phase}
+      data-work={work ? "" : undefined} data-asided={asided ? "" : undefined}>
+      {doing ? <WorkingBand key={doing.start} g={g} doing={doing} /> : (
       <div className="td5-chead" data-td5="desk-head" style={{ background: g.tint, color: g.ink }}>
-        <img src={g.art.src} alt="" aria-hidden="true" style={{ width: g.art.w + 6, left: g.art.l + 4, top: g.art.t - 2 }} />
         <span className="td5-cn">{g.name}</span>
         <span className="td5-why">{g.note}</span>
         <span className="td5-sp" />
         {item.query?.status ? (
           <span className="td5-st" data-td5="desk-status"><StatusDot status={item.query.status} overrideSize={18} decorative />{sentence(String(item.query.status))}</span>
         ) : null}
-      </div>
+      </div>)}
       {stamp ? <div className="td5-stamp" data-td5="stamp" data-navy={stamp.navy ? "" : undefined} aria-hidden="true">{stamp.word}</div> : null}
-      <div className="td5-cbody">
+      {/* v5.1 §E — the journey's own head, steps, questions and foot are portalled in here (deskSlot.ts) */}
+      <div className="td5-jhost" data-td5="journey-host" ref={hostRef} hidden={!work} />
+      {work ? null : (<>
+      <div className="td5-cbody" data-td5="card-body">
+        {banner}
         <div className="td5-who">
           <Disc item={item} />
           <span className="td5-wn"><b>{item.who}</b>{item.whoSub ? <small>{item.whoSub}</small> : null}</span>
@@ -133,13 +209,19 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
           <div className="td5-pin" data-td5="pin"><p>{pin.text}</p><small>{pin.meta}</small></div>
         ) : null}
       </div>
-      <div className="td5-cfoot">
-        <button type="button" className="td5-b1" data-td5="act" onClick={onAct}>{action}</button>
-        {onAside ? <button type="button" className="td5-b2" data-td5="desk-aside" ref={asideRef} onClick={onAside}>Set aside</button> : null}
-        {onOpenQuery ? <button type="button" className="td5-lnk" data-td5="open-query" onClick={onOpenQuery}>Open the query</button> : null}
-        <span className="td5-sp" />
-        <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
-      </div>
+      {over}
+      {foot ?? (
+        <div className="td5-cfoot" data-td5="card-foot" data-saving={saving ? "" : undefined}>
+          <button type="button" className="td5-b1" data-td5="act" disabled={saving} onClick={onAct}>{action}</button>
+          {onAside ? <button type="button" className="td5-b2" data-td5="desk-aside" ref={asideRef} disabled={saving} onClick={onAside}>{asideLabel}</button> : null}
+          {onOpenQuery ? <button type="button" className="td5-lnk" data-td5="open-query" disabled={saving} onClick={onOpenQuery}>Open the query</button> : null}
+          {onEdit ? <button type="button" className="td5-lnk" data-td5="edit" disabled={saving} onClick={onEdit}>Edit</button> : null}
+          <span className="td5-sp" />
+          {saving ? <span className="td52-saving" data-td52="saving" role="status">Saving…</span> : null}
+          <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
+        </div>
+      )}
+      </>)}
     </article>
   );
 };

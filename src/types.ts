@@ -108,6 +108,9 @@ export interface User {
        `dismissedTiles` = promo ids sent away for good. Only `wordcount` and `packages` are
        dismissable; the versions tile hides on its own evidence (a second version exists). */
     manuscripts?: { dismissedTiles?: string[] };
+    /* To-do v5.2 §H.3 — the Set aside popover's one-time explainer, seen (GOT IT), on the user so it never shows again
+       on any device; the same unconstrained map, NO rules change, written as one leaf (updateUserPaths) */
+    tray?: { explainedSetAside?: boolean };
     /* Housekeeping v2's own preferences (Contact list v13 P5) — the same page-scoped sub-map
        precedent, no rules change, proved by rulesProbe. Read through `contactPrefsOf` (total), and
        written ONLY by its dotted-path builders (lib/contactPrefs). `later` keys are
@@ -143,6 +146,9 @@ export interface User {
      path. Readers go through `notifyPrefs()`, which is total. Nothing sends email yet — see
      lib/accountPrefs. */
   notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean };
+  /* Discover v1: the Scout's tuning — a lens and three switches, written leaf by leaf. Read through
+     `discoverPrefs()` (lib/scout), which is total. */
+  discoverPrefs?: { lens?: string; openOnly?: boolean; notOnList?: boolean; ukIreland?: boolean };
   /* ⚠️ ITS OWN FIELD, NOT A KEY IN `notifyPrefs` — a consent RECORD, with the moment it was made.
      UK PECR wants affirmative, evidenced and withdrawable; absent === never granted, and nothing
      but a person clicking may create it. Withdrawal REWRITES it with granted:false rather than
@@ -915,7 +921,9 @@ export type EventKey =
   | "pass" | "offer" | "offer_call" | "offer_accepted" | "offer_declined" | "signed"
   | "nudge_sent"
   | "closed_no_reply" | "withdrawn" | "withdrawn_on_offer" | "closed_agent_gone"
-  | "late_reply_reopened" | "entry_corrected";
+  | "late_reply_reopened" | "entry_corrected"
+  /** import review v1: the import's one feed event (lib/importEvent) — about a manuscript, never a query */
+  | "imported";
 
 export enum ActivityType {
   STATUS_CHANGED = "Status Changed",

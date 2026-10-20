@@ -34,13 +34,20 @@ describe("the sidebar hold", () => {
   });
   it("a hold is read, never written: the hook's stored choice is untouched by it", () => {
     const hook = readFileSync("src/components/shell/useSidebarCollapsed.ts", "utf8");
-    expect(hook).toContain("return { collapsed: collapsed || held, toggle, setCollapsed, ready };");
+    /* RETARGETED (v138.6 §A): `ready` now also drops for a restored hold's two frames (no transition); the hold is
+       still only ever READ into `collapsed` */
+    expect(hook).toContain("return { collapsed: collapsed || held, toggle, setCollapsed, ready: ready && !instant };");
     const force = readFileSync("src/components/shell/sidebarForce.ts", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(force).not.toMatch(/localStorage|setItem/);
   });
   it("the full-screen hook holds it only while the list is full screen, and leaves on Escape last", () => {
     const hook = readFileSync("src/components/shell/useFullScreenList.ts", "utf8");
-    expect(hook).toContain("useEffect(() => (full ? holdSidebarCollapsed() : undefined), [full]);");
+    /* RETARGETED (v138.6 §A): a pin holds in a layout effect (before the first paint) and a plain full screen
+       (Comparable titles) as before; both only while `full` */
+    /* Contact list v19 §A: a pin may opt out of the hold (`holdSidebar: false`, the Contact list); the default holds */
+    expect(hook).toContain("if (!o.pin || !full || o.holdSidebar === false) return undefined;");
+    expect(hook).toContain("return holdSidebarCollapsed({ instant });");
+    expect(hook).toContain("useEffect(() => (!o.pin && full ? holdSidebarCollapsed() : undefined), [full, o.pin]);");
     expect(hook).toContain("ESC_LEVEL.pageMode");
     const esc = readFileSync("src/lib/escapeStack.ts", "utf8");
     const level = (k: string) => Number(new RegExp(`\\b${k}: (\\d+),`).exec(esc)![1]);

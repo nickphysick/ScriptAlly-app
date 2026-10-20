@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned long list: rows (the population)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned long list: the card meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: a few rows (the population)",
+  "ok": false,
+  "detail": "undefined for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: the card still meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: the last row is inside the card",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned pinned (precondition)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned long list: rows (the population)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned long list: the card meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: a few rows (the population)",
+  "ok": false,
+  "detail": "undefined for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: the card still meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: the last row is inside the card",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned long list: rows (the population)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned long list: the card meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: a few rows (the population)",
+  "ok": false,
+  "detail": "undefined for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: the card still meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: the last row is inside the card",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned pinned (precondition)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned long list: rows (the population)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned long list: the card meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: a few rows (the population)",
+  "ok": false,
+  "detail": "undefined for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: no footer element",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: the card still meets the page's foot ±1",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: the last row is inside the card",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ }
+]

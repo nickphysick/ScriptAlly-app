@@ -31,7 +31,8 @@ export async function openComps(page: Page, vp: Vp, o: { ms?: string; collapsed?
   await openRoute(page, ROUTE + (o.search ?? ""), vp);
   await page.evaluate(async () => { await document.fonts.ready; });
   await page.evaluate(LIB);
-  if ((o.ms ?? MS) === MS && !o.hold) await page.waitForFunction(() => !!(window as any).__cv().querySelector('[data-cv="row"]'), null, { timeout: 30_000 });
+  /* comps v28: the shelf's cards (v25's list rows are retired) */
+  if ((o.ms ?? MS) === MS && !o.hold) await page.waitForFunction(() => !!(window as any).__cv().querySelector('[data-cx="card"]'), null, { timeout: 30_000 });
   await page.waitForTimeout(400);
 }
 

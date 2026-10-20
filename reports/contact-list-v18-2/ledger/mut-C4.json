@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C4",
+  "where": "after Get started, home's only child is the ways card",
+  "ok": false,
+  "detail": "ways,up-next,hk8-ci,all-head,all"
+ },
+ {
+  "lock": "C4",
+  "where": "One at a time lands in Focus",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "C4",
+  "where": "By missing detail: All gaps by detail, in view",
+  "ok": true,
+  "detail": "{\"view\":\"detail\",\"inView\":true}"
+ },
+ {
+  "lock": "C4",
+  "where": "By agent: All gaps by agent, in view",
+  "ok": true,
+  "detail": "{\"view\":\"agent\",\"inView\":true}"
+ },
+ {
+  "lock": "C4",
+  "where": "'Just show me everything' shows Up next and All gaps",
+  "ok": true,
+  "detail": "up-next,hk8-ci,all-head,all"
+ },
+ {
+  "lock": "C4",
+  "where": "a second open shows no ways card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C4",
+  "where": "…and lands on home",
+  "ok": true,
+  "detail": "home"
+ },
+ {
+  "lock": "C4",
+  "where": "the run's first card was the queue's first",
+  "ok": true,
+  "detail": "msv12-agent-5:reply"
+ }
+]

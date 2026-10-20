@@ -25,7 +25,7 @@ import React, { useState } from "react";
 import "./importFlow.css";
 import { ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
-import { SegmentedToggle, WeekSlider, GenreCombobox, FitStars } from "../forms";
+import { GenreCombobox } from "../forms";
 import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
 import {
@@ -38,7 +38,30 @@ import { Chip, Disc, initialsOf } from "./ImportParts";
 import { ambiguousReadings } from "../../lib/templateImport";
 import { STAGE_NAME } from "../../lib/qcSummary";
 
-const READY = "Ready";
+/** The review list's words (import review v1; ref design-refs/onboarding/import-review-v1/
+ *  review-agents.dc.html). A row the writer leaves out stays in its place, says so, and can be undone. */
+export const ROW_WORDS = {
+  dontImport: "Don't import",
+  out: "Won't be imported",
+  undo: "Undo",
+  add: "Add details",
+  edit: "Edit details",
+  close: "Close details",
+  added: "Details added",
+  agencyOnly: "Agency only",
+  done: "Done",
+  agentFoot: "All optional. You can add or change these later on your Contact list.",
+  namePlaceholder: "Add a name, if you know it",
+  addGenre: "+ Add a genre",
+  doorUnknown: "Not known yet. Leave it if you're not sure.",
+  doorFromYou: "From you",
+  weeksUnset: "Not set",
+  setWeeks: "Set a reply time",
+  clear: "Clear",
+} as const;
+/** The reply-time stepper: where it starts when the writer asks for one, and its range. */
+export const WEEKS_START = 6, WEEKS_MIN = 1, WEEKS_MAX = 26;
+export const weeksText = (w: number) => `${w} ${w === 1 ? "week" : "weeks"}`;
 
 /** A small labelled field in part 1's dress. */
 const Field: React.FC<{ label: string; children: React.ReactNode; className?: string }> = ({ label, children, className }) => (
@@ -48,8 +71,49 @@ const Field: React.FC<{ label: string; children: React.ReactNode; className?: st
   </label>
 );
 
-const RemoveButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button type="button" className="im-x" title="Don't import" aria-label="Remove" onClick={onClick} data-im="row-remove">✕</button>
+/** "Don't import": a labelled pill, never a bare ×. It sets the row aside through the review's
+ *  existing path; only the words and the control changed. */
+const DontImportButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <button type="button" className="im-dont" onClick={onClick} data-im="row-remove">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8 12h8" /></svg>
+    {ROW_WORDS.dontImport}
+  </button>
+);
+
+/** A live row's right-hand end: "✓ Details added" once changed, the details link, "Don't import". */
+const LiveEnd: React.FC<{ open: boolean; added: boolean; onToggleOpen: () => void; onDelete: () => void; lead?: React.ReactNode }> = ({ open, added, onToggleOpen, onDelete, lead }) => (
+  <div className="im-rwend">
+    {lead}
+    {added && !open && (
+      <span className="im-added" data-im="row-added">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+        {ROW_WORDS.added}
+      </span>
+    )}
+    <button type="button" className="im-detlink" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">
+      {open ? ROW_WORDS.close : added ? ROW_WORDS.edit : ROW_WORDS.add}
+    </button>
+    <DontImportButton onClick={onDelete} />
+  </div>
+);
+
+/** A left-out row's end: "Won't be imported" and Undo. No dialog. */
+const OutEnd: React.FC<{ onUndo: () => void }> = ({ onUndo }) => (
+  <div className="im-rwend">
+    <span className="im-outword" data-im="row-out">{ROW_WORDS.out}</span>
+    <button type="button" className="im-undo" onClick={onUndo} data-im="row-undo">{ROW_WORDS.undo}</button>
+  </div>
+);
+
+/** The details panel's shell: inset under the row, paper ground, a foot with its sentence and Done. */
+const DetailsPanel: React.FC<{ foot: string; onDone: () => void; children: React.ReactNode }> = ({ foot, onDone, children }) => (
+  <div className="im-edit im-panel" data-im="row-edit">
+    {children}
+    <div className="im-panelfoot">
+      <span>{foot}</span>
+      <button type="button" className="im-done" onClick={onDone} data-im="row-done">{ROW_WORDS.done}</button>
+    </div>
+  </div>
 );
 
 /** A line stating what was answered, with the way to change it. */
@@ -70,84 +134,112 @@ export interface AgentRowProps {
   onPatch: (p: Partial<ReviewAgent>) => void;
   onDelete: () => void;
   onReopenReason: (kind: CheckReason) => void;
+  /** The writer chose "Don't import": the row stays in place, says so, and offers Undo. */
+  out?: boolean;
+  onUndo?: () => void;
+  /** Something in the details panel has been changed by the writer. */
+  added?: boolean;
 }
 
-export const AgentRow: React.FC<AgentRowProps> = ({ agent, merged, open, onToggleOpen, onPatch, onDelete, onReopenReason }) => {
+export const AgentRow: React.FC<AgentRowProps> = ({ agent, merged, open, onToggleOpen, onPatch, onDelete, onReopenReason, out, onUndo, added }) => {
   const noAgency = !agent.agency.trim();
   const disp = agent.name || agent.agency;
-  /* the build's own second line: the agency, or that the name is not recorded */
-  const subline = agent.name && agent.agency ? agent.agency : !agent.name && agent.agency ? "Agent name not recorded" : agent.name && noAgency ? "No agency" : null;
+  /* The name is said ONCE: a row with no agent name reads "Agency only" under its agency, and only
+     its panel asks for a name. */
+  const subline = agent.name && agent.agency ? agent.agency : !agent.name && agent.agency ? ROW_WORDS.agencyOnly : agent.name && noAgency ? "No agency" : null;
   const who = disp || "This agent";
   const resolvedMapping = agent.reasons.some((r) => r.kind === "mapping" && r.resolved);
+  const live = !out;
 
   return (
-    <div className="im-rw" data-row-id={agent.id} data-row="agent" data-asks="0">
-      <Disc initials={agent.name ? initialsOf(agent.name) : (agent.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–")} tone={agent.name ? "live" : "agency"} />
-      <div>
+    <div className={`im-rw${out ? " is-out" : ""}`} data-row-id={agent.id} data-row="agent" data-asks="0" data-out={out ? "1" : "0"}>
+      <Disc initials={agent.name ? initialsOf(agent.name) : (agent.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–")} tone={out ? "none" : agent.name ? "live" : "agency"} />
+      <div className="im-rwtext">
         <b className="im-rwname">{disp}</b>
         {(subline || merged) && (
           <small className="im-rwsub">{[subline, merged ? dupNoteMerged : null].filter(Boolean).join(" · ")}</small>
         )}
       </div>
-      <div className="im-rwend">
-        <Chip data-im="row-chip">{READY}</Chip>
-        <button type="button" className="sf-link sf-link--quiet" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">{open ? "Close" : "Add details"}</button>
-        <RemoveButton onClick={onDelete} />
-      </div>
+      {live
+        ? <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete} />
+        : <OutEnd onUndo={() => onUndo?.()} />}
 
-      {/* a settled row's editor: add detail, or change an answer */}
-      {open && (
-        <div className="im-edit" data-im="row-edit">
+      {/* a settled row's details: add what the file did not give, or change an answer */}
+      {live && open && (
+        <DetailsPanel foot={ROW_WORDS.agentFoot} onDone={onToggleOpen}>
           {agent.agencyWaived && noAgency && (
             <Said onChange={() => onPatch({ agencyWaived: false })}>You chose to use {who}'s name as the primary field. Their agency can be added any time.</Said>
           )}
           {resolvedMapping && (
             <Said onChange={() => onReopenReason("mapping")}>You confirmed {who}'s details look right.</Said>
           )}
-          <div className="im-editrow">
-            <Field label="Agent name">
-              <span className="sf-inwrap">
-                <input className="sf-in" value={agent.agencyOnly ? "" : agent.name} disabled={agent.agencyOnly}
-                  placeholder={agent.agencyOnly ? "Referenced by agency only" : "e.g. Eleanor Vance"}
-                  onChange={(e) => onPatch({ name: e.target.value })} />
-              </span>
-            </Field>
-            <Field label="Agency">
-              <input className="sf-in" value={agent.agency} placeholder="Agency" onChange={(e) => onPatch({ agency: e.target.value })} />
-            </Field>
-          </div>
-          <div>
-            <button type="button" className="sf-link sf-link--quiet" title="Don't know the name? Use agency only" aria-pressed={agent.agencyOnly}
-              onClick={() => onPatch({ agencyOnly: !agent.agencyOnly, ...(!agent.agencyOnly ? { name: "" } : {}) })}>
-              {agent.agencyOnly ? "Referenced by agency only" : "Reference by agency only"}
-            </button>
-          </div>
-          <div className="sf-field">
-            <span className="sf-lab">Genres they're looking for</span>
-            <GenreCombobox options={PREDEFINED_GENRES as unknown as string[]} value={agent.genres} onChange={(g) => onPatch({ genres: g })} placeholder="Type or pick…" />
-          </div>
-          <Field label="Website">
-            <input className="sf-in" value={agent.website} placeholder="agency.com/their-page" onChange={(e) => onPatch({ website: e.target.value })} />
-          </Field>
-          <div className="im-editrow">
-            <div className="sf-field">
-              <span className="sf-lab">Submissions</span>
-              <SegmentedToggle<"open" | "closed"> value={agent.submissionsOpen == null ? ("" as "open") : agent.submissionsOpen ? "open" : "closed"}
-                options={[{ value: "open", label: "Open" }, { value: "closed", label: "Closed" }]}
-                onChange={(v) => onPatch({ submissionsOpen: v === "open" })} ariaLabel="Submissions status" />
-            </div>
-            <div className="sf-field">
-              <span className="sf-lab">Typically replies in</span>
-              <WeekSlider value={agent.weeks ?? 6} onChange={(w) => onPatch({ weeks: w })} min={1} max={26} />
-            </div>
-          </div>
-          <div className="sf-field">
-            <span className="sf-lab">Agent fit</span>
-            <p className="im-editnote">Log how good a match this agent would be for you.</p>
-            <FitStars value={agent.rating} onChange={(r) => onPatch({ rating: r })} size={17} />
-          </div>
-        </div>
+          <AgentDetails agent={agent} onPatch={onPatch} />
+        </DetailsPanel>
       )}
+    </div>
+  );
+};
+
+/**
+ * The agent's details, all optional. NOTHING HERE IS PRE-ANSWERED: the door is neither Open nor
+ * Closed and the reply time is "Not set" unless the file or the writer said — the review hands the
+ * import nothing the file or the writer did not give (import truth). The reply-time slider and the
+ * Agent fit stars are retired from the review: a slider has to show a value, and showing 6 weeks on
+ * a file with no reply times implied a fact nobody gave; writers rate agents on the Contact list.
+ */
+const AgentDetails: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewAgent>) => void }> = ({ agent, onPatch }) => {
+  /* Fixed when the panel opens, so the field does not vanish as the first letter is typed. */
+  const [asksName] = useState(() => !agent.name.trim());
+  const [addingGenre, setAddingGenre] = useState(false);
+  const door = agent.submissionsOpen == null ? null : agent.submissionsOpen ? "open" : "closed";
+  const pickDoor = (v: "open" | "closed") => onPatch({ submissionsOpen: door === v ? null : v === "open" });
+  const w = agent.weeks;
+  return (
+    <div className="im-detgrid">
+      {asksName && (
+        <Field label="Agent name">
+          <input className="sf-in" value={agent.name} placeholder={ROW_WORDS.namePlaceholder}
+            onChange={(e) => onPatch({ name: e.target.value, agencyOnly: !e.target.value.trim() && !!agent.agency.trim() })} data-im="det-name" />
+        </Field>
+      )}
+      <Field label="Website">
+        <input className="sf-in" type="url" value={agent.website} placeholder="agency.com/their-page" onChange={(e) => onPatch({ website: e.target.value })} data-im="det-website" />
+      </Field>
+      <div className="sf-field" data-im="det-genres">
+        <span className="sf-lab">Genres they're looking for</span>
+        {addingGenre ? (
+          <GenreCombobox options={PREDEFINED_GENRES as unknown as string[]} value={agent.genres} onChange={(g) => onPatch({ genres: g })} placeholder="Type or pick…" />
+        ) : (
+          <div className="im-pills">
+            {agent.genres.map((g) => <span key={g} className="im-pill">{g}</span>)}
+            <button type="button" className="im-addgenre" onClick={() => setAddingGenre(true)} data-im="det-addgenre">{ROW_WORDS.addGenre}</button>
+          </div>
+        )}
+      </div>
+      <div className="sf-field" data-im="det-door">
+        <span className="sf-lab">Taking queries?</span>
+        <div role="group" aria-label="Taking queries?" className="im-seg">
+          <button type="button" aria-pressed={door === "open"} className={door === "open" ? "is-on" : ""} onClick={() => pickDoor("open")} data-im="det-open">Open</button>
+          <button type="button" aria-pressed={door === "closed"} className={door === "closed" ? "is-on" : ""} onClick={() => pickDoor("closed")} data-im="det-closed">Closed</button>
+        </div>
+        <span className="im-detnote" data-im="det-doornote">{door ? ROW_WORDS.doorFromYou : ROW_WORDS.doorUnknown}</span>
+      </div>
+      <div className="sf-field" data-im="det-weeks">
+        <span className="sf-lab">Typically replies in</span>
+        {w == null ? (
+          <div className="im-weeks">
+            <span className="im-weeksunset" data-im="det-weeks-unset">{ROW_WORDS.weeksUnset}</span>
+            <button type="button" className="im-ghostbtn" onClick={() => onPatch({ weeks: WEEKS_START })} data-im="det-weeks-set">{ROW_WORDS.setWeeks}</button>
+          </div>
+        ) : (
+          <div className="im-weeks">
+            <button type="button" className="im-step" aria-label="One week less" disabled={w <= WEEKS_MIN} onClick={() => onPatch({ weeks: Math.max(WEEKS_MIN, w - 1) })} data-im="det-weeks-down">−</button>
+            <span className="im-weeksval" data-im="det-weeks-val">{weeksText(w)}</span>
+            <button type="button" className="im-step" aria-label="One week more" disabled={w >= WEEKS_MAX} onClick={() => onPatch({ weeks: Math.min(WEEKS_MAX, w + 1) })} data-im="det-weeks-up">+</button>
+            <button type="button" className="im-detclear" onClick={() => onPatch({ weeks: null })} data-im="det-weeks-clear">{ROW_WORDS.clear}</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -323,29 +415,31 @@ export interface QueryRowProps {
   onDelete: () => void;
   /** Re-open this row's settled reasons: it goes back to the deck. */
   onReopen: () => void;
+  /** The writer chose "Don't import" (or this query's agent is not being imported). */
+  out?: boolean;
+  onUndo?: () => void;
+  added?: boolean;
 }
 
-export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onReopen }) => {
+export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onReopen, out, onUndo, added }) => {
   const dateStr = currentDate(query);
   const settledReasons = query.reasons.length > 0;
 
   return (
-    <div className="im-rw" data-row-id={query.id} data-row="query" data-asks="0">
-      <Disc initials={initialsOf(agentName)} />
-      <div>
+    <div className={`im-rw${out ? " is-out" : ""}`} data-row-id={query.id} data-row="query" data-asks="0" data-out={out ? "1" : "0"}>
+      <Disc initials={initialsOf(agentName)} tone={out ? "none" : "live"} />
+      <div className="im-rwtext">
         <b className="im-rwname">{agentName}</b>
         {/* the build's own line: where it came from, its status, its date */}
         <small className="im-rwsub">{origin} · {STAGE_NAME[query.status]} · {dateStr ? fmtDate(dateStr) : "Undated"}</small>
       </div>
-      <div className="im-rwend">
-        <span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>
-        <Chip data-im="row-chip">{READY}</Chip>
-        <button type="button" className="sf-link sf-link--quiet" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">{open ? "Close" : "Add details"}</button>
-        <RemoveButton onClick={onDelete} />
-      </div>
+      {out
+        ? <OutEnd onUndo={() => onUndo?.()} />
+        : <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete}
+            lead={<span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>} />}
 
-      {open && (
-        <div className="im-edit" data-im="row-edit">
+      {!out && open && (
+        <DetailsPanel foot="Add what you remember and your timeline stays accurate." onDone={onToggleOpen}>
           {settledReasons && (
             <Said onChange={onReopen}>You've sorted this query — {query.status.toLowerCase()}{query.sentDate ? `, sent ${fmtDate(query.sentDate)}` : ""}.</Said>
           )}
@@ -359,8 +453,7 @@ export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, op
               <input className="sf-in" type="date" value={dayOf(query.sentDate)} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
             </Field>
           </div>
-          <p className="im-editnote">Add what you remember and your timeline stays accurate.</p>
-        </div>
+        </DetailsPanel>
       )}
     </div>
   );

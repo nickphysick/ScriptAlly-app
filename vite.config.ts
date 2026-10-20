@@ -6,6 +6,8 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    /* Help system v1 E — the feedback panel's VERSION line ("Beta, 19 Oct") is the build's date */
+    define: { __QH_BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)) },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

@@ -24,11 +24,10 @@ afterEach(() => setActiveManuscript(null));
 const ROUTE = "/queries/analytics";
 
 describe("/queries/analytics renders", () => {
-  it("renders without throwing on an empty account, keeps the band, and states the no-manuscript case", () => {
+  it("renders without throwing on an empty account, and states the no-manuscript case", () => {
     expect(() => renderPage(<QueryAnalytics />, ROUTE)).not.toThrow();
     const html = renderPage(<QueryAnalytics />, ROUTE);
     expect(html).toContain("Analytics follow a manuscript");
-    expect(html).toContain("Less guesswork, better results");
   });
 
   it("renders without throwing once there are queries, and the derivation ran", () => {
@@ -37,29 +36,35 @@ describe("/queries/analytics renders", () => {
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
     /* the seed is one query, sent and unanswered */
     expect(html).toContain('data-sent="1"');
-    expect(html).toContain("Where the one query got to");
+    expect(html).toContain("What happened to your queries?");
+    expect(html).toContain("Your 1 query");
     expect(html).toContain("At a glance");
   });
 
-  it("opens on the shared band as a PANEL (header panel v2) — a PageHeader with `band`, `bandFixed` and `panel`, and no living header", () => {
+  it("v21 §A: the desktop opens on the page's own light header — no panel, no band, no illustration but the shadow", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
-    expect(html).toContain('data-probe="page-header"');
-    /* header v3: the band as a panel is the shared panel header, as a title page */
-    expect(html).toMatch(/class="ph ph--full ph--panel hp3--band hpanel hpanel--hero hp3 hp3--title"/);
-    expect(html).toContain('data-band=""');
-    expect(html).toContain('data-hpanel=""');
-    expect(html).not.toContain("data-header-sheet");
-    expect(html).not.toContain("data-living=");
+    /* the node render has no matchMedia, so it is the desktop; the phone's v17 band is a live-width branch */
+    expect(html).toContain('data-a21="header"');
+    expect(html).toContain('data-own-header=""');
+    expect(html).toContain("— ANALYTICS —");
+    expect(html).toMatch(/data-page-title=""[^>]*aria-label="1 query, no replies"/);
+    expect(html).not.toContain('data-hpanel=""');
+    expect(html).not.toContain('data-band=""');
+    const header = html.slice(html.indexOf('data-a21="header"'), html.indexOf('data-a21="card"'));
+    expect(header.match(/<img /g)?.length).toBe(1);
+    expect(header).toContain('data-a21="shadow"');
   });
 
-  it("the nine sections are there, in order, and the caveats close the page", () => {
+  it("v24: the seven question sections are there, in order, and the note closes the page", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
-    const at = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((s) => html.indexOf(`data-sec="${s}"`));
+    const at = [0, 1, 2, 3, 4, 5, 6].map((s) => html.indexOf(`data-sec="${s}"`));
     expect(at.every((i) => i > -1)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
-    expect(html).toContain("What the numbers can&#x27;t tell you");
+    expect(html).not.toContain('data-sec="7"');
+    expect(html).toContain("A note on these numbers");
+    expect(html).not.toContain("What the numbers can&#x27;t tell you");
   });
 
   it("draws no Export and no old time-range control — the strip's All time | Last 90 days is the only one", () => {

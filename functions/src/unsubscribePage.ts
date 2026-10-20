@@ -61,7 +61,7 @@ export const unsubscribePage = (outcome: UnsubscribeOutcome | null): string => {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
-<title>${esc(w.title)} — ScriptAlly</title>
+<title>${esc(w.title)} — QueryHawk</title>
 <style>
   body{margin:0;background:#f7f4ee;color:#2e2722;
        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}

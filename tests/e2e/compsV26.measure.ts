@@ -4,7 +4,10 @@
  * (`cv25-ms`, seven comps; `cv25-ms-empty`, none).
  *
  *   AD1 one heading · AD2 explainer · AD3 labels · AD4 ready · AD5 foot · AD6 again · AD7 tags ·
- *   AD8 preview · AD10 focus and keys (v26.1) · AD9 retired with comps v27
+ *   AD10 focus and keys (v26.1) · AD9 retired with comps v27 · AD8 (the preview) retired with comps v28, whose form has none
+ *
+ * Comps v28: the form is reached from the light header's "+ Add a comp" and a card's drawer (v25's list rows are retired),
+ * and an edit opened from the drawer returns to the detail on ✕, Cancel and Escape (CX28 E1).
  *
  * MUTATIONS. `AD_MUTATE=<lock>` applies that lock's named break. Four are applied in the page (below).
  * Five are edits to the source and need a rebuilt bundle; `adMutations.sh` makes the edit, rebuilds,
@@ -24,7 +27,6 @@ const near = (a: number, b: number, t = 1) => Math.abs(a - b) <= t;
 const MUTATIONS: Record<string, { css?: string; js?: string; what: string }> = {
   AD1: { what: "restore the body's \"Add a comp\" heading", js: `(() => { const b = document.querySelector('[data-hdr="comp"] [data-cf="form"]'); if (!b || b.querySelector("h4.mut")) return; const h = document.createElement("h4"); h.className = "mut"; h.textContent = "Add a comp"; b.prepend(h); })()` },
   AD5: { what: "put the foot inside the scrolling body", js: `(() => { const d = document.querySelector('[data-hdr="comp"]'); const f = d && d.querySelector('[data-hdr="foot"]'); const b = d && d.querySelector('[data-hdr="body"]'); if (f && b && f.parentElement !== b) b.append(f); })()` },
-  AD8: { what: "render a hand-built preview", js: `(() => { const p = document.querySelector('[data-hdr="comp"] [data-cf="preview"]'); if (!p || p.dataset.mut) return; p.dataset.mut = "1"; const t = (document.querySelector('[data-hdr="comp"] #cpv-f-title') || {}).value || ""; p.innerHTML = '<div class="aprev-cell"><span class="disc"></span><div><b>' + t + '</b><small></small></div></div><div class="st"><span>Log in a letter</span></div>'; })()` },
 };
 const SOURCE_MUTATIONS = ["AD2", "AD3", "AD4", "AD6", "AD7", "AD10"];
 
@@ -56,19 +58,24 @@ async function mutate(page: Page, lock: string) {
 const P = '[data-cv="page"] ';
 const D = '[data-hdr="comp"] ';
 async function openAdd(page: Page) {
-  await page.locator(`${P}[data-cv="add"]`).click();
+  /* comps v28: "+ Add a comp" in the light header, or "+ Add your first comp" in the empty panel (one is on the page) */
+  await page.locator(`${P}[data-cx="add"], ${P}[data-cx="add-first"]`).click();
   await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
   await page.waitForTimeout(500);
 }
+/** comps v28: a card opens the comp's detail, and its Edit is the form */
 async function openEdit(page: Page, nth: number) {
-  await scrollTo(page, '[data-cv="lib-head"]', 24);
-  const row = page.locator(`${P}[data-cv="row"]`).nth(nth);
-  await row.hover();
-  await row.locator('[data-cv="tray-edit"]').click();
+  await scrollTo(page, '[data-cx="shelf"]', 24);
+  await page.locator(`${P}[data-cx="card"]`).nth(nth).click();
+  await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
+  await page.locator('[data-cv="drawer-edit"]').click();
   await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
   await page.waitForTimeout(500);
 }
-const closeDrawer = async (page: Page) => { await page.keyboard.press("Escape"); await page.waitForTimeout(600); };
+/* comps v28: from an edit opened on the detail, Escape returns to the detail first, so it may take two */
+const closeDrawer = async (page: Page) => {
+  for (let i = 0; i < 2 && (await page.locator('[data-hdr="comp"]').count()) > 0; i++) { await page.keyboard.press("Escape"); await page.waitForTimeout(600); }
+};
 const emptyPage = async (page: Page, vp: Vp) => { await openComps(page, vp, { ms: MS_EMPTY }); await page.waitForSelector('[data-cv="empty"]', { timeout: 30_000 }); };
 
 /** the drawer, read whole */
@@ -243,35 +250,8 @@ test.describe("Comparable titles v26", () => {
     L.done(18);
   });
 
-  test("AD8 · preview: the library row's own comp cell, and its title is the Title input", async ({ page }) => {
-    const L = new Ledger("AD8");
-    for (const vp of SIZES) {
-      const w = `${vp.width}`;
-      await openComps(page, vp); await openAdd(page);
-      const read = () => page.evaluate(() => {
-        const shape = (e: Element | null): unknown => (e ? { tag: e.tagName, cls: [...e.classList].filter((c) => c !== "is-placeholder" && c !== "is-ring" && c !== "cv-addl--words").sort().join(" "), probe: e.getAttribute("data-cv"), kids: [...e.children].filter((k) => k.tagName !== "svg" && k.tagName !== "BUTTON" && !k.classList.contains("cv-addl")).map(shape) } : null);
-        const w2 = window as any;
-        const rowCell = w2.__q('[data-cv="row"] [data-cv="comp-cell"]');
-        const prev = document.querySelector('[data-hdr="comp"] [data-cf="preview"]') as HTMLElement | null;
-        const cell = prev?.querySelector('[data-cv="comp-cell"]') ?? prev?.firstElementChild ?? null;
-        const nx = prev?.querySelector('[data-cv="row-next"]') ?? null;
-        return { row: JSON.stringify(shape(rowCell)), cell: JSON.stringify(shape(cell)), title: prev?.querySelector('[data-cv="row-title"]')?.textContent ?? null, placeholder: prev?.querySelector('[data-cv="row-title"]')?.classList.contains("is-placeholder") ?? null,
-          by: prev?.querySelector('[data-cv="row-by"]')?.textContent ?? null, next: nx?.querySelector(".cv-nxt")?.textContent ?? null, nxRow: JSON.stringify(shape(w2.__q('[data-cv="row"] [data-cv="row-next"]'))), nxPrev: JSON.stringify(shape(nx)), tray: !!prev?.querySelector('[data-cv="row-tray"]') };
-      });
-      await mutate(page, "AD8");
-      let r = await read();
-      L.check(`${w} empty: the placeholder title`, r.title === "Your comp’s title" && r.placeholder === true, `"${r.title}" · placeholder ${r.placeholder}`);
-      await page.locator(`${D}#cpv-f-title`).fill("Salt and Iron"); await page.locator(`${D}#cpv-f-author`).fill("J. Mercer"); await page.locator(`${D}#cpv-f-year`).fill("2024");
-      await page.waitForTimeout(150); await mutate(page, "AD8");
-      r = await read();
-      L.check(`${w} the row's own comp cell exists`, !!r.row && r.row !== "null", `${r.row?.slice(0, 80)}`);
-      L.check(`${w} same element type and class set as a row's comp cell`, r.cell === r.row, `preview ${r.cell?.slice(0, 110)} · row ${r.row?.slice(0, 110)}`);
-      L.check(`${w} its title is the Title input`, r.title === "Salt and Iron" && r.placeholder === false, `"${r.title}"`);
-      L.check(`${w} its byline follows the fields`, r.by === "J. Mercer · add publisher · 2024", `"${r.by}"`);
-      L.check(`${w} the next-move cell is the row's own, with no tray`, r.next === "Add a publisher" && !r.tray, `"${r.next}" · tray ${r.tray}`);
-    }
-    L.done(12);
-  });
+  /* AD8 (the preview: the library row's own comp cell) RETIRED with comps v28: the list it previewed is retired, and the v28
+     form has no preview. compForm.test.tsx holds its absence. */
 
   /* AD9 (the exhibit draws no query line, no drag handle and no switch) RETIRED with comps v27: the exhibit is deleted.
      Its absence is held by V2 in compsV27.measure.ts. */
@@ -357,8 +337,8 @@ test.describe("Comparable titles v26", () => {
     L.check("the toast, with Undo", /Added Salt and Iron to your library\./.test(toast ?? "") && (await page.locator(".sa-toast-undo").count()) > 0, `${toast}`);
     await page.waitForTimeout(700);
     /* the comp drawer reads them back under "Matches on" */
-    await scrollTo(page, '[data-cv="lib-head"]', 24);
-    await page.locator(`${P}[data-cv="row"]`).last().click();
+    await scrollTo(page, '[data-cx="shelf"]', 24);
+    await page.locator(`${P}[data-cx="card"][aria-label="Salt and Iron"]`).click();
     await page.waitForSelector('[data-hdr="comp"].is-in'); await page.waitForTimeout(500);
     const back = await page.evaluate(() => { const d = document.querySelector('[data-hdr="comp"]')!; return { title: d.querySelector('[data-cv="drawer-title"]')?.textContent, label: d.querySelector('[data-cv="drawer-tags-label"]')?.textContent, chips: [...d.querySelectorAll('[data-cv="drawer-tags"] span')].map((s) => s.textContent) }; });
     L.check("\"Matches on\" reads them back as two chips", back.title === "Salt and Iron" && back.label === "Matches on" && back.chips.join("|") === "Tone|Coastal", JSON.stringify(back));
@@ -384,16 +364,18 @@ test.describe("Comparable titles v26", () => {
         L.check(`${w} add: opening puts focus in Title (before ${name})`, (await focus()) === "cpv-f-title", await focus());
         await close();
         const shut = await closed();
-        const back = await page.evaluate((sel) => document.activeElement === document.querySelector(sel), `${P}[data-cv="add"]`);
+        const back = await page.evaluate((sel) => document.activeElement === document.querySelector(sel), `${P}[data-cx="add"]`);
         L.check(`${w} add: ${name} closes the drawer and returns focus to "Add a comp"`, shut && back, `closed ${shut} · focus on ${await focus()}`);
       }
-      /* edit, opened from a row's own Edit */
+      /* edit, opened from a card's detail (comps v28: Escape steps back to the detail, a second closes, focus to the card) */
       await openEdit(page, 1);
       L.check(`${w} edit: opening puts focus in Title`, (await focus()) === "cpv-f-title", await focus());
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      L.check(`${w} edit: Escape returns to the detail`, (await page.locator('[data-cv="drawer-body"]').count()) === 1, `detail ${await page.locator('[data-cv="drawer-body"]').count()}`);
       await page.keyboard.press("Escape");
       const shut = await closed();
-      const back = await page.evaluate((sel) => document.activeElement === document.querySelectorAll(sel)[1]?.querySelector('[data-cv="tray-edit"]'), `${P}[data-cv="row"]`);
-      L.check(`${w} edit: Escape returns focus to the row's Edit`, shut && back, `closed ${shut} · focus on ${await focus()}`);
+      const back = await page.evaluate((sel) => document.activeElement === document.querySelectorAll(sel)[1], `${P}[data-cx="card"]`);
+      L.check(`${w} edit: a second Escape closes it and returns focus to the card`, shut && back, `closed ${shut} · focus on ${await focus()}`);
       /* Cmd + Enter at one size, Ctrl + Enter at the other, from the note */
       const key = i === 0 ? "Meta+Enter" : "Control+Enter";
       const n0 = dump().comps.length;
@@ -414,5 +396,5 @@ test.describe("Comparable titles v26", () => {
 });
 
 test("AD · every lock has a named mutation", () => {
-  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["AD1", "AD10", "AD2", "AD3", "AD4", "AD5", "AD6", "AD7", "AD8"]);
+  expect([...Object.keys(MUTATIONS), ...SOURCE_MUTATIONS].sort()).toEqual(["AD1", "AD10", "AD2", "AD3", "AD4", "AD5", "AD6", "AD7"]);
 });

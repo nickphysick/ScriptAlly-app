@@ -14,6 +14,8 @@
  */
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import { IMPORT_SEE, IMPORT_END_LINE } from "../../../lib/importEvent";
 import type { Activity, Agent, Manuscript, Query } from "../../../types";
 import { QueryStatus } from "../../../types";
 import { useOverlay } from "../../shell/useOverlay";
@@ -24,6 +26,7 @@ import {
   windowEndLine, type DrawerEvent, type FeedFilter,
 } from "../../../lib/dashFeedDrawer";
 import { actModeFor, feedFamily } from "./feedFamily";
+import { badgeText } from "../../../lib/dashFeedSeen";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 
@@ -33,12 +36,18 @@ const ListGlyph = () => (
   </svg>
 );
 
-/** `today` is the count; −1 holds the pill's place while the page loads. */
-export const FeedTab: React.FC<{ open: boolean; today: number; onOpen: () => void }> = ({ open, today, onOpen }) => (
-  <button type="button" className="d58-tab" data-d58="tab" aria-haspopup="dialog" aria-expanded={open} onClick={onOpen}>
-    <span className="d58-tabic"><ListGlyph /></span>
-    <span><b>Activity feed</b><small>LAST 30 DAYS</small></span>
-    {today !== 0 && <span className={`d58-tabnew${today < 0 ? " d58-sk" : ""}`} data-d58="tab-today">{today < 0 ? "0 today" : `${today} today`}</span>}
+/**
+ * THE FOLDER TAB (v59): it rises from the page sheet's bottom edge in the desk's colour, with an
+ * unseen badge. "LAST 30 DAYS" and the "{n} today" pill are retired. `unseen` is the count; the
+ * badge is hidden at 0, and −1 holds its place while the page loads. `bump` replays the 250ms rise when the count goes up while the page is open.
+ */
+export const FeedTab: React.FC<{ open: boolean; unseen: number; bump: boolean; onOpen: () => void }> = ({ open, unseen, bump, onOpen }) => (
+  <button type="button" className={`d59-ftab${bump ? " is-bump" : ""}`} data-d58="tab" aria-haspopup="dialog" aria-expanded={open} onClick={onOpen}
+    aria-label={unseen > 0 ? `Activity feed, ${unseen} new` : "Activity feed"}>
+    <span className="d59-ftabic" aria-hidden="true"><ListGlyph /></span>
+    <b>Activity feed</b>
+    {unseen !== 0 && <span className={`d59-badge${unseen < 0 ? " d58-sk" : ""}`} data-d58="tab-badge" aria-hidden="true">{unseen < 0 ? "0" : badgeText(unseen)}</span>}
+    <span className="d59-ftabup" aria-hidden="true">▲</span>
   </button>
 );
 
@@ -57,6 +66,40 @@ const GearGlyph = () => (
     <circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
   </svg>
 );
+
+/* The import's mark: a file with an arrow coming out of it (ref feed-import.dc.html). */
+const ImportGlyph = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-import">
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5" />
+  </svg>
+);
+
+/**
+ * THE IMPORT'S ROW (import review v1, Part D; ref design-refs/onboarding/import-review-v1/feed-import.dc.html).
+ * A white card under the day heading: the navy disc, "IMPORTED", the time, the sentence, the three
+ * groups (a group at zero left out), and a foot naming the route with the way to the Query Centre.
+ */
+const ImportRow: React.FC<{ ev: DrawerEvent; onOpenQueries: () => void }> = ({ ev, onOpenQueries }) => {
+  const { entry: e, say, tag } = ev;
+  const im = e.imported!;
+  return (
+    <article className="d58-ev d58-evimp" data-d58="ev" data-family="import" data-dir={e.dir} data-need="0" data-met="0" data-status="" data-atype={e.activityType} data-app="0"
+      data-counts={JSON.stringify(im.counts)}>
+      <span className="d58-evico d58-evimpdisc" data-d58="ev-disc"><ImportGlyph /></span>
+      <div className="d58-evmain">
+        <div className="d58-evtop"><span className="d58-evtag" data-d58="ev-tag">{tag}</span><time>{e.time}</time></div>
+        <p className="d58-evsay" data-d58="ev-say"><Segs say={say} /></p>
+        {im.groups.length > 0 && (
+          <div className="d58-evgroups" data-d58="ev-groups">{im.groups.map((g) => <span key={g}>{g}</span>)}</div>
+        )}
+        <div className="d58-evfoot">
+          <span data-d58="ev-route">{im.routeLabel}</span>
+          <button type="button" className="d58-evsee" data-d58="ev-see" onClick={onOpenQueries}>{IMPORT_SEE}</button>
+        </div>
+      </div>
+    </article>
+  );
+};
 
 /**
  * ONE ROW FOR EVERY EVENT (feed drawer v2). A 34px disc carrying the mark in ink, the tag in the
@@ -124,6 +167,9 @@ export const Dash58Feed: React.FC<{
   const qcRows = useMemo(() => buildQcRows(scopedQueries, agents, activities, now.getTime()), [scopedQueries, agents, activities, now]);
   const days = useMemo(() => drawerDays(drawerEvents(entries, qcRows, filter), now), [entries, qcRows, filter, now]);
   const sum = drawerSummary(entries);
+  const navigate = useNavigate();
+  /* the end line names imported dates only when the window holds an import */
+  const holdsImport = entries.some((e) => !!e.imported);
   const earlier = earlierWindow(from);
   const hasEarlier = useMemo(() => activities.some((a) => { const t = new Date(a.date).getTime(); return Number.isFinite(t) && t < from; }), [activities, from]);
 
@@ -174,11 +220,13 @@ export const Dash58Feed: React.FC<{
           {days.map((d) => (
             <React.Fragment key={d.key}>
               <div className="d58-day" data-d58="day"><span>{d.heading}</span><b>{d.count}</b></div>
-              {d.events.map((ev) => <FeedRow key={ev.entry.id} ev={ev} onAct={onAct} />)}
+              {d.events.map((ev) => (ev.entry.imported
+                ? <ImportRow key={ev.entry.id} ev={ev} onOpenQueries={() => { onClose(); navigate("/queries"); }} />
+                : <FeedRow key={ev.entry.id} ev={ev} onAct={onAct} />))}
             </React.Fragment>
           ))}
           <div className="d58-dend" data-d58="drawer-end">
-            {windowEndLine(from, now)}{" "}
+            {windowEndLine(from, now)}{holdsImport && <> <span data-d58="drawer-end-import">{IMPORT_END_LINE}</span></>}{" "}
             {hasEarlier && <button type="button" className="d58-link" data-d58="drawer-earlier" onClick={() => setFrom(earlier.from)}>Show {earlier.label} →</button>}
           </div>
         </div>

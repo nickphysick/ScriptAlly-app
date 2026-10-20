@@ -17,6 +17,7 @@
  * ⚠️ ALSO CHANGES IS COMPUTED, NEVER DESCRIBED (decision 14): the notes are `alsoChanges` — the dry
  * run through the real engine — shown inside the tab that causes them and counted in the foot.
  */
+import { Term } from "../../shell/Term";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SubmissionMethod, type Agent } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -85,7 +86,7 @@ export interface AgentCardEditorProps {
 }
 
 /** One labelled row of the form, the mock's `.ac-f`. */
-const F: React.FC<{ label: string; children: React.ReactNode; vl?: React.ReactNode; vlKey?: string }> = ({ label, children, vl, vlKey }) => (
+const F: React.FC<{ label: React.ReactNode; children: React.ReactNode; vl?: React.ReactNode; vlKey?: string }> = ({ label, children, vl, vlKey }) => (
   <div className="ae-f">
     <label>{label}</label>
     <div className="ae-fl">
@@ -99,7 +100,9 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
   const { mode, agent, agents, nowMs, variant } = p;
   /* ⚠️ THE BASE IS FROZEN AT THE OPEN — what "changed" is measured against must not move because
      a snapshot of the same record arrived while the writer was typing */
-  const [base] = useState<CardDraft>(() => (agent ? draftOf(agent, p.personal) : emptyCardDraft()));
+  /* v18.3 §D — the agent panel's new-agent form: no "Paste a link", a plain agency field, the UK chosen by default */
+  const panelNew = mode === "new" && variant === "panel";
+  const [base] = useState<CardDraft>(() => (agent ? draftOf(agent, p.personal) : { ...emptyCardDraft(), ...(panelNew ? { country: "GB" } : {}) }));
   const [initial] = useState<CardDraft>(() => ({ ...base, ...(p.prefill ?? {}) }));
   const [d, setD] = useState<CardDraft>(initial);
   const [tab, setTab] = useState<CardTab>((mode === "new" || variant === "panel") && p.tab === "notes" ? "who" : p.tab);
@@ -286,6 +289,12 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
     if (firstProblem) return <span className="bad" data-ae="sum-bad">{firstProblem}</span>;
     if (dup) return <span className="bad" data-ae="sum-bad">{`${dup.name} is already on your list`}</span>;
     if (carried) return "Carried over what you picked. Save on the card when you’re done.";
+    if (panelNew) {
+      const who = d.name.trim() || d.agency.trim();
+      return who
+        ? <span className="ae-will" data-ae="sum-will">{who} will be added to your list.</span>
+        : <span className="ae-need" data-ae="sum-need">A name or an agency is needed</span>;
+    }
     if (mode === "new") return "Only a name or an agency is needed.";
     if (!dirty) return "No changes yet.";
     /* the mock counts the LINES the Also-changes boxes show — each one is a thing that moves */
@@ -335,7 +344,7 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
         <div className="ae-panes">
           {/* ── Contact ── */}
           <section className={`ae-pane${tab === "who" ? " on" : ""}`} data-sec="who" role="tabpanel" aria-hidden={tab !== "who"}>
-            {mode === "new" && (
+            {mode === "new" && !panelNew && (
               <F label="Paste a link" vlKey="paste" vl={filed ? <span className={filed.ok ? "ok" : "bad"}>{filed.text}</span> : ""}>
                 <input
                   className={`ac-in${filed && !filed.ok ? " bad" : ""}`} data-ae="paste" value={paste} autoComplete="off"
@@ -349,6 +358,12 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
             ) : ""}>
               <input className={`ac-in${problems.name || dup ? " bad" : ""}`} data-ae="name" value={d.name} autoComplete="off" onChange={(e) => set({ name: e.target.value })} />
             </F>
+            {panelNew ? (
+              /* v18.3 §D — a plain field: no placeholder, no suggestions from other agents */
+              <F label="Agency" vlKey="agency">
+                <input className="ac-in" data-ae="agency" value={d.agency} autoComplete="off" onChange={(e) => { setAgencyQ(e.target.value); set({ agency: e.target.value }); }} />
+              </F>
+            ) : (
             <F label="Agency" vlKey="agency" vl={colleagues.length > 0 && d.agency.trim() ? (
               <span className="ae-hint" data-ae="agency-hint">
                 <span><b>{colleagues.length} other agent{colleagues.length > 1 ? "s" : ""}</b> at {d.agency.trim()}{colleagues[0].city ? ` · ${colleagues[0].city}` : ""}{colleagues[0].responseTimeWeeks ? ` · reply in about ${colleagues[0].responseTimeWeeks} weeks` : ""}</span>
@@ -362,6 +377,7 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
                 onPick={(x) => { setAgencyQ(x.value); set({ agency: x.value }); (document.activeElement as HTMLElement | null)?.blur(); }}
               />
             </F>
+            )}
             <F label="Country"><CountryField value={d.country} onPick={(c) => set({ country: c })} /></F>
             <F label="City">
               <Combo
@@ -443,11 +459,12 @@ export const AgentCardEditor: React.FC<AgentCardEditorProps> = (p) => {
                 onStep={(dir) => set({ weeks: d.weeks == null ? (dir > 0 ? 6 : null) : Math.max(1, Math.min(26, d.weeks + dir)) })}
               />
             </F>
-            <F label="No reply means no" vlKey="nrn" vl={d.nrn == null ? <span>Not stated yet</span> : undefined}>
+            {/* v18.3 §D — "Response policy": the same field (noResponseMeansNo) and the same values, in plain words */}
+            <F label={<Term id="responsePolicy">Response policy</Term>} vlKey="nrn" vl={d.nrn == null ? <span>Not stated yet</span> : undefined}>
               <Seg<"yes" | "no">
-                ae="nrn" label="No reply means no"
+                ae="nrn" label="Response policy"
                 value={d.nrn == null ? null : d.nrn ? "yes" : "no"}
-                options={[["yes", "Yes"], ["no", "No"]]}
+                options={[["yes", "No response means no"], ["no", "Always replies"]]}
                 onPick={(v) => set({ nrn: v === "yes" })}
               />
             </F>

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CL192-A1",
+  "where": "@1512 unpinned (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL192-A1",
+  "where": "@1512 the eyebrow and the content card are there",
+  "ok": true,
+  "detail": "{\"eb\":141.75,\"win\":105.75,\"acts\":320.75,\"counts\":311.03125,\"card\":364.75,\"full\":false}"
+ },
+ {
+  "lock": "CL192-A1",
+  "where": "@1512 eyebrow top − content card top = 36 ±2",
+  "ok": true,
+  "detail": "36.0"
+ },
+ {
+  "lock": "CL192-A1",
+  "where": "@1280 unpinned (precondition)",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL192-A1",
+  "where": "@1280 the eyebrow and the content card are there",
+  "ok": true,
+  "detail": "{\"eb\":141.75,\"win\":105.75,\"acts\":320.75,\"counts\":311.03125,\"card\":364.75,\"full\":false}"
+ },
+ {
+  "lock": "CL192-A1",
+  "where": "@1280 eyebrow top − content card top = 36 ±2",
+  "ok": true,
+  "detail": "36.0"
+ }
+]

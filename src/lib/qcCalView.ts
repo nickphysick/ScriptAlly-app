@@ -20,6 +20,7 @@ import { QueryStatus } from "../types";
 import { ATTENTION_LABEL, ATTENTION_ORDER, eyeRows, type Attention, type EyeFocus, type EyeRow } from "./qcBirdsEye";
 import { STAGE_NAME, stageOrder, tileCourt, type QcRow } from "./qcSummary";
 import { isYourMoveRow } from "./queryCentreGroups";
+import { nudgePhase } from "./nudgeWindow";
 
 export type GroupBy = "attention" | "status" | "action" | "package" | "none";
 export type SortBy = "queried" | "changed" | "due";
@@ -67,7 +68,8 @@ export const CAL_DEFAULT: CalView = {
  * the type requires it.
  */
 export const GROUP_BY_OPTIONS: readonly { key: GroupBy; label: string; short: string }[] = [
-  { key: "attention", label: "Urgency", short: "urgency" },
+  /* v139 §C — renamed from "Urgency"; the stored value stays `attention`, so a saved grouping carries over */
+  { key: "attention", label: "Who it's with", short: "who it's with" },
   { key: "status", label: "Status", short: "status" },
   { key: "action", label: "Next action", short: "next action" },
   { key: "package", label: "Submission package", short: "package" },
@@ -186,10 +188,9 @@ export const ACTION_GROUPS: readonly { key: NextAction; label: string; hint: str
   { key: "wait", label: "Waiting on the agent", hint: "nothing to do yet" },
 ];
 
-/** past its date by more than this, and it is not a nudge any more */
-export const CLOSE_OVER_DAYS = 28;
-/** …and an UNDATED stage this long with no word says the same thing */
-export const CLOSE_UNDATED_DAYS = 84;
+/* v141.1 — the thresholds and the date rule live in lib/nudgeWindow (one rule, three readers); re-exported for the
+   callers that read them from here */
+export { CLOSE_OVER_DAYS, CLOSE_UNDATED_DAYS } from "./nudgeWindow";
 const DAY = 86_400_000;
 
 /**
@@ -205,12 +206,8 @@ export function nextAction(r: QcRow, nowMs: number): NextAction {
   if (r.status === QueryStatus.REVISE_RESUBMIT) return "revision";
   if (r.status === QueryStatus.FULL_REQUESTED) return "full";
   if (r.status === QueryStatus.PARTIAL_REQUESTED) return "partial";
-  const past = r.expectedMs != null && r.expectedMs < nowMs;
-  const over = past ? (nowMs - r.expectedMs!) / DAY : 0;
-  const inStage = r.stageStartMs != null ? (nowMs - r.stageStartMs) / DAY : 0;
-  if ((past && over > CLOSE_OVER_DAYS) || (r.expectedMs == null && inStage > CLOSE_UNDATED_DAYS)) return "close";
-  if (past) return "nudge";
-  return "wait";
+  /* v141.1 — the date branch is the nudge window, lib/nudgeWindow */
+  return nudgePhase(r, nowMs);
 }
 
 /**
@@ -462,6 +459,9 @@ export interface ListGroup { key: string; label: string; hint?: string; rows: Qc
  * WITHIN each group for free. A second ordering pass inside the grouping is how a list comes to
  * disagree with its own sort control.
  */
+/** v139 §C — the closed statuses, in the order their bands come after the live ones (Status and Next action) */
+export const CLOSED_ORDER: readonly QueryStatus[] = [QueryStatus.SIGNED, QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN];
+
 export function listGroups(
   rows: readonly QcRow[],
   groupBy: GroupBy,
@@ -498,17 +498,31 @@ export function listGroups(
       .map((g) => mk(g.key, g.label, rows.filter((r) => urgencyGroup(r) === g.key), g.hint))
       .filter((g) => g.rows.length > 0);
   }
+  /* v139 §C — A CLOSED QUERY HAS ITS OWN BAND, LAST, UNDER STATUS AND UNDER NEXT ACTION. The status grouping listed
+     only the live stages, so every passed or unanswered query simply vanished from the list under it; and the
+     next-action grouping filed a passed query under "Consider closing" or "Waiting on the agent", which is a confident
+     wrong statement about a query that is over. One band per closed status, in this order, after the live ones. */
+  const closedBands = (): ListGroup[] => CLOSED_ORDER
+    .map((st) => mk(String(st), STAGE_NAME[st], rows.filter((r) => r.status === st)))
+    .filter((g) => g.rows.length > 0);
   if (groupBy === "action") {
     /* the expanded view's own next-action groups, most pressing first — §2 asks for the same ones */
-    return ACTION_GROUPS
-      .map((g) => mk(g.key, g.label, rows.filter((r) => nextAction(r, nowMs) === g.key), g.hint))
-      .filter((g) => g.rows.length > 0);
+    const live = rows.filter((r) => !CLOSED_ORDER.includes(r.status));
+    return [
+      ...ACTION_GROUPS
+        .map((g) => mk(g.key, g.label, live.filter((r) => nextAction(r, nowMs) === g.key), g.hint))
+        .filter((g) => g.rows.length > 0),
+      ...closedBands(),
+    ];
   }
   if (groupBy === "status") {
     /* PIPELINE order, never alphabetical and never by count */
-    return stageOrder([...rows])
-      .map((st: QueryStatus) => mk(String(st), STAGE_NAME[st], rows.filter((r) => r.status === st)))
-      .filter((g) => g.rows.length > 0);
+    return [
+      ...stageOrder([...rows])
+        .map((st: QueryStatus) => mk(String(st), STAGE_NAME[st], rows.filter((r) => r.status === st)))
+        .filter((g) => g.rows.length > 0),
+      ...closedBands(),
+    ];
   }
   /* packages A–Z, with "No package" LAST however its name would sort */
   const named = new Map<string, QcRow[]>();

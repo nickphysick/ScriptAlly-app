@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "A1",
+  "where": "@1512 the archivist renders",
+  "ok": true,
+  "detail": "[262,201.75,201.046875,179,463.046875]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 its height is the title block's (eyebrow top to button bottom) ±1",
+  "ok": true,
+  "detail": "179.0 vs 179.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 its top is the eyebrow's ±1",
+  "ok": true,
+  "detail": "201.8 vs 201.8"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 its width follows 1.123 (±2)",
+  "ok": true,
+  "detail": "201.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 its left is 14 from the sheet's left ±1",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the title block starts at its right + 28 ±1",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 no overlap with the letter strip",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 no overlap with the List health card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the title block clears the card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the archivist renders",
+  "ok": true,
+  "detail": "[262,201.75,201.046875,179,463.046875]"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 its height is the title block's (eyebrow top to button bottom) ±1",
+  "ok": true,
+  "detail": "179.0 vs 179.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 its top is the eyebrow's ±1",
+  "ok": true,
+  "detail": "201.8 vs 201.8"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 its width follows 1.123 (±2)",
+  "ok": true,
+  "detail": "201.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 its left is 14 from the sheet's left ±1",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the title block starts at its right + 28 ±1",
+  "ok": true,
+  "detail": "28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 no overlap with the letter strip",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 no overlap with the List health card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the title block clears the card",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1024 the archivist is hidden",
+  "ok": true,
+  "detail": "true"
+ }
+]

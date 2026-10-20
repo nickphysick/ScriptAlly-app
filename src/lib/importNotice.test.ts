@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { QueryStatus } from "../types";
 import { validateSmartImport } from "./smartImport";
 import {
-  buildImportNotice, saveImportNotice, readImportNotice, clearImportNotice, noticeHeadline, noticeWhy, noticeToggle, NO_NAME_REASON,
+  buildImportNotice, saveImportNotice, readImportNotice, clearImportNotice, noticeHeadline, noticeWhy, noticeToggle, NO_NAME_REASON, CHOSE_REASON,
 } from "./importNotice";
 
 const agents = [
@@ -59,11 +59,14 @@ describe("N1 — buildImportNotice", () => {
     expect(n.rows.map((r) => r.who)).toEqual(["Clara Voss", "Westbrook Literary", ""]);
   });
 
-  it("an automatic set-aside still set aside at import is a row, with the validator's reason", () => {
+  /* Import review v1 (Nick's ruling): a row the writer removed in the deck ("Remove this row") is
+     listed with the writer's own reason, not the validator's — they chose it. */
+  it("a row the writer removed in the deck is a row, and the reason says they chose it", () => {
     const n = buildImportNotice([], { errors: [] }, agents, [{ status: "Queried", sentDate: "2026-02-10T00:00:00.000Z" }])!;
     expect(n.count).toBe(1);
-    expect(n.rows).toEqual([{ who: "", status: "Queried", sentDate: "2026-02-10T00:00:00.000Z", reason: NO_NAME_REASON }]);
-    expect(noticeWhy(n)).toBe("It had no agent or agency name.");
+    expect(n.rows).toEqual([{ who: "", status: "Queried", sentDate: "2026-02-10T00:00:00.000Z", reason: CHOSE_REASON }]);
+    expect(CHOSE_REASON).toBe("You chose not to import this");
+    expect(noticeWhy(n), "no 'it had no name' line: the row says why").toBeNull();
   });
 
   it("all three kinds together: the count is the list's length, and the reason sentence is dropped", () => {

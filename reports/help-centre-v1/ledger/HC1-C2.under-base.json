@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HC1-C2",
+  "where": "@1512 the address is /help",
+  "ok": false,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "HC1-C2",
+  "where": "@1512 the home is on screen",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C2",
+  "where": "@1512 no blank article",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C2",
+  "where": "@1280 the address is /help",
+  "ok": false,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "HC1-C2",
+  "where": "@1280 the home is on screen",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C2",
+  "where": "@1280 no blank article",
+  "ok": true,
+  "detail": ""
+ }
+]

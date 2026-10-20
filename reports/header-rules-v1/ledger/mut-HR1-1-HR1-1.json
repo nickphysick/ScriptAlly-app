@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 found the art and the card",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 eyebrow (l, t)",
+  "ok": false,
+  "detail": "243.02,42 vs 243,36"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 title (t, size)",
+  "ok": false,
+  "detail": "69,44 vs 63,44"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 actions (t, b)",
+  "ok": false,
+  "detail": "175,221 vs 169,215"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 art (l, t, w, h)",
+  "ok": false,
+  "detail": "14,42,201.05,179 vs 14,36,201,179"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 right inset",
+  "ok": true,
+  "detail": "64 vs 64"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1280 content top",
+  "ok": false,
+  "detail": "265 vs 259"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 found the art and the card",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 eyebrow (l, t)",
+  "ok": false,
+  "detail": "243.02,42 vs 243,36"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 title (t, size)",
+  "ok": false,
+  "detail": "69,44 vs 63,44"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 actions (t, b)",
+  "ok": false,
+  "detail": "175,221 vs 169,215"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 art (l, t, w, h)",
+  "ok": false,
+  "detail": "14,42,201.05,179 vs 14,36,201,179"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 right inset",
+  "ok": true,
+  "detail": "142 vs 142"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1440 content top",
+  "ok": false,
+  "detail": "265 vs 259"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 found the art and the card",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 eyebrow (l, t)",
+  "ok": false,
+  "detail": "243.02,42 vs 243,36"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 title (t, size)",
+  "ok": false,
+  "detail": "69,44 vs 63,44"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 actions (t, b)",
+  "ok": false,
+  "detail": "175,221 vs 169,215"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 art (l, t, w, h)",
+  "ok": false,
+  "detail": "14,42,201.05,179 vs 14,36,201,179"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 right inset",
+  "ok": true,
+  "detail": "178 vs 178"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1512 content top",
+  "ok": false,
+  "detail": "265 vs 259"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 found the art and the card",
+  "ok": true,
+  "detail": "{\"header\":true,\"ey\":true,\"title\":true,\"byline\":true,\"acts\":true,\"art\":true,\"right\":true,\"content\":true}"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 eyebrow (l, t)",
+  "ok": false,
+  "detail": "267.73,42 vs 267.7,36"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 title (t, size)",
+  "ok": false,
+  "detail": "69,50 vs 63,50"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 actions (t, b)",
+  "ok": false,
+  "detail": "197,243 vs 191,237"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 art (l, t, w, h)",
+  "ok": false,
+  "detail": "14,42,225.77,201 vs 14,36,225.8,201"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 right inset",
+  "ok": true,
+  "detail": "292 vs 292"
+ },
+ {
+  "lock": "HR1-1",
+  "where": "contacts 1920 content top",
+  "ok": false,
+  "detail": "287 vs 281"
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 at rest the shadow paints over the card",
+  "ok": true,
+  "detail": "5746 pixels differ"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 hovered the card paints over the shadow",
+  "ok": false,
+  "detail": "5548 pixels differ"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 hovered the card is up 3px",
+  "ok": true,
+  "detail": "matrix(1, 0, 0, 1, 0, -3)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 at rest the shadow paints over the card",
+  "ok": true,
+  "detail": "5681 pixels differ"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 hovered the card paints over the shadow",
+  "ok": false,
+  "detail": "5480 pixels differ"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 hovered the card is up 3px",
+  "ok": true,
+  "detail": "matrix(1, 0, 0, 1, 0, -3)"
+ }
+]

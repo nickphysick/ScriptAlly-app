@@ -1,0 +1,278 @@
+[
+ {
+  "lock": "C1",
+  "where": "1280 hd present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 hd x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 hd w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 hd h",
+  "ok": true,
+  "detail": "34.0 vs ref 34.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 trust present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 trust x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 trust w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 trust y",
+  "ok": true,
+  "detail": "50.0 vs ref 50.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 trust h",
+  "ok": true,
+  "detail": "67.5 vs ref 67.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tray present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tray x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tray w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 tray y",
+  "ok": true,
+  "detail": "139.5 vs ref 139.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 lead present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 lead x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 lead w",
+  "ok": true,
+  "detail": "582.1 vs ref 581.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 lead y",
+  "ok": true,
+  "detail": "139.5 vs ref 139.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band x",
+  "ok": true,
+  "detail": "1.0 vs ref 1.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band w",
+  "ok": true,
+  "detail": "580.1 vs ref 579.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band y",
+  "ok": true,
+  "detail": "140.5 vs ref 140.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 band h",
+  "ok": true,
+  "detail": "54.0 vs ref 54.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 who present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 who x",
+  "ok": true,
+  "detail": "25.0 vs ref 25.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 who w",
+  "ok": true,
+  "detail": "532.1 vs ref 531.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 who y",
+  "ok": true,
+  "detail": "216.5 vs ref 216.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 who h",
+  "ok": true,
+  "detail": "102.6 vs ref 102.6"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 why present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 why x",
+  "ok": true,
+  "detail": "25.0 vs ref 25.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 why w",
+  "ok": true,
+  "detail": "532.1 vs ref 531.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 why y",
+  "ok": true,
+  "detail": "341.1 vs ref 341.1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 facts present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 facts x",
+  "ok": true,
+  "detail": "25.0 vs ref 25.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 facts w",
+  "ok": true,
+  "detail": "532.1 vs ref 531.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 acts present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 acts x",
+  "ok": true,
+  "detail": "25.0 vs ref 25.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 acts w",
+  "ok": true,
+  "detail": "532.1 vs ref 531.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 acts h",
+  "ok": true,
+  "detail": "63.0 vs ref 63.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 queue present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 queue x",
+  "ok": true,
+  "detail": "602.1 vs ref 601.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 queue w",
+  "ok": true,
+  "detail": "340.0 vs ref 340.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 queue y",
+  "ok": true,
+  "detail": "139.5 vs ref 139.5"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 keys present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280 keys x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 keys w",
+  "ok": true,
+  "detail": "942.1 vs ref 941.7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 keys h",
+  "ok": true,
+  "detail": "17.0 vs ref 17.0"
+ }
+]

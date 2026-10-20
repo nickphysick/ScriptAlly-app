@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 the heading order",
+  "ok": false,
+  "detail": "[\"Agent\",\"What they want\",\"Replies\",\"Query status\"]"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Agent\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "350.0 vs 350.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"What they want\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "645.1 vs 645.1"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Replies\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "1088.4 vs 1088.4"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Query status\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "1228.4 vs 1228.4"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 the population: emails and websites to check, the long ones among them",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 the heading order",
+  "ok": false,
+  "detail": "[\"Agent\",\"What they want\",\"Replies\",\"Query status\"]"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Agent\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "350.0 vs 350.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"What they want\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "570.1 vs 570.1"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Replies\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "898.0 vs 898.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Query status\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "1038.0 vs 1038.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 the population: emails and websites to check, the long ones among them",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 website and email stack at 1280 (the branch is entered)",
+  "ok": false,
+  "detail": "false"
+ }
+]

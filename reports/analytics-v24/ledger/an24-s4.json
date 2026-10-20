@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "S4 kept + longer = placed",
+  "where": "1512",
+  "ok": true,
+  "detail": "21+3 vs 21+3"
+ },
+ {
+  "lock": "S4 a kept row's took bar ends at or before its said bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 wrong"
+ },
+ {
+  "lock": "S4 a longer row's took bar ends after its said bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 wrong"
+ },
+ {
+  "lock": "S4 longer bars are rust",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(180, 85, 63) rgb(180, 85, 63) rgb(180, 85, 63)"
+ },
+ {
+  "lock": "S4 kept bars are not rust",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "S4 one shared scale (±1px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 off · 6.634 px/day"
+ },
+ {
+  "lock": "S4 kept + longer = placed",
+  "where": "1280",
+  "ok": true,
+  "detail": "21+3 vs 21+3"
+ },
+ {
+  "lock": "S4 a kept row's took bar ends at or before its said bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 wrong"
+ },
+ {
+  "lock": "S4 a longer row's took bar ends after its said bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 wrong"
+ },
+ {
+  "lock": "S4 longer bars are rust",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(180, 85, 63) rgb(180, 85, 63) rgb(180, 85, 63)"
+ },
+ {
+  "lock": "S4 kept bars are not rust",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "S4 one shared scale (±1px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 off · 4.048 px/day"
+ }
+]

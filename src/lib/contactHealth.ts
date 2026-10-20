@@ -13,26 +13,32 @@
  *    the count rises above it (something new is missing). Absent or null means "not dismissed".
  */
 import type { HkModel } from "./contactHousekeeping";
+import type { Agent } from "../types";
+import { health } from "./listHealth";
 import type { User } from "../types";
 import type { UserPaths } from "./userPaths";
 
 export interface ListHealth { pct: number; gaps: number }
 
-export const listHealth = (m: Pick<HkModel, "share" | "items">): ListHealth => ({
-  pct: Math.round(Math.max(0, Math.min(1, m.share)) * 100),
-  gaps: m.items.length,
-});
+/** v18 §F.1: the score is the POINTS share (lib/listHealth), no longer the share of agents with no gaps; the gap
+ *  count is still Housekeeping's own (the gaps not put off with Later). */
+export const listHealth = (agents: readonly Agent[], m: Pick<HkModel, "gapsById" | "items">): ListHealth => {
+  const h = health(agents, m);
+  return { pct: h.pct ?? 0, gaps: h.gaps };
+};
 
 /** "14 gaps to fill" · "1 gap to fill" · "All filled in" */
 export const gapLine = (gaps: number): string =>
   gaps <= 0 ? "All filled in" : `${gaps} gap${gaps === 1 ? "" : "s"} to fill`;
 
 export const healthLabel = (h: ListHealth): string =>
-  h.gaps <= 0 ? "List health 100%. All filled in. Open Housekeeping" : `List health ${h.pct}%. ${gapLine(h.gaps)}. Open Housekeeping`;
+  h.gaps > 0 ? `List health ${h.pct}%. ${gapLine(h.gaps)}. Open Housekeeping`
+    : h.pct === 100 ? "List health 100%. All filled in. Open Housekeeping" : `List health ${h.pct}%. Some put off for later. Open Housekeeping`;
 
 /* ── the ring ─────────────────────────────────────────────────────────────────────────────────── */
 
-export const RING = { box: 95, r: 42, w: 9, join: 2.5 } as const;
+/* v18.3 §B — a 10 stroke with a round cap on the filled arc; r keeps the stroke inside the 95 box */
+export const RING = { box: 95, r: 42.5, w: 10, join: 2.5 } as const;
 export const RING_C = 2 * Math.PI * RING.r;
 
 /** the ink arc's length, and whether the two white joins are drawn (only when 0 < pct < 100) */
@@ -62,3 +68,9 @@ export function nextDismissed(gaps: number, dismissed: number | null): number | 
 }
 
 export const dismissPath = (v: number | null): UserPaths => ({ [DISMISS_PATH]: v });
+
+/* ── v18 §F.3 · the intro's flag, in the same store ───────────────────────────────────────────── */
+
+export const INTRO_PATH_V18: UserPaths = { "todoPrefs.contacts.hkIntroSeen": true };
+export const introSeenOf = (user: Pick<User, "todoPrefs"> | null | undefined): boolean =>
+  (user?.todoPrefs as { contacts?: { hkIntroSeen?: unknown } } | undefined)?.contacts?.hkIntroSeen === true;

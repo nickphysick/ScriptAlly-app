@@ -1,0 +1,681 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v19 §A/§B — ONE LIST, PINNED OR NOT, AND ITS TOOLBAR (ref design-refs/contact-list-v19/).
+ *
+ * Unpinned: the hero, then the list card 22 under it — white, top corners 18, a 1px ring at 8% ink, square at the
+ * foot and running to the page's foot. Pinned: no hero; the card is the sheet's full width with the navy band on top.
+ * The toolbar, headings and rows are the SAME markup in both, so every rule below that styles them is unconditional.
+ *
+ * Desktop only (≥768px), as the rest of the list's chrome; the phone keeps its own layout.
+ */
+
+.clv-group {
+  --cl19-navy: #2a3a52;
+  --cl19-cream: 244, 238, 229;
+  --cl19-ink: 28, 19, 15;
+  /* where the band's text and the toolbar's first letter start, pinned (the "41" and the "A" share it) */
+  --cl19-inset: 186px;
+  --cl19-art-l: 30px;
+}
+@media (max-width: 1440px) {
+  .clv-group { --cl19-inset: 148px; --cl19-art-l: 16px; }
+}
+
+@media (min-width: 768px) {
+  /* ── the card ── */
+  .clv-group > .cl17-hd ~ .clv-main.clv-main { margin-top: 22px; }
+  .clv-group .cl16-list.cl19-card {
+    margin: 0; border-radius: 18px 18px 0 0; background: #fff;
+    box-shadow: 0 0 0 1px rgba(var(--cl19-ink), 0.08);
+  }
+  .clv-group .cl16-list.cl19-card .cl14-list { border-radius: 0; padding-bottom: 0; }
+  /* flow-root: the head's -12 cover margin must not collapse through the card's top (it pulled the card's edge 12px
+     up, leaving a strip of sheet colour under a hairline) */
+  .clv-group .cl16-list.cl19-card { display: flow-root; }
+  /* nothing beneath the card. v19.1 §F: unpinned, the card's four corners round (18) and 22px of page lies below it —
+     the scroll area's foot padding, which AgentList's measured min-height already subtracts, so a short list's card
+     still ends 22 above the page's foot; pinned, the card meets the foot square, as v19. `overflow: clip` rounds the
+     rows into the bottom corners (it makes no scroll container, so nothing sticky changes). */
+  .agl-wpg .wpg-scroll:has(.clv-group .cl19-card) { padding-bottom: 22px; }
+  .agl-wpg .wpg-scroll:has(.clv-group[data-full] .cl19-card) { padding-bottom: 0; }
+  .clv-group:not([data-full]) .cl16-list.cl19-card { border-radius: 18px; overflow: clip; }
+
+  /* pinned: no hero, the card takes the sheet's full width and starts at its top */
+  .clv-group[data-full] > .clv-main.clv-main {
+    margin-top: 0;
+    --cl16-w: var(--hsheet-w);
+  }
+  .clv-group[data-full] .cl16-list.cl19-card { border-radius: 0; box-shadow: none; }
+  /* the stack's offset is the head's own measured height (`--stk-head-h`, shell/stickyStack.ts): unpinned that box
+     already holds the lip's 12px cover, pinned it is the band and the toolbar from the sheet's top. The column
+     headings stick at it, directly under the toolbar. */
+  .clv-group.clv-group { --cl17-pin-h: var(--stk-head-h, 64px); }
+
+  /* ── the head: sticks to the scroll area's top. Unpinned it rides 12px down, under the sheet lip's cover (the
+     sheet's colour fills that strip); pinned it starts at the top and the lip turns navy over the band. ── */
+  .clv-group .cl16-list .cl19-head {
+    position: sticky; top: 0; z-index: 9; box-sizing: border-box;
+    margin-top: calc(-1 * var(--pin-cover, 12px)); padding-top: var(--pin-cover, 12px);
+    background: var(--ink-sheet, var(--ws-page));
+  }
+  .clv-group .cl16-list .cl19-head[data-pinned] { margin-top: 0; padding-top: 0; background: var(--cl19-navy); }
+  /* v19.1 §E — the illustration runs from the band's top down onto the toolbar, and nothing may cut it. Nothing CLIPS it
+     (no ancestor's overflow): what cut it was the sheet's lip — the 12px sticky strip at the scroll area's top (z 19,
+     shell/sheetLip.css), which painted over the hawk's head. Pinned, the head sits at the same top, opaque navy, so it
+     takes the lip's own level and, coming later, paints over it; it already sits above the column headings (7), the
+     applied-filters row (8) and the group bands (6), so the art's foot passes over the headings' top edge (never their
+     words, which start 13px lower). */
+  .clv-group .cl16-list .cl19-head[data-pinned] { z-index: 19; }
+}
+
+/* ── the toolbar ── */
+.cl19-tb {
+  position: relative; z-index: 1; box-sizing: border-box; display: flex; align-items: center; gap: 14px;
+  height: 52px; padding: 0 16px 0 22px; overflow: hidden; flex-wrap: nowrap;
+  background: #f7f4ee; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
+  font: 400 14.5px/1.2 var(--sp-serif); color: rgb(28, 19, 15);
+}
+.cl19-tbw { position: relative; z-index: 1; border-radius: 18px 18px 0 0; overflow: hidden; }
+.cl19-head[data-pinned] .cl19-tbw { border-radius: 0; overflow: visible; }
+.cl19-head[data-pinned] .cl19-tb { padding-left: var(--cl19-inset); }
+@media (max-width: 1440px) { .cl19-tb { padding-right: 10px; } }
+
+.cl19-az, .cl19-jump { display: flex; align-items: center; gap: 1px; flex: none; min-width: 0; }
+.cl19-az button {
+  box-sizing: border-box; flex: none; width: 21px; height: 28px; margin: 0; padding: 0; border: 0; border-radius: 6px;
+  background: transparent; color: #2a3a52; cursor: pointer;
+  font: 400 14.5px/28px var(--sp-type) !important; text-align: center;
+}
+.cl19-az button:hover:not(:disabled) { background: rgba(42, 58, 82, 0.08); }
+.cl19-az button[aria-current="true"] {
+  background: #fff; color: #2a3a52;
+  box-shadow: 0 0 0 1px rgba(42, 58, 82, 0.35), 0 1px 2px rgba(28, 19, 15, 0.1);
+}
+.cl19-az button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
+.cl19-az button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+/* the give-way order: (1) letters with no agents hide, (2) the letters tighten */
+.cl19-tb[data-fit="1"] .cl19-az button:disabled,
+.cl19-tb[data-fit="2"] .cl19-az button:disabled { display: none; }
+.cl19-tb[data-fit="2"] .cl19-az button { width: 18px; }
+
+.cl19-sp { flex: 1 1 0; min-width: 0; }
+.cl19-tools { display: flex; align-items: center; gap: 8px; flex: none; }
+
+/* the white controls: 34 tall, radius 8, a 1px ring at 12% and a 1px drop at 6% */
+.cl19-ctl, .cl19-find {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; flex: none; height: 34px; margin: 0;
+  padding: 0 12px; border: 0; border-radius: 8px; background: #fff; color: rgb(28, 19, 15); white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 2px rgba(28, 19, 15, 0.06);
+  font: 400 14.5px/1.2 var(--sp-serif) !important; cursor: pointer;
+}
+.cl19-ctl:hover:not(:disabled) { background: #fbf9f5; }
+.cl19-ctl:focus-visible, .cl19-pin:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-ctl .cl19-ic { display: inline-flex; color: #2a3a52; }
+.cl19-ctl .cl19-l { font: inherit; }
+.cl19-ctl .cl19-l b { font-weight: 600; font-family: inherit; }
+.cl19-ctl .cl19-caret { display: inline-flex; color: rgba(28, 19, 15, 0.5); }
+.cl19-fil .cl19-ic { color: #2d3a50; }
+.cl19-fil em {
+  font: 500 11.5px/1 var(--sp-mono); font-style: normal; color: #fff; background: #2a3a52;
+  min-width: 20px; height: 20px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; box-sizing: border-box;
+}
+
+/* Find: 150 wide; at ≤1440 a 42px icon button that opens to 240 over the letter row (focus, or a search held) */
+.cl19-findw { position: relative; flex: none; display: inline-flex; width: 150px; height: 34px; }
+.cl19-find { width: 100%; padding: 0 16px; cursor: text; color: rgba(28, 19, 15, 0.45); }
+.cl19-find svg { flex: none; }
+.cl19-find input {
+  flex: 1 1 auto; min-width: 0; width: 100%; height: 22px; margin: 0; padding: 0; border: 0; outline: 0; background: transparent;
+  color: rgb(28, 19, 15); font: 400 14.5px/22px var(--sp-serif) !important; line-height: normal;
+}
+.cl19-find input::placeholder { color: rgba(28, 19, 15, 0.45); }
+.cl19-find:focus-within { box-shadow: 0 0 0 1.5px #2a3a52, 0 1px 2px rgba(28, 19, 15, 0.06); }
+@media (max-width: 1440px) {
+  .cl19-findw { width: 42px; }
+  .cl19-find { position: absolute; right: 0; top: 0; width: 42px; padding: 0; justify-content: center; gap: 0; cursor: pointer; transition: width 0.18s cubic-bezier(.22,.8,.3,1); }
+  .cl19-find input { flex: 0 0 0; width: 0; opacity: 0; }
+  .cl19-findw:focus-within .cl19-find, .cl19-findw[data-has] .cl19-find {
+    z-index: 3; width: 240px; padding: 0 16px; justify-content: flex-start; gap: 8px; cursor: text;
+  }
+  .cl19-findw:focus-within .cl19-find input, .cl19-findw[data-has] .cl19-find input { flex: 1 1 auto; width: 100%; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .cl19-find { transition: none; } }
+
+/* Pin: navy, white text, the pin turned −30°; icon-only and square at ≤1440 (the aria-label stays) */
+.cl19-pin {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex: none;
+  height: 34px; margin: 0; padding: 0 12px; border: 0; border-radius: 8px; background: #2a3a52; color: #fff; cursor: pointer;
+  font: 400 14px/1.2 var(--sp-serif) !important; white-space: nowrap;
+}
+.cl19-pin:hover:not(:disabled) { background: #1f2c40; }
+.cl19-pin .cl19-pin-ic { flex: none; transform: rotate(-30deg); }
+.cl19-pin .cl19-pin-l { font: inherit; color: inherit; }
+@media (max-width: 1440px) {
+  .cl19-pin { width: 34px; padding: 0; }
+  .cl19-pin .cl19-pin-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* ── the pinned band: navy, 66 tall, the sheet's full width ── */
+.cl19-band {
+  position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 22px; height: 66px;
+  padding: 0 20px 0 var(--cl19-inset); background: #2a3a52; color: rgb(244, 238, 229);
+  font: 400 16px/1.2 var(--sp-serif); white-space: nowrap;
+}
+@media (max-width: 1440px) { .cl19-band { gap: 14px; padding-right: 12px; } }
+.cl19-art {
+  position: absolute; z-index: 3; left: var(--cl19-art-l); top: 0; width: 137px; height: 122px; object-fit: contain;
+  pointer-events: none; user-select: none;
+}
+@media (max-width: 1440px) { .cl19-art { top: 18px; width: 117px; height: 104px; } }
+.cl19-n { display: inline-flex; align-items: baseline; gap: 8px; margin: 0; flex: none; color: rgba(244, 238, 229, 0.6); }
+.cl19-n b { font: 400 28px/1 var(--sp-type) !important; color: rgb(244, 238, 229); }
+.cl19-n span { font: 400 16px/1 var(--sp-serif); }
+.cl19-seg { display: inline-flex; flex: none; padding: 3px; border-radius: 10px; background: #1f2c40; }
+.cl19-seg button {
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; margin: 0; padding: 0 14px; border: 0; border-radius: 7px;
+  background: transparent; color: rgba(244, 238, 229, 0.7); cursor: pointer; font: 400 14px/1 var(--sp-serif) !important;
+}
+.cl19-seg button + button { box-shadow: -1px 0 0 rgba(244, 238, 229, 0.1); }
+.cl19-seg button b { font: 400 16px/1 var(--sp-type) !important; color: rgb(244, 238, 229); }
+.cl19-seg button:hover:not(:disabled) { color: rgb(244, 238, 229); }
+.cl19-seg button[aria-pressed="true"] { background: rgba(244, 238, 229, 0.14); color: rgb(244, 238, 229); box-shadow: none; }
+.cl19-seg button:focus-visible { outline: 2px solid rgba(244, 238, 229, 0.8); outline-offset: -2px; }
+@media (max-width: 1440px) { .cl19-seg button { padding: 0 9px; } }
+.cl19-ym { display: inline-flex; align-items: center; gap: 8px; flex: none; height: 32px; padding: 0 12px 0 10px; font: 400 14px/1 var(--sp-serif); }
+.cl19-ym > b {
+  display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 999px;
+  background: #e08a64; color: #fff; font: 400 13px/1 var(--sp-type) !important;
+}
+.cl19-ym[data-n="0"] > b { background: rgba(244, 238, 229, 0.18); }
+@media (max-width: 1440px) { .cl19-ym { padding: 0 8px 0 6px; } }
+.cl19-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.cl19-bsp { flex: 1 1 0; min-width: 0; }
+.cl19-hl {
+  display: inline-flex; align-items: center; gap: 10px; flex: none; margin: 0; padding: 4px; border: 0; border-radius: 12px;
+  background: transparent; color: rgb(244, 238, 229); cursor: pointer; text-align: left;
+}
+.cl19-hl:hover:not(:disabled) { background: rgba(244, 238, 229, 0.08); }
+.cl19-hl:focus-visible { outline: 2px solid rgba(244, 238, 229, 0.8); outline-offset: 0; }
+.cl19-ring { width: 34px; height: 34px; flex: none; display: block; }
+.cl19-hlt { display: flex; flex-direction: column; gap: 2px; }
+.cl19-hlt b { font: 400 15px/1 var(--sp-type) !important; color: rgb(244, 238, 229); }
+.cl19-hlt small { font: italic 400 13.5px/1.35 var(--sp-serif); color: rgba(244, 238, 229, 0.7); text-decoration: underline; text-decoration-color: rgba(244, 238, 229, 0.35); text-underline-offset: 3px; }
+@media (max-width: 1440px) { .cl19-hlt small { display: none; } }
+.cl19-add {
+  display: inline-flex; align-items: center; gap: 8px; flex: none; height: 38px; margin: 0; padding: 0 18px; border: 0; border-radius: 9px;
+  background: #fff; color: #2a3a52; cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); font: 400 16px/1 var(--sp-type) !important;
+}
+.cl19-add > span { font: 400 19px/1 var(--sp-type); }
+.cl19-add:hover { background: #f7f4ee; }
+.cl19-add:focus-visible { outline: 2px solid rgba(244, 238, 229, 0.9); outline-offset: 2px; }
+@media (max-width: 1440px) { .cl19-add { padding: 0 12px; } }
+
+/* ── the folder tab and the sheet's lip, pinned only, on this page only: navy, joined to the band by an inverted
+   corner. `html[data-cl19-pinned]` is set by the page while it is on screen and pinned, and removed otherwise, so
+   no other page's tab is touched and unpinning leaves no navy curve behind. ── */
+@media (min-width: 768px) {
+  html[data-cl19-pinned] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
+  html[data-cl19-pinned] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
+  html[data-cl19-pinned] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  html[data-cl19-pinned] .agl-wpg .wpg-scroll > .sheet-lip { background: #2a3a52; box-shadow: none; }
+}
+
+/* ── pin and unpin: one view transition (old fades out 220ms, new in 300ms); none under reduced motion ── */
+html.cl19-vt::view-transition-old(root) { animation: 220ms ease both cl19-vt-out; }
+html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8, .3, 1) both cl19-vt-in; }
+@keyframes cl19-vt-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes cl19-vt-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── §C · THE COLUMNS, THE HEADINGS AND THE ROWS. Agent · Date added · Website · Email · Replies · Query status; the
+   widths are measured (ContactRows → lib/contactColumns): each column its longest entry, Agent the slack, website and
+   email stacked into one column when they do not both fit, the contact type then stepping down 0.5px at a time
+   (`--cl19-fs`, never below 12). Every rule is scoped to `.cl19-card`, so it outranks the v14–v18.3 layers. ── */
+.clv-group .cl19-card { --cl1833-av: 40px; }
+/* the headings: one face, ink at 85%, solid white with a 1px rule; they stick under the toolbar, and under the
+   applied-filters row when it shows (`--cl19-af-h`, its measured height; Part F sets it) */
+/* v19.1 §D — the gap is the fitted one (`--cl19-gap` on the list, from lib/contactColumns), shared by headings and rows */
+.clv-group .cl19-card .lt-labels.lth { column-gap: var(--cl19-gap, 20px); padding: 0 40px 0 78px; background: #fff; border-bottom: 1px solid rgba(var(--cl19-ink), 0.12); }
+@media (min-width: 768px) {
+  .clv-group .cl19-card .lt-labels.lth { top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px) + var(--cl19-af-h, 0px)); }
+}
+.clv-group .cl19-card .lt-labels.lth .lt-lab {
+  font: 500 10.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(var(--cl19-ink), 0.85); white-space: nowrap;
+}
+.clv-group .cl19-card .lt-labels.lth .lt-lab i { color: inherit; font-style: normal; }
+.clv-group .cl19-card .lt-labels.lth .lt-lab .lt-idle { opacity: 0.32; }
+.clv-group .cl19-card .lt-labels.lth button.lt-lab:not(.on):hover::after { content: none; }
+.clv-group .cl19-card .lt-labels.lth button.lt-lab:not(.on):hover .lt-idle { opacity: 0.6; }
+
+/* the rows: 70 at 1512 with one line of agency; the same inset as the headings */
+.clv-group .cl19-card .clv-row {
+  min-height: 70px; padding: 14px 40px 10px 78px; column-gap: var(--cl19-gap, 20px); font-family: var(--sp-serif);
+}
+.clv-group .cl19-card .clv-row::after { left: 0; right: 0; background: rgba(var(--cl19-ink), 0.08); }
+.clv-group .cl19-card .clv-row .clv-ini { width: 40px; height: 40px; }
+.clv-group .cl19-card .clv-row .clv-rwn b {
+  font: 400 19px/22.8px var(--sp-type) !important; letter-spacing: -0.015em; color: rgb(var(--cl19-ink));
+}
+.clv-group .cl19-card .clv-row .clv-ragy {
+  margin-top: 2px; font: italic 400 14px/20px var(--sp-serif) !important; color: rgba(var(--cl19-ink), 0.58);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Replies and Query status: as on dev; they never wrap, so the measured width is their own */
+.clv-group .cl19-card .clv-row > .clv-rrep { justify-self: start; white-space: nowrap; }
+.clv-group .cl19-card .clv-row > .clv-rq { white-space: nowrap; }
+
+/* Date added · Website · Email */
+.clv-group .cl19-card .cl19-c {
+  min-width: 0; font: 400 var(--cl19-fs, 15px)/1.4 var(--sp-serif); color: rgb(var(--cl19-ink)); white-space: nowrap;
+}
+.clv-group .cl19-card .cl19-cs { display: flex; flex-direction: column; align-items: flex-start; }
+.cl19-c .cl19-dt, .cl19-c .cl19-web, .cl19-c .cl19-em, .cl19-c .cl19-miss {
+  display: inline-block; font: inherit; white-space: nowrap; vertical-align: top;
+}
+/* brand.tsx names bare spans as the sans at runtime: every element in these cells states the serif */
+.clv-group .cl19-card .cl19-c :is(span, a, button, i) { font-family: var(--sp-serif) !important; }
+/* v19.1 §B — website and email: a 15px icon, navy at 70%, 6px before the text; the text in ink with no underline at
+   rest and a navy one at 35% (offset 4px) on hover. The icon takes no part in the type's scaling (contactColumns adds
+   its 22px to the column). */
+.cl19-c .cl19-web, .cl19-c .cl19-em { display: inline-flex; align-items: center; }
+.cl19-c .cl19-ci { flex: none; width: 15px; height: 15px; margin-right: 6px; color: rgba(42, 58, 82, 0.7); }
+.cl19-c .cl19-web { color: inherit; text-decoration: none; }
+.cl19-c :is(.cl19-wt, .cl19-et) { text-decoration: none; }
+.cl19-c .cl19-web:is(:hover, :focus-visible) .cl19-wt,
+.cl19-c .cl19-em:is(:hover, :focus-visible) .cl19-et { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px; }
+.cl19-c .cl19-ext { display: inline-block; margin-left: 4px; font: normal 400 13px/1 var(--sp-serif); color: #2a3a52; opacity: 0; }
+.cl19-c .cl19-web:hover .cl19-ext, .cl19-c .cl19-web:focus-visible .cl19-ext { opacity: 1; }
+.cl19-c .cl19-web:focus-visible, .cl19-c .cl19-em:focus-visible, .cl19-c .cl19-miss:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
+.cl19-c .cl19-em { cursor: pointer; }
+.cl19-c .cl19-ew { position: relative; display: inline-block; }
+/* the copy: "✓ Copied" over the address, which stays laid out (hidden) so the column keeps its width */
+.cl19-c .cl19-em[data-done] .cl19-et { visibility: hidden; }
+.cl19-c .cl19-copied { position: absolute; left: 0; top: 0; font-style: italic; color: #2f6b4f; white-space: nowrap; }
+/* stacked: the email under the website, at 72% ink */
+.cl19-c.cl19-cs .cl19-em { color: rgba(28, 19, 15, 0.72); }
+/* v19.1 §A — a missing website or email: blank at rest. While the row is hovered or anything in it has focus, "+ Add
+   website" / "+ Add email" shows: body serif 14px, navy, no icon, a navy underline at 35% offset 4px that goes full colour
+   on hover. Hidden is `visibility: hidden` on the WORDS only — the button stays laid out (the row never shifts) and stays
+   focusable (a hidden button would leave the tab order); focusing it is focus inside the row, so it shows. */
+.cl19-c .cl19-miss {
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52;
+  font-size: 14px; line-height: 20px;
+}
+.cl19-c .cl19-miss .cl19-mt {
+  visibility: hidden; font: inherit; color: inherit;
+  text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px;
+}
+.clv-row:is(:hover, :focus-within) .cl19-c .cl19-miss .cl19-mt { visibility: visible; }
+.cl19-c .cl19-miss:hover .cl19-mt { text-decoration-color: #2a3a52; }
+/* a list change holds hover until the pointer moves (§H): the words stay hidden under a still pointer too */
+.clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(:focus-within) .cl19-miss .cl19-mt { visibility: hidden; }
+
+/* ── §D · THE OPEN ROW: one strip (cream since v19.1 §G) under the main line, from the name's left edge (the disc's 40 + 11) to the
+   Query status column's right edge. The row keeps its own colour — white, the hover's #fdfbf8 while the pointer is
+   on it — whether the strip was opened by the pointer or the keyboard (v18's per-status tints and raise are undone).
+   `data-cl19-open` holds the strip's room through the close, so nothing jumps as `data-peek` drops; the height and
+   the strip's fade are Web Animations in ContactRows. ── */
+.clv-group .cl19-card .clv-row[data-peek]:not(.kf):not([aria-current="true"]),
+.clv-group .cl19-card .clv-row[data-peek][data-disc]:not(.kf):not([aria-current="true"]) {
+  z-index: auto; border-radius: 0; box-shadow: none; background: #fff;
+}
+.clv-group .cl19-card .clv-row:hover:not(.kf):not([aria-current="true"]),
+.clv-group .cl19-card .clv-row[data-peek][data-disc]:hover:not(.kf):not([aria-current="true"]) { background: #fdfbf8; }
+/* the selected row (its agent open in the panel) keeps its #f7f3ed tint and ink edge while hovered or open */
+.clv-group .cl19-card .clv-row[aria-current="true"],
+.clv-group .cl19-card .clv-row[aria-current="true"][data-disc] { background: #f7f3ed; box-shadow: inset 3px 0 0 #2a3a52; }
+.clv-group .cl19-card .clv-row[data-cl19-open] { grid-template-rows: auto auto; padding-bottom: 24px; }
+.cl19-strip {
+  grid-column: 1 / -1; box-sizing: border-box; display: flex; align-items: center; min-width: 0;
+  /* v19.1 §G — cream, so the open row never reads as a group header (the bands stay powder #e6edf6) */
+  margin: 21px 0 0 51px; padding: 10px 18px; border-radius: 12px; background: #f6f1e8;
+  cursor: default; text-align: left; white-space: nowrap;
+}
+.cl19-strip .cl19-sg { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.cl19-strip .cl19-pill {
+  display: inline-flex; align-items: center; gap: 4px; height: 23px; padding: 0 10px; box-sizing: border-box;
+  border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06);
+  font: 400 12.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); white-space: nowrap;
+}
+/* the fit mark: a tick and an ink ring, as the row's chips wore it */
+.cl19-strip .cl19-pill.clv-hit { color: rgb(28, 19, 15); box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.85); }
+.cl19-strip .cl19-pill.clv-hit::before { content: "\2713"; font-size: 11px; }
+.cl19-strip .cl19-sdiv { flex: none; width: 1px; height: 18px; margin: 0 18px; background: rgba(28, 19, 15, 0.12); }
+.cl19-strip .cl19-wish {
+  flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 400 14.5px/20px var(--sp-type) !important; letter-spacing: -0.01em; color: rgb(28, 19, 15);
+}
+.cl19-strip .cl19-wish::before { content: "\201C"; }
+.cl19-strip .cl19-wish::after { content: "\201D"; }
+.cl19-strip .cl19-wish .clv-mq { font: inherit !important; }
+/* on hover the text is one moving block (a transform needs a box), so the ellipsis gives way to the scroll */
+.cl19-strip .cl19-wish:hover { text-overflow: clip; }
+.cl19-strip .cl19-wish:hover .clv-mq { display: inline-block; }
+.cl19-strip .cl19-wish:not(:hover) .clv-mq { display: inline; }
+.cl19-strip .clv-miss { margin: 0; }
+
+/* ── §E · GROUP BY, THE GROUP BANDS AND THE JUMP ROW ──────────────────────────────────────────────────────────────
+   The chip is the applied-chip pattern: grouped, the wrapper turns powder with an inset 1.5px navy ring and holds a
+   separate ✕ (Stop grouping) beside the menu's button; the button inside goes clear so the two read as one chip. */
+.cl19-grpw { display: inline-flex; align-items: center; flex: none; height: 34px; border-radius: 8px; }
+.cl19-grpw[data-on] { box-sizing: border-box; padding-right: 6px; background: #e6edf6; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl19-grpw[data-on] .cl19-grp { background: transparent; box-shadow: none; padding-right: 0; }
+.cl19-grpw[data-on] .cl19-grp:hover:not(:disabled) { background: transparent; }
+.cl19-grp .cl19-l--on { display: inline-flex; align-items: center; gap: 8px; }
+.cl19-grp .cl19-gby { font: 400 13px/1 var(--sp-type) !important; color: #2a3a52; letter-spacing: 0.01em; }
+.cl19-grp .cl19-l--on b { font: 700 14.5px/20px var(--sp-serif) !important; color: rgb(28, 19, 15); }
+.cl19-grpx {
+  box-sizing: border-box; flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; margin: 0 0 0 10px;
+  padding: 0; border: 0; border-radius: 50%; background: #2a3a52; color: #fff; cursor: pointer;
+}
+.cl19-grpx:hover:not(:disabled) { background: #1f2c40; }
+.cl19-grpx:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* the jump row: a button per group — its mark and count, the current one white with a navy ring and its name */
+.cl19-jump { gap: 2px; overflow: hidden; height: 36px; }
+.cl19-jump button[data-cl19="jump-group"] {
+  box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; margin: 0; padding: 0 9px;
+  border: 0; border-radius: 8px; background: transparent; color: #2a3a52; cursor: pointer; white-space: nowrap;
+  font: 400 14.5px/1 var(--sp-type) !important;
+}
+.cl19-jump button[data-cl19="jump-group"] .cl19-jl { font: inherit !important; display: none; }
+.cl19-jump button[data-cl19="jump-group"] i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+.cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.28); }
+.cl19-jump button[data-cl19="jump-group"][aria-current="true"] .cl19-jl { display: inline; }
+.cl19-jump button[data-cl19="jump-group"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.cl19-jump button[data-cl19="jump-group"] .cl19-gm { margin-right: 2px; }
+/* give way: (1) the current group's name goes, (2) the groups that do not fit whole go into "+N more" */
+.cl19-tb:is([data-fit="1"], [data-fit="2"]) .cl19-jump button[aria-current="true"] .cl19-jl { display: none; }
+.cl19-jump button[data-over] { display: none; }
+.cl19-jmore {
+  box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; margin: 0 0 0 4px; padding: 0 12px;
+  border: 0; border-radius: 999px; background: #fff; color: #2a3a52; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 14px/1 var(--sp-type) !important;
+}
+.cl19-jmore[hidden] { display: none; }
+.cl19-jmore:hover, .cl19-jmore[aria-expanded="true"] { background: #edf1f7; }
+.cl19-jmore:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-jmore svg { color: rgba(28, 19, 15, 0.5); }
+/* its menu (portalled to body: every value stated, no page token) */
+.cl19-jpop {
+  position: fixed; z-index: 9000; box-sizing: border-box; min-width: 240px; max-height: min(60vh, 420px); overflow: auto; padding: 6px;
+  border-radius: 14px; background: #fff; box-shadow: 0 18px 40px -14px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.1);
+}
+.cl19-jpop button {
+  box-sizing: border-box; display: flex; align-items: center; gap: 9px; width: 100%; margin: 0; padding: 9px 12px; border: 0; border-radius: 9px;
+  background: transparent; color: #2a3a52; cursor: pointer; text-align: left; font: 400 15px/1.2 var(--sp-type) !important;
+}
+.cl19-jpop button span:not(.cl19-gm) { flex: 1; font: inherit !important; }
+.cl19-jpop button i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-jpop button:hover { background: #edf1f7; }
+.cl19-jpop button[aria-current="true"] { background: #e6edf6; }
+.cl19-jpop button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* a group's mark: the StatusDot (ink), a drawn mark, or a flag */
+.cl19-gm { display: inline-grid; place-items: center; flex: none; color: rgb(28, 19, 15); line-height: 0; }
+.cl19-gm .cl19-gm-svg[data-ghost] { color: rgba(28, 19, 15, 0.55); }
+.cl19-gm .cl19-flag { display: block; width: 18px; height: 13.5px; border-radius: 2px; background-size: cover; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14); }
+.cl19-gm .cl19-flag--none { box-sizing: border-box; background: transparent; box-shadow: none; border: 1.3px dashed rgba(28, 19, 15, 0.35); }
+.cl19-gb .cl19-gm { width: 22px; height: 22px; }
+.cl19-gb .cl19-gm .cl19-flag { width: 24px; height: 18px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 1px 2px rgba(28, 19, 15, 0.12); }
+.cl19-gb .cl19-gm .cl19-flag--none { border-width: 1.5px; box-shadow: none; }
+
+/* the strong band: 50 tall, powder, a 2px navy rule on top and a 1px rule at 16% navy beneath; it sticks under the
+   column headings (40 tall) until its section leaves */
+.clv-group .cl19-card .cl19-gb {
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; height: 50px; margin: 0; padding: 0 0 0 28px;
+  background: #e6edf6; border-top: 2px solid #2a3a52; border-bottom: 1px solid rgba(42, 58, 82, 0.16);
+  position: sticky; z-index: 6; top: calc(var(--cl17-pin-h, 0px) + var(--lt-stick, 0px) + var(--cl19-af-h, 0px) + var(--cl19-lh, 40px));
+}
+.clv-group .cl19-card .cl19-gb .cl19-gbl { font: 400 19px/1 var(--sp-type) !important; color: #1f2c40; white-space: nowrap; }
+.clv-group .cl19-card .cl19-gb .cl19-gbn {
+  box-sizing: border-box; display: inline-flex; align-items: center; height: 18px; padding: 3px 9px; border-radius: 999px;
+  background: #2a3a52; color: rgb(244, 238, 229); font: 400 12px/1 var(--sp-type) !important; font-style: normal; letter-spacing: 0.02em; white-space: nowrap;
+}
+/* the band's top rule ends a group: the row above it draws no rule of its own */
+.clv-group .cl19-card .cl19-grp-s > .clv-row:last-child::after { display: none; }
+.clv-group[data-loading] .cl19-gb { opacity: 0; }
+
+/* ── §F · FILTERING ──────────────────────────────────────────────────────────────────────────────────────────────────
+   The Filters chip wears the applied-chip pattern (as Group by): filtered, the wrapper turns powder with an inset 1.5px
+   navy ring, the button reads "Filtered" with a navy count, and a separate 22px navy ✕ clears everything. */
+.cl19-filw { display: inline-flex; align-items: center; flex: none; height: 34px; border-radius: 8px; }
+.cl19-filw[data-on] { box-sizing: border-box; padding-right: 8px; background: #e6edf6; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl19-filw[data-on] .cl19-fil { background: transparent; box-shadow: none; padding-right: 0; }
+.cl19-filw[data-on] .cl19-fil:hover:not(:disabled) { background: transparent; }
+.cl19-filw .cl19-fil em {
+  box-sizing: border-box; min-width: 0; height: auto; padding: 3px 7px; border-radius: 9px;
+  font: 600 11.5px/1 var(--sp-mono) !important; font-style: normal; color: #fff; background: #2a3a52;
+}
+.cl19-filw .cl19-filx { margin-left: 8px; }
+
+/* the menu: 640 wide, under the chip, right edges aligned; a navy header, a body that scrolls, a cream foot */
+.lpop.cl19-fm {
+  position: fixed; z-index: 60; box-sizing: border-box; display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  border-radius: 18px; background: #fff; color: rgb(28, 19, 15);
+  box-shadow: 0 28px 60px -22px rgba(28, 19, 15, 0.55), 0 0 0 1px rgba(28, 19, 15, 0.09);
+  font: 400 16px/1.45 var(--sp-serif);
+}
+.cl19-fm button { font-family: var(--sp-serif) !important; }
+.cl19-fm-h {
+  flex: none; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; height: 80px;
+  margin: 0 0 6px; padding: 16px 18px 14px 22px; background: #2d3a50;
+}
+.cl19-fm-h b { display: block; font: 400 19px/19px var(--sp-type) !important; color: rgb(244, 238, 229); }
+.cl19-fm-h span { display: block; margin-top: 3px; font: 400 14px/20px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.68); }
+.cl19-fm-h em { font-style: normal; font-weight: 700; color: #fff; }
+.cl19-fm-x {
+  box-sizing: border-box; display: grid; place-items: center; width: 32px; height: 32px; margin: 0; padding: 0; border: 0;
+  border-radius: 50%; background: transparent; color: rgba(244, 238, 229, 0.75); cursor: pointer;
+}
+.cl19-fm-x:hover { background: rgba(244, 238, 229, 0.12); color: rgb(244, 238, 229); }
+.cl19-fm-x:focus-visible { outline: 2px solid rgb(244, 238, 229); outline-offset: 2px; }
+.cl19-fm-b { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 22px 8px; }
+.cl19-fm-s { padding: 12px 0; }
+.cl19-fm-s h4 {
+  margin: 0 0 10px; font: 500 10.5px/14px var(--sp-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(61, 80, 112);
+}
+/* Most used: a powder band across the menu's full width */
+.cl19-fm-q { margin: 0 -22px; padding: 16px 22px 18px; background: #e9eef5; }
+.cl19-fm-qg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cl19-qp {
+  box-sizing: border-box; display: flex; align-items: center; gap: 12px; height: 64px; margin: 0; padding: 12px 14px; border: 0;
+  border-radius: 14px; background: #fff; color: rgb(28, 19, 15); text-align: left; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), inset 0 0 0 1px rgba(42, 58, 82, 0.12);
+  transition: background 0.12s, box-shadow 0.12s;
+}
+.cl19-qp:hover:not(:disabled):not(.on) { background: #f6f8fb; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), inset 0 0 0 1px rgba(42, 58, 82, 0.35); }
+.cl19-qp:disabled { opacity: 0.38; cursor: default; }
+.cl19-qp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-qic { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e9eef5; color: #2d3a50; }
+.cl19-qt { display: flex; flex-direction: column; min-width: 0; }
+.cl19-qt b { font: 400 15px/21px var(--sp-serif) !important; color: rgb(28, 19, 15); }
+.cl19-qt small { margin-top: 2px; font: italic 400 12.5px/17px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.52); }
+.cl19-qp i { margin-left: auto; font: 500 13px/17px var(--sp-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.5); }
+.cl19-qp.on { background: #2d3a50; box-shadow: none; }
+.cl19-qp.on .cl19-qic { background: rgb(244, 238, 229); color: #2d3a50; }
+.cl19-qp.on .cl19-qt b, .cl19-qp.on i { color: rgb(244, 238, 229); }
+.cl19-qp.on .cl19-qt small { color: rgba(244, 238, 229, 0.7); }
+/* the two columns */
+.cl19-fm-cols { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+.cl19-fm-list { display: flex; flex-direction: column; gap: 1px; }
+.cl19-fm-list--t { margin-top: 2px; }
+.cl19-fr {
+  box-sizing: border-box; display: flex; align-items: center; gap: 11px; min-height: 38px; margin: 0 -10px; padding: 6px 10px; border: 0;
+  border-radius: 10px; background: transparent; color: rgb(28, 19, 15); text-align: left; cursor: pointer;
+  font: 400 14.5px/1.25 var(--sp-serif) !important;
+}
+.cl19-fr:hover:not(:disabled) { background: #f3f5f9; }
+.cl19-fr:disabled { opacity: 0.35; cursor: default; background: none; }
+.cl19-fr:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+.cl19-fr i { margin-left: auto; font: 400 12px/16px var(--sp-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-fr.on i { color: #2a3a52; font-weight: 600 !important; }
+.cl19-fbox {
+  flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); transition: background 0.12s;
+}
+.cl19-fbox.on { background: #2a3a52; box-shadow: none; }
+.cl19-fic { flex: none; display: grid; place-items: center; width: 20px; height: 20px; color: rgb(28, 19, 15); }
+.cl19-flab { display: flex; flex-direction: column; font: inherit !important; line-height: 1.25; }
+.cl19-flab small { margin-top: 1px; font: italic 400 12.5px/17px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+/* the segmented controls (Submissions; the genres' Any / All) */
+.cl19-seg2 { display: inline-flex; margin: 0 0 8px; padding: 3px; border-radius: 12px; background: #f1ede6; }
+.cl19-seg2 button {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; height: 30px; margin: 0; padding: 0 13px; border: 0;
+  border-radius: 9px; background: transparent; color: rgba(28, 19, 15, 0.7); cursor: pointer; font-size: 14px !important; line-height: 1 !important;
+}
+.cl19-seg2 button i { font: 400 11.5px/1 var(--sp-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-seg2 button.on { background: #fff; color: rgb(28, 19, 15); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.14), 0 0 0 1px rgba(28, 19, 15, 0.06); }
+.cl19-seg2 button:disabled { opacity: 0.35; cursor: default; }
+.cl19-seg2 button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.cl19-seg2--s { margin: 0; }
+.cl19-seg2--s button { height: 26px; padding: 0 10px; font-size: 13px !important; }
+/* Genre */
+.cl19-fm-g { border-top: 1px solid rgba(28, 19, 15, 0.08); }
+.cl19-fm-gtop { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cl19-fm-find {
+  box-sizing: border-box; flex: 1 1 180px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px;
+  background: #f6f4f0; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); color: rgba(28, 19, 15, 0.45); cursor: text;
+}
+.cl19-fm-find:focus-within { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl19-fm-find input {
+  flex: 1 1 auto; min-width: 0; height: 20px; margin: 0; padding: 0; border: 0; outline: 0; background: transparent;
+  color: rgb(28, 19, 15); font: 400 14px/20px var(--sp-serif) !important;
+}
+.cl19-fm-find input::placeholder { color: rgba(28, 19, 15, 0.45); }
+.cl19-fm-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.cl19-gc {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 32px; margin: 0; padding: 0 12px; border: 0;
+  border-radius: 16px; background: #fff; color: rgb(28, 19, 15); cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font-size: 14px !important; line-height: 1 !important;
+}
+.cl19-gc i { font: 400 11.5px/1 var(--sp-mono) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
+.cl19-gc:hover:not(:disabled):not(.on) { background: #f3f5f9; }
+.cl19-gc.on { background: #2a3a52; color: #fff; box-shadow: none; }
+.cl19-gc.on i { color: rgba(255, 255, 255, 0.65); }
+.cl19-gc:disabled { opacity: 0.35; cursor: default; }
+.cl19-gc:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-fm-more, .cl19-fm-clear, .cl19-af-clear {
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, 0.35);
+}
+.cl19-fm-more { margin-top: 10px; font-size: 13.5px !important; line-height: 19px; }
+.cl19-fm-none { margin: 2px 0; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+/* the foot */
+.cl19-fm-f {
+  flex: none; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 14px;
+  border-top: 1px solid rgba(28, 19, 15, 0.1); background: #f4eee5;
+}
+.cl19-fm-clear { font-size: 14px !important; line-height: 20px; }
+.cl19-fm-clear:disabled { opacity: 0.35; cursor: default; text-decoration: none; }
+.cl19-fm-show {
+  box-sizing: border-box; height: 40px; margin: 0; padding: 0 20px; border: 0; border-radius: 20px; background: #2a3a52; color: #fff;
+  cursor: pointer; font-size: 15px !important; line-height: 1 !important;
+}
+.cl19-fm-show:hover { background: #1f2c40; }
+.cl19-fm-clear:focus-visible, .cl19-fm-show:focus-visible, .cl19-fm-more:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* the applied-filters row: under the toolbar (sticky under it), 44 tall, starting in line with the toolbar's first
+   button; its measured height is `--cl19-af-h` on the card, so the headings and the bands stick under it */
+.cl19-af {
+  position: relative; z-index: 8; box-sizing: border-box; display: flex; align-items: center; gap: 12px; height: 44px;
+  padding: 6px 28px 6px 22px; background: #eef2f7; border-bottom: 1px solid rgba(42, 58, 82, 0.14);
+  font: 400 14px/20px var(--sp-serif); color: rgb(28, 19, 15);
+}
+.cl19-af[data-pinned] { padding-left: var(--cl19-inset); }
+@media (min-width: 768px) {
+  .clv-group .cl16-list .cl19-af { position: sticky; top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px)); }
+}
+.cl19-af-n { flex: none; font: 400 14px/20px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl19-af-n b { font-weight: 700; color: rgb(28, 19, 15); }
+.cl19-af-chips { flex: 1 1 auto; min-width: 0; display: flex; gap: 7px; overflow: hidden; }
+.cl19-af-c {
+  box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 30px; margin: 0; padding: 0 10px 0 12px;
+  border: 0; border-radius: 15px; background: #fff; color: rgb(28, 19, 15); cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.3); font: 400 13.5px/1 var(--sp-serif) !important;
+}
+.cl19-af-c span { font: inherit !important; }
+.cl19-af-c svg { color: rgba(42, 58, 82, 0.7); }
+.cl19-af-c:hover { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl19-af-c:hover svg { color: #2a3a52; }
+.cl19-af-more { padding: 0 12px; color: #2a3a52; }
+.cl19-af-clear { flex: none; font: 400 13.5px/19px var(--sp-serif) !important; }
+.cl19-af-c:focus-visible, .cl19-af-clear:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── v19 §G — THE LIST'S LOADING SKELETON: the toolbar, the headings and rows, over the list area, until the list is ready.
+   The rows are the page's own rows (ContactSkeleton) drawn as their SHAPES — the disc, the name and agency lines and each
+   column's first mark — rather than whole grey blocks, and the headings row keeps its height with its words hidden (the
+   loaded headings are fitted to the real columns, which a placeholder cannot know). Every box is the box that replaces it:
+   the toolbar 52, the headings 40, each row its own height. Under reduced motion the shapes hold still. ── */
+.clv-group[data-loading] .cl19-card .clv-row {
+  background: transparent !important; border-radius: 0; animation: none;
+}
+.clv-group[data-loading] .cl19-card .clv-row :is(.clv-ini, .clv-rwn b, .clv-ragy, .cl19-dt, .cl19-c > *, .clv-rrep > :first-child, .clv-rq > :first-child) {
+  visibility: visible; color: transparent !important; border-color: transparent !important; box-shadow: none !important;
+  text-decoration: none !important; border-radius: 6px;
+  background: linear-gradient(90deg, #ebe8e3 0, #f4f2ef 40%, #ebe8e3 80%) 0 0 / 200% 100% !important;
+  animation: cl13Shim 1.3s linear infinite;
+}
+.clv-group[data-loading] .cl19-card .clv-row .clv-ini.clv-ini.clv-ini { border-radius: 50%; }
+.clv-group[data-loading] .cl19-card .lt-labels.lth > * { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .clv-group[data-loading] .cl19-card .clv-row :is(.clv-ini, .clv-rwn b, .clv-ragy, .cl19-dt, .cl19-c > *, .clv-rrep > :first-child, .clv-rq > :first-child) { animation: none; }
+}
+
+/* ── v19 §H — HOVER IS HELD AFTER A LIST CHANGE until the pointer moves (ContactRows sets `data-hover-hold`): a row under
+   a still pointer keeps its rest colour and does not open. ── */
+.clv-group .cl19-card .clv-list[data-hover-hold] .clv-row:hover:not(.kf):not([data-peek]):not([aria-current="true"]) { background: #fff; }
+
+/* ── v19.1 §F · UNPINNED, THE LIST'S TOOLBAR IS NAVY (screens 01–04). Pinned is unchanged: every rule below names the head
+   that is NOT pinned. The bar is the pinned band's navy with no rule beneath; the letters cream (#f4eee5), the empty
+   ones at 28%, the current one a cream tile with navy text, hover a 12% cream wash; Find, Group by and Filters keep
+   their white fill and lose their ring (the applied-chip states — powder and a navy ring — are untouched); Pin is
+   cream with navy text and icon, white on hover; the jump row's group buttons are white without a ring. Focus rings
+   that were navy turn cream, or they would vanish into the bar. ── */
+.cl19-head:not([data-pinned]) .cl19-tb { background: #2a3a52; border-bottom: 0; }
+.cl19-head:not([data-pinned]) .cl19-az button { color: rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) .cl19-az button:hover:not(:disabled) { background: rgba(244, 238, 229, 0.12); }
+.cl19-head:not([data-pinned]) .cl19-az button[aria-current="true"] { background: rgb(244, 238, 229); color: #2a3a52; box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-az button:disabled { color: rgba(244, 238, 229, 0.28); }
+.cl19-head:not([data-pinned]) .cl19-az button:focus-visible { outline-color: rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) :is(.cl19-ctl, .cl19-find) { box-shadow: none; }
+.cl19-head:not([data-pinned]) :is(.cl19-ctl, .cl19-pin, .cl19-grpx):focus-visible { outline-color: rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) .cl19-find:focus-within { box-shadow: 0 0 0 2px rgb(244, 238, 229); }
+.cl19-head:not([data-pinned]) .cl19-pin { background: rgb(244, 238, 229); color: #2a3a52; }
+.cl19-head:not([data-pinned]) .cl19-pin:hover:not(:disabled) { background: #fff; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"],
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: rgb(244, 238, 229); box-shadow: none; }
+.cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"]:focus-visible { outline-color: rgb(244, 238, 229); }
+
+/* ── v19.2 §A · BREATHING ROOM, unpinned only. The eyebrow's top sits 36 under the sheet's top edge (was 14 — the
+   header's own margin, v18 §A) and the list card's top 44 under the hero's lowest element (was 22). Both values are
+   the Contact list's own rules, not the shared hero frame (pageHeroFrame.css sets only the horizontal inset), so
+   nothing outside this page moves. Pinned has no hero and keeps its own 22 (`.clv-group[data-full] > .clv-main`). */
+@media (min-width: 768px) {
+  /* header rules v1.1: the shared hero top and gap below (shell/pageHeroFrame.css) */
+  .clv-group:not([data-full]) > .cl17-hd { margin-top: var(--hero-top); }
+  .clv-group:not([data-full]) > .cl17-hd ~ .clv-main.clv-main { margin-top: var(--hero-gap-below); }
+}
+
+/* ── v19.2 §B · THE REPLIES CELL: the reply time alone for an open agent; a closed one adds "Closed till 1 Nov" (or
+   "Closed to queries") under it in rust italic serif 13px — v18's rust, #a2452a. Not compact-hidden: it is a fact. */
+.clv-rrep .cl192-shut {
+  display: block; margin-top: 3px; font: italic 400 13px/1.3 var(--sp-serif) !important; color: #a2452a; white-space: nowrap;
+}
+
+/* ── v19.2 §C · "Not stated" — an absent (or zero) reply time — is ink at 55% (was 45). The stated window reads
+   "~6 weeks", spelled out (lib/contactList `replyWeeksLabel`). */
+.clv-group .clv-rrep b.unk { color: rgba(28, 19, 15, 0.55); }
+
+/* ── v19.2 §E · "Imported" under the Date added, serif italic 12.5px, ink at 50%. The cell is a flex column sized to
+   its content, so the label adds a line and never a width: the column is measured from the date line (contactColumns'
+   `date` reads `[data-cl19="date"]`) and the label is narrower than any date besides. */
+.clv-group .cl19-card .cl19-cd { display: flex; flex-direction: column; align-items: flex-start; }
+.clv-group .cl19-card .cl19-cd .cl192-imp {
+  display: block; margin-top: 1px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(var(--cl19-ink), 0.5);
+  white-space: nowrap;
+}

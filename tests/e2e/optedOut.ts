@@ -42,10 +42,11 @@
 /* Submission packages joined the same day (packages v2), under the same ruling and in the same shape. */
 /* The To-do list joined on 28 Sep (to-do list v2): full header over its own group, the desk rail beside. */
 /* Analytics joined on 29 Sep (analytics v2a) — the same shape: full header as its group's first row. */
-export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts", "Comparable titles", "Submission packages", "To-do list", "Analytics"];
+/* Discover joined on 18 Oct (Discover v1): its head is its own (the two-state header), so the grid's masthead is null. */
+export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts", "Comparable titles", "Submission packages", "To-do list", "Analytics", "Discover"];
 
 /** Routes of the opted-out pages, for suites whose census is keyed by route rather than by name. */
-export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics"];
+export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics", "/agents/discover"];
 
 export const isOptedOut = (nameOrRoute: string): boolean =>
   OPTED_OUT.includes(nameOrRoute) || OPTED_OUT_ROUTES.includes(nameOrRoute);

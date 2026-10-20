@@ -1,0 +1,230 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 seven buttons",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 centred in the inset",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 each 62 × 56",
+  "ok": true,
+  "detail": "[[62,56],[62,56],[62,56],[62,56],[62,56],[62,56],[62,56]]"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no visible count",
+  "ok": false,
+  "detail": "[1,1,1,1,1,1,1]"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no native title",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 q label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 q label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 q label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Queried · 35"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 q label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Queried · 35 vs 35 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 pr label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 pr label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 pr label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Partial requested · 5"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 pr label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Partial requested · 5 vs 5 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ps label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ps label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ps label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Partial sent · 5"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 ps label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Partial sent · 5 vs 5 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fr label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fr label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fr label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Full requested · 7"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fr label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Full requested · 7 vs 7 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fs label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fs label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fs label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Full sent · 6"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 fs label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Full sent · 6 vs 6 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 of label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 of label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 of label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Offer · 1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 of label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Offer · 1 vs 1 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cl label shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cl label 10 below",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cl label reads '{status} · {count}'",
+  "ok": true,
+  "detail": "Closed · 14"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 cl label's count = the rows its filter shows",
+  "ok": true,
+  "detail": "Closed · 14 vs 14 shown"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 seven buttons",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 centred in the inset",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 each 62 × 56",
+  "ok": true,
+  "detail": "[[62,56],[62,56],[62,56],[62,56],[62,56],[62,56],[62,56]]"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no visible count",
+  "ok": false,
+  "detail": "[1,1,1,1,1,1,1]"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no native title",
+  "ok": true,
+  "detail": "0"
+ }
+]

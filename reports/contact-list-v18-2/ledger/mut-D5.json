@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D5",
+  "where": "the footer reads 'Saved Wren’s wishlist.' and Undo",
+  "ok": true,
+  "detail": "Saved Wren’s wishlist.Undo"
+ },
+ {
+  "lock": "D5",
+  "where": "the footer is ink",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D5",
+  "where": "the save reached the document",
+  "ok": true,
+  "detail": "CL182 D5 probe."
+ },
+ {
+  "lock": "D5",
+  "where": "Undo restores the agent (deep-equal)",
+  "ok": false,
+  "detail": "mswlNotes,mswlCheckedAt"
+ },
+ {
+  "lock": "D5",
+  "where": "Undo restores the score",
+  "ok": false,
+  "detail": "75/50 → 76/49"
+ },
+ {
+  "lock": "D5",
+  "where": "Undo restores the counter",
+  "ok": true,
+  "detail": "1 of 50"
+ },
+ {
+  "lock": "D5",
+  "where": "Undo restores the tally (gone)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "D5",
+  "where": "Undo put the task back on the card",
+  "ok": false,
+  "detail": "false"
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "A4",
+  "where": "1512 group: buttons",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "1512 month: buttons",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 group: buttons",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 month: buttons",
+  "ok": false,
+  "detail": "0"
+ }
+]

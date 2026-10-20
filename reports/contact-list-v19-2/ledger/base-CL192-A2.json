@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 unpinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 the buttons, the counts card and the list card are there",
+  "ok": true,
+  "detail": "{\"eb\":119.75,\"win\":105.75,\"acts\":298.75,\"counts\":289.03125,\"card\":320.75,\"full\":false}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 list card top − max(buttons, counts card) = 44 ±2",
+  "ok": false,
+  "detail": "22.0 (buttons 298.8, counts 289.0)"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 a v19.1 pinned reference exists (taken on the base build)",
+  "ok": true,
+  "detail": "reports/contact-list-v19-2/ledger/ref-pinned-1512.json"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned card is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":0,\"h\":3830.8,\"left\":0,\"w\":1256} vs {\"top\":0,\"h\":3830.8,\"left\":0,\"w\":1256}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned head is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":0,\"h\":118,\"left\":0,\"w\":1256} vs {\"top\":0,\"h\":118,\"left\":0,\"w\":1256}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned band is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":0,\"h\":66,\"left\":0,\"w\":1256} vs {\"top\":0,\"h\":66,\"left\":0,\"w\":1256}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned toolbar is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":66,\"h\":52,\"left\":0,\"w\":1256} vs {\"top\":66,\"h\":52,\"left\":0,\"w\":1256}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned labels is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":118,\"h\":40,\"left\":0,\"w\":1256} vs {\"top\":118,\"h\":40,\"left\":0,\"w\":1256}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1512 pinned row is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":158,\"h\":70,\"left\":0,\"w\":1256} vs {\"top\":158,\"h\":70,\"left\":0,\"w\":1256}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 unpinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 the buttons, the counts card and the list card are there",
+  "ok": true,
+  "detail": "{\"eb\":119.75,\"win\":105.75,\"acts\":298.75,\"counts\":289.03125,\"card\":320.75,\"full\":false}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 list card top − max(buttons, counts card) = 44 ±2",
+  "ok": false,
+  "detail": "22.0 (buttons 298.8, counts 289.0)"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 a v19.1 pinned reference exists (taken on the base build)",
+  "ok": true,
+  "detail": "reports/contact-list-v19-2/ledger/ref-pinned-1280.json"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned card is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":0,\"h\":3830.8,\"left\":0,\"w\":1024} vs {\"top\":0,\"h\":3830.8,\"left\":0,\"w\":1024}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned head is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":0,\"h\":118,\"left\":0,\"w\":1024} vs {\"top\":0,\"h\":118,\"left\":0,\"w\":1024}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned band is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":0,\"h\":66,\"left\":0,\"w\":1024} vs {\"top\":0,\"h\":66,\"left\":0,\"w\":1024}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned toolbar is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":66,\"h\":52,\"left\":0,\"w\":1024} vs {\"top\":66,\"h\":52,\"left\":0,\"w\":1024}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned labels is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":118,\"h\":40,\"left\":0,\"w\":1024} vs {\"top\":118,\"h\":40,\"left\":0,\"w\":1024}"
+ },
+ {
+  "lock": "CL192-A2",
+  "where": "@1280 pinned row is where v19.1 has it (top, height, left, width ±1)",
+  "ok": true,
+  "detail": "{\"top\":158,\"h\":70,\"left\":0,\"w\":1024} vs {\"top\":158,\"h\":70,\"left\":0,\"w\":1024}"
+ }
+]

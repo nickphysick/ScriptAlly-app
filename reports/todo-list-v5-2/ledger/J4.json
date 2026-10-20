@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "J4",
+  "where": "a send to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J4",
+  "where": "the title types in on a start",
+  "ok": true,
+  "detail": "12 → 20"
+ },
+ {
+  "lock": "J4",
+  "where": "not retyped on Next",
+  "ok": true,
+  "detail": "{\"t\":\"Sending your partial\",\"typing\":false}"
+ },
+ {
+  "lock": "J4",
+  "where": "the fill line is k/n of the band (±1px)",
+  "ok": true,
+  "detail": "308.8 vs 308.8"
+ },
+ {
+  "lock": "J4",
+  "where": "sheen and breathing run while working",
+  "ok": true,
+  "detail": "td52Sheen td52Breathe"
+ },
+ {
+  "lock": "J4",
+  "where": "they stop when the journey goes",
+  "ok": true,
+  "detail": "{\"band\":false,\"live\":false}"
+ },
+ {
+  "lock": "J4",
+  "where": "reduced motion: nothing under the sheet animates",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J4",
+  "where": "…the title in full at once, the fill at k/n",
+  "ok": true,
+  "detail": "{\"running\":[],\"full\":\"Sending your partial\",\"w\":308.796875,\"want\":308.8}"
+ }
+]

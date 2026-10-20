@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L2",
+  "where": "population: both sets, and the seeded edges in each",
+  "ok": true,
+  "detail": "quiet 33 · agent-court you 13"
+ },
+ {
+  "lock": "L2",
+  "where": "Gone quiet = Consider closing",
+  "ok": true,
+  "detail": "33 vs 33; only left:  · only right: "
+ },
+ {
+  "lock": "L2",
+  "where": "the agent-court With you = Nudge",
+  "ok": true,
+  "detail": "13 vs 13; only left:  · only right: "
+ }
+]

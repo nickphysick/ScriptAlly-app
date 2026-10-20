@@ -25,6 +25,7 @@ import {
   noteDrawerPick,
 } from "../../lib/queryActions/drawerStore";
 import { journeyDoing, journeyTitle } from "../../lib/queryActions/parking";
+import { isPracticeId } from "../../lib/practiceQuery";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../lib/queryActions/snapshot";
 import { todayDay } from "../../lib/queryActions/dates";
 import { DrawerContext, initialsOf } from "./controls";
@@ -103,7 +104,12 @@ export function QueryDrawer() {
    * its chip on another page), the journey opens as the drawer it always was.
    */
   const [slot, setSlot] = useState<Element | null>(null);
-  useLayoutEffect(() => { setSlot(req?.panel ? document.querySelector(SIDE_SLOT) : null); }, [req]);
+  /* To-do list v5.1 §E — THE HOST HOOK, both halves: the slot is named by the request (`panel.slot`, else the side
+     panel's), and it is resolved for the LIVE PARKED journey too. A parked journey stays mounted, hidden; were its
+     portal moved to document.body when `req` went null, React would remount it — and Resume would hand back the preset
+     step with every answer gone (measured: TD5 E3, a nudge parked on "Where it stands" resumed on "The nudge"). */
+  const hostReq = req ?? (parked?.live ? parked.req : null);
+  useLayoutEffect(() => { setSlot(hostReq?.panel ? document.querySelector(hostReq.panel.slot ?? SIDE_SLOT) : null); }, [hostReq]);
 
   useEffect(() => subscribeDrawer((r) => {
     setReq(r);
@@ -162,6 +168,9 @@ export function QueryDrawer() {
     const v = viewRef.current;
     const st = shellRef.current;
     if (!r || !v || !st || parkingRef.current) return;
+    /* v139 §B — the practice query is never parked: a parked journey is kept in sessionStorage, and nothing about Pip is
+       kept anywhere. Leaving his journey simply ends it. */
+    if (isPracticeId(r.queryId)) { close(); return; }
     parkingRef.current = true;
     const answers = v.snapshot?.() ?? null;
     const q = r.queryId ? db.queries.find((x) => x.id === r.queryId) : undefined;
@@ -190,7 +199,7 @@ export function QueryDrawer() {
     /* the instance is hidden by now; take the shrink off it so a resume slides in from the side */
     if (anim) { const done = anim; requestAnimationFrame(() => done.cancel()); }
     parkingRef.current = false;
-  }, [req, db.queries, db.agents]);
+  }, [req, db.queries, db.agents, close]);
 
   /** "← name" and the dock chip: park with answers, cancel without (decision 8). */
   const backToCard = useCallback(() => {
@@ -206,6 +215,21 @@ export function QueryDrawer() {
     if (!uid) return;
     savingRef.current = true;
     const r = req;
+    /* v139 §B — THE PRACTICE QUERY: no snapshot (it would read Firestore for a document that does not exist) and no
+       undo bar (its Undo would restore that snapshot — a write). The journey's commit is the in-memory stand-in. */
+    if (isPracticeId(r.queryId)) {
+      try {
+        const out = await view.commit();
+        setOpen(false);
+        window.setTimeout(() => closeQueryDrawer(), r.panel ? 0 : 240);
+        r.onSaved?.({ mode: r.mode, queryId: out.queryId, message: out.message, sub: out.sub, undo: async () => {} });
+      } catch (e) {
+        console.error("[query drawer] practice save failed", e);
+      } finally {
+        savingRef.current = false;
+      }
+      return;
+    }
     try {
       const snap = await takeSnapshot(uid, view.touched());
       const out = await view.commit();
@@ -288,10 +312,12 @@ export function QueryDrawer() {
 
   const chip = parked && !req ? <ParkedChip key={parked.req.instance ?? "restored"} parked={parked} clash={clash} next={next} /> : null;
   if (!active) return chip;
+  /* v139 §B — only the response journey opens on the practice query; any other door on Pip opens nothing */
+  if (isPracticeId(active.queryId) && active.mode !== "resp") return chip;
   const J = JOURNEYS[active.mode];
   if (!J) return chip;
 
-  const inPanel = !!req?.panel && !!slot && slot.isConnected;
+  const inPanel = !!active?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
   /* §E — a picked query names the head: its agent's first name, whatever the request opened with */
   const pa = pq ? db.agents.find((a) => a.id === pq.agentId) : undefined;
@@ -306,12 +332,15 @@ export function QueryDrawer() {
       {createPortal(
         <DrawerContext.Provider value={{ today, openCal, setOpenCal }}>
           <div ref={rootRef} className={`qad-root${open ? " is-open" : ""}${inPanel ? " qad-root--panel" : ""}`} data-qad-root
+            data-practice={isPracticeId(active.queryId) ? "" : undefined}
             style={hidden || parkedAway ? { display: "none" } : undefined}>
             <J key={`${active.instance ?? 0}-${active.mode}-${gen}`} req={active} today={today} switchTo={switchTo} pickQuery={pickQuery}>
               {(view, initialStep) => {
                 viewRef.current = view;
+                /* v139 §B — the practice query's act header says so: "Recording a response · practice" */
+                const shown = isPracticeId(active.queryId) ? { ...view, eyebrow: "Recording a response · practice" } : view;
                 return (
-                  <DrawerShell view={view} mode={active.mode} open={open && !hidden && !parkedAway}
+                  <DrawerShell view={shown} mode={active.mode} open={open && !hidden && !parkedAway}
                     initialStep={active.resume?.step ?? initialStep ?? active.preset?.step} initialSeen={active.resume?.seen}
                     from={req?.dock?.name ?? null} stateRef={shellRef} panel={panelFrame}
                     onCancel={close} onPark={() => void park()} onSave={() => runSave(view)} />

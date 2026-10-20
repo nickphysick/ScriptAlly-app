@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "CL191-C1",
+  "where": "@1512 the population: dates on the rows",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1512 every date matches \"D Mon YYYY\" (never \"Sept\")",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1512 all of each date's text is one computed colour",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1512 that colour is ink rgb(28, 19, 15)",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1280 the population: dates on the rows",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1280 every date matches \"D Mon YYYY\" (never \"Sept\")",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1280 all of each date's text is one computed colour",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "CL191-C1",
+  "where": "@1280 that colour is ink rgb(28, 19, 15)",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ }
+]

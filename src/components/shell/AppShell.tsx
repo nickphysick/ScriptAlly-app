@@ -29,6 +29,7 @@ import { ShellTopBar } from "./ShellV2";
 import { BetaStrip } from "./BetaStrip";
 import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
+import { subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
@@ -232,6 +233,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  /* Dashboard v59: a page may ask for the ONE feedback panel to open (lib/feedbackStore) */
+  useEffect(() => subscribeFeedback(() => setFeedbackOpen(true)), []);
   // (NavDrawer retired — shell follow-up P3. The slim mobile Nav is retired too (Mobile Pass 1):
   // the v2 top bar now carries the <md variant itself — one bar, two breakpoint states — and the
   // rebuilt BottomTabBar is the floating tab capsule.)
@@ -583,6 +586,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           already draws. The seam is kept so a shell-level toast can take it the day one exists. */}
       <FeedbackDock
         uid={currentUser?.id}
+        email={currentUser?.email ?? null}
         open={feedbackOpen}
         onOpenChange={setFeedbackOpen}
         onReceipt={() => {}}

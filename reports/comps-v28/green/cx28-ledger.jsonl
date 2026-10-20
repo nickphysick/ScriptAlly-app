@@ -1,0 +1,207 @@
+{"lock":"H1","vp":"1512x900","what":"populated: the shared LightHeader is the header","value":true,"ok":true}
+{"lock":"H1","vp":"1512x900","what":"populated: no EmptyPanel","value":false,"ok":true}
+{"lock":"H1","vp":"1512x900","what":"populated: no v27 title panel","value":false,"ok":true}
+{"lock":"H1","vp":"1512x900","what":"populated: the header's values were read","value":{"h1":["\"Special Elite\", \"Courier New\", Courier, monospace","50px"],"k":["12px","3.84px","rgb(160, 69, 46)"],"by":"21px","btn":["18px","15px","24px"],"card":"16px","pad":["44px","40px"]},"ok":true}
+{"lock":"H1","vp":"1512x900","what":"empty: the shared EmptyPanel is the header","value":true,"ok":true}
+{"lock":"H1","vp":"1512x900","what":"empty: no LightHeader","value":false,"ok":true}
+{"lock":"H1","vp":"1512x900","what":"empty: no v27 title panel","value":false,"ok":true}
+{"lock":"H1","vp":"1512x900","what":"Analytics' light header on this build","value":"absent","ok":true}
+{"lock":"H1","vp":"1280x800","what":"populated: the shared LightHeader is the header","value":true,"ok":true}
+{"lock":"H1","vp":"1280x800","what":"populated: no EmptyPanel","value":false,"ok":true}
+{"lock":"H1","vp":"1280x800","what":"populated: no v27 title panel","value":false,"ok":true}
+{"lock":"H1","vp":"1280x800","what":"populated: the header's values were read","value":{"h1":["\"Special Elite\", \"Courier New\", Courier, monospace","40px"],"k":["12px","3.84px","rgb(160, 69, 46)"],"by":"18px","btn":["16px","13px","20px"],"card":"16px","pad":["44px","40px"]},"ok":true}
+{"lock":"H1","vp":"1280x800","what":"empty: the shared EmptyPanel is the header","value":true,"ok":true}
+{"lock":"H1","vp":"1280x800","what":"empty: no LightHeader","value":false,"ok":true}
+{"lock":"H1","vp":"1280x800","what":"empty: no v27 title panel","value":false,"ok":true}
+{"lock":"H1","vp":"1280x800","what":"Analytics' light header on this build","value":"absent","ok":true}
+{"lock":"H2","vp":"1512x900","what":"the card's rows","value":[["sent",2],["draft",1],["shelf",4]],"ok":true}
+{"lock":"H2","vp":"1512x900","what":"the title's number","value":"7","ok":true}
+{"lock":"H2","vp":"1512x900","what":"the cards' own where-used, counted","value":{"sent":2,"none":4,"unsent":1},"ok":true}
+{"lock":"H2","vp":"1512x900","what":"the ring","value":"64%","ok":true}
+{"lock":"H2","vp":"1512x900","what":"the ring's line","value":"9 of 14 sent name their comps","ok":true}
+{"lock":"H2","vp":"1512x900","what":"pressed: the row's aria-pressed","value":"true","ok":true}
+{"lock":"H2","vp":"1512x900","what":"pressed: the shelf's segment follows","value":"true","ok":true}
+{"lock":"H2","vp":"1512x900","what":"pressed: the cards shown","value":["Last Crossing"],"ok":true}
+{"lock":"H2","vp":"1512x900","what":"pressed again: cleared","value":7,"ok":true}
+{"lock":"H2","vp":"1280x800","what":"the card's rows","value":[["sent",2],["draft",1],["shelf",4]],"ok":true}
+{"lock":"H2","vp":"1280x800","what":"the title's number","value":"7","ok":true}
+{"lock":"H2","vp":"1280x800","what":"the cards' own where-used, counted","value":{"sent":2,"none":4,"unsent":1},"ok":true}
+{"lock":"H2","vp":"1280x800","what":"the ring","value":"64%","ok":true}
+{"lock":"H2","vp":"1280x800","what":"the ring's line","value":"9 of 14 sent name their comps","ok":true}
+{"lock":"H2","vp":"1280x800","what":"pressed: the row's aria-pressed","value":"true","ok":true}
+{"lock":"H2","vp":"1280x800","what":"pressed: the shelf's segment follows","value":"true","ok":true}
+{"lock":"H2","vp":"1280x800","what":"pressed: the cards shown","value":["Last Crossing"],"ok":true}
+{"lock":"H2","vp":"1280x800","what":"pressed again: cleared","value":7,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"the panel","value":true,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"the steps card","value":true,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"the steps' foot line","value":"Two or three comps in a letter is usual. Keep more on your shelf to choose from.","ok":true}
+{"lock":"H3","vp":"1512x900","what":"no door into the picker under the card","value":false,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"no notice, shelf or band","value":[false,false,false],"ok":true}
+{"lock":"H3","vp":"1512x900","what":"no Scout tab","value":false,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"b1: the form's title","value":"Add your first comp","ok":true}
+{"lock":"H3","vp":"1512x900","what":"b1: the explainer is open","value":true,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"b2: the explainer pop-up","value":true,"ok":true}
+{"lock":"H3","vp":"1512x900","what":"b2: the pop-up has no hide link","value":false,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"the panel","value":true,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"the steps card","value":true,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"the steps' foot line","value":"Two or three comps in a letter is usual. Keep more on your shelf to choose from.","ok":true}
+{"lock":"H3","vp":"1280x800","what":"no door into the picker under the card","value":false,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"no notice, shelf or band","value":[false,false,false],"ok":true}
+{"lock":"H3","vp":"1280x800","what":"no Scout tab","value":false,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"b1: the form's title","value":"Add your first comp","ok":true}
+{"lock":"H3","vp":"1280x800","what":"b1: the explainer is open","value":true,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"b2: the explainer pop-up","value":true,"ok":true}
+{"lock":"H3","vp":"1280x800","what":"b2: the pop-up has no hide link","value":false,"ok":true}
+{"lock":"N1","vp":"1512x900","what":"one letter: banners","value":1,"ok":true}
+{"lock":"N1","vp":"1512x900","what":"one letter: the copy","value":"Query letter v1 went out with 5 queries before its comps were logged. Log what it named and those queries count too.","ok":true}
+{"lock":"N1","vp":"1512x900","what":"one letter: the button","value":"Log it now","ok":true}
+{"lock":"N1","vp":"1512x900","what":"the picker opens on that letter","value":"cv25-let-1","ok":true}
+{"lock":"N1","vp":"1280x800","what":"one letter: banners","value":1,"ok":true}
+{"lock":"N1","vp":"1280x800","what":"one letter: the copy","value":"Query letter v1 went out with 5 queries before its comps were logged. Log what it named and those queries count too.","ok":true}
+{"lock":"N1","vp":"1280x800","what":"one letter: the button","value":"Log it now","ok":true}
+{"lock":"N1","vp":"1280x800","what":"the picker opens on that letter","value":"cv25-let-1","ok":true}
+{"lock":"N1","vp":"1512x900","what":"two letters: still one banner","value":1,"ok":true}
+{"lock":"N1","vp":"1512x900","what":"two letters: the copy","value":"2 letters went out with 14 queries before their comps were logged. Log what they named and those queries count too.","ok":true}
+{"lock":"N1","vp":"1512x900","what":"two letters: the button","value":"Log them now","ok":true}
+{"lock":"N1","vp":"1512x900","what":"two letters: the picker opens on the first","value":"cv25-let-1","ok":true}
+{"lock":"N1","vp":"1280x800","what":"two letters: still one banner","value":1,"ok":true}
+{"lock":"N1","vp":"1280x800","what":"two letters: the copy","value":"2 letters went out with 14 queries before their comps were logged. Log what they named and those queries count too.","ok":true}
+{"lock":"N1","vp":"1280x800","what":"two letters: the button","value":"Log them now","ok":true}
+{"lock":"N1","vp":"1280x800","what":"two letters: the picker opens on the first","value":"cv25-let-1","ok":true}
+{"lock":"S1","vp":"1512x900","what":"the grid and toolbar were read","value":{"cols":3,"overflow":0,"rowsBesideFind":1,"findBesideRest":true,"findW":230,"last":"add-card"},"ok":true}
+{"lock":"S1","vp":"1512x900","what":"grid columns","value":3,"ok":true}
+{"lock":"S1","vp":"1512x900","what":"the toolbar overflows by","value":0,"ok":true}
+{"lock":"S1","vp":"1512x900","what":"the toolbar's rows (find aside)","value":1,"ok":true}
+{"lock":"S1","vp":"1512x900","what":"find shares the row (it may wrap below 1100 only)","value":true,"ok":true}
+{"lock":"S1","vp":"1512x900","what":"find holds its 230 (150–230)","value":true,"ok":true}
+{"lock":"S1","vp":"1512x900","what":"the add card is last","value":"add-card","ok":true}
+{"lock":"S1","vp":"1512x900","what":"filtered: no add card","value":false,"ok":true}
+{"lock":"S1","vp":"1280x800","what":"the grid and toolbar were read","value":{"cols":2,"overflow":0,"rowsBesideFind":1,"findBesideRest":true,"findW":191,"last":"add-card"},"ok":true}
+{"lock":"S1","vp":"1280x800","what":"grid columns","value":2,"ok":true}
+{"lock":"S1","vp":"1280x800","what":"the toolbar overflows by","value":0,"ok":true}
+{"lock":"S1","vp":"1280x800","what":"the toolbar's rows (find aside)","value":1,"ok":true}
+{"lock":"S1","vp":"1280x800","what":"find shares the row (it may wrap below 1100 only)","value":true,"ok":true}
+{"lock":"S1","vp":"1280x800","what":"find holds its 230 (150–230)","value":true,"ok":true}
+{"lock":"S1","vp":"1280x800","what":"the add card is last","value":"add-card","ok":true}
+{"lock":"S1","vp":"1280x800","what":"filtered: no add card","value":false,"ok":true}
+{"lock":"S1","vp":"1024x768","what":"the grid and toolbar were read","value":{"cols":2,"overflow":0,"rowsBesideFind":1,"findBesideRest":false,"findW":702,"last":"add-card"},"ok":true}
+{"lock":"S1","vp":"1024x768","what":"the toolbar overflows by","value":0,"ok":true}
+{"lock":"S1","vp":"1024x768","what":"the toolbar's rows (find aside)","value":1,"ok":true}
+{"lock":"S1","vp":"1024x768","what":"find shares the row (it may wrap below 1100 only)","value":false,"ok":true}
+{"lock":"S1","vp":"1024x768","what":"the add card is last","value":"add-card","ok":true}
+{"lock":"S1","vp":"1024x768","what":"filtered: no add card","value":false,"ok":true}
+{"lock":"S2","vp":"1512x900","what":"sent (Salt Road)","value":{"kind":"sent","row2":"9 queries6 asked for more67%","buttons":[]},"ok":true}
+{"lock":"S2","vp":"1512x900","what":"draft (Last Crossing)","value":{"kind":"draft","row2":"Waiting to go out with QL v3","buttons":[]},"ok":true}
+{"lock":"S2","vp":"1512x900","what":"shelf, ready (Bright Water)","value":{"kind":"shelf","row2":"On your shelf, ready for a letterLog in a letter","buttons":["slip-pick"]},"ok":true}
+{"lock":"S2","vp":"1512x900","what":"not ready (The Ferry at Dusk)","value":{"kind":"notready","row2":"!A letter can name it once it has a publisher.Add publisher","buttons":["slip-edit"]},"ok":true}
+{"lock":"S2","vp":"1512x900","what":"buttons on cards other than the slip's link","value":[],"ok":true}
+{"lock":"S2","vp":"1280x800","what":"sent (Salt Road)","value":{"kind":"sent","row2":"9 queries6 asked for more67%","buttons":[]},"ok":true}
+{"lock":"S2","vp":"1280x800","what":"draft (Last Crossing)","value":{"kind":"draft","row2":"Waiting to go out with QL v3","buttons":[]},"ok":true}
+{"lock":"S2","vp":"1280x800","what":"shelf, ready (Bright Water)","value":{"kind":"shelf","row2":"On your shelf, ready for a letterLog in a letter","buttons":["slip-pick"]},"ok":true}
+{"lock":"S2","vp":"1280x800","what":"not ready (The Ferry at Dusk)","value":{"kind":"notready","row2":"!A letter can name it once it has a publisher.Add publisher","buttons":["slip-edit"]},"ok":true}
+{"lock":"S2","vp":"1280x800","what":"buttons on cards other than the slip's link","value":[],"ok":true}
+{"lock":"S3","vp":"1512x900","what":"every card's chip","value":[["The Tidewater Line","5 yrs old","mid","Published 2021"],["Salt Road","3 yrs old","mid","Published 2023"],["Nine Miles Out","4 yrs old","mid","Published 2022"],["Bright Water","2 yrs old","mid","Published 2024"],["Kestrel Hour","7 yrs old","old","Agents usually look for comps from the last five years"],["The Ferry at Dusk","1 yr old","new","Published 2025"],["Last Crossing","3 yrs old","mid","Published 2023"]],"ok":true}
+{"lock":"S3","vp":"1512x900","what":"branches the fixture enters","value":["mid","new","old"],"ok":true}
+{"lock":"S3","vp":"1280x800","what":"every card's chip","value":[["The Tidewater Line","5 yrs old","mid","Published 2021"],["Salt Road","3 yrs old","mid","Published 2023"],["Nine Miles Out","4 yrs old","mid","Published 2022"],["Bright Water","2 yrs old","mid","Published 2024"],["Kestrel Hour","7 yrs old","old","Agents usually look for comps from the last five years"],["The Ferry at Dusk","1 yr old","new","Published 2025"],["Last Crossing","3 yrs old","mid","Published 2023"]],"ok":true}
+{"lock":"S3","vp":"1280x800","what":"branches the fixture enters","value":["mid","new","old"],"ok":true}
+{"lock":"S4","vp":"1512x900","what":"the sort button is on the page","value":true,"ok":true}
+{"lock":"S4","vp":"1512x900","what":"sorted by queries","value":["The Tidewater Line","Salt Road","Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk","Last Crossing"],"ok":true}
+{"lock":"S4","vp":"1512x900","what":"sorted by rate","value":["The Tidewater Line","Salt Road","Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk","Last Crossing"],"ok":true}
+{"lock":"S4","vp":"1512x900","what":"sorted by newest","value":["The Ferry at Dusk","Bright Water","Salt Road","Last Crossing","Nine Miles Out","The Tidewater Line","Kestrel Hour"],"ok":true}
+{"lock":"S4","vp":"1512x900","what":"sorted by az","value":["Bright Water","The Ferry at Dusk","Kestrel Hour","Last Crossing","Nine Miles Out","Salt Road","The Tidewater Line"],"ok":true}
+{"lock":"S4","vp":"1512x900","what":"sorted by own","value":["The Tidewater Line","Salt Road","Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk","Last Crossing"],"ok":true}
+{"lock":"S4","vp":"1280x800","what":"the sort button is on the page","value":true,"ok":true}
+{"lock":"S4","vp":"1280x800","what":"sorted by queries","value":["The Tidewater Line","Salt Road","Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk","Last Crossing"],"ok":true}
+{"lock":"S4","vp":"1280x800","what":"sorted by rate","value":["The Tidewater Line","Salt Road","Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk","Last Crossing"],"ok":true}
+{"lock":"S4","vp":"1280x800","what":"sorted by newest","value":["The Ferry at Dusk","Bright Water","Salt Road","Last Crossing","Nine Miles Out","The Tidewater Line","Kestrel Hour"],"ok":true}
+{"lock":"S4","vp":"1280x800","what":"sorted by az","value":["Bright Water","The Ferry at Dusk","Kestrel Hour","Last Crossing","Nine Miles Out","Salt Road","The Tidewater Line"],"ok":true}
+{"lock":"S4","vp":"1280x800","what":"sorted by own","value":["The Tidewater Line","Salt Road","Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk","Last Crossing"],"ok":true}
+{"lock":"S5","vp":"1512x900","what":"type toggles shown (three types on the shelf; hidden in compact)","value":true,"ok":true}
+{"lock":"S5","vp":"1512x900","what":"on your shelf","value":["Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk"],"ok":true}
+{"lock":"S5","vp":"1512x900","what":"on your shelf AND TV","value":["Nine Miles Out"],"ok":true}
+{"lock":"S5","vp":"1512x900","what":"in a sent letter AND TV: none","value":[[],true],"ok":true}
+{"lock":"S5","vp":"1512x900","what":"where AND find (publisher)","value":[],"ok":true}
+{"lock":"S5","vp":"1512x900","what":"the showing line","value":"Showing 0 of 7Clear","ok":true}
+{"lock":"S5","vp":"1512x900","what":"Clear restores all","value":7,"ok":true}
+{"lock":"S5","vp":"1280x800","what":"type toggles shown (three types on the shelf; hidden in compact)","value":false,"ok":true}
+{"lock":"S5","vp":"1280x800","what":"on your shelf","value":["Nine Miles Out","Bright Water","Kestrel Hour","The Ferry at Dusk"],"ok":true}
+{"lock":"S5","vp":"1280x800","what":"where AND find (publisher)","value":["Kestrel Hour"],"ok":true}
+{"lock":"S5","vp":"1280x800","what":"the showing line","value":"Showing 1 of 7Clear","ok":true}
+{"lock":"S5","vp":"1280x800","what":"Clear restores all","value":7,"ok":true}
+{"lock":"D1","vp":"1512x900","what":"What's landing is on the page","value":true,"ok":true}
+{"lock":"D1","vp":"1512x900","what":"rows","value":[["The Tidewater Line",9,6,67,"false"],["Salt Road",9,6,67,"false"]],"ok":true}
+{"lock":"D1","vp":"1512x900","what":"the average's label","value":"Your average, 50% of all queries","ok":true}
+{"lock":"D1","vp":"1512x900","what":"the marker was read","value":{"track":96,"at":48},"ok":true}
+{"lock":"D1","vp":"1512x900","what":"the marker sits at the average (±1px)","value":true,"ok":true}
+{"lock":"D1","vp":"1512x900","what":"the band's tag","value":"From 14 sent queries","ok":true}
+{"lock":"D1","vp":"1280x800","what":"What's landing is on the page","value":true,"ok":true}
+{"lock":"D1","vp":"1280x800","what":"rows","value":[["The Tidewater Line",9,6,67,"false"],["Salt Road",9,6,67,"false"]],"ok":true}
+{"lock":"D1","vp":"1280x800","what":"the average's label","value":"Your average, 50% of all queries","ok":true}
+{"lock":"D1","vp":"1280x800","what":"the marker was read","value":{"track":96,"at":48},"ok":true}
+{"lock":"D1","vp":"1280x800","what":"the marker sits at the average (±1px)","value":true,"ok":true}
+{"lock":"D1","vp":"1280x800","what":"the band's tag","value":"From 14 sent queries","ok":true}
+{"lock":"D1","vp":"1512x900","what":"light: rows, hollow under five","value":[["The Tidewater Line",7,6,86,"false"],["Salt Road",7,6,86,"false"],["Nine Miles Out",2,0,0,"true"]],"ok":true}
+{"lock":"D1","vp":"1280x800","what":"light: rows, hollow under five","value":[["The Tidewater Line",7,6,86,"false"],["Salt Road",7,6,86,"false"],["Nine Miles Out",2,0,0,"true"]],"ok":true}
+{"lock":"D2","vp":"1512x900","what":"What's landing is on the page","value":true,"ok":true}
+{"lock":"D2","vp":"1512x900","what":"blocks","value":[["cv25-let-2","sent","67",false,false],["cv25-let-1","unrecorded","20",true,false],["cv25-let-3","unsent",null,false,true]],"ok":true}
+{"lock":"D2","vp":"1512x900","what":"Log them opens the picker on that letter","value":"cv25-let-1","ok":true}
+{"lock":"D2","vp":"1280x800","what":"What's landing is on the page","value":true,"ok":true}
+{"lock":"D2","vp":"1280x800","what":"blocks","value":[["cv25-let-2","sent","67",false,false],["cv25-let-1","unrecorded","20",true,false],["cv25-let-3","unsent",null,false,true]],"ok":true}
+{"lock":"D2","vp":"1280x800","what":"Log them opens the picker on that letter","value":"cv25-let-1","ok":true}
+{"lock":"E1","vp":"1512x900","what":"Salt Road's card is on the page","value":true,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"cancel: in the edit form","value":true,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"cancel: back on the detail","value":{"view":true,"edit":false,"open":true},"ok":true}
+{"lock":"E1","vp":"1512x900","what":"cancel: Escape on the detail closes","value":false,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"close: in the edit form","value":true,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"close: back on the detail","value":{"view":true,"edit":false,"open":true},"ok":true}
+{"lock":"E1","vp":"1512x900","what":"close: Escape on the detail closes","value":false,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"escape: in the edit form","value":true,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"escape: back on the detail","value":{"view":true,"edit":false,"open":true},"ok":true}
+{"lock":"E1","vp":"1512x900","what":"escape: Escape on the detail closes","value":false,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"Save: back on the detail","value":true,"ok":true}
+{"lock":"E1","vp":"1512x900","what":"Save: the detail shows the new line","value":"A line from E1 at 1512.","ok":true}
+{"lock":"E1","vp":"1512x900","what":"the scrim from the edit form closes everything","value":false,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"Salt Road's card is on the page","value":true,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"cancel: in the edit form","value":true,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"cancel: back on the detail","value":{"view":true,"edit":false,"open":true},"ok":true}
+{"lock":"E1","vp":"1280x800","what":"cancel: Escape on the detail closes","value":false,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"close: in the edit form","value":true,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"close: back on the detail","value":{"view":true,"edit":false,"open":true},"ok":true}
+{"lock":"E1","vp":"1280x800","what":"close: Escape on the detail closes","value":false,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"escape: in the edit form","value":true,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"escape: back on the detail","value":{"view":true,"edit":false,"open":true},"ok":true}
+{"lock":"E1","vp":"1280x800","what":"escape: Escape on the detail closes","value":false,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"Save: back on the detail","value":true,"ok":true}
+{"lock":"E1","vp":"1280x800","what":"Save: the detail shows the new line","value":"A line from E1 at 1280.","ok":true}
+{"lock":"E1","vp":"1280x800","what":"the scrim from the edit form closes everything","value":false,"ok":true}
+{"lock":"E2","vp":"1512x900","what":"Salt Road's card is on the page","value":true,"ok":true}
+{"lock":"E2","vp":"1512x900","what":"drawer closed: focus","value":"card:cmp_cv25salt","ok":true}
+{"lock":"E2","vp":"1512x900","what":"the link's picker pre-ticks the comp on the unsent letter","value":"true","ok":true}
+{"lock":"E2","vp":"1512x900","what":"picker saved: focus (the link is gone, so its card)","value":"card:cmp_cv25brit","ok":true}
+{"lock":"E2","vp":"1512x900","what":"how-it-works closed: focus","value":"how-link","ok":true}
+{"lock":"E2","vp":"1512x900","what":"explainer closed: focus","value":"explain","ok":true}
+{"lock":"E2","vp":"1280x800","what":"Salt Road's card is on the page","value":true,"ok":true}
+{"lock":"E2","vp":"1280x800","what":"drawer closed: focus","value":"card:cmp_cv25salt","ok":true}
+{"lock":"E2","vp":"1280x800","what":"the link's picker pre-ticks the comp on the unsent letter","value":"true","ok":true}
+{"lock":"E2","vp":"1280x800","what":"picker saved: focus (the link is gone, so its card)","value":"card:cmp_cv25brit","ok":true}
+{"lock":"E2","vp":"1280x800","what":"how-it-works closed: focus","value":"how-link","ok":true}
+{"lock":"E2","vp":"1280x800","what":"explainer closed: focus","value":"explain","ok":true}
+{"lock":"E3","vp":"1512x900","what":"the header's Log comps in a letter is on the page","value":true,"ok":true}
+{"lock":"E3","vp":"1512x900","what":"opens on the current letter","value":"cv25-let-3","ok":true}
+{"lock":"E3","vp":"1512x900","what":"each row's record","value":[["The Tidewater Line","rate","67%of 9 asked for more"],["Salt Road","rate","67%of 9 asked for more"],["Nine Miles Out","unsent","Not sent yet"],["Bright Water","unsent","Not sent yet"],["Kestrel Hour","old","7 yrs old"],["The Ferry at Dusk","unsent","Not sent yet"],["Last Crossing","unsent","Not sent yet"]],"ok":true}
+{"lock":"E3","vp":"1512x900","what":"the count","value":"4 comps named","ok":true}
+{"lock":"E3","vp":"1512x900","what":"the tip","value":"4 comps is more than most letters name. Two or three usually reads cleaner. Kestrel Hour is more than five years old. Agents tend to prefer recent comps.","ok":true}
+{"lock":"E3","vp":"1512x900","what":"Save stays enabled","value":false,"ok":true}
+{"lock":"E3","vp":"1512x900","what":"v3 records the four","value":["cmp_cv25last","cmp_cv25salt","cmp_cv25tide","cmp_xpb3ut3i1t92"],"ok":true}
+{"lock":"E3","vp":"1512x900","what":"the other letters are unchanged","value":[null,["cmp_cv25tide","cmp_cv25salt"]],"ok":true}
+{"lock":"E3","vp":"1280x800","what":"the header's Log comps in a letter is on the page","value":true,"ok":true}
+{"lock":"E3","vp":"1280x800","what":"opens on the current letter","value":"cv25-let-3","ok":true}
+{"lock":"E3","vp":"1280x800","what":"each row's record","value":[["The Tidewater Line","rate","67%of 9 asked for more"],["Salt Road","rate","67%of 9 asked for more"],["Nine Miles Out","unsent","Not sent yet"],["Bright Water","unsent","Not sent yet"],["Kestrel Hour","old","7 yrs old"],["The Ferry at Dusk","unsent","Not sent yet"],["Last Crossing","unsent","Not sent yet"]],"ok":true}
+{"lock":"E3","vp":"1280x800","what":"the count","value":"4 comps named","ok":true}
+{"lock":"E3","vp":"1280x800","what":"the tip","value":"4 comps is more than most letters name. Two or three usually reads cleaner. Kestrel Hour is more than five years old. Agents tend to prefer recent comps.","ok":true}
+{"lock":"E3","vp":"1280x800","what":"Save stays enabled","value":false,"ok":true}
+{"lock":"E3","vp":"1280x800","what":"v3 records the four","value":["cmp_cv25last","cmp_cv25salt","cmp_cv25tide","cmp_fp7tgsh1ng7p"],"ok":true}
+{"lock":"E3","vp":"1280x800","what":"the other letters are unchanged","value":[null,["cmp_cv25tide","cmp_cv25salt"]],"ok":true}
+{"lock":"L0","vp":"1512x900","what":"saw: the empty panel · the loading header · the shelf while loading","value":[false,true,false],"ok":true}
+{"lock":"L0","vp":"1280x800","what":"saw: the empty panel · the loading header · the shelf while loading","value":[false,true,false],"ok":true}
+{"lock":"CX28","vp":null,"what":"readings","value":206,"ok":true}

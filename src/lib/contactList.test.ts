@@ -9,7 +9,7 @@ import { joinGenres } from "./genreNoun";
 import { bookGenres } from "./genreMatch";
 import { describe, expect, it } from "vitest";
 import {
-  GROUP_OPTIONS, SORT_OPTIONS as SORT_OPTIONS_V12, RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent,
+  GROUP_OPTIONS, PRIORITY_GROUPS, priorityOf, SORT_OPTIONS as SORT_OPTIONS_V12, RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent,
   letterCounts, railHeight, surnameInitial, surnameOf,
 } from "./contactList";
 
@@ -115,7 +115,7 @@ describe("where you stand — the page-local union over the QC's own rows", () =
 import {
   ACTION_GROUPS, type ContactFilters, NOT_RECORDED, dropOptions, STATUS_CHOICES, STATUS_GROUP_ORDER, type StatusKey, actionOf,
   agentFacts, contactFilterCount, contactGroups, emptyContactFilters, facetCounts, genreTallies, OPEN_CHOICES,
-  matchesContactFilters, rowDateLine, sortFacts, standingQuery,
+  matchesContactFilters, rowDateLine, sortFacts, standingQuery, addedMs, addedLabel,
 } from "./contactList";
 import { genreKey } from "./genreMatch";
 import { QueryStatus } from "../types";
@@ -133,8 +133,9 @@ describe("the row's standing query and its date line", () => {
   it("the five shapes, each from a produced row — and the branch tally proves the spread", () => {
     const by = new Map(rows.map((r) => [r.id, r]));
     const lines = new Map([...by.entries()].map(([id, r]) => [id, rowDateLine(r, NOW)]));
-    /* agent's court, past the date → the fact, in ink */
-    expect(lines.get("fq-2")).toEqual({ text: expect.stringMatching(/^Expected \d+ \w+ · \d+d over$/), over: true });
+    /* agent's court, past the date → the fact, in ink. RE-POINTED (v19.2 §D): this fixture is more than 30 days past,
+       so it reads "Overdue since …"; the counted form ("Expected … · Nd over") is held in contactV192.test.ts */
+    expect(lines.get("fq-2")).toEqual({ text: expect.stringMatching(/^(Expected \d+ \w+ · \d+d over|Overdue since \d+ \w+( \d{4})?)$/), over: true });
     /* agent's court, inside the window → a reply coming */
     expect(lines.get("fq-1")).toEqual({ text: expect.stringMatching(/^Reply by \d+ \w+ · in \d+d$/), over: false });
     /* the writer's own send-by (partial requested carries the writer clock when one exists) —
@@ -240,8 +241,19 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
   ];
   const xRows = buildQcRows([...QUERIES, ...extra], CONTACT_FIXTURE_AGENTS, [], NOW);
   const xFacts = CONTACT_FIXTURE_AGENTS.map((a) => agentFacts(a, xRows, MS.id));
-  it("the five groupings, No grouping first (v16 §C: the list opens ungrouped)", () => {
-    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["No grouping", "Letter", "Status", "Action required", "Country"]);
+  it("v19 §E: the six groupings in the menu's order, No grouping last; only Letter carries a line", () => {
+    expect(GROUP_OPTIONS.map((g) => g.label)).toEqual(["Letter", "Status", "Action required", "Country", "Priority", "No grouping"]);
+    expect(GROUP_OPTIONS.filter((g) => g.line).map((g) => g.line)).toEqual(["Surname initial, with the A\u2013Z strip"]);
+  });
+  it("v19 §E: Priority groups by the agent's star rating, five first, the unrated last", () => {
+    const rated = xFacts.map((x, i) => ({ ...x, agent: { ...x.agent, starRating: (i % 3 === 0 ? undefined : ((i % 5) + 1)) as 1 | 2 | 3 | 4 | 5 | undefined } }));
+    const g = contactGroups("priority", sortFacts(rated, "surname"));
+    const keys = g.map((x) => x.key);
+    expect(keys).toEqual(PRIORITY_GROUPS.map((p) => p.key).filter((k) => keys.includes(k)));
+    expect(keys[keys.length - 1]).toBe("unrated");
+    expect(keys.length, "population: several ratings").toBeGreaterThan(2);
+    expect(g.reduce((n, x) => n + x.ids.length, 0)).toBe(rated.length);
+    for (const grp of g) for (const id of grp.ids) expect(priorityOf(rated.find((x) => x.agent.id === id)!)).toBe(grp.key);
   });
   it("No grouping: one unlabelled group holding the ordered list as it was sorted; an empty list has no group", () => {
     const ordered = sortFacts(xFacts, "surname");
@@ -285,8 +297,9 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
     if (labels.includes(NOT_RECORDED)) expect(labels[labels.length - 1]).toBe(NOT_RECORDED);
     expect(labels.some((l) => /England|Scotland|Wales/.test(l))).toBe(false);
   });
-  it("the five sorts, each with its direction words", () => {
-    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status"]);
+  it("the six sorts, each with its direction words (v19 §C adds Date added)", () => {
+    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status", "Date added"]);
+    expect(SORT_OPTIONS_V12.find((o) => o.key === "added")?.dir).toEqual(["Newest first", "Oldest first"]);
     expect(SORT_OPTIONS_V12[0].dir).toEqual(["A to Z", "Z to A"]);
   });
   it("agency ignores a leading The", () => {
@@ -391,5 +404,110 @@ describe("v14 §7.8 — the helpful dead end: each drop's count is what that dro
     expect(opts[0].n).toBe(facts.length);
     const none = dropOptions(facts, { ...emptyContactFilters(), genres: ["no-such-genre-a", "no-such-genre-b"], genreMode: "all" }, "", search, label);
     expect(none).toEqual([]);
+  });
+});
+
+describe("v19 §C/§J — Date added: the record's own dateAdded, newest first, no date last either way", () => {
+  const mk = (id: string, name: string, dateAdded: string) => ({ agent: { id, name, agency: "", dateAdded } }) as unknown as Parameters<typeof sortFacts>[0][number];
+  const facts = [
+    mk("a", "Ada Reed", "2026-05-12T10:00:00.000Z"),
+    mk("b", "Ben Cole", "2026-09-22T10:00:00.000Z"),
+    mk("c", "Cy Ames", ""),
+    mk("d", "Di Moss", "2026-01-18T10:00:00.000Z"),
+    mk("e", "Ed Lowe", "not a date"),
+  ];
+  it("first click: newest first; the two with no readable date last, by surname", () => {
+    expect(sortFacts(facts, "added").map((x) => x.agent.id)).toEqual(["b", "a", "d", "c", "e"]);
+  });
+  it("reversed: oldest first, and the undated STILL last", () => {
+    expect(sortFacts(facts, "added", true).map((x) => x.agent.id)).toEqual(["d", "a", "b", "c", "e"]);
+  });
+  it("v19.1 §C: the cell reads \"12 May 2026\" — day, short month, full year, never \"Sept\"; nothing for a missing or unreadable date", () => {
+    expect(addedLabel({ dateAdded: "2026-05-12T10:00:00.000Z" })).toBe("12 May 2026");
+    expect(addedLabel({ dateAdded: "2026-09-25T10:00:00.000Z" })).toBe("25 Sep 2026");
+    for (let m = 0; m < 12; m++) expect(addedLabel({ dateAdded: new Date(Date.UTC(2026, m, 15)).toISOString() })).toMatch(/^\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$/);
+    expect(addedLabel({ dateAdded: "" })).toBeNull();
+    expect(addedLabel({ dateAdded: "nonsense" })).toBeNull();
+    expect(addedMs({ dateAdded: "2026-05-12T10:00:00.000Z" })).toBe(Date.parse("2026-05-12T10:00:00.000Z"));
+  });
+});
+
+/* ══ v19 §F — the quick picks, the applied-filters row and "what the list would show" ═════════════════════════════ */
+import {
+  QUICK_PICKS, WAITING_STATUSES, appliedFilters, genreList, standsRows, wouldShow, STANDS_ROWS,
+} from "./contactList";
+
+describe("v19 §F — filtering: each quick pick selects its population, checked against a direct predicate", () => {
+  const f0 = emptyContactFilters();
+  const pool = () => true;
+  const ids = (f: ContactFilters) => facts.filter((x) => matchesContactFilters(x, f)).map((x) => x.agent.id).sort();
+  const pick = (k: string) => QUICK_PICKS.find((p) => p.key === k)!;
+  /* the direct predicates — written from the pack's own table, never from the model */
+  const direct: Record<string, (x: (typeof facts)[number]) => boolean> = {
+    you: (x) => x.standing.kind === "open" && x.standing.yourMove, // the band's "your move" count
+    ready: (x) => x.standing.kind === "none" && x.openKey === "open",
+    wait: (x) => ["Queried", "Partial Sent", "Full Sent"].includes(String(x.q?.status)) && x.standing.kind === "open",
+    open: (x) => x.openKey === "open",
+  };
+  it("the four picks, in the pack's order, with its words", () => {
+    expect(QUICK_PICKS.map((p) => [p.key, p.title, p.line])).toEqual([
+      ["you", "Your move", "Agents waiting on you"],
+      ["ready", "Ready to query", "Not queried yet and open now"],
+      ["wait", "Waiting to hear back", "Queried, or sent pages"],
+      ["open", "Open to submissions", "Taking queries now"],
+    ]);
+  });
+  for (const k of ["you", "ready", "wait", "open"]) {
+    it(`${k}: the list it gives is exactly the direct query's`, () => {
+      const f = pick(k).set(f0, true);
+      expect(pick(k).on(f)).toBe(true);
+      const want = facts.filter(direct[k]).map((x) => x.agent.id).sort();
+      expect(want.length, `population: the fixture holds no ${k} agent`).toBeGreaterThan(0);
+      expect(ids(f)).toEqual(want);
+      expect(wouldShow(facts, f, pool)).toBe(want.length);
+      /* off again: back to everyone */
+      expect(pick(k).on(pick(k).set(f, false))).toBe(false);
+      expect(ids(pick(k).set(f, false)).length).toBe(facts.length);
+    });
+  }
+  it("Ready to query also selects Open to submissions, and the applied row shows it as its two parts", () => {
+    const f = pick("ready").set(f0, true);
+    expect(pick("open").on(f)).toBe(true);
+    expect(appliedFilters(f, (k) => k).map((a) => a.label)).toEqual(["Open to submissions", "Not queried yet"]);
+    /* dropping Open leaves Ready off and Not queried yet on */
+    const g = appliedFilters(f, (k) => k).find((a) => a.key === "open")!.drop(f);
+    expect(pick("ready").on(g)).toBe(false);
+    expect(g.queried).toBe("no");
+  });
+  it("Waiting to hear back is exactly Queried, Partial sent and Full sent — a fourth status turns it off", () => {
+    expect([...WAITING_STATUSES]).toEqual(["queried", "ps", "fs"]);
+    const f = pick("wait").set(f0, true);
+    expect(pick("wait").on({ ...f, status: [...f.status, "pr"] })).toBe(false);
+  });
+  it("the applied row: one chip per filter, never the search; the chip count is the same number", () => {
+    const f: ContactFilters = { ...f0, status: ["queried", "pr"], action: true, open: "closed", queried: "yes", mats: true, always: true, genres: ["a", "b"] };
+    const labels = appliedFilters(f, (k) => k.toUpperCase()).map((a) => a.label);
+    expect(labels).toEqual(["Status: Queried +1", "Your move", "Closed to submissions", "Queried", "Missing materials", "Always replies", "Genre: A +1"]);
+    expect(contactFilterCount(f)).toBe(labels.length);
+    expect(contactFilterCount(f0)).toBe(0);
+    /* each chip's drop removes its own filter and only that */
+    for (const a of appliedFilters(f, (k) => k)) expect(appliedFilters(a.drop(f), (k) => k).map((b) => b.key)).not.toContain(a.key);
+    expect(appliedFilters(f, (k) => k).reduce((g, a) => a.drop(g), f)).toEqual(f0);
+  });
+  it("wouldShow counts under the pool too (Find, the band's group)", () => {
+    const only = facts[0].agent.id;
+    expect(wouldShow(facts, f0, (x) => x.agent.id === only)).toBe(1);
+    expect(wouldShow(facts, f0, () => false)).toBe(0);
+  });
+  it("Where your query stands: the pack's eight, and R&R / Resubmitted / Signed only while someone is there or it is on", () => {
+    expect(standsRows(() => false, f0)).toEqual([...STANDS_ROWS]);
+    expect(standsRows((k) => k === "rr", f0)).toEqual(["none", "queried", "pr", "ps", "fr", "fs", "rr", "offer", "closed"]);
+    expect(standsRows(() => false, { ...f0, status: ["signed"] })).toContain("signed");
+  });
+  it("the genres, largest first, keyed as the filter reads them, counted over the whole list", () => {
+    const list = genreList(facts, (_k, raw) => raw);
+    for (let i = 1; i < list.length; i += 1) expect(list[i - 1].n).toBeGreaterThanOrEqual(list[i].n);
+    for (const g of list) expect(g.n).toBe(facts.filter((x) => x.genres.map(genreKey).includes(g.key)).length);
+    expect(list.length, "population: the fixture carries genres").toBeGreaterThan(0);
   });
 });

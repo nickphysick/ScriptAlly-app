@@ -12,13 +12,21 @@
  * Module scope, like `drawerStore`: nothing to mount, so nothing to forget.
  */
 let holders = 0;
+/* v138.6 §A — a hold that arrives as a RESTORE (a list remembered pinned) is applied with no transition: the shell
+   reads `sidebarInstant()` and drops its `sb-ready` gate for two frames, so the rail is the first thing painted
+   rather than something the sidebar animates into. */
+let instant = false;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
-/** Hold the sidebar collapsed. Returns the release; calling it twice releases once. */
-export function holdSidebarCollapsed(): () => void {
+/** Hold the sidebar collapsed. Returns the release; calling it twice releases once. `instant`: no transition. */
+export function holdSidebarCollapsed(o?: { instant?: boolean }): () => void {
   let live = true;
   holders++;
+  if (o?.instant && typeof window !== "undefined") {
+    instant = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => { instant = false; emit(); }));
+  }
   emit();
   return () => {
     if (!live) return;
@@ -36,6 +44,7 @@ export function releaseSidebarHolds(): void {
 }
 
 export const sidebarHeld = (): boolean => holders > 0;
+export const sidebarInstant = (): boolean => instant;
 export const subscribeSidebarHold = (l: () => void): (() => void) => {
   listeners.add(l);
   return () => { listeners.delete(l); };

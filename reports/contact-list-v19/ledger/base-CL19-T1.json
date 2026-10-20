@@ -1,0 +1,410 @@
+[
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 ungrouped the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 status the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered three filters on (precondition)",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 filtered the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered three filters on (precondition)",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1512 pinned-filtered the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 ungrouped the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 status the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered three filters on (precondition)",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 filtered the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered: \".cl19-findw label.cl19-find\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered three filters on (precondition)",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the toolbar is 52 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the Pin's right is inside the toolbar",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the toolbar's content does not overflow it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered Group by's label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered Filters' label is whole and visible",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-T1",
+  "where": "@1280 pinned-filtered the page has no horizontal overflow",
+  "ok": false,
+  "detail": "0 · null"
+ }
+]

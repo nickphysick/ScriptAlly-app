@@ -49,7 +49,10 @@ describe("the title is a sentence with the live count", () => {
     expect(chart({ loading: true })).toContain('data-probe-text="chart-title">Active queries</h3>');
   });
   it("⚠️ the figure is the one it is handed — the chart derives no count of its own", () => {
-    expect(chart({ activeCount: 12 })).toContain('data-probe-text="chart-title">12 active queries</h3>');
+    /* the title's TEXT: since Dashboard v59 the figure is a <data> element, for the first paint's count-up */
+    const ttl = /data-probe-text="chart-title">([\s\S]*?)<\/h3>/.exec(chart({ activeCount: 12 }))?.[1] ?? "";
+    expect(ttl.replace(/<[^>]+>/g, "")).toBe("12 active queries");
+    expect(ttl).toContain('<data class="d59-n" data-d58="count" value="12"');
     expect(code).not.toContain("liveCount");
     expect(code).not.toContain("dashBreakdown");
   });

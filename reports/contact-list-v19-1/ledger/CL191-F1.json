@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: the toolbar is rgb(42, 58, 82) with no rule beneath",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) · 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: the card's four corners are 18px, and it clips (the toolbar's top corners follow it)",
+  "ok": true,
+  "detail": "18px 18px 18px 18px · clips true"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: Pin is rgb(244, 238, 229) with navy text",
+  "ok": true,
+  "detail": "rgb(244, 238, 229) · rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: letters (the population)",
+  "ok": true,
+  "detail": "26 · current 1"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: the letters are cream",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: the current letter is a cream tile with navy text",
+  "ok": true,
+  "detail": "{\"cur\":true,\"dis\":false,\"color\":\"rgb(42, 58, 82)\",\"bg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: an empty letter is cream at 28%",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.28)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: label.cl19-find is white with no ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · none"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: button.cl19-grp is white with no ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · none"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned: button.cl19-fil is white with no ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · none"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned, at the list's end: 22 ±1 of page below the card",
+  "ok": true,
+  "detail": "22.3"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 unpinned, at the list's end: nothing else below it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: the toolbar is v19's rgb(247, 244, 238) with its 1px rule",
+  "ok": true,
+  "detail": "rgb(247, 244, 238) · 1px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: the card is square",
+  "ok": true,
+  "detail": "0px 0px 0px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: Pin is navy with white text",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: the letters are navy, the current one on white",
+  "ok": true,
+  "detail": "{\"cur\":true,\"dis\":false,\"color\":\"rgb(42, 58, 82)\",\"bg\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: label.cl19-find keeps its ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgba(28, 19, 15, 0.12) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: button.cl19-grp keeps its ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgba(28, 19, 15, 0.12) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1512 pinned: button.cl19-fil keeps its ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgba(28, 19, 15, 0.12) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: the toolbar is rgb(42, 58, 82) with no rule beneath",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) · 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: the card's four corners are 18px, and it clips (the toolbar's top corners follow it)",
+  "ok": true,
+  "detail": "18px 18px 18px 18px · clips true"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: Pin is rgb(244, 238, 229) with navy text",
+  "ok": true,
+  "detail": "rgb(244, 238, 229) · rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: letters (the population)",
+  "ok": true,
+  "detail": "26 · current 1"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: the letters are cream",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: the current letter is a cream tile with navy text",
+  "ok": true,
+  "detail": "{\"cur\":true,\"dis\":false,\"color\":\"rgb(42, 58, 82)\",\"bg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: an empty letter is cream at 28%",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.28)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: label.cl19-find is white with no ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · none"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: button.cl19-grp is white with no ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · none"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned: button.cl19-fil is white with no ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · none"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned, at the list's end: 22 ±1 of page below the card",
+  "ok": true,
+  "detail": "22.3"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 unpinned, at the list's end: nothing else below it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: the toolbar is v19's rgb(247, 244, 238) with its 1px rule",
+  "ok": true,
+  "detail": "rgb(247, 244, 238) · 1px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: the card is square",
+  "ok": true,
+  "detail": "0px 0px 0px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: Pin is navy with white text",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: the letters are navy, the current one on white",
+  "ok": true,
+  "detail": "{\"cur\":true,\"dis\":false,\"color\":\"rgb(42, 58, 82)\",\"bg\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: label.cl19-find keeps its ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgba(28, 19, 15, 0.12) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: button.cl19-grp keeps its ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgba(28, 19, 15, 0.12) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px"
+ },
+ {
+  "lock": "CL191-F1",
+  "where": "@1280 pinned: button.cl19-fil keeps its ring",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgba(28, 19, 15, 0.12) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px"
+ }
+]

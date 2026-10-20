@@ -14,12 +14,12 @@
  *    one predicate (`nextDoor`).
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useStickyStack } from "../../shell/stickyStack";
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { Mark } from "../QueryCard";
 import type { SubmissionPackage } from "../../../types";
 import type { GroupBy, ListGroup } from "../../../lib/qcCalView";
-import { GROUP_BY_OPTIONS } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
 import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
@@ -28,6 +28,11 @@ import { nextLine, sentCell } from "../../../lib/qcRowLines";
 import { peekSummary, peekTone, YOUR_MOVE_STATUSES, type PeekEvent } from "../../../lib/qc138";
 import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } from "../../../lib/qcTl4";
 import { StageGlyph } from "./StageGlyph";
+import { bandArtOf } from "../../../lib/qcBandArt";
+import { BandMark, JumpMark, TONE_ART, TONE_ICON } from "./bandMarks";
+import { QcToolbar140, type Qc140Jump, type Qc140JumpMode, type Qc140Pop } from "./QcToolbar140";
+import type { PopoverState } from "../../shell/ListPills";
+import { JUMP_COLUMN_LABEL, jumpColumn, jumpLabel, monthJumps } from "../../../lib/qc140";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -66,7 +71,6 @@ const ICON = {
   box: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><rect x="2" y="3" width="12" height="3" rx="1" /><path d="M3 6v7h10V6M6.5 9h3" /></svg>,
   clock: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
   pkg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 8l9-4 9 4-9 4z" /><path d="M3 8v8l9 4 9-4V8" /><path d="M12 12v8" /></svg>,
-  full: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9" /></svg>,
   comfy: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3 4.5h10M3 8h10M3 11.5h10" /></svg>,
   dense: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 3.5h10M3 6.5h10M3 9.5h10M3 12.5h10" /></svg>,
 };
@@ -95,6 +99,16 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
         const stuck = Math.abs(at - top) < 1 && !!grp && grp.bottom > r.bottom + 1 && grp.top < r.top - 1;
         if (stuck) b.setAttribute("data-stuck", ""); else b.removeAttribute("data-stuck");
       });
+      /* v18.3 §E — the headings row is stuck the same way: at its sticky top with the list still running under it
+         (the shared `.lth` then draws its 8px shade) */
+      const h = root.querySelector<HTMLElement>(".qc138-heads");
+      if (h) {
+        const top = parseFloat(getComputedStyle(h).top) || 0;
+        const r = h.getBoundingClientRect();
+        const at = r.top - sc.getBoundingClientRect().top;
+        const stuck = Math.abs(at - top) < 1 && root.getBoundingClientRect().bottom > r.bottom + 1 && sc.scrollTop > 0;
+        if (stuck) h.setAttribute("data-stuck", ""); else h.removeAttribute("data-stuck");
+      }
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(read); };
     read();
@@ -103,17 +117,6 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
     return () => { sc.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
   }, [box, sig]);
 }
-const TONE_ICON: Record<BandTone, React.ReactNode> = { you: ICON.pen, waiting: ICON.glass, closed: ICON.box };
-/**
- * v138.3 §F — the group art: the pointing talon for Your move, the hawk-and-hourglass for Waiting, breaking out of the
- * band. Served as WebP at 2× (the PNGs beside them are the source). Decorative: the band's title carries the meaning.
- * Compact keeps the small icon in its circle (the art is too detailed below 40px); Closed keeps its icon.
- */
-const TONE_ART: Partial<Record<BandTone, { src: string; w: number; h: number }>> = {
-  you: { src: "/images/query-centre/your-move-talon.webp", w: 46, h: 64 },
-  waiting: { src: "/images/query-centre/waiting-hourglass.webp", w: 54, h: 55.5 },
-};
-
 /** Where it stands: four 9px dots (Queried · Partial · Full · Offer), 15 apart, joined by 11×2 lines */
 const Track: React.FC<{ level: number; yours: boolean; closed: boolean }> = ({ level, yours, closed }) => (
   <span className={`qc138-trk${yours ? " qc138-trk--you" : ""}${closed ? " qc138-trk--closed" : ""}`} data-qcv="row-track" data-level={level} aria-hidden="true">
@@ -298,7 +301,8 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
   );
 };
 
-/** "What you sent": a 92px package chip (or an empty 92px space), a rule, four 30px tiles */
+/** "What you sent" (v138.5 §F): the package chip, as wide as its name up to the column (or "+ Add" when nothing is
+    recorded), over the four material icons; with no package and something recorded, the icons alone on line 1 */
 const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
   const m = sentCell(row, pkg, nowMs);
   return (
@@ -313,16 +317,15 @@ const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: 
           onClick={(e) => { e.stopPropagation(); onAdd(); }}>
           <span className="qc138-pkg-plus" aria-hidden="true">+</span><span className="qc138-pkg-word">Add</span>
         </button>
-      ) : (
-        <span className="qc138-pkg qc138-pkg--none" data-qcv="row-pkg-none" aria-hidden="true" />
-      )}
-      <i className="qc138-sep" aria-hidden="true" />
-      {m.tiles.map((t) => (
-        <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
-          tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
-          <Mark kind={t.kind} />
-        </span>
-      ))}
+      ) : null}
+      <span className="qc138-mic" data-qcv="sent-icons">
+        {m.tiles.map((t) => (
+          <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
+            tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
+            <Mark kind={t.kind} />
+          </span>
+        ))}
+      </span>
     </div>
   );
 };
@@ -337,7 +340,18 @@ export interface QcList138Props {
   total: number;
   shown: number;
   filtered: boolean;
-  onClearAll: () => void;
+  /** v138.6 §B — the sticky stack's writer runs while this list is the page on screen */
+  stickyOn?: boolean;
+  /** v140 §A — how many filters are on (search not counted), the Filters chip's ✕, and its menu */
+  filterCount: number;
+  onClearFilters?: () => void;
+  filtersMenu?: (pop: PopoverState<Qc140Pop>) => React.ReactNode;
+  /** v140 §D — the applied-filters row, under the toolbar while anything narrows the list */
+  applied?: React.ReactNode;
+  /** v140 §C — the pinned band (QcBand140), drawn above the toolbar while the list is pinned */
+  band?: React.ReactNode;
+  /** the list is still loading: the toolbar's controls wait */
+  loading?: boolean;
   sort: Qc138Sort;
   onHeading: (k: Qc138SortKey) => void;
   density: QcDensity;
@@ -373,11 +387,25 @@ export interface QcList138Props {
   /** group keys folded at first sight (Part D: Closed) */
   folded: ReadonlySet<string>;
   onFold: (key: string) => void;
+  /** v139 §B — the page guide's practice query: its own band above every group, whatever the grouping or sort, and in
+   *  no count. `leaving` fades it out as it is cleared. */
+  practice?: { row: QcRow; leaving: boolean } | null;
+  /** v140 §F — THE ARRIVAL: a new `key` (the list's load, and every grouping, filter and search change) plays one
+   *  arrival over the bands and rows on screen, once the list is built and before it is painted. `delayMs` holds it
+   *  back (the page-load entrance, while the sheet itself is still rising). */
+  arrival?: { key: string; delayMs?: number };
+  /** v140 §F — the unpinned scroll position, for the visit: read once for the list's first draw (a reload within the
+   *  visit) and again when the route comes back with its scroller at the top; written as the list scrolls unpinned. */
+  scrollMemory?: { read: () => number; write: (y: number) => void };
 }
 
+/** v140 §F — the arrival's values: 420ms on cubic-bezier(.2,.8,.2,1) from −10px and transparent, 24ms apart, the
+ *  stagger capped at the 17th item */
+export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: -10, step: 24, items: 17 } as const;
+
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, total, shown, filtered, onClearAll, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null,
+  groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -416,24 +444,93 @@ export const QcList138: React.FC<QcList138Props> = ({
   }, [entering]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => window.clearTimeout(peekTimer.current), []);
   const boxRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  useStickyStack(topRef, stickyOn);
   const tip = useTip(boxRef);
-  const [groupOpen, setGroupOpen] = useState(false);
-  const groupBtn = useRef<HTMLButtonElement>(null);
   const rows = groups.flatMap((g) => g.rows);
   useStuckBands(boxRef, `${groups.map((g) => `${g.key}:${g.rows.length}`).join("|")}|${[...folded].join(",")}|${density}`);
-  const groupLabel = GROUP_BY_OPTIONS.find((o) => o.key === groupBy)?.label ?? "Urgency";
+  /* ── v140 §F — THE SCROLL, FOR THE VISIT (unpinned only). Read once at mount; put back on the list's first draw
+     (inside the arrival's layout effect, before paint and before the arrival picks the rows on screen, so the rows that
+     arrive are the ones the reader comes back to). A first draw while pinned drops it: it is the unpinned position. ── */
+  const scrollPending = useRef<number | null>(scrollMemory ? scrollMemory.read() || null : null);
+  const scroller = () => boxRef.current?.closest<HTMLElement>(".wpg-scroll") ?? null;
+  const restoreScroll = () => {
+    const y = scrollPending.current;
+    scrollPending.current = null;
+    const sc = scroller();
+    if (y && sc && !full) sc.scrollTop = y;
+  };
+  /* coming back to the route: a scroller the browser reset to its top (display: none loses it) is put back */
+  const wasOn = useRef(stickyOn);
+  useLayoutEffect(() => {
+    const back = stickyOn && !wasOn.current;
+    wasOn.current = stickyOn;
+    if (!back || full || !scrollMemory || scrollPending.current != null) return;
+    const sc = scroller();
+    const y = scrollMemory.read();
+    if (sc && y && sc.scrollTop === 0) sc.scrollTop = y;
+  });
   useEffect(() => {
-    if (!groupOpen) return undefined;
-    const down = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (groupBtn.current?.contains(t) || (t instanceof Element && t.closest('[data-qc138="group-menu"]'))) return;
-      setGroupOpen(false);
-    };
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setGroupOpen(false); groupBtn.current?.focus(); } };
-    document.addEventListener("pointerdown", down, true);
-    document.addEventListener("keydown", key, true);
-    return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("keydown", key, true); };
-  }, [groupOpen]);
+    if (!stickyOn || full || !scrollMemory || loading) return undefined;
+    const sc = scroller();
+    if (!sc) return undefined;
+    let raf = 0;
+    const save = () => { raf = 0; scrollMemory.write(sc.scrollTop); };
+    const on = () => { if (!raf) raf = requestAnimationFrame(save); };
+    sc.addEventListener("scroll", on, { passive: true });
+    return () => { sc.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
+  }, [stickyOn, full, loading, scrollMemory]);
+  /* ── v140 §F — THE ARRIVAL. The bands and rows ON SCREEN come in from the top, in list order, each from translateY(−10px)
+     and opacity 0 over 420ms, 24ms apart, the stagger capped at the 17th; off screen nothing animates. A row still
+     arriving from the change before keeps its animation (typing in Find would otherwise blink the list on every key).
+     `fill: backwards` only, so once it ends nothing holds a style. Reduced motion: nothing moves. Web Animations, so no
+     keyframe reads a custom property (and the QC138 entrance's own CSS animations are not what this is). ── */
+  const arriving = useRef(new WeakMap<Element, Animation>());
+  const arrivedKey = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    /* ⚠️ only while the list is the page on screen: every page stays mounted, so the data can land while /queries is
+       hidden; the key is then kept for the moment the route is opened, which is the reader's "load" */
+    if (!arrival || !stickyOn || arrivedKey.current === arrival.key) return;
+    arrivedKey.current = arrival.key;
+    if (scrollPending.current != null && !loading && rows.length) restoreScroll();
+    const root = boxRef.current?.querySelector<HTMLElement>(".qc138-body");
+    if (!root || typeof root.animate !== "function" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const sc = scroller();
+    const view = sc ? sc.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+    let i = 0;
+    for (const el of root.querySelectorAll<HTMLElement>('[data-qcv="row"], [data-qcv="gband"], [data-qc139="practice-band"]')) {
+      const b = el.getBoundingClientRect();
+      if (b.height === 0 || b.bottom <= view.top) continue;
+      if (b.top >= view.bottom) break;
+      const delay = (arrival.delayMs ?? 0) + Math.min(i, ARRIVAL_140.items - 1) * ARRIVAL_140.step;
+      i += 1;
+      const was = arriving.current.get(el);
+      if (was && was.playState === "running") continue;
+      el.setAttribute("data-qc140-arrive", "");
+      const a = el.animate([{ opacity: 0, transform: `translateY(${ARRIVAL_140.from}px)` }, { opacity: 1, transform: "none" }],
+        { duration: ARRIVAL_140.ms, delay, easing: ARRIVAL_140.easing, fill: "backwards" });
+      a.onfinish = a.oncancel = () => el.removeAttribute("data-qc140-arrive");
+      arriving.current.set(el, a);
+    }
+  });
+  /* v140 §A — the jump row: a button per group (its band's mark, its label, its count), or, ungrouped, one per month of
+     the sort column's date, in list order */
+  /* v141 §D — two modes: GLYPH for Status and Who it's with (a 44 x 40 button, the glyph alone and a count badge, the
+     name on hover), NAME for Next action and Package (the name and count, no icon). The "+N more" menu draws a glyph
+     for every grouping but Package (every package shares one box, so its rows have none). Who it's with's Closed has
+     no art of its own, so it takes the closed glyph, the circle with a line. */
+  const jumpMode: Qc140JumpMode = groupBy === "none" ? "month" : groupBy === "status" || groupBy === "attention" ? "glyph" : "name";
+  const CLOSED_ART = { kind: "glyph", glyph: "cl", grey: false, badge: null, badgeTone: null } as const;
+  const jumps: Qc140Jump[] = groupBy === "none"
+    ? monthJumps(rows, jumpColumn(sort.key), nowMs).map((m) => ({ key: m.key, label: m.label, full: m.label, n: m.n, mark: null, to: { kind: "row", id: m.firstId } }))
+    : groups.map((g) => {
+        const tone = toneOf(g);
+        const full = g.label || "All queries";
+        const art = groupBy === "attention" && g.key === "closed" ? CLOSED_ART : bandArtOf(groupBy, g.key);
+        const glyph = <JumpMark art={art} tone={tone} />;
+        return { key: g.key, label: jumpLabel(groupBy, g.key, full), full, n: g.rows.length,
+          mark: jumpMode === "glyph" ? glyph : null, menuMark: groupBy === "package" ? null : glyph, to: { kind: "group", key: g.key } };
+      });
 
   const hl = (text: string): React.ReactNode => {
     const q = find.trim();
@@ -481,7 +578,7 @@ export const QcList138: React.FC<QcList138Props> = ({
             {picked ? null : <span className="qc138-pickbox" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" /></svg></span>}
           </button>
           <span className="qc138-agt">
-            <b data-qcv="row-name">{hl(r.agentName)}</b>
+            <b data-qcv="row-name" title={r.agentName}>{hl(r.agentName)}</b>
             <small data-qcv="row-agency">{hl(r.agency)}</small>
           </span>
         </div>
@@ -536,40 +633,23 @@ export const QcList138: React.FC<QcList138Props> = ({
 
   return (
     <div className="qc138-sheet" data-qc138="sheet" data-density={density} ref={boxRef} {...tip.handlers}>
-      <div className="qc138-top" data-qc138="top" data-qcv="ws-head">
-        <p className="qc138-say" data-qc138="showing" data-qcv="ws-title">
-          {filtered
-            ? <>Showing <b data-qc138="shown">{shown}</b> of <b data-qc138="total">{total}</b>,</>
-            : <>Showing all <b data-qc138="total">{total}</b> {total === 1 ? "query" : "queries"},</>}
-          {" "}<span className="qc138-gb">grouped by</span>{" "}
-          <button type="button" ref={groupBtn} className="qc138-grp" data-qc138="group" aria-haspopup="menu" aria-expanded={groupOpen}
-            onClick={() => setGroupOpen((o) => !o)}>{groupLabel}</button>
-          {filtered ? <button type="button" className="qc138-clear" data-qc138="clear-all" onClick={onClearAll}>Clear all</button> : null}
-          {groupOpen ? (
-            <span className="qc138-gmenu" role="menu" data-qc138="group-menu">
-              {GROUP_BY_OPTIONS.map((o) => (
-                <button key={o.key} type="button" role="menuitemradio" aria-checked={groupBy === o.key} data-g={o.key}
-                  onClick={() => { onGroup(o.key); setGroupOpen(false); groupBtn.current?.focus(); }}>{o.label}</button>
-              ))}
-            </span>
-          ) : null}
-        </p>
-        {onFind ? (
-          <label className="qc138-tsearch" data-qc138="search">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
-            <kbd aria-hidden="true">/</kbd>
-          </label>
-        ) : null}
-        <span className="qc138-tools">
-          <span className="qc138-dens" role="group" aria-label="Row density" data-qcv="ws-density">
-            <button type="button" aria-pressed={density === "comfortable"} data-d="comfortable" title="Comfortable rows" aria-label="Comfortable rows" onClick={() => onDensity("comfortable")}>{ICON.comfy}</button>
-            <button type="button" aria-pressed={density === "compact"} data-d="compact" title="Compact rows" aria-label="Compact rows" onClick={() => onDensity("compact")}>{ICON.dense}</button>
-          </span>
-          <button type="button" className="qc138-fs" data-qc138="full" aria-pressed={full} title={full ? "Leave full screen" : "Full screen"} aria-label={full ? "Leave full screen" : "Full screen"} onClick={onFull}>{ICON.full}</button>
-        </span>
+      {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
+          sheet's colour. v140 §A — what sticks is the toolbar (QcToolbar140), and under it the applied-filters row while
+          anything narrows the list: `useStickyStack` measures the two together, so the headings and the current group
+          band stick under both. */}
+      <div className="qc138-topw" data-qc138="top-wrap">
+        <div className="qc140-stk" data-qc140="stack" data-pinned={full ? "" : undefined} ref={topRef}>
+          {/* v140 §C — pinned, the navy band sits above the toolbar inside the sticky stack, so the headings and the
+              current group band stick under both */}
+          {full ? band : null}
+          <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
+            jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps} jumpMode={jumpMode}
+            find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} />
+          {applied}
+        </div>
       </div>
-      <div className="qc138-heads" data-qc138="headings" role="row">
+      <div className="qc138-heads lth" data-qc138="headings" role="row">
         {HEADINGS.map((h) => {
           const on = sort.key === h.key;
           return (
@@ -586,8 +666,31 @@ export const QcList138: React.FC<QcList138Props> = ({
           builds drop the branch, since MODE is replaced at build time */}
       {import.meta.env.MODE !== "production" ? <PeekLab nowMs={nowMs} /> : null}
       <div className="qc138-body" data-qcv="list">
+        {/* v139 §B — the practice band: first, always; never counted (the title, the bands' counts and the glyphs read
+            the page's own rows, and Pip is not one of them) */}
+        {practice ? (
+          <div className={`qc138-grp qc139-practice${practice.leaving ? " out" : ""}`} data-qc139="practice" data-group="practice">
+            <div className="qc138-band qc139-pband" data-qc139="practice-band">
+              <span className="qc138-gart" aria-hidden="true" />
+              <b className="qc138-gt">Practice</b>
+              <span className="qc139-stamp" data-qc139="stamp">PRACTICE</span>
+              <span className="qc138-gh">Only on this screen · not saved to your account</span>
+            </div>
+            <div role="listbox" aria-label="Practice: 1 query" className="qc138-rows">
+              {renderRow(practice.row)}
+            </div>
+          </div>
+        ) : null}
         {groups.length === 0 && deadEnd ? deadEnd : null}
-        {groups.map((g) => {
+        {/* v140 §D — No grouping is ONE list in the order the headings sort it: no bands */}
+        {groupBy === "none" && rows.length ? (
+          <div className="qc138-grp qc140-flat" data-qcv="grp" data-group="all">
+            <div role="listbox" aria-label={`All queries: ${rows.length} ${rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">
+              {rows.map(renderRow)}
+            </div>
+          </div>
+        ) : null}
+        {groupBy === "none" ? null : groups.map((g) => {
           const tone = toneOf(g);
           const shut = folded.has(g.key);
           const label = g.label || "All queries";
@@ -595,10 +698,20 @@ export const QcList138: React.FC<QcList138Props> = ({
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
               <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
-                <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
-                {TONE_ART[tone] ? (
-                  <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
-                ) : null}
+                {/* v139 §C — under Status, Next action and Package the band draws its own mark in the art slot, and never
+                    the default grouping's talon or hourglass (which used to appear on every non-urgency band) */}
+                {(() => {
+                  const art = bandArtOf(groupBy, g.key);
+                  if (art) return <BandMark art={art} />;
+                  return (
+                    <>
+                      <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
+                      {TONE_ART[tone] ? (
+                        <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
+                      ) : null}
+                    </>
+                  );
+                })()}
                 <b className="qc138-gt" data-qcv="gband-t">{label}</b>
                 <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
                 {g.hint ? <span className="qc138-gh" data-qcv="gband-h">{g.hint}</span> : <span className="qc138-gh" />}

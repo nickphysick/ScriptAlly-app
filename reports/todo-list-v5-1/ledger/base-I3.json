@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "I3",
+  "where": "snooze: the choice is offered",
+  "ok": false,
+  "detail": "[data-snz=\"tom\"]"
+ },
+ {
+  "lock": "I3",
+  "where": "dismiss: the choice is offered",
+  "ok": false,
+  "detail": "[data-dis=\"one\"]"
+ },
+ {
+  "lock": "I3",
+  "where": "switch off: the choice is offered",
+  "ok": false,
+  "detail": "[data-dis=\"rule\"]"
+ },
+ {
+  "lock": "I3",
+  "where": "move: the choice is offered",
+  "ok": false,
+  "detail": "[data-snz=\"week\"]"
+ },
+ {
+  "lock": "I3",
+  "where": "delete: the choice is offered",
+  "ok": false,
+  "detail": "[data-td5=\"pop-delete\"]"
+ }
+]

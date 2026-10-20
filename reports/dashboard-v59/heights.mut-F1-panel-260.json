@@ -1,0 +1,178 @@
+{
+ "1920x1080": {
+  "panel": 412,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": true,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": true
+  }
+ },
+ "1696x820": {
+  "panel": 260,
+  "focus": 172,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": true,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1536x864": {
+  "panel": 260,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1512x900": {
+  "panel": 260,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1440x900": {
+  "panel": 260,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1366x768": {
+  "panel": 260,
+  "focus": 172,
+  "tiers": {
+   "art": false,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x800": {
+  "panel": 260,
+  "focus": 172,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x720": {
+  "panel": 260,
+  "focus": 172,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x680": {
+  "panel": 260,
+  "focus": 156,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1366x650": {
+  "panel": 260,
+  "focus": 156,
+  "tiers": {
+   "art": false,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x650": {
+  "panel": 260,
+  "focus": 156,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ }
+}

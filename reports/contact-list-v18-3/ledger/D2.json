@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D2",
+  "where": "the editor shows \"Response policy\"",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D2",
+  "where": "no \"No reply means\" anywhere",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D2",
+  "where": "the options are \"No response means no\" / \"Always replies\"",
+  "ok": true,
+  "detail": "[\"No response means no\",\"Always replies\"]"
+ },
+ {
+  "lock": "D2",
+  "where": "\"Always replies\" writes noResponseMeansNo = false",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D2",
+  "where": "\"No response means no\" writes noResponseMeansNo = true",
+  "ok": true,
+  "detail": "true"
+ }
+]

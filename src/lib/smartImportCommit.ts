@@ -16,7 +16,8 @@ import { Agent, ActivityType, Query, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
 import { impliedRungs, assignTimes } from "./impliedRungs";
-import { importActivityLine, type ImportSource } from "./importLabels";
+import type { ImportSource } from "./importLabels";
+import { importCounts, writeImportEvent } from "./importEvent";
 import { importedAgentDoc } from "./importedAgent";
 import { findExistingAgent, isSameQuery } from "./importDuplicates";
 
@@ -151,6 +152,8 @@ export async function commitSmartImport(
     preFeedIds = new Set((await getDocs(feedCol)).docs.map((d) => d.id));
   } catch { /* non-fatal: worst case we just don't collapse the feed */ }
   const importedQueryIds = new Set<string>();
+  /* each imported query's status, for the import event's three groups (lib/importEvent) */
+  const importedStatuses: Query["status"][] = [];
 
 
   // 1. Agents — dedupe against existing, merge rather than duplicate. Import bypasses the
@@ -256,6 +259,7 @@ export async function commitSmartImport(
       continue;
     }
 
+    importedStatuses.push(q.status!);
     try {
       await writeImportedHistory(userId, queryId, q, agent.name, manuscriptTitle);
       outcome.queriesImported++;
@@ -267,9 +271,9 @@ export async function commitSmartImport(
     }
   }
 
-  // Collapse the per-row dashboard-feed projections into ONE summary line. Delete the feed entries
-  // this import created — every new "Agent Added", and every "Query Sent"/"Status Changed" for an
-  // imported query — then write a single "Smart import · …" event. Per-query activity rungs (the
+  // Collapse the per-row dashboard-feed projections into ONE event. Delete the feed entries this
+  // import created — every new "Agent Added", and every "Query Sent"/"Status Changed" for an
+  // imported query — then write the import's own event (lib/importEvent, import review v1). Per-query activity rungs (the
   // status source of truth) and provisional rungs are untouched. Non-fatal: a feed left un-collapsed
   // is cosmetic, never a failed import.
   try {
@@ -285,18 +289,11 @@ export async function commitSmartImport(
         .map((d) => deleteDoc(d.ref))
     );
 
-    /* The line counts what was written. An import that wrote nothing leaves no line. */
-    if (outcome.agentsCreated === 0 && outcome.queriesImported === 0) return outcome;
-    const summaryId = "imp-sum-" + Math.random().toString(36).substr(2, 9);
-    await setDoc(doc(feedCol, summaryId), {
-      id: summaryId,
-      userId,
-      queryId: "",
-      manuscriptId: "",
-      activityType: ActivityType.STATUS_CHANGED, // non-housekeeping so it shows in "The story so far"
-      description: importActivityLine(source, outcome.agentsCreated, outcome.queriesImported),
-      date: new Date(importBaseMs).toISOString(),
-      details: "",
+    /* The event counts what was written. An import that wrote nothing leaves no event. It is tied to
+       the manuscript (the old line carried none, so the dashboard's scoped feed could never hold it). */
+    await writeImportEvent(db, {
+      userId, manuscriptId, manuscriptTitle, dateMs: importBaseMs, route: source,
+      counts: importCounts(outcome.agentsCreated, importedStatuses),
     });
   } catch (e) {
     console.error("Smart Import: feed-summary collapse failed:", e);

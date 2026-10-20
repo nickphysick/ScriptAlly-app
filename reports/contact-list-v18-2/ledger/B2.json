@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "B2",
+  "where": "a you agent is on the account",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "B2",
+  "where": "you: the slip is rgb(251, 238, 232)",
+  "ok": true,
+  "detail": "rgb(251, 238, 232)"
+ },
+ {
+  "lock": "B2",
+  "where": "a waiting agent is on the account",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: the slip is rgb(45, 58, 80)",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: the headline is cream",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "B2",
+  "where": "a notq agent is on the account",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "B2",
+  "where": "notq: the slip is rgba(0, 0, 0, 0)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "B2",
+  "where": "not queried: a 1.5px dotted border (device-snapped) and no shadow",
+  "ok": true,
+  "detail": "dotted 1px none"
+ },
+ {
+  "lock": "B2",
+  "where": "a closed agent is on the account",
+  "ok": true,
+  "detail": "msv12-agent-6"
+ },
+ {
+  "lock": "B2",
+  "where": "closed: the slip is rgb(233, 229, 224)",
+  "ok": true,
+  "detail": "rgb(233, 229, 224)"
+ },
+ {
+  "lock": "B2",
+  "where": "a shut agent is on the account",
+  "ok": true,
+  "detail": "seed-agent-1"
+ },
+ {
+  "lock": "B2",
+  "where": "shut: the slip is rgb(233, 229, 224)",
+  "ok": true,
+  "detail": "rgb(233, 229, 224)"
+ }
+]

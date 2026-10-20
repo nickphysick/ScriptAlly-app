@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "B1",
+  "where": "@1512 the header's button reads \"Fill in the gaps\"",
+  "ok": true,
+  "detail": "Fill in the gaps"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 H opens Housekeeping",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 its count is the open gaps (50)",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 no \"Discover agents\" in the header",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 no floating tab",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 the header's button reads \"Fill in the gaps\"",
+  "ok": true,
+  "detail": "Fill in the gaps"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 H opens Housekeeping",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 its count is the open gaps (50)",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 no \"Discover agents\" in the header",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 no floating tab",
+  "ok": false,
+  "detail": "1"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "HS1-B2",
+  "where": "@1512 the guide names a next item (precondition)",
+  "ok": true,
+  "detail": "Open an agent's card"
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1512 the menu closed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1512 the checklist did not open",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1512 the spotlight shows the next item",
+  "ok": false,
+  "detail": "null vs Open an agent's card"
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1280 the guide names a next item (precondition)",
+  "ok": true,
+  "detail": "Open an agent's card"
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1280 the menu closed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1280 the checklist did not open",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "HS1-B2",
+  "where": "@1280 the spotlight shows the next item",
+  "ok": false,
+  "detail": "null vs Open an agent's card"
+ }
+]

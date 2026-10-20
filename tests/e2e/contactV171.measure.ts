@@ -18,6 +18,7 @@
  *    put off and no dismissal stored (Undo).
  */
 import { expect, test, type Page } from "@playwright/test";
+import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openContacts16 } from "./cl16Lib";
 
@@ -106,7 +107,8 @@ const read = (page: Page) => page.evaluate(() => {
 });
 type Reading = Awaited<ReturnType<typeof read>>;
 /** "49 gaps · 1 of 37 filled in" → { gaps, filled, total } */
-const tabFigures = (s: string) => { const m = s.match(/(\d+)\s+gaps?\D+(\d+)\s+of\s+(\d+)/i); return m ? { gaps: +m[1], filled: +m[2], total: +m[3] } : null; };
+/* RE-POINTED (v18 §F.1): the tab reads "{gaps} gaps · {pct}% list health" */
+const tabFigures = (s: string) => { const m = s.match(/(\d+)\s+gaps?\D+(\d+)% list health/i); return m ? { gaps: +m[1], pct: +m[2], filled: NaN, total: NaN } : null; };
 const insetOf = (r: Reading) => (r.hd ? (r.wide ? Math.max(64, (r.hd.w - 1080) / 2) : Math.max(40, (r.hd.w - 900) / 2)) : NaN);
 
 /* ───────────────────────── A4 · inset ───────────────────────── */
@@ -118,17 +120,20 @@ test("A4 · the title row is inset; the filter row and the list are not; no hawk
     L.check(`header present ${w}`, !!r.hd && !!r.tb && !!r.card, `hd ${!!r.hd} · title block ${!!r.tb} · card ${!!r.card}`);
     if (!r.hd || !r.tb || !r.card) continue;
     const ins = insetOf(r);
-    L.check(`title block's left = header's left + inset (±1) ${w}`, near(r.tb.l, r.hd.l + ins, 1), `${r.tb.l.toFixed(1)} vs ${(r.hd.l + ins).toFixed(1)} (inset ${ins.toFixed(1)}, ${r.wide ? "full" : "compact"})`);
+    /* RETIRED (v18.2 §A): the title block starts 28px past the archivist now, not at the row's inset (CL182 A1) */
+    void ins;
     L.check(`card's right = header's right − inset (±1) ${w}`, near(r.card.r, r.hd.r - ins, 1), `${r.card.r.toFixed(1)} vs ${(r.hd.r - ins).toFixed(1)}`);
-    L.check(`filter row's left = the list's left (±1) ${w}`, !!r.fr && !!r.list && near(r.fr.l, r.list.l, 1), `${r.fr?.l.toFixed(1)} vs ${r.list?.l.toFixed(1)}`);
+    /* RETIRED (v18 §B): the filter row is gone from the page header */
     L.check(`no contact-disc-hawk image in the header ${w}`, r.hawk === 0, `${r.hawk}`);
-    L.check(`the shadow at opacity 0.15 (±0.01) ${w}`, near(r.shadow, 0.15, 0.01), `${r.shadow}`);
+    /* RE-POINTED (v18.2 §A): the shadow is at .1 over the List health card */
+    L.check(`the shadow at opacity 0.1 (±0.01) ${w}`, near(r.shadow, 0.1, 0.01), `${r.shadow}`);
   }
-  L.done(12);
+  L.done(8); /* v18.2: the title-left reading retired at both widths */
 });
 
 /* ───────────────────────── B3 · the card ───────────────────────── */
-test("B3 · one card: compact counts, no detail; List health is Housekeeping's figures and opens it", async ({ page }) => {
+/* RETIRED (Contact list v18): v18 §F.1: List health is the points share now (CL18 F1 holds the number on the ring, the tab and the drawer) */
+test.skip("B3 · one card: compact counts, no detail; List health is Housekeeping's figures and opens it", async ({ page }) => {
   const L = new Ledger("B3");
   for (const vp of SIZES) {
     await open(page, vp, "B3");
@@ -179,7 +184,8 @@ test("B4 · every gap filled: a solid ink ring, 100%, All filled in, and no tab"
   for (const vp of SIZES) {
     await open(page, vp, "B4", { allFilled: true });
     const r = await read(page); const w = `@${vp.width}`;
-    const C = 2 * Math.PI * 42;
+    /* RE-POINTED (v18.3 §B): the ring's radius is 42.5 (stroke 10, round cap; RING in lib/contactHealth) */
+    const C = 2 * Math.PI * 42.5;
     L.check(`precondition: the list is not empty ${w}`, !!r.card, "card");
     L.check(`solid ink: the arc is the whole circle, no rust, no joins ${w}`, near(r.inkDash, C, 0.01) && !r.gapsCircle && r.joins === 0, `ink ${r.inkDash?.toFixed(2)} of ${C.toFixed(2)} · rust ${r.gapsCircle} · joins ${r.joins}`);
     L.check(`reads 100% ${w}`, r.pct === "100%", `"${r.pct}"`);
@@ -191,7 +197,8 @@ test("B4 · every gap filled: a solid ink ring, 100%, All filled in, and no tab"
 });
 
 /* ───────────────────────── C2 · search ───────────────────────── */
-test("C2 · the search is 220 at compact widths and the filter row does not overflow", async ({ page }) => {
+/* RETIRED (Contact list v18): v18 §B: the filter row is gone; the search is in the list header (CL18 B1 holds it on one line) */
+test.skip("C2 · the search is 220 at compact widths and the filter row does not overflow", async ({ page }) => {
   const L = new Ledger("C2");
   for (const vp of SIZES) {
     await open(page, vp, "C2");
@@ -204,7 +211,8 @@ test("C2 · the search is 220 at compact widths and the filter row does not over
 });
 
 /* ───────────────────────── D1 · the tab shows ───────────────────────── */
-test("D1 · the tab shows, in ink, only with gaps", async ({ page }) => {
+/* RETIRED (Contact list v18.3 §B): there is no floating Housekeeping tab; CL183 B1 holds its absence */
+test.skip("D1 · the tab shows, in ink, only with gaps", async ({ page }) => {
   const L = new Ledger("D1");
   for (const vp of SIZES) {
     await open(page, vp, "D1");
@@ -225,7 +233,8 @@ test("D1 · the tab shows, in ink, only with gaps", async ({ page }) => {
 });
 
 /* ───────────────────────── D2 · dismiss ───────────────────────── */
-test("D2 · × hides the tab for the account; it stays hidden as gaps are filled and returns for a new one; Undo", async ({ page }) => {
+/* RETIRED (Contact list v18.3 §B): the tab and its × are gone, so there is nothing to dismiss */
+test.skip("D2 · × hides the tab for the account; it stays hidden as gaps are filled and returns for a new one; Undo", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("D2");
   const vp = SIZES[0];
@@ -236,14 +245,14 @@ test("D2 · × hides the tab for the account; it stays hidden as gaps are filled
   const settle = async () => { await page.waitForTimeout(1500); };
   const reload = async () => { await page.reload(); await page.locator(".clv-group:not([data-loading]) .clv-row").first().waitFor({ timeout: 60_000 }); await page.waitForTimeout(1200); };
 
+  /* RE-POINTED (Contact list v18 §F): the new drawer has no per-row "Later", so the count falls by answering a reply
+     gap with "They don't say" through Focus (the existing settled path), and rises again when that mark is taken out
+     (tests/e2e/hkFlags.mjs --unsettle). The stored value is read back from the account. */
+  const node = (args: string) => JSON.parse(execSync(`node tests/e2e/hkFlags.mjs ${args}`, { encoding: "utf8" }).trim().split("\n").pop() ?? "{}");
   let r = await read(page);
   const f0 = tabFigures(r.tab?.counts ?? "");
   L.check("precondition: the tab is shown, with gaps", !!r.tab?.shown && !!f0 && f0.gaps > 1, JSON.stringify(r.tab));
-  await openDrawer();
-  const putOff = await page.locator(`${drawerQ} [data-hkv="show-all"]`).count();
-  L.check("precondition: nothing is put off with Later", putOff === 0, `${putOff}`);
-  await closeDrawer();
-  if (!f0 || putOff) { L.done(2); return; }
+  if (!f0) { L.done(1); return; }
 
   /* dismiss */
   await page.locator('[data-ftab-x="housekeeping"]').click();
@@ -257,37 +266,29 @@ test("D2 · × hides the tab for the account; it stays hidden as gaps are filled
   await settle();
   await reload();
   r = await read(page);
-  L.check("after a reload, still hidden", r.tab === null, JSON.stringify(r.tab));
+  L.check("after a reload, still hidden", r.tab === null && node("").tabDismissedAtGaps === f0.gaps, `${JSON.stringify(r.tab)} · stored ${node("").tabDismissedAtGaps}`);
 
-  /* the count falls: one item put off */
+  /* the count falls: one reply gap answered "They don't say" */
   await openDrawer();
-  await page.locator(`${drawerQ} [data-hkv="row"] [data-hkv="rh"]`).first().click(); await page.waitForTimeout(400);
-  await page.locator(`${drawerQ} [data-hkv="row"].open [data-hkv="later"]`).first().click();
+  if (await page.locator('[data-hk8="not-now"]').count()) { await page.locator('[data-hk8="not-now"]').click(); await page.waitForTimeout(500); await openDrawer(); }
+  const row = page.locator(`${drawerQ} [data-hk8="detail"][data-gap="reply"] [data-hk8="ledger-row"]`).first();
+  const key = (await row.getAttribute("data-key")) ?? "";
+  await row.click(); await page.waitForTimeout(500);
+  await page.locator(`${drawerQ} [data-hk8="not-stated"]`).click(); await page.locator(`${drawerQ} [data-hk8="save"]`).click();
   await page.waitForTimeout(1500);
   await closeDrawer(); await settle();
   await reload();
   r = await read(page);
-  L.check("one gap fewer and reloaded: still hidden", r.tab === null && r.gapLine === `${f0.gaps - 1} gaps to fill`, `tab ${JSON.stringify(r.tab)} · "${r.gapLine}"`);
+  L.check("one gap fewer and reloaded: still hidden, the stored value lowered", r.tab === null && r.gapLine === `${f0.gaps - 1} gaps to fill` && node("").tabDismissedAtGaps === f0.gaps - 1, `tab ${JSON.stringify(r.tab)} · "${r.gapLine}" · stored ${node("").tabDismissedAtGaps}`);
 
-  /* the count rises: the tab returns, and the stored value is null — proved by taking the count back down,
-     which a lowered (not cleared) dismissal would hide the tab again for */
-  await openDrawer();
-  await page.locator(`${drawerQ} [data-hkv="show-all"]`).click(); await page.waitForTimeout(1500);
-  await closeDrawer(); await settle();
+  /* the count rises: the tab returns, and the stored value is null */
+  node(`--unsettle ${key.split(":")[0]}`);
+  await page.waitForTimeout(2500);
   r = await read(page);
   L.check("a new gap: the tab returns", !!r.tab?.shown && r.gapLine === `${f0.gaps} gaps to fill`, `tab ${JSON.stringify(r.tab)} · "${r.gapLine}"`);
-  await openDrawer();
-  await page.locator(`${drawerQ} [data-hkv="row"] [data-hkv="rh"]`).first().click(); await page.waitForTimeout(400);
-  await page.locator(`${drawerQ} [data-hkv="row"].open [data-hkv="later"]`).first().click(); await page.waitForTimeout(1500);
-  await closeDrawer(); await settle();
-  await reload();
-  r = await read(page);
-  L.check("the stored value was cleared: one gap fewer again and the tab stays", !!r.tab?.shown, `tab ${JSON.stringify(r.tab)} · "${r.gapLine}"`);
-  /* put the account back: nothing put off */
-  await openDrawer();
-  await page.locator(`${drawerQ} [data-hkv="show-all"]`).click(); await page.waitForTimeout(1500);
-  L.check("restored: nothing put off", (await page.locator(`${drawerQ} [data-hkv="show-all"]`).count()) === 0, "show-all gone");
-  await closeDrawer(); await settle();
+  await settle();
+  L.check("the stored value was cleared to null", node("").tabDismissedAtGaps === null, `${node("").tabDismissedAtGaps}`);
+  L.check("restored: the reply mark is gone again", !node("").settled.includes(`${key.split(":")[0]}:reply`), key);
 
   /* Undo restores at once */
   await page.locator('[data-ftab-x="housekeeping"]').click(); await page.waitForTimeout(400);
@@ -297,5 +298,5 @@ test("D2 · × hides the tab for the account; it stays hidden as gaps are filled
   await settle(); await reload();
   r = await read(page);
   L.check("restored: no dismissal stored (the tab is there after a reload)", !!r.tab?.shown, JSON.stringify(r.tab));
-  L.done(12);
+  L.done(11);
 });

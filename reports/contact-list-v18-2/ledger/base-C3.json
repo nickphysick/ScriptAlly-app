@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C3",
+  "where": "the button reads 'Get started →'",
+  "ok": false,
+  "detail": "Start with the most useful gap →"
+ },
+ {
+  "lock": "C3",
+  "where": "it is fully in the viewport with the drawer unscrolled",
+  "ok": false,
+  "detail": "[987.484375,1035.484375] st 0"
+ },
+ {
+  "lock": "C3",
+  "where": "no tiles while the intro shows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C3",
+  "where": "no bar while the intro shows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C3",
+  "where": "two headline lines, each one line",
+  "ok": false,
+  "detail": "[]"
+ }
+]

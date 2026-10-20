@@ -109,7 +109,8 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
     expect(listPage).toContain("snoozeCardWrites({ upsertTaskFlag, dismissTask }, c, days, when)");
     const writes = readFileSync(join(here, "snoozeWrites.ts"), "utf8");
     const fn = sliceBetween(writes, "export function snoozeCardWrites", "export function snoozeGroupWrites");
-    expect(fn).toContain("({ days, when } = clampSnooze(c, days, when))");
+    /* RETARGETED, LAW UNCHANGED (To-do list v5.1 §I.3): the one clamp now also sees the task's deadline */
+    expect(fn).toContain("({ days, when } = clampSnooze(c, days, when, daysUntilDeadline))");
     expect(fn).not.toContain('c.taskType === "offer_received" && days > 1');
   });
 

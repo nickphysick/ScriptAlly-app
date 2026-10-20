@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "CL19-D1",
+  "where": "agents with genres and a wishlist exist (precondition)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 msv12-agent-4: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-near: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-12: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 cv25-agent-06: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 seed-cal-soon: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stub0: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 clv-fx-stale: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1512 rows with genres and a wishlist were opened (the population)",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 msv12-agent-4: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-near: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-12: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 cv25-agent-06: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 seed-cal-soon: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stub0: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 clv-fx-stale: the row opened on a 450ms hover",
+  "ok": false,
+  "detail": "closed"
+ },
+ {
+  "lock": "CL19-D1",
+  "where": "@1280 rows with genres and a wishlist were opened (the population)",
+  "ok": false,
+  "detail": "0"
+ }
+]

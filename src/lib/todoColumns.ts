@@ -335,8 +335,13 @@ export function boardColumns(input: ColumnInput): BoardColumns {
      the flat lane set first, so a member is never both inside a sweep and loose on the board —
      that would double-count it and break the sum in the other direction. */
   const grouped = new Set(input.sweeps.flatMap((g) => g.memberKeys));
+  /* ⚠️ To-do list v5.1 §I.6 — AN OWN DATED TASK JOINS THE BOARD WHEN IT SURFACES (`surfaceOffset`: on its due day, a
+     day early or a week early), not the day it is written. Before then it is on the Corkboard, the Calendar and the
+     desk's "Coming up", and it is NOT a card — so the badge, the page's count and the tray agree it is not yet work. */
+  /* (one committed to TODAY by the writer is work today, whenever it is due) */
+  const waiting = (c: BoardCard) => !!c.userTaskId && c.nature === "task" && !c.surfaced && c.committedDate !== input.today;
   const lanes = boardEligible(
-    [...input.board.do, ...input.board.hk, ...input.board.nt].filter((c) => !grouped.has(c.key))
+    [...input.board.do, ...input.board.hk, ...input.board.nt].filter((c) => !grouped.has(c.key) && !waiting(c))
   );
 
   const today: BoardCard[] = [];

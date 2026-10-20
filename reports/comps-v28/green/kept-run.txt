@@ -1,0 +1,52 @@
+
+Running 16 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+[A1] 8/8 green
+  ✓   2 [measure] › tests/e2e/compsV25.measure.ts:78:3 › Comparable titles v25 › A1 · ids: every comp the page writes has a unique id, and an id survives an edit, an add and a remove (18.0s)
+[E2] 11/11 green
+  ✓   3 [measure] › tests/e2e/compsV25.measure.ts:130:3 › Comparable titles v25 › E2 · picker: Save writes compIds to the chosen letter only; Undo restores it exactly (14.0s)
+[A3] 12/12 green
+  ✓   4 [measure] › tests/e2e/compsV25.measure.ts:181:3 › Comparable titles v25 › A3 · fixed: a sent, recorded letter offers no checkbox and makes a new version; a sent, unrecorded one accepts one save (13.6s)
+  ✓   5 [measure] › tests/e2e/compsV25.measure.ts:239:1 › CV25 · every lock has a named mutation (0ms)
+  ✘   6 [measure] › tests/e2e/compsV26.measure.ts:111:3 › Comparable titles v26 › AD1 · one heading: the drawer's only heading is its title, in add, first-comp and edit (7.0m)
+  -   7 [measure] › tests/e2e/compsV26.measure.ts:133:3 › Comparable titles v26 › AD2 · explainer: open with no comps, a link otherwise, and absent in edit
+  -   8 [measure] › tests/e2e/compsV26.measure.ts:160:3 › Comparable titles v26 › AD3 · labels follow the type, and what is typed survives a type change
+  -   9 [measure] › tests/e2e/compsV26.measure.ts:192:3 › Comparable titles v26 › AD4 · ready: the note's state is ready(), and Save is never blocked by it
+  -  10 [measure] › tests/e2e/compsV26.measure.ts:220:3 › Comparable titles v26 › AD5 · foot: pinned to the drawer's bottom with the body scrolled to its end; no horizontal overflow
+  -  11 [measure] › tests/e2e/compsV26.measure.ts:260:3 › Comparable titles v26 › AD6 · again: one comp written, the drawer open on an empty form, Book, focus in Title, the explainer folded
+  -  12 [measure] › tests/e2e/compsV26.measure.ts:297:3 › Comparable titles v26 › AD7 · tags: saved to matchAxis as today, read back as two chips; a seventh is refused
+  -  13 [measure] › tests/e2e/compsV26.measure.ts:347:3 › Comparable titles v26 › AD10 · focus and keys: opening puts focus in Title; ✕, Cancel and Escape return it to the opener; Cmd/Ctrl + Enter saves from the note
+  -  14 [measure] › tests/e2e/compsV26.measure.ts:397:1 › AD · every lock has a named mutation
+[X1] 30/30 green
+  ✓  15 [measure] › tests/e2e/compsV271.measure.ts:49:3 › Comparable titles v27.1 › X1 · centred: each of the five close buttons holds an SVG ✕ at its centre, and is named "Close" (25.4s)
+  ✓  16 [measure] › tests/e2e/compsV271.measure.ts:86:1 › V27.1 · every lock has a named mutation (0ms)
+
+
+  1) [measure] › tests/e2e/compsV26.measure.ts:111:3 › Comparable titles v26 › AD1 · one heading: the drawer's only heading is its title, in add, first-comp and edit 
+
+    Test timeout of 420000ms exceeded.
+
+    Error: locator.click: Test timeout of 420000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cv="page"] [data-cx="add"]')
+
+
+      59 | const D = '[data-hdr="comp"] ';
+      60 | async function openAdd(page: Page) {
+    > 61 |   await page.locator(`${P}[data-cx="add"]`).click();
+         |                                             ^
+      62 |   await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
+      63 |   await page.waitForTimeout(500);
+      64 | }
+        at openAdd (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV26.measure.ts:61:45)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV26.measure.ts:115:40
+
+    Error Context: test-results/compsV26.measure.ts-Compar-e3916--in-add-first-comp-and-edit-measure/error-context.md
+
+    Error Context: test-results/compsV26.measure.ts-Compar-e3916--in-add-first-comp-and-edit-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/compsV26.measure.ts:111:3 › Comparable titles v26 › AD1 · one heading: the drawer's only heading is its title, in add, first-comp and edit 
+  8 did not run
+  7 passed (8.7m)

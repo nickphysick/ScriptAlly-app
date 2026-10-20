@@ -113,6 +113,8 @@ describe("the Firestore handle has exactly one home", () => {
          function deletes documents and moves the counter, so "does it use the shared handle" is
          precisely the question worth being forced to answer. It does. */
       "waitlistRetention.ts",
+      /* the tenth (Dashboard v59): the founding writer panel's weekly pulse writes betaPulse */
+      "weeklyPulse.ts",
     ];
     /* ⚠️ RECONCILED AGAINST index.ts RATHER THAN TRUSTED AS A HAND-WRITTEN LIST — a literal here
      * goes stale the day a ninth function is exported, and goes stale silently. */

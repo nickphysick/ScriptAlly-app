@@ -1,0 +1,65 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE PAGE HERO FRAME (Query Centre v138.5 §A) — the one inset the light headers come in from the sheet's edges by.
+ * The Contact list (`.cl17-hd`, which reads it as `--cl17-inset`) and the Query Centre (`.qc138-hd`) both carry `.phf`
+ * on their header, so their letter strip, status row, title rows and cards share their left and right edges.
+ *
+ * ⚠️ THE INSET IS IN CONTAINER UNITS, NOT A PERCENTAGE. A percentage in a margin resolves against the element's own
+ *    containing block, so the old `(100% − 900px) / 2` meant the header's width only on the header's direct
+ *    children. The Query Centre's desk hawk is a GRID ITEM and pulls itself out by the inset: there `100%` is its
+ *    grid area. `100cqw` is the header's width wherever it is read inside the header, because `.phf` is the
+ *    nearest inline-size container. It equals the old value on every element that used to read it.
+ * ⚠️ COMPACT AND FULL FOLLOW THE APP'S OWN SWITCH (`.ws-app.sheet-wide`, the page sheet's width), as v17.1's did:
+ *    compact max(40px, (100% − 900px) / 2), full max(64px, (100% − 1080px) / 2).
+ */
+/* ── Header rules v1.1 — THE HERO GEOMETRY, stated once (the Contact list's own values, as built on dev). Every
+   workspace page's populated, unpinned desktop hero reads these; none restates a number.
+
+   ⚠️ THEY LIVE ON THE SHELL ROOT, NOT ON `.phf`: the gap below the hero is applied to the CONTENT after it, a sibling
+      of the hero, which cannot read the hero's own custom properties. Plain lengths go here; only the inset, which is
+      in container units of the hero (`100cqw`), stays on `.phf` below.
+   ⚠️ COMPACT AND WIDE follow the shell's one switch, `.ws-app.sheet-wide` (the page sheet wider than 1440px,
+      WorkspaceShell.tsx). No second breakpoint.
+
+   The stack, eyebrow top to actions bottom: ey 12 · 15 · title · 12 · byline 26 · act gap · actions 46
+   = 179 compact (title 44, gap 24) and 201 wide (title 50, gap 40). The illustration is the stack's height at the
+   archivist's own aspect (720 / 641, read as 1.123), its left 14 from the sheet's edge; the text column starts 28 past
+   its right edge — 243 compact, 267.7 wide — whether or not a page has an illustration (titles line up page to page). */
+:root, .ws-app {
+  --hero-top: 36px;
+  --hero-gap-below: 44px;
+  --hero-w: min(1600px, calc(var(--hsheet-w) - 48px));
+  --hero-ey-lh: 12px;
+  --hero-ey-gap: 15px;
+  --hero-title-size: 44px;
+  --hero-by-gap: 12px;
+  --hero-by-lh: 26px;
+  --hero-act-gap: 24px;
+  --hero-act-h: 46px;
+  --hero-stack-h: calc(var(--hero-ey-lh) + var(--hero-ey-gap) + var(--hero-title-size) + var(--hero-by-gap) + var(--hero-by-lh) + var(--hero-act-gap) + var(--hero-act-h));
+  --hero-art-x: 14px;
+  --hero-art-ratio: 1.123;
+  --hero-art-gap: 28px;
+  --hero-art-h: var(--hero-stack-h);
+  --hero-art-w: calc(var(--hero-art-h) * var(--hero-art-ratio));
+  --hero-text-x: calc(var(--hero-art-x) + var(--hero-art-w) + var(--hero-art-gap));
+  /* the right item's width where it has none of its own (the Query Centre's chart card, the light headers' summary
+     cards). ⚠️ The Contact list's own card states no width — it is its content's, 321 compact and 363 wide — and keeps
+     it; 332 / 370 are the header rules mock's, for the right items that have no intrinsic width. */
+  --hero-right-w: 332px;
+  /* where a page's hero frame starts, from the sheet's left edge: the frame is --hero-w, centred */
+  --hero-frame-x: calc((var(--hsheet-w) - var(--hero-w)) / 2);
+}
+.ws-app.sheet-wide {
+  --hero-title-size: 50px;
+  --hero-act-gap: 40px;
+  --hero-right-w: 370px;
+}
+.phf {
+  container-type: inline-size;
+  --phf-inset: max(40px, calc((100cqw - 900px) / 2));
+}
+.ws-app.sheet-wide .phf { --phf-inset: max(64px, calc((100cqw - 1080px) / 2)); }
+.phf .phf-row { margin-inline: var(--phf-inset); }

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "I4",
+  "where": "the snooze is listed",
+  "ok": true,
+  "detail": "[\"flag-nudge_overdue__q_seed-query-23__a___r_\",\"flag-no_response_close__q_thin-q-close__a___r_\",\"flag-nudge_overdue__q_thin-q-chase__a___r_\",\"flag-data_quality_poor__q___a_seed-agent-1__r_\",\"rule-dq_materials\",\"rule-no_response_close\",\"rule-nudge_overdue\"]"
+ },
+ {
+  "lock": "I4",
+  "where": "the holding dismissal is listed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I4",
+  "where": "no_response_close and nudge_overdue are listed as switched off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I4",
+  "where": "a legacy mute is a dismissal with no date",
+  "ok": true,
+  "detail": "[{\"id\":\"flag-data_quality_poor__q___a_seed-agent-1__r_\",\"kind\":\"dismiss\",\"legacy\":true,\"text\":\"EHFill in their profileDismissed · Elinor Hale\"}]"
+ },
+ {
+  "lock": "I4",
+  "where": "k matches the list",
+  "ok": true,
+  "detail": "7 vs 7"
+ },
+ {
+  "lock": "I4",
+  "where": "n and the badge agree, and neither counts what is set aside",
+  "ok": true,
+  "detail": "22 vs 22, 0 set-aside tasks still in the tray"
+ },
+ {
+  "lock": "I4",
+  "where": "bring back clears skippedAt",
+  "ok": false,
+  "detail": "{\"skippedAt\":\"2026-10-15T17:41:46.016Z\",\"snoozedUntil\":null}"
+ },
+ {
+  "lock": "I4",
+  "where": "bring back clears snoozedUntil",
+  "ok": true,
+  "detail": "{\"skippedAt\":null,\"snoozedUntil\":null}"
+ },
+ {
+  "lock": "I4",
+  "where": "Turn it back on removes the rule key",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I4",
+  "where": "a restored dismissal is visible again",
+  "ok": false,
+  "detail": ""
+ }
+]

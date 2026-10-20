@@ -1,0 +1,206 @@
+[
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned long list: rows (the population)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": true,
+  "detail": "891.5 vs 891.5"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned long list: the card meets the page's foot ±1",
+  "ok": true,
+  "detail": "891.5 vs 891.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: a few rows (the population)",
+  "ok": true,
+  "detail": "1 for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: the card still meets the page's foot ±1",
+  "ok": true,
+  "detail": "891.8 vs 891.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 unpinned short list: the last row is inside the card",
+  "ok": true,
+  "detail": "526.8 vs 891.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned long list: rows (the population)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": true,
+  "detail": "891.5 vs 891.5"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned long list: the card meets the page's foot ±1",
+  "ok": true,
+  "detail": "891.5 vs 891.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: a few rows (the population)",
+  "ok": true,
+  "detail": "1 for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: the card still meets the page's foot ±1",
+  "ok": true,
+  "detail": "891.8 vs 891.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1512 pinned short list: the last row is inside the card",
+  "ok": true,
+  "detail": "377.8 vs 891.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned long list: rows (the population)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": true,
+  "detail": "791.5 vs 791.5"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned long list: the card meets the page's foot ±1",
+  "ok": true,
+  "detail": "791.5 vs 791.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: a few rows (the population)",
+  "ok": true,
+  "detail": "1 for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: the card still meets the page's foot ±1",
+  "ok": true,
+  "detail": "791.8 vs 791.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 unpinned short list: the last row is inside the card",
+  "ok": true,
+  "detail": "526.8 vs 791.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned long list: rows (the population)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned long list: the last row's bottom is the card's content bottom ±1",
+  "ok": true,
+  "detail": "791.5 vs 791.5"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned long list: the card meets the page's foot ±1",
+  "ok": true,
+  "detail": "791.5 vs 791.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: a few rows (the population)",
+  "ok": true,
+  "detail": "1 for \"Theo Abara\""
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: no footer element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: the card still meets the page's foot ±1",
+  "ok": true,
+  "detail": "791.8 vs 791.8"
+ },
+ {
+  "lock": "CL19-I1",
+  "where": "@1280 pinned short list: the last row is inside the card",
+  "ok": true,
+  "detail": "377.8 vs 791.8"
+ }
+]

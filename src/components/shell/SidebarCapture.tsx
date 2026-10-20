@@ -35,6 +35,8 @@ import { createPortal } from "react-dom";
 import { invokeCapture } from "./railNav";
 import { menuRows, moveInMenu } from "../../lib/menuKeys";
 import "./shellMenus.css";
+import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
+import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 
 type Navigate = (tab: string, sub?: string) => void;
 
@@ -101,6 +103,16 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
+  /* Help system v1, Part A — in the bar the menu lives in the one pop-up layer, placed from the split button */
+  const barRef = useRef<HTMLDivElement>(null);
+  const inBar = placement === "bar";
+  const anchored = useAnchoredPopover(barRef, menuRef, inBar && open, { align: "end", gap: 8 });
+  useEffect(() => {
+    if (!inBar) return undefined;
+    if (open) claimTopbar("capture"); else releaseTopbar("capture");
+    return undefined;
+  }, [inBar, open]);
+  useEffect(() => (inBar ? onTopbarClaim((id) => { if (id !== "capture") setOpen(false); }) : undefined), [inBar]);
 
   const rows = collapsed ? CAPTURE_FLYOUT_ROWS : CAPTURE_MENU_ROWS;
   const items = () => menuRows(menuRef.current);
@@ -169,12 +181,12 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
   const menu = (
     <div
       ref={menuRef}
-      className={`ws-capm sa-pop${collapsed ? " ws-capm--fly" : ""}${open ? " is-open" : ""}`}
+      className={`ws-capm sa-pop${collapsed ? " ws-capm--fly" : ""}${inBar ? " ws-capm--bar" : ""}${open ? " is-open" : ""}`}
       role="menu"
       aria-label="Ways to add"
       data-shell="capture-menu"
       onKeyDown={onMenuKey}
-      style={collapsed && at ? { left: at.left, top: at.top } : undefined}
+      style={collapsed && at ? { left: at.left, top: at.top } : inBar ? anchored.style : undefined}
     >
       {placement === "bar" && <p className="sa-peb" aria-hidden="true">Add something</p>}
       {rows.map((r) => {
@@ -220,7 +232,7 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
 
   return (
     <div ref={wrapRef} className={`ws-cap${placement === "bar" ? " ws-cap--bar" : ""}${open ? " is-open" : ""}`} data-shell="capture" data-placement={placement}>
-      <div className="ws-capb">
+      <div className="ws-capb" ref={barRef}>
         <button type="button" className="ws-capl" onClick={() => { close(false); if (onNavigate) invokeCapture("query", onNavigate); }}>
           <span className="ws-capic">{QUILL(15)}</span>
           <span className="ws-capt">Log a query</span>
@@ -238,7 +250,7 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
           {svg(13, <path d="m6 9 6 6 6-6" />, 2)}
         </button>
       </div>
-      {menu}
+      {inBar ? <AnchoredPortal>{menu}</AnchoredPortal> : menu}
     </div>
   );
 };

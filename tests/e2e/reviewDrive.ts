@@ -129,7 +129,9 @@ export async function readStep(page: Page): Promise<{ text: string; chip: string
   if (await more.count()) await more.click();
   out.push(...await page.evaluate(() => [...document.querySelectorAll('[data-im="ready"] [data-row-id]')].map((r) => ({
     text: (r.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 260),
-    chip: r.querySelector('[data-im="row-chip"]')?.textContent?.trim() ?? "",
+    /* import review v1: the per-row "Ready" chip is retired (the band says it). A row in the ready
+       list is ready, unless the writer chose not to import it, which the row says in its own words. */
+    chip: r.getAttribute("data-out") === "1" ? "Won't be imported" : "Ready",
     asks: "0",
   }))));
   return out;

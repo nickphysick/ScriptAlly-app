@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 toolbar navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 card corners 18",
+  "ok": true,
+  "detail": "18px,18px,18px,18px"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Pin cream",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 Pin reads \"Pin list\"",
+  "ok": true,
+  "detail": "Pin listPin the listF"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 no ring on the controls",
+  "ok": true,
+  "detail": "none|0px|none ‖ none|0px|none ‖ none|0px|none"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 toolbar navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 card corners 18",
+  "ok": true,
+  "detail": "18px,18px,18px,18px"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Pin cream",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 Pin reads \"Pin list\"",
+  "ok": true,
+  "detail": "Pin listPin the listF"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 no ring on the controls",
+  "ok": true,
+  "detail": "none|0px|none ‖ none|0px|none ‖ none|0px|none"
+ }
+]

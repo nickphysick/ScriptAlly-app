@@ -47,7 +47,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the index card's margin line dropped */
   F3: { css: `.apn .apn-index::before { display: none !important; }` },
   /* the query opens in a second panel beside the agent's */
-  F4: { js: `(() => { if (window.__m16f4) return; window.__m16f4 = true; document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-ap="ledger-entry"]')) { const p = document.querySelector('[data-ap="panel"]'); if (p) { const c = p.cloneNode(true); c.setAttribute("data-mut", ""); c.removeAttribute("data-ap"); c.style.right = "580px"; document.body.appendChild(c); setTimeout(() => c.remove(), 1500); } } }, true); })()` },
+  F4: { js: `(() => { if (window.__m16f4) return; window.__m16f4 = true; document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('[data-ap-h="open"]')) { const p = document.querySelector('[data-ap="panel"]'); if (p) { const c = p.cloneNode(true); c.setAttribute("data-mut", ""); c.removeAttribute("data-ap"); c.style.right = "580px"; document.body.appendChild(c); setTimeout(() => c.remove(), 1500); } } }, true); })()` },
   /* acting without a scrim */
   F5: { css: `.spanel-scrim { opacity: 0 !important; }` },
   /* the footer's primary is always "Edit profile" */
@@ -357,7 +357,8 @@ test.describe("Contact list v16", () => {
       panels: [...g.querySelectorAll<HTMLElement>('[data-clv="panel"]')].filter((e) => e.getBoundingClientRect().height > 0).length,
       labs: labs.map((l) => ({ col: l.dataset.ltCol ?? "", tag: l.tagName, sort: l.getAttribute("aria-sort"), text: (l.textContent ?? "").trim() })),
       sortPill: [...g.querySelectorAll('[data-cl16="bar"] :is([data-lp="sort"], [data-lp="dir"], .lp-join)')].length,
-      /* v17: the Grouped pill is on the list sheet's top row */ group: (g.querySelector('[data-cl17="sheet-row"] [data-lp="group"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      /* RE-POINTED (v18 §B, then v18.3 §E): the grouping is named by the toolbar's chip ("Grouped by None" ungrouped);
+         the sentence is the count alone now */ group: (g.querySelector('[data-ltb="group-name"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
     };
   });
   /** the last word of a name: the page's own surname rule, in the test's words */
@@ -372,13 +373,15 @@ test.describe("Contact list v16", () => {
       const w = `${vp.width}`;
       const r = await readRows(page);
       L.check("C3", `${w} one panel, no group labels`, r.bands === 0 && r.panels === 1 && r.names.length > 5, `${r.bands} bands · ${r.panels} panels · ${r.names.length} rows`);
-      L.check("C3", `${w} "Grouped: No grouping"`, /No grouping/.test(r.group), `"${r.group}"`);
+      /* RE-POINTED by v19 §E: ungrouped, the chip reads "Group by" and names no group (it read "Grouped by None") */
+      L.check("C3", `${w} ungrouped: the grouping chip names no group (v19 §E)`, r.group === "", `"${r.group}"`);
       const sur = r.names.map(surname);
       L.check("C3", `${w} rows are A to Z by surname`, sur.every((x, i) => i === 0 || sur[i - 1].localeCompare(x) <= 0), sur.slice(0, 8).join(" · "));
       L.check("C3", `${w} the order is not a single letter (the claim has something to order)`, new Set(r.initials).size > 4, `${new Set(r.initials).size} initials`);
       L.check("C3", `${w} no sort pill in the bar`, r.sortPill === 0, `${r.sortPill} sort controls`);
       const by = (c: string) => r.labs.find((l) => l.col === c);
-      L.check("C3", `${w} Agent, Replies and Query status sort; What they want does not`, by("Agent")?.tag === "BUTTON" && by("Replies")?.tag === "BUTTON" && by("Query status")?.tag === "BUTTON" && by("What they want")?.tag !== "BUTTON", r.labs.map((l) => `${l.col}:${l.tag}`).join(" · "));
+      /* RE-POINTED by v19 §C: "What they want" left the row; Date added sorts, Website and Email do not */
+      L.check("C3", `${w} Agent, Date added, Replies and Query status sort; Website and Email do not`, ["Agent", "Date added", "Replies", "Query status"].every((c) => by(c)?.tag === "BUTTON") && r.labs.filter((l) => /Website|Email/.test(l.col)).every((l) => l.tag !== "BUTTON") && r.labs.some((l) => /Website|Email/.test(l.col)), r.labs.map((l) => `${l.col}:${l.tag}`).join(" · "));
       L.check("C3", `${w} the active heading states the order`, by("Agent")?.sort === "ascending" && /↓/.test(by("Agent")?.text ?? "") && r.labs.filter((l) => l.sort).length === 1 && !/[↓↑]/.test(by("Replies")?.text ?? ""), r.labs.map((l) => `${l.col}:${l.sort}:${l.text}`).join(" · "));
       await lab("Replies").click(); await page.waitForTimeout(700);
       const a = await readRows(page);
@@ -395,7 +398,8 @@ test.describe("Contact list v16", () => {
     L.done(20);
   });
 
-  test("C4 · letters: a tab lands its first agent just under the pinned controls; empty letters are disabled", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §A: the in-list letter tabs are gone; CL18 A1 and A2 hold the strip at the top and the jump */
+  test.skip("C4 · letters: a tab lands its first agent just under the pinned controls; empty letters are disabled", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("C4");
     for (const vp of SIZES16) {
@@ -636,7 +640,10 @@ test.describe("Contact list v16", () => {
     L.done(34);
   });
 
-  test("E2 · refit: 400ms after full screen turns on, with the sidebar's own motion, the list is the new sheet less 48", async ({ page }) => {
+  /* RETIRED by Contact list v19 §A (reports/contact-list-v19/REPORT.md): "full screen" is retired for the pin, and a pinned
+     list takes the sheet's whole width (no 24 inset, no 48 refit) with the sidebar left as it is; CL19-P3 holds the pinned
+     band and CL19-I1 the pinned card. Its ledgers go with it. */
+  test.skip("E2 · refit: 400ms after full screen turns on, with the sidebar's own motion, the list is the new sheet less 48", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("E2");
     for (const vp of SIZES16) {
@@ -698,7 +705,10 @@ test.describe("Contact list v16", () => {
       index: index ? { top: getComputedStyle(index).borderTopColor + " " + getComputedStyle(index).borderTopWidth, bg: getComputedStyle(index).backgroundColor, radius: getComputedStyle(index).borderTopLeftRadius, line: getComputedStyle(index, "::before").display === "none" ? null : parseFloat(getComputedStyle(index, "::before").left), lineBg: getComputedStyle(index, "::before").backgroundColor, lineW: getComputedStyle(index, "::before").width,
         gap: (() => { const st = p!.querySelector('[data-ap="stand"]'); return st ? index.getBoundingClientRect().top - st.getBoundingClientRect().bottom : null; })(),
         rows: [...index.querySelectorAll<HTMLElement>("[data-ap-row]")].map((r) => ({ k: r.getAttribute("data-ap-row"), label: (r.querySelector("dt")?.textContent ?? "").trim(), missing: r.getAttribute("data-missing") === "true", add: (r.querySelector("[data-ap-add]")?.textContent ?? "").trim() || null, h: r.getBoundingClientRect().height })) } : null,
-      foot: { status: (p?.querySelector('[data-ap="status"]')?.textContent ?? "").trim(), detail: (p?.querySelector('[data-ap="status-detail"]')?.textContent ?? "").trim() || null, primary: (p?.querySelector('[data-ap="primary"]')?.textContent ?? "").trim(), act: p?.querySelector('[data-ap="primary"]')?.getAttribute("data-act") ?? null, edit: !!p?.querySelector('[data-ap="edit"]'), more: !!p?.querySelector('[data-ap="more"]'), lines: (() => { const b = p?.querySelector<HTMLElement>('[data-ap="status"]'); return b ? Math.round(b.getBoundingClientRect().height / parseFloat(getComputedStyle(b).lineHeight)) : 0; })() },
+      /* RE-POINTED (Contact list v18.1 §B): on the Profile tab the primary is the stand slip's button
+         (`data-ap="slip-go"`), and where the slip has none, Edit profile alone (in the footer) is the next step — the
+         footer table's law, read where v18.1 puts it. Queries keeps v16's footer, read as before. */
+      foot: { status: (p?.querySelector('[data-ap="status"]')?.textContent ?? "").trim(), detail: (p?.querySelector('[data-ap="status-detail"]')?.textContent ?? "").trim() || null, primary: (p?.querySelector('[data-ap="slip-go"], [data-ap="primary"]')?.textContent ?? (p?.querySelector('[data-ap="slip"]') && p?.querySelector('[data-ap="edit"]') ? "Edit profile" : "")).trim(), act: p?.querySelector('[data-ap="slip-go"], [data-ap="primary"]')?.getAttribute("data-act") ?? null, edit: p?.querySelector('[data-ap="slip"]') ? !!p?.querySelector('[data-ap="slip-go"]') && !!p?.querySelector('[data-ap="edit"]') : !!p?.querySelector('[data-ap="edit"]'), more: !!p?.querySelector('[data-ap="more"]'), lines: (() => { const b = p?.querySelector<HTMLElement>('[data-ap="status"]'); return b ? Math.round(b.getBoundingClientRect().height / parseFloat(getComputedStyle(b).lineHeight)) : 0; })() },
       qad: { head: vis(document.querySelectorAll('[data-ap="panel"] [data-qad-head]')).length, quill: vis(document.querySelectorAll('[data-ap="panel"] .qad-qwrap img')).length, from: (vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] [data-qad-from]'))[0]?.textContent ?? "").trim(), eyebrow: (vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] .qad-mode'))[0]?.textContent ?? "").trim(), title: (vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] .qad-h2'))[0]?.textContent ?? "").trim(), who: vis(document.querySelectorAll('[data-ap="panel"] [data-qad-who]')).length, stepper: vis(document.querySelectorAll('[data-ap="panel"] [data-qad-stepper]')).length, segs: vis(document.querySelectorAll<HTMLElement>('[data-ap="panel"] .apn-edit .ae-tabs button')).map((b) => (b.textContent ?? "").trim()) },
       hkTab: (() => { const t = document.querySelector<HTMLElement>('[data-ftab="housekeeping"]'); return t ? parseFloat(getComputedStyle(t).opacity) : null; })(),
       old: { card: vis(document.querySelectorAll(".ac-ov, [data-ac='quick'], .acq-head")).length, dock: vis(document.querySelectorAll("[data-qad-dock]")).length, journey: vis(document.querySelectorAll(".qad-root.is-open")).length },
@@ -725,7 +735,7 @@ test.describe("Contact list v16", () => {
       L.check("F1", `${w} exactly one row is selected, and it is this agent's`, r.selected.length === 1 && r.selected[0] === r.id, `${r.selected.join()} · panel ${r.id}`);
       L.check("F1", `${w} the selected row: #f7f3ed with a 3px ink left edge`, r.selBg === "rgb(247, 243, 237)" && /rgb\(42, 58, 82\) 3px 0px 0px 0px inset/.test(r.selEdge ?? ""), `${r.selBg} · ${r.selEdge}`);
       L.check("F1", `${w} the address carries the agent`, r.url === `?agent=${r.id}`, r.url);
-      L.check("F1", `${w} the Housekeeping tab stands down`, r.hkTab !== null && r.hkTab < 0.05, `${r.hkTab}`);
+      /* RETIRED (v18.3 §B): there is no floating Housekeeping tab to stand down — B1 in contactV183 holds its absence */
       /* another row swaps the agent in the same panel; ↓ walks to the next row */
       const before = r.id;
       await rowOf(page, `[data-stand="none"]:not([data-agent-card="${before}"])`).click({ position: { x: 150, y: 28 } }); await page.waitForTimeout(400);
@@ -750,7 +760,8 @@ test.describe("Contact list v16", () => {
     L.done(26);
   });
 
-  test("F2 · masthead: the top edge says whether they take queries; the name, the place and the links on record", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §E: the masthead takes the status colour with no top edge, the name in Source Serif 600 24, the agency in mono, the status as a mono chip and the card disc; CL18 E1 holds the colours */
+  test.skip("F2 · masthead: the top edge says whether they take queries; the name, the place and the links on record", async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger("F2");
     const seen: Record<string, number> = {};
@@ -778,7 +789,8 @@ test.describe("Contact list v16", () => {
     L.done(17);
   });
 
-  test("F3 · profile: one stand card in the agent's own state, and the index card", async ({ page }) => {
+  /* RETIRED (Contact list v18): v18 §E: the Profile tab is the plain AgentPaperCard; the stand card and the index card are gone from it (CL18 E1) */
+  test.skip("F3 · profile: one stand card in the agent's own state, and the index card", async ({ page }) => {
     test.setTimeout(400_000);
     const L = new Ledger("F3");
     const seen: Record<string, number> = {};
@@ -845,20 +857,22 @@ test.describe("Contact list v16", () => {
       if (!(await clickRow(page, '[data-stand="agent"], .aglist [data-clv="row"][data-stand="you"]').catch(() => false))) { L.check("F4", `${w} panel`, false, "no agent panel opened"); continue; }
       const id = (await readPanel(page)).id;
       await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(300);
+      /* RE-POINTED (v18.2 §B): the Queries tab is History; an entry that belongs to a query opens it, as the old
+         ledger's entries did. The ledger's own look (white card, court chip, "Open the query ›") is retired with it. */
       const q = await page.evaluate(() => {
         const p = document.querySelector('[data-ap="panel"]')!;
-        const e = [...p.querySelectorAll<HTMLElement>('[data-ap="ledger-entry"]')];
+        const e = [...p.querySelectorAll<HTMLElement>('[data-ap-h="open"]')];
         return {
           n: e.length, tab: (p.querySelector('[data-ap-tab="queries"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
           dates: [...p.querySelectorAll<HTMLElement>('[data-ap="ledger-date"]')].map((d) => (d.textContent ?? "").trim()),
-          first: e[0] ? { title: (e[0].querySelector(".apn-qt")?.textContent ?? "").trim(), titleFace: getComputedStyle(e[0].querySelector(".apn-qt")!).fontFamily, stage: (e[0].querySelector(".apn-qs")?.textContent ?? "").trim(), stageStyle: getComputedStyle(e[0].querySelector(".apn-qs")!).fontStyle, chip: (e[0].querySelector(".apn-qchip")?.textContent ?? "").trim(), open: (e[0].querySelector(".apn-qo")?.textContent ?? "").trim(), bg: getComputedStyle(e[0]).backgroundColor, radius: getComputedStyle(e[0]).borderTopLeftRadius, query: e[0].getAttribute("data-query") } : null,
+          first: e[0] ? { query: e[0].getAttribute("data-query") } : null,
           dots: p.querySelectorAll(".apn-ledger .qlg-g svg, .apn-ledger .qlg-g [data-status-dot], .apn-ledger .qlg-g > *").length, foot: !!p.querySelector('[data-ap="foot"]'),
         };
       });
-      L.check("F4", `${w} the Queries tab lists the agent's queries, and counts them`, q.n > 0 && q.tab === `Queries · ${q.n}` && q.dates.length === q.n && q.dots >= q.n, `${q.n} entries · tab "${q.tab}" · ${q.dates.join(", ")}`);
-      L.check("F4", `${w} an entry is a white card: the book in the typewriter, the stage in italics, a court chip, "Open the query ›"`, !!q.first && q.first.bg === "rgb(255, 255, 255)" && q.first.radius === "12px" && /Special Elite/.test(q.first.titleFace) && q.first.stageStyle === "italic" && /^(With you|With the agent|Closed)$/.test(q.first.chip) && /^Open the query/.test(q.first.open) && q.first.title.length > 1, JSON.stringify(q.first));
+      L.check("F4", `${w} the History tab lists the agent's events, and those of a query open it`, q.n > 0 && q.tab === "History", `${q.n} openable entries · tab "${q.tab}"`);
+      void q.dates; void q.dots;
       /* open the query: the same box, the query panel's view, a way back, no Agent tab */
-      await page.locator(`${PANEL} [data-ap="ledger-entry"]`).first().click();
+      await page.locator(`${PANEL} [data-ap-h="open"]`).first().click();
       await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 }); await page.waitForTimeout(400);
       const v = await page.evaluate(() => {
         const vis = [...document.querySelectorAll<HTMLElement>("[data-side-panel]")].filter((e) => e.getBoundingClientRect().height > 0);
@@ -875,7 +889,7 @@ test.describe("Contact list v16", () => {
       const b = await readPanel(page);
       L.check("F4", `${w} Back returns to the agent, on the Queries tab`, b.panels === 1 && b.id === id && b.tab === "queries", `${b.panels} panels · ${b.id} · tab ${b.tab}`);
       /* Escape in the query view steps back too */
-      await page.locator(`${PANEL} [data-ap="ledger-entry"]`).first().click();
+      await page.locator(`${PANEL} [data-ap-h="open"]`).first().click();
       await page.locator('[data-qp="panel"]').waitFor({ timeout: 10_000 }); await page.waitForTimeout(300);
       await page.keyboard.press("Escape"); await page.waitForTimeout(400);
       const esc = await readPanel(page);
@@ -888,14 +902,15 @@ test.describe("Contact list v16", () => {
       for (let i = 0; i < (await noneRows.count()) && !bare; i++) {
         await noneRows.nth(i).scrollIntoViewIfNeeded(); await noneRows.nth(i).click({ position: { x: 150, y: 28 } });
         await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(250);
-        const t = ((await page.locator(`${PANEL} [data-ap-tab="queries"]`).textContent()) ?? "").replace(/\s+/g, " ").trim();
+        /* RE-POINTED (v18.2 §B): History has no count chip; an agent with no query shows History's empty line */
+        await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(250);
+        const t = ((await page.locator(`${PANEL} [data-ap-h="summary"]`).textContent().catch(() => null)) ?? "").trim();
         tabText.push(t);
-        bare = t === "Queries";
+        bare = /^Nothing sent to /.test(t);
       }
-      L.check("F4", `${w} an agent with no query for any book is on the account`, bare, `tabs read: ${[...new Set(tabText)].join(" | ")}`);
-      await page.locator(`${PANEL} [data-ap-tab="queries"]`).click(); await page.waitForTimeout(250);
-      const none = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap="queries-none"]')?.textContent ?? "").trim());
-      L.check("F4", `${w} no queries: one sentence`, /^You haven’t queried .+ yet\.$/.test(none), `"${none}"`);
+      L.check("F4", `${w} an agent with no query for any book is on the account`, bare, `summaries read: ${[...new Set(tabText)].join(" | ")}`);
+      const none = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap-h="empty"]')?.textContent ?? "").trim());
+      L.check("F4", `${w} no queries: one sentence`, /^When you query .+, every letter, request and reply lands here\.$/.test(none), `"${none}"`);
       /* Notes: the composer replaces the footer; a note is added, edited and deleted (the account is left as found) */
       await page.locator(`${PANEL} [data-ap-tab="notes"]`).click(); await page.waitForTimeout(400);
       /* ⚠️ THE ACCOUNT IS LEFT AS FOUND, AND A NOTE AN EARLIER RUN LEFT IS REMOVED FIRST. The confirmation's button is
@@ -917,7 +932,7 @@ test.describe("Contact list v16", () => {
       const added = await page.locator(`${PANEL} .qn-note`, { hasText: stamp }).count();
       L.check("F4", `${w} Notes: a note is added`, added === 1, `${added} notes with the stamp`);
       const tabN = await page.evaluate(() => (document.querySelector('[data-ap="panel"] [data-ap-tab="notes"]')?.textContent ?? "").replace(/\s+/g, " ").trim());
-      L.check("F4", `${w} Notes: the tab counts it`, /^Notes · [1-9]\d*$/.test(tabN), `"${tabN}"`);
+      L.check("F4", `${w} Notes: the tab counts it`, /* RE-POINTED (v18.1 §B): the count is a chip */ /^Notes ·? ?[1-9]\d*$/.test(tabN.replace(/\s+/g, " ")), `"${tabN}"`);
       const note = page.locator(`${PANEL} .qn-note`, { hasText: stamp }).first();
       await note.hover();
       const acts = await note.locator(".qn-acts button").allTextContents();
@@ -948,11 +963,13 @@ test.describe("Contact list v16", () => {
       await mutate16(page, "F5", MUTATIONS);
       const w = `${vp.width}`;
       const acts: { name: string; row: string; press: string; eyebrow: RegExp; title: RegExp; kind: "edit" | "journey" }[] = [
+        /* RE-POINTED (v18.1 §B): the journeys are pressed from the stand slip's button on Profile (it opens exactly
+           what the footer's primary opened); Edit profile is still the footer's */
         { name: "Edit profile", row: '[data-stand="agent"]', press: '[data-ap="edit"]', eyebrow: /^EDIT AGENT$/, title: /^Edit .+’s profile$/, kind: "edit" },
-        { name: "Log a query", row: '[data-stand="none"][data-door="open"]', press: '[data-ap="primary"][data-act="log"]', eyebrow: /^LOG A QUERY$/i, title: /^Query .+$/, kind: "journey" },
+        { name: "Log a query", row: '[data-stand="none"][data-door="open"]', press: ':is([data-ap="primary"], [data-ap="slip-go"])[data-act="log"]', eyebrow: /^LOG A QUERY$/i, title: /^Query .+$/, kind: "journey" },
         /* the send journey's own eyebrow, as built ("SENT WHAT THEY ASKED FOR"); the brief's "LOG THE SEND" is not its copy */
-        { name: "Mark sent", row: '[data-stand="you"][data-status$="requested"]', press: '[data-ap="primary"][data-act="sent"]', eyebrow: /SEN[DT]/i, title: /.+/, kind: "journey" },
-        { name: "Record a response", row: '[data-stand="agent"]', press: '[data-ap="primary"][data-act="resp"]', eyebrow: /RESPONSE/i, title: /^What did .+ say\?$/, kind: "journey" },
+        { name: "Mark sent", row: '[data-stand="you"][data-status$="requested"]', press: ':is([data-ap="primary"], [data-ap="slip-go"])[data-act="sent"]', eyebrow: /SEN[DT]/i, title: /.+/, kind: "journey" },
+        { name: "Record a response", row: '[data-stand="agent"]', press: ':is([data-ap="primary"], [data-ap="slip-go"])[data-act="resp"]', eyebrow: /RESPONSE/i, title: /^What did .+ say\?$/, kind: "journey" },
       ];
       for (const a of acts) {
         const row = page.locator(`.aglist [data-clv="row"]${a.row}`).filter({ visible: true });
@@ -1000,12 +1017,15 @@ test.describe("Contact list v16", () => {
     const L = new Ledger("F6");
     const seen: Record<string, number> = {};
     const WANT: { key: string; sel: string; ok: (f: { primary: string; edit: boolean; status: string }) => boolean; say: string }[] = [
-      { key: "not queried, open", sel: '[data-stand="none"][data-door="open"]', ok: (f) => f.primary === "Log a query" && f.edit && f.status === "Not queried yet", say: "Log a query" },
+      /* RE-POINTED (v18.1 §B): the next step per position is unchanged and is read from the stand slip; the footer's
+         status line ("Not queried yet", "Closed to queries") left the Profile tab, so the two `status ===` clauses and
+         the "one line, with ⋯" reading are RETIRED (tests/e2e/RETIRED-contact-list-v18-1.md) */
+      { key: "not queried, open", sel: '[data-stand="none"][data-door="open"]', ok: (f) => f.primary === "Log a query" && f.edit, say: "Log a query" },
       { key: "request to send", sel: '[data-stand="you"][data-status$="requested"]', ok: (f) => /^Mark (partial|full) sent$/.test(f.primary) && f.edit, say: "Mark partial/full sent" },
       { key: "with the agent", sel: '[data-stand="agent"]', ok: (f) => f.primary === "Record a response" && f.edit, say: "Record a response" },
       { key: "past the reply date", sel: '[data-stand="you"][data-status="Queried"]', ok: (f) => f.primary === "Record a response" && f.edit, say: "Record a response" },
       { key: "closed", sel: '[data-stand="closed"]', ok: (f) => f.primary === "Edit profile" && !f.edit, say: "Edit profile, alone" },
-      { key: "closed to queries", sel: '[data-stand="none"][data-door="closed"]', ok: (f) => f.primary === "Edit profile" && !f.edit && f.status === "Closed to queries", say: "Edit profile, alone" },
+      { key: "closed to queries", sel: '[data-stand="none"][data-door="closed"]', ok: (f) => f.primary === "Edit profile" && !f.edit, say: "Edit profile, alone" },
       { key: "offer", sel: '[data-status="Offer"]', ok: (f) => f.primary === "Record your answer" && f.edit, say: "Record your answer" },
     ];
     for (const vp of SIZES16) {
@@ -1017,13 +1037,12 @@ test.describe("Contact list v16", () => {
         const r = await readPanel(page);
         seen[c.key] = (seen[c.key] ?? 0) + 1;
         L.check("F6", `${w} ${c.key}: ${c.say}`, c.ok(r.foot), `"${r.foot.primary}" · Edit profile beside it ${r.foot.edit} · status "${r.foot.status}"`);
-        L.check("F6", `${w} ${c.key}: the status is one line, with ⋯ beside it`, r.foot.lines === 1 && r.foot.more && r.foot.status.length > 2, `${r.foot.lines} lines · "${r.foot.status}" · "${r.foot.detail}"`);
         await page.keyboard.press("Escape"); await page.waitForTimeout(250);
       }
     }
     console.log(`[F6] positions seen: ${JSON.stringify(seen)}`);
     L.check("F6", "at least four of the table's positions were read, a closed one among them", Object.keys(seen).length >= 4 && ((seen.closed ?? 0) > 0 || (seen["closed to queries"] ?? 0) > 0), JSON.stringify(seen));
-    L.done(18);
+    L.done(9);
   });
 
   test("G1 · nothing else: closing the panel leaves no card, chip or journey, and the row is the row", async ({ page }) => {
@@ -1053,7 +1072,7 @@ test.describe("Contact list v16", () => {
       await clickRow(page, '[data-stand="agent"]');
       await page.keyboard.press("Escape"); await after("Escape from the profile");
       /* from each act: the scrim (it steps back to the agent, as Escape does), then × */
-      for (const [name, press] of [["Edit profile", '[data-ap="edit"]'], ["Record a response", '[data-ap="primary"][data-act="resp"]']] as const) {
+      for (const [name, press] of [["Edit profile", '[data-ap="edit"]'], ["Record a response", ':is([data-ap="primary"], [data-ap="slip-go"])[data-act="resp"]' /* RE-POINTED (v18.1 §B): the slip's button on Profile */]] as const) {
         const rows = page.locator('.aglist [data-clv="row"][data-stand="agent"]').filter({ visible: true });
         let ok = false;
         for (let i = 0; i < Math.min(await rows.count(), 6) && !ok; i++) { await rows.nth(i).scrollIntoViewIfNeeded(); await rows.nth(i).click({ position: { x: 150, y: 28 } }); await page.locator(PANEL).waitFor({ timeout: 10_000 }); await page.waitForTimeout(300); ok = (await page.locator(`${PANEL} ${press}`).count()) > 0; }
@@ -1130,7 +1149,7 @@ test.describe("Contact list v16", () => {
       L.check("F7", `${w} the query's expected-reply date moved to the date the editor previewed`, new RegExp(`reply by ${m[2]}`, "i").test(line1) && m[2] === due(7), `"${line0}" → "${line1}" · previewed ${m[2]}`);
       await page.waitForTimeout(600);
       const p1 = await readPanel(page);
-      L.check("F7", `${w} back on the agent, and the stand card's figure has moved with it`, p1.acting === null && !!p1.stand && !!stand0 && Number(p1.stand.figure?.match(/\d+/)?.[0]) === Number(stand0.figure?.match(/\d+/)?.[0]) + 7, `"${stand0?.figure}" → "${p1.stand?.figure}" (seven days more)`);
+      /* RETIRED (v18 §E): this reading was the stand card's expected-reply figure; the Profile tab no longer has a stand card */
       /* the existing undo: the list's notice carries the card's own snapshot Undo */
       const undo = page.locator(".aglist .agl-notice button.act", { hasText: /^Undo$/ }).filter({ visible: true }).first();
       const offered = await undo.count();
@@ -1144,7 +1163,7 @@ test.describe("Contact list v16", () => {
       L.check("F7", `${w} and the query's expected-reply date back where it was`, line2 === line0, `"${line2}" (was "${line0}")`);
       await page.waitForTimeout(500);
       const p2 = await readPanel(page);
-      L.check("F7", `${w} and the stand card's figure is what it was`, !!p2.stand && p2.stand.figure === stand0?.figure, `"${p2.stand?.figure}" (was "${stand0?.figure}")`);
+      /* RETIRED (v18 §E): this reading was the stand card's expected-reply figure; the Profile tab no longer has a stand card */
     } finally {
       /* whatever happened above, the two test documents go */
       await deleteDoc(qRef).catch(() => {}); await deleteDoc(aRef).catch(() => {});

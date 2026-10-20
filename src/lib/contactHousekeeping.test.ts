@@ -12,7 +12,7 @@ import { buildQcRows } from "./qcSummary";
 import { agentRows } from "./contactList";
 import { fitsGenre } from "./contactStrip";
 import {
-  GAP_ORDER, GAP_TARGET, agentGaps, bestPlaceToStart, gapCopy, gapScore, genreChips, hasPassedOn, hkModel,
+  GAP_DETAIL, GAP_ORDER, GAP_TARGET, agentGapLine, agentGaps, bestPlaceToStart, gapCopy, gapScore, genreChips, hasPassedOn, hkModel,
   reopenChips, savedLine, sessionLine, sessionMinutes, tabCounts, wishlistCheckin, type HkAgentCtx, type HkBook, type Run,
 } from "./contactHousekeeping";
 import { contactPrefsOf, type ContactPrefs } from "./contactPrefs";
@@ -209,5 +209,28 @@ describe("ruling Q6 and the wishlist check-in", () => {
   it("the interval decides what is due: 12 months lets a 9-month-old stamp wait", () => {
     const twelve = contactPrefsOf({ todoPrefs: { contacts: { wishlistEvery: 12 } } }, NOW);
     expect(wishlistCheckin([agent({})], (a) => ctxOf(a), twelve, NOW).due).toHaveLength(0);
+  });
+});
+
+/* ── v18.1 §B.4 — the agent panel's gap line reads Housekeeping's own items, so the two always agree ── */
+describe("the agent panel's gap line (v18.1)", () => {
+  it("n and the words are the agent's visible items, in Housekeeping's order and words", () => {
+    const m = hkModel(A, (a) => ctxOf(a), PREFS);
+    const row = m.byAgent.find((r) => r.agent.id === "fx-bare")!;
+    const line = agentGapLine(m, "fx-bare")!;
+    expect(line.n).toBe(row.items.length);
+    expect(line.keys).toEqual(row.items.map((i) => i.key));
+    expect(line.words).toEqual(row.items.map((i) => GAP_DETAIL[i.gap].toLowerCase()));
+  });
+  it("an item put off with Later leaves the line, as it leaves the drawer", () => {
+    const stored = { todoPrefs: { contacts: { later: { "fx-bare:wishlist": "2026-11-03" } } } };
+    const m = hkModel(A, (a) => ctxOf(a), contactPrefsOf(stored, NOW));
+    expect(agentGapLine(m, "fx-bare")!.keys).not.toContain("fx-bare:wishlist");
+  });
+  it("an agent with no gap has no line", () => {
+    const m = hkModel(A, (a) => ctxOf(a), PREFS);
+    const done = A.find((a) => (m.gapsById.get(a.id) ?? []).length === 0);
+    expect(done, "precondition: the fixture has a complete agent").toBeTruthy();
+    expect(agentGapLine(m, done!.id)).toBeNull();
   });
 });

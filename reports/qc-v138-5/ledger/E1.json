@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 no filter row under the header",
+  "ok": true,
+  "detail": "0 in the header, 0 on the page"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 title · search · Filters · density · pin",
+  "ok": true,
+  "detail": "[296,864,1182,1328,1414]"
+ },
+ {
+  "lock": "E1",
+  "where": "one filter set: the badge reads 1",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "E1",
+  "where": "one filter set: the title reads 'Showing {n} of {N} queries, …'",
+  "ok": true,
+  "detail": "Showing 1 of 73 queries, grouped by Urgency"
+ },
+ {
+  "lock": "E1",
+  "where": "no Clear all in the title",
+  "ok": true,
+  "detail": "Showing 1 of 73 queries, grouped by Urgency"
+ },
+ {
+  "lock": "E1",
+  "where": "Escape closes the panel",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "focus returns to the Filters button",
+  "ok": true,
+  "detail": "filters-btn"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 no filter row under the header",
+  "ok": true,
+  "detail": "0 in the header, 0 on the page"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 title · search · Filters · density · pin",
+  "ok": true,
+  "detail": "[296,712,950,1096,1182]"
+ }
+]

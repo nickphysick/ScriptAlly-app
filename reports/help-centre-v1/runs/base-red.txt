@@ -1,0 +1,395 @@
+
+Running 10 tests using 1 worker
+
+[1/10] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/10] [measure] › tests/e2e/helpCentreV1.measure.ts:76:1 › HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no shortcuts button
+[measure] › tests/e2e/helpCentreV1.measure.ts:76:1 › HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no shortcuts button
+  ✗ HC1-H1 · @1512 the new home is on screen — no .hc
+
+  ✗ HC1-H1 · @1512 "Fortnight in Focus" is gone — 
+
+  ✗ HC1-H1 · @1512 "Query Pipeline" is gone — 
+
+  ✗ HC1-H1 · @1512 "Agent Discovery" is gone — 
+
+  ✗ HC1-H1 · @1512 "Manuscript Packages" is gone — 
+
+  ✗ HC1-H1 · @1512 "Cheat Sheet" is gone — 
+
+  ✗ HC1-H1 · @1512 "overdue" is gone — 
+
+  ✗ HC1-H1 · @1512 "urgent" is gone — 
+
+  ✗ HC1-H1 · @1512 "Keyboard shortcuts" is gone — 
+
+  ✗ HC1-H1 · @1280 the new home is on screen — no .hc
+
+  ✗ HC1-H1 · @1280 "Fortnight in Focus" is gone — 
+
+  ✗ HC1-H1 · @1280 "Query Pipeline" is gone — 
+
+  ✗ HC1-H1 · @1280 "Agent Discovery" is gone — 
+
+  ✗ HC1-H1 · @1280 "Manuscript Packages" is gone — 
+
+  ✗ HC1-H1 · @1280 "Cheat Sheet" is gone — 
+
+  ✗ HC1-H1 · @1280 "overdue" is gone — 
+
+  ✗ HC1-H1 · @1280 "urgent" is gone — 
+
+  ✗ HC1-H1 · @1280 "Keyboard shortcuts" is gone — 
+
+[HC1-H1] 2/20 green
+
+  1) [measure] › tests/e2e/helpCentreV1.measure.ts:76:1 › HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no shortcuts button 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 20
+
+    - Array []
+    + Array [
+    +   "@1512 the new home is on screen — no .hc",
+    +   "@1512 \"Fortnight in Focus\" is gone — ",
+    +   "@1512 \"Query Pipeline\" is gone — ",
+    +   "@1512 \"Agent Discovery\" is gone — ",
+    +   "@1512 \"Manuscript Packages\" is gone — ",
+    +   "@1512 \"Cheat Sheet\" is gone — ",
+    +   "@1512 \"overdue\" is gone — ",
+    +   "@1512 \"urgent\" is gone — ",
+    +   "@1512 \"Keyboard shortcuts\" is gone — ",
+    +   "@1280 the new home is on screen — no .hc",
+    +   "@1280 \"Fortnight in Focus\" is gone — ",
+    +   "@1280 \"Query Pipeline\" is gone — ",
+    +   "@1280 \"Agent Discovery\" is gone — ",
+    +   "@1280 \"Manuscript Packages\" is gone — ",
+    +   "@1280 \"Cheat Sheet\" is gone — ",
+    +   "@1280 \"overdue\" is gone — ",
+    +   "@1280 \"urgent\" is gone — ",
+    +   "@1280 \"Keyboard shortcuts\" is gone — ",
+    + ]
+
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      48 |   }
+      49 | }
+      50 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:47:83)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:94:17
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-ff9d6-t-words-no-shortcuts-button-measure/error-context.md
+
+
+[3/10] [measure] › tests/e2e/helpCentreV1.measure.ts:97:1 › HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's
+[measure] › tests/e2e/helpCentreV1.measure.ts:97:1 › HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's
+  ✗ HC1-H2 · @1512 one card per page with a guide (2) — 0 cards
+
+  ✗ HC1-H2 · @1512 the cards are those pages, in sidebar order — 
+
+  ✗ HC1-H2 · @1512 Contact list card n of N = the pill's "3 of 6" — no card
+
+  ✗ HC1-H2 · @1512 the card states it — 
+
+  ✗ HC1-H2 · @1512 the card the writer came from is ringed — 
+
+  ✗ HC1-H2 · @1280 one card per page with a guide (2) — 0 cards
+
+  ✗ HC1-H2 · @1280 the cards are those pages, in sidebar order — 
+
+  ✗ HC1-H2 · @1280 Contact list card n of N = the pill's "3 of 6" — no card
+
+  ✗ HC1-H2 · @1280 the card states it — 
+
+  ✗ HC1-H2 · @1280 the card the writer came from is ringed — 
+
+[HC1-H2] 0/10 green
+
+  2) [measure] › tests/e2e/helpCentreV1.measure.ts:97:1 › HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 12
+
+    - Array []
+    + Array [
+    +   "@1512 one card per page with a guide (2) — 0 cards",
+    +   "@1512 the cards are those pages, in sidebar order — ",
+    +   "@1512 Contact list card n of N = the pill's \"3 of 6\" — no card",
+    +   "@1512 the card states it — ",
+    +   "@1512 the card the writer came from is ringed — ",
+    +   "@1280 one card per page with a guide (2) — 0 cards",
+    +   "@1280 the cards are those pages, in sidebar order — ",
+    +   "@1280 Contact list card n of N = the pill's \"3 of 6\" — no card",
+    +   "@1280 the card states it — ",
+    +   "@1280 the card the writer came from is ringed — ",
+    + ]
+
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      48 |   }
+      49 | }
+      50 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:47:83)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:120:55
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-9273d--card-s-count-is-its-pill-s-measure/error-context.md
+
+
+[4/10] [measure] › tests/e2e/helpCentreV1.measure.ts:123:1 › HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick
+[measure] › tests/e2e/helpCentreV1.measure.ts:123:1 › HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick
+[HC1-H3] 0/0 green
+
+  3) [measure] › tests/e2e/helpCentreV1.measure.ts:123:1 › HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick 
+
+    Error: HC1-H3: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 12
+    Received:    0
+
+      44 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      48 |   }
+      49 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:46:77)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:157:17
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-11643-is-found-nonsense-asks-Nick-measure/error-context.md
+
+
+[5/10] [measure] › tests/e2e/helpCentreV1.measure.ts:160:1 › HC1-H4 · '/' anywhere focuses the search
+[measure] › tests/e2e/helpCentreV1.measure.ts:160:1 › HC1-H4 · '/' anywhere focuses the search
+[HC1-H4] 0/0 green
+
+  4) [measure] › tests/e2e/helpCentreV1.measure.ts:160:1 › HC1-H4 · '/' anywhere focuses the search 
+
+    Error: HC1-H4: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 4
+    Received:    0
+
+      44 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      48 |   }
+      49 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:46:77)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:175:17
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC1-H4-·-anywhere-focuses-the-search-measure/error-context.md
+
+
+[6/10] [measure] › tests/e2e/helpCentreV1.measure.ts:180:1 › HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks
+[measure] › tests/e2e/helpCentreV1.measure.ts:180:1 › HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks
+[HC1-C1] 0/0 green
+
+  5) [measure] › tests/e2e/helpCentreV1.measure.ts:180:1 › HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks 
+
+    Error: HC1-C1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 20
+    Received:    0
+
+      44 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      48 |   }
+      49 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:46:77)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:234:55
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-1d4e2-e-writer-s-own-action-ticks-measure/error-context.md
+
+
+[7/10] [measure] › tests/e2e/helpCentreV1.measure.ts:237:1 › HC1-C2 · an unknown slug goes to /help
+[measure] › tests/e2e/helpCentreV1.measure.ts:237:1 › HC1-C2 · an unknown slug goes to /help
+  ✗ HC1-C2 · @1512 the address is /help — /dashboard
+
+  ✗ HC1-C2 · @1512 the home is on screen — 
+
+  ✗ HC1-C2 · @1280 the address is /help — /dashboard
+
+  ✗ HC1-C2 · @1280 the home is on screen — 
+
+[HC1-C2] 2/6 green
+
+  6) [measure] › tests/e2e/helpCentreV1.measure.ts:237:1 › HC1-C2 · an unknown slug goes to /help ──
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "@1512 the address is /help — /dashboard",
+    +   "@1512 the home is on screen — ",
+    +   "@1280 the address is /help — /dashboard",
+    +   "@1280 the home is on screen — ",
+    + ]
+
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      48 |   }
+      49 | }
+      50 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:47:83)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:249:17
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-5183a-n-unknown-slug-goes-to-help-measure/error-context.md
+
+
+[8/10] [measure] › tests/e2e/helpCentreV1.measure.ts:252:1 › HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds
+[measure] › tests/e2e/helpCentreV1.measure.ts:252:1 › HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds
+[HC1-C3] 0/0 green
+
+  7) [measure] › tests/e2e/helpCentreV1.measure.ts:252:1 › HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: HC1-C3: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 12
+    Received:    0
+
+      44 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      48 |   }
+      49 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:46:77)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:281:17
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-5d1d9--the-panel-keeps-four-kinds-measure/error-context.md
+
+
+[9/10] [measure] › tests/e2e/helpCentreV1.measure.ts:284:1 › HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production
+[measure] › tests/e2e/helpCentreV1.measure.ts:284:1 › HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production
+[HC1-C4] 2/2 green
+
+  8) [measure] › tests/e2e/helpCentreV1.measure.ts:284:1 › HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production 
+
+    Error: HC1-C4: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 6
+    Received:    2
+
+      44 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      48 |   }
+      49 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:46:77)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:299:17
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-eb4e3-article-never-in-production-measure/error-context.md
+
+
+[10/10] [measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article
+[measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article
+  ✗ HC1-C5 · /help/add-an-agent renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/find-an-agent renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/pin-the-list renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/open-an-agent renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/edit-an-agent renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/list-health renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/log-a-query renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/find-a-query renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/open-a-query renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/record-a-response renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · /help/birds-eye-view renders that article — {"p":"/dashboard","slug":null}
+
+  ✗ HC1-C5 · @1512 Search for an agent → Learn more → /help/find-an-agent — {"p":"/help","t":null}
+
+  ✗ HC1-C5 · @1280 Search for an agent → Learn more → /help/find-an-agent — {"p":"/help","t":null}
+
+[HC1-C5] 22/35 green
+
+  9) [measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   "/help/add-an-agent renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/find-an-agent renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/pin-the-list renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/open-an-agent renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/edit-an-agent renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/list-health renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/log-a-query renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/find-a-query renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/open-a-query renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/record-a-response renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "/help/birds-eye-view renders that article — {\"p\":\"/dashboard\",\"slug\":null}",
+    +   "@1512 Search for an agent → Learn more → /help/find-an-agent — {\"p\":\"/help\",\"t\":null}",
+    +   "@1280 Search for an agent → Learn more → /help/find-an-agent — {\"p\":\"/help\",\"t\":null}",
+    + ]
+
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      48 |   }
+      49 | }
+      50 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:47:83)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:331:55
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-7cc12-n-more-lands-on-its-article-measure/error-context.md
+
+
+  9 failed
+    [measure] › tests/e2e/helpCentreV1.measure.ts:76:1 › HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no shortcuts button 
+    [measure] › tests/e2e/helpCentreV1.measure.ts:97:1 › HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's 
+    [measure] › tests/e2e/helpCentreV1.measure.ts:123:1 › HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick 
+    [measure] › tests/e2e/helpCentreV1.measure.ts:160:1 › HC1-H4 · '/' anywhere focuses the search ─
+    [measure] › tests/e2e/helpCentreV1.measure.ts:180:1 › HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks 
+    [measure] › tests/e2e/helpCentreV1.measure.ts:237:1 › HC1-C2 · an unknown slug goes to /help ───
+    [measure] › tests/e2e/helpCentreV1.measure.ts:252:1 › HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds 
+    [measure] › tests/e2e/helpCentreV1.measure.ts:284:1 › HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production 
+    [measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article 
+  1 passed (8.1m)
+RC=1

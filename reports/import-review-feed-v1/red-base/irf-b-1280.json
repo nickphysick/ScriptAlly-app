@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "B1",
+  "where": "s=welcome centred (15.4 | -0.0)",
+  "ok": false,
+  "detail": "15.35250000000002 vs -0.00687500000003638"
+ },
+ {
+  "lock": "B3",
+  "where": "s=welcome the card fills the column",
+  "ok": true,
+  "detail": "926.734375 vs 926.734375"
+ },
+ {
+  "lock": "B1",
+  "where": "s=ack&stage=early centred (15.4 | 66.7)",
+  "ok": false,
+  "detail": "15.35250000000002 vs 66.72749999999996"
+ },
+ {
+  "lock": "B3",
+  "where": "s=ack&stage=early the card fills the column",
+  "ok": true,
+  "detail": "860 vs 860"
+ },
+ {
+  "lock": "B3",
+  "where": "s=ack&stage=early the text column is the card's width",
+  "ok": false,
+  "detail": "477.140625 vs 860"
+ },
+ {
+  "lock": "B2",
+  "where": "s=ack&stage=early the lead is one line",
+  "ok": false,
+  "detail": "2 lines: Got it. Your campaign is underway."
+ },
+ {
+  "lock": "B1",
+  "where": "s=bookmore centred (15.4 | 66.7)",
+  "ok": false,
+  "detail": "15.35250000000002 vs 66.72749999999996"
+ },
+ {
+  "lock": "B3",
+  "where": "s=bookmore the card fills the column",
+  "ok": true,
+  "detail": "860 vs 860"
+ },
+ {
+  "lock": "B1",
+  "where": "s=fork centred (15.4 | -0.0)",
+  "ok": false,
+  "detail": "15.35250000000002 vs -0.00687500000003638"
+ },
+ {
+  "lock": "B1",
+  "where": "s=confirm centred (15.4 | -0.0)",
+  "ok": false,
+  "detail": "15.35250000000002 vs -0.00687500000003638"
+ },
+ {
+  "lock": "B3",
+  "where": "s=confirm the card fills the column",
+  "ok": true,
+  "detail": "926.734375 vs 926.734375"
+ }
+]

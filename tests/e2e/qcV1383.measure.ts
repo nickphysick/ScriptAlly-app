@@ -156,9 +156,10 @@ test.describe("Query Centre v138.3", () => {
       await mutate(page, "F1");
       const a = await art();
       const w = `${vp.width}`;
-      L.check("F1", `${w} Your move: the talon, 46 ±1`, a.you.shown && near(a.you.w, 46, 1) && /your-move-talon\.webp/.test(a.you.src), `${a.you.shown} ${a.you.w} ${a.you.src.split("/").pop()}`);
+      /* RETARGETED (v138.5 §H): the art is 36 wide and inside its band; QC138.5 H1 owns the placement */
+      L.check("F1", `${w} Your move: the talon, 36 ±1`, a.you.shown && near(a.you.w, 36, 1) && /your-move-talon\.webp/.test(a.you.src), `${a.you.shown} ${a.you.w} ${a.you.src.split("/").pop()}`);
       L.check("F1", `${w} Your move: no white circle`, a.you.circle === "hidden", a.you.circle);
-      L.check("F1", `${w} Waiting: the hourglass, 54 ±1`, a.wait.shown && near(a.wait.w, 54, 1) && /waiting-hourglass\.webp/.test(a.wait.src), `${a.wait.shown} ${a.wait.w}`);
+      L.check("F1", `${w} Waiting: the hourglass, 36 ±1`, a.wait.shown && near(a.wait.w, 36, 1) && /waiting-hourglass\.webp/.test(a.wait.src), `${a.wait.shown} ${a.wait.w}`);
       L.check("F1", `${w} both move`, a.you.anim !== "none" && a.wait.anim !== "none", `${a.you.anim} ${a.wait.anim}`);
       L.check("F1", `${w} none in the pinned row`, a.pinned === 0, `${a.pinned}`);
       /* compact keeps the small icons */

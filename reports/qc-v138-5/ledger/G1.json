@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "G1",
+  "where": "sidebar open pinned: the rail",
+  "ok": true,
+  "detail": "68 vs 68"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar open pinned: no header",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar open pinned: navy header 22 under the sheet",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar open pinned: the old pinned bar not shown, even scrolled",
+  "ok": true,
+  "detail": "0 0"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar open pinned: aria-pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar open unpinned: the sidebar as it was before",
+  "ok": true,
+  "detail": "248 vs 248"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar open unpinned: the header back",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed pinned: the rail",
+  "ok": true,
+  "detail": "68 vs 68"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed pinned: no header",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed pinned: navy header 22 under the sheet",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed pinned: the old pinned bar not shown, even scrolled",
+  "ok": true,
+  "detail": "0 0"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed pinned: aria-pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed unpinned: the sidebar as it was before",
+  "ok": true,
+  "detail": "68 vs 68"
+ },
+ {
+  "lock": "G1",
+  "where": "sidebar collapsed unpinned: the header back",
+  "ok": true,
+  "detail": "true"
+ }
+]

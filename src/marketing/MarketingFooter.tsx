@@ -95,11 +95,9 @@ export const MarketingFooter: React.FC<{
               is the single value here that has a correct answer the app already knows. */}
           <p>© {new Date().getFullYear()} <span className="mk-footname">QueryHawk</span></p>
           <p className="mk-footmade"><PaperPlane />Made in the UK, for writers</p>
-          {/* ⚠️ `SUPPORT_EMAIL`, NOT hello@queryhawk.ink. On 17 Sep that domain did not resolve at all
-              (NXDOMAIN, no MX record), so mail sent to it would bounce — and the privacy policy
-              names `SUPPORT_EMAIL` as the address for a UK GDPR request, so a second address here
-              would publish a route nothing else honours. When the new mailbox exists, changing the
-              constant moves every surface at once. */}
+          {/* ⚠️ `SUPPORT_EMAIL`, AND NO OTHER ADDRESS. The privacy policy names it as the route for a
+              UK GDPR request, so a second address here would publish a route nothing else honours.
+              It is hello@queryhawk.net since 17 Oct; changing the constant moves every surface. */}
           <a className="mk-footmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
         </div>
       </div>

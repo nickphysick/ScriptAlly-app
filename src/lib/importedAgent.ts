@@ -69,3 +69,10 @@ export function importedAgentDoc(file: FileAgent, extra: { importedNeedsReview?:
   };
   return doc;
 }
+
+/** The column matcher's agent ("match your own columns" and "Create from this row"): the file's fields, flagged as
+ *  imported (v19.2 §E follow-up) so its Date added reads "Imported" as Smart import's, the template's and the email
+ *  import's already do. Agents imported this way before the flag existed are not backfilled. */
+export function matcherAgentDoc(file: FileAgent): ImportedAgentDoc {
+  return importedAgentDoc(file, { importedNeedsReview: true });
+}

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "F2",
+  "where": "the first open shows the intro",
+  "ok": true,
+  "detail": "intro"
+ },
+ {
+  "lock": "F2",
+  "where": "Not now stores the flag",
+  "ok": false,
+  "detail": "{\"hkIntroSeen\":null,\"tabDismissedAtGaps\":null}"
+ },
+ {
+  "lock": "F2",
+  "where": "the next open lands on home",
+  "ok": false,
+  "detail": "home"
+ },
+ {
+  "lock": "F2",
+  "where": "after a reload, still home",
+  "ok": false,
+  "detail": "no intro"
+ },
+ {
+  "lock": "F2",
+  "where": "Start lands in Focus",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "F2",
+  "where": "and it set the flag too (left set, as before the run)",
+  "ok": false,
+  "detail": "{\"hkIntroSeen\":null,\"tabDismissedAtGaps\":null}"
+ }
+]

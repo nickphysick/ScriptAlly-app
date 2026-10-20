@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status one jump button per group (the population)",
+  "ok": false,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned one jump button per group (the population)",
+  "ok": false,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered open the menu: \"button.cl19-fil\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered Open to submissions: \"[data-cl19='quick'][data-qp='open']:not([disabled])\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered one jump button per group (the population)",
+  "ok": false,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "the \"+N more\" branch was entered in at least one state",
+  "ok": false,
+  "detail": "0"
+ }
+]

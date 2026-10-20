@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "B5",
+  "where": "a capture from unmodified HEAD exists (CL181_CAPTURE=1)",
+  "ok": true,
+  "detail": "reports/contact-list-v18-1/b5-capture.json"
+ },
+ {
+  "lock": "B5",
+  "where": "the capture was taken today",
+  "ok": true,
+  "detail": "2026-10-15T20:50:33.421Z"
+ },
+ {
+  "lock": "B5",
+  "where": "msv12-agent-4: the Queries body is byte-identical",
+  "ok": true,
+  "detail": "958 vs 958"
+ },
+ {
+  "lock": "B5",
+  "where": "msv12-agent-4: the Notes body is byte-identical",
+  "ok": true,
+  "detail": "620 vs 620"
+ },
+ {
+  "lock": "B5",
+  "where": "seed-agent-1: the Queries body is byte-identical",
+  "ok": true,
+  "detail": "6729 vs 6729"
+ },
+ {
+  "lock": "B5",
+  "where": "seed-agent-1: the Notes body is byte-identical",
+  "ok": true,
+  "detail": "586 vs 586"
+ },
+ {
+  "lock": "B5",
+  "where": "clv-fx-reopen: the Queries body is byte-identical",
+  "ok": true,
+  "detail": "77 vs 77"
+ },
+ {
+  "lock": "B5",
+  "where": "clv-fx-reopen: the Notes body is byte-identical",
+  "ok": true,
+  "detail": "586 vs 586"
+ },
+ {
+  "lock": "B5",
+  "where": "msv12-agent-1: the Queries body is byte-identical",
+  "ok": true,
+  "detail": "1675 vs 1675"
+ },
+ {
+  "lock": "B5",
+  "where": "msv12-agent-1: the Notes body is byte-identical",
+  "ok": true,
+  "detail": "586 vs 586"
+ },
+ {
+  "lock": "B5",
+  "where": "seed-cal-near: the Queries body is byte-identical",
+  "ok": true,
+  "detail": "866 vs 866"
+ },
+ {
+  "lock": "B5",
+  "where": "seed-cal-near: the Notes body is byte-identical",
+  "ok": true,
+  "detail": "586 vs 586"
+ },
+ {
+  "lock": "B5",
+  "where": "Escape closes the panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B5",
+  "where": "✕ closes the panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B5",
+  "where": "?agent= opens that agent's panel",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "B5",
+  "where": "Edit profile docks the editor in the panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B5",
+  "where": "Escape from the editor returns to the card",
+  "ok": true,
+  "detail": ""
+ }
+]

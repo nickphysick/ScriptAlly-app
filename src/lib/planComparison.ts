@@ -21,7 +21,7 @@
  *
  * ⚠️ TWO ROWS WERE CLAIMING A GATE THAT DOES NOT EXIST. `GROUPS` listed "Submission package
  * builder" and "Agent matching & community access" as Pro-only. Neither is gated: grep
- * `SubmissionPackages.tsx` and `DiscoverNewAgents.tsx` for `isProUser` or `UserPlan.PRO` and you
+ * `SubmissionPackages.tsx` and `agents/discover1/DiscoverPage.tsx` for `isProUser` or `UserPlan.PRO` and you
  * get nothing, and CLAUDE.md records the Packages case as a DELIBERATE decision ("submission
  * packages is not Pro-gated, so it sells nothing"). The locked marketing copy agrees with the
  * code — its Free tier includes "Submission packages and comparable titles", and its Pro tier

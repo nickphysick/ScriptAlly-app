@@ -14,9 +14,9 @@
  * incl. "Your turn to send" (the send-family key), toggles.
  */
 import { Agent, Query, TaskFlag } from "../types";
-import { MUTED_UNTIL } from "./taskFlags";
-import { agentPrimary } from "./agentDisplay";
 import { formatDate } from "./dates";
+import { MUTED_UNTIL, dismissalHolds, flagDismissed, flagSleeps, subjectChange, subjectDatesChanges } from "./taskFlags";
+import { agentPrimary } from "./agentDisplay";
 
 /** The keys a switch can toggle — each an existing `mutedTaskRules` entry the engine already honours
  *  (dq_* & no_response_close via visibleAgentNeeds/isRuleMuted) or a new one (nudge_overdue)
@@ -54,88 +54,114 @@ export const GROUP_LABEL: Record<TaskSettingGroup, string> = {
    `mutedTaskRules` mapping, and nothing else ever called them: the board's set-aside panel removes
    a rule key directly as the inverse of the hiding, and `TASK_SETTING_ROWS` survives because the
    ledger reads it for the rules' plain-English names.
-   ⚠️ `HIDDEN_RULE_KEYS` STAYS, and is NOT an orphan despite reading as one from outside this file —
-   it is private and `hiddenItems` filters on it. A sweep counting external readers says zero. */
+   ⚠️ `HIDDEN_RULE_KEYS` IS GONE with `hiddenItems` (To-do list v5.1 §I.7): it hid two of the rule keys —
+   `nudge_overdue` and `send` — from the list, so those switched-off rules had no way back from the board. */
 
-// ── HIDDEN RIGHT NOW (Phase 3) ──────────────────────────────────────────────
+// ── SET ASIDE (To-do list v5.1 §I.7 — replaces Phase 3's `hiddenItems`) ──────────────────────────
 
-/** The rule keys that appear in the hidden list as "MUTED AS A RULE" — the fork-created housekeeping
- *  + stale rule-mutes (dq_* & no_response_close). nudge_overdue (and a legacy sunday_review) are settings-only
- *  preferences (no board "set aside" path) and are NOT listed — their switch is their control. */
-const HIDDEN_RULE_KEYS: ReadonlySet<string> = new Set(["dq_materials", "dq_mswl", "dq_responseTime", "no_response_close"]);
-const RULE_TITLE: Record<string, string> = {
-  dq_materials: "Missing submission material details",
-  dq_mswl: "Missing wish lists",
-  dq_responseTime: "Missing reply windows",
+/* ⚠️ THE ONE LIST OF WHAT IS SET ASIDE. Three kinds, three return rules, one derivation every surface reads (the desk's
+   Set aside tab, the header's "Set aside · k", the phone page's panel):
+   · SNOOZE — a flag sleeping until a day after today. Back on its day; "Bring it back now" clears it.
+   · DISMISS — a flag with `skippedAt` that still HOLDS (taskFlags.dismissalHolds: nothing newer on its subject), and the
+     legacy permanent mutes (`snoozedUntil === MUTED_UNTIL`, the old `dismissedTasks` migration) — which ARE dismissals
+     and are never shown as a date ("back 1 Jan 3000" would be a plausible number stating something untrue).
+   · RULE — every key in `mutedTaskRules`, each "for every agent". `mutedTaskRules` is a bare string[]: it records no
+     time, so no "since" date is ever shown for one.
+   ⚠️ EACH KIND RESTORES THROUGH ITS OWN FIELD. Phase 3's panel restored everything by clearing `snoozedUntil`, so a
+      restored DISMISSAL kept its `skippedAt` and stayed hidden — "Restore" did nothing, silently. */
+
+/** the rule keys the engine honours, by name — "Switched off" rows, and the words "Stop asking about …" uses */
+export const RULE_TITLE: Record<string, string> = {
+  send: "Your turn to send",
+  nudge_overdue: "Nudge reminders",
   no_response_close: "Stale queries",
+  dq_materials: "Missing submission details",
+  dq_mswl: "Missing wishlists",
+  dq_responseTime: "Missing reply times",
+};
+/** the same rule, in a sentence: "Stop asking about missing reply times, for every agent" */
+export const RULE_PLAIN: Record<string, string> = {
+  dq_materials: "missing submission details",
+  dq_mswl: "missing wishlists",
+  dq_responseTime: "missing reply times",
 };
 
-export type HiddenKind = "rule" | "dismissed" | "snoozed";
-export interface HiddenItem {
-  id: string; // stable key for React + restore targeting
-  kind: HiddenKind;
-  label: string; // bold lead
-  meta: string; // "MUTED AS A RULE" / "DISMISSED" / "SNOOZED UNTIL 24 Jul"
-  /** How to restore: a rule key (remove from mutedTaskRules) OR a flag key (unset snoozedUntil). */
-  restore: { rule: string } | { flag: { taskType: string; queryId?: string; agentId?: string } };
+export type SetAsideKind = "snooze" | "dismiss" | "rule";
+export interface SetAsideItem {
+  id: string;
+  kind: SetAsideKind;
+  /** the flag behind a snooze or a dismissal */
+  flag?: TaskFlag;
+  /** a dismissal from the old permanent mute: no date is stored, and none is shown */
+  legacy?: boolean;
+  /** a snooze's return (ISO) */
+  until?: string;
+  /** a dismissal's moment (ISO); absent for a legacy mute */
+  at?: string;
+  /** whether the subject dates changes (a query does; an agent does not — back only when brought back) */
+  datesChanges?: boolean;
+  /** a switched-off rule's key */
+  rule?: string;
+  /** the rule's name, or the subject's */
+  label: string;
+  who: string;
+  /** how to bring it back: a rule leaves `mutedTaskRules`; a flag has ONE field cleared */
+  restore: { rule: string } | { flag: { taskType: string; queryId?: string; agentId?: string }; patch: { snoozedUntil?: null; skippedAt?: null; unbumpSnooze?: boolean } };
 }
 
-const shortDate = (iso: string): string => {
-  const ms = Date.parse(iso);
-  return Number.isNaN(ms) ? "" : formatDate(new Date(ms), { day: "numeric", month: "short" });
-};
-
-const flagSubject = (f: TaskFlag, agents: Agent[], queries: Query[]): string => {
+const flagSubject = (f: TaskFlag, agents: Agent[], queries: Query[]): { who: string; exists: boolean } => {
   const q = f.queryId ? queries.find((x) => x.id === f.queryId) : undefined;
   const ag = agents.find((a) => a.id === (q ? q.agentId : f.agentId ?? f.queryId));
-  return ag ? agentPrimary(ag) : "A query";
+  const exists = f.taskType === "user_task" ? true : f.agentId ? !!agents.find((a) => a.id === f.agentId) : !!q;
+  return { who: ag ? agentPrimary(ag) : "", exists };
 };
 
-const kindLabel: Record<string, string> = {
-  offer_received: "offer", nudge_overdue: "nudge", no_response_close: "stale query",
-  partial_requested: "request", full_requested: "request", revise_resubmit: "R&R", data_quality_poor: "record gap",
-  materials_unrecorded: "record gap", materials_unrecorded_bulk: "record gap",
-};
-
-/**
- * Every individually-hidden item, newest-first: rule-mutes (no stored date), permanent dismisses
- * (snoozedUntil === MUTED_UNTIL — the fork's "Never just this"), and live snoozes (a finite future
- * snoozedUntil). Snoozes ARE listed with their return date (the pack lists all three kinds; the
- * ref's setfoot excluded them — pack wins, and a listed snooze gains an early Restore).
- */
-export function hiddenItems(
-  mutedTaskRules: string[] | null | undefined,
+export function setAsideItems(
+  user: { mutedTaskRules?: string[] | null } | null | undefined,
   taskFlags: TaskFlag[],
   agents: Agent[],
   queries: Query[],
   nowMs: number,
-): HiddenItem[] {
-  const rules: HiddenItem[] = (mutedTaskRules ?? [])
-    .filter((r) => HIDDEN_RULE_KEYS.has(r))
-    .map((r) => ({ id: `rule-${r}`, kind: "rule" as const, label: RULE_TITLE[r] ?? r, meta: "MUTED AS A RULE", restore: { rule: r } }));
+  activities: readonly { queryId?: string; date: string }[] = [],
+): SetAsideItem[] {
+  const rules: SetAsideItem[] = (user?.mutedTaskRules ?? [])
+    .filter((r) => r in RULE_TITLE)
+    .map((r) => ({ id: `rule-${r}`, kind: "rule" as const, rule: r, label: RULE_TITLE[r], who: "For every agent", restore: { rule: r } }));
 
-  const flags: HiddenItem[] = taskFlags
-    .filter((f) => !!f.snoozedUntil)
-    .map((f) => {
-      const su = f.snoozedUntil!;
-      const permanent = su === MUTED_UNTIL;
-      const ms = Date.parse(su);
-      const future = !Number.isNaN(ms) && ms > nowMs;
-      if (!permanent && !future) return null; // an expired snooze is not "hidden" any more
-      const subject = flagSubject(f, agents, queries);
-      const kindTxt = kindLabel[f.taskType] ?? "task";
-      return {
-        id: `flag-${f.id}`,
-        kind: (permanent ? "dismissed" : "snoozed") as HiddenKind,
-        label: `${subject} — ${kindTxt}`,
-        meta: permanent ? "DISMISSED" : `SNOOZED UNTIL ${shortDate(su)}`,
-        restore: { flag: { taskType: f.taskType, ...(f.queryId ? { queryId: f.queryId } : {}), ...(f.agentId ? { agentId: f.agentId } : {}) } },
-        _sort: permanent ? Number.MAX_SAFE_INTEGER : ms,
-      } as HiddenItem & { _sort: number };
-    })
-    .filter((x): x is HiddenItem & { _sort: number } => x != null)
-    .sort((a, b) => b._sort - a._sort)
-    .map(({ _sort, ...rest }) => rest);
-
-  return [...rules, ...flags];
+  const snoozes: SetAsideItem[] = [];
+  const dismissals: SetAsideItem[] = [];
+  for (const f of taskFlags) {
+    /* an offer's snooze is the "I need time" quiet reminder — the card stays on the board, so it is not set aside */
+    if (f.taskType === "offer_received" || f.resolvedAt) continue;
+    const { who, exists } = flagSubject(f, agents, queries);
+    if (!exists) continue; // nothing to bring back
+    const key = { taskType: f.taskType, ...(f.queryId ? { queryId: f.queryId } : {}), ...(f.agentId ? { agentId: f.agentId } : {}) };
+    if (flagDismissed(f)) {
+      if (!dismissalHolds(f, subjectChange(f, activities)?.ms)) continue; // something newer: it is back
+      dismissals.push({ id: `flag-${f.id}`, kind: "dismiss", flag: f, at: f.skippedAt, datesChanges: subjectDatesChanges(f), label: f.taskType, who, restore: { flag: key, patch: { skippedAt: null } } });
+    } else if (f.snoozedUntil === MUTED_UNTIL) {
+      dismissals.push({ id: `flag-${f.id}`, kind: "dismiss", flag: f, legacy: true, datesChanges: false, label: f.taskType, who, restore: { flag: key, patch: { snoozedUntil: null } } });
+    } else if (flagSleeps(f, nowMs)) {
+      snoozes.push({ id: `flag-${f.id}`, kind: "snooze", flag: f, until: f.snoozedUntil, label: f.taskType, who, restore: { flag: key, patch: { snoozedUntil: null, unbumpSnooze: true } } });
+    }
+  }
+  snoozes.sort((a, b) => Date.parse(a.until!) - Date.parse(b.until!));
+  dismissals.sort((a, b) => (b.at ? Date.parse(b.at) : -Infinity) - (a.at ? Date.parse(a.at) : -Infinity));
+  return [...snoozes, ...dismissals, ...rules];
 }
+
+const KIND_WORD: Record<string, string> = {
+  offer_received: "offer", nudge_overdue: "nudge", no_response_close: "stale query", partial_requested: "request",
+  full_requested: "request", revise_resubmit: "R&R", data_quality_poor: "record gap", materials_unrecorded: "record gap",
+  materials_unrecorded_bulk: "record gap", user_task: "your task",
+};
+/** the panel's bold lead: "Tom Ellery — nudge", or the rule's name */
+export const setAsideLabel = (i: SetAsideItem): string =>
+  i.kind === "rule" ? i.label : `${i.who || "A query"} — ${KIND_WORD[i.flag?.taskType ?? ""] ?? "task"}`;
+/** the panel's mono line: what it is and, only where one is stored, when */
+export const setAsideMeta = (i: SetAsideItem): string => {
+  if (i.kind === "rule") return "SWITCHED OFF · FOR EVERY AGENT";
+  if (i.kind === "snooze") { const ms = Date.parse(i.until!); return `SNOOZED UNTIL ${formatDate(new Date(ms), { day: "numeric", month: "short" })}`; }
+  if (i.legacy || !i.at) return "DISMISSED";
+  return `DISMISSED ${formatDate(new Date(Date.parse(i.at)), { day: "numeric", month: "short" })}`;
+};

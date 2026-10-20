@@ -30,7 +30,7 @@ describe("the sender is configurable, and its default is deliberate", () => {
    * which makes a genuine sender look forged — to a reader and to some filters.
    */
   it("the display name says `at`, and carries exactly one @", () => {
-    expect(DEFAULT_FROM).toContain("Nick at ScriptAlly");
+    expect(DEFAULT_FROM).toContain("Nick at QueryHawk");
     expect(DEFAULT_FROM.split("@")).toHaveLength(2);
   });
 
@@ -179,7 +179,7 @@ describe("a reader can always see a way to reach a person", () => {
    * something they can read and copy.
    */
   it("there is a support address, and it is not the diverted from-address", () => {
-    expect(SUPPORT_EMAIL).toMatch(/^[^\s@]+@scriptally\.ink$/);
+    expect(SUPPORT_EMAIL).toMatch(/^[^\s@]+@queryhawk\.net$/);
     expect(DEFAULT_FROM).not.toContain(SUPPORT_EMAIL);
   });
 });

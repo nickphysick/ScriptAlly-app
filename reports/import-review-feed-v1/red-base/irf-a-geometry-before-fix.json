@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "A1",
+  "where": "the band is navy #2d3a50",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "A1",
+  "where": "the sage tick disc",
+  "ok": true,
+  "detail": "rgb(111, 165, 131)"
+ },
+ {
+  "lock": "A1",
+  "where": "the title",
+  "ok": true,
+  "detail": "Ready to import 24px"
+ },
+ {
+  "lock": "A2",
+  "where": "rows to work with",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A2",
+  "where": "the row stays in its place",
+  "ok": true,
+  "detail": "c1,c2,c3"
+ },
+ {
+  "lock": "A2",
+  "where": "it says it won't be imported, with Undo",
+  "ok": true,
+  "detail": "{\"out\":\"1\",\"word\":\"Won't be imported\",\"undo\":true,\"bg\":\"rgb(248, 245, 240)\",\"chip\":\"2 ready\",\"outCount\":\"1 not importing\",\"toast\":false,\"tray\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "pale ground",
+  "ok": true,
+  "detail": "rgb(248, 245, 240)"
+ },
+ {
+  "lock": "A2",
+  "where": "header counts update live",
+  "ok": true,
+  "detail": "2 ready · 1 not importing"
+ },
+ {
+  "lock": "A2",
+  "where": "no toast, no tray",
+  "ok": true,
+  "detail": "{\"toast\":false,\"tray\":false}"
+ },
+ {
+  "lock": "A2",
+  "where": "Undo restores it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A2",
+  "where": "the count comes back",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "inset 82px from the row's left",
+  "ok": true,
+  "detail": "82"
+ },
+ {
+  "lock": "A3",
+  "where": "paper ground, 12px radius",
+  "ok": true,
+  "detail": "rgb(251, 249, 245) 12px"
+ },
+ {
+  "lock": "A3",
+  "where": "neither Open nor Closed chosen",
+  "ok": true,
+  "detail": "false/false"
+ },
+ {
+  "lock": "A3",
+  "where": "the door note",
+  "ok": true,
+  "detail": "Not known yet. Leave it if you're not sure."
+ },
+ {
+  "lock": "A3",
+  "where": "reply time Not set, no slider",
+  "ok": true,
+  "detail": "Not set false"
+ },
+ {
+  "lock": "A3",
+  "where": "no Agent fit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "no 6 weeks shown",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "every control sits inside its own field",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "A3",
+  "where": "the door's note is under its control",
+  "ok": false,
+  "detail": "false"
+ }
+]

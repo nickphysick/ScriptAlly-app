@@ -14,6 +14,7 @@
  *    the agent's first name or the agency. A fact the record does not hold is left out of the
  *    sentence, never guessed into it. `LEDE_FORBIDDEN` is what the lock sweeps for.
  */
+import { MUTED_UNTIL } from "./taskFlags";
 import type { Agent, Manuscript, Query, SubmissionPackage, TaskFlag, UserTask, Activity } from "../types";
 import { QueryStatus } from "../types";
 import type { BoardCard } from "./todoBoard";
@@ -40,21 +41,23 @@ export interface TrayGroup {
   buckets: Bucket[];
   tint: string;
   ink: string;
-  art: { src: string; w: number; l: number; t: number };
+  /** v5.2 §D — the band's drawing, by its width on a 56px band (equal weight, not equal width). It stands 3px above the
+   *  band's floor in a slot centred at x 31; compact bands scale the width (todoV52.css `--td5-artk`) */
+  art: { src: string; w: number };
 }
 
 /** the table's order IS the tray's order */
 export const TRAY_GROUPS: readonly TrayGroup[] = [
   { id: "you", name: "Your move", note: "Asked of you", buckets: ["send", "decide"], tint: "#f6e2d8", ink: "#a2452a",
-    art: { src: "/images/query-centre/your-move-talon.webp", w: 44, l: 8, t: -20 } },
+    art: { src: "/images/query-centre/your-move-talon.webp", w: 42 } },
   { id: "chase", name: "Worth a nudge", note: "Past the reply date", buckets: ["chase"], tint: "#e2e7ef", ink: "#2a3a52",
-    art: { src: "/images/query-centre/waiting-hourglass.webp", w: 52, l: 4, t: -9 } },
+    art: { src: "/images/query-centre/waiting-hourglass.webp", w: 49 } },
   { id: "quiet", name: "Gone quiet", note: "Time to decide", buckets: ["close"], tint: "#ece8e3", ink: "rgba(28, 19, 15, 0.6)",
-    art: { src: "/images/packages/materials-tray-pile.png", w: 50, l: 5, t: -8 } },
+    art: { src: "/images/packages/materials-tray-pile.png", w: 50 } },
   { id: "tidy", name: "Housekeeping", note: "Gaps worth filling", buckets: ["fix"], tint: "#e3e8e1", ink: "#4f6250",
-    art: { src: "/images/contact/contact-index-hawk.webp", w: 54, l: 3, t: -7 } },
+    art: { src: "/images/contact/contact-index-hawk.webp", w: 53 } },
   { id: "mine", name: "Your tasks", note: "Your own", buckets: ["note"], tint: "#f4ecdc", ink: "#8a6a3c",
-    art: { src: "/images/dash/quill.png", w: 34, l: 14, t: -16 } },
+    art: { src: "/images/dash/quill.png", w: 44 } },
 ];
 
 export const TRAY_KINDS: readonly { id: TrayKind; label: string; buckets: Bucket[] }[] = [
@@ -505,9 +508,24 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
       out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q) });
     }
   }
+  /* v5.1 §I.6 — an own dated task lands on the day it SURFACES (its due day less its surface offset), not its due day */
   for (const t of db.userTasks) {
-    if (t.done || !t.dueDate || t.dueDate <= today) continue;
-    out.push({ ms: ymdMs(t.dueDate), ymd: t.dueDate, name: t.text || "Your task", line: "Your own task.", anchorMs: Date.parse(t.createdAt || "") });
+    if (t.done || !t.dueDate) continue;
+    const lead = t.surfaceOffset === "week-before" ? 7 : t.surfaceOffset === "day-before" ? 1 : 0;
+    const d = new Date(ymdMs(t.dueDate)); d.setDate(d.getDate() - lead);
+    const joins = localYmd(d.getTime());
+    if (joins <= today) continue;
+    out.push({ ms: ymdMs(joins), ymd: joins, name: t.text || "Your task", line: lead ? "Your own task joins your tray." : "Your own task is due.", anchorMs: Date.parse(t.createdAt || "") });
+  }
+  /* v5.1 §G — a snooze coming back on its day */
+  for (const f of db.taskFlags) {
+    if (!f.snoozedUntil || f.snoozedUntil === MUTED_UNTIL || f.skippedAt || f.taskType === "offer_received") continue;
+    const ms = Date.parse(f.snoozedUntil);
+    if (!Number.isFinite(ms) || localYmd(ms) <= today) continue;
+    const q = f.queryId ? db.queries.find((x) => x.id === f.queryId) : undefined;
+    const a = db.agents.find((x) => x.id === (q ? q.agentId : f.agentId));
+    const own = f.taskType === "user_task" ? db.userTasks.find((t) => t.id === f.queryId) : undefined;
+    out.push({ ms, ymd: localYmd(ms), name: own ? own.text || "Your task" : a ? agentPrimary(a) : "A task", line: "A snooze comes back.", anchorMs: NaN });
   }
   return out.sort((a, b) => a.ms - b.ms).slice(0, limit);
 }

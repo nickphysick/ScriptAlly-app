@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1512 · seed-an24-thin",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1512 · seed-an24-pass",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1280 · seed-an24-thin",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "B2 card 3 renders",
+  "where": "1280 · seed-an24-pass",
+  "ok": false,
+  "detail": "false"
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "I1",
+  "where": "the nudge's query has a dated change (the precondition)",
+  "ok": true,
+  "detail": "2 activities"
+ },
+ {
+  "lock": "I1",
+  "where": "the outranked dismissal is back in the tray, tagged Back",
+  "ok": true,
+  "detail": "Back"
+ },
+ {
+  "lock": "I1",
+  "where": "its card states the change as a fact",
+  "ok": true,
+  "detail": "BackSomething new was logged on Tobias’s query on 21 Aug."
+ },
+ {
+  "lock": "I1",
+  "where": "a snooze back today is tagged BACK TODAY",
+  "ok": true,
+  "detail": "Back today"
+ },
+ {
+  "lock": "I1",
+  "where": "a dismissal that holds is off the tray",
+  "ok": false,
+  "detail": "still on the tray after 10s"
+ },
+ {
+  "lock": "I1",
+  "where": "…and listed in Set aside as dismissed",
+  "ok": false,
+  "detail": "0"
+ }
+]

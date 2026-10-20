@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512 both arts found",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 qc138-gimg qc138-gimg--you 36 wide",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 qc138-gimg qc138-gimg--you inside its band",
+  "ok": true,
+  "detail": "top 3.0 bottom 3.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 qc138-gimg qc138-gimg--you centred, on the left padding",
+  "ok": true,
+  "detail": "centre 0.0 left 12.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 qc138-gimg qc138-gimg--waiting 36 wide",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 qc138-gimg qc138-gimg--waiting inside its band",
+  "ok": true,
+  "detail": "top 9.5 bottom 9.5"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 qc138-gimg qc138-gimg--waiting centred, on the left padding",
+  "ok": true,
+  "detail": "centre 0.0 left 12.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 both arts found",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 qc138-gimg qc138-gimg--you 36 wide",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 qc138-gimg qc138-gimg--you inside its band",
+  "ok": true,
+  "detail": "top 3.0 bottom 3.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 qc138-gimg qc138-gimg--you centred, on the left padding",
+  "ok": true,
+  "detail": "centre 0.0 left 12.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 qc138-gimg qc138-gimg--waiting 36 wide",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 qc138-gimg qc138-gimg--waiting inside its band",
+  "ok": true,
+  "detail": "top 9.5 bottom 9.5"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 qc138-gimg qc138-gimg--waiting centred, on the left padding",
+  "ok": true,
+  "detail": "centre 0.0 left 12.0"
+ }
+]

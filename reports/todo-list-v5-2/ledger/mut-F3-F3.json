@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "F3",
+  "where": "@1512 top: texts read",
+  "ok": true,
+  "detail": "129"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 top: every text meets its ratio",
+  "ok": false,
+  "detail": "12: \"/\" 2.97 (11px rgba(28, 19, 15, 0.45) on rgb(255,255,255) KBD) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · No\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · Ma\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"1\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"of\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"48\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"Reed & Partners\" 4.47 (15px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Asked for\" 2.97 (9.5px rgba(28, 19, 15, 0.45) on rgb(255,255,255) td5-fl) · \"Asked on\" 2.97 (9.5px rgba(28, 19, 15, 0.45) on rgb(255,255,255) td5-fl) · \"Package\" 2.97 (9.5px rgba(28, 19, 15, 0.45) on rgb(255,255,255) td5-fl)"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 sheet: texts read",
+  "ok": true,
+  "detail": "98"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 sheet: every text meets its ratio",
+  "ok": false,
+  "detail": "20: \"/\" 2.97 (11px rgba(28, 19, 15, 0.45) on rgb(255,255,255) KBD) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · No\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · Ma\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · Li\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"1\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"of\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"48\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"Reed & Partners\" 4.47 (15px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL)"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 top: texts read",
+  "ok": true,
+  "detail": "113"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 top: every text meets its ratio",
+  "ok": false,
+  "detail": "7: \"/\" 2.97 (11px rgba(28, 19, 15, 0.45) on rgb(255,255,255) KBD) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · No\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"1\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"of\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"48\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"Reed & Partners\" 4.47 (15px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL)"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 sheet: texts read",
+  "ok": true,
+  "detail": "91"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 sheet: every text meets its ratio",
+  "ok": false,
+  "detail": "19: \"/\" 2.97 (11px rgba(28, 19, 15, 0.45) on rgb(255,255,255) KBD) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · No\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · Ma\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your partial · Li\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Send your full manuscr\" 4.47 (14px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"1\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"of\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"48\" 2.90 (10px rgba(28, 19, 15, 0.45) on rgb(243,239,232) SPAN) · \"Reed & Partners\" 4.47 (15px rgba(28, 19, 15, 0.58) on rgb(255,255,255) SMALL) · \"Asked for\" 2.97 (9.5px rgba(28, 19, 15, 0.45) on rgb(255,255,255) td5-fl)"
+ }
+]

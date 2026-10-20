@@ -1,0 +1,178 @@
+{
+ "1920x1080": {
+  "panel": 388,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": true,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": true
+  }
+ },
+ "1696x820": {
+  "panel": 213,
+  "focus": 172,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": true,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1536x864": {
+  "panel": 187,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": false,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1512x900": {
+  "panel": 220,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1440x900": {
+  "panel": 223,
+  "focus": 244,
+  "tiers": {
+   "art": true,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1366x768": {
+  "panel": 191,
+  "focus": 172,
+  "tiers": {
+   "art": false,
+   "hist": true,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x800": {
+  "panel": 211,
+  "focus": 172,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": true,
+   "note2": true,
+   "note": true,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x720": {
+  "panel": 152,
+  "focus": 172,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": false,
+   "note2": false,
+   "note": false,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x680": {
+  "panel": 136,
+  "focus": 156,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": false,
+   "note2": false,
+   "note": false,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1366x650": {
+  "panel": 124,
+  "focus": 156,
+  "tiers": {
+   "art": false,
+   "hist": true,
+   "cap": false,
+   "note1": false,
+   "note2": false,
+   "note": false,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ },
+ "1280x650": {
+  "panel": 124,
+  "focus": 156,
+  "tiers": {
+   "art": false,
+   "hist": false,
+   "cap": false,
+   "note1": false,
+   "note2": false,
+   "note": false,
+   "faces": true,
+   "sig": true,
+   "heading": true,
+   "poster": false
+  }
+ }
+}

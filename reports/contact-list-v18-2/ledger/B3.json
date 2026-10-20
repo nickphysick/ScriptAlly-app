@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "B3",
+  "where": "you: the tab reads \"History\", with no chip",
+  "ok": true,
+  "detail": "History"
+ },
+ {
+  "lock": "B3",
+  "where": "you: the entries are the stored events, newest first (4)",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "lock": "B3",
+  "where": "you: newest first",
+  "ok": true,
+  "detail": "1791839605690,1789808400000,1788771600000,1769936400000"
+ },
+ {
+  "lock": "B3",
+  "where": "you: one divider per month change (3)",
+  "ok": true,
+  "detail": "3 dividers"
+ },
+ {
+  "lock": "B3",
+  "where": "you: Next leads",
+  "ok": true,
+  "detail": "NEXT"
+ },
+ {
+  "lock": "B3",
+  "where": "you: Next's words are the stand's (\"Send Theo the full\")",
+  "ok": true,
+  "detail": "Send Theo the full"
+ },
+ {
+  "lock": "B3",
+  "where": "you: each entry's direction label matches its source",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: the tab reads \"History\", with no chip",
+  "ok": true,
+  "detail": "History"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: the entries are the stored events, newest first (4)",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: newest first",
+  "ok": true,
+  "detail": "1784883600000,1784538000000,1782896400000,1769936400000"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: one divider per month change (2)",
+  "ok": true,
+  "detail": "2 dividers"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: Next leads",
+  "ok": true,
+  "detail": "NEXT"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: Next's words are the stand's (\"Waiting on Sun-hee\")",
+  "ok": true,
+  "detail": "Waiting on Sun-hee"
+ },
+ {
+  "lock": "B3",
+  "where": "waiting: each entry's direction label matches its source",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B3",
+  "where": "notq: the tab reads \"History\", with no chip",
+  "ok": true,
+  "detail": "History"
+ },
+ {
+  "lock": "B3",
+  "where": "notq: the entries are the stored events, newest first (2)",
+  "ok": true,
+  "detail": "2 vs 2"
+ },
+ {
+  "lock": "B3",
+  "where": "notq: newest first",
+  "ok": true,
+  "detail": "1786233600000,1770508800000"
+ },
+ {
+  "lock": "B3",
+  "where": "notq: one divider per month change (2)",
+  "ok": true,
+  "detail": "2 dividers"
+ },
+ {
+  "lock": "B3",
+  "where": "notq: no Next",
+  "ok": true,
+  "detail": "M:August"
+ },
+ {
+  "lock": "B3",
+  "where": "notq: each entry's direction label matches its source",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B3",
+  "where": "closed: the tab reads \"History\", with no chip",
+  "ok": true,
+  "detail": "History"
+ },
+ {
+  "lock": "B3",
+  "where": "closed: the entries are the stored events, newest first (3)",
+  "ok": true,
+  "detail": "3 vs 3"
+ },
+ {
+  "lock": "B3",
+  "where": "closed: newest first",
+  "ok": true,
+  "detail": "1777626000000,1772528400000,1769936400000"
+ },
+ {
+  "lock": "B3",
+  "where": "closed: one divider per month change (3)",
+  "ok": true,
+  "detail": "3 dividers"
+ },
+ {
+  "lock": "B3",
+  "where": "closed: no Next",
+  "ok": true,
+  "detail": "M:May"
+ },
+ {
+  "lock": "B3",
+  "where": "closed: each entry's direction label matches its source",
+  "ok": true,
+  "detail": "true"
+ }
+]

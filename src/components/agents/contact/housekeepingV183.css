@@ -1,0 +1,43 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18.3 §A — Housekeeping, tidied. Imported after housekeepingV182.css; restates the title row, the tiles
+ * and the key's anchor. ≤1440 is a media query on the window (the drawer portals to the body), as v18.2's tiles were.
+ */
+
+/* the title row: the score is the hero, "List health" on its baseline 16px after it, never wrapping */
+.hk82 .hk82-tr { gap: 16px; }
+.hk82 .hk82-tr .hk8-n, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tr .hk8-n { font: 400 68px/0.9 var(--sp-type) !important; }
+.hk82 .hk82-tr .hk8-n i { font: 400 30px/1 var(--sp-type) !important; font-style: normal !important; top: -24px; }
+.hk82 .hk82-tr .hk82-lh { font: 400 26px/1 var(--sp-type) !important; white-space: nowrap; }
+@media (max-width: 1440px) {
+  .hk82 .hk82-tr .hk8-n, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tr .hk8-n { font-size: 52px !important; }
+  .hk82 .hk82-tr .hk8-n i { font-size: 26px !important; top: -16px; }
+  .hk82 .hk82-tr .hk82-lh { font-size: 20px !important; }
+}
+/* the ring: one size; the rows are no taller than it */
+.hk82 .hk8-ring, :root:has(.ws-app.sheet-wide) .hk82 .hk8-ring { width: 118px; height: 118px; min-width: 118px; }
+.hk8-head.hk82 { row-gap: 10px; }
+
+/* the tiles shrink to their text */
+.hk82 .hk82-tiles { grid-template-columns: repeat(3, max-content); gap: 8px; }
+.hk82 .hk82-tile, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile { padding: 6px 12px; gap: 6px; border-radius: 8px; }
+.hk82 .hk82-tile b, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile b { font: 400 17px/1 var(--sp-type) !important; }
+.hk82 .hk82-tile small, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile small { font: 400 12.5px/1.2 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75); white-space: nowrap; }
+@media (max-width: 1440px) {
+  .hk82 .hk82-tile, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile { padding: 6px 10px; gap: 5px; }
+  .hk82 .hk82-tile b, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile b { font-size: 16px !important; }
+  .hk82 .hk82-tile small, :root:has(.ws-app.sheet-wide) .hk82 .hk82-tile small { font-size: 12px !important; }
+}
+
+/* the points key: under the points tile, its left on the tile's left, 10 below, the caret 34 in */
+.hk82 .hk83-ptw { position: relative; display: block; }
+.hk82 .hk83-ptw > .hk82-tile { width: 100%; }
+.hk82 .hk83-key {
+  position: absolute; z-index: 40; top: calc(100% + 10px); left: 0; right: auto; width: 340px; max-width: none; margin: 0;
+}
+.hk82 .hk83-key::before {
+  content: ""; position: absolute; top: -6px; left: 28px; width: 12px; height: 12px; background: #fff; transform: rotate(45deg);
+  box-shadow: -1px -1px 0 rgba(28, 19, 15, 0.1);
+}

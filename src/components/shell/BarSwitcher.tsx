@@ -30,6 +30,7 @@ import type { Manuscript, Query } from "../../types";
 import { isWithYou } from "../../lib/qcSummary";
 import { isClosedStatus } from "../../lib/qcStages";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
+import { switcherStanding } from "../../lib/manuscriptStanding";
 import { queryingSince } from "../../lib/manuscriptSummary";
 import { dayMonth } from "../../lib/dates";
 import { SHORTCUTS, matchesShortcut, shortcutBlocked, shortcutLabel } from "../../lib/shortcuts";
@@ -46,14 +47,8 @@ export function switcherMeta(ms: { genre?: string; wordCount?: number }): string
   return bits.join(" · ");
 }
 
-/** The tile's second line: where the book stands — its status, then "N with you" when it has live queries. */
-export function switcherStanding(ms: Pick<Manuscript, "status">, msQueries: readonly Pick<Query, "status">[]): { status: string | null; withYou: number | null } {
-  const live = msQueries.filter((q) => !isClosedStatus(q.status));
-  return {
-    status: ms.status ? String(ms.status) : null,
-    withYou: live.length > 0 ? live.filter((q) => isWithYou(q.status)).length : null,
-  };
-}
+/** The tile's second line: where the book stands — `lib/manuscriptStanding`, shared with the dashboard's eyebrow. */
+export { switcherStanding } from "../../lib/manuscriptStanding";
 
 /** The menu row's facts: "Querying since 5 Dec · 26 queries", "3 queries", or "No queries yet". */
 export function switcherFacts(msQueries: readonly Pick<Query, "dateSent">[]): string {

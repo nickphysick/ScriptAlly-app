@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "S2 three panels",
+  "where": "1512 · anchors 6/50/44",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "S2 three panels",
+  "where": "1280 · anchors 9/40/60",
+  "ok": false,
+  "detail": "0"
+ }
+]

@@ -1,0 +1,278 @@
+[
+ {
+  "lock": "E1",
+  "where": "@1512 pinned (aria-pressed)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the sidebar is the 68 rail",
+  "ok": true,
+  "detail": "68"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the header is hidden",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the sheet is 12 from the top (±1)",
+  "ok": true,
+  "detail": "12.0"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the sheet is the scroller less 26 (±2)",
+  "ok": true,
+  "detail": "760 vs 786"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 Find is in the navy row, right of the day chip",
+  "ok": true,
+  "detail": "{\"pressed\":\"true\",\"panel\":68,\"header\":\"none\",\"top\":12,\"h\":760,\"port\":786,\"scroll\":0,\"findInNav\":true,\"findRightOfDay\":true,\"value\":\"Re\",\"sbKey\":null}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 Find keeps its value",
+  "ok": true,
+  "detail": "Re"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 pinning leaves sa.sidebarCollapsed alone",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 Esc clears Find first, still pinned",
+  "ok": true,
+  "detail": "{\"v\":\"\",\"p\":\"true\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the second Esc unpins",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the sidebar comes back as it was",
+  "ok": true,
+  "detail": "248 vs 248"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 the scroll position comes back (±2)",
+  "ok": true,
+  "detail": "306 vs 306"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 Find is back in the filter row",
+  "ok": true,
+  "detail": "{\"nav\":false,\"hd\":\"block\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 F in Find types, and does not pin",
+  "ok": true,
+  "detail": "f"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 F does nothing with the compose card open",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 F does nothing with the set-aside popover open",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 F does nothing with the calendar drawer open",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 F pins",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 reload: pinned",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 reload: the rail on every frame (no transition)",
+  "ok": true,
+  "detail": "68 over 143"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 reload: no header flash",
+  "ok": true,
+  "detail": "0 frames"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 after a reload, unpinning lands on the sheet",
+  "ok": true,
+  "detail": "{\"p\":\"false\",\"y\":306}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1512 sa.sidebarCollapsed never changed",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 pinned (aria-pressed)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the sidebar is the 68 rail",
+  "ok": true,
+  "detail": "68"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the header is hidden",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the sheet is 12 from the top (±1)",
+  "ok": true,
+  "detail": "12.0"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the sheet is the scroller less 26 (±2)",
+  "ok": true,
+  "detail": "660 vs 686"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 Find is in the navy row, right of the day chip",
+  "ok": true,
+  "detail": "{\"pressed\":\"true\",\"panel\":68,\"header\":\"none\",\"top\":12,\"h\":660,\"port\":686,\"scroll\":0,\"findInNav\":true,\"findRightOfDay\":true,\"value\":\"Re\",\"sbKey\":null}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 Find keeps its value",
+  "ok": true,
+  "detail": "Re"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 pinning leaves sa.sidebarCollapsed alone",
+  "ok": true,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 Esc clears Find first, still pinned",
+  "ok": true,
+  "detail": "{\"v\":\"\",\"p\":\"true\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the second Esc unpins",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the sidebar comes back as it was",
+  "ok": true,
+  "detail": "248 vs 248"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 the scroll position comes back (±2)",
+  "ok": true,
+  "detail": "306 vs 306"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 Find is back in the filter row",
+  "ok": true,
+  "detail": "{\"nav\":false,\"hd\":\"block\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 F in Find types, and does not pin",
+  "ok": true,
+  "detail": "f"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 F does nothing with the compose card open",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 F does nothing with the set-aside popover open",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 F does nothing with the calendar drawer open",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 F pins",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 reload: pinned",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 reload: the rail on every frame (no transition)",
+  "ok": true,
+  "detail": "68 over 144"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 reload: no header flash",
+  "ok": true,
+  "detail": "0 frames"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 after a reload, unpinning lands on the sheet",
+  "ok": true,
+  "detail": "{\"p\":\"false\",\"y\":306}"
+ },
+ {
+  "lock": "E1",
+  "where": "@1280 sa.sidebarCollapsed never changed",
+  "ok": true,
+  "detail": "null vs null"
+ }
+]

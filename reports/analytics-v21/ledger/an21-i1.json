@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "I1 the page renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I1 no card, desk, sections or tab",
+  "where": "1512",
+  "ok": true,
+  "detail": "{\"sent\":\"0\",\"card\":0,\"desk\":0,\"secs\":0,\"tab\":0,\"art\":\"http://127.0.0.1:4721/images/analytics/analytics-archivist.webp?v=1\",\"artIn\":true,\"how\":true,\"ways\":3,\"example\":\"An example, after 27 queries\"}"
+ },
+ {
+  "lock": "I1 the panel with the Archivist, inside its box",
+  "where": "1512",
+  "ok": true,
+  "detail": "http://127.0.0.1:4721/images/analytics/analytics-archivist.webp?v=1 true"
+ },
+ {
+  "lock": "I1 How it works and three ways",
+  "where": "1512",
+  "ok": true,
+  "detail": "true 3"
+ },
+ {
+  "lock": "I1 the example is labelled as one",
+  "where": "1512",
+  "ok": true,
+  "detail": "An example, after 27 queries"
+ },
+ {
+  "lock": "I1 the example is not counted",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "I1 the page renders",
+  "where": "390",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I1 no card, desk, sections or tab",
+  "where": "390",
+  "ok": true,
+  "detail": "{\"sent\":\"0\",\"card\":0,\"desk\":0,\"secs\":0,\"tab\":0,\"art\":\"http://127.0.0.1:4721/images/analytics/analytics-archivist.webp?v=1\",\"artIn\":true,\"how\":true,\"ways\":3,\"example\":\"An example, after 27 queries\"}"
+ },
+ {
+  "lock": "I1 the panel with the Archivist, inside its box",
+  "where": "390",
+  "ok": true,
+  "detail": "http://127.0.0.1:4721/images/analytics/analytics-archivist.webp?v=1 true"
+ },
+ {
+  "lock": "I1 How it works and three ways",
+  "where": "390",
+  "ok": true,
+  "detail": "true 3"
+ },
+ {
+  "lock": "I1 the example is labelled as one",
+  "where": "390",
+  "ok": true,
+  "detail": "An example, after 27 queries"
+ },
+ {
+  "lock": "I1 the example is not counted",
+  "where": "390",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "I1 the example is not written",
+  "where": "account",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "I1 logging a query switches the page to populated",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I1 … without a reload",
+  "where": "1512",
+  "ok": true,
+  "detail": "marker"
+ }
+]

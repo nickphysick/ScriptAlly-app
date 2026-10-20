@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "A4",
+  "where": "@1512 one line (height under 1.5 line heights)",
+  "ok": true,
+  "detail": "15.4 / 15.4"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 white-space is nowrap",
+  "ok": false,
+  "detail": "normal"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 one line (height under 1.5 line heights)",
+  "ok": true,
+  "detail": "15.4 / 15.4"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 white-space is nowrap",
+  "ok": false,
+  "detail": "normal"
+ }
+]

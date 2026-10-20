@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A4",
+  "where": "1512 group: buttons",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "A4",
+  "where": "1512 Partial Requested lands under the stack",
+  "ok": true,
+  "detail": "221.875 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1512 month: buttons",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "A4",
+  "where": "1512 m:2026-01: its first row lands under the stack",
+  "ok": true,
+  "detail": "221.859375 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1512 m:2026-03: its first row lands under the stack",
+  "ok": true,
+  "detail": "221.859375 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1512 m:2026-04: its first row lands under the stack",
+  "ok": true,
+  "detail": "221.859375 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 group: buttons",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 Partial Requested lands under the stack",
+  "ok": true,
+  "detail": "221.765625 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 month: buttons",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 m:2026-01: its first row lands under the stack",
+  "ok": true,
+  "detail": "221.75 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 m:2026-03: its first row lands under the stack",
+  "ok": true,
+  "detail": "221.75 vs 221.8"
+ },
+ {
+  "lock": "A4",
+  "where": "1280 m:2026-04: its first row lands under the stack",
+  "ok": true,
+  "detail": "221.75 vs 221.8"
+ }
+]

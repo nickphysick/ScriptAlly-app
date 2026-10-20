@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "C0",
+  "where": "the hold is real",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C0",
+  "where": "cards to measure",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C1",
+  "where": "chart-card carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "chart-card renders nothing inside",
+  "ok": false,
+  "detail": "\"Active queries\\n24 Aug\\n31 Aug\\n7 Sep\\n14 Sep\\n21 Sep\\n28 Sep\\n5 Oct\\n12 Oct\\n19 Oct\""
+ },
+ {
+  "lock": "C2",
+  "where": "chart-card no digit",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "closed-hoop carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "closed-hoop renders nothing inside",
+  "ok": false,
+  "detail": "\"0 closed\\nSee all →\\n0\\nNo reply\\n0\\nPassed on query\\n0\\nPassed on partial\\n0\\nPassed on \""
+ },
+ {
+  "lock": "C2",
+  "where": "closed-hoop no digit",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "agents-hoop carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "agents-hoop renders nothing inside",
+  "ok": false,
+  "detail": "\"Agents on file\\n+1 this week\\n23\\nOF 52\\nQUERIED\\n20\\nQuerying\\n3\\nClosed\\n29\\nNot yet que\""
+ },
+ {
+  "lock": "C2",
+  "where": "agents-hoop no digit",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "focus carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "focus renders nothing inside",
+  "ok": false,
+  "detail": "\"LOADING\""
+ },
+ {
+  "lock": "C2",
+  "where": "focus no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "panel carries the skeleton class",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "panel renders nothing inside",
+  "ok": false,
+  "detail": "\"— FOUNDING WRITER —\""
+ },
+ {
+  "lock": "C2",
+  "where": "panel no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "chart-card loading box = loaded box",
+  "ok": true,
+  "detail": "held 298,252 708×388 · loaded 298,252 708×388"
+ },
+ {
+  "lock": "C3",
+  "where": "closed-hoop loading box = loaded box",
+  "ok": true,
+  "detail": "held 298,667 341×199 · loaded 298,667 341×199"
+ },
+ {
+  "lock": "C3",
+  "where": "agents-hoop loading box = loaded box",
+  "ok": true,
+  "detail": "held 665,667 341×199 · loaded 665,667 341×199"
+ },
+ {
+  "lock": "C3",
+  "where": "focus loading box = loaded box",
+  "ok": true,
+  "detail": "held 1032,307 422×244 · loaded 1032,307 422×244"
+ },
+ {
+  "lock": "C3",
+  "where": "panel loading box = loaded box",
+  "ok": true,
+  "detail": "held 1032,586 422×249 · loaded 1032,586 422×250"
+ }
+]

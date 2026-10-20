@@ -1,0 +1,1406 @@
+[
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 the population: websites and emails, the long ones among them",
+  "ok": true,
+  "detail": "1 websites · 28 emails"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 website \"abaragrantliteraryagency.co.uk\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 website \"abaragrantliteraryagency.co.uk\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 website \"abaragrantliteraryagency.co.uk\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 website \"abaragrantliteraryagency.co.uk\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "114.515625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"theo.abara@abaragrantliteraryagency.co.uk\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"theo.abara@abaragrantliteraryagency.co.uk\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"theo.abara@abaragrantliteraryagency.co.uk\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"theo.abara@abaragrantliteraryagency.co.uk\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "46.484375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"wren@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"wren@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"wren@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"wren@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "206.859375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"hester@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"hester@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"hester@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"hester@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "199.375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"cormac@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"cormac@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"cormac@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"cormac@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "190.796875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"noah@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"noah@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"noah@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"noah@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "207.625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"alasdair@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"alasdair@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"alasdair@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"alasdair@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "187.765625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ana@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ana@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ana@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ana@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "217.453125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tom@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tom@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tom@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tom@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "215.015625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-remind@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-remind@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-remind@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-remind@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "143.25"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ottoline@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ottoline@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ottoline@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"ottoline@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "188.984375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"elinor@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"elinor@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"elinor@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"elinor@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "201.234375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"bea@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"bea@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"bea@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"bea@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "218.015625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tobias@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tobias@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tobias@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tobias@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "200.78125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"iris@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"iris@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"iris@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"iris@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "219.5625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rachel@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rachel@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rachel@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rachel@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "199.203125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"david@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"david@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"david@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"david@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "204.28125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"priya@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"priya@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"priya@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"priya@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "206.46875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"sam@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"sam@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"sam@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"sam@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "214.0625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rufus@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rufus@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rufus@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rufus@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "205.625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tamsin@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tamsin@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tamsin@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"tamsin@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "194.890625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-chase@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-chase@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-chase@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-chase@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "155.0625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rej-agent-1@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rej-agent-1@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rej-agent-1@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"rej-agent-1@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "174.4375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-gap@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-gap@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-gap@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-gap@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "169.78125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"marcus@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"marcus@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"marcus@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"marcus@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "191.09375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"imogen@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"imogen@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"imogen@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"imogen@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "190.640625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-close@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-close@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-close@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"thin-ag-close@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "159.015625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"peter@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"peter@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"peter@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"peter@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "206.359375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"joan@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"joan@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"joan@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1512 email \"joan@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "212.546875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 the population: websites and emails, the long ones among them",
+  "ok": true,
+  "detail": "1 websites · 28 emails"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 website \"abaragrantliteraryagency.co.uk\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 website \"abaragrantliteraryagency.co.uk\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 website \"abaragrantliteraryagency.co.uk\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 website \"abaragrantliteraryagency.co.uk\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "77.34375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"theo.abara@abaragrantliteraryagency.co.uk\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"theo.abara@abaragrantliteraryagency.co.uk\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"theo.abara@abaragrantliteraryagency.co.uk\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"theo.abara@abaragrantliteraryagency.co.uk\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "22.484375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"wren@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"wren@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"wren@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"wren@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "159.203125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"hester@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"hester@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"hester@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"hester@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "152.890625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"cormac@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"cormac@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"cormac@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"cormac@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "145.671875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"noah@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"noah@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"noah@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"noah@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "159.96875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"alasdair@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"alasdair@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"alasdair@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"alasdair@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "142.859375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ana@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ana@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ana@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ana@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "168.28125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tom@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tom@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tom@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tom@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "166.1875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-remind@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-remind@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-remind@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-remind@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "105.09375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ottoline@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ottoline@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ottoline@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"ottoline@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "143.984375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"elinor@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"elinor@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"elinor@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"elinor@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "154.40625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"bea@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"bea@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"bea@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"bea@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "168.78125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tobias@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tobias@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tobias@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tobias@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "154"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"iris@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"iris@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"iris@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"iris@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "169.90625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rachel@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rachel@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rachel@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rachel@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "152.734375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"david@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"david@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"david@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"david@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "156.765625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"priya@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"priya@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"priya@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"priya@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "158.734375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"sam@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"sam@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"sam@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"sam@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "165.375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rufus@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rufus@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rufus@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rufus@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "158.109375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tamsin@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tamsin@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tamsin@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"tamsin@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "149.015625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-chase@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-chase@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-chase@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-chase@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "115.1875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rej-agent-1@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rej-agent-1@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rej-agent-1@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"rej-agent-1@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "131.734375"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-gap@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-gap@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-gap@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-gap@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "127.625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"marcus@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"marcus@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"marcus@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"marcus@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "145.828125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"imogen@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"imogen@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"imogen@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"imogen@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "145.546875"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-close@example.test\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-close@example.test\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-close@example.test\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"thin-ag-close@example.test\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "118.515625"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"peter@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"peter@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"peter@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"peter@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "158.828125"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"joan@example.com\": a 15 ±1px icon",
+  "ok": true,
+  "detail": "{\"w\":15,\"h\":15}"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"joan@example.com\": the icon comes before the text, 6 ±1.5 to it",
+  "ok": true,
+  "detail": "true · 6.0"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"joan@example.com\": no underline at rest",
+  "ok": true,
+  "detail": "none · none"
+ },
+ {
+  "lock": "CL191-B1",
+  "where": "@1280 email \"joan@example.com\": ≥ 18px clear of the next column (clv-rrep)",
+  "ok": true,
+  "detail": "164.09375"
+ }
+]

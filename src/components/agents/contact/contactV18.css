@@ -1,0 +1,166 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18 (design-refs/contact-list-v18/contact-list-v18.html). The base rules are the compact values and
+ * `.ws-app.sheet-wide` restates the full ones, as v17 does. Every face is stated with two classes and `!important`
+ * (brand.tsx names headings and bare spans at runtime).
+ */
+
+/* ── §A · THE LETTER TABS at the top of the page: the header's first thing, 14 under the sheet's top edge, inset
+   with the header, 34 above the title block. 26 columns over a 2px navy rule; the strip holds the tallest tab's
+   height (52) so a hover or a pick never moves the title. ── */
+.clv-group > .cl17-hd { margin-top: 14px; }
+.cl17-hd .cl18-tabs {
+  display: grid; grid-template-columns: repeat(26, minmax(0, 1fr)); column-gap: 3px; align-items: end;
+  height: 52px; margin: 0 var(--cl17-inset) 34px; border-bottom: 2px solid #2a3a52; box-sizing: content-box;
+}
+.ws-app.sheet-wide .cl17-hd .cl18-tabs { column-gap: 4px; }
+.cl18-tabs button {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-sizing: border-box;
+  min-width: 0; height: 40px; margin: 0; padding: 0; border: 0; border-radius: 10px 10px 0 0; background: #e9e1d4;
+  color: #1c130f; cursor: pointer; transition: height 0.14s ease, background-color 0.14s ease;
+}
+.ws-app.sheet-wide .cl18-tabs button { height: 44px; }
+.cl18-tabs button b { font: 400 16px/1 var(--sp-type) !important; }
+.ws-app.sheet-wide .cl18-tabs button b { font-size: 19px !important; }
+.cl18-tabs button span { font: 400 7.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.5); min-height: 1em; }
+.ws-app.sheet-wide .cl18-tabs button span { font-size: 8.5px !important; }
+.cl18-tabs button:not(:disabled):hover, .ws-app.sheet-wide .cl18-tabs button:not(:disabled):hover { height: 50px; background: #e1d6c5; }
+.cl18-tabs button[aria-current="true"], .cl18-tabs button[aria-current="true"]:hover { height: 46px; background: #2a3a52; color: #f4eee5; }
+.ws-app.sheet-wide .cl18-tabs button[aria-current="true"], .ws-app.sheet-wide .cl18-tabs button[aria-current="true"]:hover { height: 52px; }
+.cl18-tabs button[aria-current="true"] span { color: rgba(244, 238, 229, 0.7); }
+.cl18-tabs button:disabled { background: #efe9df; color: rgba(28, 19, 15, 0.22); cursor: default; }
+.cl18-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── §A · THE COMPACT LETTERS (`LetterTabs variant="pin"`). v138.6 §C retired the pinned row that held them, so the
+   variant is mounted nowhere today; its rules stay with the component. ── */
+.cl18-pl { display: flex; gap: 2px; flex: 1 1 760px; max-width: 760px; min-width: 0; }
+.cl18-pl button {
+  flex: 1 1 0; min-width: 0; box-sizing: border-box; height: 30px; margin: 0; padding: 0; border: 0; border-radius: 8px;
+  background: none; color: #1c130f; cursor: pointer; font: 400 14px/1 var(--sp-type) !important;
+}
+.ws-app.sheet-wide .cl18-pl button { height: 34px; font-size: 16px !important; }
+.cl18-pl button b { font: inherit !important; }
+.cl18-pl button:not(:disabled):hover { background: rgba(42, 58, 82, 0.08); }
+.cl18-pl button[aria-current="true"], .cl18-pl button[aria-current="true"]:hover { background: #2a3a52; color: #f4eee5; }
+.cl18-pl button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
+.cl18-pl button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .cl18-tabs button { transition: none; } }
+
+/* ── §B · THE LIST HEADER: the top of the list sheet, slate. One sentence left; search, Filters, density and full
+   screen right, gap 10, on one line. ── */
+.cl16-list .cl18-lh {
+  min-width: 0; border-radius: 20px 20px 0 0; background: #3e5170; color: #f4eee5;
+  /* v18.3: the row's height, padding and layout are the shared toolbar's (shell/listToolbar.css) */
+}
+.cl18-lh .cl18-says {
+  flex: 1 1 auto; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font: 400 19px/1.3 var(--sp-type) !important; color: #f4eee5;
+}
+.ws-app.sheet-wide .cl18-lh .cl18-says { font-size: 22px !important; }
+.cl18-lh .cl18-says b, .cl18-lh .cl18-says b span { font: inherit !important; color: inherit; }
+.cl18-lh .cl18-says .cl18-dim { font: inherit !important; color: rgba(244, 238, 229, 0.55); }
+.cl18-lh .cl18-gn {
+  margin: 0; padding: 0; border: 0; background: none; color: #f4eee5; cursor: pointer; font: inherit !important;
+  text-decoration: underline dotted #e7a184; text-decoration-thickness: 2px; text-underline-offset: 6px;
+}
+.cl18-lh .cl18-gn:focus-visible, .cl18-lh .cl18-clear:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 3px; }
+.cl18-lh .cl18-clear {
+  margin: 0 0 0 14px; padding: 0; border: 0; background: none; cursor: pointer; vertical-align: 2px;
+  font: italic 400 15px/1 var(--sp-serif) !important; color: #e7a184; text-decoration: underline; text-underline-offset: 3px;
+}
+.cl18-lh .cl18-lt { display: flex; align-items: center; gap: 10px; flex: none; }
+.cl18-lh .cl18-lt .cl17-find.cl13-find {
+  /* v18.3: size and fill are the shared toolbar's `.ltb-search` */
+}
+.cl18-lh .cl18-lt .cl17-find.cl13-find:focus-within { box-shadow: 0 0 0 2px #e7a184; }
+.cl18-lh .cl18-fb {
+  font: 400 16px/1 var(--sp-type) !important; white-space: nowrap; /* v18.3: box is the toolbar's `.ltb-ctl` */
+}
+.cl18-lh .cl18-fb span { font: inherit !important; }
+.cl18-lh .cl18-fb.on { background: #f4eee5; color: #2d3a50; box-shadow: none; }
+.cl18-lh .cl18-fb em {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box;
+  border-radius: 10px; background: #2d3a50; color: #f4eee5; font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important;
+}
+.cl18-lh .cl18-fb:focus-visible, .cl18-lh .cl18-dens button:focus-visible, .cl18-lh .cl18-fsb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+/* v18.3: the density pair is the toolbar's `.ltb-dens` */
+.cl18-lh .cl18-fsb.cl16-fsb {
+  display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: #f4eee5; cursor: pointer;
+  font-size: 0 !important; /* v18.3: 36 round, the toolbar's `.ltb-round` */
+}
+.cl18-lh button:disabled { cursor: default; opacity: 0.6; }
+
+/* ── §B · THE FILTERS PANEL: retired by v19 §F (contactV19.css, `.cl19-fm`) ── */
+
+/* ── §B · THE COLUMN HEADINGS: the Query Centre's strip, at the sheet's full width ── */
+/* v18.3: the row's fill, height, rule and label type are the shared headings' (`.lth`, shell/listToolbar.css) */
+.clv-group .cl16-list .lt-labels .lt-lab i { color: #a2452a; }
+.clv-group .cl16-list .lt-labels button.lt-lab:not(.on):hover::after { content: " ↓"; opacity: 0.35; }
+
+/* ── §C · THE NOT-QUERIED DISC in the list's rows: a dotted navy ring with navy initials, no fill (white on the row's
+   hover). Scoped to the rows: `AgentDisc` is shared, and its own default (the cream disc) stays everywhere else. ── */
+.cl16-list .clv-row .sa-disc.clv-ini[data-disc="none"] {
+  box-sizing: border-box; background: transparent; color: #2a3a52; box-shadow: none; border: 1.6px dotted #2a3a52;
+}
+.cl16-list .clv-row:hover .sa-disc.clv-ini[data-disc="none"] { background: #fff; }
+
+/* ── §D · THE ROW PEEK. The open row: radius 12, raised, tinted by status; its main line stays where it was (the
+   hover tray and the margin letter keep to that line, `--cl18-mh`, read before the row grew). ── */
+.cl16-list .clv-row[data-peek] {
+  z-index: 3; border-radius: 12px; padding-bottom: 14px;
+  box-shadow: 0 14px 28px -20px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.06);
+}
+.cl16-list .clv-row[data-peek][data-disc="none"] { background: #faf6ee; }
+.cl16-list .clv-row[data-peek][data-disc="live"] { background: #f3f5f9; }
+.cl16-list .clv-row[data-peek][data-disc="closed"] { background: #f5f3f0; }
+/* the card is the row's second grid row, so the main line keeps its own track and its centring */
+.cl16-list .clv-row[data-peek] .clv-rtray { bottom: auto; height: calc(var(--cl18-mh, 80px) - 6px); }
+.cl16-list .clv-row[data-peek] .cl17-ml { top: calc(var(--cl18-mh, 80px) / 2); }
+
+/* the card: one white card under the main line, spanning every column */
+.cl18-pk {
+  grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.35fr) 1px minmax(0, 1fr); column-gap: 20px;
+  margin-top: 4px; padding: 20px 24px 0; border-radius: 14px; background: #fff; cursor: default; text-align: left;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 10px 22px -16px rgba(28, 19, 15, 0.35);
+  animation: cl18pk 0.3s ease both;
+}
+.ws-app.sheet-wide .cl18-pk { column-gap: 28px; }
+@keyframes cl18pk { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.cl18-pk .cl18-pk-rule { display: block; width: 1px; background: rgba(28, 19, 15, 0.1); }
+.cl18-pk h4, .cl18-pk dt, .cl18-pk .cl18-pk-n b, .cl18-pk .cl18-pk-not b {
+  margin: 0; font: 400 13.5px/1.3 var(--sp-type) !important; color: rgba(28, 19, 15, 0.55);
+}
+.cl18-pk-l { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; padding-bottom: 16px; }
+.cl18-pk .cl18-pk-wish {
+  margin: 0; padding: 0 0 0 14px; border-left: 2px solid #a2452a; font: italic 400 15.5px/1.55 var(--sp-serif) !important; color: #1c130f;
+}
+.cl18-pk .cl18-pk-src { margin: -4px 0 0 16px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.cl18-pk .cl18-pk-g { flex-wrap: wrap; }
+.cl18-pk-r { display: grid; grid-template-columns: 84px minmax(0, 1fr); row-gap: 9px; column-gap: 12px; margin: 0; padding-bottom: 16px; align-content: start; }
+.ws-app.sheet-wide .cl18-pk-r { grid-template-columns: 96px minmax(0, 1fr); }
+.cl18-pk-r dd { margin: 0; min-width: 0; font: 400 14.5px/1.4 var(--sp-serif) !important; color: #1c130f; overflow-wrap: anywhere; }
+.cl18-pk-r dd a { color: #1c130f; text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px; }
+.cl18-pk-r dd .cl18-pk-pol { display: block; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl18-pk .cl18-copy {
+  margin-left: 8px; padding: 2px 7px; border: 0; border-radius: 6px; background: #fff; cursor: pointer; vertical-align: 1px;
+  font: 400 11px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.7); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16);
+}
+.cl18-pk .cl18-add {
+  display: inline-flex; align-items: center; margin: 0; padding: 3px 12px; border: 1.2px dashed rgba(42, 58, 82, 0.45); border-radius: 14px;
+  background: none; color: #2a3a52; cursor: pointer; font: 400 14px/1.3 var(--sp-serif) !important;
+}
+.cl18-pk .cl18-add:hover { background: rgba(42, 58, 82, 0.05); }
+.cl18-pk-f {
+  grid-column: 1 / -1; display: flex; align-items: baseline; gap: 16px; padding: 12px 0 14px; border-top: 1px solid rgba(28, 19, 15, 0.08);
+}
+.cl18-pk-f .cl18-pk-n { flex: 1 1 auto; min-width: 0; display: flex; gap: 10px; align-items: baseline; }
+.cl18-pk-f .cl18-pk-n i { font: italic 400 14px/1.4 var(--sp-serif) !important; color: #1c130f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl18-pk-f .cl18-pk-n i.none { color: rgba(28, 19, 15, 0.5); }
+.cl18-pk-f .cl18-pk-open {
+  flex: none; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52;
+  font: 400 15px/1.3 var(--sp-type) !important; text-decoration: underline; text-underline-offset: 4px;
+}
+.cl18-pk button:focus-visible, .cl18-pk a:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .cl18-pk { animation: none; } }

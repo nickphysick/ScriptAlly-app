@@ -28,10 +28,24 @@ import { useQcLoad } from "./queries/centre/useQcLoad";
 import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
-import { Glance, NAV_NAMES, Section, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { Caveats, Endings, Funnel, Lanes, OverTime, Records, ReplyWindow, ShareBars, StageGaps, TrainingLog } from "./analytics/A17Figures";
-import { A17Empty } from "./analytics/A17Empty";
+import { Glance, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
+import { A21Header, usePhone } from "./analytics/A21Header";
+import { A21Desk } from "./analytics/A21Desk";
+import { Sx } from "./analytics/A24Frame";
+import { S1Body, s1Readings } from "./analytics/A24S1";
+import { S2Body, s2Readings } from "./analytics/A24S2";
+import { S3Body, s3Readings } from "./analytics/A24S3";
+import { S4Body, s4Readings } from "./analytics/A24S4";
+import { S5Body, s5Readings } from "./analytics/A24S5";
+import { S6Body } from "./analytics/A24S6";
+import { S7Body } from "./analytics/A24S7";
+import { A21Empty } from "./analytics/A21Empty";
+import { buildV21 } from "../lib/analyticsV21";
+import { buildV24, deskV24, heads, ringOf, QUESTIONS } from "../lib/analyticsV24";
+import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
+import "./analytics/a21.css"; /* after a17: v21 restates its desktop rules */
+import "./analytics/a24.css"; /* after a21: v24 adds the seven sections and the steps card */
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
@@ -50,18 +64,33 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
   const manuscript = resolveScopedManuscript(manuscripts, storedMs);
 
   /** ⚠️ ONE CLOCK PER DERIVATION, so every figure on the page agrees about what today is. */
-  const model = React.useMemo(() => {
+  const { model, v21, v24 } = React.useMemo(() => {
+    const nowMs = Date.now();
     const own = manuscript ? queries.filter((q) => q.manuscriptId === manuscript.id) : [];
     /* ⚠️ THE DEV REVIEW AID IS GATED HERE, AT THE CALL SITE: a statically replaced MODE makes the branch
        dead in a production build, so the module is unreachable from it (AN17-16 cuts the fixture with it). */
     const scoped = import.meta.env.MODE === "production" ? own : limitForReview(own);
-    return analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs: Date.now(), title: manuscript?.title });
+    const m = analyticsModel({ queries: scoped, activities, agents, packages, versions, range: "all", nowMs, title: manuscript?.title });
+    /* ⚠️ DEV ONLY, GATED HERE: the AN24-S2 lock swaps the benchmark anchors to prove the panels read them */
+    const anchors = import.meta.env.MODE === "production" || typeof window === "undefined" ? undefined : (window as unknown as { __SA_AN24_BENCH?: Parameters<typeof buildV24>[2] }).__SA_AN24_BENCH;
+    return { model: m, v21: buildV21(m, agents, nowMs), v24: buildV24(m, nowMs, anchors) };
     /* location.key: a switch re-opens the route, and the book in scope is read from storage */
   }, [queries, activities, agents, packages, versions, manuscript, location.key]);
 
+  /* ⚠️ DEV ONLY, GATED HERE AT THE CALL SITE: the AN21 locks compare what the page DRAWS with what the model SAYS.
+     A statically replaced MODE makes this dead in a production build, as the review aid above is. */
+  React.useEffect(() => {
+    if (import.meta.env.MODE === "production") return;
+    (window as unknown as { __SA_AN21?: unknown }).__SA_AN21 = { v21, v24, sent: model.sent, requests: model.requests, replies: model.replies, offers: model.offers, fulls: model.fulls };
+  }, [v21, v24, model]);
+
   const load = useQcLoad(collectionsReady && activitiesReady);
   const v = model.v17;
-  const names = NAV_NAMES(model.sent);
+  const names = [...QUESTIONS];
+
+  const phone = usePhone();
+  /** "+ Record a response": query panel v2's picker where the Query Centre hosts it, else the drawer. */
+  const record = React.useCallback(() => { if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" }); }, []);
 
   /** Scroll the page's own scroller to a section (or, on the empty page, to the first example). */
   const go = React.useCallback((sec: number) => {
@@ -70,7 +99,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
     const target = (page?.querySelector(`[data-a17="sec"][data-sec="${sec}"]`) ?? page?.querySelector('[data-a17="example"]')) as HTMLElement | null;
     if (!scroller || !target) return;
     const top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 12;
-    scroller.scrollTo({ top, behavior: "smooth" });
+    const still = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scroller.scrollTo({ top, behavior: still ? "auto" : "smooth" });
   }, []);
 
   const empty = !load.loading && manuscript !== null && model.total === 0;
@@ -86,21 +116,21 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       </p>
     );
   } else if (empty) {
-    body = <A17Empty />;
+    body = <A21Empty title={manuscript?.title || null} onImport={() => onNavigate?.("import")} />;
   } else {
-    const b = v.banners;
+    /* v24 §C: seven question sections, each answering its question in its first sentence */
+    const h = heads(v24);
     body = (
       <>
         <Glance cells={v.glance} />
-        <Section sec={0} banner={b[0]}><Funnel model={model} /></Section>
-        <Section sec={1} banner={b[1]} readings={v.log.readings}><TrainingLog model={model} /></Section>
-        <Section sec={2} banner={b[2]} readings={v.rate.readings}><ShareBars model={model} /></Section>
-        <Section sec={3} banner={b[3]} readings={v.reply.readings}><ReplyWindow model={model} /></Section>
-        <Section sec={4} banner={b[4]} readings={v.waits.readings}><div className="a17-two"><StageGaps model={model} /><Endings model={model} /></div></Section>
-        <Section sec={5} banner={b[5]}><Records model={model} /></Section>
-        <Section sec={6} banner={b[6]} readings={v.overTime.readings}><OverTime model={model} /></Section>
-        <Section sec={7} banner={b[7]} readings={v.lanes.readings}><Lanes model={model} /></Section>
-        <Section sec={8} banner={b[8]} ws><Caveats model={model} /></Section>
+        <A21Desk cards={deskV24(model, v24, v24.nowMs)} onGo={go} />
+        <Sx sec={0} head={h[0]} readings={s1Readings(v24)}><S1Body v={v24} /></Sx>
+        <Sx sec={1} head={h[1]} readings={s2Readings(v24)}><S2Body v={v24} /></Sx>
+        <Sx sec={2} head={h[2]} readings={s3Readings(v24)}><S3Body v={v24} /></Sx>
+        <Sx sec={3} head={h[3]} readings={s4Readings(v24)}><S4Body v={v24} /></Sx>
+        <Sx sec={4} head={h[4]} readings={s5Readings(v24)}><S5Body v={v24} /></Sx>
+        <Sx sec={5} head={h[5]}><S6Body v={v24} /></Sx>
+        <Sx sec={6} head={h[6]}><S7Body v={v24} /></Sx>
       </>
     );
   }
@@ -111,8 +141,13 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       <WorkspacePageGrid className="qa-wpg" scrollLabel="Analytics" masthead={null}>
         <div className={pageClass} ref={pageRef} data-a17="page" data-sent={model.sent} data-dated={v.dated} data-ms={manuscript?.id ?? ""} data-phase={load.phase}>
           <TipProvider>
-            {/* the band is the page's own chrome, so it renders through loading and on the empty page */}
-            <PageHeader
+            {/* v21 §A: the desktop opens on the light header; the phone keeps v17's band (decision 5) */}
+            {!phone && !empty && manuscript !== null ? (
+              <A21Header loading={load.loading} sent={model.sent} replies={v24.tally.all} msTitle={manuscript.title || null}
+                rows={load.loading ? null : v21.standing} inside={load.loading ? null : ringOf(v24.keeping)}
+                onRecord={record} onRead={() => go(0)} onRing={() => go(3)} />
+            ) : null}
+            {phone && !empty ? <PageHeader
               variant="full"
               band
               bandFixed
@@ -122,7 +157,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
               primary={{ label: "Take a look ↓", onClick: () => go(0) }}
               secondary={{ label: "Record a response", onClick: () => openQueryDrawer({ mode: "resp" }) }}
               art={<BandDisc />}
-            />
+            /> : null}
             <div className="a17-flow" data-a17="flow">{body}</div>
             <div className="a17-after" />
             {onNavigate ? <AppFooter onNavigate={onNavigate} /> : null}

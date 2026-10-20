@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "I2",
+  "where": "a passed send-by: no snooze at all",
+  "ok": true,
+  "detail": "{\"chips\":[],\"passed\":true,\"sendby\":true,\"cap\":null,\"offer\":null,\"dismiss\":false,\"nodismiss\":\"Marcus asked for this, so it stays until it’s sent or the query ends. Not sending it? Withdraw the query →\",\"putoff\":false}"
+ },
+ {
+  "lock": "I2",
+  "where": "…the door to a new send-by date instead",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "I2",
+  "where": "…and asked-for material cannot be dismissed",
+  "ok": true,
+  "detail": "Marcus asked for this, so it stays until it’s sent or the query ends. Not sending it? Withdraw the query →"
+ },
+ {
+  "lock": "I2",
+  "where": "a deadline 10 days off disables the chips past it",
+  "ok": true,
+  "detail": "[\"tom\",\"mon\",\"week\",\"month:off\"]"
+ },
+ {
+  "lock": "I2",
+  "where": "…and says where the cap is",
+  "ok": true,
+  "detail": "Can’t go past Sun 25 Oct, your send-by date."
+ },
+ {
+  "lock": "I2",
+  "where": "…and Pick a date stops at it",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "I2",
+  "where": "an offer: Tomorrow only",
+  "ok": true,
+  "detail": "{\"chips\":[\"tom\",\"mon:off\",\"week:off\",\"month:off\"],\"passed\":false,\"sendby\":false,\"cap\":null,\"offer\":\"An offer can wait a day at most.\",\"dismiss\":false,\"nodismiss\":\"An offer can’t be dismissed. It needs an answer. Record where you are →\",\"putoff\":false}"
+ },
+ {
+  "lock": "I2",
+  "where": "…and no dismiss",
+  "ok": true,
+  "detail": "An offer can’t be dismissed. It needs an answer. Record where you are →"
+ },
+ {
+  "lock": "I2",
+  "where": "put off twice says so",
+  "ok": true,
+  "detail": "{\"chips\":[\"tom\",\"mon\",\"week\",\"month\"],\"passed\":false,\"sendby\":false,\"cap\":null,\"offer\":null,\"dismiss\":true,\"nodismiss\":null,\"putoff\":true}"
+ },
+ {
+  "lock": "I2",
+  "where": "…and still snoozes",
+  "ok": true,
+  "detail": ""
+ }
+]

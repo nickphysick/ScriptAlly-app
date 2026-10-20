@@ -26,6 +26,7 @@ import { resolveExpectedDate } from "./expectedDate";
 import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
 import type { DerivableActivity } from "./queryDerivation";
 import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
+import { nudgePhase } from "./nudgeWindow";
 
 const DAY = 86_400_000;
 
@@ -38,6 +39,42 @@ export function courtOf(status: QueryStatus): Court {
 /** THE one definition. See the header. */
 export const isWithYou = (status: QueryStatus): boolean => courtOf(status) === "you";
 export const COURT_LABEL: Record<Court, string> = { you: "With you", agent: "With the agent", offer: "Offer", closed: "Closed" };
+
+/* ── Query Centre v141 · WHERE IT STANDS: the four sets (v141.1: the nudge window) ─────────────────────────────
+ * ⚠️ THE ONE SOURCE OF TRUTH for the hero's breakdown card, the pinned band's breakdown, the Filters menu's "Where it
+ *    stands" section, the "Your move" quick pick and the QC141 / QC1411 locks. Four sets, disjoint, covering every
+ *    query, so they always sum to the total. A query moves along them in time (Nick, v141.1):
+ *      agent  — the agent's court, inside the reply window: wait;
+ *      you    — the writer's court (a reply, request or offer waiting on them), OR the agent's court past the reply
+ *               date but still inside the nudge window: a nudge is due;
+ *      quiet  — the agent's court past the nudge window: worth considering closing;
+ *      closed — closed in any way, Withdrawn and Signed included (unlike `tileCourt`, which counts neither).
+ * ⚠️ THE WINDOW IS `nudgePhase` (lib/nudgeWindow), the same rule the Next action grouping and the row's next move
+ *    read. v141 had Gone quiet start AT the reply date, which put every nudge-due query in it: that was the false
+ *    premise v141.1 corrects.
+ */
+export type WhereKey = "you" | "agent" | "quiet" | "closed";
+export const WHERE_KEYS: readonly WhereKey[] = ["you", "agent", "quiet", "closed"];
+export type WhereRow = { status: QueryStatus | string; expectedMs: number | null; stageStartMs?: number | null };
+export function whereItStands(r: WhereRow, nowMs: number): WhereKey {
+  const c = courtOf(r.status as QueryStatus);
+  if (c === "you" || c === "offer") return "you";
+  if (c === "closed") return "closed";
+  const p = nudgePhase(r, nowMs);
+  return p === "nudge" ? "you" : p === "close" ? "quiet" : "agent";
+}
+export function whereCounts(rows: readonly WhereRow[], nowMs: number): Record<WhereKey, number> {
+  const out: Record<WhereKey, number> = { you: 0, agent: 0, quiet: 0, closed: 0 };
+  for (const r of rows) out[whereItStands(r, nowMs)] += 1;
+  return out;
+}
+/** the card's and the menu's words; `short` is the compact header's and the tight band's */
+export const WHERE_LABEL: Record<WhereKey, { label: string; compact: string; short: string; title: string }> = {
+  you: { label: "With you", compact: "With you", short: "With you", title: "Replies to answer and nudges due" },
+  agent: { label: "With the agent", compact: "With agents", short: "With agents", title: "With agents, inside their reply window" },
+  quiet: { label: "Gone quiet", compact: "Gone quiet", short: "Quiet", title: "Past the nudge window: worth closing?" },
+  closed: { label: "Closed", compact: "Closed", short: "Closed", title: "Offers taken, passes and no-replies you\u2019ve closed" },
+};
 
 /* ── stages, in the summary's order. R&R is a live status and gets a column only when one exists. ── */
 export const BASE_STAGES: readonly QueryStatus[] = [

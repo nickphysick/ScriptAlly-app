@@ -130,13 +130,25 @@ describe("⚠️ THE INVARIANTS (audit item 10) — column == source, as an equa
      unfolded them. A sweep card now ACCOUNTS FOR its members, and this asserts the reconciliation
      rather than the card count. */
   it("⚠️ THE PARTITION SUMS: To do + Today + Snoozed == the actionable badge", () => {
+    /* RETARGETED, LAW UNCHANGED (To-do list v5.1 §I.6): an own task now joins the board when it SURFACES, so the two
+       tasks are ones that have — due today, and due tomorrow surfacing a day early. One waiting to surface is in no
+       column (asserted below), and the badge is derived FROM the columns (boardFigures), so it cannot count it. */
     const b = assembleBoard(base({
-      userTasks: [utask("t1", { dueDate: "2026-09-01" }), utask("t2", { dueDate: "2026-09-02" })],
+      userTasks: [utask("t1", { dueDate: TODAY }), utask("t2", { dueDate: "2026-08-07", surfaceOffset: "day-before" })],
     }));
     const sweeps = [sweepCardFor("dq_mswl", "Wish lists", 15, [])];
     const cols = boardColumns({ board: b, flags: [], today: TODAY, nowMs: NOW, queries: [], agents: [], sweeps });
     const badge = todoCounts(b, 15, 0).actionable; // 15 gaps is the housekeeping term
     expect(columnWeight(cols.todo) + columnWeight(cols.today) + columnWeight(cols.snoozed)).toBe(badge);
+  });
+
+  it("TD5 I5 (unit) — an own task joins the board when it surfaces, not the day it is written (v5.1 §I.6)", () => {
+    const b = assembleBoard(base({ userTasks: [utask("wk", { dueDate: "2026-08-16", surfaceOffset: "week-before" })] }));
+    const at = (day: string, now: number) => boardColumns({ board: assembleBoard(base({ userTasks: [utask("wk", { dueDate: "2026-08-16", surfaceOffset: "week-before" })], today: day, now })), flags: [], today: day, nowMs: now, queries: [], agents: [], sweeps: [] });
+    const where = (c: ReturnType<typeof at>) => [...c.todo, ...c.today, ...c.snoozed].map((x) => x.key);
+    expect(b.nt.map((c) => c.key)).toEqual(["wk"]); // still a task on the corkboard and the calendar
+    expect(where(at(TODAY, NOW))).toEqual([]); // due in 10 days, "a week early": not yet on the board
+    expect(where(at("2026-08-09", Date.parse("2026-08-09T09:00:00Z")))).toEqual(["wk"]); // day 3: it has joined
   });
 
   it("a sweep card weighs its members, an ordinary card weighs one", () => {

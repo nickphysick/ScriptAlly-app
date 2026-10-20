@@ -120,7 +120,8 @@ test("A1 route", async ({ page }) => {
     /* the app's own switch: a sheet 1440 or less is compact (44), wider is full (50) */
     const wide = await ev<boolean>(page, `!!document.querySelector('.ws-app.sheet-wide')`);
     L.check(w, near(h.size, wide ? 50 : 44, 1), `h1 ${h.size}px (sheet ${wide ? "wide" : "compact"})`);
-    L.check(w, near(h.h, h.lh, 2), `h1 one line: ${h.h} tall at line-height ${h.lh}`);
+    /* header rules v1.1: beside the card the title wraps at its size (decision 5) — whole lines, never shrunk */
+    L.check(w, Math.abs(h.h / h.lh - Math.round(h.h / h.lh)) < 0.05, `h1 whole lines: ${h.h} tall at line-height ${h.lh}`);
     const imgs = await ev<string[]>(page, `[...document.querySelectorAll('[data-rsp="header"] img')].map((i) => i.getAttribute('data-rsp') ?? i.src)`);
     L.check(w, imgs.length === 1 && imgs[0] === "shadow", `header images ${JSON.stringify(imgs)}`);
   }
@@ -182,7 +183,9 @@ test("B1 gutter", async ({ page }) => {
     await ev(page, `document.querySelector('[data-rsp="track"]').scrollLeft = 0`);
     const g = await ev<{ h1: number; lab: number; head: number; card: number }>(page, `(() => {
       const x = (s) => { const e = document.querySelector(s); const r = document.createRange(); r.selectNodeContents(e); return r.getBoundingClientRect().left; };
-      return { h1: x('[data-rsp="title"] span'), lab: document.querySelector('.rsp-plab').getBoundingClientRect().left, head: document.querySelector('#rsp-pos-h').getBoundingClientRect().left, card: document.querySelector('[data-rsp="pcard"]').getBoundingClientRect().left };
+      /* header rules v1.1: the title moved to the shared text column (decision 1, every page alike); the carousel keeps
+         the column's inset, which is the header row's left edge — so it lines up with that, not with the title */
+      return { h1: document.querySelector('[data-rsp="header-row"]').getBoundingClientRect().left, lab: document.querySelector('.rsp-plab').getBoundingClientRect().left, head: document.querySelector('#rsp-pos-h').getBoundingClientRect().left, card: document.querySelector('[data-rsp="pcard"]').getBoundingClientRect().left };
     })()`);
     L.check(w, near(g.lab, g.h1, 2), `heading label ${g.lab.toFixed(1)} vs h1 ${g.h1.toFixed(1)}`);
     L.check(w, near(g.head, g.h1, 2), `heading ${g.head.toFixed(1)} vs h1 ${g.h1.toFixed(1)}`);

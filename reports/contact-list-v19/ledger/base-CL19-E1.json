@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 first visit: no bands",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 first visit: the chip reads \"Group by\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 grouped: bands show",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 grouped: the headings appear once",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 grouped: the chip reads \"Grouped by Status\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 ✕: \"[data-cl19='group-stop']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 after ✕: no bands",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 after ✕: the chip reads \"Group by\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 after ✕: the sort is unchanged",
+  "ok": true,
+  "detail": "Replies ↓ → Replies ↓"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1512 after ✕: the rows are in the same order",
+  "ok": true,
+  "detail": "seed-cal-passed20,seed-cal-passed865,thin-ag-chase,seed-agent-nowin-1 → seed-cal-passed20,seed-cal-passed865,thin-ag-chase,seed-agent-nowin-1"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 first visit: no bands",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 first visit: the chip reads \"Group by\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280: \"button.cl19-grp\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 grouped: bands show",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 grouped: the headings appear once",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 grouped: the chip reads \"Grouped by Status\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 ✕: \"[data-cl19='group-stop']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 after ✕: no bands",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 after ✕: the chip reads \"Group by\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 after ✕: the sort is unchanged",
+  "ok": true,
+  "detail": "Replies ↓ → Replies ↓"
+ },
+ {
+  "lock": "CL19-E1",
+  "where": "@1280 after ✕: the rows are in the same order",
+  "ok": true,
+  "detail": "seed-cal-passed20,seed-cal-passed865,thin-ag-chase,seed-agent-nowin-1 → seed-cal-passed20,seed-cal-passed865,thin-ag-chase,seed-agent-nowin-1"
+ }
+]

@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "B1",
+  "where": "s=welcome centred (16.0 | 320.0)",
+  "ok": false,
+  "detail": "16 vs 320"
+ },
+ {
+  "lock": "B3",
+  "where": "s=welcome the card fills the column",
+  "ok": true,
+  "detail": "1240 vs 1240"
+ },
+ {
+  "lock": "B1",
+  "where": "s=ack&stage=early centred (16.0 | 700.0)",
+  "ok": false,
+  "detail": "16 vs 700"
+ },
+ {
+  "lock": "B3",
+  "where": "s=ack&stage=early the card fills the column",
+  "ok": true,
+  "detail": "860 vs 860"
+ },
+ {
+  "lock": "B3",
+  "where": "s=ack&stage=early the text column is the card's width",
+  "ok": false,
+  "detail": "477.140625 vs 860"
+ },
+ {
+  "lock": "B2",
+  "where": "s=ack&stage=early the lead is one line",
+  "ok": false,
+  "detail": "2 lines: Got it. Your campaign is underway."
+ },
+ {
+  "lock": "B1",
+  "where": "s=bookmore centred (16.0 | 700.0)",
+  "ok": false,
+  "detail": "16 vs 700"
+ },
+ {
+  "lock": "B3",
+  "where": "s=bookmore the card fills the column",
+  "ok": true,
+  "detail": "860 vs 860"
+ },
+ {
+  "lock": "B1",
+  "where": "s=fork centred (16.0 | 280.0)",
+  "ok": false,
+  "detail": "16 vs 280"
+ },
+ {
+  "lock": "B1",
+  "where": "s=confirm centred (16.0 | 280.0)",
+  "ok": false,
+  "detail": "16 vs 280"
+ },
+ {
+  "lock": "B3",
+  "where": "s=confirm the card fills the column",
+  "ok": false,
+  "detail": "1140 vs 1280"
+ }
+]

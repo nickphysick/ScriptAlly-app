@@ -15,8 +15,11 @@
 import { expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { collection, deleteDoc, doc, getDoc, getDocs, query as fsQuery, setDoc, where } from "firebase/firestore";
+import { harnessDb } from "./harnessDocs";
 
-export const DIR = "reports/todo-list-v5";
+/* v5.1 writes its ledgers beside its own report; the v5 ledgers stay where they were committed */
+export const DIR = "reports/todo-list-v5-1";
 export const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 export type VP = { width: number; height: number };
 export const MUT = process.env.TD5_MUTATE ?? "";
@@ -56,6 +59,10 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   D1: { js: `document.addEventListener("keydown", (e) => { if (e.key === "j" && e.target && e.target.tagName === "INPUT") document.querySelector('[aria-label="Next task"]')?.click(); }, true);` },
   /* the example counted as a task: its lines carry the row's mark */
   G1: { js: `(() => { const fix = () => { for (const l of document.querySelectorAll(".td5-ml")) if (l.getAttribute("data-td5") !== "row") l.setAttribute("data-td5", "row"); }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); fix(); })()` },
+  /* v5.1 I2 — "In a month" let through on a capped task: the chips' disabled state stripped */
+  I2: { js: `(() => { const fix = () => { for (const b of document.querySelectorAll('[data-td5="aside-pop"] [data-snz]')) if (b.disabled) b.disabled = false; }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, attributes: true }); fix(); })()` },
+  /* v5.1 J1 — the card grows with its content: the sheet and its column no longer hold one screen */
+  J1: { css: `[data-todo-v5] .td5-sheet[data-one] { height: auto !important; overflow: visible !important; } [data-todo-v5] .td5-dcard, [data-todo-v5] .td5-stackwrap, [data-todo-v5] .td5-desk, [data-todo-v5] .td5-jhost, [data-todo-v5] .td5-jslot { flex: none !important; } [data-todo-v5] .td5-cbody, [data-todo-v5] .td5-jslot .qad-body { overflow: visible !important; }` },
   /* the shadow's clip removed */
   L1: { css: `[data-todo-v5] .td5-wpg, [data-todo-v5] .wpg-scroll { overflow: visible !important; } [data-todo-v5] .td5-hd .td5-shadow { left: -400px !important; width: 2600px !important; }` },
 };
@@ -82,7 +89,7 @@ window.__box = (e) => { if (!e) return null; const b = e.getBoundingClientRect()
 export async function openTodo(page: Page, vp: VP, opts: { state?: "caught" | "nothing"; motion?: boolean; want?: "list" | "caught" | "nothing" } = {}) {
   await page.addInitScript((st) => {
     try { for (const k of ["todo", "contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ }
-    try { sessionStorage.removeItem("sa.todoTray.sort"); sessionStorage.removeItem("sa.todoTray.shut"); } catch { /* */ }
+    try { sessionStorage.removeItem("sa.todoTray.sort"); sessionStorage.removeItem("sa.todoTray.shut"); sessionStorage.removeItem("qh.parkedJourney"); } catch { /* */ }
     if (st) (window as unknown as { __SA_TD5_STATE?: string }).__SA_TD5_STATE = st;
   }, opts.state ?? null);
   await openRoute(page, "/todo", vp);
@@ -106,3 +113,77 @@ export const scrollSheet = (page: Page, d = 2) => page.evaluate((d) => {
   const sheet = q(".td5-sheet")!;
   sc.scrollTop += sheet.getBoundingClientRect().top - sc.getBoundingClientRect().top + d;
 }, d);
+
+/* ── v5.1 · the account, read and put back ──────────────────────────────────────────────────────── */
+export type Docs = Map<string, string>;
+export function canon(v: unknown): string {
+  if (v === null || typeof v !== "object") return JSON.stringify(v);
+  const o = v as Record<string, unknown>;
+  if (typeof (o as { toMillis?: unknown }).toMillis === "function") return `ts:${(o as { toMillis: () => number }).toMillis()}`;
+  if (Array.isArray(v)) return `[${v.map(canon).join(",")}]`;
+  return `{${Object.keys(o).sort().map((k) => `${k}:${canon(o[k])}`).join(",")}}`;
+}
+/** every document a query journey can touch, canonical: the query, its log, its feed rows, its flags and tasks */
+export async function readSet(ids: string[]): Promise<Docs> {
+  const { db, uid } = await harnessDb();
+  const out: Docs = new Map();
+  for (const id of ids) {
+    const q = await getDoc(doc(db, "users", uid, "queries", id));
+    if (q.exists()) out.set(q.ref.path, canon(q.data()));
+    (await getDocs(collection(db, "users", uid, "queries", id, "activity"))).forEach((d) => out.set(d.ref.path, canon(d.data())));
+    (await getDocs(fsQuery(collection(db, "users", uid, "activities"), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canon(d.data())));
+    for (const c of ["taskFlags", "tasks"]) (await getDocs(fsQuery(collection(db, "users", uid, c), where("queryId", "==", id)))).forEach((d) => out.set(d.ref.path, canon(d.data())));
+  }
+  return out;
+}
+export const diffSets = (a: Docs, b: Docs) => {
+  const d: string[] = [];
+  for (const [k, v] of a) if (b.get(k) !== v) d.push(`changed/removed ${k}`);
+  for (const k of b.keys()) if (!a.has(k)) d.push(`added ${k}`);
+  return d;
+};
+
+/** the id `taskFlagId` gives a flag (lib/taskFlags) */
+export const flagId = (taskType: string, queryId = "", agentId = "") => `${taskType}__q_${queryId}__a_${agentId}__r_`;
+
+/** WHOLE documents by path under the harness user ("taskFlags/x", "tasks/y", "" for the user doc) — absent is a fact */
+export type Snap = Map<string, Record<string, unknown> | null>;
+export async function snapDocs(paths: string[]): Promise<Snap> {
+  const { db, uid } = await harnessDb();
+  const out: Snap = new Map();
+  for (const p of paths) {
+    const ref = p ? doc(db, "users", uid, ...p.split("/")) : doc(db, "users", uid);
+    const s = await getDoc(ref);
+    out.set(p, s.exists() ? s.data() : null);
+  }
+  return out;
+}
+/** put each document back exactly as read: rewritten whole, or deleted where it had not existed */
+export async function restoreDocs(before: Snap): Promise<string[]> {
+  const { db, uid } = await harnessDb();
+  const fixed: string[] = [];
+  for (const [p, data] of before) {
+    const ref = p ? doc(db, "users", uid, ...p.split("/")) : doc(db, "users", uid);
+    const now = await getDoc(ref);
+    const same = now.exists() ? data !== null && canon(now.data()) === canon(data) : data === null;
+    if (same) continue;
+    if (data === null) await deleteDoc(ref); else await setDoc(ref, data);
+    fixed.push(p || "user");
+  }
+  return fixed;
+}
+export async function sameDocs(before: Snap): Promise<string[]> {
+  const after = await snapDocs([...before.keys()]);
+  return [...before.keys()].filter((k) => canon(before.get(k)) !== canon(after.get(k)));
+}
+
+/** leave a journey on the desk without a trace: ✕, and Discard where it asks */
+export const leaveDesk = async (page: Page) => {
+  const x = page.locator("[data-td5-slot] .qad-dx:visible");
+  if (await x.count()) await x.first().click().catch(() => {});
+  /* ⚠️ the "Discard this?" bar draws AFTER the press — a count read in the same instant finds nothing and the journey
+     is left to park (measured: a parked response met the next case as a clash) */
+  const disc = page.locator("[data-td5-slot] [data-qad-discard] .disc");
+  if (await disc.first().waitFor({ state: "visible", timeout: 1500 }).then(() => true).catch(() => false)) await disc.first().click().catch(() => {});
+  await page.locator("[data-td5-slot] [data-qad-drawer]:visible").first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+};

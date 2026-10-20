@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "J1",
+  "where": "1512 the page scroller does not move (wheel, keys)",
+  "ok": false,
+  "detail": "306 → 1002"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 the sheet is the scrollport less 20",
+  "ok": false,
+  "detail": "4108 vs 766"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 the card's head and foot are in view",
+  "ok": false,
+  "detail": "{\"port\":786,\"sheetH\":4108,\"over\":true,\"overflowY\":\"hidden\",\"headIn\":false,\"footIn\":true,\"bodyOver\":0,\"tray\":\"auto\",\"bodyY\":\"visible\",\"chain\":[]}"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 only the tray and the card body scroll",
+  "ok": false,
+  "detail": "{\"port\":786,\"sheetH\":4108,\"over\":true,\"overflowY\":\"hidden\",\"headIn\":false,\"footIn\":true,\"bodyOver\":0,\"tray\":\"auto\",\"bodyY\":\"visible\",\"chain\":[]}"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 the sent journey's first three steps have no overflow in the card",
+  "ok": true,
+  "detail": "0,0,0,0,0"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 leaving work unlocks the page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "1512 the compose card has no overflow",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 composing locks the page too",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "J1",
+  "where": "1512 the popover's box is inside the card",
+  "ok": true,
+  "detail": "{\"p\":[418.828125,745.296875,702,1262],\"c\":[251.75,834.296875,682,1454]}"
+ },
+ {
+  "lock": "J1",
+  "where": "1280 the page scroller does not move (wheel, keys)",
+  "ok": false,
+  "detail": "306 → 920"
+ },
+ {
+  "lock": "J1",
+  "where": "1280 the sheet is the scrollport less 20",
+  "ok": false,
+  "detail": "4108 vs 666"
+ },
+ {
+  "lock": "J1",
+  "where": "1280 the card's head and foot are in view",
+  "ok": false,
+  "detail": "{\"port\":686,\"sheetH\":4108,\"over\":true,\"overflowY\":\"hidden\",\"headIn\":false,\"footIn\":true,\"bodyOver\":0,\"tray\":\"auto\",\"bodyY\":\"visible\",\"chain\":[]}"
+ },
+ {
+  "lock": "J1",
+  "where": "1280 only the tray and the card body scroll",
+  "ok": false,
+  "detail": "{\"port\":686,\"sheetH\":4108,\"over\":true,\"overflowY\":\"hidden\",\"headIn\":false,\"footIn\":true,\"bodyOver\":0,\"tray\":\"auto\",\"bodyY\":\"visible\",\"chain\":[]}"
+ },
+ {
+  "lock": "J1",
+  "where": "1280 leaving work unlocks the page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "1280 composing locks the page too",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "J1",
+  "where": "1280 the popover's box is inside the card",
+  "ok": true,
+  "detail": "{\"p\":[373.265625,719.296875,702,1202],\"c\":[225.75,840.296875,682,1222]}"
+ }
+]

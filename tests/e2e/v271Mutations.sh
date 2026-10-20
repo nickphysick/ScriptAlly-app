@@ -15,7 +15,7 @@ run() {
   V271_MUTATE="$1" CV25_KEEP=1 npx playwright test tests/e2e/compsV271.measure.ts -g "^.*$1 · " > "$OUT/$1.log" 2>&1
   echo "$1: exit $? · $(grep -c '✗' "$OUT/$1.log") red reading(s)"
 }
-for L in W1 W2; do run "$L"; done
+# W1 and W2 retired with comps v28 (the v25 list)
 # X1: swap the SVG back for a text "✕"
 F=src/components/manuscripts/comps25/marks.tsx
 cp "$F" "$BAK/src-components-manuscripts-comps25-marks.tsx" || exit 1

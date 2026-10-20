@@ -12,7 +12,7 @@ import { readTemplateBuffer } from "./templateImport";
 import { parseModel, seedUnidentifiedSetAside, modelToResult, autoSetAsideRows, reviewTallies } from "./smartImportReviewModel";
 import { agentKey, queryCourts } from "./importSummary";
 import { validateSmartImport } from "./smartImport";
-import { buildImportNotice, NO_NAME_REASON, noticeHeadline, noticeWhy } from "./importNotice";
+import { buildImportNotice, CHOSE_REASON, noticeHeadline, noticeWhy } from "./importNotice";
 import { ImportOverview } from "../components/onboarding/ImportOverview";
 import { openAgentQuestions } from "./reviewGate";
 
@@ -59,9 +59,11 @@ describe("C1 · one count everywhere, for template-mixed.csv", () => {
     const result = modelToResult(parsed.result, review.agents, review.queries);
     const notice = buildImportNotice(validateSmartImport(result).skipped, { errors: [] }, result.agents, autoSetAsideRows(review.agents, review.queries))!;
     expect(notice, "there is a notice").toBeTruthy();
-    expect(notice.rows.map((r) => r.reason)).toEqual([NO_NAME_REASON]);
+    /* import review v1: the writer removed it, so the reason is theirs */
+    expect(notice.rows.map((r) => r.reason)).toEqual([CHOSE_REASON]);
     expect(notice.rows[0].sentDate?.slice(0, 10), "it is the nameless row").toBe("2026-02-10");
-    expect(`${noticeHeadline(notice.count)} ${noticeWhy(notice)}`).toBe("1 row from your file wasn't imported. It had no agent or agency name.");
+    expect(noticeHeadline(notice.count)).toBe("1 row from your file wasn't imported.");
+    expect(noticeWhy(notice)).toBeNull();
     expect(result.queries.length + notice.rows.length, "written + listed = the rows in the file").toBe(parsed.rowsRead);
   });
 

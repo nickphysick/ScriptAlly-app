@@ -69,7 +69,9 @@ test.describe("Query Centre v138.1", () => {
      contents sat 6px high — the sheet lip (pointer-events: none, z 19) is painted over the row's top 12px, so the box's
      centre is not the centre of what a reader sees. It now measures as PIN1 P1 does (tests/e2e/pinRow.measure.ts):
      against the VISIBLE area, found by paint, a text-only child by its ink. */
-  test("A1 · pinned centre: every child of the pinned row is centred on the visible area (as PIN1 P1)", async ({ page }) => {
+  /* RETIRED (v138.6 §B): the Query Centre's pinned row is deleted; the navy list header is the sticky row. Its
+     centring is the header's own layout (PIN1 P1, moved onto the header) and its stack is QC138.6 B1–B3. */
+  test.skip("A1 · pinned centre: every child of the pinned row is centred on the visible area (as PIN1 P1)", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("A1");
     for (const vp of SIZES) {
@@ -224,13 +226,18 @@ test.describe("Query Centre v138.1", () => {
       L.check("F1", `${w} sheet measured`, r.sheet > 0, `${r.sheet}`);
       L.check("F1", `${w} none in the filter row`, r.inFilters === 0, `${r.inFilters}`);
       L.check("F1", `${w} one in the navy row`, r.inTop === 1, `${r.inTop}`);
-      L.check("F1", `${w} rest width`, near(r.w, wide ? 300 : 220, 1), `${r.w} · sheet ${r.sheet}`);
+      /* RE-POINTED (Contact list v18.3 §E, the shared toolbar): the search rests at 240 on the full-size sheet and 200
+         otherwise — the toolbar's own rule keys on the sheet's size switch, so the expectation does too */
+      const full = await page.evaluate(() => !!document.querySelector(".ws-app.sheet-wide"));
+      L.check("F1", `${w} rest width`, near(r.w, full ? 240 : 200, 1), `${r.w} · sheet ${r.sheet} · full ${full}`);
       await page.mouse.click(5, 300);
       await page.keyboard.press("/");
       await page.waitForTimeout(400);
       const f = await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>('[data-qc138="search"]')].find((e) => e.getBoundingClientRect().height > 0)!; return { w: s.getBoundingClientRect().width, active: document.activeElement === s.querySelector("input") }; });
       L.check("F1", `${w} / focuses it`, f.active, `${f.active}`);
-      L.check("F1", `${w} focus width`, near(f.w, wide ? 360 : 260, 2), `${f.w}`);
+      /* RE-POINTED (Contact list v18.3 §E, the shared toolbar): the search holds the toolbar's width when focused (240,
+         or 200 below the full-size sheet); v138.1's grow-on-focus is retired with it — reported to Nick */
+      L.check("F1", `${w} focus width`, near(f.w, full ? 240 : 200, 2), `${f.w} · full ${full}`);
       const rows = page.locator('.qcv-group[data-v138] [data-qcv="row"]');
       const n0 = await rows.count();
       await page.keyboard.type("Reed");
@@ -238,7 +245,8 @@ test.describe("Query Centre v138.1", () => {
       const n1 = await rows.count();
       const mirror = await page.evaluate(() => (document.querySelector('[data-qc138="pinned-find"] input') as HTMLInputElement | null)?.value);
       L.check("F1", `${w} filters`, n1 > 0 && n1 < n0, `${n0} → ${n1}`);
-      L.check("F1", `${w} mirrors the pinned search`, mirror === "Reed", `"${mirror}"`);
+      /* RETIRED (v138.6 §B): the pinned row and its mirrored search are deleted */
+      void mirror;
       await page.keyboard.press("Escape");
       await page.waitForTimeout(300);
       const after = await page.evaluate(() => ([...document.querySelectorAll<HTMLInputElement>('[data-qc138="search"] input')].find((e) => e.getBoundingClientRect().height > 0)!).value);
@@ -246,6 +254,6 @@ test.describe("Query Centre v138.1", () => {
       branches.add(wide);
     }
     L.check("F1", "both widths exercised", branches.size === 2, `${[...branches]}`);
-    L.done(16);
+    L.done(14);
   });
 });

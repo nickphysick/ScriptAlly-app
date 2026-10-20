@@ -1,0 +1,566 @@
+[
+ {
+  "lock": "P1",
+  "where": "population: the two manuscripts",
+  "ok": true,
+  "detail": "db60-pre: 0 queries · seed-ms-1: 51"
+ },
+ {
+  "lock": "P1",
+  "where": "1512x900 A left follows the predicate",
+  "ok": true,
+  "detail": "pre 1 · door true · chart false · expected pre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512x900 A right follows the predicate",
+  "ok": true,
+  "detail": "lift \"Ready for lift off?\" · list \"Ready for lift off?\" · focus false"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 A slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P6",
+  "where": "1512x900 A no closed strip",
+  "ok": true,
+  "detail": "closed element false · closed words false"
+ },
+ {
+  "lock": "P7",
+  "where": "1512x900 A one drawing, the Courier",
+  "ok": true,
+  "detail": "/images/dash/courier.png?v=9c2a4371"
+ },
+ {
+  "lock": "P7",
+  "where": "1512x900 A the agents door carries a glyph or the snapshot, no drawing",
+  "ok": true,
+  "detail": "door true · snap false"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 A one screen",
+  "ok": false,
+  "detail": "1019/786 · 1256/1256"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 A nothing past the sheet",
+  "ok": false,
+  "detail": "os-card d60-card d60-agents"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 A nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 A the panel keeps its floor",
+  "ok": true,
+  "detail": "151.3 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1512x900 B left follows the predicate",
+  "ok": true,
+  "detail": "pre 1 · door true · chart false · expected pre"
+ },
+ {
+  "lock": "P1",
+  "where": "1512x900 B right follows the predicate",
+  "ok": true,
+  "detail": "lift \"Ready for lift off?\" · list \"Ready for lift off?\" · focus false"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 B slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P6",
+  "where": "1512x900 B no closed strip",
+  "ok": true,
+  "detail": "closed element false · closed words false"
+ },
+ {
+  "lock": "P7",
+  "where": "1512x900 B one drawing, the Courier",
+  "ok": true,
+  "detail": "/images/dash/courier.png?v=9c2a4371"
+ },
+ {
+  "lock": "P7",
+  "where": "1512x900 B the agents door carries a glyph or the snapshot, no drawing",
+  "ok": true,
+  "detail": "door false · snap true"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 B one screen",
+  "ok": false,
+  "detail": "971/786 · 1256/1256"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 B nothing past the sheet",
+  "ok": false,
+  "detail": "os-card d60-card d60-agents"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 B nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 B the panel keeps its floor",
+  "ok": true,
+  "detail": "151.3 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1512x900 C left follows the predicate",
+  "ok": true,
+  "detail": "pre 0 · door false · chart true · expected querying"
+ },
+ {
+  "lock": "P1",
+  "where": "1512x900 C right follows the predicate",
+  "ok": true,
+  "detail": "lift \"null\" · list \"What's on the list today?\" · focus true"
+ },
+ {
+  "lock": "P2",
+  "where": "1512x900 C slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P3",
+  "where": "1512x900 C population",
+  "ok": true,
+  "detail": "2 hoop cards"
+ },
+ {
+  "lock": "P3",
+  "where": "1512x900 C equal widths",
+  "ok": true,
+  "detail": "341.0 · 341.0"
+ },
+ {
+  "lock": "P3",
+  "where": "1512x900 C side by side, beneath the chart",
+  "ok": true,
+  "detail": "chart bottom 640.6 · hoops 666.6/666.6"
+ },
+ {
+  "lock": "P3",
+  "where": "1512x900 C the chart takes the full width",
+  "ok": true,
+  "detail": "chart 708.0 · hoops row 708.0 · column 708.0"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 C one screen",
+  "ok": true,
+  "detail": "786/786 · 1256/1256"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 C nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 C nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1512x900 C the panel keeps its floor",
+  "ok": true,
+  "detail": "249.9 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1280x800 A left follows the predicate",
+  "ok": true,
+  "detail": "pre 1 · door true · chart false · expected pre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280x800 A right follows the predicate",
+  "ok": true,
+  "detail": "lift \"Ready for lift off?\" · list \"Ready for lift off?\" · focus false"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 A slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P6",
+  "where": "1280x800 A no closed strip",
+  "ok": true,
+  "detail": "closed element false · closed words false"
+ },
+ {
+  "lock": "P7",
+  "where": "1280x800 A one drawing, the Courier",
+  "ok": true,
+  "detail": "/images/dash/courier.png?v=9c2a4371"
+ },
+ {
+  "lock": "P7",
+  "where": "1280x800 A the agents door carries a glyph or the snapshot, no drawing",
+  "ok": true,
+  "detail": "door true · snap false"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 A one screen",
+  "ok": false,
+  "detail": "972/686 · 1024/1024"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 A nothing past the sheet",
+  "ok": false,
+  "detail": "os-card d60-card d60-door | os-card d60-card d60-agents"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 A nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 A the panel keeps its floor",
+  "ok": true,
+  "detail": "150.0 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1280x800 B left follows the predicate",
+  "ok": true,
+  "detail": "pre 1 · door true · chart false · expected pre"
+ },
+ {
+  "lock": "P1",
+  "where": "1280x800 B right follows the predicate",
+  "ok": true,
+  "detail": "lift \"Ready for lift off?\" · list \"Ready for lift off?\" · focus false"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 B slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P6",
+  "where": "1280x800 B no closed strip",
+  "ok": true,
+  "detail": "closed element false · closed words false"
+ },
+ {
+  "lock": "P7",
+  "where": "1280x800 B one drawing, the Courier",
+  "ok": true,
+  "detail": "/images/dash/courier.png?v=9c2a4371"
+ },
+ {
+  "lock": "P7",
+  "where": "1280x800 B the agents door carries a glyph or the snapshot, no drawing",
+  "ok": true,
+  "detail": "door false · snap true"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 B one screen",
+  "ok": false,
+  "detail": "968/686 · 1024/1024"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 B nothing past the sheet",
+  "ok": false,
+  "detail": "os-card d60-card d60-door | os-card d60-card d60-agents"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 B nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 B the panel keeps its floor",
+  "ok": true,
+  "detail": "150.0 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1280x800 C left follows the predicate",
+  "ok": true,
+  "detail": "pre 0 · door false · chart true · expected querying"
+ },
+ {
+  "lock": "P1",
+  "where": "1280x800 C right follows the predicate",
+  "ok": true,
+  "detail": "lift \"null\" · list \"What's on the list today?\" · focus true"
+ },
+ {
+  "lock": "P2",
+  "where": "1280x800 C slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P3",
+  "where": "1280x800 C population",
+  "ok": true,
+  "detail": "2 hoop cards"
+ },
+ {
+  "lock": "P3",
+  "where": "1280x800 C equal widths",
+  "ok": true,
+  "detail": "270.0 · 270.0"
+ },
+ {
+  "lock": "P3",
+  "where": "1280x800 C side by side, beneath the chart",
+  "ok": true,
+  "detail": "chart bottom 556.5 · hoops 574.5/574.5"
+ },
+ {
+  "lock": "P3",
+  "where": "1280x800 C the chart takes the full width",
+  "ok": true,
+  "detail": "chart 558.0 · hoops row 558.0 · column 558.0"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 C one screen",
+  "ok": true,
+  "detail": "686/686 · 1024/1024"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 C nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 C nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1280x800 C the panel keeps its floor",
+  "ok": true,
+  "detail": "237.1 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1709x849 A left follows the predicate",
+  "ok": true,
+  "detail": "pre 1 · door true · chart false · expected pre"
+ },
+ {
+  "lock": "P1",
+  "where": "1709x849 A right follows the predicate",
+  "ok": true,
+  "detail": "lift \"Ready for lift off?\" · list \"Ready for lift off?\" · focus false"
+ },
+ {
+  "lock": "P2",
+  "where": "1709x849 A slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P6",
+  "where": "1709x849 A no closed strip",
+  "ok": true,
+  "detail": "closed element false · closed words false"
+ },
+ {
+  "lock": "P7",
+  "where": "1709x849 A one drawing, the Courier",
+  "ok": true,
+  "detail": "/images/dash/courier.png?v=9c2a4371"
+ },
+ {
+  "lock": "P7",
+  "where": "1709x849 A the agents door carries a glyph or the snapshot, no drawing",
+  "ok": true,
+  "detail": "door true · snap false"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 A one screen",
+  "ok": false,
+  "detail": "1014/735 · 1453/1453"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 A nothing past the sheet",
+  "ok": false,
+  "detail": "os-card d60-card d60-door | os-card d60-card d60-agents"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 A nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 A the panel keeps its floor",
+  "ok": true,
+  "detail": "150.0 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1709x849 B left follows the predicate",
+  "ok": true,
+  "detail": "pre 1 · door true · chart false · expected pre"
+ },
+ {
+  "lock": "P1",
+  "where": "1709x849 B right follows the predicate",
+  "ok": true,
+  "detail": "lift \"Ready for lift off?\" · list \"Ready for lift off?\" · focus false"
+ },
+ {
+  "lock": "P2",
+  "where": "1709x849 B slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P6",
+  "where": "1709x849 B no closed strip",
+  "ok": true,
+  "detail": "closed element false · closed words false"
+ },
+ {
+  "lock": "P7",
+  "where": "1709x849 B one drawing, the Courier",
+  "ok": true,
+  "detail": "/images/dash/courier.png?v=9c2a4371"
+ },
+ {
+  "lock": "P7",
+  "where": "1709x849 B the agents door carries a glyph or the snapshot, no drawing",
+  "ok": true,
+  "detail": "door false · snap true"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 B one screen",
+  "ok": false,
+  "detail": "968/735 · 1453/1453"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 B nothing past the sheet",
+  "ok": false,
+  "detail": "os-card d60-card d60-door | os-card d60-card d60-agents"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 B nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 B the panel keeps its floor",
+  "ok": true,
+  "detail": "150.0 ≥ 150"
+ },
+ {
+  "lock": "P1",
+  "where": "1709x849 C left follows the predicate",
+  "ok": true,
+  "detail": "pre 0 · door false · chart true · expected querying"
+ },
+ {
+  "lock": "P1",
+  "where": "1709x849 C right follows the predicate",
+  "ok": true,
+  "detail": "lift \"null\" · list \"What's on the list today?\" · focus true"
+ },
+ {
+  "lock": "P2",
+  "where": "1709x849 C slate band",
+  "ok": true,
+  "detail": "rgb(95, 123, 147) · --clv-slate rgb(95, 123, 147)"
+ },
+ {
+  "lock": "P3",
+  "where": "1709x849 C population",
+  "ok": true,
+  "detail": "2 hoop cards"
+ },
+ {
+  "lock": "P3",
+  "where": "1709x849 C equal widths",
+  "ok": true,
+  "detail": "364.5 · 364.5"
+ },
+ {
+  "lock": "P3",
+  "where": "1709x849 C side by side, beneath the chart",
+  "ok": true,
+  "detail": "chart bottom 589.6 · hoops 615.6/615.6"
+ },
+ {
+  "lock": "P3",
+  "where": "1709x849 C the chart takes the full width",
+  "ok": true,
+  "detail": "chart 755.0 · hoops row 755.0 · column 755.0"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 C one screen",
+  "ok": true,
+  "detail": "735/735 · 1453/1453"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 C nothing past the sheet",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 C nothing cut",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "P10",
+  "where": "1709x849 C the panel keeps its floor",
+  "ok": true,
+  "detail": "191.3 ≥ 150"
+ }
+]

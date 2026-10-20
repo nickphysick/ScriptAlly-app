@@ -228,7 +228,8 @@ const stripRead = (page: P) => page.evaluate(() => {
 });
 
 /* ── lock 7 · the filter strip: one line at both widths, the measured fold, live application ── */
-test("CL14-7 · filter strip", async ({ page }) => {
+/* RETIRED (Contact list v18): the filter strip's pills are not rendered on /agents; one Filters panel drives the same state (CL18 B2) */
+test.skip("CL14-7 · filter strip", async ({ page }) => {
   const L = new Ledger("cl14-7");
   const folded: Record<string, boolean> = {};
   for (const vp of WIDTHS14) {
@@ -288,7 +289,8 @@ const pickGroup = async (page: P, k: string) => {
   await page.locator(`[data-lpop="group"] [data-opt="group:${k}"]`).click({ timeout: 4000 }).catch(() => page.keyboard.press("Escape"));
   await settle(page);
 };
-test("CL14-8 · grouping", async ({ page }) => {
+/* RETIRED (Contact list v18): the Grouped pill is gone; the list header's sentence opens grouping (CL18 A2 switches it, B1 reads it) */
+test.skip("CL14-8 · grouping", async ({ page }) => {
   const L = new Ledger("cl14-8");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -361,7 +363,8 @@ const seedMemory = async (page: P, value: unknown) => {
   await page.locator(`.aglist ${LOADED_ROW}`).first().waitFor({ timeout: 30_000 }).catch(() => {});
   await settle(page, 600);
 };
-test("CL14-9 · remembered settings", async ({ page, browser }) => {
+/* RETIRED (Contact list v18): it reads the remembered state back through the Grouped and Sort pills, which v18 removed; the memory itself is unchanged */
+test.skip("CL14-9 · remembered settings", async ({ page, browser }) => {
   const L = new Ledger("cl14-9");
   const vp = { width: 1512, height: 900 };
   const w = "1512";
@@ -409,7 +412,8 @@ test("CL14-9 · remembered settings", async ({ page, browser }) => {
 });
 
 /* ── lock 10 · the genre field: predictive tokens from the app's list, never free text ── */
-test("CL14-10 · genre field", async ({ page }) => {
+/* RETIRED (Contact list v18): the genre field is inside the Filters panel now; CL18 B2 holds the panel's state */
+test.skip("CL14-10 · genre field", async ({ page }) => {
   const L = new Ledger("cl14-10");
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
@@ -476,7 +480,7 @@ test("CL14-10 · genre field", async ({ page }) => {
     L.check("CL14-10 every token gone → the whole list", w, (await rowCount(page)) === total, `${await rowCount(page)} of ${total}`);
     await checkOverflow(page, L, w);
   }
-  L.done(28);
+  L.done(24);
 });
 
 /* ── Phase 5 · the rows and the table (§5–§6): the panel, the sticky labels and dividers, the row grammar ── */
@@ -518,7 +522,9 @@ test("CL14-11 · rows", async ({ page }) => {
     L.check("CL14-11 one panel", w, r.panels === 1, `${r.panels}`);
     /* RE-POINTED (Contact list v16): the headings pin UNDER the bar and the filter row (CL16 D1 measures the stack), so
        their sticky top is those two's height, not 0; and the ungrouped default draws no letter divider (CL16 D2) */
-    L.check("CL14-11 the labels: sticky below the pinned bar and filter row, 40 tall", w, !!r.lbl && r.lbl.pos === "sticky" && parseFloat(r.lbl.top) === 68 /* v17 §C: under the 68px pinned row */ && near(r.lbl.h, 40, 0.5), JSON.stringify(r.lbl));
+    /* RE-POINTED (Contact list v18 §B): the headings are the Query Centre's strip (12 + 13 of padding, CL18 C1 holds it), so
+       their height is no longer 40 */
+    L.check("CL14-11 the labels: sticky below the pinned row", w, !!r.lbl && r.lbl.pos === "sticky" && parseFloat(r.lbl.top) === 68 /* v17 §C: under the 68px pinned row */, JSON.stringify(r.lbl));
     L.check("CL14-11 ungrouped: no letter divider", w, r.div === null, JSON.stringify(r.div));
     L.check("CL14-11 a row is at least 80 tall", w, r.rowMin >= 79.5, `${r.rowMin}`);
     L.check("CL14-11 no row carries a coloured edge", w, r.edges === 0, `${r.edges}`);
@@ -542,27 +548,10 @@ test("CL14-11 · rows", async ({ page }) => {
     });
     L.check("CL14-11 the labels pin under the bar and filter row and lift (a shadow) once pinned", w,
       !stuck.before && stuck.after && stuck.shadow !== "none" && near(stuck.gap, 68, 1) /* v17: under the 68px pinned row */, JSON.stringify(stuck));
-    /* the marquee: a wishlist too long for its line scrolls on row hover (the Web Animations API) */
-    const mq = await page.evaluate(() => {
-      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const sp = root.querySelector<HTMLElement>('[data-clv="wish"] .clv-mq');
-      if (!sp) return null;
-      sp.textContent = "Literary suspense with a dark heart, slow-burn family secrets, unreliable narrators and coastal towns in winter, told with real restraint";
-      const row = sp.closest<HTMLElement>('[data-clv="row"]')!;
-      row.scrollIntoView({ block: "center" });
-      return row.getAttribute("data-agent-card");
-    });
-    if (!mq) { L.check("CL14-11 the marquee: population (a wishlist row)", w, false, "none"); continue; }
-    await page.locator(`.aglist [data-agent-card="${mq}"]`).filter({ visible: true }).first().hover();
-    await page.waitForTimeout(1600);
-    const moved = await page.evaluate((id) => {
-      const sp = document.querySelector<HTMLElement>(`[data-agent-card="${id}"] .clv-mq`);
-      return sp ? new DOMMatrix(getComputedStyle(sp).transform).m41 : null;
-    }, mq);
-    L.check("CL14-11 the marquee: a long wishlist scrolls on hover", w, moved != null && moved < -5, `${moved}`);
+    /* RETIRED (Contact list v18 §D): the marquee reading (the peek opens at 450ms and stills it; see CL14-15) */
     await checkOverflow(page, L, w);
   }
-  L.done(28);
+  L.done(26); /* v18: the marquee reading retired (one per width) */
 });
 
 /* ── Phase 6 · the touches (§7) ── */
@@ -679,18 +668,13 @@ test("CL14-14 · dead end", async ({ page }) => {
   for (const vp of WIDTHS14) {
     await openContacts(page, vp);
     const w = `${vp.width}`;
+    /* RE-POINTED (Contact list v18 §B): the pills are not rendered on /agents; the same filters are set through the one
+       Filters panel, which drives the same state */
     const setEmpty = async () => {
-      await v14(page, '[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(200);
-      if ((await v14(page, '[data-cl14-dd="more"]').count()) > 0) {
-        await v14(page, '[data-cl14-dd="more"]').click();
-        await page.locator('[data-lpop="more"] [data-opt="more:action"]').click({ timeout: 3000 }).catch(() => {});
-        await page.keyboard.press("Escape");
-      } else {
-        await v14(page, '[data-cl14-chip="action"]').click();
-      }
-      await v14(page, '[data-cl14-dd="queried"]').click();
-      await page.locator('[data-lpop="queried"] [data-opt="queried:no"]').click({ timeout: 3000 }).catch(() => {});
+      await v14(page, '[data-cl18="filters"]').click(); await page.waitForTimeout(300);
+      await page.locator('[data-cl18="filters-panel"] [data-opt="more:action"]').click({ timeout: 3000 }).catch(() => {});
+      await page.locator('[data-cl18="filters-panel"] [data-opt="queried:no"]').click({ timeout: 3000 }).catch(() => {});
+      await page.keyboard.press("Escape");
       await page.waitForTimeout(500);
     };
     await setEmpty();
@@ -730,11 +714,10 @@ test("CL14-15 · reduced motion", async ({ page }) => {
     await openContacts(page, { width: 1920, height: 1000 }, { motion: true });
     const tag = rm ? "reduced" : "full";
     /* the count and the reflow: toggle a filter and read inside the first ~120ms */
-    await v14(page, '[data-cl14="fbar"]').evaluate((e) => e.scrollIntoView({ block: "center" }));
     await page.waitForTimeout(300);
     const total = await rowCount(page);
-    /* RE-POINTED (Contact list v17 §E): Always responds is a switch in the More filters menu, which is opened first */
-    await v14(page, '[data-cl14-dd="more"]').click(); await page.waitForTimeout(300);
+    /* RE-POINTED (Contact list v18 §B): Always responds is a switch in the one Filters panel */
+    await v14(page, '[data-cl18="filters"]').click(); await page.waitForTimeout(300);
     await page.locator('.lpop [data-cl14-chip="always"]').click();
     const early = await page.evaluate(() => new Promise<{ ticking: boolean; shown: string; anims: number }>((res) => setTimeout(() => {
       const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -753,25 +736,14 @@ test("CL14-15 · reduced motion", async ({ page }) => {
     await page.locator('.lpop [data-cl14-chip="always"]').click();
     await page.waitForTimeout(400); await page.keyboard.press("Escape");
     await page.waitForTimeout(400);
-    /* the marquee */
-    const id = await page.evaluate(() => {
-      const root = [...document.querySelectorAll<HTMLElement>(".aglist")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const sp = root.querySelector<HTMLElement>('[data-clv="wish"] .clv-mq');
-      if (!sp) return null;
-      sp.textContent = "Literary suspense with a dark heart, slow-burn family secrets, unreliable narrators and coastal towns in winter, told with real restraint";
-      const row = sp.closest<HTMLElement>('[data-clv="row"]')!; row.scrollIntoView({ block: "center" });
-      return row.getAttribute("data-agent-card");
-    });
-    if (!id) { L.check(`CL14-15 ${tag}: population (a wishlist row)`, w, false, ""); return; }
-    await page.locator(`.aglist [data-agent-card="${id}"]`).filter({ visible: true }).first().hover();
-    await page.waitForTimeout(1600);
-    const x = await page.evaluate((id) => { const sp = document.querySelector<HTMLElement>(`[data-agent-card="${id}"] .clv-mq`); return sp ? new DOMMatrix(getComputedStyle(sp).transform).m41 : null; }, id);
-    L.check(`CL14-15 ${tag}: the marquee ${rm ? "stays still" : "runs"}`, w, rm ? x === 0 : x != null && x < -5, `${x}`);
+    /* RETIRED (Contact list v18 §D): the marquee readings. The scrolling preview starts 500ms into a hover and the peek
+       opens at 450ms, stilling it (the pack's rule), so on a pointer hover it no longer runs; the peek shows the
+       whole wishlist instead. */
   };
   await probe("1512", false);
   await probe("1512", true);
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  L.done(6);
+  L.done(4);
 });
 
 /* ── lock 16 · the page guide (§8): the four steps' words, verbatim, each ringing its own subject — the
@@ -781,8 +753,9 @@ const GUIDE14 = [
   /* RE-POINTED (Contact list v17 §F): steps 1 to 3 ring the summary card, the filter row and the list, in the build's words */
   { title: "Your list in numbers", sel: '[data-cl17="card"]',
     body: "How many agents you have on file, and how many are not queried yet, querying or closed for this book. Choose a row to filter the list." },
-  { title: "Find and filter", sel: '[data-cl17="filter-row"]',
-    body: "Search by name or agency, or narrow the list by status, who’s open, and genre." },
+  /* RE-POINTED (Contact list v18 §B): step 2 rings the list's slate header, where search and Filters are now */
+  { title: "Find and filter", sel: '[data-cl18="list-header"]',
+    body: "Search by name or agency, or open Filters to narrow the list by status, who’s open, and genre." },
   { title: "The full list", sel: '[data-cl16="list"]',
     body: "Every agent on your list. Group it your way, sort it from its column headings, or jump by letter. Click an agent to open them." },
   { title: "Housekeeping", sel: '[data-ftab="housekeeping"]',

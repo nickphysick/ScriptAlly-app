@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "E2",
+  "where": "full_requested: the same journey",
+  "ok": true,
+  "detail": "sent vs sent"
+ },
+ {
+  "lock": "E2",
+  "where": "full_requested: the same steps",
+  "ok": true,
+  "detail": "[\"The request\",\"What you're sending\",\"Sending it\",\"Reading window\",\"Check and log\"] vs [\"The request\",\"What you're sending\",\"Sending it\",\"Reading window\",\"Check and log\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "full_requested: opens on the same step",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "E2",
+  "where": "full_requested: the same review, defaults and all",
+  "ok": true,
+  "detail": "[\"The requestFull manuscriptEDIT\",\"What you're sendingFull manuscript · Post-R&R (T. Marsh)SUGGESTED · NOT OPENEDEDIT\",\"Sending itThu 15 Oct · EmailYou logged a full to Marcus on Sun 23 Aug — this logs anotherEDIT\",\"Reading windowReply by Thu 7 JanSUGGESTED · NOT OPENEDEDIT\"]\n vs [\"The requestFull manuscriptEDIT\",\"What you're sendingFull manuscript · Post-R&R (T. Marsh)SUGGESTED · NOT OPENEDEDIT\",\"Sending itThu 15 Oct · EmailYou logged a full to Marcus on Sun 23 Aug — this logs anotherEDIT\",\"Reading windowReply by Thu 7 JanSUGGESTED · NOT OPENEDEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "partial_requested: the same journey",
+  "ok": true,
+  "detail": "sent vs sent"
+ },
+ {
+  "lock": "E2",
+  "where": "partial_requested: the same steps",
+  "ok": true,
+  "detail": "[\"The request\",\"What you're sending\",\"Sending it\",\"Reading window\",\"Check and log\"] vs [\"The request\",\"What you're sending\",\"Sending it\",\"Reading window\",\"Check and log\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "partial_requested: opens on the same step",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "E2",
+  "where": "partial_requested: the same review, defaults and all",
+  "ok": true,
+  "detail": "[\"The requestPartialEDIT\",\"What you're sendingfirst 50 pagesSUGGESTED · NOT OPENEDEDIT\",\"Sending itThu 15 Oct · EmailYou logged a partial to Priya on Sun 23 Aug — this logs anotherEDIT\",\"Reading windowReply by Thu 10 DecSUGGESTED · NOT OPENEDEDIT\"]\n vs [\"The requestPartialEDIT\",\"What you're sendingfirst 50 pagesSUGGESTED · NOT OPENEDEDIT\",\"Sending itThu 15 Oct · EmailYou logged a partial to Priya on Sun 23 Aug — this logs anotherEDIT\",\"Reading windowReply by Thu 10 DecSUGGESTED · NOT OPENEDEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "offer_received: the same journey",
+  "ok": true,
+  "detail": "offer vs offer"
+ },
+ {
+  "lock": "E2",
+  "where": "offer_received: the same steps",
+  "ok": true,
+  "detail": "[\"The offer\",\"The others\",\"The call\",\"Your decision\",\"Check and save\"] vs [\"The offer\",\"The others\",\"The call\",\"Your decision\",\"Check and save\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "offer_received: opens on the same step",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "offer_received: the same review, defaults and all",
+  "ok": true,
+  "detail": "[\"The offerAnswer by Wed 2 SepSUGGESTED · NOT OPENEDEDIT\",\"The others0 of 38 told38 of 38 still to be toldEDIT\",\"The callNot arrangedSUGGESTED · NOT OPENEDEDIT\",\"Your decisionStill decidingSUGGESTED · NOT OPENEDEDIT\"]\n vs [\"The offerAnswer by Wed 2 SepSUGGESTED · NOT OPENEDEDIT\",\"The others0 of 38 told38 of 38 still to be toldEDIT\",\"The callNot arrangedSUGGESTED · NOT OPENEDEDIT\",\"Your decisionStill decidingSUGGESTED · NOT OPENEDEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "revise_resubmit: the same journey",
+  "ok": true,
+  "detail": "sent vs sent"
+ },
+ {
+  "lock": "E2",
+  "where": "revise_resubmit: the same steps",
+  "ok": true,
+  "detail": "[\"The request\",\"What you're sending\",\"Sending it\",\"Reading window\",\"Check and log\"] vs [\"The request\",\"What you're sending\",\"Sending it\",\"Reading window\",\"Check and log\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "revise_resubmit: opens on the same step",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "E2",
+  "where": "revise_resubmit: the same review, defaults and all",
+  "ok": true,
+  "detail": "[\"The requestRevision · due Mon 19 OctEDIT\",\"What you're sendingRevised manuscript · Post-R&R (T. Marsh)SUGGESTED · NOT OPENEDEDIT\",\"Sending itThu 15 Oct · EmailSUGGESTED · NOT OPENEDEDIT\",\"Reading windowReply by Thu 7 JanSUGGESTED · NOT OPENEDEDIT\"]\n vs [\"The requestRevision · due Mon 19 OctEDIT\",\"What you're sendingRevised manuscript · Post-R&R (T. Marsh)SUGGESTED · NOT OPENEDEDIT\",\"Sending itThu 15 Oct · EmailSUGGESTED · NOT OPENEDEDIT\",\"Reading windowReply by Thu 7 JanSUGGESTED · NOT OPENEDEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "nudge_overdue: the same journey",
+  "ok": true,
+  "detail": "nudge vs nudge"
+ },
+ {
+  "lock": "E2",
+  "where": "nudge_overdue: the same steps",
+  "ok": true,
+  "detail": "[\"Where it stands\",\"The nudge\",\"If it's still quiet\",\"Check and log\"] vs [\"Where it stands\",\"The nudge\",\"If it's still quiet\",\"Check and log\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "nudge_overdue: opens on the same step",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "nudge_overdue: the same review, defaults and all",
+  "ok": true,
+  "detail": "[\"Where it standsLogging a nudgeSUGGESTED · NOT OPENEDEDIT\",\"The nudgeThu 15 Oct · EmailA second nudge — you last nudged Fri 21 AugEDIT\",\"If it's still quietConsider closing Thu 12 NovSUGGESTED · NOT OPENEDEDIT\"]\n vs [\"Where it standsLogging a nudgeSUGGESTED · NOT OPENEDEDIT\",\"The nudgeThu 15 Oct · EmailA second nudge — you last nudged Fri 21 AugEDIT\",\"If it's still quietConsider closing Thu 12 NovSUGGESTED · NOT OPENEDEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "no_response_close: the same journey",
+  "ok": true,
+  "detail": "close vs close"
+ },
+ {
+  "lock": "E2",
+  "where": "no_response_close: the same steps",
+  "ok": true,
+  "detail": "[\"Where it stands\",\"Calling it\",\"Check and close\"] vs [\"Where it stands\",\"Calling it\",\"Check and close\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "no_response_close: opens on the same step",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "E2",
+  "where": "no_response_close: the same review, defaults and all",
+  "ok": true,
+  "detail": "[\"Where it standsNo replyEDIT\",\"Calling itThu 15 OctSUGGESTED · NOT OPENEDEDIT\"]\n vs [\"Where it standsNo replyEDIT\",\"Calling itThu 15 OctSUGGESTED · NOT OPENEDEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "resp (They said no): the same steps",
+  "ok": true,
+  "detail": "[\"The response\",\"Feedback\",\"Check and save\"] vs [\"The response\",\"Feedback\",\"Check and save\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "resp (They said no): the same review",
+  "ok": true,
+  "detail": "[\"The responsePass · Thu 15 OctSUGGESTED · NOT OPENEDEDIT\",\"FeedbackForm rejectionEDIT\"]\n vs [\"The responsePass · Thu 15 OctSUGGESTED · NOT OPENEDEDIT\",\"FeedbackForm rejectionEDIT\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "sent: the same documents written, field by field",
+  "ok": true,
+  "detail": "desk 3 docs, panel 3\nusers/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/*={activityType:\"Materials Sent\",bookVersionId:\"bv-rr\",date:\"2026-10-15T11:00:00.000Z\",description:\"Full manuscript sent to Marcus Reed at Reed & Partners\",details:\"Expected a response by 7 Jan 2027\",eventKey:\"full_sent\",id:\"<id>\",manuscriptId:\"seed-ms-1\",queryId:\"seed-pkgq-3\",resultingStatus:\"Full Sent\",userId:\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}\nusers/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/*={agentId:\"seed-agent-3\",dateSent:\"2026-06-25\",fullRequestedDate:\"2026-06-20T00:00:00.000Z\",fullSentDate:\"2026-10-15T11:00:00.000Z\",hasAgentResponded:true,id:\"seed-pkgq-3\",lastSentLabel:\"Full manuscript · Post-R&R (T. Marsh)\",lastStatusChange:\"2026-10-15T11:00:00.000Z\",manuscriptId:\"seed-ms-1\",nudgeDate:\"2027-01-14T12:00:00.000Z\",packageId:\"seed-pkg-1\",personalisationNotes:\"\",responseReceivedAt:\"2026-06-20T00:00:00.000Z\",revisionRound:1,sendMethod:\"Email\",sentHow:\"package\",sentPackageEdition:1,sentPackageId:\"seed-pkg-1\",status:\"Full Sent\",userId:\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",writerExpectedDate:\"2027-01-07T12:00:00.000Z\",writerExpectedSetAt:\"<now>\"}\nusers/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3/activity/*={agentName:\"Marcus Reed\",createdAt:ts:1792062000000,eventKey:\"full_sent\",manuscriptTitle:\"The Smoke Test\",note:\"Full manuscript sent to Marcus Reed at Reed & Partners\",queryId:\"seed-pkgq-3\",resultingStatus:\"Full Sent\",type:\"Full Sent\"}\n---\nusers/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/*={activityType:\"Materials Sent\",bookVersionId:\"bv-rr\",date:\"2026-10-15T11:00:00.000Z\",description:\"Full manuscript sent to Marcus Reed at Reed & Partners\",details:\"Expected a response by 7 Jan 2027\",eventKey:\"full_sent\",id:\"<id>\",manuscriptId:\"seed-ms-1\",queryId:\"seed-pkgq-3\",resultingStatus:\"Full Sent\",userId:\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}\nusers/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/*={agentId:\"seed-agent-3\",dateSent:\"2026-06-25\",fullRequestedDate:\"2026-06-20T00:00:00.000Z\",fullSentDate:\"2026-10-15T11:00:00.000Z\",hasAgentResponded:true,id:\"seed-pkgq-3\",lastSentLabel:\"Full manuscript · Post-R&R (T. Marsh)\",lastStatusChange:\"2026-10-15T11:00:00.000Z\",manuscriptId:\"seed-ms-1\",nudgeDate:\"2027-01-14T12:00:00.000Z\",packageId:\"seed-pkg-1\",personalisationNotes:\"\",responseReceivedAt:\"2026-06-20T00:00:00.000Z\",revisionRound:1,sendMethod:\"Email\",sentHow:\"package\",sentPackageEdition:1,sentPackageId:\"seed-pkg-1\",status:\"Full Sent\",userId:\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",writerExpectedDate:\"2027-01-07T12:00:00.000Z\",writerExpectedSetAt:\"<now>\"}\nusers/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3/activity/*={agentName:\"Marcus Reed\",createdAt:ts:1792062000000,eventKey:\"full_sent\",manuscriptTitle:\"The Smoke Test\",note:\"Full manuscript sent to Marcus Reed at Reed & Partners\",queryId:\"seed-pkgq-3\",resultingStatus:\"Full Sent\",type:\"Full Sent\"}"
+ },
+ {
+  "lock": "E2",
+  "where": "journeys compared",
+  "ok": true,
+  "detail": "sent,offer,nudge,close,resp"
+ }
+]

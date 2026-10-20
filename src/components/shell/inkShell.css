@@ -278,10 +278,10 @@
   .ws-cap--bar .ws-capl:hover, .ws-cap--bar .ws-capr:hover { background: rgba(var(--ink-shell-rgb), 0.06); }
   /* its menu (the house language, shellMenus.css) opens 8px below the button, right edges together,
      as wide as its longest row and never under 220 (follow-up 2, 1a) */
-  .ws-cap--bar .ws-capm {
-    left: auto;
-    right: 0;
-    top: calc(100% + 8px);
+  /* Help system v1, Part A — the menu lives in the pop-up layer now (`.ws-capm--bar`), placed by
+     `useAnchoredPopover`, which sets top/left inline; only its width stays here */
+  .ws-capm--bar {
+    overflow-y: auto;
     width: max-content;
     min-width: 220px;
   }
@@ -323,14 +323,9 @@
     box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.28);
   }
   /* the Help menu (the house language) opens 8px under the "?", right edges together, 256 wide */
-  .ws-pagebar .ws-helpmenu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    left: auto;
-    width: 256px;
-    z-index: 30;
-  }
+  /* Help system v1, Part A — the menu is portalled into the pop-up layer (`#qh-popovers`), so it is no longer a child
+     of the bar; `useAnchoredPopover` places it 8px under the "?", right edges together */
+  .ws-helpmenu { width: 256px; overflow-y: auto; }
   /* while it is open, the "?" is lit — the ref's `.hp.on` */
   .ws-pagebar .ws-help[aria-expanded="true"] {
     background: rgba(var(--ink-cream-rgb), 0.1);

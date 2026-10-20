@@ -45,8 +45,18 @@ describe("/dashboard renders", () => {
        own first getting-started deed is "Add your first manuscript". That row is addressed to an
        account with no manuscript — which is day one exactly — so gating the pack behind day-one's
        survival would leave row one permanently ticked and decorative. */
-    expect(html).toContain("Log your first query");
-    expect(html).toContain("Add your first manuscript");
+    /* ⚠️ RETARGETED A FOURTH TIME (Dashboard v59). The right column is one focus card and the
+       founding writer panel; the rest of the getting-started plan lives on the To-do page behind
+       "All {n} →". So the first deed is the focus card, and the list's second line ("Log your first
+       query") is no longer on this page. */
+    /* ⚠️ RETARGETED A FIFTH TIME (Dashboard v60). Before the first query the right column is "Ready
+       for lift off?" (it replaces the focus card, the getting-started plan included), and the left
+       column is the two doors. */
+    expect(html).toContain("Ready for lift off?");
+    expect(html).toContain("No queries out yet.");
+    expect(html).toContain("No agents yet."); // v60.1 copy (was "Your list starts here.")
+    expect(html).toContain("Where do I start?"); // v60.1: the one header button before the first query
+    expect(html).toContain("The early bird gets the worm.");
   });
 
   /**
@@ -64,15 +74,21 @@ describe("/dashboard renders", () => {
     /* ⚠️ RETARGETED (dashboard header, stage 1): the stat cards are deleted, so "Agents on file" is
        no landmark any more. The header's counts line replaced them, and it only renders its words
        with a figure in front once the record set has been read — which is the populated branch. */
-    expect(html).not.toContain("Agents on file");
+    /* ⚠️ RETARGETED AGAIN (Dashboard v60): "Agents on file" IS a landmark of the querying page now —
+       the slate hoop card beside Closed, under the full-width chart. */
+    expect(html).toContain("Agents on file");
+    expect(html).toContain('data-d60="closed-hoop"');
     /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
        populated landmarks are the title-page eyebrow and the list column's own title. */
-    expect(html).toContain("— NOW QUERYING —");
+    expect(html).toContain("— QUERYING —"); // v60.1: the eyebrow is the sidebar's status (fixture: Querying), no longer a constant
     expect(html).toContain("What&#x27;s on the list today?");
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the
        landmark that replaces it, so this census still spans all three regions of the page. */
-    expect(html).toContain("Activity feed");    // the floating tab: the feed is a drawer now
+    /* ⚠️ RETARGETED (Dashboard v59): the feed's tab is portalled into the shell's page SHEET once the
+       page has measured it, so a static render cannot see it (`DB59 T1` holds it on the rendered
+       page). The right column's third landmark is the founding writer panel. */
+    expect(html).toContain("— FOUNDING WRITER —");
     /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
        rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
        shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy

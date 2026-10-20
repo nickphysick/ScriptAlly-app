@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "A1",
+  "where": "@1512 the focus card holds [data-ae=\"materials\"]",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 four rows in order",
+  "ok": true,
+  "detail": "ql,syn,smp,oth"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 each tick is drawn, 22 × 22 (±1)",
+  "ok": true,
+  "detail": "22.0 × 22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 unticked, Opening sample is one line (≤ 47 tall)",
+  "ok": true,
+  "detail": "46.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 every row, stepper and segment button is inside the card (10 read)",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the steppers are 34 (±1) tall",
+  "ok": true,
+  "detail": "34.0,34.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 the chosen unit is rgb(45, 58, 80)",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 with cream text",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 each option's text sits inside its own button",
+  "ok": true,
+  "detail": "3 options"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 no two option buttons overlap",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the focus card holds [data-ae=\"materials\"]",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 four rows in order",
+  "ok": true,
+  "detail": "ql,syn,smp,oth"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 each tick is drawn, 22 × 22 (±1)",
+  "ok": true,
+  "detail": "22.0 × 22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 unticked, Opening sample is one line (≤ 47 tall)",
+  "ok": true,
+  "detail": "46.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 every row, stepper and segment button is inside the card (10 read)",
+  "ok": true,
+  "detail": "all inside"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the steppers are 34 (±1) tall",
+  "ok": true,
+  "detail": "34.0,34.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 the chosen unit is rgb(45, 58, 80)",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 with cream text",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 each option's text sits inside its own button",
+  "ok": true,
+  "detail": "3 options"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 no two option buttons overlap",
+  "ok": true,
+  "detail": "false"
+ }
+]

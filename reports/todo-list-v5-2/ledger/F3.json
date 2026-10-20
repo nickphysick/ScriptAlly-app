@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "F3",
+  "where": "@1512 top: texts read",
+  "ok": true,
+  "detail": "134"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 top: every text meets its ratio",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 sheet: texts read",
+  "ok": true,
+  "detail": "98"
+ },
+ {
+  "lock": "F3",
+  "where": "@1512 sheet: every text meets its ratio",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 top: texts read",
+  "ok": true,
+  "detail": "118"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 top: every text meets its ratio",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 sheet: texts read",
+  "ok": true,
+  "detail": "91"
+ },
+ {
+  "lock": "F3",
+  "where": "@1280 sheet: every text meets its ratio",
+  "ok": true,
+  "detail": "0: "
+ }
+]

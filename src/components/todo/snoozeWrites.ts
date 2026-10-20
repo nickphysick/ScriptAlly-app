@@ -18,9 +18,11 @@ import type { useScriptAllyDb } from "../../lib/db";
 type Writers = Pick<ReturnType<typeof useScriptAllyDb>, "upsertTaskFlag" | "dismissTask">;
 export interface SnoozeDone { message: string; undo: () => Promise<void> }
 
-export function snoozeCardWrites(db: Writers, c: BoardCard, days: number, when: string): SnoozeDone | null {
-  /* ⚠️ THE CEILING IS APPLIED IN lib/todoActions (`clampSnooze`), the single clamp every path reaches. */
-  ({ days, when } = clampSnooze(c, days, when));
+export function snoozeCardWrites(db: Writers, c: BoardCard, days: number, when: string, daysUntilDeadline?: number): SnoozeDone | null {
+  /* ⚠️ THE CEILING IS APPLIED IN lib/todoActions (`clampSnooze`), the single clamp every path reaches — with the task's
+     own deadline where it has one (v5.1 §I.3: a send-by or answer-by date), so no write can sleep past it. */
+  ({ days, when } = clampSnooze(c, days, when, daysUntilDeadline));
+  if (days <= 0) return null;
   if (snoozeVia(c) === "user-task-flag") {
     const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId! };
     void db.upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });

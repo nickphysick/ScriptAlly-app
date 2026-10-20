@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status one jump button per group (the population)",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"offer\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"l\":294,\"r\":388.078125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"fs\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fs\",\"l\":390.078125,\"r\":439.203125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"fr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fr\",\"l\":441.203125,\"r\":490.328125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"ps\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"ps\",\"l\":492.328125,\"r\":541.5,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"pr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"pr\",\"l\":543.5,\"r\":592.671875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"queried\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"queried\",\"l\":594.671875,\"r\":644.328125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"none\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"none\",\"l\":646.328125,\"r\":702.78125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status \"closed\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"closed\",\"l\":704.78125,\"r\":753.75,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned one jump button per group (the population)",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"offer\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"l\":396,\"r\":445.125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"fs\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fs\",\"l\":447.125,\"r\":496.25,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"fr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fr\",\"l\":498.25,\"r\":547.375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"ps\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"ps\",\"l\":549.375,\"r\":598.546875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"pr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"pr\",\"l\":600.546875,\"r\":649.71875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"queried\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"queried\",\"l\":651.71875,\"r\":701.375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"none\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"none\",\"l\":703.375,\"r\":759.828125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned \"closed\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"closed\",\"l\":761.828125,\"r\":810.796875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "0 hidden · +0"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered one jump button per group (the population)",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"offer\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"l\":396,\"r\":445.125,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"fs\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fs\",\"l\":447.125,\"r\":496.25,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"fr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"fr\",\"l\":498.25,\"r\":547.375,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"ps\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"ps\",\"l\":549.375,\"r\":598.546875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered \"pr\" is whole inside the jump row, clear of the tools",
+  "ok": true,
+  "detail": "{\"k\":\"pr\",\"l\":600.546875,\"r\":649.71875,\"inNav\":true,\"clearOfTools\":true,\"inTb\":true}"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "@1280 status-pinned-filtered the groups not shown are exactly \"+N more\"",
+  "ok": true,
+  "detail": "3 hidden · +3"
+ },
+ {
+  "lock": "CL19-E2",
+  "where": "the \"+N more\" branch was entered in at least one state",
+  "ok": true,
+  "detail": "1"
+ }
+]

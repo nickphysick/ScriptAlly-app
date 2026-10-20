@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "F1",
+  "where": "the page ring, the tab and the drawer show one number",
+  "ok": false,
+  "detail": "3 · null · null"
+ },
+ {
+  "lock": "F1",
+  "where": "the drawer states held of possible",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "F1",
+  "where": "a reply-time gap to fill",
+  "ok": false,
+  "detail": "none"
+ }
+]

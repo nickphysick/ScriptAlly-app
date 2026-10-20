@@ -13,7 +13,7 @@
 import React from "react";
 import "./onboarding.css";
 
-/** The single column a step sits in: 760 wide, left-aligned. `wide` is the fork's 1280. */
+/** The single column a step sits in: 760 wide, centred in the sheet. `wide` is the fork's 1280. */
 export const StepColumn: React.FC<{ wide?: boolean; screen: string; children: React.ReactNode }> = ({ wide, screen, children }) => (
   <div className={`sf-col${wide ? " sf-col--wide" : ""}`} data-screen={screen}>{children}</div>
 );

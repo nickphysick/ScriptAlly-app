@@ -11,17 +11,26 @@
  * ⚠️ TWO CLASSES ON EVERY RULE THAT SETS A FACE (brand.tsx and the page's font reset).
  */
 @media (min-width: 768px) {
-  .qcv-group[data-v138] { --qc138-pin-h: var(--pin-row-h); --qc138-heads-h: 40px; } /* the pinned row's height is the shell's (shell/pinnedRow.css) */
+  /* v138.6 §B — the sticky stack: the lip's cover, then the navy header (measured by `useStickyStack`), then the
+     headings (a stated 40), then the current group band. `--qc138-pin-h` keeps its name: it is now the cover plus
+     the navy header, pinned or not. */
+  .qcv-group[data-v138] { --qc138-pin-h: calc(var(--pin-cover, 12px) + var(--stk-head-h, 84px)); --qc138-heads-h: 40px; }
   /* the page box carries no paint of its own: the sheet is the white */
   .qcv-group[data-v138] > .qcv-page.qcw { background: transparent; box-shadow: none; border-radius: 0; }
   .qcv-group[data-v138] .qc13-work, .qcv-group[data-v138] .qcv-stage, .qcv-group[data-v138] .qcv-ledger { background: transparent; }
-  .wpg-scroll:has(> .qcv-group[data-v138]) { --wpg-scroll-pad: calc(var(--qc138-pin-h) + var(--qc138-heads-h, 40px) + 64px); }
-  /* full screen: the header goes, the pinned row stays */
+  .wpg-scroll:has(> .qcv-group[data-v138]) { --wpg-scroll-pad: calc(var(--pin-cover, 12px) + var(--stk-head-h, 84px) + 40px + 64px); }
+  /* v138.5 §G — pinned: the header goes and so does the old pinned bar (Queries.tsx), so nothing sits above the list:
+     the navy header is 22 under the sheet's top, and the headings and bands stick from the sheet's top edge */
   .qcv-group[data-v138][data-full] > .qc138-hd { display: none; }
-  .qcv-group[data-v138][data-full] > .qcv-page.qcw { margin-top: calc(var(--qc138-pin-h) + 16px); }
+  .qcv-group[data-v138][data-full] > .qcv-page.qcw { margin-top: 22px; }
+  /* v138.6 §B — pinned uses the same sticky stack as unpinned; it simply starts with the header already hidden */
 
   .qc138-sheet {
-    --qc138-cols: minmax(0, 1.3fr) 108px minmax(0, 1fr) 246px minmax(170px, 0.85fr) 60px;
+    /* v138.5 §F — one template for headings, rows and the peek: the gap after "Where it stands" is gone (a fixed
+       148px), and What you sent is --sent-w, 18% of the list's width between 180 and 270, in the sheet's own
+       container units (never vw: the sidebar changes the list's width, not the window's) */
+    --sent-w: clamp(180px, 18cqw, 270px);
+    --qc138-cols: minmax(160px, 1.3fr) 90px 148px var(--sent-w) minmax(140px, 1fr) 56px;
     --qc138-gap: 20px;
     --qc138-ind: 52px;
     position: relative; box-sizing: border-box; container: qc138sheet / inline-size;
@@ -29,6 +38,15 @@
     box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 30px 60px -40px rgba(28, 19, 15, 0.45);
   }
 
+  /* ── v138.6 §B · THE STICKY ROW: the wrapper sticks at the scroller's top and is padded down by the lip's cover,
+     so the navy header sits 12 under the sheet's top; its fill is the sheet's colour (behind the header's corners
+     and over the lip's strip). Nothing about the header changes when it sticks: the same height, padding and
+     controls. ── */
+  .qc138-sheet .qc138-topw {
+    position: sticky; top: 0; z-index: 9; box-sizing: border-box;
+    margin-top: calc(-1 * var(--pin-cover, 12px)); padding-top: var(--pin-cover, 12px);
+    background: var(--ink-sheet, var(--ws-page));
+  }
   /* ── the navy top row ── */
   .qc138-sheet .qc138-top {
     position: relative; display: flex; align-items: center; gap: 18px; box-sizing: border-box; min-height: 76px;
@@ -73,6 +91,23 @@
     border: 1px solid rgba(244, 238, 229, 0.3); border-radius: 5px; font: 400 11px/1 var(--font-mono) !important; color: rgba(244, 238, 229, 0.6);
   }
   .qc138-sheet .qc138-tsearch:focus-within { width: 360px; background: #f4eee5; box-shadow: none; color: #2d3a50; }
+  /* v138.5 §E — the Filters button: an outlined cream pill, 44 tall, after the search. Open: cream with ink text.
+     A rust badge counts the filter groups set. */
+  .qc138-sheet .qc138-fb {
+    flex: none; display: inline-flex; align-items: center; gap: 9px; box-sizing: border-box; height: 44px; padding: 0 20px 0 16px; margin: 0;
+    border: 1.5px solid rgba(244, 238, 229, 0.45); border-radius: 22px; background: transparent; color: #f4eee5; cursor: pointer; white-space: nowrap;
+    font: 400 17px/1 var(--sp-type) !important; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .qc138-sheet .qc138-fb span { font: inherit !important; }
+  .qc138-sheet .qc138-fb svg { flex: none; }
+  .qc138-sheet .qc138-fb:hover:not(:disabled) { background: rgba(244, 238, 229, 0.1); border-color: rgba(244, 238, 229, 0.8); }
+  .qc138-sheet .qc138-fb[aria-expanded="true"], .qc138-sheet .qc138-fb[aria-expanded="true"]:hover { background: #f4eee5; border-color: #f4eee5; color: #1c130f; }
+  .qc138-sheet .qc138-fb .qc138-fbn {
+    display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: 10px; background: #b0603e; color: #fff; font: 500 11px/1 var(--font-mono) !important;
+  }
+  .qc138-sheet .qc138-fb:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+  .qc138-sheet .qc138-fb:disabled { cursor: default; opacity: 0.6; }
   /* the compact sheet (the column grid's own 1180 line, read off the same container): 220 at rest, 260 focused */
   @container qc138sheet (max-width: 1179.98px) {
     .qc138-sheet .qc138-tsearch { width: 220px; }
@@ -90,12 +125,7 @@
   }
   .qc138-sheet .qc138-dens button svg { width: 16px; height: 16px; }
   .qc138-sheet .qc138-dens button[aria-pressed="true"] { background: #fff; color: #2d3a50; box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.35); }
-  .qc138-sheet .qc138-fs {
-    display: grid; place-items: center; box-sizing: border-box; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%;
-    background: none; color: #f4eee5; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35);
-  }
-  .qc138-sheet .qc138-fs svg { width: 15px; height: 15px; }
-  .qc138-sheet .qc138-fs[aria-pressed="true"] { background: #f4eee5; color: #2d3a50; }
+  /* v138.6 §A — the pin is the shared PinListButton (shell/pinListButton.css) */
 
   /* ── the headings: one grid with the rows, sticky under the pinned row ── */
   .qc138-sheet .qc138-heads {
@@ -201,25 +231,26 @@
   .qc138-sheet .qc138-ws1 > span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-sub { margin-top: 3px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-sub.hot { font-style: normal !important; font-weight: 600 !important; color: #a2452a; }
-  /* what you sent: a 92px chip, a rule, four 30px tiles */
-  .qc138-sheet .qc138-mats { display: flex; align-items: center; gap: 5px; }
-  .qc138-sheet .qc138-sep { flex: none; width: 1px; height: 22px; margin: 0 3px; background: rgba(28, 19, 15, 0.12); }
+  /* v138.5 §F — what you sent, on two lines like the other columns: the package chip (26 tall, as wide as its name
+     up to the column, ending in "…" with the full name in its tooltip), then 5 under it the material icons (20px
+     squares, radius 5, 12px icons, 4 apart). No package: no chip, and the icons sit on line 1. */
+  .qc138-sheet .qc138-mats { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+  .qc138-sheet .qc138-mic { display: flex; align-items: center; gap: 4px; }
   .qc138-sheet .qc138-pkg {
-    flex: none; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; width: 92px; height: 32px; padding: 0 10px 0 8px;
-    border: 0; border-radius: 16px; background: none; cursor: pointer; white-space: nowrap; overflow: hidden; font: 400 13px/1 var(--sp-type) !important;
+    flex: none; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; width: auto; max-width: 100%; height: 26px; padding: 0 12px 0 10px;
+    border: 0; border-radius: 13px; background: none; cursor: pointer; white-space: nowrap; overflow: hidden; font: 400 12.5px/1 var(--sp-type) !important;
   }
-  .qc138-sheet .qc138-pkg span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
-  .qc138-sheet .qc138-pkg svg { flex: none; width: 16px; height: 16px; }
+  .qc138-sheet .qc138-pkg span { min-width: 0; font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
+  .qc138-sheet .qc138-pkg svg { flex: none; width: 14px; height: 14px; }
   .qc138-sheet .qc138-pkg--on { background: #f6e2d8; color: #8a4a2e; }
   .qc138-sheet .qc138-pkg--add { color: rgba(28, 19, 15, 0.45); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; }
   .qc138-sheet .qc138-pkg--add:hover, .qc138-sheet .qc138-pkg--add:focus-visible { color: #2a3a52; outline-color: #2a3a52; }
-  .qc138-sheet .qc138-pkg--none { pointer-events: none; }
   .qc138-sheet .qc138-tile {
-    flex: none; display: grid; place-items: center; box-sizing: border-box; width: 30px; height: 30px; border-radius: 9px;
+    flex: none; display: grid; place-items: center; box-sizing: border-box; width: 20px; height: 20px; border-radius: 5px;
     color: rgba(28, 19, 15, 0.2); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
   }
   .qc138-sheet .qc138-tile.on { color: #2a3a52; background: #f4f1ec; box-shadow: none; }
-  .qc138-sheet .qc138-tile svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .qc138-sheet .qc138-tile svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .qc138-sheet .qc138-tile:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
   /* next move: a subgrid over the last two tracks — the action in track 5, the due figure in track 6 */
   .qc138-sheet .qc138-nx {
@@ -259,22 +290,17 @@
   .qc138-sheet[data-density="compact"] .qc138-sub, .qc138-sheet[data-density="compact"] .qc138-dial-m { display: none; }
   .qc138-sheet[data-density="compact"] .qc138-ws1 { font-size: 14.5px !important; gap: 6px; }
   .qc138-sheet[data-density="compact"] .qc138-ws1 svg { width: 11px; height: 11px; }
-  .qc138-sheet[data-density="compact"] .qc138-pkg { height: 26px; }
-  .qc138-sheet[data-density="compact"] .qc138-tile { width: 24px; height: 24px; border-radius: 7px; }
-  .qc138-sheet[data-density="compact"] .qc138-tile svg { width: 15px; height: 15px; }
+  /* compact keeps one line: the chip shrinks first, then the icons follow it */
+  .qc138-sheet[data-density="compact"] .qc138-mats { flex-direction: row; align-items: center; }
+  .qc138-sheet[data-density="compact"] .qc138-pkg { flex: 0 1 auto; min-width: 0; }
   .qc138-sheet[data-density="compact"] .qc138-nxt { font-size: 14.5px !important; }
   .qc138-sheet[data-density="compact"] .qc138-fqd { font-size: 14.5px !important; }
 
-  /* below 1180px of sheet: the narrow grid; What you sent shows only the package chip */
-  @container qc138sheet (max-width: 1179.98px) {
-    /* ⚠️ ON THE CHILDREN: a container query cannot restyle the container itself */
-    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) 100px minmax(140px, 0.85fr) 56px; }
-    .qc138-sheet .qc138-sep, .qc138-sheet .qc138-tile { display: none; }
-  }
+  /* v138.5 §F — the narrow grid below 1180px of sheet is retired: the one template above holds at 1280 too */
   /* below 900px of sheet (a 1024 window with the sidebar open) What you sent goes, with its heading: at five
      columns the headings would run into each other */
   @container qc138sheet (max-width: 899.98px) {
-    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) minmax(130px, 0.85fr) 56px; }
+    .qc138-sheet .qc138-heads, .qc138-sheet .qc138-row, .qc138-sheet .qc138-peeklab { --qc138-cols: minmax(0, 1.15fr) 92px minmax(0, 1fr) minmax(130px, 0.85fr) 64px; }
     .qc138-sheet .qc138-snt, .qc138-sheet .qc138-h[data-k="sent"] { display: none; }
   }
 }
@@ -491,19 +517,24 @@
     display: block; position: absolute; z-index: 1; height: auto; pointer-events: none; user-select: none;
     transition: transform 250ms cubic-bezier(.2,.8,.2,1), scale 250ms cubic-bezier(.2,.8,.2,1);
   }
+  /* v138.5 §H — smaller, and INSIDE the band: 36 wide, vertically centred, its left edge on the band's left padding
+     (12), nothing over the band's top or bottom. The band's height is unchanged. Hover now only straightens the
+     talon and grows both by 4%, so the art stays inside the band there too. */
+  .qc138-sheet:not([data-density="compact"]) .qc138-gimg--you,
+  .qc138-sheet:not([data-density="compact"]) .qc138-gimg--waiting { left: 12px; top: 50%; bottom: auto; width: 36px; translate: 0 -50%; }
   .qc138-sheet:not([data-density="compact"]) .qc138-gimg--you {
-    left: -6px; bottom: -14px; width: 46px; transform: rotate(-6deg); transform-origin: 50% 80%;
-    filter: drop-shadow(0 4px 5px rgba(28, 19, 15, 0.22)); animation: qc138-jab 6s ease-in-out infinite;
+    transform: rotate(-6deg); transform-origin: 50% 50%;
+    filter: drop-shadow(0 2px 3px rgba(28, 19, 15, 0.22)); animation: qc138-jab 6s ease-in-out infinite;
   }
   .qc138-sheet:not([data-density="compact"]) .qc138-gimg--waiting {
-    left: -10px; bottom: -12px; width: 54px; transform-origin: 50% 90%;
-    filter: drop-shadow(0 4px 5px rgba(28, 19, 15, 0.18)); animation: qc138-wobble 7s ease-in-out infinite;
+    transform-origin: 50% 50%;
+    filter: drop-shadow(0 2px 3px rgba(28, 19, 15, 0.18)); animation: qc138-wobble 7s ease-in-out infinite;
   }
-  .qc138-sheet:not([data-density="compact"]) .qc138-band--you:hover .qc138-gimg--you { transform: translateY(-3px) rotate(0deg); scale: 1.06; animation: none; }
-  .qc138-sheet:not([data-density="compact"]) .qc138-band--waiting:hover .qc138-gimg--waiting { transform: translateY(-3px); scale: 1.06; animation: none; }
+  .qc138-sheet:not([data-density="compact"]) .qc138-band--you:hover .qc138-gimg--you { transform: rotate(0deg); scale: 1.04; animation: none; }
+  .qc138-sheet:not([data-density="compact"]) .qc138-band--waiting:hover .qc138-gimg--waiting { scale: 1.04; animation: none; }
 }
-/* the jab: scale 1 → 1.12 → .98 → 1 over the cycle's last 14% */
-@keyframes qc138-jab { 0%, 86% { scale: 1; } 91% { scale: 1.12; } 96% { scale: 0.98; } 100% { scale: 1; } }
+/* the jab: scale 1 → 1.06 → .98 → 1 over the cycle’s last 14% */
+@keyframes qc138-jab { 0%, 86% { scale: 1; } 91% { scale: 1.06; } 96% { scale: 0.98; } 100% { scale: 1; } } /* v138.5: 1.06 at the peak (was 1.12), so the jab stays inside the band */
 /* the wobble: −8° then +5°, from the base */
 @keyframes qc138-wobble { 0%, 80% { rotate: 0deg; } 86% { rotate: -8deg; } 93% { rotate: 5deg; } 100% { rotate: 0deg; } }
 @media (prefers-reduced-motion: reduce) {
@@ -570,3 +601,46 @@
     .qc138-sheet .qc138-tlw { margin-top: 10px; }
   }
 }
+
+/* ── v139 §B — the practice band: white, a rust ring, faint blush stripes, the stamp; and Pip's row ── */
+.qc138-sheet .qc139-pband {
+  cursor: default; --qc138-c: #a2452a; background: #fff;
+  background-image: repeating-linear-gradient(135deg, rgba(247, 227, 218, 0.55) 0 10px, transparent 10px 20px);
+  box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.45);
+}
+.qc138-sheet .qc139-pband .qc138-gart { visibility: hidden; }
+.qc138-sheet .qc139-pband .qc138-gt { color: #8f4529; }
+.qc138-sheet .qc139-stamp {
+  font: 600 9.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: #a2452a;
+  border: 1.5px solid #a2452a; border-radius: 4px; padding: 3px 7px; transform: rotate(-3deg); background: #fff;
+}
+.qc138-sheet .qc139-practice .qc138-row { background: #fffaf6; box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.25); }
+.qc138-sheet .qc139-practice .qc138-disc { background: #fff !important; color: #a2452a !important; box-shadow: inset 0 0 0 1.5px #a2452a; }
+.qc138-sheet .qc139-practice { animation: qc139-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.qc138-sheet .qc139-practice.out { animation: none; transition: opacity 0.35s, transform 0.35s; opacity: 0; transform: translateY(-8px); }
+@keyframes qc139-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .qc138-sheet .qc139-practice, .qc138-sheet .qc139-practice.out { animation: none; transition: none; transform: none; }
+}
+
+/* ── v139 §C — the band's own mark under Status, Next action and Package: a 34px disc in the art slot, always shown
+   (the default grouping's art is never drawn under these), left edge on the band's padding like the talon's ── */
+.qc138-sheet .qc138-band .qc139-gart { position: relative; visibility: visible !important; width: 34px; height: 34px; flex: none; }
+.qc138-sheet[data-density="compact"] .qc138-band .qc139-gart { width: 30px; height: 30px; }
+.qc138-sheet .qc139-gart--glyph { background: #fff; color: #1c130f; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.qc138-sheet .qc139-gart--glyph .qc139-gsvg { width: 24px; height: 24px; }
+.qc138-sheet .qc139-gart--glyph.grey { color: #8a837b; }
+.qc138-sheet .qc139-gart--pkg { background: #ece6f6; color: #54468a; box-shadow: 0 0 0 1px rgba(84, 70, 138, 0.25); }
+.qc138-sheet .qc139-gart--pkg svg { width: 19px; height: 19px; }
+.qc138-sheet .qc139-gart--pkg.none { background: transparent; box-shadow: 0 0 0 1.5px rgba(84, 70, 138, 0.35); }
+.qc138-sheet .qc139-gart--pkg.none svg { opacity: 0.55; }
+.qc138-sheet .qc139-badge {
+  position: absolute; top: -5px; right: -5px; width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; box-shadow: 0 0 0 2px var(--qc138-bg);
+}
+.qc138-sheet .qc139-badge svg { width: 11px; height: 11px; }
+.qc138-sheet .qc139-badge.rust { background: #b0603e; }
+.qc138-sheet .qc139-badge.grey { background: #9a938b; }
+.qc138-sheet .qc139-badge.navy { background: #2a3a52; }
+/* the closed band's colour, as the pack gives it */
+.qc138-sheet .qc138-band--closed { --qc138-bg: #ebe7e2; }

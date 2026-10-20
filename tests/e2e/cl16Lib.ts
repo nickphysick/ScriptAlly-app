@@ -50,9 +50,10 @@ window.__cl = () => {
 window.__box = (e) => { if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, b: r.bottom, r: r.right }; };
 `;
 
-export const MEMORY_KEYS = ["sa.contactList.v3", "sa.contactList.v4"];
-/* the shared full-screen hook's device key for this page (the URL's ?full=1 is the state; this only puts it back on arrival) */
-export const FULL_KEY = "sa.contactsFull";
+export const MEMORY_KEYS = ["sa.contactList.v3", "sa.contactList.v4", "sa.contactList.v5"];
+/* v19 §G — the device's view (grouping, sort, direction and the pin: the URL's ?full=1 is the pin's state, this only puts
+   it back on arrival), and the pin's two older keys */
+export const VIEW_KEYS = ["qh.cl.view", "sa.pinList.agents", "sa.contactsFull"];
 
 export async function openContacts16(page: Page, vp: VP, opts: { keep?: boolean; query?: string; motion?: boolean } = {}) {
   await page.addInitScript(({ keep, keys, full }) => {
@@ -60,11 +61,11 @@ export async function openContacts16(page: Page, vp: VP, opts: { keep?: boolean;
       for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1");
       if (!keep && !sessionStorage.getItem("__cl16_cleared")) {
         for (const k of keys) sessionStorage.removeItem(k);
-        localStorage.removeItem(full);
+        for (const k of full) localStorage.removeItem(k);
         sessionStorage.setItem("__cl16_cleared", "1");
       }
     } catch { /* private mode */ }
-  }, { keep: !!opts.keep, keys: MEMORY_KEYS, full: FULL_KEY });
+  }, { keep: !!opts.keep, keys: MEMORY_KEYS, full: VIEW_KEYS });
   await openApp(page, `/agents${opts.query ?? ""}`, vp);
   await expect(page.locator(LOADED_ROW16).first()).toBeVisible({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);

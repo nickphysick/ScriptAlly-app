@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "S5 a row per waiting query and per reader",
+  "where": "1512",
+  "ok": true,
+  "detail": "20/18"
+ },
+ {
+  "lock": "S5 a waited bar is rust exactly when it is past the said bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 wrong"
+ },
+ {
+  "lock": "S5 reading rows have no said bar",
+  "where": "1512",
+  "ok": true,
+  "detail": "[[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"]]"
+ },
+ {
+  "lock": "S5 a reading bar counts from the day they asked (its own date, ±1 day)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 of 13 off"
+ },
+ {
+  "lock": "S5 yourMove equals the rose bars and the 'Your move' verdicts",
+  "where": "1512",
+  "ok": true,
+  "detail": "8 / 8 · 10"
+ },
+ {
+  "lock": "S5 an undated ask draws no bar",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 one shared scale (±1px)",
+  "where": "1512",
+  "ok": true,
+  "detail": "0 off"
+ },
+ {
+  "lock": "S5 a row per waiting query and per reader",
+  "where": "1280",
+  "ok": true,
+  "detail": "20/18"
+ },
+ {
+  "lock": "S5 a waited bar is rust exactly when it is past the said bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 wrong"
+ },
+ {
+  "lock": "S5 reading rows have no said bar",
+  "where": "1280",
+  "ok": true,
+  "detail": "[[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"],[\"asked\"]]"
+ },
+ {
+  "lock": "S5 a reading bar counts from the day they asked (its own date, ±1 day)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 of 13 off"
+ },
+ {
+  "lock": "S5 yourMove equals the rose bars and the 'Your move' verdicts",
+  "where": "1280",
+  "ok": true,
+  "detail": "8 / 8 · 10"
+ },
+ {
+  "lock": "S5 an undated ask draws no bar",
+  "where": "1280",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5 one shared scale (±1px)",
+  "where": "1280",
+  "ok": true,
+  "detail": "0 off"
+ }
+]

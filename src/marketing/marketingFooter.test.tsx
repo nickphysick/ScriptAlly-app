@@ -118,6 +118,6 @@ describe("the footer's base line", () => {
     const h = foot();
     const addresses = new Set([...h.matchAll(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g)].map((m) => m[0]));
     expect([...addresses]).toEqual([SUPPORT_EMAIL]);
-    expect(h).not.toContain(">scriptally.ink<");
+    expect(h).not.toContain(">queryhawk.net<");
   });
 });

@@ -13,8 +13,12 @@
  *    ring, re-read for tasks). Its figures are `lib/todoCleared`'s and the board's.
  */
 import React from "react";
+import "../../shell/pageHeroFrame.css";
 import type { TrayKind } from "../../../lib/todoTray";
 import { TRAY_KINDS } from "../../../lib/todoTray";
+
+/** header rules v1.1 — the title wraps rather than stepping down (decision 5) */
+const HERO_RULES_WRAP = true;
 
 export const TODO_EYEBROW = "— TO-DO LIST —";
 export const TODO_SHADOW = "/images/hawk-shadow.png?v=1";
@@ -69,19 +73,77 @@ export const TrayHeader: React.FC<{
   asideN: number;
   asideRef: React.Ref<HTMLButtonElement>;
   onAside: () => void;
+  /** v5.2 §A — on the populated page the card's contents are the calendar (TrayCalendar); caught up and empty keep v5.1's */
+  calendar?: React.ReactNode;
+  /** a calendar filter is on: the card's other rows fade */
+  calFiltered?: boolean;
+  /** v5.2 §F.1 — the populated title: "{o} overdue · {t} due today" (Part B's figures) */
+  urgent?: { overdue: number; today: number } | null;
   children?: React.ReactNode;
-}> = ({ loading, n, caught, msTitle, counts, active, onKind, cleared, onRing, ringTitle, onAdd, asideN, asideRef, onAside, children }) => {
+}> = ({ loading, n, caught, msTitle, counts, active, onKind, cleared, onRing, ringTitle, onAdd, asideN, asideRef, onAside, calendar, calFiltered, urgent, children }) => {
   const left = n ?? 0;
+  /* v5.2 §F.1 — the title says what's urgent, from Part B; it ticks when the figure changes (never on arrival) */
+  const urgentKey = urgent ? `${urgent.overdue}-${urgent.today}` : "";
+  const seenKey = React.useRef<string | null>(null);
+  const tick = !!urgent && seenKey.current !== null && seenKey.current !== urgentKey;
+  React.useEffect(() => { if (urgent) seenKey.current = urgentKey; }, [urgentKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ⚠️ THE TITLE FITS ITS COLUMN, IT NEVER PUSHES THE CARD (found on the integration run: "33 overdue · 2 due today" is
+     533px at 44px, and at 1280 the column beside the card is 452). The header cannot grow (A1), so the title cannot wrap:
+     its font steps down until it fits, floor 26px, re-measured on resize and once the fonts are in. */
+  const rowRef = React.useRef<HTMLDivElement>(null);
+  const h1Ref = React.useRef<HTMLHeadingElement>(null);
+  React.useLayoutEffect(() => {
+    const row = rowRef.current, h1 = h1Ref.current;
+    if (!row || !h1) return undefined;
+    const fit = () => {
+      h1.removeAttribute("data-fit");
+      /* header rules v1.1 (decision 5): a title too long for its column wraps at its size and the stack grows; it is
+         never shrunk. The fit below is kept, unreached, for the record of what v5.2 did. */
+      if (HERO_RULES_WRAP) return;
+      const card = row.querySelector<HTMLElement>('[data-td5="card"]');
+      const gap = 40;
+      const avail = row.clientWidth - (card && getComputedStyle(card).gridColumnStart === "3" ? card.offsetWidth + gap : 0);
+      const w = h1.scrollWidth, base = parseFloat(getComputedStyle(h1).fontSize);
+      /* the line box keeps the unfitted size, so the header's height never moves with the figure (A1) */
+      if (!(avail > 0 && w > avail)) return;
+      h1.style.setProperty("--td52-fit-lh", getComputedStyle(h1).lineHeight);
+      /* width is not quite linear in size (the face's spacing), so step until it fits: a few passes at most */
+      let fs = base;
+      for (let i = 0; i < 4 && h1.scrollWidth > avail && fs > 26; i++) {
+        fs = Math.max(26, Math.floor((fs * avail) / h1.scrollWidth * 10) / 10 - (i ? 0.5 : 0));
+        h1.style.setProperty("--td52-fit", `${fs}px`);
+        h1.setAttribute("data-fit", "");
+      }
+    };
+    fit();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
+    ro?.observe(row);
+    /* and whenever the title's words change (the row's width need not) */
+    const mo = new MutationObserver(fit);
+    mo.observe(h1, { childList: true, characterData: true, subtree: true });
+    void document.fonts?.ready.then(fit);
+    return () => { ro?.disconnect(); mo.disconnect(); };
+  }, [urgentKey, caught, n]);
+  const urgentWords = urgent
+    ? (urgent.overdue || urgent.today ? [urgent.overdue ? `${urgent.overdue} overdue` : "", urgent.today ? `${urgent.today} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today")
+    : "";
   return (
-    <header className="td5-hd" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+    <header className="td5-hd phf" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
       <img className="td5-shadow" data-td5="shadow" alt="" aria-hidden="true" src={TODO_SHADOW} />
-      <div className="td5-tr" data-td5="header-row">
+      <div className="td5-tr" data-td5="header-row" ref={rowRef}>
         <div className="td5-tb" data-td5="title-block">
           <span className="td5-ey" data-td5="eyebrow">{TODO_EYEBROW}</span>
-          <h1 className="td5-title" data-page-title="" data-td5="title" tabIndex={-1}
-            aria-label={caught ? "Your tray is empty" : n === null ? "Tasks in your tray" : `${n} ${titleWords(n)}`}>
+          <h1 ref={h1Ref} className="td5-title" data-page-title="" data-td5="title" tabIndex={-1}
+            aria-label={caught ? "Your tray is empty" : urgent && n !== null ? urgentWords : n === null ? "Tasks in your tray" : `${n} ${titleWords(n)}`}>
             <span aria-hidden="true">
-              {caught ? "Your tray is empty" : (
+              {caught ? "Your tray is empty" : urgent && n !== null ? (
+                <span key={urgentKey} className={`td52-urg${tick ? " tick" : ""}`} data-td52="title-urgent">
+                  {urgent.overdue ? <span className="td52-od" data-td52="title-od">{urgent.overdue} overdue</span> : null}
+                  {urgent.overdue && urgent.today ? " · " : null}
+                  {urgent.today ? <span data-td52="title-today">{urgent.today} due today</span> : null}
+                  {!urgent.overdue && !urgent.today ? "Nothing due today" : null}
+                </span>
+              ) : (
                 <>{n === null ? <span className="td5-blank">00</span> : <span data-td5="title-n">{n}</span>}{" "}{titleWords(n ?? 0)}</>
               )}
             </span>
@@ -94,6 +156,9 @@ export const TrayHeader: React.FC<{
           <button type="button" className="td5-b1" data-td5="add" disabled={loading} onClick={onAdd}>+ Add a task</button>
           <button type="button" className="td5-b2" data-td5="aside" ref={asideRef} disabled={loading} onClick={onAside}>{asideN ? `Set aside · ${asideN}` : "Set aside"}</button>
         </div>
+        {calendar ? (
+          <div className="td5-card td52-cal" data-td5="card" data-td52="cal" data-filtered={calFiltered ? "" : undefined}>{calendar}</div>
+        ) : (
         <div className="td5-card" data-td5="card" data-on={active ?? undefined}>
           <div className="td5-cnt" data-td5="counts" role="group" aria-label="What is in your tray">
             <div className="td5-bar" data-td5="card-bar" aria-hidden="true">
@@ -121,6 +186,7 @@ export const TrayHeader: React.FC<{
             </span>
           </button>
         </div>
+        )}
       </div>
       {children}
     </header>

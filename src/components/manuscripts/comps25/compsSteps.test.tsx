@@ -22,9 +22,12 @@ const files = walk(join(process.cwd(), "src")).map((p) => p.slice(process.cwd().
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
 
 describe("V10 · one steps component", () => {
-  it("only CompsSteps.tsx writes the steps' heading and their three headings", () => {
+  /* comps v28: the heading is the generic "How it works." (Analytics v24's own steps card writes the same words, by
+     design), so it is no longer a fingerprint of this component. The three step headings are comps' own, and stay. */
+  it("only CompsSteps.tsx writes the steps' three headings", () => {
     expect(files.length).toBeGreaterThan(400);
-    for (const words of [STEPS_HEADING, ...HOW_STEPS.map((s) => s.head)]) {
+    expect(STEPS_HEADING).toBe("How it works.");
+    for (const words of HOW_STEPS.map((s) => s.head)) {
       const hits = files.filter((p) => read(p).includes(words));
       expect(hits, `"${words}" is written in ${hits.join(", ")}`).toEqual([HOME]);
     }

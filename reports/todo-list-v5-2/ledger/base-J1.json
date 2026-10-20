@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "J1",
+  "where": "@1512 a send to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 the dot and TASK IN PROGRESS",
+  "ok": false,
+  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":null,\"dot\":false,\"navDashes\":-1,\"navDone\":-1,\"navSt\":null,\"bandSt\":null,\"bandDashes\":-1,\"say\":\"Working through 52 tasks, most urgent first\",\"cn\":\"Your move\",\"status\":true,\"band\":null,\"rows\":52}"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 n dashes, n = the journey's steps + its review",
+  "ok": false,
+  "detail": "-1 vs 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 STEP 1 OF n in the row and the band",
+  "ok": false,
+  "detail": "null | null"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 Next: both counters at 2",
+  "ok": false,
+  "detail": "null | null"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 the review reads n of n",
+  "ok": false,
+  "detail": "null | null"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 leaving restores \"Working through\"",
+  "ok": true,
+  "detail": "Working through 52 tasks, most urgent first"
+ },
+ {
+  "lock": "J1",
+  "where": "@1512 …and the band's group name and StatusDot",
+  "ok": true,
+  "detail": "{\"cn\":\"Your move\",\"st\":true}"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 a send to start",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 the dot and TASK IN PROGRESS",
+  "ok": false,
+  "detail": "{\"jn\":5,\"jk\":1,\"navLab\":null,\"dot\":false,\"navDashes\":-1,\"navDone\":-1,\"navSt\":null,\"bandSt\":null,\"bandDashes\":-1,\"say\":\"Working through 52 tasks, most urgent first\",\"cn\":\"Your move\",\"status\":true,\"band\":null,\"rows\":52}"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 n dashes, n = the journey's steps + its review",
+  "ok": false,
+  "detail": "-1 vs 5"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 STEP 1 OF n in the row and the band",
+  "ok": false,
+  "detail": "null | null"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 Next: both counters at 2",
+  "ok": false,
+  "detail": "null | null"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 the review reads n of n",
+  "ok": false,
+  "detail": "null | null"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 leaving restores \"Working through\"",
+  "ok": true,
+  "detail": "Working through 52 tasks, most urgent first"
+ },
+ {
+  "lock": "J1",
+  "where": "@1280 …and the band's group name and StatusDot",
+  "ok": true,
+  "detail": "{\"cn\":\"Your move\",\"st\":true}"
+ },
+ {
+  "lock": "J1",
+  "where": "a close to switch",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J1",
+  "where": "the switch recounts from the new journey",
+  "ok": false,
+  "detail": "3 → 3; null; null"
+ }
+]

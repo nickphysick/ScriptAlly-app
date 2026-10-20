@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C3",
+  "where": "the button reads 'Get started →'",
+  "ok": true,
+  "detail": "Get started →"
+ },
+ {
+  "lock": "C3",
+  "where": "it is fully in the viewport with the drawer unscrolled",
+  "ok": true,
+  "detail": "[601.5,649.5] st 0"
+ },
+ {
+  "lock": "C3",
+  "where": "no tiles while the intro shows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C3",
+  "where": "no bar while the intro shows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C3",
+  "where": "two headline lines, each one line",
+  "ok": true,
+  "detail": "[[29.265625,29.28],[29.265625,29.28]]"
+ }
+]

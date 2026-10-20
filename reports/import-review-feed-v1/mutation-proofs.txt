@@ -1,0 +1,23 @@
+A-grey-head →   ✗ A1 · the band is navy #2d3a50 — rgb(244, 239, 233)       36 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);   1 failed 
+B-inset →   ✗ B1 · s=welcome centred (16.0 | 0.0) — 16 vs 0   ✗ B1 · s=ack&stage=early centred (16.0 | 292.0) — 16 vs 292   ✗ B1 · s=bookmore centred (16.0 | 292.0) — 16 vs 292 
+B-measure →   ✗ B3 · s=ack&stage=early the text column is the card's width — 477.140625 vs 860   ✗ B2 · s=ack&stage=early the lead is one line — 2 lines: Got it. Your campaign is underway.       36 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`); 
+C-show →   ✗ C2 · chart-card renders nothing inside — "Active queries
+24 Aug
+31 Aug
+7 Sep
+14 Sep
+21 Sep
+28 Sep
+5 Oct
+12 Oct
+19 Oct"   ✗ C2 · chart-card no digit —    ✗ C2 · closed-hoop renders nothing inside — "0 closed
+See all →
+0
+No reply
+0
+Passed on query
+0
+Passed on partial
+0
+Passed on " 
+C-grow →   ✗ C3 · chart-card loading box = loaded box — held 298,252 708×720 · loaded 298,252 708×388   ✗ C3 · closed-hoop loading box = loaded box — held 298,278 341×720 · loaded 298,667 341×199   ✗ C3 · agents-hoop loading box = loaded box — held 665,278 341×720 · loaded 665,667 341×199 

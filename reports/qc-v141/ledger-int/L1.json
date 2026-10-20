@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "{\"n\":{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17},\"on\":[],\"total\":87}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 card sums to the total",
+  "ok": true,
+  "detail": "{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17} = 87 vs 87"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 the total is the rows'",
+  "ok": true,
+  "detail": "87 rows vs 87"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 band population",
+  "ok": true,
+  "detail": "{\"n\":{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17},\"on\":[],\"fit\":\"tight\"}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 band equals card",
+  "ok": true,
+  "detail": "{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17} vs {\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "{\"n\":{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17},\"on\":[],\"total\":87}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 card sums to the total",
+  "ok": true,
+  "detail": "{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17} = 87 vs 87"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 the total is the rows'",
+  "ok": true,
+  "detail": "87 rows vs 87"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 band population",
+  "ok": true,
+  "detail": "{\"n\":{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17},\"on\":[],\"fit\":\"full\"}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 band equals card",
+  "ok": true,
+  "detail": "{\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17} vs {\"you\":17,\"agent\":17,\"quiet\":36,\"closed\":17}"
+ }
+]

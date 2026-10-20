@@ -3,25 +3,25 @@
   "lock": "AN17-18 the page reads a manuscript",
   "where": "1512",
   "ok": true,
-  "detail": "{\"ms\":\"msv12-ms\",\"sent\":8,\"strip\":\"8\",\"funnel\":\"8,3,2,0\"}"
+  "detail": "{\"ms\":\"seed-ms-1\",\"sent\":51,\"strip\":\"51\",\"funnel\":\"21,20,10\"}"
  },
  {
   "lock": "AN17-18 switched to another manuscript with queries",
   "where": "1512",
   "ok": true,
-  "detail": "{\"ms\":\"seed-ms-1\",\"sent\":57,\"strip\":\"57\",\"funnel\":\"57,21,14,1\"}"
+  "detail": "{\"ms\":\"msv12-ms\",\"sent\":8,\"strip\":\"8\",\"funnel\":\"3,3,2\"}"
  },
  {
   "lock": "AN17-18 the strip's first number changes",
   "where": "1512",
   "ok": true,
-  "detail": "8 → 57"
+  "detail": "51 → 8"
  },
  {
-  "lock": "AN17-18 the funnel's top count changes",
+  "lock": "AN17-18 S1's pie changes",
   "where": "1512",
   "ok": true,
-  "detail": "8,3,2,0 → 57,21,14,1"
+  "detail": "21,20,10 → 3,3,2"
  },
  {
   "lock": "AN17-18 without a reload",

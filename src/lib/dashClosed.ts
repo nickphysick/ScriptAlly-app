@@ -178,8 +178,9 @@ export const donutRotation = (tile: Pick<ClosedTile, "total" | "buckets">): numb
 
 /**
  * What each slice's popup says under its name — what happened, and nothing the code does not do.
- * ⚠️ "No reply" IS THE WRITER'S OWN CLOSE. The app closes nothing by itself and counts no days, so
- * the line states the outcome and no threshold.
+ * ⚠️ "No reply" IS THE WRITER'S OWN CLOSE. No query closes without the writer's action ("Close it" when logging a
+ * query, or closing it from the To-do list's suggestion), and this line counts no days, so it states the outcome and
+ * no threshold.
  */
 export const CLOSED_NOTE: Record<ClosedBucketKey, string> = {
   quiet: "Closed with no reply from the agent",

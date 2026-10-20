@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "S1",
+  "where": "exactly one shadow",
+  "ok": true,
+  "detail": "{\"n\":1,\"pe\":\"none\",\"op\":0.145,\"blend\":\"multiply\",\"layerOverflow\":\"clip\",\"sh\":786,\"ch\":786,\"win\":0}"
+ },
+ {
+  "lock": "S1",
+  "where": "no pointer events, .145, multiply",
+  "ok": true,
+  "detail": "{\"n\":1,\"pe\":\"none\",\"op\":0.145,\"blend\":\"multiply\",\"layerOverflow\":\"clip\",\"sh\":786,\"ch\":786,\"win\":0}"
+ },
+ {
+  "lock": "S1",
+  "where": "the sheet clips it, and it adds no scroll",
+  "ok": true,
+  "detail": "{\"n\":1,\"pe\":\"none\",\"op\":0.145,\"blend\":\"multiply\",\"layerOverflow\":\"clip\",\"sh\":786,\"ch\":786,\"win\":0}"
+ },
+ {
+  "lock": "S1",
+  "where": "it drifts",
+  "ok": true,
+  "detail": "matrix(0.97437, -0.224951, 0.224951, 0.97437, 0, 0) → matrix(0.97461, -0.223911, 0.223911, 0.97461, -1.52583, 1.00287)"
+ },
+ {
+  "lock": "S1",
+  "where": "and not under reduced motion",
+  "ok": true,
+  "detail": "matrix(0.97437, -0.224951, 0.224951, 0.97437, 0, 0) → matrix(0.97437, -0.224951, 0.224951, 0.97437, 0, 0)"
+ },
+ {
+  "lock": "S2",
+  "where": "population: the shadow crosses the focus card",
+  "ok": true,
+  "detail": "1399 darkened white points"
+ },
+ {
+  "lock": "S2",
+  "where": "at rest darker than hovered (the card is in front of the shadow)",
+  "ok": true,
+  "detail": "1399 of 1399 points lighter when hovered"
+ },
+ {
+  "lock": "S2",
+  "where": "under reduced motion: no transform, but above the shadow",
+  "ok": true,
+  "detail": "{\"t\":\"none\",\"z\":\"4\",\"sz\":\"3\"}"
+ }
+]

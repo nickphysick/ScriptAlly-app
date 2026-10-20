@@ -8,6 +8,8 @@
  * the housekeeping, ready-to-query and coming-up states can be seen on an account that has work to
  * do. `window.__SA_DASH_NO_CLOSED = true` hands the closed card no queries. `__SA_DASH_HOLD_MS`
  * holds the loading state. Every item drawn is still the account's own, derived for real.
+ * `window.__SA_DASH_NO_AGENTS = true` (v60) hands the page NO agents — the "day one" state, which the
+ * shared harness account (agents are account-wide) can never otherwise reach.
  *
  * ⚠️ THE CALLER CARRIES THE MODE GATE (`import.meta.env.MODE !== "production"`), so a production
  * build never reaches these readers.
@@ -15,17 +17,17 @@
 import { useEffect, useState } from "react";
 import { LIST_ORDER, type ListGroupKey } from "./dashList";
 
-type Flags = { __SA_DASH_DROP?: unknown; __SA_DASH_NO_CLOSED?: unknown; __SA_DASH_HOLD_MS?: unknown };
+type Flags = { __SA_DASH_DROP?: unknown; __SA_DASH_NO_CLOSED?: unknown; __SA_DASH_HOLD_MS?: unknown; __SA_DASH_NO_AGENTS?: unknown };
 const flags = (): Flags => (typeof window === "undefined" ? {} : (window as unknown as Flags));
 
-export interface DashAid { drop: ListGroupKey[]; noClosed: boolean }
+export interface DashAid { drop: ListGroupKey[]; noClosed: boolean; noAgents: boolean }
 
 export function dashAid(): DashAid {
   const f = flags();
   const drop = Array.isArray(f.__SA_DASH_DROP)
     ? (f.__SA_DASH_DROP as unknown[]).filter((k): k is ListGroupKey => LIST_ORDER.includes(k as ListGroupKey))
     : [];
-  return { drop, noClosed: f.__SA_DASH_NO_CLOSED === true };
+  return { drop, noClosed: f.__SA_DASH_NO_CLOSED === true, noAgents: f.__SA_DASH_NO_AGENTS === true };
 }
 
 const holdMs = (): number => {

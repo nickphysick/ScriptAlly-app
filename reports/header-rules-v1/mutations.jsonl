@@ -1,0 +1,8 @@
+{"lock":"HR1-1","break":"hero-top-plus-6","red":true,"exit":1,"first":"  ✗ HR1-1 · contacts 1280 eyebrow (l, t) — 243.02,42 vs 243,36"}
+{"lock":"HR1-3","break":"responses-left-hardcoded","red":true,"exit":1,"first":"  ✗ HR1-3 · responses 1280 eyebrow left on H5 — 64 vs 243"}
+{"lock":"HR1-4","break":"art-plus-20","red":true,"exit":1,"first":"  ✗ HR1-4 · queries 1280 art bottom = stack bottom — 235 vs 215"}
+{"lock":"HR1-5","break":"right-pinned-to-gutter","red":true,"exit":1,"first":"  ✗ HR1-5 · packages 1280 right inset on H6 — 24 vs 64"}
+{"lock":"HR1-6","break":"gap-54","red":true,"exit":1,"first":"  ✗ HR1-6 · analytics 1280 content − stack bottom = 44 — 54.00 (content 371, stack 317)"}
+{"lock":"HR1-7","break":"discover-title-plus-4","red":true,"exit":1,"first":"  ✗ HR1-7 · contacts/discover 1280 title identical — 243.02,63 vs 247.02,63"}
+{"lock":"HR1-8","break":"out-of-scope-moved-6","red":true,"exit":1,"first":"  ✗ HR1-8 · manuscripts 1280 [data-ms21='header'] — 289,133.8,942.1,260 vs 289,111.8,942.1,260"}
+{"lock":"HR1-2","break":"stage-tabs-back","red":true,"exit":1,"first":"  ✗ HR1-2 · queries 1280 eyebrow top 36 — 114"}

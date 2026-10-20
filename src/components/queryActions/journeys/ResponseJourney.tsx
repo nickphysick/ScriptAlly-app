@@ -19,6 +19,7 @@ import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, type EventKey, type Query } from "../../../types";
 import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
+import { isPracticeId, practiceRespond } from "../../../lib/practiceQuery";
 import {
   addDays, dayIso, fmt, futureWeeks, offWeekend, pastAnchors, toDay, up,
 } from "../../../lib/queryActions/dates";
@@ -81,7 +82,8 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
   const late = !isLive(q);
   const closedNoReply = q.status === QueryStatus.NO_RESPONSE;
   const closedOn = toDay(q.lastStatusChange) ?? toDay(q.rejectedDate);
-  const others = db.queries.filter((x) => x.id !== q.id && x.manuscriptId === q.manuscriptId && isLive(x) && x.status !== QueryStatus.OFFER);
+  /* v139 — a practice offer tells nobody: the real queries are not his to mark */
+  const others = isPracticeId(q.id) ? [] : db.queries.filter((x) => x.id !== q.id && x.manuscriptId === q.manuscriptId && isLive(x) && x.status !== QueryStatus.OFFER);
   const otherFirsts = others.map((x) => firstName(db.agents.find((a) => a.id === x.agentId)));
 
   const reqAnch = futureWeeks(recv, [["1w", "In a week", 7], ["2w", "In two weeks", 14], ["4w", "In four weeks", 28]]);
@@ -224,7 +226,7 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
       type, recv: dayOut(recv), s, syn, sendByMode, sendByCustom: dayOut(sendByCustom), remind,
       fb, note, rrNote, offerByMode, offerByCustom: dayOut(offerByCustom), notify,
     }),
-    touched: () => [q.id, ...(type === "offer" && notify ? others.map((x) => x.id) : [])],
+    touched: () => (isPracticeId(q.id) ? [] : [q.id, ...(type === "offer" && notify ? others.map((x) => x.id) : [])]),
     commit: async () => {
       if (!type || !db.currentUser) throw new Error("No response chosen");
       const unit = s.unit === "words" ? "Words" : s.unit === "chapters" ? "Chapters" : "Pages";
@@ -244,6 +246,16 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
         closingReason: "Other", closingNotes: "",
         eventKey: KEY[type],
       };
+      /* v139 §B — THE ONE SEAM: the practice query's write is the in-memory stand-in, fed the same `data`. The screens,
+         the steps and the plan are this journey's own; only where the result goes differs. Nothing below runs for Pip
+         (he has no feed rows, no planned nudge, no others told). */
+      if (isPracticeId(q.id)) {
+        const extra: Record<string, unknown> = {};
+        if (type === "rr" && sendBy) extra.expectedSendDate = dayIso(sendBy);
+        if (type === "partial") { extra.requestSynopsis = syn; if (s.sect) { extra.requestFrom = s.from; extra.requestFromUnit = s.fu ?? (s.unit === "pages" ? "page" : "chapter"); } }
+        practiceRespond(data, extra);
+        return { queryId: q.id, message: `${SAVED_LABEL[type]} · ${agentName(agent)}`, sub: "PRACTICE · NOTHING SAVED", touched: [] };
+      }
       await recordQueryResponse({ userId: db.currentUser.id, query: q, agent, manuscript: ms }, data);
       /* A late reply to a query closed as NO REPLY replaces that ending.
          AFTER THE REPLY, NEVER BEFORE IT, so the query never reads No Response with no closure step

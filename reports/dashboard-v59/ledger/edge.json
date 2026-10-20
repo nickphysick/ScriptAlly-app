@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "R2",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "{\"content\":\"\\\"\\\"\",\"w\":6,\"h\":243.5,\"bg\":\"rgb(162, 69, 42)\",\"left\":\"0px\",\"top\":\"0px\",\"fh\":243.5}"
+ },
+ {
+  "lock": "R2",
+  "where": "1512x900 6px of rgb(162, 69, 42), full height",
+  "ok": true,
+  "detail": "{\"content\":\"\\\"\\\"\",\"w\":6,\"h\":243.5,\"bg\":\"rgb(162, 69, 42)\",\"left\":\"0px\",\"top\":\"0px\",\"fh\":243.5}"
+ },
+ {
+  "lock": "R2",
+  "where": "1280x680 population",
+  "ok": true,
+  "detail": "{\"content\":\"\\\"\\\"\",\"w\":6,\"h\":156,\"bg\":\"rgb(162, 69, 42)\",\"left\":\"0px\",\"top\":\"0px\",\"fh\":156}"
+ },
+ {
+  "lock": "R2",
+  "where": "1280x680 6px of rgb(162, 69, 42), full height",
+  "ok": true,
+  "detail": "{\"content\":\"\\\"\\\"\",\"w\":6,\"h\":156,\"bg\":\"rgb(162, 69, 42)\",\"left\":\"0px\",\"top\":\"0px\",\"fh\":156}"
+ }
+]

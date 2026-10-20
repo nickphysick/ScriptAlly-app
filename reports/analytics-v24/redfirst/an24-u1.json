@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "U1 the page has its text",
+  "where": "1512",
+  "ok": true,
+  "detail": "9421"
+ },
+ {
+  "lock": "U1 no /\\b1 wks\\b/",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "U1 no /\\b0 wks\\b/",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "U1 no /\\b0 days\\b/",
+  "where": "1512",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "U1 weeks are spelled 'wk' / 'wks'",
+  "where": "1512",
+  "ok": true,
+  "detail": "a week figure"
+ },
+ {
+  "lock": "U1 the page has its text",
+  "where": "390",
+  "ok": true,
+  "detail": "9336"
+ },
+ {
+  "lock": "U1 no /\\b1 wks\\b/",
+  "where": "390",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "U1 no /\\b0 wks\\b/",
+  "where": "390",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "U1 no /\\b0 days\\b/",
+  "where": "390",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "U1 weeks are spelled 'wk' / 'wks'",
+  "where": "390",
+  "ok": true,
+  "detail": "a week figure"
+ }
+]

@@ -1,0 +1,66 @@
+
+Running 10 tests using 1 worker
+
+[1/10] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/10] [measure] › tests/e2e/helpCentreV1.measure.ts:76:1 › HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no shortcuts button
+[measure] › tests/e2e/helpCentreV1.measure.ts:76:1 › HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no shortcuts button
+[HC1-H1] 20/20 green
+
+[3/10] [measure] › tests/e2e/helpCentreV1.measure.ts:97:1 › HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's
+[measure] › tests/e2e/helpCentreV1.measure.ts:97:1 › HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's
+[HC1-H2] 10/10 green
+
+[4/10] [measure] › tests/e2e/helpCentreV1.measure.ts:123:1 › HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick
+[measure] › tests/e2e/helpCentreV1.measure.ts:123:1 › HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick
+[HC1-H3] 12/12 green
+
+[5/10] [measure] › tests/e2e/helpCentreV1.measure.ts:160:1 › HC1-H4 · '/' anywhere focuses the search
+[measure] › tests/e2e/helpCentreV1.measure.ts:160:1 › HC1-H4 · '/' anywhere focuses the search
+[HC1-H4] 4/4 green
+
+[6/10] [measure] › tests/e2e/helpCentreV1.measure.ts:180:1 › HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks
+[measure] › tests/e2e/helpCentreV1.measure.ts:180:1 › HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks
+[HC1-C1] 20/20 green
+
+[7/10] [measure] › tests/e2e/helpCentreV1.measure.ts:237:1 › HC1-C2 · an unknown slug goes to /help
+[measure] › tests/e2e/helpCentreV1.measure.ts:237:1 › HC1-C2 · an unknown slug goes to /help
+[HC1-C2] 6/6 green
+
+[8/10] [measure] › tests/e2e/helpCentreV1.measure.ts:252:1 › HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds
+[measure] › tests/e2e/helpCentreV1.measure.ts:252:1 › HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds
+[HC1-C3] 12/12 green
+
+[9/10] [measure] › tests/e2e/helpCentreV1.measure.ts:284:1 › HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production
+[measure] › tests/e2e/helpCentreV1.measure.ts:284:1 › HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production
+[HC1-C4] 6/6 green
+
+[10/10] [measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article
+[measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article
+[HC1-C5] 35/35 green
+
+  1) [measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article 
+
+    Error: HC1-C5: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 40
+    Received:    35
+
+      44 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      45 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 46 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      47 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      48 |   }
+      49 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:46:77)
+        at /Users/nickphysick/ScriptAlly-hc1/tests/e2e/helpCentreV1.measure.ts:331:55
+
+    Error Context: test-results/helpCentreV1.measure.ts-HC-7cc12-n-more-lands-on-its-article-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/helpCentreV1.measure.ts:302:1 › HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article 
+  9 passed (3.1m)
+RC=1

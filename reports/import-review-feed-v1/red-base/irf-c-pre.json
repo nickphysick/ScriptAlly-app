@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "C0",
+  "where": "the hold is real",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C0",
+  "where": "cards to measure",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "C1",
+  "where": "queries-door carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "queries-door renders nothing inside",
+  "ok": false,
+  "detail": "\"No queries yet\\nNo queries out yet.\\n\\nLog a query to one of your 1 agents and it'l\""
+ },
+ {
+  "lock": "C2",
+  "where": "queries-door no digit",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "agents-snap carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "agents-snap renders nothing inside",
+  "ok": false,
+  "detail": "\"Agents on file\\n+1 THIS WEEK\\nof 52 queried\\n0%\\n0 querying\\n0 closed\\n52 not yet quer\""
+ },
+ {
+  "lock": "C2",
+  "where": "agents-snap no digit",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "way carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "way renders nothing inside",
+  "ok": false,
+  "detail": "\"Import your journey\\n\\nBring in the spreadsheet you've been tracking queries in.\\n\\n\""
+ },
+ {
+  "lock": "C2",
+  "where": "way no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "way#1 carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "way#1 renders nothing inside",
+  "ok": false,
+  "detail": "\"Add your materials\\n\\nYour letter, synopsis and opening sample, kept as versions.\\n\""
+ },
+ {
+  "lock": "C2",
+  "where": "way#1 no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "way#2 carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "way#2 renders nothing inside",
+  "ok": false,
+  "detail": "\"Build your comps\\n\\nMost agents want two comparable titles in a query.\\n\\nAdd a comp\""
+ },
+ {
+  "lock": "C2",
+  "where": "way#2 no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "way#3 carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "way#3 renders nothing inside",
+  "ok": false,
+  "detail": "\"Record a version\\n\\nSave the draft you're sending, so you know which one each agen\""
+ },
+ {
+  "lock": "C2",
+  "where": "way#3 no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "panel carries the skeleton class",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "panel renders nothing inside",
+  "ok": false,
+  "detail": "\"— FOUNDING WRITER —\""
+ },
+ {
+  "lock": "C2",
+  "where": "panel no digit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C3",
+  "where": "queries-door loading box = loaded box",
+  "ok": true,
+  "detail": "held 298,252 643×429 · loaded 298,252 643×429"
+ },
+ {
+  "lock": "C3",
+  "where": "agents-snap loading box = loaded box",
+  "ok": true,
+  "detail": "held 298,707 643×159 · loaded 298,707 643×159"
+ },
+ {
+  "lock": "C3",
+  "where": "way loading box = loaded box",
+  "ok": true,
+  "detail": "held 967,343 487×72 · loaded 967,343 487×72"
+ },
+ {
+  "lock": "C3",
+  "where": "way#1 loading box = loaded box",
+  "ok": true,
+  "detail": "held 967,424 487×72 · loaded 967,424 487×72"
+ },
+ {
+  "lock": "C3",
+  "where": "way#2 loading box = loaded box",
+  "ok": true,
+  "detail": "held 967,506 487×72 · loaded 967,506 487×72"
+ },
+ {
+  "lock": "C3",
+  "where": "way#3 loading box = loaded box",
+  "ok": true,
+  "detail": "held 967,588 487×91 · loaded 967,588 487×91"
+ },
+ {
+  "lock": "C3",
+  "where": "panel loading box = loaded box",
+  "ok": true,
+  "detail": "held 967,714 487×150 · loaded 967,714 487×150"
+ }
+]

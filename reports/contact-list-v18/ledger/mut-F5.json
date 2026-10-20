@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "F5",
+  "where": "two pops at 400ms",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "F5",
+  "where": "a pop is position: fixed",
+  "ok": false,
+  "detail": "absolute,absolute"
+ },
+ {
+  "lock": "F5",
+  "where": "the ring's pop has risen above the drawer's top",
+  "ok": true,
+  "detail": "-2.2 vs 8.0"
+ },
+ {
+  "lock": "F5",
+  "where": "nothing clips it (elementFromPoint at its centre returns it)",
+  "ok": false,
+  "detail": "false,false"
+ },
+ {
+  "lock": "F5",
+  "where": "gone by 1500ms (from the save landing)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F5",
+  "where": "under reduced motion no pop is ever drawn",
+  "ok": true,
+  "detail": "0"
+ }
+]

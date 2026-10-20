@@ -14,7 +14,7 @@ vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).fireb
 vi.mock("./toast/ToastProvider", async () => (await import("../test/pageSmoke")).toastMock());
 
 import { Agents } from "./Agents";
-import { DiscoverNewAgents } from "./DiscoverNewAgents";
+import { DiscoverPage } from "./agents/discover1/DiscoverPage";
 
 const list = () => <Agents searchQuery="" onNavigate={noNavigate} active />;
 
@@ -81,16 +81,33 @@ describe("/agents renders", () => {
 });
 
 describe("/agents/discover renders", () => {
+  /* Discover v1 (18 Oct): the route renders the coming-soon face while DISCOVER_LIVE is false — the navy panel */
   it("renders without throwing", () => {
-    expect(() => renderPage(<DiscoverNewAgents onNavigate={noNavigate} />, "/agents/discover")).not.toThrow();
+    expect(() => renderPage(<DiscoverPage onNavigate={noNavigate} />, "/agents/discover")).not.toThrow();
   });
 
   it("…and produces its own chrome", () => {
-    const html = renderPage(<DiscoverNewAgents onNavigate={noNavigate} />, "/agents/discover");
-    expect(html).toContain("Discover new agents");
+    const html = renderPage(<DiscoverPage onNavigate={noNavigate} />, "/agents/discover");
+    expect(html).toContain("out looking");
   });
 
   it("renders without throwing with a manuscript to match against", () => {
-    expect(() => renderPageSeeded(<DiscoverNewAgents onNavigate={noNavigate} />, "/agents/discover")).not.toThrow();
+    expect(() => renderPageSeeded(<DiscoverPage onNavigate={noNavigate} />, "/agents/discover")).not.toThrow();
+  });
+
+  /* ⚠️ THE POPULATED STATE TOO (CLAUDE.md: smoke every branch a first-run panel hides). The live face only mounts
+     through the dev review aid, which reads a window global — so the smoke gives this render one, and takes it away. */
+  it("the live face renders over the review aid's fixture, and states its own title", () => {
+    const g = globalThis as unknown as { window?: Record<string, unknown> };
+    const had = "window" in g;
+    const before = g.window;
+    g.window = { ...(before ?? {}), __SA_DV_STATE: "live" };
+    try {
+      const html = renderPageSeeded(<DiscoverPage onNavigate={noNavigate} />, "/agents/discover");
+      expect(html).toContain("to consider");
+      expect(html).not.toContain("out looking");
+    } finally {
+      if (had) g.window = before; else delete g.window;
+    }
   });
 });

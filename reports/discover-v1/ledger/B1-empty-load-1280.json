@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B1",
+  "where": "1280 read both",
+  "ok": true,
+  "detail": "{\"first\":{\"pt\":28,\"ph\":554.578125,\"sh\":1529.9375,\"blank\":true,\"sct\":109.75},\"last\":{\"pt\":28,\"ph\":554.578125,\"sh\":1529.9375,\"blank\":false,\"sct\":105.75}}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel top held, within its scroller",
+  "ok": true,
+  "detail": "28 → 28 (the scroller itself 109.75 → 105.75)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 panel height held",
+  "ok": true,
+  "detail": "554.578125 → 554.578125 (first read had the blank title)"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 the settled panel names the book",
+  "ok": true,
+  "detail": ""
+ }
+]

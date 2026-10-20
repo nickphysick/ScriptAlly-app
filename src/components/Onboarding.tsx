@@ -381,12 +381,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             title={aStart.title} name={currentUser?.name} error={branchError}
             initial={aBook ?? { ...emptyManuscriptFields(), ageCategory: "", title: aStart.title }}
             onBack={() => setAStart(null)}
-            /* It ends where it always did: the manuscript is written once, here, and set-up
-               finishes on the Contact list. */
+            /* The manuscript is written once, here. Set-up then ends on the dashboard (Dashboard v60):
+               manual set-up exits land there, and the dashboard's doors are the next step. The
+               dashboard is the ABSENCE of a hatch, so nothing is written to sessionStorage. */
             onContinue={async (f) => {
               setABook(f);
               if (await saveBranchManuscript(f, aStart.status)) {
-                sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
                 await finishOnboarding();
               }
             }}
@@ -412,11 +412,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               initialBook={b2Draft}
               onEnsureManuscript={ensureBranchBManuscript}
               onAddByHand={async () => {
-                // Manual-add finish: create the held manuscript once, then finish onto the agent
-                // list, where the app's real Add-an-agent form lives.
+                // Manual-add finish: create the held manuscript once, then finish on the dashboard
+                // (Dashboard v60), whose "Agents on file" door is where the first agent is added.
                 if (await ensureBranchBManuscript()) {
                   setBranchError(null);
-                  sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
                   await finishOnboarding();
                 }
               }}

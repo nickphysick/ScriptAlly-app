@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "HS1-C6",
+  "where": "@1512 \"Search for an agent\" is not done yet (precondition)",
+  "ok": true,
+  "detail": "{\"done\":\"false\",\"skipped\":null,\"tick\":\"\"}"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1512 skip ticks the row (skipped)",
+  "ok": true,
+  "detail": "{\"done\":\"true\",\"skipped\":\"true\",\"tick\":\"–\"}"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1512 skip raises n",
+  "ok": true,
+  "detail": "2 → 3"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1512 Undo lowers it",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1512 a real save after a skip shows a plain tick",
+  "ok": true,
+  "detail": "{\"done\":\"true\",\"skipped\":null,\"tick\":\"✓\"}"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1280 \"Search for an agent\" is not done yet (precondition)",
+  "ok": true,
+  "detail": "{\"done\":\"false\",\"skipped\":null,\"tick\":\"\"}"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1280 skip ticks the row (skipped)",
+  "ok": true,
+  "detail": "{\"done\":\"true\",\"skipped\":\"true\",\"tick\":\"–\"}"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1280 skip raises n",
+  "ok": true,
+  "detail": "2 → 3"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1280 Undo lowers it",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "HS1-C6",
+  "where": "@1280 a real save after a skip shows a plain tick",
+  "ok": true,
+  "detail": "{\"done\":\"true\",\"skipped\":null,\"tick\":\"✓\"}"
+ }
+]

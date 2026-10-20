@@ -176,15 +176,21 @@ describe("/manuscripts/comps renders", () => {
     const html = renderPageSeeded(page(), "/manuscripts/comps");
     /* comps v25: the query line left the page (which comps a letter names is logged on the letter) */
     expect(html, "the query line is still on the page").not.toContain("Your query line");
-    /* the title panel, the strip and the library all rendered, with the comp as a row. Comps v27: the steps band
-       left the page (they open in a pop-up), so the header's link is what renders, and no steps do. */
-    expect(html, "the title panel did not render").toContain('data-hp3="title"');
-    expect(html, "the strip did not render").toContain("At a glance");
-    expect(html, "the pop-up's link did not render").toContain('data-cv="how-link"');
+    /* comps v28: the shared light header (its card counts where the comps are used), the shelf of cards and "What's
+       landing" all rendered, with the comp as a card. The steps still open in a pop-up, so none are on the page. */
+    expect(html, "the light header did not render").toContain('data-slh="header"');
+    expect(html, "the header did not count the comps").toContain("1 comp on file");
+    expect(html, "the header card's rows did not render").toContain('data-slh="row"');
+    expect(html, "the pop-up's link did not render").toContain('data-cx="how-link"');
     expect(html, "the steps are on the page").not.toContain('data-cv="how-step"');
-    expect(html, "the library did not render").toContain("Your comparable titles library");
-    expect(html, "the comp's row did not render").toMatch(/data-cv="row"[^>]*>[\s\S]*The Smoke Comp/);
-    expect(html, "the row's next move did not run").toMatch(/Log in a letter|Add a publisher|Add a year/);
+    expect(html, "the shelf did not render").toContain("Your comp shelf");
+    expect(html, "the comp's card did not render").toMatch(/data-cx="card"[^>]*>[\s\S]*The Smoke Comp/);
+    expect(html, "the card's slip did not run").toMatch(/data-slip="(notready|sent|draft|shelf)"/);
+    expect(html, "What's landing did not render").toContain("What’s landing");
+    /* v25's list, strip and title panel are gone */
+    expect(html, "the strip is still on the page").not.toContain("At a glance");
+    expect(html, "the v25 list is still on the page").not.toContain('data-cv="row"');
+    expect(html, "the v27 title panel is still on the page").not.toContain('data-hp3="title"');
     /* the working Scout panel is not mounted, and nothing inline expands */
     expect(html, "ScoutPanel is mounted on the page").not.toMatch(/ct-sbody|ct-upsell/);
   });

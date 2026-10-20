@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "T1",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"text\":\"Activity feed9+▲\",\"bottom\":892,\"sheet\":892,\"bg\":\"rgb(27, 36, 51)\",\"desk\":\"rgb(27, 36, 51)\",\"badge\":\"9+\"}"
+ },
+ {
+  "lock": "T1",
+  "where": "no LAST 30 DAYS",
+  "ok": true,
+  "detail": "\"Activity feed9+▲\""
+ },
+ {
+  "lock": "T1",
+  "where": "on the sheet's bottom edge",
+  "ok": true,
+  "detail": "tab 892 · sheet 892"
+ },
+ {
+  "lock": "T1",
+  "where": "the desk's colour",
+  "ok": true,
+  "detail": "rgb(27, 36, 51) · desk rgb(27, 36, 51)"
+ },
+ {
+  "lock": "T1",
+  "where": "the badge is the unseen count",
+  "ok": true,
+  "detail": "badge 9+ · 120 rows in the drawer → 9+"
+ },
+ {
+  "lock": "T1",
+  "where": "opening the drawer clears it",
+  "ok": true,
+  "detail": "0 badge(s)"
+ },
+ {
+  "lock": "T1",
+  "where": "and stays cleared after a reload",
+  "ok": true,
+  "detail": "0 badge(s)"
+ }
+]

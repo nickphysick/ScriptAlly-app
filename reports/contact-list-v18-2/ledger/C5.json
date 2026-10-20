@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C5",
+  "where": "no keycap on /agents",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "the shell's ⌘K is still present",
+  "ok": true,
+  "detail": "⌘K"
+ },
+ {
+  "lock": "C5",
+  "where": "/ still focuses the search",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C5",
+  "where": "H still opens Housekeeping",
+  "ok": true,
+  "detail": "open"
+ },
+ {
+  "lock": "C5",
+  "where": "no keycap in the drawer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "no 'Press' or keycap hint in the drawer's text",
+  "ok": true,
+  "detail": "none"
+ }
+]

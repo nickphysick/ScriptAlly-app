@@ -26,9 +26,10 @@ import { BetaStrip } from "./BetaStrip";
 import { FeedbackDock } from "./FeedbackDock";
 import { WorkspaceShell } from "./WorkspaceShell";
 import {
-  BETA_MODE, BETA_PILL, BETA_STRIP_REPORT_LINK, FEEDBACK_FAB, FEEDBACK_KINDS,
-  FEEDBACK_PRIVACY_NOTE, feedbackContextLines,
+  BETA_MODE, BETA_PILL, BETA_STRIP_REPORT_LINK, FEEDBACK_ACCOUNT_LINE, FEEDBACK_FAB, FEEDBACK_KINDS,
+  FEEDBACK_NEVER, FEEDBACK_QUESTION,
 } from "../../lib/beta";
+import { clearFeedbackDraft, setFeedbackDraft, EMPTY_DRAFT } from "../../lib/feedbackStore";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "utf8"));
@@ -211,13 +212,27 @@ describe("the feedback dock", () => {
    * ⚠️ THE WRITER SEES EXACTLY WHAT TRAVELS. A context block they cannot inspect is one they have
    * to take on trust, and the thing being asked for is trust about their own work in progress.
    */
+  /* Help system v1 E.1 retarget — the same law (the writer sees exactly what travels, and the limit in words), in the
+     panel's new plain words: PAGE · BROWSER · WINDOW · VERSION · ACCOUNT, and what is never sent. The block shows once
+     a kind is chosen, so the kept draft is set first and cleared after. */
   it("prints the captured context and states the limit in words", () => {
+    setFeedbackDraft({ ...EMPTY_DRAFT, kind: "An idea" });
+    try {
+      const html = dock(true);
+      for (const k of ["PAGE", "BROWSER", "WINDOW", "VERSION", "ACCOUNT"]) expect(html).toContain(`<dt>${k}</dt>`);
+      expect(html).toContain(esc(FEEDBACK_ACCOUNT_LINE));
+      expect(html).toContain(esc(FEEDBACK_NEVER));
+      /* the question follows the kind */
+      expect(html).toContain(esc(FEEDBACK_QUESTION["An idea"].label));
+    } finally { clearFeedbackDraft(); }
+  });
+
+  it("shows nothing below the kind until a kind is chosen", () => {
+    clearFeedbackDraft();
     const html = dock(true);
-    for (const line of feedbackContextLines({ route: "/queries", viewport: "", browser: "", uid: "u1" })) {
-      expect(html).toContain(line.split(" · ")[0]);
-    }
-    expect(html).toContain("PAGE · /queries");
-    expect(html).toContain(esc(FEEDBACK_PRIVACY_NOTE));
+    expect(html).toContain('role="radiogroup"');
+    expect(html).not.toContain("<textarea");
+    expect(html).not.toContain("<select");
   });
 
   /**

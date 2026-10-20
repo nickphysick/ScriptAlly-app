@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "D1",
+  "where": "each ledger follows the comparator (5 ledgers, 41 same-points-same-queried neighbours)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "the fixture has ties to order",
+  "ok": true,
+  "detail": "41"
+ },
+ {
+  "lock": "D1",
+  "where": "the whole queue's first is the first ledger's first (most points)",
+  "ok": true,
+  "detail": "msv12-agent-5:reply vs msv12-agent-5:reply"
+ },
+ {
+  "lock": "D1",
+  "where": "Up next's question is the first card's",
+  "ok": true,
+  "detail": "How long does Sun-hee take to reply?"
+ },
+ {
+  "lock": "D1",
+  "where": "Coming up follows the same order",
+  "ok": true,
+  "detail": "msv12-agent-4:reply,clv-fx-stub0:reply,clv-fx-never:reply,msv12-agent-6:reply,clv181-bare:reply"
+ },
+ {
+  "lock": "D1",
+  "where": "each By agent group orders its agents by their first task under the comparator (2 groups)",
+  "ok": true,
+  "detail": "true"
+ }
+]

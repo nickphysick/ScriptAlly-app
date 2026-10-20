@@ -389,7 +389,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
   it("⚠️ nothing between the window and the content states a width of its own", () => {
     const CHAIN: [string, string, string[]][] = [
       ["Contact list", "components/agents/agentList.css", [".aglist", ".aglist .agl-page", ".aglist .agl-inner", ".aglist .agl-wpg"]],
-      ["Discover", "components/agents/discover.css", [".dv2", ".dv-wpg", ".dv-wrap"]],
+      /* Discover v1 (18 Oct): the page root — no width of its own; the grid pays the column. Header rules v1.1 (19 Oct):
+         `.dv1-hd` left this chain on purpose. It is the shared hero frame now (--hero-w, centred on the sheet), as the
+         Contact list's header (`.cl17-hd`) and Analytics' (`.a21-lh`) are, and none of the three is in this chain. */
+      ["Discover", "components/agents/discover1/discover1.css", [".dv1-page", ".dv1-ae"]],
       ["Manuscripts", "components/manuscripts/manuscripts.css", [".msv1", ".msv-wpg", ".msv-wrap"]],
       /* comps v2 (27 Sep): the page's own group under `.cpv-page`, the scroller's direct child */
       ["Comparable titles", "components/manuscripts/compsV2.css", [".cpv-page", ".cpv-group", ".cpv-main"]],
@@ -451,7 +454,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Contact list", "components/agents/agentList.css"],
       ["Manuscripts", "components/manuscripts/manuscripts.css"],
       ["Comparable titles", "components/manuscripts/compsV2.css"],
-      ["Discover", "components/agents/discover.css"],
+      ["Discover", "components/agents/discover1/discover1.css"],
       ["Submission packages", "components/packages/packagesV2.css"],
       /* ⚠️ QUERY CENTRE JOINED THE CENSUS LAST, and it was the alias's only caller. */
       ["Query Centre", "components/shell/f12.css"],
@@ -548,7 +551,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       return css.slice(i, css.indexOf("}", i));
     };
     const comps = readFileSync(resolve(__dirname, "../manuscripts/compsV2.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    const discover = readFileSync(resolve(__dirname, "../agents/discover.css"), "utf8");
+    const discover = readFileSync(resolve(__dirname, "../agents/discover1/discover1.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     /* ⚠️ THE VALUE IS EXTRACTED AND COMPARED, never tested with a `(?!0)` lookahead — `\s*`
        backtracks to zero width and the lookahead runs against the space, so `padding: 0` "matches".
        That shape has bitten this repo twice and is banned. */
@@ -559,7 +562,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const cpvRoot = rule(comps, ".cpv-page");
     expect(cpvRoot, "Comparable titles' root states a padding shorthand — it would zero the gutter AND pad its top").not.toMatch(/(^|[;{\s])padding\s*:/);
     expect(cpvRoot, "Comparable titles pads its own root's top — its header would open lower than every other full header").not.toMatch(/padding-top\s*:/);
-    expect(padTop(rule(discover, ".dv-hero")), "Discover's hero pads its own top again — it rendered a 154px gap against a 70px token").toBe("0");
+    /* RE-POINTED (Discover v1, 18 Oct): `.dv-hero` is deleted with the feature page. The new root states no padding
+       at all — the header's own 44px is inside the header, the mock's, measured by DV1 B1 against the ref. */
+    const dvRoot = rule(discover, ".dv1-page");
+    expect(dvRoot, "Discover's root states a padding — it would zero the gutter or pad its own top").not.toMatch(/(^|[;{\s])padding(-top)?\s*:/);
   });
 
   /* ══ §3 — THE SCROLL HEMS ═══════════════════════════════════════════════════════════════════ */
@@ -1090,7 +1096,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        identical" report all over again. Ten routes, eight call sites — the Tasks family is three
        pages through one layout. */
     const CONVERTED = [
-      ["Discover", "../DiscoverNewAgents.tsx"],
+      /* DISCOVER LEFT FOR OPTED_OUT ON 18 OCT (Discover v1) — see below. */
       /* ANALYTICS LEFT FOR OPTED_OUT ON 29 SEP (analytics v2a) — see below. */
       ["Tasks family (To-do · Calendar · Noteboard)", "../todo/TasksPageLayout.tsx"],
     ] as const;
@@ -1129,8 +1135,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
          header as the first row of its own group with the story rail beneath its rule — the comps
          and packages shape — so the grid's masthead is null. 6 → 7. */
       ["Analytics", "../QueryAnalytics.tsx"],
+      /* DISCOVER JOINED ON 18 OCT (Discover v1, ref design-refs/discover-v1/discover-v1.html): its head is its own —
+         the light two-state header when live, the navy panel while coming soon — so the grid's masthead is null. 7 → 8. */
+      ["Discover", "../agents/discover1/DiscoverPage.tsx"],
     ] as const;
-    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(7);
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(8);
     for (const [page, file] of OPTED_OUT) {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");
@@ -1201,7 +1210,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     /* the page roots of every converted page: a definite height, and NOT a second scrollport */
     const ROOTS: [string, string, string][] = [
       ["Contact list", "components/agents/agentList.css", ".aglist"],
-      ["Discover", "components/agents/discover.css", ".dv2"],
+      ["Discover", "components/agents/discover1/discover1.css", ".dv1-page"],
       ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv1"],
       ["Comparable titles", "components/manuscripts/compsV2.css", ".cpv-page"],
       ["Submission packages", "components/packages/packagesV2.css", ".ppv-page"],
@@ -1237,7 +1246,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const PAGES: [string, string][] = [
       ["Manuscripts", "../AllManuscripts.tsx"],
       ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
-      ["Discover", "../DiscoverNewAgents.tsx"],
+      ["Discover", "../agents/discover1/DiscoverPage.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
     ];

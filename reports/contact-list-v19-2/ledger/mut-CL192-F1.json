@@ -1,0 +1,344 @@
+[
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 website and email are stacked (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 the population: rows with an email and no website",
+  "ok": true,
+  "detail": "27"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-near: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-near: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "615.34375 vs 652.140625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-soon: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-soon: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "834.59375 vs 871.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-passed20: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-passed20: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "904.59375 vs 941.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-12: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-12: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "974.59375 vs 1011.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-bang: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-bang: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1044.59375 vs 1081.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-9: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-9: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1114.59375 vs 1151.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-2: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-2: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1329.59375 vs 1366.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-remind: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-remind: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1399.59375 vs 1436.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-passed865: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-cal-passed865: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1469.59375 vs 1506.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-1: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-1: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1539.59375 vs 1576.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-nowin-1: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-nowin-1: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1609.59375 vs 1646.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rj-agent-2: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rj-agent-2: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "1679.59375 vs 1716.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-11: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-11: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2099.59375 vs 2136.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-7: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-7: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2169.59375 vs 2206.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-8: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-8: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2239.59375 vs 2276.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-4: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-4: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2454.59375 vs 2491.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-6: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-6: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2594.59375 vs 2631.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-nowin-2: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-nowin-2: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2664.59375 vs 2701.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rj-agent-3: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rj-agent-3: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2804.59375 vs 2841.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-chase: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-chase: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "2944.59375 vs 2981.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rej-agent-1: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rej-agent-1: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "3084.59375 vs 3121.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-gap: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-gap: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "3224.59375 vs 3261.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-3: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-3: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "3369.59375 vs 3406.390625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rj-agent-1: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 rj-agent-1: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "3793.84375 vs 3830.640625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-close: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 thin-ag-close: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "3863.84375 vs 3900.640625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-10: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-10: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "3933.84375 vs 3970.640625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-5: the email's centre is within 2px of the name's first-line centre",
+  "ok": false,
+  "detail": "centres 21.9 · tops 23.0"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 seed-agent-5: the hidden \"+ Add website\" is under the email, still hidden at rest",
+  "ok": false,
+  "detail": "4148.09375 vs 4184.890625 · hidden"
+ },
+ {
+  "lock": "CL192-F1",
+  "where": "@1280 a row with both is unchanged: the website on line 1, the email under it",
+  "ok": true,
+  "detail": "{\"id\":\"zz192-both\",\"nameC\":551.84375,\"nameTop\":542.34375,\"emC\":572.1484375,\"emTop\":563.75,\"emBottom\":580.546875,\"webC\":555.3515625,\"addTop\":null,\"addVis\":null,\"mailFirst\":false}"
+ }
+]

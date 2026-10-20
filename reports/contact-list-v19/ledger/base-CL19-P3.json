@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the list pins (precondition)",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the hero goes",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the band is 66 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the band is rgb(42, 58, 82)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the first letter's left is the count's left ±2",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 pin: \"[data-cl19='pin']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the list pins (precondition)",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the hero goes",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the band is 66 ±1 tall",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the band is rgb(42, 58, 82)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the first letter's left is the count's left ±2",
+  "ok": false,
+  "detail": "undefined vs undefined"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "P3",
+  "where": "population: four faces, unanswered",
+  "ok": true,
+  "detail": "{\"state\":\"idle\",\"noted\":null,\"faces\":4,\"failed\":null,\"now\":\"\",\"on\":[]}"
+ },
+ {
+  "lock": "P3",
+  "where": "one call, with mood 3 and this ISO week",
+  "ok": true,
+  "detail": "1 call(s) · {\"data\":{\"mood\":3,\"week\":\"2026-W42\"}} · expected 2026-W42"
+ },
+ {
+  "lock": "P3",
+  "where": "Noted, and this week's dot reads Good",
+  "ok": true,
+  "detail": "{\"state\":\"noted\",\"noted\":\"Noted — thank you.Say more →Change\",\"faces\":1,\"failed\":null,\"now\":\"3\",\"on\":[\"Good\"]}"
+ },
+ {
+  "lock": "P3",
+  "where": "1512x900 the Noted line is cut nowhere",
+  "ok": true,
+  "detail": "all inside the frame"
+ },
+ {
+  "lock": "P3",
+  "where": "1280x680 the Noted line is cut nowhere",
+  "ok": true,
+  "detail": "all inside the frame"
+ },
+ {
+  "lock": "P3",
+  "where": "a stored answer for this week loads Noted",
+  "ok": true,
+  "detail": "{\"state\":\"noted\",\"noted\":\"Noted — thank you.Say more →Change\",\"faces\":1,\"failed\":null,\"now\":\"3\",\"on\":[\"Good\"]}"
+ },
+ {
+  "lock": "P3",
+  "where": "a refusal: no Noted, the faces back, the failure line",
+  "ok": true,
+  "detail": "{\"state\":\"failed\",\"noted\":null,\"faces\":4,\"failed\":\"That didn't send. Try again?\",\"now\":\"3\",\"on\":[\"Good\"]}"
+ },
+ {
+  "lock": "P3",
+  "where": "the refused face clears back to the stored answer",
+  "ok": true,
+  "detail": "[\"Good\"]"
+ }
+]

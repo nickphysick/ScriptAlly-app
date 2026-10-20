@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Contact list v13 §8 — THE LOADING BEAT. While the agents load, the page draws the desk (v15), the
- * next-step section, the "Your agents" bar's text, the A–Z strip and five rows as shimmering shapes;
+ * next-step section, the "Your agents" bar's text, the A–Z strip and twelve rows as shimmering shapes (v19 §G: the toolbar, the headings and rows, row-shaped);
  * the perched art, the pills, the tabs and the Housekeeping tab appear only with data.
  *
  * ⚠️ NOTHING JUMPS WHEN THE DATA ARRIVES BECAUSE THESE ARE THE PAGE'S OWN COMPONENTS (lock 12). Each
- * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, `ContactIndexStrip` and
+ * placeholder IS its real counterpart — the same `ContactStrip`, `ContactNextStep`, `YourAgentsBar`, and
  * `ContactRows` — drawn over a handful of
  * PLACEHOLDER agents through the page's own derivations, in the same parents, with their text made
  * transparent and a shimmer painted on (contactV13.css, `[data-loading]`). A box drawn by hand to
@@ -19,16 +19,17 @@
  */
 import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
-import { agentFacts, contactGroups, letterCounts, sortFacts } from "../../../lib/contactList";
-import { ContactIndexStrip } from "./ContactIndexStrip";
+import { agentFacts, contactGroups, sortFacts } from "../../../lib/contactList";
 import { ContactRows } from "./ContactRows";
 import type { CardPrimary } from "../../../lib/agentCard";
 
-/* ONE line, so a placeholder row sits at the row's own 80 floor at every width (a two-line wishlist
+/* ONE line, so a placeholder row sits at the row's own floor at every width (a two-line wishlist
    made it 86 at 1280, measured) */
 const WISH = "Character-led suspense.";
-/** five rows under one letter */
-const PLACEHOLDERS: Agent[] = ["Abbot", "Ashby", "Arden", "Avery", "Aston"].map((surname, i) => ({
+/** v19 §G — twelve rows under one letter: enough to run the skeleton's card past the fold at every width, as the loaded
+ *  list's card does, so the card's foot never rises and falls as the list arrives */
+const SURNAMES = ["Abbot", "Ashby", "Arden", "Avery", "Aston", "Allen", "Archer", "Ames", "Ayres", "Alder", "Astley", "Aird"];
+const PLACEHOLDERS: Agent[] = SURNAMES.map((surname, i) => ({
   id: `sk-${i}`,
   name: `Agent ${surname}`,
   agency: `${surname} Literary`,
@@ -38,6 +39,9 @@ const PLACEHOLDERS: Agent[] = ["Abbot", "Ashby", "Arden", "Avery", "Aston"].map(
   mswlNotes: WISH,
   materialsWanted: ["Query letter", "Synopsis"],
   submissionStatus: "Open",
+  /* v19 §G — a date, a typical email and no website, so the columns the skeleton fits are near the loaded list's */
+  dateAdded: "2026-02-01T00:00:00.000Z",
+  email: `${surname.toLowerCase()}@example.com`,
 }) as unknown as Agent);
 
 const noop = () => {};
@@ -52,16 +56,14 @@ export const ContactSkeleton: React.FC<{
   const byId = useMemo(() => new Map(facts.map((x) => [x.agent.id, x])), [facts]);
   /* v16 §C: the list loads as it opens — ungrouped */
   const groups = useMemo(() => contactGroups("none", facts), [facts]);
-  const counts = useMemo(() => letterCounts(facts), [facts]);
 
   return (
     <>
       <div className="clv-main">
-        <section className="cl14-ws cl16-list" aria-hidden="true">
-          {/* v17 §B — the sheet's top row at its loaded height; the count and the tools wait for data */}
-          <div className="cl17-sv"><span className="cl17-showing">{"\u00a0"}</span>{controls}</div>
+        <section className="cl14-ws cl16-list cl19-card" aria-hidden="true">
+          {/* v19 §A — the list's own head (the toolbar) at its loaded height, inert; the letters and tools wait for data */}
+          {controls}
           <div className="cl14-list">
-          <ContactIndexStrip total={facts.length} counts={counts} marked={null} onPick={noop} />
           <div>
             <ContactRows
               groups={groups} totals={null} byId={byId} nowMs={nowMs} genreHit={() => false} ungrouped byLetter={false}

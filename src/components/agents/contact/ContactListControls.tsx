@@ -10,32 +10,18 @@
  * The page owns the state and the ONE popover (the strip's dropdowns share it), so at most one is ever open.
  */
 import React from "react";
-import { ListPill, PopOption, PopSection, Popover, type PopoverState } from "../../shell/ListPills";
+import { PopOption, PopRule, PopSection, Popover, type PopoverState } from "../../shell/ListPills";
 import { type GroupKey, GROUP_OPTIONS } from "../../../lib/contactList";
 
 /** every popover the list's controls own — the bar's one and the strip's dropdowns */
-export type ContactPop = "group" | "status" | "open" | "queried" | "more";
+export type ContactPop = "group" | "status" | "open" | "queried" | "more" | "filters";
 
-export interface ContactListControlsProps {
-  find: string;
-  onFind: (v: string) => void;
-  findRef?: React.Ref<HTMLInputElement>;
-  groupKey: GroupKey;
-  onGroup: (k: GroupKey) => void;
-  pop: PopoverState<ContactPop>;
-  /** the "/" key cap on Find */
-  findKey?: React.ReactNode;
-  /** anything after the grouping: the density toggle, the key sheet, Full screen */
-  extra?: React.ReactNode;
-  /** v17 §B — the search box lives in the header's filter row (`ContactFind`); this then draws the view tools alone */
-  noFind?: boolean;
-}
 
 /** v17 §B — the search box, on its own: the header's filter row holds it, beside the filter pills. */
 export const ContactFind: React.FC<{
   find: string; onFind: (v: string) => void; findRef?: React.Ref<HTMLInputElement>; findKey?: React.ReactNode; disabled?: boolean;
 }> = ({ find, onFind, findRef, findKey, disabled }) => (
-  <label className="cl13-find cl17-find" data-clv="find" data-cl13-find="banner" data-cl17="find">
+  <label className="cl13-find cl17-find ltb-search" data-clv="find" data-cl13-find="banner" data-cl17="find">
     <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
     </svg>
@@ -44,28 +30,20 @@ export const ContactFind: React.FC<{
   </label>
 );
 
-export const ContactListControls: React.FC<ContactListControlsProps> = ({
-  find, onFind, findRef, groupKey, onGroup, pop, findKey, extra, noFind,
-}) => {
-  const group = GROUP_OPTIONS.find((g) => g.key === groupKey) ?? GROUP_OPTIONS[0];
-  const mine = (k: ContactPop) => pop.open === k && pop.anchor?.closest('[data-cl13-ctl="banner"]') != null;
-  return (
-    <div className={`cl13-ctl${noFind ? " cl17-vt" : ""}`} data-cl13-ctl="banner" data-cl17={noFind ? "view-tools" : undefined}>
-      {noFind ? null : <ContactFind find={find} onFind={onFind} findRef={findRef} findKey={findKey} />}
-      {/* v16 §C: no Sort pill — the column headings sort */}
-      <ListPill k="group" icon={"☰"} prefix="Grouped:" value={group.label} caret set={groupKey !== "none"} open={mine("group")} onPress={(a) => pop.toggle("group", a)} />
-      {extra}
-
-      {mine("group") && (
-        <Popover k="group" anchor={pop.anchor} width={280} label="Group the list">
-          <PopSection title="Group the list by">
-            {GROUP_OPTIONS.map((g) => (
-              <PopOption key={g.key} k={`group:${g.key}`} kind="radio" on={groupKey === g.key} label={g.label} line={g.line}
-                onPick={() => { onGroup(g.key); pop.close(); }} />
-            ))}
-          </PopSection>
-        </Popover>
-      )}
-    </div>
-  );
-};
+/** v18 §B — the grouping menu on its own, opened by the list header's group name (the same options and handler as
+ *  the Grouped pill had) */
+export const GroupMenu: React.FC<{ groupKey: GroupKey; onGroup: (k: GroupKey) => void; pop: PopoverState<ContactPop> }> = ({ groupKey, onGroup, pop }) =>
+  pop.open === "group" && pop.anchor?.closest('[data-cl18="list-header"]') ? (
+    <Popover k="group" anchor={pop.anchor} width={280} label="Group the list">
+      <PopSection title="Group the list by">
+        {/* v19 §E — Letter · Status · Action required · Country · Priority, then a rule and No grouping */}
+        {GROUP_OPTIONS.map((g) => (
+          <React.Fragment key={g.key}>
+            {g.key === "none" ? <PopRule /> : null}
+            <PopOption k={`group:${g.key}`} kind="radio" on={groupKey === g.key} label={g.label} line={g.line}
+              onPick={() => { onGroup(g.key); pop.close(); }} />
+          </React.Fragment>
+        ))}
+      </PopSection>
+    </Popover>
+  ) : null;

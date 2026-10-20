@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D2",
+  "where": "live the band is drawn",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "live no figure element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D2",
+  "where": "live outside Your part and the loop, no digit and no dash",
+  "ok": true,
+  "detail": "The community catalogueBuilt by writers · checked by hand"
+ },
+ {
+  "lock": "D2",
+  "where": "live the heading, Your part and the loop remain",
+  "ok": true,
+  "detail": "The community catalogueBuilt by writers · checked by hand"
+ },
+ {
+  "lock": "D2",
+  "where": "done the band is drawn",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "done no figure element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D2",
+  "where": "done outside Your part and the loop, no digit and no dash",
+  "ok": true,
+  "detail": "The community catalogueBuilt by writers · checked by hand"
+ },
+ {
+  "lock": "D2",
+  "where": "done the heading, Your part and the loop remain",
+  "ok": true,
+  "detail": "The community catalogueBuilt by writers · checked by hand"
+ },
+ {
+  "lock": "D2",
+  "where": "none the band is drawn",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D2",
+  "where": "none no figure element",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D2",
+  "where": "none outside Your part and the loop, no digit and no dash",
+  "ok": true,
+  "detail": "The community catalogueBuilt by writers · checked by hand"
+ },
+ {
+  "lock": "D2",
+  "where": "none the heading, Your part and the loop remain",
+  "ok": true,
+  "detail": "The community catalogueBuilt by writers · checked by hand"
+ }
+]

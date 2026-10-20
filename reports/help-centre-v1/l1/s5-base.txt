@@ -1,0 +1,31 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/switcherV2.measure.ts:137:1 › S5 · M opens the menu from the page, and nowhere it should not
+  1) [measure] › tests/e2e/switcherV2.measure.ts:137:1 › S5 · M opens the menu from the page, and nowhere it should not 
+
+    Test timeout of 900000ms exceeded.
+
+    Error: locator.click: Test timeout of 900000ms exceeded.
+    Call log:
+      - waiting for locator('.aglist input, [data-clv="find"] input, input[placeholder*="Find"]').filter({ visible: true }).first()
+
+
+      147 |     /* an input: the page's own find field */
+      148 |     const find = page.locator('.aglist input, [data-clv="find"] input, input[placeholder*="Find"]').filter({ visible: true }).first();
+    > 149 |     await find.click(); await page.keyboard.press("m"); await page.waitForTimeout(150);
+          |                ^
+      150 |     L.check("S5 · M in an input does nothing", ctx, !(await menuOpen(page)), "");
+      151 |     await find.fill("");
+      152 |     /* a textarea, placed on the page for the probe — the guard is by element kind */
+        at /Users/nickphysick/ScriptAlly-hc1-base/tests/e2e/switcherV2.measure.ts:149:16
+
+    Error Context: test-results/switcherV2.measure.ts-S5-·-af598-e-and-nowhere-it-should-not-measure/error-context.md
+
+
+  Slow test file: [measure] › tests/e2e/switcherV2.measure.ts (15.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [measure] › tests/e2e/switcherV2.measure.ts:137:1 › S5 · M opens the menu from the page, and nowhere it should not 
+  1 passed (15.4m)

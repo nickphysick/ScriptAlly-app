@@ -16,6 +16,7 @@
  */
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
+import { whereItStands, type WhereKey } from "./qcSummary";
 
 export type GlyphKey = "q" | "pr" | "ps" | "fr" | "fs" | "of" | "cl";
 
@@ -93,12 +94,24 @@ export interface Qc138Filters {
   past: boolean;
   missing: boolean;
   overYear: boolean;
+  /** v140 §D — the two quick picks with no field of their own: Your move (v141.1: the "With you" set) and Waiting to hear back (an
+   *  agent-court query not past its date). Overdue is `past` and Offers is `offers`. */
+  you: boolean;
+  waiting: boolean;
+  /** v141 §A — "Where it stands": one of the four sets (lib/qcSummary `whereItStands`), or none. The hero card, the
+   *  pinned band and the Filters menu all read and write this one field. */
+  where: WhereKey | null;
 }
-export const emptyQc138Filters = (): Qc138Filters => ({ stages: [], dueWeek: false, offers: false, sent: [], past: false, missing: false, overYear: false });
+export const emptyQc138Filters = (): Qc138Filters => ({ stages: [], dueWeek: false, offers: false, sent: [], past: false, missing: false, overYear: false, you: false, waiting: false, where: null });
 /** how many facets are on (the glyph row's stage counts as one) */
 export const qc138FilterCount = (f: Qc138Filters): number =>
-  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
+  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0)
+  + (f.you ? 1 : 0) + (f.waiting ? 1 : 0) + (f.where ? 1 : 0);
 export const moreCount = (f: Qc138Filters): number => (f.past ? 1 : 0) + (f.missing ? 1 : 0) + (f.overYear ? 1 : 0);
+/** v138.5 §E — the Filters button's badge: how many of the panel's five groups (Stage, Due this week, Offers, What
+    you sent, More filters) have something set. More filters counts once however many of its switches are on. */
+export const qc138FilterGroups = (f: Qc138Filters): number =>
+  (f.stages.length ? 1 : 0) + (f.dueWeek ? 1 : 0) + (f.offers ? 1 : 0) + (f.sent.length ? 1 : 0) + (moreCount(f) ? 1 : 0);
 
 export const MORE_SWITCHES: { key: "past" | "missing" | "overYear"; label: string; line: string }[] = [
   { key: "past", label: "Past their reply date", line: "Quiet past the date you expected" },
@@ -139,6 +152,8 @@ export const startOfDay = (ms: number): number => { const d = new Date(ms); d.se
 export interface Filterable {
   status: string;
   expectedMs: number | null;
+  /** v141.1 — the nudge window's undated branch reads the stage's start */
+  stageStartMs?: number | null;
   court: string;
   pastExpected: boolean;
   sentMs: number | null;
@@ -174,6 +189,11 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
   if (skip !== "past" && f.past && !r.pastExpected) return false;
   if (skip !== "missing" && f.missing && !nothingRecorded(r)) return false;
   if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
+  /* v141.1 — the "Your move" quick pick IS the "With you" set (the nudge window, lib/nudgeWindow), so the two can never
+     disagree; `isYourMoveRow` stays for the Contact list and the "Who it's with" bands, which this pack leaves alone */
+  if (skip !== "you" && f.you && whereItStands(r, now) !== "you") return false;
+  if (skip !== "waiting" && f.waiting && !(r.court === "agent" && !r.pastExpected)) return false;
+  if (skip !== "where" && f.where && whereItStands(r, now) !== f.where) return false;
   return true;
 }
 

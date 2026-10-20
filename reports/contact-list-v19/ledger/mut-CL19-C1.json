@@ -1,0 +1,440 @@
+[
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 the heading order",
+  "ok": true,
+  "detail": "[\"Agent\",\"Date added\",\"Website and email\",\"Replies\",\"Query status\"]"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Agent\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "350.0 vs 350.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Date added\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "729.0 vs 729.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Website and email\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "843.0 vs 843.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Replies\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "1164.0 vs 1164.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"Query status\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "1283.0 vs 1283.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 the population: emails and websites to check, the long ones among them",
+  "ok": true,
+  "detail": "29"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"abaragrantliteraryagency.co.uk\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": true,
+  "detail": "0 > 0 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"theo.abara@abaragrantliteraryagency.co.uk\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "300 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"wren@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "139 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"hester@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "147 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"cormac@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "155 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"noah@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "138 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"alasdair@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "158 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"ana@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "129 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"tom@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "131 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"thin-ag-remind@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "203 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"ottoline@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "157 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"elinor@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "145 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"bea@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "128 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"tobias@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "145 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"iris@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "126 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"rachel@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "147 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"david@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "142 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"priya@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "140 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"sam@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "132 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"rufus@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "140 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"tamsin@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "151 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"thin-ag-chase@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "191 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"rej-agent-1@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "172 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"thin-ag-gap@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "176 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"marcus@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "155 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"imogen@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "155 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"thin-ag-close@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "187 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"peter@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "140 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1512 \"joan@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "133 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 the heading order",
+  "ok": true,
+  "detail": "[\"Agent\",\"Date added\",\"Website and email\",\"Replies\",\"Query status\"]"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Agent\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "350.0 vs 350.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Date added\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "542.0 vs 542.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Website and email\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "656.0 vs 656.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Replies\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "932.0 vs 932.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"Query status\" starts on its column's left ±1",
+  "ok": true,
+  "detail": "1051.0 vs 1051.0"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 the population: emails and websites to check, the long ones among them",
+  "ok": true,
+  "detail": "29"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"abaragrantliteraryagency.co.uk\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": true,
+  "detail": "0 > 0 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"theo.abara@abaragrantliteraryagency.co.uk\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "255 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"wren@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "118 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"hester@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "124 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"cormac@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "131 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"noah@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "117 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"alasdair@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "134 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"ana@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "109 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"tom@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "111 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"thin-ag-remind@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "172 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"ottoline@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "133 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"elinor@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "123 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"bea@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "108 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"tobias@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "123 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"iris@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "107 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"rachel@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "124 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"david@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "120 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"priya@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "118 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"sam@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "112 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"rufus@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "119 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"tamsin@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "128 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"thin-ag-chase@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "162 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"rej-agent-1@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "145 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"thin-ag-gap@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "149 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"marcus@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "131 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"imogen@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "131 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"thin-ag-close@example.test\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "158 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"peter@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "118 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 \"joan@example.com\" is whole (scrollWidth ≤ clientWidth, inside its cell)",
+  "ok": false,
+  "detail": "113 > 90 · out false"
+ },
+ {
+  "lock": "CL19-C1",
+  "where": "@1280 website and email stack at 1280 (the branch is entered)",
+  "ok": true,
+  "detail": "true"
+ }
+]

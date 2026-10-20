@@ -28,3 +28,26 @@ claim is named beside it. The files are recoverable at `954a9413` (the base this
 
 - `frame2Recon.measure.ts` is a recon script (no assertions) that still pairs `/todo` with `.tlc`; it was already stale before this pack.
 - `corkboardV1.measure.ts` A1 reads `[data-todo-v2="noteboard-link"]` on `/todo` inside a `catch`; on the desktop that link is gone, which A1's claim (no "Noteboard" on the page) is satisfied by.
+
+## To-do list v5.1 (15 Oct) — rewritten, not retired
+
+v5.1 moved the journeys onto the desk, the composer into the desk, the sheet onto one screen and set aside into the tray. These TD5 cases measured what moved and were REWRITTEN in place, each for the claim it still makes:
+
+| Lock | Was | Now |
+|---|---|---|
+| TD5 C1 | the navy row sticks to the page and squares off; the strip and a band stick under it | the navy row is the one-screen sheet's fixed top; the strip and a band stick under it **inside the tray's own scroller** (precondition: the tray has scrolled) |
+| TD5 D1 | E opens the drawer; Escape in the drawer closes only the drawer | E starts the journey **in the desk card**; `j` in a journey moves nothing; Escape (no answers) leaves it; S and D open the popover at their section; N opens the compose card |
+| TD5 D2 | a sent save through the drawer | the same save **on the desk** (`[data-td5-slot]`) — the stamp, the row, the slip, cleared +1, Undo byte-for-byte |
+| TD5 E1 | each bucket's door is the drawer | each journey bucket opens its journey **inside the desk card**, with no drawer over the page and no scrim; the step it opens on is recorded |
+| TD5 F1 | "+ Add a task" opens the v2 composer in a dimming half drawer | the three doors open the **compose card on the desk**; every field written, compared with the v2 composer's write of the same input; a task surfacing today lands under Your tasks, selected; a note keeps its paper and stays off the tray |
+
+**Unit locks retargeted with their law unchanged** (each says so at the assertion): `sidebarCapture.test.tsx` SB9 (`n` is two pages' own adds), `noteboardTask.test.ts` (the desk papers a dateless note only), `todoActions.test.ts` + `tasksCarryover.test.tsx` (the clamp also takes the deadline), `tasksAuditBoundary.test.tsx` (the engine hands the boundary the query's newest change), `todoColumns.test.ts` (the partition fixture uses surfaced tasks), `boardSettings.test.tsx` (the ONE list is `setAsideItems`; the restore path is REWRITTEN — each kind restores through its own field).
+
+**`hiddenItems` is DELETED** (`lib/taskSettings.ts`), replaced by `setAsideItems`; its three unit cases are rewritten as TD5 I4 (unit).
+
+**Two other pages' locks re-pointed by v5.1** (law unchanged; each says so at the assertion):
+
+| Lock | Was | Now |
+|---|---|---|
+| `corkboardV1` CB1 B2 | the header's Task opens the v2 composer in the "Add a task" half drawer, in Task mode | it opens the **compose card on the desk** (`[data-td5="compose"]`) in Task mode; nothing is written |
+| `headerPanelV2` P8 | the header's Set aside opens a popover, and the popover is above the header | the header's Set aside **switches the tray to its Set aside tab** (Part I.5): the tab is chosen, its centre is on screen and nothing covers it |

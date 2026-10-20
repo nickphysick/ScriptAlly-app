@@ -56,19 +56,11 @@ export async function openContacts(page: Page, vp: { width: number; height: numb
      case is the one measuring the memory (`keep`). A stored value that IS the defaults needs no reload. */
   if (!opts.keep) {
     const had = await page.evaluate(() => {
-      /* v16: the key is `.v4`, the list opens ungrouped, and full screen is remembered per device. */
-      const KEY = "sa.contactList.v4";
-      const v = sessionStorage.getItem(KEY);
-      sessionStorage.removeItem(KEY);
-      const full = localStorage.getItem("sa.contactsFull") !== null;
-      localStorage.removeItem("sa.contactsFull");
-      if (v === null) return full;
-      try {
-        const o = JSON.parse(v);
-        const empty = { status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" };
-        return full || !(o.group === "none" && o.sort === "surname" && o.reversed === false && !o.search && o.density === "comfortable" && !o.glance
-          && JSON.stringify(o.filters) === JSON.stringify(empty));
-      } catch { return true; }
+      /* v19 §G: the visit's record is `.v5`; the grouping, sort and pin are the device's `qh.cl.view` */
+      let had = false;
+      for (const k of ["sa.contactList.v4", "sa.contactList.v5"]) { if (sessionStorage.getItem(k) !== null) had = true; sessionStorage.removeItem(k); }
+      for (const k of ["qh.cl.view", "sa.pinList.agents", "sa.contactsFull"]) { if (localStorage.getItem(k) !== null) had = true; localStorage.removeItem(k); }
+      return had;
     });
     if (had) { await page.reload(); await page.waitForLoadState("domcontentloaded"); }
   }

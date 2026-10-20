@@ -1,0 +1,296 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 hd present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":0,\"w\":1159.25,\"h\":1483.765625,\"fs\":15} vs {\"x\":0,\"y\":0,\"w\":1159.75,\"h\":1537.171875,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 hd w",
+  "ok": true,
+  "detail": "1159.3 vs ref 1159.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 panel present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":28,\"w\":1159.25,\"h\":504,\"fs\":15} vs {\"x\":0,\"y\":28,\"w\":1159.75,\"h\":504,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 panel font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 panel x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 panel w",
+  "ok": true,
+  "detail": "1159.3 vs ref 1159.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 panel y",
+  "ok": true,
+  "detail": "28.0 vs ref 28.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow present",
+  "ok": true,
+  "detail": "{\"x\":64,\"y\":80.609375,\"w\":574.5625,\"h\":18,\"fs\":12} vs {\"x\":64,\"y\":80.109375,\"w\":574.84375,\"h\":18,\"fs\":12}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow font size",
+  "ok": true,
+  "detail": "12 vs ref 12"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow x",
+  "ok": true,
+  "detail": "64.0 vs ref 64.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow w",
+  "ok": true,
+  "detail": "574.6 vs ref 574.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow y",
+  "ok": true,
+  "detail": "80.6 vs ref 80.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 eyebrow h",
+  "ok": true,
+  "detail": "18.0 vs ref 18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title present",
+  "ok": true,
+  "detail": "{\"x\":64,\"y\":116.609375,\"w\":574.5625,\"h\":138.21875,\"fs\":64} vs {\"x\":64,\"y\":116.109375,\"w\":574.84375,\"h\":138.21875,\"fs\":64}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title font size",
+  "ok": true,
+  "detail": "64 vs ref 64"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title x",
+  "ok": true,
+  "detail": "64.0 vs ref 64.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title w",
+  "ok": true,
+  "detail": "574.6 vs ref 574.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title y",
+  "ok": true,
+  "detail": "116.6 vs ref 116.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 title h",
+  "ok": true,
+  "detail": "138.2 vs ref 138.2"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 lede present",
+  "ok": true,
+  "detail": "{\"x\":64,\"y\":276.828125,\"w\":574.5625,\"h\":125.5625,\"fs\":19} vs {\"x\":64,\"y\":276.328125,\"w\":574.84375,\"h\":125.5625,\"fs\":19}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 lede font size",
+  "ok": true,
+  "detail": "19 vs ref 19"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 lede x",
+  "ok": true,
+  "detail": "64.0 vs ref 64.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 lede y",
+  "ok": true,
+  "detail": "276.8 vs ref 276.3"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 notify present",
+  "ok": true,
+  "detail": "{\"x\":64,\"y\":432.390625,\"w\":242.03125,\"h\":47,\"fs\":17} vs {\"x\":64,\"y\":431.890625,\"w\":242.03125,\"h\":48,\"fs\":17}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 notify font size",
+  "ok": true,
+  "detail": "17 vs ref 17"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 notify x",
+  "ok": true,
+  "detail": "64.0 vs ref 64.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 notify w",
+  "ok": true,
+  "detail": "242.0 vs ref 242.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 notify h",
+  "ok": true,
+  "detail": "47.0 vs ref 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how present",
+  "ok": true,
+  "detail": "{\"x\":318.03125,\"y\":432.390625,\"w\":217.359375,\"h\":47,\"fs\":17} vs {\"x\":318.03125,\"y\":431.890625,\"w\":217.359375,\"h\":48,\"fs\":17}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how font size",
+  "ok": true,
+  "detail": "17 vs ref 17"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how x",
+  "ok": true,
+  "detail": "318.0 vs ref 318.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how w",
+  "ok": true,
+  "detail": "217.4 vs ref 217.4"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how h",
+  "ok": true,
+  "detail": "47.0 vs ref 48.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 disc present",
+  "ok": true,
+  "detail": "{\"x\":703.25,\"y\":80,\"w\":400,\"h\":400,\"fs\":15} vs {\"x\":703.75,\"y\":80,\"w\":400,\"h\":400,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 disc font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 disc x",
+  "ok": true,
+  "detail": "703.3 vs ref 703.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 disc w",
+  "ok": true,
+  "detail": "400.0 vs ref 400.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 disc h",
+  "ok": true,
+  "detail": "400.0 vs ref 400.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 steps present",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":572,\"w\":1159.25,\"h\":658.171875,\"fs\":15} vs {\"x\":0,\"y\":572,\"w\":1159.75,\"h\":658.171875,\"fs\":15}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 steps font size",
+  "ok": true,
+  "detail": "15 vs ref 15"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 steps x",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 steps w",
+  "ok": true,
+  "detail": "1159.3 vs ref 1159.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 notify (relative)",
+  "ok": true,
+  "detail": "30.0 vs ref 30.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 how (relative)",
+  "ok": true,
+  "detail": "30.0 vs ref 30.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 panelBelowButtons (relative)",
+  "ok": true,
+  "detail": "52.6 vs ref 52.1"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 discCentre (relative)",
+  "ok": true,
+  "detail": "0.0 vs ref 0.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 steps (relative)",
+  "ok": true,
+  "detail": "40.0 vs ref 40.0"
+ }
+]

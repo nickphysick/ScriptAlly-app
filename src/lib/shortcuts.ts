@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Query Centre" | "Responses" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Query Centre", "Responses", "The agent card"];
+export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -51,6 +51,7 @@ export const SHORTCUTS = {
   todoClose:        { chords: [k("Escape")], label: "Close the open task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   /* To-do list v5 (desktop): the desk's action. j/k and / are the entries above, read by the same page. */
   todoAct:          { chords: [k("e"), k("Enter")], label: "Act on the task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
+  todoAdd:          { chords: [k("n")], label: "Add a task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
   calBack:          { chords: [k("ArrowLeft")], label: "A week earlier", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   calForward:       { chords: [k("ArrowRight")], label: "A week later", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   calToday:         { chords: [k("t")], label: "Back to today", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
@@ -58,7 +59,6 @@ export const SHORTCUTS = {
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* comps v25: the list's own keys — not in a field, and not while the drawer or the picker is open */
   compsFind:        { chords: [k("/")], label: "Find a comp", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
-  compsFull:        { chords: [k("f")], label: "Full-screen list", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* the Contact list's keys (v13 §8) — not in a field, and not while a card, the drawer or a popover is
      open */
   contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
@@ -68,9 +68,19 @@ export const SHORTCUTS = {
   contactsOpen:     { chords: [k("Enter")], label: "Open the agent's card", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsAct:      { chords: [k("l")], label: "Start the agent's next action", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
-  /* v16 §E — the list takes the whole content area; Escape leaves it (unless an agent's panel is open: Escape is the panel's first) */
-  contactsFull:     { chords: [k("f")], label: "Full screen list", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  /* v16 §E, v138.6 §C — the pin: owned by the shared pin hook (usePinList), not by the page; Escape leaves it last */
+  contactsFull:     { chords: [k("f")], label: "Pin the list", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  /* Discover v1 — the Scout's picks: they act on the lead card, and stand down in a field, over a modal and while any
+     escape-stack layer is open (the Tune drawer, the passed list, the query drawer) */
+  discoverAdd:      { chords: [k("a")], label: "Add the lead pick to your contact list", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverPass:     { chords: [k("n")], label: "Not for me", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverSkip:     { chords: [k("s")], label: "Skip for now", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverNext:     { chords: [k("j")], label: "Next pick", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
+  discoverPrev:     { chords: [k("k")], label: "Previous pick", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
   /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
+  /* v138.6 §A — the pin: owned by the shared pin hook (usePinList), not by the page */
+  qcPin:            { chords: [k("f")], label: "Pin the list", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  todoPin:          { chords: [k("f")], label: "Pin the list", scope: "To-do list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   qcFind:           { chords: [k("/")], label: "Find a query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcDown:           { chords: [k("j"), k("ArrowDown")], label: "Next query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcUp:             { chords: [k("k"), k("ArrowUp")], label: "Previous query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },

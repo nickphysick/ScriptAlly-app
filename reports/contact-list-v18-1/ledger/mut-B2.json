@@ -1,0 +1,164 @@
+[
+ {
+  "lock": "B2",
+  "where": "a fixture agent for you",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "B2",
+  "where": "you: the stand slip is the Profile body's first child",
+  "ok": true,
+  "detail": "slip"
+ },
+ {
+  "lock": "B2",
+  "where": "you: its headline is v16's stand heading for this state",
+  "ok": true,
+  "detail": "Send Theo the full"
+ },
+ {
+  "lock": "B2",
+  "where": "you: its text is v16's paragraph (a sentence, ending in a full stop)",
+  "ok": true,
+  "detail": "Theo asked for the full of Harbour of Glass on 19 Sep."
+ },
+ {
+  "lock": "B2",
+  "where": "you: the Profile footer has no primary button",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "B2",
+  "where": "you: the button opens the old primary's journey (sent or offer or resp)",
+  "ok": true,
+  "detail": "Mark full sent → sent"
+ },
+ {
+  "lock": "B2",
+  "where": "you: pressing it steps the journey into the panel (drawer request spy: sent)",
+  "ok": true,
+  "detail": "sent"
+ },
+ {
+  "lock": "B2",
+  "where": "a fixture agent for waiting",
+  "ok": true,
+  "detail": "msv12-agent-5"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: the stand slip is the Profile body's first child",
+  "ok": true,
+  "detail": "slip"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: its headline is v16's stand heading for this state",
+  "ok": true,
+  "detail": "Waiting on Sun-hee"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: its text is v16's paragraph (a sentence, ending in a full stop)",
+  "ok": true,
+  "detail": "You queried Sun-hee with Harbour of Glass on 1 Jul."
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: the Profile footer has no primary button",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: the button opens the old primary's journey (resp)",
+  "ok": true,
+  "detail": "Record a response → resp"
+ },
+ {
+  "lock": "B2",
+  "where": "waiting: pressing it steps the journey into the panel (drawer request spy: resp)",
+  "ok": true,
+  "detail": "resp"
+ },
+ {
+  "lock": "B2",
+  "where": "a fixture agent for notq",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "B2",
+  "where": "notq: the stand slip is the Profile body's first child",
+  "ok": true,
+  "detail": "slip"
+ },
+ {
+  "lock": "B2",
+  "where": "notq: its headline is v16's stand heading for this state",
+  "ok": true,
+  "detail": "Not queried yet"
+ },
+ {
+  "lock": "B2",
+  "where": "notq: its text is v16's paragraph (a sentence, ending in a full stop)",
+  "ok": true,
+  "detail": "You haven’t queried Wren with Harbour of Glass yet."
+ },
+ {
+  "lock": "B2",
+  "where": "notq: the Profile footer has no primary button",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "B2",
+  "where": "notq: the button opens the old primary's journey (log)",
+  "ok": true,
+  "detail": "Log a query → log"
+ },
+ {
+  "lock": "B2",
+  "where": "notq: pressing it steps the journey into the panel (drawer request spy: log)",
+  "ok": true,
+  "detail": "log"
+ },
+ {
+  "lock": "B2",
+  "where": "a fixture agent for closed",
+  "ok": true,
+  "detail": "msv12-agent-6"
+ },
+ {
+  "lock": "B2",
+  "where": "closed: the stand slip is the Profile body's first child",
+  "ok": true,
+  "detail": "slip"
+ },
+ {
+  "lock": "B2",
+  "where": "closed: its headline is v16's stand heading for this state",
+  "ok": true,
+  "detail": "Rosa passed"
+ },
+ {
+  "lock": "B2",
+  "where": "closed: its text is v16's paragraph (a sentence, ending in a full stop)",
+  "ok": true,
+  "detail": "Your query for Harbour of Glass is closed. You can query Rosa again with your next book."
+ },
+ {
+  "lock": "B2",
+  "where": "closed: the Profile footer has no primary button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B2",
+  "where": "closed: a closed agent has no slip button",
+  "ok": true,
+  "detail": "null"
+ }
+]

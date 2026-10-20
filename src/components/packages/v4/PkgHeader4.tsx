@@ -15,6 +15,7 @@
  * ⚠️ THE TITLE KEEPS `data-page-title`.
  */
 import React from "react";
+import "../../shell/pageHeroFrame.css";
 import type { Split } from "../../../lib/packageReplies";
 import "./packagesV4.css";
 
@@ -95,7 +96,7 @@ export const PkgHeader4: React.FC<{
   onAddMaterial: () => void;
   children?: React.ReactNode;
 }> = ({ loading, live, msTitle, card, onNew, onAddMaterial, children }) => (
-  <header className="pk4-hd" data-pk4="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+  <header className="pk4-hd phf" data-pk4="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <img className="pk4-shadow" data-pk4="shadow" alt="" aria-hidden="true" src={`${PK4_SHADOW.src}?v=${PK4_SHADOW.version}`} />
     <div className="pk4-tr" data-pk4="header-row">
       <div className="pk4-tb" data-pk4="title-block">

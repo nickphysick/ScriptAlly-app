@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "P4",
+  "where": "C population",
+  "ok": true,
+  "detail": "38 agents"
+ },
+ {
+  "lock": "P4",
+  "where": "C the page's figures are agentQueryStates' and nextStep's",
+  "ok": true,
+  "detail": "page {\"querying\":20,\"closed\":3,\"none\":15,\"ready\":6,\"total\":38} · contact list {\"querying\":20,\"closed\":3,\"none\":15,\"ready\":6,\"total\":38}"
+ },
+ {
+  "lock": "P4",
+  "where": "C and the words say them",
+  "ok": true,
+  "detail": "\"6 ready to query →\""
+ },
+ {
+  "lock": "P4",
+  "where": "C the legend reads the same three",
+  "ok": true,
+  "detail": "20,3,15"
+ },
+ {
+  "lock": "P5",
+  "where": "population: something closed",
+  "ok": true,
+  "detail": "11 closed"
+ },
+ {
+  "lock": "P5",
+  "where": "the hoop's four counts are closedTile's",
+  "ok": true,
+  "detail": "page {\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2} · closedTile {\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2}"
+ },
+ {
+  "lock": "P5",
+  "where": "the legend reads them, in bucket order",
+  "ok": true,
+  "detail": "1,8,0,2"
+ },
+ {
+  "lock": "P5",
+  "where": "the title is their sum",
+  "ok": true,
+  "detail": "\"11 closed\" · 11"
+ },
+ {
+  "lock": "P4",
+  "where": "B population",
+  "ok": true,
+  "detail": "38 agents"
+ },
+ {
+  "lock": "P4",
+  "where": "B the page's figures are agentQueryStates' and nextStep's",
+  "ok": true,
+  "detail": "page {\"querying\":0,\"closed\":0,\"none\":38,\"ready\":1,\"total\":38} · contact list {\"querying\":0,\"closed\":0,\"none\":38,\"ready\":1,\"total\":38}"
+ },
+ {
+  "lock": "P4",
+  "where": "B and the words say them",
+  "ok": true,
+  "detail": "\"1 ready to query →\""
+ },
+ {
+  "lock": "P4",
+  "where": "B the snapshot's big figure is the queried count",
+  "ok": true,
+  "detail": "\"0\""
+ }
+]

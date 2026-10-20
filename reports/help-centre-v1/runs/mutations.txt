@@ -1,0 +1,51 @@
+HC1-H1: applied to src/components/HelpCentre.tsx
+HC1-H1: [HC1-H1] 2/20 green
+HC1-H1:   1 failed
+HC1-H1:   1 passed (57.8s)
+HC1-H1: restored src/components/HelpCentre.tsx
+HC1-H2: applied to src/components/help/HelpHome.tsx
+HC1-H2: [HC1-H2] 6/10 green
+HC1-H2:   1 failed
+HC1-H2:   1 passed (37.4s)
+HC1-H2: restored src/components/help/HelpHome.tsx
+HC1-H3: applied to src/content/help/search.ts
+HC1-H3: [HC1-H3] 10/12 green
+HC1-H3:   1 failed
+HC1-H3:   1 passed (30.0s)
+HC1-H3: restored src/content/help/search.ts
+HC1-H4: applied to src/components/help/HelpHome.tsx
+HC1-H4: [HC1-H4] 2/4 green
+HC1-H4:   1 failed
+HC1-H4:   1 passed (38.5s)
+HC1-H4: restored src/components/help/HelpHome.tsx
+HC1-C1: applied to src/components/help/HelpArticlePage.tsx
+HC1-C1: [HC1-C1] 14/20 green
+HC1-C1:   1 failed
+HC1-C1:   1 passed (1.9m)
+HC1-C1: restored src/components/help/HelpArticlePage.tsx
+HC1-C2: applied to src/components/HelpCentre.tsx
+HC1-C2: [HC1-C2] 0/6 green
+HC1-C2:   1 failed
+HC1-C2:   1 passed (28.1s)
+HC1-C2: restored src/components/HelpCentre.tsx
+HC1-C3: applied to src/lib/beta.ts
+HC1-C3: [HC1-C3] 8/12 green
+HC1-C3:   1 failed
+HC1-C3:   1 passed (26.8s)
+HC1-C3 unit: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+HC1-C3 unit:       Tests  1 failed | 19 passed (20)
+HC1-C3: restored src/lib/beta.ts
+HC1-C4: applied to src/content/help/model.ts
+HC1-C4 unit:    × HC1-C4 (unit) · a DRAFT tag on dev builds, never in production > reads the build mode 3ms
+HC1-C4 unit: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+HC1-C4 unit:       Tests  1 failed | 19 passed (20)
+HC1-C4: restored src/content/help/model.ts
+HC1-C5: applied to src/content/help/articles.ts
+HC1-C5: [HC1-C5] 32/35 green
+HC1-C5:   1 failed
+HC1-C5:   1 passed (1.2m)
+HC1-C5 unit: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+HC1-C5 unit:       Tests  3 failed | 17 passed (20)
+HC1-C5: restored src/content/help/articles.ts
+tree after: []
+DONE

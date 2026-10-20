@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the list pins (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the hero goes",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the band is 66 ±1 tall",
+  "ok": true,
+  "detail": "66"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the band is rgb(42, 58, 82)",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1512 the first letter's left is the count's left ±2",
+  "ok": true,
+  "detail": "434.0 vs 434.0"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the list pins (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the hero goes",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the band is 66 ±1 tall",
+  "ok": true,
+  "detail": "66"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the band is rgb(42, 58, 82)",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CL19-P3",
+  "where": "@1280 the first letter's left is the count's left ±2",
+  "ok": true,
+  "detail": "396.0 vs 396.0"
+ }
+]

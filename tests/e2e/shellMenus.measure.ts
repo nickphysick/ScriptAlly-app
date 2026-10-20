@@ -130,9 +130,12 @@ test.describe("shell menus", () => {
       const h = (await vis(page, '[data-shell="help"]'))!;
       expect(near(m!.y, h.b + 8), `${w}: top ${m!.y} vs "?" foot + 8 ${h.b + 8}`).toBe(true);
       expect(near(m!.r, h.r), `${w}: right ${m!.r} vs "?" right ${h.r}`).toBe(true);
-      const rows = await page.locator('[data-shell="help-menu"] [role="menuitem"]').allInnerTexts();
-      expect(rows.map((r) => r.replace(/\s+/g, " ").trim()), `${w}: the three rows (the Query Centre has a page guide)`)
-        .toEqual(["Help centre", "Show the page guide", "Keyboard shortcuts ?"]);
+      /* RETARGETED by Help system v1 B (the "Page card"): Keyboard shortcuts leaves the menu, and its rows end with the four
+         links in order; the guide block and the articles above them depend on the account's guide state */
+      const rows = (await page.locator('[data-shell="help-menu"] [role="menuitem"]').allInnerTexts()).map((r) => r.replace(/\s+/g, " ").trim());
+      expect(rows.some((r) => /Keyboard shortcuts/.test(r)), `${w}: no Keyboard shortcuts row`).toBe(false);
+      expect(rows.slice(-4).map((r) => r.replace(/ [/\d]+$/, "")), `${w}: the four links, in order`)
+        .toEqual(["Search help", "What's new", "Give feedback", "Help Centre"]);
       await closeAll(page);
     }
   });
@@ -162,12 +165,16 @@ test.describe("shell menus · the language", () => {
   test("MS3 · every chooseable row and every search title is at least 4.5:1, from rendered pixels", async ({ page }) => {
     const secondary: string[] = [];
     await eachMenu(page, 1440, "ms3", async (name, sel) => {
-      const rows = page.locator(`${sel} .sa-mi:not([aria-disabled="true"]):not(.sa-mi--mute)`);
+      /* RETARGETED by Help system v1 B: the Help menu's rows are the Page card's (`.hm-row`; its article rows, ink 60% by
+         the pack, are reported as secondary below rather than held to 4.5) */
+      const ROW = name === "help" ? ".hm-row:not(.hm-art)" : '.sa-mi:not([aria-disabled="true"]):not(.sa-mi--mute)';
+      if (name === "help" && await page.locator(`${sel} .hm-art`).count()) secondary.push(`help .hm-art: ${(await pixelContrast(page, `${sel} .hm-art`)).toFixed(2)}:1`);
+      const rows = page.locator(`${sel} ${ROW}`);
       const n = await rows.count();
       expect(n, `${name}: rows to measure`).toBeGreaterThan(0);
       for (let i = 0; i < n; i++) {
         const label = (await rows.nth(i).innerText()).split("\n")[0];
-        const r = await pixelContrast(page, `${sel} .sa-mi:not([aria-disabled="true"]):not(.sa-mi--mute)`, i);
+        const r = await pixelContrast(page, `${sel} ${ROW}`, i);
         expect(r, `${name} · "${label}": ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
       }
       /* the brief's own secondary inks, reported (see the report's false premises) */
@@ -194,6 +201,9 @@ test.describe("shell menus · the language", () => {
   test("MS5 · in every menu, rows are 36 tall in Source Serif 4, and hover shows the wash and the edge", async ({ page }) => {
     for (const w of WIDTHS) {
       await eachMenu(page, w, "ms5", async (name, sel) => {
+        /* Help system v1 B — the Help menu is the "Page card": its rows are the pack's (14.5px, 8px 10px padding, a paper
+           hover), not the house menu rows this lock describes; it is exempt here and held by HS1-B1 */
+        if (name === "help") return;
         const rows = await page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(`${s} .sa-mi`)]
           .map((e) => ({ h: e.getBoundingClientRect().height, f: getComputedStyle(e).fontFamily, t: e.innerText.split("\n")[0] })), sel);
         expect(rows.length, `${w} ${name}: rows`).toBeGreaterThan(0);

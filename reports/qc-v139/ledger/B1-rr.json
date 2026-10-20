@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "B1",
+  "where": "Pip arrives",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "his panel and the journey",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "saved, the last card",
+  "ok": false,
+  "detail": "pip-3,pip-4,pip-5,pip-6"
+ },
+ {
+  "lock": "B1",
+  "where": "no write names a query, an activity or Pip",
+  "ok": false,
+  "detail": "count=1&ofs=2&req0___data__={\"streamToken\":\"EAEZEGhCAoH0tbU=\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/practice-pip"
+ },
+ {
+  "lock": "B1",
+  "where": "local storage unchanged",
+  "ok": true,
+  "detail": "373 chars"
+ },
+ {
+  "lock": "B1",
+  "where": "session storage keys unchanged",
+  "ok": true,
+  "detail": "[\"sa.contactList.v4\",\"sa.qc138.folded\"] → [\"sa.contactList.v4\",\"sa.qc138.folded\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "Pip is in no session or local store",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "title unchanged",
+  "ok": true,
+  "detail": "Showing all 87 queriesGrouped by who it's with⌄/FiltersPin the listF → Showing all 87 queriesGrouped by who it's with⌄/FiltersPin the listF"
+ },
+ {
+  "lock": "B1",
+  "where": "glyphs unchanged",
+  "ok": true,
+  "detail": "q:39,pr:7,ps:7,fr:8,fs:7,of:2,cl:17 → q:39,pr:7,ps:7,fr:8,fs:7,of:2,cl:17"
+ },
+ {
+  "lock": "B1",
+  "where": "tab unchanged",
+  "ok": true,
+  "detail": "Birds-eye view: 36 overdue, 18 upcoming. Press B to open. → Birds-eye view: 36 overdue, 18 upcoming. Press B to open."
+ },
+ {
+  "lock": "B1",
+  "where": "chart unchanged",
+  "ok": true,
+  "detail": "SENT · THIS WEEK 0 queries 12 WKS AGO 42 IN ALL NOW → SENT · THIS WEEK 0 queries 12 WKS AGO 42 IN ALL NOW"
+ },
+ {
+  "lock": "B1",
+  "where": "bands unchanged",
+  "ok": true,
+  "detail": "you:52 queries,waiting:18 queries,closed:17 queries → you:52 queries,waiting:18 queries,closed:17 queries"
+ },
+ {
+  "lock": "B1",
+  "where": "todo unchanged",
+  "ok": true,
+  "detail": "To-do list52 → To-do list52"
+ }
+]

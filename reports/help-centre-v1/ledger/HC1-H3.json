@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "HC1-H3",
+  "where": "@1512 'partial' → Partial requested first",
+  "ok": true,
+  "detail": "\"STATUS KEY\\nPartial requested\""
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1512 at most seven",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1512 a word only in a body is found",
+  "ok": true,
+  "detail": "\"GETTING SET UP\\nDownload the template\""
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1512 nonsense: the no-result line",
+  "ok": true,
+  "detail": "\"Nothing matches \\\"zzqxv\\\". Try a status name or a page name, or ask Nick.\""
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1512 ask Nick opens the panel on Something's confusing",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's confusing\",\"msg\":\"zzqxv\"}"
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1512 with the search text as the message",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's confusing\",\"msg\":\"zzqxv\"}"
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1280 'partial' → Partial requested first",
+  "ok": true,
+  "detail": "\"STATUS KEY\\nPartial requested\""
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1280 at most seven",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1280 a word only in a body is found",
+  "ok": true,
+  "detail": "\"GETTING SET UP\\nDownload the template\""
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1280 nonsense: the no-result line",
+  "ok": true,
+  "detail": "\"Nothing matches \\\"zzqxv\\\". Try a status name or a page name, or ask Nick.\""
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1280 ask Nick opens the panel on Something's confusing",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's confusing\",\"msg\":\"zzqxv\"}"
+ },
+ {
+  "lock": "HC1-H3",
+  "where": "@1280 with the search text as the message",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's confusing\",\"msg\":\"zzqxv\"}"
+ }
+]

@@ -1,0 +1,78 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v18.2 (design-refs/contact-list-v18-2/contact-list-v18-2.html) — the page header: the archivist left of
+ * the title block, the hawk's shadow over the List health card, the card coming forward on hover, and letter tabs that
+ * never move the page. The base rules are the compact values and `.ws-app.sheet-wide` restates the full ones (v17's
+ * switch). Imported after contactV17.css and contactV18.css: the shadow, the card's layers and the tabs are restated
+ * here at the same specificity.
+ */
+
+/* ── §A · THE ARCHIVIST. As tall as the title block (eyebrow to buttons: `--cl182-ill-h`, written by one
+   ResizeObserver from the TEXT's extent, see ContactLightHeader), its left edge 14px from the page sheet's, and the
+   title block, byline and buttons 28px past its right edge. The pull into the margin is derived from the header's own
+   inset: the title row starts `--phf-inset` (v138.5's shared frame) into the header, and the header starts (sheet − header) ÷ 2 into the
+   sheet. ── */
+/* The pull reads v138.5's shared frame inset (`--phf-inset`, shell/pageHeroFrame.css): it is in container units of
+   the header (`.phf` is the inline-size container), so it means the header's inset on the title row, the image and the
+   title block alike, with no restatement here. */
+.cl17-hd .cl17-tr {
+  position: relative;
+  --cl182-ill-w: calc(var(--cl182-ill-h, 0px) * var(--hero-art-ratio));
+  --cl182-pull: calc(var(--phf-inset) + (var(--hsheet-w) - var(--cl17-w)) / 2 - var(--hero-art-x));
+  /* the middle column may close to nothing: the title block grows by the archivist, the card does not move */
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+}
+.cl17-hd .cl17-tr > .cl182-ill {
+  position: absolute; left: calc(-1 * var(--cl182-pull)); top: var(--cl182-ill-t, 0px);
+  height: var(--cl182-ill-h, 0px); width: auto; max-width: none; aspect-ratio: 720 / 641;
+  filter: drop-shadow(0 10px 14px rgba(28, 19, 15, 0.12)); pointer-events: none; user-select: none;
+}
+.cl17-hd .cl17-tr > .cl17-tb, .cl17-hd .cl17-tr > .cl17-acts { margin-left: calc(var(--cl182-ill-w) + var(--hero-art-gap) - var(--cl182-pull)); }
+/* below 1100px of window the archivist goes and v18's alignment comes back */
+@media (max-width: 1099.98px) {
+  .cl17-hd .cl17-tr > .cl182-ill { display: none; }
+  .cl17-hd .cl17-tr > .cl17-tb, .cl17-hd .cl17-tr > .cl17-acts { margin-left: 0; }
+  .cl17-hd .cl17-tr { grid-template-columns: max-content minmax(40px, 1fr) auto; }
+}
+@container cl17hd (max-width: 899.98px) {
+  .cl17-hd .cl17-tr > .cl182-ill { display: none; }
+  .cl17-hd .cl17-tr > .cl17-tb, .cl17-hd .cl17-tr > .cl17-acts { margin-left: 0; }
+}
+
+/* ── §A · THE HAWK'S SHADOW, cast over the List health card: mirrored, turned −6°, 430 wide, anchored to the title
+   row (right −40, top −112), black, blurred, at 10%. Above the card at rest (6 over 1); the card comes forward on
+   hover. It ignores the pointer, so the card underneath still takes it. ── */
+.cl17-hd .cl17-tr > .cl17-shadow, .ws-app.sheet-wide .cl17-hd .cl17-tr > .cl17-shadow {
+  position: absolute; left: auto; right: -40px; top: -112px; z-index: 6; width: 430px; height: auto; max-width: none;
+  opacity: 0.1; filter: brightness(0) blur(2px); transform: scaleX(-1) rotate(-6deg);
+  pointer-events: none; user-select: none;
+}
+
+/* ── §A · THE LIST HEALTH CARD keeps its children's layers to itself, and comes in front of the shadow, lifted 3px,
+   on hover or focus within. ── */
+.cl17-hd .cl17-card {
+  position: relative; z-index: 1; isolation: isolate;
+  transition: transform 0.22s cubic-bezier(.22, .8, .3, 1), box-shadow 0.22s cubic-bezier(.22, .8, .3, 1);
+}
+.cl17-hd .cl17-card:hover, .cl17-hd .cl17-card:focus-within {
+  z-index: 7; transform: translateY(-3px);
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 22px 34px -20px rgba(28, 19, 15, 0.45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl17-hd .cl17-card { transition: none; }
+  .cl17-hd .cl17-card:hover, .cl17-hd .cl17-card:focus-within { transform: none; }
+}
+/* "List health" never wraps */
+.cl17-card .cl17-hl .cl17-ht b { white-space: nowrap; }
+
+/* ── §A · THE LETTER TABS. The strip reserves its tallest tab, 46 (52) plus the 2px rule, and the tabs sit on its
+   floor; a hover raises a tab to 42 (46) over 150ms, inside the strip, so nothing below it moves. Current and
+   disabled tabs are v18's. ── */
+.cl17-hd .cl18-tabs { height: 46px; box-sizing: content-box; }
+.ws-app.sheet-wide .cl17-hd .cl18-tabs { height: 52px; }
+.cl18-tabs button { transition: height 0.15s cubic-bezier(.22, .8, .3, 1), background-color 0.15s cubic-bezier(.22, .8, .3, 1); }
+.cl18-tabs button:not(:disabled):not([aria-current="true"]):hover { height: 42px; }
+.ws-app.sheet-wide .cl18-tabs button:not(:disabled):not([aria-current="true"]):hover { height: 46px; }
+@media (prefers-reduced-motion: reduce) { .cl18-tabs button { transition: none; } }

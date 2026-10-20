@@ -1,0 +1,506 @@
+
+Running 10 tests using 1 worker
+
+[1/10] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/10] [measure] › tests/e2e/dashV59.measure.ts:134:1 › DB59 R1 · F1 · P2 — the column, one screen, and the panel fits
+[measure] › tests/e2e/dashV59.measure.ts:134:1 › DB59 R1 · F1 · P2 — the column, one screen, and the panel fits
+  ✗ R1 · 1920x1080 population — right true · focus true · rule false · panel false
+
+  ✗ R1 · 1920x1080 order — list-head>focus>then>list
+
+  ✗ R1 · 1920x1080 "All {n} →" inside the column — null · link right undefined · column right 1862.0
+
+  ✗ R1 · 1920x1080 the link on the title's first line — title 258.8→288.8 · link undefined→undefined
+
+  ✗ R1 · 1920x1080 the hairline — undefinedpx · null · undefined of 662.9
+
+  ✗ R1 · 1920x1080 no list rows, group headings or "Then" — 36 found
+
+  ✗ P2 · 1920x1080 population — 0 boxes in the panel
+
+  ✗ P2 · 1920x1080 the panel ends 22px above the tab — panel bottom undefined · tab top 983.8 · gap ?
+
+  ✗ P2 · 1920x1080 the closed card ends 22px above the tab line — closed bottom 1045.8 · tab top 983.8
+
+  ✗ P2 · 1920x1080 the heading never overflows — fits null · heading false faces false sig false
+
+  ✗ P2 · 1920x1080 the poster tier — {"art":false,"hist":false,"cap":false,"note1":false,"note2":false,"note":false,"faces":false,"sig":false,"heading":false,"poster":false}
+
+  ✗ R1 · 1696x820 population — right true · focus true · rule false · panel false
+
+  ✗ R1 · 1696x820 order — list-head>focus>then>list
+
+  ✗ R1 · 1696x820 "All {n} →" inside the column — null · link right undefined · column right 1638.0
+
+  ✗ R1 · 1696x820 the link on the title's first line — title 246.0→276.0 · link undefined→undefined
+
+  ✗ R1 · 1696x820 the hairline — undefinedpx · null · undefined of 566.4
+
+  ✗ R1 · 1696x820 no list rows, group headings or "Then" — 36 found
+
+  ✗ P2 · 1696x820 population — 0 boxes in the panel
+
+  ✗ P2 · 1696x820 the panel ends 22px above the tab — panel bottom undefined · tab top 723.8 · gap ?
+
+  ✗ P2 · 1696x820 the closed card ends 22px above the tab line — closed bottom 785.8 · tab top 723.8
+
+  ✗ P2 · 1696x820 the heading never overflows — fits null · heading false faces false sig false
+
+  ✗ P2 · 1696x820 art, dots and both sentences — {"art":false,"hist":false,"cap":false,"note1":false,"note2":false,"note":false,"faces":false,"sig":false,"heading":false,"poster":false}
+
+  ✗ R1 · 1536x864 population — right true · focus true · rule false · panel false
+
+  ✗ R1 · 1536x864 order — list-head>focus>then>list
+
+  ✗ R1 · 1536x864 "All {n} →" inside the column — null · link right undefined · column right 1478.0
+
+  ✗ R1 · 1536x864 the link on the title's first line — title 250.6→280.6 · link undefined→undefined
+
+  ✗ R1 · 1536x864 the hairline — undefinedpx · null · undefined of 497.4
+
+  ✗ R1 · 1536x864 no list rows, group headings or "Then" — 36 found
+
+  ✗ P2 · 1536x864 population — 0 boxes in the panel
+
+  ✗ P2 · 1536x864 the panel ends 22px above the tab — panel bottom undefined · tab top 767.8 · gap ?
+
+  ✗ P2 · 1536x864 the closed card ends 22px above the tab line — closed bottom 829.8 · tab top 767.8
+
+  ✗ P2 · 1536x864 the heading never overflows — fits null · heading false faces false sig false
+
+  ✗ R1 · 1512x900 population — right true · focus true · rule false · panel false
+
+  ✗ R1 · 1512x900 order — list-head>focus>then>list
+
+  ✗ R1 · 1512x900 "All {n} →" inside the column — null · link right undefined · column right 1454.0
+
+  ✗ R1 · 1512x900 the link on the title's first line — title 254.3→284.3 · link undefined→undefined
+
+  ✗ R1 · 1512x900 the hairline — undefinedpx · null · undefined of 487.1
+
+  ✗ R1 · 1512x900 no list rows, group headings or "Then" — 36 found
+
+  ✗ P2 · 1512x900 population — 0 boxes in the panel
+
+  ✗ P2 · 1512x900 the panel ends 22px above the tab — panel bottom undefined · tab top 803.8 · gap ?
+
+  1) [measure] › tests/e2e/dashV59.measure.ts:134:1 › DB59 R1 · F1 · P2 — the column, one screen, and the panel fits 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 117
+
+    - Array []
+    + Array [
+    +   "R1 · 1920x1080 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1920x1080 order — list-head>focus>then>list",
+    +   "R1 · 1920x1080 \"All {n} →\" inside the column — null · link right undefined · column right 1862.0",
+    +   "R1 · 1920x1080 the link on the title's first line — title 258.8→288.8 · link undefined→undefined",
+    +   "R1 · 1920x1080 the hairline — undefinedpx · null · undefined of 662.9",
+    +   "R1 · 1920x1080 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1920x1080 population — 0 boxes in the panel",
+    +   "P2 · 1920x1080 the panel ends 22px above the tab — panel bottom undefined · tab top 983.8 · gap ?",
+    +   "P2 · 1920x1080 the closed card ends 22px above the tab line — closed bottom 1045.8 · tab top 983.8",
+    +   "P2 · 1920x1080 the heading never overflows — fits null · heading false faces false sig false",
+    +   "P2 · 1920x1080 the poster tier — {\"art\":false,\"hist\":false,\"cap\":false,\"note1\":false,\"note2\":false,\"note\":false,\"faces\":false,\"sig\":false,\"heading\":false,\"poster\":false}",
+    +   "R1 · 1696x820 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1696x820 order — list-head>focus>then>list",
+    +   "R1 · 1696x820 \"All {n} →\" inside the column — null · link right undefined · column right 1638.0",
+    +   "R1 · 1696x820 the link on the title's first line — title 246.0→276.0 · link undefined→undefined",
+    +   "R1 · 1696x820 the hairline — undefinedpx · null · undefined of 566.4",
+    +   "R1 · 1696x820 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1696x820 population — 0 boxes in the panel",
+    +   "P2 · 1696x820 the panel ends 22px above the tab — panel bottom undefined · tab top 723.8 · gap ?",
+    +   "P2 · 1696x820 the closed card ends 22px above the tab line — closed bottom 785.8 · tab top 723.8",
+    +   "P2 · 1696x820 the heading never overflows — fits null · heading false faces false sig false",
+    +   "P2 · 1696x820 art, dots and both sentences — {\"art\":false,\"hist\":false,\"cap\":false,\"note1\":false,\"note2\":false,\"note\":false,\"faces\":false,\"sig\":false,\"heading\":false,\"poster\":false}",
+    +   "R1 · 1536x864 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1536x864 order — list-head>focus>then>list",
+    +   "R1 · 1536x864 \"All {n} →\" inside the column — null · link right undefined · column right 1478.0",
+    +   "R1 · 1536x864 the link on the title's first line — title 250.6→280.6 · link undefined→undefined",
+    +   "R1 · 1536x864 the hairline — undefinedpx · null · undefined of 497.4",
+    +   "R1 · 1536x864 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1536x864 population — 0 boxes in the panel",
+    +   "P2 · 1536x864 the panel ends 22px above the tab — panel bottom undefined · tab top 767.8 · gap ?",
+    +   "P2 · 1536x864 the closed card ends 22px above the tab line — closed bottom 829.8 · tab top 767.8",
+    +   "P2 · 1536x864 the heading never overflows — fits null · heading false faces false sig false",
+    +   "R1 · 1512x900 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1512x900 order — list-head>focus>then>list",
+    +   "R1 · 1512x900 \"All {n} →\" inside the column — null · link right undefined · column right 1454.0",
+    +   "R1 · 1512x900 the link on the title's first line — title 254.3→284.3 · link undefined→undefined",
+    +   "R1 · 1512x900 the hairline — undefinedpx · null · undefined of 487.1",
+    +   "R1 · 1512x900 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1512x900 population — 0 boxes in the panel",
+    +   "P2 · 1512x900 the panel ends 22px above the tab — panel bottom undefined · tab top 803.8 · gap ?",
+    +   "P2 · 1512x900 the closed card ends 22px above the tab line — closed bottom 865.8 · tab top 803.8",
+    +   "P2 · 1512x900 the heading never overflows — fits null · heading false faces false sig false",
+    +   "R1 · 1440x900 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1440x900 order — list-head>focus>then>list",
+    +   "R1 · 1440x900 \"All {n} →\" inside the column — null · link right undefined · column right 1382.0",
+    +   "R1 · 1440x900 the link on the title's first line — title 254.3→284.3 · link undefined→undefined",
+    +   "R1 · 1440x900 the hairline — undefinedpx · null · undefined of 456.0",
+    +   "R1 · 1440x900 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1440x900 population — 0 boxes in the panel",
+    +   "P2 · 1440x900 the panel ends 22px above the tab — panel bottom undefined · tab top 803.8 · gap ?",
+    +   "P2 · 1440x900 the closed card ends 22px above the tab line — closed bottom 865.8 · tab top 803.8",
+    +   "P2 · 1440x900 the heading never overflows — fits null · heading false faces false sig false",
+    +   "R1 · 1366x768 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1366x768 order — list-head>focus>then>list",
+    +   "R1 · 1366x768 \"All {n} →\" inside the column — null · link right undefined · column right 1324.0",
+    +   "R1 · 1366x768 the link on the title's first line — title 238.6→263.8 · link undefined→undefined",
+    +   "R1 · 1366x768 the hairline — undefinedpx · null · undefined of 441.4",
+    +   "R1 · 1366x768 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1366x768 population — 0 boxes in the panel",
+    +   "P2 · 1366x768 the panel ends 22px above the tab — panel bottom undefined · tab top 677.8 · gap ?",
+    +   "P2 · 1366x768 the closed card ends 22px above the tab line — closed bottom 733.8 · tab top 677.8",
+    +   "P2 · 1366x768 the heading never overflows — fits null · heading false faces false sig false",
+    +   "R1 · 1280x800 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1280x800 order — list-head>focus>then>list",
+    +   "R1 · 1280x800 \"All {n} →\" inside the column — null · link right undefined · column right 1238.0",
+    +   "R1 · 1280x800 the link on the title's first line — title 241.9→267.1 · link undefined→undefined",
+    +   "R1 · 1280x800 the hairline — undefinedpx · null · undefined of 404.3",
+    +   "R1 · 1280x800 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1280x800 population — 0 boxes in the panel",
+    +   "P2 · 1280x800 the panel ends 22px above the tab — panel bottom undefined · tab top 709.8 · gap ?",
+    +   "P2 · 1280x800 the closed card ends 22px above the tab line — closed bottom 765.8 · tab top 709.8",
+    +   "P2 · 1280x800 the heading never overflows — fits null · heading false faces false sig false",
+    +   "P2 · 1280x800 no art, both sentences — {\"art\":false,\"hist\":false,\"cap\":false,\"note1\":false,\"note2\":false,\"note\":false,\"faces\":false,\"sig\":false,\"heading\":false,\"poster\":false}",
+    +   "R1 · 1280x720 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1280x720 order — list-head>focus>then>list",
+    +   "R1 · 1280x720 \"All {n} →\" inside the column — null · link right undefined · column right 1238.0",
+    +   "R1 · 1280x720 the link on the title's first line — title 233.6→258.8 · link undefined→undefined",
+    +   "R1 · 1280x720 the hairline — undefinedpx · null · undefined of 404.3",
+    +   "R1 · 1280x720 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1280x720 population — 0 boxes in the panel",
+    +   "P2 · 1280x720 the panel ends 22px above the tab — panel bottom undefined · tab top 629.8 · gap ?",
+    +   "P2 · 1280x720 the closed card ends 22px above the tab line — closed bottom 685.8 · tab top 629.8",
+    +   "P2 · 1280x720 the heading never overflows — fits null · heading false faces false sig false",
+    +   "R1 · 1280x680 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1280x680 order — list-head>focus>then>list",
+    +   "R1 · 1280x680 \"All {n} →\" inside the column — null · link right undefined · column right 1238.0",
+    +   "R1 · 1280x680 the link on the title's first line — title 229.5→254.7 · link undefined→undefined",
+    +   "R1 · 1280x680 the hairline — undefinedpx · null · undefined of 404.3",
+    +   "R1 · 1280x680 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1280x680 population — 0 boxes in the panel",
+    +   "P2 · 1280x680 the panel ends 22px above the tab — panel bottom undefined · tab top 589.8 · gap ?",
+    +   "P2 · 1280x680 the closed card ends 22px above the tab line — closed bottom 645.8 · tab top 589.8",
+    +   "P2 · 1280x680 the heading never overflows — fits null · heading false faces false sig false",
+    +   "P2 · 1280x680 the first sentence only — {\"art\":false,\"hist\":false,\"cap\":false,\"note1\":false,\"note2\":false,\"note\":false,\"faces\":false,\"sig\":false,\"heading\":false,\"poster\":false}",
+    +   "R1 · 1366x650 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1366x650 order — list-head>focus>then>list",
+    +   "R1 · 1366x650 \"All {n} →\" inside the column — null · link right undefined · column right 1324.0",
+    +   "R1 · 1366x650 the link on the title's first line — title 227.9→253.1 · link undefined→undefined",
+    +   "R1 · 1366x650 the hairline — undefinedpx · null · undefined of 441.4",
+    +   "R1 · 1366x650 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1366x650 population — 0 boxes in the panel",
+    +   "P2 · 1366x650 the panel ends 22px above the tab — panel bottom undefined · tab top 559.8 · gap ?",
+    +   "P2 · 1366x650 the closed card ends 22px above the tab line — closed bottom 615.8 · tab top 559.8",
+    +   "P2 · 1366x650 the heading never overflows — fits null · heading false faces false sig false",
+    +   "R1 · 1280x650 population — right true · focus true · rule false · panel false",
+    +   "R1 · 1280x650 order — list-head>focus>then>list",
+    +   "R1 · 1280x650 \"All {n} →\" inside the column — null · link right undefined · column right 1238.0",
+    +   "R1 · 1280x650 the link on the title's first line — title 227.9→253.1 · link undefined→undefined",
+    +   "R1 · 1280x650 the hairline — undefinedpx · null · undefined of 404.3",
+    +   "R1 · 1280x650 no list rows, group headings or \"Then\" — 36 found",
+    +   "P2 · 1280x650 population — 0 boxes in the panel",
+    +   "P2 · 1280x650 the panel ends 22px above the tab — panel bottom undefined · tab top 559.8 · gap ?",
+    +   "P2 · 1280x650 the closed card ends 22px above the tab line — closed bottom 615.8 · tab top 559.8",
+    +   "P2 · 1280x650 the heading never overflows — fits null · heading false faces false sig false",
+    +   "P2 · 1280x650 the note goes; heading and faces stay — {\"art\":false,\"hist\":false,\"cap\":false,\"note1\":false,\"note2\":false,\"note\":false,\"faces\":false,\"sig\":false,\"heading\":false,\"poster\":false}",
+    + ]
+
+      47 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      48 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:170:5
+
+    Error Context: test-results/dashV59.measure.ts-DB59-R1-321ea-e-screen-and-the-panel-fits-measure/error-context.md
+
+
+[3/10] [measure] › tests/e2e/dashV59.measure.ts:175:1 › DB59 R2 — the focus card's rust edge
+[measure] › tests/e2e/dashV59.measure.ts:175:1 › DB59 R2 — the focus card's rust edge
+  ✗ R2 · 1512x900 population — {"content":"none","w":null,"h":null,"bg":"rgba(0, 0, 0, 0)","left":"auto","top":"auto","fh":243.5}
+
+  ✗ R2 · 1512x900 6px of rgb(162, 69, 42), full height — {"content":"none","w":null,"h":null,"bg":"rgba(0, 0, 0, 0)","left":"auto","top":"auto","fh":243.5}
+
+  ✗ R2 · 1280x680 population — {"content":"none","w":null,"h":null,"bg":"rgba(0, 0, 0, 0)","left":"auto","top":"auto","fh":172}
+
+  ✗ R2 · 1280x680 6px of rgb(162, 69, 42), full height — {"content":"none","w":null,"h":null,"bg":"rgba(0, 0, 0, 0)","left":"auto","top":"auto","fh":172}
+
+  2) [measure] › tests/e2e/dashV59.measure.ts:175:1 › DB59 R2 — the focus card's rust edge ─────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "R2 · 1512x900 population — {\"content\":\"none\",\"w\":null,\"h\":null,\"bg\":\"rgba(0, 0, 0, 0)\",\"left\":\"auto\",\"top\":\"auto\",\"fh\":243.5}",
+    +   "R2 · 1512x900 6px of rgb(162, 69, 42), full height — {\"content\":\"none\",\"w\":null,\"h\":null,\"bg\":\"rgba(0, 0, 0, 0)\",\"left\":\"auto\",\"top\":\"auto\",\"fh\":243.5}",
+    +   "R2 · 1280x680 population — {\"content\":\"none\",\"w\":null,\"h\":null,\"bg\":\"rgba(0, 0, 0, 0)\",\"left\":\"auto\",\"top\":\"auto\",\"fh\":172}",
+    +   "R2 · 1280x680 6px of rgb(162, 69, 42), full height — {\"content\":\"none\",\"w\":null,\"h\":null,\"bg\":\"rgba(0, 0, 0, 0)\",\"left\":\"auto\",\"top\":\"auto\",\"fh\":172}",
+    + ]
+
+      47 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      48 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:189:5
+
+    Error Context: test-results/dashV59.measure.ts-DB59-R2-—-the-focus-card-s-rust-edge-measure/error-context.md
+
+
+[4/10] [measure] › tests/e2e/dashV59.measure.ts:194:1 › DB59 V1 — View task lands, and writes nothing
+[measure] › tests/e2e/dashV59.measure.ts:194:1 › DB59 V1 — View task lands, and writes nothing
+  V1 kinds seen: {"A as the account stands":"req","B no agents waiting":"nudge","B2 gone quiet":"quiet","C housekeeping only":"house","D ready to query":"ready","E coming up":"coming","F first run":"house"}
+
+  ✗ V1 · A as the account stands · the button — req · "Offer: next steps →"
+
+  ✗ V1 · A as the account stands · the query is known — none
+
+  ✗ V1 · A as the account stands · lands on the query panel — task-offer-seed-query-12 → drawer offer
+
+  ✗ V1 · B no agents waiting · the button — nudge · "Record a nudge →"
+
+  ✗ V1 · B no agents waiting · the query is known — none
+
+  ✗ V1 · B no agents waiting · lands on the query panel — task-nudge-cor-undo → drawer nudge
+
+  ✗ V1 · B2 gone quiet · the button — quiet · "Close this query →"
+
+  ✗ V1 · B2 gone quiet · the query is known — none
+
+  ✗ V1 · B2 gone quiet · lands on the query panel — task-no-res-close-cor-move-b → drawer close
+
+  ✗ V1 · C housekeeping only · the button — house · "Fill in →"
+
+  ✗ V1 · D ready to query · the button — ready · "Log a query →"
+
+  ✗ V1 · E coming up · the button — coming · "Record a response →"
+
+  ✗ V1 · E coming up · the query is known — none
+
+  ✗ V1 · E coming up · lands on the query panel — coming:seed-query-8 → drawer resp
+
+  ✗ V1 · F first run · the button — house · "Open Submission packages →"
+
+  3) [measure] › tests/e2e/dashV59.measure.ts:194:1 › DB59 V1 — View task lands, and writes nothing 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 17
+
+    - Array []
+    + Array [
+    +   "V1 · A as the account stands · the button — req · \"Offer: next steps →\"",
+    +   "V1 · A as the account stands · the query is known — none",
+    +   "V1 · A as the account stands · lands on the query panel — task-offer-seed-query-12 → drawer offer",
+    +   "V1 · B no agents waiting · the button — nudge · \"Record a nudge →\"",
+    +   "V1 · B no agents waiting · the query is known — none",
+    +   "V1 · B no agents waiting · lands on the query panel — task-nudge-cor-undo → drawer nudge",
+    +   "V1 · B2 gone quiet · the button — quiet · \"Close this query →\"",
+    +   "V1 · B2 gone quiet · the query is known — none",
+    +   "V1 · B2 gone quiet · lands on the query panel — task-no-res-close-cor-move-b → drawer close",
+    +   "V1 · C housekeeping only · the button — house · \"Fill in →\"",
+    +   "V1 · D ready to query · the button — ready · \"Log a query →\"",
+    +   "V1 · E coming up · the button — coming · \"Record a response →\"",
+    +   "V1 · E coming up · the query is known — none",
+    +   "V1 · E coming up · lands on the query panel — coming:seed-query-8 → drawer resp",
+    +   "V1 · F first run · the button — house · \"Open Submission packages →\"",
+    + ]
+
+      47 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      48 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:266:5
+
+    Error Context: test-results/dashV59.measure.ts-DB59-V1-099f0-sk-lands-and-writes-nothing-measure/error-context.md
+
+
+[5/10] [measure] › tests/e2e/dashV59.measure.ts:277:1 › DB59 P1 · P4 — the panel's copy, and its doors open the one feedback panel
+  4) [measure] › tests/e2e/dashV59.measure.ts:277:1 › DB59 P1 · P4 — the panel's copy, and its doors open the one feedback panel 
+
+    Test timeout of 420000ms exceeded.
+
+    Error: locator.click: Test timeout of 420000ms exceeded.
+    Call log:
+      - waiting for locator('[data-d58="panel-more"]')
+
+
+      295 |   const docks = () => page.locator(".sa-fbpanel").count();
+      296 |   L.check("P4", "closed at rest", (await docks()) === 0, `${await docks()} open`);
+    > 297 |   await page.locator('[data-d58="panel-more"]').click();
+          |                                                 ^
+      298 |   await page.waitForTimeout(400);
+      299 |   if (MUT === "P4-second-panel") await page.evaluate(() => { const d = document.querySelector(".sa-fbpanel"); if (d) document.body.appendChild(d.cloneNode(true)); });
+      300 |   L.check("P4", "Tell us anything opens one feedback panel", (await docks()) === 1, `${await docks()} panel(s)`);
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:297:49
+
+    Error Context: test-results/dashV59.measure.ts-DB59-P1-122c1-open-the-one-feedback-panel-measure/error-context.md
+
+
+[6/10] [measure] › tests/e2e/dashV59.measure.ts:320:1 › DB59 P3 — a face records the week, and only a yes says Noted
+  5) [measure] › tests/e2e/dashV59.measure.ts:320:1 › DB59 P3 — a face records the week, and only a yes says Noted 
+
+    Test timeout of 420000ms exceeded.
+
+    Error: locator.click: Test timeout of 420000ms exceeded.
+    Call log:
+      - waiting for locator('[data-d58="panel-face"][data-label="Good"]')
+
+
+      345 |   L.check("P3", "population: four faces, unanswered", r0.faces === 4 && r0.state === "idle", JSON.stringify(r0));
+      346 |   /* a yes */
+    > 347 |   await page.locator('[data-d58="panel-face"][data-label="Good"]').click();
+          |                                                                    ^
+      348 |   const early = await read();
+      349 |   if (MUT === "P3-noted-early") L.check("P3", "nothing says Noted before the answer", !early.noted, JSON.stringify(early));
+      350 |   await page.waitForTimeout(MUT === "P3-noted-early" ? 2200 : 800);
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:347:68
+
+    Error Context: test-results/dashV59.measure.ts-DB59-P3-df17c-k-and-only-a-yes-says-Noted-measure/error-context.md
+
+
+[7/10] [measure] › tests/e2e/dashV59.measure.ts:376:1 › DB59 T1 — the folder tab on the sheet's edge, and its unseen badge
+[measure] › tests/e2e/dashV59.measure.ts:376:1 › DB59 T1 — the folder tab on the sheet's edge, and its unseen badge
+  ✗ T1 · no LAST 30 DAYS — "Activity feedLAST 30 DAYS"
+
+  ✗ T1 · on the sheet's bottom edge — tab 865.75 · sheet 892
+
+  ✗ T1 · the desk's colour — rgb(42, 58, 82) · desk rgb(27, 36, 51)
+
+  ✗ T1 · the badge is the unseen count — badge null · 120 rows in the drawer → 9+
+
+  6) [measure] › tests/e2e/dashV59.measure.ts:376:1 › DB59 T1 — the folder tab on the sheet's edge, and its unseen badge 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "T1 · no LAST 30 DAYS — \"Activity feedLAST 30 DAYS\"",
+    +   "T1 · on the sheet's bottom edge — tab 865.75 · sheet 892",
+    +   "T1 · the desk's colour — rgb(42, 58, 82) · desk rgb(27, 36, 51)",
+    +   "T1 · the badge is the unseen count — badge null · 120 rows in the drawer → 9+",
+    + ]
+
+      47 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      48 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:411:5
+
+    Error Context: test-results/dashV59.measure.ts-DB59-T1-616b6-s-edge-and-its-unseen-badge-measure/error-context.md
+
+
+[8/10] [measure] › tests/e2e/dashV59.measure.ts:416:1 › DB59 S1 · S2 — one shadow over the cards, and a hovered card comes forward
+  7) [measure] › tests/e2e/dashV59.measure.ts:416:1 › DB59 S1 · S2 — one shadow over the cards, and a hovered card comes forward 
+
+    Error: page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+        at eval (eval at evaluate (:311:30), <anonymous>:1:7)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:7)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at tr (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:432:25)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:433:19
+
+    Error Context: test-results/dashV59.measure.ts-DB59-S1-f3210--hovered-card-comes-forward-measure/error-context.md
+
+
+[9/10] [measure] › tests/e2e/dashV59.measure.ts:474:1 › DB59 E1 — the first paint runs once, ends true, and not under reduced motion
+[measure] › tests/e2e/dashV59.measure.ts:474:1 › DB59 E1 — the first paint runs once, ends true, and not under reduced motion
+  ✗ E1 · the paint runs on loading → loaded — {"sawPaint":false,"left":"none","right":"none","counts":0}
+
+  8) [measure] › tests/e2e/dashV59.measure.ts:474:1 › DB59 E1 — the first paint runs once, ends true, and not under reduced motion 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "E1 · the paint runs on loading → loaded — {\"sawPaint\":false,\"left\":\"none\",\"right\":\"none\",\"counts\":0}",
+    + ]
+
+      47 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      48 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:513:5
+
+    Error Context: test-results/dashV59.measure.ts-DB59-E1-1df21-nd-not-under-reduced-motion-measure/error-context.md
+
+
+[10/10] [measure] › tests/e2e/dashV59.measure.ts:518:1 › DB59 L1 — loading and loaded boxes are the same boxes
+[measure] › tests/e2e/dashV59.measure.ts:518:1 › DB59 L1 — loading and loaded boxes are the same boxes
+  ✗ L1 · 1512x900 panel — loading false · loaded false
+
+  ✗ L1 · 1280x800 panel — loading false · loaded false
+
+  9) [measure] › tests/e2e/dashV59.measure.ts:518:1 › DB59 L1 — loading and loaded boxes are the same boxes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "L1 · 1512x900 panel — loading false · loaded false",
+    +   "L1 · 1280x800 panel — loading false · loaded false",
+    + ]
+
+      47 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      48 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 49 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      50 |   }
+      51 | }
+      52 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:49:95)
+        at /Users/nickphysick/ScriptAlly-dash59base/tests/e2e/dashV59.measure.ts:541:5
+
+    Error Context: test-results/dashV59.measure.ts-DB59-L1-c5e37-ed-boxes-are-the-same-boxes-measure/error-context.md
+
+
+  9 failed
+    [measure] › tests/e2e/dashV59.measure.ts:134:1 › DB59 R1 · F1 · P2 — the column, one screen, and the panel fits 
+    [measure] › tests/e2e/dashV59.measure.ts:175:1 › DB59 R2 — the focus card's rust edge ──────────
+    [measure] › tests/e2e/dashV59.measure.ts:194:1 › DB59 V1 — View task lands, and writes nothing ─
+    [measure] › tests/e2e/dashV59.measure.ts:277:1 › DB59 P1 · P4 — the panel's copy, and its doors open the one feedback panel 
+    [measure] › tests/e2e/dashV59.measure.ts:320:1 › DB59 P3 — a face records the week, and only a yes says Noted 
+    [measure] › tests/e2e/dashV59.measure.ts:376:1 › DB59 T1 — the folder tab on the sheet's edge, and its unseen badge 
+    [measure] › tests/e2e/dashV59.measure.ts:416:1 › DB59 S1 · S2 — one shadow over the cards, and a hovered card comes forward 
+    [measure] › tests/e2e/dashV59.measure.ts:474:1 › DB59 E1 — the first paint runs once, ends true, and not under reduced motion 
+    [measure] › tests/e2e/dashV59.measure.ts:518:1 › DB59 L1 — loading and loaded boxes are the same boxes 
+  1 passed (17.7m)

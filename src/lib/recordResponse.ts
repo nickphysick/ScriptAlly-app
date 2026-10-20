@@ -133,19 +133,29 @@ const convertToTimestampOrDate = (val: any) => {
 };
 
 /**
- * Performs the canonical writes for recording a response and returns an `undo`
- * closure plus the toast config. Throws only if the PRIMARY write (the status
- * update + per-query timeline entry) fails — in that case nothing is left
- * half-applied and the caller should surface the error.
+ * Query Centre v139 — THE RESPONSE, PLANNED WITHOUT I/O. Everything `recordQueryResponse` decides before it writes: the
+ * new status, the query's response-detail fields (`undefined` = cleared) and the timeline entry (without its time). The
+ * real write and the practice query's in-memory stand-in both start here, so the two cannot come to disagree about
+ * what a response means.
  */
-export async function recordQueryResponse(
-  deps: RecordResponseDeps,
-  data: RecordResponseData
-): Promise<RecordResponseResult> {
-  const { userId, query, agent, manuscript } = deps;
-  const queryId = query.id;
-  const queryRef = doc(db, "users", userId, "queries", queryId);
+export interface ResponsePlan {
+  newStatus: QueryStatus;
+  /** the response-detail fields; `undefined` means the field is cleared */
+  details: Record<string, unknown>;
+  /** the per-query timeline entry, without `createdAt` */
+  activityBase: Record<string, unknown>;
+  /** false for a reversion to Queried, which writes no entry */
+  appendsActivity: boolean;
+  /** the time the entry wants, before it is made monotonic with the log */
+  desiredMillis: number;
+}
 
+export function planResponse(
+  deps: Pick<RecordResponseDeps, "query" | "agent" | "manuscript">,
+  data: RecordResponseData
+): ResponsePlan {
+  const { query, agent, manuscript } = deps;
+  const queryId = query.id;
   // 1. Map the modal payload to status + per-status fields.
   let selectedResponseType = "";
   let materialsRequestedType: string | undefined;
@@ -250,33 +260,28 @@ export async function recordQueryResponse(
   // incoming rung), rejectedDate (the closing rejection) — so no stamp is written here and
   // the record/close paths cannot disagree (Tier 1 · Phase 2 + Tier 3 · Phase 4). The
   // user-editable dateReceived reaches the derivation via the activity's createdAt (step 4).
-  const updates: Record<string, any> = {};
+  const updates: Record<string, unknown> = {};
 
-  updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();
-  updates.materialsRequestedQuantity = materialsRequestedQuantity !== undefined ? materialsRequestedQuantity : deleteField();
-  updates.fullVersionSent = fullVersionSent !== undefined ? fullVersionSent : deleteField();
-  updates.expectedSendDate = expectedSendDate !== undefined ? expectedSendDate : deleteField();
-  updates.sendReminderDate = sendReminderDate !== undefined ? sendReminderDate : deleteField();
+  updates.materialsRequestedType = materialsRequestedType;
+  updates.materialsRequestedQuantity = materialsRequestedQuantity;
+  updates.fullVersionSent = fullVersionSent;
+  updates.expectedSendDate = expectedSendDate;
+  updates.sendReminderDate = sendReminderDate;
 
-  updates.rrNotes = rrNotes !== undefined ? rrNotes : deleteField();
+  updates.rrNotes = rrNotes;
 
-  updates.rejectionFeedbackType = rejectionFeedbackType !== undefined ? rejectionFeedbackType : deleteField();
-  updates.rejectionFeedbackText = rejectionFeedbackText !== undefined ? rejectionFeedbackText : deleteField();
-  updates.rejectionReflection = rejectionReflection !== undefined ? rejectionReflection : deleteField();
-  updates.rejectionLesson = rejectionLesson !== undefined ? rejectionLesson : deleteField();
-  updates.rejectedFromStatus = rejectedFromStatus !== undefined ? rejectedFromStatus : deleteField();
+  updates.rejectionFeedbackType = rejectionFeedbackType;
+  updates.rejectionFeedbackText = rejectionFeedbackText;
+  updates.rejectionReflection = rejectionReflection;
+  updates.rejectionLesson = rejectionLesson;
+  updates.rejectedFromStatus = rejectedFromStatus;
 
-  updates.offerDate = offerDate !== undefined ? offerDate : deleteField();
-  updates.offerResponseDeadline = offerResponseDeadline !== undefined ? offerResponseDeadline : deleteField();
-  updates.offerNotes = offerNotes !== undefined ? offerNotes : deleteField();
+  updates.offerDate = offerDate;
+  updates.offerResponseDeadline = offerResponseDeadline;
+  updates.offerNotes = offerNotes;
 
-  updates.closingReason = closingReason !== undefined ? closingReason : deleteField();
-  updates.closingNotes = closingNotes !== undefined ? closingNotes : deleteField();
-
-  // 3. Snapshot the query for undo, and reserve the activity doc references up front
-  //    so undo can delete exactly what we wrote.
-  const preSnapshot = JSON.parse(JSON.stringify(query));
-  const activityDocRef = doc(collection(db, `users/${userId}/queries/${queryId}/activity`));
+  updates.closingReason = closingReason;
+  updates.closingNotes = closingNotes;
 
   // 4. Human-readable timeline note.
   const activityNote = buildActivityNote(newStatus, {
@@ -287,17 +292,11 @@ export async function recordQueryResponse(
     rejectedFromStatus,
   });
 
-  // Concrete event time rather than serverTimestamp() (an unresolved server timestamp would
-  // sort as time-0 in the immediate recompute), clamped monotonic with the existing log so a
-  // date-only "received" date can't sort before a same-day earlier entry.
   const desiredMillis = (getTimestamp(data.dateReceived) || Timestamp.now()).toMillis();
-  const eventTime = Timestamp.fromMillis(await monotonicEventTime(userId, queryId, desiredMillis));
-
-  const activityPayload: any = {
+  const activityPayload: Record<string, any> = {
     type: newStatus,
     // The status this event produced — what recomputeQuery derives from. Exact enum member.
     resultingStatus: newStatus,
-    createdAt: eventTime,
     note: activityNote,
     queryId,
     agentName: agent?.name || "The agent",
@@ -315,9 +314,45 @@ export async function recordQueryResponse(
     activityPayload.feedbackType = rejectionFeedbackType;
   }
 
+  const appendsActivity = data.responseType !== "queried";
+  return { newStatus, details: updates, activityBase: activityPayload, appendsActivity, desiredMillis };
+}
+
+/**
+ * Performs the canonical writes for recording a response and returns an `undo`
+ * closure plus the toast config. Throws only if the PRIMARY write (the status
+ * update + per-query timeline entry) fails — in that case nothing is left
+ * half-applied and the caller should surface the error.
+ */
+export async function recordQueryResponse(
+  deps: RecordResponseDeps,
+  data: RecordResponseData
+): Promise<RecordResponseResult> {
+  const { userId, query, agent, manuscript } = deps;
+  const queryId = query.id;
+  const queryRef = doc(db, "users", userId, "queries", queryId);
+
+  const plan = planResponse({ query, agent, manuscript }, data);
+  const { newStatus, appendsActivity } = plan;
+  // 2. The query document update — the response DETAILS only (see `planResponse`); a cleared field is deleted.
+  const updates: Record<string, any> = Object.fromEntries(
+    Object.entries(plan.details).map(([k, v]) => [k, v === undefined ? deleteField() : v])
+  );
+
+  // 3. Snapshot the query for undo, and reserve the activity doc references up front
+  //    so undo can delete exactly what we wrote.
+  const preSnapshot = JSON.parse(JSON.stringify(query));
+  const activityDocRef = doc(collection(db, `users/${userId}/queries/${queryId}/activity`));
+
+  // Concrete event time rather than serverTimestamp() (an unresolved server timestamp would
+  // sort as time-0 in the immediate recompute), clamped monotonic with the existing log so a
+  // date-only "received" date can't sort before a same-day earlier entry.
+  const eventTime = Timestamp.fromMillis(await monotonicEventTime(userId, queryId, plan.desiredMillis));
+
+  const activityPayload: any = { ...plan.activityBase, createdAt: eventTime };
+
   // A reversion to Queried removes the later response rather than recording a new event —
   // it writes no per-query or global timeline entry (the caller pre-deletes the advanced ones).
-  const appendsActivity = data.responseType !== "queried";
 
   // 5. PRIMARY write — must succeed. Response details + (for real responses) the per-query
   //    timeline entry, then the recompute that derives status/dates/flags from the updated log.

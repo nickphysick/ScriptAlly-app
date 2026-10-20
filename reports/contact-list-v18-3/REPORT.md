@@ -1,0 +1,417 @@
+# Contact list v18.3 — report
+
+Branch `contact-list-v18-3`: six part commits, one fix to E (`9bde19b9`) and G on top, cut from `dashboard-v59`'s tip
+`5f566578` (dev's build, fe8f2377, plus its report). Ref `design-refs/contact-list-v18-3/` (432 refs hashed).
+
+## False premises (read first)
+
+1. **A.6 "the drawer must sit in front of the pinned row" was already true.** Recon measured the Housekeeping drawer at
+   z 61 against the pinned list header's z 9; A4 is green on the base build. Nothing was changed for it. Its red came
+   from its mutation (the drawer given z 1), where `elementFromPoint` answered `DIV.hdr-dim`.
+2. **The v18.2 page tour on `/agents` was already unreachable.** It was placed above the floating Housekeeping tab and
+   rendered only while that tab measured a height; Part B removed the tab, so the tour had no host. Part F deletes it
+   (`contact/contactGuide.ts`) rather than leaving a dead mount.
+3. **The mock's "No grouping" chip reads "Grouped by Letter".** A mock bug: the app reads "Grouped by None".
+4. **D1's "then the panel shows the new agent" cannot be read on the harness account.** It is on the Free plan with
+   38 agents against a cap of 5, so `addAgent` refuses every add, correctly, with "Couldn't save: Free tier is capped
+   at 5 agents". D1 asserts the save reached the existing add path (its own refusal in the editor's foot) and tallies
+   the after-add branch as not entered. The contact lab cannot stand in: it is not in a built bundle.
+5. **A3 as written ("with every reply time filled") would mean writing a reply time to 38 agents.** The lock uses the
+   writer's own "Say it's not stated" list (`todoPrefs.contacts.settled`) instead: one document write, restored
+   exactly, which clears the same gap through the same code path. On the account all five details have gaps, so
+   without a fixture the hidden branch is never entered.
+6. **"At ≤1440 the bars are hidden" is a WINDOW width.** The app's compact switch (`.ws-app:not(.sheet-wide)`) is on at
+   1512 too, so a first version hid the bars there; it is a `max-width: 1440px` query now.
+7. **E.2's "padding 0 40px 0 78px" is the Contact list's.** The Query Centre's rows have their own grid and inset; its
+   headings keep `0 40px` and E2 asserts each label sits on its own column's edge (within 1px) on both pages instead.
+8. **F3's mutation (end on a bubble-phase `click`) reddens F3's precondition, not its 200ms timing.** The click that
+   starts the spotlight bubbles to the window and ends it at once, so the spotlight is never on. That is the mutation
+   detected, at an earlier reading than the one it names.
+
+## §0 Recon
+
+1. **Layers.** Pinned list header (`.cl18-lh`, sticky) z 9; Housekeeping drawer z 61 over its dim; agent panel and scrim
+   z 60s; top bar is outside the scroller. The guide's popover is z 95, its note 96, the spotlight 97.
+2. **Header spacing, base build, both widths:** strip 14 · title row 34 · navy **22**, against the Query Centre's 54. The
+   22 came from `contactV17.css`'s `.clv-group > .cl17-hd + .clv-main, .clv-group > .cl17-hd ~ .clv-main
+   { margin-top: 22px }`, written for v17's filter row. Now 54, measured 14 / 34 / 54 at both widths on both pages.
+3. **"+ Add an agent" openers.** The header's button and App's "Add an agent" capture (through `sa:contact-add`) both
+   reach `AgentList.openAdd`. The panel's act view can host `AgentCardEditor` with no id and an empty draft through
+   the card host's existing `onCreateAgent` — no new write path.
+4. **The editor's fields.** Country chips UK · Ireland · US · Canada · Australia · New Zealand · Other… confirmed; "No
+   reply means" was `noResponseMeansNo`. The agency field offered suggestions from existing agents (`agency-hint`); it
+   offers none in the new-agent panel state.
+5. **The grouping menu** opened from the underlined group name (`.cl18-gn`) through the shared Popover, anchored at the
+   button's `bottom + 8, left`. The chip keeps that anchor.
+6. **The headings row** stuck at the list's pin height on `#e9edf3`; a grouped view rendered one `ListPanel` (and so
+   one headings row) per group.
+7. **The top bar** is `WorkspaceShell`'s `.ws-bright`; there was no page slot. Part F adds one (`lib/barSlot`).
+8. **Per-user UI flags** live in `todoPrefs.contacts` (`hkIntroSeen`); the guide's state is `todoPrefs.contacts.guide`.
+
+## What changed
+
+- **A** (`59532416`) Housekeeping: score 68 (52 at ≤1440) with "%" 30 (26) and "List health" 26 (20) on one line;
+  tiles `repeat(3, max-content)`; "How points work" gone, the key opens under the points tile; complete details hidden.
+- **B** (`1dd3a72b`) "Fill in the gaps {n}" replaces "Discover agents"; the floating tab is gone; the ring reads a
+  percentage (33/15, stroke 10, round cap); spacing 14 / 34 / 54.
+- **C** (`96e4a6f0`) The peek is three contact pills from the name's left; a missing one is dashed "Add …".
+- **D** (`fefd480f`) "+ Add an agent" opens the agent panel's act view, "NEW AGENT · Add an agent", with the card's
+  editor in a new-agent state (no Paste a link, no agency suggestions); "Response policy" (No response means no /
+  Always replies) replaces "No reply means".
+- **E** (`f1bece84`) `shell/listToolbar.css`, read by both list pages: a 64px navy toolbar (count, "Grouped by {Group}"
+  chip, then 36px search, Filters, density, pin); a solid white 40px headings row with an 8px shade while stuck; a
+  grouped Contact list has one panel and one headings row; letter rows open on a rule with the letter at 26. The
+  Contact list's older v18 size rules for those elements are retired, not out-ranked. The Query Centre's headings
+  derive a stuck state from boxes, as its bands do.
+- **F** (`c5cf5cc2`) The page guide: `shell/guide/PageChecklist` + `lib/pageChecklist` + `lib/barSlot`. Done is read
+  from app state and real saves (a new agent saved, search ≥ 2 characters, a panel open by any route, a card edit
+  saved, a Housekeeping save), stored by leaf in `todoPrefs.contacts.guide`. The spotlight's hole is a clip path on
+  the dim, so the target is pressed through it; it ends on pointerdown in the capture phase, Enter, Space or Escape.
+
+## Locks — CL183 (`tests/e2e/contactV183.measure.ts`)
+
+At 1512 × 900 and 1280 × 800. Final run on this branch: **18 of 18 passed, 351 readings, all green.**
+Ledgers: `ledger/<lock>.json` (green), `base-<lock>.json` (base build), `mut-<lock>.json` (mutation).
+
+| Lock | Base build | Mutation | Mutation reading |
+|---|---|---|---|
+| A1 header | 10/16 — score 40 | page: restore the link | 14/16 — "How points work" present |
+| A2 key | 10/14 — key 48 right of the tile | page: anchor to the header's right | 10/14 — left 60 off |
+| A3 complete | 7/9 — Reply time shown at 38/38 | src: render complete sections | 7/9 — same |
+| A4 front | **4/4 (premise 1)** | page: drawer z 1 | 2/4 — `DIV.hdr-dim` |
+| B1 button | 2/10 — no "Fill in the gaps" | page: restore the tab | 8/10 — a floating tab |
+| B2 spacing | 6/10 — navy 22 | page: restore the 22px rule | 6/10 — 22 |
+| C1 peek | 30/116 — no pills, tinted ground | src: restore the v18 card | 58/116 — no pills |
+| D1 add | 2/6 — no panel | src: open the centred card | 2/6 — no panel |
+| D2 policy | 0/4 — no "Always replies" option | src: rename the field | 3/5 — no "Response policy" |
+| E1 toolbar | 4/28 — no chip, 66–76 tall | page: anchor the menu to Search | 22/24 — menu 481 off |
+| E2 headings | 24/28 — `#e9edf3` | page: transparent | 24/28 — transparent |
+| E3 grouped | 0/1 — no grouping chip | src: one per group | 4/5 — six headings rows |
+| F1 pill | 6/24 — no pill | page: move it to the sidebar | 6/22 — not in the bar |
+| F2 show | 11/41 — no pill to press | page: perform the action | 21/28 — a panel opened |
+| F3 end | 2/5 — no spotlight | src: bubble-phase `click` | 2/3 — spotlight never on (premise 8) |
+| F4 done | 1/7 — nothing ticked | src: tick from the guide's button | 3/6 — a row click did not tick |
+| F5 next | 0/3 — no note | page: drop the note | 0/1 — no note |
+
+**Base runs that crashed first.** On the base build eight locks first died on a click timeout (the control does not
+exist there) rather than reading red. Their clicks and reads are bounded now, so a missing control is a red reading,
+and all eight were re-run on base and read red as above.
+
+**Source mutations** were applied and undone in this worktree from path-derived backups (`~/cl183-logs/mut183.py`),
+each with a `build:dev` before its run; the tree was clean after each.
+
+## L1 — no regression
+
+CL18.2, CL18.1, CL18, CL17, CL17.1, CL16, QC138 / .1 / .2 / .3 / .4 / .5 / .6, Responses v2 and header v3 (157 tests),
+run on both builds:
+
+- **Base build:** 129 passed, 5 failed, 23 skipped. The five are CL17 FS1, CL18.1 B5, CL18.2 C5, QC138.2 C1 and D1.
+- **This branch, after the edits below:** the same five, and nothing else. All five predate this pack:
+  - **CL17 FS1:** the pinned-list button reads "Pin the list", not "Full screen" (QC v138.6).
+  - **CL18.2 C5:** that button's tooltip carries an "F" keycap (QC v138.6).
+  - **CL18.1 B5:** a dated capture, taken 15 Oct.
+  - **QC138.2 C1 / D1:** a date-bound fixture line, and the card motion's timing.
+- **⚠️ One regression from this pack was found by L1 and fixed:** CL16 F1 caught a selected row that is the first of its
+  letter losing its 3px ink edge. Part E's letter rule is a `box-shadow` that out-ranked the open row's. `9bde19b9`
+  states both shadows.
+- **⚠️ Long runs are throttled.** In one 48-test run, CL16 F4–F7/G1 and CL18.2 B1–B3 failed with "no agent panel
+  opened" / "no closed agent found". Each file run on its own passes in full on this branch (CL16: 9 passed, 10
+  retired; CL18.2 + QC138.1: 26 passed, C5 as above). Base hit the same shape (G1) in the paired run. This is the
+  sign-in throttle the harness is known for, not the page.
+
+## Retired / edited locks
+
+Each carries a `RETIRED` or `RE-POINTED (v18.3 §…)` note at the line.
+
+- **CL16 C3:** the grouping is read from the chip ("None"), not the sentence's ", A to Z".
+- **CL16 F1:** "the Housekeeping tab stands down" is retired (no tab).
+- **CL17.1 B4:** the ring's circumference uses r 42.5.
+- **CL17.1 D1 and D2:** the floating tab and its × are retired.
+- **CL18 A2:** the grouping is read from the chip.
+- **CL18 B1:** "Showing all {N} agents" and "Showing {n} of {N}" with no ", A to Z".
+- **CL18 C1:** the headings strip is white.
+- **CL18 D1:** the v18 peek is retired; CL183 C1 holds the peek.
+- **CL18 F1:** two numbers (ring and drawer), not three.
+- **CL18.2 C2:** the key opens from the points tile.
+- **CL18.2 D3:** the tab's figures are replaced by the header's "Fill in the gaps {n}".
+- **QC138 C1:** the headings are white.
+- **QC138.1 F1:** the search rests at 240 on the full-size sheet and 200 otherwise, and holds that width on focus.
+  v138.1's grow-on-focus (360 / 260) is retired with the shared toolbar; see "For Nick".
+- **QC138.5 E1:** the title is "Showing {n} of {N} queries", with no "grouped by".
+- **The v18.2 page tour on `/agents`:** retired with its steps file. It had no lock of its own; it was unreachable.
+
+## Shots
+
+`shots/`: 01 page, 02 Housekeeping home, 03 points key, 04 over the pinned row, 07 group menu, 08 grouped by status,
+09 grouped sticky (Contact list and Query Centre), 10–11 add an agent, 13 guide open on a fresh account, 14 one
+spotlight per item (1–5), 15 done note, 16 next step, 17 hide for good, 18 guide closed, 19 all five done (no pill); `x-qc-toolbar-*` the Query
+Centre's navy row and headings after Part E, at 1512 and 1280.
+
+## For Nick
+
+- **The centred add card's last opener** is the development-only harness hook `window.__saAgentCard.openNew`
+  (`AgentCardHost.tsx`); no production route opens it. `AddAgentFocusForm` still exists, mounted by `App.tsx` for the
+  other "+ Agent" doors (unchanged, as its section says).
+- **"No reply means" still appears:** `LogJourney.tsx` ("No reply means no" toggle), `NudgeJourney.tsx` ("guidelines say
+  no reply means no"), `ContactEmptyPage.tsx` (a sample answer), `agentPanel.ts` (a fact line), `todoTray.ts` (a row
+  label and a sentence), `responseContext.ts`, `paneJourney.ts`. All read `noResponseMeansNo`; none was in scope.
+- **The Query Centre's search no longer grows on focus.** The shared toolbar fixes it at 240 (200 below the full-size
+  sheet), as the pack specifies. QC v138.1 had it grow to 360 (260). Say if you want the grow back on both pages; it is
+  one rule in `shell/listToolbar.css`.
+- **The pin button's "F" keycap trips CL18.2 C5** ("no keycaps on /agents"). This predates this pack (QC v138.6); one
+  of the two wants a ruling.
+- The harness account's guide state is back to absent, as it was before this pack. The locks set it and restore it
+  per run, and the full L1 run on this branch ticked items, which is correct behaviour.
+
+## v18.3.1 — the peek's spacing
+
+Branch `contact-list-v18-3-1`, cut from what dev served:
+`dev/main-cl18-todo51-cl181-qc1385-an21-cl182-qc1386-db60-cl183-an24` (c6505699, `index-DYhkEY1Y.js`).
+
+**False premise.** The pills were not simply "2px under the main line". The open row also re-centred its main line:
+- At rest the row is a single 56px grid track with its cells centred.
+- Open, the first track shrank to its tallest cell (49px), so the name and agency rose 3.5–5.5px as the peek opened.
+- That breaks "no other row moves", in the row's own main line.
+
+**The fix:**
+- **The main line stays put.** As the peek opens, the row reads its resting main track and pins the open row's first
+  track to it (`--cl183-track`).
+- **16 under the agency line (14 compact).** The row also reads how far the agency line already sits above the track's
+  end (`--cl183-under`), and the pills' margin is the target less that, floored at 2px so a taller wishlist cell is
+  never overlapped.
+- **18 above the row's foot (16 compact),** as the open row's bottom padding.
+- **Unchanged:** the pills' left edge, size and 12px gap, the hover timer and the Space toggle. All of these run
+  through the same `openPeek`.
+
+**The details, checked against Part C:**
+- Copy rendered as plain 14px body text, because v18's Copy rule is scoped to the retired `.cl18-pk` peek. It is v18's
+  small button again: mono 11, radius 6, hairline ring.
+- The website's ↗ took the domain's size, because the pill's `> span` rule sets every span to the pill's font. It is
+  13px navy now.
+
+**Locks:**
+- **C2, the spacing:** at 1512 × 900, 1280 × 800 and 1920 × 1080, so both the compact and the full-size branch are
+  entered. It is 67/67 green.
+  - On base it reads 4.2 / 14.0, with the main line moving 3.5–5.5px.
+  - Under its mutation (the 2px gap restored) it reads 9.7 against 14 / 16.
+- **C3, the details:** 5/5 green; red on base (Copy 14px Source Sans with no ring; no ↗ hook). The harness account has
+  no agent with a website, so C3 gives the bare fixture one for the read and re-seeds it.
+- **C1:** 176/176.
+- **CL18:** 11 passed, 3 retired as before.
+
+## v18.3.1, amended — the peek's spacing and hover actions in the status cell
+
+**Base:** dev served `contact-list-v18-3-1` at ab86ac14 (`index-BfyN6LLe.js`), the first v18.3.1 build. It carries
+v18.3: the "Getting started" pill and the contact pills. The amendment continues on that branch. Refs are enrolled at
+`design-refs/contact-list-v18-3-1/`, and all four hashes match (468 refs guarded).
+
+**False premises:**
+1. **"No box wider than the cell" cannot hold with the buttons unchanged.** The status cell is 212px at 1512 and 170px
+   at 1280; an unchanged pair of buttons with an 8px gap runs about 209–310px ("Send a nudge / Open card" about 209,
+   "Record a response / Open card" about 244, "Remind me when they reopen / Open card" about 310). At 1280 only "Open
+   card" alone fits, and the mock's own tray overflows its cell (242 against 213).
+   **Nick's ruling:** the actions stay right-aligned to the status cell and may reach left over the Replies column,
+   whose content also hides on hover. C3(a) is "right edge on the cell's, nothing past the Replies column's left".
+2. **Part A's spacing was already on dev** (ab86ac14). This pass moves its anchor from the italic agency span to the
+   name-and-agency block (`.clv-rwn`), as the pack names it (under a pixel of difference), and corrects Copy and the ↗.
+   So C2 is green on this pack's base. Its red-first stands from v18.3 (4.2 / 14.0), and its mutation reddens it here
+   (9.7 and 7.7 against 14).
+3. **The tray stood down on not-queried rows,** so that "+ Log a query" could be clicked (v17). The mock swaps those rows
+   too: the link hides and the tray's own "Log a query" and "Open card" show. That rule is retired.
+4. **The Query Centre's rows do not use this tray.** Theirs is `.qc138-tray`, inside the "Next move" cell, and a
+   different component. The pack applies the rule only if the tray is shared, so the Query Centre is unchanged;
+   `shots-v18-3-1/x-qc-row-hover-*` show it as it is.
+
+**A** (`ba7f5826`): the pills sit 16 (14) under the main line and 18 (16) above the foot. Copy is 22 tall, padding
+`0 8px`, radius 6, white, with a 1px ink-18% inset ring. The ↗ is 13px `#2d3a50`.
+
+**B** (`8065c128`): the tray is a grid item on the main line (row 1), in the Replies + status area, right-aligned, gap 8,
+with no background of its own. On hover, focus-within or keyboard focus the status and Replies content go to `opacity:
+0; visibility: hidden`, keeping their space, and the actions fade in, 120ms each way, none under reduced motion. Every
+cell is placed explicitly, because grid auto-placement never overlaps: an explicitly placed tray would have pushed the
+auto-placed cells off the main line.
+
+**Locks:**
+
+| Lock | This branch | Base (ab86ac14) | Mutation |
+|---|---|---|---|
+| C2 spacing | 67/67 | 67/67 (premise 2) | 2px gap restored: 58/67, 9.7 / 7.7 against 14 |
+| C2d Copy and ↗ | 6/6 | 4/6: Copy 18.3 tall, `2px 7px`, ring 16%; ↗ `#2a3a52` | — |
+| C3 actions | 123/123 | 51/123: right edge 1466 against 1440, off the main line by 2–5px, own gradient, status visible | overlay restored: 59/123, up to 30px off the main line with the peek open |
+
+- C3 runs at 1512 and 1280.
+- It hovers queried and not-queried rows, and reads each with the peek closed and open.
+- It asserts every branch was entered.
+
+**L1:**
+- **Green on this branch:** CL18 (12 passed, 3 retired), QC138.1, .3, .4, .5 and .6.
+- **QC138.2 C1 / D1:** red here and on every base since v18.3.
+- **CL183 E3, CL17 D1, CL16 F4–F7 / G1 and QC138 J1 went red during the run.** Each needs queried agents, and another
+  session was running the dashboard v58–v60.1 suites against the shared harness account at the same time, seeding a
+  manuscript with no queries (`db60-pre`, "DB60 Pre-query"). With it on the account every agent read "Not queried".
+  Re-run on the base build in the same state:
+  - CL183 E3 and four of the CL16 five failed there too;
+  - CL17 D1 and QC138 J1 passed, as the fixture came and went.
+  - **Re-run on this branch once the other session's run had ended** (`db60-pre` gone): **all eight pass.** CL183 E3,
+    CL17 D1, CL16 F4–F7, G1 and QC138 J1. They are the account's state, not this change.
+- **Not touched:** that session's fixture is its own.
+
+**Shots** (`shots-v18-3-1/`, beside each `screens/*`):
+- `01-hover-closed-1512`, `02-hover-peek-1512`, `03-hover-peek-1280`;
+- `x-hover-peek-not-queried-1512`, showing "Log a query" taking "+ Log a query"'s place;
+- `x-qc-row-hover-1512/1280`, the Query Centre unchanged.
+
+## v18.3.2 — the row keeps all its information on hover; the actions sit on the peek's line; no action twice
+
+**Which v18.3.1 case applied:** v18.3.1 **had** been run (its Part B was on dev). Part B is reverted (`03581e72`,
+reverting `8065c128`); v18.3.1 Part A (16 / 18, Copy, the ↗) stands.
+
+**Base:** dev served `…-an241-db601-cl1831b` at `c24f9484` (`index-DMZJAn0z.js`), which carries v18.3 (the "Getting
+started" pill and the contact pills) and v18.3.1. The branch is `contact-list-v18-3-2`. Refs are enrolled at
+`design-refs/contact-list-v18-3-2/`, and all seven hashes match (483 guarded).
+
+**False premises:**
+1. **The harness has no "full" row with an offer.** On the active manuscript (Harbour of Glass) no query is at Offer,
+   and no agent has contact details. So the locks use these rows:
+   - **"full":** Theo Abara, at Full requested, which carries the same stage, bar, YOUR MOVE and date. The run gives him
+     three long contact details.
+   - **"sparse":** Sun-hee Park (Full sent), given a website only.
+   - **"not-queried":** the bare fixture.
+
+   Every field is read first and put back exactly. Moving a query to Offer would have meant a status write and a
+   recompute on shared data.
+2. **The pills' shortening needs a floor, and it decides what fits.** With the email never shortening, at 1280 a long
+   email (the lock uses a 41-character one) leaves about 180px for the website and social pills. At a 96px floor they
+   ran 34px into the actions' 16px clearance (CL1832-D3 found it). They stop at 72px now: the disc and a few letters.
+   With a mock-like email (`shots-v18-3-2/04-…`) the social handle shows two characters before its ellipsis, where the
+   mock's keeps a few more. A higher floor would overflow the long-email case.
+3. **The Query Centre's rows do not share this tray** (`.qc138-tray`, in the "Next move" cell, as v18.3.1 found). It is
+   unchanged, for B and C alike. Its status cell offers no action of its own for the tray to repeat.
+
+**The commits:**
+- **A** (`eb1843e6`): the hover tray over the Query status cell is gone. Every column keeps its content on hover, and
+  a row with its peek closed shows no actions.
+  - ⚠️ A was committed with two unit tests red. My gate chain checked the summary line rather than the exit, which is
+    the very fault CLAUDE.md warns about. B repairs them in a follow-up commit, not an amend. The gate now refuses to
+    commit unless the only red is the known `email.test.ts`.
+- **B** (`6814e189`, fix `9a7f2000`): while the peek is open the actions sit at the right-hand end of the peek's line.
+  - The line is one flex row: the pills, then the actions, at least 16px apart.
+  - The actions' right edge is the status cell's, centred with the pills, with no background, fading in over 120ms
+    (none under reduced motion).
+  - When space is short, the social handle shortens first (flex-shrink 1000), then the website. The email never
+    shortens.
+  - Each shortened value keeps its full value as its `title`. Copy and ↗ still use the full values.
+- **C** (`92c3fa52`): `lib/rowActions` drops any action whose label (ignoring a leading "+", whitespace and case)
+  matches one the status cell offers. The row reads those labels from the rendered cell as the peek opens, in a layout
+  effect, so nothing duplicated paints, and nothing names "Log a query". Not-queried rows show Open card alone.
+
+**Locks (CL183.2, named `CL1832-D1`–`D4`; the file's own D1/D2 are the add-agent and policy locks):**
+
+| Lock | This branch | Base (c24f9484) | Mutation |
+|---|---|---|---|
+| D1 nothing hides | 54/54 | 14/54: stage, track, YOUR MOVE and date hidden on hover | v18.3.1 B's swap: 18/54 |
+| D2 actions on the peek line | 24/24 | 12/24: actions on the main line, off the pills' centre | tray centred on the row: 12/24, 603.9 against 635.1 |
+| D3 no collision (1280, full) | 8/8 | 4/9 | pill row unshrinkable: 5/6 (see below) |
+| D4 no action twice (every row, 1512) | 68/68 | 12/68: not-queried rows show two actions | dedupe removed (src): 12/68, "log a query" in both |
+
+- **D3's mutation reddens "something shortened", not (a).** With the pill row unshrinkable the actions are pushed
+  right with it, so the 16px gap still holds. D2's right-edge check is what catches that overflow.
+- **v18.3.1 C3 is retired:** the test, its mutation and its three ledgers are deleted. C2 (spacing) and C2d (Copy and
+  the ↗) stand and pass.
+
+**L1:**
+- **Green:** CL183 in full (24 tests), CL18 (12 passed, 3 retired), CL16 (10, 10 retired), QC138, .1, .3, .4, .5 and
+  .6.
+- **Red, all pre-existing:** CL17 FS1 (the pin's wording since QC v138.6), and QC138.2 C1/D1.
+
+**Shots** (`shots-v18-3-2/`, one beside each `screens/*` file): full, sparse and not queried with the peek open, at 1512
+and 1280.
+
+## v18.3.3 — the open row on the row's own columns; no tray, no Open card; the email copies itself; an open row always closes
+
+This replaces v18.3.1 Part B and all of v18.3.2.
+
+**False premises:**
+1. **There is still no Offer row on the harness account.** As in v18.3.2, the "full" row is Theo Abara at Full
+   requested, which carries the same stage, bar, YOUR MOVE and date. Its next step is "Send the full", not "Answer the
+   offer". "Sparse" is Sun-hee Park (Full sent) with a website only, and "not-queried" is the bare fixture. Every field
+   is read first and put back exactly.
+2. **The lock file already had E1–E3** (the shared toolbar and headings locks). The new locks are named
+   `CL1833-E1`–`E5`, as v18.3.2's were `CL1832-D1`–`D4`.
+3. **"v18.3.1 C3" was filed as `C2d`** (Copy and the ↗) in this file. It is deleted; the ↗ reading moved into
+   CL1833-E2.
+4. **A 16px top margin cannot give a 124px row on its own.** The open row's line starts after the main line's track,
+   which is taller than the agent block. So the line's top margin is set by measurement, once, as the row opens: the
+   agent block's bottom + 16 − the line's natural top (`--cl1833-mt`, a layout effect in `ContactRows`). Measured: the
+   full row is 123.8 at both widths; the bare row 126.3 (its two add pills make the main line taller).
+
+**Base case:** v18.3.1 and v18.3.2 were both present. The base is dev's
+`dev/…-an241-db601-cl1831b-cl1832` at `fb25648a` (`index-LkecNKe9.js`). The branch is `contact-list-v18-3-3`.
+- **Reverted** (`799d24f0`): v18.3.2 B (the tray on the peek line), its fix (the 72px pill floors) and C's rendering.
+  v18.3.1 B had already been reverted by v18.3.2 (`03581e72`).
+- **Kept:** v18.3.2 A (no hover tray over the status cell).
+- **Carried forward:** the dedupe rule, now as Part B on the next-step link.
+- **Replaced:** v18.3.1 A's spacing (16 / 18 under and above a pill row, the held resting track) and its Copy chip.
+
+**The commits:**
+- **A** (`581d6075`): the details line is a subgrid on the row's own four columns.
+  - The email sits in Agent: its disc is centred under the avatar and its text starts on the name's left.
+  - The website sits in What they want. The social handle starts on Replies and runs into Query status, stopping 24px
+    short of the next step.
+  - Each detail is a 30px disc `#eef1f6` with a 15px navy icon, 10px to a 15.5px serif value. There is no pill shell.
+  - A missing detail is a transparent disc in a faint ring, with italic text at ink 48% (navy and underlined on hover),
+    and the same add flow.
+- **B** (`0fcf196a`): the hover tray and "Open card" are gone; clicking the row (or empty space in the open row) opens
+  the card.
+  - The next step is the status's own primary action, as a link at the status cell's right edge on the details line.
+    It is the `cl17-log` class, so it is styled exactly as "+ Log a query", and it runs the old tray's handler.
+  - `lib/rowActions` drops it when the rendered status cell already offers it (labels compared ignoring a leading "+",
+    whitespace and case). So not-queried and Closed rows show none.
+  - The row's click ignores the contact details and the next step.
+- **C** (`b23383df`): the Copy chip goes and the email is the copy button.
+  - It is a focusable `role="button"` named "Copy email {address}".
+  - On hover or focus, the disc turns navy with a cream copy glyph and the address takes a light navy underline.
+  - Click, Enter or Space copies the full address (Clipboard API, then `execCommand`). It reads "Copied" in green
+    `#2f6b4f` on a `#e3efe7` disc for 1400ms.
+- **D** (`15fc53cb`): an open row always closes.
+  - The list keeps the last pointer position. On every scroll (capture), resize and pointer move it asks
+    `elementFromPoint` what is under it, and closes a pointer-opened row the pointer is no longer on.
+  - A dwell's open lands only if the pointer is still on that row.
+  - Window blur and the pointer leaving the document close it.
+  - A keyboard-opened row closes on Escape (from anywhere inside it) or when focus leaves the row.
+  - The 450ms dwell and the animation are unchanged.
+
+**Locks (CL183.3, `CL1833-E1`–`E5`)**, at 1512 and 1280:
+
+| Lock | This branch | Base (fb25648a) | Mutation |
+|---|---|---|---|
+| E1 columns | 29/29 | 7/24: email disc 417 against the avatar's 369, website 814 against 645 | the pill row restored: 13/28 |
+| E2 rhythm | 59/59 | 31/59 | the 2px gap: 55/59, 5.2 under the agent block and a 113 row |
+| E3 next step (every row at 1512) | 110/110 | 68/107: "Open card" on not-queried rows | the tray re-added: 72/110 |
+| E4 copy | 16/16 | 8/16: clicking the email copies nothing | the click guard removed (src): 10/16, the card opens |
+| E5 closes | 18/18 | 12/18: (a), (c) and (e) red | the scroll re-check removed (src): 16/18, (a) red |
+
+- **E4's and E5's mutations are in the source** (the click guard is in two places, the email's own handler and the
+  row's; the scroll listener is in `ContactRows`). Each was applied in the worktree from a path-derived backup, built,
+  measured and restored.
+- **E5 (d) passes on the base as well.** The base already cleared the dwell timer on `mouseleave`. It is kept, because
+  D's validation is a second guard against the same open.
+
+**Retired:**
+- **Deleted:** `CL1832-D1`–`D4`; C2 (v18.3.1's spacing, now CL1833-E2); C2d ("C3": the Copy chip, now CL1833-E4; the ↗
+  reading moved into CL1833-E2). Their tests, mutations and ledgers are gone, and `contactV1832Shots.measure.ts` with
+  them (its shots stay, as history).
+- **C1 is re-pointed.** The ground and the first pill's left are now CL1833-E2's and -E1's. A missing detail is
+  checked as a transparent disc in a ring, not dashed. It reads 120/120.
+
+**The Query Centre:** its rows share neither the peek nor the tray. Its tray is `.qc138-tray`, inside the Next move
+cell. Nothing there changed.
+
+**Shots** (`shots-v18-3-3/`, beside each `screens/*` file): full, sparse and not queried open at 1512 and 1280, and at
+1512 the full row's email on hover and just copied.
+
+**L1:**
+- **Green:** CL183 in full (23 tests), CL18 (12 passed, 3 retired), CL16 (10, 10 retired), QC138, .1, .3, .4, .5 and
+  .6.
+- **Red, all pre-existing and unchanged from v18.3.2:** CL17 FS1 (the pin's wording since QC v138.6), and QC138.2 C1/D1.
+- Other packs' ledgers rewritten by the run were put back, and the guide's state was cleared.

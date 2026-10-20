@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 frames were sampled",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 grouping restored at the first frame",
+  "ok": true,
+  "detail": "Grouped byStatus"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 density restored at the first frame",
+  "ok": true,
+  "detail": "compact"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the status filter restored at the first frame",
+  "ok": true,
+  "detail": "[\"st:q\",\"find\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 the search restored at the first frame",
+  "ok": true,
+  "detail": "a [\"st:q\",\"find\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 no layout shift > 2px after the first frame",
+  "ok": true,
+  "detail": "212,212,212,212,212,212,212,212,212,212,212,212"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 frames were sampled",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 grouping restored at the first frame",
+  "ok": true,
+  "detail": "Grouped byStatus"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 density restored at the first frame",
+  "ok": true,
+  "detail": "compact"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the status filter restored at the first frame",
+  "ok": true,
+  "detail": "[\"st:q\",\"find\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 the search restored at the first frame",
+  "ok": true,
+  "detail": "a [\"st:q\",\"find\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 no layout shift > 2px after the first frame",
+  "ok": true,
+  "detail": "212,212,212,212,212,212,212,212,212,212,212,212"
+ }
+]

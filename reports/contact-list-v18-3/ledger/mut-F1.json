@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "F1",
+  "where": "@1512 the pill is in the top bar",
+  "ok": false,
+  "detail": "{\"has\":true,\"inBar\":false,\"leftOfHelp\":true,\"gap\":1218,\"ys\":[907,73.75,73.75,73.75],\"text\":\"Contact list: Getting started\",\"n\":\"2/5\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 it sits left of the \"?\" with 10 ±1 between",
+  "ok": false,
+  "detail": "1218"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 its centre equals Search's, Log a query's and the \"?\"'s ±1",
+  "ok": false,
+  "detail": "[907,73.75,73.75,73.75]"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 it reads \"Contact list: Getting started\"",
+  "ok": true,
+  "detail": "Contact list: Getting started"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 and \"2/5\"",
+  "ok": true,
+  "detail": "2/5"
+ },
+ {
+  "lock": "F1",
+  "where": "step: \"[data-pck='off']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 \"Don't show this again\" asks first",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "step: \"[data-pck='hide']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 after Hide it the pill is absent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 …and stays absent after a reload",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1512 with all five done the pill is absent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 the pill is in the top bar",
+  "ok": false,
+  "detail": "{\"has\":true,\"inBar\":false,\"leftOfHelp\":true,\"gap\":986,\"ys\":[807,73.75,73.75,73.75],\"text\":\"Contact list: Getting started\",\"n\":\"2/5\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 it sits left of the \"?\" with 10 ±1 between",
+  "ok": false,
+  "detail": "986"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 its centre equals Search's, Log a query's and the \"?\"'s ±1",
+  "ok": false,
+  "detail": "[807,73.75,73.75,73.75]"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 it reads \"Contact list: Getting started\"",
+  "ok": true,
+  "detail": "Contact list: Getting started"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 and \"2/5\"",
+  "ok": true,
+  "detail": "2/5"
+ },
+ {
+  "lock": "F1",
+  "where": "step: \"[data-pck='off']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 \"Don't show this again\" asks first",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "step: \"[data-pck='hide']\" could be pressed",
+  "ok": false,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 after Hide it the pill is absent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 …and stays absent after a reload",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "@1280 with all five done the pill is absent",
+  "ok": true,
+  "detail": ""
+ }
+]

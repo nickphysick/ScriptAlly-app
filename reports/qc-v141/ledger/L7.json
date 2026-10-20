@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L7",
+  "where": "1280 package population",
+  "ok": true,
+  "detail": "9 rows"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 package: no glyph or badge meets its name",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L7",
+  "where": "1280 action population",
+  "ok": true,
+  "detail": "8 rows"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 action: rows with a glyph and a badge exist",
+  "ok": true,
+  "detail": "Full owed 7:gb Partial owed 7:gb Nudge due 11:gb Consider closing 31:gb Waiting on the agent 11:gb Passed 14:g Closed with no reply 2:g Withdrawn 1:g"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 action: no glyph or badge meets its name",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L7",
+  "where": "1512 package population",
+  "ok": true,
+  "detail": "9 rows"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 package: no glyph or badge meets its name",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L7",
+  "where": "1512 action population",
+  "ok": true,
+  "detail": "8 rows"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 action: rows with a glyph and a badge exist",
+  "ok": true,
+  "detail": "Full owed 7:gb Partial owed 7:gb Nudge due 11:gb Consider closing 31:gb Waiting on the agent 11:gb Passed 14:g Closed with no reply 2:g Withdrawn 1:g"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 action: no glyph or badge meets its name",
+  "ok": true,
+  "detail": ""
+ }
+]

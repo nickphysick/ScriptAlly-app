@@ -122,9 +122,11 @@ test.describe("Query Centre v138", () => {
         const hb = hd.getBoundingClientRect();
         const cs = getComputedStyle(h1);
         const sh = hd.querySelector<HTMLElement>('[data-qc138="shadow"]');
-        const sum = [...hd.querySelectorAll('[data-qc138="glyph-n"]')].reduce((n, e) => n + Number(e.textContent), 0);
+        /* RETARGETED (v138.5 §B): the glyphs show no counts; each carries its count as data-n */
+        const sum = [...hd.querySelectorAll<HTMLElement>('[data-qc138="glyph-btn"]')].reduce((n, e) => n + Number(e.dataset.n), 0);
         return {
-          imgs: [...hd.querySelectorAll("img")].filter((i) => !i.classList.contains("qc138-shadow")).length,
+          /* RETARGETED (v138.5 §A): the desk hawk is the one illustration by design; nothing else */
+          imgs: [...hd.querySelectorAll("img")].filter((i) => !i.classList.contains("qc138-shadow") && !i.matches('[data-qc138="hawk"]')).length,
           name: h1.getAttribute("aria-label") ?? "", size: parseFloat(cs.fontSize), face: cs.fontFamily, h: h1.getBoundingClientRect().height, lh: parseFloat(cs.lineHeight),
           wide: !!document.querySelector(".ws-app.sheet-wide"), hw: hb.width, tbL: tb.left - hb.left, grR: hb.right - gr.right,
           shadow: sh ? Number(getComputedStyle(sh).opacity) : -1, sum,
@@ -136,11 +138,12 @@ test.describe("Query Centre v138", () => {
       L.check("A1", `${w} title`, r.name === `${r.sum} ${r.sum === 1 ? "query sent" : "queries sent"}`, `"${r.name}" (glyphs sum ${r.sum})`);
       L.check("A1", `${w} title size`, near(r.size, r.wide ? 50 : 44, 1) && /Special Elite/.test(r.face), `${r.size} · wide ${r.wide}`);
       L.check("A1", `${w} one line`, r.h <= r.lh * 1.5, `${r.h} tall at ${r.lh} a line`);
-      L.check("A1", `${w} title at the inset`, near(r.tbL, inset, 1), `${r.tbL.toFixed(1)} against ${inset}`);
+      /* RETIRED (v138.5 §A): the title now follows the desk hawk, which sits at the inset; QC138.5 A1/A2 own the inset */
       L.check("A1", `${w} glyphs at the inset`, near(r.grR, inset, 1), `${r.grR.toFixed(1)} against ${inset}`);
-      L.check("A1", `${w} shadow`, near(r.shadow, 0.15, 0.01), `${r.shadow}`);
+      /* RETIRED (v138.5 §D): the shadow moved behind the chart at .11; QC138.5 D1 owns it */
+      void r.shadow;
     }
-    L.done(14);
+    L.done(10);
   });
 
   test("A2 · glyphs: seven, counts sum to N, dashed on your move, press filters and shares the Stage pill", async ({ page }) => {
@@ -153,9 +156,10 @@ test.describe("Query Centre v138", () => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
         const b = [...g.querySelectorAll<HTMLElement>('[data-qc138="glyph-btn"]')];
         return {
-          labels: b.map((e) => (e.querySelector(".qc138-sgl")?.textContent ?? "").trim()),
+          /* RETARGETED (v138.5 §B): no drawn labels; the names are the buttons' own */
+          labels: b.map((e) => (e.getAttribute("aria-label") ?? "").replace(/, \d+ quer(y|ies)$/, "").replace(/ /g, "")),
           dashed: b.map((e) => `${e.dataset.k}:${e.querySelectorAll('[data-qc138="dashed"]').length}`),
-          sum: b.reduce((n, e) => n + Number(e.querySelector('[data-qc138="glyph-n"]')!.textContent), 0),
+          sum: b.reduce((n, e) => n + Number(e.dataset.n), 0),
           name: g.querySelector("h1[data-page-title]")!.getAttribute("aria-label"),
           aria: b.map((e) => e.getAttribute("aria-label")),
         };
@@ -163,7 +167,7 @@ test.describe("Query Centre v138", () => {
       L.check("A2", `${w} labels`, JSON.stringify(r.labels) === JSON.stringify(["Queried", "Partialrequested", "Partialsent", "Fullrequested", "Fullsent", "Offer", "Closed"]), r.labels.join("|"));
       L.check("A2", `${w} sum`, r.name === `${r.sum} queries sent`, `${r.sum} against "${r.name}"`);
       L.check("A2", `${w} dashed`, JSON.stringify(r.dashed) === JSON.stringify(["q:0", "pr:1", "ps:0", "fr:1", "fs:0", "of:1", "cl:0"]), r.dashed.join(" "));
-      L.check("A2", `${w} aria`, r.aria.every((a) => /^[A-Z][a-z ]+, \d+$/.test(a ?? "")), r.aria.join(" | "));
+      L.check("A2", `${w} aria`, r.aria.every((a) => /^[A-Z][a-z ]+, \d+ quer(y|ies)$/.test(a ?? "")), r.aria.join(" | "));
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="fr"]').click();
       await page.waitForTimeout(400);
       const p = await page.evaluate(() => {
@@ -172,23 +176,22 @@ test.describe("Query Centre v138", () => {
         const fr = b.find((e) => e.dataset.k === "fr")!;
         return {
           pressed: fr.getAttribute("aria-pressed"), others: b.filter((e) => e !== fr).map((e) => Number(getComputedStyle(e).opacity)),
-          pill: g.querySelector('[data-qc138="pill"][data-k="stage"] [data-qc138="pill-label"]')?.textContent,
           statuses: [...new Set([...g.querySelectorAll<HTMLElement>('[data-qcv="row"]')].map((e) => e.dataset.status))],
-          count: Number(fr.querySelector('[data-qc138="glyph-n"]')!.textContent),
+          count: Number(fr.dataset.n),
           rows: g.querySelectorAll('[data-qcv="row"]').length,
         };
       });
       L.check("A2", `${w} pressed`, p.pressed === "true", `${p.pressed}`);
       L.check("A2", `${w} others fade`, p.others.every((o) => near(o, 0.3, 0.02)), p.others.join(","));
-      L.check("A2", `${w} pill`, p.pill === "Full requested", `"${p.pill}"`);
+      /* RETIRED (v138.5 §E): the Stage pill lives in the Filters panel now; QC138.5 B2 owns "one store" */
       L.check("A2", `${w} filters`, p.statuses.every((s) => s === "Full Requested" || s === "Revise & Resubmit") && p.rows === p.count, `${p.statuses.join(",")} · ${p.rows} rows / ${p.count}`);
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="fr"]').click();
       await page.waitForTimeout(300);
       const c = await page.evaluate(() => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
-        return { pill: g.querySelector('[data-qc138="pill"][data-k="stage"] [data-qc138="pill-label"]')?.textContent, on: g.querySelectorAll('[data-qc138="glyph-btn"][aria-pressed="true"]').length };
+        return { on: g.querySelectorAll('[data-qc138="glyph-btn"][aria-pressed="true"]').length };
       });
-      L.check("A2", `${w} clears`, c.pill === "Stage" && c.on === 0, `${c.pill} · ${c.on} pressed`);
+      L.check("A2", `${w} clears`, c.on === 0, `${c.on} pressed`);
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="cl"]').click();
       await page.waitForTimeout(300);
       await unfoldClosed(page);
@@ -200,7 +203,7 @@ test.describe("Query Centre v138", () => {
       L.check("A2", `${w} closed`, cl.length > 0 && cl.every((s) => ["Rejected", "No Response", "Withdrawn"].includes(s ?? "")) && cl.includes("Rejected"), cl.join(","));
       await page.locator('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="cl"]').click();
     }
-    L.done(20);
+    L.done(18);
   });
 
   test("B1 · filters: present, one line, the switches read the real state", async ({ page }) => {
@@ -209,12 +212,15 @@ test.describe("Query Centre v138", () => {
     for (const vp of SIZES) {
       await openQC(page, vp, "B1");
       const w = `${vp.width}`;
+      /* RETARGETED (v138.5 §E): the filters live behind the Filters button in the navy row; the panel is read */
+      await page.locator('.qcv-group[data-v138] [data-qc138="filters-btn"]').click();
+      await page.waitForTimeout(400);
       const r = await page.evaluate(() => {
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
-        const f = g.querySelector<HTMLElement>('[data-qc138="filters"]')!;
+        const f = document.querySelector<HTMLElement>('[data-qc138="filters-panel"] [data-qc138="filters"]')!;
         /* EDITED (v138.1 §F): the search lives in the sheet's navy row, so the filter row is the pills alone */
         const parts = [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')];
-        const hd = g.querySelector<HTMLElement>('[data-qc138="header"]')!.getBoundingClientRect();
+        const hd = document.querySelector<HTMLElement>('[data-qc138="filters-panel"]')!.getBoundingClientRect();
         return {
           keys: [...f.querySelectorAll<HTMLElement>('[data-qc138="pill"]')].map((e) => e.dataset.k), find: (g.querySelector('[data-qc138="top"] [data-qc138="search"] input') as HTMLInputElement)?.placeholder,
           tops: [...new Set(parts.map((e) => Math.round(e.getBoundingClientRect().top)))], right: Math.max(...parts.map((e) => e.getBoundingClientRect().right)), hdR: hd.right,
@@ -222,7 +228,7 @@ test.describe("Query Centre v138", () => {
       });
       L.check("B1", `${w} present`, JSON.stringify(r.keys) === JSON.stringify(["stage", "dueWeek", "offers", "sent", "more"]) && r.find === "Find an agent or agency", `${r.keys.join(",")} · "${r.find}"`);
       L.check("B1", `${w} one line`, r.tops.length === 1 && r.right <= r.hdR + 0.5, `tops ${r.tops.join(",")} · right ${r.right.toFixed(1)} / ${r.hdR.toFixed(1)}`);
-      await page.locator('.qcv-group[data-v138] [data-qc138="pill"][data-k="more"] .qc138-fp').click();
+      await page.locator('[data-qc138="filters-panel"] [data-qc138="pill"][data-k="more"] .qc138-fp').click();
       await page.waitForTimeout(250);
       await page.locator('[data-qc138="panel"] [data-opt="more:past"]').click();
       await page.waitForTimeout(400);
@@ -231,12 +237,13 @@ test.describe("Query Centre v138", () => {
       const s = await page.evaluate(() => {
         const sw = document.querySelector<HTMLElement>('[data-qc138="panel"] [data-opt="more:past"]')!;
         const { g } = (window as never as { __qc: () => { g: HTMLElement } }).__qc();
-        return { checked: sw.getAttribute("aria-checked"), on: sw.querySelector('[data-qc138="switch"]')!.hasAttribute("data-on"), chip: Number(sw.querySelector('[data-qc138="opt-count"]')!.textContent), rows: g.querySelectorAll('[data-qcv="row"]').length, pill: g.querySelector('[data-qc138="pill"][data-k="more"]')!.hasAttribute("data-on") };
+        return { checked: sw.getAttribute("aria-checked"), on: sw.querySelector('[data-qc138="switch"]')!.hasAttribute("data-on"), chip: Number(sw.querySelector('[data-qc138="opt-count"]')!.textContent), rows: g.querySelectorAll('[data-qcv="row"]').length, pill: document.querySelector('[data-qc138="filters-panel"] [data-qc138="pill"][data-k="more"]')!.hasAttribute("data-on") };
       });
       L.check("B1", `${w} switch reads the filter`, s.checked === "true" && s.on && s.pill, `aria-checked ${s.checked} · data-on ${s.on} · pill on ${s.pill}`);
       L.check("B1", `${w} switch filters`, s.rows === s.chip, `${s.rows} rows against its count ${s.chip}`);
       await page.keyboard.press("Escape");
-      await page.locator('.qcv-group[data-v138] [data-qc138="pill"][data-k="more"] [data-qc138="pill-clear"]').click();
+      await page.locator('[data-qc138="filters-panel"] [data-qc138="pill"][data-k="more"] [data-qc138="pill-clear"]').click();
+      await page.keyboard.press("Escape");
     }
     L.done(8);
   });
@@ -269,7 +276,8 @@ test.describe("Query Centre v138", () => {
       L.check("C1", `${w} navy`, r.bg === "rgb(45, 58, 80)", r.bg);
       L.check("C1", `${w} centred`, Math.abs(r.dy) <= 2, `${r.dy.toFixed(1)}`);
       L.check("C1", `${w} no sort control`, r.sort === 0, `${r.sort}`);
-      L.check("C1", `${w} headings`, r.hbg === "rgb(233, 237, 243)" && /Mono/i.test(r.face) && r.tt === "uppercase", `${r.hbg} · ${r.face} · ${r.tt}`);
+      /* RE-POINTED (Contact list v18.3 §E, shared): the headings are the table's own white header row */
+      L.check("C1", `${w} headings`, r.hbg === "rgb(255, 255, 255)" && /Mono/i.test(r.face) && r.tt === "uppercase", `${r.hbg} · ${r.face} · ${r.tt}`);
       for (const a of r.al) L.check("C1", `${w} heading ${a.k}`, Math.abs(a.d) <= 2, `${a.d.toFixed(1)}`);
     }
     L.done(20);
@@ -351,15 +359,16 @@ test.describe("Query Centre v138", () => {
     L.check("D1", "no-window rows are in Waiting", r.nodate.every((x) => x.grp === "waiting"), r.nodate.map((x) => x.grp).join(","));
     L.check("D1", "no 'No reply yet' group", !r.bands.some((b) => /no reply yet|past the date/i.test(b)), r.bands.join(" | "));
     /* the To-do list's Your move count is task cards, not queries (see the report): read and recorded, not asserted equal.
-       RE-POINTED (To-do list v5): the v2 tiles became the header card's three rows. */
+       RE-POINTED (To-do list v5): the v2 tiles became the header card's three rows.
+       RE-POINTED (To-do list v5.2): the populated header card is the calendar; its today rows are read instead. */
     await openRoute(page, "/todo", vp);
     await page.waitForTimeout(2500);
-    const todo = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td5="card-row"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()).slice(0, 3));
+    const todo = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td52="cal-row"], [data-td52="mix"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()).slice(0, 3));
     L.note("D1", "to-do v5 card rows", `${JSON.stringify(todo)} against the Query Centre's "${r.you}"`);
     L.done(5);
   });
 
-  test("D2 · bands: three in order, tints, Closed folded, Waiting sticks under the pinned row and the headings", async ({ page }) => {
+  test("D2 · bands: three in order, tints, Closed folded, Waiting sticks under the headings", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("D2");
     for (const vp of SIZES) {
@@ -370,7 +379,9 @@ test.describe("Query Centre v138", () => {
         return [...g.querySelectorAll<HTMLElement>('[data-qcv="gband"]')].map((b) => ({ k: b.dataset.group, bg: getComputedStyle(b).backgroundColor, ex: b.getAttribute("aria-expanded") }));
       });
       L.check("D2", `${w} order`, r.map((b) => b.k).join(",") === "you,waiting,closed", r.map((b) => b.k).join(","));
-      L.check("D2", `${w} tints`, r[0]?.bg === "rgb(246, 226, 216)" && r[1]?.bg === "rgb(226, 231, 239)" && r[2]?.bg === "rgb(236, 232, 227)", r.map((b) => b.bg).join(" | "));
+      L.check("D2", `${w} tints`, r[0]?.bg === "rgb(246, 226, 216)" && r[1]?.bg === "rgb(226, 231, 239)" && r[2]?.bg === "rgb(235, 231, 226)", r.map((b) => b.bg).join(" | "));
+      /* ↑ v139 §C — retargeted: the closed band is #ebe7e2 now (the pack's value for the closed tone under every grouping);
+         it was #ece8e3 */
       L.check("D2", `${w} closed folded`, r[2]?.ex === "false", `${r[2]?.ex}`);
       const s = await page.evaluate(async () => {
         const { g, sc } = (window as never as { __qc: () => { g: HTMLElement; sc: HTMLElement } }).__qc();
@@ -378,9 +389,10 @@ test.describe("Query Centre v138", () => {
         sc.style.scrollBehavior = "auto";
         sc.scrollTop += band.getBoundingClientRect().top - sc.getBoundingClientRect().top + 260;
         await new Promise((res) => setTimeout(res, 300));
-        const pin = document.querySelector<HTMLElement>('[data-qc138="pinned"][data-on]');
+        /* RETARGETED (v138.6 §B): the pinned row is retired; the band sticks under the headings, which stick under the
+           navy header (the sticky row). QC138.6 B1 owns the whole stack. */
         const heads = g.querySelector<HTMLElement>('[data-qc138="headings"]')!;
-        return { band: band.getBoundingClientRect().top, want: (pin ? pin.getBoundingClientRect().bottom : NaN) + heads.getBoundingClientRect().height };
+        return { band: band.getBoundingClientRect().top, want: heads.getBoundingClientRect().bottom };
       });
       L.check("D2", `${w} sticky`, near(s.band, s.want, 1), `${s.band.toFixed(1)} against ${s.want.toFixed(1)}`);
     }
@@ -601,10 +613,11 @@ test.describe("Query Centre v138", () => {
     L.check("G1", "✕ clears", cleared && (await page.locator('[data-qc138="bulk"]').count()) === 0, `clicked ${cleared}`);
     const picked = await tryClick('.qcv-group[data-v138] [data-qcv="row-pick"]');
     await page.waitForTimeout(200);
-    const filtered = await tryClick('.qcv-group[data-v138] [data-qc138="pill"][data-k="offers"] .qc138-fp');
+    /* RETARGETED (v138.5 §E): a refilter from the page itself, a glyph (the pills are behind the Filters button) */
+    const filtered = await tryClick('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="q"]');
     await page.waitForTimeout(300);
     L.check("G1", "a refilter clears", picked && filtered && (await page.locator('[data-qc138="bulk"]').count()) === 0, `picked ${picked} · filtered ${filtered}`);
-    if (filtered) await tryClick('.qcv-group[data-v138] [data-qc138="pill"][data-k="offers"] .qc138-fp');
+    if (filtered) await tryClick('.qcv-group[data-v138] [data-qc138="glyph-btn"][data-k="q"]');
     L.done(4);
   });
 
@@ -681,6 +694,10 @@ test.describe("Query Centre v138", () => {
     const ALLOWED: Record<string, string> = { none: "rgb(244, 238, 229)", querying: "rgb(42, 58, 82)", closed: "rgb(179, 172, 165)" };
     for (const route of ["/dashboard", "/queries", "/agents", "/agents/discover"]) {
       await page.addInitScript(() => { try { for (const k of ["contacts", "queries", "manuscripts"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ } });
+      /* RE-POINTED (Discover v1, 18 Oct): Discover's discs are on its LIVE face (the picks), which prod gates behind
+         DISCOVER_LIVE; the coming-soon face draws none, by design. The dev review aid's fixture puts the live face on
+         screen, so the law is held where the circles are. */
+      if (route === "/agents/discover") await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_DV_STATE = "live"; });
       await openRoute(page, route, SIZES[0]);
       await page.waitForTimeout(2500);
       if (route === "/queries") { await page.evaluate(LIB); await unfoldClosed(page); await page.waitForTimeout(300); }
@@ -695,7 +712,10 @@ test.describe("Query Centre v138", () => {
         return { n: discs.length, bad, stray };
       });
       L.check("J1", `${route} has discs`, r.n > 0, `${r.n}`);
-      L.check("J1", `${route} paint`, r.bad.every((d) => ALLOWED[d.s] === d.bg), JSON.stringify(r.bad.filter((d) => ALLOWED[d.s] !== d.bg).slice(0, 3)));
+      /* EDITED (Contact list v18 §C): on /agents a not-queried disc in the list's rows is a dotted ring with no fill (CL18 C2
+         holds it); everywhere else, and every other state, the disc's own sheet paints it as before */
+      const allowedOn = (d: { s: string; bg: string }) => ALLOWED[d.s] === d.bg || (route === "/agents" && d.s === "none" && d.bg === "rgba(0, 0, 0, 0)");
+      L.check("J1", `${route} paint`, r.bad.every(allowedOn), JSON.stringify(r.bad.filter((d) => !allowedOn(d)).slice(0, 3)));
       L.check("J1", `${route} no stray circle`, r.stray === 0, `${r.stray}`);
     }
     L.done(12);

@@ -1,0 +1,3 @@
+{"lock":"A1","break":"export-all","red":true,"first":"  ✗ A1 · 1512 exactly {v} data rows — 87 vs 14"}
+{"lock":"A2","break":"enabled-at-0","red":true,"first":"  ✗ A2 · 1512 a search matching nothing: disabled — {\"disabled\":false,\"label\":\"↓ Export 0 queries\",\"color\":\"rgb(28, 19, 15)\"}"}
+{"lock":"B1","break":"old-text","red":true,"first":"  ✗ B1 · 1512 \"pin button\" — QUERY CENTRE · STEP 3 OF 6 Pin the list Press Pin list and the list becomes the whole page: the sidebar tucks away and t"}

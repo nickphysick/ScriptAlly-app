@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "E1 five StatusDot nodes",
+  "where": "1512",
+  "ok": true,
+  "detail": "[{\"dot\":true,\"label\":\"Queried\"},{\"dot\":true,\"label\":\"Partial Requested\"},{\"dot\":true,\"label\":\"Partial Sent\"},{\"dot\":true,\"label\":\"Full Requested\"},{\"dot\":true,\"label\":\"Offer\"}]"
+ },
+ {
+  "lock": "E1 v17's reads are gone from the section",
+  "where": "1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E1 q-a is navy",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) none"
+ },
+ {
+  "lock": "E1 q-a is solid (n = 15)",
+  "where": "1512",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1 q-a's figure is stepGaps's median",
+  "where": "1512",
+  "ok": true,
+  "detail": "14 vs 14 (n 15/15)"
+ },
+ {
+  "lock": "E1 a-s is rust",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(180, 85, 63) none"
+ },
+ {
+  "lock": "E1 a-s is solid (n = 10)",
+  "where": "1512",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1 a-s's figure is stepGaps's median",
+  "where": "1512",
+  "ok": true,
+  "detail": "14 vs 14 (n 10/10)"
+ },
+ {
+  "lock": "E1 s-f is navy",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) none"
+ },
+ {
+  "lock": "E1 s-f is solid (n = 4)",
+  "where": "1512",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1 s-f's figure is stepGaps's median",
+  "where": "1512",
+  "ok": true,
+  "detail": "14 vs 14 (n 4/4)"
+ },
+ {
+  "lock": "E1 f-o is navy",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) repeating-linear-gradient(90deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 8px, rgba(0, 0, 0, 0) 8px, rgba(0, 0, 0, 0) 13px)"
+ },
+ {
+  "lock": "E1 f-o is dashed (n = 1)",
+  "where": "1512",
+  "ok": true,
+  "detail": "repeating-linear-gradient(90deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 8px, rgba(0, 0, 0, 0) 8px, rgba(0, 0, 0, 0) 13px)"
+ },
+ {
+  "lock": "E1 f-o's figure is stepGaps's median",
+  "where": "1512",
+  "ok": true,
+  "detail": "28 vs 28 (n 1/1)"
+ },
+ {
+  "lock": "E1 five StatusDot nodes",
+  "where": "1280",
+  "ok": true,
+  "detail": "[{\"dot\":true,\"label\":\"Queried\"},{\"dot\":true,\"label\":\"Partial Requested\"},{\"dot\":true,\"label\":\"Partial Sent\"},{\"dot\":true,\"label\":\"Full Requested\"},{\"dot\":true,\"label\":\"Offer\"}]"
+ },
+ {
+  "lock": "E1 v17's reads are gone from the section",
+  "where": "1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E1 q-a is navy",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) none"
+ },
+ {
+  "lock": "E1 q-a is solid (n = 15)",
+  "where": "1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1 q-a's figure is stepGaps's median",
+  "where": "1280",
+  "ok": true,
+  "detail": "14 vs 14 (n 15/15)"
+ },
+ {
+  "lock": "E1 a-s is rust",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(180, 85, 63) none"
+ },
+ {
+  "lock": "E1 a-s is solid (n = 10)",
+  "where": "1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1 a-s's figure is stepGaps's median",
+  "where": "1280",
+  "ok": true,
+  "detail": "14 vs 14 (n 10/10)"
+ },
+ {
+  "lock": "E1 s-f is navy",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) none"
+ },
+ {
+  "lock": "E1 s-f is solid (n = 4)",
+  "where": "1280",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1 s-f's figure is stepGaps's median",
+  "where": "1280",
+  "ok": true,
+  "detail": "14 vs 14 (n 4/4)"
+ },
+ {
+  "lock": "E1 f-o is navy",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) repeating-linear-gradient(90deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 8px, rgba(0, 0, 0, 0) 8px, rgba(0, 0, 0, 0) 13px)"
+ },
+ {
+  "lock": "E1 f-o is dashed (n = 1)",
+  "where": "1280",
+  "ok": true,
+  "detail": "repeating-linear-gradient(90deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 8px, rgba(0, 0, 0, 0) 8px, rgba(0, 0, 0, 0) 13px)"
+ },
+ {
+  "lock": "E1 f-o's figure is stepGaps's median",
+  "where": "1280",
+  "ok": true,
+  "detail": "28 vs 28 (n 1/1)"
+ }
+]

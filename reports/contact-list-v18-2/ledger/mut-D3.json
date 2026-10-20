@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D3",
+  "where": "before: all agree",
+  "ok": true,
+  "detail": "{\"drawer\":75,\"page\":75,\"gapsLine\":50,\"tab\":\"50 gaps · 75% list health\",\"drawerGaps\":50}"
+ },
+ {
+  "lock": "D3",
+  "where": "after Save: all agree, in one read",
+  "ok": false,
+  "detail": "{\"drawer\":76,\"page\":76,\"gapsLine\":49,\"tab\":\"50 gaps · 75% list health\",\"drawerGaps\":49}"
+ },
+ {
+  "lock": "D3",
+  "where": "after Save: the gaps went down by one",
+  "ok": true,
+  "detail": "50 → 49"
+ },
+ {
+  "lock": "D3",
+  "where": "after Undo: all agree, in one read",
+  "ok": true,
+  "detail": "{\"drawer\":75,\"page\":75,\"gapsLine\":50,\"tab\":\"50 gaps · 75% list health\",\"drawerGaps\":50}"
+ },
+ {
+  "lock": "D3",
+  "where": "after Undo: back where they were",
+  "ok": true,
+  "detail": "{\"drawer\":75,\"page\":75,\"gapsLine\":50,\"tab\":\"50 gaps · 75% list health\",\"drawerGaps\":50}"
+ }
+]

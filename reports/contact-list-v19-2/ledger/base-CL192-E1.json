@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 imp1: \"Imported\" under its date, on its left",
+  "ok": false,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 imp1: serif italic 12.5px, ink at 50%",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 imp1: the date and the label fit the cell (nothing past its edge)",
+  "ok": true,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 imp2: \"Imported\" under its date, on its left",
+  "ok": false,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 imp2: serif italic 12.5px, ink at 50%",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 imp2: the date and the label fit the cell (nothing past its edge)",
+  "ok": true,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 mat: the column matcher's agent shows \"Imported\" under its date",
+  "ok": false,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 hand: a hand-added agent has its date and no label",
+  "ok": true,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 with the flag off the labels are gone (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1512 the Date added column's width with and without the labels is the same ±1",
+  "ok": true,
+  "detail": "94 with · 94 without"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 imp1: \"Imported\" under its date, on its left",
+  "ok": false,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 imp1: serif italic 12.5px, ink at 50%",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 imp1: the date and the label fit the cell (nothing past its edge)",
+  "ok": true,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 imp2: \"Imported\" under its date, on its left",
+  "ok": false,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 imp2: serif italic 12.5px, ink at 50%",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 imp2: the date and the label fit the cell (nothing past its edge)",
+  "ok": true,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 mat: the column matcher's agent shows \"Imported\" under its date",
+  "ok": false,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 hand: a hand-added agent has its date and no label",
+  "ok": true,
+  "detail": "{\"date\":\"19 Sep 2026\",\"label\":null,\"under\":false,\"sameLeft\":false,\"fits\":true,\"font\":null}"
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 with the flag off the labels are gone (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL192-E1",
+  "where": "@1280 the Date added column's width with and without the labels is the same ±1",
+  "ok": true,
+  "detail": "94 with · 94 without"
+ }
+]

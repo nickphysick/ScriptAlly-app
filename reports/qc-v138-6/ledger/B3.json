@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B3",
+  "where": "queries nothing jumps (±1) through the stick point",
+  "ok": true,
+  "detail": "0 steps out, worst 0.1px"
+ },
+ {
+  "lock": "B3",
+  "where": "queries scrollTop holds every step",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "B3",
+  "where": "agents nothing jumps (±1) through the stick point",
+  "ok": true,
+  "detail": "0 steps out, worst 0.0px"
+ },
+ {
+  "lock": "B3",
+  "where": "agents scrollTop holds every step",
+  "ok": true,
+  "detail": "true"
+ }
+]

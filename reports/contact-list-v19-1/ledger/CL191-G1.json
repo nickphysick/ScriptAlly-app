@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 unpinned by Status a row on screen (precondition)",
+  "ok": true,
+  "detail": "cv25-agent-08"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 unpinned by Status cv25-agent-08: the row opened on a hover (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 unpinned by Status the strip is rgb(246, 241, 232)",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 unpinned by Status the group header is there and is not the strip's colour",
+  "ok": true,
+  "detail": "rgb(230, 237, 246) vs rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 unpinned by Status the group header stays powder rgb(230, 237, 246)",
+  "ok": true,
+  "detail": "rgb(230, 237, 246)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 unpinned by Status the divider is ink at 12%",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.12)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status a row on screen (precondition)",
+  "ok": true,
+  "detail": "cv25-agent-08"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status cv25-agent-08: the row opened on a hover (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status the strip is rgb(246, 241, 232)",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status the group header is there and is not the strip's colour",
+  "ok": true,
+  "detail": "rgb(230, 237, 246) vs rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status the group header stays powder rgb(230, 237, 246)",
+  "ok": true,
+  "detail": "rgb(230, 237, 246)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1512 pinned by Status the divider is ink at 12%",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.12)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 unpinned by Status a row on screen (precondition)",
+  "ok": true,
+  "detail": "cv25-agent-08"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 unpinned by Status cv25-agent-08: the row opened on a hover (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 unpinned by Status the strip is rgb(246, 241, 232)",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 unpinned by Status the group header is there and is not the strip's colour",
+  "ok": true,
+  "detail": "rgb(230, 237, 246) vs rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 unpinned by Status the group header stays powder rgb(230, 237, 246)",
+  "ok": true,
+  "detail": "rgb(230, 237, 246)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 unpinned by Status the divider is ink at 12%",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.12)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status pinned (precondition)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status a row on screen (precondition)",
+  "ok": true,
+  "detail": "cv25-agent-08"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status cv25-agent-08: the row opened on a hover (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status the strip is rgb(246, 241, 232)",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status the group header is there and is not the strip's colour",
+  "ok": true,
+  "detail": "rgb(230, 237, 246) vs rgb(246, 241, 232)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status the group header stays powder rgb(230, 237, 246)",
+  "ok": true,
+  "detail": "rgb(230, 237, 246)"
+ },
+ {
+  "lock": "CL191-G1",
+  "where": "@1280 pinned by Status the divider is ink at 12%",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.12)"
+ }
+]

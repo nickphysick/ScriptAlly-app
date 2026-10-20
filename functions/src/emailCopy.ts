@@ -22,7 +22,7 @@ export const CONFIRM_SUBJECT = "Confirm your founding place";
 export const CONFIRM_HEADING = "One click and you're on the list.";
 
 export const CONFIRM_LEAD =
-  "Thanks for putting your name down as a ScriptAlly Founding Writer. There's one thing left.";
+  "Thanks for putting your name down as a QueryHawk Founding Writer. There's one thing left.";
 
 export const CONFIRM_CTA = "Confirm my place";
 
@@ -65,7 +65,7 @@ export const welcomeLead = (position: number, cap: number): string =>
  * can honestly be said about timing today.
  */
 export const WELCOME_NEXT =
-  "We're opening ScriptAlly to founding writers in waves rather than all at once — it lets us fix " +
+  "We're opening QueryHawk to founding writers in waves rather than all at once — it lets us fix " +
   "what the first group finds before the next arrives. When your wave opens you'll get an invite " +
   "with a link to set up your account.";
 
@@ -94,4 +94,4 @@ export const UNSUBSCRIBE_LABEL = "Unsubscribe";
 export const UNSUBSCRIBE_NOTE =
   "Unsubscribing takes you off the list and frees your place for someone else.";
 
-export const SIGN_OFF = "Nick — ScriptAlly";
+export const SIGN_OFF = "Nick — QueryHawk";

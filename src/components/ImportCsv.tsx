@@ -7,10 +7,13 @@ import React, { useState, useEffect } from "react";
 import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
 import "./import/importMatcher.css";
-import { importedAgentDoc } from "../lib/importedAgent";
+import { matcherAgentDoc } from "../lib/importedAgent";
 import { saveImportNotice, type ImportNoticeRow } from "../lib/importNotice";
 import { findExistingAgent, isSameQuery } from "../lib/importDuplicates";
 import { writeImportedHistory } from "../lib/smartImportCommit";
+import { doc, deleteDoc } from "firebase/firestore";
+import { db as firestore } from "../lib/firebase";
+import { matcherImportEvents, writeImportEvent } from "../lib/importEvent";
 import { OpenTitle, OptionGroup, OptionRow } from "./onboarding/setupParts";
 import {
   MATCHER_TITLE, MATCHER_SUB, MATCHER_BACK, MATCHER_STEPS, KIND_QUESTION, KINDS, FILE_QUESTION, FILE_DROP, FILE_PASTE, FILE_READ,
@@ -336,7 +339,7 @@ export const ImportCsv: React.FC<{
         const id = "agent-fromrow-" + Math.random().toString(36).slice(2, 11);
         /* The row gave a name and nothing else, so the agent holds a name and nothing else. The
            builder writes the fields the rules require in their empty form (see importedAgent.ts). */
-        const res = await addAgent({ ...importedAgentDoc({ name: u.agentName }), id }, true);
+        const res = await addAgent({ ...matcherAgentDoc({ name: u.agentName }), id }, true);
         if (res.success) patch.agentId = id;
       }
       if (Object.keys(patch).length) {
@@ -370,6 +373,10 @@ export const ImportCsv: React.FC<{
     const localAgents = [...agents];
     const localQueries = [...queries];
     const noticeRows: ImportNoticeRow[] = [];
+    /* For the import's one feed event (import review v1, Part D): what this run wrote. */
+    const runStartMs = Date.now();
+    const addedAgentIds: string[] = [];
+    const importedForEvent: { manuscriptId: string; manuscriptTitle: string; status: QueryStatus }[] = [];
     
     for (let index = 0; index < total; index++) {
       const row = csvRows[index];
@@ -413,7 +420,7 @@ export const ImportCsv: React.FC<{
            *
            * The last of them went with the import-truth pack: a rating of 3 for an empty cell,
            * "Open", an 8-week reply window, "no response means no", three materials and the genre
-           * "General Fiction". The agent is now built by `importedAgentDoc`, which holds what the
+           * "General Fiction". The agent is now built by `matcherAgentDoc` (importedAgentDoc, flagged), which holds what the
            * sheet gave and nothing else.
            */
           const agency = getMappedValue("agency");
@@ -428,7 +435,7 @@ export const ImportCsv: React.FC<{
 
           /* Only what the sheet gave. A rating is kept when the cell holds 1 to 5; nothing else is
              filled in: no status, no reply window, no reply rule, no materials, no genre. */
-          const agentData = importedAgentDoc({
+          const agentData = matcherAgentDoc({
             name, agency, email, website, genres, mswlNotes, notes,
             starRating: getMappedValue("starRating"),
           });
@@ -442,6 +449,7 @@ export const ImportCsv: React.FC<{
               userId: currentUser?.id || "",
             } as (typeof localAgents)[number]; // a look-up entry for later rows; it is never written
             localAgents.push(addedAgRef);
+            addedAgentIds.push(newAgId);
             successfulCount++;
             runLogs.push(LOG.agentAdded(name, agency));
           } else {
@@ -640,6 +648,7 @@ export const ImportCsv: React.FC<{
               responseDeadline: undefined
             };
             localQueries.push(addedQRef);
+            importedForEvent.push({ manuscriptId: foundMs?.id ?? "", manuscriptTitle: foundMs?.title ?? "", status: queryData.status });
             successfulCount++;
             runLogs.push(LOG.queryAdded(msTitleInput, agentNameInput, normalizeQueryStatus(statusInput)));
           } else {
@@ -745,6 +754,21 @@ export const ImportCsv: React.FC<{
        therefore finished showing the counts as they stood before them, and those rows were in
        no count and no list. */
     setImportResults({ successful: successfulCount, unmatched: unmatchedList, failed: failedCount, errors: errorsList, logs: runLogs });
+
+    /* THE IMPORT'S ONE FEED EVENT, as Smart Import and the template write it: the per-agent "Agent
+       added" rows this run created are removed, and one event names what the run wrote. Non-fatal: a
+       feed left un-collapsed is cosmetic, never a failed import. */
+    if (currentUser && (addedAgentIds.length > 0 || importedForEvent.length > 0)) {
+      try {
+        const uid = currentUser.id;
+        await Promise.all(addedAgentIds.map((id) => deleteDoc(doc(firestore, "users", uid, "activities", `act-added-agent-${id}`)).catch(() => undefined)));
+        for (const ev of matcherImportEvents(addedAgentIds.length, importedForEvent)) {
+          await writeImportEvent(firestore, { userId: uid, manuscriptId: ev.manuscriptId, manuscriptTitle: ev.manuscriptTitle, dateMs: runStartMs, route: "matcher", counts: ev.counts });
+        }
+      } catch (e) {
+        console.error("Column matcher: the import's feed event failed:", e);
+      }
+    }
 
     /* Rows skipped for want of a date are kept for the dashboard. A run that skipped none leaves
        any earlier notice as it is: this run has nothing to say about it. */

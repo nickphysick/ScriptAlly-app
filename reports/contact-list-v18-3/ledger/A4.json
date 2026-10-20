@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "A4",
+  "where": "@1512 the pinned row is on screen (the precondition)",
+  "ok": true,
+  "detail": "117.75"
+ },
+ {
+  "lock": "A4",
+  "where": "@1512 the drawer's left + 60, at the pinned row's centre, is the drawer",
+  "ok": true,
+  "detail": "DIV.hk8-head hk82"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 the pinned row is on screen (the precondition)",
+  "ok": true,
+  "detail": "117.75"
+ },
+ {
+  "lock": "A4",
+  "where": "@1280 the drawer's left + 60, at the pinned row's centre, is the drawer",
+  "ok": true,
+  "detail": "DIV.hk8-head hk82"
+ }
+]

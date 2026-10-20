@@ -141,10 +141,11 @@ test.describe("CB1 · Part B — the header and the add bar", () => {
         await page.waitForURL(/\/todo$/, { timeout: 10_000 }).catch(() => {});
       }, 1800);
       L.check("B2", where, new URL(page.url()).pathname === "/todo", `Task landed on ${new URL(page.url()).pathname}`);
-      /* RE-POINTED (To-do list v5): on the desktop the own-task composer is the v2 composer in the page's "Add a task"
-         drawer, in Task mode. The law is unchanged: Task lands on /todo with that composer open and nothing written. */
-      await page.locator('[data-hdr="todo-compose"]').waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
-      const tc = await page.locator('[data-hdr="todo-compose"] [data-todo-v2="composer"]').evaluateAll((els) => els.map((e) => ({ task: e.querySelector('[data-mode="task"][aria-pressed="true"]') ? "Task" : "" })));
+      /* RE-POINTED (To-do list v5.1): on the desktop the own-task composer is the compose card on the desk, in Task mode
+         (it was the v2 composer in a half drawer in v5). The law is unchanged: Task lands on /todo with that composer
+         open and nothing written. */
+      await page.locator('[data-todo-v5] [data-td5="compose"]').waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+      const tc = await page.locator('[data-todo-v5] [data-td5="compose"]').evaluateAll((els) => els.map((e) => ({ task: e.getAttribute("data-mode") === "task" ? "Task" : "" })));
       L.check("B2", where, tc.length === 1 && tc[0].task === "Task", `the own-task composer is ${tc.length ? `open (${tc[0].task || "not in Task mode"})` : "not open"}`);
       L.check("B2", where, w2.length === 0, `pressing Task made ${w2.length} write(s): ${w2[0]?.slice(0, 160) ?? ""}`);
       await page.keyboard.press("Escape");

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 found",
+  "ok": true,
+  "detail": "true true true"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 width 250",
+  "ok": true,
+  "detail": "250.0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 left of the grid by at least the inset less 10",
+  "ok": false,
+  "detail": "0.0 vs inset 154.0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 decorative",
+  "ok": true,
+  "detail": "alt/aria"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 found",
+  "ok": true,
+  "detail": "true true true"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 width 190",
+  "ok": true,
+  "detail": "190.0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 left of the grid by at least the inset less 10",
+  "ok": false,
+  "detail": "0.0 vs inset 40.0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 decorative",
+  "ok": true,
+  "detail": "alt/aria"
+ }
+]

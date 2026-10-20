@@ -1,0 +1,473 @@
+
+Running 17 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.5s)
+  ✘   2 [measure] › tests/e2e/compsV28.measure.ts:89:1 › H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has one (35.6s)
+  ✘   3 [measure] › tests/e2e/compsV28.measure.ts:121:1 › H2 · card: the three counts are the shelf's partition and sum to the comp count; the ring is logged ÷ sent; a row filters (35.8s)
+  ✘   4 [measure] › tests/e2e/compsV28.measure.ts:147:1 › H3 · empty: the panel and the steps card only; b1 opens the first-comp form with the explainer; b2 the explainer pop-up (35.8s)
+  ✘   5 [measure] › tests/e2e/compsV28.measure.ts:170:1 › N1 · notice: one banner, its copy by the one/several rule, its button opens the picker on the first unrecorded letter (36.2s)
+  ✘   6 [measure] › tests/e2e/compsV28.measure.ts:197:1 › S1 · grid: 3 columns at 1512, 2 at 1280; the toolbar one row, no overflow, at 1024/1280/1512; the add card last, gone while filtered (35.8s)
+  ✘   7 [measure] › tests/e2e/compsV28.measure.ts:230:1 › S2 · card: the slip by state (sent, draft, shelf-ready, not ready); no hover action buttons (36.0s)
+  ✘   8 [measure] › tests/e2e/compsV28.measure.ts:250:1 › S3 · age: the chip's text and tone from the year (render); no year, no chip (35.9s)
+  ✘   9 [measure] › tests/e2e/compsV28.measure.ts:265:1 › S4 · sort: each order as the table says; Best response puts never-sent comps last (35.9s)
+  ✘  10 [measure] › tests/e2e/compsV28.measure.ts:284:1 › S5 · filters: where, type and find compose (AND); the type toggles hide in compact; Clear restores all (35.7s)
+  ✘  11 [measure] › tests/e2e/compsV28.measure.ts:308:1 › D1 · landing: by-comp rows are each sent comp's queries, asked and rate, by queries; the marker at your average; hollow under five (35.7s)
+  ✘  12 [measure] › tests/e2e/compsV28.measure.ts:341:1 › D2 · landing: by-letter blocks sent → unrecorded → unsent; Log them opens the picker; rates are asked ÷ queries (35.5s)
+  ✘  13 [measure] › tests/e2e/compsV28.measure.ts:360:1 › E1 · back: from the drawer's Edit, Cancel, ✕ and Escape return to the detail; Save returns with the new values; the scrim closes all (40.0s)
+  ✘  14 [measure] › tests/e2e/compsV28.measure.ts:396:1 › E2 · focus: back to the card after the drawer; to the card after a picker Save from its link; to the opener after either pop-up (39.2s)
+  ✘  15 [measure] › tests/e2e/compsV28.measure.ts:424:1 › E3 · picker: records and ages; four ticked with one old shows both tips; Save stays enabled and writes that letter only (40.9s)
+  ✘  16 [measure] › tests/e2e/compsV28.measure.ts:457:1 › L0 · loading: the header's loading state only; no flash of the empty panel on a seeded account (35.5s)
+  ✘  17 [measure] › tests/e2e/compsV28.measure.ts:473:1 › CX28 · the run measured enough (4ms)
+
+
+  1) [measure] › tests/e2e/compsV28.measure.ts:89:1 › H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has one 
+
+    Error: H1 1512 · populated: the shared LightHeader is the header
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+    > 36 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toBeTruthy();
+         |                                                            ^
+      37 | };
+      38 |
+      39 | /* ── the fixture's facts (seedCompsV25.mjs) ── */
+        at truthy (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:36:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:92:5
+
+    Error Context: test-results/compsV28.measure.ts-H1-·-s-166fe-ics-values-where-it-has-one-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-H1-·-s-166fe-ics-values-where-it-has-one-measure/error-context.md
+
+  2) [measure] › tests/e2e/compsV28.measure.ts:121:1 › H2 · card: the three counts are the shelf's partition and sum to the comp count; the ring is logged ÷ sent; a row filters 
+
+    Error: H2 1512 · the card's rows
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 14
+    + Received  +  1
+
+    - Array [
+    -   Array [
+    -     "sent",
+    -     2,
+    -   ],
+    -   Array [
+    -     "draft",
+    -     1,
+    -   ],
+    -   Array [
+    -     "shelf",
+    -     4,
+    -   ],
+    - ]
+    + Array []
+
+      30 |   const ok = JSON.stringify(canon(value)) === JSON.stringify(canon(want));
+      31 |   note(lock, vp, what, value, ok);
+    > 32 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toEqual(want);
+         |                                                            ^
+      33 | };
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+        at check (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:32:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:128:5
+
+    Error Context: test-results/compsV28.measure.ts-H2-·-c-c26e1-logged-÷-sent-a-row-filters-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-H2-·-c-c26e1-logged-÷-sent-a-row-filters-measure/error-context.md
+
+  3) [measure] › tests/e2e/compsV28.measure.ts:147:1 › H3 · empty: the panel and the steps card only; b1 opens the first-comp form with the explainer; b2 the explainer pop-up 
+
+    Error: H3 1512 · the panel
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+    > 36 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toBeTruthy();
+         |                                                            ^
+      37 | };
+      38 |
+      39 | /* ── the fixture's facts (seedCompsV25.mjs) ── */
+        at truthy (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:36:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:150:5
+
+    Error Context: test-results/compsV28.measure.ts-H3-·-e-f1680-ner-b2-the-explainer-pop-up-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-H3-·-e-f1680-ner-b2-the-explainer-pop-up-measure/error-context.md
+
+  4) [measure] › tests/e2e/compsV28.measure.ts:170:1 › N1 · notice: one banner, its copy by the one/several rule, its button opens the picker on the first unrecorded letter 
+
+    Error: N1 1512 · one letter: banners
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: 1
+    Received: 0
+
+      30 |   const ok = JSON.stringify(canon(value)) === JSON.stringify(canon(want));
+      31 |   note(lock, vp, what, value, ok);
+    > 32 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toEqual(want);
+         |                                                            ^
+      33 | };
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+        at check (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:32:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:173:5
+
+    Error Context: test-results/compsV28.measure.ts-N1-·-n-79e19-the-first-unrecorded-letter-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-N1-·-n-79e19-the-first-unrecorded-letter-measure/error-context.md
+
+  5) [measure] › tests/e2e/compsV28.measure.ts:197:1 › S1 · grid: 3 columns at 1512, 2 at 1280; the toolbar one row, no overflow, at 1024/1280/1512; the add card last, gone while filtered 
+
+    Error: S1 1512 · the grid and toolbar were read
+
+    expect(received).toBeTruthy()
+
+    Received: null
+
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+    > 36 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toBeTruthy();
+         |                                                            ^
+      37 | };
+      38 |
+      39 | /* ── the fixture's facts (seedCompsV25.mjs) ── */
+        at truthy (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:36:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:215:5
+
+    Error Context: test-results/compsV28.measure.ts-S1-·-g-f2372-rd-last-gone-while-filtered-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-S1-·-g-f2372-rd-last-gone-while-filtered-measure/error-context.md
+
+  6) [measure] › tests/e2e/compsV28.measure.ts:230:1 › S2 · card: the slip by state (sent, draft, shelf-ready, not ready); no hover action buttons 
+
+    Error: S2 1512 · sent (Salt Road)
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"buttons": [], "kind": "sent", "row2": "9 queries6 asked for more67%"}
+    Received: null
+
+      30 |   const ok = JSON.stringify(canon(value)) === JSON.stringify(canon(want));
+      31 |   note(lock, vp, what, value, ok);
+    > 32 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toEqual(want);
+         |                                                            ^
+      33 | };
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+        at check (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:32:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:240:5
+
+    Error Context: test-results/compsV28.measure.ts-S2-·-c-ce7bc-ady-no-hover-action-buttons-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-S2-·-c-ce7bc-ady-no-hover-action-buttons-measure/error-context.md
+
+  7) [measure] › tests/e2e/compsV28.measure.ts:250:1 › S3 · age: the chip's text and tone from the year (render); no year, no chip 
+
+    Error: S3 1512 · every card's chip
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 44
+    + Received  +  1
+
+    - Array [
+    -   Array [
+    -     "The Tidewater Line",
+    -     "5 yrs old",
+    -     "mid",
+    -     "Published 2021",
+    -   ],
+    -   Array [
+    -     "Salt Road",
+    -     "3 yrs old",
+    -     "mid",
+    -     "Published 2023",
+    -   ],
+    -   Array [
+    -     "Nine Miles Out",
+    -     "4 yrs old",
+    -     "mid",
+    -     "Published 2022",
+    -   ],
+    -   Array [
+    -     "Bright Water",
+    -     "2 yrs old",
+    -     "mid",
+    -     "Published 2024",
+    -   ],
+    -   Array [
+    -     "Kestrel Hour",
+    -     "7 yrs old",
+    -     "old",
+    -     "Agents usually look for comps from the last five years",
+    -   ],
+    -   Array [
+    -     "The Ferry at Dusk",
+    -     "1 yr old",
+    -     "new",
+    -     "Published 2025",
+    -   ],
+    -   Array [
+    -     "Last Crossing",
+    -     "3 yrs old",
+    -     "mid",
+    -     "Published 2023",
+    -   ],
+    - ]
+    + Array []
+
+      30 |   const ok = JSON.stringify(canon(value)) === JSON.stringify(canon(want));
+      31 |   note(lock, vp, what, value, ok);
+    > 32 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toEqual(want);
+         |                                                            ^
+      33 | };
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+        at check (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:32:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:259:5
+
+    Error Context: test-results/compsV28.measure.ts-S3-·-a-243f1-year-render-no-year-no-chip-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-S3-·-a-243f1-year-render-no-year-no-chip-measure/error-context.md
+
+  8) [measure] › tests/e2e/compsV28.measure.ts:265:1 › S4 · sort: each order as the table says; Best response puts never-sent comps last 
+
+    Error: S4 1512 · the sort button is on the page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      60 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+      61 |   note(lock, vp, `${what} is on the page`, ok, ok);
+    > 62 |   expect(ok, `${lock} ${vp.width} · ${what} is on the page`).toBe(true);
+         |                                                              ^
+      63 | };
+      64 | const scrollTo = async (page: Page, sel: string, top = 12) => {
+      65 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+        at need (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:62:62)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:273:5
+
+    Error Context: test-results/compsV28.measure.ts-S4-·-s-49628--puts-never-sent-comps-last-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-S4-·-s-49628--puts-never-sent-comps-last-measure/error-context.md
+
+  9) [measure] › tests/e2e/compsV28.measure.ts:284:1 › S5 · filters: where, type and find compose (AND); the type toggles hide in compact; Clear restores all 
+
+    Error: S5 1512 · type toggles shown (three types on the shelf; hidden in compact)
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: true
+    Received: false
+
+      30 |   const ok = JSON.stringify(canon(value)) === JSON.stringify(canon(want));
+      31 |   note(lock, vp, what, value, ok);
+    > 32 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toEqual(want);
+         |                                                            ^
+      33 | };
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+        at check (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:32:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:288:5
+
+    Error Context: test-results/compsV28.measure.ts-S5-·-f-cd878--compact-Clear-restores-all-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-S5-·-f-cd878--compact-Clear-restores-all-measure/error-context.md
+
+  10) [measure] › tests/e2e/compsV28.measure.ts:308:1 › D1 · landing: by-comp rows are each sent comp's queries, asked and rate, by queries; the marker at your average; hollow under five 
+
+    Error: D1 1512 · What's landing is on the page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      60 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+      61 |   note(lock, vp, `${what} is on the page`, ok, ok);
+    > 62 |   expect(ok, `${lock} ${vp.width} · ${what} is on the page`).toBe(true);
+         |                                                              ^
+      63 | };
+      64 | const scrollTo = async (page: Page, sel: string, top = 12) => {
+      65 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+        at need (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:62:62)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:315:5
+
+    Error Context: test-results/compsV28.measure.ts-D1-·-l-a9acc-r-average-hollow-under-five-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-D1-·-l-a9acc-r-average-hollow-under-five-measure/error-context.md
+
+  11) [measure] › tests/e2e/compsV28.measure.ts:341:1 › D2 · landing: by-letter blocks sent → unrecorded → unsent; Log them opens the picker; rates are asked ÷ queries 
+
+    Error: D2 1512 · What's landing is on the page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      60 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+      61 |   note(lock, vp, `${what} is on the page`, ok, ok);
+    > 62 |   expect(ok, `${lock} ${vp.width} · ${what} is on the page`).toBe(true);
+         |                                                              ^
+      63 | };
+      64 | const scrollTo = async (page: Page, sel: string, top = 12) => {
+      65 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+        at need (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:62:62)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:344:5
+
+    Error Context: test-results/compsV28.measure.ts-D2-·-l-83815-r-rates-are-asked-÷-queries-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-D2-·-l-83815-r-rates-are-asked-÷-queries-measure/error-context.md
+
+  12) [measure] › tests/e2e/compsV28.measure.ts:360:1 › E1 · back: from the drawer's Edit, Cancel, ✕ and Escape return to the detail; Save returns with the new values; the scrim closes all 
+
+    Error: E1 1512 · Salt Road's card is on the page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      60 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+      61 |   note(lock, vp, `${what} is on the page`, ok, ok);
+    > 62 |   expect(ok, `${lock} ${vp.width} · ${what} is on the page`).toBe(true);
+         |                                                              ^
+      63 | };
+      64 | const scrollTo = async (page: Page, sel: string, top = 12) => {
+      65 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+        at need (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:62:62)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:365:7
+
+    Error Context: test-results/compsV28.measure.ts-E1-·-b-273be-values-the-scrim-closes-all-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-E1-·-b-273be-values-the-scrim-closes-all-measure/error-context.md
+
+  13) [measure] › tests/e2e/compsV28.measure.ts:396:1 › E2 · focus: back to the card after the drawer; to the card after a picker Save from its link; to the opener after either pop-up 
+
+    Error: E2 1512 · Salt Road's card is on the page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      60 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+      61 |   note(lock, vp, `${what} is on the page`, ok, ok);
+    > 62 |   expect(ok, `${lock} ${vp.width} · ${what} is on the page`).toBe(true);
+         |                                                              ^
+      63 | };
+      64 | const scrollTo = async (page: Page, sel: string, top = 12) => {
+      65 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+        at need (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:62:62)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:400:7
+
+    Error Context: test-results/compsV28.measure.ts-E2-·-f-a266e--opener-after-either-pop-up-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-E2-·-f-a266e--opener-after-either-pop-up-measure/error-context.md
+
+  14) [measure] › tests/e2e/compsV28.measure.ts:424:1 › E3 · picker: records and ages; four ticked with one old shows both tips; Save stays enabled and writes that letter only 
+
+    Error: E3 1512 · the header's Log comps in a letter is on the page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      60 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+      61 |   note(lock, vp, `${what} is on the page`, ok, ok);
+    > 62 |   expect(ok, `${lock} ${vp.width} · ${what} is on the page`).toBe(true);
+         |                                                              ^
+      63 | };
+      64 | const scrollTo = async (page: Page, sel: string, top = 12) => {
+      65 |   const ok = await page.evaluate((x) => { try { return !!(window as any).__q(x); } catch { return false; } }, sel);
+        at need (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:62:62)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:429:7
+
+    Error Context: test-results/compsV28.measure.ts-E3-·-p-ba157-and-writes-that-letter-only-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-E3-·-p-ba157-and-writes-that-letter-only-measure/error-context.md
+
+  15) [measure] › tests/e2e/compsV28.measure.ts:457:1 › L0 · loading: the header's loading state only; no flash of the empty panel on a seeded account 
+
+    Error: L0 1512 · saw: the empty panel · the loading header · the shelf while loading
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+        false,
+    -   true,
+    +   false,
+        false,
+      ]
+
+      30 |   const ok = JSON.stringify(canon(value)) === JSON.stringify(canon(want));
+      31 |   note(lock, vp, what, value, ok);
+    > 32 |   expect(value, `${lock} ${vp ? vp.width : ""} · ${what}`).toEqual(want);
+         |                                                            ^
+      33 | };
+      34 | const truthy = (lock: string, vp: Vp | null, what: string, value: unknown) => {
+      35 |   note(lock, vp, what, value, !!value);
+        at check (/Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:32:60)
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:469:5
+
+    Error Context: test-results/compsV28.measure.ts-L0-·-l-c3c7b-y-panel-on-a-seeded-account-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-L0-·-l-c3c7b-y-panel-on-a-seeded-account-measure/error-context.md
+
+  16) [measure] › tests/e2e/compsV28.measure.ts:473:1 › CX28 · the run measured enough ─────────────
+
+    Error: the ledger holds 15 readings; the floor is 120
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 120
+    Received:    15
+
+      475 |   const locks = new Set(lines.map((l) => JSON.parse(l).lock));
+      476 |   note("CX28", null, "readings", lines.length, lines.length >= FLOOR);
+    > 477 |   expect(lines.length, `the ledger holds ${lines.length} readings; the floor is ${FLOOR}`).toBeGreaterThanOrEqual(FLOOR);
+          |                                                                                            ^
+      478 |   expect([...locks].sort(), "every lock wrote readings").toEqual(["D1", "D2", "E1", "E2", "E3", "H1", "H2", "H3", "L0", "N1", "S1", "S2", "S3", "S4", "S5"]);
+      479 | });
+      480 | void MS;
+        at /Users/nickphysick/ScriptAlly-comps28/tests/e2e/compsV28.measure.ts:477:92
+
+    Error Context: test-results/compsV28.measure.ts-CX28-·-the-run-measured-enough-measure/error-context.md
+
+    Error Context: test-results/compsV28.measure.ts-CX28-·-the-run-measured-enough-measure/error-context.md
+
+  16 failed
+    [measure] › tests/e2e/compsV28.measure.ts:89:1 › H1 · same header: LightHeader when populated, EmptyPanel when empty; no v27 title panel; Analytics' values where it has one 
+    [measure] › tests/e2e/compsV28.measure.ts:121:1 › H2 · card: the three counts are the shelf's partition and sum to the comp count; the ring is logged ÷ sent; a row filters 
+    [measure] › tests/e2e/compsV28.measure.ts:147:1 › H3 · empty: the panel and the steps card only; b1 opens the first-comp form with the explainer; b2 the explainer pop-up 
+    [measure] › tests/e2e/compsV28.measure.ts:170:1 › N1 · notice: one banner, its copy by the one/several rule, its button opens the picker on the first unrecorded letter 
+    [measure] › tests/e2e/compsV28.measure.ts:197:1 › S1 · grid: 3 columns at 1512, 2 at 1280; the toolbar one row, no overflow, at 1024/1280/1512; the add card last, gone while filtered 
+    [measure] › tests/e2e/compsV28.measure.ts:230:1 › S2 · card: the slip by state (sent, draft, shelf-ready, not ready); no hover action buttons 
+    [measure] › tests/e2e/compsV28.measure.ts:250:1 › S3 · age: the chip's text and tone from the year (render); no year, no chip 
+    [measure] › tests/e2e/compsV28.measure.ts:265:1 › S4 · sort: each order as the table says; Best response puts never-sent comps last 
+    [measure] › tests/e2e/compsV28.measure.ts:284:1 › S5 · filters: where, type and find compose (AND); the type toggles hide in compact; Clear restores all 
+    [measure] › tests/e2e/compsV28.measure.ts:308:1 › D1 · landing: by-comp rows are each sent comp's queries, asked and rate, by queries; the marker at your average; hollow under five 
+    [measure] › tests/e2e/compsV28.measure.ts:341:1 › D2 · landing: by-letter blocks sent → unrecorded → unsent; Log them opens the picker; rates are asked ÷ queries 
+    [measure] › tests/e2e/compsV28.measure.ts:360:1 › E1 · back: from the drawer's Edit, Cancel, ✕ and Escape return to the detail; Save returns with the new values; the scrim closes all 
+    [measure] › tests/e2e/compsV28.measure.ts:396:1 › E2 · focus: back to the card after the drawer; to the card after a picker Save from its link; to the opener after either pop-up 
+    [measure] › tests/e2e/compsV28.measure.ts:424:1 › E3 · picker: records and ages; four ticked with one old shows both tips; Save stays enabled and writes that letter only 
+    [measure] › tests/e2e/compsV28.measure.ts:457:1 › L0 · loading: the header's loading state only; no flash of the empty panel on a seeded account 
+    [measure] › tests/e2e/compsV28.measure.ts:473:1 › CX28 · the run measured enough ───────────────
+  1 passed (12.2m)

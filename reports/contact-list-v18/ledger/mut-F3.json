@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "F3",
+  "where": "it opens on home @1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "one card per applicable detail, in points order @1512",
+  "ok": true,
+  "detail": "reply,materials,genres,wishlist,reopen"
+ },
+ {
+  "lock": "F3",
+  "where": "their rows sum to the gap total @1512",
+  "ok": true,
+  "detail": "49 vs 49"
+ },
+ {
+  "lock": "F3",
+  "where": "Up next is the queue's first task @1512",
+  "ok": true,
+  "detail": "seed-agent-nowin-1:reply vs seed-agent-nowin-1:reply · \"1 of 49\""
+ },
+ {
+  "lock": "F3",
+  "where": "\"Fill in all\" starts a run counted within itself @1512",
+  "ok": false,
+  "detail": "\"42 of 49\" (run of 8)"
+ },
+ {
+  "lock": "F3",
+  "where": "it opens on home @1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "one card per applicable detail, in points order @1280",
+  "ok": true,
+  "detail": "reply,materials,genres,wishlist,reopen"
+ },
+ {
+  "lock": "F3",
+  "where": "their rows sum to the gap total @1280",
+  "ok": true,
+  "detail": "49 vs 49"
+ },
+ {
+  "lock": "F3",
+  "where": "Up next is the queue's first task @1280",
+  "ok": true,
+  "detail": "seed-agent-nowin-1:reply vs seed-agent-nowin-1:reply · \"1 of 49\""
+ },
+ {
+  "lock": "F3",
+  "where": "\"Fill in all\" starts a run counted within itself @1280",
+  "ok": false,
+  "detail": "\"42 of 49\" (run of 8)"
+ }
+]

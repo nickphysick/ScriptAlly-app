@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C2",
+  "where": "the key opens",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C2",
+  "where": "inside the viewport",
+  "ok": true,
+  "detail": "912,66,1252,296"
+ },
+ {
+  "lock": "C2",
+  "where": "its centre is the key (unclipped)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C2",
+  "where": "its foot is the key (unclipped)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C2",
+  "where": "an outside click closes it",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C2",
+  "where": "…and the drawer stays open",
+  "ok": true,
+  "detail": "open"
+ },
+ {
+  "lock": "C2",
+  "where": "Escape closes it",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C2",
+  "where": "…and the drawer stays open",
+  "ok": true,
+  "detail": "open"
+ }
+]

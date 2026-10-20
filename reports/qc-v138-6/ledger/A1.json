@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "A1",
+  "where": "queries PinListButton",
+  "ok": true,
+  "detail": "{\"plb\":true,\"keys\":\"F\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "queries aria-keyshortcuts F",
+  "ok": true,
+  "detail": "F"
+ },
+ {
+  "lock": "A1",
+  "where": "agents PinListButton",
+  "ok": true,
+  "detail": "{\"plb\":true,\"keys\":\"F\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "agents aria-keyshortcuts F",
+  "ok": true,
+  "detail": "F"
+ }
+]

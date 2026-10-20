@@ -16,12 +16,18 @@
  *   - the scroll position you left from is put back on the way out;
  *   - Escape leaves it LAST (`ESC_LEVEL.pageMode`), after every popover, drawer and dialog.
  *
+ * v138.6 §A — THE PIN. The Query Centre and the Contact list share this one hook through `usePinList(page)`: their
+ * state is remembered per page (`PIN_KEYS`), restored on the FIRST frame (no sidebar transition, no header flash),
+ * and the hook owns their F key. Comparable titles still calls `useFullScreenList` directly, unchanged.
+ *
  * ⚠️ EVERY WORKSPACE PAGE STAYS MOUNTED, so nothing here acts unless `routeActive` — a page that is
  * not on screen must not hold another page's sidebar shut.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
+import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../lib/escapeStack";
+import { guideWalking } from "../../lib/guideWalk";
+import { SHORTCUTS, isEditableTarget, matchesShortcut, type Shortcut } from "../../lib/shortcuts";
 import { holdSidebarCollapsed } from "./sidebarForce";
 
 export const FULL_PARAM = "full";
@@ -34,6 +40,15 @@ export interface FullScreenList {
   toggle: () => void;
 }
 
+/** v138.6 — the two pinnable lists, and where each remembers its pin (localStorage, per device) */
+/* To-do v5.2 §E — the To-do list joins as a third page key (its only generalisation: the hook is otherwise unchanged) */
+export type PinPage = "queries" | "agents" | "todo";
+export const PIN_KEYS: Record<PinPage, string> = { queries: "sa.pinList.queries", agents: "sa.pinList.agents", todo: "sa.pinList.todo" };
+/** the Contact list's v16 key, read once so a list pinned before v138.6 stays pinned */
+const LEGACY_PIN_KEYS: Partial<Record<PinPage, string>> = { agents: "sa.contactsFull" };
+/** each page's F, as the shortcut sheet lists it (one entry per page's scope; this one hook binds both) */
+const PIN_SHORTCUT = { queries: SHORTCUTS.qcPin, agents: SHORTCUTS.contactsFull, todo: SHORTCUTS.todoPin } as const;
+
 const remembered = (key: string): boolean => {
   try { return localStorage.getItem(key) === "1"; } catch { return false; }
 };
@@ -41,10 +56,44 @@ const remember = (key: string, on: boolean) => {
   try { if (on) localStorage.setItem(key, "1"); else localStorage.removeItem(key); } catch { /* a private window: the URL still carries it */ }
 };
 
-export function useFullScreenList(o: { storageKey: string; routeActive: boolean; scroller: () => HTMLElement | null }): FullScreenList {
+/** v138.6 — the pin for a list page: `useFullScreenList` on that page's key, restored on the first frame, with F */
+/* Contact list v19 §A — `holdSidebar: false` leaves the sidebar as the writer left it while pinned (the Contact list's
+   pinned list is the whole sheet beside an open sidebar); every other caller keeps the default hold */
+/* Contact list v19 §G — `store` lets a page keep its pinned flag in its own record (the Contact list's `qh.cl.view`);
+   given one, the page's `PIN_KEYS` entry and its legacy key are not read or written (the store migrates them itself) */
+export interface PinStore { read: () => boolean; write: (on: boolean) => void }
+export function usePinList(page: PinPage, o: { routeActive: boolean; scroller: () => HTMLElement | null; holdSidebar?: boolean; store?: PinStore }): FullScreenList {
+  return useFullScreenList({ storageKey: PIN_KEYS[page], legacyKey: o.store ? undefined : LEGACY_PIN_KEYS[page], routeActive: o.routeActive, scroller: o.scroller, pin: PIN_SHORTCUT[page], holdSidebar: o.holdSidebar, store: o.store });
+}
+
+export function useFullScreenList(o: {
+  storageKey: string; routeActive: boolean; scroller: () => HTMLElement | null;
+  /** v138.6 — a pin (its shortcut's id): restored on the first frame and owning that key (the two list pages; not
+      Comparable titles) */
+  pin?: Shortcut;
+  /** a key the state was stored under before (read when `storageKey` has nothing) */
+  legacyKey?: string;
+  /** hold the shell's sidebar at its icons while on (default true) */
+  holdSidebar?: boolean;
+  /** where the device remembers it, in place of `localStorage[storageKey]` */
+  store?: PinStore;
+}): FullScreenList {
   const location = useLocation();
   const navigate = useNavigate();
-  const full = o.routeActive && new URLSearchParams(location.search).get(FULL_PARAM) === "1";
+  /* ⚠️ A PIN IS RESTORED ON THE FIRST FRAME: on arriving with no parameter, a remembered pin counts as on at once,
+     before the effect below puts the parameter back. Read through an effect alone, the page painted unpinned (its
+     header, an open sidebar) and then pinned, which is a flash and an animation the reader did not ask for. */
+  const arrivedKey = useRef<string | null>(null);
+  const pendingRestore = !!o.pin && o.routeActive && arrivedKey.current !== location.key;
+  if (o.pin && o.legacyKey && typeof localStorage !== "undefined") {
+    try { if (localStorage.getItem(o.storageKey) === null && localStorage.getItem(o.legacyKey) === "1") { localStorage.setItem(o.storageKey, "1"); localStorage.removeItem(o.legacyKey); } } catch { /* */ }
+  }
+  const store = o.store;
+  const isRemembered = () => (store ? store.read() : remembered(o.storageKey));
+  const doRemember = (on: boolean) => { if (store) store.write(on); else remember(o.storageKey, on); };
+  const param = new URLSearchParams(location.search).get(FULL_PARAM) === "1";
+  const full = o.routeActive && (param || (pendingRestore && isRemembered()));
+  const restoring = useRef(false);
   const back = useRef(0);
   const scroller = useRef(o.scroller);
   scroller.current = o.scroller;
@@ -59,23 +108,33 @@ export function useFullScreenList(o: { storageKey: string; routeActive: boolean;
   const setFull = useCallback((on: boolean) => {
     if (!o.routeActive || on === full) return;
     if (on) back.current = scroller.current()?.scrollTop ?? 0;
-    remember(o.storageKey, on);
+    doRemember(on);
     go(on, !on);
-  }, [full, go, o.routeActive, o.storageKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [full, go, o.routeActive, o.storageKey, store]);
 
   /* the device remembers: arriving on the route with no parameter puts it back (once per arrival) */
-  const arrived = useRef<string | null>(null);
   useEffect(() => {
-    if (!o.routeActive) { arrived.current = null; return; }
-    if (arrived.current === location.key) return;
-    arrived.current = location.key;
-    if (!full && remembered(o.storageKey)) go(true, true);
-    else if (full) remember(o.storageKey, true);
+    if (!o.routeActive) { arrivedKey.current = null; return; }
+    if (arrivedKey.current === location.key) return;
+    arrivedKey.current = location.key;
+    if (!param && isRemembered()) { restoring.current = true; go(true, true); }
+    else if (param) doRemember(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [o.routeActive, location.key]);
 
-  /* the sidebar is held at its icons for exactly as long as the list is full screen and on screen */
-  useEffect(() => (full ? holdSidebarCollapsed() : undefined), [full]);
+  /* the sidebar is held at its icons for exactly as long as the list is full screen and on screen. A pin holds it
+     in a LAYOUT effect, before the first paint, and a restored pin with no transition. */
+  const firstHold = useRef(true);
+  useLayoutEffect(() => {
+    if (!o.pin || !full || o.holdSidebar === false) return undefined;
+    const instant = firstHold.current && (pendingRestore || restoring.current);
+    firstHold.current = false;
+    restoring.current = false;
+    return holdSidebarCollapsed({ instant });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [full, o.pin]);
+  useEffect(() => (!o.pin && full ? holdSidebarCollapsed() : undefined), [full, o.pin]);
 
   /* in: to the top. out: back to where you left from. A layout effect, so neither is painted wrong. */
   const was = useRef(full);
@@ -105,6 +164,26 @@ export function useFullScreenList(o: { storageKey: string; routeActive: boolean;
   }, [full]);
 
   useEscapeLayer(full, () => setFull(false), ESC_LEVEL.pageMode);
+
+  /* v138.6 §A — F toggles a pin: not in a field, not with a modifier held, and not while anything is open (the query
+     drawer, or any layer on the escape stack beyond the pin's own) */
+  const keyState = useRef({ full, setFull, on: o.routeActive && !!o.pin, id: o.pin });
+  keyState.current = { full, setFull, on: o.routeActive && !!o.pin, id: o.pin };
+  useEffect(() => {
+    if (!o.pin) return undefined;
+    const onKey = (e: KeyboardEvent) => {
+      const k = keyState.current;
+      if (!k.on || !k.id || !matchesShortcut(k.id, e)) return;
+      if (e.shiftKey || isEditableTarget(e.target)) return;
+      if (document.querySelector(".qad-root.is-open") || escapeDepth() > (k.full ? 1 : 0)) return;
+      /* v139 — the page guide's walkthrough is running: F stands down */
+      if (guideWalking()) return;
+      e.preventDefault();
+      k.setFull(!k.full);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [o.pin]);
 
   return { full, setFull, toggle: () => setFull(!full) };
 }

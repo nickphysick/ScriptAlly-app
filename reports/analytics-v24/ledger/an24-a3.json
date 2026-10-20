@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A3 the ring renders",
+  "where": "1512",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3 the label is 'Replied on time'",
+  "where": "1512",
+  "ok": true,
+  "detail": "Replied on time"
+ },
+ {
+  "lock": "A3 the arc is kept ÷ placed (±1%)",
+  "where": "1512",
+  "ok": true,
+  "detail": "186.92 vs 186.92"
+ },
+ {
+  "lock": "A3 the figure is the share",
+  "where": "1512",
+  "ok": true,
+  "detail": "88%"
+ },
+ {
+  "lock": "A3 the line is 'kept of the placed replies'",
+  "where": "1512",
+  "ok": true,
+  "detail": "21 of the 24 replies"
+ },
+ {
+  "lock": "A3 no rust in the ring",
+  "where": "1512",
+  "ok": true,
+  "detail": "rgb(229, 222, 211) rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A3 pressing it scrolls S4 into view",
+  "where": "1512",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "A3 the ring renders",
+  "where": "1280",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A3 the label is 'Replied on time'",
+  "where": "1280",
+  "ok": true,
+  "detail": "Replied on time"
+ },
+ {
+  "lock": "A3 the arc is kept ÷ placed (±1%)",
+  "where": "1280",
+  "ok": true,
+  "detail": "186.92 vs 186.92"
+ },
+ {
+  "lock": "A3 the figure is the share",
+  "where": "1280",
+  "ok": true,
+  "detail": "88%"
+ },
+ {
+  "lock": "A3 the line is 'kept of the placed replies'",
+  "where": "1280",
+  "ok": true,
+  "detail": "21 of the 24 replies"
+ },
+ {
+  "lock": "A3 no rust in the ring",
+  "where": "1280",
+  "ok": true,
+  "detail": "rgb(229, 222, 211) rgb(42, 58, 82)"
+ },
+ {
+  "lock": "A3 pressing it scrolls S4 into view",
+  "where": "1280",
+  "ok": true,
+  "detail": "12"
+ }
+]

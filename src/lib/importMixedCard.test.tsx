@@ -23,7 +23,8 @@ const card = (queries: Query[]) => {
   const html = renderToStaticMarkup(
     <OneScreenChart loading={false} queries={queries} activities={[]} activeCount={liveCount(queries)} undatedCount={undatedLiveCount(queries)} now={NOW} />,
   );
-  const title = /data-probe-text="chart-title"[^>]*>([^<]*)</.exec(html)?.[1] ?? null;
+  /* the title's TEXT: since Dashboard v59 its figure is wrapped for the first paint's count-up */
+  const title = /data-probe-text="chart-title"[^>]*>([\s\S]*?)<\/h3>/.exec(html)?.[1]?.replace(/<[^>]+>/g, "") ?? null;
   const more = /data-probe-text="chart-undated"[^>]*>([^<]*)</.exec(html)?.[1] ?? null;
   return { html, title, more };
 };

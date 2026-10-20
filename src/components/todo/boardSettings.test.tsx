@@ -217,18 +217,23 @@ describe("⚠️ the set-aside ledger lives on the board, and states its own cou
     expect(code(list), "the list card grew its own set-aside door back").not.toContain("asideCount");
   });
 
-  it("the count is DERIVED from the same hiddenItems the list renders — never a second tally", () => {
+  /* RETARGETED, LAW UNCHANGED (To-do list v5.1 §I.7): `hiddenItems` is replaced by `setAsideItems`, which every
+     surface reads — still one derivation for the count and the list. */
+  it("the count is DERIVED from the same setAsideItems the list renders — never a second tally", () => {
     /* ⚠️ ONE DERIVATION, wherever the door lives. Hoisted beside the trigger in Phase 2.1 so the
        toolbar button's figure and the panel's contents read the same expression; the assertion is
        that `hiddenItems` is called with the page's own four arguments, not where the call sits. */
     expect(listPage.replace(/\s+/g, " "))
-      .toContain("hiddenItems( currentUser?.mutedTaskRules, taskFlags, agents, queries");
-    expect(panel).toContain("hiddenItems(muted, taskFlags, agents, queries");
+      .toContain("setAsideItems( currentUser, taskFlags, agents, queries, Date.now(), activities)");
+    expect(panel).toContain("setAsideItems(currentUser, taskFlags, agents, queries, Date.now(), activities)");
   });
 
-  it("the restore path is unchanged — rule removal or flag unset, no novel write", () => {
+  /* ⚠️ REWRITTEN (To-do list v5.1 §I.7) — the old path cleared `snoozedUntil` for EVERYTHING, so a restored dismissal
+     kept its `skippedAt` and stayed hidden. Each kind now restores through its own field, carried by the item. */
+  it("each kind restores through its own field — rule removal, or the one flag field the item names", () => {
     expect(panel).toContain("mutedTaskRules: (muted ?? []).filter((k) => k !== r.rule)");
-    expect(panel).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
+    expect(panel).toContain("upsertTaskFlag(r.flag, r.patch)");
+    expect(panel).not.toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
     expect(panel).toContain("Nothing here is deleted — only set aside.");
   });
 
@@ -247,9 +252,10 @@ describe("⚠️ the set-aside ledger lives on the board, and states its own cou
      panel derives the modifier from `h.kind`, and the stylesheet distinguishes all three. */
   it("all three kinds of hiding share one row grammar", () => {
     expect(panel, "the modifier is derived from the item's kind").toContain("sap-row sap-row--${h.kind}");
-    expect(panel, "the meta line is the data's, not the component's").toContain("{h.meta}");
+    /* RETARGETED, LAW UNCHANGED (To-do list v5.1 §I.7): the row's words come from the ONE derivation's own helpers */
+    expect(panel, "the meta line is the data's, not the component's").toContain("{setAsideMeta(h)}");
     const css = readFileSync(join(here, "setAside.css"), "utf8");
-    for (const kind of ["rule", "dismissed", "snoozed"]) {
+    for (const kind of ["rule", "dismiss", "snooze"]) {
       expect(css, kind).toContain(`.sap-row--${kind}`);
     }
   });

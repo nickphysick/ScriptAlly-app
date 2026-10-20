@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "CL19-C3",
+  "where": "@1512 a row with an email (precondition)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL19-C3",
+  "where": "@1280 a row with an email (precondition)",
+  "ok": false,
+  "detail": "null"
+ }
+]

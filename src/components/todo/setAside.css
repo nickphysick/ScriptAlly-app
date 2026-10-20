@@ -63,8 +63,8 @@
 /* ⚠️ THE KIND IS A LEADING EDGE, NOT A COLOURED ROW. Three kinds of hiding sit in one list and the
    eye needs to group them without the list becoming three lists. */
 .sap-row--rule { border-left: 2.5px solid #c8d1c5; }
-.sap-row--dismissed { border-left: 2.5px solid #e8c8bc; }
-.sap-row--snoozed { border-left: 2.5px solid #efe4cc; }
+.sap-row--dismiss { border-left: 2.5px solid #e8c8bc; }
+.sap-row--snooze { border-left: 2.5px solid #efe4cc; }
 
 .sap-rowmain { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
 .sap-label {

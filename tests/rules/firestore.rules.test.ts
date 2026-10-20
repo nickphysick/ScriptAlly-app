@@ -1784,3 +1784,37 @@ describe('/waitlist and /counters', () => {
     );
   });
 });
+
+// Dashboard v59 — the founding writer panel's weekly pulse. Written only by the `sendWeeklyPulse`
+// callable (Admin SDK); a writer reads their own weeks, an admin reads all, and no client writes.
+describe('/betaPulse', () => {
+  const seed = async (id: string, uid: string) => asAdmin(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'betaPulse', id), { uid, week: '2026-W42', mood: 3 });
+  });
+
+  it('the owner reads their own week', async () => {
+    await seed(`${ALICE}_2026-W42`, ALICE);
+    await assertSucceeds(getDoc(doc(aliceCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`)));
+  });
+
+  it('another writer cannot read it', async () => {
+    await seed(`${ALICE}_2026-W42`, ALICE);
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`)));
+  });
+
+  it('an unauthenticated caller cannot read it', async () => {
+    await seed(`${ALICE}_2026-W42`, ALICE);
+    await assertFails(getDoc(doc(unauthed().firestore(), 'betaPulse', `${ALICE}_2026-W42`)));
+  });
+
+  it('an admin reads any writer\'s week', async () => {
+    await seed(`${ALICE}_2026-W42`, ALICE);
+    await assertSucceeds(getDoc(doc(adminCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`)));
+  });
+
+  it('no client writes, not even the owner, and not an admin', async () => {
+    await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`), { uid: ALICE, week: '2026-W42', mood: 4 }));
+    await assertFails(setDoc(doc(adminCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`), { uid: ALICE, week: '2026-W42', mood: 4 }));
+    await assertFails(setDoc(doc(unauthed().firestore(), 'betaPulse', 'x_2026-W42'), { uid: 'x', week: '2026-W42', mood: 1 }));
+  });
+});
