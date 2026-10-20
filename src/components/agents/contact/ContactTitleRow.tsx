@@ -46,8 +46,9 @@ export function countTitle(shown: number, total: number, narrowed: boolean): str
 }
 
 /**
- * The Cards / List switch: a tablist with ← and → between its two tabs. `size` "pill" is the title row's (labelled);
- * "icons" is the toolbar's (icon buttons; labelled too where `labels` says so). Both are the same state.
+ * The Cards / List switch: a tablist with ← and → between its two tabs. "pill" is the title row's (labelled); "icons" is
+ * the toolbar's (icon buttons named by aria-label, whose words show in full screen at 1600px and over). Both are the
+ * same state.
  */
 export const ContactViewSwitch: React.FC<{
   view: ContactView;
@@ -71,9 +72,10 @@ export const ContactViewSwitch: React.FC<{
         const on = view === v;
         return (
           <button key={v} type="button" role="tab" aria-selected={on} tabIndex={on ? 0 : -1} data-view={v} disabled={disabled}
-            aria-label={labels ? undefined : VIEW_LABEL[v]} onClick={() => { if (!on) onView(v); }}>
+            aria-label={variant === "icons" ? VIEW_LABEL[v] : undefined} onClick={() => { if (!on) onView(v); }}>
             {v === "cards" ? VIEW_CARDS_ICON : VIEW_LIST_ICON}
-            {labels ? <span>{VIEW_LABEL[v]}</span> : null}
+            {/* the toolbar's switch always carries its words (shown in full screen at 1600 and over; its name otherwise) */}
+            {labels || variant === "icons" ? <span className="cl20-vsl" aria-hidden={variant === "icons" || undefined}>{VIEW_LABEL[v]}</span> : null}
           </button>
         );
       })}

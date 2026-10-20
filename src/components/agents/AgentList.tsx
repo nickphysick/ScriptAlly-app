@@ -385,6 +385,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const wsRef = useRef<HTMLElement | null>(null);
   /** v20 §A — the title row: Part C reads whether it has scrolled away under the stuck toolbar */
   const titleRef = useRef<HTMLDivElement | null>(null);
+  /* v20 §C — HAS THE TITLE ROW SCROLLED AWAY under the stuck toolbar? Derived from the boxes on every scroll (once a frame),
+     never an observer's memory: gone when its bottom is at or above the toolbar's top. Only then (and in full screen)
+     does the toolbar carry the Cards / List switch and Full screen. */
+  const [titleGone, setTitleGone] = useState(false);
   /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
   const filRef = useRef<HTMLButtonElement | null>(null);
 
@@ -676,6 +680,26 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v138.6 §C — the pinned row (v17 C) is retired: the navy list header is the sticky row. One writer measures the
      stack (the lip's cover and the header's height) while this page is on screen over a list. */
   useStickyStack(lhRef, active && showList);
+  useEffect(() => {
+    if (!active || !showList || fullOn) { setTitleGone(false); return undefined; }
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const tr = titleRef.current, tb = lhRef.current?.querySelector<HTMLElement>('[data-cl19="toolbar"]');
+      if (!tr || !tb || tr.offsetHeight === 0) return;
+      const gone = tr.getBoundingClientRect().bottom <= tb.getBoundingClientRect().top + 0.5;
+      setTitleGone((g) => (g === gone ? g : gone));
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    raf = requestAnimationFrame(read);
+    document.addEventListener("scroll", on, { capture: true, passive: true });
+    window.addEventListener("resize", on, { passive: true });
+    return () => {
+      document.removeEventListener("scroll", on, { capture: true } as EventListenerOptions);
+      window.removeEventListener("resize", on);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [active, showList, fullOn]);
   /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
      are the only sticky element in the list. */
 
@@ -1274,7 +1298,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       search={search} onSearch={setSearch} groupKey={groupKey} filterCount={chipCount} onClearFilters={clearFilters}
       filtersRef={loading ? undefined : filRef} pop={pop}
       onStopGroup={() => setGroupKey("none")} jump={loading ? null : jump}
-      onPin={togglePin} />
+      onPin={togglePin} view={view} onView={setView} showViewTools={!loading && (fullOn || titleGone)} />
   );
   return (
     <div className="aglist">

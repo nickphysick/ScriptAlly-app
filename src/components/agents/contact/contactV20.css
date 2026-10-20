@@ -100,3 +100,32 @@
 }
 .cl20-rh .cl20-rhr { flex: 1 1 auto; min-width: 0; height: 1px; margin-left: 16px; background: rgba(28, 19, 15, 0.16); }
 .clv-group[data-loading] .cl20-rh { opacity: 0; }
+
+/* ── §C · THE TOOLBAR'S SWITCH AND FULL SCREEN, after Filters, once the title row has scrolled away and in full screen.
+   The switch: two 34 × 30 icon buttons on a 34px track, radius 9. On the navy toolbar (not full screen) the track is
+   cream at 14% and the chosen button cream with a navy icon; in full screen (the cream toolbar) the track is white with
+   the controls' ring and the chosen button navy with a cream icon. In full screen at 1600 and over the buttons show their
+   words. Full screen is the v19 Pin button (cl19-pin) with the four corners, upright. ── */
+.cl20-vsi {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 0; flex: none; height: 34px; padding: 2px; border-radius: 9px;
+  background: rgba(244, 238, 229, 0.14);
+}
+.cl20-vsi button {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 34px; height: 30px; margin: 0;
+  padding: 0; border: 0; border-radius: 7px; background: transparent; color: rgb(244, 238, 229); cursor: pointer;
+  font: 400 14.5px/1 var(--sp-type) !important;
+}
+.cl20-vsi button .cl20-vsl { display: none; font: inherit !important; color: inherit; }
+.cl20-vsi button:hover:not([aria-selected="true"]):not(:disabled) { background: rgba(244, 238, 229, 0.12); }
+.cl20-vsi button[aria-selected="true"] { background: rgb(244, 238, 229); color: #2a3a52; cursor: default; }
+.cl20-vsi button:focus-visible { outline: 2px solid rgb(244, 238, 229); outline-offset: 1px; }
+.cl19-head[data-pinned] .cl20-vsi { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 2px rgba(28, 19, 15, 0.06); }
+.cl19-head[data-pinned] .cl20-vsi button { color: rgba(28, 19, 15, 0.62); }
+.cl19-head[data-pinned] .cl20-vsi button:hover:not([aria-selected="true"]):not(:disabled) { background: #f4f0e9; color: #1c130f; }
+.cl19-head[data-pinned] .cl20-vsi button[aria-selected="true"] { background: #2a3a52; color: rgb(244, 238, 229); }
+.cl19-head[data-pinned] .cl20-vsi button:focus-visible { outline-color: #2a3a52; }
+@media (min-width: 1600px) {
+  .cl19-head[data-pinned] .cl20-vsi button { width: auto; padding: 0 11px 0 9px; }
+  .cl19-head[data-pinned] .cl20-vsi button .cl20-vsl { display: inline; }
+}
+.cl19-pin.cl20-tfs .cl19-pin-ic { transform: none; }
