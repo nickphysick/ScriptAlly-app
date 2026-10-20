@@ -63,7 +63,7 @@ import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
-import { ContactAppliedRow, ContactFilterMenu, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
+import { ContactAppliedRow, ContactFilterStrip, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
 import { escapeDepth } from "../../lib/escapeStack";
 import { quietScroll, usePopover } from "../shell/ListPills";
 import { CONTACT_PIN_STORE, type ContactView, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
@@ -1301,7 +1301,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       search={search} onSearch={setSearch} groupKey={groupKey} filterCount={chipCount} onClearFilters={clearFilters}
       filtersRef={loading ? undefined : filRef} pop={pop}
       onStopGroup={() => setGroupKey("none")} jump={loading ? null : jump}
-      onPin={togglePin} view={view} onView={setView} showViewTools={!loading && (fullOn || titleGone)} />
+      onPin={togglePin} view={view} onView={setView} showViewTools={!loading && (fullOn || titleGone)}
+      /* v20 §E — the filter strip opens inside the head, under the toolbar */
+      filterStrip={loading ? null : (
+        <ContactFilterStrip filters={filters} onFilters={setFilters} facts={factsAll} pool={inPool} pop={pop}
+          showing={visibleFacts.length} total={factsAll.length} pinned={fullOn} />
+      )} />
   );
   return (
     <div className="aglist">
@@ -1461,8 +1466,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               onClearAll={clearFilters}
               onMore={() => { const b = filRef.current; if (b && pop.open !== "filters") pop.toggle("filters", b); }} />
           ) : null}
-          <ContactFilterMenu filters={filters} onFilters={setFilters} facts={factsAll} pool={inPool} pop={pop}
-            showing={visibleFacts.length} total={factsAll.length} />
           <div className="cl14-list" data-cl14="list">
         {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
             FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own

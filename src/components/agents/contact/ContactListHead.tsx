@@ -173,7 +173,9 @@ export const ContactListHead: React.FC<{
   /** v20 §C — the switch and Full screen show in the toolbar only once the title row has scrolled away, and always in
    *  full screen (the page decides; the toolbar draws what it is told) */
   showViewTools: boolean;
-}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin, view, onView, showViewTools }) => {
+  /** v20 §E — the filter strip, drawn inside the head under the toolbar (it sticks with it and sits over the rows) */
+  filterStrip?: React.ReactNode;
+}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin, view, onView, showViewTools, filterStrip }) => {
   const tbRef = useRef<HTMLDivElement>(null);
   const showLetters = groupKey === "none" || groupKey === "letter";
   const groupName = groupKey === "none" ? null : GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? null;
@@ -372,6 +374,7 @@ export const ContactListHead: React.FC<{
         </div>
       </div>
       </div>
+      {filterStrip}
     </div>
   );
 };
