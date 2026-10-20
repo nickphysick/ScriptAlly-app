@@ -1,0 +1,455 @@
+{
+ "id": "utf8-nobom-csv-50",
+ "queries": [
+  {
+   "label": "q1 Björn Llwyd-Jönsson / Ó Riordáin Associés",
+   "agentName": "Björn Llwyd-Jönsson",
+   "agency": "Ó Riordáin Associés",
+   "status": "Rejected",
+   "sentDate": "2024-08-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q2 Ömer Çelik / Højgaard Associés",
+   "agentName": "Ömer Çelik",
+   "agency": "Højgaard Associés",
+   "status": "Rejected",
+   "sentDate": "2024-03-31",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q3 Inés Wiśniewska / Mëller Partners",
+   "agentName": "Inés Wiśniewska",
+   "agency": "Mëller Partners",
+   "status": "Rejected",
+   "sentDate": "2024-07-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q4 Søren Ó Briain / Mëller Literary",
+   "agentName": "Søren Ó Briain",
+   "agency": "Mëller Literary",
+   "status": "No Response",
+   "sentDate": "2024-08-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q5 François Gonçalves / Città Associés",
+   "agentName": "François Gonçalves",
+   "agency": "Città Associés",
+   "status": "Full Sent",
+   "sentDate": "2023-09-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q6 Dagný Kovačević / Zürich Literary",
+   "agentName": "Dagný Kovačević",
+   "agency": "Zürich Literary",
+   "status": "Queried",
+   "sentDate": "2024-02-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q7 Dagný Beaulé / Mëller Literary",
+   "agentName": "Dagný Beaulé",
+   "agency": "Mëller Literary",
+   "status": "Queried",
+   "sentDate": "2023-09-01",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q8 Chloé Kovačević / Peñafiel & Søn",
+   "agentName": "Chloé Kovačević",
+   "agency": "Peñafiel & Søn",
+   "status": "Full Requested",
+   "sentDate": "2024-11-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q9 François Brontë / Brontë & Søn",
+   "agentName": "François Brontë",
+   "agency": "Brontë & Søn",
+   "status": "Rejected",
+   "sentDate": "2023-05-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q10 Søren Wiśniewska / Città Associés",
+   "agentName": "Søren Wiśniewska",
+   "agency": "Città Associés",
+   "status": "Rejected",
+   "sentDate": "2024-03-23",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q11 Noémie Müller / Ó Riordáin Associés",
+   "agentName": "Noémie Müller",
+   "agency": "Ó Riordáin Associés",
+   "status": "Queried",
+   "sentDate": "2023-11-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q12 Inés Dvořák / Mëller Literary",
+   "agentName": "Inés Dvořák",
+   "agency": "Mëller Literary",
+   "status": "Full Requested",
+   "sentDate": "2025-08-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q13 Ömer Müller / Brontë & Søn",
+   "agentName": "Ömer Müller",
+   "agency": "Brontë & Søn",
+   "status": "Queried",
+   "sentDate": "2023-04-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q14 Siân Núñez / Brontë Agency",
+   "agentName": "Siân Núñez",
+   "agency": "Brontë Agency",
+   "status": "Revise & Resubmit",
+   "sentDate": "2024-12-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q15 Björn Brontë / Città Agency",
+   "agentName": "Björn Brontë",
+   "agency": "Città Agency",
+   "status": "Queried",
+   "sentDate": "2025-01-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q16 Zoë Øvergaard / Brontë & Søn",
+   "agentName": "Zoë Øvergaard",
+   "agency": "Brontë & Søn",
+   "status": "Full Requested",
+   "sentDate": "2024-11-25",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q17 Renée Kovačević / Brontë Agency",
+   "agentName": "Renée Kovačević",
+   "agency": "Brontë Agency",
+   "status": "No Response",
+   "sentDate": "2024-02-19",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q18 Inés Çelik / Ó Riordáin Agency",
+   "agentName": "Inés Çelik",
+   "agency": "Ó Riordáin Agency",
+   "status": "Queried",
+   "sentDate": "2023-03-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q19 Søren Øvergaard / Højgaard Associés",
+   "agentName": "Søren Øvergaard",
+   "agency": "Højgaard Associés",
+   "status": "Queried",
+   "sentDate": "2025-09-17",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q20 Søren Müller / Mëller Associés",
+   "agentName": "Søren Müller",
+   "agency": "Mëller Associés",
+   "status": "Queried",
+   "sentDate": "2024-11-13",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q21 Małgorzata Çelik / Mëller Associés",
+   "agentName": "Małgorzata Çelik",
+   "agency": "Mëller Associés",
+   "status": "Queried",
+   "sentDate": "2023-01-09",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q22 Siân Müller / Mëller Associés",
+   "agentName": "Siân Müller",
+   "agency": "Mëller Associés",
+   "status": "Queried",
+   "sentDate": "2024-09-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q23 Inés Núñez / Ó Riordáin Agency",
+   "agentName": "Inés Núñez",
+   "agency": "Ó Riordáin Agency",
+   "status": "Queried",
+   "sentDate": "2023-11-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q24 Dagný Ó Briain / Città Associés",
+   "agentName": "Dagný Ó Briain",
+   "agency": "Città Associés",
+   "status": "Rejected",
+   "sentDate": "2024-12-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q25 Inés Gonçalves / Ó Riordáin Agency",
+   "agentName": "Inés Gonçalves",
+   "agency": "Ó Riordáin Agency",
+   "status": "Rejected",
+   "sentDate": "2023-04-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q26 Ana-María Ångström / Zürich Literary",
+   "agentName": "Ana-María Ångström",
+   "agency": "Zürich Literary",
+   "status": "Queried",
+   "sentDate": "2024-09-02",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q27 Renée Wiśniewska / Brontë Agency",
+   "agentName": "Renée Wiśniewska",
+   "agency": "Brontë Agency",
+   "status": "No Response",
+   "sentDate": "2023-08-11",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q28 François Ångström / Ó Riordáin Agency",
+   "agentName": "François Ångström",
+   "agency": "Ó Riordáin Agency",
+   "status": "No Response",
+   "sentDate": "2024-10-03",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q29 Dagný Brontë / Città Associés",
+   "agentName": "Dagný Brontë",
+   "agency": "Città Associés",
+   "status": "Queried",
+   "sentDate": "2023-06-14",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q30 Thérèse Ångström / Mëller Agency",
+   "agentName": "Thérèse Ångström",
+   "agency": "Mëller Agency",
+   "status": "Queried",
+   "sentDate": "2023-05-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q31 Ana-María Beaulé / Mëller Literary",
+   "agentName": "Ana-María Beaulé",
+   "agency": "Mëller Literary",
+   "status": "Queried",
+   "sentDate": "2024-10-24",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q32 Noémie Ångström / Brontë Agency",
+   "agentName": "Noémie Ångström",
+   "agency": "Brontë Agency",
+   "status": "Partial Requested",
+   "sentDate": "2023-09-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q33 Thérèse Çelik / Peñafiel & Søn",
+   "agentName": "Thérèse Çelik",
+   "agency": "Peñafiel & Søn",
+   "status": "Rejected",
+   "sentDate": "2025-08-22",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q34 Noémie Çelik / Mëller Partners",
+   "agentName": "Noémie Çelik",
+   "agency": "Mëller Partners",
+   "status": "Rejected",
+   "sentDate": "2025-04-30",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q35 Dagný Ångström / Città Partners",
+   "agentName": "Dagný Ångström",
+   "agency": "Città Partners",
+   "status": "Queried",
+   "sentDate": "2023-06-20",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q36 Renée Beaulé / Città Partners",
+   "agentName": "Renée Beaulé",
+   "agency": "Città Partners",
+   "status": "Queried",
+   "sentDate": "2023-12-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q37 Søren Beaulé / Città Partners",
+   "agentName": "Søren Beaulé",
+   "agency": "Città Partners",
+   "status": "Queried",
+   "sentDate": "2023-09-28",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q38 Ana-María Çelik / Mëller Literary",
+   "agentName": "Ana-María Çelik",
+   "agency": "Mëller Literary",
+   "status": "Rejected",
+   "sentDate": "2023-10-06",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q39 François Çelik / Brontë Agency",
+   "agentName": "François Çelik",
+   "agency": "Brontë Agency",
+   "status": "No Response",
+   "sentDate": "2023-10-04",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q40 Małgorzata Lefèvre / Brontë & Søn",
+   "agentName": "Małgorzata Lefèvre",
+   "agency": "Brontë & Søn",
+   "status": "Queried",
+   "sentDate": "2023-11-18",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q41 Søren Çelik / Brontë & Søn",
+   "agentName": "Søren Çelik",
+   "agency": "Brontë & Søn",
+   "status": "Queried",
+   "sentDate": "2023-12-27",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q42 Chloé Llwyd-Jönsson / Città Agency",
+   "agentName": "Chloé Llwyd-Jönsson",
+   "agency": "Città Agency",
+   "status": "Queried",
+   "sentDate": "2025-04-26",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q43 Ana-María Þórsdóttir / Mëller Literary",
+   "agentName": "Ana-María Þórsdóttir",
+   "agency": "Mëller Literary",
+   "status": "Rejected",
+   "sentDate": "2023-10-07",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q44 Inés Müller / Città Partners",
+   "agentName": "Inés Müller",
+   "agency": "Città Partners",
+   "status": "Rejected",
+   "sentDate": "2024-04-08",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q45 José Kovačević / Ó Riordáin Agency",
+   "agentName": "José Kovačević",
+   "agency": "Ó Riordáin Agency",
+   "status": "Queried",
+   "sentDate": "2025-05-12",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q46 Zoë Núñez / Peñafiel & Søn",
+   "agentName": "Zoë Núñez",
+   "agency": "Peñafiel & Søn",
+   "status": "No Response",
+   "sentDate": "2024-12-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q47 Renée Ó Briain / Città Partners",
+   "agentName": "Renée Ó Briain",
+   "agency": "Città Partners",
+   "status": "No Response",
+   "sentDate": "2023-05-16",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q48 Dagný Müller / Zürich Literary",
+   "agentName": "Dagný Müller",
+   "agency": "Zürich Literary",
+   "status": "Rejected",
+   "sentDate": "2025-05-05",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q49 Chloé Wiśniewska / Højgaard Associés",
+   "agentName": "Chloé Wiśniewska",
+   "agency": "Højgaard Associés",
+   "status": "Queried",
+   "sentDate": "2024-03-21",
+   "timeline": [],
+   "reasons": []
+  },
+  {
+   "label": "q50 Siân Gonçalves / Brontë Associés",
+   "agentName": "Siân Gonçalves",
+   "agency": "Brontë Associés",
+   "status": "Full Sent",
+   "sentDate": "2024-08-13",
+   "timeline": [],
+   "reasons": []
+  }
+ ]
+}

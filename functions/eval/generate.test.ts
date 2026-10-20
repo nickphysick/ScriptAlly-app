@@ -47,6 +47,15 @@ describe("the fixture generator", () => {
     manifest.fixtures.slice(0, 50).forEach((f, i) => expect(f.split, f.id).toBe(i % 3 === 2 ? "holdout" : "dev"));
   });
 
+  it("writes the accents fixtures as UTF-8 with no byte-order mark, accents intact", () => {
+    for (const id of ["utf8-nobom-csv-10", "utf8-nobom-csv-50"]) {
+      const bytes = readFileSync(join(root, FIXTURE_DIR, `${id}.csv`));
+      expect([bytes[0], bytes[1], bytes[2]], id).not.toEqual([0xef, 0xbb, 0xbf]);
+      const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      expect(/[^\x00-\x7f]/.test(text), id).toBe(true);
+    }
+  });
+
   it("marks every layout the current pipeline cannot read, with a reason", () => {
     for (const f of manifest.fixtures) {
       if (f.layout !== "standard") expect(f.expectedToFail, f.id).toBe(true);
@@ -58,7 +67,7 @@ describe("the fixture generator", () => {
 
   it("covers every messiness knob the pack names", () => {
     const knobs = new Set(manifest.fixtures.flatMap((f) => f.knobs));
-    for (const k of ["preamble", "dupHeader", "totals", "blankRows", "placeholders", "agentNotes", "slang", "dateStyles", "serials", "usDates", "notesDates", "whitespace", "unusualColumns", "emoji", "tabs", "merged", "links", "colour"]) {
+    for (const k of ["preamble", "dupHeader", "totals", "blankRows", "placeholders", "agentNotes", "slang", "dateStyles", "serials", "usDates", "notesDates", "whitespace", "unusualColumns", "emoji", "tabs", "merged", "links", "colour", "accents"]) {
       expect(knobs.has(k), k).toBe(true);
     }
     expect(new Set(manifest.fixtures.map((f) => f.rows))).toEqual(new Set([10, 50, 150, 200, 250, 300]));

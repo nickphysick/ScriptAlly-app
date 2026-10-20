@@ -53,9 +53,39 @@ export function dateCellsToIso(XLSX: Xlsx, book: XLSXNS.WorkBook): void {
   }
 }
 
-/** Read a file's bytes into a workbook under both rules above. */
+/** A zip (.xlsx, .xlsb, .ods) or an OLE compound file (.xls) — binary formats that carry their own
+ *  text encoding. Everything else that reaches the importer is text: a .csv, .tsv or .txt.
+ *  ⚠️ NO TEST CAN SEE THIS GUARD, AND THAT IS NOT A REASON TO DELETE IT. A real workbook is never
+ *  valid UTF-8 (measured: 0 of 26 .xlsx fixtures decode), so the strict decode below already rejects
+ *  one and the old path reads it. This stops a workbook being decoded as text by luck. */
+function isBinaryWorkbook(bytes: Uint8Array): boolean {
+  const zip = bytes[0] === 0x50 && bytes[1] === 0x4b;
+  const ole = bytes[0] === 0xd0 && bytes[1] === 0xcf && bytes[2] === 0x11 && bytes[3] === 0xe0;
+  return zip || ole;
+}
+
+/**
+ * 3. A TEXT FILE IS UTF-8 WHENEVER ITS BYTES ARE VALID UTF-8. SheetJS reads CSV bytes with no BOM as
+ *    Latin-1, so a Google Sheets export — UTF-8, no BOM — turned "Zoë" into "ZoÃ«" and every curly
+ *    quote, dash and emoji into debris, before either import path saw a cell. Text bytes are decoded
+ *    strictly as UTF-8 and the TEXT is handed to SheetJS; a BOM is stripped by the decoder, so it
+ *    never lands in the first header cell. Bytes that are NOT valid UTF-8 — a genuine Windows-1252
+ *    or Latin-1 file — read exactly as they always have. No other encoding is ever guessed.
+ */
+function asText(data: ArrayBuffer | Uint8Array): string | null {
+  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+  if (isBinaryWorkbook(bytes)) return null;
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+}
+
+/** Read a file's bytes into a workbook under all three rules above. */
 export function readSheetBook(XLSX: Xlsx, data: ArrayBuffer | Uint8Array): XLSXNS.WorkBook {
-  const book = XLSX.read(data, SHEET_READ_OPTS);
+  const text = asText(data);
+  const book = text === null ? XLSX.read(data, SHEET_READ_OPTS) : XLSX.read(text, { ...SHEET_READ_OPTS, type: "string" });
   dateCellsToIso(XLSX, book);
   return book;
 }

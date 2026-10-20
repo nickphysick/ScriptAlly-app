@@ -762,6 +762,34 @@
    "rows": 250,
    "expectedToFail": false,
    "split": "dev"
+  },
+  {
+   "id": "utf8-nobom-csv-10",
+   "file": "tests/fixtures/smart-eval/utf8-nobom-csv-10.csv",
+   "expected": "tests/fixtures/smart-eval/utf8-nobom-csv-10.expected.json",
+   "format": "csv",
+   "seed": 3694607533,
+   "layout": "standard",
+   "knobs": [
+    "accents"
+   ],
+   "rows": 10,
+   "expectedToFail": false,
+   "split": "dev"
+  },
+  {
+   "id": "utf8-nobom-csv-50",
+   "file": "tests/fixtures/smart-eval/utf8-nobom-csv-50.csv",
+   "expected": "tests/fixtures/smart-eval/utf8-nobom-csv-50.expected.json",
+   "format": "csv",
+   "seed": 1143821065,
+   "layout": "standard",
+   "knobs": [
+    "accents"
+   ],
+   "rows": 50,
+   "expectedToFail": false,
+   "split": "dev"
   }
  ]
 }

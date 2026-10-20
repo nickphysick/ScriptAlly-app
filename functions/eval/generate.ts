@@ -76,6 +76,14 @@ const LAST = ["Voss", "Carter", "Webb", "Vidal", "Salt", "Hale", "Raman", "Okafo
 const AG_A = ["Pemberton", "Wren", "Kite", "Larkspur", "Hollis", "Marlow", "Greenhouse", "Quill", "Penfallow", "Blackthorn", "Ashgrove", "Bellwether", "Copperfield", "Dunmore", "Everly", "Fairweather", "Gilchrist", "Harwood", "Inkwell", "Juniper"];
 const AG_B = ["Literary", "Literary Agency", "& Co", "Associates", "Agency", "Partners", "Management"];
 
+// The accents knob's cast: names a UTF-8 file must carry intact. Written as UTF-8 with NO byte-order
+// mark — what Google Sheets exports — which is exactly the file the reader used to decode as Latin-1.
+const FIRST_ACC = ["Zoë", "Renée", "Søren", "Ana-María", "Björn", "Chloé", "José", "Siân", "Małgorzata", "François", "Thérèse", "Ömer", "Inés", "Dagný", "Noémie"];
+const LAST_ACC = ["Brontë", "Müller", "Ó Briain", "Núñez", "Kovačević", "Ångström", "Dvořák", "Lefèvre", "Çelik", "Þórsdóttir", "Øvergaard", "Gonçalves", "Wiśniewska", "Beaulé", "Llwyd-Jönsson"];
+const AG_A_ACC = ["Éditions", "Lumière", "Højgaard", "Ó Riordáin", "Peñafiel", "Città", "Zürich", "Brontë", "Fénelon", "Mëller"];
+const AG_B_ACC = ["Literary", "& Søn", "Agency", "Associés", "Partners"];
+export const ACCENT_NOTES = ["“loved the opening” — asked for more", "met at the York festival – nice chat", "fingers crossed 🤞", "agent’s wishlist: “quiet literary”", "re-sent after the typo — oops"];
+
 const slug = (s: string) => s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "");
 
 /** A pipeline path: later stages each 7–45 days after the one before. */
@@ -100,10 +108,11 @@ function history(r: Rng, sent: string, pool?: readonly Status[]): Stage[] {
   return stages;
 }
 
-function cast(r: Rng, n: number, pool?: readonly Status[]): TruthQuery[] {
-  const names = r.shuffle(FIRST.flatMap((f) => LAST.map((l) => `${f} ${l}`))).slice(0, n);
+function cast(r: Rng, n: number, pool?: readonly Status[], accents = false): TruthQuery[] {
+  const [F, L, A, B] = accents ? [FIRST_ACC, LAST_ACC, AG_A_ACC, AG_B_ACC] : [FIRST, LAST, AG_A, AG_B];
+  const names = r.shuffle(F.flatMap((f) => L.map((l) => `${f} ${l}`))).slice(0, n);
   const agencyCount = Math.max(2, Math.ceil(n / 3));
-  const agencies = r.shuffle(AG_A.flatMap((a) => AG_B.map((b) => `${a} ${b}`))).slice(0, agencyCount);
+  const agencies = r.shuffle(A.flatMap((a) => B.map((b) => `${a} ${b}`))).slice(0, agencyCount);
   const out: TruthQuery[] = [];
   for (let i = 0; i < n; i++) {
     const agency = r.pick(agencies);
@@ -254,7 +263,7 @@ function standardRow(r: Rng, q: TruthQuery, knobs: Set<string>, format: "csv" | 
     const ev = eventNote(r, q);
     if (ev) { notes = ev.note; timeline.push(ev.event); reasons.add("two-dates"); }
   }
-  if (!notes && r.chance(0.25)) notes = r.pick(PLAIN_NOTES);
+  if (!notes && r.chance(0.25)) notes = r.pick(knobs.has("accents") ? ACCENT_NOTES : PLAIN_NOTES);
   if (knobs.has("emoji") && r.chance(0.2)) notes = (notes ? notes + " " : "") + r.pick(EMOJI_NOTES);
 
   return {
@@ -481,6 +490,8 @@ export const SPECS: Spec[] = [
   // ── Added by the quick-fixes pack (20 Oct). Appended and pinned to dev — see Spec.split. ──
   { id: "size-csv-200", format: "csv", rows: 200, layout: "standard", knobs: [], split: "dev" },
   { id: "size-csv-250", format: "csv", rows: 250, layout: "standard", knobs: [], split: "dev" },
+  { id: "utf8-nobom-csv-10", format: "csv", rows: 10, layout: "standard", knobs: ["accents"], split: "dev" },
+  { id: "utf8-nobom-csv-50", format: "csv", rows: 50, layout: "standard", knobs: ["accents"], split: "dev" },
 ];
 
 const COLOUR: Partial<Record<Status, { rgb: string; label: string }>> = {
@@ -495,7 +506,7 @@ export function buildFixture(spec: Spec, seed: number): { bytes: Uint8Array | st
   const r = rng(seed);
   const knobs = new Set(spec.knobs);
   const pool = spec.layout === "colour" ? ([STATUS.Q, STATUS.FR, STATUS.RJ, STATUS.NR, STATUS.OF] as const) : undefined;
-  const qs = cast(r, spec.rows, pool);
+  const qs = cast(r, spec.rows, pool, knobs.has("accents"));
   let sheets: SheetSpec[] = [];
   let expected: ExpectedQuery[] = [];
 
