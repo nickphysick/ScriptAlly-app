@@ -59,3 +59,44 @@
 @media (min-width: 768px) {
   .clv-group .clv-main > .cl20-tr + .cl16-list.cl19-card { margin-top: 0; }
 }
+
+/* ── §B · THE CARDS VIEW: the grid inside the list card, under the same toolbar and sticky stack, no column headings.
+   Ground #f7f4ee, padding 20/22/26; up to three cards across (never under 340, `--cols` measured in ContactCards),
+   24 between rows and 22 between columns. ── */
+.clv-group .cl19-card .cl20-cards { box-sizing: border-box; padding: 20px 22px 26px; background: #f7f4ee; }
+.cl20-grid {
+  display: grid; grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr)); row-gap: 24px; column-gap: 22px; align-items: start;
+}
+.cl20-card { position: relative; display: block; min-width: 0; border-radius: 22px; cursor: pointer; outline: 0; }
+.cl20-card > .apc { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.cl20-card:hover > .apc {
+  transform: translateY(-3px); box-shadow: 0 0 0 1px #1c130f14, 0 26px 40px -24px #1c130f8c;
+}
+.cl20-card:focus-visible > .apc, .cl20-card.kf > .apc { box-shadow: 0 0 0 2px #2a3a52, 0 18px 34px -22px rgba(28, 19, 15, 0.45); }
+.cl20-card[aria-current="true"] > .apc { box-shadow: 0 0 0 2px #2a3a52, 0 26px 40px -24px #1c130f8c; }
+@media (prefers-reduced-motion: reduce) {
+  .cl20-card > .apc { transition: none; }
+  .cl20-card:hover > .apc { transform: none; }
+}
+.cl20-none { margin: 0; padding: 48px 22px 56px; text-align: center; font: italic 400 16px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+
+/* ── §D · THE CARDS VIEW'S RULED HEADING: spans the grid, 58 tall on the grid's ground; the mark, the name (typewriter
+   21), "N AGENTS" (mono 10.5, .14em, 60%), then a 1px 16% hairline to the right edge, 16 after the count. Its box is
+   the cards' column (its left is the first card's left); the two gutters beside it are covered by its own shadow, so
+   the cards scrolling up behind it never show at its sides. It sticks under the toolbar (and the applied row). ── */
+.cl20-gsec + .cl20-gsec { margin-top: 10px; }
+.cl20-gsec > .cl20-grid { padding-top: 4px; }
+.clv-group .cl19-card .cl20-rh {
+  box-sizing: border-box; display: flex; align-items: center; gap: 0; height: 58px; margin: 0; padding: 0;
+  background: #f7f4ee; box-shadow: -22px 0 0 #f7f4ee, 22px 0 0 #f7f4ee;
+  position: sticky; z-index: 6; top: calc(var(--cl17-pin-h, 0px) + var(--lt-stick, 0px) + var(--cl19-af-h, 0px));
+}
+.cl20-gsec:first-child > .cl20-rh { margin-top: -6px; }
+.cl20-rh .cl19-gm { width: 18px; height: 18px; margin-right: 12px; }
+.cl20-rh .cl20-rhl { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+.cl20-rh .cl20-rhn {
+  margin-left: 12px; font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; letter-spacing: 0.14em;
+  text-transform: uppercase; color: rgba(28, 19, 15, 0.6); white-space: nowrap;
+}
+.cl20-rh .cl20-rhr { flex: 1 1 auto; min-width: 0; height: 1px; margin-left: 16px; background: rgba(28, 19, 15, 0.16); }
+.clv-group[data-loading] .cl20-rh { opacity: 0; }
