@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Smart Import loader · 150 rows</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Playfair+Display:wght@600&amp;family=Source+Sans+3:wght@400;600&amp;family=Special+Elite&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes ldDrift{0%{transform:translate(0,0)}50%{transform:translate(7px,-9px)}100%{transform:translate(0,0)}}
+@keyframes ldIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ldPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes ldShim{0%{background-position:-160px 0}100%{background-position:460px 0}}
+.ld-drift{animation:ldDrift 7s ease-in-out infinite}
+.ld-in{animation:ldIn .45s cubic-bezier(.22,.8,.3,1) both}
+.ld-pop{animation:ldPop .5s cubic-bezier(.22,.8,.3,1) both}
+.ld-shim{background:linear-gradient(90deg,#e4ded6 0,#cfc6ba 40%,#e4ded6 80%) no-repeat;background-size:160px 100%;animation:ldShim 1.4s linear infinite}
+.ld-btn{cursor:pointer}
+.ld-btn:hover{filter:brightness(1.08)}
+.ld-link{cursor:pointer}
+.ld-link:hover{text-decoration:underline}
+@media (prefers-reduced-motion:reduce){.ld-drift,.ld-in,.ld-pop,.ld-shim{animation:none}}
+</style>
+</helmet>
+<div style="width:1280px; height:800px; box-sizing:border-box; display:flex; background:#1b2433; font-family:'Source Sans 3',system-ui,sans-serif; color:#1b2433; overflow:hidden">
+
+<aside style="width:248px; flex:none; box-sizing:border-box; padding:24px 16px 18px; display:flex; flex-direction:column; gap:22px; color:#f4eee5">
+  <div style="display:flex; align-items:center; gap:10px; padding:0 6px">
+    <div aria-hidden="true" style="width:32px; height:32px; border-radius:50%; background:#d9967a; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:600; font-size:17px; color:#1b2433">Q</div>
+    <span style="font-family:'Playfair Display',serif; font-weight:600; font-size:22px">QueryHawk</span>
+    <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; border:1px solid rgba(244,238,229,.4); border-radius:5px; padding:3px 6px">BETA</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px; padding:12px; border:1px solid rgba(244,238,229,.16); border-radius:12px">
+    <div aria-hidden="true" style="width:30px; height:38px; border-radius:4px; background:#fbf9f5"></div>
+    <div style="display:flex; flex-direction:column; gap:3px">
+      <span style="font-family:'Special Elite',monospace; font-size:16px">Murphy's Day Out</span>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.16em; color:rgba(244,238,229,.62)">QUERYING</span>
+    </div>
+  </div>
+      <div style="display:flex; flex-direction:column; gap:6px">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:rgba(244,238,229,.55); padding:0 8px 6px">GETTING SET UP</span>
+      <div style="display:flex; align-items:center; gap:12px; padding:9px 10px; font-family:'Playfair Display',serif; font-size:18px; color:rgba(244,238,229,.85)"><span aria-hidden="true" style="width:22px; height:22px; border-radius:50%; background:rgba(244,238,229,.12); font-size:11px; display:flex; align-items:center; justify-content:center">✓</span>You</div>
+      <div style="display:flex; align-items:center; gap:12px; padding:9px 10px; font-family:'Playfair Display',serif; font-size:18px; color:rgba(244,238,229,.85)"><span aria-hidden="true" style="width:22px; height:22px; border-radius:50%; background:rgba(244,238,229,.12); font-size:11px; display:flex; align-items:center; justify-content:center">✓</span>Your book</div>
+      <div style="display:flex; align-items:center; gap:12px; padding:9px 10px; border-radius:10px; background:rgba(244,238,229,.09); box-shadow:inset 2px 0 0 #d9967a; font-family:'Playfair Display',serif; font-weight:600; font-size:18px"><span aria-hidden="true" style="width:22px; height:22px; border-radius:50%; background:#d9967a; color:#1b2433; font-family:'JetBrains Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center">3</span>Your list</div>
+    </div>
+  <div style="flex:1"></div>
+  <div style="display:flex; align-items:center; gap:12px; padding:14px 6px 0; border-top:1px solid rgba(244,238,229,.14)">
+    <div aria-hidden="true" style="width:38px; height:38px; border-radius:50%; border:1px solid rgba(244,238,229,.3); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:12px">NP</div>
+    <div style="display:flex; flex-direction:column">
+      <span style="font-family:'Playfair Display',serif; font-weight:600; font-size:16px">Nick Physick</span>
+      <span style="font-size:13px; color:#d9967a">Founding writer</span>
+    </div>
+  </div>
+</aside>
+
+<main style="flex:1; min-width:0; position:relative; display:flex; flex-direction:column; padding:20px 8px 8px 0; box-sizing:border-box">
+  <div style="align-self:flex-start; height:50px; padding:0 28px; border-radius:12px 12px 0 0; background:#f1ede6; display:flex; align-items:center; gap:14px">
+    <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.22em; color:rgba(28,19,15,.6)">{{tabKicker}}</span>
+    <span style="font-family:'Special Elite',monospace; font-size:24px; color:#1b2433">{{tabTitle}}</span>
+  </div>
+
+
+  <div style="flex:1; min-height:0; position:relative; border-radius:0 12px 12px 12px; background-color:#f1ede6; background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 33px, rgba(28,19,15,.055) 33px, rgba(28,19,15,.055) 34px); overflow:hidden; display:flex; flex-direction:column">
+
+          <div style="flex:1; position:relative">
+
+        <div aria-hidden="true" style="{{fadeStyle}}">
+          <div class="ld-drift" style="position:absolute; left:230px; top:96px; width:48px; height:48px; border-radius:50%; background:#d9e0e7; display:flex; align-items:center; justify-content:center; animation-delay:-2s">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b2433" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>
+          </div>
+          <div class="ld-drift" style="position:absolute; left:880px; top:300px; width:50px; height:50px; border-radius:50%; background:#f3ddd2; color:#a2452a; display:flex; align-items:center; justify-content:center; font-family:'Special Elite',monospace; font-size:24px; animation-delay:-4s">?</div>
+          <div class="ld-drift" style="position:absolute; left:470px; top:612px; width:16px; height:16px; border-radius:50%; background:#e4ded6; animation-delay:-1s"></div>
+
+          <div style="position:absolute; left:410px; top:196px; width:270px; transform:rotate(1.2deg)">
+            <div class="ld-drift" style="border-radius:10px; background:#ffffff; box-shadow:0 8px 22px rgba(28,19,15,.10); overflow:hidden; animation-delay:-3s">
+              <div style="height:34px; background:#2d3a50; color:#f4eee5; display:flex; align-items:center; gap:8px; padding:0 14px; font-size:14px">Add an agent</div>
+              <div style="padding:10px 14px 14px; display:flex; flex-direction:column; gap:8px">
+                <div style="display:flex; gap:14px; align-items:baseline; border-bottom:1px dashed rgba(28,19,15,.25); padding-bottom:4px"><span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:rgba(28,19,15,.55); width:58px">NAME</span><span style="font-family:'Special Elite',monospace; font-size:14px">Vidal</span></div>
+                <div style="display:flex; gap:14px; align-items:baseline; border-bottom:1px dashed rgba(28,19,15,.25); padding-bottom:4px"><span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:rgba(28,19,15,.55); width:58px">AGENCY</span><span style="font-family:'Special Elite',monospace; font-size:14px">Quill</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:absolute; left:690px; top:540px; width:260px; transform:rotate(-1deg)">
+            <div class="ld-drift" style="border-radius:10px; background:#ffffff; box-shadow:0 8px 22px rgba(28,19,15,.10); overflow:hidden; animation-delay:-5s">
+              <div style="height:34px; background:#2d3a50; color:#f4eee5; display:flex; align-items:center; gap:8px; padding:0 14px; font-size:14px">Log a query</div>
+              <div style="padding:10px 14px 14px; display:flex; flex-direction:column; gap:8px">
+                <div style="display:flex; gap:14px; align-items:baseline; border-bottom:1px dashed rgba(28,19,15,.25); padding-bottom:4px"><span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:rgba(28,19,15,.55); width:68px">STATUS</span><span style="font-family:'Special Elite',monospace; font-size:14px">Full requested</span></div>
+                <div style="display:flex; gap:14px; align-items:baseline; border-bottom:1px dashed rgba(28,19,15,.25); padding-bottom:4px"><span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:rgba(28,19,15,.55); width:68px">DATE SENT</span><span style="font-family:'Special Elite',monospace; font-size:14px">12.4.24</span></div>
+              </div>
+            </div>
+          </div>
+
+          <sc-for list="{{cards}}" as="c" hint-placeholder-count="6">
+            <div style="{{c.box}}">
+              <div class="ld-drift" style="{{c.inner}}">
+                <span aria-hidden="true" style="width:22px; height:22px; flex:none; border-radius:5px; background:#ece6dd"></span>
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{c.text}}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{showTips}}" hint-placeholder-val="{{false}}">
+          <section class="ld-in" aria-label="Did you know" style="position:absolute; left:28px; bottom:22px; width:476px; z-index:20; box-sizing:border-box; display:flex; background:#ffffff; border:1px solid #e4ded6; border-radius:16px; box-shadow:0 18px 40px rgba(28,19,15,.16), 0 2px 6px rgba(28,19,15,.06)">
+            <div style="width:136px; flex:none; position:relative; border-radius:15px 0 0 15px; background:#f3ddd2">
+              <img src="/_blob/71b1d80b85ea8f3d48d3786f81fa4694" alt="" style="position:absolute; left:-14px; bottom:14px; width:168px; height:168px; object-fit:contain; pointer-events:none">
+            </div>
+            <div style="flex:1; min-width:0; box-sizing:border-box; padding:18px 20px 0 22px; display:flex; flex-direction:column; gap:10px">
+              <div style="display:flex; align-items:center; justify-content:space-between">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:#a2452a">DID YOU KNOW?</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:rgba(28,19,15,.55)">{{tipNum}}</span>
+              </div>
+              <div aria-live="polite" style="position:relative; height:118px">
+                <sc-for list="{{tips}}" as="tip" hint-placeholder-count="1">
+                  <div style="{{tip.style}}">
+                    <h2 style="margin:0; font-family:'Special Elite',monospace; font-weight:400; font-size:21px; line-height:1.3; color:#1b2433">{{tip.title}}</h2>
+                    <p style="margin:0; font-size:14.5px; line-height:1.45; color:rgba(28,19,15,.78)">{{tip.body}}</p>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid #efe9e1; margin:0 -20px 0 -22px; padding:0 12px 0 22px">
+                <div aria-hidden="true" style="display:flex; gap:5px; align-items:center">
+                  <sc-for list="{{tipDots}}" as="d" hint-placeholder-count="5">
+                    <span style="{{d.style}}"></span>
+                  </sc-for>
+                </div>
+                <button type="button" class="ld-link" onClick="{{nextTip}}" style="height:44px; padding:0 10px; border:0; background:none; display:flex; align-items:center; gap:6px; color:#1b2433; font-family:'Source Sans 3',sans-serif; font-weight:600; font-size:14px">Next tip<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{showDone}}" hint-placeholder-val="{{false}}">
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px">
+            <div class="ld-pop" aria-hidden="true" style="width:116px; height:116px; border-radius:50%; background:#2a3a52; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 30px rgba(28,19,15,.18)">
+              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            </div>
+            <span style="font-family:'Special Elite',monospace; font-size:30px; color:#1b2433">Ready</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:rgba(28,19,15,.62)">{{doneLine}}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div role="status" style="height:52px; flex:none; box-sizing:border-box; display:flex; align-items:center; gap:18px; padding:0 28px; background:#fbf9f5; border-top:1px solid rgba(28,19,15,.10); font-family:'JetBrains Mono',monospace">
+        <span aria-hidden="true" style="width:9px; height:9px; flex:none; border-radius:50%; background:#d9967a"></span>
+        <span style="width:250px; flex:none; font-size:13px; color:rgba(28,19,15,.78); white-space:nowrap">{{leftText}}</span>
+        <div aria-hidden="true" style="flex:1; max-width:440px; height:5px; border-radius:3px; background:#e4ded6; overflow:hidden">
+          <sc-if value="{{shimmer}}" hint-placeholder-val="{{true}}">
+            <div class="ld-shim" style="width:100%; height:100%"></div>
+          </sc-if>
+          <sc-if value="{{solidBar}}" hint-placeholder-val="{{false}}">
+            <div style="{{barStyle}}"></div>
+          </sc-if>
+        </div>
+        <span style="flex:1; text-align:right; font-size:12.5px; color:rgba(28,19,15,.62); white-space:nowrap">{{rightText}}</span>
+      </div>
+
+  </div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"rows":{"editor":"int","default":150,"min":1,"max":300,"section":"Mock"},"speed":{"editor":"enum","default":"8","options":["1","4","8"],"section":"Mock"},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  state = { t: 0, real: 0, doneReal: null, tipBump: 0, tipAt: 0 };
+
+  componentDidMount() { this.iv = setInterval(() => this.tick(), 100); }
+  componentWillUnmount() { clearInterval(this.iv); }
+
+  n() {
+    const v = Math.round(Number(this.props.rows ?? 150));
+    return v > 0 ? v : 150;
+  }
+
+  tick() {
+    const sp = Number(this.props.speed ?? 8) || 8;
+    const N = this.n();
+    const total = 1.2 + 0.6 * N + 1.0;
+    this.setState((s) => {
+      const real = s.real + 0.1;
+      const t = Math.min(total, s.t + 0.1 * sp);
+      let doneReal = s.doneReal;
+      if (t >= total && doneReal === null) doneReal = real;
+      if (doneReal !== null && real - doneReal > 3.2) {
+        return { t: 0, real: real, doneReal: null };
+      }
+      return { t: t, real: real, doneReal: doneReal };
+    });
+  }
+
+  fmtEst(sec) {
+    if (sec < 20) return 'a few seconds';
+    if (sec < 50) return 'about ' + Math.max(10, Math.round(sec / 10) * 10) + ' seconds';
+    if (sec < 80) return 'about a minute';
+    const m = Math.round(sec / 30) / 2;
+    const whole = Math.floor(m);
+    return 'about ' + whole + (m % 1 ? '½' : '') + ' minutes';
+  }
+
+  fmtLeft(sec) {
+    if (sec < 10) return 'a few seconds left';
+    if (sec < 45) return 'about ' + Math.max(10, Math.round(sec / 10) * 10) + ' seconds left';
+    if (sec < 80) return 'about a minute left';
+    return this.fmtEst(sec) + ' left';
+  }
+
+  renderVals() {
+    const s = this.state;
+    const N = this.n();
+    const t = s.t;
+    const est = 0.5 + 0.7 * N;
+    const start = 1.2;
+    const total = start + 0.6 * N + 1.0;
+    const rows = Math.max(0, Math.min(N, Math.floor((t - start) / 0.6)));
+    const phase = t < start ? 'intro' : rows < N ? 'reading' : t < total ? 'tidy' : 'done';
+    const done = phase === 'done';
+
+    let leftText = 'Opening your file…';
+    let rightText = N + ' rows · ' + this.fmtEst(est);
+    let pct = 0;
+    if (phase === 'reading' && rows === 0) {
+      leftText = 'Reading your first rows…';
+    } else if (phase === 'reading') {
+      leftText = 'Reading row ' + rows + ' of ' + N;
+      const left = rows < 6 ? Math.max(1, est - t) : (N - rows) * 0.6 + 1.0;
+      rightText = this.fmtLeft(left);
+      pct = 2 + (rows / N) * 94;
+    } else if (phase === 'tidy') {
+      leftText = 'Tidying records…';
+      rightText = 'almost there';
+      pct = 100;
+    } else if (done) {
+      leftText = 'Ready';
+      rightText = N + ' of ' + N + ' rows read';
+      pct = 100;
+    }
+
+    const tipList = [
+      ["Whose move is it?", "Your Query Centre will tell you at a glance which queries need your attention and which ones you don't need to worry about right now."],
+      ["Heads up", "When a query passes its agent's reply window, we'll add a nudge to your to-do list. Nothing slips through the cracks."],
+      ["Record a response", "Got an answer? Log what came back, good news or bad, and see your campaign analytics and to-do list update in real time."],
+      ["Materials & Packages", "Track which manuscript versions, letters and synopses are getting agents asking for more."],
+      ["Benchmarking", "Track your response rate and how far your queries are getting, and use the analysis to shape your campaign."],
+    ];
+    const tipIdx = (Math.floor(((s.real || 0) - (s.tipAt || 0)) / 7) + (s.tipBump || 0)) % tipList.length;
+
+    const texts = [
+      'J. Carter · Carter & Vale · "replied, wants pages"',
+      'Okonkwo Lit · fulls req · 12.4.24',
+      'Vidal · Quill · sent · 6 May',
+      'G. Salt · offer!! · 02/13/2024',
+      'Mercer · R&R · 18 Apr',
+      'Webb · rejected · 5.2.24',
+    ];
+    const slots = [
+      [60, 168, 500, -4, 0],
+      [560, 130, 420, 3.5, -2.5],
+      [40, 330, 500, 2.5, -5],
+      [560, 330, 420, -3.5, -1.5],
+      [100, 490, 500, 3, -3.5],
+      [530, 450, 440, -3, -6],
+    ];
+    const cards = slots.map((p, i) => ({
+      text: texts[i],
+      box: 'position:absolute; left:' + p[0] + 'px; top:' + p[1] + 'px; width:' + p[2] + 'px; transform:rotate(' + p[3] + 'deg)',
+      inner: 'display:flex; align-items:center; gap:14px; box-sizing:border-box; height:72px; padding:0 24px; border-radius:12px; background:#ffffff; box-shadow:0 10px 26px rgba(28,19,15,.10); font-family:"JetBrains Mono",monospace; font-size:14px; color:rgba(28,19,15,.66); animation-delay:' + p[4] + 's',
+    }));
+
+    return {
+      cards: cards,
+      fadeStyle: 'position:absolute; inset:0; transition:opacity .5s ease, transform .5s ease; opacity:' + (done ? 0 : 1) + '; transform:scale(' + (done ? 0.96 : 1) + ')',
+      leftText: leftText,
+      rightText: rightText,
+      shimmer: phase === 'intro' || (phase === 'reading' && rows === 0),
+      solidBar: !(phase === 'intro' || (phase === 'reading' && rows === 0)),
+      barStyle: 'height:100%; border-radius:3px; background:#2a3a52; transition:width .35s linear; width:' + pct.toFixed(1) + '%',
+      showTips: phase === 'reading' && t > 3,
+      tips: tipList.map((tp, i) => ({
+        title: tp[0],
+        body: tp[1],
+        style: 'position:absolute; inset:0; display:flex; flex-direction:column; gap:6px; transition:opacity .5s ease, transform .5s ease; opacity:' + (i === tipIdx ? 1 : 0) + '; transform:translateY(' + (i === tipIdx ? 0 : 6) + 'px)',
+      })),
+      tipDots: tipList.map((tp, i) => ({
+        style: 'height:6px; border-radius:3px; transition:width .3s ease, background .3s ease; width:' + (i === tipIdx ? 18 : 6) + 'px; background:' + (i === tipIdx ? '#2a3a52' : '#e4ded6'),
+      })),
+      nextTip: () => this.setState((st) => ({ tipBump: tipIdx + 1, tipAt: st.real })),
+      tipNum: (tipIdx + 1) + ' / ' + tipList.length,
+      showDone: done,
+      doneLine: N + ' of ' + N + ' rows read',
+      tabKicker: 'GETTING SET UP',
+      tabTitle: 'Your list',
+    };
+  }
+}
+</script>
+</body>
+</html>

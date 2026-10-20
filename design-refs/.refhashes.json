@@ -312,7 +312,9 @@
     "design-refs/materials/packages-v3.html": "4a10bd924ffcf674b8ffdc38ffb6ebfeec022891cbb2794f553221e02d0b9c4a",
     "design-refs/packages-v4/packages-v4.html": "f9b14d578d209c6e3bec11aecbe65c3a82624af5d8ae0dbf89d60b647d3c12e5",
     "design-refs/responses-v4/responses-v4.html": "547080b86a960d6aeda08ccd0737209471720dea849795cfc3556e2e77f398e4",
-    "design-refs/todo-list-v5/todo-list-v5.html": "8a9a29a962c25c81d16f65ea9b36a276c6eda2f6fad31af1fdd5b11823f3f7d9"
+    "design-refs/todo-list-v5/todo-list-v5.html": "8a9a29a962c25c81d16f65ea9b36a276c6eda2f6fad31af1fdd5b11823f3f7d9",
+    "design-refs/onboarding/smart-import-loader-v2/loader-v2.dc.html": "58a407e300012b3449d9a604b7d5be66a36d529c9549c08870e0711f8fe6a49c",
+    "design-refs/onboarding/smart-import-loader-v2/tip-hawk.png": "5e2e343cb49d50120f85a4a70d9f8186249df580a806579fc6d869c2d674c29c"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
