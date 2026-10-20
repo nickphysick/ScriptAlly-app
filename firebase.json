@@ -1,6 +1,11 @@
 {
   "functions": {
     "source": "functions",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "eval"
+    ],
     "predeploy": [
       "npm --prefix functions run build"
     ]
