@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L2",
+  "where": "population: both sets, and the seeded edges in each",
+  "ok": false,
+  "detail": "quiet 41 · agent-court you 0"
+ },
+ {
+  "lock": "L2",
+  "where": "Gone quiet = Consider closing",
+  "ok": false,
+  "detail": "41 vs 33; only left: cor-move-b cor-pair msv12-q-2 q1411-at0 q1411-at28 q1411-past1 · only right: cv25-q-03 cv25-q-04 cv25-q-05 cv25-q-10 cv25-q-11 msv12-q-5"
+ },
+ {
+  "lock": "L2",
+  "where": "the agent-court With you = Nudge",
+  "ok": false,
+  "detail": "0 vs 13; only left:  · only right: q1411-at28 seed-query-5 cor-move-b seed-pkgq-7 seed-query-23 cor-pair"
+ }
+]
