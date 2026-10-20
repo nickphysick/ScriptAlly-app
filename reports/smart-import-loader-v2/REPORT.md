@@ -1,6 +1,6 @@
 # Smart Import loader v2 — the report
 
-20 October 2026 · branch `smart-import-loader-v2`, cut from `origin/main` at `de272e1a` · **pushed; deployed to dev** (function from the integration `…-hc1-sil2` at `45782f0c`, hosting now serving another session's integration that contains this branch — see below) · live run on dev: one 150-row import.
+20 October 2026 · branch `smart-import-loader-v2`, cut from `origin/main` at `de272e1a` · **merged to `main`; deployed to dev** (function from the integration `…-hc1-sil2` at `45782f0c`, hosting now serving another session's integration that contains this branch — see below) · live run on dev: one 150-row import.
 
 ## False premises and deviations — read first
 
@@ -110,6 +110,19 @@ Four changes, each with a unit test that failed against `37b7391d` before it was
 4. **Never "0 rows".** Until the total is known (`rowsTotal` 0), the right-hand text is empty in every state that names the count: opening, the first rows, the clock-only read, and Ready.
 
 Loader: `ScatterSettleLoader` now keeps the hold per phase (in place of the rung) and records the first counted row on its own clock, cleared on a retry. Its locks L1–L6 still pass (9 of 9) against a local dev build.
+
+### The follow-up, live on dev
+
+Deployed in the integration `…-hc1-sil2-wf1-qc141-silf` (`d984dc9c`): the wording-fixes and Query Centre v141 integration that dev was serving (built here to the same `index-DTpuR3x0.js` first, to confirm), plus this branch. Hosting only, because nothing under `functions/` has changed since the function deploy. Dev served `index-CdPbB1Bc.js`; the driver refused to start on any other bundle. The run is the same 150-row file and the same Pro fixture account (allowance restored after). Raw record: `live-dev-150-followup.json`.
+
+| | |
+|---|---|
+| Stream | first chunk 4.65 s; 150 counted against `rowsTotal` 150, only ever rising; result 91.85 s |
+| Text or fill ahead of the stream | never; 100% only at "Ready" |
+| 1 · Flicker | **7 countdown labels, each shown once, in order**; shortest time between two changes 6.0 s; no flip-backs |
+| 2 · Pace | opens at "about 1½ minutes left" (a 2-minute file); never shows 2½; worst overstatement 17.8 s |
+| 3 · The end | 0.0 s past the label's band in the last 30 s; "a few seconds left" from 6.9 s before the end |
+| 4 · "0 rows" | no frame; the right-hand text is empty until "150 rows · about 2 minutes" |
 
 ## Deploy order
 
