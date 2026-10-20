@@ -126,7 +126,16 @@ T − 28, T − 28.5 and T − 29 days) and removes them in the same run. Every 
 
 ## 8. Integration branch and dev
 
-- **Integration branch:** `dev/main-cl18-…-hr1-hs1-hc1-sil2-wf1-qc141-silf-qc1411`, cut from `d984dc9c` (what dev
-  served). The merge is `017116a2`, with no conflicts.
-- **Gates on it:** tsc 0, `vite build` 0 with no warnings, `build:dev` 0, Vitest 634/634 files (9,341 tests).
-- **Dev build:** see the deploy line below.
+- **The first integration branch is stale.** `dev/…-qc141-silf-qc1411` (`27efc5b3`, cut from `d984dc9c`) was pushed,
+  but dev moved to Import review v1 (`…-silf-irf1`, `4230ebbb`) before the deploy. Deploying it would have taken Import
+  review off dev, so it was **not deployed**.
+- **The deployed branch:** `dev/main-cl18-…-hr1-hs1-hc1-sil2-wf1-qc141-silf-irf1-qc1411`, cut from `4230ebbb` (dev
+  served it as `index-C2WQubzs.js`). The merge is `3f664f21`, with no conflicts.
+- **Gates on it:** tsc 0, `vite build` 0 with no warnings, `build:dev` 0, Vitest 636/636 files (9,373 tests).
+- **Locks on it:** QC1411 L1–L4 (5 + 3 + 14 + 3 readings) and QC141 L1–L4 all green.
+- **QC140 on it: incomplete.** Its runs there were cut short by the password quota: D2, E1 and QC141 L1's guide
+  restore failed in `guideFlags`, not in an assertion. QC140's full reading is the 14 of 15 in §6.
+- **Dev build:** deployed 20 Oct from a clean detached checkout of `3f664f21`. Dev served `index-C2WQubzs.js`
+  immediately before, and serves **`index-Dbgped49.js`** after. Hosting only; no rules or functions changed.
+- **The harness account was left as found:** no `q1411-` documents, and the Query Centre guide state back to its
+  starting value (verified through the REST API).
