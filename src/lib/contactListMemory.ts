@@ -32,6 +32,10 @@ export type Density = "comfortable" | "compact";
 const oneOf = <T extends string>(v: unknown, keys: readonly T[], fallback: T): T =>
   (typeof v === "string" && (keys as readonly string[]).includes(v) ? (v as T) : fallback);
 
+/** Contact list v20 — how the agents are drawn: as paper cards in a grid, or as the list's rows */
+export type ContactView = "cards" | "list";
+export const CONTACT_VIEWS: readonly ContactView[] = ["cards", "list"];
+
 /* ── per device: the view ─────────────────────────────────────────────────────────────────────────────────────── */
 
 export const LIST_VIEW_VERSION = 1;

@@ -66,7 +66,7 @@ import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
 import { ContactAppliedRow, ContactFilterMenu, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
 import { escapeDepth } from "../../lib/escapeStack";
 import { quietScroll, usePopover } from "../shell/ListPills";
-import { CONTACT_PIN_STORE, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
+import { CONTACT_PIN_STORE, type ContactView, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
@@ -75,6 +75,7 @@ import "./contact/contactV14.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { ContactListHead } from "./contact/ContactListHead";
+import { ContactTitleRow } from "./contact/ContactTitleRow";
 import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
 import type { PanelAct } from "../../lib/agentPanel";
 import { firstNameOf } from "../../lib/agentPanel";
@@ -181,6 +182,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* choosing a sort resets the direction to its natural order (§5) */
   const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
   useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
+  /* v20 §A/§B — CARDS OR LIST: two views of the one list. Every control and every piece of state (grouping, sort,
+     filters, search, the A to Z, the jump row, full screen) is shared; switching changes only how the agents are drawn. */
+  const [view, setView] = useState<ContactView>("list");
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -361,6 +365,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
   /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
   const wsRef = useRef<HTMLElement | null>(null);
+  /** v20 §A — the title row: Part C reads whether it has scrolled away under the stuck toolbar */
+  const titleRef = useRef<HTMLDivElement | null>(null);
   /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
   const filRef = useRef<HTMLButtonElement | null>(null);
 
@@ -1389,6 +1395,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             1600, centred): the ink control bar, the white filter row with the count at its right, the letter tabs,
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
+        <>
+        {/* v20 §A — THE TITLE ROW: the live count, the Cards / List pill and Full screen (not in full screen) */}
+        {!fullOn ? (
+          <ContactTitleRow shown={visibleFacts.length} total={factsAll.length} narrowed={anyActive}
+            view={view} onView={setView} onFull={togglePin} rowRef={titleRef} />
+        ) : null}
         <section className="cl14-ws cl16-list cl19-card" data-cl14="ws" data-cl16="list" data-cl19="card" ref={wsRef} aria-label="The full list">
           {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
               control bar is gone: search and the filters are in the header. */}
@@ -1465,6 +1477,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         </div>
           </div>
         </section>
+        </>
         )}
         </>
         )}

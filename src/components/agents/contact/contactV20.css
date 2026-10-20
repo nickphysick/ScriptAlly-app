@@ -1,0 +1,61 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v20 (ref design-refs/contact-list-v20/). Every face is stated with two classes and `!important` where
+ * brand.tsx would otherwise reach it (it forces h1/h2/h3 and names bare spans at runtime).
+ *
+ * §A · THE TITLE ROW, between the hero and the list card: the live count, the Cards / List pill and Full screen. Its
+ * left edge is the toolbar's first control's (22px inside the card); 18px of page lies between it and the card.
+ */
+.cl20-tr {
+  box-sizing: border-box; display: flex; align-items: center; gap: 18px; margin: 0 0 18px; padding: 0 0 0 22px;
+}
+.cl20-tr .cl20-ttl.cl20-ttl {
+  margin: 0; padding: 0; font: 400 30px/1.05 var(--sp-type) !important; color: #1c130f; letter-spacing: 0; white-space: nowrap;
+}
+
+/* the Cards / List pill: a white 36px track, 3px inside, two 30px buttons 2px apart */
+.cl20-vs {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 2px; flex: none; height: 36px; padding: 3px;
+  border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 0 rgba(28, 19, 15, 0.06);
+}
+.cl20-vs button {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 30px; margin: 0; padding: 0 13px 0 11px; border: 0;
+  border-radius: 7px; background: transparent; color: rgba(28, 19, 15, 0.62); cursor: pointer; white-space: nowrap;
+  font: 400 15px/1 var(--sp-type) !important;
+}
+.cl20-vs button span { font: inherit !important; color: inherit; }
+.cl20-vs button svg { flex: none; }
+.cl20-vs button:hover:not([aria-selected="true"]):not(:disabled) { background: #f4f0e9; color: #1c130f; }
+.cl20-vs button[aria-selected="true"] { background: #2a3a52; color: #f4eee5; cursor: default; }
+.cl20-vs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* Full screen: 10px after the pill, the same white and ring */
+.cl20-tr .cl20-fs {
+  position: relative; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; flex: none; height: 36px; margin: 0 0 0 -8px;
+  padding: 0 12px; border: 0; border-radius: 10px; background: #fff; color: #1c130f; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 0 rgba(28, 19, 15, 0.06);
+  font: 400 15.5px/1 var(--sp-serif) !important;
+}
+.cl20-tr .cl20-fs > span:not(.cl20-tip) { font: inherit !important; }
+.cl20-tr .cl20-fs:hover { background: #f4f0e9; }
+.cl20-tr .cl20-fs:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* the tooltip (v138.6's): "Full screen" and the F key cap, under the button after 400ms; never a native title */
+.cl20-tip {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px;
+  border-radius: 8px; background: #1c130f; color: #f4eee5; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.12s ease;
+  font: 400 13.5px/1.2 var(--sp-serif) !important;
+}
+.cl20-tip kbd {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; border-radius: 4px;
+  background: rgba(244, 238, 229, 0.16); color: #f4eee5; font: 600 11px/1 var(--sp-mono) !important;
+}
+:is(.cl20-fs, .cl20-tfs):is(:hover, :focus-visible) .cl20-tip { opacity: 1; transition-delay: 0.4s; }
+@media (prefers-reduced-motion: reduce) { .cl20-tip { transition: none; } }
+
+/* the title row sits where the card used to start: the hero's gap is above it, 18 below it, and the card follows */
+@media (min-width: 768px) {
+  .clv-group .clv-main > .cl20-tr + .cl16-list.cl19-card { margin-top: 0; }
+}
