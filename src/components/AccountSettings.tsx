@@ -1275,7 +1275,7 @@ export const AccountSettings: React.FC<{
            question rather than answering it. Overruling copy a brief fixed is not a layout
            decision, so the sentence stands and the enumeration is ADDED, which understates
            nothing. */
-        blurb="Downloads everything QueryHawk holds about your querying — your agents, queries, and history — as files you can open anywhere."
+        blurb="Downloads everything QueryHawk holds about your querying — your agents, queries, and history — as a single JSON file of your data."
         headingId="acct-h-data"
         note={exportMsg ? <span style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{exportMsg}</span> : undefined}
       >
@@ -1382,7 +1382,7 @@ export const AccountSettings: React.FC<{
                 is still what the confirmation modal enumerates. */}
             <SettingsRow
               label="Delete account"
-              description={`This removes your account and everything in it — manuscripts, agents, queries, and history. You'll have ${DELETION_GRACE_DAYS} days to change your mind: signing in again within that time cancels it.`}
+              description={`This removes your account and everything in it — manuscripts, agents, queries, and history. You'll have ${DELETION_GRACE_DAYS} days to change your mind: pressing Cancel deletion in that time stops it.`}
               control={
                 <button
                   onClick={() => setShowDelete(true)}

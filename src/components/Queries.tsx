@@ -5725,7 +5725,7 @@ export const Queries: React.FC<{
     const unpinned = <T,>(read: () => T): T => { if (qcPin.full) flushSync(() => qcPin.setFull(false)); return read(); };
     switch (k) {
       case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
-      case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters. You can also tap a status glyph at the top of the page." };
+      case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters and tick a status under Where it stands." };
       /* v140 §G — the toolbar's Pin button, unpinned first (pinned, it reads Unpin list and the page is not the one the
          card describes) */
       case "pin": return unpinned(() => ({
