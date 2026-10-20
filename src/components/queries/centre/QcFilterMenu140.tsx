@@ -46,7 +46,7 @@ const TICK = (
 const box = (on: boolean) => <span className={`qc140-bx${on ? " on" : ""}`} aria-hidden="true">{on ? TICK : null}</span>;
 
 /** a stand row's glyph: the black stage glyph, the dashed ring on a requested stage; Passed and No reply the closed one */
-const standGlyph = (key: string) => (key === "rj" || key === "nr" ? "cl" : key) as Parameters<typeof StageGlyph>[0]["k"];
+const standGlyph = (key: string) => (key === "rj" ? "cl" : key) as Parameters<typeof StageGlyph>[0]["k"]; /* v141 §D — No reply has its own glyph now */
 
 export interface Qc140FilterModel {
   filters: Qc138Filters;

@@ -21,8 +21,26 @@ import { tileCourt } from "./qcSummary";
 export type BandTone = "you" | "waiting" | "closed";
 export type BandBadge = "star" | "send" | "bang" | "x" | "clock" | "dots";
 
+/**
+ * v141 §D — A GLYPH PER STATUS. The seven stage glyphs fold statuses together (No response and Withdrawn under Passed's
+ * circle-with-a-line, R&R under Full requested, Resubmitted under Full sent, Signed under Offer); a group per status
+ * needs each its own, or two jump buttons draw the same mark. The extra five stay in the stage glyphs' grammar:
+ *   nr  No response — a dashed circle with a clock hand (the mock's own svg)
+ *   rr  Revise & resubmit — Full requested's disc with a ring cut out of it
+ *   rs  Resubmitted — Full sent's disc with the same ring cut out
+ *   sg  Signed — Offer's ring and centre without the dashed ring (settled, not your move)
+ *   wd  Withdrawn — the ring with a diagonal stroke rather than Passed's level one
+ */
+export type StageKey = GlyphKey | "nr" | "rr" | "rs" | "sg" | "wd";
+const OWN_GLYPH: Partial<Record<string, StageKey>> = {
+  [QueryStatus.NO_RESPONSE]: "nr", [QueryStatus.REVISE_RESUBMIT]: "rr", [QueryStatus.RESUBMITTED]: "rs",
+  [QueryStatus.SIGNED]: "sg", [QueryStatus.WITHDRAWN]: "wd",
+};
+/** the glyph a status draws on its own (a Status group, a stand row): its stage glyph unless it has one of its own */
+export const stageKeyOfStatus = (s: string): StageKey => OWN_GLYPH[s] ?? glyphOfStatus(s);
+
 export type BandArt =
-  | { kind: "glyph"; glyph: GlyphKey; grey: boolean; badge: BandBadge | null; badgeTone: "rust" | "grey" | "navy" | null }
+  | { kind: "glyph"; glyph: StageKey; grey: boolean; badge: BandBadge | null; badgeTone: "rust" | "grey" | "navy" | null }
   | { kind: "package"; none: boolean };
 
 const CLOSED_GREY: ReadonlySet<string> = new Set([QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]);
@@ -44,11 +62,11 @@ export const ACTION_ART: Readonly<Record<NextAction, { glyph: GlyphKey; badge: B
 export function bandArtOf(groupBy: GroupBy, key: string): BandArt | null {
   if (groupBy === "status") {
     const grey = CLOSED_GREY.has(key);
-    return { kind: "glyph", glyph: glyphOfStatus(key), grey, badge: null, badgeTone: null };
+    return { kind: "glyph", glyph: stageKeyOfStatus(key), grey, badge: null, badgeTone: null };
   }
   if (groupBy === "action") {
     /* a closed status's band (Passed, No response…): the closed glyph, grey, and no badge */
-    if (CLOSED_GREY.has(key) || key === QueryStatus.SIGNED) return { kind: "glyph", glyph: glyphOfStatus(key), grey: key !== QueryStatus.SIGNED, badge: null, badgeTone: null };
+    if (CLOSED_GREY.has(key) || key === QueryStatus.SIGNED) return { kind: "glyph", glyph: stageKeyOfStatus(key), grey: key !== QueryStatus.SIGNED, badge: null, badgeTone: null };
     const a = ACTION_ART[key as NextAction] ?? ACTION_ART.wait;
     return { kind: "glyph", glyph: a.glyph, grey: false, badge: a.badge, badgeTone: a.tone };
   }
