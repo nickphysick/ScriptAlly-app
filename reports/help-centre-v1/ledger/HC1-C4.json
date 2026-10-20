@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "HC1-C4",
+  "where": "production never shows it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C4",
+  "where": "a dev build does",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C4",
+  "where": "@1512 a drafted article carries DRAFT",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C4",
+  "where": "@1512 the reviewed article does not",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C4",
+  "where": "@1280 a drafted article carries DRAFT",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-C4",
+  "where": "@1280 the reviewed article does not",
+  "ok": true,
+  "detail": ""
+ }
+]

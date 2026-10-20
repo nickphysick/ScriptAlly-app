@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "HC1-H4",
+  "where": "@1512 '/' focuses the search",
+  "ok": true,
+  "detail": "{\"focused\":\"search-input\",\"value\":\"\"}"
+ },
+ {
+  "lock": "HC1-H4",
+  "where": "@1512 and types nothing into it",
+  "ok": true,
+  "detail": "{\"focused\":\"search-input\",\"value\":\"\"}"
+ },
+ {
+  "lock": "HC1-H4",
+  "where": "@1280 '/' focuses the search",
+  "ok": true,
+  "detail": "{\"focused\":\"search-input\",\"value\":\"\"}"
+ },
+ {
+  "lock": "HC1-H4",
+  "where": "@1280 and types nothing into it",
+  "ok": true,
+  "detail": "{\"focused\":\"search-input\",\"value\":\"\"}"
+ }
+]

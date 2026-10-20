@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 the new home is on screen",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 read some text",
+  "ok": true,
+  "detail": "2018 chars"
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"Fortnight in Focus\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"Query Pipeline\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"Agent Discovery\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"Manuscript Packages\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"Cheat Sheet\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"overdue\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"urgent\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1512 \"Keyboard shortcuts\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 the new home is on screen",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 read some text",
+  "ok": true,
+  "detail": "2018 chars"
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"Fortnight in Focus\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"Query Pipeline\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"Agent Discovery\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"Manuscript Packages\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"Cheat Sheet\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"overdue\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"urgent\" is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "HC1-H1",
+  "where": "@1280 \"Keyboard shortcuts\" is gone",
+  "ok": true,
+  "detail": ""
+ }
+]
