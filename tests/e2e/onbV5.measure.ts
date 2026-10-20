@@ -304,7 +304,8 @@ test.describe("OB1", () => {
       expect(up.raised).toBe("Create account");
       expect(up.other, `@${vp.width}: exactly one recessed tab`).toEqual(["Sign in"]);
       expect(up.panel).toBe("rgb(45, 58, 80)");
-      expect(up.title).toBe("The hunt begins.");
+      /* The offer panel reads the landing hero's headline (`HERO_H1`), which landing hero v3 changed. */
+      expect(up.title).toBe("No more winging it.");
       expect(up.old, "the preview and the segmented control are gone").toBe(0);
       await page.click(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib");
       await page.waitForFunction(() => document.querySelector(".sf .ws-ftn")?.textContent === "Sign in");
