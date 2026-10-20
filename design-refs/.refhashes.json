@@ -678,7 +678,9 @@
     "design-refs/query-centre-v141/screens/08-pinned-1280.png": "ce59ee6eabc17ced7c015c946f397f14e4ae9e9a0bde104ccd4f1164f0ad9969",
     "design-refs/query-centre-v141/screens/09-pinned-1512.png": "166ff59c0a2136eec24e4618c62ba774b0539582953477b50242b643395bf872",
     "design-refs/query-centre-v141/screens/10-pinned-1920.png": "7b9e8b5cc8c20258a2dfbdd38812375328d017cef659296ed3906033484c6821",
-    "design-refs/query-centre-v141/screens/11-pinned-gone-quiet-1512.png": "3ea65703e3b90490b3ec83c931f8b77af5b6d4737e235c4ff34423f03c3479a3"
+    "design-refs/query-centre-v141/screens/11-pinned-gone-quiet-1512.png": "3ea65703e3b90490b3ec83c931f8b77af5b6d4737e235c4ff34423f03c3479a3",
+    "design-refs/onboarding/import-review-v1/review-agents.dc.html": "be5c1c01d756f1e77f0e2e38c4c80bb6daaba4d7467a875031dceb236f2ddaec",
+    "design-refs/onboarding/import-review-v1/feed-import.dc.html": "9a3fb217c984ef58f635fdc1cae409aa2e58546996df7a1a7789a3b8c71e8065"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
