@@ -180,4 +180,36 @@ Oracle at 1280: eyebrow 243, 36 · title 63, 44 · actions 169, 215 · art 14, 3
 
 ## 8. Integration and dev
 
-DEPLOY
+- **What dev served at deploy time:** `bbd9f309` (`index-DSAY7Z_7.js`), the base. It was re-checked immediately before the deploy and had not moved.
+- **Integration branch:** `dev/…-cl191-qc140-cl192-qc1401-hr1`, a fast-forward from `bbd9f309` to `0a717ffc`, pushed.
+- **Gates on the integration tree:** tsc 0, `vite build` 0 (no errors or warnings), `build:dev` 0, Vitest 617/617 files (9,155 passed, 3 skipped).
+- **Deployed to dev only**, from a clean detached checkout of `0a717ffc`, as hosting only. **Dev serves `index-C67unNEy.js`.** Not merged to main; prod untouched.
+
+**The first full lock run on the integration build had reds in nine suites, and each was settled before the deploy:**
+
+- **One real fault, fixed (`eef381fa`).**
+  - Discover's loading title was the placeholder "00 agents to consider". At a 1512 window it wrapped in the column beside the card, while the loaded "6 agents to consider" fits on one line, so the header lost a line as the data landed.
+  - The placeholder is now one digit.
+  - **What's left:** with ten or more agents at 1512, the loaded title wraps where the placeholder doesn't. This comes from decision 5 and how tight the column is (§6).
+- **Claims the rules replace, re-pointed with their reasons** (`eef381fa`, `0a717ffc`):
+  - **Packages A1 and Responses A1:** "one line" becomes "whole lines at its size". Packages' title block is checked on the shared text column.
+  - **Responses B1:** the carousel lines up with the header row's inset, not the title.
+  - **To-do v5.2 A1 / F1:** the header is at least its old height; a long title keeps its size and wraps.
+  - **Discover B1 (the old mock):** presence only.
+  - **Discover's `appColumn`:** it read the header as the page's column. The header is the wider hero frame now, so the mock opened 49px too wide. It now reads the page root's content box.
+  - **QC139 A2's second "find" case (the stage-tab assertion Phase 2 names):** it pressed a stage-tab button that decision 4 removed. It now chooses Queried in the Filters menu's "Where it stands".
+  - **Also a stage-tab read:** QC139's snapshot of the glyph counts for B1's "unchanged" check (`qcV139.measure.ts:83`) now reads an empty set on both sides. It passes, but proves nothing about glyphs any more.
+- **Reds that were the shared account, not this branch:**
+  - **The cases:** CL19 I1, CL19.1 A1 / A2, CL19.2 A2, QC140 G1 and QC139 A2 / B4, on the first run.
+  - **What the failures showed:** no rows without an email; a pinned list 1,400px taller; the guide's done items missing, with `{seen: true}` written over them.
+  - **On the unchanged base at the same hour, all five suites were green.**
+  - **On the integration build, re-run:** CL19 15/15, CL19.1 9/9, CL19.2 9/9, QC140 15/15, QC139 14/14.
+  - **Responses E1** ("no requests during a save") failed inside two full runs of its suite and passed twice run alone on this build. My Responses change is CSS only.
+- **Final green readings on the integration build:**
+  - HR1 3/3 (HR1-1 to HR1-8);
+  - QC140 15, QC1401 5, QC139 14, QC138.6 10;
+  - CL19 15, CL19.1 9, CL19.2 9;
+  - Analytics v24 15, Discover v1 21, Packages (pk4) 39, To-do v5.2 23 (+1 skipped), Dashboard v60.1 3;
+  - Responses (rs2) 17/18 in full, E1 2/2 alone.
+- **The account's guide state** (`todoPrefs.queries.guide`) is back to its value before all of this, `{seen, done: log/open/find}`, and was read back. One suite had cleared it while the sign-in quota was out, so it was restored through the admin API.
+- **The `~/ScriptAlly-hr1` worktree disappeared between sessions** (only uncommitted scratch probes were lost), and was recreated from the pushed branch.
