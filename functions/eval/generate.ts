@@ -417,6 +417,10 @@ interface Spec {
   layout: "standard" | "events" | "wide" | "tabsCover" | "tabsSplit" | "tabsRejections" | "merged" | "links" | "colour";
   knobs: string[];
   failReason?: string;
+  /** Pins the split. Without it the split is positional (every third fixture is held out), which is
+   *  why new fixtures are APPENDED and pinned rather than inserted: an insertion would move every
+   *  later fixture between dev and holdout and invalidate every report measured before it. */
+  split?: "dev" | "holdout";
 }
 
 const KITCHEN = ["preamble", "dupHeader", "totals", "blankRows", "placeholders", "agentNotes", "slang", "dateStyles", "notesDates", "whitespace", "emoji"];
@@ -456,8 +460,10 @@ export const SPECS: Spec[] = [
   { id: "kitchen-csv-150", format: "csv", rows: 150, layout: "standard", knobs: KITCHEN },
   { id: "kitchen-xlsx-150", format: "xlsx", rows: 150, layout: "standard", knobs: KITCHEN },
   { id: "size-csv-150", format: "csv", rows: 150, layout: "standard", knobs: [] },
-  { id: "size-csv-300", format: "csv", rows: 300, layout: "standard", knobs: [], failReason: "300 queries need ~15k output tokens against the 12k ceiling; the reply truncates" },
-  { id: "size-xlsx-300", format: "xlsx", rows: 300, layout: "standard", knobs: ["dateStyles", "slang"], failReason: "300 queries need ~15k output tokens against the 12k ceiling; the reply truncates" },
+  // Expected to fail until the quick-fixes pack raised the output ceiling 12k -> 32k (measured: 300
+  // clean rows complete in 181 s at 15,034 tokens). size-xlsx-300 is holdout and unmeasured since.
+  { id: "size-csv-300", format: "csv", rows: 300, layout: "standard", knobs: [] },
+  { id: "size-xlsx-300", format: "xlsx", rows: 300, layout: "standard", knobs: ["dateStyles", "slang"] },
   { id: "events-csv-10", format: "csv", rows: 10, layout: "events", knobs: [], failReason: "one row per EVENT: the prompt maps every row to its own query, so one query becomes several" },
   { id: "events-xlsx-10", format: "xlsx", rows: 10, layout: "events", knobs: [], failReason: "one row per EVENT: the prompt maps every row to its own query, so one query becomes several" },
   { id: "events-csv-50", format: "csv", rows: 50, layout: "events", knobs: [], failReason: "one row per EVENT: the prompt maps every row to its own query, so one query becomes several" },
@@ -472,6 +478,9 @@ export const SPECS: Spec[] = [
   { id: "links-xlsx-50", format: "xlsx", rows: 50, layout: "links", knobs: ["links"], failReason: "the website is only the agent name's link target, which the conversion drops" },
   { id: "colour-xlsx-10", format: "xlsx", rows: 10, layout: "colour", knobs: ["colour"], failReason: "the status column is empty and a fill colour carries the status; the conversion drops colour" },
   { id: "colour-xlsx-50", format: "xlsx", rows: 50, layout: "colour", knobs: ["colour"], failReason: "the status column is empty and a fill colour carries the status; the conversion drops colour" },
+  // ── Added by the quick-fixes pack (20 Oct). Appended and pinned to dev — see Spec.split. ──
+  { id: "size-csv-200", format: "csv", rows: 200, layout: "standard", knobs: [], split: "dev" },
+  { id: "size-csv-250", format: "csv", rows: 250, layout: "standard", knobs: [], split: "dev" },
 ];
 
 const COLOUR: Partial<Record<Status, { rgb: string; label: string }>> = {
@@ -585,7 +594,7 @@ export function generateAll(root: string): Manifest {
       id: spec.id, file, expected: exp, format: spec.format, seed, layout: spec.layout, knobs: spec.knobs,
       rows: expected.queries.length, expectedToFail: !!spec.failReason, ...(spec.failReason ? { failReason: spec.failReason } : {}),
       // Every third fixture in list order is held out — the list is grouped by knob, so this spreads it.
-      split: i % 3 === 2 ? "holdout" : "dev",
+      split: spec.split ?? (i % 3 === 2 ? "holdout" : "dev"),
     };
   });
   const manifest: Manifest = {

@@ -25,17 +25,17 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { basename, extname, join } from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { bufferToCsv } from "../../src/lib/sheetText";
-import { mapSheet, MAX_OUTPUT_TOKENS, type MapClient, type MapOutcome, type MapUsage } from "../src/smartImportCore";
+import { mapSheet, MAX_OUTPUT_TOKENS, MAX_SHEET_CHARS, MAX_SHEET_LINES, type MapClient, type MapOutcome, type MapUsage } from "../src/smartImportCore";
 import { SYSTEM_PROMPT } from "../src/smartImportPrompt";
 import { MODEL } from "../src/emailImportCore";
 import { scoreFixture, disagreements, FIELDS, type FixtureScore } from "./score";
 import { costUsd, priceFor, SPEND_CEILING_USD } from "./pricing";
 import { FIXTURE_DIR, REAL_DIR, repoRoot, type ExpectedFile, type Manifest, type ManifestEntry } from "./types";
 
-// The callable's own limits (functions/src/smartImport.ts), mirrored so a fixture the app would
-// refuse is refused here too rather than scored as though it had been sent.
-const MAX_CHARS = 200_000;
-const MAX_LINES = 600;
+// The callable's own limits — the same constants, so a fixture the app would refuse is refused here
+// too rather than scored as though it had been sent.
+const MAX_CHARS = MAX_SHEET_CHARS;
+const MAX_LINES = MAX_SHEET_LINES;
 /** The callable's own timeout (smartImport.ts: timeoutSeconds 90). A call slower than this would
  *  have failed in production with the writer seeing an error, whatever the model eventually said. */
 export const CALLABLE_TIMEOUT_MS = 90_000;
@@ -168,6 +168,8 @@ interface RunRecord {
   attempts: number;
   stopReason?: string | null;
   ms: number;
+  /** Time to the first streamed output token; null when not measured. */
+  firstTokenMs?: number | null;
   usage: MapUsage;
   costUsd: number;
   score: FixtureScore;
@@ -280,11 +282,11 @@ function summary(results: FixtureResult[], args: Args, stamp: string): string {
   }
   L.push("");
 
-  L.push("## Every fixture (first run)", "", "| Fixture | Split | Pass | Accuracy | Dropped | Invented | Ambig. | Wrong fields | Coverage | In | Out | Cache r/w | Cost | ms | Tries | Failure |",
-    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
+  L.push("## Every fixture (first run)", "", "| Fixture | Split | Pass | Accuracy | Dropped | Invented | Ambig. | Wrong fields | Coverage | In | Out | Cache r/w | Cost | First token ms | ms | Tries | Failure |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
   for (const r of results) {
     const x = first(r), s = x.score;
-    L.push(`| ${r.id}${r.expectedToFail ? " ⚠︎" : ""} | ${r.split} | ${s.pass ? "✓" : "✗"} | ${pct(s.fieldsCorrect, s.fieldsCompared)} | ${s.dropped.length} | ${s.invented.length} | ${s.ambiguous.length} | ${s.wrong.length} | ${pct(r.conversion.coverage.visible, r.conversion.coverage.facts)} | ${x.usage.inputTokens} | ${x.usage.outputTokens} | ${x.usage.cacheReadTokens}/${x.usage.cacheWriteTokens} | ${usd(x.costUsd)} | ${x.ms} | ${x.attempts} | ${x.failure ?? ""} |`);
+    L.push(`| ${r.id}${r.expectedToFail ? " ⚠︎" : ""} | ${r.split} | ${s.pass ? "✓" : "✗"} | ${pct(s.fieldsCorrect, s.fieldsCompared)} | ${s.dropped.length} | ${s.invented.length} | ${s.ambiguous.length} | ${s.wrong.length} | ${pct(r.conversion.coverage.visible, r.conversion.coverage.facts)} | ${x.usage.inputTokens} | ${x.usage.outputTokens} | ${x.usage.cacheReadTokens}/${x.usage.cacheWriteTokens} | ${usd(x.costUsd)} | ${x.firstTokenMs ?? "—"} | ${x.ms} | ${x.attempts} | ${x.failure ?? ""} |`);
   }
   L.push("", "⚠︎ = expected to fail. Coverage = share of the expected agent names, agencies and websites present in the converted text at all (a conversion measure; free).", "");
 
@@ -395,7 +397,7 @@ export async function main(argv = process.argv.slice(2)) {
     } else {
       const client = realClient ?? stubClient(oracleReply(p.fx.expected));
       const out = await mapSheet(client, p.text);
-      rec = { run, failure: out.failure, attempts: out.attempts, stopReason: out.stopReason, ms: out.ms, usage: out.usage,
+      rec = { run, failure: out.failure, attempts: out.attempts, stopReason: out.stopReason, ms: out.ms, firstTokenMs: out.firstTokenMs ?? null, usage: out.usage,
         costUsd: costUsd(MODEL, out.usage), score: scoreFixture(p.fx.expected, out.result),
         ...(p.fx.real ? {} : { rawResult: out.result }) };
     }

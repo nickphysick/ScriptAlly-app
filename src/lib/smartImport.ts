@@ -14,9 +14,12 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { QueryStatus } from "../types";
 import { SmartImportResult, ParsedQuery } from "../types/smartImport";
 
-/** Caps mirrored from the function so oversize files fail fast, before the network. */
+/** Caps mirrored from the function so oversize files fail fast, before the network — and before an
+ *  import is spent. MAX_SHEET_ROWS counts TEXT LINES: 300 data rows plus the header, the largest size
+ *  measured to complete inside the time limit (functions/src/smartImportCore.ts MAX_SHEET_LINES, which
+ *  a lock holds this equal to). */
 export const MAX_SHEET_CHARS = 200_000;
-export const MAX_SHEET_ROWS = 600;
+export const MAX_SHEET_ROWS = 301;
 /** The callable's client-side timeout — just above the function's 300s (functions/src/smartImport.ts). */
 export const SMART_IMPORT_CALL_TIMEOUT_MS = 310_000;
 

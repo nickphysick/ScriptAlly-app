@@ -17,7 +17,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // The request itself — model, prompt, temperature, ceiling, parse-and-repair, the one strict retry —
 // lives in the pure core so the evaluation harness makes exactly this call (functions/eval/). The
 // MODEL is still the single constant shared with the email-import path (emailImportCore.MODEL).
-import { mapSheet } from "./smartImportCore";
+import { mapSheet, MAX_SHEET_CHARS, MAX_SHEET_LINES } from "./smartImportCore";
 
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 
@@ -54,8 +54,8 @@ export const smartImportMap = onCall(
 
     const sheetText = (req.data?.sheetText ?? "") as string;
     if (!sheetText.trim()) throw new HttpsError("invalid-argument", "No file content.");
-    if (sheetText.length > 200_000) throw new HttpsError("invalid-argument", "File too large.");
-    if (sheetText.split("\n").length > 600)
+    if (sheetText.length > MAX_SHEET_CHARS) throw new HttpsError("invalid-argument", "File too large.");
+    if (sheetText.split("\n").length > MAX_SHEET_LINES)
       throw new HttpsError("invalid-argument", "Too many rows — split the file or use the Import desk.");
 
     // ── Entitlement gate (server-enforced, before the costly AI call) ─────────────────────────────

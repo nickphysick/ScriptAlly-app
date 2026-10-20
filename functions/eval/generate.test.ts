@@ -41,12 +41,19 @@ describe("the fixture generator", () => {
     expect(layoutsIn("holdout").size).toBeGreaterThanOrEqual(4);
   });
 
+  it("never moves an existing fixture between splits (new ones are appended and pinned)", () => {
+    // The 50 fixtures of the evaluation pack, by position: every third held out. A change to the
+    // ordering would silently invalidate every report measured before it.
+    manifest.fixtures.slice(0, 50).forEach((f, i) => expect(f.split, f.id).toBe(i % 3 === 2 ? "holdout" : "dev"));
+  });
+
   it("marks every layout the current pipeline cannot read, with a reason", () => {
     for (const f of manifest.fixtures) {
       if (f.layout !== "standard") expect(f.expectedToFail, f.id).toBe(true);
       if (f.expectedToFail) expect(f.failReason, f.id).toBeTruthy();
     }
-    expect(manifest.fixtures.filter((f) => f.rows === 300).every((f) => f.expectedToFail)).toBe(true);
+    // 300 rows stopped being expected to fail when the output ceiling rose to 32k (quick-fixes pack).
+    expect(manifest.fixtures.filter((f) => f.rows === 300).some((f) => f.expectedToFail)).toBe(false);
   });
 
   it("covers every messiness knob the pack names", () => {
@@ -54,6 +61,6 @@ describe("the fixture generator", () => {
     for (const k of ["preamble", "dupHeader", "totals", "blankRows", "placeholders", "agentNotes", "slang", "dateStyles", "serials", "usDates", "notesDates", "whitespace", "unusualColumns", "emoji", "tabs", "merged", "links", "colour"]) {
       expect(knobs.has(k), k).toBe(true);
     }
-    expect(new Set(manifest.fixtures.map((f) => f.rows))).toEqual(new Set([10, 50, 150, 300]));
+    expect(new Set(manifest.fixtures.map((f) => f.rows))).toEqual(new Set([10, 50, 150, 200, 250, 300]));
   });
 });

@@ -25,6 +25,18 @@ import { MODEL } from "./emailImportCore";
  *  call below streams. */
 export const MAX_OUTPUT_TOKENS = 32000;
 
+/**
+ * THE SIZE CAP, measured (reports/smart-import-quickfixes/): one call per size, one at a time, clean
+ * sheets — 150 rows 90 s, 200 rows 117 s, 250 rows 149 s, 300 rows 181 s, all complete, none
+ * truncated. 300 data rows is the largest size measured inside the 240 s target (leaving margin under
+ * the function's 300 s). The check counts TEXT LINES, so the cap is 300 rows plus the header line;
+ * preamble, blank and tab-heading lines only add to the count, so it never admits more than 300 data
+ * rows. Messier files are slower per row — measured 17% at 150 rows — and are flagged in the report.
+ * The client mirrors this (src/lib/smartImport.ts MAX_SHEET_ROWS), held equal by a lock.
+ */
+export const MAX_SHEET_LINES = 301;
+export const MAX_SHEET_CHARS = 200_000;
+
 /** The reminder appended to the system prompt on the one strict retry. */
 export const STRICT_SUFFIX = "\n\nReturn ONLY the JSON object — no prose, no explanation, no code fences.";
 
@@ -35,11 +47,19 @@ export const STRICT_SUFFIX = "\n\nReturn ONLY the JSON object — no prose, no e
  *  `finalMessage()` resolves to the same Message a non-streaming call returns — the same content
  *  blocks, stop_reason and usage — and rejects on an API error, so everything below is unchanged. */
 export interface MapClient {
-  messages: { stream(args: any): { finalMessage(): Promise<any> } };
+  messages: { stream(args: any): { finalMessage(): Promise<any>; on?(event: "text", cb: (delta: string) => void): unknown } };
 }
 
-/** One mapping request, streamed to completion. */
-const call = (client: MapClient, args: any) => client.messages.stream(args).finalMessage();
+/** One mapping request, streamed to completion. `onFirstText` fires once, at the first text delta
+ *  (time to first output token); a client without `on` (a test fake) simply never reports it. */
+const call = (client: MapClient, args: any, onFirstText?: () => void) => {
+  const stream = client.messages.stream(args);
+  if (onFirstText && typeof stream.on === "function") {
+    let seen = false;
+    stream.on("text", () => { if (!seen) { seen = true; onFirstText(); } });
+  }
+  return stream.finalMessage();
+};
 
 export type MapFailure = "nonjson" | "badjson" | "api";
 
@@ -63,6 +83,10 @@ export interface MapOutcome {
   attempts: number;
   /** The `stop_reason` of the last message received, when there was one. */
   stopReason?: string | null;
+  /** Milliseconds from the start of the mapping to the first streamed output text of the call that
+   *  produced the result (the retry's, when the retry ran). Null when the client does not stream
+   *  events or no text arrived. */
+  firstTokenMs?: number | null;
 }
 
 export interface MapOpts {
@@ -135,13 +159,15 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   const startedMs = now();
   log("smartImportMap: mapping call started");
   let attempts = 0;
+  let firstTokenMs: number | null = null;
+  const firstText = () => { firstTokenMs = now() - startedMs; };
   const done = (result: any | null, failure: MapFailure | null, stopReason?: string | null): MapOutcome =>
-    ({ result, failure, usage, ms: now() - startedMs, attempts, stopReason });
+    ({ result, failure, usage, ms: now() - startedMs, attempts, stopReason, firstTokenMs });
 
   let msg: any;
   try {
     attempts++;
-    msg = await call(client, mappingRequest(sheetText, false));
+    msg = await call(client, mappingRequest(sheetText, false), firstText);
   } catch (e) {
     // Log the underlying cause (status, message) — the caller only ever surfaces a generic error.
     logError("Anthropic mapping call failed:", e);
@@ -166,7 +192,8 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   let retryMsg: any;
   try {
     attempts++;
-    retryMsg = await call(client, mappingRequest(sheetText, true));
+    firstTokenMs = null;
+    retryMsg = await call(client, mappingRequest(sheetText, true), firstText);
   } catch (e) {
     logError("Anthropic mapping retry call failed:", e);
     return done(null, "api");

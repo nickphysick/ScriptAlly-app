@@ -521,8 +521,7 @@
    "layout": "standard",
    "knobs": [],
    "rows": 300,
-   "expectedToFail": true,
-   "failReason": "300 queries need ~15k output tokens against the 12k ceiling; the reply truncates",
+   "expectedToFail": false,
    "split": "dev"
   },
   {
@@ -537,8 +536,7 @@
     "slang"
    ],
    "rows": 300,
-   "expectedToFail": true,
-   "failReason": "300 queries need ~15k output tokens against the 12k ceiling; the reply truncates",
+   "expectedToFail": false,
    "split": "holdout"
   },
   {
@@ -739,6 +737,30 @@
    "rows": 50,
    "expectedToFail": true,
    "failReason": "the status column is empty and a fill colour carries the status; the conversion drops colour",
+   "split": "dev"
+  },
+  {
+   "id": "size-csv-200",
+   "file": "tests/fixtures/smart-eval/size-csv-200.csv",
+   "expected": "tests/fixtures/smart-eval/size-csv-200.expected.json",
+   "format": "csv",
+   "seed": 1220880806,
+   "layout": "standard",
+   "knobs": [],
+   "rows": 200,
+   "expectedToFail": false,
+   "split": "dev"
+  },
+  {
+   "id": "size-csv-250",
+   "file": "tests/fixtures/smart-eval/size-csv-250.csv",
+   "expected": "tests/fixtures/smart-eval/size-csv-250.expected.json",
+   "format": "csv",
+   "seed": 3602758251,
+   "layout": "standard",
+   "knobs": [],
+   "rows": 250,
+   "expectedToFail": false,
    "split": "dev"
   }
  ]

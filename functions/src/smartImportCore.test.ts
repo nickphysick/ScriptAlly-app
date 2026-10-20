@@ -107,7 +107,7 @@ describe("the callable delegates to the core (locked)", () => {
   const src = readFileSync(resolve(process.cwd(), "functions/src/smartImport.ts"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   it("imports mapSheet", () => {
-    expect(src).toMatch(/import\s*\{\s*mapSheet\s*\}\s*from\s*"\.\/smartImportCore"/);
+    expect(src).toMatch(/import\s*\{[^}]*\bmapSheet\b[^}]*\}\s*from\s*"\.\/smartImportCore"/);
     expect(src).toMatch(/mapSheet\(client,\s*sheetText/);
   });
   it("no longer calls the model itself, nor restates the request", () => {
@@ -120,6 +120,28 @@ describe("the callable delegates to the core (locked)", () => {
     expect(src).toContain('reason: "pro_month_used"');
     expect(src).toContain('reason: "free_used"');
     expect(src.indexOf("await consume()")).toBeGreaterThan(src.indexOf("outcome.failure"));
+  });
+});
+
+describe("time to first output token", () => {
+  it("is measured at the first streamed text delta, once", async () => {
+    let t = 0;
+    const c: MapClient = { messages: { stream: () => {
+      let cb: ((d: string) => void) | null = null;
+      return {
+        on: (_e: "text", f: (d: string) => void) => { cb = f; },
+        finalMessage: async () => {
+          t = 1200; cb?.("{"); t = 1500; cb?.('"agents"'); t = 9000;
+          return { content: [{ type: "text", text: GOOD }], usage: {} };
+        },
+      };
+    } } };
+    const out = await mapSheet(c, "x", { now: () => t });
+    expect(out.firstTokenMs).toBe(1200);
+    expect(out.ms).toBe(9000);
+  });
+  it("is null when the client streams no events", async () => {
+    expect((await mapSheet(fakeClient([GOOD]), "x")).firstTokenMs).toBeNull();
   });
 });
 
