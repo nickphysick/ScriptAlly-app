@@ -21,6 +21,7 @@ import { MATERIAL_ROW_NAMES, type MaterialKind } from "./agentMaterials";
 import { tileCourt, STAGE_NAME, type QcRow } from "./qcSummary";
 import type { ComingUp } from "./qcComingUp";
 import { keptTracking, longSilence, nextDoor, nextWords } from "./queryActions/entry";
+import { nudgePhase } from "./nudgeWindow";
 
 const DAY = 86_400_000;
 const WEEKDAY = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -101,8 +102,9 @@ export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine 
 
   /* ⚠️ THE PHRASE IS THE ROW'S ONE NEXT MOVE (`nextWords`, lib/queryActions/entry) — the same decision the tray's
      button and the panel's primary state. The board's card no longer chooses it. The second line is the dates. */
-  const move = nextDoor(r);
-  const phrase = nextWords(r) ?? STAGE_NAME[r.status];
+  /* v141.1 — on the line's own clock, so the phrase and the line cannot read two different days */
+  const move = nextDoor(r, nowMs);
+  const phrase = nextWords(r, nowMs) ?? STAGE_NAME[r.status];
 
   if (court === "you") {
     const hot = left != null && (over || left <= 2);
@@ -115,9 +117,15 @@ export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine 
   }
 
   /* with the agent */
-  if (longSilence(r) && (move?.mode === "close" || keptTracking(r))) {
-    const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
-    return { phrase, line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
+  /* v141.1 — Close leads once the query is past the nudge window (lib/nudgeWindow); after "Keep tracking" a response
+     leads, and the line still says how long it has been. A year silent keeps its "NO REPLY · N YEARS". */
+  const quiet = nudgePhase(r, nowMs) === "close";
+  if (quiet && (move?.mode === "close" || keptTracking(r))) {
+    if (longSilence(r)) {
+      const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
+      return { phrase, line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
+    }
+    return { phrase, line: exp != null ? `OVERDUE SINCE ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
   }
   if (move?.mode === "nudge") return { phrase, line: `OVERDUE SINCE ${upDate(exp!, nowMs)}`, hot: false };
   /* Record a response leads: nothing to do but wait. Inside the last week the wait is named "Reply due". */

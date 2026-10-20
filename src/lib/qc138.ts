@@ -16,7 +16,6 @@
  */
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
-import { isYourMoveRow } from "./queryCentreGroups";
 import { whereItStands, type WhereKey } from "./qcSummary";
 
 export type GlyphKey = "q" | "pr" | "ps" | "fr" | "fs" | "of" | "cl";
@@ -95,7 +94,7 @@ export interface Qc138Filters {
   past: boolean;
   missing: boolean;
   overYear: boolean;
-  /** v140 §D — the two quick picks with no field of their own: Your move (`isYourMoveRow`) and Waiting to hear back (an
+  /** v140 §D — the two quick picks with no field of their own: Your move (v141.1: the "With you" set) and Waiting to hear back (an
    *  agent-court query not past its date). Overdue is `past` and Offers is `offers`. */
   you: boolean;
   waiting: boolean;
@@ -153,6 +152,8 @@ export const startOfDay = (ms: number): number => { const d = new Date(ms); d.se
 export interface Filterable {
   status: string;
   expectedMs: number | null;
+  /** v141.1 — the nudge window's undated branch reads the stage's start */
+  stageStartMs?: number | null;
   court: string;
   pastExpected: boolean;
   sentMs: number | null;
@@ -188,9 +189,11 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
   if (skip !== "past" && f.past && !r.pastExpected) return false;
   if (skip !== "missing" && f.missing && !nothingRecorded(r)) return false;
   if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
-  if (skip !== "you" && f.you && !isYourMoveRow(r)) return false;
+  /* v141.1 — the "Your move" quick pick IS the "With you" set (the nudge window, lib/nudgeWindow), so the two can never
+     disagree; `isYourMoveRow` stays for the Contact list and the "Who it's with" bands, which this pack leaves alone */
+  if (skip !== "you" && f.you && whereItStands(r, now) !== "you") return false;
   if (skip !== "waiting" && f.waiting && !(r.court === "agent" && !r.pastExpected)) return false;
-  if (skip !== "where" && f.where && whereItStands(r) !== f.where) return false;
+  if (skip !== "where" && f.where && whereItStands(r, now) !== f.where) return false;
   return true;
 }
 

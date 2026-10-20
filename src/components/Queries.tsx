@@ -107,7 +107,6 @@ import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/Q
 import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
 import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
 import { QcBand140 } from "./queries/centre/QcBand140";
-import { isYourMoveRow } from "../lib/queryCentreGroups";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
@@ -143,7 +142,7 @@ import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
   inScope, matchesFilter, matchesFind, sortRows, STAGE_NAME,
   type QcFilter, type QcSort, type TileCourt,
-  whereCounts, type WhereKey,
+  whereCounts, whereItStands, type WhereKey,
 } from "../lib/qcSummary";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
@@ -3840,14 +3839,15 @@ export const Queries: React.FC<{
   ];
   /* v140 §D — the quick picks' counts, over the scoped rows */
   const qc140QuickN = {
-    you: qcScoped.filter((r) => isYourMoveRow(r)).length,
+    /* v141.1 — the "Your move" quick pick is the "With you" set */
+    you: qcScoped.filter((r) => whereItStands(r, qcNow138) === "you").length,
     over: qcScoped.filter((r) => r.pastExpected).length,
     wait: qcScoped.filter((r) => waitingRow(r)).length,
     offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
   };
   /* v141 — the four sets over the scoped rows (lib/qcSummary `whereItStands`): the hero card, the pinned band and the
      Filters menu's "Where it stands" all state these, and all three write the one `qcF138.where` */
-  const qcWhereN = whereCounts(qcScoped);
+  const qcWhereN = whereCounts(qcScoped, qcNow138);
   /* v141 §B/§E — the pinned band's figures, read by the hero card's Heard back too (one computation, one number) */
   const qcBandFig = bandFigures(qcScoped, qcNow138);
   /* v141 §B — a card row or a band part: set (or, pressed again, clear) the one "Where it stands" filter; from the

@@ -11,6 +11,7 @@
  */
 import { QueryStatus } from "../../types";
 import type { DrawerMode } from "./drawerStore";
+import { nudgePhase } from "../nudgeWindow";
 
 export const DRAWER_LIVE: Record<DrawerMode, boolean> = {
   log: true,
@@ -52,13 +53,16 @@ export function cardDoors(status: QueryStatus | string): Door[] {
  * ⚠️ A CLOSED QUERY'S DOOR IS STILL "Record a late reply". There is no reopen-without-a-reply journey: what
  *    reopens a query is the reply that arrived, and the response journey records it.
  */
+/** v141.1 — a year with the agent: no longer what decides the lead (that is the nudge window); only the row's second
+    line still says "NO REPLY · N YEARS" past it */
 export const LONG_SILENCE_DAYS = 365;
+/** what leads an agent-court query: Close once it has gone quiet, Nudge inside the nudge window, else a response */
+export type AgentLead = "close" | "nudge" | null;
 /**
- * @param daysWaiting  days with the agent, or null where a year of silence must not lead with Close (not with
- *                     the agent, or the writer pressed "Keep tracking")
- * @param pastDate     the expected-reply date has gone, inside the first year: Nudge leads
+ * @param lead  v141.1 — for a query with the agent: "close" past the nudge window (unless the writer pressed "Keep
+ *              tracking"), "nudge" inside it, null otherwise. `leadDoors` works it out (lib/nudgeWindow).
  */
-export function panelDoors(status: QueryStatus | string, daysWaiting: number | null, pastDate = false): Door[] {
+export function panelDoors(status: QueryStatus | string, lead: AgentLead = null): Door[] {
   if (ENDED.has(status)) return [{ mode: "resp", label: "Record a late reply", primary: true }];
   if (status === QueryStatus.SIGNED) return [];
   if (status === QueryStatus.OFFER) return [{ mode: "offer", label: "Record your answer", primary: true }, { mode: "close", label: "Close query" }];
@@ -67,12 +71,12 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
     { mode: "resp", label: "Record a response" },
     { mode: "close", label: "Close query" },
   ];
-  if (daysWaiting != null && daysWaiting > LONG_SILENCE_DAYS) return [
+  if (lead === "close") return [
     { mode: "close", label: "Close query", primary: true },
     { mode: "resp", label: "Record a response" },
     { mode: "nudge", label: "Nudge" },
   ];
-  if (pastDate) return [
+  if (lead === "nudge") return [
     { mode: "nudge", label: "Nudge", primary: true },
     { mode: "resp", label: "Record a response" },
     { mode: "close", label: "Close query" },
@@ -90,8 +94,10 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
  *
  *      a request the writer owes          → Mark partial / full / revision sent
  *      an offer                           → Record your answer
- *      with the agent, over 365 days      → Close query          (Record a response, once "Keep tracking" is set)
- *      with the agent, past the reply date, inside the year → Nudge
+ *      with the agent, past the nudge window → Close query       (Record a response, once "Keep tracking" is set)
+ *      with the agent, inside the nudge window → Nudge
+ *    (v141.1 — the nudge window is lib/nudgeWindow, the rule the Next action grouping and the four sets read: the
+ *    year-with-the-agent rule that decided Close before is retired as a lead)
  *      with the agent, otherwise          → Record a response
  *      closed                             → Record a late reply   (signed: nothing)
  *
@@ -99,17 +105,26 @@ export function panelDoors(status: QueryStatus | string, daysWaiting: number | n
  *    expected-reply date has gone — and the writer's "Keep tracking" (`closureOfferDismissed`). Record a response
  *    stays as a secondary door wherever it does not lead.
  */
-export interface LeadRow { status: QueryStatus | string; court: string; dayN: number | null; pastExpected?: boolean; query?: object | null }
+export interface LeadRow {
+  status: QueryStatus | string; court: string; dayN: number | null; pastExpected?: boolean; query?: object | null;
+  /** v141.1 — the nudge window reads these (a QcRow carries both) */
+  expectedMs?: number | null; stageStartMs?: number | null;
+}
 export const keptTracking = (row: LeadRow): boolean => (row.query as { closureOfferDismissed?: boolean } | null | undefined)?.closureOfferDismissed === true;
 export const longSilence = (row: LeadRow): boolean => row.court === "agent" && row.dayN != null && row.dayN > LONG_SILENCE_DAYS;
 /** The row's doors, the next move first. */
-export function leadDoors(row: LeadRow): Door[] {
-  const agent = row.court === "agent";
-  return panelDoors(row.status, agent && !keptTracking(row) ? row.dayN : null, agent && !!row.pastExpected && !longSilence(row));
+export function leadDoors(row: LeadRow, nowMs: number = Date.now()): Door[] {
+  return panelDoors(row.status, agentLead(row, nowMs));
+}
+/** v141.1 — the nudge window decides the lead; "Keep tracking" stops Close leading (a response leads instead) */
+export function agentLead(row: LeadRow, nowMs: number = Date.now()): AgentLead {
+  if (row.court !== "agent") return null;
+  const p = nudgePhase({ expectedMs: row.expectedMs ?? null, stageStartMs: row.stageStartMs ?? null }, nowMs);
+  return p === "close" ? (keptTracking(row) ? null : "close") : p === "nudge" ? "nudge" : null;
 }
 /** The row's next move: the door that leads. Null only where there is none (a signed query). */
-export function nextDoor(row: LeadRow): Door | null {
-  return leadDoors(row).find((d) => d.primary) ?? null;
+export function nextDoor(row: LeadRow, nowMs: number = Date.now()): Door | null {
+  return leadDoors(row, nowMs).find((d) => d.primary) ?? null;
 }
 /**
  * The "Next move" column's words for each door — the column's own vocabulary, held beside the predicate so the
@@ -119,8 +134,8 @@ export const NEXT_WORDS: Record<string, string> = {
   "Mark partial sent": "Send partial", "Mark full sent": "Send full", "Mark revision sent": "Send revision",
   "Record your answer": "Decide on offer", "Nudge": "Nudge", "Close query": "Consider closing", "Record a response": "Waiting",
 };
-export function nextWords(row: LeadRow): string | null {
-  const d = nextDoor(row);
+export function nextWords(row: LeadRow, nowMs: number = Date.now()): string | null {
+  const d = nextDoor(row, nowMs);
   return d ? NEXT_WORDS[d.label] ?? d.label : null;
 }
 /** The step's title in the query's panel, said for this query ("What did Eleanor say?"). */

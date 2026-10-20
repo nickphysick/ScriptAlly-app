@@ -139,7 +139,9 @@ describe("v126.2 · the Birds-eye row's one next move", () => {
   it("is the row's own next move, whatever card is raised", async () => {
     const { nextMove } = await import("./qcComingUp");
     const { QueryStatus: S } = await import("../types");
-    const r = (status: string, court: string, o: object = {}) => ({ id: "q1", status, court, dayN: 30, ...o } as unknown as QcRow);
+    /* v141.1 — "past the date" is an expected date 5 days gone: inside the nudge window */
+    const r = (status: string, court: string, o: { pastExpected?: boolean } = {}) =>
+      ({ id: "q1", status, court, dayN: 30, ...o, expectedMs: o.pastExpected ? Date.now() - 5 * DAY : Date.now() + 20 * DAY } as unknown as QcRow);
     for (const t of Object.values(TYPE_FOR)) {
       expect(nextMove(card(t), r(S.QUERIED, "agent"), NOW)).toEqual({ label: "Record a response", request: { mode: "resp", queryId: "q1" } });
       expect(nextMove(card(t), r(S.QUERIED, "agent", { pastExpected: true }), NOW)).toEqual({ label: "Nudge", request: { mode: "nudge", queryId: "q1" } });
@@ -167,7 +169,11 @@ describe("Query panel v1 · the tray's label is the panel's primary", () => {
   it("one label for one act, from the panel's own table", async () => {
     const { QueryStatus: S } = await import("../types");
     const { panelDoors } = await import("./queryActions/entry");
-    const row = (status: string, court = "you", dayN: number | null = 10, pastExpected = false) => ({ status, court, dayN, pastExpected } as never);
+    /* v141.1 — the lead is the nudge window's (lib/nudgeWindow), so a row carries an expected date: past it by 5 days
+       is a nudge, by 40 days (the old "a year with the agent" case, 400) gone quiet */
+    const now = Date.now();
+    const row = (status: string, court = "you", dayN: number | null = 10, pastExpected = false) =>
+      ({ status, court, dayN, pastExpected, expectedMs: pastExpected ? now - 5 * DAY : dayN != null && dayN > 365 ? now - 40 * DAY : now + 20 * DAY } as never);
     expect(trayLabel("send", row(S.FULL_REQUESTED))).toBe("Mark full sent");
     expect(trayLabel("send", row(S.PARTIAL_REQUESTED))).toBe("Mark partial sent");
     expect(trayLabel("decide", row(S.OFFER, "offer"))).toBe("Record your answer");
@@ -176,24 +182,30 @@ describe("Query panel v1 · the tray's label is the panel's primary", () => {
     expect(trayLabel("close", row(S.QUERIED, "agent", 400))).toBe("Close query");
     expect(trayLabel("fix", row(S.QUERIED, "agent", 3))).toBe("Record a response");
     /* derived against the panel's table, never a second list */
-    expect(trayLabel("chase", row(S.QUERIED, "agent", 60, true))).toBe(panelDoors(S.QUERIED, 60, true).find((d) => d.primary)!.label);
+    expect(trayLabel("chase", row(S.QUERIED, "agent", 60, true))).toBe(panelDoors(S.QUERIED, "nudge").find((d) => d.primary)!.label);
     expect(COMING_ACTION.fix.length).toBeGreaterThan(0);
   });
 });
 
 describe("one next move for every row (ruling, 13 Oct)", () => {
   const NOW2 = Date.now();
-  const mk = (status: string, court: string, dayN: number | null, o: { past?: boolean; kept?: boolean } = {}) =>
-    ({ id: "q", status, court, dayN, pastExpected: !!o.past, sentMs: dayN != null ? NOW2 - dayN * 86_400_000 : null, expectedMs: o.past ? NOW2 - 5 * 86_400_000 : NOW2 + 30 * 86_400_000, query: o.kept ? { closureOfferDismissed: true } : {} } as never);
+  /* v141.1 — RE-POINTED to the nudge window (lib/nudgeWindow): `over` is days past the expected date (null: no date
+     ever, `dayN` days in the stage). The year-with-the-agent states became "past the nudge window" ones. */
+  const mk = (status: string, court: string, dayN: number | null, o: { over?: number | null; kept?: boolean } = {}) => {
+    const over = o.over === undefined ? -30 : o.over;
+    return ({ id: "q", status, court, dayN, pastExpected: over != null && over >= 0, sentMs: dayN != null ? NOW2 - dayN * 86_400_000 : null,
+      expectedMs: over == null ? null : NOW2 - over * 86_400_000, stageStartMs: dayN != null ? NOW2 - dayN * 86_400_000 : null,
+      query: o.kept ? { closureOfferDismissed: true } : {} } as never);
+  };
   /* every state the rule names, and what leads in it */
   const STATES: [string, never, string, string][] = [
     ["waiting, inside the date", mk("Queried", "agent", 20), "Record a response", "Waiting"],
-    ["past the reply date, inside the year", mk("Queried", "agent", 90, { past: true }), "Nudge", "Nudge"],
-    ["past the date, kept, inside the year", mk("Full Sent", "agent", 200, { past: true, kept: true }), "Nudge", "Nudge"],
-    ["over a year", mk("Queried", "agent", 400, { past: true }), "Close query", "Consider closing"],
-    ["over a year, no date ever", mk("Partial Sent", "agent", 400), "Close query", "Consider closing"],
-    ["over a year, kept", mk("Queried", "agent", 400, { past: true, kept: true }), "Record a response", "Waiting"],
-    ["exactly a year", mk("Queried", "agent", 365, { past: true }), "Nudge", "Nudge"],
+    ["past the reply date, inside the nudge window", mk("Queried", "agent", 90, { over: 5 }), "Nudge", "Nudge"],
+    ["inside the window, kept", mk("Full Sent", "agent", 200, { over: 5, kept: true }), "Nudge", "Nudge"],
+    ["past the nudge window", mk("Queried", "agent", 400, { over: 40 }), "Close query", "Consider closing"],
+    ["no date ever, long in the stage", mk("Partial Sent", "agent", 400, { over: null }), "Close query", "Consider closing"],
+    ["past the nudge window, kept", mk("Queried", "agent", 400, { over: 40, kept: true }), "Record a response", "Waiting"],
+    ["inside the last day of the nudge window", mk("Queried", "agent", 365, { over: 27.5 }), "Nudge", "Nudge"],
     ["a partial owed", mk("Partial Requested", "you", 400), "Mark partial sent", "Send partial"],
     ["a full owed", mk("Full Requested", "you", 10), "Mark full sent", "Send full"],
     ["a revision owed", mk("Revise & Resubmit", "you", 10), "Mark revision sent", "Send revision"],
@@ -230,7 +242,7 @@ describe("one next move for every row (ruling, 13 Oct)", () => {
     }
   });
   it("Close as the lead carries the no-reply reason; a closed query's move is a late reply", () => {
-    expect(trayOpen("chase", mk("Queried", "agent", 400))).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
+    expect(trayOpen("chase", mk("Queried", "agent", 400, { over: 40 }))).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
     expect(nextDoor(mk("Rejected", "closed", 400))?.label).toBe("Record a late reply");
     expect(nextDoor(mk("Signed", "closed", 10))).toBeNull();
   });

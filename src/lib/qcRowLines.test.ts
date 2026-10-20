@@ -60,7 +60,10 @@ describe("Next move — the phrase and its line", () => {
   it("with the agent: waiting, reply due this week, nudge, consider closing — never rust", () => {
     expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW + 46 * DAY, dayN: 10 }), null, NOW)).toEqual({ phrase: "Waiting", line: "REPLY BY 23 NOV", hot: false });
     expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW + 1 * DAY, dayN: 55 }), null, NOW)).toEqual({ phrase: "Reply due", line: "BY FRI 9 OCT", hot: false });
-    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: Date.parse("2026-06-11T12:00:00Z"), pastExpected: true, dayN: 170 }), null, NOW)).toEqual({ phrase: "Nudge", line: "OVERDUE SINCE 11 JUN", hot: false });
+    /* v141.1 — RE-POINTED: Nudge is inside the nudge window (28 days past the date, lib/nudgeWindow); past it, Close
+       leads inside the year too, with the date it went overdue */
+    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: NOW - 10 * DAY, pastExpected: true, dayN: 70 }), null, NOW)).toEqual({ phrase: "Nudge", line: "OVERDUE SINCE 28 SEP", hot: false });
+    expect(nextLine(row(QueryStatus.QUERIED, { expectedMs: Date.parse("2026-06-11T12:00:00Z"), pastExpected: true, dayN: 170 }), null, NOW)).toEqual({ phrase: "Consider closing", line: "OVERDUE SINCE 11 JUN", hot: false });
     const old = nextLine(row(QueryStatus.QUERIED, { sentMs: NOW - 913 * DAY, expectedMs: NOW - 800 * DAY, pastExpected: true, dayN: 913 }), null, NOW);
     expect(old).toEqual({ phrase: "Consider closing", line: "NO REPLY · 2.5 YEARS", hot: false });
     const kept = nextLine(row(QueryStatus.QUERIED, { sentMs: NOW - 913 * DAY, expectedMs: NOW - 800 * DAY, pastExpected: true, dayN: 913, q: { closureOfferDismissed: true } }), null, NOW);

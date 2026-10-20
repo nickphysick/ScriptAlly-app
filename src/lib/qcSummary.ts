@@ -26,6 +26,7 @@ import { resolveExpectedDate } from "./expectedDate";
 import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
 import type { DerivableActivity } from "./queryDerivation";
 import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
+import { nudgePhase } from "./nudgeWindow";
 
 const DAY = 86_400_000;
 
@@ -39,27 +40,32 @@ export function courtOf(status: QueryStatus): Court {
 export const isWithYou = (status: QueryStatus): boolean => courtOf(status) === "you";
 export const COURT_LABEL: Record<Court, string> = { you: "With you", agent: "With the agent", offer: "Offer", closed: "Closed" };
 
-/* ── Query Centre v141 · WHERE IT STANDS: the four sets ────────────────────────────────────────────────────────
+/* ── Query Centre v141 · WHERE IT STANDS: the four sets (v141.1: the nudge window) ─────────────────────────────
  * ⚠️ THE ONE SOURCE OF TRUTH for the hero's breakdown card, the pinned band's breakdown, the Filters menu's "Where it
- *    stands" section and the QC141 locks. Four sets, disjoint, covering every query, so they always sum to the total:
- *      you    — not closed, its court is the writer's (a request, an offer or a reply waiting on them);
- *      agent  — the agent's court, NOT past the expected reply date;
- *      quiet  — the agent's court, PAST it (`pastExpected`: the date the due ring and "Overdue since …" read);
+ *    stands" section, the "Your move" quick pick and the QC141 / QC1411 locks. Four sets, disjoint, covering every
+ *    query, so they always sum to the total. A query moves along them in time (Nick, v141.1):
+ *      agent  — the agent's court, inside the reply window: wait;
+ *      you    — the writer's court (a reply, request or offer waiting on them), OR the agent's court past the reply
+ *               date but still inside the nudge window: a nudge is due;
+ *      quiet  — the agent's court past the nudge window: worth considering closing;
  *      closed — closed in any way, Withdrawn and Signed included (unlike `tileCourt`, which counts neither).
- * ⚠️ "With you" is NOT the "Your move" quick pick: `isYourMoveRow` also takes agent-court queries past their date,
- *    and those are "Gone quiet" here. Both stay as they are (Nick, v141).
+ * ⚠️ THE WINDOW IS `nudgePhase` (lib/nudgeWindow), the same rule the Next action grouping and the row's next move
+ *    read. v141 had Gone quiet start AT the reply date, which put every nudge-due query in it: that was the false
+ *    premise v141.1 corrects.
  */
 export type WhereKey = "you" | "agent" | "quiet" | "closed";
 export const WHERE_KEYS: readonly WhereKey[] = ["you", "agent", "quiet", "closed"];
-export function whereItStands(r: { status: QueryStatus | string; pastExpected: boolean }): WhereKey {
+export type WhereRow = { status: QueryStatus | string; expectedMs: number | null; stageStartMs?: number | null };
+export function whereItStands(r: WhereRow, nowMs: number): WhereKey {
   const c = courtOf(r.status as QueryStatus);
   if (c === "you" || c === "offer") return "you";
   if (c === "closed") return "closed";
-  return r.pastExpected ? "quiet" : "agent";
+  const p = nudgePhase(r, nowMs);
+  return p === "nudge" ? "you" : p === "close" ? "quiet" : "agent";
 }
-export function whereCounts(rows: readonly { status: QueryStatus | string; pastExpected: boolean }[]): Record<WhereKey, number> {
+export function whereCounts(rows: readonly WhereRow[], nowMs: number): Record<WhereKey, number> {
   const out: Record<WhereKey, number> = { you: 0, agent: 0, quiet: 0, closed: 0 };
-  for (const r of rows) out[whereItStands(r)] += 1;
+  for (const r of rows) out[whereItStands(r, nowMs)] += 1;
   return out;
 }
 /** the card's and the menu's words; `short` is the compact header's and the tight band's */
