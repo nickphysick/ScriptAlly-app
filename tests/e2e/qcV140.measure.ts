@@ -144,22 +144,28 @@ test.describe("Query Centre v140", () => {
       });
       L.check("A2", `${vp.width} buttons`, r.length >= 4, `${r.length}`);
       L.check("A2", `${vp.width} every button has visible text`, r.every((b) => /[A-Za-z]/.test(b.text)), JSON.stringify(r.map((b) => b.text)));
-      /* the closed bands (Passed, No reply, Withdrawn) carry the one grey closed glyph with no badge, by design (v139 C);
-         the rule is about the badged groups, whose badge is what tells two Queried-glyph groups apart */
-      const badged = r.filter((b) => !/^(Rejected|No Response|Withdrawn|Signed)$/.test(b.key));
-      L.check("A2", `${vp.width} no two neighbouring badged groups share a mark`, badged.every((b, i) => i === 0 || b.sig !== badged[i - 1].sig), badged.map((b) => b.sig).join(" "));
-      L.check("A2", `${vp.width} each button's mark is its band's`, r.every((b) => b.band === null || b.band === b.sig), JSON.stringify(r.filter((b) => b.band !== null && b.band !== b.sig)));
-      L.check("A2", `${vp.width} the badge is drawn on the badged groups`, r.filter((b) => !/^(Rejected|No Response|Withdrawn|Signed)$/.test(b.key)).every((b) => !b.sig.endsWith("|-")), r.map((b) => `${b.key}:${b.sig}`).join(" "));
+      /* RETIRED BY v141 §D (name mode): Next action's buttons carry their names and no mark, so "no two neighbouring
+         badged groups share a mark", "each button's mark is its band's" and "the badge is drawn on the badged groups"
+         no longer apply to the BUTTONS. The marks moved to the "+N more" menu, where they are checked below against
+         their bands instead. What the buttons must do now is carry no mark at all. */
+      L.check("A2", `${vp.width} name mode: no button carries a mark (v141 §D)`, r.every((b) => b.sig === "?|-"), r.map((b) => `${b.key}:${b.sig}`).join(" "));
       const more = await box(page, `${G} [data-qc140='jump-more']:not([hidden])`);
       if (more) {
         await press(page, `${G} [data-qc140='jump-more']`);
         await page.waitForTimeout(400);
         const items = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((e) => (e.innerText || "").trim()));
         L.check("A2", `${vp.width} every "Jump to" item has text`, items.length > 0 && items.every((t) => /[A-Za-z]/.test(t)), JSON.stringify(items));
+        /* v141 §D — the menu rows carry the marks now: each is its band's (the glyph and the badge) */
+        const bandSig = Object.fromEntries(r.map((b) => [b.key, b.band]));
+        const ms = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((e) => {
+          const m = e.querySelector<HTMLElement>("[data-qc140='jump-mark']");
+          return { key: e.dataset.gkey ?? "", sig: `${m?.dataset.glyph ?? m?.dataset.kind ?? "?"}|${m?.querySelector(".qc140-jbd") ? (m?.dataset.badge ?? "?") : "-"}` };
+        }));
+        L.check("A2", `${vp.width} each menu row's mark is its band's`, ms.length > 0 && ms.every((x) => bandSig[x.key] == null || bandSig[x.key] === x.sig), JSON.stringify(ms.filter((x) => bandSig[x.key] != null && bandSig[x.key] !== x.sig)));
         await page.keyboard.press("Escape");
       } else L.check("A2", `${vp.width} nothing folded (no menu to read)`, true, "");
     }
-    L.done(12);
+    L.done(8);
   });
 
   test("A3 · fold: buttons end inside the row; visible + folded = groups; the menu lists the folded; pinned and unpinned fold alike", async ({ page }) => {
@@ -289,7 +295,10 @@ test.describe("Query Centre v140", () => {
       await open(page, vp, "C2", { pinned: true });
       const t = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='band']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "");
       L.check("C2", `${vp.width} the band is there`, t.length > 10, t.slice(0, 80));
-      L.check("C2", `${vp.width} no court words`, !/Your move|Waiting|Closed/.test(t), t.replace(/\s+/g, " ").slice(0, 160));
+      /* RETIRED BY v141 §E: "no court words" — the band now carries the four sets (With you, With the agent, Gone
+         quiet, Closed) by Nick's ruling. What survives of the rule is that the band never repeats the JUMP ROW's groups
+         ("Your move", "Waiting"), which are a different partition. */
+      L.check("C2", `${vp.width} no jump-row group names (v141)`, !/Your move|Waiting/.test(t), t.replace(/\s+/g, " ").slice(0, 160));
     }
     L.done(4);
   });
@@ -302,37 +311,18 @@ test.describe("Query Centre v140", () => {
       await open(page, vp, "C3", { pinned: true });
       const r = await page.evaluate(() => {
         const t = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0)?.textContent?.replace(/\s+/g, " ").trim() ?? "";
-        return { count: t("[data-qc140='band-figure']"), pct: t("[data-qc140='band-heard-pct']"), more: t("[data-qc140='band-more']"), over: [...document.querySelectorAll<HTMLElement>("[data-qc140='band-overdue']")].find((e) => e.getBoundingClientRect().height > 0)?.dataset.n ?? null };
+        return { count: t("[data-qc140='band-figure']"), pct: t("[data-qc140='band-heard-pct']"), more: t("[data-qc140='band-more']"), fit: [...document.querySelectorAll<HTMLElement>("[data-qc140='band']")].find((e) => e.getBoundingClientRect().height > 0)?.dataset.fit ?? null, over: [...document.querySelectorAll<HTMLElement>("[data-qc140='band-overdue']")].find((e) => e.getBoundingClientRect().height > 0)?.dataset.n ?? null };
       });
       L.check("C3", `${vp.width} {N} queries`, r.count === String(want.total), `${r.count} vs ${want.total}`);
       L.check("C3", `${vp.width} heard back`, new RegExp(`^${want.heard}%`).test(r.pct), `${r.pct} vs ${want.heard}%`);
-      L.check("C3", `${vp.width} asked for more`, new RegExp(`^${want.more}\\b`).test(r.more), `${r.more} vs ${want.more}`);
-      /* overdue: the band's count is the "Past their reply date" switch's count, and pressing it shows that many rows */
-      /* no Escape here: Escape unpins the list, and the band is the pinned list's */
-      const sw = await page.evaluate(async () => {
-        const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
-        g.querySelector<HTMLElement>("[data-qc140='filters']")?.click();
-        await new Promise((r) => setTimeout(r, 500));
-        const past = document.querySelector<HTMLElement>("[data-qc140='more'][data-k='past']");
-        const n = past?.textContent?.match(/(\d+)\s*$/)?.[1] ?? past?.getAttribute("data-n") ?? null;
-        return n;
-      });
-      await press(page, "[data-qc140='filter-close']");
-      await page.waitForTimeout(400);
-      L.check("C3", `${vp.width} overdue = the reply-date switch's count`, r.over != null && sw != null && r.over === sw, `${r.over} vs ${sw}`);
-      await press(page, "[data-qc140='band-overdue']");
-      await page.waitForTimeout(900);
-      const shown = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='applied-count']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent?.match(/(\d+)/)?.[1] ?? null);
-      if (shown == null) console.log("C3 debug", await page.evaluate(() => JSON.stringify({
-        bands: [...document.querySelectorAll<HTMLElement>("[data-qc140='band-overdue']")].map((e) => [e.getBoundingClientRect().height, e.getAttribute("aria-pressed"), e.getAttribute("data-n")]),
-        rows: [...document.querySelectorAll<HTMLElement>("[data-qc140='applied']")].map((e) => [e.getBoundingClientRect().height, e.textContent?.slice(0, 60)]),
-        menu: !!document.querySelector("[data-qc140='filter-menu']"),
-      })));
-      L.check("C3", `${vp.width} pressing it shows that many`, shown === r.over, `${shown} vs ${r.over}`);
-      await press(page, "[data-qc140='band-overdue']");
-      await page.waitForTimeout(500);
+      /* v141 §E — the ring's subline is "{n} of {total} agents", n = asked for more + passed (was "{more} asked for more") */
+      /*   …and a band too narrow for its sets goes `tight`, which drops the subline (v141 §E), so it is held only at full fit */
+      L.check("C3", `${vp.width} {n} of {total} agents (fit ${r.fit})`, r.fit === "full" ? r.more === `${want.more + want.passed} of ${want.total} agents` : r.more === "",
+        `${r.more} vs ${want.more + want.passed} of ${want.total}`);
+      /* RETIRED BY v141 §E: "overdue = the reply-date switch's count" and "pressing it shows that many" — the band's
+         overdue pill is removed (Gone quiet in the breakdown is the band's view of it, held by QC141 L1–L3). */
     }
-    L.done(10);
+    L.done(6);
   });
 
   test("C4 · illustration: its aspect, nothing clips it, and it covers no control or heading", async ({ page }) => {
@@ -406,19 +396,9 @@ test.describe("Query Centre v140", () => {
     await press(page, "[data-qc140='filter-clear']");
     await press(page, "[data-qc140='filter-close']");
     await page.waitForTimeout(400);
-    /* pinned: the band's overdue disc is the same state — pressing it sets the switch and lights the disc and the pick */
-    await press(page, "[data-qc140='pin']");
-    await page.waitForTimeout(1000);
-    await press(page, "[data-qc140='band-overdue']");
-    await page.waitForTimeout(600);
-    const disc = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='band-overdue']")].find((e) => e.getBoundingClientRect().height > 0)?.getAttribute("aria-pressed") ?? null);
-    await menu();
-    s = await state();
-    L.check("D1", "pinned: the band's disc on → the switch and the pick on, one chip", disc === "true" && s.past === "true" && s.over === "true" && s.chips.length === 1, `disc ${disc} ${JSON.stringify(s)}`);
-    await press(page, "[data-qc140='filter-clear']");
-    await press(page, "[data-qc140='filter-close']");
-    await page.waitForTimeout(400);
-    L.done(7);
+    /* RETIRED BY v141 §E: "pinned: the band's disc on → the switch and the pick on" — the band's overdue disc is
+       removed. The band's one filter control is now the breakdown, whose single state QC141 L3 holds. */
+    L.done(6);
   });
 
   test("D2 · escape: pinned with the Filters menu open, Esc closes the menu and the list stays pinned; a second Esc unpins", async ({ page }) => {
