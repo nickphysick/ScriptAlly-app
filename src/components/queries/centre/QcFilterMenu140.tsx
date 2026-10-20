@@ -5,7 +5,7 @@
  * Query Centre v140 §D — THE FILTERS MENU (Contact list v19's layout A) AND THE APPLIED-FILTERS ROW.
  *
  *   - The menu: a navy header ("Filter queries", "{v} of {N} showing", ✕); "Most used", four quick picks two by two on a
- *     powder band; two columns that scroll inside the menu ("Where it stands" — the Stage filter; "What you sent" — the
+ *     powder band; two columns that scroll inside the menu ("Status" — the Stage filter, called "Where it stands" until v141 gave that name to the four sets; "What you sent" — the
  *     package options; "More" — four switches); an oat footer ("Clear all", "Show {v} queries", which closes it).
  *   - The applied row: under the toolbar while any filter or search is on — "{v} of {N} queries", one removable chip per
  *     filter (with its glyph for a status) and one for the search, "Clear all" on the right.
@@ -29,6 +29,8 @@ import { glyphOfStatus } from "../../../lib/qcBandArt";
 import type { SentOption } from "./QcFilters138";
 import { StageGlyph } from "./StageGlyph";
 import { CROSS140, type Qc140Pop } from "./QcToolbar140";
+import { WhereMenuSection } from "./QcWhere141";
+import type { WhereKey } from "../../../lib/qcSummary";
 
 const plural = (n: number) => (n === 1 ? "query" : "queries");
 
@@ -57,6 +59,8 @@ export interface Qc140FilterModel {
   stageCounts: ReadonlyMap<string, number>;
   sent: readonly SentOption[];
   moreN: Record<"dueWeek" | "past" | "missing" | "overYear", number>;
+  /** v141 §A — the four sets' counts over the scoped rows (lib/qcSummary `whereCounts`) */
+  whereN: Record<WhereKey, number>;
   /** v140.1 §A — anything narrowing the list (a filter, a quick pick, the search), and the export of what it shows */
   filtered: boolean;
   onExport: () => void;
@@ -70,7 +74,7 @@ const MORE_ROWS: { key: "dueWeek" | "past" | "missing" | "overYear"; label: stri
 ];
 
 export const QcFilterMenu140: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc140FilterModel }> = ({ pop, model }) => {
-  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, filtered, onExport } = model;
+  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, whereN, filtered, onExport } = model;
   const anchor = pop.open === "filters" ? pop.anchor : null;
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -137,9 +141,12 @@ export const QcFilterMenu140: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc1
           })}
         </div>
       </section>
+      {/* v141 §A — the four sets, single-select; the same field the hero card and the pinned band write */}
+      <WhereMenuSection where={f.where} counts={whereN} onWhere={(k) => set({ ...f, where: k })} />
       <div className="qc140-fm-b" data-qc140="filter-body">
         <section className="qc140-fm-s" data-qc140="filter-stands">
-          <h4>Where it stands</h4>
+          {/* v141 — renamed from "Where it stands": that heading is the four sets' now, and these rows are statuses */}
+          <h4>Status</h4>
           {STAND_ROWS.map((row) => {
             const on = standOn(f, row);
             const n = row.statuses.reduce((a, s) => a + (stageCounts.get(s) ?? 0), 0);

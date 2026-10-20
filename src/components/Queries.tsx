@@ -144,6 +144,7 @@ import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
   inScope, matchesFilter, matchesFind, sortRows, STAGE_NAME,
   type QcFilter, type QcSort, type TileCourt,
+  whereCounts,
 } from "../lib/qcSummary";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
@@ -3845,6 +3846,9 @@ export const Queries: React.FC<{
     wait: qcScoped.filter((r) => waitingRow(r)).length,
     offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
   };
+  /* v141 — the four sets over the scoped rows (lib/qcSummary `whereItStands`): the hero card, the pinned band and the
+     Filters menu's "Where it stands" all state these, and all three write the one `qcF138.where` */
+  const qcWhereN = whereCounts(qcScoped);
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
@@ -7387,7 +7391,7 @@ export const Queries: React.FC<{
                     <QcFilterMenu140 pop={pop} model={{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
                       quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
-                      moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more },
+                      moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more }, whereN: qcWhereN,
                       filtered: qc140Chips.length > 0,
                       onExport: () => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`),
                     }} />

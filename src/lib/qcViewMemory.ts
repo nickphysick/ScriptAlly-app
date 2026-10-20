@@ -114,6 +114,7 @@ export function sanitiseQcVisit(raw: unknown): QcVisit | null {
     overYear: f.overYear === true,
     you: f.you === true,
     waiting: f.waiting === true,
+    where: f.where === "you" || f.where === "agent" || f.where === "quiet" || f.where === "closed" ? f.where : null,
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
   return { filters, search: typeof r.search === "string" ? r.search.slice(0, 200) : d.search, scroll };

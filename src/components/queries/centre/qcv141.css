@@ -1,0 +1,30 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v141 — the four sets' markers, the Filters menu's "Where it stands" section, the hero breakdown card
+ * and the pinned band's breakdown. Values ported from design-refs/query-centre-v141/query-centre-v141.html.
+ */
+
+/* ── the markers (the mock's .qsc .rw .m) ── */
+.qc141-m { flex: none; display: inline-block; width: 11px; height: 11px; border-radius: 3px; box-sizing: border-box; }
+.qc141-m--you { background: #a2452a; }
+.qc141-m--agent { background: #2a3a52; }
+.qc141-m--quiet { background: repeating-linear-gradient(135deg, #c9bfb1 0 3px, #e3dccf 3px 6px); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.qc141-m--closed { background: #cfc6b9; }
+
+/* ── the Filters menu's section (Part A) ── */
+.qc141-fw { flex: none; padding: 14px 22px 16px; border-bottom: 1px solid rgba(28, 19, 15, 0.08); }
+.qc141-fw-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.qc141-fw-o {
+  box-sizing: border-box; display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 40px; margin: 0; padding: 8px 12px;
+  border: 0; border-radius: 10px; background: #f6f3ee; color: #1c130f; text-align: left; cursor: pointer;
+}
+.qc141-fw-o:hover:not(:disabled):not(.on) { background: #efeae2; }
+.qc141-fw-o:disabled { opacity: 0.4; cursor: default; }
+.qc141-fw-o:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc141-fw-o b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/20px var(--sp-serif) !important; color: #1c130f; }
+.qc141-fw-o i { flex: none; font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.55); }
+.qc141-fw-o.on { background: #2a3a52; }
+.qc141-fw-o.on b, .qc141-fw-o.on i { color: #f4eee5; }
+.qc141-fw-o.on .qc141-m--agent { box-shadow: inset 0 0 0 1.5px #f4eee5; }
