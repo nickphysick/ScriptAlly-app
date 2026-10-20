@@ -48,10 +48,14 @@ export interface ImportNotice {
 
 /** The reason validation gives a row with no agent name or agency (smartImport.ts). */
 export const NO_NAME_REASON = "Row has no agent name or agency to identify it";
+/** The reason for a row the writer chose to leave out in the review ("Remove this row" on a row
+ *  with no agent and no agency). Rows marked "Don't import" on the list are NOT in the notice at
+ *  all: it lists rows that didn't make it in, not choices the writer just made on screen. */
+export const CHOSE_REASON = "You chose not to import this";
 /** The line the commit writes when a query's agent could not be saved (smartImportCommit.ts). */
 const COMMIT_SKIP = /^Skipped a (.*) query — its agent couldn't be saved\.$/;
 
-/** A row the review set aside by itself and that was still set aside at import. */
+/** A row the writer removed in the review's "Needs an answer" deck, still left out at import. */
 export interface SetAsideRow { status: string; sentDate: string | null }
 
 export function buildImportNotice(
@@ -77,7 +81,7 @@ export function buildImportNotice(
     const m = COMMIT_SKIP.exec(line);
     if (m) rows.push({ who: "", status: m[1], sentDate: null, reason: line });
   }
-  for (const r of setAside) rows.push({ who: "", status: r.status, sentDate: r.sentDate, reason: NO_NAME_REASON });
+  for (const r of setAside) rows.push({ who: "", status: r.status, sentDate: r.sentDate, reason: CHOSE_REASON });
   for (const r of already) rows.push({ who: r.who, status: r.status, sentDate: r.sentDate, reason: ALREADY_REASON });
   if (rows.length === 0) return null;
   return { count: rows.length, rows, at: now };

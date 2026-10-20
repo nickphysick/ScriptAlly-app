@@ -117,7 +117,9 @@ const Questions: React.FC<{ items: Faq[]; open: Set<number>; onToggle: (i: numbe
   </div>
 );
 
-// ── Gentle undo: a brief toast for the instant "oops", and the set-aside tray ────────────────────
+// ── Gentle undo: a brief toast for a duplicates-step removal ────────────────────────────────────
+/* A row left out on the agents or queries step needs no toast and no tray: it stays in its place,
+   says "Won't be imported", and carries its own Undo (import review v1). */
 const UndoToast: React.FC<{ msg: string; onUndo: () => void; onClose: () => void }> = ({ msg, onUndo, onClose }) => (
   <div role="status" className="im-toast" data-im="toast">
     <span>{msg}</span>
@@ -125,30 +127,6 @@ const UndoToast: React.FC<{ msg: string; onUndo: () => void; onClose: () => void
     <button type="button" className="im-toastx" onClick={onClose} aria-label="Dismiss">×</button>
   </div>
 );
-
-interface SetAsideItem { kind: "agent" | "query"; id: string; name: string; sub: string; context?: string; unidentified?: boolean; }
-const SetAsideTray: React.FC<{ items: SetAsideItem[]; onRestore: (kind: "agent" | "query", id: string) => void }> = ({ items, onRestore }) => {
-  const [open, setOpen] = useState(false);
-  if (items.length === 0) return null;
-  return (
-    <div className="im-tray" data-im="tray">
-      <button type="button" className="im-trayhead" onClick={() => setOpen((o) => !o)} aria-expanded={open} data-im="tray-head">
-        <span><b>{items.length}</b> set aside</span>
-        <span className="im-trayend">{open ? "Hide ▲" : "Review ▼"}</span>
-      </button>
-      {open && items.map((it) => (
-        <div className="im-trayrow" key={`${it.kind}-${it.id}`} data-tray-id={it.id}>
-          <div>
-            <div className="im-trayname">{it.name}</div>
-            <div className="im-traysub">{it.sub}</div>
-            {it.context && <div className="im-trayctx">Your note said “{it.context}” — no problem, set aside for now. Name them any time if a reply lands.</div>}
-          </div>
-          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" onClick={() => onRestore(it.kind, it.id)} data-im="tray-restore">{it.unidentified ? "Name it instead" : "Restore"}</button>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 // ── Review (Duplicates → Agents ⇄ Queries) ──────────────────────────────────────────────────────
 export interface SmartImportReviewProps {
@@ -192,6 +170,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   const reconcileSnapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: ReviewQuery[] }>>({});
   const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>({});
   const [openId, setOpenId] = useState<string | null>(null);
+  /* Rows whose details the writer changed in the panel: "✓ Details added" and "Edit details". */
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const touch = (id: string) => setTouched((t) => (t.has(id) ? t : new Set(t).add(id)));
   const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
   const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });
 
@@ -231,7 +212,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     const next = applyAgentRemoval(agents, queries, id);
     setAgents(next.agents.map((x) => (x.id === id ? { ...x, setAsideStage: "agents" as const } : x)));
     setQueries(next.queries);
-    flashToast(`${(a?.name || a?.agency || "Agent")} set aside${qc > 0 ? ` (with ${qc} quer${qc === 1 ? "y" : "ies"})` : ""}`, () => restoreAgent(id));
+    setOpenId((cur) => (cur === id ? null : cur));
   };
 
   // Snapshot a cluster's pre-resolution state (members + their queries' agentRefs) so the decision can
@@ -272,7 +253,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     setAgents(next.agents);
     setQueries(next.queries);
     const label = (agents.find((x) => x.id === removedId)?.name || agents.find((x) => x.id === removedId)?.agency) || "Record";
-    flashToast(`${label} set aside`, () => undoCluster(leader.id));
+    flashToast(`${label} won't be imported`, () => undoCluster(leader.id));
   };
 
   // Keep both: dismiss the suggestion, leaving two agents. The leader's `duplicate` reason resolves
@@ -363,24 +344,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // ── Queries side ──────────────────────────────────────────────────────────────────────────────
   const qActive = queries.filter((q) => !q.removed);
   const agentNameOf = (ref: string) => { const a = agents.find((x) => x.id === ref); return (a ? agentPrimary(a) : "") || AGENT_NOT_SPECIFIED; };
-  // Set-aside shelf contents: deleted agents + queries the user removed directly (queries removed by
-  // an agent's cascade ride back with that agent's restore, so they're not listed twice).
-  const setAsideItems: SetAsideItem[] = [
-    // Duplicates-step merges are recovered on the duplicates step, not here.
-    ...agents.filter((a) => a.deleted && a.setAsideStage !== "duplicates").map((a) => (
-      a.setAsideStage === "unidentified"
-        ? { kind: "agent" as const, id: a.id, name: "Couldn't tell who this was for", sub: "Set aside — name it any time", context: a.setAsideContext, unidentified: true }
-        : { kind: "agent" as const, id: a.id, name: agentPrimary(a) || AGENT_NOT_SPECIFIED, sub: "Agent · set aside" }
-    )),
-    ...queries.filter((q) => q.removed && q.removedReason === "Removed by you").map((q) => ({ kind: "query" as const, id: q.id, name: agentNameOf(q.agentRef), sub: `Query · ${q.status}` })),
-  ];
-  const onRestoreSetAside = (kind: "agent" | "query", id: string) => (kind === "agent" ? restoreAgent(id) : restoreQuery(id));
   const qNeed = openQueryQuestions(qActive).length;
   // Import needs at least one query to bring across, and every question answered.
   const canImport = qActive.length > 0 && qNeed === 0;
 
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); };
-  const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); flashToast("Query set aside", () => restoreQuery(id)); };
+  const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); setOpenId((cur) => (cur === id ? null : cur)); };
   // Mark one typed reason resolved (the row goes Ready when none remain open). `patch` lets a
   // resolution also apply the user's fix in the same update.
   const resolveQueryReason = (id: string, code: ReviewReasonCode, patch: Partial<ReviewQuery> = {}) => {
@@ -523,28 +492,39 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   };
 
   // ── The three steps' rows ─────────────────────────────────────────────────────────────────────
-  /* The ready rows. A row that still asks something is in the deck, not here. */
-  const readyAgents = active.filter((a) => agentAsk(a) === null);
+  /* The ready rows. A row that still asks something is in the deck, not here. A row the writer
+     chose not to import stays in its place, says so, and can be undone (import review v1). */
+  const outAgent = (a: ReviewAgent) => a.deleted && a.setAsideStage === "agents";
+  const listAgents = agents.filter((a) => (a.deleted ? outAgent(a) : agentAsk(a) === null));
+  const readyAgents = listAgents.filter((a) => !a.deleted);
   const agentRows = (): React.ReactNode[] => {
     /* An agent merged from two rows says so in its second line. */
     const mergedKeepers = new Set(mergedAwayByKeeper(agents).keys());
-    return readyAgents.map((a) => (
+    return listAgents.map((a) => (
       <AgentRow key={a.id} agent={a} merged={mergedKeepers.has(a.id)}
         open={openId === a.id} onToggleOpen={() => setOpenId((cur) => (cur === a.id ? null : a.id))}
-        onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
+        onPatch={(p) => { patch(a.id, p); touch(a.id); }} onDelete={() => remove(a.id)}
         onReopenReason={(kind) => reopenReason(a.id, kind)}
+        out={a.deleted} onUndo={() => restoreAgent(a.id)} added={touched.has(a.id)}
       />
     ));
   };
   const originOf = (q: ReviewQuery): string => queryOriginLine(agents.find((x) => x.id === q.agentRef && !x.deleted));
-  const readyQueries = qActive.filter((q) => !q.reasons.some((r) => !r.resolved));
-  const queryRows = (): React.ReactNode[] => readyQueries.map((q) => (
+  /* A query is left out in place when the writer chose it, or when its agent was left out on the
+     agents step (its Undo brings the agent back, with its queries). */
+  const outQuery = (q: ReviewQuery) => q.removed && (q.removedReason === "Removed by you"
+    || (q.removedReason === "Agent removed" && agents.some((a) => a.id === q.agentRef && outAgent(a))));
+  const listQueries = queries.filter((q) => (q.removed ? outQuery(q) : !q.reasons.some((r) => !r.resolved)));
+  const readyQueries = listQueries.filter((q) => !q.removed);
+  const queryRows = (): React.ReactNode[] => listQueries.map((q) => (
     <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)}
       open={openId === q.id}
       onToggleOpen={() => setOpenId((cur) => (cur === q.id ? null : q.id))}
-      onPatch={(p) => patchQuery(q.id, p)}
+      onPatch={(p) => { patchQuery(q.id, p); touch(q.id); }}
       onDelete={() => removeQuery(q.id)}
       onReopen={() => reopenQueryReasons(q.id)}
+      out={q.removed} onUndo={() => (q.removedReason === "Removed by you" ? restoreQuery(q.id) : restoreAgent(q.agentRef))}
+      added={touched.has(q.id)}
     />
   ));
 
@@ -641,13 +621,17 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   const [showAll, setShowAll] = useState(false);
   const allRows = isDup ? duplicateUnits() : screen === "agents" ? agentRows() : queryRows();
   const rows = isDup || showAll ? allRows : allRows.slice(0, READY_FIRST);
+  const outCount = screen === "agents" ? listAgents.length - readyAgents.length : screen === "queries" ? listQueries.length - readyQueries.length : 0;
+  const liveCount = screen === "agents" ? readyAgents.length : readyQueries.length;
   const chips = isDup
     ? <Chip hot={openSets > 0} data-im="chip-sets">{openSets === 1 ? "1 set" : `${openSets} sets`}</Chip>
-    : <Chip data-im="ready-chip">{allRows.length} ready</Chip>;
+    : <>
+        {outCount > 0 && <span className="im-outcount" data-im="out-count">{outCount} not importing</span>}
+        <Chip className="im-chip--ready" data-im="ready-chip">{liveCount} ready</Chip>
+      </>;
   const emptyLine = isDup ? "No duplicates to review." : screen === "agents" ? "No agents are ready yet." : "No queries are ready yet.";
   const faqs = isDup ? DUP_FAQS : screen === "agents" ? AGENT_FAQS : QUERY_FAQS;
   const back = isDup ? onBack : screen === "agents" ? () => (hadDuplicates ? switchScreen("duplicates") : onBack?.()) : () => switchScreen("agents");
-  const trayItems = screen === "agents" ? setAsideItems.filter((i) => i.kind === "agent") : screen === "queries" ? setAsideItems.filter((i) => i.kind === "query") : [];
   /* the deck, and what is left after the card on show */
   const cards = isDup ? [] : screen === "agents" ? agentCards() : queryCards();
   const openCount = isDup ? 0 : screen === "agents" ? agentOpen : qNeed;
@@ -703,7 +687,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           </section>
         ) : (
           <section className={`im-list${isDup ? "" : " o9-ready o9-rise"}`} data-im={isDup ? "list" : "ready"} aria-label={listTitle}>
-            <div className={`im-listhead${isDup ? "" : " im-listhead--quiet"}`} data-im="list-head">
+            <div className={`im-listhead${isDup ? "" : " im-listhead--ready"}`} data-im="list-head">
+              {!isDup && (
+                <span className="im-readymark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                </span>
+              )}
               <h2 className="im-listtitle">{listTitle}</h2>
               <span className="im-chips">
                 {chips}
@@ -719,7 +708,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
             )}
           </section>
         )}
-        <SetAsideTray items={trayItems} onRestore={onRestoreSetAside} />
         <div className="o9-bar" data-im="foot">
           <p className="o9-barhint" data-im="hint">{hint}</p>
           <div className="o9-bargo">

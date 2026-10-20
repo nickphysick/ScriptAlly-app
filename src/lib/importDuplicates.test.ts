@@ -28,7 +28,7 @@ import { readTemplateBuffer } from "./templateImport";
 import { parseModel, modelToResult, seedUnidentifiedSetAside } from "./smartImportReviewModel";
 import { summaryModel } from "./importSummary";
 import { splitDuplicates, sameAgent, findExistingAgent, isSameQuery, ALREADY_REASON } from "./importDuplicates";
-import { buildImportNotice, noticeWhy, NO_NAME_REASON } from "./importNotice";
+import { buildImportNotice, noticeWhy, CHOSE_REASON } from "./importNotice";
 import { validateSmartImport } from "./smartImport";
 import { LOG } from "./importMatcher";
 import type { SmartImportResult } from "../types/smartImport";
@@ -204,12 +204,14 @@ describe("N1 · the notice gains the rows already here", () => {
     expect(n).toEqual({ count: 1, at: 5, rows: [{ who: "Clara Voss", status: "Queried", sentDate: "2026-08-02T00:00:00.000Z", reason: "Already in your queries" }] });
     expect(ALREADY_REASON).toBe("Already in your queries");
   });
+  /* Import review v1: a row the writer removed in the deck carries the writer's own reason, so no
+     "it had no name" sentence is added for it (that sentence's own cases are in importNotice.test). */
   it("the second sentence is said only when every row has the no-name reason", () => {
-    const noName = [{ status: "Queried", sentDate: null }];
-    expect(noticeWhy(buildImportNotice([], { errors: [] }, [], noName, 0)!)).not.toBeNull();
-    const mixed = buildImportNotice([], { errors: [] }, [], noName, 0, already)!;
+    const removed = [{ status: "Queried", sentDate: null }];
+    expect(noticeWhy(buildImportNotice([], { errors: [] }, [], removed, 0)!)).toBeNull();
+    const mixed = buildImportNotice([], { errors: [] }, [], removed, 0, already)!;
     expect(mixed.count).toBe(2);
-    expect(mixed.rows.map((r) => r.reason)).toEqual([NO_NAME_REASON, ALREADY_REASON]);
+    expect(mixed.rows.map((r) => r.reason)).toEqual([CHOSE_REASON, ALREADY_REASON]);
     expect(noticeWhy(mixed)).toBeNull();
     expect(noticeWhy(buildImportNotice([], { errors: [] }, [], [], 0, already)!)).toBeNull();
   });
