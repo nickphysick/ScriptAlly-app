@@ -180,7 +180,8 @@ L7's first break run died in sign-in setup; it was re-run and went red as record
   cut-over.
 - **The merge** is `f52c0466`. Its one conflict was `design-refs/.refhashes.json`: both sides enrolled refs, and
   both lists were kept (678 checked).
-- **Dev build:** see the deploy line below.
+- **Dev build:** deployed 20 Oct from a clean detached checkout of `53b2f00c`. Dev served `index-8VnU8F6o.js`
+  immediately before, and serves **`index-DTpuR3x0.js`** after. Hosting only; no rules or functions changed.
 
 ## Not touched
 
