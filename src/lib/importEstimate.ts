@@ -42,7 +42,9 @@ export type LoaderPhase = "opening" | "reading" | "tidying" | "retry";
 export interface LoaderProgress {
   /** The file's row count (countDataRows), known before the call. */
   rowsTotal: number;
-  /** Rows the server has read so far — capped at rowsTotal. */
+  /** Rows the server has counted so far — NOT capped: the counter is an estimate from the model's
+   *  output (half its records), so it can pass rowsTotal on a sheet where one row holds two agents or
+   *  countDataRows skipped blank rows. footBar decides what each part of the bar may claim from it. */
   rowsDone: number;
   phase: LoaderPhase;
   /** "live" while the server's row count is arriving (or may yet); "none" once it cannot — the
@@ -60,7 +62,7 @@ export function applyImportUpdate(
 ): LoaderProgress {
   switch (u.type) {
     case "start": return { ...PROGRESS_START, rowsTotal: u.rowsTotal };
-    case "rows": return { ...p, phase: "reading", stream: "live", rowsDone: Math.min(Math.max(0, u.rows), p.rowsTotal) };
+    case "rows": return { ...p, phase: "reading", stream: "live", rowsDone: Math.max(0, u.rows) };
     case "retry": return { ...p, phase: "retry", rowsDone: 0 };
     case "quiet": return p.phase === "opening" ? { ...p, stream: "none" } : p;
     case "plain": return { ...p, phase: "opening", stream: "none", rowsDone: 0 };
@@ -162,5 +164,11 @@ export function footBar(i: FootInput): FootBar {
   }
   if (phase === "opening") return { left: "Opening your file…", right: `${N} rows · ${fmtEst(est)}`, fill: null, rung: null };
   if (d === 0) return { left: "Reading your first rows…", right: `${N} rows · ${fmtEst(est)}`, fill: null, rung: null };
-  return { left: `Reading row ${d} of ${N}`, ...countdown(secondsLeft(N, d, i.elapsedS)), fill: 2 + (d / N) * 94 };
+  // The fill's span is max(N, count + 1), so while the stream runs the fraction is always below one:
+  // below N it is d / N exactly; at N and past it (the counter overshooting) it keeps creeping towards
+  // 96% and never reaches it. 100% is the result's alone (tidying, above) — the stream's end, never a
+  // count. And from N on there is no honest countdown left to give, so the time left says so.
+  const fill = 2 + (rowsDone / Math.max(N, rowsDone + 1)) * 94;
+  if (rowsDone >= N) return { left: `Reading row ${N} of ${N}`, right: "almost there", fill, rung: null };
+  return { left: `Reading row ${d} of ${N}`, ...countdown(secondsLeft(N, d, i.elapsedS)), fill };
 }

@@ -34,9 +34,9 @@ describe("applyImportUpdate", () => {
   it("start sets the total and opens", () => {
     expect(applyImportUpdate(at({ phase: "reading", rowsDone: 9 }), { type: "start", rowsTotal: 40 })).toEqual({ rowsTotal: 40, rowsDone: 0, phase: "opening", stream: "live" });
   });
-  it("rows reads, capped at the total and never negative", () => {
+  it("rows reads the raw count, never negative — and NOT capped: overshoot is footBar's to handle", () => {
     expect(applyImportUpdate(at({}), { type: "rows", rows: 12 })).toMatchObject({ phase: "reading", rowsDone: 12, stream: "live" });
-    expect(applyImportUpdate(at({}), { type: "rows", rows: 999 }).rowsDone).toBe(150);
+    expect(applyImportUpdate(at({}), { type: "rows", rows: 999 }).rowsDone).toBe(999);
     expect(applyImportUpdate(at({}), { type: "rows", rows: -3 }).rowsDone).toBe(0);
   });
   it("retry starts the count again", () => {
@@ -130,6 +130,18 @@ describe("footBar", () => {
     expect(f.right).toBe("about a minute left"); // 75 × 0.6 + 1 = 46 s, past fmtLeft's 45 s edge
     expect(f.fill).toBeCloseTo(2 + 0.5 * 94);
     expect(footBar(base({ phase: "reading", rowsDone: 999 }, { elapsedS: 90 })).left).toBe("Reading row 150 of 150");
+  });
+  it("a count that reaches or passes the total: the text holds at N of N, the time says 'almost there', and the fill keeps rising but stays under 96% — only the result gives 100%", () => {
+    const fills: number[] = [];
+    for (const d of [140, 149, 150, 151, 160, 300, 10_000]) {
+      const f = footBar(base({ phase: "reading", rowsDone: d }, { elapsedS: 90 }));
+      fills.push(f.fill!);
+      expect(f.fill!).toBeLessThan(96);
+      if (d >= 150) expect(f).toMatchObject({ left: "Reading row 150 of 150", right: "almost there", rung: null });
+    }
+    for (let k = 1; k < fills.length; k++) expect(fills[k]).toBeGreaterThan(fills[k - 1]);
+    expect(fills[0]).toBeCloseTo(2 + (140 / 150) * 94); // below N: exactly d / N, unchanged
+    expect(footBar(base({ phase: "tidying", rowsDone: 10_000 })).fill).toBe(100);
   });
   it("retry: another look, a fresh estimate, and the fill back to 2%", () => {
     expect(footBar(base({ phase: "retry" }, { sinceRetryS: 0 }))).toMatchObject({ left: "Having another look…", right: "about 2 minutes left", fill: 2 });

@@ -1,6 +1,6 @@
 # Smart Import loader v2 — the report
 
-20 October 2026 · branch `smart-import-loader-v2`, cut from `origin/main` at `de272e1a` · seven commits · **not pushed, nothing deployed** · **spend $0** (the live run was skipped; see below).
+20 October 2026 · branch `smart-import-loader-v2`, cut from `origin/main` at `de272e1a` · **pushed; deployed to dev** (function from the integration `…-hc1-sil2` at `45782f0c`, hosting now serving another session's integration that contains this branch — see below) · live run on dev: one 150-row import.
 
 ## False premises and deviations — read first
 
@@ -53,7 +53,7 @@ Gates were green before every commit. At the last: both typechecks plus the eval
 - the colour fixtures' legend rows;
 - **one row per event** (`events-*`, +70–110%). There the model also writes one row per line today, so the count matches what it actually reads.
 
-**"Row d" is the server's half-count of completed objects.** It is exact at each completed row pair, but within a row it moves in steps of half an object, rounded down. The bar caps d at N, so an overcounted N just skips the last few percent when tidying fills it to 100%. If the model drops or merges rows (seen on messy 150-row files), d ends below N and tidying fills the rest.
+**"Row d" is the server's half-count of completed objects.** It is exact at each completed row pair, but within a row it moves in steps of half an object, rounded down. The text holds d at N, and the fill never reaches 96% before the result (see *Can the count overshoot the total?* below), so an overcounted N just skips the last few percent when tidying fills it to 100%. If the model drops or merges rows (seen on messy 150-row files), d ends below N and tidying fills the rest.
 
 ## The fallback, and why it can't charge the writer twice
 
@@ -63,9 +63,42 @@ The browser falls back to the plain call **only** when the stream failed with th
 - **What the fallback can cost is a second model call,** on our bill rather than the writer's.
 - **A server error never triggers it.** That covers the allowance errors, "malformed" and "Couldn't read…", and any error once a chunk has arrived. Tests cover each case.
 
-## The live run — skipped
+## The live run on dev — 150 rows
 
-The pack asked for a real 150-row file through the dev functions emulator or the dev project. **That can't be done without a deploy or a key.** The new server code (Phase 1) isn't deployed, so the dev project still runs the old function, which sends no counts. Running the functions emulator needs the Anthropic key, which went with the last worktree as you asked. Nothing was deployed. The measured behaviour above uses the lab's stream, which runs on the timings measured last pack (first chunk at 1.2 s, 0.6 s a row).
+**Done on 20 Oct, after the deploy.** The `smartImportMap` function was deployed first, from the dev integration `…-hc1-sil2` (`45782f0c`); hosting followed (`index-DYoj0VDD.js`). One real import of `tests/fixtures/smart-eval/size-csv-150.csv` ran through the `/import` page as the Pro fixture account `ms21-filled`, stopping at the overview, so nothing was imported. The browser recorded every streamed chunk and every change to the bar on one clock. Raw record: `live-dev-150.json` (152 count messages, 166 bar states).
+
+| | |
+|---|---|
+| First chunk | **3.20 s** after Read (counter 0) |
+| First counted row | 4.14 s |
+| Pace | median 0.57 s between counts, longest gap 1.21 s; 11 rows by 10 s, 49 by 30 s, 102 by 60 s |
+| Last count | **150** at 90.72 s, against `rowsTotal` **150**: exact, and rising every time |
+| Result | 90.84 s; Tidying at 90.85 s; Ready at 91.92 s; overview at 93.9 s |
+| "Reading row d of N" ahead of the stream | **never** (each sample's d against the last count received before it) |
+| Fill ahead of `2 + d/N × 94` | **never**; 100% first appears at Tidying, after the result |
+
+**Two things the run showed that the lab could not.**
+- **The time left runs early and flickers.** It ends early, as the estimate was designed to: "a few seconds left" with 10 s to go, "about 10 seconds" with 14 s to go. But at each boundary the label flips between neighbouring values every 0.1–0.5 s: 1½ ↔ 2 minutes from 9–17 s, a minute ↔ 40 seconds at 39 s, 40 ↔ 30 seconds at 51 s, 30 ↔ 20 seconds at 65 s. It also climbs to "about 2½ minutes" at row 6 (7.1 s), where the estimate hands over to the observed pace, because that pace still includes the 3.2 s spent opening. `stepRung` stops jumps but has no hysteresis. **Not fixed — it wasn't asked for.** A proposed fix: only move a rung once the target has stayed on the new side for about 2 s, and work out the pace from the first count rather than from Read.
+- **For one frame (1.07 s) the right-hand text read "0 rows · a few seconds"**, before the `start` update carried the total. It is cosmetic and also not fixed.
+
+**The first attempt measured the wrong build, and spent the allowance.** Between my hosting deploy and the run, another session deployed its own integration (`…-hc1-wf1`, `index-CFqysGNF.js`), which does not contain this branch. The browser therefore loaded the old loader, which gave up at 30 s and showed the fallback, while the server finished and **consumed the account's allowance anyway**: the quick-fixes gap, live. The entitlement doc was deleted afterwards (`firebase firestore:delete`, dev only), which puts the account back as it was. The run was then repeated once that session deployed `…-hc1-sil2-wf1` (`index-8VnU8F6o.js`), which contains this branch, and the driver now refuses to start unless dev serves the bundle it expects. **The function measured is the one deployed from `45782f0c`; the hosting measured is `index-8VnU8F6o.js`.**
+
+## Can the count overshoot the total? Yes — fixed
+
+The counter is half the records the model has written (`(agents + queries) / 2`). `rowsTotal` is `countDataRows`, which skips blank rows and sheet headings. **Nothing ties the two together.** `countDataRows` never undercounts the fixtures (above), so overshoot needs the model to write more than one agent and one query for a row: a row naming two agents, a row the model splits into several queries, or an invented record. In 133 eval runs the queries written never exceeded the sheet's lines (the "events" layout writes up to 21 queries for 10 expected, inside a 30-line sheet), but agent counts were not recorded, so that is no proof.
+
+**Before the fix:** the client capped the count at N. From the moment it reached N, the bar showed "Reading row N of N", a 96% fill and "a few seconds left" (`secondsLeft = 0 × pace + 1`), and held them for as long as the model kept writing.
+
+**The fix (`importEstimate.ts`):**
+- The count is kept raw.
+- The fill's span is `max(N, count + 1)`, so while the stream runs the fraction is always below one. Below N it is exactly d / N, unchanged. At N and past it, it keeps creeping towards 96% and never reaches it.
+- **100% is the result's alone** (Tidying), which is the end of the stream.
+- From N on, the right-hand text says "almost there", a string already in use, instead of a countdown that has nothing left to count.
+- The text holds at "Reading row N of N".
+
+The new unit case was proved red against the old scaling. L2's expected fill moved with it: at d = 40 of 40 the reading fill is now 2 + 40/41 × 94 ≈ 93.7, not 96. L1–L6 pass (9 of 9) against a local dev build, and L2 is still red under its `fill-backwards` mutation.
+
+**Dev does not have this fix yet.** Dev's hosting is now another session's integration, and redeploying over it mid-session would race that session. It needs a fresh integration with this commit when that session is done.
 
 ## Deploy order
 
@@ -76,11 +109,12 @@ The pack asked for a real 150-row file through the dev functions emulator or the
 
 ## The placeholder illustration
 
-`public/images/import/tip-hawk.png` is a byte-identical copy of the design ref's placeholder, reached through **one constant, `IMPORT_TIP_ART`** in `src/lib/importTips.ts`, which is marked as a placeholder in a comment. **It is 1200×1200 and 1.3 MB for a 168 px slot**, so the real artwork should be exported near 336 px; swapping it is that file and that one constant.
+`public/images/import/tip-hawk.png` is the design ref's placeholder, reached through **one constant, `IMPORT_TIP_ART`** in `src/lib/importTips.ts`, which is marked as a placeholder in a comment. **It is now 336 × 336 RGBA, 136,751 bytes** (it was 1200 × 1200 and 1,304,075 bytes): twice the 168 px slot. The design ref keeps the full-size original. Swapping in the real artwork is that file and that one constant.
 
 ## Not done
 
-- The live measurement above.
+- The time-left flicker and the one-frame "0 rows" above: both found live, proposed, not built.
+- The overshoot fix is not on dev yet.
 - `p1-before.json`, a before-capture from the onboarding v5 e2e suite, still holds the old strip's HTML. It is a historical capture, so I left it alone.
 
 ## The worktree

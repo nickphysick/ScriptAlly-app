@@ -1,0 +1,1784 @@
+{
+ "when": "2026-10-20",
+ "target": "https://scriptally-dev.web.app (bundle index-8VnU8F6o.js; function smartImportMap from 45782f0c)",
+ "account": "ms21-filled (Pro), allowance restored after",
+ "fixture": "tests/fixtures/smart-eval/size-csv-150.csv",
+ "rowsTotal": 150,
+ "firstChunkS": 3.197,
+ "resultS": 90.84,
+ "overviewWallS": 93.871,
+ "streamed": [
+  {
+   "t": 3.197,
+   "rows": 0
+  },
+  {
+   "t": 4.136,
+   "rows": 1
+  },
+  {
+   "t": 4.623,
+   "rows": 2
+  },
+  {
+   "t": 5.146,
+   "rows": 3
+  },
+  {
+   "t": 5.712,
+   "rows": 4
+  },
+  {
+   "t": 6.211,
+   "rows": 5
+  },
+  {
+   "t": 6.734,
+   "rows": 6
+  },
+  {
+   "t": 7.37,
+   "rows": 7
+  },
+  {
+   "t": 7.939,
+   "rows": 8
+  },
+  {
+   "t": 8.522,
+   "rows": 9
+  },
+  {
+   "t": 8.951,
+   "rows": 10
+  },
+  {
+   "t": 9.577,
+   "rows": 11
+  },
+  {
+   "t": 10.151,
+   "rows": 12
+  },
+  {
+   "t": 10.737,
+   "rows": 13
+  },
+  {
+   "t": 11.217,
+   "rows": 14
+  },
+  {
+   "t": 11.736,
+   "rows": 15
+  },
+  {
+   "t": 12.314,
+   "rows": 16
+  },
+  {
+   "t": 12.894,
+   "rows": 17
+  },
+  {
+   "t": 13.393,
+   "rows": 18
+  },
+  {
+   "t": 13.895,
+   "rows": 19
+  },
+  {
+   "t": 14.422,
+   "rows": 20
+  },
+  {
+   "t": 14.899,
+   "rows": 21
+  },
+  {
+   "t": 15.43,
+   "rows": 22
+  },
+  {
+   "t": 15.962,
+   "rows": 23
+  },
+  {
+   "t": 16.387,
+   "rows": 24
+  },
+  {
+   "t": 16.91,
+   "rows": 25
+  },
+  {
+   "t": 17.388,
+   "rows": 26
+  },
+  {
+   "t": 17.969,
+   "rows": 27
+  },
+  {
+   "t": 18.445,
+   "rows": 28
+  },
+  {
+   "t": 19.072,
+   "rows": 29
+  },
+  {
+   "t": 19.648,
+   "rows": 30
+  },
+  {
+   "t": 20.252,
+   "rows": 31
+  },
+  {
+   "t": 20.797,
+   "rows": 32
+  },
+  {
+   "t": 21.379,
+   "rows": 33
+  },
+  {
+   "t": 21.815,
+   "rows": 34
+  },
+  {
+   "t": 22.505,
+   "rows": 35
+  },
+  {
+   "t": 23.022,
+   "rows": 36
+  },
+  {
+   "t": 23.633,
+   "rows": 37
+  },
+  {
+   "t": 24.126,
+   "rows": 38
+  },
+  {
+   "t": 24.657,
+   "rows": 39
+  },
+  {
+   "t": 25.232,
+   "rows": 40
+  },
+  {
+   "t": 25.658,
+   "rows": 41
+  },
+  {
+   "t": 26.182,
+   "rows": 42
+  },
+  {
+   "t": 26.712,
+   "rows": 43
+  },
+  {
+   "t": 27.238,
+   "rows": 44
+  },
+  {
+   "t": 27.847,
+   "rows": 45
+  },
+  {
+   "t": 28.241,
+   "rows": 46
+  },
+  {
+   "t": 28.768,
+   "rows": 47
+  },
+  {
+   "t": 29.246,
+   "rows": 48
+  },
+  {
+   "t": 29.881,
+   "rows": 49
+  },
+  {
+   "t": 30.459,
+   "rows": 50
+  },
+  {
+   "t": 31.023,
+   "rows": 51
+  },
+  {
+   "t": 31.46,
+   "rows": 52
+  },
+  {
+   "t": 31.938,
+   "rows": 53
+  },
+  {
+   "t": 32.411,
+   "rows": 54
+  },
+  {
+   "t": 32.944,
+   "rows": 55
+  },
+  {
+   "t": 33.365,
+   "rows": 56
+  },
+  {
+   "t": 33.798,
+   "rows": 57
+  },
+  {
+   "t": 34.322,
+   "rows": 58
+  },
+  {
+   "t": 34.694,
+   "rows": 59
+  },
+  {
+   "t": 35.139,
+   "rows": 60
+  },
+  {
+   "t": 35.556,
+   "rows": 61
+  },
+  {
+   "t": 35.871,
+   "rows": 62
+  },
+  {
+   "t": 36.351,
+   "rows": 63
+  },
+  {
+   "t": 36.777,
+   "rows": 64
+  },
+  {
+   "t": 37.289,
+   "rows": 65
+  },
+  {
+   "t": 37.679,
+   "rows": 66
+  },
+  {
+   "t": 38.108,
+   "rows": 67
+  },
+  {
+   "t": 38.482,
+   "rows": 68
+  },
+  {
+   "t": 38.91,
+   "rows": 69
+  },
+  {
+   "t": 39.401,
+   "rows": 70
+  },
+  {
+   "t": 39.709,
+   "rows": 71
+  },
+  {
+   "t": 40.142,
+   "rows": 72
+  },
+  {
+   "t": 40.514,
+   "rows": 73
+  },
+  {
+   "t": 40.949,
+   "rows": 74
+  },
+  {
+   "t": 41.262,
+   "rows": 75
+  },
+  {
+   "t": 42.465,
+   "rows": 76
+  },
+  {
+   "t": 43.151,
+   "rows": 77
+  },
+  {
+   "t": 43.995,
+   "rows": 78
+  },
+  {
+   "t": 44.828,
+   "rows": 79
+  },
+  {
+   "t": 45.362,
+   "rows": 80
+  },
+  {
+   "t": 46.056,
+   "rows": 81
+  },
+  {
+   "t": 46.629,
+   "rows": 82
+  },
+  {
+   "t": 47.26,
+   "rows": 83
+  },
+  {
+   "t": 47.756,
+   "rows": 84
+  },
+  {
+   "t": 48.338,
+   "rows": 85
+  },
+  {
+   "t": 48.903,
+   "rows": 86
+  },
+  {
+   "t": 49.592,
+   "rows": 87
+  },
+  {
+   "t": 50.221,
+   "rows": 88
+  },
+  {
+   "t": 51.065,
+   "rows": 89
+  },
+  {
+   "t": 51.646,
+   "rows": 90
+  },
+  {
+   "t": 52.325,
+   "rows": 91
+  },
+  {
+   "t": 53.219,
+   "rows": 92
+  },
+  {
+   "t": 53.753,
+   "rows": 93
+  },
+  {
+   "t": 54.453,
+   "rows": 94
+  },
+  {
+   "t": 55.012,
+   "rows": 95
+  },
+  {
+   "t": 55.703,
+   "rows": 96
+  },
+  {
+   "t": 56.442,
+   "rows": 97
+  },
+  {
+   "t": 57.078,
+   "rows": 98
+  },
+  {
+   "t": 57.763,
+   "rows": 99
+  },
+  {
+   "t": 58.504,
+   "rows": 100
+  },
+  {
+   "t": 59.288,
+   "rows": 101
+  },
+  {
+   "t": 59.874,
+   "rows": 102
+  },
+  {
+   "t": 60.4,
+   "rows": 103
+  },
+  {
+   "t": 61.031,
+   "rows": 104
+  },
+  {
+   "t": 61.667,
+   "rows": 105
+  },
+  {
+   "t": 62.441,
+   "rows": 106
+  },
+  {
+   "t": 63.569,
+   "rows": 107
+  },
+  {
+   "t": 64.285,
+   "rows": 108
+  },
+  {
+   "t": 64.898,
+   "rows": 109
+  },
+  {
+   "t": 65.402,
+   "rows": 110
+  },
+  {
+   "t": 66.065,
+   "rows": 111
+  },
+  {
+   "t": 66.731,
+   "rows": 112
+  },
+  {
+   "t": 67.255,
+   "rows": 113
+  },
+  {
+   "t": 68.043,
+   "rows": 114
+  },
+  {
+   "t": 68.575,
+   "rows": 115
+  },
+  {
+   "t": 69.313,
+   "rows": 116
+  },
+  {
+   "t": 69.917,
+   "rows": 117
+  },
+  {
+   "t": 70.632,
+   "rows": 118
+  },
+  {
+   "t": 71.247,
+   "rows": 119
+  },
+  {
+   "t": 71.898,
+   "rows": 120
+  },
+  {
+   "t": 72.589,
+   "rows": 121
+  },
+  {
+   "t": 73.397,
+   "rows": 122
+  },
+  {
+   "t": 74.069,
+   "rows": 123
+  },
+  {
+   "t": 74.7,
+   "rows": 124
+  },
+  {
+   "t": 75.277,
+   "rows": 125
+  },
+  {
+   "t": 76.06,
+   "rows": 126
+  },
+  {
+   "t": 76.654,
+   "rows": 127
+  },
+  {
+   "t": 77.181,
+   "rows": 128
+  },
+  {
+   "t": 77.872,
+   "rows": 129
+  },
+  {
+   "t": 78.397,
+   "rows": 130
+  },
+  {
+   "t": 78.986,
+   "rows": 131
+  },
+  {
+   "t": 79.509,
+   "rows": 132
+  },
+  {
+   "t": 79.989,
+   "rows": 133
+  },
+  {
+   "t": 80.519,
+   "rows": 134
+  },
+  {
+   "t": 81.052,
+   "rows": 135
+  },
+  {
+   "t": 81.789,
+   "rows": 136
+  },
+  {
+   "t": 82.473,
+   "rows": 137
+  },
+  {
+   "t": 83.227,
+   "rows": 138
+  },
+  {
+   "t": 83.644,
+   "rows": 139
+  },
+  {
+   "t": 84.219,
+   "rows": 140
+  },
+  {
+   "t": 84.851,
+   "rows": 141
+  },
+  {
+   "t": 85.387,
+   "rows": 142
+  },
+  {
+   "t": 85.972,
+   "rows": 143
+  },
+  {
+   "t": 86.704,
+   "rows": 144
+  },
+  {
+   "t": 87.308,
+   "rows": 145
+  },
+  {
+   "t": 87.868,
+   "rows": 146
+  },
+  {
+   "t": 88.661,
+   "rows": 147
+  },
+  {
+   "t": 89.346,
+   "rows": 148
+  },
+  {
+   "t": 89.823,
+   "rows": 149
+  },
+  {
+   "t": 90.513,
+   "rows": 150
+  },
+  {
+   "t": 90.723,
+   "rows": 150
+  }
+ ],
+ "ui": [
+  {
+   "t": 1.065,
+   "status": "Opening your file…",
+   "right": "0 rows · a few seconds",
+   "fill": null,
+   "shimmer": true
+  },
+  {
+   "t": 1.076,
+   "status": "Opening your file…",
+   "right": "150 rows · about 2 minutes",
+   "fill": null,
+   "shimmer": true
+  },
+  {
+   "t": 3.2,
+   "status": "Reading your first rows…",
+   "right": "150 rows · about 2 minutes",
+   "fill": null,
+   "shimmer": true
+  },
+  {
+   "t": 4.137,
+   "status": "Reading row 1 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "2.62667%",
+   "shimmer": false
+  },
+  {
+   "t": 4.624,
+   "status": "Reading row 2 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "3.25333%",
+   "shimmer": false
+  },
+  {
+   "t": 5.147,
+   "status": "Reading row 3 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "3.88%",
+   "shimmer": false
+  },
+  {
+   "t": 5.713,
+   "status": "Reading row 4 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "4.50667%",
+   "shimmer": false
+  },
+  {
+   "t": 6.212,
+   "status": "Reading row 5 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "5.13333%",
+   "shimmer": false
+  },
+  {
+   "t": 6.734,
+   "status": "Reading row 6 of 150",
+   "right": "about 2 minutes left",
+   "fill": "5.76%",
+   "shimmer": false
+  },
+  {
+   "t": 7.068,
+   "status": "Reading row 6 of 150",
+   "right": "about 2½ minutes left",
+   "fill": "5.76%",
+   "shimmer": false
+  },
+  {
+   "t": 7.37,
+   "status": "Reading row 7 of 150",
+   "right": "about 2 minutes left",
+   "fill": "6.38667%",
+   "shimmer": false
+  },
+  {
+   "t": 7.94,
+   "status": "Reading row 8 of 150",
+   "right": "about 2 minutes left",
+   "fill": "7.01333%",
+   "shimmer": false
+  },
+  {
+   "t": 8.524,
+   "status": "Reading row 9 of 150",
+   "right": "about 2 minutes left",
+   "fill": "7.64%",
+   "shimmer": false
+  },
+  {
+   "t": 8.953,
+   "status": "Reading row 10 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "8.26667%",
+   "shimmer": false
+  },
+  {
+   "t": 9.066,
+   "status": "Reading row 10 of 150",
+   "right": "about 2 minutes left",
+   "fill": "8.26667%",
+   "shimmer": false
+  },
+  {
+   "t": 9.578,
+   "status": "Reading row 11 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "8.89333%",
+   "shimmer": false
+  },
+  {
+   "t": 10.067,
+   "status": "Reading row 11 of 150",
+   "right": "about 2 minutes left",
+   "fill": "8.89333%",
+   "shimmer": false
+  },
+  {
+   "t": 10.152,
+   "status": "Reading row 12 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "9.52%",
+   "shimmer": false
+  },
+  {
+   "t": 10.739,
+   "status": "Reading row 13 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "10.1467%",
+   "shimmer": false
+  },
+  {
+   "t": 11.068,
+   "status": "Reading row 13 of 150",
+   "right": "about 2 minutes left",
+   "fill": "10.1467%",
+   "shimmer": false
+  },
+  {
+   "t": 11.218,
+   "status": "Reading row 14 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "10.7733%",
+   "shimmer": false
+  },
+  {
+   "t": 11.737,
+   "status": "Reading row 15 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "11.4%",
+   "shimmer": false
+  },
+  {
+   "t": 12.315,
+   "status": "Reading row 16 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "12.0267%",
+   "shimmer": false
+  },
+  {
+   "t": 12.896,
+   "status": "Reading row 17 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "12.6533%",
+   "shimmer": false
+  },
+  {
+   "t": 13.393,
+   "status": "Reading row 18 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "13.28%",
+   "shimmer": false
+  },
+  {
+   "t": 13.896,
+   "status": "Reading row 19 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "13.9067%",
+   "shimmer": false
+  },
+  {
+   "t": 14.422,
+   "status": "Reading row 20 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "14.5333%",
+   "shimmer": false
+  },
+  {
+   "t": 14.901,
+   "status": "Reading row 21 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "15.16%",
+   "shimmer": false
+  },
+  {
+   "t": 15.431,
+   "status": "Reading row 22 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "15.7867%",
+   "shimmer": false
+  },
+  {
+   "t": 15.963,
+   "status": "Reading row 23 of 150",
+   "right": "about a minute left",
+   "fill": "16.4133%",
+   "shimmer": false
+  },
+  {
+   "t": 16.068,
+   "status": "Reading row 23 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "16.4133%",
+   "shimmer": false
+  },
+  {
+   "t": 16.387,
+   "status": "Reading row 24 of 150",
+   "right": "about a minute left",
+   "fill": "17.04%",
+   "shimmer": false
+  },
+  {
+   "t": 16.91,
+   "status": "Reading row 25 of 150",
+   "right": "about a minute left",
+   "fill": "17.6667%",
+   "shimmer": false
+  },
+  {
+   "t": 17.068,
+   "status": "Reading row 25 of 150",
+   "right": "about 1½ minutes left",
+   "fill": "17.6667%",
+   "shimmer": false
+  },
+  {
+   "t": 17.389,
+   "status": "Reading row 26 of 150",
+   "right": "about a minute left",
+   "fill": "18.2933%",
+   "shimmer": false
+  },
+  {
+   "t": 17.97,
+   "status": "Reading row 27 of 150",
+   "right": "about a minute left",
+   "fill": "18.92%",
+   "shimmer": false
+  },
+  {
+   "t": 18.446,
+   "status": "Reading row 28 of 150",
+   "right": "about a minute left",
+   "fill": "19.5467%",
+   "shimmer": false
+  },
+  {
+   "t": 19.073,
+   "status": "Reading row 29 of 150",
+   "right": "about a minute left",
+   "fill": "20.1733%",
+   "shimmer": false
+  },
+  {
+   "t": 19.648,
+   "status": "Reading row 30 of 150",
+   "right": "about a minute left",
+   "fill": "20.8%",
+   "shimmer": false
+  },
+  {
+   "t": 20.253,
+   "status": "Reading row 31 of 150",
+   "right": "about a minute left",
+   "fill": "21.4267%",
+   "shimmer": false
+  },
+  {
+   "t": 20.799,
+   "status": "Reading row 32 of 150",
+   "right": "about a minute left",
+   "fill": "22.0533%",
+   "shimmer": false
+  },
+  {
+   "t": 21.38,
+   "status": "Reading row 33 of 150",
+   "right": "about a minute left",
+   "fill": "22.68%",
+   "shimmer": false
+  },
+  {
+   "t": 21.816,
+   "status": "Reading row 34 of 150",
+   "right": "about a minute left",
+   "fill": "23.3067%",
+   "shimmer": false
+  },
+  {
+   "t": 22.506,
+   "status": "Reading row 35 of 150",
+   "right": "about a minute left",
+   "fill": "23.9333%",
+   "shimmer": false
+  },
+  {
+   "t": 23.023,
+   "status": "Reading row 36 of 150",
+   "right": "about a minute left",
+   "fill": "24.56%",
+   "shimmer": false
+  },
+  {
+   "t": 23.634,
+   "status": "Reading row 37 of 150",
+   "right": "about a minute left",
+   "fill": "25.1867%",
+   "shimmer": false
+  },
+  {
+   "t": 24.126,
+   "status": "Reading row 38 of 150",
+   "right": "about a minute left",
+   "fill": "25.8133%",
+   "shimmer": false
+  },
+  {
+   "t": 24.658,
+   "status": "Reading row 39 of 150",
+   "right": "about a minute left",
+   "fill": "26.44%",
+   "shimmer": false
+  },
+  {
+   "t": 25.233,
+   "status": "Reading row 40 of 150",
+   "right": "about a minute left",
+   "fill": "27.0667%",
+   "shimmer": false
+  },
+  {
+   "t": 25.658,
+   "status": "Reading row 41 of 150",
+   "right": "about a minute left",
+   "fill": "27.6933%",
+   "shimmer": false
+  },
+  {
+   "t": 26.183,
+   "status": "Reading row 42 of 150",
+   "right": "about a minute left",
+   "fill": "28.32%",
+   "shimmer": false
+  },
+  {
+   "t": 26.713,
+   "status": "Reading row 43 of 150",
+   "right": "about a minute left",
+   "fill": "28.9467%",
+   "shimmer": false
+  },
+  {
+   "t": 27.239,
+   "status": "Reading row 44 of 150",
+   "right": "about a minute left",
+   "fill": "29.5733%",
+   "shimmer": false
+  },
+  {
+   "t": 27.848,
+   "status": "Reading row 45 of 150",
+   "right": "about a minute left",
+   "fill": "30.2%",
+   "shimmer": false
+  },
+  {
+   "t": 28.241,
+   "status": "Reading row 46 of 150",
+   "right": "about a minute left",
+   "fill": "30.8267%",
+   "shimmer": false
+  },
+  {
+   "t": 28.769,
+   "status": "Reading row 47 of 150",
+   "right": "about a minute left",
+   "fill": "31.4533%",
+   "shimmer": false
+  },
+  {
+   "t": 29.247,
+   "status": "Reading row 48 of 150",
+   "right": "about a minute left",
+   "fill": "32.08%",
+   "shimmer": false
+  },
+  {
+   "t": 29.881,
+   "status": "Reading row 49 of 150",
+   "right": "about a minute left",
+   "fill": "32.7067%",
+   "shimmer": false
+  },
+  {
+   "t": 30.46,
+   "status": "Reading row 50 of 150",
+   "right": "about a minute left",
+   "fill": "33.3333%",
+   "shimmer": false
+  },
+  {
+   "t": 31.023,
+   "status": "Reading row 51 of 150",
+   "right": "about a minute left",
+   "fill": "33.96%",
+   "shimmer": false
+  },
+  {
+   "t": 31.461,
+   "status": "Reading row 52 of 150",
+   "right": "about a minute left",
+   "fill": "34.5867%",
+   "shimmer": false
+  },
+  {
+   "t": 31.939,
+   "status": "Reading row 53 of 150",
+   "right": "about a minute left",
+   "fill": "35.2133%",
+   "shimmer": false
+  },
+  {
+   "t": 32.411,
+   "status": "Reading row 54 of 150",
+   "right": "about a minute left",
+   "fill": "35.84%",
+   "shimmer": false
+  },
+  {
+   "t": 32.944,
+   "status": "Reading row 55 of 150",
+   "right": "about a minute left",
+   "fill": "36.4667%",
+   "shimmer": false
+  },
+  {
+   "t": 33.365,
+   "status": "Reading row 56 of 150",
+   "right": "about a minute left",
+   "fill": "37.0933%",
+   "shimmer": false
+  },
+  {
+   "t": 33.799,
+   "status": "Reading row 57 of 150",
+   "right": "about a minute left",
+   "fill": "37.72%",
+   "shimmer": false
+  },
+  {
+   "t": 34.323,
+   "status": "Reading row 58 of 150",
+   "right": "about a minute left",
+   "fill": "38.3467%",
+   "shimmer": false
+  },
+  {
+   "t": 34.694,
+   "status": "Reading row 59 of 150",
+   "right": "about a minute left",
+   "fill": "38.9733%",
+   "shimmer": false
+  },
+  {
+   "t": 35.14,
+   "status": "Reading row 60 of 150",
+   "right": "about a minute left",
+   "fill": "39.6%",
+   "shimmer": false
+  },
+  {
+   "t": 35.556,
+   "status": "Reading row 61 of 150",
+   "right": "about a minute left",
+   "fill": "40.2267%",
+   "shimmer": false
+  },
+  {
+   "t": 35.871,
+   "status": "Reading row 62 of 150",
+   "right": "about a minute left",
+   "fill": "40.8533%",
+   "shimmer": false
+  },
+  {
+   "t": 36.352,
+   "status": "Reading row 63 of 150",
+   "right": "about a minute left",
+   "fill": "41.48%",
+   "shimmer": false
+  },
+  {
+   "t": 36.778,
+   "status": "Reading row 64 of 150",
+   "right": "about a minute left",
+   "fill": "42.1067%",
+   "shimmer": false
+  },
+  {
+   "t": 37.29,
+   "status": "Reading row 65 of 150",
+   "right": "about a minute left",
+   "fill": "42.7333%",
+   "shimmer": false
+  },
+  {
+   "t": 37.68,
+   "status": "Reading row 66 of 150",
+   "right": "about a minute left",
+   "fill": "43.36%",
+   "shimmer": false
+  },
+  {
+   "t": 38.109,
+   "status": "Reading row 67 of 150",
+   "right": "about a minute left",
+   "fill": "43.9867%",
+   "shimmer": false
+  },
+  {
+   "t": 38.483,
+   "status": "Reading row 68 of 150",
+   "right": "about a minute left",
+   "fill": "44.6133%",
+   "shimmer": false
+  },
+  {
+   "t": 38.911,
+   "status": "Reading row 69 of 150",
+   "right": "about 40 seconds left",
+   "fill": "45.24%",
+   "shimmer": false
+  },
+  {
+   "t": 39.067,
+   "status": "Reading row 69 of 150",
+   "right": "about a minute left",
+   "fill": "45.24%",
+   "shimmer": false
+  },
+  {
+   "t": 39.401,
+   "status": "Reading row 70 of 150",
+   "right": "about 40 seconds left",
+   "fill": "45.8667%",
+   "shimmer": false
+  },
+  {
+   "t": 39.709,
+   "status": "Reading row 71 of 150",
+   "right": "about 40 seconds left",
+   "fill": "46.4933%",
+   "shimmer": false
+  },
+  {
+   "t": 40.142,
+   "status": "Reading row 72 of 150",
+   "right": "about 40 seconds left",
+   "fill": "47.12%",
+   "shimmer": false
+  },
+  {
+   "t": 40.515,
+   "status": "Reading row 73 of 150",
+   "right": "about 40 seconds left",
+   "fill": "47.7467%",
+   "shimmer": false
+  },
+  {
+   "t": 40.95,
+   "status": "Reading row 74 of 150",
+   "right": "about 40 seconds left",
+   "fill": "48.3733%",
+   "shimmer": false
+  },
+  {
+   "t": 41.262,
+   "status": "Reading row 75 of 150",
+   "right": "about 40 seconds left",
+   "fill": "49%",
+   "shimmer": false
+  },
+  {
+   "t": 42.466,
+   "status": "Reading row 76 of 150",
+   "right": "about 40 seconds left",
+   "fill": "49.6267%",
+   "shimmer": false
+  },
+  {
+   "t": 43.152,
+   "status": "Reading row 77 of 150",
+   "right": "about 40 seconds left",
+   "fill": "50.2533%",
+   "shimmer": false
+  },
+  {
+   "t": 43.996,
+   "status": "Reading row 78 of 150",
+   "right": "about 40 seconds left",
+   "fill": "50.88%",
+   "shimmer": false
+  },
+  {
+   "t": 44.829,
+   "status": "Reading row 79 of 150",
+   "right": "about 40 seconds left",
+   "fill": "51.5067%",
+   "shimmer": false
+  },
+  {
+   "t": 45.363,
+   "status": "Reading row 80 of 150",
+   "right": "about 40 seconds left",
+   "fill": "52.1333%",
+   "shimmer": false
+  },
+  {
+   "t": 46.056,
+   "status": "Reading row 81 of 150",
+   "right": "about 40 seconds left",
+   "fill": "52.76%",
+   "shimmer": false
+  },
+  {
+   "t": 46.629,
+   "status": "Reading row 82 of 150",
+   "right": "about 40 seconds left",
+   "fill": "53.3867%",
+   "shimmer": false
+  },
+  {
+   "t": 47.261,
+   "status": "Reading row 83 of 150",
+   "right": "about 40 seconds left",
+   "fill": "54.0133%",
+   "shimmer": false
+  },
+  {
+   "t": 47.757,
+   "status": "Reading row 84 of 150",
+   "right": "about 40 seconds left",
+   "fill": "54.64%",
+   "shimmer": false
+  },
+  {
+   "t": 48.339,
+   "status": "Reading row 85 of 150",
+   "right": "about 40 seconds left",
+   "fill": "55.2667%",
+   "shimmer": false
+  },
+  {
+   "t": 48.904,
+   "status": "Reading row 86 of 150",
+   "right": "about 40 seconds left",
+   "fill": "55.8933%",
+   "shimmer": false
+  },
+  {
+   "t": 49.592,
+   "status": "Reading row 87 of 150",
+   "right": "about 40 seconds left",
+   "fill": "56.52%",
+   "shimmer": false
+  },
+  {
+   "t": 50.222,
+   "status": "Reading row 88 of 150",
+   "right": "about 40 seconds left",
+   "fill": "57.1467%",
+   "shimmer": false
+  },
+  {
+   "t": 51.066,
+   "status": "Reading row 89 of 150",
+   "right": "about 30 seconds left",
+   "fill": "57.7733%",
+   "shimmer": false
+  },
+  {
+   "t": 51.066,
+   "status": "Reading row 89 of 150",
+   "right": "about 40 seconds left",
+   "fill": "57.7733%",
+   "shimmer": false
+  },
+  {
+   "t": 51.647,
+   "status": "Reading row 90 of 150",
+   "right": "about 30 seconds left",
+   "fill": "58.4%",
+   "shimmer": false
+  },
+  {
+   "t": 52.068,
+   "status": "Reading row 90 of 150",
+   "right": "about 40 seconds left",
+   "fill": "58.4%",
+   "shimmer": false
+  },
+  {
+   "t": 52.325,
+   "status": "Reading row 91 of 150",
+   "right": "about 30 seconds left",
+   "fill": "59.0267%",
+   "shimmer": false
+  },
+  {
+   "t": 53.22,
+   "status": "Reading row 92 of 150",
+   "right": "about 30 seconds left",
+   "fill": "59.6533%",
+   "shimmer": false
+  },
+  {
+   "t": 53.753,
+   "status": "Reading row 93 of 150",
+   "right": "about 30 seconds left",
+   "fill": "60.28%",
+   "shimmer": false
+  },
+  {
+   "t": 54.454,
+   "status": "Reading row 94 of 150",
+   "right": "about 30 seconds left",
+   "fill": "60.9067%",
+   "shimmer": false
+  },
+  {
+   "t": 55.013,
+   "status": "Reading row 95 of 150",
+   "right": "about 30 seconds left",
+   "fill": "61.5333%",
+   "shimmer": false
+  },
+  {
+   "t": 55.704,
+   "status": "Reading row 96 of 150",
+   "right": "about 30 seconds left",
+   "fill": "62.16%",
+   "shimmer": false
+  },
+  {
+   "t": 56.442,
+   "status": "Reading row 97 of 150",
+   "right": "about 30 seconds left",
+   "fill": "62.7867%",
+   "shimmer": false
+  },
+  {
+   "t": 57.078,
+   "status": "Reading row 98 of 150",
+   "right": "about 30 seconds left",
+   "fill": "63.4133%",
+   "shimmer": false
+  },
+  {
+   "t": 57.764,
+   "status": "Reading row 99 of 150",
+   "right": "about 30 seconds left",
+   "fill": "64.04%",
+   "shimmer": false
+  },
+  {
+   "t": 58.505,
+   "status": "Reading row 100 of 150",
+   "right": "about 30 seconds left",
+   "fill": "64.6667%",
+   "shimmer": false
+  },
+  {
+   "t": 59.288,
+   "status": "Reading row 101 of 150",
+   "right": "about 30 seconds left",
+   "fill": "65.2933%",
+   "shimmer": false
+  },
+  {
+   "t": 59.875,
+   "status": "Reading row 102 of 150",
+   "right": "about 30 seconds left",
+   "fill": "65.92%",
+   "shimmer": false
+  },
+  {
+   "t": 60.401,
+   "status": "Reading row 103 of 150",
+   "right": "about 30 seconds left",
+   "fill": "66.5467%",
+   "shimmer": false
+  },
+  {
+   "t": 61.031,
+   "status": "Reading row 104 of 150",
+   "right": "about 30 seconds left",
+   "fill": "67.1733%",
+   "shimmer": false
+  },
+  {
+   "t": 61.668,
+   "status": "Reading row 105 of 150",
+   "right": "about 30 seconds left",
+   "fill": "67.8%",
+   "shimmer": false
+  },
+  {
+   "t": 62.441,
+   "status": "Reading row 106 of 150",
+   "right": "about 30 seconds left",
+   "fill": "68.4267%",
+   "shimmer": false
+  },
+  {
+   "t": 63.569,
+   "status": "Reading row 107 of 150",
+   "right": "about 30 seconds left",
+   "fill": "69.0533%",
+   "shimmer": false
+  },
+  {
+   "t": 64.285,
+   "status": "Reading row 108 of 150",
+   "right": "about 30 seconds left",
+   "fill": "69.68%",
+   "shimmer": false
+  },
+  {
+   "t": 64.899,
+   "status": "Reading row 109 of 150",
+   "right": "about 20 seconds left",
+   "fill": "70.3067%",
+   "shimmer": false
+  },
+  {
+   "t": 65.066,
+   "status": "Reading row 109 of 150",
+   "right": "about 30 seconds left",
+   "fill": "70.3067%",
+   "shimmer": false
+  },
+  {
+   "t": 65.402,
+   "status": "Reading row 110 of 150",
+   "right": "about 20 seconds left",
+   "fill": "70.9333%",
+   "shimmer": false
+  },
+  {
+   "t": 66.065,
+   "status": "Reading row 111 of 150",
+   "right": "about 20 seconds left",
+   "fill": "71.56%",
+   "shimmer": false
+  },
+  {
+   "t": 66.731,
+   "status": "Reading row 112 of 150",
+   "right": "about 20 seconds left",
+   "fill": "72.1867%",
+   "shimmer": false
+  },
+  {
+   "t": 67.255,
+   "status": "Reading row 113 of 150",
+   "right": "about 20 seconds left",
+   "fill": "72.8133%",
+   "shimmer": false
+  },
+  {
+   "t": 68.043,
+   "status": "Reading row 114 of 150",
+   "right": "about 20 seconds left",
+   "fill": "73.44%",
+   "shimmer": false
+  },
+  {
+   "t": 68.576,
+   "status": "Reading row 115 of 150",
+   "right": "about 20 seconds left",
+   "fill": "74.0667%",
+   "shimmer": false
+  },
+  {
+   "t": 69.314,
+   "status": "Reading row 116 of 150",
+   "right": "about 20 seconds left",
+   "fill": "74.6933%",
+   "shimmer": false
+  },
+  {
+   "t": 69.918,
+   "status": "Reading row 117 of 150",
+   "right": "about 20 seconds left",
+   "fill": "75.32%",
+   "shimmer": false
+  },
+  {
+   "t": 70.632,
+   "status": "Reading row 118 of 150",
+   "right": "about 20 seconds left",
+   "fill": "75.9467%",
+   "shimmer": false
+  },
+  {
+   "t": 71.248,
+   "status": "Reading row 119 of 150",
+   "right": "about 20 seconds left",
+   "fill": "76.5733%",
+   "shimmer": false
+  },
+  {
+   "t": 71.899,
+   "status": "Reading row 120 of 150",
+   "right": "about 20 seconds left",
+   "fill": "77.2%",
+   "shimmer": false
+  },
+  {
+   "t": 72.59,
+   "status": "Reading row 121 of 150",
+   "right": "about 20 seconds left",
+   "fill": "77.8267%",
+   "shimmer": false
+  },
+  {
+   "t": 73.397,
+   "status": "Reading row 122 of 150",
+   "right": "about 20 seconds left",
+   "fill": "78.4533%",
+   "shimmer": false
+  },
+  {
+   "t": 74.07,
+   "status": "Reading row 123 of 150",
+   "right": "about 20 seconds left",
+   "fill": "79.08%",
+   "shimmer": false
+  },
+  {
+   "t": 74.701,
+   "status": "Reading row 124 of 150",
+   "right": "about 20 seconds left",
+   "fill": "79.7067%",
+   "shimmer": false
+  },
+  {
+   "t": 75.277,
+   "status": "Reading row 125 of 150",
+   "right": "about 20 seconds left",
+   "fill": "80.3333%",
+   "shimmer": false
+  },
+  {
+   "t": 76.06,
+   "status": "Reading row 126 of 150",
+   "right": "about 20 seconds left",
+   "fill": "80.96%",
+   "shimmer": false
+  },
+  {
+   "t": 76.654,
+   "status": "Reading row 127 of 150",
+   "right": "about 10 seconds left",
+   "fill": "81.5867%",
+   "shimmer": false
+  },
+  {
+   "t": 77.182,
+   "status": "Reading row 128 of 150",
+   "right": "about 10 seconds left",
+   "fill": "82.2133%",
+   "shimmer": false
+  },
+  {
+   "t": 77.872,
+   "status": "Reading row 129 of 150",
+   "right": "about 10 seconds left",
+   "fill": "82.84%",
+   "shimmer": false
+  },
+  {
+   "t": 78.398,
+   "status": "Reading row 130 of 150",
+   "right": "about 10 seconds left",
+   "fill": "83.4667%",
+   "shimmer": false
+  },
+  {
+   "t": 78.987,
+   "status": "Reading row 131 of 150",
+   "right": "about 10 seconds left",
+   "fill": "84.0933%",
+   "shimmer": false
+  },
+  {
+   "t": 79.51,
+   "status": "Reading row 132 of 150",
+   "right": "about 10 seconds left",
+   "fill": "84.72%",
+   "shimmer": false
+  },
+  {
+   "t": 79.989,
+   "status": "Reading row 133 of 150",
+   "right": "about 10 seconds left",
+   "fill": "85.3467%",
+   "shimmer": false
+  },
+  {
+   "t": 80.52,
+   "status": "Reading row 134 of 150",
+   "right": "about 10 seconds left",
+   "fill": "85.9733%",
+   "shimmer": false
+  },
+  {
+   "t": 81.053,
+   "status": "Reading row 135 of 150",
+   "right": "a few seconds left",
+   "fill": "86.6%",
+   "shimmer": false
+  },
+  {
+   "t": 81.79,
+   "status": "Reading row 136 of 150",
+   "right": "a few seconds left",
+   "fill": "87.2267%",
+   "shimmer": false
+  },
+  {
+   "t": 82.474,
+   "status": "Reading row 137 of 150",
+   "right": "a few seconds left",
+   "fill": "87.8533%",
+   "shimmer": false
+  },
+  {
+   "t": 83.228,
+   "status": "Reading row 138 of 150",
+   "right": "a few seconds left",
+   "fill": "88.48%",
+   "shimmer": false
+  },
+  {
+   "t": 83.644,
+   "status": "Reading row 139 of 150",
+   "right": "a few seconds left",
+   "fill": "89.1067%",
+   "shimmer": false
+  },
+  {
+   "t": 84.22,
+   "status": "Reading row 140 of 150",
+   "right": "a few seconds left",
+   "fill": "89.7333%",
+   "shimmer": false
+  },
+  {
+   "t": 84.852,
+   "status": "Reading row 141 of 150",
+   "right": "a few seconds left",
+   "fill": "90.36%",
+   "shimmer": false
+  },
+  {
+   "t": 85.387,
+   "status": "Reading row 142 of 150",
+   "right": "a few seconds left",
+   "fill": "90.9867%",
+   "shimmer": false
+  },
+  {
+   "t": 85.972,
+   "status": "Reading row 143 of 150",
+   "right": "a few seconds left",
+   "fill": "91.6133%",
+   "shimmer": false
+  },
+  {
+   "t": 86.705,
+   "status": "Reading row 144 of 150",
+   "right": "a few seconds left",
+   "fill": "92.24%",
+   "shimmer": false
+  },
+  {
+   "t": 87.308,
+   "status": "Reading row 145 of 150",
+   "right": "a few seconds left",
+   "fill": "92.8667%",
+   "shimmer": false
+  },
+  {
+   "t": 87.868,
+   "status": "Reading row 146 of 150",
+   "right": "a few seconds left",
+   "fill": "93.4933%",
+   "shimmer": false
+  },
+  {
+   "t": 88.662,
+   "status": "Reading row 147 of 150",
+   "right": "a few seconds left",
+   "fill": "94.12%",
+   "shimmer": false
+  },
+  {
+   "t": 89.347,
+   "status": "Reading row 148 of 150",
+   "right": "a few seconds left",
+   "fill": "94.7467%",
+   "shimmer": false
+  },
+  {
+   "t": 89.823,
+   "status": "Reading row 149 of 150",
+   "right": "a few seconds left",
+   "fill": "95.3733%",
+   "shimmer": false
+  },
+  {
+   "t": 90.514,
+   "status": "Reading row 150 of 150",
+   "right": "a few seconds left",
+   "fill": "96%",
+   "shimmer": false
+  },
+  {
+   "t": 90.846,
+   "status": "Tidying records…",
+   "right": "almost there",
+   "fill": "100%",
+   "shimmer": false
+  },
+  {
+   "t": 91.916,
+   "status": "Ready",
+   "right": "150 of 150 rows read",
+   "fill": "100%",
+   "shimmer": false
+  },
+  {
+   "t": 93.705,
+   "status": "Ready",
+   "right": "150 of 150 rows read",
+   "fill": "100%",
+   "shimmer": false
+  }
+ ]
+}

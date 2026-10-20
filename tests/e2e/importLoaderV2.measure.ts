@@ -81,13 +81,15 @@ test.describe("Smart Import loader v2", () => {
           return { d: +m[1], style: parseFloat(fill.style.width), rendered: fill.offsetWidth / track.offsetWidth * 100 };
         });
         if (r) seen.push(r);
-        if (r && r.d === 40 && Math.abs(r.rendered - 96) < 0.5) break;
+        /* At d = N the span is N + 1 (importEstimate.footBar): the reading fill stays under 96% and only
+           the result takes it to 100, so the read's last state is 2 + 40/41 × 94 ≈ 93.7. */
+        if (r && r.d === 40 && Math.abs(r.rendered - (2 + (40 / 41) * 94)) < 0.5) break;
         await page.waitForTimeout(60);
       }
       record("L2", `samples@${vp.width}`, { n: seen.length, first: seen[0], last: seen[seen.length - 1] });
       expect(seen.length, "the read was sampled while it ran").toBeGreaterThan(10);
       expect(new Set(seen.map((s) => s.d)).size, "many rows were seen").toBeGreaterThan(5);
-      for (const s of seen) expect(s.style, `fill names row ${s.d}`).toBeCloseTo(2 + (s.d / 40) * 94, 1);
+      for (const s of seen) expect(s.style, `fill names row ${s.d}`).toBeCloseTo(2 + (s.d / Math.max(40, s.d + 1)) * 94, 1);
       for (let i = 1; i < seen.length; i++) {
         expect(seen[i].d).toBeGreaterThanOrEqual(seen[i - 1].d);
         expect(seen[i].rendered, `rendered width at sample ${i}`).toBeGreaterThanOrEqual(seen[i - 1].rendered - 0.3);
