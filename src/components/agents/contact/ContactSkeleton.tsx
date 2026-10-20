@@ -21,6 +21,8 @@ import React, { useMemo } from "react";
 import type { Agent } from "../../../types";
 import { agentFacts, contactGroups, sortFacts } from "../../../lib/contactList";
 import { ContactRows } from "./ContactRows";
+import { AgentPaperCard, type PaperCardData } from "../../shared/AgentPaperCard";
+import type { ContactView } from "../../../lib/contactListMemory";
 import type { CardPrimary } from "../../../lib/agentCard";
 
 /* ONE line, so a placeholder row sits at the row's own floor at every width (a two-line wishlist
@@ -45,12 +47,18 @@ const PLACEHOLDERS: Agent[] = SURNAMES.map((surname, i) => ({
 }) as unknown as Agent);
 
 const noop = () => {};
+/** v20 §G — the Cards view's loading beat: ghost paper cards (every value a bar), never rows */
+const GHOST: PaperCardData = { status: "none", statusLabel: "", initials: "", name: "", genres: [], materials: [] };
 const PRIMARY = { act: "log", label: "Log a query" } as unknown as CardPrimary;
 
 export const ContactSkeleton: React.FC<{
   /** the bar's controls, the page's own (drawn invisible until there is data) */
   controls: React.ReactNode;
-}> = ({ controls }) => {
+  /** v20 §G — the view the page will open in: Cards loads as ghost cards, so the list never flashes rows first */
+  view?: ContactView;
+  /** v20 §A — the title row, inert, so the card sits where it will sit once loaded */
+  titleRow?: React.ReactNode;
+}> = ({ controls, view = "list", titleRow }) => {
   const nowMs = useMemo(() => Date.now(), []);
   const facts = useMemo(() => sortFacts(PLACEHOLDERS.map((a) => agentFacts(a, [], null)), "surname"), []);
   const byId = useMemo(() => new Map(facts.map((x) => [x.agent.id, x])), [facts]);
@@ -60,16 +68,25 @@ export const ContactSkeleton: React.FC<{
   return (
     <>
       <div className="clv-main">
+        {titleRow}
         <section className="cl14-ws cl16-list cl19-card" aria-hidden="true">
           {/* v19 §A — the list's own head (the toolbar) at its loaded height, inert; the letters and tools wait for data */}
           {controls}
           <div className="cl14-list">
           <div>
+            {view === "cards" ? (
+              <div className="cl20-cards" data-cl20="cards-skeleton">
+                <div className="cl20-grid" style={{ "--cols": 3 } as React.CSSProperties}>
+                  {SURNAMES.slice(0, 6).map((s) => <AgentPaperCard key={s} variant="ghost" data={GHOST} />)}
+                </div>
+              </div>
+            ) : (
             <ContactRows
               groups={groups} totals={null} byId={byId} nowMs={nowMs} genreHit={() => false} ungrouped byLetter={false}
               openId={null} newId={null} onOpen={noop} onAddGenres={noop} onAddWishlist={noop}
               trayFor={() => PRIMARY} onAct={noop}
             />
+            )}
           </div>
           </div>
         </section>

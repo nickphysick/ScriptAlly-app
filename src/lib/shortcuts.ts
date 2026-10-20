@@ -69,7 +69,7 @@ export const SHORTCUTS = {
   contactsAct:      { chords: [k("l")], label: "Start the agent's next action", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   /* v16 §E, v138.6 §C — the pin: owned by the shared pin hook (usePinList), not by the page; Escape leaves it last */
-  contactsFull:     { chords: [k("f")], label: "Pin the list", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  contactsFull:     { chords: [k("f")], label: "Full screen", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   /* Discover v1 — the Scout's picks: they act on the lead card, and stand down in a field, over a modal and while any
      escape-stack layer is open (the Tune drawer, the passed list, the query drawer) */
   discoverAdd:      { chords: [k("a")], label: "Add the lead pick to your contact list", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },

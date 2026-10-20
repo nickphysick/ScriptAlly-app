@@ -36,15 +36,24 @@ describe("the view — per device (qh.cl.view)", () => {
     expect(LIST_VIEW_KEY).toBe("qh.cl.view");
     expect(LIST_VIEW_VERSION).toBe(1);
   });
-  it("a first ever visit reads unpinned, ungrouped, Surname A to Z", () => {
-    expect(readListView()).toEqual({ group: "none", sort: "surname", reversed: false, pinned: false });
+  /* RETARGETED (Contact list v20 §G): the record carries the view too; a first ever visit opens in List */
+  it("a first ever visit reads unpinned, ungrouped, Surname A to Z, in List", () => {
+    expect(readListView()).toEqual({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list" });
     expect(DEFAULT_LIST_VIEW()).toEqual(readListView());
   });
   it("it lives in localStorage, never sessionStorage", () => {
     writeListView({ group: "status", sort: "added", reversed: true, pinned: true });
     expect(g.window!.sessionStorage.length).toBe(0);
-    expect(JSON.parse(g.window!.localStorage.getItem(LIST_VIEW_KEY)!)).toEqual({ v: 1, group: "status", sort: "added", reversed: true, pinned: true });
-    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: true, pinned: true });
+    expect(JSON.parse(g.window!.localStorage.getItem(LIST_VIEW_KEY)!)).toEqual({ v: 1, group: "status", sort: "added", reversed: true, pinned: true, view: "list" });
+    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: true, pinned: true, view: "list" });
+  });
+  it("v20 §G — the view is remembered; a record from before v20 (no view) reads List and keeps everything else", () => {
+    writeListView({ view: "cards" });
+    expect(readListView().view).toBe("cards");
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "added", reversed: false, pinned: true }));
+    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: false, pinned: true, view: "list" });
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "none", sort: "surname", reversed: false, pinned: false, view: "grid" }));
+    expect(readListView().view).toBe("list");
   });
   it("a write is a patch over what is stored", () => {
     writeListView({ group: "country" });

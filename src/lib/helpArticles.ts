@@ -39,7 +39,7 @@ export const PAGE_ARTICLES: Record<string, readonly string[]> = {
 
 /** Each guide item's "Learn more", by page and item key. */
 export const ITEM_ARTICLES: Record<string, Record<string, string>> = {
-  "Contact list": { add: "add-an-agent", search: "find-an-agent", pin: "pin-the-list", open: "open-an-agent", edit: "edit-an-agent", hk: "list-health" },
+  "Contact list": { add: "add-an-agent", search: "find-an-agent", pin: "go-full-screen", open: "open-an-agent", edit: "edit-an-agent", hk: "list-health" },
   "Query Centre": { log: "log-a-query", find: "find-a-query", pin: "pin-the-list", open: "open-a-query", resp: "record-a-response", birds: "birds-eye-view" },
 };
 

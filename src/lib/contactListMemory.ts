@@ -4,7 +4,8 @@
  *
  * contactListMemory — what the Contact list remembers, and for how long (v19 §G).
  *
- *   - PER DEVICE (localStorage, `qh.cl.view`): the grouping, the sort, its direction, and whether the list is pinned.
+ *   - PER DEVICE (localStorage, `qh.cl.view`): the grouping, the sort, its direction, whether the list is in full screen
+ *     (v19 called it pinned; the field keeps that name) and, from v20, the view (Cards or List).
  *   - FOR THE VISIT (sessionStorage, `sa.contactList.v5`): the filters, the "At a glance" group, the search and the
  *     scroll position. Coming back within the visit restores them; a new visit starts at the top, unfiltered.
  *
@@ -43,8 +44,10 @@ export const LIST_VIEW_KEY = "qh.cl.view";
 /** v138.6's pin key for this page, and v16's before it — read once, when `qh.cl.view` has no record, then removed */
 export const OLD_PIN_KEYS = ["sa.pinList.agents", "sa.contactsFull"] as const;
 
-export interface ListView { group: GroupKey; sort: SortKey; reversed: boolean; pinned: boolean }
-export const DEFAULT_LIST_VIEW = (): ListView => ({ group: "none", sort: "surname", reversed: false, pinned: false });
+/* v20 §G — `view` joins version 1 rather than bumping it: a record without it reads List (the first-visit view), so
+   nobody's grouping, sort or full screen is thrown away for the sake of a new field */
+export interface ListView { group: GroupKey; sort: SortKey; reversed: boolean; pinned: boolean; view: ContactView }
+export const DEFAULT_LIST_VIEW = (): ListView => ({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list" });
 
 /** a stored view made safe — null when it is not this version's shape at all */
 export function sanitiseListView(raw: unknown): ListView | null {
@@ -57,11 +60,12 @@ export function sanitiseListView(raw: unknown): ListView | null {
     sort: oneOf<SortKey>(r.sort, SORT_OPTIONS.map((s) => s.key), d.sort),
     reversed: r.reversed === true,
     pinned: r.pinned === true,
+    view: oneOf<ContactView>(r.view, CONTACT_VIEWS, d.view),
   };
 }
 
 export const serialiseListView = (m: ListView): string =>
-  JSON.stringify({ v: LIST_VIEW_VERSION, group: m.group, sort: m.sort, reversed: m.reversed, pinned: m.pinned });
+  JSON.stringify({ v: LIST_VIEW_VERSION, group: m.group, sort: m.sort, reversed: m.reversed, pinned: m.pinned, view: m.view });
 
 /**
  * The device's view. Absent or unreadable reads as the defaults — except that a device with no `qh.cl.view` yet but a

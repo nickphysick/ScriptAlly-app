@@ -202,7 +202,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
   /* v20 §A/§B — CARDS OR LIST: two views of the one list. Every control and every piece of state (grouping, sort,
      filters, search, the A to Z, the jump row, full screen) is shared; switching changes only how the agents are drawn. */
-  const [view, setView] = useState<ContactView>("list");
+  /* v20 §G — remembered per device (`qh.cl.view`), read before the first paint so the other view never flashes; a first
+     ever visit opens in List */
+  const [view, setView] = useState<ContactView>(() => rememberedView.view);
+  useEffect(() => { writeListView({ view }); }, [view]);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -980,8 +983,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   };
   useEffect(() => { if (search.trim().length >= 2) tickGuide.current("search"); }, [search]);
   useEffect(() => { if (panelId) tickGuide.current("open"); }, [panelId]);
-  /* v19 §K — "Pin the list" ticks when the writer pins (the button or F): a change from unpinned to pinned on this page,
-     never a remembered pin put back on arrival */
+  /* v19 §K, v20 §G — "Go full screen" ticks when the writer goes full screen (the button or F): a change into full
+     screen on this page, never a remembered full screen put back on arrival */
   const wasPin = useRef({ full, active });
   useEffect(() => {
     const was = wasPin.current;
@@ -1009,8 +1012,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     switch (k) {
       case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
       case "search": return { el: vis(".aglist [data-cl19='toolbar'] [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
-      /* v19 §K — the toolbar's Pin button (pinned already, it reads Unpin: the spotlight still points at it) */
-      case "pin": return { el: vis(".aglist button.cl19-pin[data-cl19='pin']"), text: "Press the pin. The list becomes the whole page; press it again to come back." };
+      /* v20 §G — "Go full screen": the title row's Full screen button (in full screen there is no title row, so the
+         toolbar's Exit full screen) */
+      case "pin": return { el: vis(".aglist [data-cl20='full']") ?? vis(".aglist [data-cl20='full-tb']"), text: "Press Full screen, or F. The list becomes the whole page; Exit full screen brings the page back." };
       case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
       case "edit": {
         const edit = vis("[data-ap='panel'] [data-ap='edit']");
@@ -1429,7 +1433,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </ContactLightHeader>
         )}
         {pageState === "settling" && (
-          <ContactSkeleton controls={listHead(true)} />
+          <ContactSkeleton controls={listHead(true)} view={view}
+            titleRow={<ContactTitleRow shown={0} total={0} narrowed={false} view={view} onView={setView} onFull={togglePin} />} />
         )}
         <div className="clv-main" ref={mainColRef}>
 
