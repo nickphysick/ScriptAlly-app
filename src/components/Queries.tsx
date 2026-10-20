@@ -101,8 +101,7 @@ import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
-import { QcWeekChart138 } from "./queries/centre/QcWeekChart138";
-import { sentWeeks } from "../lib/qcSentWeeks";
+import { QcWhereCard } from "./queries/centre/QcWhere141";
 import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
 import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
@@ -144,7 +143,7 @@ import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
   inScope, matchesFilter, matchesFind, sortRows, STAGE_NAME,
   type QcFilter, type QcSort, type TileCourt,
-  whereCounts,
+  whereCounts, type WhereKey,
 } from "../lib/qcSummary";
 /* ⚠️ ALIASED: this file already has a `listGroups` — the To-do calendar's sections. */
 import { listGroups as qcListGroups, type GroupBy } from "../lib/qcCalView";
@@ -3849,6 +3848,22 @@ export const Queries: React.FC<{
   /* v141 — the four sets over the scoped rows (lib/qcSummary `whereItStands`): the hero card, the pinned band and the
      Filters menu's "Where it stands" all state these, and all three write the one `qcF138.where` */
   const qcWhereN = whereCounts(qcScoped);
+  /* v141 §B/§E — the pinned band's figures, read by the hero card's Heard back too (one computation, one number) */
+  const qcBandFig = bandFigures(qcScoped, qcNow138);
+  /* v141 §B — a card row or a band part: set (or, pressed again, clear) the one "Where it stands" filter; from the
+     card, scroll the list's top into view (the pinned list is already the page, so it does not scroll) */
+  const qcPickWhere = (k: WhereKey, scroll: boolean) => {
+    const next = qcF138.where === k ? null : k;
+    setQcF138((f) => ({ ...f, where: f.where === k ? null : k }));
+    if (!next || !scroll || qcFull) return;
+    requestAnimationFrame(() => {
+      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc140="toolbar"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const sc = tb?.closest<HTMLElement>(".wpg-scroll");
+      if (!tb || !sc) return;
+      const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
+      sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    });
+  };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
@@ -5185,7 +5200,8 @@ export const Queries: React.FC<{
       onRecord={() => onNavigate?.("queries", "Record a response")}
       logDisabled={creating}
       logRef={logTriggerRef}
-      chart={<QcWeekChart138 weeks={showGridSkeleton ? null : sentWeeks(qcScoped.map((r) => r.sentMs), qcNow138)} />}
+      chart={<QcWhereCard counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} heard={qcBandFig.more + qcBandFig.passed}
+        heardPct={qcBandFig.heardPct} where={qcF138.where} onPick={(k) => qcPickWhere(k, true)} />}
     >
       <i ref={qc138Ref} hidden />
       <BulkBar138
@@ -7400,7 +7416,7 @@ export const Queries: React.FC<{
                      never one of them). Its disc is the "Past their reply date" filter (`past`), the Overdue quick
                      pick's own state; "+ Log a query" opens the real log journey. */
                   band={qcFull ? (
-                    <QcBand140 fig={bandFigures(qcScoped, qcNow138)} overdueOn={qcF138.past} loading={showGridSkeleton}
+                    <QcBand140 fig={qcBandFig} overdueOn={qcF138.past} loading={showGridSkeleton}
                       onOverdue={() => setQcF138((f) => ({ ...f, past: !f.past }))}
                       onLog={() => onNavigate?.("queries", "Log a query")} />
                   ) : null}
