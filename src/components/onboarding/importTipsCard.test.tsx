@@ -37,7 +37,11 @@ describe("ImportTipsCard", () => {
   });
   it("shows the art through the one named constant, with no alt text", () => {
     expect(html).toContain(`src="${IMPORT_TIP_ART.src}?v=${IMPORT_TIP_ART.version}" alt=""`);
-    expect(readFileSync("public/images/import/tip-hawk.png").equals(readFileSync("design-refs/onboarding/smart-import-loader-v2/tip-hawk.png"))).toBe(true);
+    // The shipped file is the design ref's placeholder scaled to 2× the 168px slot: read its PNG header.
+    const png = readFileSync("public/images/import/tip-hawk.png");
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)], "336 × 336").toEqual([336, 336]);
+    expect(png[25], "RGBA, so the drawing keeps its transparent ground").toBe(6);
+    expect(png.length, "well under the 1.3 MB original").toBeLessThan(200_000);
   });
   it("offers Next tip and nothing that leaves or carries on", () => {
     expect(html).toContain('data-im="tip-next"');

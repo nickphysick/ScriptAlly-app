@@ -23,7 +23,8 @@ export const TIP_EVERY_MS = 7000;
 
 /**
  * ⚠️ PLACEHOLDER ILLUSTRATION. `tip-hawk.png` is the stand-in supplied with the design ref, awaiting
- * the commissioned artwork. It is 1200 × 1200 and 1.3 MB for a 168 px slot; the real file should be
- * exported near 2× that (≈336 px). Swapping it is this one constant and the file it names.
+ * the commissioned artwork. The design ref holds it at 1200 × 1200 (1.3 MB); the shipped copy is
+ * scaled to 336 × 336 — twice the 168 px slot — at 137 KB. Export the real artwork at 336 px too.
+ * Swapping it is this one constant and the file it names.
  */
-export const IMPORT_TIP_ART = { src: "/images/import/tip-hawk.png", version: "082dc088", width: 168, height: 168 } as const;
+export const IMPORT_TIP_ART = { src: "/images/import/tip-hawk.png", version: "527602b5", width: 168, height: 168 } as const;
