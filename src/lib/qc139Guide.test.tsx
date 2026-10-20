@@ -58,7 +58,7 @@ describe("the guide's six items and its words (v140 §G adds Pin the list, third
   it("in order, with the pack's copy", () => {
     expect(QC_CHECKLIST.map((i) => [i.key, i.title, i.line])).toEqual([
       ["log", "Log a query", "Who you sent it to, and when."],
-      ["find", "Find a query", "Search by agent or agency, filter, or tap a status at the top."],
+      ["find", "Find a query", "Search by agent or agency, or press Filters and tick a status."],
       ["pin", "Pin the list", "Turn the list into the whole page while you work."],
       ["open", "Open a query", "Its whole story, in one panel."],
       ["resp", "Record a response", "Try it on a practice query. Nothing is saved."],

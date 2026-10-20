@@ -112,7 +112,7 @@ export type QcGuideKey = "log" | "find" | "pin" | "open" | "resp" | "birds";
 
 export const QC_CHECKLIST: readonly ChecklistItem<QcGuideKey>[] = [
   { key: "log", title: "Log a query", line: "Who you sent it to, and when." },
-  { key: "find", title: "Find a query", line: "Search by agent or agency, filter, or tap a status at the top." },
+  { key: "find", title: "Find a query", line: "Search by agent or agency, or press Filters and tick a status." },
   /* Query Centre v140 §G — the third of six: its spotlight is the toolbar's Pin button, and it ticks when the list is pinned */
   { key: "pin", title: "Pin the list", line: "Turn the list into the whole page while you work." },
   { key: "open", title: "Open a query", line: "Its whole story, in one panel." },

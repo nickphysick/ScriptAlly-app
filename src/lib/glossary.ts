@@ -8,7 +8,8 @@
  * ⚠️ FACTS ONLY. No verdict words ("overdue", "urgent", any appraisal); a status that waits on the writer says "your move".
  * ⚠️ A STATUS'S ICON IS THE REAL `StatusDot`, drawn by the card from `status` — never a copied glyph.
  * ⚠️ COPY ASSERTS ONLY WHAT THE CODE DOES TODAY. The mock's response-policy example said a "no response means no" query
- *    "closes quietly"; nothing closes a query by itself — the To-do list SUGGESTS closing it — so the example says that.
+ *    "closes quietly"; no query closes without the writer's action — "Close it" when logging a query, or closing it
+ *    from the To-do list's suggestion — so the example says what the To-do list suggests.
  */
 import { QueryStatus } from "../types";
 
