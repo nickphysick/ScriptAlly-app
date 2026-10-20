@@ -6,6 +6,11 @@
  * `SetupFrame`:
  *
  *   ?s=reading[&hold=work|done]      the reading loader — looping, or held in one state
+ *   ?s=reading&rows=N[&speed=1|8][&stream=none][&hold=work]
+ *                                    a simulated stream (loader v2): the first chunk at 1.2 s, then a
+ *                                    row every 0.6 s (÷ speed), then tidying and the settle;
+ *                                    hold=work stops on the last row; hold=open never sends the
+ *                                    first chunk; stream=none sends no counts
  *   ?s=overview&fx=review|dupes|clear
  *   ?s=review&fx=review|dupes|clear   the three review steps, start to finish
  *   ?s=importing[&done=1]
@@ -20,6 +25,7 @@ import React, { useEffect, useState } from "react";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
 import { validateSmartImport } from "../../lib/smartImport";
+import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../lib/importEstimate";
 import { CommitOutcome } from "../../lib/smartImportCommit";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { ImportingLoader } from "./ImportingLoader";
@@ -50,7 +56,36 @@ const SAMPLE: { messy: string; name: string; agency: string; date: string; statu
 
 /** The reading loader: mock raw cells and a simulated 2.2s read, looping so both halves can be
  *  seen. `hold=work` never finishes; `hold=done` finishes once and stays on its last frame. */
-export const LabReading: React.FC<{ hold: string | null }> = ({ hold }) => {
+export const LabReading: React.FC<{ hold: string | null; rows?: number | null; speed?: number; stream?: string | null }> = ({ hold, rows, speed, stream }) => {
+  if (rows && rows > 0) return <LabReadingStream rows={rows} speed={speed && speed > 0 ? speed : 1} hold={hold} silent={stream === "none"} />;
+  return <LabReadingLoop hold={hold} />;
+};
+
+/** The simulated stream: the real reducer, fed on the measured timings (0.6 s a row, first chunk
+ *  at 1.2 s), sped up by `speed`. Nothing here calls anything. */
+export const LAB_FIRST_CHUNK_MS = 1200;
+export const LAB_ROW_MS = 600;
+const LabReadingStream: React.FC<{ rows: number; speed: number; hold: string | null; silent: boolean }> = ({ rows, speed, hold, silent }) => {
+  const [progress, setProgress] = useState<LoaderProgress>(() => applyImportUpdate(PROGRESS_START, { type: "start", rowsTotal: rows }));
+  const [complete, setComplete] = useState(false);
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const step = (u: Parameters<typeof applyImportUpdate>[1]) => setProgress((p) => applyImportUpdate(p, u));
+    const first = LAB_FIRST_CHUNK_MS / speed, row = LAB_ROW_MS / speed;
+    if (hold === "open") return () => {};
+    if (silent) timers.push(setTimeout(() => step({ type: "quiet" }), 0));
+    else for (let d = 0; d <= rows; d++) timers.push(setTimeout(() => step({ type: "rows", rows: d }), first + d * row));
+    if (hold !== "work") {
+      const end = first + rows * row + 1000 / speed;
+      timers.push(setTimeout(() => { step({ type: "result" }); setComplete(true); }, end));
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [rows, speed, hold, silent]);
+  const cards: LoaderCard[] = SAMPLE.map((s) => (complete ? { ...s } : { messy: s.messy }));
+  return <ScatterSettleLoader cards={cards} complete={complete} total={rows} onProceed={spy("proceed")} onTimeout={spy("timeout")} progress={progress} />;
+};
+
+const LabReadingLoop: React.FC<{ hold: string | null }> = ({ hold }) => {
   const [complete, setComplete] = useState(false);
   useEffect(() => {
     if (hold === "work") return;

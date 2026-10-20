@@ -433,9 +433,13 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         <span className="sa-sc-pip im-ssl-pip" aria-hidden />
         <span className="im-ssl-txt" data-im="status" aria-hidden>{bar.left}</span>
         <span className="im-ssl-track" data-im="track" aria-hidden>
+          {/* ⚠️ KEYED APART ON PURPOSE. Unkeyed, React reuses one <i>: it drops the shimmer's class while
+              still 100% wide, and the fill's width transition then runs the bar BACKWARDS from full to
+              ~3% at the first row (measured by L2: 95.3% → 78.2%). A fresh element has no width to
+              animate from. */}
           {bar.fill === null
-            ? <i className="im-ssl-shim" data-im="shimmer" />
-            : <i data-im="fill" style={{ width: `${bar.fill}%` }} />}
+            ? <i key="shim" className="im-ssl-shim" data-im="shimmer" />
+            : <i key="fill" data-im="fill" style={{ width: `${bar.fill}%` }} />}
         </span>
         <span className="im-ssl-left" data-im="left" aria-hidden>{bar.right}</span>
         <span className="sr-only" role="status">

@@ -1,0 +1,11 @@
+# Mutation proofs — tests/e2e/importLoaderV2.measure.ts (IL2_MUTATE=<name>), 20 Oct 2026
+# Each mutation breaks the property its lock reads; each turned that lock red.
+ending-slow -> L5: 1 failed (Error: expect(received).toBeLessThan(expected))
+est-text -> L1: 1 failed (Error: 40 rows)
+fill-backwards -> L2: 1 failed (Error: fill names row 1)
+old-text -> L3: 1 failed (at the forbidden-words check)
+shim-moves -> L6: 1 failed (Error: expect(received).toBe(expected) // Object.is equality)
+tips-overflow -> L4: 1 failed (Error: 1 / 5 fits its stack)
+tips-overlap -> L4: 1 failed (Error: clear of the foot bar)
+# Natural red: before the shimmer/fill elements were keyed apart, L2 failed unmutated —
+#   'rendered width at sample 1': 95.29% then 78.19% (the bar ran backwards from full).
