@@ -102,13 +102,18 @@ const band = (page: Page) => page.evaluate(() => {
 /** every row the list draws, with what the row itself says about its court and its due date */
 const rows = (page: Page) => page.evaluate(() => {
   const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
-  return [...g.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].map((r) => ({ id: r.dataset.qid!, court: r.dataset.court!, status: r.dataset.status!, due: r.dataset.due ? Number(r.dataset.due) : null }));
+  return [...g.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].map((r) => ({ id: r.dataset.qid!, court: r.dataset.court!, status: r.dataset.status!, due: r.dataset.due ? Number(r.dataset.due) : null, from: r.dataset.from ? Number(r.dataset.from) : null }));
 });
 /** the four sets, derived from the rows beside the page (see the header) */
-const setOf = (r: { court: string; status: string; due: number | null }, now: number): string => {
+/* v141.1 — RE-POINTED: v141 had Gone quiet start AT the reply date. On the nudge window (lib/nudgeWindow, stated
+   here from the row's own data-due and data-from, never by calling it): an agent-court row past its date by 28 days or
+   less is With you; past that, or 84 days in a stage with no date, it is Gone quiet. */
+const DAYMS = 86_400_000;
+const setOf = (r: { court: string; status: string; due: number | null; from?: number | null }, now: number): string => {
   if (r.court === "you") return "you";
   if (r.court === "closed") return "closed";
-  return r.due != null && r.due <= now ? "quiet" : "agent";
+  if (r.due != null) return r.due < now ? ((now - r.due) / DAYMS > 28 ? "quiet" : "you") : "agent";
+  return r.from != null && (now - r.from) / DAYMS > 84 ? "quiet" : "agent";
 };
 const chipN = (page: Page) => page.evaluate(() => Number([...document.querySelectorAll<HTMLElement>("[data-qc140='filters']")].find((e) => e.getBoundingClientRect().height > 0)?.dataset.n ?? NaN));
 /** an svg's drawing with its data attributes stripped, so a lock compares the marks and not their labels */

@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "L3",
+  "where": "1512 population: the six seeded queries are on the page",
+  "ok": true,
+  "detail": "q1411-at0 q1411-at28 q1411-before1 q1411-past1 q1411-past28h q1411-past29"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 q1411-before1 is agent",
+  "ok": true,
+  "detail": "in agent"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 q1411-at0 is agent",
+  "ok": true,
+  "detail": "in agent"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 q1411-past1 is you",
+  "ok": true,
+  "detail": "in you"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 q1411-at28 is you",
+  "ok": true,
+  "detail": "in you"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 q1411-past28h is quiet",
+  "ok": true,
+  "detail": "in quiet"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 q1411-past29 is quiet",
+  "ok": true,
+  "detail": "in quiet"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 population: the six seeded queries are on the page",
+  "ok": true,
+  "detail": "q1411-at0 q1411-at28 q1411-before1 q1411-past1 q1411-past28h q1411-past29"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 q1411-before1 is agent",
+  "ok": true,
+  "detail": "in agent"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 q1411-at0 is agent",
+  "ok": true,
+  "detail": "in agent"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 q1411-past1 is you",
+  "ok": true,
+  "detail": "in you"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 q1411-at28 is you",
+  "ok": true,
+  "detail": "in you"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 q1411-past28h is quiet",
+  "ok": true,
+  "detail": "in quiet"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 q1411-past29 is quiet",
+  "ok": true,
+  "detail": "in quiet"
+ }
+]
