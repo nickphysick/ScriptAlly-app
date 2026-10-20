@@ -112,6 +112,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* A card on a tinted band: the app's `--fc-card`. True white, which `--mk-card` (#fffefb) is not. */
   --mk-white: #ffffff;
   --mk-hero-ground: #fbf9f5;
+  /* The hero's foot and the band's top: the ref's `.hero` gradient ends on #eeebe5 and its `.peek`
+     band begins on #efece6 — a unit apart, so the join between them reads as no join at all. */
+  --mk-hero-foot: #eeebe5;
+  --mk-band-top: #efece6;
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
   --mk-lower: #f2eee8;
@@ -222,6 +226,13 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
      and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
   --mk-nearblack: #1c130f;
+  /* ⚠️ THE FACES, AS TOKENS, SO `heroCard.css` CAN READ THEM WITHOUT NAMING THEM (landing hero v3).
+     This sheet is the one place Special Elite and Source Serif 4 are named; a second file naming
+     either is a decision `marketingTokens.test.ts` fails on. */
+  --mk-f-display: "Special Elite", "Courier New", monospace;
+  --mk-f-serif: "Source Serif 4", Georgia, serif;
+  --mk-f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --mk-f-sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
   /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
      repo's no-colour-mix() rule. */
   --mk-illo-rim: rgba(162, 69, 42, 0.34);
@@ -617,179 +628,73 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
-/* ── Hero: a copy column beside the hawk's shadow ──
-   ⚠️ IT SHARES THE FEATURE ROWS' CONTAINER. 1180px capped, 56px gutters, centred — the SAME two
-   numbers `.mk-rows` uses, so the page has one gutter rather than two that merely look alike. It
-   was full-bleed with an 80px pad on the copy, which put the headline hard against the page's left
-   edge while the shadow ran off the right: one block reading as two different margins.
-   ⚠️ `overflow: hidden` STAYS AS THE BACKSTOP. The shadow is sized to sit inside the container now,
-   so nothing should need clipping — but the clip is the guarantee that the art can never reach the
-   document's scroll width, and keeping it costs nothing.
-   ⚠️ `container-type` WENT WITH THE HEADLINE THAT NEEDED IT. It existed so the size could be
-   computed from the hero's own width in cqw; the headline is three short words at a flat 56px now
-   and measures against nothing. */
-/* ⚠️ THE SLACK IS ARITHMETIC, NOT TASTE, AND THE TWO HALVES OF THE BRIEF CANNOT BOTH HOLD.
-   The row is `align-items: center` over copy that measures 308.8px at 1440, so
-     slack (each side) = (min-height - 308.8) / 2      band top = 88 + min-height
-   Less slack therefore ALWAYS means a lower band top and MORE band visible, never less. Showing
-   only 100px of band needs min-height 712, which RAISES the slack to 201.6 — more than the 175.6
-   the brief asked to close. There is no value satisfying both. 520 was chosen on the stated
-   weighting (slack first): 105.6px each side, down from 175.6, with the band's top edge at 608.
-   It is one number to change if the other reading was meant.
-   ⚠️ `overflow-x: clip; overflow-y: visible` IS THE ONLY PAIR THAT DOES THIS. `hidden` on one axis
-   forces the other to `auto` — so `overflow-x: hidden; overflow-y: visible` would give a scroll
-   container, not a spill. The x-clip is still the guarantee that the art can never reach the
-   document's scroll width; the y-visible is what lets the shadow cross into the band below. */
-/* ⚠️ NO `overflow` AT ALL NOW — IT MOVED TO `html`/`body`. The shadow is meant to spill off the
-   right edge of the PAGE, not merely out of its column, and any overflow value here makes the hero
-   the box that clips it. The scrollbar it would otherwise cause is prevented one level up, where
-   clipping costs nothing. */
-/* ⚠️ THE CAP AND THE GUTTER ARE TOKENS BECAUSE THE SHADOW'S RULE READS THEM (18 Sep). They are the
-   same two numbers `.mk-rows` uses and they have not moved; what changed is that a second rule now
-   depends on them, and a number restated in two rules for two elements is the fault this repo keeps
-   paying for. Change them here and the shadow follows.
-   ⚠️ `--mk-hero-ink` IS THE MEASURED WIDTH OF THE RENDERED HEADLINE, and it is the one input CSS
-   cannot compute for itself. "The hunt begins." at 74px Special Elite measures 617.2px of ink;
-   618 is that rounded UP, so the clearance below can never come out under its stated minimum.
-   ⚠️ IT IS A FACT ABOUT THE TYPE, SO IT DIES WITH THE TYPE. A different headline, a different size,
-   a different face — or Special Elite failing to load — and this number is wrong. It is not left to
-   a comment: `heroShadow.measure.ts` measures the ink on the rendered page and asserts the
-   clearance the rule claims, so the token going stale is a red that names it. */
-.mk-hero {
-  --mk-hero-cap: 1180px;
-  --mk-hero-pad: 56px;
-  --mk-hero-ink: 618px;
-  /* How close the shadow may come to the headline's ink, and to the viewport's edge. Two rules
-     that happen to share a value, named separately so one can move without the other. */
-  --mk-hero-clear: 24px;
-  --mk-hero-edge: 24px;
-  /* The shadow's left edge in VIEWPORT coordinates: the page's gutter, the hero's own padding, the
-     headline's ink, then the clearance. `100cqw` is the width outside the cap — see `.mk-herowrap`.
-     Declared here because the hero owns every term; read once, by the image. */
-  --mk-hero-shadow-x: calc(
-    max(0px, (100cqw - var(--mk-hero-cap)) / 2)
-    + var(--mk-hero-pad) + var(--mk-hero-ink) + var(--mk-hero-clear)
-  );
-  max-width: var(--mk-hero-cap); margin: 0 auto; padding: 0 var(--mk-hero-pad);
-  position: relative;
-  display: grid; grid-template-columns: 1fr 1fr; align-items: center;
-  min-height: 520px;
-}
-/* ⚠️ A QUERY CONTAINER, AND IT EXISTS FOR ONE MEASUREMENT: how much room there is OUTSIDE the cap.
-   The hero caps at 1180, so its own width stops carrying that information the moment the viewport
-   passes it — and the shadow's right-hand limit is stated against the viewport, not the container.
-   ⚠️ `cqw`, NOT `vw`, AND THAT IS THE WHOLE REASON FOR THE ELEMENT. `100vw` includes a classic
-   scrollbar, so on a machine that draws one the shadow's "24px from the edge" would be 24px minus
-   the scrollbar — i.e. under it. `.mk-featband` already solved this the same way for the Track
-   illustration's bleed. Do not "simplify" this to `vw`. */
-/* ⚠️ AND IT PAINTS THE HERO'S GROUND, BECAUSE IT IS THE FULL-WIDTH BOX. `.mk-hero` is capped at
-   1180, so a ground painted there would be a column, not a surface. Paper white to 62% of the
-   hero's height, then a straight fade to the oat below — arriving exactly at the foot, so the join
-   with `.mk-lower` has no edge at all.
-   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND, for the reason this file gives everywhere:
-   the shorthand resets the colour, so a gradient that fails to parse would leave the hero showing
-   whatever is behind it. The colour here is the gradient's own first stop. */
+/* ── Hero v3 (20 Oct, ref design-refs/landing-hero-v3.html): the copy, the card pile, the cast shadow ──
+   ⚠️ IT IS A 1280px FRAME SCALED TO THE WINDOW. `.mk-hero` is the frame: 1280 wide, `--mk-hero-h` tall
+   (frame units), scaled by `--mk-hero-k`; `.mk-herowrap` is the full-width box whose height is the
+   SCALED hero. `Hero.tsx`'s `size()` — the ref's — writes both, and the copy's top and scale and the
+   pile's transform, on load, on resize and once the fonts arrive. The defaults below are the 1280
+   frame at its tallest, which is what renders before that runs.
+   ⚠️ IT IS ABOVE THE BAND (`z-index: 2`) AND NOTHING CLIPS IT, so the pile's soft shadows and the tip
+   of the hawk's shadow fall onto the band below rather than being cut at the hero's foot. The page
+   cannot scroll sideways because `html`/`body` clip the x axis one level up.
+   ⚠️ THE CLEARANCE RULE IS RETIRED, NOT MOVED: `--mk-hero-ink`, `--mk-hero-clear`, `--mk-hero-edge`,
+   `--mk-hero-shadow-x`, `--mk-hero-cap`, `--mk-hero-pad` and the `cqw` container all went with the
+   shadow's own column. The shadow is cast over the words now, by design.
+   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE `background` SHORTHAND: the shorthand resets the colour,
+   so a gradient that failed to parse would leave the hero showing whatever is behind it. */
 .mk-herowrap {
-  container-type: inline-size;
+  /* The frame at its tallest, at 1:1 — what renders before `size()` writes the window's values. */
+  --mk-hero-h: 672px; --mk-hero-k: 1;
+  position: relative; z-index: 2;
+  height: calc(var(--mk-hero-h) * var(--mk-hero-k));
   background-color: var(--mk-hero-ground);
-  background-image: linear-gradient(180deg, var(--mk-hero-ground) 62%, var(--mk-lower) 100%);
+  background-image: linear-gradient(180deg, var(--mk-hero-ground) 0%, var(--mk-hero-foot) 100%);
 }
-/* ⚠️ THE STACKING CONTEXT IS LOAD-BEARING AT EVERY WIDTH NOW, not just stacked. The shadow is
-   169% of its column and grows LEFTWARD from a fixed right edge, so it reaches back across the
-   copy; the art is the later grid item, so without this it would paint a 20% wash over the
-   headline. It was already doing exactly this below 900px, where the art becomes the full hero —
-   the rule has simply stopped being a mobile special case. */
-.mk-herocopy { padding: 0 40px 0 0; min-width: 0; max-width: 560px; position: relative; z-index: 1; }
+.mk-hero {
+  position: absolute; left: 0; top: 0; width: 1280px; height: var(--mk-hero-h);
+  transform-origin: 0 0; transform: scale(var(--mk-hero-k));
+}
+/* The copy: 175 in from the frame's left, 560 wide, scaled about its own top-left by `size()`. */
+.mk-herocopy {
+  position: absolute; left: 175px; top: 150px; width: 560px;
+  display: flex; flex-direction: column; transform-origin: 0 0;
+}
+/* The pile's box IS the frame above 900px, so the pile's coordinates are the ref's. */
+.mk-herobox { position: absolute; inset: 0; pointer-events: none; }
 
-/* ⚠️ THE FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects a style element at runtime,
-   on every route, whose heading rule gives every bare h1, h2 and h3 the brand heading font with
-   !important — so without the flag this family never reaches the page. Between two important
-   declarations specificity decides, and .mk-hero .mk-herotitle (two classes) outranks the
-   injection's h1:not(.wsh-title).
-   ⚠️ A FLAT 56px NOW, AND THE 11ch MEASURE, THE cqw STEP-DOWN AND `.mk-hkeep` ALL WENT TOGETHER.
-   Every one of them existed to keep "querying campaign" — a held, unbreakable pair — inside a column
-   half the hero wide. The headline is "The hunt begins.": three short words, nothing held, nothing
-   that can be stranded. The span is no longer rendered, so a rule for it would style nothing. */
-/* ⚠️ 74px AND `nowrap`, AND THE OVERFLOW IS THE DESIGN. "The hunt begins." at this size is wider
-   than the 560px copy column, so it runs across the shadow beside it — intended, and the reason
-   the hero no longer clips. The page cannot scroll sideways because `html`/`body` clip that axis.
-   ⚠️ IT RELEASES AT 560px, NOT EARLIER. Held on one line the headline needs ~590px of ink; a phone
-   has 323px inside its gutters, so below the break it wraps at 38px rather than spilling past the
-   viewport where the clip would simply eat it. */
+/* ⚠️ THE FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects, on every route, a rule
+   giving every bare h1 (as `h1:not(.wsh-title)`, 0-1-1) the brand heading font with !important —
+   two classes outrank it. Its other rule gives every bare SPAN the body font, so the two line spans
+   inherit explicitly or they would draw in the app's sans inside a typewriter heading. */
 .mk-hero .mk-herotitle {
-  font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: 74px; white-space: nowrap;
-  line-height: 1.14; letter-spacing: -0.01em; color: var(--mk-nearblack);
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 78px; line-height: 1.04; letter-spacing: -.02em; color: var(--mk-nearblack);
   margin: 0;
 }
-/* The column carries the measure now, so the paragraph does not restate it — two caps on one
-   block is how they come to disagree. */
+.mk-hero .mk-herotitle .mk-hl { display: block; font-family: inherit; }
+/* ⚠️ THE SUB IS THE HEADLINE'S FACE, QUIETER — the ref's `data-sub="c"`, and the other four variants it
+   carries are retired. Two sentences, a line break between them; "QueryHawk" in full ink, 400 (the
+   face has one weight), on a faint rust highlighter. */
 .mk-herosub {
-  font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 21px;
-  line-height: 1.65; color: var(--mk-nearblack); margin: 26px 0 0;
+  margin: 28px 0 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 21px; line-height: 1.6;
+  letter-spacing: -.005em; color: rgba(28, 19, 15, .78); text-wrap: pretty;
 }
-.mk-heroctas { display: flex; align-items: center; gap: 22px; margin-top: 34px; }
+.mk-herosub b { font-weight: 400; color: var(--mk-nearblack); box-shadow: inset 0 -.38em 0 rgba(162, 69, 42, .16); }
+.mk-heroctas { display: flex; align-items: center; gap: 30px; margin-top: 38px; }
 /* ⚠️ BOTH DECLARE THEIR OWN FAMILY. The button is caught by the injection's plain `button` rule and
-   the link inherits from a `div` it also sets, so neither would be Source Serif by inheritance. */
-/* ⚠️ THE ONE DOMINANT ACTION ON THE SITE, AND THE ONLY NAVY BUTTON THAT IS HEAVIER THAN THE REST
-   (18 Sep). `.mk-btn--navy` — the nav, /pricing, the sign-up — keeps its 1rem regular weight on
-   purpose, so this pill reads as the page's ask and the chrome's reads as a way in. Making the
-   others match would remove the ranking rather than tidy it. */
-/* ⚠️ NO `line-height`, AND DROPPING IT IS WHAT MAKES THE BUTTON THE RIGHT HEIGHT. At `1` the pill
-   measured 52px against the ref's 59 — the padding was correct and the line box inside it was 18px
-   where `normal` gives ~25. Seven pixels, on the page's one dominant action, from a declaration
-   inherited off the old 17px pill and never re-measured. The widths matched exactly (282.6 on both)
-   the whole time, which is why it read as correct. */
+   the link inherits from a `div` it also sets, so neither would be the serif by inheritance. */
 .mk-heropill {
-  font-family: "Source Serif 4", Georgia, serif; font-size: 18px; font-weight: 600;
-  letter-spacing: .005em;
-  background: var(--mk-navy); color: #ffffff; border: 0; border-radius: 30px;
-  padding: 17px 32px; cursor: pointer;
+  font: 600 18px/1 var(--mk-f-serif); white-space: nowrap;
+  background: var(--mk-navy); color: #f4f1ea; border: 0; border-radius: 999px;
+  padding: 19px 30px; cursor: pointer;
   transition: background .18s ease;
 }
 .mk-heropill:hover { background: var(--mk-navy-hov); }
 @media (prefers-reduced-motion: reduce) { .mk-heropill { transition: none; } }
-/* ⚠️ RUST, NOT INK, AND IT IS THE SECOND HALF OF THE SAME DECISION. Beside a navy pill an ink link
-   reads as a second, quieter button; rust reads as a different KIND of thing — a way to keep
-   reading rather than a way to act. The underline stays the hairline weight so it never competes. */
+/* Rust, not ink: beside a navy pill it reads as a way to keep reading rather than a second button. */
 .mk-herolink {
-  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; color: var(--mk-rust);
-  text-decoration: underline; text-underline-offset: 5px;
-  text-decoration-color: rgba(162, 69, 42, .45);
-}
-/* ⚠️ THE IMAGE OVERFLOWS ITS COLUMN BY DESIGN, AND `max-width: none` IS LOAD-BEARING. The global
-   image reset caps every img at 100% of its box, which would cancel the width below silently. */
-.mk-heroart { position: relative; height: 100%; }
-/* ⚠️ POSITIONED BY A RULE, NOT BY THE REF'S NUMBERS (18 Sep). `design-refs/landing-v6.html` draws
-   the hero in a 1440px frame with 120px gutters; this one shares the feature rows' container — 1180
-   capped, 56px gutters — so the copy column starts 66px further right and every offset drawn there
-   puts the wing through the headline. The ref's SIZE is kept (104% of the art column) and its
-   POSITION is derived:
-
-     left   the headline's ink, plus a stated clearance — so the wing tip can never reach the words
-     width  that size, capped by the room left before the viewport's own margin
-     shrink when those two cannot both hold, the picture gives way, never the clearance
-
-   Measured at 1440: the ink ends at 803.2 and the wing starts at 828 — 24.8px clear — and the box
-   stops 32.6px short of the viewport's 24px margin, at the full 104%. The cap starts binding below
-   ~1375, where the picture shrinks instead of moving left: 458px at 1180, 278px at 1000, 179px at
-   901. Small, and never over the words.
-   ⚠️ THE FILE IS TRIMMED TO ITS OWN INK, WHICH IS WHAT LETS THIS RULE MEAN WHAT IT SAYS. With 30%
-   transparent padding in the PNG — as it had until 18 Sep — "the shadow's left edge" is a margin
-   rather than a wing, the clearance is a lie by whatever that padding measures, and the drawing
-   renders at 70% of the size the percentage claims.
-   ⚠️ IT GROWS SYMMETRICALLY, BECAUSE IT IS CENTRED. `top: 50%` plus `translateY(-50%)`, so an
-   overhang past the hero's bottom is an equal overhang past its top. The top slides under the
-   sticky nav (z-index 60, opaque ground) and is never seen; the bottom crosses into the band, which
-   is intended — `.mk-hero` sets no `overflow`, and `html`/`body` clip the x axis one level up.
-   ⚠️ `pointer-events: none` BECAUSE IT REACHES ACROSS THE COPY COLUMN AT NARROW WIDTHS. A 0.18
-   wash that eats a click on the headline is a bug nobody can see. */
-.mk-heroart img {
-  position: absolute; top: 50%;
-  left: calc(var(--mk-hero-ink) + var(--mk-hero-clear) - 100%);
-  width: max(0px, min(104%, calc(100cqw - var(--mk-hero-edge) - var(--mk-hero-shadow-x))));
-  max-width: none;
-  transform: translateY(-50%); opacity: 0.18; display: block; pointer-events: none;
+  font: 400 17px/1 var(--mk-f-serif); color: var(--mk-rust); white-space: nowrap;
+  text-decoration: none; border-bottom: 1.5px solid var(--mk-rust); padding-bottom: 3px;
 }
 
 /* ⚠️ THE RULE BELOW IS NOT THE HERO'S. `.mk-eyebrow` is the mono kicker About, Contact and Pricing
@@ -823,55 +728,20 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-fmof { opacity: .6; }
 
 
-/* ⚠️ THE HERO STACKS AT 900, THE BREAKPOINT IT HAS ALWAYS USED — the feature rows keep their own
-   1080, and the two are deliberately different numbers.
-   ⚠️ THE SHADOW SITS BEHIND THE COPY RATHER THAN BENEATH IT, at a lower opacity. Stacked beneath the
-   text it read as a second, unexplained block; behind the words at 0.12 it is texture the copy sits
-   on. The copy takes a stacking context of its own so the words stay above it. */
-@media (max-width: 900px) {
-  .mk-hero {
-    grid-template-columns: 1fr; min-height: 0; padding: 56px 26px 64px;
-  }
-  /* The stacking context is on the base rule now; only the padding is a stacked concern. */
-  .mk-herocopy { padding: 0; }
-  /* A flat step rather than a computed one: there is no unbreakable run left to fit. It is still
-     held on one line here — 40px of "The hunt begins." is ~320px of ink, which fits a 900px hero
-     with room. The release comes at 560, below. */
-  .mk-hero .mk-herotitle { font-size: 40px; }
-  .mk-heroart { position: absolute; inset: 0; height: 100%; z-index: 0; pointer-events: none; }
-  /* ⚠️ SQUARED UP HERE, OR THE SHADOW RUNS OFF A PHONE. Stacked, the art box IS the hero rather than
-     a half-width column, so the desktop -6%/112% pushed the image 22.5px past the viewport at 375.
-     It never scrolled — the hero clips it — but clipped art at the page edge is the same fault the
-     desktop change was made to fix, just quieter. */
-  /* ⚠️ `left: 0` IS STATED, NOT INHERITED. The base rule anchors from the LEFT at 54%, and leaving
-     that standing while setting `right: 0` over-constrains the box — the browser keeps `left` and
-     the width, which put the shadow 203px past a 375px viewport. It was clipped rather than
-     scrolling, but art cut off at the page edge is the fault the squaring-up was measured to fix
-     in the first place. */
-  .mk-heroart img { left: 0; right: auto; width: 100%; opacity: 0.12; }
+/* ⚠️ BELOW 900px THE HERO STACKS — a default Nick has not ruled on (landing hero v3). The frame stops
+   being scaled: the copy flows at its own sizes, and the pile sits in a box below it, centred and
+   scaled to the width by `size()`, which also sets the box's height. The two OUTERMOST back cards
+   (`.mk-lc--o`, the −9° and the +11°) are dropped, and the animation still plays. */
+@media (max-width: 899.98px) {
+  .mk-herowrap { height: auto; }
+  .mk-hero { position: relative; width: auto; height: auto; transform: none; padding: 48px 0 8px; }
+  .mk-herocopy { position: static; width: auto; transform: none; padding: 0 24px; }
+  .mk-hero .mk-herotitle { font-size: clamp(40px, 10vw, 64px); }
+  .mk-herosub { font-size: 18px; margin-top: 22px; }
+  .mk-heroctas { flex-wrap: wrap; gap: 18px 26px; margin-top: 30px; }
+  .mk-herobox { position: relative; inset: auto; height: 560px; margin-top: 16px; }
+  .mk-herobox .mk-lc--o { display: none; }
 }
-
-/* ⚠️ THE HEADLINE RELEASES HERE, AND ONLY HERE. Held on one line it needs ~590px of ink at 74px and
-   ~320px at 40px; a 375px phone leaves 323px inside its gutters, so 40px is already sitting on the
-   boundary and anything narrower spills into a clip that would simply eat the words. At 38px and
-   `normal` it wraps to two lines and stays inside the column.
-   ⚠️ AFTER THE 900px BLOCK, NOT BEFORE IT. Both are equal specificity and a media query confers
-   none, so the narrower query must come later or the wider one wins and every phone keeps 40px
-   held on one line. This stylesheet has shipped that inversion once already, in the nav. */
-@media (max-width: 560px) {
-  .mk-hero .mk-herotitle { font-size: 38px; white-space: normal; }
-}
-/* ⚠️ AND IT STEPS DOWN TWICE MORE, SO IT NEVER ENDS ON ONE WORD (17 Sep). "The hunt begins." is
-   317px at 38 with the face loaded, and a three-word headline that wraps always leaves one word
-   alone — so on a narrower phone the line gets smaller instead of breaking. 34px (284) holds one
-   line from 372 down to 341; 31px (259) holds it on a 320. Copy untouched; sizes only. */
-@media (max-width: 372px) {
-  .mk-hero .mk-herotitle { font-size: 34px; }
-}
-@media (max-width: 340px) {
-  .mk-hero .mk-herotitle { font-size: 31px; }
-}
-
 
 /* ── Features: one parchment band, centred header, seven alternating hairline rows ── */
 /* ⚠️ THE TOP PADDING HOLDS THE ECG INSIDE THE BAND. The trace is 150px tall and centred on the
@@ -907,79 +777,32 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    a fade behind a rule is a fade nobody can see. It also cut the hero's shadow in half at the one
    place the shadow is meant to cross. Deleted rather than made transparent — a border set to
    `none` is a declaration describing a decision twice. */
-/* ⚠️ 88/56 NOW, AND THE FOOT IS THE POINT (18 Sep, ref design-refs/landing-v6.html). The carousel
-   used to close this band, so 80px of bottom padding separated it from the first feature row. With
-   the carousel gone the heading IS the last thing here, and it is a question the rows answer — so
-   it sits with them rather than being held off at arm's length. */
+/* ⚠️ THE BAND PAINTS ITS OWN GROUND, AND IT IS THE ONE STATED EXCEPTION INSIDE `.mk-lower`
+   (landing hero v3). It continues the hero's lower ground — the ref's `.peek`: the band's top colour
+   fading into the lower surface over 220px — so hero and band meet with no seam and no hairline.
+   It is FULL WIDTH so the ground is a surface rather than a column; the heading is centred in it.
+   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND, for the reason this file gives everywhere.
+   ⚠️ `scroll-margin-top` IS THE NAV'S FULL HEIGHT — "See how it works" jumps here. */
 .mk-statband {
-  max-width: 1180px; margin: 0 auto; padding: 88px 56px 56px;
+  padding: clamp(40px, 5.47vw, 105px) 16px 56px;
   text-align: center;
+  background-color: var(--mk-lower);
+  background-image: linear-gradient(180deg, var(--mk-band-top), var(--mk-lower) 220px);
+  background-repeat: no-repeat;
   scroll-margin-top: var(--mk-nav-h);
 }
-/* ⚠️ THE FAMILY IS !important FOR THE SAME REASON THE HERO'S AND THE ROWS' ARE: brand.tsx injects a
-   runtime rule giving every bare h2 the brand heading font with !important, and only a selector of
-   two classes outranks it. Without the flag this heading silently draws in Playfair. */
-/* ⚠️ SPECIAL ELITE, NOT THE MONO KICKER THE OTHER PAGES USE. This eyebrow is a sentence in the
-   brand's own voice rather than a label, so it takes the display face at a size that reads as
-   speech; `.mk-eyebrow` stays what About, Contact and Pricing wear. */
-.mk-stateyebrow {
-  font-family: "Special Elite", cursive; font-weight: 400; font-size: 21px;
-  letter-spacing: .13em; text-transform: uppercase; color: var(--mk-claim-accent);
-  margin: 0 0 18px;
-}
-/* ⚠️ 33px, NOT THE REF'S 34, AND THE MISSING PIXEL IS ARITHMETIC RATHER THAN TASTE. The ref sets
-   34px inside a 1200px column; this band's column is 1068 (1180 capped, 56px gutters), and the
-   heading measures 1071.4px of ink at 34 — 3.4px over, which a `nowrap` answers by spilling into
-   the gutter rather than by wrapping, silently, with no scrollbar to report it. At 33 it measures
-   ~1040 and clears by 28. The same arithmetic said the OLD heading was already overflowing this
-   column by 31px at 31px of type, so this is a repair as well as a retune.
-   ⚠️ AND THE RELEASE BELOW MOVED WITH IT. A larger heading runs out of room sooner; the boundary is
-   measured on the rendered page, not carried over. */
+/* ⚠️ ONE LINE ABOVE 900px, AND THE CLAMP IS THE REF'S. `clamp(20px, 2.3vw, 40px)` reaches its 40px
+   ceiling at 1739px; the band has no container cap (it is the page's width), so nothing past that
+   width is type growing against a frozen measure. The family is !important for brand.tsx's h2 rule. */
 .mk-stattitle {
-  font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: 33px; line-height: 1.22; letter-spacing: -0.012em;
-  color: var(--mk-nearblack); margin: 0; white-space: nowrap;
-}
-/* ⚠️ THE STATUS CAROUSEL IS DELETED ENTIRELY (18 Sep): `.mk-carousel`, `.mk-carglyphs`,
-   `.mk-carglyph` and its `--on`/hover/focus states, `.mk-carcopy`, `@keyframes mkCarIn`,
-   `.mk-carcopyin`, `.mk-cartitle`, `.mk-carbody`, `.mk-cardashes`, `.mk-cardash`, `.mk-cardash--on`,
-   their reduced-motion block and their 900px overrides. The band is an eyebrow and a question now,
-   and the feature rows below are the answer.
-   ⚠️ THE GLYPH ITSELF IS NOT DELETED. `StatusGlyph`/`STATUS_GLYPH_COUNT` still draw the footer's
-   signature row; `.mk-footglyphs` is its rule and it was never part of this block. Checked by grep
-   before the deletion rather than inferred from the diff — the two share a prefix and nothing
-   else. */
-
-/* ⚠️ THE BOUNDARY IS 1099.98, NOT 1100, BECAUSE `max-width` IS INCLUSIVE. The brief says the heading
-   releases BELOW 1100, so at exactly 1100 it must still be held — and `@media (max-width: 1100px)`
-   matches at 1100 and wraps it a pixel early. Measured rather than reasoned: the probe read
-   `normal` at 1100 where it should have read `nowrap`.
-   ⚠️ AND A NOWRAP FAILS BY OVERFLOW RATHER THAN BY WRAPPING. Held on one line the heading needs more
-   width than the container has below this point; past it the text does not break, it spills into
-   the gutter — silently, because the spill lands inside the page's own padding rather than past the
-   viewport, so no scrollbar ever appears to report it. */
-/* ⚠️ THE BOUNDARY IS MEASURED, AND IT MOVED UP WITH THE HEADING (18 Sep). Held on one line the
-   question needs ~1040px of ink at 33px; the column is the viewport less 112px of gutters, so it
-   stops fitting below ~1152 and the release sits at 1159.98. The old 999.98 was measured for a
-   31px heading and carrying it forward would have left this band spilling into its own gutter for
-   160px of viewport — silently, because the spill lands inside the page's padding and no scrollbar
-   ever appears to report it.
-   ⚠️ AND IT IS .98, NOT A ROUND NUMBER, BECAUSE `max-width` IS INCLUSIVE. The heading must still be
-   held AT the boundary and release below it; `max-width: 1160px` matches at 1160 and wraps it a
-   pixel early. */
-@media (max-width: 1159.98px) {
-  /* ⚠️ `text-wrap` ONLY HERE, AND AFTER `white-space`. Both are shorthands that set the wrap mode,
-     so in the base rule it would quietly undo the desktop `nowrap`. Released, it stops the sentence
-     ending on "campaign." alone, as it did at 375. */
-  .mk-stattitle { white-space: normal; font-size: 27px; text-wrap: balance; }
-}
-/* On a 320 phone even balanced lines of 27px left "campaign." alone; a size down fixes the count. */
-@media (max-width: 340px) {
-  .mk-stattitle { font-size: 24px; }
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: clamp(20px, 2.3vw, 40px); line-height: 1.2;
+  color: var(--mk-nearblack); margin: 0 auto; white-space: nowrap;
 }
 @media (max-width: 900px) {
-  .mk-statband { padding: 64px 26px 48px; }
-  .mk-stateyebrow { font-size: 18px; }
+  /* `text-wrap` only here, after `white-space`: both set the wrap mode, so in the base rule it would
+     quietly undo the desktop `nowrap`. */
+  .mk-stattitle { white-space: normal; text-wrap: balance; }
 }
 /* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first

@@ -16,24 +16,28 @@
 import { CopyRun } from "./CopyRuns";
 import { supportMailto } from "../lib/companyInfo";
 
-/* ⚠️ THE HERO IS ONE HEADLINE, ONE SUB, TWO ACTIONS (brief, 16 Sep). The statement hero's copy —
-   `HERO_LEDE` on its paper slip, `HERO_GRIND`'s postscript, `HERO_TURN_LEAD` / `HERO_TURN_BODY`
-   behind the burgundy rule — went with the layout that carried it, and so did the founding panel's
-   own wording. The sign-up itself is unchanged and still mounted twice: the sealed band at the foot
-   of this page and `/founders`.
-   ⚠️ THE HEADLINE IS THREE WORDS NOW, AND THE HELD PAIR WENT WITH THE LONG ONE. "A bird's-eye view
-   of your querying campaign" needed its last two words held on one line at an 11ch measure, or it
-   broke four deep and stranded "campaign"; that phrase is the BAND's heading below, and this is a
-   short headline that wraps where it likes. `Hero.tsx` renders the string plainly — see its note. */
-export const HERO_H1 = "The hunt begins.";
+/* ⚠️ THE HERO IS ONE HEADLINE, ONE SUB, TWO ACTIONS — LANDING HERO v3 (20 Oct, ref
+   design-refs/landing-hero-v3.html). "The hunt begins." and the "expert querying companion" sub are
+   retired with the shadow-column hero that carried them; the right of the hero is the living query
+   card now (`HeroCard.tsx`). The text never animates: all four are on the page at first paint.
+   ⚠️ "No more winging it." MOVED UP FROM THE BAND'S EYEBROW, AND IT IS STILL SAID EXACTLY ONCE.
+   `BAND_EYEBROW` is retired in the same edit; a lock asserts one owner across every string the page
+   renders, so restoring the eyebrow beside this headline fails. */
+export const HERO_H1 = "No more winging it.";
+/** The two lines the headline sets on at desktop. `Hero.tsx` renders each as its own block so the
+ *  break is the design's rather than the column's; joined with a space they ARE `HERO_H1`. */
+export const HERO_H1_LINES = ["No more", "winging it."] as const;
 
-/* ⚠️ IT NO LONGER OPENS WITH "No more winging it." (18 Sep). That sentence was stated twice on one
-   page — here and as the band's eyebrow six hundred pixels below — and the ref of 18 Sep resolves
-   the repetition in the band's favour. A lock below asserts the hero does NOT open with it, which
-   is what stops the duplicate returning from a diff. */
-export const HERO_SUB =
-  "QueryHawk is your expert querying companion, ready to take you on a data-driven journey to " +
-  "land your manuscript in the right agent's hands.";
+/* ⚠️ THE SUB IS TWO SENTENCES ON TWO LINES — a line break, not two paragraphs — and the brand name
+   in the second is DATA, not markup in a string: `HERO_SUB_BRAND` is what `Hero.tsx` wraps in the
+   rust highlighter, and a lock requires it exactly once, in the second line. */
+export const HERO_SUB_LINES = [
+  "Hunting for literary agent representation?",
+  "Smarten your search with QueryHawk.",
+] as const;
+export const HERO_SUB_BRAND = "QueryHawk";
+/** The whole sub as a reader (or a screen reader) is told it. */
+export const HERO_SUB = HERO_SUB_LINES.join(" ");
 
 /** The solid pill. It goes to `/founders`, which is where the sign-up it asks for lives. */
 export const HERO_CTA = "Become a founding writer";
@@ -57,30 +61,13 @@ export const HERO_LINK = "See how it works";
 /* ══════════════ The status band, between the hero and the rows ══════════════ */
 
 /**
- * ⚠️ THIS PHRASE MOVED DOWN THE PAGE RATHER THAN BEING WRITTEN (16 Sep). It was the hero's headline
- * until the hero took "The hunt begins."; putting it here is what stops the two stating the same
- * sentence twice, six hundred pixels apart.
- *
- * ⚠️ AND IT REPLACED `PULSE_HEADING` AND `SECTION_EYEBROW`. "A finger on the pulse of your querying
- * journey" and its mono eyebrow went with the ECG band they titled — the six status marks below
- * this heading say what the trace was gesturing at, in the product's own vocabulary. The band has
- * no eyebrow, no sub-copy and no CTA: one heading and the marks.
- */
-/**
- * ⚠️ THE DUPLICATION IS RESOLVED, AND THIS IS THE OWNER THAT KEPT THE PHRASE (18 Sep). "No more
- * winging it." opened `HERO_SUB` as well, so the page stated it twice six hundred pixels apart;
- * the editorial call went to the band, and the hero's copy now begins at "QueryHawk is your expert
- * querying companion". A lock asserts it appears EXACTLY ONCE across every string the page
- * renders — which fails whichever surface reintroduces it.
- */
-export const BAND_EYEBROW = "No more winging it.";
-/**
- * ⚠️ A QUESTION NOW, NOT A CLAIM (ref design-refs/landing-v6.html). "QueryHawk gives a bird's-eye
- * view…" stated the benefit at the reader; this asks whether they want it, and the feature rows
- * below are the answer. The question mark and the apostrophe are both part of the copy.
+ * ⚠️ THE BAND HAS NO EYEBROW (landing hero v3, 20 Oct). `BAND_EYEBROW` ("No more winging it.") is
+ * DELETED: the phrase moved up to be the hero's headline, which is what keeps it said once.
+ * ⚠️ AND THE HEADING IS A STATEMENT WITH A FULL STOP, NOT THE OLD QUESTION — with the typographic
+ * apostrophe the ref sets. One line at desktop; it may wrap below 900px.
  */
 export const BAND_HEADING =
-  "Ready for a bird's-eye view of your entire querying campaign?";
+  "A bird\u2019s-eye view of your entire querying campaign.";
 
 /* ⚠️ `STATUS_STEPS` AND `StatusStep` ARE RETIRED WITH THE CAROUSEL THEY WERE WRITTEN FOR (18 Sep).
    Six titles and six descriptions of the pipeline states, rotated one at a time under the band's

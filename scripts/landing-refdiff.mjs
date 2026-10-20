@@ -6,7 +6,12 @@
  * ══ THE LANDING REF-DIFF ═════════════════════════════════════════════════════════════════════
  *
  * ⚠️ IT ASKS ONE QUESTION — "where does the ref put this, and where does the app put it" — of the
- * hero, the bird's-eye band and the vision section, at 1440, in the SAME headless browser. Neither
+ * vision section (and the nav's button), at 1440, in the SAME headless browser.
+ * ⚠️ THE HERO AND THE BAND LEFT THIS SCRIPT WITH LANDING HERO v3 (20 Oct). Their oracle is
+ * design-refs/landing-hero-v3.html now, not landing-v6.html, and they are measured against it by
+ * `tests/e2e/landingHeroV3.measure.ts`. Retired here by name: the hero's h1/sub/cta/link/shadow
+ * probes, the band's eyebrow and heading probes, the headline's sanctioned overflow, the shadow's
+ * clearance check and the two-column hero sweep — every one of them about the shadow column. Neither
  * side gets a different engine, a different device pixel ratio or a different font stack to hide
  * behind. That is the whole reason it exists: a measurement that only asks the questions its author
  * thought of confirms the author's model of the page rather than the page.
@@ -56,19 +61,11 @@ const TOL = 2;
    colour and a line-height from whatever wraps them, so comparing those across two documents with
    different body fonts produces a page of differences about nothing — noise that buries the rows
    worth reading. `box` probes are compared on geometry alone. */
-const BOX_ONLY = new Set(["band", "points", "fig1", "fig2", "fig3", "img1", "img2", "img3", "shadow"]);
+const BOX_ONLY = new Set(["band", "points", "fig1", "fig2", "fig3", "img1", "img2", "img3"]);
 
 const PROBES = [
   // section, name, app selector, ref selector
-  ["hero", "h1", ".mk-herotitle", "h1"],
-  ["hero", "sub", ".mk-herosub", ".sub"],
-  ["hero", "cta", ".mk-heropill", ".solid"],
-  ["hero", "link", ".mk-herolink", ".ghost"],
-  ["hero", "shadow", ".mk-heroart img", ".shadow"],
   ["hero", "navcta", ".mk-navright .mk-btn--navy", ".dash"],
-
-  ["band", "eyebrow", ".mk-stateyebrow", ".band .eyebrow"],
-  ["band", "heading", ".mk-stattitle", ".band h2"],
 
   ["vision", "band", ".mk-vision", ".vision"],
   ["vision", "h2", ".mk-visionh2", ".vision h2"],
@@ -97,14 +94,7 @@ const PROBES = [
  * FIELD rather than a tolerance is what keeps the size claims live: `h1.w` is still compared.
  */
 const EXPECTED = [
-  [/^hero\.\w+\.(x|right|cx)$/, "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120"],
-  [/^band\.\w+\.(x|right|cx|w)$/, "same container — the band's column is 1068 against the ref's 1200"],
-  [/^hero\.h1\.(fontSize|w|h|lineHeight|letterSpacing|bottom|y)$/, "the headline stays at 74px; the ref draws 68"],
-  [/^hero\.sub\.(fontSize|w|h|lineHeight|y|bottom|maxWidth)$/, "the sub stays 21px/1.65; the ref draws 19/1.7"],
-  [/^hero\.(cta|link|shadow|navcta)\.(y|bottom|h|w)$/, "follows the headline and sub above it, and the narrower art column"],
-  [/^hero\.shadow\.(fontSize|lineHeight|letterSpacing|color)$/, "not text"],
-  [/^band\.eyebrow\.(fontSize|letterSpacing|h|y|bottom|lineHeight)$/, "the eyebrow is left as it is: 21px/.13em against the ref's 17/.2em"],
-  [/^band\.heading\.(fontSize|h|y|bottom|lineHeight|letterSpacing)$/, "33px, not the ref's 34 — 34 overflows a 1068px column by 3.4px"],
+  [/^hero\.navcta\.(x|right|cx|y|bottom|h|w)$/, "the nav's own layout; the ref draws a different nav"],
   [/^vision\.(band|h2|points|fig\d|img\d|h3[abc]|p\d|more)\.(x|right|cx|y|bottom)$/, "the band sits lower on a page whose hero and band differ above it, and 66px further in"],
   [/^vision\.(points|fig\d|p\d|h3[abc])\.w$/, "the column is 318.7px against the ref's 362.7 — the page's own container"],
   [/^vision\.img2\.w$/, "the current artwork carries a paper aeroplane the ref's older export cropped off"],
@@ -274,7 +264,6 @@ async function run() {
     const out = await page.evaluate(READ, {
       probes: PROBES.map(([s, n, a, r]) => [s, n, isRef ? r : a]),
       ink: {
-        h1: pick("hero", "h1"), bandHeading: pick("band", "heading"),
         vh3a: pick("vision", "h3a"), vh3b: pick("vision", "h3b"), vh3c: pick("vision", "h3c"),
         vp1: pick("vision", "p1"), vp2: pick("vision", "p2"), vp3: pick("vision", "p3"),
       },
@@ -340,12 +329,7 @@ async function run() {
   console.log("\nINK — rendered text against the column that must hold it:");
   console.log("  " + "run".padEnd(14) + "app lines/widest/column/over".padEnd(34) + "ref lines/widest/column/over");
   const fmt = (i) => i ? `${i.lines}  ${num(i.widest)} / ${num(i.column)}  ${num(i.overflow) > 0 ? "OVER " + num(i.overflow) : "ok"}` : "—";
-  /* ⚠️ THE HEADLINE'S OVERFLOW IS THE DESIGN, AND IT IS THE ONE EXEMPTION. "The hunt begins." at
-     74px is deliberately wider than its column so it runs across the shadow beside it; the page
-     cannot scroll sideways because `html`/`body` clip that axis. What must hold is not that it
-     stays inside its box but that the SHADOW stays out of its way — asserted below, in pixels, as
-     the thing the rule actually claims. Exempting it without that check would be a hole. */
-  const SANCTIONED = new Set(["h1"]);
+  const SANCTIONED = new Set();
   const spilling = [];
   for (const name of Object.keys(appData.__ink)) {
     const a = appData.__ink[name], r = refData.__ink[name];
@@ -353,40 +337,6 @@ async function run() {
     console.log("  " + name.padEnd(14) + fmt(a).padEnd(34) + fmt(r) + (SANCTIONED.has(name) && a && a.overflow > 0.5 ? "   · overflow is the design — see the clearance below" : ""));
   }
 
-  /* ⚠️ THE CLEARANCE IS THE HERO'S WHOLE RULE, AND NO BOX COMPARISON CAN SEE IT. The headline's ink
-     leaves its element, so the gap between the words and the wing is a fact about a text run and an
-     image — two things that never appear in one rect. Measured here, on both sides, at the width
-     the ref was drawn at. */
-  const inkRight = await (async () => {
-    const page = await ctx.newPage();
-    await page.goto(appUrl, { waitUntil: "load" });
-    await page.waitForSelector(".mk-herotitle", { state: "attached", timeout: 30000 });
-    await page.evaluate(() => document.fonts.ready);
-    const v = await page.evaluate(() => {
-      const h = document.querySelector(".mk-herotitle");
-      const range = document.createRange();
-      range.selectNodeContents(h);
-      const rects = Array.from(range.getClientRects()).filter((r) => r.width > 0);
-      const shadow = document.querySelector(".mk-heroart img").getBoundingClientRect();
-      return {
-        ink: Math.max.apply(null, rects.map((r) => r.right)),
-        shadowLeft: shadow.x, shadowRight: shadow.right, shadowW: shadow.width,
-        viewport: document.documentElement.clientWidth,
-      };
-    });
-    await page.close();
-    return v;
-  })();
-  const clear = inkRight.shadowLeft - inkRight.ink;
-  const edge = inkRight.viewport - inkRight.shadowRight;
-  console.log("\nHERO SHADOW — placed by rule, so the rule is what is measured:");
-  console.log(`  headline ink ends   ${num(inkRight.ink)}`);
-  console.log(`  wing tip starts     ${num(inkRight.shadowLeft)}   clearance ${num(clear)}  (minimum 24)`);
-  console.log(`  shadow right edge   ${num(inkRight.shadowRight)}   from viewport ${num(edge)}  (minimum 24)`);
-  console.log(`  shadow width        ${num(inkRight.shadowW)}   (104% of the art column when both margins hold)`);
-  const heroFaults = [];
-  if (clear < 24) heroFaults.push(`the wing is ${num(24 - clear)}px inside the headline's clearance`);
-  if (edge < 24) heroFaults.push(`the shadow is ${num(24 - edge)}px inside the viewport's margin`);
   if (showAll) table(expected, "EXPECTED — agreed differences");
   else console.log(`\nexpected differences: ${expected.length} (run with --all to list them)`);
   table(misses, "MISSES — over " + TOL + "px and not agreed");
@@ -402,54 +352,9 @@ async function run() {
       : "\n✗ self-test: the harness did NOT report a moved probe — it proves nothing");
     process.exit(caught ? 0 : 1);
   }
-  /* ── the hero's rule at every two-column width ───────────────────────────────────────────────
-     ⚠️ THE REF CANNOT ANSWER THIS AND THAT IS WHY IT IS HERE. It is a fixed 1440 frame; the rule it
-     was translated into claims something at EVERY width the hero is two columns, and a law that
-     holds at exactly one width is a coincidence. The shrink is the half worth watching: past ~1375
-     the 104% stops fitting and the picture has to give way rather than the clearance. */
-  const SWEEP = [1920, 1600, 1440, 1375, 1280, 1180, 1000, 901];
-  console.log("\nHERO SWEEP — the rule at every width the hero is two columns:");
-  console.log("  " + "width".padEnd(8) + "ink ends".padEnd(11) + "wing at".padEnd(10) + "clear".padEnd(8) +
-    "shadow w".padEnd(11) + "from edge".padEnd(11) + "scrollW");
-  for (const w of SWEEP) {
-    const page = await ctx.newPage();
-    await page.setViewportSize({ width: w, height: HEIGHT });
-    await page.goto(appUrl, { waitUntil: "load" });
-    await page.waitForSelector(".mk-herotitle", { state: "attached", timeout: 30000 });
-    await page.evaluate(() => document.fonts.ready);
-    const v = await page.evaluate(() => {
-      const h = document.querySelector(".mk-herotitle");
-      const range = document.createRange();
-      range.selectNodeContents(h);
-      const rects = Array.from(range.getClientRects()).filter((r) => r.width > 0);
-      const img = document.querySelector(".mk-heroart img").getBoundingClientRect();
-      const grid = getComputedStyle(document.querySelector(".mk-hero")).gridTemplateColumns;
-      return {
-        ink: Math.max.apply(null, rects.map((r) => r.right)),
-        x: img.x, right: img.right, w: img.width,
-        viewport: document.documentElement.clientWidth,
-        scrollW: document.documentElement.scrollWidth,
-        twoCol: grid.split(" ").length === 2,
-      };
-    });
-    await page.close();
-    if (!v.twoCol) { console.log("  " + String(w).padEnd(8) + "stacked — the rule does not apply"); continue; }
-    const c = v.x - v.ink, e = v.viewport - v.right;
-    console.log("  " + String(w).padEnd(8) + num(v.ink).toString().padEnd(11) + num(v.x).toString().padEnd(10) +
-      num(c).toString().padEnd(8) + num(v.w).toString().padEnd(11) + num(e).toString().padEnd(11) + v.scrollW);
-    if (c < 24) heroFaults.push(`${w}: the wing is ${num(24 - c)}px inside the headline's clearance`);
-    if (e < 24) heroFaults.push(`${w}: the shadow is ${num(24 - e)}px inside the viewport's margin`);
-    if (v.scrollW > w) heroFaults.push(`${w}: the page scrolls sideways (scrollWidth ${v.scrollW})`);
-  }
-
   await browser.close();
   server.close();
 
-  if (heroFaults.length) {
-    console.log("\n✗ the hero's placement rule is broken:");
-    heroFaults.forEach((x) => console.log("   " + x));
-    process.exit(1);
-  }
   if (spilling.length) {
     console.log("\n✗ text is spilling out of its column — a `nowrap` that fails by overflow:");
     spilling.forEach((x) => console.log("   " + x));

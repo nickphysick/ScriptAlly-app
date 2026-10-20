@@ -1,6 +1,13 @@
 /**
- * Landing colours v2 — the public site in the app's colours. Locks LC2 N1–N3, H1–H2, S1–S2, V1,
+ * Landing colours v2 — the public site in the app's colours. Locks LC2 N1–N3, H1, S1, V1,
  * F1–F2, T1 (K1 and C1 are unit locks, in src/marketing/marketingTokens.test.ts).
+ *
+ * ⚠️ H2 AND S2 ARE RETIRED BY LANDING HERO v3 (20 Oct), NOT LOOSENED. H2 held the shadow column's
+ * picture to its pre-pack box and its .18 opacity; S2 held every box on the landing page to the
+ * pre-pack geometry. The hero they describe is gone — the shadow is cast over a card pile now and
+ * every section below the hero moved with the new hero's height — so both are claims about a page
+ * that no longer exists. Their replacements are `landingHeroV3.measure.ts` (the cast shadow, the
+ * hero's sizing) and N3 here, which still holds the anchor landing. H1 is re-pointed to v3's ground.
  *
  * The public pages need no sign-in, so this file opens them itself rather than through `openRoute`.
  *
@@ -37,9 +44,7 @@ const MUTATIONS: Record<string, string> = {
   N1: ".mk-navwrap.mk-scrolled{background:rgba(247,244,238,.92)!important;backdrop-filter:blur(8px)!important}",
   N3: ".mk-navword{font-size:40px!important}",
   H1: ".mk-herowrap{background:#1b2433!important}",
-  H2: ".mk-heroart img{opacity:.5!important}",
   S1: ".mk-sheet{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}",
-  S2: ".mk-statband{padding-bottom:76px!important}",
   V1: ".mk-vision{background-color:#ffffff!important}",
   F1: ".mk-claimcard .mk-betamsg{color:#3a1c14!important;background:none!important}",
   F2: ".mk-claimform input{color:#f4eee5!important}.mk-betanote{color:rgba(244,238,229,.62)!important}" +
@@ -181,8 +186,8 @@ async function navHeights(page: Page) {
 const BOXES = [
   ".mk-navwrap", ".mk-nav", ".mk-logo", ".mk-links button", ".mk-login", ".mk-navright .mk-btn", ".mk-burger",
   ".mk-herowrap", ".mk-hero", ".mk-herocopy", ".mk-herotitle", ".mk-herosub", ".mk-heroctas", ".mk-heropill",
-  ".mk-herolink", ".mk-heroart img",
-  ".mk-statband", ".mk-stateyebrow", ".mk-stattitle",
+  ".mk-herolink",
+  ".mk-statband", ".mk-stattitle",
   ".mk-featband", ".mk-rows", ".mk-frow", ".mk-frow h3", ".mk-fcopy", ".mk-fcopy p", ".mk-rowillo",
   ".mk-vision", ".mk-visionin", ".mk-visionh2", ".mk-visionpoints", ".mk-vfig", ".mk-vfig img", ".mk-vh3",
   ".mk-vbody", ".mk-visionmore",
@@ -192,13 +197,6 @@ const BOXES = [
   ".mk-foot", ".mk-footinner", ".mk-footgrid", ".mk-footbrand", ".mk-footmark", ".mk-wordmark", ".mk-foottag",
   ".mk-footglyphs", ".mk-footcol", ".mk-footcol button", ".mk-footbase", ".mk-footmail",
 ];
-
-/**
- * The one stated exception to ±1. The vision band's two 1px edge rules were deleted and its inner
- * box took those two pixels as padding, so the band's own box and everything below it are
- * unmoved while this inner box is 1px higher and 2px taller.
- */
-const S2_TOLERANCE: Record<string, number> = { ".mk-visionin": 2 };
 
 async function boxes(page: Page) {
   /* Walk the page once so every lazy picture has its box, then read in document coordinates. */
@@ -220,13 +218,6 @@ async function boxes(page: Page) {
     return out;
   }, BOXES);
 }
-
-const shadow = (page: Page) => page.evaluate(() => {
-  const img = document.querySelector(".mk-heroart img") as HTMLElement | null;
-  if (!img) return null;
-  const r = img.getBoundingClientRect();
-  return { box: [r.x, r.y + window.scrollY, r.width, r.height], opacity: getComputedStyle(img).opacity };
-});
 
 /** `See how it works` → #pulse: the gap between the nav's bottom edge and the section's top. */
 async function anchorGap(page: Page) {
@@ -252,7 +243,7 @@ const shot = async (page: Page, name: string, fullPage = false) => {
 test.describe("LC2", () => {
   test("capture: the pre-pack geometry", async ({ page }) => {
     test.skip(!CAPTURE, "capture runs once, on request");
-    const g: Record<string, unknown> = { nav: {}, boxes: {}, shadow: {}, anchor: {} };
+    const g: Record<string, unknown> = { nav: {}, boxes: {}, anchor: {} };
     for (const route of ROUTES) for (const vp of NAV_VPS) {
       await open(page, route, vp);
       (g.nav as Record<string, unknown>)[route + "@" + key(vp)] = await navHeights(page);
@@ -260,7 +251,6 @@ test.describe("LC2", () => {
     for (const vp of VPS) {
       await open(page, "/", vp);
       (g.boxes as Record<string, unknown>)[key(vp)] = await boxes(page);
-      (g.shadow as Record<string, unknown>)[key(vp)] = await shadow(page);
       (g.anchor as Record<string, unknown>)[key(vp)] = await anchorGap(page);
     }
     mkdirSync(resolve(OUT, "baseline"), { recursive: true });
@@ -348,38 +338,33 @@ test.describe("LC2", () => {
     }
   });
 
-  test("H1 the hero is paper white fading to oat, with ink type", async ({ page }) => {
+  /* RE-POINTED (landing hero v3): the hero's ground is the ref's `.hero` gradient now — paper white
+     at the top to `--mk-hero-foot` (#eeebe5) at its foot — rather than white to 62% and the oat. */
+  test("H1 the hero is paper white fading to its foot, with ink type", async ({ page }) => {
     test.skip(CAPTURE);
     for (const vp of VPS) {
       await open(page, "/", vp);
-      /* The shadow is hidden for this one reading: it is a wash over the ground, and H2 holds it. */
-      await page.addStyleTag({ content: ".mk-heroart img{visibility:hidden!important}" });
+      /* The pile and its shadow are hidden for this one reading: the claim is the ground. */
+      await page.addStyleTag({ content: ".mk-herobox{visibility:hidden!important}" });
       const hero = await page.evaluate(() => {
         const r = document.querySelector(".mk-herowrap")!.getBoundingClientRect();
         return { top: r.top, h: r.height, color: getComputedStyle(document.querySelector(".mk-herotitle")!).color };
       });
-      expect(hero.top + hero.h, "the hero's foot is on screen").toBeLessThanOrEqual(vp.height);
-      const [top, third, foot] = await pixels(page, [
-        [24, hero.top + 24], [24, hero.top + hero.h * 0.3], [24, hero.top + hero.h - 1],
-      ]);
-      console.log(`LC2 H1 @${vp.width}`, JSON.stringify({ top, third, foot, title: hero.color }));
-      expect(near(top, [251, 249, 245]), `top ${top}`).toBe(true);
-      expect(near(third, [251, 249, 245]), `30% ${third}`).toBe(true);
-      expect(near(foot, [242, 238, 232]), `foot ${foot}`).toBe(true);
+      const [top] = await pixels(page, [[24, hero.top + 24]]);
+      /* Stacked, the hero is taller than a phone's screen by design (the copy, then the pile), so its
+         foot is brought on screen before it is read rather than assumed to be there. */
+      const footY = await page.evaluate(() => {
+        const r = document.querySelector(".mk-herowrap")!.getBoundingClientRect();
+        if (r.bottom > innerHeight) window.scrollTo(0, scrollY + r.bottom - innerHeight + 40);
+        return new Promise<number>((done) => requestAnimationFrame(() =>
+          done(document.querySelector(".mk-herowrap")!.getBoundingClientRect().bottom - 1)));
+      });
+      expect(footY, "the hero's foot is on screen").toBeLessThanOrEqual(vp.height);
+      const [foot] = await pixels(page, [[24, footY]]);
+      console.log(`LC2 H1 @${vp.width}`, JSON.stringify({ top, foot, title: hero.color }));
+      expect(near(top, [251, 249, 245], 2), `top ${top}`).toBe(true);
+      expect(near(foot, [238, 235, 229], 2), `foot ${foot}`).toBe(true);
       expect(hero.color).toBe("rgb(28, 19, 15)");
-    }
-  });
-
-  test("H2 the shadow is the same picture in the same place", async ({ page }) => {
-    test.skip(CAPTURE);
-    const base = baseline();
-    for (const vp of VPS) {
-      await open(page, "/", vp);
-      const now = await shadow(page);
-      expect(now, "the shadow is rendered").toBeTruthy();
-      expect(now!.opacity).toBe(vp.width <= 900 ? "0.12" : "0.18");
-      const was = base.shadow[key(vp)].box as number[];
-      now!.box.forEach((v, i) => expect(Math.abs(v - was[i]), `shadow box[${i}] @${vp.width}: ${v} vs ${was[i]}`).toBeLessThanOrEqual(0.5));
     }
   });
 
@@ -420,29 +405,6 @@ test.describe("LC2", () => {
     }
     console.log("LC2 S1 routes x widths", read);
     expect(read).toBe(ROUTES.length * VPS.length);
-  });
-
-  test("S2 nothing on the landing page moved", async ({ page }) => {
-    test.skip(CAPTURE);
-    const base = baseline();
-    for (const vp of [VPS[0], VPS[2]]) {
-      await open(page, "/", vp);
-      const now = await boxes(page);
-      const was = base.boxes[key(vp)] as Record<string, number[][]>;
-      let compared = 0;
-      const moved: string[] = [];
-      for (const sel of BOXES) {
-        expect(now[sel].length, `${sel} @${vp.width}: population`).toBe(was[sel].length);
-        now[sel].forEach((b, i) => {
-          compared++;
-          const d = b.map((v, k) => Math.abs(v - was[sel][i][k]));
-          if (Math.max(...d) > (S2_TOLERANCE[sel] ?? 1)) moved.push(`${sel}[${i}] ${b.map((v) => v.toFixed(1))} was ${was[sel][i].map((v) => v.toFixed(1))}`);
-        });
-      }
-      console.log(`LC2 S2 @${vp.width}: ${compared} boxes compared, ${moved.length} moved`);
-      expect(compared).toBeGreaterThan(60);
-      expect(moved, moved.join("\n")).toEqual([]);
-    }
   });
 
   test("V1 the vision band is stone, holding three white cards", async ({ page }) => {

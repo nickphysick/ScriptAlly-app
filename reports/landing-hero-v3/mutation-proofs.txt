@@ -1,0 +1,19 @@
+LH1 -> LH1 :   1 failed  ::  Error: @1440: the sub's face|
+LH1b -> LH1 :   1 failed  ::  Error: @1440: two lines|
+LH2 -> LH2 :   1 failed  ::  Error: the feed is the writer's to scroll| Expected: "auto"| Received: "hidden"|
+LH3 -> LH3 :   1 failed  ::  Error: at 0ms: [{"s":".mk-herotitle","op":0.25,"anims":1},{"s":".mk-herosub","op":1,"anims":0},{"s":".mk-heroctas","op":1,"anims":0}]| Expected: true| Received: false|
+LH4 -> LH4 :   1 failed  ::  Error: no day is held for more than 2.5s| Expected: <= 2500| Received: 2538|
+LH5 -> LH5 :   1 failed  ::  Error: nothing but the form fills the space over the card|
+LH6 -> LH6 :   1 failed  ::  Error: @1204: …and ends above the fold| Expected: <= 594| Received: 1024.984375|
+LH6b -> LH6 :   1 failed  ::  Error: @1204: the card's centre on the copy's| Expected: <= 8| Received: 56.28466796875|
+LH7 -> LH7 :   1 failed  ::  Error: expect(received).toBe(expected) // Object.is equality| Expected: "0.2"| Received: "0.5"|
+LH7b -> LH7 :   1 failed  ::  Error: @1920: not cropped on the left| Expected: >= 0| Received: -305.97265625|
+LH8 -> LH8 :   1 failed  ::  Error: expect(received).toBe(expected) // Object.is equality| Expected: "true"| Received: null|
+--- unit locks
+brand-not-highlighted :  × landing copy — verbatim locks > the sub, word for word: two sentences, the brand once, in the second 7ms|
+cast-not-multiplied :  × the hero is a 1280px frame scaled to the window, with the pile cast over it > the shadow is cast over the pile: multiplied, .2, blurred, turned, and it takes no clicks 5ms|
+pile-not-aria-hidden :  × the hero > carries both actions, and the pile and its shadow are decorative 27ms|
+line-spans-take-brand-sans :  × the hero is a 1280px frame scaled to the window, with the pile cast over it > the headline: the typewriter face, important, 78px/1.04, two block lines 13ms|
+eyebrow-restored :  × the status band: one line, and nothing that moves > renders the heading, word for word, and no eyebrow 11ms|
+    Error: top 27,36,51
+  1 failed

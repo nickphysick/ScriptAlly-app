@@ -32,8 +32,8 @@ import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FEATURE_ROWS,
-  VISION_HEADING, VISION_POINTS, VISION_LINK, BAND_EYEBROW, BAND_HEADING } from "./landingCopy";
+import { HERO_H1, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK, FEATURE_ROWS,
+  VISION_HEADING, VISION_POINTS, VISION_LINK, BAND_HEADING } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
 
@@ -47,7 +47,10 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      words sat inside a `nowrap` span, so the sentence was not one uninterrupted run of text in the
      markup and the landmark had to avoid the split. Nothing is held any more — see the hero's own
      describe, which asserts that absence. */
-  ["/", () => <Landing onNavigate={noNavigate} />, "The hunt begins."],
+  /* ⚠️ RETARGET, SAME LAW (landing hero v3): the h1 is two block spans now, so the sentence is not one
+     uninterrupted run in the markup; the sub's first sentence is, and it is hero copy that only this
+     route renders. The h1's own text is asserted whole by the hero describe below. */
+  ["/", () => <Landing onNavigate={noNavigate} />, "Hunting for literary agent representation?"],
   /* Retarget, same law: the page is three tiers now and its h1 changed with them. */
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Pick the plan that fits"],
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
@@ -434,14 +437,11 @@ describe("the nav's condense is triggered by sentinels ahead of the nav", () => 
 });
 
 /**
- * ⚠️ THE HERO IS A HEADLINE, A SUB AND TWO ACTIONS (brief, 16 Sep). `HERO_H1` stays one locked
- * string; `Hero` cuts it at its second-to-last space so the final two words can be held on one line
- * at the brief's 11ch measure. The risk that buys is a silent copy change — a dropped space, a lost
- * apostrophe — which no verbatim lock on the constant can see, because the constant is still right.
- * So this reads the RENDERED h1, strips the markup, and requires the sentence back.
- *
- * Where the lines break, and that the held pair stays inside its column, are rendered-page claims
- * and are measured rather than read out of a file.
+ * ⚠️ THE HERO IS A HEADLINE, A SUB AND TWO ACTIONS, AND A DECORATIVE PILE (landing hero v3, 20 Oct).
+ * `HERO_H1` renders as two block lines; the sub as two lines with the brand in a `<b>`. The risk both
+ * buy is a silent copy change — a dropped space, a lost word — which no verbatim lock on the constant
+ * can see, because the constant is still right. So these read the RENDERED markup, strip it, and
+ * require the copy back.
  */
 describe("the hero", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
@@ -452,27 +452,47 @@ describe("the hero", () => {
   };
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
-  it("reads as the whole sentence, with nothing held", () => {
+  it("reads as the whole sentence, on its two lines", () => {
     const h = heading();
     expect(unesc(h.replace(/<[^>]+>/g, "")), "word for word").toBe(HERO_H1);
-    /* ⚠️ THE ABSENCE IS THE CLAIM NOW. The held pair stopped a four-line headline stranding
-       "campaign"; on three short words the identical span strands "The" instead, because the break
-       has to fall in front of a run that cannot break inside. It was removed with the headline that
-       needed it, and this is what stops it returning from a diff. */
-    expect(h, "no held run — a three-word headline wraps where it likes").not.toContain("mk-hkeep");
+    expect(h.match(/class="mk-hl"/g) ?? [], "two block lines").toHaveLength(2);
+    expect(html().match(/<h1\b/g) ?? [], "the page's only h1").toHaveLength(1);
   });
 
-  it("carries the sub and both actions, and the shadow is decorative", () => {
+  it("the sub is two lines, broken after the question, with the brand highlighted once", () => {
+    const m = html().match(/<p class="mk-herosub">([\s\S]*?)<\/p>/);
+    expect(m, "the hero renders p.mk-herosub").toBeTruthy();
+    const lines = m![1].split(/<br\s*\/?>/);
+    expect(lines, "one line break, not two paragraphs").toHaveLength(2);
+    expect(unesc(lines[0].replace(/<[^>]+>/g, ""))).toBe(HERO_SUB_LINES[0]);
+    expect(unesc(lines[1].replace(/<[^>]+>/g, ""))).toBe(HERO_SUB_LINES[1]);
+    expect(lines[1].match(/<b>([^<]*)<\/b>/g), "the brand, and only the brand, is the highlight").toEqual(["<b>" + HERO_SUB_BRAND + "</b>"]);
+  });
+
+  it("carries both actions, and the pile and its shadow are decorative", () => {
     const h = html();
-    /* ⚠️ UNESCAPED FIRST, AND THE OLD SUB HID THIS. `renderToStaticMarkup` writes an apostrophe as
-       `&#x27;`, so a raw `toContain` fails on a page that renders the string perfectly. The previous
-       sub contained no apostrophe; this one ends "in the right agent's hands", so the comparison
-       had to start unescaping the markup rather than the assertion being loosened. */
-    expect(unesc(h)).toContain(HERO_SUB);
     expect(h).toContain(HERO_CTA);
     expect(h).toContain(HERO_LINK);
     expect(h, "the link is an in-page jump to the section break").toContain('href="#pulse"');
-    expect(h, "an empty alt, because the shadow says nothing the copy does not").toMatch(/<img[^>]*src="\/images\/hawk-shadow\.png\?v=[0-9a-f]{8}"[^>]*alt=""/);
+    expect(h, "the whole pile is hidden from assistive tech").toMatch(/<div class="mk-hc-pile" aria-hidden="true">/);
+    expect(h, "an empty alt, because the shadow says nothing the copy does not").toMatch(/<img[^>]*class="mk-lc-cast"[^>]*src="\/images\/hawk-shadow\.png\?v=[0-9a-f]{8}"[^>]*alt=""/);
+  });
+
+  /**
+   * ⚠️ WHAT RENDERS WITHOUT SCRIPT — before hydration, to a crawler, under reduced motion — IS THE
+   * STORY'S END STATE: Day 99, "With you", "Full requested", all five lines, the final panel and its
+   * footer. The animation starts from an earlier state; the markup is where it ends.
+   */
+  it("renders the card's end state before any script runs", () => {
+    const h = unesc(html());
+    for (const s of ["With you", "Day 99", "Full requested", "Eleanor wants the full! Send it by 5 July.", "Send the full by 5 July", "Mark full sent",
+                     "Query sent", "Partial requested", "Partial sent", "You nudged Eleanor", "Full manuscript"]) {
+      expect(h, s).toContain(s);
+    }
+    expect(h, "the feed is the writer's to scroll").toMatch(/class="mk-lc-tlv mk-lc-tlv--scroll"/);
+    expect(h, "the final panel is the one showing").toMatch(/class="mk-lc-panel mk-lc-panel--final"/);
+    expect(h.match(/class="mk-lc mk-lc--back/g) ?? [], "four cards behind").toHaveLength(4);
+    for (const name of ["Greg Panetta", "Tessa Rowe", "Amira Khan", "Tom Ellery", "Eleanor Whitfield"]) expect(h).toContain(name);
   });
 
   /**
@@ -488,10 +508,11 @@ describe("the hero", () => {
     expect(html()).toContain('src="/images/hawk-shadow.png?v=' + version + '"');
   });
 
-  /** ⚠️ Asserting the ABSENCE is what stops the statement hero returning from a diff. */
-  it("carries none of the statement hero it replaced", () => {
+  /** ⚠️ Asserting the ABSENCE is what stops the statement hero, and the shadow column after it, returning from a diff. */
+  it("carries none of the heroes it replaced", () => {
     const h = html();
-    for (const gone of ["mk-statement", "mk-heroburst", "mk-slip", "mk-lede", "mk-turn", "mk-found", "mk-illoart"]) {
+    expect(h, "the shadow-column hero's headline").not.toContain("The hunt begins.");
+    for (const gone of ["mk-statement", "mk-heroburst", "mk-slip", "mk-lede", "mk-turn", "mk-found", "mk-illoart", "mk-heroart"]) {
       expect(h, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
     }
     expect(h).not.toContain("You&#x27;ve written a book.");
@@ -506,15 +527,18 @@ describe("the hero", () => {
  * diff. The glyph MARKS are not forbidden — the footer draws all six — so this is scoped to the
  * band rather than to the page.
  */
-describe("the status band: a question, and nothing that moves", () => {
+describe("the status band: one line, and nothing that moves", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
   const band = () => sliceBetween(html(), 'class="mk-statband"', 'id="mk-features"', "the status band");
 
-  it("renders the eyebrow and the heading, word for word", () => {
+  /* RETARGET (landing hero v3): the eyebrow is retired — "No more winging it." is the hero's
+     headline — so the band is its heading alone, and the absence is asserted. */
+  it("renders the heading, word for word, and no eyebrow", () => {
     const b = band();
     const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/'/g, "&#x27;");
-    expect(b).toContain(esc(BAND_EYEBROW));
     expect(b).toContain(esc(BAND_HEADING));
+    expect(b, "the eyebrow moved up to be the hero's headline").not.toContain("No more winging it.");
+    expect(b, "no eyebrow element").not.toMatch(/["\s`]mk-stateyebrow["\s`]/);
     expect(b, "the anchor the hero's link jumps to").toBeTruthy();
     expect(html(), "…and the id itself, which the hero depends on").toContain('id="pulse"');
   });
