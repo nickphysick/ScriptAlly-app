@@ -313,7 +313,7 @@ export const OneScreenChart: React.FC<{
 
   if (empty) {
     return (
-      <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]} lift={false} band={title} innerRef={cardRef}>
+      <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]} skeletonClass="d58-skcard" lift={false} band={title} innerRef={cardRef}>
         <OneScreenChartEmpty onLogFirst={onSendFirst} />
       </OneScreenPanel>
     );
@@ -334,7 +334,7 @@ export const OneScreenChart: React.FC<{
   const carryTo = size ? Math.max(size.carry, last ? last[0] : 0) : null;
 
   return (
-    <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]} lift={false} band={title} innerRef={cardRef}>
+    <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]} skeletonClass="d58-skcard" lift={false} band={title} innerRef={cardRef}>
       <div className="os-acplot" data-probe="plot-box">
         <div className="os-acground" aria-hidden="true" />
         {/* ⚠️ THE MENTOR: TWO DRAWINGS IN ONE ISOLATED WRAPPER, CROSS-DISSOLVED ADDITIVELY. His head

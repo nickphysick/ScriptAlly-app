@@ -106,7 +106,7 @@ export const Dash58List: React.FC<{
         <>
       <div className="d58-listhead" data-d58="list-head">
         <div className="d59-titlerow" data-d58="title-row">
-          <h2 className="d58-listtitle" data-d58="list-title">{LIST_TITLE}</h2>
+          <h2 className={`d58-listtitle${loading ? " d58-sk" : ""}`} data-d58="list-title">{LIST_TITLE}</h2>
           {!loading && plan.items.length > 0 && (
             <button type="button" className="d59-all" data-d58="list-all" onClick={onAll}>{allLabel} →</button>
           )}
@@ -114,7 +114,7 @@ export const Dash58List: React.FC<{
         <span className="d58-listbar" data-d58="list-bar" aria-hidden="true" />
       </div>
       {loading ? (
-        <div className="d58-focus is-loading" data-d58="focus" style={{ height: focusH }} aria-hidden="true">
+        <div className="d58-focus is-loading d58-skcard" data-sk="card" data-d58="focus" style={{ height: focusH }} aria-hidden="true">
           <div className="d58-fband"><span className="d58-fpill d58-sk">LOADING</span></div>
         </div>
       ) : focus.item ? (

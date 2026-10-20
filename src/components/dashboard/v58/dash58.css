@@ -438,3 +438,21 @@
 .d58-noticelist small { font-size: 14px; color: rgba(91, 42, 31, .78); }
 @keyframes d58NoticeIn { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .d58-notice { animation: none; } }
+
+/* ── ONE LOADING STATE ACROSS THE DASHBOARD (import review v1, Part C) ──────────────────────────
+   While the page loads, every card carries `d58-skcard` and draws the same skeleton: its real frame
+   and band, the band in plain grey with the shimmer, and NOTHING inside — no title, number, label,
+   legend, ring or drawing. The contents stay laid out (visibility, never display), so each card keeps
+   its loaded size and nothing moves when the data lands. Page chrome is not a card: the header's
+   buttons and the feed tab stay. A zero computed from data that has not arrived is never shown. */
+.d58-skcard * { visibility: hidden !important; }
+.d58-skcard :is(.os-frame, .d59-fwframe) { visibility: visible !important; }
+.d58-skcard :is(.os-band, .d58-fband, .d59-fwband) {
+  visibility: visible !important;
+  background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important;
+  background-size: 220% 100% !important;
+  animation: d58-sk-shimmer 1.4s linear infinite;
+  color: transparent !important; box-shadow: none !important;
+}
+@keyframes d58-sk-shimmer { from { background-position: 110% 0; } to { background-position: -110% 0; } }
+@media (prefers-reduced-motion: reduce) { .d58-skcard :is(.os-band, .d58-fband, .d59-fwband) { animation: none; } }

@@ -57,6 +57,9 @@ export interface OneScreenPanelProps {
    * change what the page looks like, so it cannot be the reason a diff passes.
    */
   probe?: string;
+  /** A page that draws ONE skeleton across all its cards (the dashboard: `d58-skcard`) passes its
+   *  class here, and it replaces this panel's own bar skeleton while loading. */
+  skeletonClass?: string;
   children?: React.ReactNode;
 }
 
@@ -70,16 +73,17 @@ export interface OneScreenPanelProps {
  * repaints all of them.
  */
 export const OneScreenPanel: React.FC<OneScreenPanelProps> = ({
-  variant, loading = false, skel, band, label, lift = true, innerRef, probe, children,
+  variant, loading = false, skel, band, label, lift = true, innerRef, probe, skeletonClass, children,
 }) => (
   <div
     ref={innerRef}
     data-probe={probe}
     role={label ? "group" : undefined}
     aria-label={label}
-    className={`os-card${lift ? " os-lift" : ""} ${variant}${loading ? " isload" : ""}`}
+    className={`os-card${lift ? " os-lift" : ""} ${variant}${loading ? (skeletonClass ? ` ${skeletonClass}` : " isload") : ""}`}
+    data-sk={loading && skeletonClass ? "card" : undefined}
   >
-    {loading && skel && <Skel bars={skel} />}
+    {loading && skel && !skeletonClass && <Skel bars={skel} />}
     <div className="os-frame" data-probe={probe ? `${probe}-frame` : undefined}>
       {band !== undefined && <div className="os-band" data-probe={probe ? `${probe}-band` : undefined}>{band}</div>}
       {children}

@@ -32,12 +32,12 @@ export const Dash60Lift: React.FC<{
   <>
     <div className="d58-listhead" data-d58="list-head">
       <div className="d59-titlerow" data-d58="title-row">
-        <h2 className="d58-listtitle" data-d58="list-title" data-d60="lift-title">{LIFT_TITLE}</h2>
+        <h2 className={`d58-listtitle${loading ? " d58-sk" : ""}`} data-d58="list-title" data-d60="lift-title">{LIFT_TITLE}</h2>
       </div>
       <span className="d58-listbar" data-d58="list-bar" aria-hidden="true" />
     </div>
     <div className="d60-liftsub" data-d60="lift-sub">
-      <span>{hasAgents ? "You could also:" : "Start on the left, or with any of these:"}</span>
+      <span className={loading ? "d58-sk" : undefined}>{hasAgents ? "You could also:" : "Start on the left, or with any of these:"}</span>
       <b className={loading ? "d58-sk" : undefined} data-d60="lift-done">{tilesDone(tiles)} OF 4 · OPTIONAL</b>
     </div>
     <div className="d60-ways" data-d60="ways">
@@ -49,7 +49,7 @@ export const Dash60Lift: React.FC<{
 const Way: React.FC<{ t: FirstUseTile; loading: boolean; onTile: (k: TileKey) => void }> = ({ t, loading, onTile }) => {
   const { spot, first } = useSpot(`tile:${t.key}`);
   return (
-        <div className={`d60-way${t.done ? " is-done" : ""}`} data-d60="way" data-key={t.key} data-done={t.done ? "1" : "0"} data-spot={spot}>
+        <div className={`d60-way${t.done ? " is-done" : ""}${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="way" data-key={t.key} data-done={t.done ? "1" : "0"} data-spot={spot}>
           <StartTag show={first} />
           <div className="d60-wi">
             <div className="d60-wh">

@@ -63,7 +63,7 @@ export interface Dash59PanelProps {
 export const Dash59Panel: React.FC<Dash59PanelProps> = ({ loading, history, chosen, state, onChoose, onChange, onFeedback }) => {
   if (loading) {
     return (
-      <section className="d59-fw is-loading" data-d58="panel" data-loading="1" aria-hidden="true">
+      <section className="d59-fw is-loading d58-skcard" data-sk="card" data-d58="panel" data-loading="1" aria-hidden="true">
         <div className="d59-fwframe">
           <div className="d59-fwband"><span className="d58-sk">{PANEL_COPY.band}</span></div>
           <div className="d59-fwbody"><div className="d59-fwart" /><div className="d59-fwtxt"><span className="d58-sk d59-skh" /><span className="d58-sk d59-skn" /><span className="d58-sk d59-skn" /></div></div>

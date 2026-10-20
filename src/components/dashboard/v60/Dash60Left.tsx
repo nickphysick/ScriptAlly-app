@@ -41,7 +41,7 @@ const LogGlyph = () => (
 export const QueriesDoor: React.FC<{ loading: boolean; agents: number; onLog: () => void }> = ({ loading, agents, onLog }) => {
   const { spot, first } = useSpot("queries");
   return (
-  <div className="os-card d60-card d60-door" data-d60="queries-door" data-spot={spot} role="group" aria-label="No queries yet">
+  <div className={`os-card d60-card d60-door${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="queries-door" data-spot={spot} role="group" aria-label="No queries yet">
     <StartTag show={first} />
     <div className="os-frame">
       <div className="os-band d60-band--navy"><div className="os-bandrow"><h3 className="os-cardttl">No queries yet</h3></div></div>
@@ -69,7 +69,7 @@ export const QueriesDoor: React.FC<{ loading: boolean; agents: number; onLog: ()
 export const AgentsDoor: React.FC<{ loading: boolean; onAdd: () => void; onImport: () => void }> = ({ loading, onAdd, onImport }) => {
   const { spot, first } = useSpot("agents");
   return (
-  <div className="os-card d60-card d60-agents" data-d60="agents-door" data-spot={spot} role="group" aria-label="Agents on file">
+  <div className={`os-card d60-card d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-door" data-spot={spot} role="group" aria-label="Agents on file">
     <StartTag show={first} />
     <div className="os-frame">
       <div className="os-band d60-band--slate"><div className="os-bandrow"><h3 className="os-cardttl">Agents on file</h3><span className="d60-meta" data-d60="agents-meta">0 ON FILE</span></div></div>
@@ -97,7 +97,7 @@ const Key: React.FC<{ cls: string; n: number; label: string }> = ({ cls, n, labe
 export const AgentsSnap: React.FC<{ loading: boolean; cov: AgentCoverage; onReady: () => void }> = ({ loading, cov, onReady }) => {
   const { spot, first } = useSpot("agents");
   return (
-  <div className="os-card d60-card d60-agents" data-d60="agents-snap" data-spot={spot} role="group" aria-label="Agents on file"
+  <div className={`os-card d60-card d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-snap" data-spot={spot} role="group" aria-label="Agents on file"
     data-cov={JSON.stringify({ querying: cov.querying, closed: cov.closed, none: cov.none, ready: cov.ready, total: cov.total })}>
     <StartTag show={first} />
     <div className="os-frame">
@@ -135,7 +135,7 @@ export const ClosedHoop: React.FC<{ loading: boolean; tile: ClosedTile | null; p
   const segs: HoopSeg[] = CLOSED_BUCKETS.map((b) => ({ key: b.key, n: loading ? 0 : count(b.key), color: CLOSED_STONES[b.key] }));
   const total = loading ? 0 : tile?.total ?? 0;
   return (
-    <div className="os-card d60-card d60-hoopcard d60-closed" data-d60="closed-hoop" role="group" aria-label="Closed queries" data-loading={loading ? "1" : "0"}
+    <div className={`os-card d60-card d60-hoopcard d60-closed${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="closed-hoop" role="group" aria-label="Closed queries" data-loading={loading ? "1" : "0"}
       data-counts={tile ? JSON.stringify(Object.fromEntries(tile.buckets.map((b) => [b.key, b.count]))) : undefined}>
       <div className="os-frame">
         <div className="os-band d60-band--stone">
@@ -168,7 +168,7 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
     { key: "none", n: loading ? 0 : cov.none, color: AGENT_SEG.none },
   ];
   return (
-    <div className="os-card d60-card d60-hoopcard d60-agents" data-d60="agents-hoop" role="group" aria-label="Agents on file" data-loading={loading ? "1" : "0"}
+    <div className={`os-card d60-card d60-hoopcard d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-hoop" role="group" aria-label="Agents on file" data-loading={loading ? "1" : "0"}
       data-cov={JSON.stringify({ querying: cov.querying, closed: cov.closed, none: cov.none, ready: cov.ready, total: cov.total })}>
       <div className="os-frame">
         <div className="os-band d60-band--slate">
