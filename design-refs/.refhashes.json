@@ -664,7 +664,19 @@
     "design-refs/header-rules-v1-1/screens/04-qc-rules-1920.png": "a5555d575449ea94316dd14041a74f8e9b39b3aaeedc4968d28835a8976bef78",
     "design-refs/header-rules-v1-1/screens/05-qc-full-1280.png": "83514ca982cd0dc75fa40f4c0673eaa4cc0d91094cac3fdabd5ee28c840a8373",
     "design-refs/header-rules-v1-1/screens/06-qc-full-1512.png": "c7d3cc26b7ae9a3fdc4b6c93dc42b6ee580ea0d67bb8a167733980148ca8b3d5",
-    "design-refs/help-system-v1/help-system-v1.html": "57c496153d744a61984faf87751bb9166add431731c34fcfd0b1a3752d01b03b"
+    "design-refs/help-system-v1/help-system-v1.html": "57c496153d744a61984faf87751bb9166add431731c34fcfd0b1a3752d01b03b",
+    "design-refs/query-centre-v141/query-centre-v141.html": "8846fa85a5e87bcee27677524d553fd3959567b764cedb138c486f194e2c7f1d",
+    "design-refs/query-centre-v141/screens/01-unpinned-1512.png": "f175a54a22864fd51656a7ba18606a79c7d0ef5fed78b0d4432f820c5daed543",
+    "design-refs/query-centre-v141/screens/02-unpinned-1280.png": "0de3a6b25696039c7c9c76fa157d95098ddecc6d2a4625db3f4af4d8342fb0cf",
+    "design-refs/query-centre-v141/screens/03-unpinned-1920.png": "d322cb29149b168a6d23c64dffaa7d129b05a0d68b2349030ac63726f1febea4",
+    "design-refs/query-centre-v141/screens/04-unpinned-gone-quiet-1512.png": "f6328c652223cca0a3ae3027bb723a3e1c1b6d303985c89b88f4731ba50f0aa0",
+    "design-refs/query-centre-v141/screens/05-jump-glyph-hover-1512.png": "6d850549d1385de4aeac02d22af5aacbbece24a072e35ab49a2a902369fdcd48",
+    "design-refs/query-centre-v141/screens/06-jump-package-menu-1280.png": "7b1716390ac38b81a8525de3d7163a403a7b0457c02d86fe1727b897a2bd20ec",
+    "design-refs/query-centre-v141/screens/07-jump-action-menu-1512.png": "06ff167e4d372ea2a625f300eda01b669c8c793530cdf2e308d53dbf02782175",
+    "design-refs/query-centre-v141/screens/08-pinned-1280.png": "ce59ee6eabc17ced7c015c946f397f14e4ae9e9a0bde104ccd4f1164f0ad9969",
+    "design-refs/query-centre-v141/screens/09-pinned-1512.png": "166ff59c0a2136eec24e4618c62ba774b0539582953477b50242b643395bf872",
+    "design-refs/query-centre-v141/screens/10-pinned-1920.png": "7b9e8b5cc8c20258a2dfbdd38812375328d017cef659296ed3906033484c6821",
+    "design-refs/query-centre-v141/screens/11-pinned-gone-quiet-1512.png": "3ea65703e3b90490b3ec83c931f8b77af5b6d4737e235c4ff34423f03c3479a3"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
