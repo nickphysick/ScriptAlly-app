@@ -29,9 +29,12 @@ import { quietScroll, usePopover, type PopoverState } from "../../shell/ListPill
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { FULL_ICON, ViewSwitch, type ListView } from "../../shell/ViewTitleRow";
+import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
+import { QC_SORT_FIELDS } from "../../../lib/cardsSort";
+import type { Qc138Sort } from "../../../lib/qc138";
 import "./qcv140.css";
 
-export type Qc140Pop = "group" | "filters" | "jump";
+export type Qc140Pop = "group" | "filters" | "jump" | "sort";
 
 /** one jump: a group (its band) or, ungrouped, a month (its first row) */
 /** v141 §D — glyph (Status, Who it's with), name (Next action, Package) or month (ungrouped) */
@@ -214,10 +217,13 @@ export interface QcToolbar140Props {
   /** v142 §A — the Cards / List view (the title row's pill and, in full screen, this toolbar's switch: one state) */
   view: ListView;
   onView: (v: ListView) => void;
+  /** cards-sort-search v1 §B — the page's one sort (the headings'), read and written by the Cards view's Sort chip */
+  sort: Qc138Sort;
+  onSort: (s: Qc138Sort) => void;
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, jumpMode = "name", find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, view, onView,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, jumpMode = "name", find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, view, onView, sort, onSort,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLElement>(null);
@@ -319,6 +325,16 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
             <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
             <kbd aria-hidden="true">/</kbd>
           </label>
+        ) : null}
+        {/* cards-sort-search v1 §B — the Sort chip: the Cards view only, just before Group by, the headings' own sort */}
+        {view === "cards" ? (
+          <span className="qc140-chipw qc1421-sortw" data-qc1421="sort-chip">
+            <SortChipButton fields={QC_SORT_FIELDS} value={sort} open={pop.open === "sort"} onToggle={(a) => pop.toggle("sort", a)}
+              className="qc140-chip qc1421-sort" ns="qc1421" disabled={loading} toolbar={() => rowRef.current?.closest<HTMLElement>("[data-qc140='toolbar']") ?? null} />
+          </span>
+        ) : null}
+        {view === "cards" && pop.open === "sort" && pop.anchor ? (
+          <SortChipMenu anchor={pop.anchor} fields={QC_SORT_FIELDS} value={sort} ns="qc1421" onChange={onSort} />
         ) : null}
         <span className="qc140-chipw" data-qc140="group-chip" data-on={def ? undefined : ""}>
           <button type="button" ref={grpRef} className="qc140-chip qc140-grp" data-qc140="group" data-lp="qc140-group" aria-haspopup="menu" aria-expanded={pop.open === "group"}

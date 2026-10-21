@@ -27,7 +27,7 @@ import { DEFAULT_SORT_138, emptyQc138Filters, type Qc138Filters, type Qc138Sort,
 import { parseQcListMemory, QC_LIST_MEMORY_KEY, type QcDensity } from "./qcListMemory";
 
 const GROUPS: readonly GroupBy[] = ["attention", "status", "action", "package", "none"];
-const SORT_KEYS: readonly Qc138SortKey[] = ["agent", "first", "stage", "sent", "next", "due"];
+const SORT_KEYS: readonly Qc138SortKey[] = ["agent", "first", "stage", "sent", "next", "due", "changed"];
 const STATUSES: readonly string[] = Object.values(QueryStatus);
 
 /* ── per device: the view ─────────────────────────────────────────────────────────────────────────────────────── */

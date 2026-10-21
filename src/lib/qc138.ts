@@ -154,6 +154,8 @@ export interface Filterable {
   expectedMs: number | null;
   /** v141.1 — the nudge window's undated branch reads the stage's start */
   stageStartMs?: number | null;
+  /** cards-sort-search v1 — Last changed falls back to the last activity where no date marks the stage */
+  lastMs?: number;
   court: string;
   pastExpected: boolean;
   sentMs: number | null;
@@ -202,7 +204,10 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
  *    from an already-sorted list. A row with nothing to sort on goes LAST in either direction (the house rule),
  *    so reversing a sort never floats the empties to the top.
  */
-export type Qc138SortKey = "agent" | "first" | "stage" | "sent" | "next" | "due";
+/** cards-sort-search v1 §B — "changed" (Last changed: the day the query reached the stage it stands at, else its last
+ *  activity) has no column heading; it is chosen from the Cards view's Sort chip, and while it is the List view shows no
+ *  active heading */
+export type Qc138SortKey = "agent" | "first" | "stage" | "sent" | "next" | "due" | "changed";
 export interface Qc138Sort { key: Qc138SortKey; reversed: boolean }
 export const DEFAULT_SORT_138: Qc138Sort = { key: "due", reversed: false };
 
@@ -240,6 +245,7 @@ export function sort138<T extends Filterable & { id: string; agentName: string }
       case "sent": return ctx.packageName(r)?.toLowerCase() ?? null;
       case "next": return ctx.nextLabel(r)?.toLowerCase() ?? null;
       case "due": return dueOf(r);
+      case "changed": return r.stageStartMs ?? r.lastMs ?? null;
     }
   };
   const dir = s.reversed ? -1 : 1;

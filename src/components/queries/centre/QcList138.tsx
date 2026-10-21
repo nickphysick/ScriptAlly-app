@@ -357,6 +357,8 @@ export interface QcList138Props {
   loading?: boolean;
   sort: Qc138Sort;
   onHeading: (k: Qc138SortKey) => void;
+  /** cards-sort-search v1 §B — set the sort outright (the Cards view's chip) */
+  onSort?: (s: Qc138Sort) => void;
   density: QcDensity;
   onDensity: (d: QcDensity) => void;
   full: boolean;
@@ -418,7 +420,7 @@ export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: 
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, title, bookOf, onCardTab,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, title, bookOf, onCardTab, onSort,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -673,7 +675,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
             jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps} jumpMode={jumpMode}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
-            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} view={view} onView={(v) => onView?.(v)} />
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} view={view} onView={(v) => onView?.(v)} sort={sort} onSort={(s) => onSort?.(s)} />
           {applied}
         </div>
       </div>

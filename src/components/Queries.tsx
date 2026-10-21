@@ -7445,6 +7445,7 @@ export const Queries: React.FC<{
                   ) : null}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
+                  onSort={setQcSort138}
                   density={qcDensity}
                   onDensity={setQcDensity}
                   full={qcFull}
