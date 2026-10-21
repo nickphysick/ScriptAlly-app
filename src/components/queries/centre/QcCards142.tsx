@@ -7,7 +7,7 @@
  *   - The groups are the list's own groups, in the list's order (so search, filters, grouping, "Where it stands" and the
  *     sort all apply exactly as to List). Each group is a section under the Contact list's RULED heading (glyph, name,
  *     mono count, a hairline to the right edge) that sticks directly under the toolbar; No grouping is one grid.
- *   - The grid: three across when the list card is 1240px or wider, otherwise two; 24px gaps; 30px above the first row,
+ *   - The grid: three across when the list card is 1,100px or wider (v142.1 A1; it was 1,240), otherwise two; 24px gaps; 30px above the first row,
  *     24px at the sides; cards align to their tops.
  *   - THE CARD IS THE LANDING PAGE'S FRONT CARD, PORTED, NOT REDRAWN: it is built from `src/marketing/heroCard.css`'s own
  *     `.mk-lc*` classes (read-only — this file changes nothing in the marketing tier), so the mat, the inner border, the
@@ -84,6 +84,8 @@ export interface QcCard142Props {
   onTab: (t: CardTab) => void;
   onAct: () => void;
 }
+
+export const CARDS_THREE_FROM = 1100;
 
 export const QcCard142: React.FC<QcCard142Props> = ({ row: r, nowMs, book, pkg, coming, events, selected, onOpen, onTab, onAct }) => {
   const where = whereItStands(r, nowMs);
@@ -194,14 +196,14 @@ function useCardEvents(ids: readonly string[], load?: (id: string) => Promise<Pe
   return cache.current;
 }
 
-/** §D — three across when the list card (the sheet) is 1240px or wider, else two: read from the sheet's width on mount and
+/** §D, v142.1 A1 — three across when the list card (the sheet) is 1,100px or wider (1,208 at 1512 with the sidebar open), else two: read from the sheet's width on mount and
  *  whenever it resizes (a container query would make the sheet a containing block for its own fixed-position popups) */
 function useCols(ref: React.RefObject<HTMLElement | null>): 2 | 3 {
   const [cols, setCols] = useState<2 | 3>(2);
   useLayoutEffect(() => {
     const sheet = ref.current?.closest<HTMLElement>(".qc138-sheet");
     if (!sheet) return undefined;
-    const read = () => { const w = sheet.offsetWidth; if (w > 0) setCols(w >= 1240 ? 3 : 2); };
+    const read = () => { const w = sheet.offsetWidth; if (w > 0) setCols(w >= CARDS_THREE_FROM ? 3 : 2); };
     read();
     if (typeof ResizeObserver === "undefined") return undefined;
     const ro = new ResizeObserver(read);
