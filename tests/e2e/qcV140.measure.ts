@@ -107,10 +107,13 @@ test.describe("Query Centre v140", () => {
           .map((s) => tb.querySelector<HTMLElement>(s)?.getBoundingClientRect()).filter(Boolean) as DOMRect[];
         return { h: t.height, tops: parts.map((p) => p.top), hs: parts.map((p) => p.height), n: parts.length };
       });
-      L.check("A1", `${w} five controls`, r.n === 5, `${r.n}`);
+      /* v142 §A — re-pointed: no Pin on the page; unpinned the toolbar has four controls, in full screen the fifth is
+         "Exit full screen" (the toolbar's Full screen) */
+      L.check("A1", `${w} ${pinned ? "five" : "four"} controls`, r.n === (pinned ? 5 : 4), `${r.n}`);
       L.check("A1", `${w} one line (every top within 2px)`, Math.max(...r.tops) - Math.min(...r.tops) <= 2, r.tops.map((x) => x.toFixed(1)).join(","));
-      L.check("A1", `${w} height`, near(r.h, pinned ? 72 : 64, 0.6), `${r.h}`);
-      L.check("A1", `${w} controls 40 tall`, r.hs.every((h) => near(h, 40, 0.6)), r.hs.join(","));
+      /* v142 §B — re-pointed: unpinned the toolbar is the Contact list's, 52 tall with 34px controls (was 64 and 40) */
+      L.check("A1", `${w} height`, near(r.h, pinned ? 72 : 52, 0.6), `${r.h}`);
+      L.check("A1", `${w} controls ${pinned ? 40 : 34} tall`, r.hs.every((h) => near(h, pinned ? 40 : 34, 0.6)), r.hs.join(","));
       const old = await page.evaluate(() => ({
         title: /Showing all \d+ quer/.test(document.querySelector(".qcv-group[data-v138]")?.textContent ?? ""),
         sort: !!document.querySelector(".qcv-group[data-v138] [data-ltb='sort-name'], .qcv-group[data-v138] [data-qc138='sort']"),
@@ -254,16 +257,16 @@ test.describe("Query Centre v140", () => {
         const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
         const sheet = g.querySelector<HTMLElement>(".qc138-sheet")!;
         const cs = getComputedStyle(sheet);
-        const pin = g.querySelector<HTMLElement>("[data-qc140='pin']")!;
+        const pin = g.querySelector<HTMLElement>("[data-qc140='pin']") ?? g;
         const ring = (s: string) => { const e = g.querySelector<HTMLElement>(s); if (!e) return "none"; const c = getComputedStyle(e); return `${c.boxShadow}|${c.borderTopWidth}|${c.outlineStyle}`; };
         return { corners: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomLeftRadius, cs.borderBottomRightRadius], pin: getComputedStyle(pin).backgroundColor, pinText: pin.textContent?.trim(), rings: [ring("[data-qc140='find']"), ring("[data-qc140='group']"), ring("[data-qc140='filters']")] };
       });
       L.check("B1", `${vp.width} card corners 18`, r.corners.every((c) => c === "18px"), r.corners.join(","));
-      L.check("B1", `${vp.width} Pin cream`, r.pin === "rgb(244, 238, 229)", `${r.pin}`);
-      L.check("B1", `${vp.width} Pin reads "Pin list"`, /Pin list/.test(r.pinText ?? "") || vp.width === 1280, `${r.pinText}`);
+      /* v142 §A — RETIRED: "Pin cream" and "Pin reads 'Pin list'". There is no Pin on the page; QC142-L3 asserts its absence. */
+      void r.pin; void r.pinText;
       L.check("B1", `${vp.width} no ring on the controls`, r.rings.every((x) => /^none\|0px\|none$/.test(x)), r.rings.join(" ‖ "));
     }
-    L.done(10);
+    L.done(6);
   });
 
   test("C1 · pinned scheme: navy band, cream toolbar, white headings, flush to the sheet at the top", async ({ page }) => {
@@ -371,7 +374,8 @@ test.describe("Query Centre v140", () => {
     const menu = async () => { if (!(await page.locator("[data-qc140='filter-menu']").count())) await press(page, `${G} [data-qc140='filters']`); await page.waitForTimeout(500); };
     const state = () => page.evaluate(() => ({
       over: document.querySelector<HTMLElement>("[data-qc140='quick'][data-qp='over']")?.getAttribute("aria-pressed"),
-      past: document.querySelector<HTMLElement>("[data-qc140='more'][data-k='past']")?.getAttribute("aria-checked"),
+      /* v142 §E — re-pointed: the More rows are chips in the strip now, pressed rather than checked */
+      past: document.querySelector<HTMLElement>("[data-qc140='more'][data-k='past']")?.getAttribute("aria-pressed"),
       offersQ: document.querySelector<HTMLElement>("[data-qc140='quick'][data-qp='offers']")?.getAttribute("aria-pressed"),
       chips: [...document.querySelectorAll<HTMLElement>("[data-qc140='applied-chip']")].filter((c) => c.getBoundingClientRect().width > 0).map((c) => c.dataset.k),
     }));

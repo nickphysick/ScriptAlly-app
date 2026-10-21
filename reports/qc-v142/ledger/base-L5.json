@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "L5",
+  "where": "1280 · population",
+  "ok": false,
+  "detail": "landing true · QC false"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · population",
+  "ok": false,
+  "detail": "landing true · QC false"
+ }
+]

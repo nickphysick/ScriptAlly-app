@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "{\"tb\":72,\"find\":34,\"group\":34,\"filters\":34,\"jb\":{\"w\":40,\"h\":34}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · the toolbar is 52 tall",
+  "ok": false,
+  "detail": "72"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · Find is 34",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · Group by is 34",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · Filters is 34",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · a jump-row glyph button is 40 × 34",
+  "ok": true,
+  "detail": "{\"w\":40,\"h\":34}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "{\"tb\":72,\"find\":34,\"group\":34,\"filters\":34,\"jb\":{\"w\":40,\"h\":34}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · the toolbar is 52 tall",
+  "ok": false,
+  "detail": "72"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · Find is 34",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · Group by is 34",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · Filters is 34",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · a jump-row glyph button is 40 × 34",
+  "ok": true,
+  "detail": "{\"w\":40,\"h\":34}"
+ }
+]

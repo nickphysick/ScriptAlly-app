@@ -1,0 +1,446 @@
+[
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · population at scroll 0",
+  "ok": true,
+  "detail": "{\"stackB\":470.75,\"hT\":470.75,\"hB\":519.75,\"cT\":549.75,\"atFoot\":false,\"scroll\":0}"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · scroll 0: the first card is 24 or more below its heading",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · the stuck heading's top is the toolbar's bottom",
+  "ok": true,
+  "detail": "heading 210.8 · toolbar 210.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · population: jumps",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Queried: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Queried: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Partial Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Partial Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Partial Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Partial Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Full Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Full Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.6"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Full Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.1 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Full Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Revise & Resubmit: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.1 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Revise & Resubmit: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Offer: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.1 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Offer: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Rejected: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Rejected: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.7"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump No Response: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.2 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump No Response: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · jump Withdrawn (at the foot: the list cannot scroll it up)",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 unpinned · population: jumps that landed under the toolbar",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · population at scroll 0",
+  "ok": true,
+  "detail": "{\"stackB\":249.75,\"hT\":249.75,\"hB\":298.75,\"cT\":328.75,\"atFoot\":false,\"scroll\":0}"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · scroll 0: the first card is 24 or more below its heading",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · the stuck heading's top is the toolbar's bottom",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · population: jumps",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · jump Queried: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · jump Queried: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · jump Partial Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · jump Partial Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · jump Partial Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · jump Partial Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 full screen · population: jumps that landed under the toolbar",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · population at scroll 0",
+  "ok": true,
+  "detail": "{\"stackB\":470.75,\"hT\":470.75,\"hB\":519.75,\"cT\":549.75,\"atFoot\":false,\"scroll\":0}"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · scroll 0: the first card is 24 or more below its heading",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · the stuck heading's top is the toolbar's bottom",
+  "ok": true,
+  "detail": "heading 210.8 · toolbar 210.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · population: jumps",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Queried: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Queried: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Partial Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Partial Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Partial Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Partial Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Full Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Full Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.6"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Full Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.1 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Full Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Revise & Resubmit: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.1 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Revise & Resubmit: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Offer: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.1 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Offer: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Rejected: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Rejected: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.7"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump No Response: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 170.2 · toolbar 169.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump No Response: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · jump Withdrawn (at the foot: the list cannot scroll it up)",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 unpinned · population: jumps that landed under the toolbar",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · population at scroll 0",
+  "ok": true,
+  "detail": "{\"stackB\":249.75,\"hT\":249.75,\"hB\":298.75,\"cT\":328.75,\"atFoot\":false,\"scroll\":0}"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · scroll 0: the first card is 24 or more below its heading",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · the stuck heading's top is the toolbar's bottom",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · population: jumps",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Queried: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Queried: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Partial Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Partial Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.9"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Partial Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 250.1 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Partial Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Full Requested: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Full Requested: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Full Sent: the heading sits on the toolbar",
+  "ok": true,
+  "detail": "heading 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · jump Full Sent: its first card is 24 or more below it",
+  "ok": true,
+  "detail": "29.8"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 full screen · population: jumps that landed under the toolbar",
+  "ok": true,
+  "detail": "5"
+ }
+]

@@ -181,3 +181,10 @@
   .qc138-sheet .qc140-af-export:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
   .qc138-sheet .qc140-af-export + .qc140-af-clear { margin-left: 22px; }
 }
+
+/* §A · as the Contact list's toolbar Full screen (v20 §C): at a window of 1440 or less the toolbar's "Exit full screen" is
+   its icon alone (the name stays), so the jump row keeps its glyphs at 1280 rather than folding them all into "+N more" */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc140-pin.qc142-xfs { gap: 0; width: 46px; padding: 0; justify-content: center; }
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc140-pin.qc142-xfs .qc140-pin-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

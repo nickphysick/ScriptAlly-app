@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "L4",
+  "where": "nothing narrows, Status · population",
+  "ok": true,
+  "detail": "applied true · list 87 · cards 87"
+ },
+ {
+  "lock": "L4",
+  "where": "nothing narrows, Status · the same ids",
+  "ok": true,
+  "detail": "list 87 · cards 87 · only list 0 · only cards 0"
+ },
+ {
+  "lock": "L4",
+  "where": "nothing narrows, Status · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"All 87 queries\" · 87"
+ },
+ {
+  "lock": "L4",
+  "where": "nothing narrows, Status · the title counts them (List)",
+  "ok": true,
+  "detail": "\"All 87 queries\" · 87"
+ },
+ {
+  "lock": "L4",
+  "where": "Gone quiet (Where it stands), Status · population",
+  "ok": true,
+  "detail": "applied true · list 32 · cards 87"
+ },
+ {
+  "lock": "L4",
+  "where": "Gone quiet (Where it stands), Status · the same ids",
+  "ok": false,
+  "detail": "list 32 · cards 87 · only list 0 · only cards 55"
+ },
+ {
+  "lock": "L4",
+  "where": "Gone quiet (Where it stands), Status · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"87 of 87 queries\" · 87"
+ },
+ {
+  "lock": "L4",
+  "where": "Gone quiet (Where it stands), Status · the title counts them (List)",
+  "ok": true,
+  "detail": "\"32 of 87 queries\" · 32"
+ },
+ {
+  "lock": "L4",
+  "where": "With the agent (Where it stands), Next action · population",
+  "ok": true,
+  "detail": "applied true · list 11 · cards 87"
+ },
+ {
+  "lock": "L4",
+  "where": "With the agent (Where it stands), Next action · the same ids",
+  "ok": false,
+  "detail": "list 11 · cards 87 · only list 0 · only cards 76"
+ },
+ {
+  "lock": "L4",
+  "where": "With the agent (Where it stands), Next action · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"87 of 87 queries\" · 87"
+ },
+ {
+  "lock": "L4",
+  "where": "With the agent (Where it stands), Next action · the title counts them (List)",
+  "ok": true,
+  "detail": "\"11 of 87 queries\" · 11"
+ },
+ {
+  "lock": "L4",
+  "where": "Your move (Most used), Who it's with · population",
+  "ok": true,
+  "detail": "applied true · list 27 · cards 27"
+ },
+ {
+  "lock": "L4",
+  "where": "Your move (Most used), Who it's with · the same ids",
+  "ok": true,
+  "detail": "list 27 · cards 27 · only list 0 · only cards 0"
+ },
+ {
+  "lock": "L4",
+  "where": "Your move (Most used), Who it's with · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"27 of 87 queries\" · 27"
+ },
+ {
+  "lock": "L4",
+  "where": "Your move (Most used), Who it's with · the title counts them (List)",
+  "ok": true,
+  "detail": "\"27 of 87 queries\" · 27"
+ },
+ {
+  "lock": "L4",
+  "where": "Queried (Status), Package · population",
+  "ok": true,
+  "detail": "applied true · list 39 · cards 39"
+ },
+ {
+  "lock": "L4",
+  "where": "Queried (Status), Package · the same ids",
+  "ok": true,
+  "detail": "list 39 · cards 39 · only list 0 · only cards 0"
+ },
+ {
+  "lock": "L4",
+  "where": "Queried (Status), Package · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"39 of 87 queries\" · 39"
+ },
+ {
+  "lock": "L4",
+  "where": "Queried (Status), Package · the title counts them (List)",
+  "ok": true,
+  "detail": "\"39 of 87 queries\" · 39"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar', No grouping · population",
+  "ok": true,
+  "detail": "applied true · list 43 · cards 43"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar', No grouping · the same ids",
+  "ok": true,
+  "detail": "list 43 · cards 43 · only list 0 · only cards 0"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar', No grouping · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"43 of 87 queries\" · 43"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar', No grouping · the title counts them (List)",
+  "ok": true,
+  "detail": "\"43 of 87 queries\" · 43"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar' + Gone quiet, Status · population",
+  "ok": true,
+  "detail": "applied true · list 16 · cards 43"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar' + Gone quiet, Status · the same ids",
+  "ok": false,
+  "detail": "list 16 · cards 43 · only list 0 · only cards 27"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar' + Gone quiet, Status · the title counts them (Cards)",
+  "ok": true,
+  "detail": "\"43 of 87 queries\" · 43"
+ },
+ {
+  "lock": "L4",
+  "where": "search 'ar' + Gone quiet, Status · the title counts them (List)",
+  "ok": true,
+  "detail": "\"16 of 87 queries\" · 16"
+ }
+]

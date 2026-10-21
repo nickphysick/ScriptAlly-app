@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L3",
+  "where": "1280 · population: the page's buttons",
+  "ok": true,
+  "detail": "431"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · unpinned: no Pin button",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the title row's Full screen enters",
+  "ok": true,
+  "detail": "pressed true"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · in full screen the toolbar says Exit full screen",
+  "ok": true,
+  "detail": "Exit full screenExit full screenF"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · in full screen the toolbar carries the icon toggle",
+  "ok": true,
+  "detail": "{\"l\":1130,\"r\":1202,\"t\":196.25,\"b\":230.25,\"w\":72,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the icon toggle switches to Cards and back",
+  "ok": true,
+  "detail": "cards true · list true"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · Exit full screen leaves",
+  "ok": true,
+  "detail": "pressed"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · F enters",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · Esc leaves",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · population: the page's buttons",
+  "ok": true,
+  "detail": "431"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · unpinned: no Pin button",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the title row's Full screen enters",
+  "ok": true,
+  "detail": "pressed true"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · in full screen the toolbar says Exit full screen",
+  "ok": true,
+  "detail": "Exit full screenExit full screenF"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · in full screen the toolbar carries the icon toggle",
+  "ok": true,
+  "detail": "{\"l\":1246.78125,\"r\":1318.78125,\"t\":196.25,\"b\":230.25,\"w\":72,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the icon toggle switches to Cards and back",
+  "ok": true,
+  "detail": "cards true · list true"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · Exit full screen leaves",
+  "ok": true,
+  "detail": "pressed"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · F enters",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · Esc leaves",
+  "ok": true,
+  "detail": ""
+ }
+]

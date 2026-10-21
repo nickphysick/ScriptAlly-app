@@ -94,9 +94,11 @@ test.describe("Query Centre v140.1", () => {
       await openMenu(page);
       await press(page, "[data-qc140='stand'][data-k='q']"); await page.waitForTimeout(300);
       await press(page, "[data-qc140='quick'][data-qp='wait']"); await page.waitForTimeout(700);
+      /* v142 §E — re-pointed: the export is in the applied row, and the strip has no Show button; {v} is the strip's own
+         "{v} of {N} showing" */
       const label = await text(page, "[data-qc140='filter-export']");
-      const show = await text(page, "[data-qc140='filter-show']");
-      const v = show?.match(/Show (\d+)/)?.[1] ?? null;
+      const show = await text(page, "[data-qc142='filter-count']");
+      const v = show?.match(/^(\d+) of/i)?.[1] ?? null;
       L.check("A1", `${vp.width} the label reads "Export {v} queries"`, !!v && new RegExp(`^↓ Export ${v} quer(y|ies)$`).test(label ?? ""), `${label} · ${show}`);
       L.check("A1", `${vp.width} a narrowed set (fewer than all)`, !!v && Number(v) > 0 && !/all/.test(label ?? ""), `${v}`);
       const dl = page.waitForEvent("download", { timeout: 15_000 });
@@ -132,10 +134,8 @@ test.describe("Query Centre v140.1", () => {
     for (const vp of SIZES) {
       await open(page, vp, "A2");
       await openMenu(page);
-      const label = await text(page, "[data-qc140='filter-export']");
-      const show = await text(page, "[data-qc140='filter-show']");
-      const n = show?.match(/Show (\d+)/)?.[1];
-      L.check("A2", `${vp.width} no filters: "Export all {N} queries"`, !!n && label === `↓ Export all ${n} queries`, `${label} · ${show}`);
+      /* v142 §E — RETIRED: "no filters: Export all {N} queries". The export moved to the applied row, which shows only
+         while something narrows the list (the pack's own placement). The narrowed and zero states below stand. */
       await press(page, "[data-qc140='filter-close']"); await page.waitForTimeout(400);
       await page.locator(`${G} [data-qc140='find'] input`).first().fill("zzqqxx-nothing-matches");
       await page.waitForTimeout(800);
@@ -151,7 +151,7 @@ test.describe("Query Centre v140.1", () => {
       await press(page, "[data-qc140='filter-close']");
       await page.locator(`${G} [data-qc140='find'] input`).first().fill("");
     }
-    L.done(8);
+    L.done(6);
   });
 
   /* one test per size: a fresh page each, so no Firestore cache or init script carries over from the other size */
@@ -178,7 +178,7 @@ test.describe("Query Centre v140.1", () => {
         const popVisible = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-pck='popover']")].some((e) => e.getBoundingClientRect().height > 0));
         if (!popVisible) { await press(page, "[data-pck='pill']"); await page.waitForTimeout(700); }
         await page.locator("[data-pck='popover'] [data-pck='item'][data-k='pin'] button").first().click({ timeout: 4000 }).catch(() => {});
-        opened = await page.waitForFunction(() => { const c = document.querySelector<HTMLElement>("[data-pck='spot'] [data-pck='card']"); return !!c && getComputedStyle(c).visibility !== "hidden" && /Pin the list/.test(c.innerText); }, null, { timeout: 4000 }).then(() => true).catch(() => false);
+        opened = await page.waitForFunction(() => { const c = document.querySelector<HTMLElement>("[data-pck='spot'] [data-pck='card']"); return !!c && getComputedStyle(c).visibility !== "hidden" && /Go full screen/.test(c.innerText); }, null, { timeout: 4000 }).then(() => true).catch(() => false);
       }
       L.check("B1", `${vp.width} the Pin step opened from the checklist`, opened, "");
       await page.waitForFunction(() => { const c = document.querySelector<HTMLElement>("[data-pck='spot'] [data-pck='card']"); return !!c && getComputedStyle(c).visibility !== "hidden"; }, null, { timeout: 8000 }).catch(() => {});
@@ -187,8 +187,10 @@ test.describe("Query Centre v140.1", () => {
         return c ? { text: c.innerText.replace(/\s+/g, " "), bold: [...c.querySelectorAll("b")].map((b) => b.textContent), kbd: [...c.querySelectorAll("kbd")].map((k) => k.textContent) } : null;
       });
       const t = card?.text ?? "";
-      L.check("B1", `${vp.width} "pin button"`, /pin button/.test(t), t.slice(0, 120));
-      L.check("B1", `${vp.width} "F" named in the text`, /\bor F\b/.test(t) && (card?.bold ?? []).includes("F"), JSON.stringify(card?.bold));
+      /* v142 §A — re-pointed: the step is "Go full screen", in the Contact list v20's words (plain text, as its own is):
+         it names the Full screen button and F */
+      L.check("B1", `${vp.width} "Full screen" named`, /Press Full screen\b/.test(t), t.slice(0, 120));
+      L.check("B1", `${vp.width} "F" named in the text`, /\bor F\b/.test(t), JSON.stringify(card?.bold));
       L.check("B1", `${vp.width} never "Pin list"`, !/Pin list/.test(t), t.slice(0, 120));
       L.check("B1", `${vp.width} the F key cap is still on the card`, (card?.kbd ?? []).includes("F"), JSON.stringify(card?.kbd));
       await page.mouse.click(5, 400); await page.waitForTimeout(300);
