@@ -1,0 +1,61 @@
+== U1 copy: the sub reworded — RED
+   × pricing v3: the copy is the ref's, word for word > renders every line 10ms
+   × pricing v3: the copy is the ref's, word for word > …and the constants are those lines (so an edit in one place cannot pass) 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 7 passed (9)
+== U2 the page says AI — RED
+   × pricing v3: the copy is the ref's, word for word > renders every line 10ms
+   × pricing v3: the copy is the ref's, word for word > …and the constants are those lines (so an edit in one place cannot pass) 1ms
+   × pricing v3: the copy is the ref's, word for word > never names Wall of no or Corkboard, never says AI, never limits Smart Import to once 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 6 passed (9)
+== U3 Smart Import becomes once — RED
+   × pricing v3: the copy is the ref's, word for word > renders every line 10ms
+   × pricing v3: the copy is the ref's, word for word > …and the constants are those lines (so an edit in one place cannot pass) 1ms
+   × pricing v3: the copy is the ref's, word for word > never names Wall of no or Corkboard, never says AI, never limits Smart Import to once 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 6 passed (9)
+== U4 the counter moved below the form (DOM) — RED
+   × pricing v3: the banner > puts the counter before the form 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 8 passed (9)
+== U5 a hardcoded places line in the band — RED
+   × pricing v3: the banner > with no figure from the store, draws no counter and states no number but the H1's 100 6ms
+   × the public pricing page sells nothing and writes nothing > renders no places figure until a real one comes back 6ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 103 passed (105)
+== U6 a second h1 — RED
+   × pricing v3: the banner > has exactly one h1, and it is the banner's 6ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 8 passed (9)
+== U7 a novel passes without its length — RED
+   × pricing v3: the journey's gates > each step opens only once it is answered, and a novel needs its length 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 8 passed (9)
+== U8 an answer pre-selected — RED
+   × pricing v3: the journey's gates > opens on question 1 with Next disabled and nothing pre-selected 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 8 passed (9)
+== U9 estimate: 80-110k read in 11 weeks — RED
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 5 · steady 3ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 5 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 40 · steady 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 40 · brisk 0ms
+== U10 estimate: August counted every year — RED
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/s · 150 · steady 3ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/m · 150 · steady 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · novel/l · 150 · steady 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · nonfic · 150 · steady 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · prep · pb · 150 · steady 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-21 · ready · novel/s · 150 · steady 0ms
+== U11 a saving moved without its price — RED
+   × the pass table > holds each stated saving within one point of the arithmetic 2ms
+   × the pass table > prints the ref's per-month lines 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 2 passed (4)
+== U12 an invented price on the page — RED
+   × the public pricing page sells nothing and writes nothing > quotes no price that the pass table does not state 5ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 95 passed (96)

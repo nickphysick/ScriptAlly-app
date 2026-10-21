@@ -82,7 +82,7 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
         <FoundingSignup
           idPrefix="mk-pricing"
           source="sealed-band"
-          formClass="mk-claimform mk-pv3form"
+          formClass="mk-pv3form"
           onNavigate={onNavigate}
         />
       </section>
