@@ -110,6 +110,7 @@ import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
 import { QcBand140 } from "./queries/centre/QcBand140";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
+import { QcCardsSkeleton } from "./queries/centre/QcCards142";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
 import { usePopover } from "./shell/ListPills";
 import { stripSent } from "../lib/qcStrip";
@@ -7388,7 +7389,7 @@ export const Queries: React.FC<{
             hasOpen={!!(panelRow && activeQuery)}
             body={
               showGridSkeleton ? (
-                qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
+                qcDesk ? (qcListView === "cards" ? <QcCardsSkeleton /> : <QcList132Skeleton />) : <QcListSkeleton />
               ) : !qcDesk && emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's

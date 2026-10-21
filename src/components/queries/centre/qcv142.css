@@ -191,3 +191,15 @@
   .qcv-group[data-v138][data-full] .qc138-sheet .qc140-pin.qc142-xfs { gap: 0; width: 46px; padding: 0; justify-content: center; }
   .qcv-group[data-v138][data-full] .qc138-sheet .qc140-pin.qc142-xfs .qc140-pin-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+/* v142.1 A4 — the keyboard ring on a card (the rows' `kf`): the focus ring the card's own focus draws */
+.qc142-card.kf .mk-lc.qc142-lc { box-shadow: 0 0 0 2px #2a3a52, 0 26px 48px -20px rgba(28, 19, 15, 0.38); }
+/* v142.1 A4 — the Cards placeholder: the landing card's frame, a grey band strip, grey lines, a foot; no text */
+.qc142-sk { padding-top: 0; }
+.qc142-sk .qc142-card { cursor: default; }
+.qc142-sk .mk-lc-band.qc142-skband { height: 37px; padding: 0; background: #efeae2; }
+.qc142-sk .mk-lc-line { margin-left: 18px; }
+.qc142-sk .qc142-skfoot { height: 16px; margin: 22px 18px 18px; border-radius: 5px; background: #f2ede6; }
+.qc142-sk .mk-lc-line, .qc142-sk .mk-lc-band.qc142-skband, .qc142-sk .qc142-skfoot { animation: qcv-sk-pulse 1.4s ease-in-out infinite; }
+@keyframes qcv-sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .qc142-sk .mk-lc-line, .qc142-sk .mk-lc-band.qc142-skband, .qc142-sk .qc142-skfoot { animation: none; } }

@@ -80,6 +80,8 @@ export interface QcCard142Props {
   coming: ComingUp | null;
   events: readonly PeekEvent[] | null;
   selected: boolean;
+  /** v142.1 A4 — the keyboard ring (j / k), the rows' own `kf` */
+  ring?: boolean;
   onOpen: () => void;
   onTab: (t: CardTab) => void;
   onAct: () => void;
@@ -87,7 +89,7 @@ export interface QcCard142Props {
 
 export const CARDS_THREE_FROM = 1100;
 
-export const QcCard142: React.FC<QcCard142Props> = ({ row: r, nowMs, book, pkg, coming, events, selected, onOpen, onTab, onAct }) => {
+export const QcCard142: React.FC<QcCard142Props> = ({ row: r, nowMs, book, pkg, coming, events, selected, ring = false, onOpen, onTab, onAct }) => {
   const where = whereItStands(r, nowMs);
   const tone = CARD_TONE[where];
   const nx = nextLine(r, coming, nowMs);
@@ -98,7 +100,7 @@ export const QcCard142: React.FC<QcCard142Props> = ({ row: r, nowMs, book, pkg, 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   return (
     /* `qcv-legacy`: the page's own font reset (qcvPage.css) stops here, so the landing card's classes name its faces */
-    <div id={`query-row-${r.id}`} className="qc142-card qcv-legacy" role="button" tabIndex={0} data-qc142="card" data-id={r.id} data-where={where} data-status={r.status} aria-current={selected ? "true" : undefined}
+    <div id={`query-row-${r.id}`} className={`qc142-card qcv-legacy${ring ? " kf" : ""}`} role="button" tabIndex={0} data-qc142="card" data-id={r.id} data-qid={r.id} data-ring={ring || undefined} data-where={where} data-status={r.status} aria-current={selected ? "true" : undefined}
       aria-label={`${r.agentName}, ${r.agency}. ${STAGE_NAME[r.status]}`}
       onClick={onOpen} onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(); } }}>
       <div className="mk-lc qc142-lc" data-qc142="mat">
@@ -139,7 +141,7 @@ export const QcCard142: React.FC<QcCard142Props> = ({ row: r, nowMs, book, pkg, 
           <div className="mk-lc-ft">
             <span className={nx.hot ? "mk-late" : undefined} data-qc142="due" data-hot={nx.hot ? "" : undefined}>{CLOCK}<em>{nx.line}</em></span>
             {move ? (
-              <button type="button" className="qc142-act" data-qc142="act" data-next={move.mode} onClick={(e) => { stop(e); onAct(); }} onKeyDown={stop}>{move.label}</button>
+              <button type="button" className="qc142-act" data-qc142="act" data-qcv="row-act" data-next={move.mode} onClick={(e) => { stop(e); onAct(); }} onKeyDown={stop}>{move.label}</button>
             ) : <span className="qc142-noact" />}
           </div>
         </div>
@@ -167,6 +169,8 @@ export interface QcCards142Props {
   packageOf?: (id: string) => SubmissionPackage | null;
   coming?: ReadonlyMap<string, ComingUp>;
   selectedId: string | null;
+  /** v142.1 A4 — the card the keyboard ring is on (the list keys' `ringId`) */
+  ringId?: string | null;
   loadPeek?: (id: string) => Promise<PeekEvent[]>;
   onOpen: (id: string) => void;
   onTab: (id: string, t: CardTab) => void;
@@ -201,7 +205,8 @@ function useCardEvents(ids: readonly string[], load?: (id: string) => Promise<Pe
 function useCols(ref: React.RefObject<HTMLElement | null>): 2 | 3 {
   const [cols, setCols] = useState<2 | 3>(2);
   useLayoutEffect(() => {
-    const sheet = ref.current?.closest<HTMLElement>(".qc138-sheet");
+    /* the sheet; the loading placeholder has none, so its own box (the ledger's width) stands in */
+    const sheet = ref.current?.closest<HTMLElement>(".qc138-sheet") ?? ref.current;
     if (!sheet) return undefined;
     const read = () => { const w = sheet.offsetWidth; if (w > 0) setCols(w >= CARDS_THREE_FROM ? 3 : 2); };
     read();
@@ -213,7 +218,7 @@ function useCols(ref: React.RefObject<HTMLElement | null>): 2 | 3 {
   return cols;
 }
 
-export const QcCards142: React.FC<QcCards142Props> = ({ groups, groupBy, markOf, nowMs, bookOf, packageOf, coming, selectedId, loadPeek, onOpen, onTab, onAct }) => {
+export const QcCards142: React.FC<QcCards142Props> = ({ groups, groupBy, markOf, nowMs, bookOf, packageOf, coming, selectedId, ringId = null, loadPeek, onOpen, onTab, onAct }) => {
   const rows = groups.flatMap((g) => g.rows);
   const boxRef = useRef<HTMLDivElement>(null);
   const cols = useCols(boxRef);
@@ -223,7 +228,7 @@ export const QcCards142: React.FC<QcCards142Props> = ({ groups, groupBy, markOf,
     const c = coming?.get(r.id) ?? null;
     return (
       <QcCard142 key={r.id} row={r} nowMs={nowMs} book={bookOf(r)} pkg={pkgId ? packageOf?.(pkgId) ?? null : null} coming={c}
-        events={events.get(r.id) ?? null} selected={r.id === selectedId}
+        events={events.get(r.id) ?? null} selected={r.id === selectedId} ring={r.id === ringId}
         onOpen={() => onOpen(r.id)} onTab={(t) => onTab(r.id, t)} onAct={() => onAct(r.id, c?.bucket ?? null)} />
     );
   };
@@ -244,6 +249,33 @@ export const QcCards142: React.FC<QcCards142Props> = ({ groups, groupBy, markOf,
           <div className="qc142-grid" data-qc142="grid">{g.rows.map(card)}</div>
         </section>
       ))}
+    </div>
+  );
+};
+
+/**
+ * v142.1 A4 — THE CARDS VIEW'S LOADING PLACEHOLDER, drawn while the list loads when the remembered view is Cards (the row
+ * placeholder otherwise): three cards a row, or two, by the same rule as the grid — each the landing card's frame (its
+ * mat and inner border), a band strip and grey lines (the landing's own back-card `.mk-lc-line`). No row placeholders.
+ */
+export const QcCardsSkeleton: React.FC = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const cols = useCols(ref);
+  return (
+    <div className="qc142-cards qc142-sk" data-qc142="sk-cards" data-sk="true" data-cols={cols} ref={ref} aria-hidden="true">
+      <div className="qc142-grid">
+        {Array.from({ length: cols * 2 }, (_, i) => (
+          <div key={i} className="qc142-card" data-qc142="sk-card">
+            <div className="mk-lc qc142-lc">
+              <div className="mk-lc-in">
+                <div className="mk-lc-band qc142-skband" />
+                {[0, 1, 2, 3, 4, 5].map((k) => <div key={k} className={`mk-lc-line${k % 2 ? " mk-lc-line--s" : ""}`} />)}
+                <div className="qc142-skfoot" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

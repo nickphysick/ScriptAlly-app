@@ -716,7 +716,7 @@ export const QcList138: React.FC<QcList138Props> = ({
         {/* v142 §D — THE CARDS VIEW: the same groups, in the same order, each under a ruled heading, as landing-page cards */}
         {view === "cards" && rows.length ? (
           <QcCards142 groups={groups} groupBy={groupBy} markOf={(g) => groupMark(g, toneOf(g))} nowMs={nowMs} bookOf={(r) => bookOf?.(r) ?? null}
-            packageOf={packageOf} coming={coming} selectedId={selectedId} loadPeek={loadPeek} onOpen={onOpen}
+            packageOf={packageOf} coming={coming} selectedId={selectedId} ringId={ringId} loadPeek={loadPeek} onOpen={onOpen}
             onTab={(id, t) => (onCardTab ?? ((x: string) => onOpen(x)))(id, t)} onAct={(id, b) => onAct?.(id, b)} />
         ) : null}
         {/* v140 §D — No grouping is ONE list in the order the headings sort it: no bands */}
