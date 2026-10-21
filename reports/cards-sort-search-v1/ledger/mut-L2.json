@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 · population: the strip's count",
+  "ok": true,
+  "detail": "87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · unfiltered: \"Export all {N} queries\"",
+  "ok": false,
+  "detail": "null · 87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · filtered: \"Export {v} queries\", v the strip's own",
+  "ok": false,
+  "detail": "null · 27 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · population: the strip's count",
+  "ok": true,
+  "detail": "87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · unfiltered: \"Export all {N} queries\"",
+  "ok": false,
+  "detail": "null · 87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · filtered: \"Export {v} queries\", v the strip's own",
+  "ok": false,
+  "detail": "null · 27 of 87 showing"
+ }
+]

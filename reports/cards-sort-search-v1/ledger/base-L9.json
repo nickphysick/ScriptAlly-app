@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L9",
+  "where": "Query Centre 1280 · population",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"ph\":\"rgba(28, 19, 15, 0.5)\"}"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1280 · at rest: not white",
+  "ok": false,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1280 · at rest: the placeholder is cream",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.5)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1280 · focused: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1280 · full screen at rest: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1512 · population",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"ph\":\"rgba(28, 19, 15, 0.5)\"}"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1512 · at rest: not white",
+  "ok": false,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1512 · at rest: the placeholder is cream",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.5)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1512 · focused: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Query Centre 1512 · full screen at rest: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1280 · population",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"ph\":\"rgba(28, 19, 15, 0.45)\"}"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1280 · at rest: not white",
+  "ok": false,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1280 · at rest: the placeholder is cream",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1280 · focused: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1280 · full screen at rest: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1512 · population",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"ph\":\"rgba(28, 19, 15, 0.45)\"}"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1512 · at rest: not white",
+  "ok": false,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1512 · at rest: the placeholder is cream",
+  "ok": false,
+  "detail": "rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1512 · focused: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L9",
+  "where": "Contact list 1512 · full screen at rest: white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ }
+]

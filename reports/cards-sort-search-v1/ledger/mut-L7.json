@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "L7",
+  "where": "Query Centre 1280 unpinned · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1280 unpinned · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1280 unpinned · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1280 unpinned · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1280 full screen · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1280 full screen · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1280 full screen · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1280 full screen · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1512 unpinned · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1512 unpinned · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1512 unpinned · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1512 unpinned · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1512 full screen · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Query Centre 1512 full screen · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":10}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1512 full screen · Cards: the chip, then Group by",
+  "ok": true,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ },
+ {
+  "lock": "L7",
+  "where": "Contact list 1512 full screen · List: no chip (Group by present)",
+  "ok": false,
+  "detail": "{\"chip\":true,\"group\":true,\"nextIsGroup\":true,\"gap\":8}"
+ }
+]

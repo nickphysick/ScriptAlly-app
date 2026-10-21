@@ -205,7 +205,9 @@ test("CL19-P1 · parity: the toolbar, its controls, the headings and a row's cel
       /* v19.1 §F — the unpinned toolbar is navy by design, so the controls' rings (Find, Group by, Filters) and the Pin's
          colours differ between the positions; the toolbar's own background and the letters' colours are not read here
          (CL191-F1 holds both positions to their values). Everything else stays literal. */
-      const BY_DESIGN: Record<string, string[]> = { find: ["boxShadow"], group: ["boxShadow"], filters: ["boxShadow"], pin: ["color"] };
+      /* cards-sort-search v1 §C — re-pointed: Find is the recessed well unpinned (cream ink, radius 9) and white on the
+         cream toolbar (the controls' ink, radius 8), so its colour and radius now differ by design too */
+      const BY_DESIGN: Record<string, string[]> = { find: ["boxShadow", "color", "borderRadius"], group: ["boxShadow"], filters: ["boxShadow"], pin: ["color"] };
       for (const k of keys) {
         const a = un[k], b = pi[k];
         L.check(`${w} ${k}: present in both positions`, !!a && !!b, `${!!a} · ${!!b}`);

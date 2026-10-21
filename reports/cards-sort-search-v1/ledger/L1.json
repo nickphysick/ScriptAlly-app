@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L1",
+  "where": "1280 unpinned · population",
+  "ok": true,
+  "detail": "{\"sheetW\":976,\"cols\":[2],\"firstRow\":2,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 unpinned · 2 columns (list card 976px)",
+  "ok": true,
+  "detail": "{\"sheetW\":976,\"cols\":[2],\"firstRow\":2,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 full screen · population",
+  "ok": true,
+  "detail": "{\"sheetW\":1204,\"cols\":[3],\"firstRow\":3,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 full screen · 3 columns (list card 1204px)",
+  "ok": true,
+  "detail": "{\"sheetW\":1204,\"cols\":[3],\"firstRow\":3,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 unpinned · population",
+  "ok": true,
+  "detail": "{\"sheetW\":1208,\"cols\":[3],\"firstRow\":3,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 unpinned · 3 columns (list card 1208px)",
+  "ok": true,
+  "detail": "{\"sheetW\":1208,\"cols\":[3],\"firstRow\":3,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 full screen · population",
+  "ok": true,
+  "detail": "{\"sheetW\":1436,\"cols\":[3],\"firstRow\":3,\"cards\":39}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 full screen · 3 columns (list card 1436px)",
+  "ok": true,
+  "detail": "{\"sheetW\":1436,\"cols\":[3],\"firstRow\":3,\"cards\":39}"
+ }
+]

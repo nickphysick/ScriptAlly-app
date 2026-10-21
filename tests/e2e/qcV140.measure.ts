@@ -264,7 +264,9 @@ test.describe("Query Centre v140", () => {
       L.check("B1", `${vp.width} card corners 18`, r.corners.every((c) => c === "18px"), r.corners.join(","));
       /* v142 §A — RETIRED: "Pin cream" and "Pin reads 'Pin list'". There is no Pin on the page; QC142-L3 asserts its absence. */
       void r.pin; void r.pinText;
-      L.check("B1", `${vp.width} no ring on the controls`, r.rings.every((x) => /^none\|0px\|none$/.test(x)), r.rings.join(" ‖ "));
+      /* cards-sort-search v1 §C — re-pointed: Find is the recessed well now, whose inset drop and 14% cream ring ARE its look;
+         Group by and Filters still carry no ring */
+      L.check("B1", `${vp.width} no ring on the controls (Find is the recessed well)`, r.rings.slice(1).every((x) => /^none\|0px\|none$/.test(x)) && /inset/.test(r.rings[0]), r.rings.join(" ‖ "));
     }
     L.done(6);
   });

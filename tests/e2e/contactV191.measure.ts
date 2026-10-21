@@ -475,7 +475,12 @@ test("CL191-F1 · unpinned bar: navy toolbar, cream letters and Pin, white contr
       L.check(`${w} unpinned: the letters are cream`, on.length > 0 && on.every((l) => l.color === CREAM), [...new Set(on.map((l) => l.color))].join(" "));
       L.check(`${w} unpinned: the current letter is a cream tile with navy text`, cur.length === 1 && cur[0].bg === CREAM && cur[0].color === NAVY, JSON.stringify(cur[0]));
       if (off.length) L.check(`${w} unpinned: an empty letter is cream at 28%`, off.every((l) => l.color === "rgba(244, 238, 229, 0.28)"), [...new Set(off.map((l) => l.color))].join(" "));
-      for (const x of u.ctl) L.check(`${w} unpinned: ${x.s} is white with no ring`, x.bg === "rgb(255, 255, 255)" && x.ring === "none", `${x.bg} · ${x.ring}`);
+      /* cards-sort-search v1 §C — re-pointed: Find is the recessed well (a dark well, its inset drop and 14% cream ring); the
+         other controls stay white with no ring */
+      for (const x of u.ctl) {
+        if (/cl19-find/.test(x.s)) L.check(`${w} unpinned: ${x.s} is the recessed well`, x.bg === "rgba(10, 18, 32, 0.32)" && /inset/.test(x.ring), `${x.bg} · ${x.ring}`);
+        else L.check(`${w} unpinned: ${x.s} is white with no ring`, x.bg === "rgb(255, 255, 255)" && x.ring === "none", `${x.bg} · ${x.ring}`);
+      }
       await scrollTo(page, "end");
       const e = await page.evaluate(() => {
         const card = [...document.querySelectorAll<HTMLElement>("[data-cl19='card']")].find((x) => x.getBoundingClientRect().height > 0);
@@ -494,7 +499,12 @@ test("CL191-F1 · unpinned bar: navy toolbar, cream letters and Pin, white contr
       L.check(`${w} pinned: Pin is navy with white text`, p.pinBg === NAVY && p.pinColor === "rgb(255, 255, 255)", `${p.pinBg} · ${p.pinColor}`);
       const pcur = p.letters.filter((l) => l.cur);
       L.check(`${w} pinned: the letters are navy, the current one on white`, p.letters.filter((l) => !l.cur && !l.dis).every((l) => l.color === NAVY) && pcur.length === 1 && pcur[0].bg === "rgb(255, 255, 255)" && pcur[0].color === NAVY, JSON.stringify(pcur[0]));
-      for (const x of p.ctl) L.check(`${w} pinned: ${x.s} keeps its ring`, x.bg === "rgb(255, 255, 255)" && x.ring === RING, `${x.bg} · ${x.ring}`);
+      /* cards-sort-search v1 §C — re-pointed: on the cream toolbar Find is white with the well's full-screen outline (an inset
+         1px at 16% ink); the other controls keep the controls' ring */
+      for (const x of p.ctl) {
+        if (/cl19-find/.test(x.s)) L.check(`${w} pinned: ${x.s} is white with its inset outline`, x.bg === "rgb(255, 255, 255)" && x.ring === "rgba(28, 19, 15, 0.16) 0px 0px 0px 1px inset", `${x.bg} · ${x.ring}`);
+        else L.check(`${w} pinned: ${x.s} keeps its ring`, x.bg === "rgb(255, 255, 255)" && x.ring === RING, `${x.bg} · ${x.ring}`);
+      }
       await setPin(page, L, false, `${w} unpin`);
     }
   });
