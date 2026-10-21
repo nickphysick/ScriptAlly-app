@@ -29,7 +29,7 @@ import { peekSummary, peekTone, YOUR_MOVE_STATUSES, type PeekEvent } from "../..
 import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } from "../../../lib/qcTl4";
 import { StageGlyph } from "./StageGlyph";
 import { bandArtOf } from "../../../lib/qcBandArt";
-import { BandMark, JumpMark, TONE_ART, TONE_ICON } from "./bandMarks";
+import { BandMark, JumpMark, TONE_ICON } from "./bandMarks";
 import { QcToolbar140, type Qc140Jump, type Qc140JumpMode, type Qc140Pop } from "./QcToolbar140";
 import type { PopoverState } from "../../shell/ListPills";
 import { JUMP_COLUMN_LABEL, jumpColumn, jumpLabel, monthJumps } from "../../../lib/qc140";
@@ -541,6 +541,13 @@ export const QcList138: React.FC<QcList138Props> = ({
           mark: jumpMode === "glyph" ? glyph : null, menuMark: groupBy === "package" ? null : glyph, to: { kind: "group", key: g.key } };
       });
 
+  /* v142 §C — a heading's glyph: the grouping's own mark (Status, Next action, Package), Who it's with's Closed the closed
+     glyph, and Your move / Waiting their tone icon — the same marks the jump row draws (no artwork on a ledger) */
+  const groupMark = (g: ListGroup, tone: BandTone): React.ReactNode => {
+    const art = groupBy === "attention" && g.key === "closed" ? CLOSED_ART : bandArtOf(groupBy, g.key);
+    return art ? <BandMark art={art} /> : <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>;
+  };
+
   const hl = (text: string): React.ReactNode => {
     const q = find.trim();
     if (!q) return text;
@@ -713,25 +720,16 @@ export const QcList138: React.FC<QcList138Props> = ({
           const label = g.label || "All queries";
           return (
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
-              <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
+              {/* v142 §C — THE LEDGER HEADING (the Contact list v20's cream ledger, `.cl20-lg`): #f4f0e9 with a hairline above
+                  and below, the group's glyph centred on the rows' disc column, the name in the typewriter, "N QUERIES" in
+                  mono, the fold chevron at the right. It replaces v138's powder and blush bands: the court colour lives on
+                  the cards and the breakdown card now, never on a heading. */}
+              <button type="button" className={`qc138-band qc138-band--${tone} qc142-lg`} data-qcv="gband" data-qc142="ledger" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
-                {/* v139 §C — under Status, Next action and Package the band draws its own mark in the art slot, and never
-                    the default grouping's talon or hourglass (which used to appear on every non-urgency band) */}
-                {(() => {
-                  const art = bandArtOf(groupBy, g.key);
-                  if (art) return <BandMark art={art} />;
-                  return (
-                    <>
-                      <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
-                      {TONE_ART[tone] ? (
-                        <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
-                      ) : null}
-                    </>
-                  );
-                })()}
+                <span className="qc142-lgm" data-qc142="ledger-mark">{groupMark(g, tone)}</span>
                 <b className="qc138-gt" data-qcv="gband-t">{label}</b>
                 <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
-                {g.hint ? <span className="qc138-gh" data-qcv="gband-h">{g.hint}</span> : <span className="qc138-gh" />}
+                <span className="qc138-gh" />
                 <span className="qc138-chev" aria-hidden="true">▾</span>
               </button>
               {!shut && (

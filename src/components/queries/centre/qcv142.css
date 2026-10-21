@@ -38,3 +38,38 @@
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chipw { height: 34px; border-radius: 9px; }
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chip { height: 34px; border-radius: 9px; }
 }
+
+/* §C · THE LIST'S GROUP HEADING, the Contact list's cream ledger (v20 §D, `.cl20-lg`): 54 tall (44 compact), #f4f0e9, a
+   7% hairline above and below (the brief's, and the mock's `inset 0 ±1px` — the Contact list's own ledger draws none),
+   no radius and no shadow, stuck or not. It runs the sheet's full width (the body's 18px side padding is taken back),
+   its mark centred on the rows' disc column (the body's 18 + the row's 22, then the disc's 40, or 26 compact) and the
+   name 12 after it, where a row's name starts. The powder and blush tones, the band art, the count pill and the hint
+   are retired here: the court colour is on the cards and the breakdown card. */
+@media (min-width: 768px) {
+  .qc138-sheet .qc138-band.qc142-lg {
+    --qc142-disc: 40px;
+    gap: 0; width: calc(100% + 36px); height: 54px; margin: 0 -18px; padding: 0 22px 0 40px; border-radius: 0;
+    background: #f4f0e9; color: #1c130f; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.07), inset 0 -1px 0 rgba(28, 19, 15, 0.07);
+  }
+  .qc138-sheet .qc138-grp:first-child .qc138-band.qc142-lg,
+  .qc138-sheet[data-density="compact"] .qc138-band.qc142-lg { margin-top: 0; }
+  .qc138-sheet .qc138-band.qc142-lg[data-stuck] { border-radius: 0; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.07), inset 0 -1px 0 rgba(28, 19, 15, 0.07); }
+  .qc138-sheet[data-density="compact"] .qc138-band.qc142-lg { --qc142-disc: 26px; height: 44px; }
+  .qc138-sheet .qc142-lg .qc142-lgm { display: inline-flex; align-items: center; justify-content: center; flex: none; width: var(--qc142-disc); margin-right: 12px; }
+  .qc138-sheet .qc142-lg .qc142-lgm .qc138-gart,
+  .qc138-sheet .qc142-lg .qc142-lgm .qc139-gart {
+    visibility: visible !important; width: 18px; height: 18px; border-radius: 0; background: none; box-shadow: none; color: #1c130f;
+  }
+  .qc138-sheet .qc142-lg .qc142-lgm .qc138-gart svg,
+  .qc138-sheet .qc142-lg .qc142-lgm .qc139-gsvg { width: 18px; height: 18px; }
+  .qc138-sheet .qc138-band.qc142-lg .qc138-gt { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; }
+  .qc138-sheet[data-density="compact"] .qc138-band.qc142-lg .qc138-gt { font-size: 19px !important; }
+  .qc138-sheet .qc138-band.qc142-lg .qc138-gn {
+    margin-left: 12px; padding: 0; border-radius: 0; background: none; color: rgba(28, 19, 15, 0.6);
+    font: 500 10.5px/1 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .qc138-sheet .qc138-band.qc142-lg .qc138-gh { margin-left: auto; }
+  .qc138-sheet .qc138-band.qc142-lg .qc138-chev { color: rgba(28, 19, 15, 0.45); }
+  /* the first group's heading sits flush under the column headings; the next follows its last row with no gap */
+  .qc138-sheet .qc138-grp + .qc138-grp .qc138-band.qc142-lg { margin-top: 0; }
+}
