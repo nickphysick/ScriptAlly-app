@@ -53,8 +53,9 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/", () => <Landing onNavigate={noNavigate} />, "Hunting for literary agent representation?"],
   /* Retarget, same law: the page is three tiers now and its h1 changed with them. */
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Pick the plan that fits"],
-  /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
-  ["/about", () => <AboutPage onNavigate={noNavigate} />, "Get good stories told."],
+  /* Retarget, same law (21 Oct): the h1 is three block spans now, so the sentence is not one
+     uninterrupted run in the markup; the navy band's hit line is, and only this route renders it. */
+  ["/about", () => <AboutPage onNavigate={noNavigate} />, "That gap is where good stories go to die."],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
   /* Retarget, same law: the founders headline changed with the hero rebuild (16 Sep). */
   ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help get things off the ground."],

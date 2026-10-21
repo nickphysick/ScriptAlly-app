@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * About — the page's structural laws, asserted against RENDERED output rather than source, so a
- * class list built from a template still satisfies them.
+ * class list built from a template still satisfies them. Rebuilt 21 Oct with the page
+ * (ref design-refs/about-page-v1.html).
  */
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
@@ -14,125 +15,106 @@ vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).fireb
 vi.mock("../components/toast/ToastProvider", async () => (await import("../test/pageSmoke")).toastMock());
 
 import { AboutPage } from "./AboutPage";
-import { ABOUT_COMMITMENTS, ABOUT_VISIONS } from "./aboutCopy";
+import {
+  ABOUT_VISIONS, ABOUT_PLATES, ABOUT_STATEMENT_LINES, ABOUT_GAP_HIT, ABOUT_TURN, ABOUT_SECTION_H2,
+  ABOUT_CLOSE_CTA,
+} from "./aboutCopy";
 
 const html = () => renderPage(<AboutPage onNavigate={noNavigate} />, "/about");
 
 describe("About is built from bands, not the document card", () => {
-  /**
-   * ⚠️ THE TWO SHAPES ARE DELIBERATELY DIFFERENT. `DocumentShell` is the legal tier's reading
-   * column; About is a page read once. If this page ever renders inside the card, three short
-   * sections start looking like a contract.
-   */
   it("does not render the document card", () => {
     expect(html()).not.toMatch(/["\s`]mk-doccard["\s`]/);
   });
 
   /**
-   * ⚠️ RETARGET, AND THE LAW GOT STRONGER RATHER THAN WEAKER. The hero used to be a band and is
-   * now the mission grid, so the count is one per vision with NO hero — and the second half of
-   * this test is new: the mission hero must not be a band. That is the thing worth locking. A
-   * band centres its copy against the plate, which would flatten the three-register escalation
-   * the hero is built on.
+   * ⚠️ THE WHOLE ATTRIBUTE, NEVER A PREFIX. Splitting on `class="mk-band` also splits on
+   * `class="mk-bandcopy"`. After `mk-band` the pattern demands the closing quote or a ` mk-band--`
+   * modifier, and `copy"` is neither.
    */
-  it("renders one band per vision, and the mission hero is not one of them", () => {
-    const page = html();
-    const bands = page.match(/class="mk-band(?![a-z-])/g) ?? [];
-    expect(bands.length).toBe(ABOUT_VISIONS.length);
-    expect(page).toMatch(/["\s`]mk-mission["\s`]/);
-  });
-
-  /**
-   * ⚠️ THE ALTERNATION IS A CLASS, AND THIS ASSERTS THE CLASS — the pixels were measured in the
-   * browser at 1280 (bands landed at copy 106 / plate 663 and back again). The first attempt put
-   * the flip modifier on the bands whose DOM order already agreed with it, so the rule was a
-   * no-op and all three visions drew their plate on the left through a green suite. A source lock
-   * cannot see that; it can only stop the class drifting off the band it was measured on.
-   */
-  it("pulls the copy across on exactly the middle vision", () => {
-    /* ⚠️ THE WHOLE ATTRIBUTE, NEVER A PREFIX. Splitting on `class="mk-band` also splits on
-       `class="mk-bandcopy"` — it found eight bands in a page that has four. The pattern below
-       still cannot match `mk-bandcopy`: after `mk-band` it demands either the closing quote or a
-       ` mk-band--` modifier, and `copy"` is neither. */
+  it("renders one band per vision and pulls the copy across on exactly the middle one", () => {
     const bands = [...html().matchAll(/class="(mk-band(?: mk-band--[a-z]+)*)"/g)].map((m) => m[1]);
     expect(bands.length).toBe(ABOUT_VISIONS.length);
-    expect(bands).toEqual([
-      "mk-band mk-band--first", "mk-band mk-band--copyfirst", "mk-band",
-    ]);
+    expect(bands).toEqual(["mk-band mk-band--first", "mk-band mk-band--copyfirst", "mk-band"]);
   });
 
   /**
-   * ⚠️ THE FIRST BAND'S HAIRLINE IS REMOVED BY STRUCTURE, NOT BY A DECLARATION — which is exactly
-   * why it is worth asserting. `.mk-band + .mk-band` draws it, so the section header sitting
-   * between the hero and the first vision is what stops it matching. Move the header and the
-   * hairline comes back silently, under a centred rule that already separates the two.
+   * The order is the argument: the aim, the gap on navy, the method header, the three visions, the
+   * founder's note, the way out. The section header sits between the gap and the first band, which
+   * is also what keeps `.mk-band + .mk-band`'s hairline off the first band.
    */
-  it("puts the section header between the hero and the first vision", () => {
+  it("opens with the aim, then the gap, then the method, the visions, the note and the close", () => {
     const page = html();
-    const mission = page.indexOf("mk-mission");
-    const sechead = page.indexOf("mk-sechead");
-    const firstBand = page.indexOf("mk-band mk-band--first");
-    expect(mission).toBeGreaterThanOrEqual(0);
-    expect(sechead).toBeGreaterThan(mission);
-    expect(firstBand).toBeGreaterThan(sechead);
+    const order = ["mk-ahero", "mk-agap", "mk-sechead", "mk-band mk-band--first", "mk-note", "mk-aclose"]
+      .map((c) => page.indexOf(`class="${c}`));
+    for (const at of order) expect(at).toBeGreaterThanOrEqual(0);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
 
-  /**
-   * Every band carries its illustration slot, so no slot is silently dropped by a copy edit.
-   * ⚠️ RETARGET, SAME LAW: the hero slot is now keyed `mission` — one primitive serves both public
-   * pages, so the key names which panel it is rather than where it sits. The claim is unchanged
-   * (every band reserves its plate) and it is still read off rendered output.
-   */
-  /**
-   * ⚠️ THE MISSION SLOT IS GONE FROM THE LIST BECAUSE IT IS GONE FROM THE PRODUCT. The hero rendered
-   * a watercolour handshake through `MarketingIllustration` with `finished` set — which is the
-   * component doing nothing except drawing an image, since `finished` switches off the rim, the
-   * ground and the caption that are its entire purpose. It renders a finished drawing directly now,
-   * so the `mission` key, its art and the `tall` flag only it set are all deleted. The three VISION
-   * bands still reserve their slots, and that is the claim that survives.
-   */
-  it("reserves an illustration slot in each vision band, and none for the hero", () => {
+  it("states the aim on three explicit lines, the hit line, the turn and the method header", () => {
     const page = html();
-    for (const slot of ABOUT_VISIONS.map((v) => v.key)) {
+    for (const line of ABOUT_STATEMENT_LINES) expect(page).toContain(`<span class="mk-astl">${line}</span>`);
+    expect(page).toContain(ABOUT_GAP_HIT);
+    expect(page).toContain(ABOUT_TURN.replace("'", "&#x27;"));
+    expect(page).toContain(ABOUT_SECTION_H2);
+  });
+
+  it("draws the hero drawing as a real image with real alt text", () => {
+    expect(html()).toMatch(/<img class="mk-aheroart"[^>]*alt="An older hawk reading aloud/);
+  });
+});
+
+describe("every illustration slot carries its brief", () => {
+  /**
+   * The slots ship as placeholders so nothing shifts when the art lands, and each one carries the
+   * illustrator's brief on the element — the brief travels with the slot rather than living in a
+   * document nobody opens.
+   */
+  it("reserves a slot for each vision and for the founder, each with a caption and a brief", () => {
+    const page = html();
+    for (const slot of [...ABOUT_VISIONS.map((v) => v.key), "founder"] as const) {
+      const plate = ABOUT_PLATES[slot];
       expect(page).toContain(`data-illo="${slot}"`);
-    }
-    expect(page, "the hero draws its own picture, not a slot").not.toContain('data-illo="mission"');
-    expect(page, "and it is a real image with real alt text")
-      .toMatch(/<img class="mk-missionart"[^>]*alt="An older hawk reading aloud/);
-  });
-});
-
-describe("the commitments say what the product is asserted to do elsewhere", () => {
-  /**
-   * ⚠️ THESE ARE PRODUCT LAW, NOT MARKETING. "It reports; it never appraises" is enforced in code
-   * across the app. A commitment softened here would put the shop window at odds with the product.
-   */
-  it("states all three, in full", () => {
-    const page = html();
-    for (const commitment of ABOUT_COMMITMENTS) {
-      expect(page).toContain(commitment.heading);
+      expect(plate.brief.length).toBeGreaterThan(40);
+      expect(page).toContain(plate.caption.replace("'", "&#x27;"));
     }
   });
 
-  it("keeps the no-appraisal promise on the page", () => {
-    expect(html()).toContain("It reports; it never appraises.");
+  it("does not draw the retired dashed-rim primitive", () => {
+    expect(html()).not.toMatch(/["\s`]mk-illo["\s`]/);
   });
 });
 
-describe("the founder sign-off follows the identity-line law", () => {
+describe("the three promises are gone, and vision 03 holds the data promise alone", () => {
+  it("renders no commitment strip", () => {
+    expect(html()).not.toMatch(/["\s`]mk-commitstrip["\s`]/);
+  });
+
+  it("states that nothing is sold, shown adverts, trained on, or written for the writer", () => {
+    const body = (ABOUT_VISIONS.find((v) => v.key === "time")!.body as string[]).join("");
+    expect(body).toMatch(/won't sell them/);
+    expect(body).toMatch(/train AI/);
+    expect(body).toMatch(/won't try to write for\s+you/);
+  });
+});
+
+describe("the founder's note and the sign-off", () => {
   /**
    * ⚠️ THE HAIRLINE IS ITS OWN ELEMENT — never a border or a pseudo-element on either label, which
-   * would drift the moment either label's length changed. `IdentityLine` carries the same law and
-   * the same reasoning; it is not imported here because it takes an agent and pulls a workspace
-   * lib into a tier that states it makes no workspace imports.
+   * would drift the moment either label's length changed. `IdentityLine` carries the same law.
    */
   it("draws the rule as a sibling element", () => {
     expect(html()).toMatch(/["\s`]mk-signrule["\s`]/);
   });
 
-  it("names the role and the person separately", () => {
+  it("names the role and the person separately, and offers a way to say hello", () => {
     const page = html();
     expect(page).toContain("Nick Physick");
     expect(page).toContain("Founder");
+    expect(page).toContain("Say hello");
+  });
+
+  it("closes on the founding-writer offer", () => {
+    expect(html()).toContain(ABOUT_CLOSE_CTA);
   });
 });
