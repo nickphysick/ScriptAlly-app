@@ -170,12 +170,37 @@ The ledgers these runs rewrote under other packs' reports were put back to their
 
 ## Shots
 
-_(filled in below)_
+`reports/contact-list-v20/shots/` holds 24 PNGs at 2×, one beside each `screens/*` file at the same size and in the
+same state (`tests/e2e/contactV20Shots.measure.ts`), taken from **dev** after the deploy (`index-CUVPhDL9.js`) on the
+harness account. Names and counts are the account's, not the mock's invented ones. The shell's beta strip sits above the
+page (the mock has none), so everything is about 40px lower than in the mock.
 
 ## Deploy
 
-_(filled in below)_
+- Dev served `…-raam-hero3` d0d07756 (`index-BcvvtJS0.js`, confirmed by building its tip) when the deploy started: landing
+  hero v3 on top of this pack's base.
+- Integration branch `dev/…-raam-hero3-cl20` = **bdb89584**, a merge of `contact-list-v20` (0180f68a) into d0d07756. One
+  conflict, `design-refs/.refhashes.json`: both sides had enrolled refs, so it was resolved as their union (706 refs,
+  `check-design-refs` passes).
+- Gates on the integration branch: tsc 0, both builds 0, Vitest 637 files / 9386 passed / 3 skipped. The first Vitest run
+  failed three `functions/` files only because that worktree had no `functions/node_modules`; linked and re-run, it passed.
+- CL20 on the integration build: 18 passed, 324/324.
+- Deployed **hosting only, to dev** (`--config firebase.dev.json --project scriptally-dev`), from a clean tree, with
+  the served hash checked in the same command. Dev now serves **`index-CUVPhDL9.js`**.
+- Both branches are pushed. Nothing is merged to `main`; prod is untouched.
 
 ## For Nick in the morning
 
-_(filled in below)_
+Things that look off on dev and that no lock covers:
+
+1. **The cards show "+ Add their website" / "+ Add their email" pills in the head.** The mock's cards have no link
+   row. This is `AgentPaperCard`'s own behaviour (a missing value is an add pill), kept as the pack said. With sparse data
+   it makes most cards busier than the mock.
+2. **The status chip on a card is the query's stage only.** The mock colours bands by stage (taupe for Passed, and so
+   on); the build keeps slate for everything except your move, as the pack said.
+3. **In full screen at 1512, the strip's "Where your query stands" column scrolls inside itself** to reach "Closed"
+   (the strip is capped at 236 tall). That is the pack's own cap; the mock shows the same.
+4. **The cards don't stretch to their row's height**, so a short card sits above empty space beside a tall one. The mock
+   does the same.
+5. **The Query Centre guide was left changed for about 40 minutes overnight** (a restore failed against the sign-in
+   quota). It has been put back to the state read before the run: seen, all six done. Worth a glance.
