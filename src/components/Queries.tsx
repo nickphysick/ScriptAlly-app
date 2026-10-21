@@ -2451,6 +2451,17 @@ export const Queries: React.FC<{
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
   /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
+  /* v142 §D — the card's Materials tab: once the panel has drawn its Tracking ledger, the "what was sent" slip
+     (`[data-qp="slip"]`) is scrolled into view. Polled for a moment, because the panel opens a frame or two later. */
+  const revealSentSlip = useCallback(() => {
+    let tries = 0;
+    const look = () => {
+      const slip = [...document.querySelectorAll<HTMLElement>('[data-qp="slip"]')].find((e) => e.getBoundingClientRect().height > 0);
+      if (slip) { slip.scrollIntoView({ block: "center", behavior: "auto" }); slip.setAttribute("data-qc142-shown", ""); return; }
+      if (++tries < 40) window.setTimeout(look, 50);
+    };
+    window.setTimeout(look, 50);
+  }, []);
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
   useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
@@ -7438,6 +7449,16 @@ export const Queries: React.FC<{
                   title={listCountTitle(qcVisible.length, qcScoped.length, qc140Chips.length > 0, "query", "queries")}
                   view={qcListView}
                   onView={setQcListView}
+                  /* v142 §D — a card's book, and its tabs: Tracking and Agent open the panel on that tab; Materials opens
+                     Tracking and brings the ledger's "what was sent" slip into view (the panel has no Materials tab) */
+                  bookOf={(r) => manuscripts.find((m) => m.id === r.manuscriptId)?.title ?? null}
+                  onCardTab={(id, t) => {
+                    if (isPracticeId(id)) { openPip(); return; }
+                    requestPanelTab(t === "agent" ? "agent" : "tracking");
+                    cardSetRef.current = qcVisible.map((r) => r.id);
+                    onOpenQuery?.(id);
+                    if (t === "materials") revealSentSlip();
+                  }}
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */

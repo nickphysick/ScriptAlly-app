@@ -73,3 +73,86 @@
   /* the first group's heading sits flush under the column headings; the next follows its last row with no gap */
   .qc138-sheet .qc138-grp + .qc138-grp .qc138-band.qc142-lg { margin-top: 0; }
 }
+
+/* ── §D · THE CARDS VIEW. The ground is the Contact list's (#f7f4ee); 24px at the sides, 26 at the foot. The landing
+   card's faces are READ, not named: `heroCard.css` reads `--mk-f-*`, which `.mk-scope` declares on the public pages; here
+   they are pointed at the app's own face tokens (marketing.css is the only sheet allowed to name the families). ── */
+.qc142-cards {
+  --mk-f-display: var(--sp-type); --mk-f-serif: var(--sp-serif); --mk-f-mono: var(--sp-mono); --mk-f-sans: var(--font-sans);
+  box-sizing: border-box; padding: 0 24px 26px; background: #f7f4ee;
+}
+/* brand.tsx names a family on bare span/div/b/button at runtime; an UNCLASSED element in the card inherits instead. The
+   attribute keeps this at 0-1-0, so every one of heroCard.css's own rules (0-1-0 or more) still wins. */
+:where(.qc142-lc) :where(span, div, b, i, em, small, li, ol, button):not([class]) { font-family: inherit; }
+
+/* the grid: two across, three when the list card is 1240 or wider (`data-cols`, measured from the sheet); 24 gaps */
+.qc142-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; padding: 30px 0 30px; }
+.qc142-cards[data-cols="3"] .qc142-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.qc142-gsec:last-child > .qc142-grid { padding-bottom: 0; }
+
+/* the card: the landing's front card out of its pile — in the flow, upright, the column's width */
+.qc142-card { position: relative; display: block; min-width: 0; border-radius: 20px; cursor: pointer; outline: 0; }
+.qc142-card .mk-lc.qc142-lc { position: relative; left: auto; top: auto; width: auto; transform: none; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.qc142-card:hover .mk-lc.qc142-lc { transform: translateY(-3px); }
+.qc142-card:focus-visible .mk-lc.qc142-lc,
+.qc142-card[aria-current="true"] .mk-lc.qc142-lc { box-shadow: 0 0 0 2px #2a3a52, 0 26px 48px -20px rgba(28, 19, 15, 0.38); }
+@media (prefers-reduced-motion: reduce) {
+  .qc142-card .mk-lc.qc142-lc { transition: none; }
+  .qc142-card:hover .mk-lc.qc142-lc { transform: none; }
+}
+.qc142-lc .mk-lc-band > span:last-child:empty { display: none; }
+.qc142-lc .mk-lc-agent { align-items: flex-start; }
+.qc142-lc .mk-lc-agent > .mk-lc-disc { margin-top: 2px; }
+.qc142-lc .qc142-who { min-width: 0; }
+.qc142-lc .mk-lc-nm { overflow-wrap: anywhere; }
+.qc142-lc .mk-lc-pill { margin-top: 4px; }
+.qc142-lc .mk-lc-pill svg { flex: none; }
+.qc142-lc .mk-lc-ms b { overflow-wrap: anywhere; line-height: 1.05; }
+/* the tabs are buttons (each opens the query's panel), drawn as the landing card's tab words */
+.qc142-lc .qc142-tabs button {
+  margin: 0; padding: 0 0 10px; border: 0; background: none; color: inherit; cursor: pointer; font: inherit;
+}
+.qc142-lc .qc142-tabs button[aria-current="true"] { color: #1c130f; box-shadow: inset 0 -2px 0 #1c130f; }
+.qc142-lc .qc142-tabs button:hover { color: #1c130f; }
+.qc142-lc .qc142-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
+/* the history: the glyph in the 20px column, a rail from each glyph to the next */
+.qc142-lc .qc142-steps { padding-bottom: 4px; }
+.qc142-lc .qc142-steps .mk-lc-step:not(:last-child)::after {
+  content: ""; position: absolute; left: 7px; top: 19px; bottom: -12px; width: 1px; background: #e4ddd3;
+}
+.qc142-lc .qc142-g { position: relative; z-index: 1; display: inline-grid; place-items: center; width: 15px; height: 15px; margin-top: 2px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px #fff; }
+.qc142-lc .qc142-dot { display: block; width: 7px; height: 7px; border-radius: 50%; background: #a99f94; }
+.qc142-lc .mk-lc-att span svg { flex: none; }
+/* the foot: the due line (the landing's mono caps, rust when hot) and the next move as an underlined serif link */
+.qc142-lc .mk-lc-ft { gap: 12px; align-items: center; }
+.qc142-lc .mk-lc-ft > span:first-child { line-height: 1.35; }
+.qc142-lc .mk-lc-ft > span:first-child svg { flex: none; }
+.qc142-lc .qc142-act {
+  flex: none; margin: 0; padding: 0 0 3px; border: 0; border-radius: 0; background: none; color: #1c130f; cursor: pointer; white-space: nowrap;
+  font: 400 16px/1 var(--mk-f-serif) !important; box-shadow: inset 0 -1px 0 #1c130f;
+}
+.qc142-lc .qc142-act:hover { box-shadow: inset 0 -2px 0 #1c130f; }
+.qc142-lc .qc142-act:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+
+/* ── §C · THE CARDS VIEW'S GROUP HEADING, the Contact list's ruled heading (v20 §D): the glyph (18), the name in the
+   typewriter at 21, "N QUERIES" in mono, then a 1px 16% hairline to the right edge. Compact: 14 above and below. It
+   sticks DIRECTLY under the toolbar (and the applied row): `--qc138-pin-h` is the stack's MEASURED height, never a
+   constant; the column headings are not drawn in this view. Its gutters are covered by its own shadow. ── */
+.qc142-cards .qc142-rh {
+  position: sticky; z-index: 6; top: var(--qc138-pin-h);
+  box-sizing: border-box; display: flex; align-items: center; margin: 0; padding: 14px 0;
+  background: #f7f4ee; box-shadow: -24px 0 0 #f7f4ee, 24px 0 0 #f7f4ee;
+}
+.qc142-rh .qc142-rhm { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 18px; height: 18px; margin-right: 12px; color: #1c130f; }
+.qc142-rh .qc142-rhm .qc138-gart,
+.qc142-rh .qc142-rhm .qc139-gart { visibility: visible !important; position: relative; width: 18px; height: 18px; border-radius: 0; background: none; box-shadow: none; color: #1c130f; }
+.qc142-cards .qc142-rh .qc142-rhm svg { width: 18px; height: 18px; }
+.qc142-rh .qc142-rhl.qc142-rhl { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+.qc142-rh .qc142-rhn.qc142-rhn {
+  margin-left: 12px; font: 500 10.5px/1 var(--sp-mono) !important; font-style: normal; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.6); white-space: nowrap;
+}
+.qc142-rh .qc142-rhr { flex: 1 1 auto; min-width: 0; height: 1px; margin-left: 16px; background: rgba(28, 19, 15, 0.16); }
+/* the Cards view's sheet: no column headings, and the body gives its side padding to the cards' own ground */
+.qc138-sheet[data-view="cards"] .qc138-body { padding: 0; }
+.qc138-sheet[data-view="cards"] .qc138-body > .qc139-practice { margin: 0 18px; }

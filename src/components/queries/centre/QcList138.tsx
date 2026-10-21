@@ -40,6 +40,7 @@ import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { ViewTitleRow, type ListView } from "../../shell/ViewTitleRow";
+import { QcCards142, type CardTab } from "./QcCards142";
 import "./qcvList138.css";
 import "./qcv142.css";
 
@@ -404,6 +405,9 @@ export interface QcList138Props {
   onView?: (v: ListView) => void;
   /** v142 §A — the title row's count ("All 27 queries" / "10 of 27 queries"); the row is not drawn in full screen */
   title?: string;
+  /** v142 §D — a card's manuscript title, and its tabs (open the query's panel on that tab) */
+  bookOf?: (r: QcRow) => string | null;
+  onCardTab?: (id: string, tab: CardTab) => void;
 }
 
 /** v140 §F — the arrival's values: 420ms on cubic-bezier(.2,.8,.2,1) from −10px and transparent, 24ms apart, the
@@ -414,7 +418,7 @@ export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: 
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, title,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, title, bookOf, onCardTab,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -673,19 +677,22 @@ export const QcList138: React.FC<QcList138Props> = ({
           {applied}
         </div>
       </div>
-      <div className="qc138-heads lth" data-qc138="headings" role="row">
-        {HEADINGS.map((h) => {
-          const on = sort.key === h.key;
-          return (
-            <div key={h.key} role="columnheader" className={`qc138-h${on ? " on" : ""}`} data-k={h.key} data-qc138="heading"
-              aria-sort={on ? (sort.reversed ? "descending" : "ascending") : "none"}>
-              <button type="button" onClick={() => onHeading(h.key)}>
-                <span>{h.label}</span><i aria-hidden="true">{on && sort.reversed ? "↑" : "↓"}</i>
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      {/* v142 §C — the column headings belong to the List view; the Cards view draws none */}
+      {view === "list" ? (
+        <div className="qc138-heads lth" data-qc138="headings" role="row">
+          {HEADINGS.map((h) => {
+            const on = sort.key === h.key;
+            return (
+              <div key={h.key} role="columnheader" className={`qc138-h${on ? " on" : ""}`} data-k={h.key} data-qc138="heading"
+                aria-sort={on ? (sort.reversed ? "descending" : "ascending") : "none"}>
+                <button type="button" onClick={() => onHeading(h.key)}>
+                  <span>{h.label}</span><i aria-hidden="true">{on && sort.reversed ? "↑" : "↓"}</i>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
       {/* a dev-only review aid: `window.__SA_QC138_PEEK_LAB` forces peek cases (the F2 edge-case sheet); production
           builds drop the branch, since MODE is replaced at build time */}
       {import.meta.env.MODE !== "production" ? <PeekLab nowMs={nowMs} /> : null}
@@ -706,15 +713,21 @@ export const QcList138: React.FC<QcList138Props> = ({
           </div>
         ) : null}
         {groups.length === 0 && deadEnd ? deadEnd : null}
+        {/* v142 §D — THE CARDS VIEW: the same groups, in the same order, each under a ruled heading, as landing-page cards */}
+        {view === "cards" && rows.length ? (
+          <QcCards142 groups={groups} groupBy={groupBy} markOf={(g) => groupMark(g, toneOf(g))} nowMs={nowMs} bookOf={(r) => bookOf?.(r) ?? null}
+            packageOf={packageOf} coming={coming} selectedId={selectedId} loadPeek={loadPeek} onOpen={onOpen}
+            onTab={(id, t) => (onCardTab ?? ((x: string) => onOpen(x)))(id, t)} onAct={(id, b) => onAct?.(id, b)} />
+        ) : null}
         {/* v140 §D — No grouping is ONE list in the order the headings sort it: no bands */}
-        {groupBy === "none" && rows.length ? (
+        {view === "list" && groupBy === "none" && rows.length ? (
           <div className="qc138-grp qc140-flat" data-qcv="grp" data-group="all">
             <div role="listbox" aria-label={`All queries: ${rows.length} ${rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">
               {rows.map(renderRow)}
             </div>
           </div>
         ) : null}
-        {groupBy === "none" ? null : groups.map((g) => {
+        {view !== "list" || groupBy === "none" ? null : groups.map((g) => {
           const tone = toneOf(g);
           const shut = folded.has(g.key);
           const label = g.label || "All queries";
