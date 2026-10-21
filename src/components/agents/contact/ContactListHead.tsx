@@ -30,6 +30,9 @@ import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import type { PopoverState } from "../../shell/ListPills";
 import type { ContactPop } from "./ContactListControls";
 import { ContactViewSwitch, FULL_ICON } from "./ContactTitleRow";
+import { SortChipButton, SortChipMenu, type SortValue } from "../../shell/SortChip";
+import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
+import type { SortKey } from "../../../lib/contactList";
 import type { ContactView } from "../../../lib/contactListMemory";
 import "./contactV19.css";
 
@@ -175,9 +178,14 @@ export const ContactListHead: React.FC<{
   showViewTools: boolean;
   /** v20 §E — the filter strip, drawn inside the head under the toolbar (it sticks with it and sits over the rows) */
   filterStrip?: React.ReactNode;
-}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin, view, onView, showViewTools, filterStrip }) => {
+  /** cards-sort-search v1 §B — the list's one sort (the column headings'), read and written by the Cards view's chip */
+  sort?: SortValue<SortKey>;
+  onSort?: (v: SortValue<SortKey>) => void;
+  /** cards-sort-search v1 §B — ungrouped and sorted by a date: the jump row is months (`jump` carries them), not A to Z */
+  months?: boolean;
+}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin, view, onView, showViewTools, filterStrip, sort, onSort, months = false }) => {
   const tbRef = useRef<HTMLDivElement>(null);
-  const showLetters = groupKey === "none" || groupKey === "letter";
+  const showLetters = (groupKey === "none" || groupKey === "letter") && !months;
   const groupName = groupKey === "none" ? null : GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? null;
 
   const grpRef = useRef<HTMLButtonElement>(null);
@@ -192,9 +200,10 @@ export const ContactListHead: React.FC<{
 
   /* ── the give-way pass: the smallest `data-fit` at which nothing in the row is clipped ──
      Letters: 1 hides the letters with no agents, 2 tightens them. The jump row (v19 §E): 1 hides the current group's
-     label, 2 then puts the groups that do not fit WHOLE into "+N more" — set on each button as `data-over` (never
+     label, 2 then puts the groups that do not fit WHOLE into "+N more". With the letters, 3 (cards-sort-search v1)
+     folds the Sort chip's "Sorted by" — set on each button as `data-over` (never
      React state, so it cannot re-render the page), with the count handed to the one "+N more" button. */
-  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "") + (showViewTools ? "v" : "") + jumpSig;
+  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "") + (showViewTools ? "v" : "") + view + (sort ? `${sort.key}${sort.reversed}` : "") + jumpSig;
   useLayoutEffect(() => {
     const tb = tbRef.current;
     if (!tb) return undefined;
@@ -204,7 +213,8 @@ export const ContactListHead: React.FC<{
       const btns = nav ? Array.from(nav.querySelectorAll<HTMLElement>("button[data-cl19='jump-group']")) : [];
       btns.forEach((b) => b.removeAttribute("data-over"));
       nav?.removeAttribute("data-cut");
-      for (let lv = 0; lv <= 2; lv += 1) {
+      /* cards-sort-search v1 §B — 3 (the letters' path only): the Cards view's Sort chip drops "Sorted by" */
+      for (let lv = 0; lv <= 3; lv += 1) {
         tb.setAttribute("data-fit", String(lv));
         if (lv === 2 && nav && btns.length) {
           /* the room the jump row has: what the toolbar leaves once everything else has its width */
@@ -228,6 +238,7 @@ export const ContactListHead: React.FC<{
           return;
         }
         if (tb.scrollWidth <= tb.clientWidth + 0.5) { if (lv < 2) setCut(null); return; }
+        if (lv === 3) return;
       }
     };
     fit();
@@ -301,14 +312,14 @@ export const ContactListHead: React.FC<{
           </nav>
         ) : (
           /* v19 §E — the jump row: one button per group (its mark and count; the current one also its name) */
-          <nav className="cl19-jump" ref={jumpRef} data-cl19="jump" aria-label="Jump to a group">
+          <nav className={`cl19-jump${months ? " cl21-months" : ""}`} ref={jumpRef} data-cl19="jump" data-mode={months ? "month" : "group"} aria-label={months ? "Jump to a month" : "Jump to a group"}>
             {jumpGroups.map((g) => {
               const on = jump?.current === g.key;
               return (
                 <button key={g.key} type="button" data-cl19="jump-group" data-gkey={g.key} aria-current={on ? "true" : undefined}
                   aria-label={`${g.label}, ${g.n} ${g.n === 1 ? "agent" : "agents"}`} title={g.label} disabled={loading}
                   onClick={() => jump?.onJump(g.key)}>
-                  <ContactGroupMark groupKey={groupKey} gkey={g.key} label={g.label} size={16} />
+                  {months ? null : <ContactGroupMark groupKey={groupKey} gkey={g.key} label={g.label} size={16} />}
                   <span className="cl19-jl">{g.label}</span><i>{g.n}</i>
                 </button>
               );
@@ -333,6 +344,14 @@ export const ContactListHead: React.FC<{
           </span>
           {/* v19 §E — Group by, the applied-chip pattern: grouped, the chip turns powder with a navy ring and carries a
               separate ✕ (Stop grouping) that never opens the menu */}
+          {/* cards-sort-search v1 §B — the Sort chip: the Cards view only, just before Group by, the headings' own sort */}
+          {view === "cards" && sort && onSort ? (
+            <>
+              <SortChipButton fields={CL_SORT_FIELDS} value={sort} open={pop.open === "sort"} onToggle={(a) => pop.toggle("sort", a)}
+                className="cl19-ctl cl21-sort" ns="cl21" disabled={loading} toolbar={() => tbRef.current} />
+              {pop.open === "sort" && pop.anchor ? <SortChipMenu anchor={pop.anchor} fields={CL_SORT_FIELDS} value={sort} ns="cl21" onChange={onSort} /> : null}
+            </>
+          ) : null}
           <span className="cl19-grpw" data-cl19="group-chip" data-on={groupName ? "" : undefined}>
             <button type="button" ref={grpRef} className="cl19-ctl cl19-grp" data-cl19="group" data-cl18="group" aria-haspopup="dialog" aria-expanded={pop.open === "group"}
               aria-label={groupName ? `Grouped by ${groupName}. Change grouping` : "Group the list"} disabled={loading}

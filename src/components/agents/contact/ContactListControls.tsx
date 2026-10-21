@@ -14,7 +14,7 @@ import { PopOption, PopRule, PopSection, Popover, type PopoverState } from "../.
 import { type GroupKey, GROUP_OPTIONS } from "../../../lib/contactList";
 
 /** every popover the list's controls own — the bar's one and the strip's dropdowns */
-export type ContactPop = "group" | "status" | "open" | "queried" | "more" | "filters";
+export type ContactPop = "group" | "status" | "open" | "queried" | "more" | "filters" | "sort";
 
 
 /** v17 §B — the search box, on its own: the header's filter row holds it, beside the filter pills. */

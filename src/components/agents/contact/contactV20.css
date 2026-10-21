@@ -102,3 +102,13 @@
 .cl19-head:not([data-pinned]) .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; color: #2a3a52; }
 /* a chosen chip in the filter strip is navy: its glyph turns cream with it */
 .cl20-chip.on .cl19-gm svg { color: rgb(244, 238, 229) !important; }
+
+/* ── cards-sort-search v1 §B · the Sort chip (shell/SortChip) in this toolbar: the give-way pass's level 3 keeps level 2's
+   letters and folds the chip's "Sorted by" ── */
+.cl19-tb[data-fit="3"] .cl19-az button:disabled { display: none; }
+.cl19-tb[data-fit="3"] .cl19-az button { width: 18px; }
+.cl19-tb[data-fit="3"] .sc-chip .sc-sby { display: none; }
+/* the month jumps (ungrouped, sorted by Date added) have no mark, so every one names its month, at every fit level; the
+   count follows in the label's quieter ink */
+.cl19-jump.cl21-months button[data-cl19="jump-group"] .cl19-jl,
+.cl19-tb:is([data-fit="1"], [data-fit="2"], [data-fit="3"]) .cl19-jump.cl21-months button[data-cl19="jump-group"] .cl19-jl { display: inline; }

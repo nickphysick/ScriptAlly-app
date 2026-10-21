@@ -47,7 +47,9 @@ import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { contactFilterCount, agentRows, appliedFilters, GROUP_OPTIONS } from "../../lib/contactList";
+import { contactFilterCount, agentRows, appliedFilters, GROUP_OPTIONS, addedMs } from "../../lib/contactList";
+import { CL_DATE_SORTS, monthJumpsOf } from "../../lib/cardsSort";
+import { MONTHS_SHORT } from "../../lib/dates";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
@@ -480,6 +482,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     row.setAttribute("data-wash", "");
     window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
   }, [landUnder]);
+  /* cards-sort-search v1 §B — A MONTH PICK (ungrouped, sorted by Date added): the month's first row, or card, in the order
+     the list draws, landed as a letter pick lands its row */
+  const jumpToMonth = useCallback((key: string) => {
+    const m = monthJumpsRef.current.find((x) => x.key === key);
+    const col = mainColRef.current;
+    const sc = col?.closest<HTMLElement>(".wpg-scroll");
+    const row = m && col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-agent-card="${CSS.escape(m.firstId)}"]`)).find((r) => r.getBoundingClientRect().height > 0) : null;
+    if (!col || !sc || !row) return;
+    const top = Math.max(0, sc.scrollTop + row.getBoundingClientRect().top - stackLine(col, sc));
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let done = false;
+    const settle = () => { if (done) return; done = true; sc.removeEventListener("scrollend", settle); landUnder(row); };
+    sc.addEventListener("scrollend", settle, { once: true });
+    window.setTimeout(settle, reduce ? 0 : 900);
+    sc.scrollTo({ top, behavior: reduce ? ("instant" as ScrollBehavior) : "smooth" });
+  }, [landUnder]);
   /* v19 §B — A LETTER PICK. Ungrouped: the first row IN THE CURRENT ORDER whose surname starts with the letter (the
      sort is left as it is). Grouped by Letter: that letter's band. The A to Z shows only in those two groupings. */
   const pickLetter = useCallback((letter: string) => {
@@ -537,6 +555,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     current: markedGroup ?? (groups[0] ? groups[0].key ?? groups[0].label : null),
     onJump: jumpToGroup,
   } : null), [jumping, groups, markedGroup, jumpToGroup]);
+  /* cards-sort-search v1 §B — THE JUMP ROW FOLLOWS THE SORT: ungrouped and sorted by a date, months (in both views);
+     sorted by Surname (or anything else), the A to Z */
+  const monthMode = groupKey === "none" && CL_DATE_SORTS.includes(sortKey);
+  const monthJumps = useMemo(() => (monthMode ? monthJumpsOf(visibleFacts, (x) => addedMs(x.agent), (x) => x.agent.id, Date.now(), MONTHS_SHORT) : []), [monthMode, visibleFacts]);
+  const monthJumpsRef = useRef(monthJumps);
+  monthJumpsRef.current = monthJumps;
+  const monthJump = useMemo(() => (monthMode ? { groups: monthJumps.map((m) => ({ key: m.key, label: m.label, n: m.n })), current: null, onJump: jumpToMonth } : null), [monthMode, monthJumps, jumpToMonth]);
   const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
   /* the current letter: the per-frame reader's, else (at the list's top) the first row's own */
   const firstInitial = useMemo(() => (visibleFacts.length ? surnameInitial(groups[0] ? (factsById.get(groups[0].ids[0])?.agent ?? visibleFacts[0].agent) : visibleFacts[0].agent) : null), [visibleFacts, groups, factsById]);
@@ -1304,7 +1329,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       counts={stripCounts} current={currentLetter} onPick={pickLetter}
       search={search} onSearch={setSearch} groupKey={groupKey} filterCount={chipCount} onClearFilters={clearFilters}
       filtersRef={loading ? undefined : filRef} pop={pop}
-      onStopGroup={() => setGroupKey("none")} jump={loading ? null : jump}
+      onStopGroup={() => setGroupKey("none")} jump={loading ? null : (monthMode ? monthJump : jump)} months={monthMode}
+      /* cards-sort-search v1 §B — the Cards view's Sort chip: the headings' own sort, set outright */
+      sort={{ key: sortKey, reversed }} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
       onPin={togglePin} view={view} onView={setView} showViewTools={!loading && (fullOn || titleGone)}
       /* v20 §E — the filter strip opens inside the head, under the toolbar */
       filterStrip={loading ? null : (

@@ -30,3 +30,29 @@ export const CL_SORT_FIELDS: readonly SortField<SortKey>[] = [
   { key: "reply", label: "Reply time", order: [{ label: "Fastest first", reversed: false }, { label: "Slowest first", reversed: true }] },
   { key: "status", label: "Query status", order: [{ label: "Furthest on", reversed: false }, { label: "Earliest first", reversed: true }] },
 ];
+
+/**
+ * cards-sort-search v1 §B — THE MONTH JUMPS for a list sorted by a date: one per month the rows fall in, in the order the
+ * list draws them, each naming its first row. Rows with no readable date take no month. "Jun", or "Jun ’25" in
+ * another year (the Query Centre's month jumps' own words).
+ */
+export interface MonthJumpItem { key: string; label: string; n: number; firstId: string }
+export function monthJumpsOf<T>(rows: readonly T[], ms: (r: T) => number | null, id: (r: T) => string, nowMs: number, months: readonly string[]): MonthJumpItem[] {
+  const y0 = new Date(nowMs).getFullYear();
+  const out: MonthJumpItem[] = [];
+  const at = new Map<string, MonthJumpItem>();
+  for (const r of rows) {
+    const t = ms(r);
+    if (t == null || !Number.isFinite(t)) continue;
+    const d = new Date(t);
+    const key = `m:${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const hit = at.get(key);
+    if (hit) { hit.n += 1; continue; }
+    const m: MonthJumpItem = { key, label: `${months[d.getMonth()]}${d.getFullYear() === y0 ? "" : ` \u2019${String(d.getFullYear()).slice(2)}`}`, n: 1, firstId: id(r) };
+    at.set(key, m);
+    out.push(m);
+  }
+  return out;
+}
+/** the Contact list's date sorts: ungrouped, these make the jump row months */
+export const CL_DATE_SORTS: readonly SortKey[] = ["added"];
