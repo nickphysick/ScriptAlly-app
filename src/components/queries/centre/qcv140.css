@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v140 §A — THE LIST'S TOOLBAR (QcToolbar140): one row, 64 tall unpinned and 72 pinned, never wrapping —
+ * Query Centre v140 §A — THE LIST'S TOOLBAR (QcToolbar140): one row, 52 tall unpinned (v142 §B, qcv142.css; was 64) and 72 pinned, never wrapping —
  * the jump row (flex 1), Find, Group by, Filters, Pin. Every control 40 tall with 11px corners, 10 apart.
  *
  * ⚠️ THE GIVE-WAY IS A CONTAINER QUERY ON THE TOOLBAR'S OWN WIDTH (`qc140tb`, on its wrapper), never the viewport:
