@@ -237,8 +237,10 @@ describe("the tier's navy is a documented copy of the dashboard's, not a referen
 
 /** Who may read `--mk-lower`. Phase 4 adds the sheet and the other pages' opening fades. */
 const LOWER_READERS = [
-  /* the five other pages' opening sections: paper white fading to the oat, as the hero does */
-  ".mk-mission::before, .mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
+  /* the four other pages' opening sections: paper white fading to the oat, as the hero does.
+     About left this group on 21 Oct: its hero sits directly on a navy band, so it has no lower
+     ground to fade into and paints its own flat ground (`.mk-ahero::before`). */
+  ".mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
   /* the status band continues the hero's lower ground into the oat (landing hero v3) */
   ".mk-lower", ".mk-statband",
   /* the sheet itself: every page continues on the oat */
@@ -1120,20 +1122,31 @@ describe("the feature rows set their own type, and nothing else uses its familie
       ".mk-frow h3",
       ".mk-fw .mk-fwcard h2",
       ".mk-fw .mk-fwh1",
-      ".mk-mission .mk-mission-main",
-      ".mk-missionturn",
       /* ⚠️ THE TIER'S FACES AS TOKENS (landing hero v3): `--mk-f-display` and `--mk-f-serif` on
          `.mk-scope`, read by the hero, the band and the card pile's own sheet — which may then style
          a typewriter card without being a second file that names the face. The hero's headline, its
          sub and the band's heading READ the token, so they leave this list. */
       ".mk-scope",
+      /* ⚠️ SIX MORE ON 21 OCT, AND THEY REPLACE TWO: About's lower half took the feature rows'
+         voice, and the mission headline and its turn left with the hero they styled. The hero's
+         aim, the navy band's verdict and turn, the vision headings, the founder's note and the
+         closing card. Each is `.mk-scope` + one class, 0-2-0, which beats brand.tsx's forced
+         heading rule honestly on an h1 as well as an h2. */
+      ".mk-scope .mk-acloseh",
+      ".mk-scope .mk-agaphit",
+      ".mk-scope .mk-agapturn",
+      ".mk-scope .mk-ast",
+      ".mk-scope .mk-bandcopy h2",
+      ".mk-scope .mk-noteh",
       ".mk-sechead h2",
       ".mk-vh3",
       ".mk-visionh2",
       ".mk-way .mk-wayh",
     ]);
     expect(ruleOwners("Source Serif 4").sort())
-      .toEqual([".mk-fcopy p", ".mk-scope", ".mk-vbody", ".mk-visionmore"]);
+      /* About's body copy joined on 21 Oct, for the same reason as the headings above. */
+      .toEqual([".mk-aclosep", ".mk-agapbody", ".mk-bandcopy p", ".mk-fcopy p", ".mk-notep",
+        ".mk-scope", ".mk-vbody", ".mk-visionmore"]);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
       d.isDirectory() ? walk(resolve(dir, d.name))

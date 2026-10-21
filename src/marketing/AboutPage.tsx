@@ -2,56 +2,60 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * About — the public marketing route at /about. The mission hero and the centred section header
- * come from design-refs/scriptally-about-v1.html; the vision bands, commitments and sign-off below
- * them are unchanged from design-refs/scriptally-about.html.
+ * About — the public marketing route at /about, rebuilt 21 Oct (ref claude/about-page-v1.html).
+ * Top to bottom: the aim ("We want to get good stories told.") beside the fireside drawing, the
+ * skills gap on a navy band, "How will we do it?", three vision bands, the founder's note, and one
+ * closing card pointing at the founding-writer offer.
  *
- * ⚠️ THE MISSION HERO IS NOT A `.mk-band`. It is a stretch grid carrying a statement beside a
- * plate, the same rhythm as the landing hero; the bands below it are centre-aligned rows. Making
- * it a band again would centre the copy against a 340px plate and lose the escalation the three
- * paragraphs are built on.
+ * ⚠️ FULL-WIDTH BANDS, NOT THE DOCUMENT CARD. Privacy and Terms are documents you consult; this is
+ * a page you read once. `DocumentShell` is for the legal tier and this page does not use it.
  *
- * ⚠️ ITS MEASURE IS THIS PAGE'S 1180, NOT THE LANDING'S 1300. The rhythm is shared; the measure is
- * not. A 1300 hero above 1180 bands would put the page's own left edges 60px apart, and alignment
- * down a page beats matching a number across two.
- *
- * ⚠️ FULL-WIDTH ALTERNATING BANDS, NOT THE DOCUMENT CARD. Privacy and Terms are documents you
- * consult; this is a page you read once, and the card's reading column would make three short
- * sections look like a contract. The two shapes are deliberately different — `DocumentShell` is
- * for the legal tier and this page does not use it.
+ * ⚠️ ITS MEASURE IS 1180, NOT THE LANDING'S 1300 — alignment down a page beats matching a number
+ * across two.
  *
  * ⚠️ THE SIGN-OFF FOLLOWS `IdentityLine`'s LAW WITHOUT IMPORTING IT: the hairline is its OWN
- * element, never a border or a pseudo-element on either text, so it holds its position whatever
- * the two labels do. The component itself is not reused because it takes an `AgentLike` and pulls
- * `lib/agentDisplay` — a workspace import the marketing tier states it does not make — and a
- * founder's role is not an agency, however alike the two rows look.
+ * element, never a border or a pseudo-element on either text. The component itself is not reused
+ * because it takes an `AgentLike` and pulls `lib/agentDisplay`, a workspace import the marketing
+ * tier states it does not make.
  *
  * Pure presentation over static copy: no Firebase, no stores, no workspace imports.
  */
 
 import React, { useEffect } from "react";
 import {
-  ABOUT_DOCUMENT_TITLE, ABOUT_MISSION_PRE, ABOUT_MISSION_MAIN,
+  ABOUT_DOCUMENT_TITLE, ABOUT_STORY_ALT, ABOUT_STATEMENT_LINES,
   ABOUT_GAP_BODY, ABOUT_GAP_HIT, ABOUT_TURN, ABOUT_SECTION_H2, ABOUT_VISIONS,
-  ABOUT_COMMITMENTS_EYEBROW, ABOUT_COMMITMENTS,
-  ABOUT_FOUNDER_BODY, ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
+  ABOUT_PLATES, AboutPlate,
+  ABOUT_NOTE_EYEBROW, ABOUT_NOTE_HEADING, ABOUT_NOTE_BODY, ABOUT_NOTE_SIGNATURE,
+  ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
+  ABOUT_CLOSE_HEADING, ABOUT_CLOSE_BODY, ABOUT_CLOSE_CTA, ABOUT_CLOSE_LINK,
 } from "./aboutCopy";
-import { ABOUT_STORY_ALT } from "./aboutCopy";
 import { Runs } from "./CopyRuns";
-import { MarketingIllustration, CommitmentTick } from "./marketingMarks";
 
 /**
- * The mission illustration's own facts. The version is the first eight hex digits of the file's
- * md5 and rides the URL: nothing under `public/` is fingerprinted by the build and hosting lets a
- * browser keep a file for an hour, so a re-export under the same name would be served stale.
- *
- * ⚠️ IT REPLACES A PLACEHOLDER, AND THE PLACEHOLDER'S CHROME GOES WITH IT. The watercolour
- * handshake rendered through `MarketingIllustration` with `finished` set — which is the component
- * doing nothing except drawing an image, since `finished` switches off the rim, the ground and the
- * caption that are its entire purpose. A finished asset does not need the primitive that exists to
- * say an asset is unfinished.
+ * The hero drawing's own facts. The version is the first eight hex digits of the file's md5 and
+ * rides the URL: nothing under `public/` is fingerprinted by the build.
  */
 const STORY = { src: "/images/about-story.png", version: "a35cb880", width: 1000, height: 1000 };
+
+/**
+ * An illustration slot awaiting the illustrator: a brush wash at the finished drawing's ratio, so
+ * the page keeps its shape when the art drops in, and a caption naming the slot. The brief rides
+ * `data-brief` so the copy file stays the one place it is written. When a drawing arrives, the
+ * slot becomes an <img> with `ABOUT_PLATES[slot].alt` at the same ratio.
+ */
+const PlateSlot: React.FC<{ plate: AboutPlate; className?: string }> = ({ plate, className }) => (
+  <div
+    className={"mk-aplate mk-aplate--" + plate.slot + (className ? " " + className : "")}
+    role="img"
+    aria-label={"Illustration placeholder: " + plate.alt}
+    data-illo={plate.slot}
+    data-brief={plate.brief}
+  >
+    <span className="mk-aplatewash" aria-hidden="true" />
+    <span className="mk-aplatetag">{plate.caption}</span>
+  </div>
+);
 
 export const AboutPage: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -65,31 +69,26 @@ export const AboutPage: React.FC<{
   return (
     <div>
       <main>
-        <section className="mk-mission">
-          {/* ⚠️ ONE MANUSCRIPT PAGE CARRYING THE WHOLE ARGUMENT — not a card around the headline.
-              The kicker, the rule, the statement, the lede, the hit line and the turn all sit on
-              the same sheet, which is what makes it read as a page rather than as a heading in a
-              box with prose underneath. */}
-          <div className="mk-missioncol">
-            <p className="mk-mission-kicker">{ABOUT_MISSION_PRE}</p>
-            <h1 className="mk-mission-main">{ABOUT_MISSION_MAIN}</h1>
-            <p className="mk-gapbody">{ABOUT_GAP_BODY}</p>
-            {/* The hit line's rust rule is a `border-left` on this paragraph, not an element
-                between it and the lede — a rule that exists to mark one sentence belongs to that
-                sentence, and a separate div would drift the moment the copy rewrapped. */}
-            <p className="mk-gaphit">{ABOUT_GAP_HIT}</p>
-            {/* ⚠️ THE LIGHTBULB IS DELETED, NOT HIDDEN. A mark saying "here is an idea" beside a
-                sentence that IS the idea says it twice, and the smaller voice wins. The turn is a
-                plain paragraph now, so it needs no flex row to align a mark against. */}
-            <p className="mk-missionturn">{ABOUT_TURN}</p>
+        {/* ⚠️ HERO v2 (21 Oct, Nick's pick of three): the aim in large type beside the drawing,
+            then the skills-gap argument on its own navy band. The three statement lines are set
+            explicitly so "told." can never be left alone on a line at desktop widths. */}
+        <section className="mk-ahero">
+          <div className="mk-aherocol">
+            <h1 className="mk-ast">
+              {ABOUT_STATEMENT_LINES.map((l) => <span className="mk-astl" key={l}>{l}</span>)}
+            </h1>
           </div>
-          <img
-            className="mk-missionart"
-            src={STORY.src + "?v=" + STORY.version}
-            alt={ABOUT_STORY_ALT}
-            width={STORY.width}
-            height={STORY.height}
-          />
+          <img className="mk-aheroart" src={STORY.src + "?v=" + STORY.version} alt={ABOUT_STORY_ALT}
+               width={STORY.width} height={STORY.height} />
+        </section>
+        <section className="mk-agap" aria-label="The problem">
+          <div className="mk-agapinner">
+            <p className="mk-agapbody">{ABOUT_GAP_BODY}</p>
+            <div className="mk-agapright">
+              <p className="mk-agaphit">{ABOUT_GAP_HIT}</p>
+              <p className="mk-agapturn">{ABOUT_TURN}</p>
+            </div>
+          </div>
         </section>
 
         {/* ⚠️ THE HEADER OWNS THE BREAK, WHICH IS WHY THE FIRST BAND GIVES ONE UP. A centred
@@ -112,38 +111,47 @@ export const AboutPage: React.FC<{
             className={"mk-band" + (i === 0 ? " mk-band--first" : "") + (i % 2 === 1 ? " mk-band--copyfirst" : "")}
             key={vision.key}
           >
-            <MarketingIllustration slot={vision.key as "simplify" | "waste" | "time"} />
+            <PlateSlot plate={ABOUT_PLATES[vision.key]} />
             <div className="mk-bandcopy">
-              <div className="mk-eyebrow">{vision.eyebrow}</div>
+              <div className="mk-anum">{vision.eyebrow}</div>
               <h2>{vision.heading}</h2>
               <p><Runs runs={vision.body} onNavigate={onNavigate} /></p>
             </div>
           </section>
         ))}
 
-        <section className="mk-commitstrip">
-          <div className="mk-commitinner">
-            <div className="mk-eyebrow">{ABOUT_COMMITMENTS_EYEBROW}</div>
-            <div className="mk-commitgrid">
-              {ABOUT_COMMITMENTS.map((commitment) => (
-                <div className="mk-commit" key={commitment.heading}>
-                  <CommitmentTick />
-                  <strong>{commitment.heading}</strong>
-                  <span>{commitment.body}</span>
-                </div>
-              ))}
+        {/* ⚠️ THE FOUNDER'S NOTE REPLACES THE ONE-LINE SIGN-OFF. A page whose whole argument is
+            "a person built this for people like you" ended on a sentence about that person in
+            the third person. It is a letter now, signed. */}
+        <section className="mk-note" aria-labelledby="mk-note-h">
+          <PlateSlot plate={ABOUT_PLATES.founder} className="mk-noteart" />
+          <div className="mk-notecol">
+            <p className="mk-notekick">{ABOUT_NOTE_EYEBROW}</p>
+            <h2 id="mk-note-h" className="mk-noteh">{ABOUT_NOTE_HEADING}</h2>
+            {ABOUT_NOTE_BODY.map((para, i) => (
+              <p className="mk-notep" key={i}><Runs runs={para} onNavigate={onNavigate} /></p>
+            ))}
+            <p className="mk-notesig" aria-hidden="true">{ABOUT_NOTE_SIGNATURE}</p>
+            <div className="mk-signoff">
+              <span className="mk-signname">{ABOUT_FOUNDER_NAME}</span>
+              <span className="mk-signrule" aria-hidden="true" />
+              <span className="mk-signrole">{ABOUT_FOUNDER_ROLE}</span>
             </div>
           </div>
         </section>
 
-        <section className="mk-founder">
-          <p><Runs runs={ABOUT_FOUNDER_BODY} onNavigate={onNavigate} /></p>
-          <div className="mk-signoff">
-            <span className="mk-signname">{ABOUT_FOUNDER_NAME}</span>
-            {/* Its own element — see the docblock. A border on either label would drift the moment
-                either label's length changed. */}
-            <span className="mk-signrule" aria-hidden="true" />
-            <span className="mk-signrole">{ABOUT_FOUNDER_ROLE}</span>
+        <section className="mk-aclose" aria-labelledby="mk-aclose-h">
+          <div className="mk-aclosecard">
+            <h2 id="mk-aclose-h" className="mk-acloseh">{ABOUT_CLOSE_HEADING}</h2>
+            <p className="mk-aclosep">{ABOUT_CLOSE_BODY}</p>
+            <div className="mk-acloseacts">
+              <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("founders")}>
+                {ABOUT_CLOSE_CTA}
+              </button>
+              <button type="button" className="mk-acloselink" onClick={() => onNavigate("pricing")}>
+                {ABOUT_CLOSE_LINK}
+              </button>
+            </div>
           </div>
         </section>
       </main>
