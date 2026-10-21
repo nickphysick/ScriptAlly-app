@@ -332,19 +332,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-scope .mk-foot a:focus-visible, .mk-scope .mk-foot button:focus-visible {
   outline: 2px solid var(--mk-stamp); outline-offset: 2px;
 }
-.mk-tlink {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--mk-rust);
-  text-decoration: none;
-  cursor: pointer;
-  background: none;
-  border: none;
-  font-family: inherit;
-  border-bottom: 1px solid rgba(162, 69, 42, 0.35);
-  padding: 0 0 1px;
-}
-.mk-tlink:hover { border-bottom-color: var(--mk-rust); }
+/* `.mk-tlink` is DELETED (21 Oct): the three-tier pricing page was its last renderer — checked across
+   `src/` after the removal. */
 
 /* ── The marketing nav: brand furniture, condensing on scroll ── */
 /* ⚠️ THE CONDENSE'S TRIGGERS, AND THEY SIT BEFORE THE NAV ON PURPOSE. Condensing shortens the nav,
