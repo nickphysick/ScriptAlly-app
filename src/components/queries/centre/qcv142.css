@@ -39,9 +39,9 @@
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chip { height: 34px; border-radius: 9px; }
 }
 
-/* §C · THE LIST'S GROUP HEADING, the Contact list's cream ledger (v20 §D, `.cl20-lg`): 54 tall (44 compact), #f4f0e9, a
-   7% hairline above and below (the brief's, and the mock's `inset 0 ±1px` — the Contact list's own ledger draws none),
-   no radius and no shadow, stuck or not. It runs the sheet's full width (the body's 18px side padding is taken back),
+/* §C · THE LIST'S GROUP HEADING, the Contact list's cream ledger (v20 §D, `.cl20-lg`): 54 tall (44 compact), #f4f0e9,
+   no hairline (v142.1 A3 removed v142's: the Contact list's ledger draws none, and the two must match), no radius and
+   no shadow, stuck or not. It runs the sheet's full width (the body's 18px side padding is taken back),
    its mark centred on the rows' disc column (the body's 18 + the row's 22, then the disc's 40, or 26 compact) and the
    name 12 after it, where a row's name starts. The powder and blush tones, the band art, the count pill and the hint
    are retired here: the court colour is on the cards and the breakdown card. */
@@ -49,11 +49,11 @@
   .qc138-sheet .qc138-band.qc142-lg {
     --qc142-disc: 40px;
     gap: 0; width: calc(100% + 36px); height: 54px; margin: 0 -18px; padding: 0 22px 0 40px; border-radius: 0;
-    background: #f4f0e9; color: #1c130f; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.07), inset 0 -1px 0 rgba(28, 19, 15, 0.07);
+    background: #f4f0e9; color: #1c130f; box-shadow: none;
   }
   .qc138-sheet .qc138-grp:first-child .qc138-band.qc142-lg,
   .qc138-sheet[data-density="compact"] .qc138-band.qc142-lg { margin-top: 0; }
-  .qc138-sheet .qc138-band.qc142-lg[data-stuck] { border-radius: 0; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.07), inset 0 -1px 0 rgba(28, 19, 15, 0.07); }
+  .qc138-sheet .qc138-band.qc142-lg[data-stuck] { border-radius: 0; box-shadow: none; }
   .qc138-sheet[data-density="compact"] .qc138-band.qc142-lg { --qc142-disc: 26px; height: 44px; }
   .qc138-sheet .qc142-lg .qc142-lgm { display: inline-flex; align-items: center; justify-content: center; flex: none; width: var(--qc142-disc); margin-right: 12px; }
   .qc138-sheet .qc142-lg .qc142-lgm .qc138-gart,
