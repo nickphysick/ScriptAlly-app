@@ -166,7 +166,10 @@
   .qc142-strip .cl20-fsb.qc142-fsb { grid-template-columns: minmax(min-content, 1fr) minmax(min-content, 1.45fr) minmax(min-content, 1.15fr); }
   .qc142-strip .cl20-fcol { max-height: min(360px, calc(100vh - 320px)); }
   .qc142-strip .cl20-fsh > b { white-space: nowrap; }
-  .qc142-strip .cl20-fsh > span { flex: 1 1 auto; }
+  .qc142-strip .cl20-fsh > span { flex: none; }
+  /* v142.1 A2 — the export sits right of the count; the close button keeps the far right */
+  .qc142-strip .cl20-fsh > .qc1421-export { margin-right: auto; white-space: nowrap; }
+  .qc142-strip .cl20-fsh > .qc1421-export:disabled { opacity: 1; color: rgba(28, 19, 15, 0.35); }
   .qc142-strip .cl20-fcol h4.qc142-fsub { margin-top: 16px; }
   .qc142-strip .qc142-where .qc141-m { width: 10px; height: 10px; }
   .qc142-strip .cl20-chip.on .qc141-m { box-shadow: 0 0 0 1.5px rgb(244, 238, 229); }

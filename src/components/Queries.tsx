@@ -3843,6 +3843,9 @@ export const Queries: React.FC<{
   /* v140.1 §A — the rows in the order the desktop list draws them: its groups, each in the headings' sort, flattened
      (one source with the list, so an export is the list as shown) */
   const qcListOrder = () => (qcGroup === "none" ? qcVisible : qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName).flatMap((g) => g.rows));
+  /* v142.1 A2 — the ONE export handler, run by the strip's header and the applied row alike: exactly the rows the list
+     shows, in its order (v140.1 §A) */
+  const exportQcList = () => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`);
   /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
   const qcGlyphCounts = glyphCounts(qcScoped);
   /* v140 §D — the applied row's chips: one per active filter (lib/qc140), the older sentence filter and the strip's court
@@ -7423,6 +7426,7 @@ export const Queries: React.FC<{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
                       quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
                       moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more }, whereN: qcWhereN,
+                      filtered: qc140Chips.length > 0, onExport: exportQcList,
                     }} />
                   )}
                   /* v140 §C — the pinned band, over the rows the list is built from (the manuscript-scoped set; Pip is
@@ -7436,7 +7440,7 @@ export const Queries: React.FC<{
                   applied={qc140Chips.length ? (
                     <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll}
                       /* v142 §E — Export CSV (v140.1 §A) moved here from the retired menu footer: exactly the rows the list shows, in its order */
-                      onExport={() => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`)} />
+                      onExport={exportQcList} />
                   ) : null}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}

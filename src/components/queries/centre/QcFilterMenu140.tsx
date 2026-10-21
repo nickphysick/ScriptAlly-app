@@ -48,6 +48,10 @@ export interface Qc140FilterModel {
   moreN: Record<"dueWeek" | "past" | "missing" | "overYear", number>;
   /** v141 §A — the four sets' counts over the scoped rows (lib/qcSummary `whereCounts`) */
   whereN: Record<WhereKey, number>;
+  /** v142.1 A2 — the export, always in the strip's header: "Export all {N} queries" with nothing narrowing the list,
+   *  "Export {v} queries" otherwise. The applied row's copy runs the same handler. */
+  filtered: boolean;
+  onExport: () => void;
 }
 
 const MORE_ROWS: { key: "dueWeek" | "past" | "missing" | "overYear"; label: string }[] = [
@@ -71,7 +75,7 @@ const MORE_ROWS: { key: "dueWeek" | "past" | "missing" | "overYear"; label: stri
  * ⚠️ THE MODEL AND THE COUNTS ARE v140 §D's AND v141 §A's, UNCHANGED (one filter state, the page's `Qc138Filters`).
  */
 export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc140FilterModel; pinned: boolean }> = ({ pop, model, pinned }) => {
-  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, whereN } = model;
+  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, whereN, filtered, onExport } = model;
   const anchor = pop.open === "filters" ? pop.anchor : null;
   const ref = useRef<HTMLDivElement>(null);
   const host = anchor?.closest<HTMLElement>('[data-qc140="stack"]') ?? null;
@@ -97,6 +101,10 @@ export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc
       <header className="cl20-fsh" data-qc140="filter-head">
         <b>Filter queries</b>
         <span data-qc140="filter-showing" data-qc142="filter-count">{showing} of {total} showing</span>
+        {/* v142.1 A2 — right of the count, always: the export of exactly what the list shows */}
+        <button type="button" className="cl20-fsc qc1421-export" data-qc140="filter-export" data-qc1421="strip-export" disabled={showing === 0} onClick={onExport}>
+          {exportLabel(showing, total, filtered)}
+        </button>
         <button type="button" className="cl20-fsx" data-qc140="filter-close" aria-label="Close" onClick={close}>{CROSS140}</button>
       </header>
       <div className="cl20-fsb qc142-fsb" data-qc140="filter-body">
@@ -202,7 +210,7 @@ export const QcAppliedRow140: React.FC<{
       ))}
     </span>
     {onExport ? (
-      <button type="button" className="qc140-af-export" data-qc140="filter-export" data-qc142="export" disabled={showing === 0} onClick={onExport}>{exportLabel(showing, total, true)}</button>
+      <button type="button" className="qc140-af-export" data-qc142="export" disabled={showing === 0} onClick={onExport}>{exportLabel(showing, total, true)}</button>
     ) : null}
     <button type="button" className="qc140-af-clear" data-qc140="applied-clear" onClick={onClearAll}>Clear all</button>
   </div>
