@@ -391,7 +391,11 @@ test.describe("LC2", () => {
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
       expect(Math.abs(s!.footTop - s!.docBottom), "the footer starts where the sheet ends").toBeLessThanOrEqual(0.5);
       const L = s!.left, R = s!.right - 1;
-      const topPx = await pixels(page, [[L + 2, s!.top + 2], [R - 2, s!.top + 2], [L + 20, s!.top + 20], [R - 20, s!.top + 20]]);
+      /* ⚠️ /pricing OPENS ON A NAVY BAND INSET INTO THE SHEET (pricing v3, 21 Oct; ref pricing-page-v1):
+         18px of oat round it, 10px below 640. At 390 the "20px in" point is inside the band, so on that
+         page the sheet's own ground is read in its side gutter, 5px in and 60px down — past the arc. */
+      const inset: [number, number][] = route === "/pricing" ? [[L + 5, s!.top + 60], [R - 5, s!.top + 60]] : [[L + 20, s!.top + 20], [R - 20, s!.top + 20]];
+      const topPx = await pixels(page, [[L + 2, s!.top + 2], [R - 2, s!.top + 2], ...inset]);
       /* Bring the sheet's bottom edge into the middle of the viewport, then read its corners. */
       await page.evaluate((y) => window.scrollTo(0, y - window.innerHeight / 2), s!.docBottom);
       await page.waitForTimeout(80);
@@ -507,8 +511,8 @@ test.describe("LC2", () => {
       expect(btn.length).toBe(1);
       expect(btn[0].ratio, "the hero's submit: its label on its own fill").toBeGreaterThanOrEqual(4.5);
       expect(near(btn[0].ground, [42, 58, 82]), "on a light ground the submit stays the navy button").toBe(true);
-      await open(page, "/pricing", vp, "count");
-      await light("pricing tally", ".mk-tierplaces .mk-fmmeta, .mk-tierplaces .mk-fmtally");
+      /* ⚠️ RETIRED HERE (pricing v3, 21 Oct): /pricing's tally sits on the founding band's NAVY now,
+         so it is no longer a light mount. Its contrast on navy is asserted in pricingV3.measure.ts. */
     }
     expect(n).toBeGreaterThan(20);
   });

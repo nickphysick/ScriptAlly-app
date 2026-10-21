@@ -3,190 +3,135 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * The public pricing page — marketing tier, `mk-` system, rendered for everyone.
- * Design ref: design-refs/scriptally-pricing-v2.html.
+ * Design ref: design-refs/pricing-page-v1.html (21 Oct), ported wholesale. It supersedes
+ * scriptally-pricing-v2.html for this route; the signed-in /plans page is a different page with its
+ * own sources and is untouched.
  *
- * ⚠️ NOTHING ON THIS PAGE WRITES ANYTHING. The page it replaces was a developer sandbox that had
- * escaped onto a public route: it rendered `null` for logged-out visitors (a blank page inside the
- * marketing chrome, on the route the landing's own CTA points at), and offered signed-in ones an
- * "Activate Pro account now" button that wrote `plan: 'Pro'` straight to their user document.
+ * ⚠️ NOTHING ON THIS PAGE WRITES ANYTHING EXCEPT THE FOUNDING CLAIM FORM — the same component and
+ * the same store the landing uses. No buy buttons, no payment path, no plan switching. The page it
+ * descends from once rendered `null` to logged-out visitors and offered signed-in ones a button
+ * that wrote to their user document; the smoke test drives it logged out first.
  *
- * ⚠️ IT TAKES NO USER AND READS NO DB. That is what makes the logged-out render impossible to get
- * wrong a second time; the smoke test drives it logged out first for the same reason.
+ * ⚠️ IT TAKES NO USER AND READS NO DB. The counter and the form read `foundingStore`, a module-scope
+ * store over a public endpoint, exactly as the landing's do.
  *
- * ⚠️ THREE TIERS, AND THE MIDDLE ONE IS THE ONLY ONE THAT CAN BE ACTED ON. Free and Pro cannot be
- * bought — there is no payment path — so they are `aria-disabled`, dimmed, and their calls to
- * action are LABELS rather than controls: no `role`, no `tabindex`, nothing in the tab order. A
- * greyed-out button still announces itself as a button and still invites the click it will refuse.
- * The order is by what a reader can DO, not by price, which is why Founding sits in the middle.
+ * ⚠️ THE PAGE DESCRIBES THE PLANS PLANNED FOR LAUNCH, under "Then, once we launch:". It changes no
+ * entitlement, limit or gate in the app; the copy for it lives in `pricingCopy.ts`, which /plans
+ * never reads.
  *
- * ⚠️ AND NO SWITCHING SCRIPT. The ref draws the tiers as though they were tabs; two of the three
- * lead nowhere, so a tab set here would be chrome pretending at a choice that does not exist.
- *
- * ⚠️ THE PLACES BAR IS THE SHARED COUNTER, LIVE OR ABSENT. `FoundingCounter` reads the one store
- * the hero panel and the sealed band read, so the three surfaces cannot state different numbers —
- * and it renders NOTHING until a real figure comes back. The ref hardcodes "37 of 100 places
- * claimed"; on a public page that is a factual claim about how many people have signed up, made by
- * nobody and checkable by nobody.
+ * ⚠️ THE COUNTER SITS ABOVE THE FORM, AND IT IS LIVE OR ABSENT. The ref hardcodes "63 places left"
+ * at 37%; `FoundingCounter` renders nothing until a real figure comes back.
  */
 
 import React, { useEffect } from "react";
 import {
-  PRICING_DOCUMENT_TITLE, PRICING_EYEBROW, PRICING_H1, PRICING_SUB, PRICING_TIERS,
-  PRICING_PLACES_NOTE, PRICING_PLACES_LINK, PRICING_FOOTNOTE,
-  PRICING_COMPARISON_H2, PRICING_COMPARISON, PRICING_FAQ_H2, PRICING_FAQ, PricingTier,
-} from "./landingCopy";
+  PRICING_V3_DOCUMENT_TITLE, PV3_KICKER, PV3_H1, PV3_SUB, PV3_LAUNCH_LINE, PV3_FREE, PV3_PRO,
+  PRO_FROM, PV3_FAQ_H2, PV3_FAQ, PV3_SOURCE_NOTE,
+} from "./pricingCopy";
+import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
+import { CampaignJourney } from "./CampaignJourney";
 import { Runs } from "./CopyRuns";
-import { FoundingCounter } from "./FoundingSignup";
+
+/** A price as the ref draws it: an optional "from", a small £, the figure, an optional unit. */
+const Price: React.FC<{ amount: string; from?: string; per?: string }> = ({ amount, from, per }) => (
+  <div className="mk-pv3price">
+    {from && <span className="mk-pv3from">{from}</span>}
+    <span className="mk-pv3cur">£</span>
+    <span className="mk-pv3amt">{amount}</span>
+    {per && <span className="mk-pv3per">{per}</span>}
+  </div>
+);
 
 /**
- * Each tier's bird. The words live in `PRICING_TIERS` (`illoAlt`); the file, its pixel size and its
- * hash live here — the same split `FeatureRows` uses, so copy stays in copy modules and asset facts
- * stay next to each other.
- *
- * ⚠️ THE VERSION IS THE FILE'S OWN md5 AND RIDES THE URL. Nothing under `public/` is fingerprinted
- * by the build and hosting lets a browser keep a file for an hour, so a re-export under the same
- * name is served stale. A smoke test reads both sides.
+ * ⚠️ THE "How long will I need?" LINK SCROLLS IN SCRIPT, NOT BY CHANGING THE HASH. The app reads
+ * `location.hash` for its pre-auth routes (`#/login`, `#/signup`), so a page that writes a hash of
+ * its own is one listener away from being read as a route. `href` stays for the no-script reading
+ * and the address a reader copies.
  */
-const TIER_ART: Record<string, { src: string; version: string; width: number; height: number }> = {
-  free: { src: "/images/tier-free.png", version: "6c11c444", width: 800, height: 800 },
-  founding: { src: "/images/tier-founding.png", version: "e9d308a4", width: 800, height: 800 },
-  pro: { src: "/images/tier-pro.png", version: "a11fb5f2", width: 800, height: 800 },
-};
-
-const Tier: React.FC<{ tier: PricingTier; onNavigate: (tab: string, sub?: string) => void }> = ({ tier, onNavigate }) => {
-  const live = tier.cta === "live";
-  const art = TIER_ART[tier.key];
-  return (
-    <div
-      className={`mk-tier mk-tier--${tier.key}`}
-      /* ⚠️ ONLY THE UNBUYABLE TIERS CARRY THIS, and it is what the CSS dims on — one attribute
-         driving both the semantics and the treatment, so they cannot drift apart. */
-      aria-disabled={live ? undefined : true}
-    >
-      {tier.tag && <span className="mk-tiertag">{tier.tag}</span>}
-      {/* ⚠️ PERCHED ON THE CORNER, OUT OF FLOW (17 Sep). The fixed-height slot this replaced existed
-          so three birds drawn at three scales could not push three plan names onto three lines;
-          positioned absolutely, they cannot push anything at all. It stays here in the source, ahead
-          of the name, so a screen reader meets the bird where it always has. */}
-      <img
-        className="mk-tierbird"
-        src={art.src + "?v=" + art.version}
-        alt={tier.illoAlt}
-        width={art.width}
-        height={art.height}
-        loading="lazy"
-      />
-      <p className="mk-tiername">{tier.name}</p>
-      <p className="mk-tierline">{tier.summary}</p>
-
-      <div className="mk-tierprice">
-        <span className="mk-tieramount">{tier.price}</span>
-        {tier.priceUnit && <span className="mk-tierper">{tier.priceUnit}</span>}
-        {tier.priceNote && <span className="mk-tierper">{tier.priceNote}</span>}
-      </div>
-      <p className="mk-tierafter"><Runs runs={tier.after} onNavigate={onNavigate} /></p>
-
-      <ul className="mk-tierfeats">
-        {tier.includes.map((f) => <li key={f}>{f}</li>)}
-        {/* ⚠️ SHOWN AND MUTED, NOT OMITTED — and each carries its own sub-line. What a tier does
-            not have is the reason to read the next card along; leaving it out makes three lists
-            that look the same length, and showing a greyed-out name alone says something is
-            missing without saying what. */}
-        {tier.excludes?.map((f) => (
-          <li key={f.label} className="mk-tieroff">
-            {f.label}
-            <span className="mk-tieroffnote">{f.note}</span>
-          </li>
-        ))}
-      </ul>
-
-      {live && <div className="mk-tierplaces"><FoundingCounter variant="tally" /></div>}
-
-      <div className="mk-tiercta">
-        {live ? (
-          <>
-            <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("founders")}>
-              {tier.action}
-            </button>
-            <p className="mk-tiernote">Closes at 100 · no card needed</p>
-          </>
-        ) : (
-          /* A label. Not a button, not a disabled button, not a link. */
-          <span className="mk-tierlater">{tier.action}</span>
-        )}
-      </div>
-    </div>
-  );
+export const scrollToJourney = (e: React.MouseEvent) => {
+  const target = document.getElementById("how-long");
+  if (!target) return;
+  e.preventDefault();
+  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
 };
 
 export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   useEffect(() => {
     const prev = document.title;
-    document.title = PRICING_DOCUMENT_TITLE;
+    document.title = PRICING_V3_DOCUMENT_TITLE;
     return () => { document.title = prev; };
   }, []);
 
   return (
-    <div>
-      <header className="mk-pricehead">
-        <p className="mk-eyebrow">{PRICING_EYEBROW}</p>
-        <h1>{PRICING_H1}</h1>
-        <p>{PRICING_SUB}</p>
-      </header>
+    <div className="mk-pv3">
+      {/* ── The navy band the tiers hang from ── */}
+      <section className="mk-pv3band" aria-labelledby="mk-pv3-h1">
+        <span className="mk-pv3kicker">{PV3_KICKER}</span>
+        <h1 id="mk-pv3-h1" className="mk-pv3h1">{PV3_H1}</h1>
+        <p className="mk-pv3sub">{PV3_SUB}</p>
+        {/* ⚠️ THE `tally` VARIANT, BECAUSE IT IS THE REF'S SHAPE: a 5px bar and one mono line. Its
+            wording is the shared component's ("37/100 places claimed"), not the ref's hardcoded
+            "63 places left · no card needed" — the component and its words are not this page's to
+            fork. The counter renders nothing until a figure comes back, so the wrapper holds no
+            height of its own. */}
+        <div className="mk-pv3count"><FoundingCounter variant="tally" /></div>
+        {/* ⚠️ `source` IS "sealed-band" BECAUSE THE SERVER'S SOURCE SET IS CLOSED: an unknown value
+            folds to `unknown`. A `pricing-banner` source needs `functions/src/waitlistModel.ts` and a
+            prod functions deploy — flagged in reports/pricing-v3/REPORT.md rather than invented. */}
+        <FoundingSignup
+          idPrefix="mk-pricing"
+          source="sealed-band"
+          formClass="mk-pv3form"
+          onNavigate={onNavigate}
+        />
+      </section>
 
-      <div className="mk-pricebody">
-        <section className="mk-tiers">
-          {PRICING_TIERS.map((tier) => <Tier key={tier.key} tier={tier} onNavigate={onNavigate} />)}
-        </section>
+      {/* ── Then, once we launch: the two tiers, hanging over the band's lower edge ── */}
+      <section className="mk-pv3soon" aria-labelledby="mk-pv3-launch">
+        <p id="mk-pv3-launch" className="mk-pv3launch">{PV3_LAUNCH_LINE}</p>
+        <div className="mk-pv3tiers">
+          <article className="mk-pv3tier mk-pv3tier--free">
+            <h2 className="mk-pv3tname">{PV3_FREE.name}</h2>
+            <Price amount={PV3_FREE.price} />
+            <p className="mk-pv3tsub">{PV3_FREE.sub}</p>
+            <ul className="mk-pv3tlist">
+              {PV3_FREE.list.map((f) => <li key={f}>{f}</li>)}
+            </ul>
+          </article>
+          <article className="mk-pv3tier mk-pv3tier--pro">
+            <h2 className="mk-pv3tname">{PV3_PRO.name}</h2>
+            <Price amount={PRO_FROM} from={PV3_PRO.from} per={PV3_PRO.per} />
+            <p className="mk-pv3tsub">{PV3_PRO.sub}</p>
+            <ul className="mk-pv3tlist">
+              <li className="mk-pv3plus">{PV3_PRO.plus}</li>
+              {PV3_PRO.list.map((f) => <li key={f}>{f}</li>)}
+            </ul>
+            <p className="mk-pv3flex">{PV3_PRO.flex}</p>
+            <a className="mk-pv3tlink" href="#how-long" onClick={scrollToJourney}>{PV3_PRO.link}</a>
+          </article>
+        </div>
+      </section>
 
-        <p className="mk-pricefoot">
-          {PRICING_PLACES_NOTE}{" "}
-          <button type="button" className="mk-tlink" onClick={() => onNavigate("founders")}>
-            {PRICING_PLACES_LINK}<span aria-hidden="true"> →</span>
-          </button>
-        </p>
-        <p className="mk-pricefoot mk-pricefoot--quiet">{PRICING_FOOTNOTE}</p>
+      {/* ── How long will I need? — the target of the Pro tier's link ── */}
+      <section className="mk-pv3sect mk-pv3how" id="how-long">
+        <CampaignJourney />
+        <p className="mk-pv3source"><Runs runs={PV3_SOURCE_NOTE} onNavigate={onNavigate} /></p>
+      </section>
 
-        <section className="mk-cmp">
-          <h2>{PRICING_COMPARISON_H2}</h2>
-          {/* ⚠️ THE TABLE SCROLLS INSIDE ITS OWN BOX RATHER THAN WIDENING THE PAGE. Four columns of
-              prose cannot be made narrow enough for 390px, and a page that scrolls sideways is a
-              worse answer than a table that does. */}
-          <div className="mk-cmpscroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th className="mk-c">Free</th>
-                  <th className="mk-c mk-colfound">Founding</th>
-                  <th className="mk-c">Pro</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PRICING_COMPARISON.map((row) => (
-                  <tr key={row.label}>
-                    <td>{row.label}</td>
-                    <td className="mk-c">{row.free}</td>
-                    <td className="mk-c mk-colfound">{row.founding}</td>
-                    <td className="mk-c">{row.pro}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="mk-faq">
-          <h2>{PRICING_FAQ_H2}</h2>
-          {PRICING_FAQ.map((qa) => (
-            <div className="mk-qa" key={qa.q}>
-              <p className="mk-q">{qa.q}</p>
-              <p className="mk-a">{qa.a}</p>
+      {/* ── Questions ── */}
+      <section className="mk-pv3sect" aria-labelledby="mk-pv3-faq">
+        <h2 id="mk-pv3-faq" className="mk-pv3h2">{PV3_FAQ_H2}</h2>
+        <div className="mk-pv3faq">
+          {PV3_FAQ.map((qa) => (
+            <div className="mk-pv3qa" key={qa.q}>
+              <p className="mk-pv3q">{qa.q}</p>
+              <p className="mk-pv3a">{qa.a}</p>
             </div>
           ))}
-        </section>
-      </div>
-
+        </div>
+      </section>
+      <div className="mk-pv3end" aria-hidden="true" />
     </div>
   );
 };

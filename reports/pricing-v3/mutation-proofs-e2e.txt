@@ -1,0 +1,48 @@
+== E1 the H1 loses its !important (PV1) — RED
+    Error: .mk-pv3h1
+    - Expected  - 1
+    + Received  + 1
+  1 failed
+  1 passed (19.5s)
+== E2 the inherit reset is removed (PV1) — RED
+    Error: .mk-pv3sub
+    Expected: "Source Serif 4"
+    Received: "Source Sans 3"
+  1 failed
+  1 passed (18.9s)
+== E3 the counter drawn below the form (DOM unchanged) (PV2) — RED
+    Error: 1440: counter above form
+    Expected: <= 371.25
+    Received:    504.25
+  1 failed
+  1 passed (18.6s)
+== E4 a novel passes without its length (PV4) — RED
+    Error: a novel needs its length
+    expect(locator).toBeDisabled() failed
+    Expected: disabled
+    Received: enabled
+  1 failed
+  1 passed (23.7s)
+== E5 two tiles highlighted (PV4) — RED
+    Error: exactly one tile highlighted, the fitting pass
+    - Expected  - 0
+    + Received  + 1
+  1 failed
+  1 passed (19.4s)
+== E6 the band pushed 400px down (PV5) — RED
+    Error: 1440: free price above the fold (900)
+    Expected: <= 900
+    Received:    1080.71875
+  1 failed
+  1 passed (18.8s)
+== E7 a hardcoded places line in the band (PV3) — RED
+    Error: expect(received).toEqual(expected) // deep equality
+    - Expected  - 0
+    + Received  + 1
+  1 failed
+  1 passed (19.5s)
+clean rebuild done
+== E8 LC2 S1 /pricing gutter read, with the band edge to edge — RED
+    Error: /pricing @1440 top 20px in is light: [[42,58,82],[42,58,82]]
+  1 failed
+  1 passed (20.3s)
