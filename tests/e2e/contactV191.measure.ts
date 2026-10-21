@@ -154,7 +154,10 @@ test("CL191-A1 · blank: a missing email's (and website's) add link is hidden at
   for (const vp of SIZES) {
     const w = `@${vp.width}`;
     await open(page, vp, "CL191-A1");
-    const ids = (await rowOnScreen(page, "[data-cl19='add-email']", vp)).slice(0, 3);
+    /* RE-POINTED (Contact list v20 §A): the title row sits above the card, so at 1280 × 800 the rows start 54px lower and
+       the window this reads can hold no row without an email at the top; scrolled 300 it holds some again */
+    let ids = (await rowOnScreen(page, "[data-cl19='add-email']", vp)).slice(0, 3);
+    if (!ids.length) { await scrollTo(page, 300); ids = (await rowOnScreen(page, "[data-cl19='add-email']", vp)).slice(0, 3); }
     L.check(`${w} rows with no email on screen (the population)`, ids.length >= 1, `${ids.length}`);
     for (const id of ids) {
       await page.mouse.move(5, 5); await page.waitForTimeout(300);
@@ -187,7 +190,9 @@ test("CL191-A2 · focus: Tab reaches the hidden add link, which shows with a foc
   for (const vp of SIZES) {
     const w = `@${vp.width}`;
     await open(page, vp, "CL191-A2");
-    const id = (await rowOnScreen(page, "[data-cl19='add-email']", vp))[0];
+    /* RE-POINTED (Contact list v20 §A): as A1 — scrolled 300 when the title row leaves the window without such a row */
+    let id = (await rowOnScreen(page, "[data-cl19='add-email']", vp))[0];
+    if (!id) { await scrollTo(page, 300); id = (await rowOnScreen(page, "[data-cl19='add-email']", vp))[0]; }
     L.check(`${w} a row with no email on screen (precondition)`, !!id, `${id}`);
     if (!id) continue;
     await page.mouse.move(5, 5); await page.waitForTimeout(300);
@@ -459,7 +464,12 @@ test("CL191-F1 · unpinned bar: navy toolbar, cream letters and Pin, white contr
       const u = await readBar(page);
       L.check(`${w} unpinned: the toolbar is ${NAVY} with no rule beneath`, u.tbBg === NAVY && u.tbRule === "0px", `${u.tbBg} · ${u.tbRule}`);
       L.check(`${w} unpinned: the card's four corners are 18px, and it clips (the toolbar's top corners follow it)`, u.corners.length === 4 && u.corners.every((x) => x === "18px") && u.clips, `${u.corners.join(" ")} · clips ${u.clips}`);
-      L.check(`${w} unpinned: Pin is ${CREAM} with navy text`, u.pinBg === CREAM && u.pinColor === NAVY, `${u.pinBg} · ${u.pinColor}`);
+      /* RE-POINTED (Contact list v20 §C): unpinned, the toolbar's full-screen button (v19's Pin) appears only once the title
+         row has scrolled away, so its colours are read there — the claim (cream with navy text on the navy bar) stands */
+      await scrollTo(page, 1400);
+      const us = await readBar(page);
+      await scrollTo(page, 0);
+      L.check(`${w} unpinned (scrolled): Full screen is ${CREAM} with navy text`, us.pinBg === CREAM && us.pinColor === NAVY, `${us.pinBg} · ${us.pinColor}`);
       const cur = u.letters.filter((l) => l.cur), on = u.letters.filter((l) => !l.cur && !l.dis), off = u.letters.filter((l) => l.dis);
       L.check(`${w} unpinned: letters (the population)`, u.letters.length >= 20 && cur.length === 1, `${u.letters.length} · current ${cur.length}`);
       L.check(`${w} unpinned: the letters are cream`, on.length > 0 && on.every((l) => l.color === CREAM), [...new Set(on.map((l) => l.color))].join(" "));
@@ -520,7 +530,9 @@ test("CL191-G1 · strip: the open row's strip is cream rgb(246, 241, 232), unlik
         L.check(`${w} ${id}: the row opened on a hover (precondition)`, r.open, `${r.open}`);
         L.check(`${w} the strip is rgb(246, 241, 232)`, r.sbg === "rgb(246, 241, 232)", `${r.sbg}`);
         L.check(`${w} the group header is there and is not the strip's colour`, !!r.gbg && r.gbg !== r.sbg, `${r.gbg} vs ${r.sbg}`);
-        L.check(`${w} the group header stays powder rgb(230, 237, 246)`, r.gbg === "rgb(230, 237, 246)", `${r.gbg}`);
+        /* RE-POINTED (Contact list v20 §D): the group header is the cream ledger now, not powder; the claim that matters —
+           an open row never reads as a group header — is the line above (the two colours differ) */
+        L.check(`${w} the group header is v20's ledger rgb(244, 240, 233)`, r.gbg === "rgb(244, 240, 233)", `${r.gbg}`);
         if (r.dv) L.check(`${w} the divider is ink at 12%`, r.dv === "rgba(28, 19, 15, 0.12)", `${r.dv}`);
         await page.mouse.move(5, 5); await page.waitForTimeout(300);
         if (pos === "pinned") await setPin(page, L, false, `${w} unpin`);

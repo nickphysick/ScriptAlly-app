@@ -7,7 +7,8 @@
  *   - PINNED, a navy band (66 tall) sits above the toolbar: the hawk over the card index, "N agents", the three-part
  *     count (Not queried · Querying · Closed), "your move", List health and "+ Add an agent". Every figure is the
  *     page's own (the glance model, the census, Housekeeping's health), never a stored number.
- *   - IN BOTH POSITIONS, the toolbar: the A to Z (ungrouped or grouped by Letter), then Find, Group by, Filters, Pin.
+ *   - IN BOTH POSITIONS, the toolbar: the A to Z (ungrouped or grouped by Letter), then Find, Group by, Filters, and
+ *     (v20 §C) the Cards / List switch and Full screen once the title row has scrolled away, and in full screen.
  *     It is the SAME markup pinned and unpinned; only the band is added.
  *
  * ⚠️ THE TOOLBAR NEVER WRAPS. Its items do not shrink; when the row is too narrow it gives way in a fixed order, set
@@ -28,6 +29,8 @@ import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import type { PopoverState } from "../../shell/ListPills";
 import type { ContactPop } from "./ContactListControls";
+import { ContactViewSwitch, FULL_ICON } from "./ContactTitleRow";
+import type { ContactView } from "../../../lib/contactListMemory";
 import "./contactV19.css";
 
 export const CL19_ART = { src: "/images/contact-list-archivist.webp", version: 1 };
@@ -53,11 +56,6 @@ const FILTER_ICON = (
 const FIND_ICON = (
   <svg width="13" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
     <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-  </svg>
-);
-const PIN_ICON = (
-  <svg className="cl19-pin-ic" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M9 4h6l-1 5 3 3v2H7v-2l3-3z" /><path d="M12 14v6" />
   </svg>
 );
 
@@ -167,8 +165,17 @@ export const ContactListHead: React.FC<{
   /** v19 §F — the Filters chip's button, so "+N more" can open the menu from it */
   filtersRef?: React.MutableRefObject<HTMLButtonElement | null>;
   pop: PopoverState<ContactPop>;
+  /** v20 §C — full screen on and off (the shared pin hook, through the page's toggle) */
   onPin: () => void;
-}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin }) => {
+  /** v20 §C — the Cards / List view: one state with the title row's pill */
+  view: ContactView;
+  onView: (v: ContactView) => void;
+  /** v20 §C — the switch and Full screen show in the toolbar only once the title row has scrolled away, and always in
+   *  full screen (the page decides; the toolbar draws what it is told) */
+  showViewTools: boolean;
+  /** v20 §E — the filter strip, drawn inside the head under the toolbar (it sticks with it and sits over the rows) */
+  filterStrip?: React.ReactNode;
+}> = ({ pinned, loading = false, band, headRef, counts, current, onPick, search, onSearch, groupKey, onStopGroup, jump, filterCount, onClearFilters, filtersRef, pop, onPin, view, onView, showViewTools, filterStrip }) => {
   const tbRef = useRef<HTMLDivElement>(null);
   const showLetters = groupKey === "none" || groupKey === "letter";
   const groupName = groupKey === "none" ? null : GROUP_OPTIONS.find((g) => g.key === groupKey)?.label ?? null;
@@ -187,7 +194,7 @@ export const ContactListHead: React.FC<{
      Letters: 1 hides the letters with no agents, 2 tightens them. The jump row (v19 §E): 1 hides the current group's
      label, 2 then puts the groups that do not fit WHOLE into "+N more" — set on each button as `data-over` (never
      React state, so it cannot re-render the page), with the count handed to the one "+N more" button. */
-  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "") + jumpSig;
+  const sig = LETTERS.map((L) => (loading ? 0 : counts.get(L) ?? 0) > 0 ? "1" : "0").join("") + (showLetters ? "L" : "") + groupKey + filterCount + (pinned ? "p" : "") + (showViewTools ? "v" : "") + jumpSig;
   useLayoutEffect(() => {
     const tb = tbRef.current;
     if (!tb) return undefined;
@@ -353,13 +360,21 @@ export const ContactListHead: React.FC<{
                 onClick={() => { if (pop.open === "filters") pop.close(); onClearFilters(); filRef.current?.focus({ preventScroll: true }); }}>{CROSS}</button>
             ) : null}
           </span>
-          <button type="button" className="cl19-pin" data-cl19="pin" data-cl16="full" data-pin-list="" aria-pressed={pinned} aria-keyshortcuts="F"
-            aria-label={pinned ? "Unpin" : "Pin list"} disabled={loading} onClick={onPin}>
-            {PIN_ICON}<span className="cl19-pin-l">{pinned ? "Unpin" : "Pin list"}</span>
-          </button>
+          {/* v20 §C — after Filters: the Cards / List switch, then Full screen (Exit full screen in full screen). While the
+              title row is on screen it carries both, so the toolbar carries neither. */}
+          {showViewTools ? (
+            <>
+              <ContactViewSwitch view={view} onView={onView} variant="icons" labels={false} disabled={loading} probe="view-tb" />
+              <button type="button" className="cl19-pin cl20-tfs" data-cl19="pin" data-cl20="full-tb" data-cl16="full" data-pin-list="" aria-pressed={pinned} aria-keyshortcuts="F"
+                aria-label={pinned ? "Exit full screen" : "Full screen"} disabled={loading} onClick={onPin}>
+                {FULL_ICON}<span className="cl19-pin-l">{pinned ? "Exit full screen" : "Full screen"}</span>
+              </button>
+            </>
+          ) : null}
         </div>
       </div>
       </div>
+      {filterStrip}
     </div>
   );
 };

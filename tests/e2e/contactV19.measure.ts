@@ -151,7 +151,9 @@ const readParity = (page: Page, ids: { mail: string | null; web: string | null; 
     find: vis(".cl19-findw label.cl19-find")[0] ?? null,
     group: vis("button.cl19-grp")[0] ?? null,
     filters: vis("button.cl19-fil")[0] ?? null,
-    pin: vis("button.cl19-pin")[0] ?? null,
+    /* RETIRED (Contact list v20 §C): "pin" is no longer one control in two positions — unpinned at the top the
+       toolbar carries no full-screen control at all (the title row does), so it has no parity to hold. CL20-C1 holds
+       where the control is in each state. */
     name: any?.querySelector<HTMLElement>(".clv-rwn b") ?? null,
     agency: any?.querySelector<HTMLElement>(".clv-ragy") ?? null,
     date: any?.querySelector<HTMLElement>("[data-cl19='date']") ?? null,
@@ -334,7 +336,10 @@ test("CL19-P3 · pinned: the band is 66 tall and navy; the toolbar's first lette
 /* ───────────────────────── T · the toolbar never wraps ───────────────────────── */
 const readToolbar = (page: Page) => page.evaluate(() => {
   const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().height > 0);
-  const tb = vis("[data-cl19='toolbar']")[0], pin = vis("button.cl19-pin")[0];
+  /* RE-POINTED (Contact list v20 §C): the toolbar carries no Pin while the title row shows, so "nothing spills out of the
+     right" is asserted on its LAST control, whatever that is (Filters at the top; Full screen once scrolled or full
+     screen) — the claim was always that the row ends inside the toolbar */
+  const tb = vis("[data-cl19='toolbar']")[0], pin = tb ? [...tb.querySelectorAll<HTMLElement>("[data-cl19='tools'] > *")].filter((e) => e.offsetWidth > 0).pop() : undefined;
   const lab = (sel: string) => { const b = vis(sel)[0]; const l = b?.querySelector<HTMLElement>(".cl19-l"); if (!b || !l) return null; const lb = l.getBoundingClientRect(), bb = b.getBoundingClientRect(); return { w: lb.width, clip: l.scrollWidth > l.clientWidth + 1, inside: lb.left >= bb.left - 0.5 && lb.right <= bb.right + 0.5, text: (l.textContent ?? "").trim() }; };
   const sc = tb?.closest<HTMLElement>(".wpg-scroll");
   return {
@@ -375,7 +380,7 @@ test("CL19-T1 · never wraps: 52 tall, the Pin inside, Group by and Filters whol
         const r = await readToolbar(page);
         if (state.includes("filtered")) L.check(`${w} three filters on (precondition)`, r.n === "3", `"${r.n}"`);
         L.check(`${w} the toolbar is 52 ±1 tall`, near(r.h, 52, 1), `${r.h}`);
-        L.check(`${w} the Pin's right is inside the toolbar`, (r.pinR ?? Infinity) <= (r.tbR ?? -Infinity) + 0.5, `${r.pinR?.toFixed(1)} vs ${r.tbR?.toFixed(1)}`);
+        L.check(`${w} the toolbar's last control's right is inside the toolbar`, (r.pinR ?? Infinity) <= (r.tbR ?? -Infinity) + 0.5, `${r.pinR?.toFixed(1)} vs ${r.tbR?.toFixed(1)}`);
         L.check(`${w} the toolbar's content does not overflow it`, (r.tbOver ?? 99) <= 1, `${r.tbOver}`);
         L.check(`${w} Group by's label is whole and visible`, !!r.group && r.group.w > 0 && !r.group.clip && r.group.inside, JSON.stringify(r.group));
         L.check(`${w} Filters' label is whole and visible`, !!r.filters && r.filters.w > 0 && !r.filters.clip && r.filters.inside, JSON.stringify(r.filters));
@@ -570,10 +575,9 @@ test("CL19-E1 · grouping: none at first; by Status 50-tall bands with a 2px nav
     await groupBy(page, L, "status", w);
     const b = await bands();
     L.check(`${w} grouped: bands show`, b.length >= 2, `${b.length}`);
-    for (const [i, x] of b.entries()) {
-      L.check(`${w} band ${i + 1}: 50 ±1 tall`, near(x.h, 50, 1), `${x.h}`);
-      L.check(`${w} band ${i + 1}: a 2px navy top border`, x.bw === "2px" && x.bc === "rgb(42, 58, 82)", `${x.bw} ${x.bc}`);
-    }
+    /* RETIRED (Contact list v20 §D): the 50-tall powder band with a 2px navy top is now the 54-tall cream ledger with no
+       rules; CL20-D1 holds the ledger's height, ground, rules and alignment */
+    void b;
     L.check(`${w} grouped: the headings appear once`, (await heads()) === 1, `${await heads()}`);
     L.check(`${w} grouped: the chip reads "Grouped by Status"`, /Grouped by\s*Status/.test((await chip()) ?? ""), `${await chip()}`);
     await click(page, L, "[data-cl19='group-stop']", `${w} ✕`);
@@ -584,7 +588,8 @@ test("CL19-E1 · grouping: none at first; by Status 50-tall bands with a 2px nav
     const ids1 = (await rowIds(page)).slice(0, 20);
     L.check(`${w} after ✕: the rows are in the same order`, JSON.stringify(ids1) === JSON.stringify(ids0), `${ids0.slice(0, 4)} → ${ids1.slice(0, 4)}`);
   }
-  L.done(30);
+  /* RE-POINTED (Contact list v20 §D): 18 readings once the band checks moved to CL20-D1 (was 30) */
+  L.done(18);
 });
 
 test("CL19-E2 · jump row: grouped by Status at 1280, no jump button is cut — each is whole in the row or behind '+N more'", async ({ page }) => {

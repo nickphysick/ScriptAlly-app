@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "CL20-E3",
+  "where": "@1512 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1512 the strip is open with a filter on (precondition)",
+  "ok": true,
+  "detail": "{\"strip\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1512 Esc closes the strip",
+  "ok": true,
+  "detail": "{\"strip\":false,\"focus\":true,\"full\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1512 focus is on the Filters chip",
+  "ok": true,
+  "detail": "{\"strip\":false,\"focus\":true,\"full\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1512 the list stays filtered and in full screen",
+  "ok": true,
+  "detail": "{\"strip\":false,\"focus\":true,\"full\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1512 a second Esc leaves full screen",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1280 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1280 the strip is open with a filter on (precondition)",
+  "ok": true,
+  "detail": "{\"strip\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1280 Esc closes the strip",
+  "ok": true,
+  "detail": "{\"strip\":false,\"focus\":true,\"full\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1280 focus is on the Filters chip",
+  "ok": true,
+  "detail": "{\"strip\":false,\"focus\":true,\"full\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1280 the list stays filtered and in full screen",
+  "ok": true,
+  "detail": "{\"strip\":false,\"focus\":true,\"full\":true,\"n\":4}"
+ },
+ {
+  "lock": "CL20-E3",
+  "where": "@1280 a second Esc leaves full screen",
+  "ok": true,
+  "detail": "false"
+ }
+]

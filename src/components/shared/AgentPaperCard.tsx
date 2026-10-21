@@ -11,9 +11,10 @@
  *   panel   (v18.1) the agent panel itself: framed's frame, band and head, with ✕ in the band, and the panel's tabs,
  *           body and footer as slots. The band is fixed; the head, tabs and body scroll together; the footer is fixed.
  *
- * ⚠️ THE BAND IS ALWAYS THE LIST HEADER'S SLATE, #3e5170 (v18.2 §B; v18.1 coloured it by whose move it was, and that
- *    rule is retired). The state is said by the agent panel's stand slip, not by the band. `status` still travels as
- *    `data-kind` for anything that reads it, and is never a colour.
+ * ⚠️ THE BAND IS THE LIST HEADER'S SLATE, #3e5170 (v18.2 §B; v18.1 coloured it by whose move it was, and that rule is
+ *    retired), EXCEPT where a caller passes `tone="pink"`: Contact list v20 §F gives a your-move card in the Cards view
+ *    the app's pink. The panel's state is said by its stand slip, not by the band. `status` still travels as
+ *    `data-kind` for anything that reads it, and is never a colour on its own.
  *
  * ⚠️ IT DRAWS WHAT IT IS GIVEN AND DERIVES NOTHING: the caller says the status, the words and which genre is the
  *    manuscript's. A value given as null is a dashed "+ Add …" pill when `onAdd` is supplied, and is left out when not.
@@ -24,6 +25,8 @@ import "./agentPaperCard.css";
 export type PaperStatus = "you" | "none" | "querying" | "closed";
 /** v18.2 §B — every band, in every variant and every state: the list header's slate */
 export const PAPER_BAND = "#3e5170";
+/** v20 §F — the Contact list's Cards view: a your-move card's band, the app's `--pink` */
+export const PAPER_BAND_PINK = "#f5e2da";
 
 export type PaperAddKey = "website" | "email" | "genres" | "wishlist" | "materials";
 
@@ -86,7 +89,11 @@ export const AgentPaperCard: React.FC<{
   className?: string;
   /** the panel variant's slots */
   panel?: PaperPanelSlots;
-}> = ({ variant, data: d, onAdd, className, panel }) => {
+  /** Contact list v20 §F — the band's tone. Absent: the list header's slate (every card, every variant, as v18.2). "pink":
+   *  the app's pink with rust words, which only the Contact list's Cards view asks for, on a card whose next step is the
+   *  writer's. The agent panel and Housekeeping never pass it. */
+  tone?: "pink";
+}> = ({ variant, data: d, onAdd, className, panel, tone }) => {
   if (variant === "panel" && panel) {
     return (
       <div className={`apc apc--panel${className ? ` ${className}` : ""}`} data-apc="card" data-variant="panel" data-status={d.status}>
@@ -144,9 +151,10 @@ export const AgentPaperCard: React.FC<{
   );
   const meta = [d.city?.trim(), d.weeks ? `Replies in about ${d.weeks} weeks` : null].filter(Boolean).join(" · ");
   return (
-    <div className={`apc apc--${variant}${className ? ` ${className}` : ""}`} data-apc="card" data-variant={variant} data-status={d.status} aria-hidden={ghost || undefined}>
+    <div className={`apc apc--${variant}${className ? ` ${className}` : ""}`} data-apc="card" data-variant={variant} data-status={d.status} data-tone={tone}
+      aria-hidden={ghost || undefined}>
       <div className="apc-frame" data-apc="frame">
-        <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_BAND }}>
+        <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: tone === "pink" ? PAPER_BAND_PINK : PAPER_BAND }}>
           <span className="apc-st" data-apc="status">{ghost ? bar(110, 12) : d.statusLabel}</span>
           {!ghost && d.stars ? <Stars n={d.stars} /> : null}
         </div>

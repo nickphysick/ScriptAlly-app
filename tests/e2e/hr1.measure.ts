@@ -54,7 +54,9 @@ const RIGHT_W = (w: number) => (w === 1920 ? 370 : 332);
 
 type PageMap = { key: string; route: string; header: string; eyebrow: string; title: string; byline: string; acts: string; art?: string; right?: string; rightTokenW?: boolean; content: string; init?: string };
 const PAGES: PageMap[] = [
-  { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-cl19='toolbar']" },
+  { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-cl20='title-row']" },
+  /* RE-POINTED (Contact list v20 §A): the Contact list's content now opens on its title row (the count, the Cards / List
+     pill, Full screen), which sits where the toolbar did; the toolbar follows 54 lower */
   { key: "queries", route: "/queries", header: "[data-qc138='header']", eyebrow: "[data-qc138='eyebrow']", title: "[data-qc138='title']", byline: "[data-qc138='byline']", acts: "[data-qc138='acts']", art: "[data-qc138='hawk']", right: "[data-qc138='chart-col']", rightTokenW: true, content: ".qcv-group > .qcv-page" },
   { key: "analytics", route: "/queries/analytics", header: "[data-a21='header']", eyebrow: "[data-a21='eyebrow']", title: "[data-a21='title']", byline: "[data-a21='byline']", acts: "[data-a21='acts']", right: "[data-a21='card']", rightTokenW: true, content: ".a21-desk" },
   { key: "responses", route: "/queries/responses", header: "[data-rsp='header']", eyebrow: "[data-rsp='eyebrow']", title: ".rsp-hd h1", byline: "[data-rsp='byline']", acts: "[data-rsp='acts']", right: "[data-rsp='card']", content: ".rsp-pos" },

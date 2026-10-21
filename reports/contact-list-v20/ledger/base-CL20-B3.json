@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "CL20-B3",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1512 a letter with agents (population)",
+  "ok": true,
+  "detail": "M"
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1512 the first M card's top is 2px or less under the stack",
+  "ok": false,
+  "detail": "NaN vs 169.75"
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1512 the current letter is M",
+  "ok": true,
+  "detail": "M"
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1280 a letter with agents (population)",
+  "ok": true,
+  "detail": "M"
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1280 the first M card's top is 2px or less under the stack",
+  "ok": false,
+  "detail": "NaN vs 169.75"
+ },
+ {
+  "lock": "CL20-B3",
+  "where": "@1280 the current letter is M",
+  "ok": true,
+  "detail": "M"
+ }
+]

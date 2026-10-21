@@ -92,7 +92,7 @@
 }
 .cl18-lh button:disabled { cursor: default; opacity: 0.6; }
 
-/* ── §B · THE FILTERS PANEL: retired by v19 §F (contactV19.css, `.cl19-fm`) ── */
+/* ── §B · THE FILTERS PANEL: retired by v19 §F, whose own menu v20 §E retired in turn for the filter strip ── */
 
 /* ── §B · THE COLUMN HEADINGS: the Query Centre's strip, at the sheet's full width ── */
 /* v18.3: the row's fill, height, rule and label type are the shared headings' (`.lth`, shell/listToolbar.css) */

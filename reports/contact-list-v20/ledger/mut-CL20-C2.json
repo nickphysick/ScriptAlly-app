@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 the toolbar's switch shows once scrolled (precondition)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 the title row's pill now reads Cards",
+  "ok": false,
+  "detail": "list"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 the toolbar's switch now reads List",
+  "ok": false,
+  "detail": "cards"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 the toolbar's switch shows once scrolled (precondition)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 the title row's pill now reads Cards",
+  "ok": false,
+  "detail": "list"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 the toolbar's switch now reads List",
+  "ok": false,
+  "detail": "cards"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 a your-move card and a waiting card (population)",
+  "ok": false,
+  "detail": "{\"you\":null,\"wait\":null,\"n\":0}"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 your move: band rgb(245,226,218)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 your move: chip text rgb(138,64,48)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 waiting: band unchanged (slate rgb(62,81,112))",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 a your-move card on screen to open",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 a your-move card and a waiting card (population)",
+  "ok": false,
+  "detail": "{\"you\":null,\"wait\":null,\"n\":0}"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 your move: band rgb(245,226,218)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 your move: chip text rgb(138,64,48)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 waiting: band unchanged (slate rgb(62,81,112))",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 a your-move card on screen to open",
+  "ok": false,
+  "detail": "none"
+ }
+]

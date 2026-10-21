@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 set: Status, a sort, one filter, a search, List (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 Cards: aria-selected is Cards",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 Cards: the grid renders and the rows do not",
+  "ok": false,
+  "detail": "0 cards, 3 rows"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 Cards: grouping, sort, filters and search unchanged",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 switch to list — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 List: aria-selected is List; the rows render",
+  "ok": false,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1512 List: grouping, sort, filters and search unchanged",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 set: Status, a sort, one filter, a search, List (precondition)",
+  "ok": false,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 Cards: aria-selected is Cards",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 Cards: the grid renders and the rows do not",
+  "ok": false,
+  "detail": "0 cards, 3 rows"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 Cards: grouping, sort, filters and search unchanged",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 switch to list — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 List: aria-selected is List; the rows render",
+  "ok": false,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ },
+ {
+  "lock": "CL20-A3",
+  "where": "@1280 List: grouping, sort, filters and search unchanged",
+  "ok": true,
+  "detail": "{\"group\":\"Status\",\"sort\":\"\\\"added\\\"\",\"filters\":1,\"search\":\"a\",\"sel\":null,\"cards\":0,\"rows\":3}"
+ }
+]
