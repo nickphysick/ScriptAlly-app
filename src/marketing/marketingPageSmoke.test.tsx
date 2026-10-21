@@ -159,8 +159,11 @@ describe("the public pricing page sells nothing and writes nothing", () => {
    */
   it("renders no places figure until a real one comes back", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    expect(html).toContain("mk-pv3count");
-    expect(html).not.toMatch(/\d+\s*(?:of|\/)\s*\d+/);
+    /* ⚠️ SCOPED TO THE BAND. The journey below says "Question 1 of 4", which is a count and not a
+       places figure; a page-wide sweep for "N of M" reads it as the fabricated scarcity number. */
+    const band = sliceBetween(html, 'class="mk-pv3band"', 'class="mk-pv3soon"');
+    expect(band).toContain("mk-pv3count");
+    expect(band).not.toMatch(/\d+\s*(?:of|\/)\s*\d+/);
     expect(html).not.toContain("places claimed");
     expect(html).not.toContain("places left");
   });

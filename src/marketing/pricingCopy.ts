@@ -125,6 +125,93 @@ export const PV3_FAQ: Pv3Question[] = [
   },
 ];
 
+/* ══════════════ How long will I need? — one question at a time ══════════════
+   ⚠️ VERBATIM FROM THE REF'S MARKUP AND SCRIPT. The arithmetic is `campaignEstimate.ts`; these are
+   the words around it. */
+export const JY_TITLE = "How long will I need?";
+export const JY_STEPS = 4;
+export const jyStepLabel = (n: number): string => (n < JY_STEPS ? `Question ${n + 1} of ${JY_STEPS}` : "Your plan");
+export const JY_NEXT = "Next";
+export const JY_SEE_PLAN = "See my plan";
+export const JY_BACK = "Back";
+export const JY_AGAIN = "Change my answers";
+export const JY_GOOD_TO_KNOW = "Good to know";
+
+export interface JyOption<V extends string> { v: V; title: string; small?: string }
+
+export const JY_Q_STAGE = "Where are you with your querying?";
+export const JY_STAGES: JyOption<"prep" | "ready" | "already">[] = [
+  { v: "prep", title: "Getting ready", small: "Building my list, polishing my letter" },
+  { v: "ready", title: "Ready to start", small: "About to send my first queries" },
+  { v: "already", title: "Already querying", small: "I've sent some queries" },
+];
+export const JY_Q_KIND = "What are you querying?";
+export const JY_KINDS: JyOption<"novel" | "nonfic" | "pb">[] = [
+  { v: "novel", title: "A novel" },
+  { v: "nonfic", title: "Non-fiction" },
+  { v: "pb", title: "A picture book" },
+];
+export const JY_Q_LEN = "Roughly how long is it?";
+export const JY_LENGTHS: JyOption<"s" | "m" | "l">[] = [
+  { v: "s", title: "Under 80,000 words" },
+  { v: "m", title: "80,000 to 110,000" },
+  { v: "l", title: "Over 110,000" },
+];
+export const JY_Q_AGENTS = "How many agents are on your list?";
+export const JY_FEWER = "Fewer agents";
+export const JY_MORE = "More agents";
+export const JY_Q_PACE = "How will you send them?";
+export const JY_PACES: JyOption<"steady" | "brisk">[] = [
+  { v: "steady", title: "A few at a time", small: "Rounds of about ten" },
+  { v: "brisk", title: "Bigger batches", small: "Rounds of fifteen or more" },
+];
+
+/** "Good to know", per answer. */
+export const JY_INSIGHT = {
+  stage: {
+    prep: "Getting ready counts. Most writers spend a month or two building their list and polishing their letter before the first query goes out.",
+    ready: "Good timing. Your first round teaches you the most, so it pays to send it organised.",
+    already: "We'll count from today. Replies to queries you've already sent can keep arriving for up to three months.",
+  },
+  kind: {
+    nonfic: "Non-fiction usually sells on a proposal, and agents read a proposal faster than a full manuscript.",
+    pb: "Agents read a picture book alongside your query, so decisions tend to come sooner.",
+  },
+  len: {
+    s: "Agents who like your opening ask for the full manuscript. Shorter books get read a little faster.",
+    m: "Agents who like your opening ask for the full manuscript. At this length, reading it usually takes two to three months.",
+    l: "Agents who like your opening ask for the full manuscript. Longer books take longer to read, so allow a few extra weeks.",
+  },
+  pace: {
+    steady: "Small rounds give you time to change your letter if the first replies are quiet.",
+    brisk: "Bigger batches finish sooner, but leave less room to improve your letter between rounds.",
+  },
+} as const;
+export const jyAgentsInsight = (n: number): string =>
+  n < 20 ? "That's a short list. Most writers query more agents than that before they're done, so it's worth building up."
+  : n <= 60 ? "That's in line with most campaigns. Querying writers send around 40 to 50 queries on average."
+  : "A long list. It takes more rounds to get through, so your campaign runs longer.";
+
+/* The result screen. */
+export const JY_YOUR_CAMPAIGN = "Your campaign";
+export const JY_PREP_NOTE =
+  "That getting-ready time counts too. Build your agent list with what each agent wants, find comparable " +
+  "titles and new agents with The Scout, and put your letter, synopsis and sample into submission " +
+  "packages, so you start querying organised.";
+export const JY_FITS = "Fits your campaign";
+export const JY_INCLUDES = "Every Pro feature: manuscript versions, submission packages, Smart email drop and The Scout.";
+export const JY_ALL_PLANS = "See all plans";
+/** The five tiles under the result. `m` 0 is Free. */
+export const JY_TILES: { m: 0 | 1 | 3 | 6 | 12; name: string; price: string; small: string }[] = [
+  { m: 0, name: "Free", price: "0", small: "No time limit" },
+  ...PASSES.map((p) => ({
+    m: p.months,
+    name: `${p.months} month${p.months > 1 ? "s" : ""}`,
+    price: p.price,
+    small: p.months === 1 ? "Top up any pass" : `£${perMonth(p)} a month`,
+  })),
+];
+
 /* ══════════════ The source note under the journey ══════════════ */
 export const PV3_SOURCE_NOTE: CopyRun[] = [
   "A rough guide, not a promise, based on typical reply times reported by querying writers (",

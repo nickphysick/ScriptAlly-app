@@ -26,9 +26,11 @@
 import React, { useEffect } from "react";
 import {
   PRICING_V3_DOCUMENT_TITLE, PV3_KICKER, PV3_H1, PV3_SUB, PV3_LAUNCH_LINE, PV3_FREE, PV3_PRO,
-  PRO_FROM, PV3_FAQ_H2, PV3_FAQ,
+  PRO_FROM, PV3_FAQ_H2, PV3_FAQ, PV3_SOURCE_NOTE,
 } from "./pricingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
+import { CampaignJourney } from "./CampaignJourney";
+import { Runs } from "./CopyRuns";
 
 /** A price as the ref draws it: an optional "from", a small £, the figure, an optional unit. */
 const Price: React.FC<{ amount: string; from?: string; per?: string }> = ({ amount, from, per }) => (
@@ -109,6 +111,12 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
             <a className="mk-pv3tlink" href="#how-long" onClick={scrollToJourney}>{PV3_PRO.link}</a>
           </article>
         </div>
+      </section>
+
+      {/* ── How long will I need? — the target of the Pro tier's link ── */}
+      <section className="mk-pv3sect mk-pv3how" id="how-long">
+        <CampaignJourney />
+        <p className="mk-pv3source"><Runs runs={PV3_SOURCE_NOTE} onNavigate={onNavigate} /></p>
       </section>
 
       {/* ── Questions ── */}
