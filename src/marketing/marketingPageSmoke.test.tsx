@@ -27,6 +27,7 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 import { Landing } from "./Landing";
 import { MarketingShell } from "./MarketingShell";
 import { PricingPage } from "./PricingPage";
+import { PASSES, ADD_MONTH_PRICE, perMonth } from "./pricingCopy";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
@@ -51,8 +52,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      uninterrupted run in the markup; the sub's first sentence is, and it is hero copy that only this
      route renders. The h1's own text is asserted whole by the hero describe below. */
   ["/", () => <Landing onNavigate={noNavigate} />, "Hunting for literary agent representation?"],
-  /* Retarget, same law: the page is three tiers now and its h1 changed with them. */
-  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Pick the plan that fits"],
+  /* Retarget, same law (pricing v3, 21 Oct): the page opens on the founding band and its h1 changed. */
+  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "A free QueryHawk campaign for our first 100 writers."],
   /* Retarget, same law (21 Oct): the h1 is three block spans now, so the sentence is not one
      uninterrupted run in the markup; the navy band's hit line is, and only this route renders it. */
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "That gap is where good stories go to die."],
@@ -116,100 +117,52 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     });
   }
 
-  /**
-   * ⚠️ AN UNBUYABLE TIER RENDERS A LABEL, NOT A DISABLED BUTTON. A `<button disabled>` still
-   * announces itself as a button and still invites the click it will refuse; a `<span>` says the
-   * thing is not available and offers nothing. The claim is therefore about the ELEMENT, not
-   * about a `disabled` attribute — asserting the attribute would pass on exactly the markup this
-   * forbids.
-   */
-  /**
-   * ⚠️ THE CARD IS BOUNDED BY THE TIER SECTION, NOT BY "the rest of the document". Pro is the LAST
-   * card, so an unbounded slice ran to the footer and caught the foot link's button and four
-   * footer buttons — reporting a control inside a card that has none. Same slicing fault this repo
-   * records twice; the tail of a document is not the tail of an element.
-   */
-  const tierCard = (html: string, key: string): string => {
-    const tiers = html.slice(html.indexOf('class="mk-tiers"'), html.indexOf("</section>"));
-    const from = tiers.indexOf(`mk-tier--${key}`);
-    expect(from, `the ${key} card renders`).toBeGreaterThan(-1);
-    const next = tiers.indexOf("mk-tier--", from + 12);
-    return next === -1 ? tiers.slice(from) : tiers.slice(from, next);
-  };
+  /** The page's visible text: tags out, entities back, whitespace folded. */
+  const textOf = (html: string) =>
+    html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
 
-  it("Free and Pro state their unavailability and offer no control at all", () => {
+  /**
+   * ⚠️ REWRITTEN FOR PRICING v3 (21 Oct). The three-tier page's locks — two `aria-disabled` tiers,
+   * a live middle tier, perched birds — went with the tiers. What survives is the claim they all
+   * served: NOTHING HERE CAN BE BOUGHT. The page's only control that acts on anything outside the
+   * page is the founding claim form's submit; every other button belongs to the page itself.
+   */
+  it("offers no way to buy, upgrade or switch plans", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    expect(html).not.toMatch(/Activate Pro/i);
-    for (const key of ["free", "pro"]) {
-      const card = tierCard(html, key);
-      expect(card, `${key} is marked unavailable`).toContain('aria-disabled="true"');
-      expect(card, `${key} offers a label`).toContain("Available at launch");
-      expect(card, `${key} renders no button`).not.toContain("<button");
-      expect(card, `${key} is not focusable`).not.toContain("tabindex");
-      expect(card, `${key} is not a tab`).not.toContain('role="tab"');
+    const text = textOf(html);
+    for (const verb of [/\bbuy now\b/i, /\bupgrade\b/i, /\bsubscribe\b/i, /\bcheckout\b/i, /Activate Pro/i, /\bswitch plan/i]) {
+      expect(text, `no ${verb} on the page`).not.toMatch(verb);
     }
-  });
-
-  it("…and the one live tier does render a real control", () => {
-    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    const card = tierCard(html, "founding");
-    expect(card).not.toContain("aria-disabled");
-    expect(card).toContain("<button");
-    expect(card).toContain("Claim your spot");
+    const submits = [...html.matchAll(/<button[^>]*type="submit"[^>]*>/g)];
+    expect(submits, "exactly one submit: the founding claim").toHaveLength(1);
+    expect(html).toContain("Claim your place");
   });
 
   /**
-   * ⚠️ THE BIRDS PERCH; THEY NO LONGER HAVE A ROW (17 Sep). The fixed-height slot above each plan
-   * name is gone, and each bird is the card's own positioned image. It stays AHEAD of the name in
-   * the markup, so a screen reader still meets it where it always did, and it keeps its words.
+   * ⚠️ EVERY PRICE ON THE PAGE COMES FROM THE ONE TABLE IN `pricingCopy.ts`. The old sweep pinned
+   * the exact set; the page now states planned launch prices, so the sweep asserts PROVENANCE
+   * instead — any £ figure must be £0 or a figure the table states or derives. The next invented
+   * number fails here whichever number it is.
    */
-  it("perches each tier's bird on its card rather than in a slot above the name", () => {
-    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    expect(html, "the slot is retired").not.toMatch(/["\s`]mk-tierillo["\s`]/);
-    for (const key of ["free", "founding", "pro"]) {
-      const card = tierCard(html, key);
-      const bird = /<img class="mk-tierbird"[^>]*>/.exec(card);
-      expect(bird, `${key} carries a perched bird`).toBeTruthy();
-      expect(card.indexOf(bird![0]), `${key}: the bird reads before the plan name`)
-        .toBeLessThan(card.indexOf('class="mk-tiername"'));
-      expect(bird![0], `${key}: and it keeps its description`).toMatch(/alt="[^"]+"/);
-    }
+  it("quotes no price that the pass table does not state", () => {
+    const text = textOf(renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing"));
+    const amounts = [...text.matchAll(/£\s*([\d.,]+)/g)].map((m) => m[1]);
+    expect(amounts.length, "the sweep found prices (not vacuous)").toBeGreaterThan(1);
+    const allowed = new Set(["0", ADD_MONTH_PRICE, ...PASSES.map((p) => p.price), ...PASSES.map(perMonth)]);
+    for (const a of amounts) expect(allowed, `£${a} has a source`).toContain(a);
+    expect(text, "the old monthly figure is not this page's").not.toContain("£4.99");
   });
 
   /**
-   * ⚠️ NO INVENTED FIGURE, ANYWHERE ON THE PAGE. The design this was rebuilt from carries £7/mo,
-   * £70/yr and £3.50/mo; none has been set, and a price on a public page is a claim about what
-   * something costs. `£0` is the one figure that is true today.
-   *
-   * The assertion is a SWEEP for any currency amount rather than a list of the three, because the
-   * next invented figure will not be one of those three.
-   */
-  it("quotes no price but £0, because no other price exists yet", () => {
-    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    /* ⚠️ TWO FIGURES NOW, AND THE SWEEP IS KEPT RATHER THAN DELETED. It existed so that no price
-       could appear before one had been decided — £7/mo, £70/yr and £3.50/mo were all invented for
-       a mockup. Pro's monthly price IS decided, so the set grows by exactly that one value and a
-       third figure still fails here. The yearly rate and the founding rate remain unset, which is
-       why neither appears. */
-    const amounts = [...html.matchAll(/£\s*[\d.,]+/g)].map((m) => m[0]);
-    expect(amounts).toEqual(["£0", "£4.99"]);
-    /* ⚠️ "Price to be confirmed" IS ASSERTED ABSENT NOW, WHICH IS THE SAME CLAIM POINTED THE OTHER
-       WAY. It was the placeholder Pro wore while `PRO_PRICE_MONTHLY` was null; the constant is set,
-       so the placeholder must not survive beside a real figure — a page showing both would be
-       stating two different things about one price. */
-    expect(html, "the placeholder went when the figure arrived").not.toContain("Price to be confirmed");
-    expect(html, "a price is still not a payment path").toContain("Not on sale yet");
-  });
-
-  /**
-   * ⚠️ THE PLACES BAR IS LIVE OR ABSENT — never the ref's hardcoded "37 of 100 places claimed".
+   * ⚠️ THE PLACES BAR IS LIVE OR ABSENT — never the ref's hardcoded "63 places left" at 37%.
    * Rendered with no count in the store, the slot exists and holds nothing.
    */
   it("renders no places figure until a real one comes back", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    expect(html).toContain("mk-tierplaces");
+    expect(html).toContain("mk-pv3count");
     expect(html).not.toMatch(/\d+\s*(?:of|\/)\s*\d+/);
     expect(html).not.toContain("places claimed");
+    expect(html).not.toContain("places left");
   });
 
   /**
@@ -222,6 +175,7 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     expect(html).not.toMatch(/six free months end/i);
     expect(html).not.toMatch(/half price for life[^<]*\u2014/i);
     expect(html).not.toMatch(/charged automatically/i);
+    expect(html, "the stronger promise is retired everywhere").not.toContain("for life");
   });
 });
 
@@ -653,22 +607,10 @@ describe("the founding sign-up — one on the landing, in the band", () => {
     expect(h).not.toMatch(/\d+\s+left/);
   });
 
-  /**
-   * ⚠️ THE PERKS ARE STILL LOCKED, ON THE PAGE THAT STILL RENDERS THEM. They were the hero panel's
-   * three lines and `PRICING_TIERS` spreads them into the founding tier, so /pricing is where the
-   * wording now has to hold — moved rather than deleted, because the constant did not go.
-   */
-  it("the founding perks, in full, on the pricing page", () => {
-    const h = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    expect(h).toContain("Six months&#x27; free Pro access");
-    expect(h).toContain("Half price for as long as you need it");
-    expect(h).toContain("A direct line to the founder");
-    expect(h).not.toContain("6 months free Pro");
-    /* ⚠️ "for life" ASSERTED ABSENT FROM THE WHOLE PAGE, not just from the perk list. It was on
-       this tier twice — once in the perks and once in the after-line — so a lock naming only the
-       list would go green with the promise still printed two lines below it. */
-    expect(h, "the stronger promise is retired everywhere").not.toContain("for life");
-  });
+  /* ⚠️ RETIRED (pricing v3, 21 Oct): "the founding perks, in full, on the pricing page". /pricing no
+     longer renders `PRICING_TIERS`' founding tier, so the perks render on no public page. The
+     constant is unchanged and `landingCopy.test.ts` still locks its wording; the page-wide "for
+     life" absence moved into the pricing describe above. */
 });
 
   /**

@@ -240,7 +240,8 @@ const LOWER_READERS = [
   /* the four other pages' opening sections: paper white fading to the oat, as the hero does.
      About left this group on 21 Oct: its hero sits directly on a navy band, so it has no lower
      ground to fade into and paints its own flat ground (`.mk-ahero::before`). */
-  ".mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
+  /* Pricing left this group on 21 Oct (pricing v3): it opens on a navy band, like About. */
+  ".mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
   /* the status band continues the hero's lower ground into the oat (landing hero v3) */
   ".mk-lower", ".mk-statband",
   /* the sheet itself: every page continues on the oat */
@@ -508,7 +509,8 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
     expect(cream.length, "the panel restates them (the sweep is not vacuous)").toBeGreaterThan(8);
     for (const m of cream) {
       for (const sel of m[1].split(",")) {
-        expect(sel.trim(), "starts at the panel").toMatch(/^\.mk-claimcard\s/);
+        /* Two navy panels now: the banner card and /pricing's founding band (21 Oct). */
+        expect(sel.trim(), "starts at a navy panel").toMatch(/^(?:\.mk-claimcard|\.mk-pv3 \.mk-pv3band)\s/);
       }
     }
   });
@@ -806,10 +808,9 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",
-      /* the founding tier's lift (17 Sep): the 12px of extra top padding its flag needs, given back
-         as a negative top margin, so the card grows upward and its feature list starts on exactly
-         the line its neighbours' do. The transform it replaced moved the content with the card. */
-      ".mk-tier--founding",
+      /* /pricing's two tiers hanging over the founding band's foot (21 Oct, ref pricing-page-v1):
+         the band's 128px of bottom padding is the room they hang into. */
+      ".mk-pv3 .mk-pv3soon",
       /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
          margin, so the picture, heading and body keep their column (landing colours v2) */
       ".mk-vpoint",

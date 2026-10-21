@@ -378,12 +378,10 @@ export const VISION_LINK = "Read our story";
    key. The `founding` entry is additive and that page never sees it; `pro.price` and
    `pro.priceNote` are asserted there and must keep saying there is no payment path. */
 
-export const PRICING_DOCUMENT_TITLE = "QueryHawk — Plans";
-export const PRICING_EYEBROW = "Pricing";
-export const PRICING_H1 = "Pick the plan that fits the search you're on.";
-export const PRICING_SUB =
-  "Free for as long as you want it. Pro when you're querying in earnest. And for the next hundred " +
-  "writers, something better than both.";
+/* ⚠️ THE PUBLIC /pricing PAGE NO LONGER READS THIS SECTION (pricing v3, 21 Oct). Its copy is in
+   `pricingCopy.ts`. What stays here is what the SIGNED-IN /plans page and its tests read:
+   `PRO_PRICE_*`, `FOUNDING_RATE_AFTER`, `PricingTier` and `PRICING_TIERS`. The old page's header,
+   places note, footnote, comparison table and questions are deleted — nothing else read them. */
 
 /**
  * ⚠️ THE THREE UNSET FIGURES. `null` means "nobody has decided", and every consumer falls back to
@@ -418,7 +416,8 @@ export interface PricingTier {
   summary: string;
   /** The sentence under the price. `b` is the one emphasised run. */
   after: CopyRun[];
-  /** The tier's bird. The file, its pixel size and its hash live in `PricingPage`; the words here. */
+  /** The tier's bird's description. ⚠️ No surface renders the birds since pricing v3 (21 Oct); the
+   *  field stays because `PRICING_TIERS` is /plans' data and is not this pass's to reshape. */
   illoAlt: string;
   includes: string[];
   /**
@@ -530,56 +529,5 @@ export const PRICING_TIERS: PricingTier[] = [
     ],
     action: "Available at launch",
     cta: "later",
-  },
-];
-
-/**
- * ⚠️ THE CLOSING LINE STATES THE SCARCITY AND NOT THE PRICE. The ref ends it "…Pro is £7 a month";
- * that figure does not exist yet.
- */
-export const PRICING_PLACES_NOTE =
-  "Founding places are limited to a hundred. When they're gone, the founding rate goes with them.";
-export const PRICING_PLACES_LINK = "How founding access works";
-
-export const PRICING_FOOTNOTE =
-  "Pro is not on sale yet. When it is, you will be able to upgrade from inside the app — nothing " +
-  "here charges you, and nothing changes on your account.";
-
-/* ── The comparison table ──
-   ⚠️ EVERY ROW IS A CLAIM THE CARDS ABOVE ALREADY MAKE. The ref carries a "Querying analytics" row
-   and a "Price after six months" row; the first is a feature no tier's list mentions, and the
-   second is arithmetic on the unset rate. Both are absent rather than softened. */
-export const PRICING_COMPARISON_H2 = "What's in each plan";
-export interface ComparisonRow { label: string; free: string; founding: string; pro: string }
-/** `—` is an absence; `✓` is presence. Both are rendered as text, not as glyphs to be announced. */
-export const PRICING_COMPARISON: ComparisonRow[] = [
-  /* ⚠️ FREE'S AGENT LIMIT IS TWENTY NOW, NOT UNLIMITED, and this row is the one place the table
-     could have gone on contradicting the card above it. The tier list and this table are two
-     statements of the same fact, so they move together or the page argues with itself. */
-  { label: "Manuscripts", free: "1", founding: "Unlimited", pro: "Unlimited" },
-  { label: "Agents", free: "Up to 20", founding: "Unlimited", pro: "Unlimited" },
-  { label: "Queries", free: "Unlimited", founding: "Unlimited", pro: "Unlimited" },
-  { label: "Smart Import", free: "Once", founding: "Monthly", pro: "Monthly" },
-  { label: "Smart Email Drop", free: "—", founding: "✓", pro: "✓" },
-  { label: "The Comp Scout", free: "—", founding: "✓", pro: "✓" },
-  { label: "A direct line to the founder", free: "—", founding: "✓", pro: "—" },
-];
-
-/* ── Questions ──
-   ⚠️ THE REF'S FIRST QUESTION IS CUT, NOT LEFT UNANSWERED. "What happens when my six free months
-   end?" has exactly one useful answer and that answer is a billing commitment nobody has made. A
-   question printed with no answer on a pricing page reads worse than no question at all. */
-export interface PricingQuestion { q: string; a: string }
-export const PRICING_FAQ_H2 = "Questions";
-export const PRICING_FAQ: PricingQuestion[] = [
-  {
-    q: "What if I don't want to pay anything?",
-    a: "Stay on Free. One manuscript, unlimited agents and queries, the full timeline — it isn't " +
-       "a trial and it doesn't expire.",
-  },
-  {
-    q: "What happens when the hundred places are gone?",
-    a: "Founding access closes. Everyone who joined as a Founding Writer keeps their founding " +
-       "rate.",
   },
 ];

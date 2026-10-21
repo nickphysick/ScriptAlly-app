@@ -158,17 +158,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      green build and a green suite. `marketingTokens.test.ts` asserts that every `var(--mk-…)`
      this sheet READS resolves to a declaration; declaring them together here is what makes that
      guard cheap to keep satisfied. */
-  --mk-blush: #f8e8e1;
-  /* ⚠️ THE QUIET LABEL TREATMENT ON CARD KICKERS, AND IT IS DELIBERATELY NOT EITHER NEIGHBOUR.
-     Mono uppercase at wide tracking is a high-attention treatment, and on the deal cards the
-     HEADING is the offer — the kicker only says which of the three you are reading. This sits
-     between `--mk-muted` (#8a7a6c, 16 points lighter on every channel and visibly cooler) and
-     `--mk-blush-body` (#6d5348, darker and redder); neither is this value, and snapping to one to
-     save a token would be a colour decision made by convenience. Alpha pre-computed, per the
-     no-`color-mix()` rule. */
-  --mk-kicker: rgba(28, 19, 15, .45);
   --mk-blush-label: rgba(28, 19, 15, .62);
-  --mk-blush-body: rgba(28, 19, 15, .68);
   --mk-blush-note: rgba(28, 19, 15, .62);
   --mk-blush-ph: rgba(28, 19, 15, .48);
   --mk-msg-ok-bg: rgba(233, 237, 230, .8);
@@ -593,16 +583,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ── Every page opens on paper white and continues on oat ──
    ⚠️ THE SHEET IS OAT; A PAGE'S OPENING SECTION PAINTS THE PAPER WHITE OVER IT, with the landing
    hero's own treatment: paper to 62% of the section's height, then a straight fade arriving at the
-   oat at its foot. One rule for the five pages that are not the landing, so none of them was
-   restructured to get it.
+   oat at its foot. One rule for the pages whose opener is a plain section, so none of them was
+   restructured to get it. (About and Pricing left the group: both open on a navy band, which paints
+   its own ground.)
    ⚠️ A PSEUDO-ELEMENT, BECAUSE EVERY ONE OF THESE SECTIONS IS A CAPPED, CENTRED COLUMN. Painted on
    the section itself the ground would be a column with oat down both sides. The layer is centred
    on the section and a full viewport wide; the sheet clips whatever a scrollbar makes it overhang.
    ⚠️ THE PAIR IS ONE MECHANISM: `z-index: -1` here and `isolation: isolate` on the sheet. Either
    alone is wrong — see the note there.
    Contact and the two legal pages are one section each, so the whole page is the opening. */
-.mk-pricehead, .mk-fwhero, .mk-contact, .mk-docplane { position: relative; }
-.mk-pricehead::before, .mk-fwhero::before, .mk-contact::before, .mk-docplane::before {
+.mk-fwhero, .mk-contact, .mk-docplane { position: relative; }
+.mk-fwhero::before, .mk-contact::before, .mk-docplane::before {
   content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
   left: calc(50% - 50vw); width: 100vw; pointer-events: none;
   background-color: var(--mk-hero-ground);
@@ -697,15 +688,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   text-decoration: none; border-bottom: 1.5px solid var(--mk-rust); padding-bottom: 3px;
 }
 
-/* ⚠️ THE RULE BELOW IS NOT THE HERO'S. `.mk-eyebrow` is the mono kicker About, Contact and Pricing
-   all render; it sat inside the statement hero's block and survived its deletion (16 Sep) because a
-   removal scoped to one surface must not take out a rule serving three. Do not sweep it with the
-   hero next time either. */
-.mk-eyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .22em;
-  text-transform: uppercase; color: var(--mk-label);
-}
-
+/* `.mk-eyebrow` is DELETED (21 Oct): the old pricing header was its last renderer — checked across
+   `src/` after the removal, not from the diff. */
 
 /* The counter: a 5px bar and a mono tally, centred. Live or absent. */
 .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
@@ -1411,235 +1395,188 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      the same inset, in a media query nobody editing the banner would think to look in. */
 }
 
-/* ══════════════ Pricing (public marketing route) ══════════════
-   ⚠️ ONE AUTHORITATIVE BLOCK. Every `.mk-price*` / `.mk-tier*` / `.mk-cmp*` / `.mk-faq*` rule was
-   deleted and rewritten here rather than patched. A second declaration of any selector below is
-   the beginning of the fault this file already records twice — the cascade takes the LAST rule
-   while a reader takes the FIRST — so if this section needs more than a one-line change it is
-   rewritten again.
-   ⚠️ THE OLD PAGE'S CLASSES ARE GONE: `.mk-pricegrid`, `.mk-pricecard`, `.mk-pricecard-pro`,
-   `.mk-pricecardhead`, `.mk-priceline`, `.mk-priceamount`, `.mk-pricenote`, `.mk-pricesum`,
-   `.mk-pricelist`, `.mk-priceaction`, `.mk-comingsoon`. Nothing else in `src/` renders any of
-   them — checked after the removal, not from the diff. `.mk-pricehead` and `.mk-pricefoot` keep
-   their names and are restated below.
-   Surfaces from --mk-parch/--mk-blush, hairlines from --mk-hair. No new colour. */
-
-/* ⚠️ 76 ABOVE AND 48 BELOW, AND THE 56px SIDES STAY (17 Sep). The brief wrote `76px 0 48px`, but
-   this header is its own container — a zero there would take away the only thing keeping both
-   lines off the edge of a 1000px window. */
-.mk-pricehead { max-width: 1300px; margin: 0 auto; padding: 76px 56px 48px; text-align: center; }
-.mk-pricehead h1 {
-  font-family: "Playfair Display", Georgia, serif; font-size: clamp(2rem, 3.2vw, 2.6rem);
-  font-weight: 500; line-height: 1.14; color: var(--mk-head); margin: 0; text-wrap: balance;
+/* ══════════════ Pricing (public /pricing, ref design-refs/pricing-page-v1.html, 21 Oct) ══════════════
+   ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED. The three-tier page's `.mk-price*`,
+   `.mk-tier*`, `.mk-cmp*` and `.mk-faq*` rules were deleted with it — nothing else in `src/`
+   renders any of them (checked after the removal). Every value below is the ref's own, read from
+   its stylesheet; where the ref and a marketing token say the same thing, the token is used.
+   ⚠️ EVERY SELECTOR IS `.mk-pv3 .x` (0-2-0) OR `.mk-scope .x` WITH `!important`. brand.tsx injects
+   `p, span, div, button, input, label { font-family: … }` at 0-0-1 on every route, which beats
+   inheritance; the page restates `inherit` on those elements at 0-1-0 (a `:where` list, so it adds
+   nothing more) and every face below then wins on specificity rather than on source order. Its
+   `h1:not(.wsh-title), h2, h3` rule is `!important`, so the headings take two classes AND the flag.
+   ⚠️ SPECIAL ELITE IS WEIGHT 400 ONLY, AND EVERY RULE NAMING IT STATES 400. An `h2` or a `b`
+   defaults to bold and would be drawn faux-bold. */
+.mk-pv3 {
+  padding: 18px 18px 0;
+  font-family: var(--mk-f-serif); color: var(--mk-nearblack);
+  /* The ref's body states no line-height, so its text sits at \`normal\`; the sheet inherits 1.5,
+     which ran every list row ~2.5px taller than the ref (measured at 1440). */
+  line-height: normal;
 }
-/* Balanced AND measured: without the 52ch the sub is a single 1,188px line at 1440. */
-.mk-pricehead p {
-  font-size: 1.06rem; font-weight: 300; line-height: 1.6; color: var(--mk-muted);
-  margin: 18px auto 0; max-width: 52ch; text-wrap: balance;
-}
-.mk-pricebody { max-width: 1300px; margin: 0 auto; padding: 0 56px 100px; }
-
-/* ⚠️ `1fr 1.16fr 1fr`, AND THE WIDE ONE IS THE MIDDLE. The tier a reader can act on is the one
-   with room for a places bar and a real button; the other two carry a label. */
-.mk-tiers {
-  display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 20px;
-  align-items: stretch; padding: 22px 0 0;
-}
-/* ⚠️ `overflow: visible` IS STATED, NOT INHERITED, because the bird's whole point is to break the
-   card's top edge and a future `overflow: hidden` here — the usual way to tidy a radius — would
-   quietly cut its head off. `isolation` gives each card its own stacking context, so the bird's
-   and the flag's z-indexes are ordered against each other and not against the page. */
-.mk-tier {
-  position: relative; display: flex; flex-direction: column; overflow: visible; isolation: isolate;
-  background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 16px;
-  padding: 26px 28px 26px;
-}
-/* ⚠️ THE BIRD PERCHES ON THE CORNER; IT NO LONGER HAS A ROW OF ITS OWN (17 Sep). The fixed-height
-   slot above each plan name is deleted. Out of flow, the birds cannot push three names onto three
-   lines however differently they are drawn, which was the slot's only job.
-   ⚠️ EACH FILE CARRIES 12–19% EMPTY CANVAS ABOVE ITS DRAWING, so at `top: -18px` the ink breaks
-   the edge by 2–8px rather than by 18. The numbers are the brief's, applied as given; trimming the
-   canvas would widen each bird to 99–125px, past the 30% the text leaves free.
-   Above the card, below the flag: z 1 against the flag's 2. */
-.mk-tierbird {
-  position: absolute; top: -18px; right: 18px; z-index: 1;
-  height: 84px; width: auto; object-fit: contain; display: block; pointer-events: none;
-}
-.mk-tier--founding .mk-tierbird { height: 96px; }
-/* ⚠️ ONE ATTRIBUTE DRIVES BOTH THE SEMANTICS AND THE TREATMENT. `aria-disabled` is what a screen
-   reader hears and what this rule dims, so the two cannot drift apart — and there is no separate
-   `.mk-tier--off` class that someone could apply to a tier that is actually buyable. */
-.mk-tier[aria-disabled="true"] { opacity: .5; box-shadow: none; cursor: default; }
-/* ⚠️ THE LIFT IS A MARGIN NOW, NOT A TRANSFORM, AND THAT IS WHAT LINES THE LISTS UP (17 Sep). The
-   card takes 12px of extra top padding for its flag and gives the same 12px back as a negative
-   top margin, so it grows upward and its content starts on exactly the same line as its
-   neighbours'. `translateY(-6px)` moved the content too, which — with the old taller bird slot —
-   left this card's list 14px below the other two. */
-.mk-tier--founding {
-  background: var(--mk-blush); border-color: var(--mk-cta-bd); cursor: default;
-  box-shadow: 0 18px 44px rgba(162, 69, 42, .14);
-  padding-top: 38px; margin-top: -12px;
-}
-/* ⚠️ THE TAB BREAKS THE TOP EDGE, which is why it is absolutely positioned and the card is
-   `position: relative`. It says what is true of this tier and nothing persuasive. Above the
-   perched bird: z 2 against the bird's 1.
-   ⚠️ TOP-LEFT, NOT CENTRED (17 Sep), because centred it collided with the perched bird at every
-   width measured — by 20px at 1440 and 62px on a phone. At the left it lines up with the card's
-   own content edge and clears the bird wherever three cards fit side by side. */
-.mk-tiertag {
-  position: absolute; top: -13px; left: 28px; z-index: 2;
-  font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .58rem;
-  letter-spacing: .2em; text-transform: uppercase;
-  background: var(--mk-nearblack); color: var(--mk-cta-ink);
-  border-radius: 999px; padding: 6px 15px; white-space: nowrap;
-}
-/* ⚠️ 70% ON THE NAME AND THE LINE BENEATH IT, so neither runs under the bird in the corner. The
-   price and everything below sit clear of the bird's foot and keep the full width. */
-.mk-tiername {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 26px;
-  line-height: 1.3; color: var(--mk-nearblack); margin: 0; max-width: 70%;
-}
-/* ⚠️ A `min-height` ON EACH OF THE THREE ROWS ABOVE THE LIST — description, price and after-line
-   — so three cards of different wordiness start their feature lists on one line. Without them
-   the columns cannot be read across, which is the only thing a three-card layout is for. */
-.mk-tierline {
-  font-size: .95rem; color: var(--mk-muted); margin: 6px 0 0; line-height: 1.4;
-  max-width: 70%; min-height: 72px;
-}
-.mk-tierprice {
-  display: flex; align-items: baseline; gap: 8px; margin: 20px 0 0; flex-wrap: wrap;
-  min-height: 48px;
-}
-.mk-tieramount {
-  font-family: "Playfair Display", Georgia, serif; font-size: 2.1rem; font-weight: 500;
-  color: var(--mk-nearblack); line-height: 1.1;
-}
-.mk-tierper {
-  font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-muted);
-}
-.mk-tierafter { font-size: .88rem; color: var(--mk-muted); margin: 8px 0 0; line-height: 1.45; min-height: 66px; }
-.mk-tierafter strong { color: var(--mk-nearblack); font-weight: 600; }
-
-.mk-tierfeats {
-  list-style: none; margin: 22px 0 0; padding: 20px 0 0;
-  border-top: 1px solid var(--mk-hair); display: grid; gap: 12px;
-}
-.mk-tier--founding .mk-tierfeats { border-top-color: rgba(162, 69, 42, .18); }
-.mk-tierfeats li { position: relative; padding-left: 22px; font-size: 16px; line-height: 1.45; color: var(--mk-blush-body); }
-/* Drawn, not typed — a glyph would be announced once per item and the list already says how many. */
-.mk-tierfeats li::before {
-  content: ""; position: absolute; left: 1px; top: .36em; width: 9px; height: 6px;
-  border-left: 2px solid var(--mk-rust); border-bottom: 2px solid var(--mk-rust);
-  transform: rotate(-45deg); opacity: .8;
-}
-.mk-tierfeats li.mk-tieroff { color: var(--mk-kicker); }
-/* The sub-line says what the reader would be missing — a greyed-out name alone says only that
-   something is absent, which is half a sentence. */
-.mk-tieroffnote { display: block; font-size: .8rem; line-height: 1.4; color: var(--mk-kicker); opacity: .85; margin: 2px 0 0; }
-.mk-tierfeats li.mk-tieroff::before { border-color: var(--mk-kicker); transform: rotate(-45deg) scale(.85); opacity: .7; }
-
-.mk-tierplaces { margin: 16px 0 0; }
-/* `margin-top: auto` pins the call to action to the card's foot whatever the list above it does. */
-.mk-tiercta { margin-top: auto; padding-top: 22px; }
-.mk-tiercta .mk-btn { display: block; width: 100%; text-align: center; padding: 13px 20px; border-radius: 11px; }
-.mk-tiernote {
-  font-family: "JetBrains Mono", monospace; font-size: .58rem; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-kicker); margin: 11px 0 0; text-align: center;
-}
-/* ⚠️ A LABEL, AND IT MUST NOT LOOK LIKE A BUTTON. Dashed, mono, no fill — the same grammar the
-   rest of the app uses for "not yet". A solid outline here would read as a control. */
-.mk-tierlater {
-  display: block; text-align: center;
-  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--mk-muted);
-  border: 1px dashed var(--mk-hair); border-radius: 11px; padding: 13px 20px;
+.mk-pv3 :where(p, span, div, button, input, label, li, a, output, small, b, strong, h1, h2, h3) {
+  font-family: inherit;
 }
 
-.mk-pricefoot {
-  text-align: center; padding: 46px 0 0; color: var(--mk-muted); font-size: .95rem; margin: 0;
+/* ── The navy band the tiers hang from ── */
+.mk-pv3 .mk-pv3band {
+  position: relative; overflow: hidden; text-align: center;
+  background: var(--mk-navy); color: var(--mk-cream);
+  border-radius: 22px; padding: 44px 40px 128px;
 }
-.mk-pricefoot--quiet { padding-top: 10px; font-size: .82rem; }
+.mk-pv3 .mk-pv3band::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(1200px 420px at 50% -10%, rgba(255, 255, 255, .07), transparent 60%);
+}
+/* The band's contents sit above its glow. */
+.mk-pv3 .mk-pv3band > * { position: relative; z-index: 1; }
+.mk-pv3 .mk-pv3kicker {
+  display: inline-block; font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem;
+  letter-spacing: .2em; text-transform: uppercase; line-height: normal;
+  background: var(--mk-cream-btn); color: var(--mk-nearblack); border-radius: 999px; padding: 6px 13px;
+}
+.mk-scope .mk-pv3h1 {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: clamp(1.9rem, 2.8vw, 2.6rem); line-height: 1.14; color: var(--mk-cream);
+  margin: 16px auto 0; max-width: 26ch; text-wrap: balance;
+}
+.mk-pv3 .mk-pv3sub {
+  font-size: 1.12rem; font-weight: 300; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .78);
+  max-width: 60ch; margin: 14px auto 0; text-wrap: balance;
+}
 
-.mk-cmp {
-  margin: 72px 0 0; background: var(--mk-parch); border: 1px solid var(--mk-hair);
-  border-radius: 16px; overflow: hidden;
+/* The counter, on navy. `FoundingCounter`'s `tally` shape restated for this ground and scoped to
+   the band, so its light-ground treatment elsewhere is untouched. */
+.mk-pv3 .mk-pv3count .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
+.mk-pv3 .mk-pv3count .mk-fmbar { background: rgba(var(--mk-cream-rgb), .18); }
+.mk-pv3 .mk-pv3count .mk-fmfill { background: var(--mk-stamp); opacity: 1; }
+.mk-pv3 .mk-pv3count .mk-fmmeta {
+  font-family: var(--mk-f-mono); margin: 9px 0 0; color: rgba(var(--mk-cream-rgb), .62);
 }
-.mk-cmp h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.35rem;
-  color: var(--mk-nearblack); margin: 0; padding: 22px 26px 18px;
-}
-/* The scroll lives on a wrapper, so the card's own radius and border stay unclipped. */
-.mk-cmpscroll { overflow-x: auto; }
-.mk-cmp table { width: 100%; border-collapse: collapse; font-size: .95rem; }
-/* ⚠️ THE SHARED PROPERTIES ARE REPEATED RATHER THAN GROUPED, and that is deliberate. A grouped
-   `.mk-cmp th, .mk-cmp td { … }` above these two makes each selector's BASE rule ambiguous: a
-   lock that finds a rule by its selector reads whichever comes first, and this file has already
-   had two assertions silently repointed at a stub that way. One rule per selector, always. */
-.mk-cmp th {
-  text-align: left; padding: 12px 26px; border-top: 1px solid var(--mk-hair);
-  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--mk-muted); font-weight: 400;
-}
-.mk-cmp td {
-  text-align: left; padding: 12px 26px; border-top: 1px solid var(--mk-hair);
-  color: var(--mk-blush-body);
-}
-.mk-cmp .mk-c { text-align: center; width: 132px; }
-/* The live tier's column is tinted the whole way down, so the eye can follow it out of the card. */
-.mk-cmp .mk-colfound { background: rgba(248, 232, 225, .5); }
+.mk-pv3 .mk-pv3count .mk-fmtally { color: var(--mk-cream); font-weight: 600; }
 
-.mk-faq { margin: 64px 0 0; }
-.mk-faq h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.35rem;
-  color: var(--mk-nearblack); margin: 0 0 18px;
+/* The claim form, on navy: a white field and a cream pill, side by side, centred. */
+.mk-pv3 .mk-pv3form { display: flex; gap: 10px; justify-content: center; margin: 18px auto 0; max-width: 520px; }
+.mk-pv3 .mk-pv3form input {
+  flex: 1; min-width: 0; height: 50px; border-radius: 999px; border: 0; padding: 0 22px;
+  font-size: 1rem; font-weight: 400; color: var(--mk-nearblack); background: #fff;
 }
-.mk-qa { border-top: 1px solid var(--mk-hair); padding: 16px 0; }
-.mk-qa p { margin: 0; }
-.mk-q { font-weight: 600; color: var(--mk-nearblack); }
-.mk-a { color: var(--mk-muted); margin-top: 5px; line-height: 1.6; max-width: 76ch; }
+.mk-pv3 .mk-pv3form input::placeholder { color: var(--mk-blush-ph); }
+.mk-pv3 .mk-pv3form input:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 2px; }
+/* ⚠️ THE SHARED FORM RENDERS ITS SUBMIT AS `.mk-btn--navy`; ON A NAVY BAND THAT IS A BUTTON NOBODY
+   CAN FIND. The ref's cream pill is restated here, scoped to this form — the component is not
+   forked and its other mounts keep their navy. */
+.mk-pv3 .mk-pv3form .mk-btn {
+  height: 50px; padding: 0 26px; white-space: nowrap; justify-content: center;
+  background: var(--mk-cream-btn); border: 0; color: var(--mk-nearblack);
+  border-radius: 999px; font-size: 1.02rem; font-weight: 600; box-shadow: none;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.mk-pv3 .mk-pv3form .mk-btn:hover { background: var(--mk-cream-btn); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 0, 0, .25); }
+.mk-pv3 .mk-pv3form .mk-btn:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .mk-pv3 .mk-pv3form .mk-btn { transition: none; }
+  .mk-pv3 .mk-pv3form .mk-btn:hover { transform: none; }
+}
+/* The form's own notes and outcomes, centred and legible on navy. */
+.mk-pv3 .mk-pv3band .mk-betanote { margin: 14px auto 0; font-size: .9rem; color: rgba(var(--mk-cream-rgb), .62); }
+.mk-pv3 .mk-pv3band .mk-betanote a,
+.mk-pv3 .mk-pv3band .mk-betanote button,
+.mk-pv3 .mk-pv3band .mk-betanote .mk-doclink { color: var(--mk-cream); }
+.mk-pv3 .mk-pv3band .mk-betainvalid { margin: 12px auto 0; color: #f2c3ae; }
+.mk-pv3 .mk-pv3band .mk-betamsg { margin: 22px auto 0; text-align: left; }
 
-/* ⚠️ THE CARDS STACK BELOW 1200, UP FROM 960 (17 Sep), AND THE NUMBER IS MEASURED. Three columns
-   need the founding card to be at least 368px wide: that is where its 96px bird's drawing clears a
-   flag 223px wide at the left, and where "Founding Writer" at 26px fits its 70% line. The card
-   reaches 368 at a 1189px window. Below that, side by side, the flag ran into the bird and the
-   name broke onto a second line, which put that card's list 34px below its neighbours' — the one
-   thing three cards side by side exist to avoid.
-   ⚠️ WIDENING-TO-NARROWING: this block, then 960, then 560 — equal specificity throughout. */
-@media (max-width: 1199.98px) {
-  /* One column, and the lift comes off — a card raised above nothing reads as misaligned. The
-     flag's extra padding stays; only the margin that paid for it goes. The 26px gap is also what
-     the perched birds and the flag overhang into, and both overhang by less. */
-  .mk-tiers { grid-template-columns: 1fr; gap: 26px; }
-  .mk-tier--founding { margin-top: 0; }
-  /* Stacked, the rows above the list have nothing to line up WITH, so the reserved height is dead. */
-  .mk-tierline, .mk-tierprice, .mk-tierafter { min-height: 0; }
+/* ── Then, once we launch: the line and two tiers, hanging over the band's foot ──
+   ⚠️ THE NEGATIVE MARGIN IS THE REF'S AND IT IS THE DESIGN: the tiers hang from the band. The
+   band's 128px of bottom padding is the room they hang into. */
+.mk-pv3 .mk-pv3soon { position: relative; z-index: 1; max-width: 1240px; margin: -104px auto 0; padding: 0 22px; }
+.mk-pv3 .mk-pv3launch {
+  max-width: 920px; margin: 0 auto 12px; padding: 0 4px;
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3; color: #fff;
 }
-@media (max-width: 960px) {
-  .mk-pricehead { padding: 44px 26px 30px; }
-  .mk-pricebody { padding: 0 26px 72px; }
-  .mk-cmp .mk-c { width: auto; }
+.mk-pv3 .mk-pv3tiers {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start;
+  max-width: 920px; margin: 0 auto;
 }
-/* ⚠️ ON A PHONE THE FOUNDING CARD IS 323px WIDE, AND BOTH THE FLAG AND THE NAME HAVE TO GIVE.
-   Measured at 375: the flag at full size runs 40px into the bird's drawing, and "Founding Writer"
-   at 26px is 196px against a 186px line, so it broke before its last word. The tighter flag clears
-   the drawing by 22px at 375 and 7px at 360, and 22px keeps each plan name to one line. */
-@media (max-width: 560px) {
-  .mk-tiertag { left: 20px; font-size: .5rem; letter-spacing: .1em; padding: 5px 11px; }
-  .mk-tiername { font-size: 22px; }
+.mk-pv3 .mk-pv3tier {
+  background: #fff; border-radius: 20px; padding: 26px 30px 28px; margin: 8px;
+  box-shadow: 0 0 0 7px #fff, 0 0 0 8px rgba(90, 70, 54, .08), 0 18px 40px rgba(28, 19, 15, .10);
 }
-/* Below 360 the plan name steps down again: at 22px "Founding Writer" (166px) outgrows its 70%
-   line from ~348 down. */
-@media (max-width: 360px) {
-  .mk-tiername { font-size: 19px; }
+.mk-pv3 .mk-pv3tier--pro { background: var(--mk-navy); color: var(--mk-cream); }
+.mk-scope .mk-pv3tname {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.4rem; line-height: 1.2; margin: 0; color: var(--mk-nearblack);
 }
-/* ⚠️ ON A 320 PHONE THE FOUNDING CARD IS 266px INSIDE ITS BORDER, AND A 96px BIRD AND A 168px FLAG
-   CANNOT SHARE ITS TOP EDGE — measured, the flag ran 32px into the drawing and the plan name 16px
-   under it. The bird steps down to 72 and the flag tightens, which clears both by 6–8px. The brief's
-   96 holds everywhere from 341 up. */
-@media (max-width: 340px) {
-  .mk-tier--founding .mk-tierbird { height: 72px; }
-  .mk-tiertag { left: 14px; font-size: .46rem; }
+.mk-scope .mk-pv3tier--pro .mk-pv3tname { color: #fff; }
+.mk-pv3 .mk-pv3price { display: flex; align-items: flex-start; gap: 3px; margin: 10px 0 0; }
+.mk-pv3 .mk-pv3amt {
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1;
+  letter-spacing: -.02em; color: var(--mk-nearblack);
+}
+.mk-pv3 .mk-pv3cur {
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.2rem; line-height: 1;
+  margin-top: 6px; color: var(--mk-nearblack);
+}
+.mk-pv3 .mk-pv3tier--pro .mk-pv3amt, .mk-pv3 .mk-pv3tier--pro .mk-pv3cur { color: #fff; }
+.mk-pv3 .mk-pv3from, .mk-pv3 .mk-pv3per {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .66rem; line-height: 1;
+  letter-spacing: .14em; text-transform: uppercase; opacity: .75;
+}
+.mk-pv3 .mk-pv3from { margin: 12px 6px 0 0; }
+.mk-pv3 .mk-pv3per { align-self: flex-end; margin: 0 0 6px 8px; }
+.mk-pv3 .mk-pv3tsub { margin: 8px 0 0; font-size: .98rem; color: #5a4636; }
+.mk-pv3 .mk-pv3tier--pro .mk-pv3tsub { color: rgba(var(--mk-cream-rgb), .82); }
+.mk-pv3 .mk-pv3tlist {
+  list-style: none; margin: 18px 0 0; padding: 16px 0 0; border-top: 1px dashed rgba(90, 70, 54, .3);
+  display: grid; gap: 8px; font-size: .98rem; color: #3a2e27;
+}
+.mk-pv3 .mk-pv3tier--pro .mk-pv3tlist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
+.mk-pv3 .mk-pv3tlist li { position: relative; padding-left: 22px; }
+.mk-pv3 .mk-pv3tlist li::before {
+  content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--mk-rust);
+}
+.mk-pv3 .mk-pv3tier--pro .mk-pv3tlist li::before { background: var(--mk-terra); }
+.mk-pv3 .mk-pv3tlist li.mk-pv3plus { padding-left: 0; font-weight: 600; }
+.mk-pv3 .mk-pv3tlist li.mk-pv3plus::before { display: none; }
+.mk-pv3 .mk-pv3flex {
+  margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--mk-cream-rgb), .08);
+  font-size: .92rem; line-height: 1.45; color: rgba(var(--mk-cream-rgb), .88);
+}
+.mk-pv3 .mk-pv3tlink {
+  display: inline-block; margin-top: 14px; color: var(--mk-cream); font-weight: 600;
+  text-decoration: none; border-bottom: 1px solid rgba(var(--mk-cream-rgb), .45);
+}
+.mk-pv3 .mk-pv3tlink::after { content: " ↓"; }
+.mk-pv3 .mk-pv3tlink:hover { border-bottom-color: var(--mk-cream); }
+.mk-pv3 .mk-pv3tlink:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+
+/* ── Sections below the tiers ── */
+.mk-pv3 .mk-pv3sect { max-width: 1240px; margin: 88px auto 0; padding: 0 22px; }
+.mk-scope .mk-pv3h2 {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 2rem; line-height: 1.25; margin: 0 0 22px; color: var(--mk-nearblack);
+}
+.mk-pv3 .mk-pv3faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
+.mk-pv3 .mk-pv3qa { border-top: 1px solid var(--mk-hair); padding: 20px 0; }
+.mk-pv3 .mk-pv3q { font-weight: 600; margin: 0; font-size: 1.04rem; color: var(--mk-nearblack); }
+.mk-pv3 .mk-pv3a { color: rgba(28, 19, 15, .56); margin: 6px 0 0; line-height: 1.6; }
+.mk-pv3 .mk-pv3end { height: 110px; }
+
+/* ── Narrow widths: the ref's breakpoints, widening to narrowing ── */
+@media (max-width: 900px) {
+  .mk-pv3 .mk-pv3faq { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .mk-pv3 .mk-pv3tiers { grid-template-columns: 1fr; }
+  .mk-pv3 .mk-pv3tier { padding: 22px 22px 24px; }
+}
+@media (max-width: 640px) {
+  .mk-pv3 { padding: 10px 10px 0; }
+  .mk-pv3 .mk-pv3band { padding: 34px 18px 112px; }
+  .mk-pv3 .mk-pv3form { flex-direction: column; }
+  .mk-pv3 .mk-pv3form input { flex: none; }
+  .mk-pv3 .mk-pv3soon, .mk-pv3 .mk-pv3sect { padding: 0 12px; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════
