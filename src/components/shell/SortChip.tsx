@@ -11,7 +11,7 @@
  *
  *   - The chip: a sort icon (two arrows), the muted "Sorted by", the field in semibold and a navy ↓ (or ↑ reversed).
  *     Its box is the page's own chip (the class it passes, the same as its Group by), so it matches that toolbar in
- *     both positions. Below 1,120px of toolbar (`toolbar`, measured) "Sorted by" drops.
+ *     both positions. Below 1,120px of toolbar room (`toolbar`'s content box, measured) "Sorted by" drops.
  *   - The menu: "SORT CARDS BY", the fields as radio items with a navy ✓, a two-way order switch whose labels suit the
  *     field, then the italic note. It is an `.lpop`, so the page's `usePopover` closes it on an outside press and on
  *     Escape; the arrow keys move through its items.
@@ -51,7 +51,12 @@ export function SortChipButton<K extends string>({ fields, value, open, onToggle
   useLayoutEffect(() => {
     const tb = toolbar?.() ?? null;
     if (!tb) return undefined;
-    const read = () => { const w = tb.clientWidth; if (w > 0) setNarrow(w < 1120); };
+    /* the toolbar's ROOM: its content box (a full-screen toolbar is inset past the desk hawk, which is not room) */
+    const read = () => {
+      const cs = getComputedStyle(tb);
+      const w = tb.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+      if (tb.clientWidth > 0) setNarrow(w < 1120);
+    };
     read();
     if (typeof ResizeObserver === "undefined") return undefined;
     const ro = new ResizeObserver(read);

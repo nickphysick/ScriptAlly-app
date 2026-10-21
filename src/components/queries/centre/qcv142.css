@@ -203,3 +203,12 @@
 .qc142-sk .mk-lc-line, .qc142-sk .mk-lc-band.qc142-skband, .qc142-sk .qc142-skfoot { animation: qcv-sk-pulse 1.4s ease-in-out infinite; }
 @keyframes qcv-sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 @media (prefers-reduced-motion: reduce) { .qc142-sk .mk-lc-line, .qc142-sk .mk-lc-band.qc142-skband, .qc142-sk .qc142-skfoot { animation: none; } }
+
+/* cards-sort-search v1 §B · ROOM FOR THE JUMP ROW IN FULL-SCREEN CARDS. The Sort chip joins the cream toolbar there, and
+   that toolbar's own give-way steps (v140: Group by drops "Grouped by", Find narrows to 210) key on its whole width,
+   which includes the 196px inset past the desk hawk — so they never fire, and at 1280 every glyph went into "+N more".
+   In full-screen Cards at a window of 1,600 or less, those two steps are taken. */
+@media (min-width: 768px) and (max-width: 1600px) {
+  .qcv-group[data-v138][data-full] .qc138-sheet[data-view="cards"] .qc140-chip .qc140-gby { display: none; }
+  .qcv-group[data-v138][data-full] .qc138-sheet[data-view="cards"] .qc140-find { width: 210px; }
+}
