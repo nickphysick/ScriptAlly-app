@@ -32,6 +32,7 @@ import type { ContactPop } from "./ContactListControls";
 import { ContactViewSwitch, FULL_ICON } from "./ContactTitleRow";
 import { SortChipButton, SortChipMenu, type SortValue } from "../../shell/SortChip";
 import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
+import "../../shell/findWell.css";
 import type { SortKey } from "../../../lib/contactList";
 import type { ContactView } from "../../../lib/contactListMemory";
 import "./contactV19.css";
@@ -337,7 +338,7 @@ export const ContactListHead: React.FC<{
         <span className="cl19-sp" aria-hidden="true" />
         <div className="cl19-tools" data-cl19="tools">
           <span className="cl19-findw" data-cl19="find-wrap" data-has={search.trim() ? "" : undefined}>
-            <label className="cl19-find" data-cl19="find" data-cl17="find" data-clv="find" data-cl13-find="banner">
+            <label className="cl19-find fw-well" data-cl19="find" data-cl17="find" data-clv="find" data-cl13-find="banner" data-full={pinned ? "" : undefined}>
               {FIND_ICON}
               <input value={search} onChange={(e) => onSearch(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" disabled={loading} />
             </label>

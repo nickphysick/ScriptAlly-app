@@ -1,0 +1,46 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE RECESSED-WELL SEARCH (cards-sort-search v1 §C; the mocks' `#recessed-well`), shared by the Query Centre's and the
+ * Contact list's Find fields. A field takes it with `fw-well` and says which toolbar it is on with `data-full` (present
+ * on the cream full-screen toolbar). The placeholders, the "/" shortcut and the widths are each page's own.
+ *
+ *   - At rest on the navy toolbar: a dark well (rgba(10,18,32,.32)), an inset drop and an inset 14% cream ring, radius 9,
+ *     34 tall; a cream 17px magnifier 12px in, the text from 38px; the placeholder italic serif, cream at 62%; the "/"
+ *     hint a 30% cream outline with no fill.
+ *   - Focused, or holding text: white, a navy magnifier, a 2px cream focus ring; the "/" hint hides.
+ *   - In full screen (the cream toolbar): white at rest, a navy magnifier, an inset 1px 16% ink outline. No well.
+ *
+ * ⚠️ THE SELECTORS ARE DELIBERATELY HEAVY (`.fw-well` four times, inside the toolbar): each page's own Find rules reach
+ *    0-5-0 (the v140/v142 toolbar's), and this sheet's place in the one bundle is not something to rely on.
+ */
+@media (min-width: 768px) {
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well {
+    box-sizing: border-box; height: 34px; border-radius: 9px; gap: 9px; padding-left: 12px;
+  }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) {
+    background: rgba(10, 18, 32, 0.32); color: rgb(244, 238, 229);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(244, 238, 229, 0.14);
+  }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well > svg { flex: none; width: 17px; height: 17px; }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) > svg { color: rgb(244, 238, 229); }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) input { color: rgb(244, 238, 229); }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) input::placeholder {
+    color: rgba(244, 238, 229, 0.62); font-style: italic; font-family: var(--sp-serif);
+  }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) kbd {
+    background: transparent; color: rgba(244, 238, 229, 0.78); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3);
+  }
+  /* focused, or holding text: white, a navy magnifier, the cream focus ring; the hint goes */
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) {
+    background: #fff; color: #1c130f; box-shadow: 0 0 0 2px rgb(244, 238, 229);
+  }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) > svg { color: #2a3a52; }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) input { color: #1c130f; }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:is(:focus-within, :has(input:not(:placeholder-shown))) kbd { display: none; }
+  /* full screen: white with a navy magnifier and the cream toolbar's inset outline */
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well[data-full] { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well[data-full] > svg { color: #2a3a52; }
+  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well[data-full]:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+}

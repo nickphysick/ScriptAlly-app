@@ -112,3 +112,10 @@
    count follows in the label's quieter ink */
 .cl19-jump.cl21-months button[data-cl19="jump-group"] .cl19-jl,
 .cl19-tb:is([data-fit="1"], [data-fit="2"], [data-fit="3"]) .cl19-jump.cl21-months button[data-cl19="jump-group"] .cl19-jl { display: inline; }
+
+/* cards-sort-search v1 §C · the recessed well (shell/findWell.css) on this toolbar's Find: at a window of 1440 or less the
+   field is folded to its 42px icon until it is focused or holds text, so the well's 12px inset gives way to the centred
+   icon there (the widths are the Contact list's own, unchanged) */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .cl19-tb .cl19-findw:not(:focus-within):not([data-has]) .fw-well.fw-well.fw-well.fw-well.cl19-find { padding: 0; justify-content: center; gap: 0; }
+}

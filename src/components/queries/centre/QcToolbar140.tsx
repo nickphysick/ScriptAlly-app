@@ -30,6 +30,7 @@ import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { FULL_ICON, ViewSwitch, type ListView } from "../../shell/ViewTitleRow";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
+import "../../shell/findWell.css";
 import { QC_SORT_FIELDS } from "../../../lib/cardsSort";
 import type { Qc138Sort } from "../../../lib/qc138";
 import "./qcv140.css";
@@ -320,7 +321,7 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
           ) : null}
         </nav>
         {onFind ? (
-          <label className="qc140-find" data-qc140="find" data-qc138="search">
+          <label className="qc140-find fw-well" data-qc140="find" data-qc138="search" data-full={pinned ? "" : undefined}>
             {FIND_ICON}
             <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
             <kbd aria-hidden="true">/</kbd>
