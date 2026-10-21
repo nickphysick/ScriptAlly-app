@@ -24,6 +24,7 @@ import {
   emptyContactFilters, genreList, standsRows, wouldShow,
 } from "../../../lib/contactList";
 import { ContactGroupMark } from "./ContactGroupMark";
+import "../../shell/filterStrip.css";
 import type { ContactPop } from "./ContactListControls";
 
 /** a genre key's words: the app's own label for a canonical genre, else what the agent's record says */

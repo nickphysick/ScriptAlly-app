@@ -105,7 +105,7 @@ import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
 import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
-import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
+import { QcAppliedRow140, QcFilterStrip142, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
 import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
 import { QcBand140 } from "./queries/centre/QcBand140";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
@@ -7419,12 +7419,10 @@ export const Queries: React.FC<{
                   onClearFilters={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}
                   loading={showGridSkeleton}
                   filtersMenu={(pop) => (
-                    <QcFilterMenu140 pop={pop} model={{
+                    <QcFilterStrip142 pop={pop} pinned={qcFull} model={{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
                       quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
                       moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more }, whereN: qcWhereN,
-                      filtered: qc140Chips.length > 0,
-                      onExport: () => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`),
                     }} />
                   )}
                   /* v140 §C — the pinned band, over the rows the list is built from (the manuscript-scoped set; Pip is
@@ -7436,7 +7434,9 @@ export const Queries: React.FC<{
                       onLog={() => onNavigate?.("queries", "Log a query")} />
                   ) : null}
                   applied={qc140Chips.length ? (
-                    <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll} />
+                    <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll}
+                      /* v142 §E — Export CSV (v140.1 §A) moved here from the retired menu footer: exactly the rows the list shows, in its order */
+                      onExport={() => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`)} />
                   ) : null}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}

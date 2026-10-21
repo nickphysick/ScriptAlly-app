@@ -156,3 +156,28 @@
 /* the Cards view's sheet: no column headings, and the body gives its side padding to the cards' own ground */
 .qc138-sheet[data-view="cards"] .qc138-body { padding: 0; }
 .qc138-sheet[data-view="cards"] .qc138-body > .qc139-practice { margin: 0 18px; }
+
+/* ── §E · THE FILTER STRIP (the Contact list's, shell/filterStrip.css) in this list: inside the sticky stack, flush under
+   its bottom (the toolbar's, or the applied row's when one shows); the list card's width unpinned, inset 24px each side
+   in full screen. Three columns: Most used · Where it stands (the four sets, then the statuses) · What you sent + More. ── */
+@media (min-width: 768px) {
+  .qc138-sheet .lpop.qc142-strip { left: 0; right: 0; }
+  .qc138-sheet .lpop.qc142-strip.qc142-strip--full { left: 24px; right: 24px; }
+  .qc142-strip .cl20-fsb.qc142-fsb { grid-template-columns: minmax(min-content, 1fr) minmax(min-content, 1.45fr) minmax(min-content, 1.15fr); }
+  .qc142-strip .cl20-fcol { max-height: min(360px, calc(100vh - 320px)); }
+  .qc142-strip .cl20-fsh > b { white-space: nowrap; }
+  .qc142-strip .cl20-fsh > span { flex: 1 1 auto; }
+  .qc142-strip .cl20-fcol h4.qc142-fsub { margin-top: 16px; }
+  .qc142-strip .qc142-where .qc141-m { width: 10px; height: 10px; }
+  .qc142-strip .cl20-chip.on .qc141-m { box-shadow: 0 0 0 1.5px rgb(244, 238, 229); }
+  .qc142-strip .qc142-fgl { display: inline-grid; place-items: center; width: 15px; height: 15px; color: currentColor; }
+  .qc142-strip .qc142-fgl svg { width: 15px; height: 15px; }
+  /* the applied row's export (v140.1 §A's words), a quiet text button before "Clear all" */
+  .qc138-sheet .qc140-af-export {
+    flex: none; margin: 0 0 0 auto; padding: 0; border: 0; background: none; cursor: pointer; color: #1c130f; white-space: nowrap;
+    font: 400 15px/21px var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.35);
+  }
+  .qc138-sheet .qc140-af-export:disabled { color: rgba(28, 19, 15, 0.35); cursor: default; text-decoration: none; }
+  .qc138-sheet .qc140-af-export:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .qc138-sheet .qc140-af-export + .qc140-af-clear { margin-left: 22px; }
+}
