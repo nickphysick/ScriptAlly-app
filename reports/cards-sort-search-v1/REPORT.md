@@ -130,4 +130,26 @@ local build of `bf766a32` (`index-cV8aKfVq.js`, dev's own) on the same port.
 
 ## 7. Integration and dev
 
-(filled below)
+- **Dev at deploy time:** dev was still serving the base, `index-cV8aKfVq.js`. I checked twice: before the branch was
+  cut, and in the same command as the deploy, which would have stopped on any other hash.
+- **The integration branch is `dev/about1-qc142-css1`:** the base (`dev/…-cl20-about1-qc142`, `bf766a32`)
+  fast-forwarded to `3ef9eb08`. **⚠️ The branch names this repo chains (each pack's suffix appended) have reached
+  GitHub's 255-byte limit on ref names**, so the push under the full chained name was refused. It is pushed under the
+  short name; this line records its lineage.
+- **Gates there:** in a clean worktree, tsc 0, build 0 (no warnings), Vitest 9,397 passed / 3 skipped.
+- **Dev build: `index-DUZC5Si8.js`**, hosting only. It is the bundle the locks measured locally, and it is served now.
+- **CSS1 L1–L9 against the deployed site:** all green.
+
+| Lock | Readings |
+|---|---|
+| L1 | 8/8 |
+| L2 | 10/10 |
+| L3 | 12/12 |
+| L4 | 8/8 |
+| L5 | 8/8 |
+| L6 | 72/72 |
+| L7 | 16/16 |
+| L8 | 12/12 |
+| L9 | 20/20 |
+
+- **Not merged to main.**
