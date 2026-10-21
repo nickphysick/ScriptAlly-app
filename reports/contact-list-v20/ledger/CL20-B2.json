@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "CL20-B2",
+  "where": "@1512 a first agent (population)",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1512 the row opens the panel",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"acting\":null}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1512 the card opens the same panel (same agent)",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"acting\":null}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1512 a card with a '+ Add' (population)",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"k\":\"website\"}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1512 '+ Add their website' opens the editor (not the card's open)",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"acting\":\"edit\"}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1280 a first agent (population)",
+  "ok": true,
+  "detail": "msv12-agent-4"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1280 the row opens the panel",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"acting\":null}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1280 the card opens the same panel (same agent)",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"acting\":null}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1280 a card with a '+ Add' (population)",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"k\":\"website\"}"
+ },
+ {
+  "lock": "CL20-B2",
+  "where": "@1280 '+ Add their website' opens the editor (not the card's open)",
+  "ok": true,
+  "detail": "{\"id\":\"msv12-agent-4\",\"acting\":\"edit\"}"
+ }
+]

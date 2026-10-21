@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "CL20-E2",
+  "where": "the base build's readings exist (precondition)",
+  "ok": true,
+  "detail": "reports/contact-list-v20/ledger/e2-base.json"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "a genre to choose (population)",
+  "ok": true,
+  "detail": "literary-fiction"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "choices with counts (population)",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "every zero-count choice is disabled",
+  "ok": true,
+  "detail": "0 zero · enabled: "
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:you: a base reading (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:you: the list equals v19's menu's (4)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:ready: a base reading (population)",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:ready: the list equals v19's menu's (34)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:wait: a base reading (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:wait: the list equals v19's menu's (7)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:open: a base reading (population)",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "quick:open: the list equals v19's menu's (48)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "status:queried: a base reading (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "status:queried: the list equals v19's menu's (4)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "open:open: a base reading (population)",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "open:open: the list equals v19's menu's (48)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "always: a base reading (population)",
+  "ok": true,
+  "detail": "22"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "always: the list equals v19's menu's (22)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "genre:literary-fiction: a base reading (population)",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "genre:literary-fiction: the list equals v19's menu's (28)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "status:none+open:open: a base reading (population)",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "status:none+open:open: the list equals v19's menu's (34)",
+  "ok": false,
+  "detail": "now 52"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "genre:literary-fiction+status:none: a base reading (population)",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "genre:literary-fiction+status:none: the list equals v19's menu's (28)",
+  "ok": false,
+  "detail": "now 52"
+ }
+]

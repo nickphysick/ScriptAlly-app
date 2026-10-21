@@ -127,7 +127,9 @@ const readTop = (page: Page) => page.evaluate(() => {
   const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().height > 0);
   const eb = vis("[data-cl17='eyebrow']")[0], win = vis(".ws-window")[0], acts = vis("[data-cl17='acts']")[0], counts = vis("[data-cl17='card']")[0], card = vis("section.cl19-card[data-cl19='card']")[0];
   const b = (e?: HTMLElement) => (e ? e.getBoundingClientRect() : null);
-  return { eb: b(eb)?.top ?? null, win: b(win)?.top ?? null, acts: b(acts)?.bottom ?? null, counts: b(counts)?.bottom ?? null, card: b(card)?.top ?? null, full: !!document.querySelector(".clv-group[data-full]") };
+  /* Contact list v20 §A: the title row now opens the list, between the hero and the card */
+  const title = vis("[data-cl20='title-row']")[0];
+  return { eb: b(eb)?.top ?? null, win: b(win)?.top ?? null, acts: b(acts)?.bottom ?? null, counts: b(counts)?.bottom ?? null, card: b(card)?.top ?? null, title: b(title)?.top ?? null, full: !!document.querySelector(".clv-group[data-full]") };
 });
 test("CL192-A1 · top: unpinned, the eyebrow's top is 36 ±2 below the content card's top", async ({ page }) => {
   test.setTimeout(300_000);
@@ -161,7 +163,10 @@ test("CL192-A2 · gap: unpinned, the list card's top is 44 ±2 below the lower o
       L.check(`${w} unpinned (precondition)`, !(await pinned(page)) && !r.full, "");
       L.check(`${w} the buttons, the counts card and the list card are there`, r.acts != null && r.counts != null && r.card != null, JSON.stringify(r));
       const low = Math.max(r.acts ?? NaN, r.counts ?? NaN);
-      L.check(`${w} list card top − max(buttons, counts card) = 44 ±2`, near((r.card ?? NaN) - low, 44, 2), `${((r.card ?? NaN) - low).toFixed(1)} (buttons ${r.acts?.toFixed(1)}, counts ${r.counts?.toFixed(1)})`);
+      /* RE-POINTED (Contact list v20 §A): the 44 now lies between the hero and the TITLE ROW, which opens the list where
+         the card used to start (the card follows 18 below it). The claim — the hero's gap below — is unchanged. */
+      L.check(`${w} the title row (v20) is there`, r.title != null, `${r.title}`);
+      L.check(`${w} title row top − max(buttons, counts card) = 44 ±2`, near((r.title ?? NaN) - low, 44, 2), `${((r.title ?? NaN) - low).toFixed(1)} (buttons ${r.acts?.toFixed(1)}, counts ${r.counts?.toFixed(1)})`);
       L.check(`${w} pinned (precondition)`, await setPin(page, L, true, `${w} pin`), "");
       await page.mouse.move(5, 5); await page.waitForTimeout(300);
       const p = await readPinned(page);

@@ -95,7 +95,9 @@ export const ContactTitleRow: React.FC<{
   <div className="cl20-tr" data-cl20="title-row" ref={rowRef}>
     <h2 className="cl20-ttl" data-cl20="count" aria-live="polite" aria-atomic="true">{countTitle(shown, total, narrowed)}</h2>
     <ContactViewSwitch view={view} onView={onView} variant="pill" probe="view-pill" />
-    <button type="button" className="cl20-fs" data-cl20="full" data-pin-list="" aria-pressed={false} aria-keyshortcuts="F" onClick={onFull}>
+    {/* data-cl19="pin" / data-cl16="full": the v16–v19 locks find the full-screen control by these, and this is it while the
+        title row shows (the toolbar's carries them in full screen and once this row has scrolled away) */}
+    <button type="button" className="cl20-fs" data-cl20="full" data-cl19="pin" data-cl16="full" data-pin-list="" aria-pressed={false} aria-keyshortcuts="F" onClick={onFull}>
       {FULL_ICON}<span>Full screen</span>
       <span className="cl20-tip" aria-hidden="true">Full screen<kbd>F</kbd></span>
     </button>

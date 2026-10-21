@@ -1,0 +1,314 @@
+[
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 headings to measure (population)",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 offer: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 offer: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 offer: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 offer: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 offer: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fs: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fs: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fs: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fs: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fs: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fr: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fr: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fr: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fr: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 fr: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 ps: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 ps: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 ps: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 ps: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 ps: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 pr: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 pr: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 pr: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 pr: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1512 pr: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 headings to measure (population)",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 offer: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 offer: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 offer: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 offer: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 offer: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fs: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fs: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fs: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fs: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fs: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fr: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fr: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fr: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fr: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 fr: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 ps: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 ps: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 ps: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 ps: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 ps: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 pr: background rgb(244,240,233)",
+  "ok": true,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 pr: 54 ±1 tall",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 pr: no top or bottom border, no shadow",
+  "ok": true,
+  "detail": "0/0/none"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 pr: the glyph's centre is the disc column's ±1",
+  "ok": true,
+  "detail": "370 vs 370"
+ },
+ {
+  "lock": "CL20-D1",
+  "where": "@1280 pr: the label's left is the name's ±1",
+  "ok": true,
+  "detail": "401 vs 401"
+ }
+]
