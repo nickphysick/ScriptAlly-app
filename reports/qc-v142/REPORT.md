@@ -138,7 +138,26 @@ CL19.1/19.2's first run had one `toHaveCount` failure. It did not reproduce: the
 
 ## 8. Integration and dev
 
-See the closing section, filled in after the deploy.
+- **Dev at deploy time:** dev was still serving the base, `index-D9V5t99l.js`. I checked twice: before the branch was cut,
+  and in the same command as the deploy, which would have stopped on any other hash.
+- **The integration branch is a fast-forward of the base:**
+  `dev/main-cl18-…-qc1411-raam-hero3-cl20-about1-qc142`, cut from the base and fast-forwarded to `a653e354`. It was built
+  in a clean worktree (`git status` empty), and the build reproduced the bundle the locks had measured.
+- **Dev build: `index-cV8aKfVq.js`**, hosting only. It is served now.
+- **The QC142 locks against the deployed site:** all green.
+
+| Lock | Readings |
+|---|---|
+| L1 | 14/14 |
+| L2 | 12/12 |
+| L3 | 18/18 |
+| L4 | 28/28 |
+| L5 | 22/22 |
+| L6 | 74/74 |
+| L7 | 28/28 |
+| L8 | green |
+
+- **Not merged to main.**
 
 ## Known gaps, not done
 
