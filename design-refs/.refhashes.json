@@ -707,7 +707,20 @@
     "design-refs/contact-list-v20/screens/11-full-screen-filter-strip-1512@2x.png": "1784aa5b02b86ea4ad4299ab3844832abf1970c6b1008ebfda841823ac0755f0",
     "design-refs/contact-list-v20/screens/12-full-screen-list-1280@2x.png": "0ab43588d1da27d2dcbfb3c1aafb8ce53b7d314217a910e8420770befef5ac4f",
     "design-refs/contact-list-v20/screens/12-full-screen-list-1512@2x.png": "b716e20ecec84e0de8910bbc3a4bf7732eb9a66170e5ded7452b8b05a5ecf05b",
-    "design-refs/about-page-v1/about-page-v1.html": "9183edc1ce978579745753f2db198a83a39a663aaaab4a21886752a6d2f742d2"
+    "design-refs/about-page-v1/about-page-v1.html": "9183edc1ce978579745753f2db198a83a39a663aaaab4a21886752a6d2f742d2",
+    "design-refs/query-centre-v142/query-centre-v142.html": "20bd89034d818b0cded74e8e5a406b17f92823610085b1c8b9e61ebef260a55a",
+    "design-refs/query-centre-v142/screens/01-list-1280.png": "8a06d37fd08cc18af3c2c21fc99819e6200d1fcff670bf5b5145b44371241584",
+    "design-refs/query-centre-v142/screens/01-list-1512.png": "6b7e3d79ba579e97df946b99ddde15b6f9b428cfcc01bb9b665928b313aea1e9",
+    "design-refs/query-centre-v142/screens/02-cards-1280.png": "a63e7b6bc9d539125ca7d67933a56e65dfec7293c93b434c78ecdf313a9e403d",
+    "design-refs/query-centre-v142/screens/02-cards-1512.png": "67814396367c2d6df6605655a1ee7b0a1decf5959b55087a0c73080047df1494",
+    "design-refs/query-centre-v142/screens/03-filter-strip-1280.png": "f264440c3184389fa6e4b975b4bd01e585e923926c516da6c465e97c972db55e",
+    "design-refs/query-centre-v142/screens/03-filter-strip-1512.png": "6f9dffb84ea10c027cfd6772911f59d689a2c7ee80cfaa1c531447ecb5f06234",
+    "design-refs/query-centre-v142/screens/04-full-screen-cards-1280.png": "c5c9c9a90ccf06638f89c4cc7c6138fd8667966e6a98474d1e714f1544cafe94",
+    "design-refs/query-centre-v142/screens/04-full-screen-cards-1512.png": "f1997691181b5877b90ce7ad8ca4f493cfbde03e8890bc011e0924d3f48322e0",
+    "design-refs/query-centre-v142/screens/05-full-screen-list-1280.png": "af3654b33d039b61c7910cb9925886f4d5f802917b9a1c61b407b06f061307b6",
+    "design-refs/query-centre-v142/screens/05-full-screen-list-1512.png": "55d9cda3479fb1cd1965924ef91df33257f3a4e7dc146daaff4a032f8a521a70",
+    "design-refs/query-centre-v142/screens/06-full-screen-cards-scrolled-1512.png": "9afcd9b33aef44431afcbc31d624b91e3d6f0b64805e174830717e8c4cad1722",
+    "design-refs/query-centre-v142/screens/07-full-screen-cards-jumped-1512.png": "47b93b424230048c1aa33c220a7cd262689b348a35b5331040182b56650335ba"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

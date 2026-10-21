@@ -1,0 +1,22 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v142 (ref design-refs/query-centre-v142/): Cards / List, as the Contact list (v20), with the landing
+ * page's query card. The title row and the switch are the shared shell/ViewTitleRow (shell/viewTitleRow.css); this sheet
+ * holds only what is the Query Centre's own context. Every face is stated with two classes and `!important` where
+ * brand.tsx would otherwise reach it.
+ */
+@media (min-width: 768px) {
+  /* §A · the title row sits where the list card used to start (the hero's gap above it, 18 below it) */
+  .qcv-group[data-v138] .qcv-ledger > .cl20-tr { margin-top: 0; }
+
+  /* §A · in full screen the toolbar is cream: the switch is white with the controls' ring, the chosen button navy with a
+     cream icon (the Contact list's full-screen switch, v20 §C, in this toolbar's context) */
+  .qcv-group[data-v138][data-full] .qc140-tb .cl20-vsi { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 2px rgba(28, 19, 15, 0.06); }
+  .qcv-group[data-v138][data-full] .qc140-tb .cl20-vsi button { color: rgba(28, 19, 15, 0.62); }
+  .qcv-group[data-v138][data-full] .qc140-tb .cl20-vsi button:hover:not([aria-selected="true"]):not(:disabled) { background: #f4f0e9; color: #1c130f; }
+  .qcv-group[data-v138][data-full] .qc140-tb .cl20-vsi button[aria-selected="true"] { background: #2a3a52; color: rgb(244, 238, 229); }
+  .qcv-group[data-v138][data-full] .qc140-tb .cl20-vsi button:focus-visible { outline-color: #2a3a52; }
+  .qc138-sheet .qc140-tb .cl20-vsi { flex: none; }
+}

@@ -37,15 +37,23 @@ describe("the view — per device (qh.qc.view)", () => {
     expect(QC_VISIT_KEY).toBe("qh.qc.filters");
   });
   /* v141 §C — the default grouping moved from "Who it's with" (attention) to Status */
-  it("a first visit: Status, due first, comfortable", () => {
-    expect(readQcView()).toEqual({ group: "status", sort: { key: "due", reversed: false }, density: "comfortable" });
+  it("a first visit: Status, due first, comfortable, List (v142 §A)", () => {
+    expect(readQcView()).toEqual({ group: "status", sort: { key: "due", reversed: false }, density: "comfortable", view: "list" });
+  });
+  it("v142 §A — the view round-trips inside version 1, and a record without one reads as List", () => {
+    writeQcView({ view: "cards" });
+    expect(readQcView().view).toBe("cards");
+    g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: { key: "due", reversed: false }, density: "comfortable" }));
+    expect(readQcView().view).toBe("list");
+    g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: { key: "due", reversed: false }, density: "comfortable", view: "grid" }));
+    expect(readQcView().view).toBe("list");
   });
   it("round-trips grouping, sort and density", () => {
     /* v141 §C — Status is the default now, so the round trip saves a grouping that is not (a saved choice is honoured) */
     writeQcView({ group: "action" });
     writeQcView({ sort: { key: "agent", reversed: true } });
     writeQcView({ density: "compact" });
-    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact" });
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact", view: "list" });
   });
   it("migrates sa.qcList.v1 once: its grouping and density move in, the old key goes", () => {
     g.window!.localStorage.setItem(QC_LIST_MEMORY_KEY, serialiseQcListMemory({ density: "compact", group: "package" }));

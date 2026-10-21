@@ -95,12 +95,13 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { useQcListKeys } from "./queries/centre/useQcListKeys";
-import { readQcView, readQcVisit, writeQcView, writeQcVisit } from "../lib/qcViewMemory";
+import { readQcView, readQcVisit, writeQcView, writeQcVisit, type QcListView } from "../lib/qcViewMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader138 } from "./queries/centre/QcHeader138";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
+import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
 import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
@@ -2426,6 +2427,10 @@ export const Queries: React.FC<{
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
   const [qcDensity, setQcDensityState] = useState<QcDensity>(() => qcRemView.density);
   const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcView({ density: d }); }, []);
+  /* v142 §A — Cards or List (List by default), remembered on this device inside `qh.qc.view`, read before the first paint
+     so the other view never flashes */
+  const [qcListView, setQcListViewState] = useState<QcListView>(() => qcRemView.view);
+  const setQcListView = useCallback((v: QcListView) => { setQcListViewState(v); writeQcView({ view: v }); }, []);
   /* v138.1 §F — the search lives in the list sheet's navy row. v138.6 §B: that row is the sticky row and the old
      pinned bar (with its mirrored search) is retired, so "/" (useQcListKeys) has the one field to focus. */
   const qcSheetFindRef = useRef<HTMLInputElement>(null);
@@ -5707,7 +5712,7 @@ export const Queries: React.FC<{
   const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
   useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
   useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
-  /* v140 §G — "Pin the list" ticks when the writer pins (the button or F, walkthrough or not), never for a remembered pin
+  /* v140 §G, v142 — "Go full screen" ticks when the writer goes full screen (the button or F, walkthrough or not), never for a remembered pin
      put back on arrival. ⚠️ THE DISCRIMINATOR IS THE DEVICE'S PIN RECORD AS IT WAS ONE RENDER BEFORE THE LIST PINNED: a
      restore pins a list the device already remembers as pinned, while the writer's press is what writes it. (Reading
      "was the page already on screen", as the Contact list does, ticked every pinned reload here: the restore lands a
@@ -5746,12 +5751,11 @@ export const Queries: React.FC<{
     switch (k) {
       case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
       case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters and tick a status under Where it stands." };
-      /* v140 §G — the toolbar's Pin button, unpinned first (pinned, it reads Unpin list and the page is not the one the
-         card describes) */
+      /* v142 §A — "Go full screen": the title row's Full screen button, unpinned first (in full screen there is no title
+         row and the page is not the one the card describes). The Contact list v20 wording. */
       case "pin": return unpinned(() => ({
-        el: vis(".qc138-sheet button[data-qc140='pin']"), keyCap: "F",
-        /* v140.1 §B — names the button, not its label: at a toolbar of 1000px or less the Pin shows only its icon */
-        text: <>Press the <b>pin</b> button, or <b>F</b>, and the list becomes the whole page: the sidebar tucks away and the counts move into a band at the top. Press it again, or Esc, to put things back.</>,
+        el: vis(".qcv-group [data-qc142='full']") ?? vis(".qc138-sheet [data-qc142='full-tb']"), keyCap: "F",
+        text: "Press Full screen, or F. The list becomes the whole page; Exit full screen brings the page back.",
       }));
       case "open": {
         const row = vis(".qc138-sheet [data-qcv='row']");
@@ -7429,6 +7433,11 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
+                  /* v142 §A — the title row's count ("All 27 queries" / "10 of 27 queries": the applied row's own figures) and
+                     the Cards / List view */
+                  title={listCountTitle(qcVisible.length, qcScoped.length, qc140Chips.length > 0, "query", "queries")}
+                  view={qcListView}
+                  onView={setQcListView}
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */

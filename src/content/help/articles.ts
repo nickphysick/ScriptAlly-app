@@ -121,11 +121,11 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     related: ["find-an-agent", "open-an-agent", "add-an-agent"],
   },
   {
-    slug: "pin-the-list", area: "queries", title: "Pin the list", draft: true, updated: D,
-    lede: "Pinning gives the Query Centre's list the whole page and tucks the header away. Unpin to bring it back.",
+    slug: "pin-the-list", area: "queries", title: "Go full screen on the Query Centre", draft: true, updated: D,
+    lede: "Full screen gives the Query Centre's list the whole page and folds the header away. Exit full screen brings it back.",
     guide: { page: QC, key: "pin" },
-    body: "Press `Pin list` in the list's toolbar, or press `F`. The header folds away and a navy band takes its place, carrying the page's figures. The sidebar tucks away too, for more room.\n\n"
-      + "Press `Unpin`, or `F` again, to bring the header back. QueryHawk remembers the pin on this device. (On the Contact list the same thing is called Full screen.)",
+    body: "Press `Full screen` beside the Cards and List switch above the list, or press `F`. The header folds away and a navy band takes its place, carrying the page's figures. The sidebar tucks away too, for more room.\n\n"
+      + "Press `Exit full screen`, or `F` again, to bring the header back. QueryHawk remembers full screen, and whether you chose Cards or List, on this device.",
     related: ["find-a-query", "open-a-query", "go-full-screen"],
   },
   {

@@ -4,7 +4,7 @@
  *
  * Query Centre v140 §A — THE LIST'S TOOLBAR (ref design-refs/query-centre-v140/): one row, in both positions —
  *
- *   jump row (flex 1) · Find · Group by · Filters · Pin
+ *   jump row (flex 1) · Find · Group by · Filters  [· Cards / List · Exit full screen, in full screen only (v142 §A)]
  *
  * It replaces the navy header's title ("Showing all N queries, grouped by …"), its Grouped/Sort menus, the direction
  * button, the density toggle and Full screen. Sort stays on the column headings; density moves into the Group by menu;
@@ -28,6 +28,7 @@ import { createPortal } from "react-dom";
 import { quietScroll, usePopover, type PopoverState } from "../../shell/ListPills";
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import type { QcDensity } from "../../../lib/qcListMemory";
+import { FULL_ICON, ViewSwitch, type ListView } from "../../shell/ViewTitleRow";
 import "./qcv140.css";
 
 export type Qc140Pop = "group" | "filters" | "jump";
@@ -62,9 +63,6 @@ const FILTER_ICON = (
 );
 const FIND_ICON = (
   <svg className="qc140-fic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
-);
-const PIN_ICON = (
-  <svg className="qc140-pin-ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4v2H6v-2l4-4z" /><path d="M12 15v6" /></svg>
 );
 export const CROSS140 = (
   <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
@@ -213,10 +211,13 @@ export interface QcToolbar140Props {
   /** the Filters menu, drawn while it is open */
   filtersMenu: (pop: PopoverState<Qc140Pop>) => React.ReactNode;
   onPin: () => void;
+  /** v142 §A — the Cards / List view (the title row's pill and, in full screen, this toolbar's switch: one state) */
+  view: ListView;
+  onView: (v: ListView) => void;
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, jumpMode = "name", find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, jumpColumn, jumps, jumpMode = "name", find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, view, onView,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLElement>(null);
@@ -354,11 +355,19 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
           ) : null}
         </span>
         {pop.open === "filters" && pop.anchor ? filtersMenu(pop) : null}
-        <button type="button" className="qc140-pin" data-qc140="pin" data-qc138="pin" data-pin-list="" aria-pressed={pinned} aria-keyshortcuts="F"
-          aria-label={pinned ? "Unpin" : "Pin list"} disabled={loading} onClick={onPin}>
-          {PIN_ICON}<span className="qc140-pin-l">{pinned ? "Unpin" : "Pin list"}</span>
-          <span className="qc140-tip" aria-hidden="true">{pinned ? "Unpin" : "Pin the list"}<kbd>F</kbd></span>
-        </button>
+        {/* v142 §A — no Pin on the page: "Full screen" lives in the title row (shell/ViewTitleRow). In full screen (today's
+            pinned mode) the toolbar carries the icon Cards / List switch and "Exit full screen", after Filters, placed as
+            on the Contact list (v20 §C). */}
+        {pinned ? (
+          <>
+            <ViewSwitch view={view} onView={onView} variant="icons" labels={false} disabled={loading} ns="qc142" probe="view-tb" noun="queries" />
+            <button type="button" className="qc140-pin qc142-xfs" data-qc140="pin" data-qc138="pin" data-qc142="full-tb" data-pin-list="" aria-pressed={pinned} aria-keyshortcuts="F"
+              aria-label="Exit full screen" disabled={loading} onClick={onPin}>
+              {FULL_ICON}<span className="qc140-pin-l">Exit full screen</span>
+              <span className="qc140-tip" aria-hidden="true">Exit full screen<kbd>F</kbd></span>
+            </button>
+          </>
+        ) : null}
       </div>
     </div>
   );

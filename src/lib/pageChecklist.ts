@@ -114,8 +114,10 @@ export type QcGuideKey = "log" | "find" | "pin" | "open" | "resp" | "birds";
 export const QC_CHECKLIST: readonly ChecklistItem<QcGuideKey>[] = [
   { key: "log", title: "Log a query", line: "Who you sent it to, and when." },
   { key: "find", title: "Find a query", line: "Search by agent or agency, or press Filters and tick a status." },
-  /* Query Centre v140 §G — the third of six: its spotlight is the toolbar's Pin button, and it ticks when the list is pinned */
-  { key: "pin", title: "Pin the list", line: "Turn the list into the whole page while you work." },
+  /* Query Centre v140 §G, v142 §A — the third of six: "Go full screen" (the Contact list v20 wording). Its spotlight is the
+     title row's Full screen button, and it ticks when the list goes full screen. The key stays `pin`, so a tick already
+     earned stays earned. */
+  { key: "pin", title: "Go full screen", line: "Turn the list into the whole page while you work." },
   { key: "open", title: "Open a query", line: "Its whole story, in one panel." },
   { key: "resp", title: "Record a response", line: "Try it on a practice query. Nothing is saved." },
   { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline. Press B." },

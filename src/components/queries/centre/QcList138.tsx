@@ -39,7 +39,9 @@ import { AgentDisc } from "../../shared/AgentDisc";
 import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
+import { ViewTitleRow, type ListView } from "../../shell/ViewTitleRow";
 import "./qcvList138.css";
+import "./qcv142.css";
 
 const MON = MONTHS_SHORT;
 const DAY_MS = 86_400_000;
@@ -397,15 +399,22 @@ export interface QcList138Props {
   /** v140 §F — the unpinned scroll position, for the visit: read once for the list's first draw (a reload within the
    *  visit) and again when the route comes back with its scroller at the top; written as the list scrolls unpinned. */
   scrollMemory?: { read: () => number; write: (y: number) => void };
+  /** v142 §A — the Cards / List view (one state: the title row's pill and the full-screen toolbar's switch) */
+  view?: ListView;
+  onView?: (v: ListView) => void;
+  /** v142 §A — the title row's count ("All 27 queries" / "10 of 27 queries"); the row is not drawn in full screen */
+  title?: string;
 }
 
 /** v140 §F — the arrival's values: 420ms on cubic-bezier(.2,.8,.2,1) from −10px and transparent, 24ms apart, the
  *  stagger capped at the 17th item */
+const QC_FULL = { "data-qc140": "pin", "data-qc138": "pin" };
+
 export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: -10, step: 24, items: 17 } as const;
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, title,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -632,7 +641,15 @@ export const QcList138: React.FC<QcList138Props> = ({
   };
 
   return (
-    <div className="qc138-sheet" data-qc138="sheet" data-density={density} ref={boxRef} {...tip.handlers}>
+    <>
+    {/* v142 §A — THE TITLE ROW, between the hero and the list card (shell/ViewTitleRow, the Contact list's own): the
+        count, the Cards / List pill and Full screen. Not drawn in full screen, where the toolbar carries the switch. */}
+    {!full && title != null ? (
+      /* data-qc140="pin" / data-qc138="pin": the v138.6–v141 locks find the full-screen control by these, and this is it while
+         the title row shows (in full screen, the toolbar's Exit full screen carries them) — as the Contact list's does */
+      <ViewTitleRow title={title} view={view} onView={(v) => onView?.(v)} onFull={onFull} ns="qc142" noun="queries" disabled={loading} fullAttrs={QC_FULL} />
+    ) : null}
+    <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view={view} ref={boxRef} {...tip.handlers}>
       {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
           sheet's colour. v140 §A — what sticks is the toolbar (QcToolbar140), and under it the applied-filters row while
           anything narrows the list: `useStickyStack` measures the two together, so the headings and the current group
@@ -645,7 +662,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
             jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps} jumpMode={jumpMode}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
-            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} />
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} view={view} onView={(v) => onView?.(v)} />
           {applied}
         </div>
       </div>
@@ -728,6 +745,7 @@ export const QcList138: React.FC<QcList138Props> = ({
       </div>
       {tip.node}
     </div>
+    </>
   );
 };
 
