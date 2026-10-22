@@ -168,8 +168,8 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
         {!pinned && count ? (
           <span className="qc144-nt" data-qc144="count" aria-live="polite" aria-atomic="true">
             {count.narrowed
-              ? <><b>{count.shown}</b><span>of {count.total} {count.total === 1 ? "query" : "queries"}</span></>
-              : <><b>{count.total}</b><span>{count.total === 1 ? "query" : "queries"}</span></>}
+              ? <><b>{count.shown}</b>{" "}<span>of {count.total} {count.total === 1 ? "query" : "queries"}</span></>
+              : <><b>{count.total}</b>{" "}<span>{count.total === 1 ? "query" : "queries"}</span></>}
           </span>
         ) : null}
         {!pinned ? (
