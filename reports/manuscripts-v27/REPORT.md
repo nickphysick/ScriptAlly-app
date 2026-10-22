@@ -122,4 +122,10 @@ exercised by D1 but not shot.
 
 ## Integration and deploy
 
-Filled in below.
+- Dev served `index-BZj1FSmS.js` (`dev/css1-pv3`, caa9a1e6) at the start and again right before the deploy.
+- Integration branch **`dev/css1-pv3-ms27`**: `origin/dev/css1-pv3` + a merge of `manuscripts-v27` (no conflicts; its
+  tree equals the branch's). Gates there: tsc 0, build clean, Vitest no worse than baseline (the same three
+  `functions/` files). MSV27 on its build: 25 of 25.
+- **Deployed to dev, hosting only** (`firebase.dev.json`, `--project scriptally-dev`), from a clean checkout of that
+  branch. Dev now serves **`index-CCHtLZcn.js`**. A1, A3, B1 and E1 re-run against deployed dev: 8 of 8.
+- Not merged to `main`. No rules or functions deployed.
