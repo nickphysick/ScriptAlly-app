@@ -75,6 +75,11 @@ export interface FlowCard {
   onEscape: () => void;
   /** presses outside the hole reach the page (the log journey's card: the drawer's own Cancel stays live) */
   passThrough?: boolean;
+  /** Manuscripts v27 — the hole and the card move with the target every frame it moves (a field in a scrolling form).
+   *  Omitted, the card is placed once its target has settled and stays there (the Query Centre's cards, unchanged). */
+  follow?: boolean;
+  /** Manuscripts v27 — the dim, hole and card sit above the app's dialogs (z 210), for a target inside one */
+  above?: boolean;
 }
 
 export interface PageChecklistProps<K extends string> {
@@ -98,8 +103,9 @@ export interface PageChecklistProps<K extends string> {
   art?: string;
   /** Query Centre v139 — items that cannot be done yet, and the line each shows instead (no arrow, not pressable) */
   disabled?: Partial<Record<K, string>>;
-  /** Query Centre v139 — with all done, the header says so and the pill stays (sage) for the rest of the visit */
-  allDone?: { title: string; line: string };
+  /** Query Centre v139 — with all done, the header says so and the pill stays (sage) for the rest of the visit.
+   *  Manuscripts v27 — `after`: what follows the list once all are done (the page's next links) */
+  allDone?: { title: string; line: string; after?: React.ReactNode };
   /** Query Centre v139 — the page's own card for a walkthrough of several presses (see `FlowCard`) */
   flow?: FlowCard | null;
   /** Query Centre v139 — an item the page walks through itself: return true and the checklist only closes */
@@ -118,6 +124,10 @@ export interface PageChecklistProps<K extends string> {
   onUnhide?: () => void;
   /** Help system v1 C.4 — the next unfinished guide, in sidebar order, for the last note ("Your next guide is …") */
   nextGuide?: string | null;
+  /** Manuscripts v27 — a class on the pill (the page's own narrow-window rule) */
+  pillClass?: string;
+  /** Manuscripts v27 — the last item's note in the page's own words; omitted, the built "{Page} learned" note */
+  finalNote?: { kicker: string; title: string; line: string; actions: { label: string; onClick: () => void; attrs?: Record<string, string> }[] };
 }
 
 const AUTO_OPEN_MS = 1200;
@@ -423,7 +433,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
       const b = el ? boxOf(el) : null;
       if (!b || b.width === 0) { last = ""; still = 0; return; }
       const sig = `${Math.round(b.left)},${Math.round(b.top)},${Math.round(b.width)},${Math.round(b.height)},${window.innerWidth},${window.innerHeight}`;
-      if (sig === last) still += 1; else { still = 0; last = sig; if (shownOnce) return; }
+      if (sig === last) still += 1; else { still = 0; last = sig; if (shownOnce && !flow.follow) return; }
       if (!shownOnce && still < 2) return;
       if (shownOnce && still !== 0) return;
       shownOnce = true;
@@ -533,7 +543,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
 
   /* ── C.1 the pill: the ring, "{Page} guide", "{n} of {N}"; finished this visit: sage, "{Page}: Learned ✓" ── */
   const pill = (
-    <button ref={pillRef} type="button" className={`pck-pill${open && !closing ? " open" : ""}${finished ? " all" : ""}`} data-pck="pill"
+    <button ref={pillRef} type="button" className={`pck-pill${open && !closing ? " open" : ""}${finished ? " all" : ""}${p.pillClass ? ` ${p.pillClass}` : ""}`} data-pck="pill"
       data-state={finished ? "done" : "live"}
       aria-haspopup="dialog" aria-expanded={open && !closing}
       aria-label={finished ? `${page} guide: learned` : `${page} guide, ${n} of ${items.length} done`}
@@ -602,6 +612,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
                 );
               })}
             </ul>
+            {finished && p.allDone?.after ? <div className="pck-after" data-pck="after">{p.allDone.after}</div> : null}
             <p className="pck-n"><i>{n} of {items.length} done</i>
               <button type="button" className="pck-off" data-pck="off" onClick={() => setSure(true)}>Don't show this again</button></p>
           </>
@@ -653,7 +664,21 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
 
   const noteItem = note ? items.find((i) => i.key === note.key) : null;
   const noteEl = note ? (
-    note.final ? (
+    note.final && p.finalNote ? (
+      <div ref={noteRef} className={`pck-note pck-note--final${leaving ? " leave" : ""}${reduced() ? " pck-still" : ""}`} role="status" data-pck="note"
+        data-final="true" style={notePlace.style}>
+        <span className="pck-ok" aria-hidden="true">✓</span>
+        <span className="pck-nt"><small>{p.finalNote.kicker}</small><b>{p.finalNote.title}</b>
+          <small className="pck-nl">{p.finalNote.line}</small>
+          <span className="pck-nb">
+            {p.finalNote.actions.map((a) => (
+              <button key={a.label} type="button" {...(a.attrs ?? {})} onClick={() => { setNote(null); a.onClick(); }}>{a.label}</button>
+            ))}
+          </span>
+        </span>
+        <button type="button" className="pck-nx" aria-label="Close" data-pck="note-close" onClick={() => setNote(null)}>✕</button>
+      </div>
+    ) : note.final ? (
       <div ref={noteRef} className={`pck-note pck-note--final${leaving ? " leave" : ""}${reduced() ? " pck-still" : ""}`} role="status" data-pck="note"
         data-final="true" style={notePlace.style}>
         <span className="pck-ok" aria-hidden="true">✓</span>
@@ -685,7 +710,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     <>
       {createPortal(<>{pill}<span className="pck-sr" role="status" aria-live="polite" data-pck="live">{said}</span></>, slot)}
       {(popover || noteEl) && <AnchoredPortal>{popover}{noteEl}</AnchoredPortal>}
-      {(spotlight || flowEl) && createPortal(<div className={`pck-layer${reduced() ? " pck-still" : ""}`}>{spotlight}{flowEl}</div>, document.body)}
+      {(spotlight || flowEl) && createPortal(<div className={`pck-layer${reduced() ? " pck-still" : ""}${flow?.above ? " pck-layer--above" : ""}`}>{spotlight}{flowEl}</div>, document.body)}
     </>
   );
 }

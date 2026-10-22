@@ -837,6 +837,15 @@
     opacity: 0;
   }
 
+  /* Manuscripts v27 Part E — a row's "PRO" tag (Versions): a small pill, a 4px rose dot. Gone when the sidebar folds. */
+  .ws-qpro {
+    flex: none; margin-left: auto; box-sizing: border-box; display: inline-flex; align-items: center; gap: 5px;
+    height: 16px; padding: 0 7px; border-radius: 99px; background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-rose);
+    font: 600 7.5px/1 "JetBrains Mono", monospace; letter-spacing: 0.14em;
+  }
+  .ws-qpro::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-rose); }
+  .sb-collapsed .ws-qpro { display: none; }
+
   /* centred icon tiles, the selected edge pinned at the rail's left */
   .sb-collapsed .ws-ni { width: 100%; height: 33px; padding: 0; justify-content: center; }
   .sb-collapsed .ws-ni.on::before { left: calc(-1 * (var(--shell-side-w-collapsed) - 42px) / 2); }

@@ -23,7 +23,7 @@
  * a dialog rendered inside the page would be sealed with it. Their sheet (msv21.css) reads only
  * `:root` tokens, so nothing is lost by leaving the page's scope.
  */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { deleteField, type FieldValue } from "firebase/firestore";
 import { useOverlay } from "../../shell/useOverlay";
@@ -91,15 +91,52 @@ const Shell: React.FC<{
 
 /* ══ edit details ═════════════════════════════════════════════════════════════════════════════ */
 
+/** Manuscripts v27 Part C — the sections the form can open on (the guide's four steps, and the book view's "Add one"). */
+export type EditField = "basics" | "logline" | "elevatorPitch" | "synopsis";
+/** The pitch's example and the two hints (v27 Part C), stated once for the form and its locks. */
+export const PITCH_PLACEHOLDER = "e.g. A ferry skipper races the tide to bring his brother home.";
+export const PITCH_HINT = "Keep it on the tip of your tongue. You never know when the right person might ask what your book’s all about.";
+export const SYNOPSIS_HINT = "The whole story in brief, ending included.";
+
+/**
+ * Manuscripts v27 Part C — open on a field: its section is scrolled to the middle of the form and the field takes focus
+ * with the caret at the end. Run after `useOverlay` has focused the dialog's root (a frame later), or that focus wins.
+ */
+const useOpenOn = (rootRef: React.RefObject<HTMLElement | null>, field: EditField | undefined) => {
+  useEffect(() => {
+    if (!field) return undefined;
+    const raf = requestAnimationFrame(() => {
+      const root = rootRef.current;
+      const sect = root?.querySelector<HTMLElement>(`[data-ms21-sect="${field}"]`);
+      if (!root || !sect) return;
+      const scroller = root.closest<HTMLElement>(".ms21-modal") ?? root;
+      const r = sect.getBoundingClientRect(), v = scroller.getBoundingClientRect();
+      scroller.scrollTop += (r.top + r.height / 2) - (v.top + v.height / 2);
+      const el = sect.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input");
+      if (el) {
+        el.focus({ preventScroll: true });
+        const n = el.value.length;
+        try { el.setSelectionRange(n, n); } catch { /* a field type with no caret */ }
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [rootRef, field]);
+};
+
 export const Msv21EditDetails: React.FC<{
   ms: Manuscript;
   updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
   onClose: () => void;
-}> = ({ ms, updateManuscript, onClose }) => {
+  /** v27 Part C — the section to open on */
+  focus?: EditField;
+}> = ({ ms, updateManuscript, onClose, focus }) => {
   const { showToast } = useToast();
+  const hostRef = useRef<HTMLDivElement>(null);
+  useOpenOn(hostRef, focus);
   const [d, setD] = useState({
     title: ms.title, genre: ms.genre, ageCategory: ms.ageCategory,
     wordCount: String(ms.wordCount ?? ""), logline: ms.logline ?? "",
+    elevatorPitch: ms.elevatorPitch ?? "", synopsis: ms.synopsis ?? "",
     setting: ms.setting ?? "", series: ms.series ?? "",
     status: ms.status, shelvedReason: ms.shelvedReason ?? "",
   });
@@ -115,12 +152,17 @@ export const Msv21EditDetails: React.FC<{
     setErr(null);
     const setting = factPatch(d.setting, ms.setting);
     const series = factPatch(d.series, ms.series);
+    /* v27 Part C — the pitch and the synopsis keep the house convention: an empty field is OMITTED, never "" */
+    const elevatorPitch = factPatch(d.elevatorPitch, ms.elevatorPitch);
+    const synopsis = factPatch(d.synopsis, ms.synopsis);
     const payload: Record<string, unknown> = {
       title: d.title.trim(), genre: d.genre.trim(), ageCategory: d.ageCategory.trim(),
       wordCount: parseWords(d.wordCount) ?? 0,
       logline: d.logline, status: d.status, shelvedReason: d.shelvedReason,
       ...(setting !== null ? { setting } : {}),
       ...(series !== null ? { series } : {}),
+      ...(elevatorPitch !== null ? { elevatorPitch } : {}),
+      ...(synopsis !== null ? { synopsis } : {}),
     };
     try {
       await updateManuscript(ms.id, payload as Partial<Manuscript>);
@@ -138,57 +180,82 @@ export const Msv21EditDetails: React.FC<{
       label="Edit details" title="Edit details" sub="What agents see first: the title, the pitch and the numbers."
       probe="edit-dialog" onClose={onClose} onSubmit={() => void save()} saveLabel="Save details" busy={busy}
     >
-      <div className="ms21-fld ms21-fld--w">
-        <label htmlFor="ms21-f-title">Title</label>
-        <input id="ms21-f-title" value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} />
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-words">Word count</label>
-        <input id="ms21-f-words" inputMode="numeric" value={d.wordCount} onChange={(e) => setD({ ...d, wordCount: e.target.value })} />
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-genre">Genre</label>
-        <select id="ms21-f-genre" value={d.genre} onChange={(e) => setD({ ...d, genre: e.target.value })}>
-          {!d.genre ? <option value="">Choose one</option> : null}
-          {genres.map((g) => <option key={g} value={g}>{g}</option>)}
-        </select>
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-age">Age category</label>
-        <select id="ms21-f-age" value={d.ageCategory} onChange={(e) => setD({ ...d, ageCategory: e.target.value })}>
-          {!d.ageCategory ? <option value="">Choose one</option> : null}
-          {ages.map((a) => <option key={a} value={a}>{a}</option>)}
-        </select>
-      </div>
-      <div className="ms21-fld ms21-fld--w">
-        <label htmlFor="ms21-f-logline">Logline</label>
-        <textarea id="ms21-f-logline" value={d.logline} onChange={(e) => setD({ ...d, logline: e.target.value })} />
-        <span className="ms21-hint">One or two sentences.</span>
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-setting">Setting</label>
-        <input id="ms21-f-setting" value={d.setting} onChange={(e) => setD({ ...d, setting: e.target.value })} />
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-series">Series</label>
-        <input id="ms21-f-series" placeholder="Standalone" value={d.series} onChange={(e) => setD({ ...d, series: e.target.value })} />
-      </div>
-      <div className="ms21-fld ms21-fld--w">
-        <span className="ms21-fl" id="ms21-f-status">Status</span>
-        <div className="ms21-seg" role="group" aria-labelledby="ms21-f-status" data-ms21="status-seg">
-          {STATUS_ORDER.map((s) => (
-            <button type="button" key={s} aria-pressed={d.status === s} className={d.status === s ? "is-on" : undefined} onClick={() => setD({ ...d, status: s })}>
-              {STATUS_WORDS[s]}
-            </button>
-          ))}
-        </div>
-      </div>
-      {d.status === ManuscriptStatus.SHELVED ? (
+      {/* v27 Part C — the same fields, in five sections the form can open on (`data-ms21-sect`) */}
+      <div className="ms21-sects" ref={hostRef}>
+      <div className="ms21-sect" data-ms21-sect="basics">
+        <h4 className="ms21-sect-h"><span className="ms21-sn">1</span>The book</h4>
         <div className="ms21-fld ms21-fld--w">
-          <label htmlFor="ms21-f-shelved">Shelved reason</label>
-          <input id="ms21-f-shelved" value={d.shelvedReason} onChange={(e) => setD({ ...d, shelvedReason: e.target.value })} />
+          <label htmlFor="ms21-f-title">Title</label>
+          <input id="ms21-f-title" value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} />
         </div>
-      ) : null}
+        <div className="ms21-fld">
+          <label htmlFor="ms21-f-words">Word count</label>
+          <input id="ms21-f-words" inputMode="numeric" value={d.wordCount} onChange={(e) => setD({ ...d, wordCount: e.target.value })} />
+        </div>
+        <div className="ms21-fld">
+          <label htmlFor="ms21-f-genre">Genre</label>
+          <select id="ms21-f-genre" value={d.genre} onChange={(e) => setD({ ...d, genre: e.target.value })}>
+            {!d.genre ? <option value="">Choose one</option> : null}
+            {genres.map((g) => <option key={g} value={g}>{g}</option>)}
+          </select>
+        </div>
+        <div className="ms21-fld">
+          <label htmlFor="ms21-f-age">Age category</label>
+          <select id="ms21-f-age" value={d.ageCategory} onChange={(e) => setD({ ...d, ageCategory: e.target.value })}>
+            {!d.ageCategory ? <option value="">Choose one</option> : null}
+            {ages.map((a) => <option key={a} value={a}>{a}</option>)}
+          </select>
+        </div>
+        <div className="ms21-fld ms21-fld--w">
+          <span className="ms21-fl" id="ms21-f-status">Status</span>
+          <div className="ms21-seg" role="group" aria-labelledby="ms21-f-status" data-ms21="status-seg">
+            {STATUS_ORDER.map((s) => (
+              <button type="button" key={s} aria-pressed={d.status === s} className={d.status === s ? "is-on" : undefined} onClick={() => setD({ ...d, status: s })}>
+                {STATUS_WORDS[s]}
+              </button>
+            ))}
+          </div>
+        </div>
+        {d.status === ManuscriptStatus.SHELVED ? (
+          <div className="ms21-fld ms21-fld--w">
+            <label htmlFor="ms21-f-shelved">Shelved reason</label>
+            <input id="ms21-f-shelved" value={d.shelvedReason} onChange={(e) => setD({ ...d, shelvedReason: e.target.value })} />
+          </div>
+        ) : null}
+      </div>
+      <div className="ms21-sect" data-ms21-sect="logline">
+        <h4 className="ms21-sect-h"><span className="ms21-sn">2</span><label htmlFor="ms21-f-logline">Logline</label></h4>
+        <div className="ms21-fld ms21-fld--w">
+          <textarea id="ms21-f-logline" value={d.logline} onChange={(e) => setD({ ...d, logline: e.target.value })} />
+          <span className="ms21-hint">One or two sentences.</span>
+        </div>
+      </div>
+      <div className="ms21-sect" data-ms21-sect="elevatorPitch">
+        <h4 className="ms21-sect-h"><span className="ms21-sn">3</span><label htmlFor="ms21-f-pitch">Elevator pitch</label><em>Optional</em></h4>
+        <div className="ms21-fld ms21-fld--w">
+          <textarea id="ms21-f-pitch" data-ms21="pitch" placeholder={PITCH_PLACEHOLDER} value={d.elevatorPitch} onChange={(e) => setD({ ...d, elevatorPitch: e.target.value })} />
+          <span className="ms21-hint" data-ms21="pitch-hint">{PITCH_HINT}</span>
+        </div>
+      </div>
+      <div className="ms21-sect" data-ms21-sect="synopsis">
+        <h4 className="ms21-sect-h"><span className="ms21-sn">4</span><label htmlFor="ms21-f-synopsis">Synopsis</label><em>Optional</em></h4>
+        <div className="ms21-fld ms21-fld--w">
+          <textarea id="ms21-f-synopsis" className="ms21-ta-tall" data-ms21="synopsis" value={d.synopsis} onChange={(e) => setD({ ...d, synopsis: e.target.value })} />
+          <span className="ms21-hint" data-ms21="synopsis-hint">{SYNOPSIS_HINT}</span>
+        </div>
+      </div>
+      <div className="ms21-sect" data-ms21-sect="more">
+        <h4 className="ms21-sect-h"><span className="ms21-sn">5</span>Setting and series<em>Optional</em></h4>
+        <div className="ms21-fld">
+          <label htmlFor="ms21-f-setting">Setting</label>
+          <input id="ms21-f-setting" value={d.setting} onChange={(e) => setD({ ...d, setting: e.target.value })} />
+        </div>
+        <div className="ms21-fld">
+          <label htmlFor="ms21-f-series">Series</label>
+          <input id="ms21-f-series" placeholder="Standalone" value={d.series} onChange={(e) => setD({ ...d, series: e.target.value })} />
+        </div>
+      </div>
+      </div>
       {err ? <div className="ms21-derr" role="alert">{err}</div> : null}
     </Shell>
   );

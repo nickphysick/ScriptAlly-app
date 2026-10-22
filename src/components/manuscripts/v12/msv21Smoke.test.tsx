@@ -16,10 +16,9 @@ vi.mock("../../../lib/db", async () => (await import("../../../test/pageSmoke"))
 vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSmoke")).firebaseMock());
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
-import { ManuscriptPage, DELETED_TITLE, EMPTY_TITLE, MS_GUIDE, deletedSub } from "./ManuscriptPage";
+import { ManuscriptPage, DELETED_TITLE, EMPTY_TITLE, deletedSub } from "./ManuscriptPage";
 import { factPatch, parseWords } from "./Msv21Dialogs";
-import { EMPTY_PREVIEWS, MS_HEADER_SUB } from "./Msv21Parts";
-import { SD_VIEWBOX } from "../../../test/statusDotSignature";
+import { EMPTY_PREVIEWS } from "./Msv21Parts";
 import { sliceBetween } from "../../../test/sliceBetween";
 import { deleteField, type FieldValue } from "firebase/firestore";
 
@@ -48,25 +47,9 @@ describe("/manuscripts (v21) renders", () => {
     for (const g of ghosts) expect(g[1]).not.toMatch(/<button|<a |<input/);
   });
 
-  it("filled: the book's title is the page title, over the book, activity, the banner, versions and three doors", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toMatch(/<h1 class="hp3-title" data-probe="title" data-page-title="">The Smoke Test<\/h1>/);
-    expect(html).toContain('data-hp3="title"');
-    expect(html).toContain(MS_HEADER_SUB);
-    for (const probe of ["header", "book", "activity", "banner", "versions", "materials"]) expect(html, probe).toContain(`data-ms21="${probe}"`);
-    expect(html.match(/data-ms21="door"/g)?.length ?? 0).toBe(3);
-    expect(html.match(/data-ms21-fact="/g)?.length ?? 0).toBe(9);
-    expect(html, "the shared footer").toContain('data-probe="app-footer"');
-    /* the v13 page is gone: no shelf, no owed list, no desk hero */
-    expect(html).not.toMatch(/msv13-|data-msv12="hero"|data-msv12="owed"/);
-  });
-
-  it("every status glyph is the real StatusDot, and no mock ring was ported", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toContain(SD_VIEWBOX);
-    expect(html).not.toMatch(/class="[^"]*\bdot\b[^"]*"/);
-    expect(html.split('data-ms21-sd=""').length - 1).toBeGreaterThan(0);
-  });
+  /* v27 (22 Oct): the filled page is two containers (msv27Smoke.test.tsx). Retired here, deliberately: "filled: the book,
+     activity, the banner, versions and three doors" and "every status glyph is the real StatusDot" (no query status is
+     drawn on the v27 page). */
 
   it("no appraisal word in the page's own text, either state", () => {
     const banned = /(?<![\w-])(only|already|still|good|bad|slow|fast|poor|strong|weak|overdue|late|behind|impressive|finally|unfortunately)(?![\w-])/i;
@@ -81,11 +64,7 @@ describe("/manuscripts (v21) renders", () => {
     expect(deletedSub("The Salt Ledger")).toBe("The Salt Ledger has been deleted, along with its queries and materials. Add a manuscript to start again.");
   });
 
-  it("the page guide has three steps, each pointing at a part the page draws", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    expect(MS_GUIDE.map((s) => s.title)).toEqual(["Your book on one page", "Versions", "Your materials"]);
-    for (const s of MS_GUIDE) expect(html, s.subject).toContain(/\[(.+)\]/.exec(s.subject!)![1]);
-  });
+  /* v27: the three-step PageGuide is retired; the page's guide is the four-item checklist (msv27Smoke.test.tsx) */
 });
 
 describe("the page writes nothing itself, and deletes nothing", () => {
@@ -99,9 +78,7 @@ describe("the page writes nothing itself, and deletes nothing", () => {
     expect(parts, "the parts take no writer at all").not.toMatch(/updateManuscript|addManuscript/);
   });
 
-  it("an activity row opens the query drawer, and the journey comes from rowDoor", () => {
-    expect(src).toMatch(/const d = rowDoor\(r\); if \(d\) openQueryDrawer\(\{ mode: d\.mode, queryId: d\.queryId \}\)/);
-  });
+  /* v27: the activity card left the page, and with it the row door ("an activity row opens the query drawer") */
 
   it("the retired components are gone", () => {
     for (const f of ["Msv12EditDetails.tsx", "Msv12Empty.tsx", "Msv12Sections.tsx", "Msv13Shelf.tsx"]) {
@@ -116,10 +93,10 @@ describe("the dialogs", () => {
   const version = sliceBetween(src, "export const Msv21Version", "export const Msv21AddManuscript", "the version dialog");
   const add = src.slice(src.indexOf("export const Msv21AddManuscript"));
 
-  it("Edit details: one write, the eight fields in the oracle's order, the six statuses, and no author", () => {
+  it("Edit details: one write, the fields in five sections (v27 Part C adds the pitch and the synopsis), the six statuses, and no author", () => {
     expect(edit.match(/\bupdateManuscript\(/g)?.length ?? 0).toBe(1);
     const labels = [...edit.matchAll(/<label htmlFor="[^"]+">([^<]+)<\/label>|<span className="ms21-fl"[^>]*>([^<]+)<\/span>/g)].map((m) => m[1] ?? m[2]);
-    expect(labels).toEqual(["Title", "Word count", "Genre", "Age category", "Logline", "Setting", "Series", "Status", "Shelved reason"]);
+    expect(labels).toEqual(["Title", "Word count", "Genre", "Age category", "Status", "Shelved reason", "Logline", "Elevator pitch", "Synopsis", "Setting", "Series"]);
     expect(edit).toContain("STATUS_ORDER.map");
     expect(edit).not.toMatch(/author|updateUserProfile/i);
     expect(edit).toMatch(/<select id="ms21-f-genre"/);
@@ -141,7 +118,7 @@ describe("the dialogs", () => {
     const block = [...rules.matchAll(/hasOnly\(\[([\s\S]*?)\]/g)].map((m) => m[1]).find((b) => b.includes("'bookVersions'"));
     expect(block, "the manuscript update allowlist moved — re-find it").toBeTruthy();
     const listed = block!.replace(/\/\/[^\n]*/g, "");
-    for (const k of ["'title'", "'genre'", "'ageCategory'", "'wordCount'", "'logline'", "'status'", "'shelvedReason'", "'setting'", "'series'", "'bookVersions'"]) {
+    for (const k of ["'title'", "'genre'", "'ageCategory'", "'wordCount'", "'logline'", "'status'", "'shelvedReason'", "'setting'", "'series'", "'elevatorPitch'", "'synopsis'", "'bookVersions'"]) {
       expect(listed, `${k} left the allowlist — every save carrying it now fails whole`).toContain(k);
     }
     /* `BookVersion.wordCount` is safe to add only while the rules treat the list as a list */

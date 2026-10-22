@@ -32,7 +32,7 @@ export const WORKSPACE_PATHS = new Set([
   // The To-do WORKSPACE — four pages, one section (workspace pack P1).
   "/todo", "/todo/calendar", "/todo/corkboard",
   "/agents", "/agents/discover",
-  "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
+  "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/manuscripts/versions", "/import",
   "/account", "/plans", "/help",
   /* The settings SECTIONS are real routes (`/account/profile`, …) — spread from the one table so
      a new section cannot be added without being registered here. `/account` itself stays listed

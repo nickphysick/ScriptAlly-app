@@ -221,3 +221,11 @@
 /* all done: the header says so (the pill's sage is with the pill's rules above) */
 .pck-fin { margin: 14px 14px 2px; font: 400 15px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); }
 
+
+/* ── Manuscripts v27 — additive: a flow card over an open dialog, the final note's buttons, the all-done links ── */
+.pck-layer.pck-layer--above { z-index: 210; }
+.pck-note .pck-nb { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pck-note .pck-nb button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: #4b6151; color: #fff; font: 400 13px var(--sp-type); white-space: nowrap; }
+.pck-note .pck-nb button + button { background: #fff; color: #4b6151; box-shadow: inset 0 0 0 1.5px rgba(75, 97, 81, 0.5); }
+.pck-note .pck-nb button:focus-visible { outline: 2px solid #4b6151; outline-offset: 2px; }
+.pck-pop .pck-after { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 12px 10px; }

@@ -1,0 +1,14 @@
+{"mutation":"a1","cases":"A1 sections","failed":1,"passed":1,"first":"    Error: expect(received).toEqual(expected) // deep equality"}
+{"mutation":"a2","cases":"A2 header","failed":1,"passed":1,"first":"    Error: right inset 154"}
+{"mutation":"a3","cases":"A3 card 1280","failed":1,"passed":1,"first":"    Error: expect(received).toEqual(expected) // deep equality"}
+{"mutation":"a4","cases":"A4 strip","failed":1,"passed":1,"first":"    Error: strip text 517 vs title 523.015625"}
+{"mutation":"b1","cases":"B1 the book opens 1512","failed":1,"passed":1,"first":"    Error: [data-ms27=\"full\"]: cover rotateY(-180) → m11 1"}
+{"mutation":"b2","cases":"B2 rows","failed":1,"passed":1,"first":"    Error: the fixture states no series"}
+{"mutation":"b3","cases":"B3 reduced motion","failed":0,"passed":3,"first":""}
+{"mutation":"c1","cases":"C1 copy","failed":1,"passed":1,"first":"    Error: form"}
+{"mutation":"c2","cases":"C2 opens on the field","failed":1,"passed":1,"first":"    Error: the pitch field has focus"}
+{"mutation":"d1","cases":"D1 done","failed":1,"passed":1,"first":"    Error: cancelled: still 3 of 4"}
+{"mutation":"d2","cases":"D2 steps","failed":0,"passed":3,"first":""}
+{"mutation":"e1","cases":"E1 versions","failed":1,"passed":1,"first":"    Error: a Versions row in the sidebar"}
+{"mutation":"b3src","source":true,"cases":"B3 reduced motion","failed":1,"passed":1,"first":"    Error: cover already turned: m11 1"}
+{"mutation":"d2src","source":true,"cases":"D2 steps","failed":1,"passed":1,"first":"    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded."}

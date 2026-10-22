@@ -123,6 +123,9 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       def: "m-ms",
       children: [
         { id: "m-ms", label: "Manuscripts", path: "/manuscripts", icon: "library" },
+        /* Manuscripts v27 Part E — Versions moved out of Manuscripts onto its own page. Its PRO tag shows to everyone
+           for now (TODO(gating): when plans return, the tag means something only to Free accounts). */
+        { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: true },
         { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books" },
         { id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" },
       ],

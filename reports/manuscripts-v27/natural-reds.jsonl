@@ -1,0 +1,14 @@
+{"case":"A1 sections 1280","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"A2 header 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"A3 card 1280","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"A4 strip 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"B1 the book opens 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"B2 rows 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"B3 reduced motion 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"C1 copy 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"C2 opens on the field 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"D2 steps open the form, never the book 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"E1 versions 1512","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"D1 done","failed":1,"first":"    TimeoutError: page.waitForFunction: Timeout 30000ms exceeded."}
+{"case":"HS1-B1 on dev baseline","failed":1}
+NATDONE

@@ -24,6 +24,7 @@ import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
+import { VersionsPage } from "./components/manuscripts/v27/VersionsPage";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
@@ -291,6 +292,7 @@ export function pathFor(tab: string, subPageName?: string): string {
       /* the dashboard's quick action — the packages page's Builder tab, where a package is made */
       if (subPageName === "New package") return "/manuscripts/packages?tab=builder";
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
+      if (subPageName === "Versions") return "/manuscripts/versions";
       return "/manuscripts";
     }
     // Two pricing surfaces, and they answer different questions: PUBLIC /pricing is the shop
@@ -617,6 +619,7 @@ function AppContent() {
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
+  const manuscriptsVersions = path === "/manuscripts/versions";
 
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
@@ -738,6 +741,9 @@ function AppContent() {
             <SubmissionPackages />
           ) : manuscriptsComps ? (
             <ComparableTitlesPage onNavigate={handleNavigate} />
+          ) : manuscriptsVersions ? (
+            /* Manuscripts v27 Part E — the interim Versions page (the versions UI that left Manuscripts, unchanged) */
+            <VersionsPage onNavigate={handleNavigate} />
           ) : (
             /* Manuscripts v12 (25 Sep): the route now renders `ManuscriptPage` — one manuscript,
                its versions, letters, synopses, packages and comps, built to
@@ -746,7 +752,7 @@ function AppContent() {
             <ManuscriptPage
               onNavigate={handleNavigate}
               openId={manuscriptView}
-              active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps}
+              active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps && !manuscriptsVersions}
             />
           )}
         </StagePage>
