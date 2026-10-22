@@ -161,8 +161,8 @@ export type MsGuideKey = "details" | "logline" | "pitch" | "synopsis";
 
 export const MS_CHECKLIST: readonly ChecklistItem<MsGuideKey>[] = [
   { key: "details", title: "Check your book's details", line: "Genre, age category and word count." },
-  { key: "logline", title: "Write your logline", line: "One or two sentences that sell the book." },
-  { key: "pitch", title: "Add an elevator pitch", line: "Have it on the tip of your tongue." },
+  { key: "logline", title: "Write your logline", line: "The hook in a single sentence." },
+  { key: "pitch", title: "Add an elevator pitch", line: "The 30-second version, said out loud." },
   { key: "synopsis", title: "Add a synopsis", line: "The whole story, ending included." },
 ];
 

@@ -30,9 +30,25 @@ export type EditField = "basics" | "logline" | "elevatorPitch" | "synopsis";
 
 export const DRAWER_SUB = "The book’s details. Edit anything; save once.";
 export const PITCH_PLACEHOLDER = "e.g. A ferry skipper races the tide to bring his brother home.";
-export const PITCH_HINT = "Keep it on the tip of your tongue. You never know when the right person might ask what your book’s all about.";
+export const PITCH_HINT = "What you’d say if someone asked what your book’s about: the hook, then the stakes and what makes it yours. Keep it on the tip of your tongue. You never know when the right person might ask.";
 export const SYNOPSIS_HINT = "The whole story in brief, ending included.";
-export const LOGLINE_HINT = "One or two sentences.";
+export const LOGLINE_HINT = "The hook in a single sentence. It’s the line that opens your query letter.";
+export const LOGLINE_TAG = "one sentence";
+export const PITCH_TAG = "30 seconds, out loud";
+
+/** v28 Part B — the series switch over the existing `series` string. */
+export const SERIES_ON = "Part of a series";
+export const seriesOn = (stored: string | undefined): boolean => !!(stored ?? "").trim();
+export const seriesLine = (on: boolean): string => (on ? "Yes, it’s part of a series" : "No, it’s a standalone");
+/**
+ * What a save writes for the switch: on keeps a stored non-empty value (a writer's own series name) or writes
+ * "Part of a series"; off omits the key. Null when nothing changes.
+ */
+export const seriesPatch = (on: boolean, stored: string | undefined): string | FieldValue | null => {
+  const had = seriesOn(stored);
+  if (on) return had ? null : SERIES_ON;
+  return had ? deleteField() : null;
+};
 
 /** A text field as it belongs in the payload: null when unchanged; `deleteField()` when cleared. */
 export const textPatch = (next: string, prev: string | undefined): string | FieldValue | null => {
@@ -101,7 +117,8 @@ export const MsEditDrawer: React.FC<{
     title: ms.title, genre: ms.genre, ageCategory: ms.ageCategory,
     wordCount: ms.wordCount > 0 ? ms.wordCount.toLocaleString("en-GB") : "", logline: ms.logline ?? "",
     elevatorPitch: ms.elevatorPitch ?? "", synopsis: ms.synopsis ?? "",
-    setting: ms.setting ?? "", series: ms.series ?? "",
+    /* v28 Part B: Setting is not in the UI any more; its stored value is left as it is */
+    series: seriesOn(ms.series),
     status: ms.status, shelvedReason: ms.shelvedReason ?? "",
   });
   const [err, setErr] = useState<string | null>(null);
@@ -115,7 +132,7 @@ export const MsEditDrawer: React.FC<{
     setBusy(true);
     setErr(null);
     const patches = {
-      setting: textPatch(d.setting, ms.setting), series: textPatch(d.series, ms.series),
+      series: seriesPatch(d.series, ms.series),
       elevatorPitch: textPatch(d.elevatorPitch, ms.elevatorPitch), synopsis: textPatch(d.synopsis, ms.synopsis),
     };
     const payload: Record<string, unknown> = {
@@ -187,12 +204,12 @@ export const MsEditDrawer: React.FC<{
               <input id="ms21-f-shelved" value={d.shelvedReason} onChange={(e) => setD({ ...d, shelvedReason: e.target.value })} /></label>
           ) : null}
         </Sect>
-        <Sect n={2} id="logline" title="Logline">
+        <Sect n={2} id="logline" title="Logline" tag={LOGLINE_TAG}>
           <label className="ms28-fld">
             <textarea id="ms21-f-logline" rows={3} aria-label="Logline" value={d.logline} onChange={(e) => setD({ ...d, logline: e.target.value })} />
             <p className="ms28-hint" data-ms21="logline-hint">{LOGLINE_HINT}</p></label>
         </Sect>
-        <Sect n={3} id="elevatorPitch" title="Elevator pitch" optional>
+        <Sect n={3} id="elevatorPitch" title="Elevator pitch" tag={PITCH_TAG} optional>
           <label className="ms28-fld">
             <textarea id="ms21-f-pitch" rows={3} aria-label="Elevator pitch" data-ms21="pitch" placeholder={PITCH_PLACEHOLDER} value={d.elevatorPitch} onChange={(e) => setD({ ...d, elevatorPitch: e.target.value })} />
             <p className="ms28-hint" data-ms21="pitch-hint">{PITCH_HINT}</p></label>
@@ -202,10 +219,11 @@ export const MsEditDrawer: React.FC<{
             <textarea id="ms21-f-synopsis" rows={5} aria-label="Synopsis" data-ms21="synopsis" value={d.synopsis} onChange={(e) => setD({ ...d, synopsis: e.target.value })} />
             <p className="ms28-hint" data-ms21="synopsis-hint">{SYNOPSIS_HINT}</p></label>
         </Sect>
-        <Sect n={5} id="more" title="Setting and series" optional>
-          <div className="ms28-frow ms28-frow--2">
-            <label className="ms28-fld"><span>Setting</span><input id="ms21-f-setting" value={d.setting} onChange={(e) => setD({ ...d, setting: e.target.value })} /></label>
-            <label className="ms28-fld"><span>Series</span><input id="ms21-f-series" placeholder="Standalone" value={d.series} onChange={(e) => setD({ ...d, series: e.target.value })} /></label>
+        <Sect n={5} id="series" title="Series">
+          <div className="ms28-sr" data-ms28="series">
+            <span><b>Part of a series?</b><small data-ms28="series-line">{seriesLine(d.series)}</small></span>
+            <button type="button" className="ms28-tog" role="switch" aria-checked={d.series} aria-label="Part of a series"
+              data-ms28="series-toggle" onClick={() => setD({ ...d, series: !d.series })}><i /></button>
           </div>
         </Sect>
       </div>

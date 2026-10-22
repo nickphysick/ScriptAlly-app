@@ -52,8 +52,8 @@ export const deletedSub = (title: string): string =>
 /** The guide's step cards (Part D): what each says, and which section of Edit details it lights. */
 export const MS_STEP_CARDS: Record<MsGuideKey, { field: EditField; title: string; body: React.ReactNode }> = {
   details: { field: "basics", title: "Check the basics", body: <>Agents filter on <b>genre</b>, <b>age category</b> and <b>word count</b> first. Make sure they’re right, then press <b>Save details</b>.</> },
-  logline: { field: "logline", title: "Your logline", body: <>One or two sentences: who it’s about, what they want and what stands in the way. Then press <b>Save details</b>.</> },
-  pitch: { field: "elevatorPitch", title: "Your elevator pitch", body: <>You never know when the right person might ask what your book’s all about, and it might be the moment that matters. Say it out loud: if it trips you up, trim it. Then press <b>Save details</b>.</> },
+  logline: { field: "logline", title: "Your logline", body: <>One sentence that captures the hook: who it’s about, what they want and what stands in the way. It opens your query letter. Then press <b>Save details</b>.</> },
+  pitch: { field: "elevatorPitch", title: "Your elevator pitch", body: <>Longer than your logline: the hook, then the stakes and what makes it yours. You never know when the right person might ask what your book’s all about, and it might be the moment that matters. Say it out loud: if it trips you up, trim it. Then press <b>Save details</b>.</> },
   synopsis: { field: "synopsis", title: "Your synopsis", body: <>The whole story in brief, ending included. Agents often ask for one alongside your opening pages. Then press <b>Save details</b>.</> },
 };
 export const MS_ALL_DONE = { title: "Your book's set up", line: "Everything an agent asks about the book, in one place. Next, try smart querying." };

@@ -78,8 +78,8 @@ export const bookRows = (
     clean(ms.ageCategory) ? { key: "age", label: "Age", value: clean(ms.ageCategory) } : null,
     w > 0 ? { key: "words", label: "Words", value: wordsText(w) } : null,
     { key: "status", label: "Status", value: statusWord(ms), dot: true },
-    clean(ms.setting) ? { key: "setting", label: "Setting", value: clean(ms.setting) } : null,
-    clean(ms.series) ? { key: "series", label: "Series", value: clean(ms.series) } : null,
+    /* v28 Part B: no Setting row (the stored value is kept); Series always, from the switch's reading of `series` */
+    { key: "series", label: "Series", value: clean(ms.series) || "Standalone" },
     sinceDay(since) ? { key: "since", label: "Since", value: sinceDay(since)! } : null,
   ];
   return rows.filter((r): r is BookRow => !!r);

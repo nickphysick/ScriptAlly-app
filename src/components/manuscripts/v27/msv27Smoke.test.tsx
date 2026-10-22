@@ -93,7 +93,9 @@ describe("A4 — the coming-soon strip's copy, exact", () => {
 describe("B — the book view", () => {
   const rows = bookRows(MS({ setting: undefined, series: "" }), null);
   it("omits a row with no value, and never draws a dash", () => {
-    expect(rows.map((r) => r.key)).toEqual(["genre", "age", "words", "status"]);
+    /* v28 Part B: Series is always a row ("Standalone" when unset), and Setting never is */
+    expect(rows.map((r) => r.key)).toEqual(["genre", "age", "words", "status", "series"]);
+    expect(rows.find((r) => r.key === "series")!.value).toBe("Standalone");
     expect(rows.every((r) => !/^[—–-]$/.test(r.value.trim()))).toBe(true);
     expect(allGenres(MS())).toBe("Thriller · Crime · Mystery");
   });
@@ -120,7 +122,8 @@ describe("B — the book view", () => {
 describe("C1 — copy: no 'working copy' on the page, the drawer or the book view; the two hints", () => {
   it("the hints and the placeholder are the prompt's", () => {
     expect(PITCH_PLACEHOLDER).toBe("e.g. A ferry skipper races the tide to bring his brother home.");
-    expect(PITCH_HINT).toBe("Keep it on the tip of your tongue. You never know when the right person might ask what your book’s all about.");
+    /* v28 Part B rewrote the pitch hint */
+    expect(PITCH_HINT).toBe("What you’d say if someone asked what your book’s about: the hook, then the stakes and what makes it yours. Keep it on the tip of your tongue. You never know when the right person might ask.");
     expect(SYNOPSIS_HINT).toBe("The whole story in brief, ending included.");
   });
   it("no user-facing 'working copy' or 'working synopsis' in the page's files", () => {
@@ -138,8 +141,9 @@ describe("D — the guide", () => {
   it("four items, in order, with the prompt's titles and lines", () => {
     expect(MS_CHECKLIST.map((i) => [i.title, i.line])).toEqual([
       ["Check your book's details", "Genre, age category and word count."],
-      ["Write your logline", "One or two sentences that sell the book."],
-      ["Add an elevator pitch", "Have it on the tip of your tongue."],
+      /* v28 Part B rewrote these two lines */
+      ["Write your logline", "The hook in a single sentence."],
+      ["Add an elevator pitch", "The 30-second version, said out loud."],
       ["Add a synopsis", "The whole story, ending included."],
     ]);
   });
