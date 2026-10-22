@@ -21,7 +21,8 @@ export const MUT16 = process.env.CL16_MUTATE ?? "";
 /** names the ledger of a run against the build before the pack (the red-first reading) */
 export const BASE16 = process.env.CL16_BASE === "1";
 export const near = (a: unknown, b: number, t: number) => typeof a === "number" && Number.isFinite(a) && Math.abs(a - b) <= t;
-export const LOADED_ROW16 = ".clv-group:not([data-loading]) .clv-row";
+/* navy-bar-address-book v1 — the address book's rows stand in for the retired list rows (RETIRED-navy-bar-address-book-v1.md) */
+export const LOADED_ROW16 = ".clv-group:not([data-loading]) .clv-row, .clv-group:not([data-loading]) [data-nb1='name-row']";
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
 export class Ledger {

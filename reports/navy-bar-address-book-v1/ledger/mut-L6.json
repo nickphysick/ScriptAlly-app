@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L6",
+  "where": "1280 · population: the box",
+  "ok": true,
+  "detail": "{\"bTop\":303,\"bBottom\":-3600.96875,\"B\":[272,408.75,1248,4392.96875],\"vw\":1280,\"vh\":800,\"headTop\":408.75,\"stripTop\":408.75,\"page\":0,\"list\":0,\"listMax\":0,\"nx\":332,\"ny\":612.28125}"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · header and panel tops equal (±1) at every sample",
+  "ok": false,
+  "detail": "289/289 169/169 126/126 126/6 126/-114 126/-234 126/-354 126/-474 126/-594 126/-714 126/-834 126/-954"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · at the page's end: box top = container top + 20 (±1)",
+  "ok": false,
+  "detail": "-3318"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · at the page's end: box bottom = container bottom − 20 (±1)",
+  "ok": true,
+  "detail": "20.03125"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · all four corners in view",
+  "ok": false,
+  "detail": "[272,-3212.25,1248,771.96875]"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · a wheel over the list scrolls the list (and not the page)",
+  "ok": false,
+  "detail": "0→0 page 3621→3621"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · population: the box",
+  "ok": true,
+  "detail": "{\"bTop\":303,\"bBottom\":-3504.125,\"B\":[272,408.75,1480,4396.125],\"vw\":1512,\"vh\":900,\"headTop\":408.75,\"stripTop\":408.75,\"page\":0,\"list\":0,\"listMax\":0,\"nx\":332,\"ny\":615.4375}"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · header and panel tops equal (±1) at every sample",
+  "ok": false,
+  "detail": "289/289 169/169 126/126 126/6 126/-114 126/-234 126/-354 126/-474 126/-594 126/-714 126/-834 126/-954"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · at the page's end: box top = container top + 20 (±1)",
+  "ok": false,
+  "detail": "-3221"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · at the page's end: box bottom = container bottom − 20 (±1)",
+  "ok": true,
+  "detail": "19.875"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · all four corners in view",
+  "ok": false,
+  "detail": "[272,-3115.25,1480,872.125]"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · a wheel over the list scrolls the list (and not the page)",
+  "ok": false,
+  "detail": "0→0 page 3524→3524"
+ }
+]

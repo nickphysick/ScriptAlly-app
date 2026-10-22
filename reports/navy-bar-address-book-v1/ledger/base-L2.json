@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 · population: search, Full screen and the list card",
+  "ok": false,
+  "detail": "{\"f\":false,\"b\":false,\"s\":true,\"fRight\":null,\"bLeft\":null,\"fH\":null,\"bH\":null,\"fTop\":null,\"bTop\":null,\"joint\":null,\"sheetC\":760,\"kbd\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · search and Full screen are adjacent",
+  "ok": false,
+  "detail": "{\"f\":false,\"b\":false,\"s\":true,\"fRight\":null,\"bLeft\":null,\"fH\":null,\"bH\":null,\"fTop\":null,\"bTop\":null,\"joint\":null,\"sheetC\":760,\"kbd\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · both 60 tall (±1)",
+  "ok": false,
+  "detail": "{\"f\":false,\"b\":false,\"s\":true,\"fRight\":null,\"bLeft\":null,\"fH\":null,\"bH\":null,\"fTop\":null,\"bTop\":null,\"joint\":null,\"sheetC\":760,\"kbd\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · their joint centre is the list card's (±2)",
+  "ok": false,
+  "detail": "null vs 760"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · no keycap visible on the page (the sheet)",
+  "ok": false,
+  "detail": "2 visible kbd"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · population: search, Full screen and the list card",
+  "ok": false,
+  "detail": "{\"f\":false,\"b\":false,\"s\":true,\"fRight\":null,\"bLeft\":null,\"fH\":null,\"bH\":null,\"fTop\":null,\"bTop\":null,\"joint\":null,\"sheetC\":876,\"kbd\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · search and Full screen are adjacent",
+  "ok": false,
+  "detail": "{\"f\":false,\"b\":false,\"s\":true,\"fRight\":null,\"bLeft\":null,\"fH\":null,\"bH\":null,\"fTop\":null,\"bTop\":null,\"joint\":null,\"sheetC\":876,\"kbd\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · both 60 tall (±1)",
+  "ok": false,
+  "detail": "{\"f\":false,\"b\":false,\"s\":true,\"fRight\":null,\"bLeft\":null,\"fH\":null,\"bH\":null,\"fTop\":null,\"bTop\":null,\"joint\":null,\"sheetC\":876,\"kbd\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · their joint centre is the list card's (±2)",
+  "ok": false,
+  "detail": "null vs 876"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · no keycap visible on the page (the sheet)",
+  "ok": false,
+  "detail": "2 visible kbd"
+ }
+]

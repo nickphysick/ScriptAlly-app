@@ -1,0 +1,338 @@
+[
+ {
+  "lock": "L4",
+  "where": "1280 list · population: headings",
+  "ok": true,
+  "detail": "{\"n\":10,\"sheetRight\":1248,\"hs\":[{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0}]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 0: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 0: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 1: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 1: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 2: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 2: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 3: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · heading 3: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · population: a stuck heading",
+  "ok": true,
+  "detail": "{\"bottom\":262.9375,\"left\":272,\"width\":976,\"bg\":\"rgb(244, 240, 233)\",\"fade\":0,\"bgImg\":\"linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))\",\"nextTop\":211.9375}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · stuck: white",
+  "ok": false,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · stuck: a 14px fade below it",
+  "ok": false,
+  "detail": "0 linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · stuck: the fade overlaps the next card or row",
+  "ok": true,
+  "detail": "211.9375 vs 262.9375"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · stuck: the band below starts white and has no hard step (<1% of rows' range)",
+  "ok": false,
+  "detail": "{\"first\":228.27055555555552,\"max\":10.290555555555528}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · population: headings",
+  "ok": true,
+  "detail": "{\"n\":10,\"sheetRight\":1248,\"hs\":[{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0}]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 0: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 0: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 1: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 1: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 2: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 2: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 3: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 3: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · population: a stuck heading",
+  "ok": true,
+  "detail": "{\"bottom\":222.9375,\"left\":296,\"width\":928,\"bg\":\"rgb(244, 240, 233)\",\"fade\":0,\"bgImg\":\"linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))\",\"nextTop\":201.9375}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · stuck: white",
+  "ok": false,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · stuck: a 14px fade below it",
+  "ok": false,
+  "detail": "0 linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · stuck: the fade overlaps the next card or row",
+  "ok": true,
+  "detail": "201.9375 vs 222.9375"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · stuck: the band below starts white and has no hard step (<1% of rows' range)",
+  "ok": false,
+  "detail": "{\"first\":233.77388888888933,\"max\":16.086666666666588}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · population: headings",
+  "ok": true,
+  "detail": "{\"n\":10,\"sheetRight\":1480,\"hs\":[{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0}]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 0: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 0: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 1: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 1: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 2: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 2: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 3: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · heading 3: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · population: a stuck heading",
+  "ok": true,
+  "detail": "{\"bottom\":262.9375,\"left\":272,\"width\":1208,\"bg\":\"rgb(244, 240, 233)\",\"fade\":0,\"bgImg\":\"linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))\",\"nextTop\":211.9375}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · stuck: white",
+  "ok": false,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · stuck: a 14px fade below it",
+  "ok": false,
+  "detail": "0 linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · stuck: the fade overlaps the next card or row",
+  "ok": true,
+  "detail": "211.9375 vs 262.9375"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · stuck: the band below starts white and has no hard step (<1% of rows' range)",
+  "ok": false,
+  "detail": "{\"first\":229.63333333333333,\"max\":10.287222222222255}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · population: headings",
+  "ok": true,
+  "detail": "{\"n\":10,\"sheetRight\":1480,\"hs\":[{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":0,\"ruleH\":0}]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 0: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 0: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 1: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 1: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 2: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 2: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 3: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 3: a rule within 40px of the list's right edge",
+  "ok": false,
+  "detail": "0 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · population: a stuck heading",
+  "ok": true,
+  "detail": "{\"bottom\":222.9375,\"left\":296,\"width\":1160,\"bg\":\"rgb(244, 240, 233)\",\"fade\":0,\"bgImg\":\"linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))\",\"nextTop\":201.9375}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · stuck: white",
+  "ok": false,
+  "detail": "rgb(244, 240, 233)"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · stuck: a 14px fade below it",
+  "ok": false,
+  "detail": "0 linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0))"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · stuck: the fade overlaps the next card or row",
+  "ok": true,
+  "detail": "201.9375 vs 222.9375"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · stuck: the band below starts white and has no hard step (<1% of rows' range)",
+  "ok": false,
+  "detail": "{\"first\":233.69111111111152,\"max\":16.063333333333134}"
+ }
+]

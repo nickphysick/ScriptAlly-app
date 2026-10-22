@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is none",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · none: fill rgba(0, 0, 0, 0), initials rgb(244, 238, 229)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(244, 238, 229)\",\"border\":\"dashed 1px\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · none: border dashed 1.5px",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(244, 238, 229)\",\"border\":\"dashed 1px\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · none: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · none on the selected (cream) row: initials rgb(36, 51, 74)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(36, 51, 74)\",\"border\":\"dashed 1px\",\"shadow\":\"none\",\"name\":\"rgb(36, 51, 74)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is agent",
+  "ok": true,
+  "detail": "cv25-agent-05"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · agent: fill rgb(244, 238, 229), initials rgb(36, 51, 74)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"color\":\"rgb(36, 51, 74)\",\"border\":\"none\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · agent: border none",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"color\":\"rgb(36, 51, 74)\",\"border\":\"none\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · agent: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · agent on the selected (cream) row: initials rgb(244, 238, 229), fill rgb(36, 51, 74)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(36, 51, 74)\",\"color\":\"rgb(244, 238, 229)\",\"border\":\"none\",\"shadow\":\"none\",\"name\":\"rgb(36, 51, 74)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is you",
+  "ok": true,
+  "detail": "cv25-agent-06"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · you: fill rgb(217, 128, 95), initials rgb(255, 255, 255)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(217, 128, 95)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"none\",\"shadow\":\"rgba(217, 128, 95, 0.22) 0px 0px 0px 3px\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · you: border none, ring rgba(217, 128, 95, 0.22) 0px 0px 0px 3px",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(217, 128, 95)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"none\",\"shadow\":\"rgba(217, 128, 95, 0.22) 0px 0px 0px 3px\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · you: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · you on the selected (cream) row: initials rgb(255, 255, 255), fill rgb(217, 128, 95)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(217, 128, 95)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"none\",\"shadow\":\"rgba(217, 128, 95, 0.22) 0px 0px 0px 3px\",\"name\":\"rgb(36, 51, 74)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is closed",
+  "ok": true,
+  "detail": "cv25-agent-12"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · closed: fill rgba(0, 0, 0, 0), initials rgba(244, 238, 229, 0.42)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgba(244, 238, 229, 0.42)\",\"border\":\"none\",\"shadow\":\"rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset\",\"name\":\"rgba(244, 238, 229, 0.6)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · closed: border none, ring rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgba(244, 238, 229, 0.42)\",\"border\":\"none\",\"shadow\":\"rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset\",\"name\":\"rgba(244, 238, 229, 0.6)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · closed: the name dims to 60%",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.6)"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · closed: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · closed on the selected (cream) row: initials rgba(28, 19, 15, 0.45)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgba(28, 19, 15, 0.45)\",\"border\":\"none\",\"shadow\":\"rgba(28, 19, 15, 0.25) 0px 0px 0px 1.5px inset\",\"name\":\"rgba(36, 51, 74, 0.7)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is none",
+  "ok": true,
+  "detail": "seed-cal-near"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · none: fill rgba(0, 0, 0, 0), initials rgb(244, 238, 229)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(244, 238, 229)\",\"border\":\"dashed 1px\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · none: border dashed 1.5px",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(244, 238, 229)\",\"border\":\"dashed 1px\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · none: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · none on the selected (cream) row: initials rgb(36, 51, 74)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(36, 51, 74)\",\"border\":\"dashed 1px\",\"shadow\":\"none\",\"name\":\"rgb(36, 51, 74)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is agent",
+  "ok": true,
+  "detail": "cv25-agent-05"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · agent: fill rgb(244, 238, 229), initials rgb(36, 51, 74)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"color\":\"rgb(36, 51, 74)\",\"border\":\"none\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · agent: border none",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"color\":\"rgb(36, 51, 74)\",\"border\":\"none\",\"shadow\":\"none\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · agent: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · agent on the selected (cream) row: initials rgb(244, 238, 229), fill rgb(36, 51, 74)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(36, 51, 74)\",\"color\":\"rgb(244, 238, 229)\",\"border\":\"none\",\"shadow\":\"none\",\"name\":\"rgb(36, 51, 74)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is you",
+  "ok": true,
+  "detail": "cv25-agent-06"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · you: fill rgb(217, 128, 95), initials rgb(255, 255, 255)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(217, 128, 95)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"none\",\"shadow\":\"rgba(217, 128, 95, 0.22) 0px 0px 0px 3px\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · you: border none, ring rgba(217, 128, 95, 0.22) 0px 0px 0px 3px",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(217, 128, 95)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"none\",\"shadow\":\"rgba(217, 128, 95, 0.22) 0px 0px 0px 3px\",\"name\":\"rgb(244, 238, 229)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · you: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · you on the selected (cream) row: initials rgb(255, 255, 255), fill rgb(217, 128, 95)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(217, 128, 95)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"none\",\"shadow\":\"rgba(217, 128, 95, 0.22) 0px 0px 0px 3px\",\"name\":\"rgb(36, 51, 74)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is closed",
+  "ok": true,
+  "detail": "cv25-agent-12"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · closed: fill rgba(0, 0, 0, 0), initials rgba(244, 238, 229, 0.42)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgba(244, 238, 229, 0.42)\",\"border\":\"none\",\"shadow\":\"rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset\",\"name\":\"rgba(244, 238, 229, 0.6)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · closed: border none, ring rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgba(244, 238, 229, 0.42)\",\"border\":\"none\",\"shadow\":\"rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset\",\"name\":\"rgba(244, 238, 229, 0.6)\",\"dots\":0}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · closed: the name dims to 60%",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.6)"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · closed: no separate status dot in the row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · closed on the selected (cream) row: initials rgba(28, 19, 15, 0.45)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgba(28, 19, 15, 0.45)\",\"border\":\"none\",\"shadow\":\"rgba(28, 19, 15, 0.25) 0px 0px 0px 1.5px inset\",\"name\":\"rgba(36, 51, 74, 0.7)\",\"dots\":0}"
+ }
+]

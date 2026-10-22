@@ -13,7 +13,6 @@ import { expect, test, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
-import { openContacts16, LOADED_ROW16 } from "./cl16Lib";
 
 const DIR = "reports/qc-v142";
 const SIZES = [{ width: 1280, height: 800 }, { width: 1512, height: 900 }] as const;
@@ -81,7 +80,6 @@ async function openQc(page: Page, vp: VP, o: Opt = {}) {
   await page.mouse.move(5, 5);
   if (o.pinned) { await page.keyboard.press("f"); await page.waitForTimeout(1200); }
 }
-const vis = (sel: string) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.getBoundingClientRect().height > 0)`;
 const rect = (page: Page, sel: string) => page.evaluate((s) => {
   const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0);
   if (!e) return null;
@@ -92,50 +90,9 @@ const press = (page: Page, sel: string) => page.evaluate((s) => { const e = [...
 const scrollTo = (page: Page, y: number) => page.evaluate((v) => { const s = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0); if (s) s.scrollTop = v; return s ? s.scrollTop : null; }, y);
 
 /** wait for a smooth scroll to finish: the scroll position unchanged across three reads 150ms apart (at most 6s) */
-async function settle(page: Page) {
-  let last = -1, same = 0;
-  for (let i = 0; i < 40 && same < 3; i += 1) {
-    await page.waitForTimeout(150);
-    const y = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)?.scrollTop ?? 0);
-    same = y === last ? same + 1 : 0;
-    last = y;
-  }
-}
 
 /* ── L1 · the title row: placed against its card as the Contact list's is ─────────────────────────────────────────── */
-test("QC142-L1 title row", async ({ page }) => {
-  test.setTimeout(420_000);
-  const L = new Ledger("L1");
-  for (const vp of SIZES) {
-    const at = `${vp.width}`;
-    await openContacts16(page, vp);
-    await page.locator(LOADED_ROW16).first().waitFor({ timeout: 30_000 });
-    await page.waitForTimeout(800);
-    const cl = await page.evaluate(() => {
-      const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect() ?? null;
-      const t = v('[data-cl20="count"]'), card = v(".cl16-list.cl19-card"), sw = v('[data-cl20="view-pill"]'), fs = v('[data-cl20="full"]'), row = v('[data-cl20="title-row"]'), hd = v(".cl17-hd");
-      if (!t || !card || !sw || !fs || !row) return null;
-      return { title: t.left - card.left, sw: sw.left - t.right, fs: fs.left - t.right, gap: card.top - row.bottom, hero: hd ? row.top - hd.bottom : null };
-    });
-    await openQc(page, vp);
-    await mutate(page, "L1");
-    const qc = await page.evaluate(() => {
-      const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect() ?? null;
-      const t = v('[data-qc142="count"]'), card = v(".qc138-sheet"), sw = v('[data-qc142="view-pill"]'), fs = v('[data-qc142="full"]'), row = v('[data-qc142="title-row"]'), hd = v(".qc138-hd");
-      if (!t || !card || !sw || !fs || !row) return null;
-      return { title: t.left - card.left, sw: sw.left - t.right, fs: fs.left - t.right, gap: card.top - row.bottom, hero: hd ? row.top - hd.bottom : null, text: [...document.querySelectorAll<HTMLElement>('[data-qc142="count"]')].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "" };
-    });
-    L.check(`${at} · population`, cl && qc, `Contact list ${cl ? "found" : "MISSING"} · Query Centre ${qc ? "found" : "MISSING"}`);
-    if (!cl || !qc) continue;
-    L.check(`${at} · the title's left edge, from the card`, near(qc.title, cl.title, 1), `QC ${qc.title.toFixed(1)} · CL ${cl.title.toFixed(1)}`);
-    L.check(`${at} · the toggle, from the title's right edge`, near(qc.sw, cl.sw, 1), `QC ${qc.sw.toFixed(1)} · CL ${cl.sw.toFixed(1)}`);
-    L.check(`${at} · Full screen, from the title's right edge`, near(qc.fs, cl.fs, 1), `QC ${qc.fs.toFixed(1)} · CL ${cl.fs.toFixed(1)}`);
-    L.check(`${at} · 18 from the row to the card`, near(qc.gap, 18, 1), `QC ${qc.gap.toFixed(1)}`);
-    L.check(`${at} · 44 (H7) from the hero stack to the row`, near(qc.hero, 44, 1), `QC ${qc.hero?.toFixed(1)} · CL ${cl.hero?.toFixed(1)}`);
-    L.check(`${at} · the words`, /^All \d+ queries$/.test(qc.text), qc.text);
-  }
-  L.done(14);
-});
+/* RETIRED (navy-bar-address-book v1): QC142-L1 · the title row — retired on both pages: the Query Centre's count and switch moved into the navy bar (navy-bar A1) and the Contact list's Cards / List views became the address book (B1). NB1-L1/L2 hold the new places. */
 
 /* ── L2 · the unpinned toolbar is the Contact list's height ──────────────────────────────────────────────────────── */
 test("QC142-L2 toolbar", async ({ page }) => {
@@ -147,19 +104,18 @@ test("QC142-L2 toolbar", async ({ page }) => {
     const m = await page.evaluate(() => {
       const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0);
       const h = (s: string) => v(s)?.getBoundingClientRect().height ?? null;
-      const glyph = v(".qc140-jr [data-qc140='jump-btn']");
-      return { tb: h("[data-qc140='toolbar']"), find: h("[data-qc140='find']"), group: h("[data-qc140='group-chip']"), filters: h("[data-qc140='filters-chip']"),
-        jb: glyph ? { w: glyph.getBoundingClientRect().width, h: glyph.getBoundingClientRect().height } : null };
+      /* RE-POINTED (navy-bar v1 A1/A2): Find moved to the pill above the list (NB1-L2 holds its 60) and the jump row is gone;
+         the bar's chips are now Filters · Group by · Sort */
+      return { tb: h("[data-qc140='toolbar']"), group: h("[data-qc140='group-chip']"), filters: h("[data-qc140='filters-chip']"), sort: h("[data-qc1421='sort-chip']") };
     });
     const at = `${vp.width}`;
-    L.check(`${at} · population`, m.tb != null && m.find != null && m.group != null && m.filters != null && m.jb, JSON.stringify(m));
+    L.check(`${at} · population`, m.tb != null && m.group != null && m.filters != null && m.sort != null, JSON.stringify(m));
     L.check(`${at} · the toolbar is 52 tall`, near(m.tb, 52, 1), `${m.tb}`);
-    L.check(`${at} · Find is 34`, near(m.find, 34, 1), `${m.find}`);
     L.check(`${at} · Group by is 34`, near(m.group, 34, 1), `${m.group}`);
     L.check(`${at} · Filters is 34`, near(m.filters, 34, 1), `${m.filters}`);
-    L.check(`${at} · a jump-row glyph button is 40 × 34`, m.jb && near(m.jb.w, 40, 1) && near(m.jb.h, 34, 1), JSON.stringify(m.jb));
+    L.check(`${at} · Sort is 34`, near(m.sort, 34, 1), `${m.sort}`);
   }
-  L.done(12);
+  L.done(10);
 });
 
 /* ── L3 · no Pin on the page; Full screen by button, F and Esc; the toolbar's icon toggle switches views ──────── */
@@ -212,19 +168,15 @@ const ids = (page: Page) => page.evaluate(() => {
   if (!sheet) return null;
   const sel = sheet.getAttribute("data-view") === "cards" ? "[data-qc142='card']" : ".qc138-row[data-qcv='row']";
   const out = [...sheet.querySelectorAll<HTMLElement>(sel)].filter((e) => !e.closest("[data-qc139='practice']")).map((e) => e.dataset.id ?? "");
-  const title = [...document.querySelectorAll<HTMLElement>("[data-qc142='count']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "";
+  /* RE-POINTED (navy-bar v1 A1): the count is the navy bar's */
+  const title = [...document.querySelectorAll<HTMLElement>("[data-qc144='count']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "";
   return { ids: out, title, view: sheet.getAttribute("data-view") };
 });
-const titleN = (t: string) => { const m = /^(?:All (\d+)|(\d+) of \d+) quer/.exec(t.trim()); return m ? Number(m[1] ?? m[2]) : NaN; };
-async function setView(page: Page, v: "cards" | "list") { await press(page, `[data-qc142='view-pill'] [data-view='${v}']`); await page.waitForTimeout(900); }
+/* "87 queries" or "8 of 87 queries" (the bar's count) */
+const titleN = (t: string) => { const m = /^(\d+)(?: of \d+)? quer/.exec(t.trim()); return m ? Number(m[1]) : NaN; };
+async function setView(page: Page, v: "cards" | "list") { await press(page, `[data-qc144='view-bar'] [data-view='${v}']`); await page.waitForTimeout(900); }
 async function unfold(page: Page) {
   for (let i = 0; i < 12; i += 1) { const any = await press(page, ".qc138-sheet .qc138-grp.shut .qc138-band"); if (!any) break; await page.waitForTimeout(250); }
-}
-async function pickGroup(page: Page, g: string) {
-  await press(page, ".qcv-group[data-v138] [data-qc140='group']");
-  await page.waitForTimeout(400);
-  await press(page, `[data-qc140='group-opt'][data-g='${g}']`);
-  await page.waitForTimeout(900);
 }
 async function filterChip(page: Page, sel: string) {
   await press(page, ".qcv-group[data-v138] [data-qc140='filters']");
@@ -357,26 +309,10 @@ test("QC142-L6 not covered", async ({ page }) => {
         return { stackB: stack.bottom, top: hs.length ? hs[0].top : null };
       });
       L.check(`${at} · the stuck heading's top is the toolbar's bottom`, near(stuck.top, stuck.stackB, 1), `heading ${stuck.top?.toFixed(1)} · toolbar ${stuck.stackB.toFixed(1)}`);
-      /* every jump in the row (the folded ones through "+N more" are reached by scrolling the row's own targets) */
-      await scrollTo(page, 0);
-      await page.waitForTimeout(400);
-      const keys = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qc140='jump-btn']")].filter((b) => b.getBoundingClientRect().height > 0 && !b.hasAttribute("data-over")).map((b) => b.dataset.gkey ?? ""));
-      L.check(`${at} · population: jumps`, keys.length >= 3, `${keys.length}`);
-      let stuckJumps = 0;
-      for (const k of keys) {
-        await press(page, `.qc138-sheet [data-qc140='jump-btn'][data-gkey="${k}"]`);
-        await settle(page);
-        const r = await read(k);
-        if (!r) { L.check(`${at} · jump ${k}`, false, "no section"); continue; }
-        if (r.atFoot && Math.abs(r.hT - r.stackB) > 1) { L.check(`${at} · jump ${k} (at the foot: the list cannot scroll it up)`, r.cT - r.hB >= 24 - 0.5, `${(r.cT - r.hB).toFixed(1)}`); continue; }
-        stuckJumps += 1;
-        L.check(`${at} · jump ${k}: the heading sits on the toolbar`, near(r.hT, r.stackB, 1), `heading ${r.hT.toFixed(1)} · toolbar ${r.stackB.toFixed(1)}`);
-        L.check(`${at} · jump ${k}: its first card is 24 or more below it`, r.cT - r.hB >= 24 - 0.5, `${(r.cT - r.hB).toFixed(1)}`);
-      }
-      L.check(`${at} · population: jumps that landed under the toolbar`, stuckJumps >= 2, `${stuckJumps}`);
+      /* RETIRED (navy-bar v1 A1): the half that pressed each jump-row button — the jump row is gone in both modes */
     }
   }
-  L.done(30);
+  L.done(12);
 });
 
 /* ── L7 · the strip: under the toolbar, the card's width (inset 24 in full screen), one Clear all, live ─────────── */

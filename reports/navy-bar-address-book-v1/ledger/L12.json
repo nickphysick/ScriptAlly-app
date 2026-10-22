@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L12",
+  "where": "1280 · two ticks show \"2 selected\" and the bulk actions",
+  "ok": true,
+  "detail": "{\"n\":\"2 selected\",\"acts\":[\"Select all 52\",\"Export 2\",\"Clear\"]}"
+ },
+ {
+  "lock": "L12",
+  "where": "1280 · population: Export in Filters",
+  "ok": true,
+  "detail": "Export 7 agents · 7"
+ },
+ {
+  "lock": "L12",
+  "where": "1280 · \"Export 7 agents\" downloads 7 rows",
+  "ok": true,
+  "detail": "Export 7 agents · 7 rows"
+ },
+ {
+  "lock": "L12",
+  "where": "1280 · population: an agent with no email",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L12",
+  "where": "1280 · \"+ Add email\" opens the agent form at email",
+  "ok": true,
+  "detail": "email"
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · two ticks show \"2 selected\" and the bulk actions",
+  "ok": true,
+  "detail": "{\"n\":\"2 selected\",\"acts\":[\"Select all 52\",\"Export 2\",\"Clear\"]}"
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · population: Export in Filters",
+  "ok": true,
+  "detail": "Export 7 agents · 7"
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · \"Export 7 agents\" downloads 7 rows",
+  "ok": true,
+  "detail": "Export 7 agents · 7 rows"
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · population: an agent with no email",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · \"+ Add email\" opens the agent form at email",
+  "ok": true,
+  "detail": "email"
+ }
+]

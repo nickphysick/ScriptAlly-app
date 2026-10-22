@@ -1,0 +1,29 @@
+[L1] 8/8 green
+[L2] 10/10 green
+[L4] 8/8 green
+[L5] 8/8 green
+[L6] 28/28 green
+[L7] 8/8 green
+[L9] 10/10 green
+  1) [measure] › tests/e2e/hr1.measure.ts:137:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs 
+  2) [measure] › tests/e2e/hr1.measure.ts:221:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+[L1] 20/20 green
+[L2] 10/10 green
+[L3] 16/16 green
+[L4] 56/56 green
+[L5] 8/8 green
+[L6] 12/12 green
+[L7] 8/8 green
+[L8] 42/42 green
+[L9] 12/12 green
+[L10] 12/12 green
+[L11] 10/10 green
+[L12] 10/10 green
+[L2] 10/10 green
+[L3] 18/18 green
+[L4] 28/28 green
+[L5] 22/22 green
+[L6] 12/12 green
+[L7] 28/28 green
+  2 failed
+  53 passed (24.4m)

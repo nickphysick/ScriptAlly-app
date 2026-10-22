@@ -54,7 +54,7 @@ const RIGHT_W = (w: number) => (w === 1920 ? 370 : 332);
 
 type PageMap = { key: string; route: string; header: string; eyebrow: string; title: string; byline: string; acts: string; art?: string; right?: string; rightTokenW?: boolean; content: string; init?: string };
 const PAGES: PageMap[] = [
-  { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-cl20='title-row']" },
+  { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-nb1='book']" }, /* RE-POINTED (navy-bar v1 B1): the Contact list's content starts with the address book */
   /* RE-POINTED (Contact list v20 §A): the Contact list's content now opens on its title row (the count, the Cards / List
      pill, Full screen), which sits where the toolbar did; the toolbar follows 54 lower */
   { key: "queries", route: "/queries", header: "[data-qc138='header']", eyebrow: "[data-qc138='eyebrow']", title: "[data-qc138='title']", byline: "[data-qc138='byline']", acts: "[data-qc138='acts']", art: "[data-qc138='hawk']", right: "[data-qc138='chart-col']", rightTokenW: true, content: ".qcv-group > .qcv-page" },
@@ -231,7 +231,8 @@ test.describe("Header rules v1.1", () => {
       cases.push({ name: `corkboard ${vp.width}`, route: "/todo/corkboard", vp, sel: ["header.hp3", "header.hp3 h1"] });
       cases.push({ name: `discover coming soon ${vp.width}`, route: "/agents/discover", vp, sel: ["[data-dv1='coming-soon']", "[data-dv1='coming-soon'] h1"] });
       cases.push({ name: `queries pinned ${vp.width}`, route: "/queries", vp, pinned: "queries", sel: ["[data-qc140='band']", "[data-qc140='toolbar']", "[data-qc138='headings']"] });
-      cases.push({ name: `contacts pinned ${vp.width}`, route: "/agents", vp, pinned: "agents", sel: ["[data-cl19='head']", "[data-cl19='toolbar']"] });
+      /* RETIRED (navy-bar-address-book v1 B5): "contacts pinned" read the pinned list's head and toolbar; the Contact list
+         is the address book now, whose full screen is NB1-L11's */
     }
     for (const route of ["/queries", "/agents", "/queries/analytics"]) cases.push({ name: `phone ${route}`, route, vp: { width: 390, height: 844 }, sel: ["h1"] });
     const got: Record<string, (number[] | null)[]> = {};

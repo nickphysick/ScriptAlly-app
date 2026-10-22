@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 · population: search, Full screen and the list card",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":977.640625,\"bLeft\":977.640625,\"fH\":60,\"bH\":60,\"fTop\":404.75,\"bTop\":404.75,\"joint\":760,\"sheetC\":760,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · search and Full screen are adjacent",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":977.640625,\"bLeft\":977.640625,\"fH\":60,\"bH\":60,\"fTop\":404.75,\"bTop\":404.75,\"joint\":760,\"sheetC\":760,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · both 60 tall (±1)",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":977.640625,\"bLeft\":977.640625,\"fH\":60,\"bH\":60,\"fTop\":404.75,\"bTop\":404.75,\"joint\":760,\"sheetC\":760,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · their joint centre is the list card's (±2)",
+  "ok": true,
+  "detail": "760 vs 760"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · no keycap visible on the page (the sheet)",
+  "ok": true,
+  "detail": "0 visible kbd"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · population: search, Full screen and the list card",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1093.640625,\"bLeft\":1093.640625,\"fH\":60,\"bH\":60,\"fTop\":404.75,\"bTop\":404.75,\"joint\":876,\"sheetC\":876,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · search and Full screen are adjacent",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1093.640625,\"bLeft\":1093.640625,\"fH\":60,\"bH\":60,\"fTop\":404.75,\"bTop\":404.75,\"joint\":876,\"sheetC\":876,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · both 60 tall (±1)",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1093.640625,\"bLeft\":1093.640625,\"fH\":60,\"bH\":60,\"fTop\":404.75,\"bTop\":404.75,\"joint\":876,\"sheetC\":876,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · their joint centre is the list card's (±2)",
+  "ok": true,
+  "detail": "876 vs 876"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · no keycap visible on the page (the sheet)",
+  "ok": true,
+  "detail": "0 visible kbd"
+ }
+]

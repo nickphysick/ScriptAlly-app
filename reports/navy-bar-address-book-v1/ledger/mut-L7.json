@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L7",
+  "where": "1280 · population: the header and its rows",
+  "ok": true,
+  "detail": "{\"first\":\"Contact list\",\"count\":\"52 agents\",\"texts\":[\"Contact list\",\"52 agents\"],\"rows\":52}"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 · the header's first text is \"52 agents\"",
+  "ok": false,
+  "detail": "Contact list"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 · no other title in the header",
+  "ok": false,
+  "detail": "[\"Contact list\",\"52 agents\"]"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 · Your move: \"{n} of 52 agents\", n = the rows showing",
+  "ok": false,
+  "detail": "{\"first\":\"Contact list\",\"rows\":4}"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · population: the header and its rows",
+  "ok": true,
+  "detail": "{\"first\":\"Contact list\",\"count\":\"52 agents\",\"texts\":[\"Contact list\",\"52 agents\"],\"rows\":52}"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · the header's first text is \"52 agents\"",
+  "ok": false,
+  "detail": "Contact list"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · no other title in the header",
+  "ok": false,
+  "detail": "[\"Contact list\",\"52 agents\"]"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · Your move: \"{n} of 52 agents\", n = the rows showing",
+  "ok": false,
+  "detail": "{\"first\":\"Contact list\",\"rows\":4}"
+ }
+]

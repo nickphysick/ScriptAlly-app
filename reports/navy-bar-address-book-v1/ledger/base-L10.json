@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "L10",
+  "where": "1280 · population: the card",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L10",
+  "where": "1512 · population: the card",
+  "ok": false,
+  "detail": "null"
+ }
+]
