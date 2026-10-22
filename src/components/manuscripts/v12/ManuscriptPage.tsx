@@ -2,83 +2,61 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ THE MANUSCRIPTS PAGE (v21) — the Contact list look, the book on one page ══
+ * ══ THE MANUSCRIPTS PAGE (v27) — one neat page for the book, a book that opens, and a guide ══
  *
- * Design authority: design-refs/manuscripts/manuscripts-v21.html. Locks:
- * tests/e2e/manuscriptsV21.measure.ts (MS21) and the unit locks beside this file.
+ * Design authority: design-refs/manuscripts-v27/manuscripts-v27.html. Locks: tests/e2e/manuscriptsV27.measure.ts (MSV27)
+ * and the unit locks beside this file.
  *
- * TOP TO BOTTOM: the open header (the book's title, one line, two buttons, the Archivist over the
- * hairline) · the book card beside Recent activity · the versions banner · Versions (the copy and a
- * stacked deck, with a list on demand) · Your materials (three doors on a full-width band) · the
- * app footer. With no manuscript the same header carries one action over three previews.
+ * TWO CONTAINERS AND NOTHING ELSE: the book (the header-rules header inside a white card, the details card on its
+ * right, the logline at its foot) and the coming-soon strip. No footer. The book's details open in the book view
+ * (`v27/BookView`), and every edit is the one Edit details form (`Msv21EditDetails`), which can open on a field.
  *
+ * ⚠️ NO PRO INFORMATION HERE. Versions moved to their own page (`/manuscripts/versions`, `v27/VersionsPage`); packages,
+ *    materials, comps and activity are their own pages' business.
  * ⚠️ SINGLE-MANUSCRIPT BY DESIGN. The page shows the SCOPED manuscript — the shell's own
- * `scriptally_active_manuscript_id` selection resolved through `scopedManuscript` — read on every
- * arrival (`location.key`), because the switcher writes the key and re-opens the route.
- *
- * ⚠️ NOTHING HERE CHANGES A QUERY INLINE. An activity row opens the query drawer — the "sent"
- * journey for an owed request — and only the drawer writes.
- *
- * ⚠️ THE JUST-DELETED STATE READS NOTHING THAT WAS DELETED. The page remembers the book it last
- * showed (id and title, in memory, for the session). When that book is gone and no other is left,
- * the empty state names it. Nothing on this page deletes a manuscript; whatever does, this notices.
+ *    `scriptally_active_manuscript_id` selection resolved through `scopedManuscript` — read on every arrival
+ *    (`location.key`), because the switcher writes the key and re-opens the route.
+ * ⚠️ THE EMPTY AND JUST-DELETED STATES ARE v21's, UNCHANGED.
  */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
-import { ComponentType } from "../../../types";
-import type { BookVersion } from "../../../types";
-import {
-  currentBookVersion, letterInUse, materialsOf, owedRequests, queryingSince, scopedManuscript,
-} from "../../../lib/manuscriptSummary";
-import { manuscriptActivity, packagesFact, versionTiles } from "../../../lib/manuscriptShelf";
-import { bookVersionsOf } from "../../../lib/bookVersions";
-import { queryLine } from "../../../lib/compsPage";
-import {
-  bookFacts, materialDoors, rowDoor, v21Activity, versionCards, versionsLede,
-} from "../../../lib/manuscriptV21";
-import type { Door, V21ActivityRow } from "../../../lib/manuscriptV21";
+import { queryingSince, scopedManuscript } from "../../../lib/manuscriptSummary";
+import { bookRows, cardRows, coverKicker, msGuideDone, whereItsBeen, wordsOf, wordsText } from "../../../lib/manuscriptV27";
+import type { MsGuideKey } from "../../../lib/manuscriptV27";
+import { MS_CHECKLIST, MS_GUIDE_HIDDEN_PATH, MS_GUIDE_SEEN_PATH, MS_GUIDE_UNHIDE_PATH, msGuideOf } from "../../../lib/pageChecklist";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { AppFooter } from "../../shell/AppFooter";
-import { PageGuide } from "../../shell/PageGuide";
-import type { GuideStep } from "../../shell/PageGuide";
+import { PageChecklist, type FlowCard } from "../../shell/guide/PageChecklist";
 import { useToast } from "../../toast/ToastProvider";
-import {
-  ActivityCard, BookCard, EmptyPreviews, MS_HEADER_SUB, MaterialDoors, MsBanner, MsOpenHeader, VersionsSection,
-} from "./Msv21Parts";
-import { Msv21AddManuscript, Msv21EditDetails, Msv21Version } from "./Msv21Dialogs";
+import { EmptyPreviews, MsBanner, MsOpenHeader } from "./Msv21Parts";
+import { Msv21AddManuscript, Msv21EditDetails, type EditField } from "./Msv21Dialogs";
+import { BookContainer, SoonStrip } from "../v27/Msv27Parts";
+import { BookView, type BookField } from "../v27/BookView";
+import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import "./msv12.css";
 import "./msv21.css";
-import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
-import { compsInLetter, currentLetter } from "../../../lib/compUsage";
+import "../v27/msv27.css";
 
 /** The shell's shared scope key — the sidebar switcher writes it; this page only reads. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-
-export const MS_GUIDE_PAGE = "manuscripts";
-export const MS_GUIDE: readonly GuideStep[] = [
-  {
-    title: "Your book on one page",
-    body: ["The details agents see first, every version you’ve saved, and what’s been happening with it."],
-    subject: '[data-ms21="book"]',
-  },
-  {
-    title: "Versions",
-    body: ["Save each new opening or draft, and see which one gets requests."],
-    subject: '[data-ms21="versions"]',
-  },
-  {
-    title: "Your materials",
-    body: ["Comps, letters and packages each have their own page."],
-    subject: '[data-ms21="materials"]',
-  },
-];
 
 export const EMPTY_TITLE = "Let's add your book";
 export const EMPTY_SUB = "Title, word count, genre and a line about it. It takes a minute, and everything else in QueryHawk hangs off it.";
 export const DELETED_TITLE = "Add your book again";
 export const deletedSub = (title: string): string =>
   `${title} has been deleted, along with its queries and materials. Add a manuscript to start again.`;
+
+/** The guide's step cards (Part D): what each says, and which section of Edit details it lights. */
+export const MS_STEP_CARDS: Record<MsGuideKey, { field: EditField; title: string; body: React.ReactNode }> = {
+  details: { field: "basics", title: "Check the basics", body: <>Agents filter on <b>genre</b>, <b>age category</b> and <b>word count</b> first. Make sure they’re right, then press <b>Save details</b>.</> },
+  logline: { field: "logline", title: "Your logline", body: <>One or two sentences: who it’s about, what they want and what stands in the way. Then press <b>Save details</b>.</> },
+  pitch: { field: "elevatorPitch", title: "Your elevator pitch", body: <>You never know when the right person might ask what your book’s all about, and it might be the moment that matters. Say it out loud: if it trips you up, trim it. Then press <b>Save details</b>.</> },
+  synopsis: { field: "synopsis", title: "Your synopsis", body: <>The whole story in brief, ending included. Agents often ask for one alongside your opening pages. Then press <b>Save details</b>.</> },
+};
+export const MS_ALL_DONE = { title: "Your book's set up", line: "Everything an agent asks about the book, in one place. Next, try smart querying." };
+export const MS_FINAL = { kicker: "Manuscripts · 4 of 4", title: "Your book’s set up.", line: "Everything an agent asks about the book, in one place. Now put it to work with smart querying." };
+/** No help article covers a manuscript's details yet; Learn more goes to the Help Centre (its Materials area). */
 
 /** The book this page last showed, for the session. Module scope: it must outlive the page's own
  *  state, and it holds nothing but an id and a title. */
@@ -92,10 +70,10 @@ export interface ManuscriptPageProps {
   openId?: string | null;
 }
 
-export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, openId = null }) => {
+export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, active = true, openId = null }) => {
   const {
-    currentUser, manuscripts, versions, packages, agents, queries, activities, collectionsReady,
-    updateManuscript, addManuscript,
+    currentUser, manuscripts, agents, queries, activities, collectionsReady,
+    updateManuscript, addManuscript, updateUserPaths,
   } = useScriptAllyDb();
   const location = useLocation();
   const { showToast } = useToast();
@@ -106,52 +84,21 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
   }, [location.key]);
   const ms = useMemo(() => scopedManuscript(manuscripts, openId ?? stored), [manuscripts, openId, stored]);
 
-  /* everything below is scoped to the one manuscript the page shows */
   const msQueries = useMemo(() => (ms ? queries.filter((q) => q.manuscriptId === ms.id) : []), [ms, queries]);
-  const msPackages = useMemo(() => (ms ? packages.filter((p) => p.manuscriptId === ms.id && p.status !== "Retired") : []), [ms, packages]);
-  const bookVersions = useMemo(() => bookVersionsOf(ms), [ms]);
-  const current = useMemo(() => currentBookVersion(ms), [ms]);
-  const letters = useMemo(() => (ms ? materialsOf(ms.id, ComponentType.QUERY_LETTER, versions) : []), [ms, versions]);
-  const synopses = useMemo(() => (ms ? materialsOf(ms.id, ComponentType.SYNOPSIS, versions) : []), [ms, versions]);
-  const inUseLetter = useMemo(() => letterInUse(msPackages, msQueries), [msPackages, msQueries]);
-  const owed = useMemo(() => owedRequests(msQueries), [msQueries]);
   const since = useMemo(() => queryingSince(msQueries), [msQueries]);
-  const comps = useMemo(() => ms?.comps ?? [], [ms]);
+  const author = (currentUser?.name ?? "").trim() || null;
 
-  const facts = useMemo(
-    () => (ms ? bookFacts({ ms, authorName: currentUser?.name, since, current }) : []),
-    [ms, currentUser, since, current],
-  );
-  /* the comps page keeps no saved format: it opens on "readers", and so does this line */
-  /* comps v25: "in your letter" is the CURRENT letter's own record, never a flag on the comp */
-  const nowLetter = useMemo(() => (ms ? currentLetter(ms.id, versions) : null), [ms, versions]);
-  const line = useMemo(() => queryLine(compsInLetter([...comps], nowLetter), ms?.title ?? "", "readers"), [comps, nowLetter, ms]);
-  const rows = useMemo(() => {
-    if (!ms) return [];
-    const now = new Date();
-    const all = manuscriptActivity({ ms, activities, queries, agents, packages, bookVersions, now, max: Number.MAX_SAFE_INTEGER }).rows;
-    return v21Activity({
-      rows: all, owed, now,
-      agentName: (id) => { const a = agents.find((x) => x.id === id); return (a?.name || a?.agency || "The agent").trim(); },
-    });
-  }, [ms, activities, queries, agents, packages, bookVersions, owed]);
-  const cards = useMemo(
-    () => versionCards(versionTiles(bookVersions, current?.id ?? null, msPackages, msQueries)),
-    [bookVersions, current, msPackages, msQueries],
-  );
-  const lede = useMemo(() => versionsLede(cards, ms?.title ?? ""), [cards, ms]);
-  const doors = useMemo(() => materialDoors({
-    comps, letterCompIds: nowLetter?.compIds ?? null, letters: letters.length, synopses: synopses.length,
-    letterName: letters.find((l) => l.id === inUseLetter)?.versionName ?? null,
-    livePackages: msPackages.length, packageQueries: packagesFact(msPackages, msQueries).queries,
-  }), [comps, nowLetter, letters, synopses, inUseLetter, msPackages, msQueries]);
+  /* ══ the book view and the edit form: one open at a time ═══════════════════════════════════ */
 
-  /* ══ the page's own dialogs ═════════════════════════════════════════════════════════════════ */
-
-  const [editOpen, setEditOpen] = useState(false);
-  /** `null` closed · `"new"` a new version · a version to rename (no per-version panel exists) */
-  const [versionDlg, setVersionDlg] = useState<"new" | BookVersion | null>(null);
+  const [bookOpen, setBookOpen] = useState(false);
+  /** null closed · otherwise open, on the named section (or none) */
+  const [edit, setEdit] = useState<{ field?: EditField } | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [flowKey, setFlowKey] = useState<MsGuideKey | null>(null);
+  const [nonce, setNonce] = useState(0);
+
+  const openEdit = useCallback((field?: EditField) => { setBookOpen(false); setEdit({ field }); }, []);
+  const closeEdit = useCallback(() => { setEdit(null); setFlowKey(null); }, []);
 
   /* ══ the just-deleted state ═════════════════════════════════════════════════════════════════ */
 
@@ -163,16 +110,45 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
     showToast({ message: `${deleted.title} deleted.` });
   }, [deleted, showToast]);
 
+  /* ══ the guide (Part D) ═════════════════════════════════════════════════════════════════════ */
+
+  const guide = msGuideOf(currentUser);
+  const done = useMemo(() => msGuideDone(ms), [ms]);
+  const markSeen = useCallback(() => { if (!guide.seen) void updateUserPaths(MS_GUIDE_SEEN_PATH); }, [guide.seen, updateUserPaths]);
+  const hideGuide = useCallback(() => { void updateUserPaths(MS_GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
+  const unhideGuide = useCallback(() => { void updateUserPaths(MS_GUIDE_UNHIDE_PATH); }, [updateUserPaths]);
+  /* every step opens Edit details on its own field — never the book view (closed first if it is open) */
+  const startStep = useCallback((k: MsGuideKey) => {
+    const card = MS_STEP_CARDS[k];
+    setBookOpen(false);
+    setEdit({ field: card.field });
+    setFlowKey(k);
+    return true;
+  }, []);
+  const toVersions = useCallback(() => onNavigate("manuscripts", "Versions"), [onNavigate]);
+  const toPackages = useCallback(() => onNavigate("manuscripts", "Submission packages"), [onNavigate]);
+  const flow: FlowCard | null = useMemo(() => {
+    if (!flowKey || !edit) return null;
+    const card = MS_STEP_CARDS[flowKey];
+    const n = MS_CHECKLIST.findIndex((i) => i.key === flowKey) + 1;
+    return {
+      id: `ms-${flowKey}`, kicker: `Manuscripts · Step ${n} of ${MS_CHECKLIST.length}`, title: card.title, body: card.body,
+      target: () => document.querySelector<HTMLElement>(`[data-ms21-sect="${card.field}"]`),
+      passThrough: true, follow: true, above: true,
+      onBack: () => { setFlowKey(null); setNonce((x) => x + 1); },
+      onEscape: () => setFlowKey(null),
+    };
+  }, [flowKey, edit]);
+  const targetFor = useCallback(() => ({ el: null, text: "" }), []);
+
   /* ══ render ═════════════════════════════════════════════════════════════════════════════════ */
 
   const grid = (children: React.ReactNode, state: "filled" | "empty" | "deleted" | "loading") => (
     <WorkspacePageGrid className="msv12-wpg" masthead={null} scrollLabel="Manuscripts">
-      {/* ⚠️ THE FOOTER IS INSIDE THE PAGE ROOT, as the Contact list's is inside its group: the shared
-          column's gutter is `padding-inline` on the scroller's own children, and the footer's own
-          `padding` shorthand would zero it there. */}
-      <div className="msv12-own msv12-root ms21" data-msv12="page" data-ms21="page" data-state={state}>
+      <div className={`msv12-own msv12-root ms21${state === "filled" ? " ms27" : ""}`} data-msv12="page" data-ms21="page" data-ms27="page" data-state={state}>
         {children}
-        {state === "loading" ? null : <AppFooter onNavigate={(t, sub) => onNavigate(t, sub)} />}
+        {/* v27: the populated page has no footer; the empty and deleted states keep v21's */}
+        {state === "empty" || state === "deleted" ? <AppFooter onNavigate={(t, sub) => onNavigate(t, sub)} /> : null}
       </div>
     </WorkspacePageGrid>
   );
@@ -196,44 +172,52 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, open
     );
   }
 
-  const onRow = (r: V21ActivityRow) => { const d = rowDoor(r); if (d) openQueryDrawer({ mode: d.mode, queryId: d.queryId }); };
-  const onDoor = (d: Door) => onNavigate("manuscripts", d.key === "comps" ? "Comparable titles" : "Submission packages");
+  const w = wordsOf(ms);
+  const words = w > 0 ? wordsText(w) : null;
+  const stats = whereItsBeen(msQueries, activities, agents, Date.now());
 
   return grid(
     <>
-      <PageGuide page={MS_GUIDE_PAGE} steps={MS_GUIDE} />
-      <MsOpenHeader v3 title={ms.title} sub={MS_HEADER_SUB} soon={manuscripts.length <= 1}>
-        <button type="button" className="hp3-btn hpanel-b1" data-ms21="header-edit" onClick={() => setEditOpen(true)}>Edit details</button>
-        <button type="button" className="hp3-btn hpanel-b2" data-ms21="header-new-version" onClick={() => setVersionDlg("new")}>+ New version</button>
-      </MsOpenHeader>
-
-      <div className="ms21-grid" data-ms21="row">
-        <BookCard
-          title={ms.title} authorName={(currentUser?.name ?? "").trim()} coverUrl={ms.coverUrl}
-          logline={ms.logline ?? ""} facts={facts} line={line}
-          onEdit={() => setEditOpen(true)} onComps={() => onNavigate("manuscripts", "Comparable titles")}
+      <PageChecklist page="Manuscripts" items={MS_CHECKLIST} done={done} seen={guide.seen} hidden={guide.hidden}
+        active={active} ready={collectionsReady} targetFor={targetFor} onSeen={markSeen} onHide={hideGuide}
+        art={heroArt} onStart={startStep} flow={flow} openNonce={nonce}
+        /* never over a task: the book view or the edit form open */
+        quiet={bookOpen || !!edit} onUnhide={unhideGuide} pillClass="pck-pill--ms27"
+        allDone={{
+          ...MS_ALL_DONE,
+          after: (
+            <>
+              <button type="button" className="ms27-gl" data-ms27="guide-versions" onClick={toVersions}>Save your first version</button>
+              <button type="button" className="ms27-gl" data-ms27="guide-packages" onClick={toPackages}>Build a package</button>
+            </>
+          ),
+        }}
+        finalNote={{
+          ...MS_FINAL,
+          actions: [
+            { label: "Save your first version", onClick: toVersions, attrs: { "data-ms27": "final-versions" } },
+            { label: "Build a package", onClick: toPackages, attrs: { "data-ms27": "final-packages" } },
+          ],
+        }} />
+      <div className="ms27-bkp" data-ms27="sections">
+        <BookContainer
+          title={ms.title} byline={author} rows={cardRows(ms, since)} words={words} logline={ms.logline ?? ""}
+          onEdit={() => openEdit()} onView={() => setBookOpen(true)} onAddLogline={() => openEdit("logline")}
         />
-        <ActivityCard rows={rows} onRow={onRow} onAll={() => onNavigate("queries")} />
+        <SoonStrip onVersions={toVersions} onPackages={toPackages} />
       </div>
 
-      <MsBanner>
-        Prologue first? Fast-paced opening? Leading with a passage of world-building? Track <b>versions</b> of a manuscript to see what's landing best.
-      </MsBanner>
-
-      <VersionsSection
-        title={ms.title} cards={cards} lede={lede}
-        onNew={() => setVersionDlg("new")} onOpen={(c) => setVersionDlg(c.v)}
-      />
-
-      <MaterialDoors doors={doors} onOpen={onDoor} />
-
-      {editOpen ? <Msv21EditDetails ms={ms} updateManuscript={updateManuscript} onClose={() => setEditOpen(false)} /> : null}
-      {versionDlg ? (
-        <Msv21Version
-          ms={ms} editing={versionDlg === "new" ? null : versionDlg}
-          updateManuscript={updateManuscript} onClose={() => setVersionDlg(null)}
+      {bookOpen ? (
+        <BookView
+          title={ms.title} author={author} kicker={coverKicker(ms.genre)} words={words}
+          rows={bookRows(ms, since)} stats={stats}
+          logline={ms.logline ?? ""} pitch={ms.elevatorPitch ?? ""} synopsis={ms.synopsis ?? ""}
+          onClosed={() => setBookOpen(false)}
+          onEdit={(f?: BookField) => openEdit(f)}
+          onQueryCentre={() => { setBookOpen(false); onNavigate("queries"); }}
         />
       ) : null}
+      {edit ? <Msv21EditDetails ms={ms} updateManuscript={updateManuscript} onClose={closeEdit} focus={edit.field} /> : null}
     </>,
     "filled",
   );

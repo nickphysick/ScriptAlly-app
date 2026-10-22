@@ -76,8 +76,9 @@ describe("CV25 A4: inQuery is retired", () => {
       const s = materialDoors({ comps, letterCompIds: ids, letters: 1, synopses: 0, letterName: null, livePackages: 0, packageQueries: 0 })[0].sentence;
       expect(s).toBe(`Books and films like yours. ${ids.length === 0 ? "None are in your query letter yet." : `${ids.length} ${ids.length === 1 ? "is" : "are"} in your query letter.`}`);
     }
+    /* Manuscripts v27 (22 Oct): the page draws no comps facts at all now, so the page half of this lock is retired with
+       its subject; it asserts the absence instead, so the facts cannot return reading a stored flag. */
     const page = readFileSync("src/components/manuscripts/v12/ManuscriptPage.tsx", "utf8");
-    expect(page).toContain("letterCompIds: nowLetter?.compIds ?? null");
-    expect(page).toContain("currentLetter(ms.id, versions)");
+    expect(page).not.toMatch(/inQuery|materialDoors\(/);
   });
 });
