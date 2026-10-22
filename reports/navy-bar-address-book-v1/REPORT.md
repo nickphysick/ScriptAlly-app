@@ -112,4 +112,10 @@ Run against the final build (`runs/l13-summary.txt`): **QC142, QC141, QC1411, QC
 
 ## Integration and dev
 
-DEPLOY_PLACEHOLDER
+Dev had moved during the build: it served `index-wDx05B0j.js` from `dev/css1-pv3-ms27-ms28-ms281-ver1` (cdb00b2a, Versions v1, which sits on this pack's base). A build of cdb00b2a gave exactly that hash.
+
+- Integration branch **`dev/ver1-nbab`** (a short name; the chained one exceeds GitHub's ref limit): cdb00b2a + this branch, merged clean at **df00b456**.
+- Gates there: tsc 0, production build with no warnings, Vitest 650 files / 9,971 passed.
+- Locks there, on its build: NB1 12/12; QC142, QC141, QC1411, QC140, QC1401, CSS1 and HR1 all pass (54 + HR1-8 after a fresh base capture from cdb00b2a's build).
+- **Deployed to dev from the pushed tip, in a clean worktree: `index-Cp8ra_2G.js`** (the served hash was checked as `index-wDx05B0j.js` in the same command before deploying). NB1 against the deployed site: 12/12 locks, 13 passed.
+- Not merged to main. Prod untouched; no rules or functions changed.
