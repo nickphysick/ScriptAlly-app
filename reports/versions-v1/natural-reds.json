@@ -1,0 +1,92 @@
+{
+ "build": "dev index-BmbaNVwq.js (Manuscripts v28.1: the interim Versions page)",
+ "result": "RED",
+ "failed": [
+  [
+   "1280",
+   "A1"
+  ],
+  [
+   "1280",
+   "A2"
+  ],
+  [
+   "1280",
+   "B1"
+  ],
+  [
+   "1280",
+   "B2"
+  ],
+  [
+   "1280",
+   "B3"
+  ],
+  [
+   "1280",
+   "C1"
+  ],
+  [
+   "1280",
+   "C2"
+  ],
+  [
+   "1280",
+   "D1"
+  ],
+  [
+   "1280",
+   "D2"
+  ],
+  [
+   "1280",
+   "D3"
+  ],
+  [
+   "1512",
+   "A1"
+  ],
+  [
+   "1512",
+   "A2"
+  ],
+  [
+   "1512",
+   "B1"
+  ],
+  [
+   "1512",
+   "B2"
+  ],
+  [
+   "1512",
+   "B3"
+  ],
+  [
+   "1512",
+   "C1"
+  ],
+  [
+   "1512",
+   "C2"
+  ],
+  [
+   "1512",
+   "D1"
+  ],
+  [
+   "1512",
+   "D2"
+  ],
+  [
+   "1512",
+   "D3"
+  ]
+ ],
+ "reading": [
+  "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.",
+  "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.",
+  "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.",
+  "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded."
+ ]
+}

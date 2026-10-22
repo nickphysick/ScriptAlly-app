@@ -33,7 +33,7 @@ test.describe.configure({ mode: "serial" });
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 110; /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke) */
+const FLOOR = 104; /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke); Versions v1: E1's interim-page asserts (3 × 2) moved to VER1 */
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 const MUTATE = process.env.MS27_MUTATE ?? "";
@@ -93,7 +93,7 @@ async function openAt(page: Page, route: string, vp: { width: number; height: nu
   if (!o.motion) await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
   if (CSS_MUT[MUTATE]) await page.addStyleTag({ content: CSS_MUT[MUTATE] });
   await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
-  const sel = route === "/manuscripts/versions" ? '[data-ms27="versions-header"]' : '[data-ms27="book"]';
+  const sel = route === "/manuscripts/versions" ? '[data-ver1="header"]' : '[data-ms27="book"]'; /* Versions v1 replaced the interim page */
   await page.waitForFunction((s) => [...document.querySelectorAll(s)].some((e) => e.getBoundingClientRect().height > 0), sel, { timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(800);
@@ -347,12 +347,11 @@ for (const vp of VPS) {
     expect(row!.pro, "its PRO tag").toBe(true); ck();
     const tab = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-ftsib")].some((e) => e.getBoundingClientRect().width > 0 && (e.getAttribute("aria-label") === "Versions" || e.textContent === "Versions")));
     expect(tab, "Versions in the Materials tabs").toBe(true); ck();
+    /* Versions v1 (22 Oct) replaced the interim page: its header and copy are VER1's (tests/e2e/versionsV1.measure.ts).
+       What stays here is v27's claim that the route renders a Versions page with "+ New version". */
     await openAt(page, "/manuscripts/versions", vp);
-    expect(await page.locator('[data-ms27="versions-header"] [data-ms27="eyebrow"]').innerText()).toMatch(/Versions/i); ck();
-    expect(await page.locator('[data-ms27="versions-header"] h1').innerText()).toBe(MS_TITLE); ck();
-    expect(await page.locator('[data-ms21="versions"]').count()).toBe(1); ck();
-    expect(await page.locator('[data-ms27="new-version"]').innerText()).toBe("+ New version"); ck();
-    expect(await page.locator('[data-ms27="how-versions"]').innerText()).toBe("How version tracking works"); ck();
+    expect(await page.locator('[data-ver1="eyebrow"]').innerText()).toMatch(/Versions/i); ck();
+    expect(await page.locator('[data-ver1="new"]').innerText()).toBe("+ New version"); ck();
   });
 }
 
