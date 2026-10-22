@@ -18,7 +18,7 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 
 import { ManuscriptPage, MS_ALL_DONE, MS_FINAL, MS_STEP_CARDS } from "../v12/ManuscriptPage";
 import { BookView } from "./BookView";
-import { PITCH_HINT, PITCH_PLACEHOLDER, SYNOPSIS_HINT } from "../v12/Msv21Dialogs";
+import { PITCH_HINT, PITCH_PLACEHOLDER, SYNOPSIS_HINT } from "../v28/MsEditDrawer";
 import { MS_CHECKLIST, msGuideOf } from "../../../lib/pageChecklist";
 import { bookRows, cardGenre, cardRows, coverKicker, msGuideDone, sinceDay, allGenres, paragraphs } from "../../../lib/manuscriptV27";
 import { ManuscriptStatus } from "../../../types";

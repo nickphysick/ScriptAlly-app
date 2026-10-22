@@ -89,18 +89,10 @@ describe("the page writes nothing itself, and deletes nothing", () => {
 
 describe("the dialogs", () => {
   const src = strip(read("Msv21Dialogs.tsx"));
-  const edit = sliceBetween(src, "export const Msv21EditDetails", "export const Msv21Version", "the edit dialog");
   const version = sliceBetween(src, "export const Msv21Version", "export const Msv21AddManuscript", "the version dialog");
   const add = src.slice(src.indexOf("export const Msv21AddManuscript"));
 
-  it("Edit details: one write, the fields in five sections (v27 Part C adds the pitch and the synopsis), the six statuses, and no author", () => {
-    expect(edit.match(/\bupdateManuscript\(/g)?.length ?? 0).toBe(1);
-    const labels = [...edit.matchAll(/<label htmlFor="[^"]+">([^<]+)<\/label>|<span className="ms21-fl"[^>]*>([^<]+)<\/span>/g)].map((m) => m[1] ?? m[2]);
-    expect(labels).toEqual(["Title", "Word count", "Genre", "Age category", "Status", "Shelved reason", "Logline", "Elevator pitch", "Synopsis", "Setting", "Series"]);
-    expect(edit).toContain("STATUS_ORDER.map");
-    expect(edit).not.toMatch(/author|updateUserProfile/i);
-    expect(edit).toMatch(/<select id="ms21-f-genre"/);
-  });
+  /* v28 (22 Oct): Edit details is the slide-in drawer (v28/MsEditDrawer); its field lock moved to msv28Smoke.test.tsx */
 
   it("a fact rides only when it changed, and a cleared fact is REMOVED — never '' and never undefined", () => {
     expect(factPatch("West Cork", "West Cork")).toBeNull();
@@ -151,7 +143,7 @@ describe("the dialogs", () => {
   it("every dialog portals out of #root — useOverlay seals #root inert, so a dialog inside it is dead", () => {
     expect(src.match(/return toBody\(/g)?.length ?? 0, "the one shell every dialog is drawn through").toBe(1);
     expect(src).toMatch(/createPortal\(node, document\.body\)/);
-    expect(src.match(/<Shell\b/g)?.length ?? 0).toBe(3);
+    expect(src.match(/<Shell\b/g)?.length ?? 0).toBe(2); /* v28: Edit details left for the drawer */
     /* the dialogs' sheet reads only :root tokens, so leaving the page's scope loses nothing */
     const css = read("msv21.css").replace(/\/\*[\s\S]*?\*\//g, "");
     const dialogs = css.slice(css.indexOf(".ms21-layer {"));

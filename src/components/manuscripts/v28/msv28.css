@@ -1,0 +1,73 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Manuscripts v28 (design-refs/manuscripts-v28/manuscripts-v28.html): the edit drawer's contents (the mock's drawer
+ * chrome: `.dh`, `.db`, `.df`, `.cx-sect`, `.cx-fld`, `.cx-type`, `.cx-b`), the genre picker (`.gx`), the age control
+ * (`.ag`), the series toggle (`.sr-tog`), the word-count hint (`.wc-hint`), and the page foot (`.sbar`, `.stile2`).
+ *
+ * ⚠️ THE DRAWER PORTALS TO THE BODY (HalfDrawer): its rules read literals and `:root` tokens only (`--sp-type`,
+ *    `--font-mono`, `--msv12-serif` is not in scope there, so the serif is named through `--ms28-serif` on the drawer).
+ * ⚠️ lib/brand.tsx forces faces on h1–h3 and bare spans: every face here is stated with two classes and `!important`.
+ */
+
+/* ══ the drawer ══ */
+.hdr[data-hdr="ms-edit"] {
+  --ms28-serif: "Source Serif 4", Georgia, serif; --ms28-ink: #1c130f; --ms28-navy: #2a3a52; --ms28-rust: #a0452e;
+  --ms28-i58: rgba(28, 19, 15, 0.58); --ms28-i45: rgba(28, 19, 15, 0.45); --ms28-i14: rgba(28, 19, 15, 0.14); --ms28-i08: rgba(28, 19, 15, 0.08);
+  font-family: var(--ms28-serif); color: var(--ms28-ink);
+}
+.hdr[data-hdr="ms-edit"] :where(span, p, div, label, li, ul, b, i, em, small, button, input, textarea, select) { font-family: inherit; }
+.hdr[data-hdr="ms-edit"] *, .hdr[data-hdr="ms-edit"] *::before, .hdr[data-hdr="ms-edit"] *::after { box-sizing: border-box; }
+.ms28-dh { background: #2c3a53; color: #f4eee5; padding: 22px 24px; display: flex; align-items: flex-start; gap: 14px; }
+.ms28-disc {
+  flex: none; display: grid; place-items: center; width: 46px; height: 60px; padding: 4px; border-radius: 4px; background: #f8f3ea;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 3px 3px 0 rgba(0, 0, 0, 0.2); color: var(--ms28-ink); text-align: center; overflow: hidden;
+}
+.hdr .ms28-disc i { font: normal 400 7px/1.2 var(--sp-type) !important; text-transform: uppercase; overflow-wrap: anywhere; }
+.ms28-tx { flex: 1; min-width: 0; }
+.hdr .ms28-dh h3.ms28-dt { margin: 0; font: 400 26px/1.15 var(--sp-type) !important; color: #f8f3ea; overflow-wrap: anywhere; }
+.hdr .ms28-dh small { display: block; margin-top: 6px; font: italic 400 15px var(--ms28-serif) !important; color: rgba(244, 238, 229, 0.72); }
+.hdr .ms28-x { all: unset; cursor: pointer; flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); color: #fff; }
+.ms28-x svg { width: 14px; height: 14px; display: block; }
+.hdr .ms28-x:hover { background: rgba(255, 255, 255, 0.22); }
+.hdr .ms28-x:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.ms28-db { padding: 22px 28px 28px; background: #fbf9f5; min-height: 100%; }
+.ms28-df { display: flex; align-items: center; gap: 12px; padding: 16px 28px; border-top: 1px solid var(--ms28-i08); background: #fff; }
+.hdr .ms28-df > span:first-child { flex: 1; min-width: 0; font: 400 14px var(--ms28-serif) !important; color: var(--ms28-i58); }
+.hdr .ms28-err { font: 400 13.5px var(--ms28-serif) !important; color: #7c2d2d; }
+.ms28-bt { display: flex; gap: 8px; flex: none; }
+.hdr .ms28-b { all: unset; cursor: pointer; box-sizing: border-box; height: 42px; padding: 0 20px; border-radius: 21px; display: inline-flex; align-items: center; justify-content: center; font: 400 15px var(--sp-type) !important; white-space: nowrap; }
+.hdr .ms28-b.p { background: var(--ms28-navy); color: #fff; }
+.hdr .ms28-b.p:hover { background: #1b2433; }
+.hdr .ms28-b.p[disabled] { background: #b9b3ad; cursor: default; }
+.hdr .ms28-b.g { background: #fff; color: var(--ms28-navy); box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.35); }
+.hdr .ms28-b.g:hover { box-shadow: inset 0 0 0 1.5px var(--ms28-navy); }
+.hdr .ms28-b:focus-visible { outline: 2px solid var(--ms28-navy); outline-offset: 2px; }
+
+/* sections */
+.ms28-sect { margin-bottom: 26px; }
+.hdr .ms28-sect > h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font: 400 18px var(--sp-type) !important; color: var(--ms28-ink); }
+.ms28-n { flex: none; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--ms28-rust); color: var(--ms28-rust); display: grid; place-items: center; font: 600 10.5px var(--font-mono); }
+.hdr .ms28-sect > h4 .ms28-h4s { margin-left: 0; font: italic 14px var(--ms28-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.hdr .ms28-sect > h4 em { margin-left: auto; font: 500 9px var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ms28-i45); font-style: normal; }
+.ms28-fld { display: block; margin-bottom: 14px; }
+.hdr .ms28-fld > span { display: block; margin-bottom: 7px; font: 500 9px var(--font-mono) !important; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ms28-i45); }
+.ms28-req { color: var(--ms28-rust); font-style: normal; }
+.hdr .ms28-fld :is(input, textarea, select) {
+  box-sizing: border-box; width: 100%; height: 46px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff;
+  box-shadow: inset 0 0 0 1px var(--ms28-i14); font: 400 16px var(--ms28-serif) !important; color: var(--ms28-ink); outline: none;
+}
+.hdr .ms28-fld input.big { height: 52px; font-size: 19px !important; }
+.hdr .ms28-fld textarea { height: auto; min-height: 92px; padding: 12px 14px; line-height: 1.5; resize: vertical; }
+.hdr .ms28-fld textarea[rows="5"] { min-height: 132px; }
+.hdr .ms28-fld :is(input, textarea, select):focus { box-shadow: inset 0 0 0 2px var(--ms28-navy); }
+.hdr .ms28-fld :is(input, textarea)::placeholder { color: rgba(28, 19, 15, 0.36); }
+.hdr .ms28-hint { margin: 6px 0 0; font: italic 13.5px var(--ms28-serif) !important; color: var(--ms28-i45); }
+.ms28-frow { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 12px; align-items: start; }
+.ms28-frow--2 { grid-template-columns: 1fr 1fr; }
+.ms28-type { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 5px; border-radius: 14px; background: #efe9e1; }
+.hdr .ms28-type button { all: unset; cursor: pointer; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font: 400 15px var(--sp-type) !important; color: var(--ms28-i58); }
+.hdr .ms28-type button:hover { color: var(--ms28-ink); }
+.hdr .ms28-type button[aria-checked="true"] { background: #fff; color: var(--ms28-ink); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.12), 0 0 0 1px rgba(28, 19, 15, 0.08); }
+.hdr .ms28-type button:focus-visible { outline: 2px solid var(--ms28-navy); outline-offset: 1px; }

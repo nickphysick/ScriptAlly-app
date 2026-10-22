@@ -9,7 +9,8 @@
  *
  * TWO CONTAINERS AND NOTHING ELSE: the book (the header-rules header inside a white card, the details card on its
  * right, the logline at its foot) and the coming-soon strip. No footer. The book's details open in the book view
- * (`v27/BookView`), and every edit is the one Edit details form (`Msv21EditDetails`), which can open on a field.
+ * (`v27/BookView`), and every edit is the one Edit details drawer (`v28/MsEditDrawer`, on the shared HalfDrawer),
+ * which can open on a field. v28: never a centred modal.
  *
  * ⚠️ NO PRO INFORMATION HERE. Versions moved to their own page (`/manuscripts/versions`, `v27/VersionsPage`); packages,
  *    materials, comps and activity are their own pages' business.
@@ -30,7 +31,8 @@ import { AppFooter } from "../../shell/AppFooter";
 import { PageChecklist, type FlowCard } from "../../shell/guide/PageChecklist";
 import { useToast } from "../../toast/ToastProvider";
 import { EmptyPreviews, MsBanner, MsOpenHeader } from "./Msv21Parts";
-import { Msv21AddManuscript, Msv21EditDetails, type EditField } from "./Msv21Dialogs";
+import { Msv21AddManuscript } from "./Msv21Dialogs";
+import { MsEditDrawer, type EditField } from "../v28/MsEditDrawer";
 import { BookContainer, SoonStrip } from "../v27/Msv27Parts";
 import { BookView, type BookField } from "../v27/BookView";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
@@ -217,7 +219,7 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
           onQueryCentre={() => { setBookOpen(false); onNavigate("queries"); }}
         />
       ) : null}
-      {edit ? <Msv21EditDetails ms={ms} updateManuscript={updateManuscript} onClose={closeEdit} focus={edit.field} /> : null}
+      {edit ? <MsEditDrawer ms={ms} since={since} updateManuscript={updateManuscript} onClose={closeEdit} focus={edit.field} /> : null}
     </>,
     "filled",
   );
