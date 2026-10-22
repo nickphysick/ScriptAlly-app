@@ -83,6 +83,9 @@ export interface FlowCard {
 }
 
 export interface PageChecklistProps<K extends string> {
+  /** Manuscripts v28 Part G: also close the popover when focus moves outside it and the pill (Tab away). Opt-in, so
+   *  the pages that already mount the checklist keep exactly their behaviour. */
+  closeOnFocusOut?: boolean;
   /** the page's name: "Contact list" */
   page: string;
   items: readonly ChecklistItem<K>[];
@@ -149,7 +152,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   const slot = useBarSlot();
   const navigate = useNavigate();
   const off = useGuidesOff();
-  const { items, done, page } = p;
+  const { items, done, page, closeOnFocusOut = false } = p;
 
   /* ── C.5 skips: per page, on this device; a real save outranks a skip ── */
   const [skipped, setSkipped] = useState<string[]>(() => readSkipped(page));
@@ -283,10 +286,19 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
       closePop(false);
     };
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopImmediatePropagation(); e.preventDefault(); closePop(true); } };
+    const focus = (e: FocusEvent) => {
+      const t = e.target as Node;
+      if (popRef.current?.contains(t) || pillRef.current?.contains(t)) return;
+      closePop(false);
+    };
     window.addEventListener("pointerdown", down, true);
     window.addEventListener("keydown", key, true);
-    return () => { window.removeEventListener("pointerdown", down, true); window.removeEventListener("keydown", key, true); };
-  }, [open, closing, closePop]);
+    if (closeOnFocusOut) window.addEventListener("focusin", focus, true);
+    return () => {
+      window.removeEventListener("pointerdown", down, true); window.removeEventListener("keydown", key, true);
+      window.removeEventListener("focusin", focus, true);
+    };
+  }, [open, closing, closePop, closeOnFocusOut]);
   /* C.6 — the checklist is a dialog: focus moves in when it opens */
   useEffect(() => { if (open && !closing) requestAnimationFrame(() => popRef.current?.focus({ preventScroll: true })); }, [open, closing]);
 

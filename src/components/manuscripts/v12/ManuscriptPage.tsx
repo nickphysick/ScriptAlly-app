@@ -185,7 +185,7 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
         active={active} ready={collectionsReady} targetFor={targetFor} onSeen={markSeen} onHide={hideGuide}
         art={heroArt} onStart={startStep} flow={flow} openNonce={nonce}
         /* never over a task: the book view or the edit form open */
-        quiet={bookOpen || !!edit} onUnhide={unhideGuide} pillClass="pck-pill--ms27"
+        quiet={bookOpen || !!edit} onUnhide={unhideGuide} pillClass="pck-pill--ms27" closeOnFocusOut
         allDone={{
           ...MS_ALL_DONE,
           after: (
