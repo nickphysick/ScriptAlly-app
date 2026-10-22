@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L6",
+  "where": "1280 · population: the box",
+  "ok": true,
+  "detail": "{\"bTop\":259,\"bBottom\":-218.75,\"B\":[272,364.75,1248,1010.75],\"vw\":1280,\"vh\":800,\"headTop\":364.75,\"stripTop\":364.75,\"page\":0,\"list\":0,\"listMax\":3339,\"nx\":332,\"ny\":568.28125}"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · header and panel tops equal (±1) at every sample",
+  "ok": true,
+  "detail": "245/245 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · at the page's end: box top = container top + 20 (±1)",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · at the page's end: box bottom = container bottom − 20 (±1)",
+  "ok": true,
+  "detail": "20.25"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · all four corners in view",
+  "ok": true,
+  "detail": "[272,125.75,1248,771.75]"
+ },
+ {
+  "lock": "L6",
+  "where": "1280 · a wheel over the list scrolls the list (and not the page)",
+  "ok": true,
+  "detail": "0→600 page 239→239"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · population: the box",
+  "ok": true,
+  "detail": "{\"bTop\":259,\"bBottom\":-218.75,\"B\":[272,364.75,1480,1110.75],\"vw\":1512,\"vh\":900,\"headTop\":364.75,\"stripTop\":364.75,\"page\":0,\"list\":0,\"listMax\":3242,\"nx\":332,\"ny\":571.4375}"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · header and panel tops equal (±1) at every sample",
+  "ok": true,
+  "detail": "245/245 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126 126/126"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · at the page's end: box top = container top + 20 (±1)",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · at the page's end: box bottom = container bottom − 20 (±1)",
+  "ok": true,
+  "detail": "20.25"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · all four corners in view",
+  "ok": true,
+  "detail": "[272,125.75,1480,871.75]"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · a wheel over the list scrolls the list (and not the page)",
+  "ok": true,
+  "detail": "0→600 page 239→239"
+ }
+]

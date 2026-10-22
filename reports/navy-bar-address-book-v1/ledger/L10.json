@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L10",
+  "where": "1280 · population: the card",
+  "ok": true,
+  "detail": "{\"band\":\"Not queried yet\",\"name\":\"Theo Abara\",\"wish\":true,\"query\":true,\"notes\":true,\"cardId\":\"msv12-agent-4\",\"selId\":\"msv12-agent-4\",\"selName\":\"Theo Abara\",\"pos\":\"1 OF 52\",\"ids\":52}"
+ },
+ {
+  "lock": "L10",
+  "where": "1280 · band word, name, wishlist, query block and Notes",
+  "ok": true,
+  "detail": "{\"band\":\"Not queried yet\",\"name\":\"Theo Abara\",\"wish\":true,\"query\":true,\"notes\":true,\"cardId\":\"msv12-agent-4\",\"selId\":\"msv12-agent-4\",\"selName\":\"Theo Abara\",\"pos\":\"1 OF 52\",\"ids\":[\"msv12-agent-4\",\"seed-cal-near\",\"cv25-agent-12\",\"cv25-agent-06\",\"seed-cal-soon\",\"seed-cal-passed20\",\"seed-agent-12\",\"seed-cal-bang\",\"seed-agent-9\",\"cv25-agent-05\",\"cv25-agent-08\",\"seed-agent-2\",\"thin-ag-remind\",\"seed-cal-passed865\",\"seed-agent-1\",\"seed-agent-nowin-1\",\"rj-agent-2\",\"cv25-agent-13\",\"cv25-agent-10\",\"clv-fx-reopen\",\"msv12-agent-1\",\"clv-fx-stub0\",\"seed-agent-11\",\"seed-agent-7\",\"seed-agent-8\",\"clv-fx-stale\",\"cv25-agent-09\",\"seed-agent-4\",\"cv25-agent-04\",\"seed-agent-6\",\"seed-agent-nowin-2\",\"msv12-agent-5\",\"rj-agent-3\",\"cv25-agent-11\",\"thin-ag-chase\",\"msv12-agent-6\",\"rej-agent-1\",\"cv25-agent-03\",\"thin-ag-gap\",\"cv25-agent-07\",\"seed-agent-3\",\"msv12-agent-2\",\"cv25-agent-14\",\"clv181-bare\",\"cv25-agent-02\",\"clv-fx-never\",\"rj-agent-1\",\"thin-ag-close\",\"seed-agent-10\",\"msv12-agent-3\",\"cv25-agent-01\",\"seed-agent-5\"]}"
+ },
+ {
+  "lock": "L10",
+  "where": "1280 · population: Querying narrows the list",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "L10",
+  "where": "1280 · \"1 OF 7\" on the first visible agent",
+  "ok": true,
+  "detail": "1 OF 7 cv25-agent-05"
+ },
+ {
+  "lock": "L10",
+  "where": "1280 · › steps to the next visible agent, \"2 OF 7\"",
+  "ok": true,
+  "detail": "cv25-agent-13 2 OF 7"
+ },
+ {
+  "lock": "L10",
+  "where": "1280 · Notes persist across a reload (the same agent selected)",
+  "ok": true,
+  "detail": "cv25-agent-13 vs cv25-agent-13 · NB1 lock note — safe to delete"
+ },
+ {
+  "lock": "L10",
+  "where": "1280 · the original note is put back",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "L10",
+  "where": "1512 · population: the card",
+  "ok": true,
+  "detail": "{\"band\":\"Not queried yet\",\"name\":\"Theo Abara\",\"wish\":true,\"query\":true,\"notes\":true,\"cardId\":\"msv12-agent-4\",\"selId\":\"msv12-agent-4\",\"selName\":\"Theo Abara\",\"pos\":\"1 OF 52\",\"ids\":52}"
+ },
+ {
+  "lock": "L10",
+  "where": "1512 · band word, name, wishlist, query block and Notes",
+  "ok": true,
+  "detail": "{\"band\":\"Not queried yet\",\"name\":\"Theo Abara\",\"wish\":true,\"query\":true,\"notes\":true,\"cardId\":\"msv12-agent-4\",\"selId\":\"msv12-agent-4\",\"selName\":\"Theo Abara\",\"pos\":\"1 OF 52\",\"ids\":[\"msv12-agent-4\",\"seed-cal-near\",\"cv25-agent-12\",\"cv25-agent-06\",\"seed-cal-soon\",\"seed-cal-passed20\",\"seed-agent-12\",\"seed-cal-bang\",\"seed-agent-9\",\"cv25-agent-05\",\"cv25-agent-08\",\"seed-agent-2\",\"thin-ag-remind\",\"seed-cal-passed865\",\"seed-agent-1\",\"seed-agent-nowin-1\",\"rj-agent-2\",\"cv25-agent-13\",\"cv25-agent-10\",\"clv-fx-reopen\",\"msv12-agent-1\",\"clv-fx-stub0\",\"seed-agent-11\",\"seed-agent-7\",\"seed-agent-8\",\"clv-fx-stale\",\"cv25-agent-09\",\"seed-agent-4\",\"cv25-agent-04\",\"seed-agent-6\",\"seed-agent-nowin-2\",\"msv12-agent-5\",\"rj-agent-3\",\"cv25-agent-11\",\"thin-ag-chase\",\"msv12-agent-6\",\"rej-agent-1\",\"cv25-agent-03\",\"thin-ag-gap\",\"cv25-agent-07\",\"seed-agent-3\",\"msv12-agent-2\",\"cv25-agent-14\",\"clv181-bare\",\"cv25-agent-02\",\"clv-fx-never\",\"rj-agent-1\",\"thin-ag-close\",\"seed-agent-10\",\"msv12-agent-3\",\"cv25-agent-01\",\"seed-agent-5\"]}"
+ },
+ {
+  "lock": "L10",
+  "where": "1512 · population: Querying narrows the list",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "L10",
+  "where": "1512 · \"1 OF 7\" on the first visible agent",
+  "ok": true,
+  "detail": "1 OF 7 cv25-agent-05"
+ },
+ {
+  "lock": "L10",
+  "where": "1512 · › steps to the next visible agent, \"2 OF 7\"",
+  "ok": true,
+  "detail": "cv25-agent-13 2 OF 7"
+ }
+]

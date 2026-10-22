@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L9",
+  "where": "1280 added · population: sections",
+  "ok": true,
+  "detail": "[\"T\",\"K\",\"M\",\"V\",\"H\",\"O\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 added · month headings (\"Aug 2026\")",
+  "ok": false,
+  "detail": "[\"T\",\"K\",\"M\",\"V\",\"H\",\"O\",\"P\",\"H\",\"V\",\"B\",\"K\",\"V\",\"D\",\"M\",\"L\",\"O\",\"W\",\"F\",\"Q\",\"R\",\"V\",\"N\",\"R\",\"E\",\"H\",\"R\",\"A\",\"B\",\"C\",\"F\",\"A\",\"B\",\"D\",\"E\",\"H\",\"K\",\"M\",\"O\",\"Q\",\"R\",\"S\",\"T\",\"W\",\"A\",\"K\",\"P\",\"Q\",\"R\",\"V\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 added · the index is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · population: sections",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · letter headings",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"H\",\"K\",\"L\",\"M\",\"N\",\"O\",\"P\",\"Q\",\"R\",\"S\",\"T\",\"V\",\"W\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · the index is shown",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · population: sections",
+  "ok": true,
+  "detail": "[\"T\",\"K\",\"M\",\"V\",\"H\",\"O\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · month headings (\"Aug 2026\")",
+  "ok": false,
+  "detail": "[\"T\",\"K\",\"M\",\"V\",\"H\",\"O\",\"P\",\"H\",\"V\",\"B\",\"K\",\"V\",\"D\",\"M\",\"L\",\"O\",\"W\",\"F\",\"Q\",\"R\",\"V\",\"N\",\"R\",\"E\",\"H\",\"R\",\"A\",\"B\",\"C\",\"F\",\"A\",\"B\",\"D\",\"E\",\"H\",\"K\",\"M\",\"O\",\"Q\",\"R\",\"S\",\"T\",\"W\",\"A\",\"K\",\"P\",\"Q\",\"R\",\"V\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · the index is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · population: sections",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · letter headings",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"H\",\"K\",\"L\",\"M\",\"N\",\"O\",\"P\",\"Q\",\"R\",\"S\",\"T\",\"V\",\"W\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · the index is shown",
+  "ok": true,
+  "detail": "true"
+ }
+]

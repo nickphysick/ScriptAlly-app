@@ -22,51 +22,7 @@
   .qc138-sheet .qc140-tb[data-pinned] { height: 72px; }
 
   /* ── the jump row ── */
-  .qc138-sheet .qc140-jr {
-    flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 3px; height: 40px; overflow: hidden;
-  }
-  .qc138-sheet .qc140-jcol {
-    flex: none; margin: 0 8px 0 4px; font: 500 10.5px/1 var(--sp-mono) !important; letter-spacing: 0.14em; color: rgba(244, 238, 229, 0.6);
-  }
-  .qc138-sheet .qc140-jb {
-    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 7px; height: 34px; margin: 0; padding: 0 10px;
-    border: 0; border-radius: 9px; background: transparent; color: #f4eee5; cursor: pointer; white-space: nowrap;
-    font: 400 15px/1 var(--sp-type) !important;
-  }
-  .qc138-sheet .qc140-jb .qc140-jt { font: inherit !important; color: inherit; }
-  .qc138-sheet .qc140-jb i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(244, 238, 229, 0.55); }
-  .qc138-sheet .qc140-jb[data-over] { display: none; }
-  .qc138-sheet .qc140-jb { --qc140-jbg: #2a3a52; }
-  .qc138-sheet .qc140-jb:hover:not(:disabled) { background: rgba(244, 238, 229, 0.12); }
-  .qc138-sheet .qc140-jb:focus-visible, .qc138-sheet .qc140-jmore:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
-  .qc138-sheet .qc140-jmore {
-    box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; margin: 0; padding: 0 11px;
-    border: 0; border-radius: 9px; background: transparent; color: #f4eee5; cursor: pointer; white-space: nowrap;
-    font: 400 14.5px/1 var(--sp-serif) !important;
-  }
-  .qc138-sheet .qc140-jmore[hidden] { display: none; }
-  .qc138-sheet .qc140-jmore .qc140-cv { color: inherit; }
-
   /* the marks: the glyph 16 in a 17 box with its 11px badge top right; the art in a 22 disc; the package cube */
-  .qc140-jg { position: relative; flex: none; display: inline-grid; place-items: center; width: 17px; height: 17px; color: currentColor; line-height: 0; }
-  .qc140-jg .qc140-jsvg { width: 16px; height: 16px; }
-  .qc140-jg.grey { opacity: 0.6; }
-  .qc140-jg .qc140-jbd {
-    position: absolute; top: -5px; right: -5px; box-sizing: border-box; display: grid; place-items: center; width: 11px; height: 11px;
-    border-radius: 50%; color: #fff; box-shadow: 0 0 0 1.5px var(--qc140-jbg, #2a3a52);
-  }
-  .qc140-jg .qc140-jbd svg { width: 8px; height: 8px; }
-  .qc140-jg .qc140-jbd.rust { background: #b0603e; }
-  .qc140-jg .qc140-jbd.grey { background: #9a938b; }
-  .qc140-jg .qc140-jbd.navy { background: #5b6f8f; }
-  .qc140-jo .qc140-jg .qc140-jbd.navy { background: #2a3a52; }
-  .qc140-jg--art { width: 22px; height: 22px; }
-  .qc140-jg--art img { box-sizing: border-box; width: 22px; height: 22px; padding: 1px; border-radius: 50%; background: #f4eee5; object-fit: contain; }
-  .qc140-jg--icon svg { width: 15px; height: 15px; }
-  .qc140-jg--pkg { width: 18px; height: 18px; border-radius: 50%; background: #ece6f6; color: #54468a; }
-  .qc140-jg--pkg svg { width: 12px; height: 12px; }
-  .qc140-jg--pkg.none { background: transparent; box-shadow: inset 0 0 0 1.2px rgba(236, 230, 246, 0.6); color: #ece6f6; }
-
   /* ── Find: a white field, 270 (210 when narrow), the / key cap ── */
   .qc138-sheet .qc140-find {
     box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 8px; width: 270px; height: 40px; margin: 0; padding: 0 10px 0 12px;
@@ -147,41 +103,19 @@
 }
 
 /* ── the menus (portalled to body: every value stated, no page token) ── */
-.lpop.qc140-jpop, .lpop.qc140-gpop {
+.lpop.qc140-gpop {
   position: fixed; z-index: 60; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px; overflow: auto;
   border-radius: 14px; background: #fff; color: #1c130f; max-height: min(60vh, 460px);
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 24px 44px -18px rgba(28, 19, 15, 0.45);
-}
-.lpop.qc140-jpop { min-width: 280px; }
-.lpop.qc140-gpop { width: 330px; padding: 10px 8px 8px; }
-.qc140-mh { padding: 6px 12px 8px; font: 500 9.5px/1.4 var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
-.qc140-jo {
-  box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; margin: 0; padding: 9px 12px; border: 0; border-radius: 10px;
-  background: transparent; color: #1c130f; cursor: pointer; text-align: left;
-}
-.qc140-jo b { flex: 1 1 auto; font: 400 16px/1.3 var(--sp-serif) !important; color: #1c130f; }
-.qc140-jo i { font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.5); }
-.qc140-jo .qc140-jg { --qc140-jbg: #fff; color: #1c130f; }
-.qc140-jo .qc140-jg--art img { background: #f4eee5; }
-.qc140-jo .qc140-jg--pkg.none { color: #54468a; box-shadow: inset 0 0 0 1.2px rgba(84, 70, 138, 0.35); }
-.qc140-jo:hover, .qc140-jo[aria-current="true"] { background: #f2f4f8; }
-.qc140-jo:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
-/* ── v140 §B · UNPINNED (as Contact list v19.1 §F): the list is a white card with all four corners at 18 and 22px of
+}.lpop.qc140-gpop { width: 330px; padding: 10px 8px 8px; }
+.qc140-mh { padding: 6px 12px 8px; font: 500 9.5px/1.4 var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }/* ── v140 §B · UNPINNED (as Contact list v19.1 §F): the list is a white card with all four corners at 18 and 22px of
    page below it; the toolbar is navy with no rule beneath and follows the card's top corners. The jump row is cream on
    navy (counts at 55%, a 12% cream wash on hover); the current button is a cream tile with navy text and glyph; "+N
    more" is outlined in 35% cream. Find, Group by and Filters are white with no ring (their applied states are Part A's);
    Pin is cream with navy text and icon, white on hover. Pinned, Part C restyles all of this. ── */
 @media (min-width: 768px) {
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet { border-radius: 18px; margin-bottom: 22px; }
-  .qcv-group[data-v138]:not([data-full]) .qc140-tb { border-bottom: 0; }
-  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"],
-  .qcv-group[data-v138]:not([data-full]) .qc140-jmore[aria-current="true"] { --qc140-jbg: #f4eee5; background: #f4eee5; color: #2a3a52; }
-  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"] i { color: rgba(42, 58, 82, 0.55); }
-  .qcv-group[data-v138]:not([data-full]) .qc140-jb[aria-current="true"] .qc140-jg--art img { background: #fff; }
-  .qcv-group[data-v138]:not([data-full]) .qc140-jmore { box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35); }
-  .qcv-group[data-v138]:not([data-full]) .qc140-jmore:hover,
-  .qcv-group[data-v138]:not([data-full]) .qc140-jmore[aria-expanded="true"] { background: rgba(244, 238, 229, 0.12); }
-  .qcv-group[data-v138]:not([data-full]) .qc140-find,
+  .qcv-group[data-v138]:not([data-full]) .qc140-tb { border-bottom: 0; }  .qcv-group[data-v138]:not([data-full]) .qc140-find,
   .qcv-group[data-v138]:not([data-full]) .qc140-chipw:not([data-on]) { box-shadow: none; }
   .qcv-group[data-v138]:not([data-full]) .qc140-pin { background: #f4eee5; color: #2a3a52; }
   .qcv-group[data-v138]:not([data-full]) .qc140-pin:hover:not(:disabled) { background: #fff; }
@@ -286,25 +220,9 @@
   .qcv-group[data-v138][data-full] .qc140-tb {
     border-radius: 0; padding-left: var(--qc140-inset); background: #f4f0e9; color: #1c130f;
     border-bottom: 1px solid rgba(28, 19, 15, 0.08);
-  }
-  .qcv-group[data-v138][data-full] .qc140-jcol { color: rgba(28, 19, 15, 0.6); }
-  .qcv-group[data-v138][data-full] .qc140-jb,
-  .qcv-group[data-v138][data-full] .qc140-jmore { --qc140-jbg: #f4f0e9; color: #1c130f; }
-  .qcv-group[data-v138][data-full] .qc140-jb i { color: rgba(28, 19, 15, 0.42); }
-  .qcv-group[data-v138][data-full] .qc140-jb:hover:not(:disabled) { background: rgba(28, 19, 15, 0.06); }
-  .qcv-group[data-v138][data-full] .qc140-jb[aria-current="true"],
-  .qcv-group[data-v138][data-full] .qc140-jmore[aria-current="true"] {
-    --qc140-jbg: #fff; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16), 0 1px 2px rgba(28, 19, 15, 0.08);
-  }
-  .qcv-group[data-v138][data-full] .qc140-jmore { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
-  .qcv-group[data-v138][data-full] .qc140-jmore:hover,
-  .qcv-group[data-v138][data-full] .qc140-jmore[aria-expanded="true"] { background: rgba(28, 19, 15, 0.06); }
-  .qcv-group[data-v138][data-full] .qc140-jg--pkg.none { color: #54468a; box-shadow: inset 0 0 0 1.2px rgba(84, 70, 138, 0.35); }
-  .qcv-group[data-v138][data-full] .qc140-jb:focus-visible,
-  .qcv-group[data-v138][data-full] .qc140-jmore:focus-visible,
-  .qcv-group[data-v138][data-full] .qc140-chip:focus-visible,
-  .qcv-group[data-v138][data-full] .qc140-x:focus-visible,
-  .qcv-group[data-v138][data-full] .qc140-pin:focus-visible { outline: 2px solid #2a3a52; }
+  }  .qcv-group[data-v138][data-full] .qc140-chip:focus-visible,
+.qcv-group[data-v138][data-full] .qc140-x:focus-visible,
+.qcv-group[data-v138][data-full] .qc140-pin:focus-visible { outline: 2px solid #2a3a52; }
   /* Find, Group by and Filters: white with their 1px ring (the applied chips keep their powder and navy ring) */
   .qcv-group[data-v138][data-full] .qc140-find,
   .qcv-group[data-v138][data-full] .qc140-chipw:not([data-on]) { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }

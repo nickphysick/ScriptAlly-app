@@ -16,31 +16,31 @@
  *    0-5-0 (the v140/v142 toolbar's), and this sheet's place in the one bundle is not something to rely on.
  */
 @media (min-width: 768px) {
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well { gap: 9px; padding-left: 12px; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well { gap: 9px; padding-left: 12px; }
   /* the well's geometry is the navy toolbar's; in full screen the cream toolbar keeps its own controls' height */
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) {
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]) {
     box-sizing: border-box; height: 34px; border-radius: 9px;
     background: rgba(10, 18, 32, 0.32); color: rgb(244, 238, 229);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(244, 238, 229, 0.14);
   }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well > svg { flex: none; width: 17px; height: 17px; }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) > svg { color: rgb(244, 238, 229); }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) input { color: rgb(244, 238, 229); }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) input::placeholder {
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well > svg { flex: none; width: 17px; height: 17px; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]) > svg { color: rgb(244, 238, 229); }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]) input { color: rgb(244, 238, 229); }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]) input::placeholder {
     color: rgba(244, 238, 229, 0.62); font-style: italic; font-family: var(--sp-serif);
   }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]) kbd {
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]) kbd {
     background: transparent; color: rgba(244, 238, 229, 0.78); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3);
   }
   /* focused, or holding text: white, a navy magnifier, the cream focus ring; the hint goes */
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) {
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) {
     background: #fff; color: #1c130f; box-shadow: 0 0 0 2px rgb(244, 238, 229);
   }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) > svg { color: #2a3a52; }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) input { color: #1c130f; }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well:is(:focus-within, :has(input:not(:placeholder-shown))) kbd { display: none; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) > svg { color: #2a3a52; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:not([data-full]):is(:focus-within, :has(input:not(:placeholder-shown))) input { color: #1c130f; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well:is(:focus-within, :has(input:not(:placeholder-shown))) kbd { display: none; }
   /* full screen: white with a navy magnifier and the cream toolbar's inset outline */
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well[data-full] { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well[data-full] > svg { color: #2a3a52; }
-  :is(.qc138-sheet, .cl19-tb) .fw-well.fw-well.fw-well.fw-well[data-full]:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well[data-full] { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well[data-full] > svg { color: #2a3a52; }
+  :is(.qc138-sheet, .cl19-tb, .nb1-top) .fw-well.fw-well.fw-well.fw-well[data-full]:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
 }

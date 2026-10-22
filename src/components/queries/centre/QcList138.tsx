@@ -29,20 +29,20 @@ import { peekSummary, peekTone, YOUR_MOVE_STATUSES, type PeekEvent } from "../..
 import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } from "../../../lib/qcTl4";
 import { StageGlyph } from "./StageGlyph";
 import { bandArtOf } from "../../../lib/qcBandArt";
-import { BandMark, JumpMark, TONE_ICON } from "./bandMarks";
-import { QcToolbar140, type Qc140Jump, type Qc140JumpMode, type Qc140Pop } from "./QcToolbar140";
+import { BandMark, TONE_ICON } from "./bandMarks";
+import { QcToolbar140, type Qc140Pop } from "./QcToolbar140";
 import type { PopoverState } from "../../shell/ListPills";
-import { JUMP_COLUMN_LABEL, jumpColumn, jumpLabel, monthJumps } from "../../../lib/qc140";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
-import { ViewTitleRow, type ListView } from "../../shell/ViewTitleRow";
+import { FULL_ICON, type ListView } from "../../shell/ViewTitleRow";
 import { QcCards142, type CardTab } from "./QcCards142";
 import "./qcvList138.css";
 import "./qcv142.css";
+import "./qcv144.css";
 
 const MON = MONTHS_SHORT;
 const DAY_MS = 86_400_000;
@@ -94,7 +94,7 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
     let raf = 0;
     const read = () => {
       raf = 0;
-      root.querySelectorAll<HTMLElement>(".qc138-band").forEach((b) => {
+      root.querySelectorAll<HTMLElement>(".qc138-band, .qc142-rh").forEach((b) => {
         const top = parseFloat(getComputedStyle(b).top) || 0;
         const r = b.getBoundingClientRect();
         const grp = b.parentElement?.getBoundingClientRect();
@@ -356,7 +356,8 @@ export interface QcList138Props {
   /** the list is still loading: the toolbar's controls wait */
   loading?: boolean;
   sort: Qc138Sort;
-  onHeading: (k: Qc138SortKey) => void;
+  /** navy-bar v1 — the headings no longer sort: kept optional for callers, never read */
+  onHeading?: (k: Qc138SortKey) => void;
   /** cards-sort-search v1 §B — set the sort outright (the Cards view's chip) */
   onSort?: (s: Qc138Sort) => void;
   density: QcDensity;
@@ -405,8 +406,8 @@ export interface QcList138Props {
   /** v142 §A — the Cards / List view (one state: the title row's pill and the full-screen toolbar's switch) */
   view?: ListView;
   onView?: (v: ListView) => void;
-  /** v142 §A — the title row's count ("All 27 queries" / "10 of 27 queries"); the row is not drawn in full screen */
-  title?: string;
+  /** navy-bar v1 A1 — anything narrows the list (a filter or Find): the bar's count reads "8 of 27 queries" */
+  narrowed?: boolean;
   /** v142 §D — a card's manuscript title, and its tabs (open the query's panel on that tab) */
   bookOf?: (r: QcRow) => string | null;
   onCardTab?: (id: string, tab: CardTab) => void;
@@ -419,8 +420,8 @@ const QC_FULL = { "data-qc140": "pin", "data-qc138": "pin" };
 export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: -10, step: 24, items: 17 } as const;
 
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, title, bookOf, onCardTab, onSort,
+  groups, groupBy, onGroup, toneOf, total, shown, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, density, onDensity, full, onFull,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, narrowed, bookOf, onCardTab, onSort,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -528,24 +529,9 @@ export const QcList138: React.FC<QcList138Props> = ({
       arriving.current.set(el, a);
     }
   });
-  /* v140 §A — the jump row: a button per group (its band's mark, its label, its count), or, ungrouped, one per month of
-     the sort column's date, in list order */
-  /* v141 §D — two modes: GLYPH for Status and Who it's with (a 44 x 40 button, the glyph alone and a count badge, the
-     name on hover), NAME for Next action and Package (the name and count, no icon). The "+N more" menu draws a glyph
-     for every grouping but Package (every package shares one box, so its rows have none). Who it's with's Closed has
-     no art of its own, so it takes the closed glyph, the circle with a line. */
-  const jumpMode: Qc140JumpMode = groupBy === "none" ? "month" : groupBy === "status" || groupBy === "attention" ? "glyph" : "name";
+  /* navy-bar v1 A1 — the jump row is retired (both modes); Who it's with's Closed has no art of its own, so its heading
+     takes the closed glyph, the circle with a line */
   const CLOSED_ART = { kind: "glyph", glyph: "cl", grey: false, badge: null, badgeTone: null } as const;
-  const jumps: Qc140Jump[] = groupBy === "none"
-    ? monthJumps(rows, jumpColumn(sort.key), nowMs).map((m) => ({ key: m.key, label: m.label, full: m.label, n: m.n, mark: null, to: { kind: "row", id: m.firstId } }))
-    : groups.map((g) => {
-        const tone = toneOf(g);
-        const full = g.label || "All queries";
-        const art = groupBy === "attention" && g.key === "closed" ? CLOSED_ART : bandArtOf(groupBy, g.key);
-        const glyph = <JumpMark art={art} tone={tone} />;
-        return { key: g.key, label: jumpLabel(groupBy, g.key, full), full, n: g.rows.length,
-          mark: jumpMode === "glyph" ? glyph : null, menuMark: groupBy === "package" ? null : glyph, to: { kind: "group", key: g.key } };
-      });
 
   /* v142 §C — a heading's glyph: the grouping's own mark (Status, Next action, Package), Who it's with's Closed the closed
      glyph, and Your move / Waiting their tone icon — the same marks the jump row draws (no artwork on a ledger) */
@@ -655,12 +641,23 @@ export const QcList138: React.FC<QcList138Props> = ({
 
   return (
     <>
-    {/* v142 §A — THE TITLE ROW, between the hero and the list card (shell/ViewTitleRow, the Contact list's own): the
-        count, the Cards / List pill and Full screen. Not drawn in full screen, where the toolbar carries the switch. */}
-    {!full && title != null ? (
-      /* data-qc140="pin" / data-qc138="pin": the v138.6–v141 locks find the full-screen control by these, and this is it while
-         the title row shows (in full screen, the toolbar's Exit full screen carries them) — as the Contact list's does */
-      <ViewTitleRow title={title} view={view} onView={(v) => onView?.(v)} onFull={onFull} ns="qc142" noun="queries" disabled={loading} fullAttrs={QC_FULL} />
+    {/* navy-bar v1 A2 — THE PILL ABOVE THE LIST: Find (the left half, white) and Full screen (the right half, navy) as one
+        pill centred on the list card, 40 above it and 22 to it. It replaces v142's title row: the count and the Cards /
+        List switch moved into the navy bar. Not drawn in full screen, where Find is in the cream toolbar. */}
+    {!full ? (
+      <div className="qc144-srow" data-qc144="srow">
+        {onFind ? (
+          <label className="qc144-find" data-qc140="find" data-qc138="search" data-qc144="find">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
+          </label>
+        ) : null}
+        {/* data-qc140="pin" / data-qc138="pin": the v138.6–v142 locks find the full-screen control by these */}
+        <button type="button" className="qc144-fs" data-qc144="full" data-qc142="full" {...QC_FULL} data-pin-list="" aria-pressed={false} aria-keyshortcuts="F"
+          disabled={loading} onClick={onFull}>
+          {FULL_ICON}<span>Full screen</span>
+        </button>
+      </div>
     ) : null}
     <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view={view} ref={boxRef} {...tip.handlers}>
       {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
@@ -673,7 +670,7 @@ export const QcList138: React.FC<QcList138Props> = ({
               current group band stick under both */}
           {full ? band : null}
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
-            jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps} jumpMode={jumpMode}
+            count={{ shown, total, narrowed: !!narrowed }}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
             filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} view={view} onView={(v) => onView?.(v)} sort={sort} onSort={(s) => onSort?.(s)} />
           {applied}
@@ -682,17 +679,13 @@ export const QcList138: React.FC<QcList138Props> = ({
       {/* v142 §C — the column headings belong to the List view; the Cards view draws none */}
       {view === "list" ? (
         <div className="qc138-heads lth" data-qc138="headings" role="row">
-          {HEADINGS.map((h) => {
-            const on = sort.key === h.key;
-            return (
-              <div key={h.key} role="columnheader" className={`qc138-h${on ? " on" : ""}`} data-k={h.key} data-qc138="heading"
-                aria-sort={on ? (sort.reversed ? "descending" : "ascending") : "none"}>
-                <button type="button" onClick={() => onHeading(h.key)}>
-                  <span>{h.label}</span><i aria-hidden="true">{on && sort.reversed ? "↑" : "↓"}</i>
-                </button>
-              </div>
-            );
-          })}
+          {/* navy-bar v1 A1 — THE HEADINGS ARE PLAIN LABELS: not buttons, no arrows, no sort state. Sorting is the Sort
+              chip's (the same one state the headings used to write). Due's label is blank: its column is the date ring. */}
+          {HEADINGS.map((h) => (
+            <div key={h.key} role="columnheader" className="qc138-h qc144-h" data-k={h.key} data-qc138="heading" aria-label={h.key === "due" ? h.label : undefined}>
+              <span aria-hidden={h.key === "due" || undefined}>{h.key === "due" ? "" : h.label}</span>
+            </div>
+          ))}
         </div>
       ) : null}
       {/* a dev-only review aid: `window.__SA_QC138_PEEK_LAB` forces peek cases (the F2 edge-case sheet); production
@@ -735,17 +728,16 @@ export const QcList138: React.FC<QcList138Props> = ({
           const label = g.label || "All queries";
           return (
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
-              {/* v142 §C — THE LEDGER HEADING (the Contact list v20's cream ledger, `.cl20-lg`): #f4f0e9 with a hairline above
-                  and below, the group's glyph centred on the rows' disc column, the name in the typewriter, "N QUERIES" in
-                  mono, the fold chevron at the right. It replaces v138's powder and blush bands: the court colour lives on
-                  the cards and the breakdown card now, never on a heading. */}
-              <button type="button" className={`qc138-band qc138-band--${tone} qc142-lg`} data-qcv="gband" data-qc142="ledger" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
+              {/* navy-bar v1 A4 — THE RULED HEADING ("C · Ruled"), the Cards view's own: the group's glyph (20), the name in
+                  the typewriter at 23, "N QUERIES" in mono, the fold chevron, then a hairline to the right edge. It
+                  replaces v142's cream ledger. Stuck, it is white and fades out over 14px below itself. */}
+              <button type="button" className={`qc138-band qc138-band--${tone} qc144-rh`} data-qcv="gband" data-qc144="heading" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
-                <span className="qc142-lgm" data-qc142="ledger-mark">{groupMark(g, tone)}</span>
-                <b className="qc138-gt" data-qcv="gband-t">{label}</b>
-                <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
-                <span className="qc138-gh" />
+                <span className="qc144-rhm" data-qc144="heading-mark">{groupMark(g, tone)}</span>
+                <b className="qc138-gt qc144-rhl" data-qcv="gband-t">{label}</b>
+                <span className="qc138-gn qc144-rhn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
                 <span className="qc138-chev" aria-hidden="true">▾</span>
+                <i className="qc144-rhr" data-qc144="heading-rule" aria-hidden="true" />
               </button>
               {!shut && (
                 <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">

@@ -7450,9 +7450,9 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
-                  /* v142 §A — the title row's count ("All 27 queries" / "10 of 27 queries": the applied row's own figures) and
+                  /* navy-bar v1 A1 — the navy bar's count ("27 QUERIES" / "8 of 27 queries": the applied row's own figures) and
                      the Cards / List view */
-                  title={listCountTitle(qcVisible.length, qcScoped.length, qc140Chips.length > 0, "query", "queries")}
+                  narrowed={qc140Chips.length > 0}
                   view={qcListView}
                   onView={setQcListView}
                   /* v142 §D — a card's book, and its tabs: Tracking and Agent open the panel on that tab; Materials opens

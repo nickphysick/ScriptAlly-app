@@ -79,12 +79,16 @@ export function SortChipButton<K extends string>({ fields, value, open, onToggle
 }
 
 /** the menu, 8 under the chip, its left edge on the chip's (kept inside the window) */
-export function SortChipMenu<K extends string>({ anchor, fields, value, onChange, ns }: {
+export function SortChipMenu<K extends string>({ anchor, fields, value, onChange, ns, heading = "Sort cards by", note = "The same order as the list\u2019s column headings." }: {
   anchor: HTMLElement;
   fields: readonly SortField<K>[];
   value: SortValue<K>;
   onChange: (v: SortValue<K>) => void;
   ns: string;
+  /** the menu's heading (mono caps); the Contact list's address book says "Sort by" */
+  heading?: string;
+  /** the italic note under the order switch; null draws none */
+  note?: string | null;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
@@ -106,7 +110,7 @@ export function SortChipMenu<K extends string>({ anchor, fields, value, onChange
   return createPortal(
     <div className="lpop sc-pop" data-lpop="sort" {...{ [`data-${ns}`]: "sort-menu" }} role="menu" aria-label="Sort the cards by" ref={ref} onKeyDown={onKey}
       style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
-      <div className="sc-mh">Sort cards by</div>
+      <div className="sc-mh">{heading}</div>
       {fields.map((x) => {
         const on = x.key === value.key;
         return (
@@ -122,7 +126,7 @@ export function SortChipMenu<K extends string>({ anchor, fields, value, onChange
             onClick={() => { if (value.reversed !== o.reversed) onChange({ key: value.key, reversed: o.reversed }); }}>{o.label}</button>
         ))}
       </div>
-      <p className="sc-note">The same order as the list&rsquo;s column headings.</p>
+      {note ? <p className="sc-note">{note}</p> : null}
     </div>,
     document.body,
   );

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "L6",
+  "where": "1280 · population: the box",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L6",
+  "where": "1512 · population: the box",
+  "ok": false,
+  "detail": "null"
+ }
+]

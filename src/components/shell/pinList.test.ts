@@ -18,13 +18,13 @@ describe("QC138.6 A1 · one pin for both lists", () => {
     it(`${page}: uses usePinList("${page}") and PinListButton`, () => {
       const src = code(file) + (page === "queries" ? code("src/components/queries/centre/QcList138.tsx") : "");
       expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
-      /* RETARGETED (Contact list v19 §A): the Contact list's pin is the toolbar's own navy "Pin list" / "Unpin" button
-         (ContactListHead), drawn by the page's one head component */
+      /* RETARGETED (navy-bar-address-book v1, B4/B5): the Contact list's pin is the address book's "Full screen" /
+         "Exit full screen" button, in the navy strip over the card (ContactBook) */
       if (page === "agents") {
-        expect(src).toMatch(/<ContactListHead\b/);
-        const head = code("src/components/agents/contact/ContactListHead.tsx");
+        expect(src).toMatch(/<ContactBook\b/);
+        const head = code("src/components/agents/book/ContactBook.tsx");
         expect(head).toMatch(/data-pin-list=""/);
-        expect(head).toMatch(/aria-pressed=\{pinned\}/);
+        expect(head).toMatch(/aria-pressed=\{full\}/);
       } else {
         /* RETARGETED (Query Centre v140 §A/§B): the Query Centre's pin is the toolbar's own cream "Pin list" / "Unpin"
            button (QcToolbar140), drawn by the list's one toolbar component, as the Contact list's is */

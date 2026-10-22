@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L9",
+  "where": "1280 added · population: sections",
+  "ok": true,
+  "detail": "[\"Oct 2026\",\"Jul 2026\",\"May 2026\",\"Apr 2026\",\"Mar 2026\",\"Feb 2026\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 added · month headings (\"Aug 2026\")",
+  "ok": true,
+  "detail": "[\"Oct 2026\",\"Jul 2026\",\"May 2026\",\"Apr 2026\",\"Mar 2026\",\"Feb 2026\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 added · the index is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · population: sections",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · letter headings",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"H\",\"K\",\"L\",\"M\",\"N\",\"O\",\"P\",\"Q\",\"R\",\"S\",\"T\",\"V\",\"W\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · the index is shown",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · population: sections",
+  "ok": true,
+  "detail": "[\"Oct 2026\",\"Jul 2026\",\"May 2026\",\"Apr 2026\",\"Mar 2026\",\"Feb 2026\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · month headings (\"Aug 2026\")",
+  "ok": true,
+  "detail": "[\"Oct 2026\",\"Jul 2026\",\"May 2026\",\"Apr 2026\",\"Mar 2026\",\"Feb 2026\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · the index is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · population: sections",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · letter headings",
+  "ok": true,
+  "detail": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"H\",\"K\",\"L\",\"M\",\"N\",\"O\",\"P\",\"Q\",\"R\",\"S\",\"T\",\"V\",\"W\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · the index is shown",
+  "ok": true,
+  "detail": "true"
+ }
+]

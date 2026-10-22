@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L7",
+  "where": "1280 · population: the header and its rows",
+  "ok": true,
+  "detail": "{\"first\":\"52 agents\",\"count\":\"52 agents\",\"texts\":[\"52 agents\"],\"rows\":52}"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 · the header's first text is \"52 agents\"",
+  "ok": true,
+  "detail": "52 agents"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 · no other title in the header",
+  "ok": true,
+  "detail": "[\"52 agents\"]"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 · Your move: \"{n} of 52 agents\", n = the rows showing",
+  "ok": true,
+  "detail": "{\"first\":\"4 of 52 agents\",\"rows\":4}"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · population: the header and its rows",
+  "ok": true,
+  "detail": "{\"first\":\"52 agents\",\"count\":\"52 agents\",\"texts\":[\"52 agents\"],\"rows\":52}"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · the header's first text is \"52 agents\"",
+  "ok": true,
+  "detail": "52 agents"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · no other title in the header",
+  "ok": true,
+  "detail": "[\"52 agents\"]"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · Your move: \"{n} of 52 agents\", n = the rows showing",
+  "ok": true,
+  "detail": "{\"first\":\"4 of 52 agents\",\"rows\":4}"
+ }
+]

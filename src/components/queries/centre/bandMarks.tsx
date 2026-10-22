@@ -50,29 +50,3 @@ export const BandMark: React.FC<{ art: BandArt }> = ({ art }) => art.kind === "p
   </span>
 );
 
-/**
- * v140 §A — THE SAME MARK, SMALL, FOR THE JUMP ROW: the glyph (16 in a 17 box) with its badge (11 across, top right);
- * the package cube; under Who it's with the group's art in a 22px cream disc (the Closed box an icon). `data-glyph` and
- * `data-badge` are the band's own, so a lock can compare the two.
- */
-export const JumpMark: React.FC<{ art: BandArt | null; tone: BandTone }> = ({ art, tone }) => {
-  if (!art) {
-    const a = TONE_ART[tone];
-    return a ? (
-      <span className="qc140-jg qc140-jg--art" data-qc140="jump-mark" data-kind="art" data-tone={tone} aria-hidden="true">
-        <img src={a.src} alt="" draggable={false} />
-      </span>
-    ) : (
-      <span className="qc140-jg qc140-jg--icon" data-qc140="jump-mark" data-kind="icon" data-tone={tone} aria-hidden="true">{TONE_ICON[tone]}</span>
-    );
-  }
-  if (art.kind === "package") {
-    return <span className={`qc140-jg qc140-jg--pkg${art.none ? " none" : ""}`} data-qc140="jump-mark" data-kind="package" aria-hidden="true">{PKG_ICON}</span>;
-  }
-  return (
-    <span className={`qc140-jg qc140-jg--glyph${art.grey ? " grey" : ""}`} data-qc140="jump-mark" data-kind="glyph" data-glyph={art.glyph} data-badge={art.badge ?? undefined} aria-hidden="true">
-      <StageGlyph k={art.glyph} className="qc140-jsvg" />
-      {art.badge ? <i className={`qc140-jbd ${art.badgeTone ?? "navy"}`}>{BADGE_ICON[art.badge]}</i> : null}
-    </span>
-  );
-};
