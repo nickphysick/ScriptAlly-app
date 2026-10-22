@@ -19,7 +19,7 @@
  */
 import { CommunityAgent, Manuscript } from "../types";
 import { compsSearchText } from "./comps";
-import { genreDisplay } from "./genres";
+import { canonicalIdOf, genreAndAncestors, genreDisplay } from "./genres";
 
 /** The minimum total score (out of 75) for an agent to be surfaced as a suggestion. */
 export const MATCH_THRESHOLD = 42;
@@ -131,10 +131,18 @@ export const calculateCommunityAgentMatch = (commAgent: CommunityAgent, ms: Manu
   const genresClean = (commAgent.genres || []).map(g => g.trim().toLowerCase());
 
   let genreScore = 0;
+  /* Manuscripts v28 Part D2 — a sub-genre counts as its parent: an agent listing the parent (by label or id) takes the
+     book as fully as one listing the sub-genre itself */
+  const msGenreId = canonicalIdOf((ms.genre || "").trim());
+  const countsAs = msGenreId
+    ? genreAndAncestors(msGenreId).flatMap((id) => [id, genreDisplay(id).toLowerCase()])
+    : [];
   const msGenreComponents = msGenreRaw.split(/\s+/).filter(w => w.length > 0);
   const isCompound = msGenreComponents.length > 1;
 
-  if (isCompound) {
+  if (countsAs.some((k) => genresClean.includes(k))) {
+    genreScore = 20;
+  } else if (isCompound) {
     if (genresClean.includes(msGenreLower)) {
       genreScore = 20;
     } else {

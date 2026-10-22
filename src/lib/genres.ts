@@ -58,18 +58,18 @@ export const CANONICAL_GENRES: CanonicalGenre[] = [
   { id: "womens-fiction", label: "Women's fiction", aliases: ["womens fiction", "women’s fiction"], wordCountRange: "70,000 – 100,000" },
   { id: "historical-fiction", label: "Historical fiction", aliases: ["historical", "histfic", "hist fic"], wordCountRange: "70,000 – 100,000" },
   { id: "contemporary", label: "Contemporary", aliases: ["contemporary fiction"], wordCountRange: "70,000 – 90,000" },
-  { id: "fantasy", label: "Fantasy", aliases: ["epic fantasy", "high fantasy", "low fantasy"], wordCountRange: "90,000 – 120,000" },
+  { id: "fantasy", label: "Fantasy", aliases: ["high fantasy", "low fantasy"], wordCountRange: "90,000 – 120,000" },
   { id: "science-fiction", label: "Science fiction", aliases: ["scifi", "sci-fi", "sci fi", "sf"], wordCountRange: "90,000 – 120,000" },
   { id: "speculative-fiction", label: "Speculative fiction", aliases: ["speculative", "spec fic", "spec-fic"], wordCountRange: "90,000 – 120,000" },
   { id: "romantasy", label: "Romantasy", aliases: ["romantic fantasy", "fantasy romance"], wordCountRange: "90,000 – 120,000" },
   { id: "dystopian", label: "Dystopian", aliases: ["dystopia", "dystopian fiction"], wordCountRange: "90,000 – 120,000" },
   { id: "magical-realism", label: "Magical realism", aliases: ["magic realism"], wordCountRange: "80,000 – 100,000" },
-  { id: "horror", label: "Horror", aliases: ["gothic horror", "gothic"], wordCountRange: "70,000 – 90,000" },
-  { id: "romance", label: "Romance", aliases: ["rom", "romcom", "rom-com", "romantic comedy"], wordCountRange: "70,000 – 90,000" },
-  { id: "thriller", label: "Thriller", aliases: ["psychological thriller", "domestic thriller"], wordCountRange: "70,000 – 90,000" },
-  { id: "mystery", label: "Mystery", aliases: ["whodunit", "whodunnit"], wordCountRange: "70,000 – 90,000" },
-  { id: "crime", label: "Crime", aliases: ["crime fiction", "noir"], wordCountRange: "70,000 – 90,000" },
-  { id: "cosy-crime", label: "Cosy crime", aliases: ["cozy crime", "cosy mystery", "cozy mystery"], wordCountRange: "70,000 – 90,000" },
+  { id: "horror", label: "Horror", aliases: [], wordCountRange: "70,000 – 90,000" },
+  { id: "romance", label: "Romance", aliases: ["rom"], wordCountRange: "70,000 – 90,000" },
+  { id: "thriller", label: "Thriller", aliases: [], wordCountRange: "70,000 – 90,000" },
+  { id: "mystery", label: "Mystery", aliases: [], wordCountRange: "70,000 – 90,000" },
+  { id: "crime", label: "Crime", aliases: ["crime fiction"], wordCountRange: "70,000 – 90,000" },
+  { id: "cosy-crime", label: "Cosy crime", aliases: ["cozy crime"], wordCountRange: "70,000 – 90,000" },
   { id: "action-adventure", label: "Action & adventure", aliases: ["action", "adventure", "action adventure"], wordCountRange: "80,000 – 100,000" },
   { id: "young-adult", label: "Young adult", aliases: ["ya"], wordCountRange: "50,000 – 80,000" },
   { id: "middle-grade", label: "Middle grade", aliases: ["mg"], wordCountRange: "30,000 – 55,000" },
@@ -78,6 +78,76 @@ export const CANONICAL_GENRES: CanonicalGenre[] = [
   { id: "memoir", label: "Memoir", aliases: ["memoirs"], wordCountRange: "70,000 – 90,000" },
   { id: "non-fiction", label: "Non-fiction", aliases: ["nonfiction", "non fiction", "nf"], wordCountRange: "70,000 – 90,000" },
   { id: "narrative-non-fiction", label: "Narrative non-fiction", aliases: ["narrative nonfiction", "creative non-fiction", "creative nonfiction"], wordCountRange: "70,000 – 90,000" },
+  /* ── Manuscripts v28 Part D2 — SUB-GENRES. Each names its parent (a main genre above), inherits the parent's
+     word-count range, and counts as the parent wherever genres are matched (`genreAndAncestors`). Agents' pickers
+     list main genres only; sub-genres appear only in the manuscript picker. ── */
+  { id: "psychological-thriller", label: "Psychological thriller", aliases: [], parent: "thriller" },
+  { id: "domestic-thriller", label: "Domestic thriller", aliases: [], parent: "thriller" },
+  { id: "legal-thriller", label: "Legal thriller", aliases: [], parent: "thriller" },
+  { id: "political-thriller", label: "Political thriller", aliases: [], parent: "thriller" },
+  { id: "spy-thriller", label: "Spy thriller", aliases: [], parent: "thriller" },
+  { id: "techno-thriller", label: "Techno-thriller", aliases: [], parent: "thriller" },
+  { id: "medical-thriller", label: "Medical thriller", aliases: [], parent: "thriller" },
+  { id: "conspiracy-thriller", label: "Conspiracy thriller", aliases: [], parent: "thriller" },
+  { id: "serial-killer", label: "Serial killer thriller", aliases: [], parent: "thriller" },
+  { id: "police-procedural", label: "Police procedural", aliases: [], parent: "crime" },
+  { id: "noir", label: "Noir", aliases: [], parent: "crime" },
+  { id: "domestic-noir", label: "Domestic noir", aliases: [], parent: "crime" },
+  { id: "historical-crime", label: "Historical crime", aliases: [], parent: "crime" },
+  { id: "heist", label: "Heist", aliases: [], parent: "crime" },
+  { id: "nordic-noir", label: "Nordic noir", aliases: [], parent: "crime" },
+  { id: "whodunnit", label: "Whodunnit", aliases: ["whodunit"], parent: "mystery" },
+  { id: "locked-room", label: "Locked-room mystery", aliases: [], parent: "mystery" },
+  { id: "amateur-sleuth", label: "Amateur sleuth", aliases: [], parent: "mystery" },
+  { id: "cosy-mystery", label: "Cosy mystery", aliases: ["cozy mystery"], parent: "mystery" },
+  { id: "historical-mystery", label: "Historical mystery", aliases: [], parent: "mystery" },
+  { id: "gothic", label: "Gothic", aliases: ["gothic horror"], parent: "horror" },
+  { id: "folk-horror", label: "Folk horror", aliases: [], parent: "horror" },
+  { id: "supernatural", label: "Supernatural horror", aliases: [], parent: "horror" },
+  { id: "psychological-horror", label: "Psychological horror", aliases: [], parent: "horror" },
+  { id: "haunted-house", label: "Haunted house", aliases: [], parent: "horror" },
+  { id: "body-horror", label: "Body horror", aliases: [], parent: "horror" },
+  { id: "urban-fantasy", label: "Urban fantasy", aliases: [], parent: "fantasy" },
+  { id: "dark-fantasy", label: "Dark fantasy", aliases: [], parent: "fantasy" },
+  { id: "cosy-fantasy", label: "Cosy fantasy", aliases: [], parent: "fantasy" },
+  { id: "portal-fantasy", label: "Portal fantasy", aliases: [], parent: "fantasy" },
+  { id: "grimdark", label: "Grimdark", aliases: [], parent: "fantasy" },
+  { id: "epic-fantasy", label: "Epic fantasy", aliases: [], parent: "fantasy" },
+  { id: "historical-fantasy", label: "Historical fantasy", aliases: [], parent: "fantasy" },
+  { id: "fairytale-retelling", label: "Fairytale retelling", aliases: [], parent: "fantasy" },
+  { id: "myth-retelling", label: "Myth retelling", aliases: [], parent: "fantasy" },
+  { id: "sword-and-sorcery", label: "Sword and sorcery", aliases: [], parent: "fantasy" },
+  { id: "space-opera", label: "Space opera", aliases: [], parent: "science-fiction" },
+  { id: "cyberpunk", label: "Cyberpunk", aliases: [], parent: "science-fiction" },
+  { id: "climate-fiction", label: "Climate fiction", aliases: [], parent: "science-fiction" },
+  { id: "time-travel", label: "Time travel", aliases: [], parent: "science-fiction" },
+  { id: "hard-sf", label: "Hard science fiction", aliases: [], parent: "science-fiction" },
+  { id: "post-apocalyptic", label: "Post-apocalyptic", aliases: [], parent: "science-fiction" },
+  { id: "first-contact", label: "First contact", aliases: [], parent: "science-fiction" },
+  { id: "military-sf", label: "Military science fiction", aliases: [], parent: "science-fiction" },
+  { id: "romcom", label: "Romantic comedy", aliases: ["romcom", "rom-com"], parent: "romance" },
+  { id: "historical-romance", label: "Historical romance", aliases: [], parent: "romance" },
+  { id: "contemporary-romance", label: "Contemporary romance", aliases: [], parent: "romance" },
+  { id: "paranormal-romance", label: "Paranormal romance", aliases: [], parent: "romance" },
+  { id: "regency", label: "Regency romance", aliases: [], parent: "romance" },
+  { id: "dark-romance", label: "Dark romance", aliases: [], parent: "romance" },
+  { id: "sports-romance", label: "Sports romance", aliases: [], parent: "romance" },
+  { id: "romantic-suspense", label: "Romantic suspense", aliases: [], parent: "romance" },
+  { id: "autofiction", label: "Autofiction", aliases: [], parent: "literary-fiction" },
+  { id: "coming-of-age", label: "Coming of age", aliases: [], parent: "literary-fiction" },
+  { id: "satire", label: "Satire", aliases: [], parent: "literary-fiction" },
+  { id: "campus-novel", label: "Campus novel", aliases: [], parent: "literary-fiction" },
+  { id: "experimental", label: "Experimental fiction", aliases: [], parent: "literary-fiction" },
+  { id: "literary-thriller", label: "Literary thriller", aliases: [], parent: "literary-fiction" },
+  { id: "alternate-history", label: "Alternate history", aliases: [], parent: "historical-fiction" },
+  { id: "family-saga", label: "Family saga", aliases: [], parent: "historical-fiction" },
+  { id: "dual-timeline", label: "Dual timeline", aliases: [], parent: "historical-fiction" },
+  { id: "wartime", label: "Wartime fiction", aliases: [], parent: "historical-fiction" },
+  { id: "tudor", label: "Tudor fiction", aliases: [], parent: "historical-fiction" },
+  { id: "victorian", label: "Victorian fiction", aliases: [], parent: "historical-fiction" },
+  { id: "uplit", label: "Up-lit", aliases: [], parent: "commercial-fiction" },
+  { id: "comic-fiction", label: "Comic fiction", aliases: [], parent: "commercial-fiction" },
+  { id: "military-fiction", label: "Military fiction", aliases: [], parent: "action-adventure" },
 ];
 
 /** Lowercase, fold `&`→"and", strip punctuation to spaces, collapse — the comparison key. So
@@ -214,8 +284,28 @@ export function genreLabel(id: string, personal: PersonalGenre[] = []): string {
 export function wordCountRangeForGenre(id: string | undefined, personal: PersonalGenre[] = []): string {
   if (!id) return GENERIC_WORD_COUNT_RANGE;
   const canon = CANON_BY_ID.get(id);
-  return canon?.wordCountRange ?? GENERIC_WORD_COUNT_RANGE;
+  /* v28: a sub-genre inherits its parent's range unless it states its own */
+  const parent = canon?.parent ? CANON_BY_ID.get(canon.parent) : undefined;
+  return canon?.wordCountRange ?? parent?.wordCountRange ?? GENERIC_WORD_COUNT_RANGE;
 }
+
+/**
+ * Manuscripts v28 Part D2 — A GENRE AND EVERYTHING IT COUNTS AS: a canonical id, then its parent, then the parent's
+ * parent. A psychological thriller is also a thriller, so an agent who lists Thriller takes it. EVERY matcher goes
+ * through this one helper (genreMatch's `bookGenreHit` and `isGenreMatch`, communityMatch's genre score); a value
+ * the taxonomy does not know is just itself.
+ */
+export function genreAndAncestors(id: string): string[] {
+  const out: string[] = [];
+  let cur: string | undefined = id;
+  while (cur && !out.includes(cur)) {
+    out.push(cur);
+    cur = CANON_BY_ID.get(cur)?.parent;
+  }
+  return out;
+}
+/** The main genres only: what an agent's genre pickers and filters list. */
+export const MAIN_GENRES: CanonicalGenre[] = CANONICAL_GENRES.filter((g) => !g.parent);
 
 /** The full pickable set for a user: canonical + their personal genres. */
 export function genresForUser(personal: PersonalGenre[] = []): Array<CanonicalGenre | PersonalGenre> {

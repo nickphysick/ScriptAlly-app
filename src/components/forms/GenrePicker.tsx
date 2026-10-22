@@ -76,7 +76,8 @@ export const GenrePicker: React.FC<{
 
   const options: Opt[] = useMemo(
     () => [
-      ...CANONICAL_GENRES.map((g) => ({ id: g.id, label: g.label, personal: false })),
+      /* Manuscripts v28 D2: an agent's genres are main genres only; sub-genres live in the manuscript picker */
+      ...CANONICAL_GENRES.filter((g) => !g.parent).map((g) => ({ id: g.id, label: g.label, personal: false })),
       ...personal.map((p) => ({ id: p.id, label: p.label, personal: true })),
     ],
     [personal]

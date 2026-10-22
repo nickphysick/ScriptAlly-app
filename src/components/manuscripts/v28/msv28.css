@@ -13,7 +13,7 @@
 
 /* ══ the drawer ══ */
 .hdr[data-hdr="ms-edit"] {
-  --ms28-serif: "Source Serif 4", Georgia, serif; --ms28-ink: #1c130f; --ms28-navy: #2a3a52; --ms28-rust: #a0452e;
+  --ms28-serif: var(--sp-serif); --ms28-ink: #1c130f; --ms28-navy: #2a3a52; --ms28-rust: #a0452e;
   --ms28-i58: rgba(28, 19, 15, 0.58); --ms28-i45: rgba(28, 19, 15, 0.45); --ms28-i14: rgba(28, 19, 15, 0.14); --ms28-i08: rgba(28, 19, 15, 0.08);
   font-family: var(--ms28-serif); color: var(--ms28-ink);
 }

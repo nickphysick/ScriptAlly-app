@@ -10,7 +10,7 @@
  * does not know. With no genre, or no count, there is no hint.
  */
 import {
-  CANONICAL_GENRES, GENERIC_WORD_COUNT_RANGE, canonicalGenreById, canonicalIdOf, genreDisplay, genreLabel, matchKey, wordCountRangeForGenre,
+  CANONICAL_GENRES, GENERIC_WORD_COUNT_RANGE, canonicalGenreById, canonicalIdOf, genreAndAncestors, genreDisplay, genreLabel, matchKey, wordCountRangeForGenre,
 } from "./genres";
 import { storedGenre } from "./onboardingGenres";
 
@@ -86,6 +86,11 @@ export interface GenreHit { id: string; label: string; parent: string | null; vi
 /**
  * Predictive search: exact label 100, label prefix 80, word prefix 60, alias prefix 50, substring 30; a main genre beats a
  * sub-genre at equal rank (+5). Seven at most. `exclude` are ids already picked.
+ *
+ * ⚠️ AT EQUAL RANK, A GENRE RELATED TO ONE ALREADY PICKED COMES FIRST, then alphabetical. The prompt's lock wants
+ *    "psych" to list Psychological thriller first; the mock (Thriller picked) lists Psychological horror first, because
+ *    it breaks the tie alphabetically. Relatedness (sharing a main genre with a pick) satisfies the lock without
+ *    favouring one family for everyone.
  */
 export function searchGenres(q: string, exclude: readonly string[] = [], max = 7): GenreHit[] {
   const k = matchKey(q);
@@ -107,7 +112,9 @@ export function searchGenres(q: string, exclude: readonly string[] = [], max = 7
     if (s < 0) continue;
     out.push({ id: g.id, label: g.label, parent: g.parent ?? null, via, range: wordCountRangeForGenre(g.id), score: s + (g.parent ? 0 : 5) });
   }
-  return out.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label)).slice(0, max);
+  const family = new Set(exclude.flatMap((id) => genreAndAncestors(id)));
+  const related = (h: GenreHit) => (genreAndAncestors(h.id).some((x) => family.has(x)) ? 1 : 0);
+  return out.sort((a, b) => b.score - a.score || related(b) - related(a) || a.label.localeCompare(b.label)).slice(0, max);
 }
 /** True when the text names a genre exactly (its label or an alias) — then no "add your own" row is offered. */
 export const isExactGenre = (q: string): boolean => {

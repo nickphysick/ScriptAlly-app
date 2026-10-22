@@ -51,3 +51,58 @@ describe("D1 — the genre search and the stored form", () => {
     expect([g.main!, ...g.also].map(storedOf)).toEqual(["Thriller", "Crime", "Northern gothic"]);
   });
 });
+
+import { CANONICAL_GENRES, MAIN_GENRES, canonicalIdOf, genreAndAncestors, wordCountRangeForGenre } from "./genres";
+import { GENRE_NOUN } from "./genreNoun";
+import { bookGenreHit, isGenreMatch, matchGenre, takesBook } from "./genreMatch";
+import { calculateCommunityAgentMatch } from "./communityMatch";
+import type { CommunityAgent, Manuscript } from "../types";
+
+describe("D4 — the sub-genre list", () => {
+  const subs = CANONICAL_GENRES.filter((g) => g.parent);
+  it("67 sub-genres; every parent is a canonical MAIN genre; ids unique; every id has a noun", () => {
+    expect(subs.length).toBe(67);
+    const mains = new Set(MAIN_GENRES.map((g) => g.id));
+    for (const g of subs) expect(mains.has(g.parent!), `${g.id} → ${g.parent}`).toBe(true);
+    const ids = CANONICAL_GENRES.map((g) => g.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(GENRE_NOUN[id], id).toBeTruthy();
+  });
+  it("a sub-genre inherits its parent's range, and counts as its parent", () => {
+    expect(wordCountRangeForGenre("psychological-thriller")).toBe(wordCountRangeForGenre("thriller"));
+    expect(genreAndAncestors("psychological-thriller")).toEqual(["psychological-thriller", "thriller"]);
+    expect(genreAndAncestors("thriller")).toEqual(["thriller"]);
+  });
+  it("the moved aliases resolve to their sub-genres", () => {
+    for (const [alias, id] of [["epic fantasy", "epic-fantasy"], ["noir", "noir"], ["gothic horror", "gothic"], ["gothic", "gothic"], ["rom-com", "romcom"], ["romantic comedy", "romcom"], ["whodunit", "whodunnit"], ["cozy mystery", "cosy-mystery"], ["psychological thriller", "psychological-thriller"], ["domestic thriller", "domestic-thriller"]]) {
+      expect(canonicalIdOf(alias), alias).toBe(id);
+    }
+  });
+});
+
+describe("D3 — a sub-genre matches an agent who lists its parent", () => {
+  const book = ["Psychological thriller"];
+  it("genreMatch: takesBook, bookGenreHit and the tint's isGenreMatch", () => {
+    expect(takesBook(["Thriller"], book)).toBe(true);
+    expect(takesBook(["thriller"], book)).toBe(true);
+    expect(bookGenreHit(book)("Thriller")).toBe(true);
+    expect(isGenreMatch("Thriller", matchGenre("Psychological thriller"))).toBe(true);
+    expect(takesBook(["Romance"], book)).toBe(false);
+  });
+  it("the Discover score counts the parent as fully as the sub-genre", () => {
+    const agent = { id: "a", name: "A", agency: "B", email: "", website: "", genres: ["Thriller"], mswl: "" } as unknown as CommunityAgent;
+    const ms = { id: "m", title: "T", genre: "Psychological thriller", subGenres: [], ageCategory: "Adult", wordCount: 80000, logline: "", comps: [] } as unknown as Manuscript;
+    expect(calculateCommunityAgentMatch(agent, ms).genreScore).toBe(20);
+  });
+});
+
+describe("D1 with the sub-genres", () => {
+  it("'psych' lists Psychological thriller first (Thriller picked), in Thriller, with its range", () => {
+    const h = searchGenres("psych", ["thriller"]);
+    expect(h[0].id).toBe("psychological-thriller");
+    expect(h[0].parent).toBe("thriller");
+    expect(h[0].range).toBe("70,000 – 90,000");
+    /* with nothing picked the tie is alphabetical, as the mock draws it */
+    expect(searchGenres("psych")[0].id).toBe("psychological-horror");
+  });
+});
