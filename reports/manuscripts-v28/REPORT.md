@@ -147,4 +147,12 @@ false premise 4).
 
 ## Integration and deploy
 
-See the next section, added after the deploy.
+- Dev served `index-CCHtLZcn.js` from `dev/css1-pv3-ms27` at **f37121e9**, this branch's base, so the integration
+  branch **`dev/css1-pv3-ms27-ms28`** is a fast-forward to **2e72f905**: the same commit the gates and locks above ran
+  on.
+- Gates at every commit (in a throwaway worktree): `tsc` clean at all nine. Vitest is green from D2 on. A to D1 each
+  fail only the marketing font lock, as above.
+- Built from a clean checkout of 2e72f905. The served hash was re-checked in the same command, then deployed (hosting
+  only, `--project scriptally-dev`). **Dev now serves `index-Boa5GRP3.js`.**
+- MSV28 against the deployed site: 22 of 22 green at both widths, with the fixture unchanged afterwards.
+- Not merged to `main`. Prod untouched. No rules or functions changed.
