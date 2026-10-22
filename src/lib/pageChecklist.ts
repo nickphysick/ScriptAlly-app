@@ -151,6 +151,31 @@ export const QC_GUIDE_HIDDEN_PATH: UserPaths = { [`${QC_BASE}.hidden`]: true };
 export const QC_GUIDE_UNHIDE_PATH: UserPaths = { [`${QC_BASE}.hidden`]: false };
 export const QC_GUIDE_FINISHED_PATH: UserPaths = { [`${QC_BASE}.finished`]: true };
 
+/* ── Manuscripts v27 Part D — the Manuscripts page's state ──
+   ⚠️ ITS DONE FLAGS ARE NOT STORED: they are read from the saved manuscript (`lib/manuscriptV27.msGuideDone`). Only
+      `seen` and `hidden` live here, per account, written by leaf like the other two pages'.
+   ⚠️ NOT IN `GUIDE_PAGES` (yet): adding it changes the Help Centre's guide cards and every other page's "Your next
+      guide is …", which are outside this pack. */
+
+export type MsGuideKey = "details" | "logline" | "pitch" | "synopsis";
+
+export const MS_CHECKLIST: readonly ChecklistItem<MsGuideKey>[] = [
+  { key: "details", title: "Check your book's details", line: "Genre, age category and word count." },
+  { key: "logline", title: "Write your logline", line: "One or two sentences that sell the book." },
+  { key: "pitch", title: "Add an elevator pitch", line: "Have it on the tip of your tongue." },
+  { key: "synopsis", title: "Add a synopsis", line: "The whole story, ending included." },
+];
+
+const MS_BASE = "todoPrefs.manuscripts.guide";
+
+export function msGuideOf(user: User | null | undefined): { seen: boolean; hidden: boolean } {
+  const g = (user?.todoPrefs as { manuscripts?: { guide?: { seen?: unknown; hidden?: unknown } } } | undefined)?.manuscripts?.guide;
+  return { seen: g?.seen === true, hidden: g?.hidden === true };
+}
+export const MS_GUIDE_SEEN_PATH: UserPaths = { [`${MS_BASE}.seen`]: true };
+export const MS_GUIDE_HIDDEN_PATH: UserPaths = { [`${MS_BASE}.hidden`]: true };
+export const MS_GUIDE_UNHIDE_PATH: UserPaths = { [`${MS_BASE}.hidden`]: false };
+
 /* ── Help system v1 C.4 — the pages with a guide, in sidebar order, for the last note's "Your next guide is …" ──
    Help Centre v1 — and for the Help Centre's guide cards: each page's route, its sidebar group, its items, and what is
    done there. ⚠️ A CARD'S COUNT IS THE PILL'S COUNT (lock HC1-H2): the same done flags, the same credit for what is
