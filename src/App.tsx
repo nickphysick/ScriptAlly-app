@@ -24,7 +24,7 @@ import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
-import { VersionsPage } from "./components/manuscripts/v27/VersionsPage";
+import { VersionsV1Page } from "./components/versions/VersionsV1Page";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
@@ -742,8 +742,9 @@ function AppContent() {
           ) : manuscriptsComps ? (
             <ComparableTitlesPage onNavigate={handleNavigate} />
           ) : manuscriptsVersions ? (
-            /* Manuscripts v27 Part E — the interim Versions page (the versions UI that left Manuscripts, unchanged) */
-            <VersionsPage onNavigate={handleNavigate} />
+            /* Versions v1 (22 Oct) — the Versions page, built to design-refs/versions-v1. It replaces v27 Part E's
+               interim page, which stays in the tree (manuscripts/v27/VersionsPage), mounted nowhere. */
+            <VersionsV1Page onNavigate={handleNavigate} />
           ) : (
             /* Manuscripts v12 (25 Sep): the route now renders `ManuscriptPage` — one manuscript,
                its versions, letters, synopses, packages and comps, built to

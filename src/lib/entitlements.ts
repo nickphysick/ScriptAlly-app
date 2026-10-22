@@ -20,3 +20,16 @@ export const PACKAGES_OPEN_TO_ALL = true;
 export function packagesUnlocked(user: Pick<User, "plan"> | null | undefined): boolean {
   return PACKAGES_OPEN_TO_ALL || user?.plan === UserPlan.PRO;
 }
+
+/**
+ * ⚠️ VERSIONS IS PRO, AND FOUNDING MEMBERS HAVE IT IN FULL (Nick, 22 Oct; Versions v1). There is no founding
+ * flag on the account: during the beta every account is a founding member (the sidebar's feedback card says so
+ * to everyone), so founding access is this one constant, exactly as packages' is. When founding access ends,
+ * turn it off and the gate is Pro alone.
+ */
+export const VERSIONS_FOUNDING_ACCESS = true;
+
+/** True when this user may use the Versions page: Pro, or a founding member while founding access is on. */
+export function versionsUnlocked(user: Pick<User, "plan"> | null | undefined, foundingAccess: boolean = VERSIONS_FOUNDING_ACCESS): boolean {
+  return foundingAccess || user?.plan === UserPlan.PRO;
+}
