@@ -151,3 +151,13 @@ In `shots/`, beside each `design-refs/versions-v1/screens/*` file, at both width
   Free only.
 - **Commits:** parts A–D landed as one commit, because they share one component and one stylesheet; splitting them
   would commit intermediate files that never existed. Then one commit for the locks and this report.
+
+## Integration and deploy
+
+- Dev served `index-BmbaNVwq.js` from `dev/css1-pv3-ms27-ms28-ms281` at e54396d8, this branch's base. So the
+  integration branch **`dev/css1-pv3-ms27-ms28-ms281-ver1`** is a fast-forward to **40080ff6**, the commit the gates
+  and locks ran on.
+- Built from a clean checkout of 40080ff6. The served hash was re-checked in the same command, then deployed (hosting
+  only, `--project scriptally-dev`). **Dev now serves `index-wDx05B0j.js`.**
+- VER1 against the deployed site: 21 of 21 green at both widths, with the fixture unchanged afterwards.
+- Not merged to `main`. Prod untouched. No rules or functions changed.
