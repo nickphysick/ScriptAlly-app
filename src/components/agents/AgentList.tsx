@@ -12,25 +12,16 @@
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
 import { flushSync } from "react-dom";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
 import { Agent } from "../../types";
-import { agentRelationship } from "../../lib/agentList";
-import {
-  isDoorOpen,
-  contactListState,
-  matchesAgentSearch,
-} from "../../lib/agentList";
+import { contactListState, matchesAgentSearch } from "../../lib/agentList";
 import { prefersReducedMotion } from "../../lib/agentMotion";
 import { reopenReminder } from "../../lib/agentCard";
-import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
-import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
-
-import { useFixedMenu } from "../forms/useFixedMenu";
 import { hkAllFilled } from "../../lib/hkReviewAid";
 import { INTRO_PATH_V18, dismissPath, dismissedAtGaps, introSeenOf, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
 import { agentGapLine, hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
@@ -47,55 +38,36 @@ import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { contactFilterCount, agentRows, appliedFilters, GROUP_OPTIONS, addedMs } from "../../lib/contactList";
-import { CL_DATE_SORTS, monthJumpsOf } from "../../lib/cardsSort";
-import { MONTHS_SHORT } from "../../lib/dates";
+import { contactFilterCount, agentRows } from "../../lib/contactList";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactLightHeader } from "./contact/ContactLightHeader";
-import {
-  type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactGroups, dropOptions, emptyContactFilters,
-  letterCounts, matchesContactFilters, sortFacts, surnameInitial,
-} from "../../lib/contactList";
+import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
-import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
-import { ContactAppliedRow, ContactFilterStrip, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
+import { type ContactPop } from "./contact/ContactListControls";
 import { escapeDepth } from "../../lib/escapeStack";
-import { quietScroll, usePopover } from "../shell/ListPills";
-import { CONTACT_PIN_STORE, type ContactView, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
+import { usePopover } from "../shell/ListPills";
+import { CONTACT_PIN_STORE, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import "./contact/contactV13.css";
 import "./contact/contactV14.css";
+/* navy-bar v1 — kept for what still renders: these sheets came in with the list head and the title row (both retired with
+   the Cards and List views), and they also style the light header (`cl17-hd`), the group and the scroller's foot. */
+import "./contact/contactV19.css";
+import "./contact/contactV20.css";
 import { nextStep } from "../../lib/contactNextStep";
 import { BLANK_GLANCE } from "./contact/ContactStrip";
-import { ContactListHead } from "./contact/ContactListHead";
-import { ContactTitleRow } from "./contact/ContactTitleRow";
-import { ContactCards, ContactCardsEmpty } from "./contact/ContactCards";
-import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
-import type { PanelAct } from "../../lib/agentPanel";
-import { firstNameOf } from "../../lib/agentPanel";
 import { genreLabel } from "../../lib/genres";
-import { destroyManifest } from "../../lib/cascade";
-import { emitAgentCardEvent, closeAgentCard } from "../../lib/agentCardStore";
-import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from "../../lib/queryPanelStore";
-import { GLANCE_LABEL, glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
-import "../shell/listToolbar.css"; /* v18.3 §E — the list toolbar and headings, shared with the Query Centre */
-import { useStickyStack } from "../shell/stickyStack";
 import { fitsGenre } from "../../lib/contactStrip";
-import { joinGenres } from "../../lib/genreNoun";
-import { cardQuery, cardRows, primaryFor, type CardAct, type CardPrimary } from "../../lib/agentCard";
-import { CANONICAL_GENRES } from "../../lib/genres";
 import { RAIL_GROUPS } from "../shell/railNav";
-import { countryName } from "../../lib/territory";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -104,7 +76,8 @@ import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklis
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
-import { ContactSkeleton } from "./contact/ContactSkeleton";
+import { BookSkeleton, ContactBook } from "./book/ContactBook";
+import { downloadAgentsCsv } from "../../lib/agentCsv";
 import "./agentList.css";
 
 /**
@@ -116,23 +89,6 @@ import "./agentList.css";
 /** v16 §E — the device key the shared full-screen hook remembers under (Comparable titles has its own) */
 /** v16 E's key: the shared pin hook reads it once and moves it to `sa.pinList.agents` (v138.6) */
 export const CONTACTS_FULL_KEY = "sa.contactsFull";
-
-/**
- * v20 §B — THE LINE A JUMP LANDS UNDER, read from the boxes (never restated): in the List view the column headings' stuck
- * bottom; in the Cards view (no headings) the head's own height and the applied-filters row's, from the scroll area's
- * top — which is where the head and that row stick. One reader for the letter, the group, the marked letter and group.
- */
-function stackLine(col: HTMLElement, sc: HTMLElement): number {
-  const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
-  const top = sc.getBoundingClientRect().top;
-  if (labels) return top + (parseFloat(getComputedStyle(labels).top) || 0) + labels.offsetHeight;
-  const head = col.querySelector<HTMLElement>('[data-cl19="head"]');
-  const af = col.querySelector<HTMLElement>('[data-cl19="applied"]');
-  return top + (head?.offsetHeight ?? 12) + (af?.offsetHeight ?? 0);
-}
-/** v20 §B — what a letter jump looks for: a row in the List view, a card in the Cards view */
-const itemsWithInitial = (col: HTMLElement, L?: string) =>
-  Array.from(col.querySelectorAll<HTMLElement>(L ? `[data-clv="row"][data-initial="${L}"], [data-clv="card"][data-initial="${L}"]` : `[data-clv="row"][data-initial], [data-clv="card"][data-initial]`));
 
 const DISCOVER = RAIL_GROUPS.flatMap((g) => g.items).find((i) => i.path === "/agents/discover");
 
@@ -153,8 +109,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      page went on stating the old book's facts after the bar had changed book. */
   const { key: locationKey } = useLocation();
   const {
-    agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths, taskFlags, deleteAgent,
+    agents, queries, manuscripts, activities, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
+    currentUser, updateUserPaths,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -177,7 +133,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      so this page and the QC cannot disagree (v11 §10). The clock freezes per data change. */
   const qcRows = useMemo(() => buildQcRows(queries, agents, activities, Date.now()), [queries, agents, activities]);
   /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible` (the house tile law). */
-  const census = useMemo(() => contactCensus(agents, qcRows, scoped?.id ?? null), [agents, qcRows, scoped]);
   /* ⚠️ THE COUNT CARDS LEFT WITH v12: the card index took the list mount (P2 — their pool
      narrowing, the cardSel state and the bar's "Showing" chips went with them), and P5's empty
      state took the exhibit's. `CountCards` is deleted; the strip indexes, it never filters. */
@@ -196,18 +151,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [glance, setGlance] = useState<GlanceKey | null>(() => rememberedVisit?.glance ?? null);
   const [search, setSearch] = useState(() => searchQuery?.trim() || rememberedVisit?.search || "");
   /* v16 §C / v19 baked 2: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill) */
-  const [groupKey, setGroupKey] = useState<GroupKey>(() => rememberedView.group);
+  const [groupKey] = useState<GroupKey>(() => rememberedView.group);
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => rememberedView.sort);
   const [reversed, setReversed] = useState<boolean>(() => rememberedView.reversed);
   /* choosing a sort resets the direction to its natural order (§5) */
-  const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
   useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
-  /* v20 §A/§B — CARDS OR LIST: two views of the one list. Every control and every piece of state (grouping, sort,
-     filters, search, the A to Z, the jump row, full screen) is shared; switching changes only how the agents are drawn. */
-  /* v20 §G — remembered per device (`qh.cl.view`), read before the first paint so the other view never flashes; a first
-     ever visit opens in List */
-  const [view, setView] = useState<ContactView>(() => rememberedView.view);
-  useEffect(() => { writeListView({ view }); }, [view]);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -249,42 +197,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // that re-animates every time you tick a checkbox is exhausting, and this animation introduces
   // the page, it doesn't celebrate each interaction.
   //
-  // Disarming also matters MECHANICALLY: these animations carry fill-mode `both`, and a filled
-  // animation outranks an inline transform, so cards still holding one would silently ignore the
-  // FLIP transforms that arrive in Phase 2. Clearing the class returns them to a movable state.
-  const gridRef = useRef<HTMLDivElement>(null);
   /** the LIST column's box — what the floating bar centres on (§5.4) */
   const mainColRef = useRef<HTMLDivElement>(null);
   /* v138.6 §C — the navy list header: the sticky row, measured by the one stack writer */
-  const lhRef = useRef<HTMLDivElement>(null);
-  // The positions captured just BEFORE a change that reflows the list. Consumed once, by the
-  // layout effect below, on the very next render. (The FLIP survives the grid→rows move: the
-  // rows carry `data-agent-card`, flip.ts's own default selector.)
-  const flipBefore = useRef<FlipRects | null>(null);
   /** The saved card's beat, and the inline notice that outlives the motion. */
   const [notice, setNotice] = useState<{
     text: string; kind: "travel" | "filtered-out" | "failed"; agentId: string; canUndo: boolean;
   } | null>(null);
   /** Which section the card sat in before the save — read once the outcome is computed. */
-  const sectionBeforeSave = useRef<string | null>(null);
   /** The card's own Undo for the last save — the SAME closure its foot offers (a whole-document
    *  snapshot: the agent, the deadlines the fan-out moved, the task flag), so the notice and the card
    *  cannot restore different things. Null when the card could not take a snapshot. */
   const undoSave = useRef<(() => Promise<unknown>) | null>(null);
-
-  // LAST + INVERT + PLAY. Runs after the DOM has the new arrangement but before paint, so the
-  // displaced cards are jumped back to their old positions and released on the next frame. Only
-  // cards that actually MOVED are touched; a card that stayed put gets no transform and no layer.
-  useLayoutEffect(() => {
-    const before = flipBefore.current;
-    if (!before) return;
-    flipBefore.current = null;
-    if (prefersReducedMotion()) return clearFlip(gridRef.current);
-    playFlip(gridRef.current, before, { durationMs: BUMP_MS });
-    const done = window.setTimeout(() => clearFlip(gridRef.current), BUMP_MS + 60);
-    return () => window.clearTimeout(done);
-  });
-
 
   /* ⚠️ THE ONE-SHOT REVEAL (board fixes II, P1). The To-do board's ⋯ menu offers "View the
      agent"; this is the receiving end. sessionStorage rather than a route param, deliberately:
@@ -311,8 +235,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     try { sessionStorage.removeItem("sa.agentReveal"); } catch { /* private mode */ }
     if (!agents.some((a) => a.id === id)) return;  // stale id — consumed, nothing to show
     revealed.current = true; /* v19 §G — the reveal's scroll wins over the visit's remembered one */
-    const card = document.querySelector<HTMLElement>(`[data-agent-card="${id}"]`);
-    card?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    setBookReq({ id, seq: Date.now() });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, agents.length]);
 
@@ -341,10 +264,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     [agents, qcRows, scoped],
   );
   /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
-  const takesFact = useCallback(
-    (x: { genres: string[] }) => x.genres.some(bookHit),
-    [bookHit],
-  );
   /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
   const inPool = useCallback(
     (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!glance || glanceOf(x) === glance),
@@ -361,213 +280,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     () => sortFacts(factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed),
     [factsAll, inPool, filters, sortKey, reversed],
   );
-  const groupCtx = useMemo(() => ({ takes: takesFact }), [takesFact]);
-  const groups = useMemo(() => contactGroups(groupKey, visibleFacts, groupCtx), [groupKey, visibleFacts, groupCtx]);
-  /* v19 §E — a band counts the rows showing; the v13 "n of m" heading is retired with the powder bands */
-  const factsById = useMemo(
-    () => new Map(visibleFacts.map((x) => [x.agent.id, x])),
-    [visibleFacts],
-  );
-  /* §7.8 — the dead end's drops, only when the list is empty */
-  const drops = useMemo(
-    () => (visibleFacts.length > 0 ? [] : dropOptions(factsAll, filters, search, (x, q) => matchesAgentSearch(x.agent, q), (k) => CANONICAL_GENRES.find((g) => g.id === k)?.label ?? k)),
-    [visibleFacts.length, factsAll, filters, search],
-  );
-  /* §7.7 — the keyboard's focus ring: the rows in the order they are DRAWN (groups flattened) */
-  const [kfId, setKfId] = useState<string | null>(null);
-  const displayIds = useMemo(() => groups.flatMap((g) => g.ids), [groups]);
-  useEffect(() => { if (kfId && !displayIds.includes(kfId)) setKfId(null); }, [displayIds, kfId]);
-  /* §7.7 — what the row keys read, current on every render (the key handler is bound once). ⚠️ DECLARED HERE, above
-     every render-time reader (the trayFor assignment below), never beside the handler — the TDZ order rule. */
-  const rowKeys = useRef({ kfId, displayIds, factsById, trayFor: null as null | ((x: AgentFacts) => CardPrimary), onOpen: null as null | ((id: string, r?: DOMRect) => void), act: null as null | ((id: string, a: CardAct) => void) });
-  rowKeys.current = { ...rowKeys.current, kfId, displayIds, factsById };
-  const shownGroups = groups;
-  const visible = visibleFacts;
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
   const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
-  /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
-  const wsRef = useRef<HTMLElement | null>(null);
-  /** v20 §A — the title row: Part C reads whether it has scrolled away under the stuck toolbar */
-  const titleRef = useRef<HTMLDivElement | null>(null);
-  /* v20 §C — HAS THE TITLE ROW SCROLLED AWAY under the stuck toolbar? Derived from the boxes on every scroll (once a frame),
-     never an observer's memory: gone when its bottom is at or above the STUCK toolbar's top. Only then (and in full screen)
-     does the toolbar carry the Cards / List switch and Full screen. */
-  const [titleGone, setTitleGone] = useState(false);
-  /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
-  const filRef = useRef<HTMLButtonElement | null>(null);
-
-  /* ── v12 §4 / v13 §6: the marked letter ───────────────────────────────────
-   * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
-   * IO-misses-are-permanent law): the marked cell is the LAST letter divider at or above the line a
-   * strip pick lands a divider on, re-read rAF-throttled on every scroll — a reading that cannot go
-   * stale. Capture-phase on document because scroll does not bubble and the page's scroller is the
-   * shell's, not this component's to name. Letters only: under any other grouping nothing marks.
-   * ⚠️ THE LINE IS READ, NOT RESTATED: the bottom of the list's pinned headings, which is where `landUnder` puts a
-   * picked divider, so a picked letter is always the marked one. */
-  /* v18 §A — THE CURRENT LETTER: the letter of the row at the line under the pinned row and the column headings (the
-     last row whose top is at or above that line; none while the first row is still below it). ONE reader, scheduled once
-     per animation frame on scroll; it writes the current letter for both strips and nothing else. Capture-phase on
-     document because scroll does not bubble. */
-  const [markedLetter, setMarkedLetter] = useState<string | null>(null);
-  useEffect(() => {
-    if (!active) { setMarkedLetter(null); return; }
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      const col = mainColRef.current;
-      const rows = col ? itemsWithInitial(col) : [];
-      if (!col || !rows.length) { setMarkedLetter((m) => (m === null ? m : null)); return; }
-      const scroller = col.closest<HTMLElement>(".wpg-scroll");
-      if (!scroller) return;
-      /* the line is where the headings sit once STUCK (their sticky top + their height), the place a pick lands a
-         row: read against their current bottom, the first row always touched it and "A" was marked at the top.
-         v20 §B: in the Cards view the cards of one row share a top, so the last card at or above the line is read. */
-      const line = stackLine(col, scroller) + 2;
-      let cur: HTMLElement | null = null;
-      for (const r of rows) {
-        if (r.getBoundingClientRect().top <= line) cur = r;
-        else break;
-      }
-      const L = cur?.dataset.initial ?? null;
-      setMarkedLetter((m) => (m === L ? m : L));
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    raf = requestAnimationFrame(read);
-    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-    return () => {
-      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [active, groupKey, sortKey, reversed, visibleFacts, view]);
-
-  /* v16 §C — A LETTER TAB. In the ungrouped list it scrolls to the first agent whose surname starts with the
-     letter, lands that row just under the pinned controls and washes it for 1.4s. Grouped by letter it scrolls to
-     the letter's divider; under any other grouping the pick restores the letter grouping first. "All" returns to
-     the list's top.
-     ⚠️ THE LANDING IS MEASURED, IN PASSES: the stack the row lands under changes height as it pins, so the target
-     is re-read after each jump (the column headings' own bottom, once they have stuck) until it holds. An instant
-     jump, never a smooth one: a smooth scroll cannot be corrected until it ends. */
-  const landUnder = useCallback((el: HTMLElement) => {
-    const sc = el.closest<HTMLElement>(".wpg-scroll");
-    if (!sc) return;
-    let passes = 0;
-    const col = el.closest<HTMLElement>(".clv-main");
-    const pass = () => {
-      const labels = el.closest(".lt-panel")?.querySelector<HTMLElement>(":scope > .lt-labels");
-      const line = labels ? labels.getBoundingClientRect().bottom : col ? stackLine(col, sc) : sc.getBoundingClientRect().top + 12;
-      const delta = el.getBoundingClientRect().top - line;
-      if (Math.abs(delta) < 0.5 || passes >= 4) return;
-      passes += 1;
-      sc.scrollTo({ top: sc.scrollTop + delta, behavior: "instant" as ScrollBehavior });
-      requestAnimationFrame(() => requestAnimationFrame(pass));
-    };
-    pass();
-  }, []);
-  /* the jump to a letter's first row (in the order the list draws): smooth, to the row's measured place under the
-     stuck headings, then `landUnder` corrects it once the scroll has ended */
-  const jumpToLetter = useCallback((letter: string) => {
-    const col = mainColRef.current;
-    const sc = col?.closest<HTMLElement>(".wpg-scroll");
-    const row = col ? itemsWithInitial(col, letter).find((r) => r.getBoundingClientRect().height > 0) : null;
-    if (!col || !sc || !row) return;
-    const under = stackLine(col, sc);
-    const top = Math.max(0, sc.scrollTop + row.getBoundingClientRect().top - under);
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    let done = false;
-    const settle = () => { if (done) return; done = true; sc.removeEventListener("scrollend", settle); landUnder(row); };
-    sc.addEventListener("scrollend", settle, { once: true });
-    window.setTimeout(settle, reduce ? 0 : 900);
-    sc.scrollTo({ top, behavior: reduce ? ("instant" as ScrollBehavior) : "smooth" });
-    row.setAttribute("data-wash", "");
-    window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
-  }, [landUnder]);
-  /* cards-sort-search v1 §B — A MONTH PICK (ungrouped, sorted by Date added): the month's first row, or card, in the order
-     the list draws, landed as a letter pick lands its row */
-  const jumpToMonth = useCallback((key: string) => {
-    const m = monthJumpsRef.current.find((x) => x.key === key);
-    const col = mainColRef.current;
-    const sc = col?.closest<HTMLElement>(".wpg-scroll");
-    const row = m && col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-agent-card="${CSS.escape(m.firstId)}"]`)).find((r) => r.getBoundingClientRect().height > 0) : null;
-    if (!col || !sc || !row) return;
-    const top = Math.max(0, sc.scrollTop + row.getBoundingClientRect().top - stackLine(col, sc));
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    let done = false;
-    const settle = () => { if (done) return; done = true; sc.removeEventListener("scrollend", settle); landUnder(row); };
-    sc.addEventListener("scrollend", settle, { once: true });
-    window.setTimeout(settle, reduce ? 0 : 900);
-    sc.scrollTo({ top, behavior: reduce ? ("instant" as ScrollBehavior) : "smooth" });
-  }, [landUnder]);
-  /* v19 §B — A LETTER PICK. Ungrouped: the first row IN THE CURRENT ORDER whose surname starts with the letter (the
-     sort is left as it is). Grouped by Letter: that letter's band. The A to Z shows only in those two groupings. */
-  const pickLetter = useCallback((letter: string) => {
-    if (groupKey === "letter") {
-      const col = mainColRef.current;
-      const band = col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`)).find((b) => b.getBoundingClientRect().height > 0) : null;
-      /* v19 §E — the band sticks inside its section, so the section's top is where the band starts */
-      if (band) landUnder(band.closest<HTMLElement>('[data-cl19="group-section"]') ?? band);
-      return;
-    }
-    jumpToLetter(letter);
-  }, [groupKey, jumpToLetter, landUnder]);
-  /* v19 §E — THE JUMP ROW (grouped by anything but Letter): one button per group, the current group following the
-     scroll (the last section whose top has reached the stuck headings' foot), a click landing that group's band at
-     the headings' foot. Read per frame from the boxes, as the letters are. */
-  const [markedGroup, setMarkedGroup] = useState<string | null>(null);
-  const jumping = groupKey !== "none" && groupKey !== "letter";
-  useEffect(() => {
-    if (!active || !jumping) { setMarkedGroup(null); return; }
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      const col = mainColRef.current;
-      const secs = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-cl19="group-section"]')).filter((x) => x.offsetHeight > 0) : [];
-      if (!col || !secs.length) { setMarkedGroup((m) => (m === null ? m : null)); return; }
-      const scroller = col.closest<HTMLElement>(".wpg-scroll");
-      if (!scroller) return;
-      const line = stackLine(col, scroller) + 2;
-      let cur: HTMLElement = secs[0];
-      for (const x of secs) { if (x.getBoundingClientRect().top <= line) cur = x; else break; }
-      /* at the list's foot a short last group can never reach the line: the scroll has nowhere further to go, so the
-         group whose band is on screen last is the one being read */
-      if (scroller.scrollTop > 0 && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2) {
-        const bottom = scroller.getBoundingClientRect().bottom;
-        for (const x of secs) if (x.getBoundingClientRect().top < bottom - 50) cur = x;
-      }
-      const k = cur.dataset.gkey ?? null;
-      setMarkedGroup((m) => (m === k ? m : k));
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    raf = requestAnimationFrame(read);
-    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-    return () => {
-      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [active, jumping, groupKey, sortKey, reversed, visibleFacts, view]);
-  const jumpToGroup = useCallback((key: string) => {
-    const col = mainColRef.current;
-    const sec = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-cl19="group-section"]')).find((x) => x.dataset.gkey === key && x.offsetHeight > 0) : null;
-    if (sec) landUnder(sec);
-  }, [landUnder]);
-  const jump = useMemo(() => (jumping ? {
-    groups: groups.map((g) => ({ key: g.key ?? g.label, label: g.label, n: g.ids.length })),
-    current: markedGroup ?? (groups[0] ? groups[0].key ?? groups[0].label : null),
-    onJump: jumpToGroup,
-  } : null), [jumping, groups, markedGroup, jumpToGroup]);
-  /* cards-sort-search v1 §B — THE JUMP ROW FOLLOWS THE SORT: ungrouped and sorted by a date, months (in both views);
-     sorted by Surname (or anything else), the A to Z */
-  const monthMode = groupKey === "none" && CL_DATE_SORTS.includes(sortKey);
-  const monthJumps = useMemo(() => (monthMode ? monthJumpsOf(visibleFacts, (x) => addedMs(x.agent), (x) => x.agent.id, Date.now(), MONTHS_SHORT) : []), [monthMode, visibleFacts]);
-  const monthJumpsRef = useRef(monthJumps);
-  monthJumpsRef.current = monthJumps;
-  const monthJump = useMemo(() => (monthMode ? { groups: monthJumps.map((m) => ({ key: m.key, label: m.label, n: m.n })), current: null, onJump: jumpToMonth } : null), [monthMode, monthJumps, jumpToMonth]);
-  const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
-  /* the current letter: the per-frame reader's, else (at the list's top) the first row's own */
-  const firstInitial = useMemo(() => (visibleFacts.length ? surnameInitial(groups[0] ? (factsById.get(groups[0].ids[0])?.agent ?? visibleFacts[0].agent) : visibleFacts[0].agent) : null), [visibleFacts, groups, factsById]);
-  const currentLetter = markedLetter ?? firstInitial;
   /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
-  const yourMoveN = useMemo(() => factsAll.filter((x) => x.standing.kind === "open" && x.standing.yourMove).length, [factsAll]);
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
    * never restated here. See `contactListState` for why there are three of them and why the
@@ -600,16 +316,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v19 §G — THE SCROLL POSITION, FOR THE VISIT. Saved (once a frame) while the list is on screen; put back once when the
      list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
      handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
-  const scrollPending = useRef<number | null>(rememberedVisit?.scroll || null);
   /* the first draw: the list's arrival calls this before it picks the rows on screen (v19 §H), so the rows that animate
      are the ones the reader comes back to */
-  const restoreScroll = useCallback(() => {
-    const y = scrollPending.current;
-    scrollPending.current = null;
-    if (revealed.current) { revealed.current = false; return; }
-    const sc = fullScroller();
-    if (y && sc) sc.scrollTop = y;
-  }, [fullScroller]);
   /* coming back to the route: a scroller the browser reset to its top is put back */
   const wasActive = useRef(active);
   useLayoutEffect(() => {
@@ -632,105 +340,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     sc.addEventListener("scroll", on, { passive: true });
     return () => { sc.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
   }, [active, showList, fullScroller]);
-  /* ── v19 §F — THE APPLIED-FILTERS ROW: one chip per filter, per search and for the band's group, in that order the
-     search first. The Filters chip counts the filters (and the band's group) but never the search. */
-  const appliedChips = useMemo<AppliedChip[]>(() => {
-    const out: AppliedChip[] = [];
-    const q = search.trim();
-    if (q) out.push({ key: "search", label: `\u201c${q}\u201d`, off: () => setSearch("") });
-    if (glance) out.push({ key: "glance", label: GLANCE_LABEL[glance], off: () => setGlance(null) });
-    for (const a of appliedFilters(filters, genreWords)) out.push({ key: a.key, label: a.label, off: () => setFilters(a.drop(filters)) });
-    return out;
-  }, [search, glance, filters]);
-  const chipCount = contactFilterCount(filters) + (glance ? 1 : 0);
-  /* the row's measured height, published on the list card as `--cl19-af-h` (0 when there is no row) so the headings and
-     the group bands stick under it */
-  const afRef = useRef<HTMLDivElement | null>(null);
-  const afOn = appliedChips.length > 0;
-  useLayoutEffect(() => {
-    const card = wsRef.current;
-    const row = afRef.current;
-    if (!card) return undefined;
-    if (!afOn || !row) { card.style.setProperty("--cl19-af-h", "0px"); return undefined; }
-    const write = () => { const h = row.offsetHeight; if (h > 0) card.style.setProperty("--cl19-af-h", `${h}px`); };
-    write();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(write);
-    ro.observe(row);
-    return () => ro.disconnect();
-  }, [afOn, showList, fullOn]);
-  /* v19 §I — THE LIST HAS NO FOOTER: THE CARD RUNS TO THE PAGE'S FOOT. With more rows than the page holds the last row
-     ends the card and the card ends the scroll (contactV19.css drops the page's foot air). With fewer — a search, a
-     filter, a short list — the card still runs to the page's foot rather than ending mid-page (v19.1 §F: unpinned it
-     stops 22px short, rounded, the scroll area's foot padding; pinned it meets the foot square): its min-height is the
-     scroll area's height less the card's own top in the scrolled content and that padding, measured, and
-     re-measured whenever the scroll area or the group above it changes size. Desktop only (the phone keeps its flow). */
-  useLayoutEffect(() => {
-    const card = wsRef.current;
-    const sc = card?.closest<HTMLElement>(".wpg-scroll");
-    if (!card || !sc || !(active && showList)) return undefined;
-    const group = card.closest<HTMLElement>(".clv-group");
-    const write = () => {
-      if (!window.matchMedia?.("(min-width: 768px)").matches) { card.style.minHeight = ""; return; }
-      const top = card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
-      const pad = parseFloat(getComputedStyle(sc).paddingBottom) || 0;
-      const h = Math.floor(sc.clientHeight - top - pad);
-      const v = h > 0 ? `${h}px` : "";
-      if (card.style.minHeight !== v) card.style.minHeight = v;
-    };
-    write();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(write);
-    ro.observe(sc);
-    if (group) ro.observe(group);
-    return () => { ro.disconnect(); };
-  }, [active, showList, fullOn]);
-  /* when the SET of filters changes, the list goes back to its top (the toolbar at the top of the scroll area) — only if
-     it has scrolled past it, and quietly, so a live menu stays open */
-  const filterSig = JSON.stringify([filters, search.trim(), glance]);
-  const lastSig = useRef(filterSig);
-  useEffect(() => {
-    if (lastSig.current === filterSig) return;
-    lastSig.current = filterSig;
-    const card = wsRef.current;
-    const sc = card?.closest<HTMLElement>(".wpg-scroll");
-    if (!card || !sc) return;
-    const over = card.getBoundingClientRect().top - sc.getBoundingClientRect().top;
-    if (over < -0.5) quietScroll(() => { sc.scrollTop += over; });
-  }, [filterSig]);
-  /* v19 §A — the folder tab and the sheet lip go navy while this list is pinned and on screen, and ONLY then: a
-     layout effect, so the tab never paints navy over an unpinned page (or cream over a pinned one) */
-  useLayoutEffect(() => {
-    if (!(active && fullOn)) return undefined;
-    document.documentElement.setAttribute("data-cl19-pinned", "");
-    return () => document.documentElement.removeAttribute("data-cl19-pinned");
-  }, [active, fullOn]);
-  /* v138.6 §C — the pinned row (v17 C) is retired: the navy list header is the sticky row. One writer measures the
-     stack (the lip's cover and the header's height) while this page is on screen over a list. */
-  useStickyStack(lhRef, active && showList);
-  useEffect(() => {
-    if (!active || !showList || fullOn) { setTitleGone(false); return undefined; }
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      const tr = titleRef.current, head = lhRef.current, sc = tr?.closest<HTMLElement>(".wpg-scroll");
-      if (!tr || !head || !sc || tr.offsetHeight === 0) return;
-      /* where the toolbar sits once STUCK: the scroll area's top plus the head's cover (its top padding); the title row
-         is gone once its bottom has reached that line, never merely because it is above the toolbar at rest */
-      const stuckTop = sc.getBoundingClientRect().top + (parseFloat(getComputedStyle(head).paddingTop) || 0);
-      const gone = tr.getBoundingClientRect().bottom <= stuckTop + 0.5;
-      setTitleGone((g) => (g === gone ? g : gone));
-    };
-    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
-    raf = requestAnimationFrame(read);
-    document.addEventListener("scroll", on, { capture: true, passive: true });
-    window.addEventListener("resize", on, { passive: true });
-    return () => {
-      document.removeEventListener("scroll", on, { capture: true } as EventListenerOptions);
-      window.removeEventListener("resize", on);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [active, showList, fullOn]);
   /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
      are the only sticky element in the list. */
 
@@ -758,21 +367,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const panelParam = active ? params.get("agent") : null;
   const panelAgent = panelParam ? agents.find((a) => a.id === panelParam) ?? null : null;
   const panelId = panelAgent?.id ?? null;
-  const [panelTab, setPanelTab] = useState<AgentPanelTab>("profile");
   const setPanelParam = useCallback((id: string | null, how: "push" | "replace") => {
     setParams((prev) => { const n = new URLSearchParams(prev); if (id) n.set("agent", id); else n.delete("agent"); return n; }, { replace: how === "replace" });
   }, [setParams]);
   const panelIdRef = useRef(panelId);
   panelIdRef.current = panelId;
-  const closePanel = useCallback(() => { closeAgentCard(); if (panelIdRef.current) setPanelParam(null, "replace"); }, [setPanelParam]);
   /** open the panel on this agent — and, when a door asks for it, the editor at a field */
+  /* navy-bar v1 B6 — THE AGENT'S PANEL IS RETIRED ON THIS PAGE: every door that opened it (a deep link, Housekeeping,
+     an add) now selects the agent in the address book and docks the box to it; a door that asked for the editor opens
+     the agent card's editor at that field. */
+  const [bookReq, setBookReq] = useState<{ id: string; seq: number } | null>(null);
   const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
     if (!agents.some((a) => a.id === agentId)) return;
     setHkOpenRef.current(false);
-    if (panelIdRef.current !== agentId) { setPanelTab("profile"); setPanelParam(agentId, panelIdRef.current ? "replace" : "push"); }
-    if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row", host: "panel" });
-    else closeAgentCard();
-  }, [agents, setPanelParam]);
+    setBookReq({ id: agentId, seq: Date.now() });
+    if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row" });
+  }, [agents]);
+  /* a link to `?agent=` selects that agent and docks, then the parameter goes */
+  useEffect(() => {
+    if (!active || !panelParam || !collectionsReady) return;
+    if (agents.some((a) => a.id === panelParam)) setBookReq({ id: panelParam, seq: Date.now() });
+    setPanelParam(null, "replace");
+  }, [active, panelParam, collectionsReady, agents, setPanelParam]);
   /* an id the list does not hold (deleted, or a stale link) clears itself once the agents can answer */
   useEffect(() => { if (active && panelParam && collectionsReady && agents.length > 0 && !panelAgent) setPanelParam(null, "replace"); }, [active, panelParam, panelAgent, collectionsReady, agents.length, setPanelParam]);
   /* the query view opened from this panel has its own ×: it closes the agent too */
@@ -782,13 +398,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.removeEventListener("sa:agent-panel-close", on);
   }, [setPanelParam]);
   /* while one of this agent's queries has the box (opened from the Queries tab), the agent's panel stands aside */
-  const qPanel = useSyncExternalStore(subscribeQueryPanel, currentQueryPanel, currentQueryPanel);
-  const queryHasBox = qPanel?.from === "agent";
   const openId = panelId;
   /** the list's current order and filter */
-  const sequence = useMemo(() => visibleFacts.map((x) => x.agent.id), [visibleFacts]);
   /** OPEN this agent — a row, a strip, a key */
-  const onOpen = useCallback((agentId: string, _from?: DOMRect) => openPanel(agentId), [openPanel]);
   /* kept under its old name for the doors that asked for the card's editor at a field */
   const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => openPanel(agentId, opts.tab || opts.focus || opts.prefill ? { tab: opts.tab, focus: opts.focus, prefill: opts.prefill } : undefined), [openPanel]);
 
@@ -830,7 +442,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
       const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
-        .map((a) => (a.id === saved.id ? savedFacts : (factsById.get(a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
+        .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
       const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed);
       const index = after.findIndex((x) => x.agent.id === saved.id);
       const outcome: SaveOutcome = !survives
@@ -844,12 +456,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         // the card's snapshot Undo, when it could take one
         canUndo: !!undoSave.current,
       });
-
-      /* the list reflows under the store's own update — measure BEFORE it lands so the FLIP
-         can play the move (rows carry data-agent-card, flip.ts's selector) */
-      flipBefore.current = measureFlip(gridRef.current);
     },
-    [agents, filters, sortKey, reversed, qcRows, scoped, factsById, inPool],
+    [agents, filters, sortKey, reversed, qcRows, scoped, factsAll, inPool],
   );
 
   /**
@@ -863,32 +471,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setNotice(null);
     undoSave.current = null;
     if (!undo) return;
-    flipBefore.current = measureFlip(gridRef.current);
     await undo();
   }, []);
-  /* the row a delete collapses — kept so a delete that fails can put the row back */
-  const collapsing = useRef<Animation | null>(null);
 
-  /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
-  const [newId, setNewId] = useState<string | null>(null);
 
   /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
   const remindRef = useRef<(a: Agent) => void>(() => {});
-  /** a card's (and, from Phase 4, a row tray's) next step, WITHOUT the card: the same journey the card's
-   *  button opens, straight to the drawer (§4: "its button opens the journey directly") */
-  const actWithoutCard = useCallback((agentId: string, act: CardAct) => {
-    const agent = agents.find((a) => a.id === agentId);
-    if (!agent) return;
-    if (act === "log") { openQueryDrawer({ mode: "log", agentId, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
-    if (act === "remind") { remindRef.current(agent); return; }
-    const q = cardQuery(cardRows(qcRows, agentId, scoped?.id ?? null));
-    if (!q || act === "qc") { openCard(agentId, { from: "row" }); return; }
-    openQueryDrawer({ mode: act, queryId: q.id });
-  }, [agents, scoped, qcRows, openCard]);
-  /** v13 §6 — a row's hover tray offers the card's own next step (one derivation: the card's button) */
-  const trayFor = useCallback((x: AgentFacts) => primaryFor(x, cardQuery(cardRows(qcRows, x.agent.id, scoped?.id ?? null))), [qcRows, scoped]);
-  rowKeys.current = { ...rowKeys.current, trayFor, onOpen: (id, r) => onOpen(id, r), act: actWithoutCard };
-
   /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
      the notice withdrawing once the Undo has run, and a delete's row collapsing */
   useEffect(() => subscribeAgentCardEvents((e) => {
@@ -898,27 +486,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
       tickGuide.current("add");
-      setNewId(e.agentId);
       /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
       if (addFromHere.current) addedInPanel.current = e.agentId;
       addFromHere.current = false;
     } else if (e.type === "undone") {
       undoSave.current = null;
       setNotice((n) => (n && n.agentId === e.agentId && n.kind !== "failed" ? null : n));
-    } else if (e.type === "deleting") {
-      /* §7: the row collapses over 240ms, then the delete runs and the list closes the gap */
-      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${e.agentId}"]`)]
-        .find((r) => r.getBoundingClientRect().height > 0);
-      if (row && !prefersReducedMotion() && typeof row.animate === "function") {
-        row.style.overflow = "hidden";
-        collapsing.current = row.animate(
-          [{ height: `${row.offsetHeight}px`, opacity: 1 }, { height: "0px", opacity: 0, paddingTop: "0px", paddingBottom: "0px", marginTop: "0px", marginBottom: "0px" }],
-          { duration: 240, easing: "cubic-bezier(.4,0,.8,.4)", fill: "forwards" },
-        );
-      }
     } else if (e.type === "delete-failed") {
-      collapsing.current?.cancel();
-      collapsing.current = null;
       setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
     }
   }), [beginSaveChoreography]);
@@ -932,17 +506,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     addedInPanel.current = null;
     openPanel(id);
   }, [agents, openPanel]);
-
-  /* §8.4: the new row into view, centred, once the store's own update has rendered it; the ring
-     class rides `newId` and drops when the animation has had its 2.4s (reduced motion shows the
-     ring statically for the same window — the CSS half). */
-  useEffect(() => {
-    if (!newId || !factsById.has(newId)) return;
-    const row = document.querySelector<HTMLElement>(`[data-agent-card="${newId}"]`);
-    row?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    const drop = window.setTimeout(() => setNewId(null), 2500);
-    return () => window.clearTimeout(drop);
-  }, [newId, factsById]);
 
   /* ── Housekeeping v2 (Contact list v13 §6) ───────────────────────────────────────────────
      The gap model over the WHOLE list. "Live" is any live query whatever the manuscript — the
@@ -1033,19 +596,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the control each item shows, on this page, as it is now */
   const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
     const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const row = () => vis(".aglist [data-clv='row'][data-agent-card]");
+    const row = () => vis(".aglist [data-nb1='name-row']");
     switch (k) {
       case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
-      case "search": return { el: vis(".aglist [data-cl19='toolbar'] [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
-      /* v20 §G — "Go full screen": the title row's Full screen button (in full screen there is no title row, so the
-         toolbar's Exit full screen) */
-      case "pin": return { el: vis(".aglist [data-cl20='full']") ?? vis(".aglist [data-cl20='full-tb']"), text: "Press Full screen, or F. The list becomes the whole page; Exit full screen brings the page back." };
-      case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
-      case "edit": {
-        const edit = vis("[data-ap='panel'] [data-ap='edit']");
-        return edit ? { el: edit, text: "Press Edit profile. Everything on the card can be changed here." }
-          : { el: row(), text: "Open any agent's card first. Edit profile is at the foot of it." };
-      }
+      /* navy-bar v1 — the address book's own controls */
+      case "search": return { el: vis(".aglist [data-nb1='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      case "pin": return { el: vis(".aglist [data-nb1='full']"), text: "Press Full screen, or F. The address book fills the window; Exit full screen brings the page back." };
+      case "open": return { el: row(), text: "Click any name. Their card shows on the right." };
+      case "edit": return { el: vis(".aglist [data-nb1='edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
       case "hk": return { el: vis(".aglist [data-cl183='fill']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
@@ -1186,40 +744,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       /* §7.7 — the row keys: J K / ↑ ↓ move the ring (scrolling to keep it in view, its tray showing), Enter opens
          the card, L starts the next action, Esc lets go. Enter, L and Esc act only while a ring is held, and Enter
          only from the page itself — a focused control answers its own Enter. */
-      if (down || up || openK || actK || letGo) {
-        const r = rowKeys.current;
-        if ((openK || actK || letGo) && !r.kfId) return;
-        if (openK && e.target instanceof HTMLElement && e.target.closest("button, a, [role='button']") && !e.target.closest('[data-clv="row"]')) return;
-        e.preventDefault();
-        if (letGo) { setKfId(null); return; }
-        const id = r.kfId;
-        if (down || up) {
-          const ids = r.displayIds;
-          if (!ids.length) return;
-          const i = id ? ids.indexOf(id) : -1;
-          const next = ids[Math.max(0, Math.min(ids.length - 1, i < 0 ? 0 : i + (down ? 1 : -1)))];
-          setKfId(next);
-          requestAnimationFrame(() => {
-            const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${next}"]`)].find((x) => x.getBoundingClientRect().height > 0);
-            row?.scrollIntoView({ block: "nearest", behavior: "auto" });
-          });
-          return;
-        }
-        const row = id ? [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${id}"]`)].find((x) => x.getBoundingClientRect().height > 0) : null;
-        if (openK && id) { r.onOpen?.(id, row?.getBoundingClientRect()); return; }
-        if (actK && id) {
-          const x = r.factsById.get(id);
-          const tray = x && r.trayFor ? r.trayFor(x) : null;
-          if (tray && !tray.ghost) r.act?.(id, tray.act);
-        }
-        return;
-      }
+      /* navy-bar v1 — the address book's list has its own ↑ ↓ while it has focus; the old row ring has no rows */
+      if (down || up || openK || actK || letGo) return;
       e.preventDefault();
       if (hk) { openHk(); return; }
       /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
       /* v138.6 §C: the pinned row (and its mirrored search) is retired; the navy header is the sticky row, so its
          own search is on screen whenever the list is, and is brought into view otherwise */
-      const input = [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
+      const input = [...document.querySelectorAll<HTMLInputElement>('[data-nb1="find"] input')].find((x) => x.getBoundingClientRect().height > 0);
       if (!input) return;
       input.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" });
       input.focus({ preventScroll: true });
@@ -1235,110 +767,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [addUserTask, openCard]);
   remindRef.current = onHkRemind;
 
-  /* ── v16 §F — the panel's acts ─────────────────────────────────────────────────────────────────────────── */
-  const panelFacts = useMemo(() => (panelAgent ? agentFacts(panelAgent, qcRows, scoped?.id ?? null) : null), [panelAgent, qcRows, scoped]);
-  const panelQ = useMemo(() => (panelAgent ? cardQuery(cardRows(qcRows, panelAgent.id, scoped?.id ?? null)) : null), [panelAgent, qcRows, scoped]);
-  const panelRows = useMemo(() => (panelAgent ? qcRows.filter((r) => r.query.agentId === panelAgent.id) : []), [panelAgent, qcRows]);
-  /* v18.2 §B — the same queries as documents, for the History tab */
-  const panelQueries = useMemo(() => (panelAgent ? queries.filter((q) => q.agentId === panelAgent.id) : []), [panelAgent, queries]);
-  const panelGenres = useMemo(
-    () => (panelAgent?.genres ?? []).map((g) => ({ label: genreLabel(g, personalGenres), hit: bookHit(g) })),
-    [panelAgent, personalGenres, bookHit],
-  );
-  const titleOf = useCallback((id: string) => manuscripts.find((m) => m.id === id)?.title?.trim() || null, [manuscripts]);
-  /** ↑ ↓ J K: the row before or after the open one, in the order the list draws */
-  const walkPanel = useCallback((dir: 1 | -1) => {
-    const ids = rowKeys.current.displayIds;
-    const i = panelIdRef.current ? ids.indexOf(panelIdRef.current) : -1;
-    const next = ids[Math.max(0, Math.min(ids.length - 1, i < 0 ? 0 : i + dir))];
-    if (!next || next === panelIdRef.current) return;
-    closeAgentCard();
-    setPanelTab("profile");
-    setPanelParam(next, "replace");
-    requestAnimationFrame(() => {
-      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${next}"]`)].find((x) => x.getBoundingClientRect().height > 0);
-      row?.scrollIntoView({ block: "nearest", behavior: "auto" });
-    });
-  }, [setPanelParam]);
-  /** a query journey, stepped into the panel in the action drawer's look */
-  /* v17 §D — "+ Log a query" on a row: the agent's panel opens and steps straight to the Log a query journey with
-     the agent chosen (v16 Part F's act look). The journey is portalled into the panel, so it starts once the panel
-     for THAT agent is on the page. */
-  const pendingLog = useRef<string | null>(null);
-  const logInPanel = useCallback((agentId: string) => {
-    pendingLog.current = agentId;
-    openPanel(agentId);
-  }, [openPanel]);
-  useEffect(() => {
-    const a = panelAgent;
-    if (!a || pendingLog.current !== a.id) return undefined;
-    pendingLog.current = null;
-    const first = firstNameOf(a);
-    const nm = (a.name || a.agency || "The agent").trim();
-    const id = requestAnimationFrame(() => openQueryDrawer({
-      mode: "log", agentId: a.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}),
-      panel: { name: nm, agency: (a.name ? a.agency ?? "" : "").trim(), first, backLabel: `Back to ${first}`, title: `Query ${first}` },
-    }));
-    return () => cancelAnimationFrame(id);
-  }, [panelAgent, scoped]);
-  const actInPanel = useCallback((act: PanelAct) => {
-    const a = panelAgent;
-    if (!a || act.kind !== "journey") return;
-    const first = firstNameOf(a);
-    const nm = (a.name || a.agency || "The agent").trim();
-    const panel = { name: nm, agency: (a.name ? a.agency ?? "" : "").trim(), first, backLabel: `Back to ${first}`, ...(act.mode === "log" ? { title: `Query ${first}` } : {}) };
-    if (act.mode === "log") { openQueryDrawer({ mode: "log", agentId: a.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}), panel }); return; }
-    if (panelQ) openQueryDrawer({ mode: act.mode, queryId: panelQ.id, panel });
-  }, [panelAgent, panelQ, scoped]);
-  const panelDeleteFacts = useMemo(() => {
-    if (!panelAgent) return null;
-    const m = destroyManifest("agent", panelAgent.id, { queries, activities, taskFlags });
-    return { queries: m.queries, history: m.activityRecords };
-  }, [panelAgent, queries, activities, taskFlags]);
-  /** ⋯ → Delete agent…, confirmed: the panel closes, the row collapses (the list's own aftermath), then the cascade runs */
-  const deletePanelAgent = useCallback(async () => {
-    const a = panelAgent;
-    if (!a) return;
-    const name = (a.name ?? "").trim() || a.agency;
-    closePanel();
-    emitAgentCardEvent({ type: "deleting", agentId: a.id });
-    await new Promise((r) => window.setTimeout(r, 240));
-    try { await deleteAgent(a.id); } catch { emitAgentCardEvent({ type: "delete-failed", agentId: a.id, name }); }
-  }, [panelAgent, closePanel, deleteAgent]);
-  const writePanelAgent = useCallback(async (id: string, patch: AgentEditPatch): Promise<SaveAgentResult> => {
+  /* navy-bar v1 B4 — the card's Notes write through the card's own path (`commitAgentEdits`, or the lab's sandbox) */
+  const writeAgentPatch = useCallback(async (id: string, patch: AgentEditPatch): Promise<SaveAgentResult> => {
     if (sandbox?.writeAgent) return sandbox.writeAgent(id, patch);
     if (!currentUser) return { ok: false, error: "Not signed in." } as SaveAgentResult;
     return commitAgentEdits(firestoreDb, currentUser.id, id, patch);
   }, [sandbox, currentUser]);
-  const panelMenu = useMemo(() => {
-    const out: { key: string; label: string; run: () => void }[] = [];
-    if (panelQ) out.push({ key: "qc", label: "Open in Query Centre", run: () => navigate(`/queries?q=${encodeURIComponent(panelQ.id)}`) });
-    if (panelQ && panelQ.court === "agent" && panelQ.pastExpected) out.push({ key: "nudge", label: "Send a nudge", run: () => actInPanel({ kind: "journey", mode: "nudge" }) });
-    if (panelAgent && panelFacts?.door === "closed" && reopenReminder(panelAgent)) out.push({ key: "remind", label: "Remind me when they reopen", run: () => remindRef.current(panelAgent) });
-    return out;
-  }, [panelQ, panelAgent, panelFacts, navigate, actInPanel]);
 
-  /** v19 §A/§B — the list's head (the band, pinned, and the toolbar), the same markup pinned and unpinned; the
-   *  loading skeleton draws it inert */
-  const listHead = (loading: boolean) => (
-    <ContactListHead pinned={loading ? full : fullOn} loading={loading} headRef={loading ? undefined : lhRef}
-      band={!loading && fullOn ? {
-        total: factsAll.length, model: glanceM, glance, onGlance: (k) => setGlance((g) => (g === k ? null : k)),
-        yourMove: yourMoveN, health: pageState === "list" ? health : null, onHealth: openHk, onAdd: openAdd,
-      } : null}
-      counts={stripCounts} current={currentLetter} onPick={pickLetter}
-      search={search} onSearch={setSearch} groupKey={groupKey} filterCount={chipCount} onClearFilters={clearFilters}
-      filtersRef={loading ? undefined : filRef} pop={pop}
-      onStopGroup={() => setGroupKey("none")} jump={loading ? null : (monthMode ? monthJump : jump)} months={monthMode}
-      /* cards-sort-search v1 §B — the Cards view's Sort chip: the headings' own sort, set outright */
-      sort={{ key: sortKey, reversed }} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-      onPin={togglePin} view={view} onView={setView} showViewTools={!loading && (fullOn || titleGone)}
-      /* v20 §E — the filter strip opens inside the head, under the toolbar */
-      filterStrip={loading ? null : (
-        <ContactFilterStrip filters={filters} onFilters={setFilters} facts={factsAll} pool={inPool} pop={pop}
-          showing={visibleFacts.length} total={factsAll.length} pinned={fullOn} />
-      )} />
-  );
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -1408,24 +843,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onWishlistChanged={(id) => openPanel(id, { tab: "want", focus: "wishlist" })}
           />
         )}
-        {/* v16 §F — the agent's panel (portalled): only while this is the page on screen, and not while one of the
-            agent's queries has the box */}
-        {showList && active && panelAgent && panelFacts && !queryHasBox && (
-          <AgentPanel
-            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows}
-            queries={panelQueries} activities={activities} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
-            genres={panelGenres} nowMs={nowMs} uid={currentUser?.id ?? null} writeAgent={writePanelAgent}
-            tab={panelTab} onTab={setPanelTab}
-            editing={cardReq?.host === "panel" && cardReq.agentId === panelAgent.id}
-            onClose={closePanel} onWalk={walkPanel}
-            onEdit={(tab, focus) => openPanel(panelAgent.id, { tab: tab ?? "who", focus })}
-            onAct={actInPanel}
-            onOpenQuery={(queryId) => openQueryPanelFromAgent(queryId, { agentId: panelAgent.id, first: firstNameOf(panelAgent) })}
-            menu={panelMenu} deleteFacts={panelDeleteFacts} onDelete={deletePanelAgent}
-            gaps={agentGapLine(hk, panelAgent.id)}
-            onFillIn={() => { const id = panelAgent.id; closePanel(); setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
-          />
-        )}
         {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
         {!sandbox && (
           <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guideDone} seen={guide.seen} hidden={guide.hidden}
@@ -1459,10 +876,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
           </ContactLightHeader>
         )}
-        {pageState === "settling" && (
-          <ContactSkeleton controls={listHead(true)} view={view}
-            titleRow={<ContactTitleRow shown={0} total={0} narrowed={false} view={view} onView={setView} onFull={togglePin} />} />
-        )}
+        {pageState === "settling" && <BookSkeleton />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -1476,95 +890,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
         <>
-        {/* v20 §A — THE TITLE ROW: the live count, the Cards / List pill and Full screen (not in full screen) */}
-        {!fullOn ? (
-          <ContactTitleRow shown={visibleFacts.length} total={factsAll.length} narrowed={anyActive}
-            view={view} onView={setView} onFull={togglePin} rowRef={titleRef} />
-        ) : null}
-        <section className="cl14-ws cl16-list cl19-card" data-cl14="ws" data-cl16="list" data-cl19="card" ref={wsRef} aria-label="The full list">
-          {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
-              control bar is gone: search and the filters are in the header. */}
-          {/* v18 §B — THE LIST HEADER: the top of the list sheet, slate. One sentence, left (the group name opens the
-              grouping menu); search, Filters, density and full screen, right. */}
-          {/* v138.6 §C — THE STICKY ROW: the navy header in a wrapper that sticks under the sheet's lip, filled with the
-              sheet's colour (the Query Centre's own construction) */}
-          {/* v19 §A/§B — THE HEAD: the band (pinned only) and the toolbar, sticky at the scroll area's top; the column
-              headings stick directly under it. The old list bar ("Showing all N agents · Grouped by …", its own Find,
-              density and pin) is retired: the toolbar is the list's only control row. */}
-          {listHead(false)}
-          <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
-          {afOn ? (
-            <ContactAppliedRow chips={appliedChips} showing={visibleFacts.length} total={factsAll.length} pinned={fullOn} rowRef={afRef}
-              onClearAll={clearFilters}
-              onMore={() => { const b = filRef.current; if (b && pop.open !== "filters") pop.toggle("filters", b); }} />
-          ) : null}
-          <div className="cl14-list" data-cl14="list">
-        {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
-            FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
-            default selector, so a filter change still animates the reflow. */}
-        <div ref={gridRef}>
-          {visible.length === 0 && view === "cards" ? (
-            <ContactCardsEmpty />
-          ) : visible.length === 0 ? (
-            /* §7.8 — THE HELPFUL DEAD END: each active control offered as one drop, with how many it brings back */
-            <div className="cl14-none" data-cl13="none" role="status">
-              <b>No agents match all of these.</b>
-              <span>{drops.length ? "Drop one filter to see some again:" : "Even dropping one filter leaves nobody. Try clearing them."}</span>
-              {drops.length > 0 && (
-                <span className="cl14-lz" data-cl14="drops">
-                  {drops.map((d) => (
-                    <button key={d.key} type="button" data-cl14-drop={d.key} data-n={d.n} onClick={() => { if (d.clearsSearch) setSearch(""); else setFilters(d.drop(filters)); }}>
-                      Drop <em>{d.label}</em><small>{d.n} {d.n === 1 ? "agent" : "agents"}</small>
-                    </button>
-                  ))}
-                </span>
-              )}
-              <button type="button" className="cl14-lzc" data-cl13="none-clear" onClick={clearFilters}>Clear all filters</button>
-            </div>
-          ) : view === "cards" ? (
-            /* v20 §B — THE CARDS VIEW: the same groups, in the same order, as paper cards; the same arrival */
-            <ContactCards
-              groups={shownGroups} byId={factsById} groupKey={groupKey} genreHit={bookHit} personalGenres={personalGenres}
-              openId={openId} focusId={kfId} onOpen={onOpen}
-              onEdit={(id, tab, focus) => openCard(id, { tab, focus, from: "slip" })}
-              arrival={{ key: JSON.stringify([view, groupKey, sortKey, reversed, filters, search.trim(), glance, fullOn]), before: restoreScroll }}
-            />
-          ) : (
-            <ContactRows
-              groups={shownGroups}
-              byId={factsById}
-              nowMs={nowMs}
-              genreHit={bookHit}
-              /* §4: under Status and Action grouping the heading already says it */
-              hideYourMove={groupKey === "status" || groupKey === "action"}
-              /* §5: Letter draws one panel with letter dividers; any other grouping a powder band per group;
-                 v16 §C: no grouping is one panel with no dividers */
-              byLetter={groupKey === "letter"}
-              ungrouped={groupKey === "none"}
-              /* v19 §E — every grouping draws the strong band over its own section */
-              groupKey={groupKey}
-              /* §6: the sortable column labels drive the page's own sort */
-              sort={{ key: sortKey, reversed, onSort: setSortKey, onReverse: () => setReversed((r) => !r) }}
-              /* §7.7 the keyboard's ring · §7.3 the Find text marked · §7.6 the density */
-              focusId={kfId}
-              highlight={search.trim()}
-              compact={false}
-              /* v19 §H — one arrival for every change to what the list shows or how: load (the first draw), grouping,
-                 sort, filters, the summary card's group, Find and the pin */
-              arrival={{ key: JSON.stringify([view, groupKey, sortKey, reversed, filters, search.trim(), glance, fullOn]), before: restoreScroll }}
-              openId={openId}
-              newId={newId}
-              onOpen={onOpen}
-              onAddGenres={(id) => openCard(id, { tab: "want", focus: "genres", from: "slip" })}
-              onAddWishlist={(id) => openCard(id, { tab: "want", focus: "wishlist", from: "slip" })}
-              onEdit={(id, tab, focus) => openCard(id, { tab, focus, from: "slip" })}
-              trayFor={trayFor} onLog={logInPanel}
-              onAct={actWithoutCard}
-            />
-          )}
-        </div>
-          </div>
-        </section>
+        {/* navy-bar v1 B1 — THE ADDRESS BOOK: one box of two columns in place of Cards and List, their title row, the
+            navy toolbar, the filter strip and the list body. It docks 20px from the top and the list scrolls inside it. */}
+        <ContactBook
+          pool={visibleFacts} all={factsAll} narrowed={anyActive}
+          search={search} onSearch={setSearch}
+          filters={filters} onFilters={setFilters} onClearAll={clearFilters}
+          sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
+          genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
+          bookTitle={scoped?.title?.trim() || null} nowMs={nowMs}
+          full={fullOn} onFull={togglePin} active={active}
+          selectRequest={bookReq}
+          onEdit={(id, tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" })}
+          onMore={(id) => openAgentCard(id, { from: "button" })}
+          onJourney={(id, mode, queryId) => {
+            if (mode === "log" || !queryId) { openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
+            if (mode === "edit") { openAgentCard(id, { tab: "who", from: "row" }); return; }
+            openQueryDrawer({ mode, queryId });
+          }}
+          onOpenQuery={(queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`)}
+          gapsOf={(id) => { const g = agentGapLine(hk, id); return g ? `Missing: ${g.words.join(", ")}` : null; }}
+          onFillIn={(id) => { setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
+          onNotes={async (id, text) => (await writeAgentPatch(id, { notes: text })).ok}
+          onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
+        />
         </>
         )}
         </>
@@ -1584,12 +933,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                   setSearch("");
                   setGlance(null);
                   setNotice(null);
-                  // let the cleared list render, then bring the card into view
-                  window.setTimeout(() => {
-                    document
-                      .querySelector(`[data-agent-card="${notice.agentId}"]`)
-                      ?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-                  }, 0);
+                  // the book selects the agent once the cleared list holds it
+                  setBookReq({ id: notice.agentId, seq: Date.now() });
                 }}
               >
                 Show all agents
