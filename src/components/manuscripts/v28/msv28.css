@@ -193,3 +193,9 @@ img.ms28-st-ph { width: 100%; object-fit: cover; background: none; box-shadow: n
   .ms27 .ms28-st { grid-template-columns: 96px 1fr; gap: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .ms27 .ms28-st { transition: none; } }
+
+/* ── v28.1: the logline's closing quote — the opening mark's font, size, colour and drop, mirrored (a gap before it,
+   none after). Two classes + !important: brand.tsx names bare spans as body sans at runtime. ── */
+.ms27 .ms27-lg .ms28-qend, .ms27-bx .ms27-bx-lg .ms28-qend { font: inherit !important; white-space: nowrap; }
+.ms27 .ms27-lg .ms28-cq { font: 400 40px/0 var(--sp-type) !important; color: var(--ms27-rust); vertical-align: -15px; margin-left: 6px; }
+.ms27-bx .ms27-bx-lg .ms28-cq { font: 400 44px/0 var(--sp-type) !important; color: #a2452a; vertical-align: -17px; margin-left: 6px; }

@@ -7,7 +7,7 @@
  * It is the shared `HalfDrawer` (shell): the right-hand drawer the Contact list's Housekeeping and the Comparable titles
  * drawer use. The page supplies the head (a title-page disc, the book's title, "The book's details. Edit anything; save
  * once."), five numbered sections, and the foot ("Querying since …", Cancel, Save details). Every way in opens it:
- * the header's Edit details, the book view's Edit details and "Add one", the logline strip's "Add one", and the guide.
+ * the header's Edit, the book view's Edit and "Add one", the logline strip's "Add one", and the guide.
  *
  * ⚠️ ONE MANUSCRIPT WRITE. Save sends one `updateManuscript`; Cancel, Escape and the dim discard. Optional text fields
  *    are omitted when cleared (`deleteField()`), never stored as "".

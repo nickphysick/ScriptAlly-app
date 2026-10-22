@@ -20,6 +20,7 @@ import { createPortal } from "react-dom";
 import { useOverlay } from "../../shell/useOverlay";
 import type { BookRow, WhereItsBeen } from "../../../lib/manuscriptV27";
 import { paragraphs } from "../../../lib/manuscriptV27";
+import { QuotedLine } from "../v28/QuotedLine";
 
 export type BookField = "logline" | "elevatorPitch" | "synopsis";
 
@@ -105,7 +106,7 @@ export const BookView: React.FC<BookViewProps> = (p) => {
           <section className="ms27-bx-pg ms27-bx-right" aria-label="Logline, pitch and synopsis" data-ms27bx="right">
             <div className="ms27-bx-in">
               <h4>Logline</h4>
-              {p.logline.trim() ? <p className="ms27-bx-lg">{p.logline.trim()}</p> : none("logline")}
+              {p.logline.trim() ? <p className="ms27-bx-lg"><QuotedLine text={p.logline} /></p> : none("logline")}
               <h4>Elevator pitch</h4>
               {p.pitch.trim() ? <p className="ms27-bx-pt" data-ms27bx="pitch">{p.pitch.trim()}</p> : none("elevatorPitch")}
               <h4>Synopsis</h4>
@@ -114,7 +115,7 @@ export const BookView: React.FC<BookViewProps> = (p) => {
             <div className="ms27-bx-ft">
               <span className="ms27-bx-pn">ii</span><span className="ms27-bx-sp" />
               <button type="button" className="ms27-bx-b g" data-ms27bx="close" onClick={() => close()}>Close</button>
-              <button type="button" className="ms27-bx-b p" data-ms27bx="edit" onClick={() => edit()}>Edit details</button>
+              <button type="button" className="ms27-bx-b p" data-ms27bx="edit" onClick={() => edit()}>Edit</button>
             </div>
           </section>
           <div className="ms27-bx-cover" data-ms27bx="cover">

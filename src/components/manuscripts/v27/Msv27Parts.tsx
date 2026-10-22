@@ -15,6 +15,7 @@
 import React from "react";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import type { CardRow } from "../../../lib/manuscriptV27";
+import { QuotedLine } from "../v28/QuotedLine";
 
 /* ══ the header ════════════════════════════════════════════════════════════════════════════════ */
 
@@ -62,8 +63,8 @@ export const BookContainer: React.FC<{
         eyebrow="— Manuscripts —" title={title} byline={byline}
         acts={(
           <>
-            <button type="button" className="ms27-p1" data-ms27="edit" onClick={onEdit}>Edit details</button>
-            <button type="button" className="ms27-p2" data-ms27="full" onClick={view}>Full details</button>
+            <button type="button" className="ms27-p1" data-ms27="edit" aria-label="Edit the book's details" onClick={onEdit}>Edit</button>
+            <button type="button" className="ms27-p2" data-ms27="full" aria-label="View the book's summary" onClick={view}>View summary</button>
           </>
         )}
         right={(
@@ -85,10 +86,9 @@ export const BookContainer: React.FC<{
       />
       <div className="ms27-bkl" data-ms27="logline">
         {logline.trim() ? (
-          <>
-            <p className="ms27-lg">{logline}</p>
-            <button type="button" className="ms27-lnk" data-ms27="read-all" onClick={view}>Read it all</button>
-          </>
+          /* v28.1: "Read it all" is gone (the details card still opens the book view); the line takes the strip's
+             full width and closes with a rust ” */
+          <p className="ms27-lg"><QuotedLine text={logline} /></p>
         ) : (
           <p className="ms27-lg is-empty">No logline yet. <button type="button" className="ms27-lnk" data-ms27="add-logline" onClick={onAddLogline}>Add one</button></p>
         )}

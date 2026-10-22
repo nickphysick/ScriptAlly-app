@@ -45,8 +45,10 @@ describe("A1 — the page is two containers and nothing else", () => {
     expect(html).toMatch(/data-ms27="eyebrow">— Manuscripts —</);
     expect(html).toMatch(/<h1 class="ms27-h1" id="ms27-title" data-page-title="" data-ms27="title">The Smoke Test<\/h1>/);
     expect(html).toMatch(/data-ms27="byline"><i aria-hidden="true"><\/i><em>by<\/em> /);
-    expect(html).toContain(">Edit details</button>");
-    expect(html).toContain(">Full details</button>");
+    /* v28.1: the buttons read Edit and View summary */
+    expect(html).toMatch(/aria-label="Edit the book&#x27;s details"[^>]*>Edit<\/button>/);
+    expect(html).toMatch(/aria-label="View the book&#x27;s summary"[^>]*>View summary<\/button>/);
+    expect(text(html)).not.toMatch(/Edit details|Full details|Read it all/);
     expect(text(html)).not.toMatch(/How it works/i);
   });
 });
@@ -61,10 +63,13 @@ describe("A2/A3 — the details card and the logline strip", () => {
     expect(cardGenre(MS({ subGenres: [] }))).toBe("Thriller");
     expect(sinceDay("2026-03-03")).toBe("3 Mar 2026");
   });
-  it("a written logline sits in the strip with Read it all", () => {
+  it("a written logline sits in the strip alone, closed by a rust quote mark bound to its last word (v28.1)", () => {
     setActiveManuscript(null);
     const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toContain('data-ms27="read-all"');
+    const strip = /data-ms27="logline">([\s\S]*?)<\/div>/.exec(html);
+    expect(strip).toBeTruthy();
+    expect(strip![1]).not.toMatch(/<button|<a /);
+    expect(strip![1]).toMatch(/<span class="ms28-qend" data-ms28="qend">\S+<span class="ms28-cq" aria-hidden="true" data-ms28="close-quote">\u201D<\/span><\/span><\/p>/);
   });
 });
 
