@@ -227,6 +227,8 @@ export function manuscriptReadiness(ms: Manuscript, rangeLabel: string | null): 
 export const HIGHLIGHT_STOPWORDS = new Set<string>([
   ...PREDEFINED_GENRES.flatMap((g) => g.toLowerCase().split(/[^a-z0-9]+/)).filter(Boolean),
   ...AGE_CATEGORIES.flatMap((a) => a.toLowerCase().split(/[^a-z0-9]+/)).filter(Boolean),
+  /* v28 Part E renamed the list; the old words stay unlit too ("early reader") */
+  "early", "reader", "readers",
   "fiction", "fictional", "novel", "novels", "story", "stories", "book", "books", "genre", "general",
 ]);
 

@@ -13,6 +13,7 @@
 import { ManuscriptStatus } from "../types";
 import type { Activity, Agent, Manuscript, Query } from "../types";
 import { STATUS_WORDS } from "./manuscriptV21";
+import { ageDisplay } from "./ageCategories";
 import { buildRows } from "./analytics";
 import { tileCourt } from "./qcSummary";
 import type { MsGuideKey } from "./pageChecklist";
@@ -53,7 +54,7 @@ export interface CardRow { key: "genre" | "age" | "status" | "since" | "words"; 
 /** The details card's five rows. The fifth (Words) shows only on a narrow sheet; the wide card draws the count large. */
 export const cardRows = (ms: Pick<Manuscript, "genre" | "subGenres" | "ageCategory" | "status" | "shelved" | "wordCount">, since: string | null): CardRow[] => {
   const g = cardGenre(ms);
-  const age = clean(ms.ageCategory);
+  const age = ageDisplay(ms.ageCategory);
   const day = sinceDay(since);
   const w = wordsOf(ms);
   return [
@@ -75,7 +76,7 @@ export const bookRows = (
   const w = wordsOf(ms);
   const rows: (BookRow | null)[] = [
     allGenres(ms) ? { key: "genre", label: "Genre", value: allGenres(ms) } : null,
-    clean(ms.ageCategory) ? { key: "age", label: "Age", value: clean(ms.ageCategory) } : null,
+    ageDisplay(ms.ageCategory) ? { key: "age", label: "Age", value: ageDisplay(ms.ageCategory) } : null,
     w > 0 ? { key: "words", label: "Words", value: wordsText(w) } : null,
     { key: "status", label: "Status", value: statusWord(ms), dot: true },
     /* v28 Part B: no Setting row (the stored value is kept); Series always, from the switch's reading of `series` */

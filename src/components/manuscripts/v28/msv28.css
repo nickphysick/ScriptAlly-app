@@ -139,3 +139,22 @@
 .hdr .gx-list .gl b, .hdr .gx-list .gl em { display: inline; }
 .hdr .gx-list li { align-items: baseline; }
 .hdr .gx-chip:hover .gx-up, .hdr .gx-chip:focus-within .gx-up { opacity: 1; width: auto; padding: 0 8px; }
+
+/* ── v28 Part E: the age control (the mock's .ag, scoped to the drawer) ── */
+.hdr .ag { position:relative }
+.hdr .ag-seg { display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;border-radius:12px;background:#efe9e0 }
+.hdr .ag-seg button { all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:50px;border-radius:9px;text-align:center }
+.hdr .ag-seg button b { font:400 15.5px var(--sp-type) !important;font-weight:400;color:rgba(28,19,15,.72) }
+.hdr .ag-seg button small { font:500 9.5px var(--font-mono) !important;letter-spacing:.06em;color:rgba(28,19,15,.45) }
+.hdr .ag-seg button:hover b { color:#1c130f }
+.hdr .ag-seg button[aria-checked=true],.hdr .ag-seg .ag-oth.on { background:#fff;box-shadow:0 1px 3px rgba(28,19,15,.14),0 0 0 1px rgba(28,19,15,.06) }
+.hdr .ag-seg button[aria-checked=true] b,.hdr .ag-seg .ag-oth.on b { color:#1c130f }
+.hdr .ag-seg button:focus-visible { outline:2px solid #2a3a52;outline-offset:-2px }
+.hdr .ag-oth b { font-style:normal }
+.hdr .ag-menu { position:absolute;right:0;top:calc(100% + 6px);z-index:6;width:300px;list-style:none;margin:0;padding:6px;background:#fff;border-radius:12px;box-shadow:0 0 0 1px rgba(28,19,15,.1),0 22px 40px -18px rgba(28,19,15,.45) }
+.hdr .ag-menu li { padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;gap:2px }
+.hdr .ag-menu li:hover,.hdr .ag-menu li[aria-selected=true] { background:#f4f1ec }
+.hdr .ag-menu b { font:400 15.5px var(--sp-type) !important;font-weight:400;color:#1c130f }
+.hdr .ag-menu em { font:500 10px var(--font-mono) !important;font-style:normal;color:rgba(28,19,15,.45);margin-left:6px }
+.hdr .ag-menu small { font:italic 13.5px var(--ms28-serif) !important;color:rgba(28,19,15,.55) }
+.hdr .ag-menu li:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }

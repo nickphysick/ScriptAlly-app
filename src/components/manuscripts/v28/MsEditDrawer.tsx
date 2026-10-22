@@ -18,7 +18,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { deleteField, type FieldValue } from "firebase/firestore";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { useToast } from "../../toast/ToastProvider";
-import { AGE_CATEGORIES } from "../../../lib/manuscripts";
+import { DEFAULT_AGE, normaliseAgeCategory } from "../../../lib/ageCategories";
+import { AgeField } from "./AgeField";
 import { STATUS_ORDER, STATUS_WORDS } from "../../../lib/manuscriptV21";
 import { sinceDay } from "../../../lib/manuscriptV27";
 import { wordCountHint, pickedFromStored, storedOf, type PickedGenre } from "../../../lib/manuscriptV28";
@@ -64,8 +65,6 @@ export const wordsOf = (raw: string): number | null => {
   const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
   return Number.isFinite(n) && n > 0 ? n : null;
 };
-const withStored = (list: readonly string[], stored: string | undefined): string[] =>
-  !stored || list.includes(stored) ? [...list] : [...list, stored];
 
 /**
  * Open on a field: the section is scrolled to the middle of the drawer's body and the field takes focus, caret at the
@@ -118,7 +117,9 @@ export const MsEditDrawer: React.FC<{
   const bodyRef = useRef<HTMLDivElement>(null);
   useOpenOn(bodyRef, focus);
   const [d, setD] = useState({
-    title: ms.title, ageCategory: ms.ageCategory,
+    title: ms.title,
+    /* v28 Part E: an old spelling reads as its UK label; nothing stored is Adult, the default */
+    ageCategory: normaliseAgeCategory(ms.ageCategory) ?? ((ms.ageCategory ?? "").trim() || DEFAULT_AGE),
     wordCount: ms.wordCount > 0 ? ms.wordCount.toLocaleString("en-GB") : "", logline: ms.logline ?? "",
     elevatorPitch: ms.elevatorPitch ?? "", synopsis: ms.synopsis ?? "",
     /* v28 Part B: Setting is not in the UI any more; its stored value is left as it is */
@@ -129,7 +130,6 @@ export const MsEditDrawer: React.FC<{
   const [gx, setGx] = useState<{ main: PickedGenre | null; also: PickedGenre[] }>(() => pickedFromStored(ms.genre, ms.subGenres));
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const ages = withStored(AGE_CATEGORIES, ms.ageCategory);
 
   const save = async () => {
     if (busy) return;
@@ -202,11 +202,8 @@ export const MsEditDrawer: React.FC<{
             {/* v28 Part C: silent unless the count is 25% outside the main genre's range; it follows the count and genre live */}
             <p className="ms28-wc" data-ms28="wc-hint" aria-live="polite">{wcHint ? <><b>{wcHint.lead}</b>{wcHint.rest}</> : null}</p>
           </div>
-          <label className="ms28-fld"><span>Age category</span>
-            <select id="ms21-f-age" value={d.ageCategory} onChange={(e) => setD({ ...d, ageCategory: e.target.value })}>
-              {!d.ageCategory ? <option value="">Choose one</option> : null}
-              {ages.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select></label>
+          <div className="ms28-fld" data-ms28="age"><span>Age category</span>
+            <AgeField value={d.ageCategory} onChange={(ageCategory) => setD({ ...d, ageCategory })} /></div>
           <div className="ms28-fld"><span id="ms21-f-status">Where it stands</span>
             <div className="ms28-type" role="radiogroup" aria-labelledby="ms21-f-status" data-ms21="status-seg">
               {STATUS_ORDER.map((s) => (

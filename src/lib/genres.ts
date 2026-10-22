@@ -18,6 +18,7 @@
  * PURE: no React, no Firebase. Consumers own storage (personal genres live on the user; suggestions
  * in genreSuggestions) and wiring. Locked in genres.test.ts.
  */
+import { normaliseAgeCategory } from "./ageCategories";
 
 export interface CanonicalGenre {
   /** Stable kebab-case id — the stored value. Never changes even if the label is re-worded. */
@@ -167,16 +168,17 @@ export const CANONICAL_GENRES: CanonicalGenre[] = [
  * unknown category yields an empty list, which renders no pills rather than a wrong set.
  */
 export const COMMON_GENRES_BY_AGE: Record<string, string[]> = {
-  "Picture Book": ["picture-book", "childrens"],
-  "Early Reader": ["childrens", "action-adventure", "fantasy"],
-  "Middle Grade": ["middle-grade", "fantasy", "action-adventure", "mystery", "contemporary"],
-  "Young Adult": ["young-adult", "fantasy", "contemporary", "romance", "thriller", "dystopian"],
+  /* Manuscripts v28 Part E: keyed by the UK labels; commonGenresFor reads old spellings through the normaliser */
+  "Picture book": ["picture-book", "childrens"],
+  "Young fiction": ["childrens", "action-adventure", "fantasy"],
+  "Middle grade": ["middle-grade", "fantasy", "action-adventure", "mystery", "contemporary"],
+  "Young adult": ["young-adult", "fantasy", "contemporary", "romance", "thriller", "dystopian"],
   Adult: ["literary-fiction", "commercial-fiction", "crime", "thriller", "romance", "fantasy", "historical-fiction"],
 };
 
 /** The shortcut pills for a category — empty for an unknown one, so nothing wrong is offered. */
 export function commonGenresFor(ageCategory: string | undefined): string[] {
-  return COMMON_GENRES_BY_AGE[(ageCategory ?? "").trim()] ?? [];
+  return COMMON_GENRES_BY_AGE[normaliseAgeCategory(ageCategory) ?? (ageCategory ?? "").trim()] ?? [];
 }
 
 export function matchKey(raw: string): string {

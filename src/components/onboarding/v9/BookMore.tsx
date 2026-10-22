@@ -15,6 +15,7 @@
  *   · Age category: one of the shared list, each with a note saying what it means.
  *   · Word count: optional; digits only; 1,000 to 500,000.
  */
+import { normaliseAgeCategory } from "../../../lib/ageCategories";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AGE_CATEGORIES } from "../../../lib/manuscripts";
 import { BackLink, StepFoot, FieldError } from "../setupParts";
@@ -42,7 +43,7 @@ export const BookMore: React.FC<BookMoreProps> = ({ title, name, initial, error,
   const type = useTypewriter([title], { startDelay: 350 });
   const byline = bookByline(name);
   const [picked, setPicked] = useState<string[]>(() => fromStoredGenres(initial.genre, initial.subGenres));
-  const [age, setAge] = useState<string>(AGE_CATEGORIES.includes(initial.ageCategory) ? initial.ageCategory : "");
+  const [age, setAge] = useState<string>(normaliseAgeCategory(initial.ageCategory) ?? "");
   const [words, setWords] = useState(initial.wordCount);
   const [typed, setTyped] = useState("");
   const [open, setOpen] = useState(false);

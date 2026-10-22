@@ -20,6 +20,7 @@
 import { CommunityAgent, Manuscript } from "../types";
 import { compsSearchText } from "./comps";
 import { canonicalIdOf, genreAndAncestors, genreDisplay } from "./genres";
+import { agentAgeCategories, normaliseAgeCategory } from "./ageCategories";
 
 /** The minimum total score (out of 75) for an agent to be surfaced as a suggestion. */
 export const MATCH_THRESHOLD = 42;
@@ -164,10 +165,12 @@ export const calculateCommunityAgentMatch = (commAgent: CommunityAgent, ms: Manu
     genreScore = hasExactMatch ? 20 : 0;
   }
 
-  const msAge = (ms.ageCategory || "").trim().toLowerCase();
-  const isAgeMatch = genresClean.some(g => g === msAge);
+  /* Manuscripts v28 Part E: both sides through the one normaliser, so "Young Adult", "Young adult", "YA" and the
+     "young-adult" genre id all name the same category */
+  const msAge = normaliseAgeCategory(ms.ageCategory);
+  const isAgeMatch = !!msAge && agentAgeCategories(commAgent.genres).includes(msAge);
   const ageScore = isAgeMatch ? 15 : 0;
-  const matchedAgeCat = isAgeMatch ? ms.ageCategory : "";
+  const matchedAgeCat = isAgeMatch ? msAge! : "";
 
   return {
     mswlScore,

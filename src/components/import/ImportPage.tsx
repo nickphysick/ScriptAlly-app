@@ -11,6 +11,7 @@
  * No tile is ringed, badged or recommended. A spent Smart Import disables its tile's button and the
  * fact line says why; there is no dead-end screen and no upgrade prompt here.
  */
+import { importAgeCategory } from "../../lib/ageCategories";
 import React, { useRef, useState } from "react";
 import { BookStep } from "../onboarding/BookStep";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "../onboarding/ManuscriptFields";
@@ -98,7 +99,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
         title: draft!.title.trim() || "Untitled manuscript",
         genre: draft!.genre,
         subGenres: draft!.subGenres,
-        ageCategory: draft!.ageCategory,
+        ageCategory: importAgeCategory(draft!.ageCategory),
         wordCount: parseInt(draft!.wordCount.replace(/\D/g, ""), 10) || 0,
         logline: draft!.strapline,
         status: ManuscriptStatus.QUERYING,

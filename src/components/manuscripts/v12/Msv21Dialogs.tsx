@@ -18,6 +18,7 @@
  * a dialog rendered inside the page would be sealed with it. Their sheet (msv21.css) reads only
  * `:root` tokens, so nothing is lost by leaving the page's scope.
  */
+import { DEFAULT_AGE } from "../../../lib/ageCategories";
 import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { deleteField, type FieldValue } from "firebase/firestore";
@@ -194,7 +195,7 @@ export const Msv21AddManuscript: React.FC<{
     };
     const payload = {
       ...buildManuscriptPayload({
-        title, genre: d.genre, ageCategory: "", wordCount: count ?? 0, logline: d.logline,
+        title, genre: d.genre, ageCategory: DEFAULT_AGE /* v28 Part E: Adult by default */, wordCount: count ?? 0, logline: d.logline,
         status: ManuscriptStatus.DRAFTING,
       }),
       bookVersions: appendBookVersion([], first),
