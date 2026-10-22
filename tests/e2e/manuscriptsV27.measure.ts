@@ -33,14 +33,13 @@ test.describe.configure({ mode: "serial" });
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 120;
+const FLOOR = 110; /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke) */
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 const MUTATE = process.env.MS27_MUTATE ?? "";
 const CSS_MUT: Record<string, string> = {
   a2: ".ms27-bkx .ms27-mh{--ms27-ins:max(64px,calc((100cqw - 900px)/2))!important}",
   a3: "@container ms27 (max-width:1152px){.ms27 .ms27-bf{grid-template-columns:minmax(0,1fr) 1px 128px!important}.ms27-bf .ms27-wc,.ms27-bf .ms27-dv{display:flex!important}.ms27 .ms27-bf .ms27-cw{display:none!important}}",
-  a4: ".ms27-soon{grid-template-columns:200px minmax(0,1fr)!important}",
   b1: ".ms27-bx.open .ms27-bx-cover{transform:none!important}",
   b3: "@media (prefers-reduced-motion:reduce){.ms27-bx-cover{transition:transform .9s!important}}",
 };
@@ -143,9 +142,10 @@ for (const vp of VPS) {
     const r = await page.evaluate(() => {
       const kids = [...document.querySelectorAll(".ms27-bkp")].filter((e) => e.getBoundingClientRect().height > 0).flatMap((e) => [...e.children]);
       const root = document.querySelector('[data-ms27="page"]')!;
-      const soon = root.querySelector(".ms27-soon");
+      /* v28 Part F: the coming-soon strip is the page foot (bar and two tiles) */
+      const soon = root.querySelector(".ms28-foot");
       const outside = root.cloneNode(true) as HTMLElement;
-      outside.querySelector(".ms27-soon")?.remove();
+      outside.querySelector(".ms28-foot")?.remove();
       return {
         kids: kids.map((k) => `${k.tagName}.${k.className}`),
         old: [...root.querySelectorAll('[data-ms21="versions"],[data-ms21="activity"],[data-ms21="materials"],[data-ms21="banner"],.ms21-vc,[data-probe="app-footer"]')].length,
@@ -154,11 +154,11 @@ for (const vp of VPS) {
         soon: !!soon,
       };
     });
-    expect(r.soon, "the strip exists").toBe(true); ck();
-    expect(r.kids).toEqual(["SECTION.ms27-bkx", "SECTION.ms27-soon"]); ck();
+    expect(r.soon, "the page foot exists").toBe(true); ck();
+    expect(r.kids).toEqual(["SECTION.ms27-bkx", "DIV.ms28-foot"]); ck();
     expect(r.old, "an old section or a footer is on the page").toBe(0); ck();
     expect(r.text).not.toMatch(/What['’]s landing|Comparable|Recent activity/); ck();
-    expect(r.outside, "Submission packages is named only in the coming-soon strip").not.toMatch(/Submission package/); ck();
+    expect(r.outside, "Submission packages is named only in the page foot").not.toMatch(/Submission package/); ck();
   });
 
   test(`MSV27-A2 header ${w}`, async () => {
@@ -214,29 +214,8 @@ for (const vp of VPS) {
     }
   });
 
-  test(`MSV27-A4 strip ${w}`, async () => {
-    await openAt(page, "/manuscripts", vp);
-    const tx = await box(page, '[data-ms27="soon-text"]');
-    const h1 = await box(page, '[data-ms27="title"]');
-    expect(tx && h1, "the strip's text and the title").toBeTruthy(); ck();
-    expect(near(tx!.l, h1!.l), `strip text ${tx!.l} vs title ${h1!.l}`).toBe(true); ck();
-    /* textContent, not innerText: the eyebrow is uppercased by CSS, and the copy lock is about the words */
-    const t = (await page.locator('[data-ms27="soon"]').textContent()) ?? "";
-    for (const s of [
-      "Coming soon", "Multiple manuscripts", "In the meantime, founding members have full access to Versions and Submission packages.",
-      "We call this smart querying.",
-      "Build your library of materials, attach custom combinations to queries to track their journey, then use the analysis to hone your strategy and generate requests.",
-      "See which opening is landing", "Bundle what goes out with a query",
-    ]) { expect(t.replace(/\s+/g, " ")).toContain(s); ck(); }
-    if (w === 1512) {
-      await page.locator('[data-ms27="link-versions"]').click();
-      await expect(page).toHaveURL(/\/manuscripts\/versions$/); ck();
-      await page.goBack();
-      await page.locator('[data-ms27="link-packages"]').click();
-      await expect(page).toHaveURL(/\/manuscripts\/packages/); ck();
-    }
-  });
-
+  /* MSV27-A4 (the coming-soon strip's alignment and copy) is retired by v28 Part F: MSV28-F1 measures the foot that
+     replaced it, and v28/msv28Smoke.test.tsx locks its copy */
   test(`MSV27-B1 the book opens ${w}`, async () => {
     for (const opener of ['[data-ms27="full"]', '[data-ms27="card"]', '[data-ms27="read-all"]']) {
       await openAt(page, "/manuscripts", vp, { motion: true });
@@ -265,12 +244,13 @@ for (const vp of VPS) {
     await openAt(page, "/manuscripts", vp);
     await page.locator('[data-ms27="full"]').click();
     await page.waitForSelector(".ms27-bx-r", { state: "attached" });
-    if (MUTATE === "b2") await page.evaluate(() => { const d = document.createElement("div"); d.className = "ms27-bx-r"; d.setAttribute("data-row", "series"); d.innerHTML = "<dt>Series</dt><dd>—</dd>"; document.querySelector(".ms27-bx-dl")!.appendChild(d); });
+    if (MUTATE === "b2") await page.evaluate(() => { const d = document.createElement("div"); d.className = "ms27-bx-r"; d.setAttribute("data-row", "dash"); d.innerHTML = "<dt>Dash</dt><dd>—</dd>"; document.querySelector(".ms27-bx-dl")!.appendChild(d); });
     const rows = await page.evaluate(() => [...document.querySelectorAll(".ms27-bx-r")].map((r) => [r.getAttribute("data-row"), (r.querySelector("dd") as HTMLElement).textContent!.trim()]));
     expect(rows.length, "rows drawn").toBeGreaterThan(3); ck();
-    expect(rows.map((r) => r[0]), "the fixture states no series").not.toContain("series"); ck();
+    /* v28 Part B: Series is always a row ("Standalone" when unset) and Setting is gone */
+    expect(rows.find((r) => r[0] === "series")?.[1], "the fixture states no series: Standalone").toBe("Standalone"); ck();
     expect(rows.filter((r) => /^[—–-]$/.test(r[1] ?? "")), "a dash row").toEqual([]); ck();
-    expect(rows.map((r) => r[0])).toContain("setting"); ck();
+    expect(rows.map((r) => r[0])).not.toContain("setting"); ck();
     const stats = await page.evaluate(() => [...document.querySelectorAll('[data-ms27bx="stats"] b')].map((b) => Number(b.textContent)));
     expect(stats).toEqual([STATS.sent, STATS.askedForMore, STATS.withAgents]); ck();
     await page.keyboard.press("Escape");
@@ -309,7 +289,7 @@ for (const vp of VPS) {
       expect(t.length, `${n} has text`).toBeGreaterThan(40); ck();
       expect(t, `${n}`).not.toMatch(/working (copy|synopsis)/i); ck();
     }
-    expect(await page.locator('[data-ms21="pitch-hint"]').innerText()).toBe("Keep it on the tip of your tongue. You never know when the right person might ask what your book’s all about."); ck();
+    expect(await page.locator('[data-ms21="pitch-hint"]').innerText()).toBe("What you’d say if someone asked what your book’s about: the hook, then the stakes and what makes it yours. Keep it on the tip of your tongue. You never know when the right person might ask."); ck();
     expect(await page.locator('[data-ms21="synopsis-hint"]').innerText()).toBe("The whole story in brief, ending included."); ck();
     await page.keyboard.press("Escape");
   });
@@ -324,7 +304,8 @@ for (const vp of VPS) {
     const r = await page.evaluate(() => {
       const ta = document.querySelector("#ms21-f-pitch");
       const sect = document.querySelector<HTMLElement>('[data-ms21-sect="elevatorPitch"]')!.getBoundingClientRect();
-      const modal = document.querySelector<HTMLElement>(".ms21-modal")!.getBoundingClientRect();
+      /* v28 Part A: the form is the drawer's scrolling body */
+      const modal = document.querySelector<HTMLElement>('[data-hdr="ms-edit"] [data-hdr="body"]')!.getBoundingClientRect();
       return { focused: document.activeElement === ta, book: !!document.querySelector(".ms27-bx"), inView: sect.top >= modal.top - 1 && sect.bottom <= modal.bottom + 1 };
     });
     expect(r.book, "the book closed first").toBe(false); ck();
@@ -350,7 +331,7 @@ for (const vp of VPS) {
       expect(r.book, `step ${i + 1} opened the book`).toBe(false); ck();
       expect(near(r.hole.left, r.e.l - 8, 1.5) && near(r.hole.top, r.e.t - 8, 1.5) && near(r.hole.width, r.e.w + 16, 1.5),
         `hole ${JSON.stringify(r.hole)} around ${JSON.stringify(r.e)}`).toBe(true); ck();
-      await page.locator(".ms21-mc").click();
+      await page.locator('[data-ms21="cancel"]').click();
       await expect(page.locator('[data-pck="flow"]')).toHaveCount(0); ck();
     }
   });
@@ -385,7 +366,7 @@ test("MSV27-D1 done is read from the save", async () => {
   await page.locator('[data-pck="item"][data-k="pitch"] button').first().click();
   await page.waitForSelector('[data-ms21="edit-dialog"]');
   if (MUTATE === "d1") await page.evaluate(() => document.querySelector('[data-pck="count"]')!.textContent = "Learned ✓");
-  await page.locator(".ms21-mc").click();
+  await page.locator('[data-ms21="cancel"]').click();
   await page.waitForTimeout(500);
   expect(await count(), "cancelled: still 3 of 4").toBe("3 of 4"); ck();
   /* typed and saved: learned */
