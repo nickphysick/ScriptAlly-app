@@ -89,4 +89,10 @@ In `shots/`, on the harness account: `01-book-container-{1512,1280}@2x.png` and 
 
 ## Integration and deploy
 
-See the next section, added after the deploy.
+- Dev still served `index-Boa5GRP3.js` from `dev/css1-pv3-ms27-ms28` at a361e487, this branch's base. So the
+  integration branch **`dev/css1-pv3-ms27-ms28-ms281`** is a fast-forward to **c9b16255**, the commit the gates and
+  locks ran on.
+- Built from a clean checkout of c9b16255. The served hash was re-checked in the same command, then deployed (hosting
+  only, `--project scriptally-dev`). **Dev now serves `index-BmbaNVwq.js`.**
+- MSV281 against the deployed site: all green at both widths, with the logline restored afterwards.
+- Not merged to `main`. Prod untouched. No rules or functions changed.
