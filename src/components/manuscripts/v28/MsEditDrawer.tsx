@@ -18,10 +18,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { deleteField, type FieldValue } from "firebase/firestore";
 import { HalfDrawer } from "../../shell/HalfDrawer";
 import { useToast } from "../../toast/ToastProvider";
-import { AGE_CATEGORIES, PREDEFINED_GENRES } from "../../../lib/manuscripts";
+import { AGE_CATEGORIES } from "../../../lib/manuscripts";
 import { STATUS_ORDER, STATUS_WORDS } from "../../../lib/manuscriptV21";
 import { sinceDay } from "../../../lib/manuscriptV27";
-import { wordCountHint } from "../../../lib/manuscriptV28";
+import { wordCountHint, pickedFromStored, storedOf, type PickedGenre } from "../../../lib/manuscriptV28";
+import { useScriptAllyDb } from "../../../lib/db";
+import { GenreField } from "./GenreField";
 import { ManuscriptStatus } from "../../../types";
 import type { Manuscript } from "../../../types";
 import "./msv28.css";
@@ -112,19 +114,21 @@ export const MsEditDrawer: React.FC<{
   focus?: EditField;
 }> = ({ ms, since, updateManuscript, onClose, onSaved, focus }) => {
   const { showToast } = useToast();
+  const { addPersonalGenre } = useScriptAllyDb();
   const bodyRef = useRef<HTMLDivElement>(null);
   useOpenOn(bodyRef, focus);
   const [d, setD] = useState({
-    title: ms.title, genre: ms.genre, ageCategory: ms.ageCategory,
+    title: ms.title, ageCategory: ms.ageCategory,
     wordCount: ms.wordCount > 0 ? ms.wordCount.toLocaleString("en-GB") : "", logline: ms.logline ?? "",
     elevatorPitch: ms.elevatorPitch ?? "", synopsis: ms.synopsis ?? "",
     /* v28 Part B: Setting is not in the UI any more; its stored value is left as it is */
     series: seriesOn(ms.series),
     status: ms.status, shelvedReason: ms.shelvedReason ?? "",
   });
+  /* v28 Part D1: one main genre and up to three more, read from the stored labels/ids */
+  const [gx, setGx] = useState<{ main: PickedGenre | null; also: PickedGenre[] }>(() => pickedFromStored(ms.genre, ms.subGenres));
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const genres = withStored(PREDEFINED_GENRES, ms.genre);
   const ages = withStored(AGE_CATEGORIES, ms.ageCategory);
 
   const save = async () => {
@@ -132,12 +136,22 @@ export const MsEditDrawer: React.FC<{
     if (!d.title.trim()) { setErr("A manuscript needs a title."); return; }
     setBusy(true);
     setErr(null);
+    /* an own genre is registered now, on save, through the one personal-genre path */
+    const resolved: PickedGenre[] = [];
+    for (const p of [gx.main, ...gx.also].filter((x): x is PickedGenre => !!x)) {
+      if (!p.own) { resolved.push(p); continue; }
+      const r = await addPersonalGenre(p.label);
+      /* strictNullChecks is off, so the boolean `ok` does not narrow: test for the reason itself */
+      if ("reason" in r) { setErr(r.reason); setBusy(false); return; }
+      resolved.push(r.id.startsWith("u:") ? { id: null, label: r.label } : { id: r.id, label: r.label });
+    }
+    const [mainG, ...alsoG] = resolved;
     const patches = {
       series: seriesPatch(d.series, ms.series),
       elevatorPitch: textPatch(d.elevatorPitch, ms.elevatorPitch), synopsis: textPatch(d.synopsis, ms.synopsis),
     };
     const payload: Record<string, unknown> = {
-      title: d.title.trim(), genre: d.genre.trim(), ageCategory: d.ageCategory.trim(),
+      title: d.title.trim(), genre: mainG ? storedOf(mainG) : "", subGenres: alsoG.map(storedOf), ageCategory: d.ageCategory.trim(),
       wordCount: wordsOf(d.wordCount) ?? 0, logline: d.logline, status: d.status, shelvedReason: d.shelvedReason,
     };
     for (const [k, v] of Object.entries(patches)) if (v !== null) payload[k] = v;
@@ -153,7 +167,7 @@ export const MsEditDrawer: React.FC<{
     onClose();
   };
   const day = sinceDay(since);
-  const wcHint = wordCountHint(wordsOf(d.wordCount), d.genre);
+  const wcHint = wordCountHint(wordsOf(d.wordCount), gx.main ? storedOf(gx.main) : "");
 
   return (
     <HalfDrawer
@@ -180,11 +194,8 @@ export const MsEditDrawer: React.FC<{
         <Sect n={1} id="basics" title="The book">
           <label className="ms28-fld"><span>Title <i className="ms28-req">*</i></span>
             <input id="ms21-f-title" className="big" value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} /></label>
-          <label className="ms28-fld"><span>Genre</span>
-            <select id="ms21-f-genre" value={d.genre} onChange={(e) => setD({ ...d, genre: e.target.value })}>
-              {!d.genre ? <option value="">Choose one</option> : null}
-              {genres.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select></label>
+          <div className="ms28-fld" data-ms28="genre"><span>Genre</span>
+            <GenreField main={gx.main} also={gx.also} onChange={setGx} /></div>
           <div className="ms28-frow">
             <label className="ms28-fld"><span>Word count</span>
               <input id="ms21-f-words" inputMode="numeric" value={d.wordCount} onChange={(e) => setD({ ...d, wordCount: e.target.value })} /></label>

@@ -22,3 +22,32 @@ describe("C1 — the word-count hint is silent unless the count is way off", () 
     expect(wordCountHint(10, "")).toBeNull();
   });
 });
+
+import { isExactGenre, pickedFromStored, popularFor, searchGenres, storedOf } from "./manuscriptV28";
+
+describe("D1 — the genre search and the stored form", () => {
+  it("ranks exact, then prefix, then word prefix, then alias, then substring; seven at most", () => {
+    expect(searchGenres("thriller")[0].id).toBe("thriller");
+    expect(searchGenres("fan")[0].id).toBe("fantasy");
+    const lit = searchGenres("litfic");
+    expect(lit[0].id).toBe("literary-fiction");
+    expect(lit[0].via).toBe("litfic");
+    expect(searchGenres("e").length).toBeLessThanOrEqual(7);
+    expect(searchGenres("thriller", ["thriller"]).some((h) => h.id === "thriller")).toBe(false);
+  });
+  it("an exact label or alias offers no own-genre row; anything else does", () => {
+    expect(isExactGenre("Thriller")).toBe(true);
+    expect(isExactGenre("litfic")).toBe(true);
+    expect(isExactGenre("northern gothic")).toBe(false);
+  });
+  it("popular: the first five not already picked", () => {
+    expect(popularFor([])).toEqual(["crime", "thriller", "literary-fiction", "fantasy", "romance"]);
+    expect(popularFor(["crime", "thriller"])).toEqual(["literary-fiction", "fantasy", "romance", "historical-fiction", "science-fiction"]);
+  });
+  it("reads stored labels or ids and writes the house label form", () => {
+    const g = pickedFromStored("Thriller", ["crime", "Northern gothic"]);
+    expect(g.main).toEqual({ id: "thriller", label: "Thriller" });
+    expect(g.also.map((a) => a.label)).toEqual(["Crime", "Northern gothic"]);
+    expect([g.main!, ...g.also].map(storedOf)).toEqual(["Thriller", "Crime", "Northern gothic"]);
+  });
+});

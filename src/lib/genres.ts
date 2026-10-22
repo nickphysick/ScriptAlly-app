@@ -29,6 +29,9 @@ export interface CanonicalGenre {
   /** Typical word-count range as a display string ("90,000 – 120,000", en-dash). Absent → the
    *  generic fallback (GENERIC_WORD_COUNT_RANGE) is used. */
   wordCountRange?: string;
+  /** Manuscripts v28 — a sub-genre names its main genre (a canonical id). It inherits the parent's word-count range
+   *  unless it states its own, and counts as its parent wherever genres are matched (`genreAndAncestors`). */
+  parent?: string;
 }
 
 /** A user-invented genre. `id` is `u:{uid}:{slug}`; behaves like a canonical one for that user. */
