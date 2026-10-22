@@ -175,6 +175,13 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
         {!pinned ? (
           <ViewSwitch view={view} onView={onView} variant="pill" ns="qc144" probe="view-bar" noun="queries" disabled={loading} />
         ) : null}
+        {/* A3 — in full screen the search is in this cream toolbar, a rounded white field left of Filters */}
+        {pinned && onFind ? (
+          <label className="qc140-find qc144-tfind" data-qc140="find" data-qc138="search" data-qc144="find-tb">
+            {FIND_ICON}
+            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
+          </label>
+        ) : null}
         <span className="qc140-chipw qc144-first" data-qc140="filters-chip" data-on={filterCount ? "" : undefined}>
           <button type="button" ref={filRef} className="qc140-chip qc140-fil" data-qc140="filters" data-qc138="filters-btn" data-lp="qc140-filters" data-n={filterCount}
             aria-haspopup="dialog" aria-expanded={pop.open === "filters"} aria-label={filterCount ? `Filters: ${filterCount} applied` : "Filters"} disabled={loading}
