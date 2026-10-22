@@ -224,7 +224,7 @@ test.describe("Header rules v1.1", () => {
     const L = new Ledger("HR1-8");
     const cases: { name: string; route: string; vp: { width: number; height: number }; sel: string[]; pinned?: string; init?: string }[] = [];
     for (const vp of [SIZES[0], SIZES[2]]) {
-      cases.push({ name: `manuscripts ${vp.width}`, route: "/manuscripts", vp, sel: ["[data-ms21='header']", "[data-ms21='header'] h1", "[data-ms21='header'] [data-probe='actions']"] });
+      /* Manuscripts v27 retired the manuscripts case: the v21 header it held is gone (RETIRED-manuscripts-v27.md) */
       cases.push({ name: `comps ${vp.width}`, route: "/manuscripts/comps", vp, sel: ["[data-slh='header']", "[data-slh='eyebrow']", "[data-slh='header'] h1", "[data-slh='card']"] });
       cases.push({ name: `dashboard ${vp.width}`, route: "/dashboard", vp, sel: ["[data-d58='header']", "[data-d58='eyebrow']", "[data-d58='title']", "[data-d58='buttons']"] });
       cases.push({ name: `calendar ${vp.width}`, route: "/todo/calendar", vp, sel: ["header[data-probe='page-header']", "header[data-probe='page-header'] h1"] });
