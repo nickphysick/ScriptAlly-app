@@ -9,8 +9,6 @@
  */
 @media (min-width: 768px) {
   /* §A · the title row sits where the list card used to start (the hero's gap above it, 18 below it) */
-  .qcv-group[data-v138] .qcv-ledger > .cl20-tr { margin-top: 0; }
-
   /* §A · in full screen the toolbar is cream: the switch is white with the controls' ring, the chosen button navy with a
      cream icon (the Contact list's full-screen switch, v20 §C, in this toolbar's context) */
   .qcv-group[data-v138][data-full] .qc140-tb .cl20-vsi { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 2px rgba(28, 19, 15, 0.06); }

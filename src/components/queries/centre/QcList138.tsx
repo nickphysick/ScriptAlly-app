@@ -641,6 +641,24 @@ export const QcList138: React.FC<QcList138Props> = ({
 
   return (
     <>
+    {/* navy-bar v1 A2 — THE PILL ABOVE THE LIST: Find (the left half, white) and Full screen (the right half, navy) as one
+        pill centred on the list card, 40 above it and 22 to it. It replaces v142's title row: the count and the Cards /
+        List switch moved into the navy bar. Not drawn in full screen, where Find is in the cream toolbar. */}
+    {!full ? (
+      <div className="qc144-srow" data-qc144="srow">
+        {onFind ? (
+          <label className="qc144-find" data-qc140="find" data-qc138="search" data-qc144="find">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
+          </label>
+        ) : null}
+        {/* data-qc140="pin" / data-qc138="pin": the v138.6–v142 locks find the full-screen control by these */}
+        <button type="button" className="qc144-fs" data-qc144="full" data-qc142="full" {...QC_FULL} data-pin-list="" aria-pressed={false} aria-keyshortcuts="F"
+          disabled={loading} onClick={onFull}>
+          {FULL_ICON}<span>Full screen</span>
+        </button>
+      </div>
+    ) : null}
     <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view={view} ref={boxRef} {...tip.handlers}>
       {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
           sheet's colour. v140 §A — what sticks is the toolbar (QcToolbar140), and under it the applied-filters row while
