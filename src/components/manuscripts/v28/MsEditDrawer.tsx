@@ -21,6 +21,7 @@ import { useToast } from "../../toast/ToastProvider";
 import { AGE_CATEGORIES, PREDEFINED_GENRES } from "../../../lib/manuscripts";
 import { STATUS_ORDER, STATUS_WORDS } from "../../../lib/manuscriptV21";
 import { sinceDay } from "../../../lib/manuscriptV27";
+import { wordCountHint } from "../../../lib/manuscriptV28";
 import { ManuscriptStatus } from "../../../types";
 import type { Manuscript } from "../../../types";
 import "./msv28.css";
@@ -152,6 +153,7 @@ export const MsEditDrawer: React.FC<{
     onClose();
   };
   const day = sinceDay(since);
+  const wcHint = wordCountHint(wordsOf(d.wordCount), d.genre);
 
   return (
     <HalfDrawer
@@ -186,6 +188,8 @@ export const MsEditDrawer: React.FC<{
           <div className="ms28-frow">
             <label className="ms28-fld"><span>Word count</span>
               <input id="ms21-f-words" inputMode="numeric" value={d.wordCount} onChange={(e) => setD({ ...d, wordCount: e.target.value })} /></label>
+            {/* v28 Part C: silent unless the count is 25% outside the main genre's range; it follows the count and genre live */}
+            <p className="ms28-wc" data-ms28="wc-hint" aria-live="polite">{wcHint ? <><b>{wcHint.lead}</b>{wcHint.rest}</> : null}</p>
           </div>
           <label className="ms28-fld"><span>Age category</span>
             <select id="ms21-f-age" value={d.ageCategory} onChange={(e) => setD({ ...d, ageCategory: e.target.value })}>

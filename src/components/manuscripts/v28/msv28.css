@@ -82,3 +82,8 @@
 .ms28-tog[aria-checked="true"] i { transform: translateX(20px); }
 .hdr .ms28-tog:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .hdr .ms28-tog, .ms28-tog i { transition: none; } }
+
+/* ── v28 Part C: the word-count hint (the mock's .wc-hint): rust italic 600 lead, the rest ink 55% italic serif 14 ── */
+.hdr .ms28-wc { margin: 30px 0 0; font: italic 14px/1.4 var(--ms28-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.hdr .ms28-wc:empty { display: none; }
+.hdr .ms28-wc b { font: italic 600 14px/1.4 var(--ms28-serif) !important; color: #a2452a; }
