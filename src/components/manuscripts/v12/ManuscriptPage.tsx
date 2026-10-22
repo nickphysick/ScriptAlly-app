@@ -33,7 +33,8 @@ import { useToast } from "../../toast/ToastProvider";
 import { EmptyPreviews, MsBanner, MsOpenHeader } from "./Msv21Parts";
 import { Msv21AddManuscript } from "./Msv21Dialogs";
 import { MsEditDrawer, type EditField } from "../v28/MsEditDrawer";
-import { BookContainer, SoonStrip } from "../v27/Msv27Parts";
+import { BookContainer } from "../v27/Msv27Parts";
+import { MsFoot } from "../v28/MsFoot";
 import { BookView, type BookField } from "../v27/BookView";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import "./msv12.css";
@@ -147,7 +148,7 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
 
   const grid = (children: React.ReactNode, state: "filled" | "empty" | "deleted" | "loading") => (
     <WorkspacePageGrid className="msv12-wpg" masthead={null} scrollLabel="Manuscripts">
-      <div className={`msv12-own msv12-root ms21${state === "filled" ? " ms27" : ""}`} data-msv12="page" data-ms21="page" data-ms27="page" data-state={state}>
+      <div className={`msv12-own msv12-root ms21${state === "filled" ? " ms27 ms28-fill" : ""}`} data-msv12="page" data-ms21="page" data-ms27="page" data-state={state}>
         {children}
         {/* v27: the populated page has no footer; the empty and deleted states keep v21's */}
         {state === "empty" || state === "deleted" ? <AppFooter onNavigate={(t, sub) => onNavigate(t, sub)} /> : null}
@@ -206,7 +207,7 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
           title={ms.title} byline={author} rows={cardRows(ms, since)} words={words} logline={ms.logline ?? ""}
           onEdit={() => openEdit()} onView={() => setBookOpen(true)} onAddLogline={() => openEdit("logline")}
         />
-        <SoonStrip onVersions={toVersions} onPackages={toPackages} />
+        <MsFoot onVersions={toVersions} onPackages={toPackages} />
       </div>
 
       {bookOpen ? (

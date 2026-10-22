@@ -60,7 +60,7 @@
 .ms27 .ms27-p1:hover { background: #1c130f; }
 .ms27 .ms27-p2 { background: #fff; color: var(--ms27-ink); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
 .ms27 .ms27-p2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.3), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
-.ms27 :is(.ms27-p1, .ms27-p2, .ms27-lnk, .ms27-s-em, .ms27-s-ln):focus-visible { outline: 2px solid var(--ms27-navy); outline-offset: 3px; }
+.ms27 :is(.ms27-p1, .ms27-p2, .ms27-lnk):focus-visible { outline: 2px solid var(--ms27-navy); outline-offset: 3px; }
 .ms27-mh-r { position: absolute; right: var(--ms27-ins); top: var(--hero-top, 36px); height: var(--hero-stack-h); width: var(--ms27-cw); display: flex; align-items: center; z-index: 2; }
 /* the Versions page: the same header on the page, no card on the right */
 .ms27-mh--page .ms27-mh-t { max-width: calc(100% - var(--ms27-txt) - 24px); }
@@ -103,42 +103,7 @@
 .ms27 .ms27-lnk { all: unset; cursor: pointer; font: 400 14px var(--sp-type); color: var(--ms27-rust); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .ms27 .ms27-lnk:hover { color: #7c3a2a; }
 
-/* ── the coming-soon strip ── */
-.ms27-soon {
-  display: grid; grid-template-columns: calc(var(--ms27-txt) - 38px) minmax(0, 1fr); gap: 0 24px; align-items: center;
-  padding: 20px 26px 20px 20px; border: 1.5px dashed rgba(28, 19, 15, 0.18); border-radius: 20px;
-}
-.ms27-s-ph {
-  grid-row: 1 / 3; align-self: stretch; min-height: 128px; border-radius: 14px;
-  background: repeating-linear-gradient(135deg, rgba(162, 69, 42, 0.045) 0 8px, transparent 8px 16px), #f6e2d8;
-  box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.22);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: rgba(162, 69, 42, 0.6);
-}
-img.ms27-s-ph { width: 100%; height: 100%; object-fit: contain; background: none; box-shadow: none; }
-.ms27-s-ph svg { width: 74px; height: 56px; }
-.ms27 .ms27-s-ph span { font: 600 8.5px var(--font-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(162, 69, 42, 0.7); }
-.ms27-s-tx { min-width: 0; max-width: 760px; }
-.ms27 .ms27-s-k { margin: 0 0 6px; font: 500 10.5px var(--font-mono) !important; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ms27-rust); }
-.ms27 h2.ms27-s-h { margin: 0; font: 400 24px/1.1 var(--sp-type) !important; color: rgba(28, 19, 15, 0.6); }
-.ms27 .ms27-s-d { max-width: 700px; margin: 6px 0 0; font: italic 15.5px/1.45 var(--ms27-serif) !important; color: rgba(28, 19, 15, 0.55); }
-.ms27 .ms27-s-d2 { margin-top: 10px; }
-.ms27 .ms27-s-em { all: unset; cursor: pointer; font: 400 16px var(--sp-type); font-style: normal; color: var(--ms27-ink); background: linear-gradient(transparent 62%, #f6e2d8 62%); padding: 0 2px; border-radius: 2px; }
-.ms27 .ms27-s-em:hover { background: linear-gradient(transparent 0, #f6e2d8 0); }
-.ms27 .ms27-s-sq { font: 400 17px var(--sp-type) !important; font-style: normal; color: var(--ms27-rust); letter-spacing: 0.01em; }
-.ms27-s-go { grid-column: 2; margin-top: 16px; max-width: 760px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.ms27 .ms27-s-ln {
-  all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 42px 1fr auto; column-gap: 14px; align-items: center;
-  padding: 12px 16px 12px 12px; background: #fff; border-radius: 14px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 8px 18px -14px rgba(28, 19, 15, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.ms27 .ms27-s-ln:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.18), 0 14px 24px -14px rgba(28, 19, 15, 0.45); }
-.ms27-s-ic { grid-row: 1 / 3; grid-column: 1; width: 42px; height: 42px; border-radius: 11px; background: #e9edf2; color: var(--ms27-navy); display: grid; place-items: center; transition: background 0.2s, color 0.2s; }
-.ms27-s-ic svg { width: 22px; height: 22px; }
-.ms27-s-ln:hover .ms27-s-ic { background: var(--ms27-navy); color: #f4eee5; }
-.ms27 .ms27-s-ln b { grid-column: 2; font: 400 16.5px var(--sp-type) !important; color: var(--ms27-ink); }
-.ms27 .ms27-s-ln small { grid-column: 2; grid-row: 2; margin-top: 2px; font: italic 13.5px var(--ms27-serif) !important; color: rgba(28, 19, 15, 0.55); }
-.ms27 .ms27-s-ln span { grid-row: 1 / 3; grid-column: 3; font: 400 20px var(--sp-type) !important; color: rgba(28, 19, 15, 0.35); }
-.ms27-s-ln:hover span { color: var(--ms27-rust) !important; }
+/* (the coming-soon strip's rules are retired with it: v28 Part F) */
 
 /* ── a narrow sheet (≤ 1200; the root's content box ≤ 1152): the card is one column of five rows, no large figure ── */
 @container ms27 (max-width: 1152px) {
@@ -151,7 +116,7 @@ img.ms27-s-ph { width: 100%; height: 100%; object-fit: contain; background: none
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ms27 :is(.ms27-bf, .ms27-s-ln, .ms27-s-ic) { transition: none; }
+  .ms27 .ms27-bf { transition: none; }
 }
 
 /* ══ THE BOOK VIEW (`#bx`) — portalled to the body: literals and `:root` tokens only ══ */

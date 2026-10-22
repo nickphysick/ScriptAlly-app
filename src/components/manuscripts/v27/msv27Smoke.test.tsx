@@ -35,20 +35,11 @@ const MS = (over: Partial<Manuscript> = {}): Manuscript => ({
 
 describe("A1 — the page is two containers and nothing else", () => {
   const html = renderPageSeeded(page(), "/manuscripts");
-  it("the sections are the book and the coming-soon strip, in that order", () => {
-    const sec = /<div class="ms27-bkp" data-ms27="sections">([\s\S]*)$/.exec(html);
-    expect(sec, "the sections wrapper").toBeTruthy();
-    const top = [...sec![1].matchAll(/<section class="(ms27-[a-z0-9]+)"/g)].map((m) => m[1]);
-    expect(top).toEqual(["ms27-bkx", "ms27-soon"]);
-  });
-  it("no versions, What's landing, comps, packages, activity, banner or footer", () => {
+  /* v28 Part F: the page is the book and the page foot now — its sections and copy are locked in v28/msv28Smoke.test.tsx */
+  it("no versions, What's landing, comps, packages cards, activity, banner or footer", () => {
     for (const probe of ["versions", "materials", "activity", "banner", "door", "book"]) expect(html, probe).not.toContain(`data-ms21="${probe}"`);
     expect(html).not.toContain('data-probe="app-footer"');
-    const t = text(html);
-    expect(t).not.toMatch(/What's landing|What’s landing|Comparable|Recent activity|\+ New version|Add manuscript/);
-    /* "Submission packages" is named only in the coming-soon strip's own copy */
-    const outside = text(html.replace(/<section class="ms27-soon"[\s\S]*?<\/section>/, ""));
-    expect(outside).not.toMatch(/Submission package/);
+    expect(text(html)).not.toMatch(/What's landing|What’s landing|Comparable|Recent activity|\+ New version|Add manuscript/);
   });
   it("the header: eyebrow, the title, the byline and two buttons — no How it works", () => {
     expect(html).toMatch(/data-ms27="eyebrow">— Manuscripts —</);
@@ -77,18 +68,7 @@ describe("A2/A3 — the details card and the logline strip", () => {
   });
 });
 
-describe("A4 — the coming-soon strip's copy, exact", () => {
-  const t = text(renderPageSeeded(page(), "/manuscripts"));
-  it("reads as the prompt states it", () => {
-    expect(t).toContain("Coming soon");
-    expect(t).toContain("Multiple manuscripts");
-    expect(t).toContain("In the meantime, founding members have full access to Versions and Submission packages .");
-    expect(t).toContain("We call this smart querying .");
-    expect(t).toContain("Build your library of materials, attach custom combinations to queries to track their journey, then use the analysis to hone your strategy and generate requests.");
-    expect(t).toContain("See which opening is landing");
-    expect(t).toContain("Bundle what goes out with a query");
-  });
-});
+/* A4 (the coming-soon strip) retired by v28 Part F: the foot's copy is locked in v28/msv28Smoke.test.tsx */
 
 describe("B — the book view", () => {
   const rows = bookRows(MS({ setting: undefined, series: "" }), null);
