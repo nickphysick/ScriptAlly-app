@@ -217,7 +217,8 @@ for (const vp of VPS) {
   /* MSV27-A4 (the coming-soon strip's alignment and copy) is retired by v28 Part F: MSV28-F1 measures the foot that
      replaced it, and v28/msv28Smoke.test.tsx locks its copy */
   test(`MSV27-B1 the book opens ${w}`, async () => {
-    for (const opener of ['[data-ms27="full"]', '[data-ms27="card"]', '[data-ms27="read-all"]']) {
+    /* v28.1: "Read it all" is gone; View summary and the details card are the two ways in */
+    for (const opener of ['[data-ms27="full"]', '[data-ms27="card"]']) {
       await openAt(page, "/manuscripts", vp, { motion: true });
       await page.locator(opener).click();
       await page.waitForTimeout(1800);

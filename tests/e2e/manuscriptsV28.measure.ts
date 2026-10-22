@@ -166,7 +166,7 @@ for (const vp of VPS) {
       await ctx.close();
     });
 
-    test("A1 — every Edit details entry opens the right-hand drawer, and no centred modal exists", async ({ browser, baseURL }) => {
+    test("A1 — every Edit entry opens the right-hand drawer, and no centred modal exists", async ({ browser, baseURL }) => {
       test.skip(!run("A1"));
       await assertLocalBundleIsDev();
       const ctx = await ctxFor(browser, baseURL!, vp);

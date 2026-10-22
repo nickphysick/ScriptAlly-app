@@ -1,0 +1,24 @@
+{
+ "build": "dev index-Boa5GRP3.js (v28)",
+ "A1": {
+  "result": "RED",
+  "reading": [
+   "Error: expect(received).toEqual(expected) // deep equality",
+   "- Expected  - 2",
+   "+ Received  + 2"
+  ]
+ },
+ "A2": {
+  "result": "RED",
+  "reading": [
+   "no link or button in the strip: Expected 0, Received 1"
+  ]
+ },
+ "A3": {
+  "result": "RED",
+  "reading": [
+   "long strip: ends with ”: Expected true"
+  ]
+ },
+ "widths": "1512 and 1280"
+}

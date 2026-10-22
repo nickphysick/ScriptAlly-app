@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Manuscripts v28 — read and put back the fields MSV28 writes on the ms21-filled book (series, genre, subGenres,
- * ageCategory, wordCount). ⚠️ DEV ONLY, and only the dedicated ms21-filled account.
+ * ageCategory, wordCount, logline). ⚠️ DEV ONLY, and only the dedicated ms21-filled account.
  *
  *   node tests/e2e/ms28Fixture.mjs --get                 print the fields (absent keys are left out)
  *   node tests/e2e/ms28Fixture.mjs --snap <file>         save them
  *   node tests/e2e/ms28Fixture.mjs --restore <file>      put them back exactly: a key absent then is deleted now
  *   node tests/e2e/ms28Fixture.mjs --age "<value>"       store a raw ageCategory (E2's legacy values)
+ *   node tests/e2e/ms28Fixture.mjs --logline "<text>"    store a logline ("" empties it, as the drawer does: v28.1 A3)
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -28,7 +29,7 @@ const dbId = dev.VITE_FIREBASE_DATABASE_ID;
 const db = !dbId || dbId === "(default)" ? getFirestore(app) : getFirestore(app, dbId);
 const { user } = await signInWithEmailAndPassword(getAuth(app), FILLED_EMAIL, process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD);
 const ms = doc(db, "users", user.uid, "manuscripts", MS_ID);
-const KEYS = ["series", "genre", "subGenres", "ageCategory", "wordCount"];
+const KEYS = ["series", "genre", "subGenres", "ageCategory", "wordCount", "logline"];
 const read = async () => { const d = (await getDoc(ms)).data() ?? {}; return Object.fromEntries(KEYS.filter((k) => k in d).map((k) => [k, d[k]])); };
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === "--get") console.log(JSON.stringify(await read()));
@@ -40,5 +41,6 @@ else if (cmd === "--restore") {
   if (JSON.stringify(now) !== JSON.stringify(Object.fromEntries(KEYS.filter((k) => k in was).map((k) => [k, was[k]])))) throw new Error(`restore mismatch: ${JSON.stringify(now)}`);
   console.log("restored");
 } else if (cmd === "--age") { await updateDoc(ms, { ageCategory: arg }); console.log("age set"); }
+else if (cmd === "--logline") { await updateDoc(ms, { logline: arg ?? "" }); console.log("logline set"); /* the rules require the key: empty is "", as the drawer writes it */ }
 else throw new Error("usage: --get | --snap <file> | --restore <file> | --age <value>");
 process.exit(0);
