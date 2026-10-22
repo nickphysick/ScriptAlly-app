@@ -68,45 +68,11 @@
 
 /* ── Part D · the jump row's two modes (the mock's `.jr.gly` / `.jr.txt`) ── */
 @media (min-width: 768px) {
-  /* GLYPH (Status, Who it's with): a 44 x 40 button, the glyph alone at 23, the count as a badge top right */
-  .qc138-sheet .qc140-jr.qc141-jr--glyph { gap: 6px; overflow: visible; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jb {
-    position: relative; width: 44px; height: 40px; padding: 0; gap: 0; justify-content: center; border-radius: 11px;
-  }
-  .qc138-sheet .qc141-jr--glyph .qc140-jb .qc140-jt { display: none; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jg { width: 24px; height: 24px; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jg .qc140-jsvg { width: 23px; height: 23px; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jg--art { width: 28px; height: 28px; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jg--art img { width: 28px; height: 28px; margin: 0; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jg .qc140-jbd { display: none; }
-  .qc138-sheet .qc141-jr--glyph .qc140-jb i {
-    position: absolute; top: -1px; right: -1px; box-sizing: border-box; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px;
-    border-radius: 9px; letter-spacing: 0; background: #f4eee5; box-shadow: 0 0 0 2px #2a3a52;
-    font: 600 10.5px/1 var(--sp-mono) !important; color: #2a3a52 !important;
-  }
-  /* the name, in a dark label beneath, on hover or keyboard focus */
-  .qc138-sheet .qc141-jtip {
-    position: absolute; left: 50%; top: calc(100% + 8px); z-index: 30; transform: translateX(-50%) translateY(-2px);
-    padding: 5px 9px; border-radius: 7px; background: #1c130f; color: #f4eee5; white-space: nowrap;
-    font: 400 13px/normal var(--sp-serif) !important; opacity: 0; pointer-events: none; transition: opacity 0.12s, transform 0.12s;
-  }
-  .qc138-sheet .qc141-jr--glyph .qc140-jb:hover .qc141-jtip, .qc138-sheet .qc141-jr--glyph .qc140-jb:focus-visible .qc141-jtip { opacity: 1; transform: translateX(-50%); }
-  @media (prefers-reduced-motion: reduce) { .qc138-sheet .qc141-jtip { transition: none; } }
-  /* unpinned (the navy toolbar): the current button is cream with a navy glyph, its badge navy */
-  .qcv-group[data-v138]:not([data-full]) .qc141-jr--glyph .qc140-jb[aria-current="true"] i { background: #2a3a52; box-shadow: 0 0 0 2px #f4eee5; color: #f4eee5 !important; }
-  /* pinned (the cream toolbar): every badge navy with cream text */
-  .qcv-group[data-v138][data-full] .qc141-jr--glyph .qc140-jb i { background: #2a3a52; box-shadow: 0 0 0 2px #f4f0e9; color: #f4eee5 !important; }
-  /* NAME (Next action, Package): the name and count, no icon */
-  .qc138-sheet .qc141-jr--name .qc140-jb { padding: 0 12px; }
-}
+  /* GLYPH (Status, Who it's with): a 44 x 40 button, the glyph alone at 23, the count as a badge top right */  /* the name, in a dark label beneath, on hover or keyboard focus */
+  /* unpinned (the navy toolbar): the current button is cream with a navy glyph, its badge navy */  /* pinned (the cream toolbar): every badge navy with cream text */  /* NAME (Next action, Package): the name and count, no icon */}
 
 /* the "+N more" menu: a 32px glyph column, then the name, then the count; the glyph and its badge sit inside their
    column, so nothing reaches the name. A row with no glyph (a package, a month) has no column. */
-.qc140-jo { display: grid !important; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 10px; }
-.qc140-jo .qc141-jmc { position: relative; display: grid; place-items: center; width: 32px; height: 24px; }
-.qc140-jo .qc141-jmc:empty { display: none; }
-.qc140-jo:has(.qc141-jmc:empty) { grid-template-columns: minmax(0, 1fr) auto; }
-
 /* ── Part E · the pinned band (the mock's `.pband.b2`): "{N} queries sent" · the breakdown · heard back · + Log a query.
    The count starts at the toolbar's inset (`--qc140-inset`), where the first jump item sits beneath it. ── */
 @media (min-width: 768px) {

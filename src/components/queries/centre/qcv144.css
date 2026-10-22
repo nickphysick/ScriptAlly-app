@@ -1,0 +1,34 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v144 — "all in navy" (ref design-refs/navy-bar-address-book-v1/query-centre-v144.html, layout 5, headings
+ * C · Ruled). The count and the Cards / List switch move into the navy bar; Filters · Group by · Sort sit at its right in
+ * both views; Find and Full screen become one pill above the list; the group headings are ruled in both views.
+ * Faces are stated with two classes and `!important` where brand.tsx would otherwise reach them.
+ */
+@media (min-width: 768px) {
+  /* ── A1 · the navy bar's left: the count, then the switch on the navy ── */
+  .qc138-sheet .qc144-tb .qc144-nt {
+    flex: none; display: flex; align-items: baseline; gap: 8px; margin: 0 6px 0 4px; white-space: nowrap;
+  }
+  .qc138-sheet .qc144-nt b { font: 400 24px/1 var(--sp-type) !important; color: #f4eee5; }
+  .qc138-sheet .qc144-nt span {
+    font: 500 11px/1 var(--sp-mono) !important; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(244, 238, 229, 0.55);
+  }
+  .qc138-sheet .qc144-tb > .cl20-vs { flex: none; height: 34px; background: rgba(244, 238, 229, 0.1); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.16); }
+  .qc138-sheet .qc144-tb > .cl20-vs button { height: 28px; color: rgba(244, 238, 229, 0.75); }
+  .qc138-sheet .qc144-tb > .cl20-vs button:hover:not([aria-selected="true"]):not(:disabled) { background: rgba(244, 238, 229, 0.1); color: #f4eee5; }
+  .qc138-sheet .qc144-tb > .cl20-vs button[aria-selected="true"] { background: #f4eee5; color: #2a3a52; }
+  .qc138-sheet .qc144-tb > .cl20-vs button:focus-visible { outline-color: #f4eee5; }
+  /* Filters · Group by · Sort, pushed right (in full screen Find's own auto margin does it) */
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc144-tb .qc144-first { margin-left: auto; }
+  .qc138-sheet .qc144-tb .qc1421-sortw { flex: none; }
+
+  /* ── A1 · the headings are plain labels; Due's is blank ── */
+  .qc138-sheet .qc138-h.qc144-h > span {
+    display: inline-block; white-space: nowrap;
+    font: 600 10.5px/1.3 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62);
+  }
+
+}

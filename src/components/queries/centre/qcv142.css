@@ -25,16 +25,7 @@
    `.cl19-tb`). The jump row's glyph buttons are 40 × 34 with a 20px glyph and a 17px badge; Find, Group by and Filters
    are 34 tall. Full screen (the cream toolbar) is unchanged. */
 @media (min-width: 768px) {
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tb { height: 52px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-jr { height: 34px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc141-jr--glyph .qc140-jb { width: 40px; height: 34px; border-radius: 9px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc141-jr--glyph .qc140-jg { width: 20px; height: 20px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc141-jr--glyph .qc140-jg .qc140-jsvg { width: 20px; height: 20px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc141-jr--glyph .qc140-jg--art,
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc141-jr--glyph .qc140-jg--art img { width: 22px; height: 22px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc141-jr--glyph .qc140-jb i { min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; font-size: 10px !important; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-jmore { height: 34px; }
-  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-find { height: 34px; border-radius: 9px; }
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tb { height: 52px; }  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-find { height: 34px; border-radius: 9px; }
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chipw { height: 34px; border-radius: 9px; }
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chip { height: 34px; border-radius: 9px; }
 }
