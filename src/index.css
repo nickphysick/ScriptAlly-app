@@ -216,6 +216,8 @@
   --ink-cream-12: rgba(244, 238, 229, 0.12);
   --ink-terra: #d9967a;
   --ink-terra-rgb: 217, 150, 122;
+  /* Manuscripts v27 Part E — the sidebar's "PRO" tag: the rose of the ref's tag and its 4px dot */
+  --ink-rose: #e0a38f;
   /* the full-strength text the ref writes as #fffaf3 — cream at its brightest, on ink */
   --ink-bright: #fffaf3;
   /* the ink figures and labels that sit ON cream or terracotta (Log a query, the to-do pill) */

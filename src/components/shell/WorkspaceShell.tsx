@@ -756,6 +756,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           flex gap beside a zero-width child would hold itself open and park the
                           icon 5px off the rail's centre. */}
                       <span className="ws-lbl">{ch.label}</span>
+                      {ch.pro ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
                       {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
                     </button>
                   );

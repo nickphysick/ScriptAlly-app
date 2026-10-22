@@ -33,6 +33,8 @@ export interface ShellChild {
   count?: number;
   /** Burgundy dot — attention, not volume. */
   urgent?: boolean;
+  /** Manuscripts v27 Part E — a small "PRO" tag after the label (Versions). Shown to everyone for now. */
+  pro?: boolean;
   /** The row's OWN icon key. Every destination carries one now — the flat nav has no parent row
    *  to inherit from, and a row without an icon in a list of rows with them reads as broken. */
   icon?: string;

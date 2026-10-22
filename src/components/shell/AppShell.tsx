@@ -21,7 +21,7 @@ import { STAGE_REPLAY_EVENT } from "./BarSwitcher";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
+  ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
   LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
@@ -200,6 +200,8 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   library: <Library aria-hidden="true" />,
   books: <BookCopy aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
+  /* Manuscripts v27 Part E — Versions: the mock's ⇆ */
+  versions: <ArrowLeftRight aria-hidden="true" />,
   settings: <Settings aria-hidden="true" />,
 };
 
