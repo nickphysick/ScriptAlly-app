@@ -94,7 +94,7 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
     let raf = 0;
     const read = () => {
       raf = 0;
-      root.querySelectorAll<HTMLElement>(".qc138-band").forEach((b) => {
+      root.querySelectorAll<HTMLElement>(".qc138-band, .qc142-rh").forEach((b) => {
         const top = parseFloat(getComputedStyle(b).top) || 0;
         const r = b.getBoundingClientRect();
         const grp = b.parentElement?.getBoundingClientRect();
@@ -728,17 +728,16 @@ export const QcList138: React.FC<QcList138Props> = ({
           const label = g.label || "All queries";
           return (
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
-              {/* v142 §C — THE LEDGER HEADING (the Contact list v20's cream ledger, `.cl20-lg`): #f4f0e9 with a hairline above
-                  and below, the group's glyph centred on the rows' disc column, the name in the typewriter, "N QUERIES" in
-                  mono, the fold chevron at the right. It replaces v138's powder and blush bands: the court colour lives on
-                  the cards and the breakdown card now, never on a heading. */}
-              <button type="button" className={`qc138-band qc138-band--${tone} qc142-lg`} data-qcv="gband" data-qc142="ledger" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
+              {/* navy-bar v1 A4 — THE RULED HEADING ("C · Ruled"), the Cards view's own: the group's glyph (20), the name in
+                  the typewriter at 23, "N QUERIES" in mono, the fold chevron, then a hairline to the right edge. It
+                  replaces v142's cream ledger. Stuck, it is white and fades out over 14px below itself. */}
+              <button type="button" className={`qc138-band qc138-band--${tone} qc144-rh`} data-qcv="gband" data-qc144="heading" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
-                <span className="qc142-lgm" data-qc142="ledger-mark">{groupMark(g, tone)}</span>
-                <b className="qc138-gt" data-qcv="gband-t">{label}</b>
-                <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
-                <span className="qc138-gh" />
+                <span className="qc144-rhm" data-qc144="heading-mark">{groupMark(g, tone)}</span>
+                <b className="qc138-gt qc144-rhl" data-qcv="gband-t">{label}</b>
+                <span className="qc138-gn qc144-rhn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
                 <span className="qc138-chev" aria-hidden="true">▾</span>
+                <i className="qc144-rhr" data-qc144="heading-rule" aria-hidden="true" />
               </button>
               {!shut && (
                 <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">

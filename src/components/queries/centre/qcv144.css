@@ -70,4 +70,42 @@
   .qcv-group[data-v138][data-full] .qc138-sheet .qc144-tfind input::placeholder { font-style: italic; color: rgba(28, 19, 15, 0.5); }
   .qcv-group[data-v138][data-full] .qc138-sheet .qc144-tfind:focus-within { box-shadow: inset 0 0 0 2px #2a3a52; }
 
+  /* ── A4 · THE RULED HEADING, List view: glyph 20 · name 23 · count 11 · chevron · a 14% rule to the right edge, padded
+     22 36 6 across the sheet's full width (the body's 18 taken back). Stuck: white, fading out over 14px below. ── */
+  .qc138-sheet .qc138-band.qc144-rh {
+    gap: 0; width: calc(100% + 36px); height: auto; margin: 0 -18px; padding: 22px 36px 6px; border-radius: 0;
+    background: transparent; color: #1c130f; box-shadow: none;
+  }
+  .qc138-sheet[data-density="compact"] .qc138-band.qc144-rh { height: auto; margin-top: 0; }
+  .qc138-sheet .qc138-grp:first-child .qc138-band.qc144-rh { margin-top: 0; }
+  .qc138-sheet .qc138-band.qc144-rh[data-stuck] { border-radius: 0; background: #fff; box-shadow: none; }
+  .qc138-sheet .qc138-band.qc144-rh[data-stuck]::before,
+  .qc142-cards .qc142-rh[data-stuck]::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 14px; pointer-events: none;
+    background: linear-gradient(#fff, rgba(255, 255, 255, 0));
+  }
+  .qc138-sheet .qc144-rh .qc144-rhm { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 20px; height: 20px; margin-right: 12px; }
+  .qc138-sheet .qc144-rh .qc144-rhm .qc138-gart,
+  .qc138-sheet .qc144-rh .qc144-rhm .qc139-gart {
+    visibility: visible !important; position: relative; width: 20px; height: 20px; border-radius: 0; background: none; box-shadow: none; color: #1c130f;
+  }
+  .qc138-sheet .qc144-rh .qc144-rhm svg { width: 20px; height: 20px; }
+  .qc138-sheet .qc138-band.qc144-rh .qc144-rhl { font: 400 23px/1.2 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+  .qc138-sheet .qc138-band.qc144-rh .qc144-rhn {
+    margin-left: 12px; padding: 0; border-radius: 0; background: none; white-space: nowrap;
+    font: 500 11px/1 var(--sp-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45);
+  }
+  .qc138-sheet .qc138-band.qc144-rh .qc138-chev { margin-left: 8px; color: rgba(28, 19, 15, 0.45); }
+  .qc138-sheet .qc144-rh .qc144-rhr { flex: 1 1 auto; min-width: 0; height: 1px; margin-left: 8px; background: rgba(28, 19, 15, 0.14); }
 }
+
+/* ── A4 · the Cards view's heading: the same face, rule and stuck fade (it sticks directly under the toolbar) ── */
+.qc142-cards .qc142-rh { padding: 22px 12px 6px; background: transparent; box-shadow: none; }
+.qc142-cards .qc142-rh[data-stuck] { background: #fff; box-shadow: -24px 0 0 #fff, 24px 0 0 #fff; }
+.qc142-cards .qc142-rh[data-stuck]::before { left: -24px; right: -24px; }
+.qc142-rh .qc142-rhm.qc142-rhm { width: 20px; height: 20px; }
+.qc142-rh .qc142-rhm .qc138-gart, .qc142-rh .qc142-rhm .qc139-gart { width: 20px; height: 20px; }
+.qc142-cards .qc142-rh .qc142-rhm svg { width: 20px; height: 20px; }
+.qc142-rh .qc142-rhl.qc142-rhl { font: 400 23px/1.2 var(--sp-type) !important; }
+.qc142-rh .qc142-rhn.qc142-rhn { font: 500 11px/1 var(--sp-mono) !important; letter-spacing: 0.1em; color: rgba(28, 19, 15, 0.45); }
+.qc142-rh .qc142-rhr { margin-left: 8px; background: rgba(28, 19, 15, 0.14); }

@@ -152,11 +152,11 @@ export const QcCard142: React.FC<QcCard142Props> = ({ row: r, nowMs, book, pkg, 
 
 /** the Cards view's group heading: the Contact list's ruled heading (v20 §D), in this list's words */
 export const QcCardsHeading: React.FC<{ label: string; n: number; mark: React.ReactNode; gkey: string }> = ({ label, n, mark, gkey }) => (
-  <div className="qc142-rh" data-qc142="ruled" data-group={gkey}>
-    <span className="qc142-rhm" aria-hidden="true">{mark}</span>
+  <div className="qc142-rh" data-qc142="ruled" data-qc144="heading" data-group={gkey}>
+    <span className="qc142-rhm" data-qc144="heading-mark" aria-hidden="true">{mark}</span>
     <b className="qc142-rhl" data-qc142="ruled-label">{label}</b>
     <em className="qc142-rhn" data-qc142="ruled-count">{n} {n === 1 ? "query" : "queries"}</em>
-    <i className="qc142-rhr" aria-hidden="true" />
+    <i className="qc142-rhr" data-qc144="heading-rule" aria-hidden="true" />
   </div>
 );
 
