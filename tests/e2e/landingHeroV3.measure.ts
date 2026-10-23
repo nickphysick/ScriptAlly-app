@@ -270,7 +270,9 @@ test.describe("landing hero v3", () => {
   });
 
   test("LH7 the shadow: versioned, above the cards and copy at .2, and never cropped", async ({ page }) => {
-    for (const vp of [{ width: 1920, height: 1080 }, { width: 1440, height: 780 }, { width: 1204, height: 594 }, { width: 390, height: 844 }]) {
+    /* RETIRED AT 390 (phone hero, 23 Oct): phones draw no cast shadow — the hawk's shadow flies over once
+       instead, which `landingHeroMobile.measure.ts` HM7 holds. 820 keeps the stacked regime covered. */
+    for (const vp of [{ width: 1920, height: 1080 }, { width: 1440, height: 780 }, { width: 1204, height: 594 }, { width: 820, height: 900 }]) {
       await open(page, vp);
       await settle(page);
       const r = await page.evaluate(() => {
@@ -301,7 +303,7 @@ test.describe("landing hero v3", () => {
       expect(r.right, `@${vp.width}: not cropped on the right`).toBeLessThanOrEqual(r.cw);
       expect(r.top, `@${vp.width}: not cropped at the top of the page`).toBeGreaterThanOrEqual(0);
       expect(r.sw, `@${vp.width}: and the page does not scroll sideways`).toBeLessThanOrEqual(r.cw);
-      if (vp.width === 390) await shot(page, "hero-390x844");
+      if (vp.width === 820) await shot(page, "hero-820x900");
     }
   });
 

@@ -29,7 +29,10 @@ const VPS = [
   { width: 1280, height: 800 },
   { width: 390, height: 844 },
 ];
-/** The nav's three regimes: full links (1440, 1280), burger on one row (900), wrapped (390). */
+/** The nav's regimes: full links (1440, 1280), burger on one row (900), and — since the phone hero
+ *  (23 Oct) — the 60px phone row with the founding pill (390). The 600px wrap no longer renders at
+ *  any width this suite reads. */
+const PHONE = 760;
 const NAV_VPS = [...VPS.slice(0, 2), { width: 900, height: 800 }, VPS[2]];
 const OUT = resolve("reports/landing-colours-v2");
 const GEOMETRY = resolve(OUT, "baseline/geometry.json");
@@ -50,6 +53,11 @@ const MUTATIONS: Record<string, string> = {
   F2: ".mk-claimform input{color:#f4eee5!important}.mk-betanote{color:rgba(244,238,229,.62)!important}" +
       ".mk-claimnum,.mk-claimof,.mk-claimleft,.mk-fmmeta,.mk-fmtally{color:#f4eee5!important}",
   T1: ".mk-foot{border-top:1px solid #e7ddd2!important}",
+  /* The phone retargets' own breaks (phone hero, 23 Oct) — each turns only the ≤760px branch red. */
+  N2p: ".mk-navpill{background:#1b2433!important}",
+  N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
+  H1p: ".mk-hp-stage{background:#ffffff!important}",
+  S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
 };
 
 async function mutate(page: Page) {
@@ -222,7 +230,9 @@ async function boxes(page: Page) {
 /** `See how it works` → #pulse: the gap between the nav's bottom edge and the section's top. */
 async function anchorGap(page: Page) {
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.click(".mk-herolink");
+  /* RETARGET (phone hero, 23 Oct): on a phone the jump is the drawer's "See how it works". Same law —
+     the band lands at the nav's foot — through whichever of the two links the page renders. */
+  await page.click((page.viewportSize()?.width ?? 1440) <= PHONE ? ".mk-hp-how" : ".mk-herolink");
   await page.waitForTimeout(400);
   return page.evaluate(() =>
     document.querySelector("#pulse")!.getBoundingClientRect().top -
@@ -289,7 +299,8 @@ test.describe("LC2", () => {
         const brand = document.querySelector(".mk-nav .mk-brand")!;
         const word = brand.querySelector(".mk-navword");
         const c = word ? getComputedStyle(word) : null;
-        const btn = getComputedStyle(document.querySelector(".mk-navright .mk-btn")!);
+        /* RETARGET (phone hero): at ≤760px the anon primary is the founding pill — the same cream on ink. */
+        const btn = getComputedStyle(document.querySelector(".mk-navright .mk-btn, .mk-navright .mk-navpill")!);
         return {
           imgs: Array.from(brand.querySelectorAll("img")).map((i) => i.getAttribute("src") ?? ""),
           text: word?.textContent ?? null, color: c?.color ?? null, family: c?.fontFamily ?? null,
@@ -301,7 +312,8 @@ test.describe("LC2", () => {
       expect(w.imgs.length, "the mark is still drawn").toBe(1);
       expect(w.text).toBe("QueryHawk");
       expect(w.color).toBe("rgb(244, 238, 229)");
-      expect(w.family ?? "").toMatch(/Playfair Display/);
+      /* RETARGET (phone hero): the phone row sets the wordmark in Source Serif 4 700, per its ref. */
+      expect(w.family ?? "").toMatch(vp.width <= PHONE ? /Source Serif 4/ : /Playfair Display/);
       expect(w.name).toBe("QueryHawk home");
       expect(w.btnBg).toBe("rgb(243, 238, 230)");
       expect(w.btnFg).toBe("rgb(27, 36, 51)");
@@ -324,6 +336,15 @@ test.describe("LC2", () => {
     for (const route of ROUTES) for (const vp of NAV_VPS) {
       await open(page, route, vp);
       const now = await navHeights(page);
+      /* RETARGET (phone hero, 23 Oct): at ≤760px the bar is a NEW regime — one 60px row in both states,
+         because the landing's sticky stage sits at `top: var(--mk-nav-h)` — so it is held to that, not
+         to the pre-pack wrapped bar's 128.8. Every other width is still held to its capture. */
+      if (vp.width <= PHONE) {
+        expect(Math.abs(now.rest - 60), `${route} @${vp.width} rest ${now.rest}`).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(now.condensed - 60), `${route} @${vp.width} condensed ${now.condensed}`).toBeLessThanOrEqual(0.5);
+        read++;
+        continue;
+      }
       const was = base.nav[route + "@" + key(vp)];
       expect(Math.abs(now.rest - was.rest), `${route} @${vp.width} rest ${now.rest} vs ${was.rest}`).toBeLessThanOrEqual(0.5);
       expect(Math.abs(now.condensed - was.condensed), `${route} @${vp.width} condensed ${now.condensed} vs ${was.condensed}`).toBeLessThanOrEqual(0.5);
@@ -334,7 +355,9 @@ test.describe("LC2", () => {
       await open(page, "/", vp);
       const gap = await anchorGap(page);
       console.log(`LC2 N3 anchor @${vp.width}: ${gap.toFixed(2)} (was ${Number(base.anchor[key(vp)]).toFixed(2)})`);
-      expect(Math.abs(gap - base.anchor[key(vp)]), `anchor landing @${vp.width}`).toBeLessThanOrEqual(1);
+      /* RETARGET (phone hero, 23 Oct): at ≤760px the jump is the drawer's link and the band lands AT the
+         nav's foot (the pre-pack wrapped bar left 8.5px); the law is the landing, so it is held to 0. */
+      expect(Math.abs(gap - (vp.width <= PHONE ? 0 : base.anchor[key(vp)])), `anchor landing @${vp.width}`).toBeLessThanOrEqual(1);
     }
   });
 
@@ -344,6 +367,22 @@ test.describe("LC2", () => {
     test.skip(CAPTURE);
     for (const vp of VPS) {
       await open(page, "/", vp);
+      /* RETARGET (phone hero, 23 Oct): on a phone the hero is the navy stage under the bar with the
+         cream drawer over its foot, and the type that opens the page is the drawer's question. */
+      if (vp.width <= PHONE) {
+        const r = await page.evaluate(() => {
+          const st = document.querySelector(".mk-hp-stage")!.getBoundingClientRect();
+          const sh = document.querySelector(".mk-hp-sheet")!.getBoundingClientRect();
+          return { stageTop: st.top, sheetTop: sh.top, color: getComputedStyle(document.querySelector(".mk-hp-q2")!).color };
+        });
+        await page.addStyleTag({ content: ".mk-hp-scope{visibility:hidden!important}" });
+        const [stage, drawer] = await pixels(page, [[8, r.stageTop + 8], [8, r.sheetTop + 40]]);
+        console.log(`LC2 H1 @${vp.width} phone`, JSON.stringify({ stage, drawer, title: r.color }));
+        expect(near(stage, [30, 40, 57], 6), `stage ${stage}`).toBe(true);
+        expect(near(drawer, [251, 249, 245], 2), `drawer ${drawer}`).toBe(true);
+        expect(r.color).toBe("rgb(28, 19, 15)");
+        continue;
+      }
       /* The pile and its shadow are hidden for this one reading: the claim is the ground. */
       await page.addStyleTag({ content: ".mk-herobox{visibility:hidden!important}" });
       const hero = await page.evaluate(() => {
@@ -387,7 +426,10 @@ test.describe("LC2", () => {
         };
       });
       expect(s, `${route}: the sheet exists`).toBeTruthy();
-      expect(s!.radii, `${route} @${vp.width}`).toEqual(["18px", "18px", "18px", "18px"]);
+      /* RETARGET (phone hero, 23 Oct): on the landing at ≤760px the navy stage meets the bar square, so
+         the sheet's top corners are 0 there and only its bottom arcs are read. */
+      const phoneLanding = route === "/" && vp.width <= PHONE;
+      expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
       expect(Math.abs(s!.footTop - s!.docBottom), "the footer starts where the sheet ends").toBeLessThanOrEqual(0.5);
       const L = s!.left, R = s!.right - 1;
@@ -401,7 +443,7 @@ test.describe("LC2", () => {
       await page.waitForTimeout(80);
       const by = await page.evaluate(() => document.querySelector(".mk-sheet")!.getBoundingClientRect().bottom);
       const botPx = await pixels(page, [[L + 2, by - 3], [R - 2, by - 3], [L + 20, by - 21], [R - 20, by - 21]]);
-      for (const [name, px] of [["top", topPx], ["bottom", botPx]] as const) {
+      for (const [name, px] of (phoneLanding ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
         expect(near(px[0], INK, 2) && near(px[1], INK, 2), `${route} @${vp.width} ${name} arcs are ink: ${JSON.stringify(px.slice(0, 2))}`).toBe(true);
         expect(lum(px[2]) > 0.7 && lum(px[3]) > 0.7, `${route} @${vp.width} ${name} 20px in is light: ${JSON.stringify(px.slice(2))}`).toBe(true);
       }
