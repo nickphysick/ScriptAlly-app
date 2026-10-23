@@ -9,7 +9,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { ctxFor, openV2, scrollInto, VER2_FRESH, VER2_MANY, VER2_PRE, VPS } from "./ver2Lib";
+import { ctxFor, openV2, scrollInto, VER2_FRESH, VER2_MANY, VER2_PRE, VER2_WARM, VPS } from "./ver2Lib";
 
 test.setTimeout(600_000);
 const ONLY = process.env.VER2_SHOT ?? "";
@@ -87,6 +87,7 @@ for (const vp of VPS) {
       if (want("26")) await shot(page, "26", "empty-with-queries", vp.width);
       if (want("27")) { await page.locator('[data-vv2="first"]').click(); await shot(page, "27", "first-save-form", vp.width); await esc(page); }
     }
+    if (want("30")) { await openV2(page, VER2_WARM); await page.waitForTimeout(2500); if (await page.locator('[data-pck="popover"]').count()) await page.locator('[data-pck="close"]').click(); await scrollInto(page, '[data-vv2="tracking"]', 20); await shot(page, "30", "warming-up-pace", vp.width); }
     if (want("29")) { await openV2(page, undefined, { free: true }); await shot(page, "29", "free-locked", vp.width); await page.evaluate(() => sessionStorage.removeItem("sa.dev.versionsFree")); }
     expect(true).toBe(true);
     await ctx.close();

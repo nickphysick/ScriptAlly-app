@@ -9,6 +9,7 @@
  *   npx tsx tests/e2e/ver2Fixture.mjs --ms <id>  one manuscript document, keys sorted (Undo's byte-for-byte check)
  *   npx tsx tests/e2e/ver2Fixture.mjs --q        every ver2 query's stored bookVersionId, keys sorted
  *   npx tsx tests/e2e/ver2Fixture.mjs --guide-reset   forget the account's Versions guide (seen, hidden, ticks)
+ *   npx tsx tests/e2e/ver2Fixture.mjs --warm-log <n>  log n more queries with the warm book's version, as addQuery writes them (v2.1 B4)
  *
  * ⚠️ IT OWNS ONLY ver2- DOCUMENTS. The account is shared with the Manuscripts suites, whose seeder wipes it whole —
  *    which is why every VER2 run seeds first rather than trusting what it finds.
@@ -101,6 +102,18 @@ async function wipe() {
   return n;
 }
 
+export const WARM = "ver2-warm", COLD = "ver2-cold";
+/** a London calendar day n days before today, "YYYY-MM-DD" */
+const daysAgo = (n) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date(Date.now() - n * 864e5));
+let logN = 0;
+/** one query, written as addQuery writes it: the stamp (or none), the sent date, the first log rung */
+async function logOne(book, stamp, day) {
+  const id = `ver2-${book.slice(5)}-q-${Date.now().toString(36)}-${logN++}`;
+  const ag = logN % NAMES.length;
+  await setDoc(doc(db, "users", uid, "queries", id), { id, userId: uid, manuscriptId: book, agentId: `ver2-ag-${ag}`, packageId: "", status: "Queried", dateSent: noon(day), personalisationNotes: "", sendMethod: "Email", ...(stamp ? { bookVersionId: stamp } : {}) });
+  await setDoc(doc(db, "users", uid, "activities", `ver2-act-${id}`), { id: `ver2-act-${id}`, userId: uid, queryId: id, manuscriptId: book, activityType: "Query Sent", description: `Query sent to ${NAMES[ag][0]} at ${NAMES[ag][1]}`, date: noon(day), details: "", resultingStatus: "Queried" });
+}
+
 async function seed() {
   const n = await wipe();
   const put = (path, data) => setDoc(doc(db, "users", uid, ...path), data).catch((e) => { console.error(`DENIED writing ${path.join("/")}: ${e.code}`); throw e; });
@@ -147,9 +160,20 @@ async function seed() {
       await put(["activities", `ver2-act-${id}-queried`], { id: `ver2-act-${id}-queried`, userId: uid, queryId: id, manuscriptId: MANY, activityType: "Query Sent", description: `Query sent to ${NAMES[ag][0]} at ${NAMES[ag][1]}`, date: noon(day), details: "", resultingStatus: "Queried" });
     }
   }
+  /* v2.1 — two books still warming up: Original 7 sent (before it was saved) and one version 2 sent. "warm" sent its two
+     in the last 30 days (pace 2); "cold" sent nothing in 30 days (pace 0). Dates are relative to today, so neither goes
+     stale. */
+  for (const [book, title, recent] of [[WARM, "High Water", true], [COLD, "Low Water", false]]) {
+    const o = `${book}-bv-0`, v = `${book}-bv-1`;
+    await put(["manuscripts", book], { id: book, userId: uid, title, genre: "Thriller", ageCategory: "Adult", wordCount: 80000, logline: "A tide, waiting.", comps: [], status: "Querying", statusChangedDate: noon("2026-01-05"),
+      bookVersions: [{ id: o, name: "Original", kind: "initial", createdDate: "2026-03-03", num: 0, original: true }, { id: v, name: "Shorter first page", kind: "revision", createdDate: "2026-03-10", num: 1, parentId: o, changes: ["Cut the first page to 250 words"] }],
+      inUseBookVersionId: v, bookVersionSeq: 1 });
+    for (let k = 0; k < 7; k++) await logOne(book, null, `2026-02-${String(2 + k * 3).padStart(2, "0")}`);
+    for (let k = 0; k < 2; k++) await logOne(book, v, recent ? daysAgo(3 + k * 5) : `2026-04-${String(10 + k * 7).padStart(2, "0")}`);
+  }
   /* the book with nothing: no versions, no queries (S28) */
   await put(["manuscripts", FRESH], { id: FRESH, userId: uid, title: "Dead Reckoning", genre: "Thriller", ageCategory: "Adult", wordCount: 70000, logline: "A navigator's last chart.", comps: [], status: "Querying", statusChangedDate: noon("2026-09-01") });
-  console.log(`seeded ver2 (${uid}) — wiped ${n}, wrote 4 books, ${NAMES.length} agents, ${Q.length + mq} queries`);
+  console.log(`seeded ver2 (${uid}) — wiped ${n}, wrote 6 books, ${NAMES.length} agents, ${Q.length + mq} queries`);
 }
 
 /** What the page should show, worked out from the raw documents with this file's own arithmetic. */
@@ -172,6 +196,7 @@ if (arg === "--seed") await seed();
 else if (arg === "--facts") await facts();
 else if (arg === "--ms") console.log(JSON.stringify(sortKeys((await getDoc(doc(db, "users", uid, "manuscripts", process.argv[3] ?? MS))).data() ?? null)));
 else if (arg === "--q") console.log(JSON.stringify(sortKeys(Object.fromEntries((await getDocs(collection(db, "users", uid, "queries"))).docs.filter((d) => d.id.startsWith("ver2-")).map((d) => [d.id, d.data().bookVersionId ?? null])))));
+else if (arg === "--warm-log") { const n = Number(process.argv[3] ?? 1); for (let k = 0; k < n; k++) await logOne(WARM, `${WARM}-bv-1`, daysAgo(1)); console.log(`logged ${n}`); }
 else if (arg === "--guide-reset") { await updateDoc(doc(db, "users", uid), { "todoPrefs.versions": deleteField() }); console.log("guide reset"); }
 else throw new Error(`unknown ${arg}`);
 process.exit(0);
