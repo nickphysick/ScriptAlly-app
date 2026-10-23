@@ -12,8 +12,9 @@
    chips, the tabs, the odometer's digits — would draw in the app's sans while its parent named the
    right face. `:where()` holds the reset to one class of specificity, so every single-class rule
    below still wins on source order. */
-.mk-hc-pile :where(span, div, p, b, i, em, small, li, ol),
-.mk-hp-dock :where(span, div, p, b, i, em, small, li, ol) { font-family: inherit; }
+.mk-hc-pile :where(span, div, p, b, i, em, small, li, ol, ul, nav, strong),
+.mk-hp-dock :where(span, div, p, b, i, em, small, li, ol, ul, nav, strong),
+.mk-up :where(span, div, p, b, i, em) { font-family: inherit; }
 
 .mk-hc-pile { position: absolute; inset: 0; transform-origin: 0 0; pointer-events: none; }
 
@@ -327,4 +328,91 @@
   .mk-hp-sheet, .mk-hp-head, .mk-hp-su, .mk-hp-bird { transition: none; }
   .mk-hp-how svg { animation: none; }
   .mk-hp-fly { display: none; }
+}
+
+/* ═════════════ The phone card's story, v2 (ref design-refs/landing-hero-mobile-v2.html) ═════════════
+   ⚠️ THE REF IS CUMULATIVE — it restates `.lcq-p`, `.lcd`, `.lcd-chart`, `.lcd-ph` and others several
+   times — so every value below is the LAST declaration of its property, merged by hand and then
+   measured against the rendered ref. Its dead helpers (ghost, rise, notify, sentPop, bubbleGhost,
+   chartGhost, noteTask, drift, tag, the `#lq` form, the night sky) are not ported.
+   ⚠️ CONTENT-BOX, AS THE REF IS: it has no Tailwind preflight, so a 42px chip with 1px of padding is
+   43 there. These are new elements with no desk counterpart, so the ref's box model is simply theirs.
+   ⚠️ THE STAGE IS v1's. The ref also restyles `.stage` (a new gradient, `overflow: hidden`); the
+   brief keeps the stage as v1 built it, so those two rules are deliberately not ported. */
+.mk-lcd, .mk-lcd *, .mk-lcq, .mk-lcq *, .mk-lcf, .mk-lcf *, .mk-hp-dock .mk-smp, .mk-hp-dock .mk-smp * { box-sizing: content-box; }
+
+/* P3 — profile heads in every phone disc. */
+.mk-hc-pile--phone .mk-lc-disc { color: #b9b0a5; overflow: hidden; align-items: end; }
+.mk-hc-pile--phone .mk-lc-disc svg { width: 26px; height: 26px; margin-bottom: -3px; }
+/* S4 — the manuscript block with the ref's more generous room, and the typing caret. */
+.mk-hc-pile--phone .mk-lc-ms { padding: 16px 16px 17px; column-gap: 14px; }
+.mk-hc-pile--phone .mk-lc-ms small { width: 40px; height: 40px; border-radius: 10px; }
+.mk-hc-pile--phone .mk-lc-ms small svg { width: 21px; height: 21px; }
+.mk-hc-pile--phone .mk-lc-ms b { margin: 2px 0 11px; font-size: 30px; }
+.mk-hc-pile--phone .mk-lc-ms b.mk-typing::after {
+  content: ""; display: inline-block; width: 2px; height: .9em; margin-left: 2px; vertical-align: -.08em;
+  background: #a2452a; animation: mkHpBlink .9s steps(1) infinite;
+}
+@keyframes mkHpBlink { 50% { opacity: 0; } }
+
+/* S1 — the dashboard the card opens on (`.lcd`). */
+.mk-lcd {
+  position: absolute; inset: 7px; z-index: 8; display: flex; flex-direction: column; gap: 10px;
+  padding: 18px 20px 0; background: #f3f0ea; border-radius: 14px; opacity: 0; pointer-events: none;
+}
+.mk-lcd-title { margin: 0 0 2px; font: 400 32px/1.05 var(--mk-f-display); color: #1c130f; }
+.mk-lcd-panel { padding: 5px; border-radius: 14px; background: #fff; box-shadow: 0 10px 24px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.06); }
+.mk-lcd-ph { padding: 10px 14px 9px; border-radius: 10px 10px 0 0; background: #2a3a52; color: #f5f1eb; font: 400 20px/1 var(--mk-f-display); }
+.mk-lcd-chart { display: block; width: 100%; height: 52px; margin-top: 6px; border-left: 1px solid transparent; }
+.mk-lcd-ax { display: flex; justify-content: space-between; padding: 5px 10px 6px; margin: 0 6px; border-top: 1px solid rgba(28,19,15,.1); font: 400 11px/1 var(--mk-f-serif); color: rgba(28,19,15,.5); }
+.mk-lcd-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mk-lcd-mini { padding: 4px; border-radius: 12px; background: #fff; box-shadow: 0 8px 20px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.06); }
+.mk-lcd-mh { padding: 8px 11px 7px; border-radius: 9px 9px 0 0; font: 400 16px/1 var(--mk-f-display); }
+.mk-lcd-mh--grey { background: #e7e2da; color: #1c130f; }
+.mk-lcd-mh--blue { background: #5d7393; color: #f5f1eb; }
+.mk-lcd-mb { display: flex; align-items: center; gap: 8px; padding: 8px 6px 6px; }
+.mk-lcd-mb svg { flex: none; width: 58px; height: 58px; }
+.mk-lcd-mb ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.mk-lcd-mb li { display: flex; align-items: center; gap: 6px; font: 400 12.5px/1.1 var(--mk-f-serif); color: #1c130f; white-space: nowrap; }
+.mk-lcd-mb li i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.mk-lcd-lh {
+  display: flex; align-items: baseline; justify-content: space-between; margin-top: 2px; padding-bottom: 6px;
+  background: linear-gradient(#a2452a, #a2452a) 0 100% / 44px 2.5px no-repeat;
+}
+.mk-lcd-lh b { font: 400 21px/1.1 var(--mk-f-display); color: #1c130f; }
+.mk-lcd-lh span { font: 500 11px/1 var(--mk-f-mono); letter-spacing: .14em; text-transform: uppercase; color: #1c130f; border-bottom: 1.5px solid #1c130f; padding-bottom: 2px; }
+.mk-lcd-task { border-radius: 12px; background: #fff; overflow: hidden; box-shadow: inset 4px 0 0 #a2452a, 0 8px 20px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.06); }
+.mk-lcd-th { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 8px 18px; background: #f5e6df; }
+.mk-lcd-th span { padding: 5px 8px 4px; border-radius: 4px; background: #2a3a52; color: #fff; font: 500 10px/1 var(--mk-f-mono); letter-spacing: .18em; text-transform: uppercase; }
+.mk-lcd-th em { font: 400 10.5px/1 var(--mk-f-mono); font-style: normal; letter-spacing: .14em; color: #6c675f; }
+.mk-lcd-tb { padding: 12px 14px 8px 18px; }
+.mk-lcd-ta { display: flex; align-items: center; gap: 12px; }
+.mk-lcd-ta i { flex: none; width: 42px; height: 42px; border-radius: 50%; background: #2a3a52; color: #8f9db4; display: grid; place-items: end center; overflow: hidden; }
+.mk-lcd-ta i svg { margin-bottom: -3px; }
+.mk-lcd-ta b { display: block; font: 400 18px/1.2 var(--mk-f-serif); color: #1c130f; }
+.mk-lcd-ta strong { font-weight: 700; }
+.mk-lcd-ta span { display: block; margin-top: 4px; font: 400 9.5px/1.2 var(--mk-f-mono); letter-spacing: .14em; text-transform: uppercase; color: #8a857e; }
+.mk-lcd-tf { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding: 8px 14px 8px 18px; border-top: 1px solid rgba(28,19,15,.08); }
+.mk-lcd-tf span { font: 400 15px/1 var(--mk-f-serif); color: rgba(28,19,15,.65); }
+.mk-lcd-tf b { padding: 9px 14px; border-radius: 8px; background: #2a3a52; color: #fff; font: 400 14px/1 var(--mk-f-display); }
+.mk-lcd-go {
+  margin-top: auto; align-self: stretch; display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 50px; border-radius: 12px; background: #2a3a52; color: #fff; font: 400 20px/1 var(--mk-f-display);
+}
+.mk-lcd-tabs { display: flex; justify-content: space-around; margin: 4px -20px 0; padding: 10px 6px 14px; border-top: 1px solid rgba(28,19,15,.1); background: #fbf9f5; border-radius: 0 0 14px 14px; }
+.mk-lcd-tab { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 62px; font: 400 12.5px/1 var(--mk-f-serif); color: rgba(28,19,15,.5); }
+.mk-lcd-tab.mk-on { color: #2a3a52; font-weight: 600; }
+.mk-lcd-tab.mk-on svg { color: #a2452a; }
+
+/* S2 — "Who are you querying?" (`.lcq`). Each row IS the card's agent row: same disc, same name and
+   agency classes, the same 14px 18px 11px padding and 14px gap — so it can slide onto it. */
+.mk-lcq {
+  position: absolute; left: 8px; right: 8px; top: 48px; bottom: 8px; z-index: 6; display: flex; flex-direction: column; gap: 8px;
+  padding: 20px 24px 24px; background: #fff; border-radius: 0 0 13px 13px; opacity: 0; pointer-events: none;
+}
+.mk-lcq-h { margin: 6px 0 10px; font: 400 30px/1.1 var(--mk-f-display); color: #1c130f; }
+.mk-lcq-list { display: flex; flex-direction: column; gap: 4px; }
+.mk-lcq-p {
+  position: relative; display: flex; align-items: center; gap: 14px; margin: 0 -24px; padding: 14px 18px 11px;
+  box-shadow: inset 0 -1px 0 rgba(28,19,15,.06); background: rgba(42,58,82,0);
 }

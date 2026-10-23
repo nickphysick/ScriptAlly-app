@@ -24,7 +24,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
-import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS } from "./landingCopy";
+import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_DASH, PHONE_PICK, PHONE_LOGGING } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
@@ -53,6 +53,79 @@ const BellIcon = ({ w = 11, h = 12, sw = 1.8, stroke = "currentColor" }: { w?: n
 const AgainIcon = () => <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M13 2.5v3.2H9.8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 
 const BookIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6.5C10 5 7.5 4.5 4 4.5v13c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2v-13c-3.5 0-6 .5-8 2z" /><path d="M12 6.5v13" /></svg>;
+
+/* The phone cards' profile head (v2 P3, the ref's HEAD): a head-and-shoulders silhouette where the
+   desk card prints initials. */
+const Head = ({ w = 22 }: { w?: number }) => <svg viewBox="0 0 24 24" width={w} height={w} aria-hidden="true"><circle cx="12" cy="9" r="4.2" fill="currentColor" /><path d="M4.2 21c.9-4.2 4-6.6 7.8-6.6s6.9 2.4 7.8 6.6z" fill="currentColor" /></svg>;
+const Disc: React.FC<{ phone: boolean; ini: string }> = ({ phone, ini }) => <span className="mk-lc-disc">{phone ? <Head /> : ini}</span>;
+
+/* The dashboard tab bar's five glyphs, in PHONE_DASH.tabs' order. */
+const TAB_ICONS = [
+  <svg key="h" viewBox="0 0 16 16" width="22" height="22"><rect x="2.5" y="2.5" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="8.9" y="2.5" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="2.5" y="8.9" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="8.9" y="8.9" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>,
+  <svg key="q" viewBox="0 0 16 16" width="22" height="22"><path d="M2.5 8.3 13.5 3l-3.6 10.5-2.4-4.3z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M7.5 9.2 13.5 3" stroke="currentColor" strokeWidth="1.5" /></svg>,
+  <svg key="a" viewBox="0 0 16 16" width="22" height="22"><circle cx="8" cy="5.8" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M3.2 13.2c.8-2.4 2.6-3.6 4.8-3.6s4 1.2 4.8 3.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>,
+  <svg key="m" viewBox="0 0 16 16" width="22" height="22"><path d="M8 4.5C6.6 3.5 4.8 3.2 2.5 3.2v9c2.3 0 4.1.3 5.5 1.3 1.4-1 3.2-1.3 5.5-1.3v-9c-2.3 0-4.1.3-5.5 1.3z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M8 4.5v9" stroke="currentColor" strokeWidth="1.5" /></svg>,
+  <svg key="o" viewBox="0 0 16 16" width="22" height="22"><circle cx="3.5" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="12.5" cy="8" r="1.4" fill="currentColor" /></svg>,
+];
+/* A small ring with its figure in the middle (the ref's, verbatim geometry: r 30, 188.5 round). */
+const Ring: React.FC<{ n: string; dash: string; stroke: string }> = ({ n, dash, stroke }) => (
+  <svg viewBox="0 0 76 76" width="76" height="76"><circle cx="38" cy="38" r="30" fill="none" stroke="#e7e2da" strokeWidth="9" /><circle cx="38" cy="38" r="30" fill="none" stroke={stroke} strokeWidth="9" strokeDasharray={dash} transform="rotate(-90 38 38)" strokeLinecap="butt" /><text x="38" y="44" textAnchor="middle" fontSize="18" fontWeight="700" fill="#1c130f" style={{ fontFamily: "var(--mk-f-serif)" }}>{n}</text></svg>
+);
+
+/**
+ * S1 — the dashboard the front card deals in showing (the ref's `.lcd`): a marketing mock-up of the
+ * app's screen, built from `PHONE_DASH` and never from the app's own Dashboard component.
+ */
+const PhoneDash: React.FC = () => {
+  const D = PHONE_DASH;
+  return (
+    <div className="mk-lcd" data-hc="lcd">
+      <b className="mk-lcd-title">{D.title}</b>
+      <div className="mk-lcd-panel">
+        <div className="mk-lcd-ph">{D.active}</div>
+        <svg className="mk-lcd-chart" viewBox="0 0 400 120" preserveAspectRatio="none">
+          <defs><linearGradient id="mk-lcdg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c9cdd6" stopOpacity=".75" /><stop offset="1" stopColor="#eef0f3" stopOpacity=".2" /></linearGradient></defs>
+          <path d="M8 96 C 60 92, 90 86, 130 70 S 200 44, 250 40 L 392 40 L 392 112 L 8 112 Z" fill="url(#mk-lcdg)" />
+          <path d="M8 96 C 60 92, 90 86, 130 70 S 200 44, 250 40 L 392 40" fill="none" stroke="#2a3a52" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="70" cy="91" r="5" fill="#2a3a52" /><circle cx="250" cy="40" r="5" fill="#2a3a52" /><circle cx="392" cy="40" r="6" fill="#2a3a52" />
+        </svg>
+        <div className="mk-lcd-ax">{D.axis.map((m) => <span key={m}>{m}</span>)}</div>
+      </div>
+      <div className="mk-lcd-two">
+        <div className="mk-lcd-mini"><div className="mk-lcd-mh mk-lcd-mh--grey">{D.closed.title}</div><div className="mk-lcd-mb"><Ring n={D.closed.n} dash="126.3 188.5" stroke="#8a837a" /><ul><li><i style={{ background: "#8a837a" }} />{D.closed.keys[0]}</li><li><i style={{ background: "#3d3833" }} />{D.closed.keys[1]}</li></ul></div></div>
+        <div className="mk-lcd-mini"><div className="mk-lcd-mh mk-lcd-mh--blue">{D.agents.title}</div><div className="mk-lcd-mb"><Ring n={D.agents.n} dash="177.4 188.5" stroke="#2a3a52" /><ul><li><i style={{ background: "#2a3a52" }} />{D.agents.keys[0]}</li><li><i style={{ background: "#c9c2b8" }} />{D.agents.keys[1]}</li></ul></div></div>
+      </div>
+      <div className="mk-lcd-lh"><b>{D.upNext}</b><span>{D.all}</span></div>
+      <div className="mk-lcd-task">
+        <div className="mk-lcd-th"><span>{D.task.kicker}</span><em>{D.task.count}</em></div>
+        <div className="mk-lcd-tb"><div className="mk-lcd-ta"><i><Head w={30} /></i><div><b>{D.task.lead}<strong>{D.task.who}</strong></b><span>{D.task.meta}</span></div></div></div>
+        <div className="mk-lcd-tf"><span>{D.task.state}</span><b>{D.task.go}</b></div>
+      </div>
+      <b className="mk-lcd-go" data-hc="lcd-go"><svg viewBox="0 0 16 16" width="18" height="18"><path d="M4 12 12 4M6 4h6v6" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /></svg>{D.log}</b>
+      <nav className="mk-lcd-tabs">{D.tabs.map((t, k) => <span key={t} className={"mk-lcd-tab" + (k === 0 ? " mk-on" : "")}>{TAB_ICONS[k]}{t}</span>)}</nav>
+    </div>
+  );
+};
+
+/**
+ * S2 — "Who are you querying?" (the ref's `.lcq`). ⚠️ EACH ROW IS THE CARD'S AGENT ROW, NOT A LOOK-ALIKE:
+ * the same disc markup (`Disc`), the same name and agency classes, so the chosen row slides onto the
+ * card's own row by translation alone and the hand-over is one frame with nothing to change format.
+ * (The ref draws the list's discs as a background image at a different head size; that difference
+ * is exactly the flicker this is built to remove.)
+ */
+const PhonePick: React.FC = () => (
+  <div className="mk-lcq" data-hc="lcq">
+    <span className="mk-lcq-h">{PHONE_PICK.heading}</span>
+    <div className="mk-lcq-list">
+      {PHONE_PICK.agents.map(([name, agency], k) => (
+        <div key={name} className="mk-lcq-p" data-hc={k === PHONE_PICK.picked ? "lcq-pick" : undefined}>
+          <Disc phone ini="" /><div><div className="mk-lc-nm">{name}</div><div className="mk-lc-ag">{agency}</div></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 /* ── the four cards behind, positions and angles from the ref ── */
 const BACKS = [
@@ -245,6 +318,9 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     band.style.background = YOU.bg; band.style.color = YOU.fg; bandT.textContent = YOU.word; pill.style.background = YOU.pill; pill.innerHTML = PILL.freq;
     build(); show(99); psd.classList.remove("mk-late");
     ftT.textContent = "Send the full by 5 July"; ftA.textContent = "Mark full sent"; ftL.classList.add("mk-late");
+    /* The phone's typed title, whole again whatever a run left it as. (A hoisted function reading a
+       const declared further down: safe only because the first call is at the foot of makeStory.) */
+    if (msTitle) { msTitle.textContent = HERO_PHONE_MS; msTitle.classList.remove("mk-typing"); }
   }
   function cancelAll() { anims.forEach((a) => a.cancel()); anims = []; timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); }
   function stop() { cancelAll(); setStatic(); }
@@ -309,7 +385,136 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     prepClock(); raf = requestAnimationFrame(runClock);
     later(scrollable, t + 900);
   }
-  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; play(); }
+
+  /* ═════ the phone story, v2 (ref design-refs/landing-hero-mobile-v2.html): it opens on the card ═════ */
+  const front = $("front");
+  const dash = front.querySelector<HTMLElement>('[data-hc="lcd"]');
+  const pick = front.querySelector<HTMLElement>('[data-hc="lcq"]');
+  const agentRow = front.querySelector<HTMLElement>('[data-hc="agent"]');
+  const msBlock = front.querySelector<HTMLElement>('[data-hc="ms"]');
+  const msTitle = front.querySelector<HTMLElement>('[data-hc="ms-title"]');
+  const cardTabs = front.querySelector<HTMLElement>('[data-hc="tabs"]');
+  /** An element's place inside the front card in the card's OWN (unrotated, unscaled) units. */
+  const inCard = (el: HTMLElement) => {
+    let x = 0, y = 0;
+    for (let n: HTMLElement | null = el; n && n !== front; n = n.offsetParent as HTMLElement | null) { x += n.offsetLeft; y += n.offsetTop; }
+    return { x, y };
+  };
+
+  /**
+   * S1–S4: the dashboard, "Log a query", the agent list, Eleanor picked and slid onto the card's own
+   * agent row, then "Your manuscript" typed into the manuscript block. Returns when the card is ready
+   * for the query to be logged.
+   * ⚠️ THE SLIDE IS WORKED FROM OFFSETS, NOT RECTS. The ref divides a rect's width by the card's to get
+   * its scale, but the card is turned .8°, so that ratio is ~2% high and the hand-over lands a few
+   * pixels short — the jump S2 exists to remove. Offsets live in the card's own frame, so the
+   * translation is exact whatever the card is turned or scaled by.
+   */
+  function openOnCard(t: number) {
+    if (!dash || !pick || !agentRow || !msBlock || !msTitle || !cardTabs) return t;
+    const rows = [...pick.querySelectorAll<HTMLElement>(".mk-lcq-p")];
+    const ew = pick.querySelector<HTMLElement>('[data-hc="lcq-pick"]')!;
+    A(pick, [{ opacity: 1 }, { opacity: 1 }], { duration: 1, fill: "forwards" });
+    A(dash, [{ opacity: 1 }, { opacity: 1 }], { duration: 1, fill: "forwards" });
+    // the tab bar: Queries → More lift and darken in turn, then "Log a query" is pressed
+    [...dash.querySelectorAll<HTMLElement>(".mk-lcd-tab")].slice(1).forEach((x, k) =>
+      A(x, [{ transform: "none", color: "rgba(28,19,15,.5)" }, { transform: "translateY(-4px)", color: "#2a3a52", offset: .4 }, { transform: "none", color: "rgba(28,19,15,.5)" }], { duration: 460, delay: t + 700 + k * 180, fill: "none" }));
+    t += 1700; t = press(dash.querySelector('[data-hc="lcd-go"]')!, t);
+    A(dash, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(-24px)" }], { duration: 300, delay: t + 40, fill: "forwards", easing: "cubic-bezier(.4,0,.6,1)" });
+    A(pick, [{ opacity: 0, transform: "translateX(24px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: t + 120, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
+    t += 200 + 700;
+    // the highlight steps down two rows, and Eleanor is tapped
+    rows.slice(0, 2).forEach((r, k) => A(r, [{ background: "rgba(42,58,82,0)" }, { background: "rgba(42,58,82,.08)", offset: .3 }, { background: "rgba(42,58,82,.08)", offset: .7 }, { background: "rgba(42,58,82,0)" }], { duration: 400, delay: t + k * 360, fill: "none" }));
+    t += 720;
+    A(ew, [{ background: "rgba(42,58,82,0)" }, { background: "rgba(42,58,82,.1)" }], { duration: 160, delay: t, fill: "both" });
+    t = press(ew, t + 180);
+    rows.filter((r) => r !== ew).forEach((r) => A(r, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: t, fill: "both" }));
+    A(pick.querySelector(".mk-lcq-h")!, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: t, fill: "both" });
+    // her row slides onto the card's agent row, by translation alone
+    const from = inCard(ew.querySelector<HTMLElement>(".mk-lc-disc")!), to = inCard(agentRow.querySelector<HTMLElement>(".mk-lc-disc")!);
+    A(ew, [{ transform: "none" }, { transform: `translate(${to.x - from.x}px,${to.y - from.y}px)` }], { duration: 560, delay: t + 200, fill: "forwards", easing: "cubic-bezier(.3,.7,.2,1)" });
+    t += 820;
+    // the real row is now underneath, identical, in one frame; the list fades off it
+    A(agentRow, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: t, fill: "both" });
+    A(pick, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: t + 20, fill: "forwards" });
+    // the manuscript block pops in empty, and its title types out with a rust caret
+    A(msBlock, [{ opacity: 0, transform: "translateY(14px) scale(.94)" }, { opacity: 1, transform: "scale(1.03)", offset: .65 }, { opacity: 1, transform: "none" }], { duration: 500, delay: t + 380, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
+    const word = HERO_PHONE_MS, T0 = t + 760;
+    later(() => { msTitle.textContent = ""; msTitle.classList.add("mk-typing"); }, t);
+    for (let i = 1; i <= word.length; i++) later(() => { msTitle.textContent = word.slice(0, i); }, T0 + i * 55);
+    later(() => msTitle.classList.remove("mk-typing"), T0 + word.length * 55 + 500);
+    return T0 + word.length * 55 + 350;
+  }
+
+  function playPhone() {
+    tilt = 0; scrolled = 0; ol.style.transform = "none"; tlv.classList.remove("mk-lc-tlv--scroll"); tlv.scrollTop = 0;
+    pill.style.background = AGENT.pill; pill.innerHTML = PILL.queried;
+    ftT.textContent = "Reply expected by 9 May"; ftA.textContent = "Record a response"; ftL.classList.remove("mk-late"); psd.classList.remove("mk-late");
+    A(pf, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" });
+    let t = 700 + LEAD;
+    t0 = performance.now();
+    // S3: until the query is logged the band is neutral and nobody's turn, and the pill is hidden
+    [agentRow, msBlock, cardTabs].forEach((el) => el && A(el, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" }));
+    band.style.background = "#efe9df"; band.style.color = "#6b6257"; bandT.textContent = PHONE_LOGGING;
+    A(pill, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" });
+    build(); show(32);
+    t = openOnCard(t);
+    knots = [[t, 32]];
+    court(AGENT, t + 120); stamp(pill, t + 300, -2, "both");
+    if (cardTabs) A(cardTabs, [{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: t + 200, fill: "both" });
+    t += 380;
+    // Day 36 — she asks for the partial: your move
+    reveal(parts[1].st, t);
+    t = climb(waits[1]!, 32, 36, t + 300);
+    court(YOU, t); setPill("preq", t); foot("Send the partial by 25 April", "Mark partial sent", true, t);
+    t = step(parts[1], t);
+    // Day 40 — the partial goes, and it matches what she asked for
+    reveal(parts[2].st, t + 300);
+    t = climb(waits[2]!, 36, 40, t + 500);
+    court(AGENT, t); setPill("psent", t); foot("Response expected by 3 June", "Record a response", false, t);
+    t = step(parts[2], t);
+    // the long wait — past the date she gave
+    t = climb(slotWait, 40, 86, t + 600);
+    court(YOU, t); later(() => psd.classList.add("mk-late"), t); foot("Response expected by 3 June", "Record a response", true, t);
+    A(psd, [{ transform: "scale(1)" }, { transform: "scale(1.25)", offset: .4 }, { transform: "scale(1)" }], { duration: 500, delay: t, fill: "none" });
+    t = stamp(pn, t + 200, -1.2);
+    A(pnIcon, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: t });
+    A(pnIcon, [{ transform: "rotate(0)" }, { transform: "rotate(-20deg)" }, { transform: "rotate(16deg)" }, { transform: "rotate(-8deg)" }, { transform: "rotate(0)" }], { duration: 700, delay: t + 60, fill: "none", easing: "ease-in-out" });
+    t = type(pnText, t + 200);
+    t = stamp(pnBtn, t + 300, 1.5);
+    // the writer presses Nudge, and the form opens
+    t = press(pnBtn, t + 600);
+    A(form, [{ opacity: 0, transform: "translateY(48px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 460, delay: t + 60, fill: "forwards", easing: BOUNCE });
+    t += 550;
+    t = select(fToday, t);
+    t = select(f2w, t + 350);
+    t = type(noteText, t + 300, 24);
+    t = press(fSave, t + 450);
+    knots.push([t, 92]);   // saved on Day 92, 14 Jun
+    A(form, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(30px) scale(.98)" }], { duration: 300, delay: t + 80, fill: "forwards" });
+    t += 420;
+    // the nudge is logged; it's back with the agent
+    A(pn, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.94)" }], { duration: 260, delay: t, fill: "forwards" });
+    reveal(parts[3].st, t);
+    court(AGENT, t); later(() => psd.classList.remove("mk-late"), t); foot("Reminder on 28 June", "Record a response", false, t);
+    t = step(parts[3], t + 400);
+    // Day 99 — she wants the full
+    reveal(parts[4].st, t + 300);
+    t = climb(waits[4]!, 92, 99, t + 600);
+    court(YOU, t); setPill("freq", t); foot("Send the full by 5 July", "Mark full sent", true, t);
+    t = step(parts[4], t);
+    t = stamp(pf, t + 500, -1.2);
+    A(pfIcon, [{ opacity: 0, transform: "scale(0) rotate(-90deg)" }, { opacity: 1, transform: "scale(1.3) rotate(10deg)", offset: .7 }, { opacity: 1, transform: "none" }], { duration: 520, delay: t, easing: BOUNCE });
+    t = type(pfText, t + 300);
+    t = stamp(pfBtn, t + 400, 1.5);
+    A(pfIcon, [{ transform: "scale(1) rotate(0)" }, { transform: "scale(1.35) rotate(25deg)" }, { transform: "scale(1) rotate(0)" }], { duration: 700, delay: t + 250, fill: "none", easing: "ease-in-out" });
+    /* The story is over: offer it again (never on its own — it does not loop). */
+    later(() => hooks.onEnd?.(), t + 900);
+    later(() => hooks.onGrow?.(), t + 1500);
+    prepClock(); raf = requestAnimationFrame(runClock);
+    later(scrollable, t + 900);
+  }
+  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; if (hooks.phone) playPhone(); else play(); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
   function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); }
@@ -359,10 +564,10 @@ function enter(root: HTMLElement, host: HTMLElement | null) {
 }
 
 /** The manuscript block: "The Salt Road" on the desk, "Your novel" beside a book tile on a phone. */
-const Ms: React.FC<{ phone: boolean; chips: readonly string[] }> = ({ phone, chips }) => phone ? (
-  <div className="mk-lc-ms">
+const Ms: React.FC<{ phone: boolean; chips: readonly string[]; front?: boolean }> = ({ phone, chips, front }) => phone ? (
+  <div className="mk-lc-ms" data-hc={front ? "ms" : undefined}>
     <small aria-hidden="true"><BookIcon /></small>
-    <b>{HERO_PHONE_MS}</b>
+    <b data-hc={front ? "ms-title" : undefined}>{HERO_PHONE_MS}</b>
     <div className="mk-lc-chips">{chips.map((x) => <span key={x}>{x}</span>)}</div>
   </div>
 ) : (
@@ -394,7 +599,7 @@ const BackCard: React.FC<{ c: typeof BACKS[number]; phone: boolean; t?: string }
   <div className={"mk-lc mk-lc--back " + c.cls} style={phone ? { left: 688, top: 14, transform: t } : { left: c.left, top: c.top, transform: c.t }}>
     <div className="mk-lc-in">
       <div className="mk-lc-band" style={{ background: c.band[0], color: c.band[1] }}><span>{c.word}</span><span>{c.day}</span></div>
-      <div className="mk-lc-agent"><span className="mk-lc-disc">{c.ini}</span><div><div className="mk-lc-nm">{c.name}</div><div className="mk-lc-ag">{c.agency}</div></div><span className="mk-lc-pill" style={{ background: c.pillBg }}>{RING}{c.pill}</span></div>
+      <div className="mk-lc-agent"><Disc phone={phone} ini={c.ini} /><div><div className="mk-lc-nm">{c.name}</div><div className="mk-lc-ag">{c.agency}</div></div><span className="mk-lc-pill" style={{ background: c.pillBg }}>{RING}{c.pill}</span></div>
       <Ms phone={phone} chips={c.chips} />
       <div className="mk-lc-tabs"><span>Tracking</span><span>Agent</span><span>Materials</span></div>
       {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className={"mk-lc-line" + (i % 2 ? " mk-lc-line--s" : "")} />)}
@@ -423,18 +628,22 @@ const NudgeForm: React.FC = () => (
 /** The living card. The nudge form rides inside it on the desk only. */
 const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
     <div className="mk-lc" data-hc="front">
+      {/* v2: the card opens on the dashboard and logs the query on itself. Overlays, all at rest
+          invisible, so without script the card is still the story's end state. */}
+      {phone && <PhoneDash />}
+      {phone && <PhonePick />}
       <div className="mk-lc-in">
         <div className="mk-lc-band" data-hc="band" style={{ background: YOU.bg, color: YOU.fg }}>
           <span data-hc="bandt">With you</span>
           <span className="mk-lc-day" data-hc="day" data-n="99">Day 99</span>
         </div>
-        <div className="mk-lc-agent">
-          <span className="mk-lc-disc">EW</span>
+        <div className="mk-lc-agent" data-hc="agent">
+          <Disc phone={phone} ini="EW" />
           <div><div className="mk-lc-nm">Eleanor Whitfield</div><div className="mk-lc-ag">Greenfield Literary</div></div>
           <span className="mk-lc-pill" data-hc="pill" style={{ background: YOU.pill }} dangerouslySetInnerHTML={{ __html: PILL.freq }} />
         </div>
-        <Ms phone={phone} chips={phone ? HERO_PHONE_TAGS : ["ADULT", "LITERARY FICTION", "94,000 WORDS"]} />
-        <div className="mk-lc-tabs"><span>Tracking</span><span>Agent</span><span>Materials</span></div>
+        <Ms phone={phone} front chips={phone ? HERO_PHONE_TAGS : ["ADULT", "LITERARY FICTION", "94,000 WORDS"]} />
+        <div className="mk-lc-tabs" data-hc="tabs"><span>Tracking</span><span>Agent</span><span>Materials</span></div>
         <div className="mk-lc-tlv mk-lc-tlv--scroll" data-hc="tlv">
           <ol className="mk-lc-steps" data-hc="steps">
             <i className="mk-lc-rail" aria-hidden="true" />
