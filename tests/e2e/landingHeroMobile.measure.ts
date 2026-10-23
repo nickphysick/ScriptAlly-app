@@ -2,8 +2,8 @@
  * The landing hero on phones (23 Oct, ref design-refs/landing-hero-mobile-v1.html) — the rendered locks.
  *
  *   HM1  fit: at 390 × 844, 375 × 667 and 430 × 932 the front card and all four behind it are inside the
- *        viewport horizontally, and the front card ends no more than 12px below the drawer's resting top
- *        — EXCEPT where the .56 floor binds, where the scale must be exactly the floor (see the case)
+ *        viewport horizontally, the front card ends no more than 12px below the drawer's resting top, and
+ *        its last panel (where the story ends) is wholly above the drawer — on all three screens
  *   HM2  drawer: scrolling the drawer's travel brings the sheet's top to the header's foot with a 0px
  *        radius, and the hero is still in the DOM, sticky, behind it
  *   HM3  sign-up: with the story run to its end and no scroll, the sign-up shows and is a FoundingSignup
@@ -12,6 +12,8 @@
  *   HM5  copy: "No more winging it." is on the rendered page exactly once, at 390 and at 1440
  *   HM6  reduced motion (phones): the static end state, the drawer grown, nothing animating, no fly-past
  *   HM7  phones draw no cast shadow; the fly-past is the versioned file, flown once along its curve
+ *   HM8  with the drawer grown, the card's last panel is still above it — at 390 × 844 (where the
+ *        card's grown scale is the ref's .86 exactly) and on a short 375 × 667 phone
  *
  * The public page needs no sign-in, so this file opens it itself. Run without the setup project:
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test landingHeroMobile --project measure --no-deps
@@ -81,14 +83,14 @@ const shot = async (page: Page, name: string) => {
 test.describe("landing hero on phones", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  /* ⚠️ THE 12px CLAUSE AND THE .56 FLOOR CANNOT BOTH HOLD ON A 667px SCREEN, AND THE CASE SAYS SO. The
-     front card is ~690 frame units tall; at the .56 floor that is 386px, and the drawer's resting top on
-     a 667 screen is 357px below the header — so even a card touching the header ends ~29px past it. The
-     floor is a baked decision; the case asserts the 12px rule where it can hold and, where the floor
-     binds, that the scale IS the floor (so a fit that gave up early still fails), reporting the overlap. */
-  test("HM1 fit: every card inside the width; the front card ends at the drawer (or the floor binds)", async ({ page }) => {
+  /* ⚠️ THE FLOOR IS .45 (Nick, 23 Oct), SO THE 12px RULE NOW HOLDS ON A 667px SCREEN TOO, AND THE CASE
+     ASSERTS IT THERE RATHER THAN EXCUSING IT. Under the brief's .56 the front card ended 57px under the
+     drawer at 375 × 667 and its last panel was hidden; this case is red against that build. It also
+     reads the last panel itself, because "the card ends at the drawer" is a proxy for the claim that
+     matters — the panel the story ends on can be seen. */
+  test("HM1 fit: every card inside the width; the front card ends at the drawer; its last panel above it", async ({ page }) => {
     const seen: string[] = [];
-    let held = 0, floored = 0;
+    let held = 0;
     for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }, { width: 430, height: 932 }]) {
       await open(page, vp);
       await page.waitForTimeout(2600); // the deal is over by 1.81s
@@ -96,25 +98,26 @@ test.describe("landing hero on phones", () => {
         const cards = [...document.querySelectorAll(".mk-hc-pile--phone .mk-lc")].map((e) => e.getBoundingClientRect());
         const front = document.querySelector('[data-hc="front"]')!.getBoundingClientRect();
         const sheet = document.querySelector(".mk-hp-sheet")!.getBoundingClientRect();
+        const panel = document.querySelector('[data-hc="slot"]')!.getBoundingClientRect();
         return {
           n: cards.length, vw: document.documentElement.clientWidth,
           left: Math.min(...cards.map((c) => c.left)), right: Math.max(...cards.map((c) => c.right)),
-          below: front.bottom - sheet.top, scale: Number((document.querySelector(".mk-hc-pile") as HTMLElement).dataset.scale),
+          below: front.bottom - sheet.top, panelBelow: panel.bottom - sheet.top, scale: Number((document.querySelector(".mk-hc-pile") as HTMLElement).dataset.scale),
         };
       });
-      seen.push(`${vp.width}x${vp.height}: scale ${r.scale} below ${r.below.toFixed(1)}`);
+      seen.push(`${vp.width}x${vp.height}: scale ${r.scale} below ${r.below.toFixed(1)} panel ${r.panelBelow.toFixed(1)}`);
       console.log(`HM1 @${vp.width}x${vp.height}`, JSON.stringify(r));
       expect(r.n, "population: the front card and four behind it").toBe(5);
       expect(r.left, `@${vp.width}: nothing cut off on the left`).toBeGreaterThanOrEqual(0);
       expect(r.right, `@${vp.width}: nothing cut off on the right`).toBeLessThanOrEqual(r.vw);
-      if (r.below > 12) floored++; else held++;
-      if (r.below > 12) expect(r.scale, `@${vp.width}x${vp.height}: past the drawer by ${r.below.toFixed(1)}px, so the floor must be what binds`).toBe(0.56);
-      else expect(r.below).toBeLessThanOrEqual(12);
+      if (r.below <= 12) held++;
+      expect(r.below, `@${vp.width}x${vp.height}: the front card ends at the drawer`).toBeLessThanOrEqual(12);
+      expect(r.panelBelow, `@${vp.width}x${vp.height}: the last panel is above the drawer`).toBeLessThanOrEqual(0);
+      expect(r.scale, `@${vp.width}x${vp.height}: never below the .45 floor`).toBeGreaterThanOrEqual(0.45);
       await shot(page, `hm1-${vp.width}x${vp.height}`);
     }
-    console.log("HM1", seen.join(" · "), `· held ${held} · floored ${floored}`);
-    /* The branch tally: the 12px rule was exercised, not only the floor. */
-    expect(held, "the 12px rule held on at least one screen").toBeGreaterThan(0);
+    console.log("HM1", seen.join(" · "), `· held ${held}`);
+    expect(held, "population: all three screens measured and held").toBe(3);
   });
 
   test("HM2 drawer: the travel brings the sheet to the header, square, over a sticky hero", async ({ page }) => {
@@ -262,5 +265,33 @@ test.describe("landing hero on phones", () => {
     expect(r.path).toContain("M -170 600");
     expect(r.anims, "one pass").toBe(1);
     expect(r.timing).toMatchObject({ duration: 1000, delay: 1500, easing: "linear", iterations: 1 });
+  });
+
+  /* ⚠️ THE REF EASES THE CARD TO .86 "SO ITS FINAL PANEL STAYS VISIBLE", AND THIS CASE HOLDS THE REASON.
+     On a short phone .86 left the grown drawer over the panel (95px at the .56 floor, 60 at .45), so the
+     grown scale is derived from the panel; on the ref's own screen it must still come out at .86.
+     Read under reduced motion, which arrives grown with nothing moving. */
+  test("HM8 grown: the last panel stays above the drawer, and 390 keeps the ref's .86", async ({ page }) => {
+    const seen: string[] = [];
+    for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }]) {
+      await open(page, vp, { reduce: true });
+      await page.waitForTimeout(500);
+      const r = await page.evaluate(() => {
+        const sheet = document.querySelector(".mk-hp-sheet")!;
+        const panel = document.querySelector('[data-hc="slot"]')!.getBoundingClientRect();
+        return {
+          grown: sheet.classList.contains("mk-hp-sheet--grown"),
+          panelBelow: panel.bottom - sheet.getBoundingClientRect().top,
+          k: (document.querySelector(".mk-hp-hero") as HTMLElement).style.transform,
+        };
+      });
+      seen.push(`${vp.width}x${vp.height}: ${r.k} panel ${r.panelBelow.toFixed(1)}`);
+      console.log(`HM8 @${vp.width}x${vp.height}`, JSON.stringify(r));
+      expect(r.grown, "population: the drawer is grown").toBe(true);
+      expect(r.panelBelow, `@${vp.width}x${vp.height}: the last panel is above the grown drawer`).toBeLessThanOrEqual(0);
+      if (vp.width === 390) expect(r.k, "on the ref's screen the grown scale is the ref's").toBe("scale(0.86)");
+      await shot(page, `hm8-${vp.width}x${vp.height}`);
+    }
+    console.log("HM8", seen.join(" · "));
   });
 });

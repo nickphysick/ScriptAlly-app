@@ -29,8 +29,13 @@ export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c003
 
 /* The ref's numbers. */
 const REST = 250, GROWN = 378;          // the drawer's resting and grown heights
-const S_MAX = .68, S_MIN = .56, TOP = 40, TOP_MIN = 24, GUTTER = 16, OVERLAP = 12;
+const S_MAX = .68, S_MIN = .45, TOP = 40, TOP_MIN = 24, GUTTER = 16, OVERLAP = 12;
+/* The fit aims 1px inside the 12px allowance: aimed AT it, sub-pixel rounding decides the lock (measured 12.000008). */
+const OVERLAP_FIT = OVERLAP - 1;
 const K_REST = 1, K_GROWN = .86, K_SCROLLED = .06;
+/* The gap kept between the last panel and the grown drawer's top. The ref's own .86 leaves just
+   under 3px at 390 × 844 (measured 2.9–3.2), so 2 keeps the derived scale at exactly .86 there. */
+const PANEL_CLEAR = 2;
 
 const reduceMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -38,11 +43,12 @@ const reduceMotion = () =>
 /**
  * The pile's scale and top: the ref's .68 and 40px at 390 × 844, smaller where the screen is
  * narrower or shorter — so the front card and all four behind it fit the width inside 16px gutters,
- * and the front card ends at the drawer's resting top (12px of overlap allowed) — but never below .56.
- * ⚠️ WHERE THE .56 FLOOR BINDS (a short phone: 375 × 667 measured 73px of card under the drawer)
- * THE PILE RISES, its top coming in from 40 toward 24 — the least that still shows the back cards
- * peeking below the header — so the card's last panel, where the story ends, stays above the drawer.
- * Even at 24 a 667px screen cannot meet the 12px rule at .56; that is the floor's price, and stated.
+ * and the front card ends at the drawer's resting top (12px of overlap allowed) — but never below .45.
+ * ⚠️ THE FLOOR IS .45, LOWERED FROM THE BRIEF'S .56 (Nick, 23 Oct). At .56 a 375 × 667 phone put the
+ * front card 57px under the drawer and hid its last panel — the panel the story ends on. At .45 the
+ * fit itself decides that screen (≈.48) and the card ends at the drawer. Should a screen ever be short
+ * enough for the floor to bind again, the pile rises, its top coming in from 40 toward 24 (the least
+ * that still shows the back cards peeking below the header), to keep as much of the card in view.
  * The widths are worked from each card's own transform (the ref's numbers), never from a measured
  * rect: the entrance deals the cards in from 720px off to the right, so a rect read now would be
  * the animation's, not the layout's.
@@ -53,9 +59,13 @@ export function phonePileFit(screenW: number, stageH: number, front: { w: number
   let reach = half(front.w, front.h, PHONE_FRONT_ROTATE, 1);
   for (const b of PHONE_BACKS) reach = Math.max(reach, Math.abs(b.tx) + half(front.w, backH, b.r, b.s));
   const sW = (screenW / 2 - GUTTER) / reach;
-  const sH = (stageH - REST + OVERLAP - TOP) / front.h;
+  /* The front card's bottom as drawn: its top is placed at TOP, and its .8° turn carries the lower
+     corner a little further down than its height alone — measured 1.6px at .48, enough to break 12. */
+  const r = rad(PHONE_FRONT_ROTATE);
+  const drawnH = front.h / 2 + front.h / 2 * Math.cos(r) + front.w / 2 * Math.sin(r);
+  const sH = (stageH - REST + OVERLAP_FIT - TOP) / drawnH;
   const s = Math.max(S_MIN, Math.min(S_MAX, sW, sH));
-  const short = Math.max(0, TOP + front.h * s - (stageH - REST + OVERLAP));
+  const short = Math.max(0, TOP + drawnH * s - (stageH - REST + OVERLAP_FIT));
   return { s, top: Math.max(TOP_MIN, TOP - short) };
 }
 
@@ -86,7 +96,7 @@ export const HeroPhone: React.FC<{
   const wrap = useRef<HTMLDivElement>(null);
   /* The drawer's state lives in refs and classes, never React state: the sheet holds the whole rest
      of the page, and the card above must never re-render. */
-  const st = useRef({ grown: false, k: K_REST, run: 0, stageH: 0 });
+  const st = useRef({ grown: false, k: K_REST, kGrown: K_GROWN, run: 0, stageH: 0 });
 
   const parts = () => {
     const el = wrap.current;
@@ -123,6 +133,23 @@ export const HeroPhone: React.FC<{
     const cx = p0.front.offsetLeft + f.w / 2;
     p0.pile.style.transform = `translate(${p0.stage.clientWidth / 2 - cx * S}px,${top - p0.front.offsetTop * S}px) scale(${S})`;
     p0.pile.dataset.scale = S.toFixed(3);
+    /* ⚠️ THE GROWN SCALE IS THE REF'S REASON, NOT ITS NUMBER. The ref eases the card to .86 "so its
+       final panel stays visible; only its footer is covered" — true at 390 × 844 and false on a short
+       phone, where the grown drawer covered the panel by 60px. So the grown scale is the smaller of
+       .86 and the scale that keeps the panel PANEL_CLEAR above the grown drawer. At 390 × 844 that is
+       .86 exactly; at 375 × 667 it is smaller. The panel's place is worked from offsets (the deal
+       has the card 760px off to the right at this moment, so a rect would be the animation's), plus
+       the corner the .8° turn carries down. The card scales about the stage's top (origin 50% 0). */
+    const slot = p0.front.querySelector<HTMLElement>('[data-hc="slot"]');
+    if (slot) {
+      let y = slot.offsetHeight;
+      for (let n: HTMLElement | null = slot; n && n !== p0.front; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+      const turn = f.w / 2 * Math.sin(PHONE_FRONT_ROTATE * Math.PI / 180);
+      const panelBottom = top + S * (y + turn);
+      s.kGrown = Math.min(K_GROWN, (s.stageH - GROWN - PANEL_CLEAR) / panelBottom);
+      p0.pile.dataset.kGrown = s.kGrown.toFixed(3);
+      if (s.grown) s.k = s.kGrown;
+    }
     s.run = s.stageH - (s.grown ? GROWN : REST);
     onScroll();
   }, [onScroll]);
@@ -138,7 +165,7 @@ export const HeroPhone: React.FC<{
       p0.hero.style.transition = "transform .8s cubic-bezier(.2,.8,.2,1)";
       window.setTimeout(() => { p0.hero.style.transition = ""; }, 900);
     }
-    s.k = K_GROWN;
+    s.k = s.kGrown;
     s.run = s.stageH - GROWN;
     onScroll();
   }, [onScroll]);
