@@ -186,3 +186,8 @@ with that version chosen, and point Versions' Change and Add to a package at it.
   - **M-E1b**, Versions dropping the version: the URL check fails, `version=` empty.
 - **Gates:** tsc clean; build with no warnings; Vitest at baseline (the three `functions/` reds). VER1 23 of 23 and
   `pk4` 39 of 39 on this build.
+- **Integration:** dev served `index-Cp8ra_2G.js` from `dev/ver1-nbab` at 337befa8, which already carried Versions v1
+  and the navy bar / address book work. This branch was merged into **`dev/ver1-nbab-pkglink`** (6cce282c), and the
+  gates, VER1 (23) and `pk4` (39) were re-run there and passed. Deployed from a clean checkout after re-checking the
+  served hash: **dev now serves `index-BP7RZ5a2.js`**. VER1 23 of 23 on the deployed site, with the fixture unchanged.
+  Not merged to `main`; prod untouched; no rules or functions changed.
