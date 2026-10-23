@@ -128,3 +128,52 @@ Differences, and what was done:
   - That branch is the previous served branch, `dev/ver1-nbab-pkglink-hm1` (verified to build to the served `index-BgvCz4eN.js`), plus `versions-v2`.
 - Dev Firestore rules deployed (`updateTime` 2026-10-23T11:50:44Z).
 - **Prod untouched** (hosting, rules and functions).
+
+## 7. v2.1 — Tracking & performance "warming up" (23 Oct; ref `design-refs/versions-v2-1`, S30)
+
+Once a book has a live version, the section stays on the page. If fewer than two live versions have each gone out with 5 queries, the band shows its divider and the warming-up panel instead of the carousel, league table and summary. Compare appears only with the full section.
+
+### 7.1 False premises
+- **The spec file is `tests/e2e/versionsV2.measure.ts`**, not `e2e/versions-v2.spec.ts`. W1–W4 are in that file, beside S01–S29.
+- **The pack arrived in `~/Downloads`**, not the repo root. It was copied to `design-refs/versions-v2-1/` and hash-checked (`053072a9`).
+- **v2 did not hide the section on "fewer than 2 ready".** It hid it on fewer than 2 *sent* versions (any query at all): `V2Tracking.tsx:51` at `053072a9` (`if (sent.length < 2) return null`). Compare used the same test (`VersionsV2Page.tsx:79,260`). So a book with two versions out once each showed the full section, with every rate reading "too early". v2.1 replaces both conditions with one: `trackingState` (`lib/versionsV2.ts`).
+- **W2 does not drive the Log-a-query journey.** It writes the same query and activity documents `addQuery` writes (`ver2Fixture.mjs --warm-log n`), while the page stays open with a window mark set. Driving the drawer five times would have tested the drawer rather than B4. B4 works because the section is derived from the live snapshot, and the mark surviving proves no reload happened.
+- **The CSS was hand-ported, not regenerated.** The v2 extractor only reads the v2 ref, and the v41 rules are a self-contained block. So the `.wt*` rules were copied into `versionsV2.app.css`, scoped to `.vv2`. The `@container sheet (max-width:1200px)` block was written by hand because the extractor's parser misses `@container`.
+- **W4 cannot be shown red first.** The empty state already hid the band in v2. It is a guard, and it was green on dev before the change.
+- **The panel title rendered in Playfair**, not the typewriter face. brand.tsx forces every `h3` with `!important`. One claw-back rule fixes it (`.vv2.vv2 .wt-tx h3`), and W1 now asserts the face.
+
+### 7.2 Recon
+- The threshold is `MIN_SENT_FOR_RATE = 5` (`lib/versionsV2.ts:29`). The panel reads it, so there is still only one "5".
+- "Sent" is `VersionFacts.n`, which already excludes withdrawn queries (`counts`, `:132`). Archived versions are not in `m.live`.
+- Pace counts this manuscript's queries dated in the last 30 London days: withdrawn excluded, with any version or none. The day comes from `Intl` en-CA in `Europe/London`.
+- **B5 (Free):** the lock is unchanged. As in v2, a Free page draws everything beneath the lock, inert (`VersionsV2Page.tsx:295,315`). So what sits under the lock now follows the same three states, and a Free book with only one ready version shows the warming panel there, inert, rather than nothing.
+
+### 7.3 Commits and red proofs
+- `053072a9`: the pack.
+- `47acf2c4`, phase 1: `trackingState`, `warmOrder`, `warmNeed`, `warmPace`, `warmWeeks`, `V2Warming`, the state branch in `V2Tracking`, Compare on "full", the ported CSS and the smoke update.
+  - `versionsV21.test.ts` has 11 cases. Each was turned red by a named mutation (`scratchpad/mut/p21.py`) before being trusted.
+  - The tie-order case passed under its own mutation at first: a stable sort hid it. The fixture was reordered so that only the tie-break can pass, then proved red.
+- Phase 2: W1–W4, the fixture (two new books, High Water and Low Water), the S30 shots and this section.
+  - W1, W2 and W3 were red on dev's build before the change (`index-OojVGv_5.js`). W4 was green, as a guard (see 7.1).
+
+### 7.4 Gates against baseline
+| | Baseline (before editing) | After |
+|---|---|---|
+| tsc | clean | clean |
+| `vite build` (whole log grepped) | no errors or warnings | no errors or warnings |
+| vitest | 650 files · 9,998 passed · 3 skipped | 651 files · 10,010 passed · 3 skipped |
+| VER2 on dev (`index-OojVGv_5.js`, S cases) → after (`index-DIv_ZsAq.js`, S + W) | 24 + setup green; W1–W3 red | 33 of 33 green (S01–S29 and W1–W4 at both widths, plus setup) |
+| VER2 locally (127.0.0.1:4614) | — | 33 of 33 green |
+
+### 7.5 Screenshots (`reports/versions-v2-1/`, beside S30)
+- **1512:** three columns: the illustration slot, the copy with the ETA box, and the progress panel. Then the "What you'll see here" row with three EXAMPLE tiles. Copy, eyebrow, typewriter title and progress rows match S30.
+- **1280:** the progress panel wraps under the copy, as in S30.
+- **Differences:**
+  - **Rows:** the fixture has two live versions, so two rows. S30 draws five, two of them "Not sent yet".
+  - **Width:** the app's sheet is about 8px narrower than the ref's frame, so at 1512 the title wraps one word earlier.
+  - **Not in the app:** the ref's demo state switcher ("Early days · Querying, no versions …") is part of the mock.
+
+### 7.6 Dev
+- **Deployed to dev 23 Oct (hosting only)** from a clean checkout of the pushed `dev/ver1-nbab-pkglink-hm1-ver21` (`40100845`, which is v2's integration branch with `versions-v2` merged in). Served before: `index-OojVGv_5.js`. Served after: **`index-DIv_ZsAq.js`**.
+- Gates on the merged tip: tsc clean, vitest 652 files · 10,025 passed · 3 skipped, `build:dev` with no warnings.
+- **Prod is untouched.** No prod deploy, no rules change and no data-model change.
