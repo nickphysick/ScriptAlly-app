@@ -24,7 +24,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
-import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_DASH, PHONE_PICK, PHONE_LOGGING } from "./landingCopy";
+import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_DASH, PHONE_PICK, PHONE_LOGGING, PHONE_FORM } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
@@ -126,6 +126,39 @@ const PhonePick: React.FC = () => (
     </div>
   </div>
 );
+
+const Tick = () => <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3.5 8.4 6.6 11.4 12.5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+
+/**
+ * The sample control (the ref's `.smp`): "First [n] [Pages | Chapters | Words]" with a sliding navy
+ * thumb. `small` is the response form's size (`.sm2`), which has no stepper. The thumb's place is
+ * written by the story from the chosen option's own box, so it fits whatever the labels measure.
+ */
+const Sample: React.FC<{ id: string; n: string; small?: boolean }> = ({ id, n, small }) => (
+  <div className={"mk-smp" + (small ? " mk-smp--small" : "")} data-hc={id}>
+    <span className="mk-smp-f">{PHONE_FORM.first}</span>
+    <span className="mk-smp-n" data-hc={id + "-n"}>{n}</span>
+    {!small && <b className="mk-smp-pm" data-hc={id + "-plus"}>+</b>}
+    <div className="mk-seg" data-hc={id + "-seg"}><i />{PHONE_FORM.units.map((u, k) => <span key={u} data-u={u.toLowerCase()} className={k === 0 ? "mk-on" : undefined}>{u}</span>)}</div>
+  </div>
+);
+
+/** S5 — the quick query form the rest of the front card becomes (the ref's `.lcf`). */
+const PhoneForm: React.FC = () => {
+  const F = PHONE_FORM;
+  return (
+    <div className="mk-lcf" data-hc="lcf">
+      <span className="mk-lcq-l">{F.sentBy}</span>
+      <div className="mk-lcq-row">{F.via.map((v, k) => <span key={v} className="mk-lcq-ch" data-hc={k === 0 ? "lcf-email" : undefined}>{v}</span>)}</div>
+      <span className="mk-lcq-l">{F.materials}</span>
+      <div className="mk-lcq-row">{F.items.map((v, k) => <span key={v} className="mk-lcq-ch mk-lcf-m" data-hc={"lcf-m" + k}><Tick />{v}</span>)}</div>
+      <Sample id="smp" n="10" />
+      <span className="mk-lcq-l">{F.sent}</span>
+      <div className="mk-lcq-row">{F.when.map((v, k) => <span key={v} className="mk-lcq-ch" data-hc={k === 0 ? "lcf-today" : undefined}>{v}</span>)}</div>
+      <b className="mk-lcq-go" data-hc="lcf-go">{F.go}</b>
+    </div>
+  );
+};
 
 /* ── the four cards behind, positions and angles from the ref ── */
 const BACKS = [
@@ -290,7 +323,8 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     // the dots wait on the next line; the clock reaches this event's day as the dots clear
     /* ⚠️ 110ms A DAY, CAPPED AT 2.8s (D1, 23 Oct) — the long wait after "Partial sent" used to run
        240ms a day to a 12s ceiling, which was a held breath nobody waited out. Both layouts. */
-    const n = to - from, dur = Math.max(900, Math.min(2800, n * 110));
+    /* P1 (v2): the phone's clock runs faster still — 55ms a day between 0.7s and 1.8s. */
+    const n = to - from, dur = hooks.phone ? Math.max(700, Math.min(1800, n * 55)) : Math.max(900, Math.min(2800, n * 110));
     A(w, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: t, fill: "forwards" });
     A(w, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: t + dur, fill: "forwards" });
     knots.push([t + dur, to]);
@@ -446,6 +480,60 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     return T0 + word.length * 55 + 350;
   }
 
+  /* The sample control. `seg` moves the thumb to a unit and changes the number with it; `segReset`
+     puts it back on Pages without the slide (the thumb's transition is lifted for the one write). */
+  const q = (k: string) => root.querySelector<HTMLElement>(`[data-hc="${k}"]`);
+  function seg(id: string, unit: string, val: string, t: number) {
+    const sg = q(id + "-seg"), n = q(id + "-n"); if (!sg || !n) return t + 420;
+    const opt = sg.querySelector<HTMLElement>(`[data-u="${unit}"]`)!;
+    press(opt, t);
+    later(() => {
+      sg.querySelectorAll("span").forEach((x) => x.classList.toggle("mk-on", x === opt));
+      const th = sg.querySelector<HTMLElement>("i")!; th.style.left = opt.offsetLeft + "px"; th.style.width = opt.offsetWidth + "px";
+    }, t + 60);
+    A(n, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }], { duration: 120, delay: t + 60, fill: "none" });
+    later(() => { n.textContent = val; }, t + 180);
+    A(n, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 180, delay: t + 180, fill: "none" });
+    return t + 420;
+  }
+  function segReset(id: string, val: string) {
+    const sg = q(id + "-seg"), n = q(id + "-n"); if (!sg || !n) return;
+    const opt = sg.querySelector<HTMLElement>('[data-u="pages"]')!;
+    sg.querySelectorAll("span").forEach((x) => x.classList.toggle("mk-on", x === opt));
+    const th = sg.querySelector<HTMLElement>("i")!;
+    th.style.transition = "none"; th.style.left = opt.offsetLeft + "px"; th.style.width = opt.offsetWidth + "px"; void th.offsetWidth; th.style.transition = "";
+    n.textContent = val;
+  }
+
+  /**
+   * S5 — the rest of the card becomes a quick query form: Sent by Email; Letter v3, Synopsis and
+   * Sample ticked in turn; the sample to Chapters, Words and back to Pages, then "+" five times to 15;
+   * Today; "Log query". Returns the moment "Log query" has been pressed.
+   */
+  function logOnCard(u: number) {
+    const f = q("lcf"); if (!f || !msBlock) return u;
+    /* The thumb is placed under Pages before the form is seen (the ref does it on load). */
+    later(() => { f.style.top = (msBlock.offsetTop + msBlock.offsetHeight + 12) + "px"; segReset("smp", "10"); }, u - 20);
+    A(f, [{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: u, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
+    u += 500; u = select(q("lcf-email")!, u);
+    later(() => segReset("smp", "10"), u - 30);
+    u = select(q("lcf-m0")!, u + 280); u = select(q("lcf-m1")!, u + 200); u = select(q("lcf-m2")!, u + 200);
+    A(q("smp")!, [{ opacity: .35 }, { opacity: 1 }], { duration: 260, delay: u, fill: "both" });
+    u = seg("smp", "chapters", "3", u + 350); u = seg("smp", "words", "2,500", u + 420); u = seg("smp", "pages", "10", u + 420);
+    u += 300;
+    const plus = q("smp-plus")!, num = q("smp-n")!;
+    for (let v = 11; v <= 15; v++) {
+      const vv = String(v);
+      press(plus, u); later(() => { num.textContent = vv; }, u + 90);
+      A(num, [{ transform: "scale(1)" }, { transform: "scale(1.12)", offset: .4 }, { transform: "scale(1)" }], { duration: 220, delay: u + 90, fill: "none" });
+      u += 230;
+    }
+    u = select(q("lcf-today")!, u + 300);
+    u = press(q("lcf-go")!, u + 420);
+    A(f, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-8px)" }], { duration: 260, delay: u + 40, fill: "forwards" });
+    return u;
+  }
+
   function playPhone() {
     tilt = 0; scrolled = 0; ol.style.transform = "none"; tlv.classList.remove("mk-lc-tlv--scroll"); tlv.scrollTop = 0;
     pill.style.background = AGENT.pill; pill.innerHTML = PILL.queried;
@@ -457,15 +545,19 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     [agentRow, msBlock, cardTabs].forEach((el) => el && A(el, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" }));
     band.style.background = "#efe9df"; band.style.color = "#6b6257"; bandT.textContent = PHONE_LOGGING;
     A(pill, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" });
-    build(); show(32);
-    t = openOnCard(t);
-    knots = [[t, 32]];
+    // the clock opens on Day 1 and holds there while the query is logged
+    build(); show(1); knots = [[t, 1]];
+    t = logOnCard(openOnCard(t));
+    // S3: "Log query" pressed — now it is with the agent, and the Queried pill stamps in
     court(AGENT, t + 120); stamp(pill, t + 300, -2, "both");
     if (cardTabs) A(cardTabs, [{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: t + 200, fill: "both" });
     t += 380;
+    // S6: Day 1 — the query goes out: its line types in, with the 15 pages the form logged
+    t = step(parts[0], t + 150);
+    knots.push([t + 700, 2]);
     // Day 36 — she asks for the partial: your move
-    reveal(parts[1].st, t);
-    t = climb(waits[1]!, 32, 36, t + 300);
+    reveal(parts[1].st, t + 600);
+    t = climb(waits[1]!, 2, 36, t + 800);
     court(YOU, t); setPill("preq", t); foot("Send the partial by 25 April", "Mark partial sent", true, t);
     t = step(parts[1], t);
     // Day 40 — the partial goes, and it matches what she asked for
@@ -631,6 +723,7 @@ const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
       {/* v2: the card opens on the dashboard and logs the query on itself. Overlays, all at rest
           invisible, so without script the card is still the story's end state. */}
       {phone && <PhoneDash />}
+      {phone && <PhoneForm />}
       {phone && <PhonePick />}
       <div className="mk-lc-in">
         <div className="mk-lc-band" data-hc="band" style={{ background: YOU.bg, color: YOU.fg }}>
@@ -650,7 +743,7 @@ const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
             <li className="mk-lc-step">
               <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /></svg>
               <span className="mk-lc-t">Query sent <i>by email</i></span><span className="mk-lc-d">14 MAR</span>
-              <span className="mk-lc-att"><span><DocIcon />Letter v3</span><span><SynIcon />Synopsis</span><span><PagesIcon />10 pages</span></span>
+              <span className="mk-lc-att"><span><DocIcon />Letter v3</span><span><SynIcon />Synopsis</span><span><PagesIcon />{phone ? "15 pages" : "10 pages"}</span></span>
             </li>
             <li className="mk-lc-step">
               <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" strokeDasharray="2.2 2.2" /><path d="M10 4.5a5.5 5.5 0 0 1 0 11z" fill="#1c130f" /></svg>
