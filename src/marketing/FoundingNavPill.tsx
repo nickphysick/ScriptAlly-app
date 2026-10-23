@@ -8,8 +8,9 @@
  * cap − claimed. With no count yet, or the store `down`, only the first line renders — no segments,
  * no number, no zero (the live-or-absent rule every founding counter keeps).
  *
- * The number counts up and the segments fill ONCE: ease-out over 1.4s, starting 0.6s after mount —
- * or the moment the count arrives, if that is later. Under reduced motion the final figures, at once.
+ * The number counts DOWN from the cap to the places left (v2 P4, the ref's `data-from`) and the
+ * segments fill, ONCE: ease-out over 1.4s, starting 0.6s after mount — or the moment the count
+ * arrives, if that is later. Under reduced motion the final figures, at once.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { useFounding, ensureCount } from "./foundingStore";
@@ -54,7 +55,7 @@ export const FoundingNavPill: React.FC<{ onGo: () => void }> = ({ onGo }) => {
             {Array.from({ length: SEGMENTS }, (_, k) => <b key={k} className={k < on ? "mk-on" : undefined} />)}
           </i>
           {/* The number a reader hears is the final one; the count-up is for the eye. */}
-          <em aria-hidden="true">{navPlacesLeft(Math.round(left * e))}</em>
+          <em aria-hidden="true">{navPlacesLeft(Math.round(cap + (left - cap) * e))}</em>
           <span className="mk-sr">{navPlacesLeft(left)}</span>
         </span>
       )}

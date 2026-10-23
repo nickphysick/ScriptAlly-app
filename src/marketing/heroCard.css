@@ -462,3 +462,34 @@
 .mk-smp--small .mk-seg i { top: 3px; bottom: 3px; }
 .mk-smp--small .mk-seg span { padding: 7px 10px 6px; font-size: 13px; }
 @media (prefers-reduced-motion: reduce) { .mk-seg i, .mk-seg span { transition: none; } }
+
+/* Each new line's pop: a highlighter behind its words (the ref's `.lc-t` wash). The tone is set per
+   line by the story; the push-and-highlight sets its own rust over it. */
+.mk-hc-pile--phone .mk-lc-t {
+  --mk-wash: rgba(162,69,42,.18);
+  display: inline-block; transform-origin: 0 60%;
+  background-image: linear-gradient(var(--mk-wash), var(--mk-wash)); background-repeat: no-repeat;
+  background-position: 0 88%; background-size: 0% 42%;
+}
+.mk-hp-hero { will-change: transform, translate, scale; }
+
+/* U1 — the status pill (`.up`, option 4): bottom right, just above the drawer. It may wrap to two
+   lines and is never wider than the screen less 14px each side. */
+.mk-up {
+  position: absolute; right: 14px; bottom: 270px; z-index: 22; box-sizing: border-box; max-width: calc(100% - 28px);
+  display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 14px 7px 10px;
+  background: #fff; border-radius: 18px; white-space: normal; pointer-events: none; opacity: 0;
+  box-shadow: 0 12px 24px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(28,19,15,.08);
+}
+.mk-up-i { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #f5e6df; color: #7c3a2a; }
+.mk-up--send .mk-up-i, .mk-up--bell .mk-up-i { background: #e2e6e0; color: #4d524a; }
+.mk-up-i svg { width: 12px; height: 12px; }
+.mk-up-t { display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 2px; column-gap: 6px; }
+.mk-up-t b { font: 600 13.5px/1 var(--mk-f-serif); color: #1c130f; }
+.mk-up-t span { font: 400 12px/1.25 var(--mk-f-serif); color: rgba(28,19,15,.62); }
+.mk-up-t span::before { content: "· "; }
+@media (prefers-reduced-motion: reduce) { .mk-up { display: none; } }
+
+/* U3 — the response form's due line. */
+.mk-lr-due { margin: 4px 0 0; font: 400 14px/1.3 var(--mk-f-serif); color: rgba(28,19,15,.65); }
+.mk-lr-due b { font-weight: 600; color: #7c3a2a; }

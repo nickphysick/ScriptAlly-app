@@ -24,7 +24,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
-import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_DASH, PHONE_PICK, PHONE_LOGGING, PHONE_FORM } from "./landingCopy";
+import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_DASH, PHONE_PICK, PHONE_LOGGING, PHONE_FORM, PHONE_RESPONSE, PHONE_PILLS } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
@@ -142,6 +142,31 @@ const Sample: React.FC<{ id: string; n: string; small?: boolean }> = ({ id, n, s
     <div className="mk-seg" data-hc={id + "-seg"}><i />{PHONE_FORM.units.map((u, k) => <span key={u} data-u={u.toLowerCase()} className={k === 0 ? "mk-on" : undefined}>{u}</span>)}</div>
   </div>
 );
+
+/**
+ * U3 — "Record a response · Eleanor replied" (the ref's `#lr`), docked above the drawer in the nudge
+ * form's style and place. Its "Which pages" is the sample control at the small size.
+ */
+const ResponseForm: React.FC = () => {
+  const R = PHONE_RESPONSE;
+  return (
+    <div className="mk-lf" data-hc="lr">
+      <div className="mk-lf-in">
+        <div className="mk-lf-h"><small>{R.kicker}</small><b>{R.title}</b><i>{R.meta}</i></div>
+        <div className="mk-lf-b">
+          <span className="mk-lf-l">{R.asked}</span>
+          <div className="mk-lf-row">{R.options.map((o, k) => <span key={o} className="mk-lf-ch" data-hc={k === 0 ? "lr-partial" : undefined}>{o}</span>)}</div>
+          <span className="mk-lf-l">{R.pages}</span>
+          <Sample id="smp2" n="50" small />
+          <span className="mk-lf-l">{R.received}</span>
+          <div className="mk-lf-row">{R.when.map((o, k) => <span key={o} className="mk-lf-ch" data-hc={k === 0 ? "lr-today" : undefined}>{o}</span>)}</div>
+          <p className="mk-lr-due">{R.due} <b data-hc="lr-due">—</b></p>
+        </div>
+        <div className="mk-lf-f"><b data-hc="lr-save">{R.save}</b><span>{R.cancel}</span></div>
+      </div>
+    </div>
+  );
+};
 
 /** S5 — the quick query form the rest of the front card becomes (the ref's `.lcf`). */
 const PhoneForm: React.FC = () => {
@@ -334,6 +359,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   function step(p: typeof parts[number], t: number) {
     A(p.g, [{ transform: "scale(0)" }, { transform: "scale(1.2)", offset: .7 }, { transform: "scale(1)" }], { duration: 300, delay: t, easing: BOUNCE });
     t = type(p.chars, t + 200);
+    if (hooks.phone) pop(p, t + 40);
     A(p.d, [{ opacity: 0, transform: "translateY(3px)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: t + 120 });
     t += 200;
     if (p.chips.length) { t += 380; p.chips.forEach((c) => { t = stamp(c, t); t += 160; }); }
@@ -534,6 +560,88 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     return u;
   }
 
+  /* ── v2's updates around the card: a pop on each new line, a status pill, a push-and-highlight ── */
+  const heroEl = root.querySelector<HTMLElement>(".mk-hp-hero");
+  const pileEl = root.querySelector<HTMLElement>(".mk-hc-pile");
+  /* The highlighter tone behind each line as it lands, in the steps' order (the ref's). */
+  const WASH = ["rgba(122,154,130,.28)", "rgba(201,120,100,.24)", "rgba(122,154,130,.28)", "rgba(122,154,130,.28)", "rgba(201,120,100,.24)"];
+  /** The newest line pops: a quick swell and a highlighter wash behind its words. */
+  function pop(p: typeof parts[number], t: number) {
+    A(p.t, [{ transform: "scale(1)" }, { transform: "scale(1.07)", offset: .35 }, { transform: "scale(1)" }], { duration: 520, delay: t, fill: "none", easing: "ease-out" });
+    A(p.t, [{ backgroundSize: "0% 42%" }, { backgroundSize: "100% 42%", offset: .35 }, { backgroundSize: "100% 42%", offset: .75 }, { backgroundSize: "100% 42%", opacity: 1 }], { duration: 1500, delay: t, fill: "none" });
+    p.t.style.setProperty("--mk-wash", WASH[parts.indexOf(p)]);
+  }
+  const UPI: Record<string, string> = {
+    send: '<path d="M2.5 8.3 13.5 3l-3.6 10.5-2.4-4.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.5 9.2 13.5 3" stroke="currentColor" stroke-width="1.5"/>',
+    todo: '<rect x="2.5" y="2.5" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.2 8.2 7.2 10.2 10.8 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+    bell: '<path d="M4.5 11V7.5a3.5 3.5 0 0 1 7 0V11l1 1.2h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.8 13.6a1.4 1.4 0 0 0 2.4 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+    pen: '<path d="M3 13l.7-2.8L10.5 3.4a1.4 1.4 0 0 1 2 2L5.8 12.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.5 4.5l2 2" stroke="currentColor" stroke-width="1.5"/>',
+  };
+  /**
+   * U1 — a status pill, bottom right just above the drawer (the ref's `.up`): in as the line starts,
+   * about 2.4s, then down and away. The words go in as text, never as markup.
+   */
+  function up(pill: readonly [string, string, string], t: number) {
+    const [title, detail, icon] = pill;
+    const g = document.createElement("div"); g.className = "mk-up mk-up--" + icon; g.setAttribute("aria-hidden", "true");
+    const ic = document.createElement("span"); ic.className = "mk-up-i";
+    ic.innerHTML = `<svg viewBox="0 0 16 16" width="15" height="15">${UPI[icon]}</svg>`;
+    const tx = document.createElement("span"); tx.className = "mk-up-t";
+    const b = document.createElement("b"); b.textContent = title;
+    const d = document.createElement("span"); d.textContent = detail;
+    tx.append(b, d); g.append(ic, tx);
+    later(() => root.appendChild(g), Math.max(0, t - 30));
+    later(() => g.remove(), t + 3200);
+    A(g, [{ opacity: 0, translate: "24px 0" }, { opacity: 1, translate: "0 0" }], { duration: 380, delay: t, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
+    A(g, [{ opacity: 1, translate: "0 0" }, { opacity: 0, translate: "0 10px" }], { duration: 360, delay: t + 2400, fill: "forwards", easing: "cubic-bezier(.4,0,1,1)" });
+  }
+  /**
+   * U2 — push and highlight: the hero pushes in to 1.2× about the new line's title, so the title is
+   * centred at the ref's Q point, holds, and eases back over 1.4s; a rust highlighter sweeps across the
+   * title and fades over 2.2s. No tilt. Worked from rects at the moment it starts, as the ref's is,
+   * with the timeline's own glide (`scrolled` against its current translation) added back in.
+   */
+  function zoomOn(el: HTMLElement, t0: number) {
+    later(() => {
+      if (!heroEl || !pileEl) return;
+      const h = heroEl.getBoundingClientRect(), r = el.getBoundingClientRect();
+      const st = getComputedStyle(heroEl).transformOrigin.split(" ").map(parseFloat);
+      const k = pileEl.getBoundingClientRect().width / pileEl.offsetWidth;
+      const cur = new DOMMatrix(getComputedStyle(ol).transform).f;
+      const P = [r.left - h.left + Math.min(r.width, 140) / 2, r.top - h.top + r.height / 2 + (-scrolled - cur) * k];
+      const Q = [heroEl.offsetWidth / 2, 250];
+      const tr = (Z: number) => `${Q[0] - st[0] - Z * (P[0] - st[0])}px ${Q[1] - st[1] - Z * (P[1] - st[1])}px`;
+      heroEl.dataset.zoom = String(parts.findIndex((p) => p.t === el));
+      A(heroEl, [{ translate: "0 0", scale: 1 }, { translate: tr(1.2), scale: 1.2, offset: .35 }, { translate: tr(1.2), scale: 1.2, offset: .7 }, { translate: "0 0", scale: 1 }], { duration: 1400, fill: "none", easing: "cubic-bezier(.45,0,.55,1)" });
+      el.style.setProperty("--mk-wash", "rgba(201,120,100,.28)");
+      A(el, [{ backgroundSize: "0% 46%" }, { backgroundSize: "100% 46%", offset: .3 }, { backgroundSize: "100% 46%", offset: .85 }, { backgroundSize: "100% 0%" }], { duration: 2200, fill: "none", easing: "cubic-bezier(.3,.7,.2,1)" });
+    }, t0);
+  }
+  /* Each line's pill, in the steps' order. Partial sent raises none. */
+  const LINE_PILLS = [PHONE_PILLS.sent, PHONE_PILLS.partial, null, PHONE_PILLS.nudge, PHONE_PILLS.full] as const;
+  /* U2 — the push-and-highlight runs on Query sent, Partial requested and Full requested only. */
+  const ZOOMS = new Set([0, 1, 4]);
+  function zstep(i: number, t: number) {
+    const p = parts[i], pl = LINE_PILLS[i];
+    if (pl) up(pl, t + 60);
+    const end = step(p, t);
+    if (ZOOMS.has(i)) zoomOn(p.t, t - 80);
+    return end;
+  }
+  /** U3 — the writer records Eleanor's reply: a partial, the first 3 chapters, received today. */
+  function recordForm(t: number) {
+    const f = q("lr"), due = q("lr-due"); if (!f || !due) return t;
+    later(() => segReset("smp2", "50"), Math.max(0, t - 20));
+    A(f, [{ opacity: 0, transform: "translateY(48px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 460, delay: t, fill: "forwards", easing: BOUNCE });
+    t += 600; t = select(q("lr-partial")!, t);
+    t = seg("smp2", "chapters", "3", t + 380); t = select(q("lr-today")!, t + 320);
+    later(() => { due.textContent = PHONE_RESPONSE.dueDate; }, t + 150);
+    A(due, [{ opacity: .35 }, { opacity: 1 }], { duration: 300, delay: t + 150, fill: "none" });
+    t = press(q("lr-save")!, t + 700);
+    A(f, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(30px) scale(.98)" }], { duration: 300, delay: t + 80, fill: "forwards" });
+    return t + 420;
+  }
+
   function playPhone() {
     tilt = 0; scrolled = 0; ol.style.transform = "none"; tlv.classList.remove("mk-lc-tlv--scroll"); tlv.scrollTop = 0;
     pill.style.background = AGENT.pill; pill.innerHTML = PILL.queried;
@@ -553,18 +661,25 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     if (cardTabs) A(cardTabs, [{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: t + 200, fill: "both" });
     t += 380;
     // S6: Day 1 — the query goes out: its line types in, with the 15 pages the form logged
-    t = step(parts[0], t + 150);
+    root.querySelectorAll(".mk-up").forEach((g) => g.remove());
+    const due = q("lr-due"); if (due) due.textContent = "—";
+    t = zstep(0, t + 150);
     knots.push([t + 700, 2]);
-    // Day 36 — she asks for the partial: your move
+    // Day 36 — she asks for the partial; the writer logs her reply first, then it is your move
     reveal(parts[1].st, t + 600);
     t = climb(waits[1]!, 2, 36, t + 800);
+    t = recordForm(t + 250); knots.push([t, 37]);
     court(YOU, t); setPill("preq", t); foot("Send the partial by 25 April", "Mark partial sent", true, t);
-    t = step(parts[1], t);
-    // Day 40 — the partial goes, and it matches what she asked for
+    t = zstep(1, t);
+    // her request came with a comment: noted, and turned into something to act on before the partial goes
+    up(PHONE_PILLS.note, t + 1400);
+    up(PHONE_PILLS.partialTask, t + 4000);
+    knots.push([t + 6400, 38]); t += 5600;
+    // Day 40 — the partial goes, and it matches what she asked for (no pill, no zoom)
     reveal(parts[2].st, t + 300);
     t = climb(waits[2]!, 36, 40, t + 500);
     court(AGENT, t); setPill("psent", t); foot("Response expected by 3 June", "Record a response", false, t);
-    t = step(parts[2], t);
+    t = zstep(2, t);
     // the long wait — past the date she gave
     t = climb(slotWait, 40, 86, t + 600);
     court(YOU, t); later(() => psd.classList.add("mk-late"), t); foot("Response expected by 3 June", "Record a response", true, t);
@@ -589,12 +704,12 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     A(pn, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.94)" }], { duration: 260, delay: t, fill: "forwards" });
     reveal(parts[3].st, t);
     court(AGENT, t); later(() => psd.classList.remove("mk-late"), t); foot("Reminder on 28 June", "Record a response", false, t);
-    t = step(parts[3], t + 400);
+    t = zstep(3, t + 400);
     // Day 99 — she wants the full
     reveal(parts[4].st, t + 300);
     t = climb(waits[4]!, 92, 99, t + 600);
     court(YOU, t); setPill("freq", t); foot("Send the full by 5 July", "Mark full sent", true, t);
-    t = step(parts[4], t);
+    t = zstep(4, t);
     t = stamp(pf, t + 500, -1.2);
     A(pfIcon, [{ opacity: 0, transform: "scale(0) rotate(-90deg)" }, { opacity: 1, transform: "scale(1.3) rotate(10deg)", offset: .7 }, { opacity: 1, transform: "none" }], { duration: 520, delay: t, easing: BOUNCE });
     t = type(pfText, t + 300);
@@ -609,7 +724,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; if (hooks.phone) playPhone(); else play(); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
-  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); }
+  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-up").forEach((g) => g.remove()); }
   setStatic();
   return { start, stop, dispose };
 }
@@ -678,11 +793,12 @@ function enterPhone(scope: HTMLElement) {
   // dealt from the side: each back card slides in from the right, spinning down onto the pile; the front lands last
   backs.forEach((b, k) => E(b, [{ opacity: 0, translate: "720px -40px", rotate: "18deg" }, { opacity: 1, offset: .25 }, { opacity: 1, translate: "0 0", rotate: "0deg" }], { duration: 700, delay: 350 + k * 150 }));
   E(front, [{ opacity: 0, translate: "760px -60px", rotate: "16deg" }, { opacity: 1, offset: .25 }, { opacity: 1, translate: "0 0", rotate: "0deg" }], { duration: 800, delay: 350 + 4 * 150 + 60 });
-  // the hawk's shadow: one pass, low left to top right along one curve, at a constant speed
+  // the hawk's shadow: one pass, low left to top right along one curve, at a constant speed — at 650ms
+  // (v2 P2), while the cards are still being dealt
   if (fly) {
-    anims.push(fly.animate([{ opacity: 1, offsetDistance: "0%", scale: .94 }, { opacity: 1, offsetDistance: "100%", scale: 1.06 }], { duration: 1000, delay: 1500, easing: "linear", fill: "none" }));
+    anims.push(fly.animate([{ opacity: 1, offsetDistance: "0%", scale: .94 }, { opacity: 1, offsetDistance: "100%", scale: 1.06 }], { duration: 1000, delay: 650, easing: "linear", fill: "none" }));
     const img = fly.querySelector("img");
-    if (img) anims.push(img.animate([{ filter: "blur(7px)" }, { filter: "blur(10px)" }], { duration: 1000, delay: 1500, fill: "none" }));
+    if (img) anims.push(img.animate([{ filter: "blur(7px)" }, { filter: "blur(10px)" }], { duration: 1000, delay: 650, fill: "none" }));
   }
   return () => { anims.forEach((a) => a.cancel()); };
 }
@@ -861,6 +977,7 @@ export const HeroCard: React.FC<{
         <img src={HERO_FLY.src + "?v=" + HERO_FLY.version} alt="" width={HERO_FLY.width} height={HERO_FLY.height} />
       </div>
       {againBtn}
+      <div className="mk-hp-dock" aria-hidden="true"><ResponseForm /></div>
       <div className="mk-hp-dock" aria-hidden="true"><NudgeForm /></div>
     </div>
   );
