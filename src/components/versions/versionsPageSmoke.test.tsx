@@ -58,8 +58,20 @@ describe("/manuscripts/versions renders", () => {
     expect(rows.length).toBe(3);
     expect(rows[0]).toContain('"bv-2"');
     expect(t).toContain("How your versions connect");
+    /* v2.1 — one query each is short of 5 each: the band shows the warming-up panel, not the comparison */
+    expect(t).toContain("This fills in once two versions have each gone out with 5 queries.");
+    expect(t).not.toContain("How each version is doing");
+    expect(h).not.toContain('data-vv2="compare"');
+  });
+  it("two versions with 5 sent each: the full Tracking & performance section and Compare, no warming-up panel", () => {
+    const five = (v: string, p: string) => Array.from({ length: 5 }, (_, i) => Q(`${p}${i}`, QueryStatus.QUERIED, { bookVersionId: v }));
+    state.data = { ...base(UserPlan.PRO), manuscripts: [MS([O, V1, V2], { inUseBookVersionId: "bv-2" })], queries: [...five("bv-1", "a"), ...five("bv-2", "b")] };
+    const h = render();
+    const t = text(h);
     expect(t).toContain("How each version is doing");
     expect(t).toContain("Which version is out in front?");
+    expect(t).not.toContain("Warming up");
+    expect(h).toContain('data-vv2="compare"');
   });
   it("before any version, with queries out: the zero ring, the earlier-queries note and the steps", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [Q("q1", QueryStatus.QUERIED), Q("q2", QueryStatus.REJECTED)] };

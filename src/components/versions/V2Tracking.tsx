@@ -11,12 +11,13 @@
  * ⚠️ R14: THE APP REPORTS. Nothing here suggests what to change.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { QueryStatus } from "../../types";
+import { QueryStatus, type Query } from "../../types";
 import {
-  MIN_SENT_FOR_RATE, carouselOrder, leadingId, leagueOrder, rated, type CarouselSort, type LeagueKey, type VersionFacts, type VersionsModel,
+  MIN_SENT_FOR_RATE, carouselOrder, trackingState, leadingId, leagueOrder, rated, type CarouselSort, type LeagueKey, type VersionFacts, type VersionsModel,
 } from "../../lib/versionsV2";
 import type { AnalyticsRow } from "../../lib/analytics";
 import { Dot, Num, msDay, shortDay } from "./v2Bits";
+import { V2Warming } from "./V2Warming";
 
 export interface V2TrackingProps {
   m: VersionsModel;
@@ -24,12 +25,15 @@ export interface V2TrackingProps {
   onOpen: (id: string, from: HTMLElement | null) => void;
   onPackage: (id: string) => void;
   onFill: () => void;
+  /** v2.1 — the manuscript's queries and today's London day, for the warming-up panel's pace */
+  queries: readonly Query[];
+  today: string;
 }
 
 const SORTS: [CarouselSort, string][] = [["rate", "Asked for more"], ["sent", "Most sent"], ["fast", "Fastest replies"]];
 const LCOLS: [LeagueKey | "bar", string][] = [["n", "Sent"], ["bar", "Where they stand"], ["rep", "Replies"], ["rate", "Rate"], ["req", "Requests"], ["avg", "Avg reply"]];
 
-export const V2Tracking: React.FC<V2TrackingProps> = ({ m, rows, onOpen, onPackage, onFill }) => {
+export const V2Tracking: React.FC<V2TrackingProps> = ({ m, rows, onOpen, onPackage, onFill, queries, today }) => {
   const [cs, setCs] = useState<CarouselSort>("rate");
   const [ls, setLs] = useState<LeagueKey>("req");
   const trRef = useRef<HTMLDivElement>(null);
@@ -48,7 +52,29 @@ export const V2Tracking: React.FC<V2TrackingProps> = ({ m, rows, onOpen, onPacka
   };
   useEffect(() => { syncEdge(); const tr = trRef.current; if (!tr) return; const ro = new ResizeObserver(syncEdge); ro.observe(tr); return () => ro.disconnect(); }, [all.length, cs]);
 
-  if (sent.length < 2) return null;
+  /* ⚠️ v2.1 B1 — THE SECTION NEVER VANISHES ONCE A VERSION EXISTS. Until two live versions have each gone out with 5
+     queries, the divider shows over the warming-up panel; then the full section, never both. (v2 hid the whole band
+     below two SENT versions.) */
+  const state = trackingState(m);
+  if (state === "hidden") return null;
+  const divider = (
+    <div className="tpd">
+      <p className="tpd-k">— Tracking &amp; performance —</p>
+      <h2 id="msLH">Which version gets agents asking for more?</h2>
+      <p className="tpd-s">Every query with a version counts here, from the first one you sent.</p>
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 3v13M4.5 10.5 10 16l5.5-5.5" /></svg>
+    </div>
+  );
+  if (state === "warming") {
+    return (
+      <section className="cx-band is-full" id="secH2hB" data-vv2="tracking" data-state="warming">
+        <div className="cx-sec" id="secH2h" aria-labelledby="msLH">
+          {divider}
+          <div className="cv" id="h2h"><V2Warming m={m} queries={queries} today={today} /></div>
+        </div>
+      </section>
+    );
+  }
 
   const mxN = Math.max(1, ...sent.map((f) => f.n));
   const mnA = Math.min(999, ...sent.filter((f) => f.avgReply != null).map((f) => f.avgReply!));
@@ -122,14 +148,9 @@ export const V2Tracking: React.FC<V2TrackingProps> = ({ m, rows, onOpen, onPacka
   };
 
   return (
-    <section className="cx-band is-full" id="secH2hB" data-vv2="tracking">
+    <section className="cx-band is-full" id="secH2hB" data-vv2="tracking" data-state="full">
       <div className="cx-sec" id="secH2h" aria-labelledby="msLH">
-        <div className="tpd">
-          <p className="tpd-k">— Tracking &amp; performance —</p>
-          <h2 id="msLH">Which version gets agents asking for more?</h2>
-          <p className="tpd-s">Every query with a version counts here, from the first one you sent.</p>
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 3v13M4.5 10.5 10 16l5.5-5.5" /></svg>
-        </div>
+        {divider}
         <div className="cv" id="h2h">
           <div className="oh"><div>
             <p className="oh-k">Your versions</p>

@@ -31,3 +31,58 @@ body > .vv2[data-vv2="layer"] {
   vertical-align: middle;
   flex: none;
 }
+
+/* ══ v2.1 — Tracking & performance warming up (design-refs/versions-v2-1, the mock's last <style> block "v41") ══
+   Ported wholesale and scoped to .vv2, by hand rather than by the generator: scripts/versions-v2 extracts from the v2
+   ref only. The faces are the page's --machine / --serif / --mono (the generated sheet points those at the app's
+   tokens). */
+.vv2 .wt { padding:8px 0 24px }
+.vv2 .wt-top { display:grid;grid-template-columns:200px minmax(0,1.25fr) minmax(300px,1fr);gap:40px;align-items:center;padding:34px 36px;border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(28,19,15,.05),0 22px 40px -30px rgba(28,19,15,.45),inset 0 0 0 1px rgba(28,19,15,.08) }
+.vv2 .wt-art { display:grid;place-items:center;height:200px;border:1.5px dashed rgba(28,19,15,.2);border-radius:16px;text-align:center;font:600 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:rgba(28,19,15,.45) }
+.vv2 .wt-art small { display:block;margin-top:6px;font:italic 13px var(--serif);letter-spacing:0;text-transform:none;color:rgba(28,19,15,.55);padding:0 14px }
+.vv2 .wt-tx h3 { margin:6px 0 12px;font:400 26px/1.2 var(--machine);color:#1c130f }
+/* brand.tsx forces h3 with !important; the generated sheet's heading claw-back pattern, for this one heading */
+.vv2.vv2 .wt-tx h3 { font-family: var(--machine) !important; }
+.vv2 .wt-tx>p:not(.oh-k) { margin:0;font:400 16px/1.55 var(--serif);color:rgba(28,19,15,.75) }
+.vv2 .wt-tx .wt-eta { margin-top:16px!important;padding:12px 14px;border-radius:12px;background:#f4efe8;font-size:15px!important }
+.vv2 .wt-eta b { color:#2a3a52 }
+.vv2 .wt-pg { padding:18px 18px 12px;border-radius:16px;background:#faf7f2;box-shadow:inset 0 0 0 1px rgba(28,19,15,.07) }
+.vv2 .wt-pg header { display:flex;align-items:baseline;gap:8px;margin-bottom:10px;font:400 14px var(--serif);color:rgba(28,19,15,.65) }
+.vv2 .wt-pg header span { margin-right:auto;font:600 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#a2452a }
+.vv2 .wt-pg header b { font:400 17px var(--machine);color:#1c130f }
+.vv2 .wt-pg ul { margin:0;padding:0;list-style:none }
+.vv2 .wt-pg li { display:grid;grid-template-columns:30px minmax(0,1fr) auto 64px;gap:12px;align-items:center;padding:9px 0;border-top:1px solid rgba(28,19,15,.07) }
+.vv2 .wt-pg .vl-n { width:28px;height:28px;font-size:12px;display:grid;place-items:center;border-radius:50%;background:#efe9e0;color:#1c130f }
+.vv2 .wt-pg .vl-n.on { background:#2a3a52;color:#f4eee5 }
+.vv2 .wt-pg .vl-n svg { width:13px;height:13px }
+.vv2 .wt-nm b { display:block;font:400 14.5px/1.25 var(--machine);color:#1c130f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+.vv2 .wt-nm small { display:block;margin-top:1px;font:italic 12.5px var(--serif);color:rgba(28,19,15,.55) }
+.vv2 .wt-pp { display:flex;gap:4px }
+.vv2 .wt-pp i { width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1.5px rgba(28,19,15,.22) }
+.vv2 .wt-pp i.on { background:#2a3a52;box-shadow:none }
+.vv2 .wt-pg li em { font:italic 13px var(--serif);color:rgba(28,19,15,.55);text-align:right }
+.vv2 .wt-pg li.ok em { font:600 9px var(--mono);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:#4a6a52 }
+.vv2 .wt-more { margin:6px 0 0;font:italic 12.5px var(--serif);color:rgba(28,19,15,.5) }
+.vv2 .wt-k { margin:34px 0 12px;font:600 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:rgba(28,19,15,.5) }
+.vv2 .wt-ex { display:grid;grid-template-columns:repeat(3,1fr);gap:16px }
+.vv2 .wt-ex figure { margin:0;padding:16px;border-radius:16px;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1.5px rgba(28,19,15,.08) }
+.vv2 .wt-ex figcaption { margin-top:12px;font:400 13.5px/1.4 var(--serif);color:rgba(28,19,15,.6) }
+.vv2 .wt-ex figcaption b { display:block;margin-bottom:2px;font:400 15px var(--machine);color:#1c130f }
+.vv2 .wt-g { position:relative;height:96px;padding:12px;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.07);opacity:.75 }
+.vv2 .wt-g::after { content:"Example";position:absolute;top:8px;right:8px;padding:2px 7px;border-radius:999px;background:#f4efe8;font:600 7.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:rgba(28,19,15,.5) }
+.vv2 .wt-g .d { display:inline-block;width:16px;height:16px;border-radius:50%;background:#efe9e0;vertical-align:middle }
+.vv2 .g1 b { display:inline-block;width:46%;height:8px;margin-left:8px;border-radius:4px;background:#e6dfd4;vertical-align:middle }
+.vv2 .g1 s { display:block;width:30%;height:18px;margin:12px 0 8px;border-radius:5px;background:#2a3a52;opacity:.85;text-decoration:none }
+.vv2 .g1 u, .vv2 .g2 u { display:block;height:5px;border-radius:3px;background:#f1ece4;overflow:hidden }
+.vv2 .g1 u em, .vv2 .g2 u em { display:block;height:100%;background:#2a3a52 }
+.vv2 .g1>span { display:flex;gap:4px;margin-top:8px }
+.vv2 .g1>span i { width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px rgba(28,19,15,.35) }
+.vv2 .g2 p { display:grid;grid-template-columns:16px 60px 1fr;gap:8px;align-items:center;margin:0 0 7px }
+.vv2 .g2 p b { height:7px;border-radius:4px;background:#e6dfd4 }
+.vv2 .g3 { display:grid;place-items:center }
+.vv2 .g3 svg { height:72px }
+@container sheet (max-width:1200px) {
+  .vv2 .wt-top { grid-template-columns:150px minmax(0,1fr);gap:28px;padding:28px }
+  .vv2 .wt-art { height:150px }
+  .vv2 .wt-pg { grid-column:1/-1 }
+}
