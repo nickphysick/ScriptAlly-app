@@ -1,0 +1,20 @@
+Landing hero on phones — red-before proofs (23 Oct). Build: worktree tip c200b670 + Phase 4 tests, vite preview on 127.0.0.1:4731.
+Each line: the named break applied -> the lock it must turn red : the result | the first error line.
+
+HM1 -> HM1 :   1 failed  | Error: @390: nothing cut off on the left
+HM2 -> HM2 :   1 failed  | Error: expect(received).toBe(expected) // Object.is equality
+HM3 -> HM3 :   1 failed  | Error: expect(received).toBe(expected) // Object.is equality
+HM3b -> HM3 :   1 failed  | Error: scrolled first: the drawer does not grow
+HM4 -> HM4 :   1 failed  | Error: expect(received).toContain(expected) // indexOf
+HM6 -> HM6 :   1 failed  | Error: no fly-past
+HM7 -> HM7 :   1 failed  | Error: phones draw no cast shadow
+src-mutation -> HM5 :   1 failed  | Error: @390
+src-mutation -> HM6 :   1 failed  | Error: the drawer arrives grown
+N2p -> N2 :   1 failed  | Error: expect(received).toBe(expected) // Object.is equality
+N3p -> N3 :   1 failed  | Error: / @1440 rest 72 vs 88
+H1p -> H1 :   1 failed  | Error: stage 255,255,255
+S1p -> S1 :   1 failed  | Error: / @390
+N3p(scoped) -> N3 :   1 failed  | Error: / @390 rest 72
+unit: HERO_PHONE_JOIN set to 'Join. No more winging it.' -> landingCopy.test 'says No more winging it. exactly once' : 1 failed | owners of the phrase: No more winging it. | Join. No more winging it.
+
+Source mutations (HM5, HM6) were made in the measurement worktree from path-derived backups and restored by copy; git status clean under src/ afterwards.

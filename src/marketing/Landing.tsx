@@ -18,6 +18,8 @@
 
 import React, { useEffect } from "react";
 import { Hero } from "./Hero";
+import { HeroPhone } from "./HeroPhone";
+import { usePhone } from "./usePhone";
 import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
@@ -31,12 +33,14 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
     return () => { document.title = prev; };
   }, []);
 
-  return (
-    <div>
-      <Hero onNavigate={onNavigate} />
-      {/* ⚠️ THE SECOND SURFACE STARTS HERE AND RUNS TO THE FOOT OF THE PAGE. The hero is on the
-          app's content ground above it and the boundary is marked by the colour change alone —
-          there is deliberately no rule at the join. */}
+  /* ⚠️ ON A PHONE (≤760px) THE REST OF THE PAGE IS THE HERO'S DRAWER — `HeroPhone` renders it inside
+     the pull-up sheet, so swiping up is ordinary scrolling. The content is the same element either
+     way; only its wrapper differs. 761px and up is the v3 hero unchanged. */
+  const phone = usePhone();
+  /* ⚠️ THE SECOND SURFACE STARTS HERE AND RUNS TO THE FOOT OF THE PAGE. The hero is on the app's
+     content ground above it and the boundary is marked by the colour change alone — there is
+     deliberately no rule at the join. */
+  const lower = (
       <div className="mk-lower">
         <StatusBand />
         <FeatureRows />
@@ -51,6 +55,11 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
           between "no policy yet" and "the link is broken". The footer is now shared, so a page
           added to the site is reachable from every other page by construction. */}
       </div>
+  );
+
+  return (
+    <div>
+      {phone ? <HeroPhone onNavigate={onNavigate}>{lower}</HeroPhone> : <><Hero onNavigate={onNavigate} />{lower}</>}
     </div>
   );
 };

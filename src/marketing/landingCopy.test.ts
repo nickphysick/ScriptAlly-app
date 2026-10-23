@@ -13,6 +13,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_H1_LINES, HERO_SUB, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
+  HERO_AGAIN, HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_TAGS,
   DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
   VISION_HEADING, VISION_POINTS, VISION_LINK,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
@@ -56,6 +57,8 @@ describe("landing copy — verbatim locks", () => {
     const said = [
       BAND_HEADING,
       HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
+      /* The phone hero's own strings (23 Oct): its strapline IS `HERO_H1`, so none of these may say it. */
+      HERO_AGAIN, ...HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN, HERO_PHONE_MS, ...HERO_PHONE_TAGS,
       VISION_HEADING, VISION_LINK,
       ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
       ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt]),

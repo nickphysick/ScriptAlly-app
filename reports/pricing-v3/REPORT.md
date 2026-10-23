@@ -3,7 +3,7 @@
 Public `/pricing` rebuilt to `design-refs/pricing-page-v1.html` (sha256 `9801fd52…a7be`, verified). It has a navy founding banner with the live counter above the claim form, "Then, once we launch:", Free and Pro, the "How long will I need?" journey, and the six questions. The signed-in `/plans` page is unchanged: its 1440 screenshot is byte-identical before and after.
 
 **On `main`:** `08c9e22d` → `e2f14aa2` → `7eb9ff1e`, plus a follow-up commit (`.mk-tlink` removal and this report).
-**On dev:** https://scriptally-dev.web.app/pricing, from `dev/css1-pv3`. That branch is the previously served `dev/about1-qc142-css1` with these commits merged in. It serves `index-go5FnK2z.js`, and the live counter reads "2/100 places claimed".
+**On dev:** https://scriptally-dev.web.app/pricing, from `dev/css1-pv3`. That branch is the previously served `dev/about1-qc142-css1` with these commits merged in (tip `caa9a1e6`). It serves `index-BZj1FSmS.js`, and the live counter reads "2/100 places claimed".
 
 ## False premises, first
 
