@@ -2143,7 +2143,16 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ Keys A / N / S / J / K** are the "Discover" scope in `lib/shortcuts`, bound once in `DvPicks`, standing down in a field, over a modal and under any escape-stack layer. `sidebarCapture` SB9 now holds that every `n` binding is page-scoped, not that only one page uses it.
 - **Locks:** `tests/e2e/discoverV1.measure.ts` (B1 header and panel against the ref at 1512/1280, loading → loaded; B2; C1–C5; A3; D1; D2; E2), `tests/e2e/dv1BundleCheck.mjs` (E1, two-sided), `tests/rules/discover.rules.test.ts` (A1), `src/lib/scout.test.ts` (A2), `discoverCopy.test.tsx` (L1). Writing locks use the owned Pro account `dv1@scriptally.test` (`tests/e2e/seedDiscoverV1.mjs`; the harness is Free and `addAgent` caps Free at five). **D1 reads the share write from the browser's request and aborts it** — a real submission would sit in the admin's queue for ever. Proofs: `reports/discover-v1/mutation-proofs.jsonl`.
 
+## Versions v2 — the Versions page (23 Oct; ref = design-refs/versions-v2/versions-v2.html; report reports/versions-v2.md; branch `versions-v2`, NOT merged)
+- **A query stores its book version (`Query.bookVersionId`), and `resolveQueryVersion` (lib/versionsV2) is the one reader:** the query's own, then its package's (credited edition, package, sample), then Original by date, else unrecorded. `VERSION_NOT_SURE` is "Not sure yet" said on purpose and stays unrecorded. `db.addQuery` stamps every logged query (package's version, else in use) except imports.
+- **Original is auto-created at the first save and is the root; every version has one parent; numbers are never reused (`bookVersionSeq`); `inUseBookVersionId` is the one in use.** Every write is lib/bookVersions + one `db.writeVersionChange` batch, and every Undo is `versionSnapshot` (absent stays absent: `null` deletes the key).
+- **Rates, ranking and "Leading" only from 5 sent (`MIN_SENT_FOR_RATE`); "asked for more" is Analytics' `reachedRequest` (history), never the current status.**
+- **⚠️ versionsV2.css IS GENERATED** (`scripts/versions-v2/extract-css.mjs` then `gen-css.mjs`); hand edits go in versionsV2.app.css. Three traps the generator handles: the CSSOM turns a `font:` shorthand holding a `var()` into empty longhands (bodies come from the ref's source text), `@container` rules, and the ref's own `--sp-type`/`--sp-serif` redefinitions, which cycle with the app's tokens and blank every face while every gate stays green.
+- **Prod rules for the three new fields are Nick's and must precede any prod deploy of this page.**
+
 ## Next session — start here
+**Versions v2 is DONE on branch `versions-v2` (pushed), on dev via `dev/ver1-nbab-pkglink-hm1-ver2` as `index-OojVGv_5.js`, NOT merged; dev Firestore rules deployed, prod not.** Read `reports/versions-v2.md` §5 first.
+
 **Discover v1 is DONE on branch `discover-v1` (Parts A–E), NOT merged; on dev via `dev/…-td52-dv1-qc139-dv1b`.** Read `reports/discover-v1/REPORT.md` first: the prod rules blocks to deploy, the false premises, and dev's `ca-aoife-murphy.contributedByCount` left at 1 by a mutation proof (an admin reset).
 
 **Contact list v18 is DONE on branch `contact-list-v18` (off `main` at 30439920, which dev served), NOT merged to `main`.** Read `reports/contact-list-v18/REPORT.md` first.
