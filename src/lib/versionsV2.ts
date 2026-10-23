@@ -30,6 +30,13 @@ export const MIN_SENT_FOR_RATE = 5;
 
 /* ══ which version went ══════════════════════════════════════════════════════════════════════════════════════ */
 
+/**
+ * "Not sure yet", said on purpose (P10). Clearing the stored id would let the resolver fall back to the package or to
+ * Original and count the query anyway — the opposite of what the writer said. So the choice is stored, as this
+ * sentinel (it has an id's shape, so the rules accept it, and it names no version), and it resolves to unrecorded.
+ */
+export const VERSION_NOT_SURE = "not-sure";
+
 export type ResolvedVia = "query" | "package" | "original";
 export interface Resolved { id: string; via: ResolvedVia }
 
@@ -61,6 +68,7 @@ export function packageVersion(
 
 /**
  * D4 — which version went with this query:
+ *   0. "Not sure yet", said on purpose (`VERSION_NOT_SURE`), is unrecorded and stays so;
  *   1. the query's own `bookVersionId`, if it names a version on the manuscript (archived counts);
  *   2. else the version its package carries;
  *   3. else Original, if the query was sent on or before the day Original was saved;
@@ -73,6 +81,7 @@ export function resolveQueryVersion(
   materials: readonly ManuscriptVersion[],
 ): Resolved | null {
   const has = (id: string | null | undefined) => !!id && versions.some((v) => v.id === id);
+  if (q.bookVersionId === VERSION_NOT_SURE) return null;
   if (has(q.bookVersionId)) return { id: q.bookVersionId!, via: "query" };
   const pv = packageVersion(q, packages, materials);
   if (has(pv)) return { id: pv!, via: "package" };

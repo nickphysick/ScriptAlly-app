@@ -18,7 +18,7 @@ import {
 } from "./bookVersions";
 import {
   MIN_SENT_FOR_RATE, carouselOrder, donut, inUseId, laterBy, leadingId, leagueOrder, pickerDefault, rated, resolveQueryVersion,
-  savedBy, treeModel, versionAtLogging, versionColour, versionsModel,
+  savedBy, treeModel, versionAtLogging, versionColour, versionsModel, VERSION_NOT_SURE,
 } from "./versionsV2";
 
 const TODAY = "2026-10-23";
@@ -82,6 +82,9 @@ describe("D4 — the resolution order: the query's own, then its package's, then
     const p2 = { ...pkg, id: "p2", bookVersionId: undefined, samplePagesVersionId: "s1" } as SubmissionPackage;
     const mat = { id: "s1", componentType: "Sample Pages", bookVersionId: "v2" } as unknown as ManuscriptVersion;
     expect(resolveQueryVersion(q("c", { packageId: "p2" }), vs, [p2], [mat])?.id).toBe("v2");
+  });
+  it("\"Not sure yet\", said on purpose, stays unrecorded — the package and Original are not consulted", () => {
+    expect(resolveQueryVersion(q("ns", { bookVersionId: VERSION_NOT_SURE, packageId: "p1", dateSent: "2026-01-01T00:00:00Z" }), vs, [pkg], [])).toBeNull();
   });
   it("R13 — an id that is not a version on this manuscript is ignored, never trusted", () => {
     expect(resolveQueryVersion(q("d", { bookVersionId: "other-book-v9" }), vs, [], [])).toBeNull();

@@ -708,7 +708,8 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
         onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); setNote(null); pillRef.current?.focus(); } }}>
         <span className="pck-ok" aria-hidden="true">✓</span>
         <span className="pck-nt"><b>{noteItem?.title}</b>
-          <small>{page} · {n} of {items.length} done</small></span>
+          <small>{page} · {n} of {items.length} done</small>
+          {noteItem?.tip ? <small className="pck-tip" data-pck="tip">{noteItem.tip}</small> : null}</span>
         {after ? (
           <button type="button" data-pck="next" onClick={() => { const k = after.key; setNote(null); startSpot(k); }}>Next: {after.title} →</button>
         ) : <span className="pck-all" data-pck="all-done">All done</span>}

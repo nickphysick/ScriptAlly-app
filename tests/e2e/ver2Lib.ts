@@ -5,9 +5,30 @@
  * Versions v2 — shared helpers for the VER2 locks and shots. The account is v1's ms21-filled harness account; the
  * books are seeded by tests/e2e/ver2Fixture.mjs (`ver2-ms` with versions, `ver2-pre` with queries and no versions).
  */
-import type { Page } from "@playwright/test";
+import { expect, type Browser, type Page } from "@playwright/test";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { FILLED_EMAIL } from "./ms21Fixture.mjs";
 
-export { ctxFor } from "./ver1Lib";
+const pw = () => { for (const l of readFileSync(".env.local", "utf8").split("\n")) { const m = /^\s*SA_E2E_PASSWORD\s*=\s*(.*)$/.exec(l); if (m) return m[1].trim().replace(/^["']|["']$/g, ""); } throw new Error("no SA_E2E_PASSWORD in .env.local"); };
+
+/** A signed-in context on the ms21-filled harness account (the session is cached per port, as v1's was). */
+export async function ctxFor(browser: Browser, baseURL: string, vp: { width: number; height: number }, scale = 1) {
+  const port = new URL(baseURL).port || "443";
+  const file = resolve(process.cwd(), `tests/e2e/.auth/${FILLED_EMAIL.split("@")[0]}-${port}.json`);
+  if (!existsSync(file)) {
+    const c = await browser.newContext({ baseURL, viewport: vp });
+    const p = await c.newPage();
+    await p.goto("/#/signin");
+    await p.locator("#au-email").fill(FILLED_EMAIL);
+    await p.locator("#au-pw").fill(pw());
+    await p.getByRole("button", { name: /^Sign in$/ }).last().click();
+    await expect(p.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
+    await c.storageState({ path: file, indexedDB: true });
+    await c.close();
+  }
+  return browser.newContext({ storageState: file, viewport: vp, baseURL, deviceScaleFactor: scale });
+}
 
 export const VER2_MS = "ver2-ms";
 export const VER2_PRE = "ver2-pre";
