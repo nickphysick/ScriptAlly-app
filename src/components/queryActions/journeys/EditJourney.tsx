@@ -29,6 +29,7 @@ import { Chips, DateField, Fl, Note, SampleControl, TextBox, Toggle, Who } from 
 import { ComponentType } from "../../../types";
 import { currentVersion, editionsOn, readSummary, sentPieces, summaryOf, summaryWith, type EditionChoice } from "../../../lib/queryActions/packages";
 import { sentRecordOf } from "../../../lib/queryActions/sentRecord";
+import { packageVersion } from "../../../lib/versionsV2";
 import { bookOf, blankSample, type Materials, type Sample } from "../../../lib/queryActions/sample";
 import { ordinal } from "../SentHow";
 import type { JourneyProps } from "../QueryDrawer";
@@ -303,6 +304,12 @@ export function EditJourney({ req, today, children }: JourneyProps) {
           sentCorrectedAt: new Date().toISOString(),
           sentCorrectedFrom: q.sentMaterials ?? "",
         });
+        /* Versions v2 (D3) — a correction of what was sent is a correction of which book version went: the corrected
+           package's version replaces the stored one. With no package, or a package stating none, the record stands. */
+        if (next.id) {
+          const pv = packageVersion({ ...q, sentHow: "package", packageId: next.id, sentPackageId: next.id, sentPackageEdition: next.edition ?? undefined } as Query, db.packages, db.versions);
+          if (pv && (ms?.bookVersions ?? []).some((v) => v.id === pv)) extra.bookVersionId = pv;
+        }
       }
       if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>, sentChanged && next?.id ? { stampPackage: next.id } : undefined);
       /* the stale-stamp rule (Nick, 28 Sep): the package this query WAS sent with may now have none */

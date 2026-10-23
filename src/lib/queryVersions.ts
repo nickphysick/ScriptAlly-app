@@ -24,27 +24,25 @@
  */
 import { QueryStatus } from "../types";
 import type { Activity, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
-import { bookVersionOf, bookVersionById, isSendStatus, versionsActive } from "./bookVersions";
+import { bookVersionById, isSendStatus, readVersions, versionsActive } from "./bookVersions";
+import { resolveQueryVersion } from "./versionsV2";
 
 /**
- * The version the agent READ — the sample in the package this query went out with.
+ * The version that went with this query — VERSIONS v2: the shared resolver, `resolveQueryVersion` (D4: the query's
+ * own `bookVersionId`, then its package's version, then Original by date, else unrecorded). The name "opening read"
+ * is kept so every caller (the reading pane's "Opening read" line, the send flow's default) reads the one answer.
  *
- * ⚠️ IT REACHES THE VERSION THROUGH THE SAMPLE, NEVER THROUGH THE PACKAGE. A package carries no
- * version field anywhere in this app; it inherits one from the material it holds. That is the single
- * edge, and it is what stops a query, a package and a sample ever disagreeing about one fact.
+ * (History) It used to reach the version only through the package's sample. That route is still inside the resolver,
+ * third in its package step.
  */
 export const openingRead = (
-  query: Pick<Query, "packageId">,
+  query: Pick<Query, "packageId"> & Partial<Query>,
   packages: readonly SubmissionPackage[],
   materials: readonly ManuscriptVersion[],
   versions: readonly BookVersion[],
 ): BookVersion | null => {
-  if (!query.packageId) return null;
-  const pkg = packages.find((p) => p.id === query.packageId);
-  const sampleId = pkg?.samplePagesVersionId;
-  if (!sampleId) return null;
-  const sample = materials.find((m) => m.id === sampleId);
-  return sample ? bookVersionById(versions, bookVersionOf(sample)) : null;
+  const r = resolveQueryVersion(query as Query, readVersions({ bookVersions: versions as BookVersion[] }), packages, materials);
+  return r ? bookVersionById(versions, r.id) : null;
 };
 
 /**
@@ -94,21 +92,20 @@ export const MATCH_NOTE: Record<VersionMatch, string | null> = {
 };
 
 /**
- * The version chip for a row in the query list (D8).
+ * The version chip for a row in the query list (D8), and the version filter's predicate (D11).
  *
- * ⚠️ HELD WINS OVER READ, per the ref: "the chip shows the version HELD where one has been sent,
- * otherwise the version READ". They are different facts and the more recent one is the answer to
- * "what has this agent got".
+ * ⚠️ VERSIONS v2 (D4) — IT IS THE SHARED RESOLVER NOW, NOT "HELD WINS OVER READ". The filter must keep exactly the
+ * queries the Versions page counts for a version, and the chip must show the version the filter selects by; both read
+ * `resolveQueryVersion`. What the agent HOLDS after a full or partial send is still its own line in the reading pane
+ * (`manuscriptHeld`), a different fact. `activities` stays in the signature so no caller changes.
  */
 export const listVersion = (
-  query: Pick<Query, "id" | "packageId">,
+  query: Pick<Query, "id" | "packageId"> & Partial<Query>,
   packages: readonly SubmissionPackage[],
   materials: readonly ManuscriptVersion[],
-  activities: readonly Activity[],
+  _activities: readonly Activity[],
   versions: readonly BookVersion[],
-): BookVersion | null =>
-  manuscriptHeld(query.id, activities, versions)?.version
-  ?? openingRead(query, packages, materials, versions);
+): BookVersion | null => openingRead(query, packages, materials, versions);
 
 /**
  * ⚠️ ONE GATE, READ FROM THE SHARED DERIVATION (D12). A writer with fewer than two versions sees no

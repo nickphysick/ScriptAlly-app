@@ -24,6 +24,7 @@ import type { Manuscript, ManuscriptVersion, Query, SubmissionPackage } from "..
 import type { AnalyticsRow } from "./analytics";
 import { bookVersionOf, readVersions, type V2Version } from "./bookVersions";
 import { creditedSlot } from "./packageReplies";
+import { isPackageLocked } from "./packageMetrics";
 
 export const MIN_SENT_FOR_RATE = 5;
 
@@ -220,6 +221,14 @@ export function versionsModel(
     sentTotal: counted.length,
   };
 }
+
+/**
+ * The packages a delete clears the version from: this manuscript's packages stating it that have not gone out. A sent
+ * package's version is frozen by the rules (and a never-sent version cannot be what a sent package's credited edition
+ * carried, or a query would resolve to it).
+ */
+export const packagesHolding = (packages: readonly SubmissionPackage[], msId: string, versionId: string): SubmissionPackage[] =>
+  packages.filter((p) => p.manuscriptId === msId && p.bookVersionId === versionId && !isPackageLocked(p));
 
 /** A version has gone out when any query (Withdrawn included) resolves to it: archive, never delete. */
 export const hasGoneOut = (m: VersionsModel, id: string): boolean => (m.facts.get(id)?.all.length ?? 0) > 0;
