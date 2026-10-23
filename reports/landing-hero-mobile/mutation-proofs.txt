@@ -23,3 +23,4 @@ Follow-up (floor 0.45), red-before against the previous dev build index-C9MUhkiz
 HM1 (rewritten) -> 1 failed | Error: @375x667: the front card ends at the drawer (below 57.0, panel 19.8)
 HM8 (new)       -> 1 failed | Error: @375x667: the last panel is above the grown drawer (95.0px under)
 Green on the new build: landingHeroMobile 8 passed (HM1 375x667 scale 0.471, below 11.0; HM8 390 scale(0.86), 375 scale(0.673733) panel -2.1).
+Deployed to dev 23 Oct as dev/ver1-nbab-pkglink-hm1 09f1c872 (index-BgvCz4eN.js): landingHeroMobile 8 passed against it.
