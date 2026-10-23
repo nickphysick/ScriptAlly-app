@@ -454,7 +454,7 @@ interface DbContextType {
    */
   writeVersionChange: (
     msId: string,
-    fields: { bookVersions?: BookVersion[]; inUseBookVersionId?: string | null; bookVersionSeq?: number | null } | null,
+    fields: { bookVersions?: BookVersion[] | null; inUseBookVersionId?: string | null; bookVersionSeq?: number | null } | null,
     extra?: { packages?: { id: string; bookVersionId: string | null }[]; queries?: { id: string; bookVersionId: string | null }[] },
   ) => Promise<boolean>;
   deleteQuery: (id: string) => Promise<void>;
@@ -3348,7 +3348,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const batch = writeBatch(db);
       if (fields) {
         const up: Record<string, unknown> = {};
-        if (fields.bookVersions !== undefined) up.bookVersions = fields.bookVersions;
+        if (fields.bookVersions !== undefined) up.bookVersions = orDelete(fields.bookVersions);
         if (fields.inUseBookVersionId !== undefined) up.inUseBookVersionId = orDelete(fields.inUseBookVersionId);
         if (fields.bookVersionSeq !== undefined) up.bookVersionSeq = orDelete(fields.bookVersionSeq);
         batch.update(doc(db, "users", currentUser.id, "manuscripts", msId), up);

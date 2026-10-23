@@ -248,7 +248,7 @@
 .vv2 .vr-row em { font:italic 14px var(--serif);color:rgba(28,19,15,.55);margin-left:6px }
 .vv2 .vi-m { margin:6px 0 0;font:italic 14px var(--serif);color:rgba(28,19,15,.55) }
 .vv2 .vi-q { background:#fff;border-radius:12px;box-shadow:0 0 0 1px rgba(28,19,15,.08);padding:4px 16px }
-.vv2 { --sp-serif:var(--serif);--sp-type:var(--machine);--font-mono:var(--mono) }
+.vv2 { }
 .vv2 .mh.vh { padding-bottom:44px }
 .vv2 .vret { margin-top:14px }
 .vv2 #secH2hB { margin-top:56px }

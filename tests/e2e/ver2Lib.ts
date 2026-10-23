@@ -32,6 +32,8 @@ export async function ctxFor(browser: Browser, baseURL: string, vp: { width: num
 
 export const VER2_MS = "ver2-ms";
 export const VER2_PRE = "ver2-pre";
+export const VER2_MANY = "ver2-many";
+export const VER2_FRESH = "ver2-fresh";
 export const VPS = [{ width: 1512, height: 982 }, { width: 1280, height: 832 }];
 
 /** Open the Versions page on one book; `free` turns on the dev-only Free review aid first. */

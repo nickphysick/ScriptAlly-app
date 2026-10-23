@@ -687,14 +687,15 @@ export function changesProblem(list: readonly string[]): "none" | "many" | "long
 
 /** The three manuscript fields a version change writes. `null` clears a key. */
 export interface VersionFields {
-  bookVersions: BookVersion[];
+  /** null: the key was absent and an Undo removes it again */
+  bookVersions: BookVersion[] | null;
   inUseBookVersionId: string | null;
   bookVersionSeq: number | null;
 }
 
 /** The state an Undo puts back exactly — absent stays absent. */
 export const versionSnapshot = (ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">): VersionFields => ({
-  bookVersions: bookVersionsOf(ms).map((v) => ({ ...v })),
+  bookVersions: Array.isArray(ms.bookVersions) ? bookVersionsOf(ms).map((v) => ({ ...v })) : null,
   inUseBookVersionId: ms.inUseBookVersionId ?? null,
   bookVersionSeq: typeof ms.bookVersionSeq === "number" ? ms.bookVersionSeq : null,
 });
@@ -794,7 +795,7 @@ export function archiveVersion(ms: Pick<Manuscript, "bookVersions" | "inUseBookV
   if (v.original) return "original";
   if (v.id === inUseId) return "inUse";
   const snap = versionSnapshot(ms);
-  return { ...snap, bookVersions: snap.bookVersions.map((x) => (x.id === id ? { ...x, archived: true as const, archivedDate: today } : x)) };
+  return { ...snap, bookVersions: bookVersionsOf(ms).map((x) => (x.id === id ? { ...x, archived: true as const, archivedDate: today } : x)) };
 }
 
 /** Bring an archived version back to the list and the comparisons. */
@@ -802,7 +803,7 @@ export function bringBackVersion(ms: Pick<Manuscript, "bookVersions" | "inUseBoo
   const snap = versionSnapshot(ms);
   return {
     ...snap,
-    bookVersions: snap.bookVersions.map((x) => {
+    bookVersions: bookVersionsOf(ms).map((x) => {
       if (x.id !== id) return x;
       const { archived: _a, archivedDate: _d, ...rest } = x;
       return rest;

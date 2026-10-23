@@ -40,7 +40,9 @@ const uid = user.uid;
 const sortKeys = (o) => Array.isArray(o) ? o.map(sortKeys) : o && typeof o === "object" && !(o instanceof Timestamp) ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sortKeys(o[k])])) : o;
 const noon = (day) => `${day}T12:00:00.000Z`;
 
-export const MS = "ver2-ms", PRE = "ver2-pre";
+export const MS = "ver2-ms", PRE = "ver2-pre", MANY = "ver2-many", FRESH = "ver2-fresh";
+/* fifteen versions and the original — the ref's own tree shape (S22–S25): [num, name, parent, changes, saved, sent, asked] */
+const MANY_T = [[0, "Original", null, [], "2026-03-03", 7, 1], [1, "Fast-paced opening", 0, ["Cut the prologue", "Opens on the ferry at dawn"], "2026-09-02", 5, 2], [2, "Tighter first chapter", 1, ["Trimmed chapter one", "The ferry is moving by the end of page one"], "2026-10-14", 4, 1], [3, "Dual timeline", 0, ["Alternates 1994 and the present from page one", "Cut the ferry crossing"], "2026-07-28", 3, 0], [4, "Premise up front", 1, ["Stated the premise on page 3", "Toned down the language"], "2026-09-20", 4, 1], [5, "Ferry cold open", 2, ["Opens mid-argument on the ferry"], "2026-10-02", 3, 1], [6, "No ferry at all", 3, ["Cut the ferry entirely", "Opens in the hospital"], "2026-08-06", 2, 0], [7, "Murphy narrates", 2, ["First person, the skipper", "Cut the aunt's chapter"], "2026-10-05", 4, 2], [8, "Present tense", 7, ["Switched to present tense"], "2026-10-09", 3, 1], [9, "Shorter first page", 5, ["Cut the first page to 250 words"], "2026-10-08", 2, 0], [10, "Prologue back in", 4, ["Put the prologue back", "Kept the premise on page 3"], "2026-09-25", 3, 0], [11, "Hint at the ending", 9, ["Foreshadowed the ending on page 2"], "2026-10-12", 1, 0], [12, "Tighter dialogue", 8, ["Cut dialogue tags", "Shorter opening scene"], "2026-10-14", 2, 1], [13, "Opens at the funeral", 6, ["Opens at the funeral", "Moved the hospital to chapter 3"], "2026-08-15", 2, 0], [14, "New first line", 12, ["New first line"], "2026-10-18", 0, 0], [15, "Quieter opening", 10, ["Slower first chapter", "Removed the chase"], "2026-10-01", 1, 0]];
 const BV = [
   { id: "ver2-bv-0", name: "Original", kind: "initial", createdDate: "2026-03-03", num: 0, original: true },
   { id: "ver2-bv-1", name: "Fast-paced opening", kind: "revision", createdDate: "2026-04-02", num: 1, parentId: "ver2-bv-0", changes: ["Cut the prologue", "Opens on the ferry at dawn"], wordCount: 82400 },
@@ -130,7 +132,24 @@ async function seed() {
       await put(["activities", fid], { id: fid, userId: uid, queryId: id, manuscriptId: ms, activityType: TYPE[st], description: st === "Queried" ? `Query sent to ${a[0]} at ${a[1]}` : `${st} — ${a[0]}`, date: when.toISOString(), details: "", resultingStatus: st });
     }
   }
-  console.log(`seeded ver2 (${uid}) — wiped ${n}, wrote 2 books, ${NAMES.length} agents, ${Q.length} queries`);
+  /* the fifteen-version book: every query stamped with its version, sent on the day after its version was saved */
+  const mid = (v) => `ver2-m-bv-${v}`;
+  await put(["manuscripts", MANY], { id: MANY, userId: uid, title: "Slack Water", genre: "Thriller", ageCategory: "Adult", wordCount: 82000, logline: "One tide, one skipper.", comps: [], status: "Querying", statusChangedDate: noon("2026-03-03"),
+    bookVersions: MANY_T.map(([n, name, p, ch, d]) => ({ id: mid(n), name, kind: n ? "revision" : "initial", createdDate: d, num: n, ...(n ? { parentId: mid(p), changes: ch, wordCount: 82000 } : { original: true }) })),
+    inUseBookVersionId: mid(8), bookVersionSeq: 15 });
+  let mq = 0;
+  for (const [n, , , , d, sent, asked] of MANY_T) {
+    for (let k = 0; k < sent; k++) {
+      const id = `ver2-mq-${mq}`; const ag = mq % NAMES.length; mq++;
+      const day = n ? new Date(Date.parse(`${d}T12:00:00Z`) + (k + 1) * 864e5).toISOString().slice(0, 10) : `2026-02-${String(10 + k).padStart(2, "0")}`;
+      const status = k < asked ? "Partial Requested" : ["Queried", "Rejected", "No Response"][k % 3];
+      await put(["queries", id], { id, userId: uid, manuscriptId: MANY, agentId: `ver2-ag-${ag}`, packageId: "", status, dateSent: noon(day), personalisationNotes: "", sendMethod: "Email", ...(n ? { bookVersionId: mid(n) } : {}) });
+      await put(["activities", `ver2-act-${id}-queried`], { id: `ver2-act-${id}-queried`, userId: uid, queryId: id, manuscriptId: MANY, activityType: "Query Sent", description: `Query sent to ${NAMES[ag][0]} at ${NAMES[ag][1]}`, date: noon(day), details: "", resultingStatus: "Queried" });
+    }
+  }
+  /* the book with nothing: no versions, no queries (S28) */
+  await put(["manuscripts", FRESH], { id: FRESH, userId: uid, title: "Dead Reckoning", genre: "Thriller", ageCategory: "Adult", wordCount: 70000, logline: "A navigator's last chart.", comps: [], status: "Querying", statusChangedDate: noon("2026-09-01") });
+  console.log(`seeded ver2 (${uid}) — wiped ${n}, wrote 4 books, ${NAMES.length} agents, ${Q.length + mq} queries`);
 }
 
 /** What the page should show, worked out from the raw documents with this file's own arithmetic. */

@@ -9,7 +9,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { ctxFor, openV2, scrollInto, VER2_PRE, VPS } from "./ver2Lib";
+import { ctxFor, openV2, scrollInto, VER2_FRESH, VER2_MANY, VER2_PRE, VPS } from "./ver2Lib";
 
 test.setTimeout(600_000);
 const ONLY = process.env.VER2_SHOT ?? "";
@@ -47,6 +47,7 @@ for (const vp of VPS) {
       await scrollInto(page, '[data-vv2="list-sec"]', 20);
       await page.locator('[data-vv2="row"].use').click();
       await page.waitForSelector('[data-vv2="drawer"] .vk2');
+      await page.waitForTimeout(500);
       if (want("11")) await shot(page, "11", "drawer-top", vp.width);
       if (want("12")) { const b = await page.locator('[data-vv2="drawer"] .hfC-b').nth(2).boundingBox(); if (b) await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await shot(page, "12", "drawer-funnel-hover", vp.width); }
       if (want("13")) { await page.evaluate(() => { const d = document.querySelector('[data-vv2="drawer"] .db'); if (d) d.scrollTop = d.scrollHeight; }); await shot(page, "13", "drawer-changes-queries", vp.width); }
@@ -63,7 +64,25 @@ for (const vp of VPS) {
       await esc(page);
     }
     if (want("20")) { await page.locator('[data-pck="pill"]').click(); await page.locator('[data-pck="popover"] li').first().click().catch(() => {}); await shot(page, "20", "guide-spotlight", vp.width); await esc(page); await esc(page); }
-    if (want("26") || want("27") || want("28")) {
+    if (want("21")) {
+      await scrollInto(page, '[data-vv2="list-sec"]', 20);
+      await page.locator('[data-vv2="row"][data-id="ver2-bv-4"] [data-vv2="edit"]').click();
+      await page.locator('[data-vv2="name"]').fill("Premise up front, again");
+      await page.locator('[data-vv2="save"]').click();
+      await page.locator('[data-pck="note"]').waitFor({ timeout: 8000 }).catch(() => {});
+      await shot(page, "21", "guide-done-note", vp.width);
+      fx("--seed");
+    }
+    if (want("22") || want("23") || want("24") || want("25")) {
+      await openV2(page, VER2_MANY);
+      if (await page.locator('[data-pck="popover"]').count()) await page.locator('[data-pck="close"]').click();
+      if (want("22")) await shot(page, "22", "many-top", vp.width);
+      if (want("23")) { await scrollInto(page, '[data-vv2="list-sec"]', 20); await shot(page, "23", "many-list", vp.width); }
+      if (want("24")) { await scrollInto(page, '[data-vv2="tree"]', 20); await shot(page, "24", "many-tree", vp.width); }
+      if (want("25")) { await scrollInto(page, '[data-vv2="carousel"]', 40); await shot(page, "25", "many-carousel", vp.width); }
+    }
+    if (want("28")) { await openV2(page, VER2_FRESH); await page.locator('[data-pck="pill"]').click().catch(() => {}); await shot(page, "28", "empty-guide-locked", vp.width); await esc(page); }
+    if (want("26") || want("27")) {
       await openV2(page, VER2_PRE);
       if (want("26")) await shot(page, "26", "empty-with-queries", vp.width);
       if (want("27")) { await page.locator('[data-vv2="first"]').click(); await shot(page, "27", "first-save-form", vp.width); await esc(page); }

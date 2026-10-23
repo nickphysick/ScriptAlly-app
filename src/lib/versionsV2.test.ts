@@ -25,7 +25,7 @@ const TODAY = "2026-10-23";
 const base = (over: Partial<Manuscript> = {}): Manuscript => ({ id: "ms", userId: "u", title: "Murphy's Day Out", genre: "Thriller", ageCategory: "Adult", wordCount: 84100, logline: "", status: "Querying" as never, ...over } as Manuscript);
 const apply = (ms: Manuscript, f: VersionFields | string): Manuscript => {
   if (typeof f === "string") throw new Error(`refused: ${f}`);
-  return { ...ms, bookVersions: f.bookVersions, inUseBookVersionId: f.inUseBookVersionId ?? undefined, bookVersionSeq: f.bookVersionSeq ?? undefined };
+  return { ...ms, bookVersions: f.bookVersions ?? undefined, inUseBookVersionId: f.inUseBookVersionId ?? undefined, bookVersionSeq: f.bookVersionSeq ?? undefined };
 };
 const q = (id: string, over: Partial<Query> = {}): Query => ({ id, userId: "u", manuscriptId: "ms", agentId: "a", packageId: "", status: QueryStatus.QUERIED, dateSent: "2026-05-01T10:00:00.000Z", ...over } as Query);
 const row = (id: string, over: Partial<AnalyticsRow> = {}): [string, AnalyticsRow] => [id, { id, sentMs: Date.parse("2026-05-01T10:00:00Z"), hasResponded: false, reachedRequest: false, reachedFull: false, reachedOffer: false, replyDays: null, ...over } as AnalyticsRow];
@@ -230,7 +230,8 @@ describe("R8 — archive keeps everything and can be undone; delete re-parents a
   });
   it("an Undo is a snapshot: absent stays absent", () => {
     const snap = versionSnapshot(base());
-    expect(snap).toEqual({ bookVersions: [], inUseBookVersionId: null, bookVersionSeq: null });
+    expect(snap).toEqual({ bookVersions: null, inUseBookVersionId: null, bookVersionSeq: null });
+    expect(versionSnapshot(base({ bookVersions: [] })).bookVersions, "an empty list stays an empty list").toEqual([]);
   });
 });
 

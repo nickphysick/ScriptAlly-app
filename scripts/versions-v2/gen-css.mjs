@@ -66,6 +66,10 @@ flush();
    lock (marketingTokens.test) forbids any other sheet naming either family — the app reads them from --sp-type and
    --sp-serif. Same faces, one owner. */
 for (let i = 0; i < out.length; i++) {
+  /* ⚠️ AND THE REF'S OWN DEFINITIONS OF THE APP'S TOKENS GO: it declares `--sp-type: var(--machine)` and
+     `--sp-serif: var(--serif)` (and --font-mono) on :root to imitate the app. Kept beside the swap above they form a
+     cycle — --machine → --sp-type → --machine — and every face on the page resolves to nothing. The app owns them. */
+  out[i] = out[i].replace(/--(sp-serif|sp-type|font-mono)\s*:\s*var\(--(serif|machine|mono)\)\s*;?/g, "");
   out[i] = out[i].replace(/--machine:\s*'Special Elite',\s*monospace/g, "--machine:var(--sp-type)").replace(/--serif:\s*'Source Serif 4',\s*Georgia,\s*serif/g, "--serif:var(--sp-serif)");
 }
 const allText = out.join("\n");
