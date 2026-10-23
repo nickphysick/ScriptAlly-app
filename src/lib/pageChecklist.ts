@@ -18,6 +18,8 @@ export interface ChecklistItem<K extends string = string> {
   key: K;
   title: string;
   line: string;
+  /** Versions v2 — a line the item's done note adds beneath its count (optional; no other page sets one) */
+  tip?: string;
 }
 
 export type DoneMap<K extends string = string> = Partial<Record<K, boolean>>;
@@ -254,3 +256,42 @@ export function nextGuideAfter(page: string, user: User | null | undefined, skip
   for (const g of GUIDE_PAGES) if (g.page !== page && !g.finished(user, skippedOf(g.page))) return g.page;
   return null;
 }
+
+/* ── the Versions page's state (Versions v2 §GUIDE; design-refs/versions-v2 S19–S21, S28) ── */
+
+export type VersionsGuideKey = "add" | "edit" | "use" | "check";
+
+export const VERSIONS_CHECKLIST: readonly ChecklistItem<VersionsGuideKey>[] = [
+  { key: "add", title: "Add a version", line: "Name it and list what changed.", tip: "A new version becomes the one in use. You can change that any time." },
+  { key: "edit", title: "Edit a version", line: "Rename it, or add a change you missed." },
+  { key: "use", title: "Change which version is in use", line: "The one new queries go out with." },
+  { key: "check", title: "Check how a version is performing", line: "How far it gets, and every query it went with." },
+];
+
+/** What each step's spotlight card says (the ref's `ins`). */
+export const VERSIONS_STEP_TEXT: Record<VersionsGuideKey, string> = {
+  add: "Press New version. Name it, list what changed, and choose which version it starts from.",
+  edit: "Press the pencil on any version to change its name, its changes or its word count.",
+  use: "Press this on another version. New queries will go out with it from now on.",
+  check: "Click any version that’s gone out.",
+};
+
+/** The line a locked step shows instead of its own (the ref's `lock`). */
+export const VERSIONS_LOCKED: Record<Exclude<VersionsGuideKey, "add">, string> = {
+  edit: "Unlocks after your first version",
+  use: "Unlocks once you have two versions",
+  check: "Unlocks once a version has gone out",
+};
+
+const VER_BASE = "todoPrefs.versions.guide";
+
+export function versionsGuideOf(user: User | null | undefined): GuideState<VersionsGuideKey> {
+  const g = (user?.todoPrefs as { versions?: { guide?: { done?: Record<string, unknown>; seen?: unknown; hidden?: unknown } } } | undefined)?.versions?.guide;
+  const done: DoneMap<VersionsGuideKey> = {};
+  for (const it of VERSIONS_CHECKLIST) if (g?.done?.[it.key] === true) done[it.key] = true;
+  return { done, seen: g?.seen === true, hidden: g?.hidden === true };
+}
+export const versionsGuideDonePath = (k: VersionsGuideKey): UserPaths => ({ [`${VER_BASE}.done.${k}`]: true });
+export const VERSIONS_GUIDE_SEEN_PATH: UserPaths = { [`${VER_BASE}.seen`]: true };
+export const VERSIONS_GUIDE_HIDDEN_PATH: UserPaths = { [`${VER_BASE}.hidden`]: true };
+export const VERSIONS_GUIDE_UNHIDE_PATH: UserPaths = { [`${VER_BASE}.hidden`]: false };

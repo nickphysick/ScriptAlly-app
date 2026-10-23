@@ -1818,3 +1818,55 @@ describe('/betaPulse', () => {
     await assertFails(setDoc(doc(unauthed().firestore(), 'betaPulse', 'x_2026-W42'), { uid: 'x', week: '2026-W42', mood: 1 }));
   });
 });
+
+/* ══ Versions v2 (design-refs/versions-v2, D1–D3, D9) ═════════════════════════════════════════════════════════════ */
+describe('Versions v2 — the new manuscript and query fields', () => {
+  const msDoc = (ctx: RulesTestContext, id = 'ms-1') => doc(ctx.firestore(), 'users', ALICE, 'manuscripts', id);
+  const qDoc = (ctx: RulesTestContext, id = 'q-1') => doc(ctx.firestore(), 'users', ALICE, 'queries', id);
+  const seedMs = () => asAdmin(async (ctx) => { await setDoc(msDoc(ctx), validManuscript(ALICE)); });
+  const seedQ = () => asAdmin(async (ctx) => { await setDoc(qDoc(ctx), { ...validQuery(ALICE), id: 'q-1' }); });
+
+  it('a manuscript may set and clear its in-use version, in one write with its versions', async () => {
+    await seedMs();
+    const ctx = aliceCtx();
+    await assertSucceeds(updateDoc(msDoc(ctx), {
+      bookVersions: [{ id: 'bv-o', name: 'Original', kind: 'initial', createdDate: '2026-10-23', num: 0, original: true }],
+      inUseBookVersionId: 'bv-o', bookVersionSeq: 1,
+    }));
+    await assertSucceeds(updateDoc(msDoc(ctx), { inUseBookVersionId: deleteField(), bookVersionSeq: deleteField() }));
+  });
+
+  it('an in-use id must be an id, and the sequence an int from 0 to 10000', async () => {
+    await seedMs();
+    const ctx = aliceCtx();
+    await assertFails(updateDoc(msDoc(ctx), { inUseBookVersionId: 'not an id!' }));
+    await assertFails(updateDoc(msDoc(ctx), { inUseBookVersionId: 42 }));
+    await assertFails(updateDoc(msDoc(ctx), { bookVersionSeq: -1 }));
+    await assertFails(updateDoc(msDoc(ctx), { bookVersionSeq: 10001 }));
+    await assertFails(updateDoc(msDoc(ctx), { bookVersionSeq: 1.5 }));
+    await assertSucceeds(updateDoc(msDoc(ctx), { bookVersionSeq: 10000 }));
+  });
+
+  it('the version list stays capped at 50 (MAX_BOOK_VERSIONS)', async () => {
+    await seedMs();
+    const v = (i: number) => ({ id: `bv-${i}`, name: `V${i}`, kind: 'revision', createdDate: '2026-10-23', num: i });
+    await assertSucceeds(updateDoc(msDoc(aliceCtx()), { bookVersions: Array.from({ length: 50 }, (_, i) => v(i)) }));
+    await assertFails(updateDoc(msDoc(aliceCtx()), { bookVersions: Array.from({ length: 51 }, (_, i) => v(i)) }));
+  });
+
+  it('a query may be created with, updated to and cleared of a book version', async () => {
+    const ctx = aliceCtx();
+    await assertSucceeds(setDoc(qDoc(ctx, 'q-2'), { ...validQuery(ALICE), id: 'q-2', bookVersionId: 'bv-1' }));
+    await seedQ();
+    await assertSucceeds(updateDoc(qDoc(ctx), { bookVersionId: 'bv-2' }));
+    await assertSucceeds(updateDoc(qDoc(ctx), { bookVersionId: deleteField() }));
+  });
+
+  it('a query book version must be an id', async () => {
+    await seedQ();
+    const ctx = aliceCtx();
+    await assertFails(updateDoc(qDoc(ctx), { bookVersionId: 'bv 1' }));
+    await assertFails(updateDoc(qDoc(ctx), { bookVersionId: 7 }));
+    await assertFails(updateDoc(qDoc(ctx), { bookVersionId: 'x'.repeat(129) }));
+  });
+});

@@ -179,6 +179,8 @@
 .pck-nt { display: flex; flex-direction: column; gap: 2px; }
 .pck-nt b { font: 500 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; }
 .pck-nt small { font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+/* Versions v2 — an item's own tip under its count (design-refs/versions-v2 `.gd-tip`); serif italic, never mono */
+.pck-nt small.pck-tip { margin: 8px 0 0; max-width: 240px; font: italic 13px/1.4 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.6); }
 .pck-note button {
   all: unset; cursor: pointer; margin-left: 6px; height: 32px; padding: 0 13px; border-radius: 16px; background: #2a3a52; color: #f4eee5;
   font: 500 13.5px/32px var(--sp-serif) !important; white-space: nowrap;
