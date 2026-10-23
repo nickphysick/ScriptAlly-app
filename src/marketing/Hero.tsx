@@ -66,6 +66,7 @@ function size(wrap: HTMLElement) {
     cast.style.width = cw + "px";
     cast.style.left = (28 - dx) / s + "px";
     cast.style.top = card.offsetTop + (card.offsetHeight - cw * (1197 / 1400)) / 2 + "px";
+    placeAgain(wrap, card, dx, dy, s, 1);
     return;
   }
 
@@ -84,6 +85,24 @@ function size(wrap: HTMLElement) {
   const cardMidY = card.offsetTop + card.offsetHeight / 2, cardRight = card.offsetLeft + card.offsetWidth;
   const dx = RIGHT - cardRight * s, dy = cMid - cardMidY * s;
   pile.style.transform = `translate(${dx}px,${dy}px) scale(${s})`;
+  placeAgain(wrap, card, dx, dy, s, k);
+}
+
+/**
+ * "Watch again" sits just above the front card's top-right corner. It lives OUTSIDE the pile (the
+ * pile is `aria-hidden`), so it is placed in the pile's box from the same `dx`, `dy` and `s` the pile
+ * was given, and counter-scaled by the frame's `k` so its 13px type reads at 13px at every width.
+ * The corner is where the card's 2.5° turn carries it: its own top-right, rotated about its centre.
+ */
+function placeAgain(wrap: HTMLElement, card: HTMLElement, dx: number, dy: number, s: number, k: number) {
+  const btn = wrap.querySelector<HTMLElement>(".mk-again");
+  if (!btn) return;
+  const r = 2.5 * Math.PI / 180, hw = card.offsetWidth / 2, hh = card.offsetHeight / 2;
+  const cx = card.offsetLeft + hw, cy = card.offsetTop + hh;
+  const x = cx + hw * Math.cos(r) + hh * Math.sin(r), y = cy + hw * Math.sin(r) - hh * Math.cos(r);
+  btn.style.left = dx + x * s + "px";
+  btn.style.top = dy + y * s - 10 / k + "px";
+  btn.style.setProperty("--mk-again-k", String(1 / k));
 }
 
 export const Hero: React.FC<{

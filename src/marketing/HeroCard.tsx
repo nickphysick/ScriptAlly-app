@@ -24,6 +24,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
+import { HERO_AGAIN } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
@@ -46,6 +47,8 @@ const PagesIcon = () => <svg width="12" height="12" viewBox="0 0 12 12" fill="no
 const BellIcon = ({ w = 11, h = 12, sw = 1.8, stroke = "currentColor" }: { w?: number; h?: number; sw?: number; stroke?: string }) =>
   <svg width={w} height={h} viewBox="0 0 20 20" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 14h9l-1.3-1.8V9a3.2 3.2 0 0 0-6.4 0v3.2zM8.6 16.2h2.8" /></svg>;
 
+const AgainIcon = () => <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M13 2.5v3.2H9.8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+
 /* ── the four cards behind, positions and angles from the ref ── */
 const BACKS = [
   { cls: "mk-lc--o", left: 640, top: 90, t: "rotate(-9deg) scale(.82)", band: ["#f5e6df", "#7c3a2a"], word: "With you", day: "Day 21", ini: "GP", name: "Greg Panetta", agency: "Panetta Associates", pillBg: "#f5e6df", pill: "Full requested", chips: ["ADULT", "LITERARY FICTION"] },
@@ -54,11 +57,17 @@ const BACKS = [
   { cls: "", left: 772, top: -4, t: "rotate(6deg) scale(.8)", band: ["#d7e0e8", "#2f4258"], word: "Offer", day: "Day 128", ini: "TE", name: "Tom Ellery", agency: "Ellery & Finch", pillBg: "#d7e0e8", pill: "Offer", chips: ["ADULT", "LITERARY FICTION"] },
 ] as const;
 
+/** What the story tells its host about its own progress. */
+interface StoryHooks {
+  /** The last line has landed: the host may offer "Watch again". */
+  onEnd?: () => void;
+}
+
 const reduceMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ═════════════ variation 4: one query, start to finish (the ref's V4, ported) ═════════════ */
-function makeStory(root: HTMLElement) {
+function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   const $ = (k: string) => root.querySelector<HTMLElement>(`[data-hc="${k}"]`)!;
   const ol = $("steps"), tlv = $("tlv"), steps = [...ol.querySelectorAll<HTMLElement>(".mk-lc-step")];
   const band = $("band"), bandT = $("bandt"), day = $("day"), pill = $("pill"), psd = $("psd");
@@ -183,7 +192,9 @@ function makeStory(root: HTMLElement) {
   }
   function climb(w: HTMLElement, from: number, to: number, t: number) {
     // the dots wait on the next line; the clock reaches this event's day as the dots clear
-    const n = to - from, dur = Math.max(900, Math.min(12000, n * 240));
+    /* ⚠️ 110ms A DAY, CAPPED AT 2.8s (D1, 23 Oct) — the long wait after "Partial sent" used to run
+       240ms a day to a 12s ceiling, which was a held breath nobody waited out. Both layouts. */
+    const n = to - from, dur = Math.max(900, Math.min(2800, n * 110));
     A(w, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: t, fill: "forwards" });
     A(w, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: t + dur, fill: "forwards" });
     knots.push([t + dur, to]);
@@ -269,6 +280,8 @@ function makeStory(root: HTMLElement) {
     t = type(pfText, t + 300);
     t = stamp(pfBtn, t + 400, 1.5);
     A(pfIcon, [{ transform: "scale(1) rotate(0)" }, { transform: "scale(1.35) rotate(25deg)" }, { transform: "scale(1) rotate(0)" }], { duration: 700, delay: t + 250, fill: "none", easing: "ease-in-out" });
+    /* The story is over: offer it again (never on its own — it does not loop). */
+    later(() => hooks.onEnd?.(), t + 900);
     prepClock(); raf = requestAnimationFrame(runClock);
     later(scrollable, t + 900);
   }
@@ -339,6 +352,7 @@ const BackCard: React.FC<{ c: typeof BACKS[number] }> = ({ c }) => (
  */
 export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> = React.memo(({ host }) => {
   const root = useRef<HTMLDivElement>(null);
+  const again = useRef<HTMLButtonElement>(null);
 
   /* ⚠️ A LAYOUT EFFECT, SO THE ENTRANCE IS APPLIED BEFORE THE FIRST PAINT. With `fill: backwards` the
      cards and the shadow hold their first keyframe through their delays — invisible at 0.1s — and a
@@ -350,8 +364,15 @@ export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> =
 
   useEffect(() => {
     const el = root.current; if (!el) return;
-    const story = makeStory(el);
+    const btn = again.current;
+    /* ⚠️ THE CLASS IS SET ON THE ELEMENT, NOT THROUGH STATE: this component must never re-render
+       (see the docblock), and "Watch again" is the story's own business. */
+    const story = makeStory(el, { onEnd: () => btn?.classList.add("mk-again--on") });
     if (reduceMotion()) return () => story.dispose();
+    /* Watch again replays the STORY only — the card back to Day 32 and on to the end — and never the
+       deal or the shadow, which are the page arriving rather than the query's life. */
+    const replay = () => { btn?.classList.remove("mk-again--on"); story.start(0); };
+    btn?.addEventListener("click", replay);
     /* The story starts 1.7s after load, as the ref's `V4.start(1700)` — but its first act measures
        the timeline's lines, so it waits for the fonts. If they are slower than that, it starts the
        moment they arrive with whatever lead is left, never early. */
@@ -360,10 +381,11 @@ export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> =
     const go = () => { if (live) story.start(Math.max(0, 1700 - (performance.now() - born))); };
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     if (fonts?.ready) fonts.ready.then(go, go); else go();
-    return () => { live = false; story.dispose(); };
+    return () => { live = false; btn?.removeEventListener("click", replay); story.dispose(); };
   }, []);
 
   return (
+    <>
     <div className="mk-hc-pile" ref={root} aria-hidden="true">
       {BACKS.map((c) => <BackCard key={c.ini} c={c} />)}
 
@@ -447,6 +469,13 @@ export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> =
         height={HERO_SHADOW.height}
       />
     </div>
+    {/* ⚠️ OUTSIDE THE PILE, BECAUSE THE PILE IS `aria-hidden` and a button inside it would be
+        focusable but unannounced. `Hero.tsx`'s `size()` places it just above the front card's
+        top-right corner, in the pile's own coordinates. Hidden (and inert) until the story ends. */}
+    <button type="button" className="mk-again" ref={again}>
+      <AgainIcon />{HERO_AGAIN}
+    </button>
+    </>
   );
 });
 HeroCard.displayName = "HeroCard";

@@ -44,6 +44,8 @@ export const HERO_CTA = "Become a founding writer";
 
 /** The plain link beside it: an in-page jump to the section break above the feature rows. */
 export const HERO_LINK = "See how it works";
+/** The pill offered once the card's story has ended (both layouts). It never loops on its own. */
+export const HERO_AGAIN = "Watch again";
 
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —

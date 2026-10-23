@@ -154,3 +154,31 @@
   .mk-odo-w { transition: none; }
   .mk-lc-wait i { animation: none; }
 }
+
+/* "Watch again" (23 Oct, ref design-refs/landing-hero-mobile-v1.html `.again`): a small navy pill
+   that fades in once the card's story has ended, and replays the story only. It never loops.
+   ⚠️ ITS BOTTOM-RIGHT CORNER IS THE ANCHOR `size()` WRITES (`left`/`top`), and it is counter-scaled
+   by `--mk-again-k` about that corner so it keeps its own size inside the scaled 1280 frame.
+   ⚠️ `visibility` RIDES THE FADE so the hidden pill is out of the tab order, not merely transparent. */
+.mk-again {
+  --mk-again-k: 1;
+  position: absolute; z-index: 16; display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 12px 0 10px; border: 0; border-radius: 14px; white-space: nowrap;
+  background: rgba(27, 36, 51, .92); color: #f4f1ea; font: 500 13px/1 var(--mk-f-sans);
+  box-shadow: 0 0 0 1px rgba(244, 241, 234, .18), 0 6px 14px -6px rgba(0, 0, 0, .5);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  cursor: pointer; pointer-events: auto;
+  transform-origin: 100% 100%;
+  transform: translate(-100%, -100%) scale(var(--mk-again-k)) translateY(-4px);
+  opacity: 0; visibility: hidden;
+  transition: opacity .5s, transform .5s, background .2s, visibility 0s linear .5s;
+}
+.mk-again svg { flex: none; }
+.mk-again.mk-again--on {
+  opacity: 1; visibility: visible;
+  transform: translate(-100%, -100%) scale(var(--mk-again-k));
+  transition: opacity .5s, transform .5s, background .2s, visibility 0s;
+}
+.mk-again:hover { background: #26334a; }
+.mk-again:focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .mk-again { display: none; } }
