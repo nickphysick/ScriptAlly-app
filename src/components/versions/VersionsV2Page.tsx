@@ -31,7 +31,7 @@ import {
 } from "../../lib/bookVersions";
 import { buildRows } from "../../lib/analytics";
 import { versionsUnlocked, VERSIONS_FOUNDING_ACCESS } from "../../lib/entitlements";
-import { VERSION_NOT_SURE, donut, hasGoneOut, packagesHolding, versionsModel } from "../../lib/versionsV2";
+import { VERSION_NOT_SURE, donut, hasGoneOut, packagesHolding, trackingState, versionsModel } from "../../lib/versionsV2";
 import {
   VERSIONS_CHECKLIST, VERSIONS_GUIDE_HIDDEN_PATH, VERSIONS_GUIDE_SEEN_PATH, VERSIONS_GUIDE_UNHIDE_PATH, VERSIONS_LOCKED, VERSIONS_STEP_TEXT,
   versionsGuideDonePath, versionsGuideOf, type VersionsGuideKey,
@@ -76,7 +76,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const m = useMemo(() => versionsModel(ms, msQueries, packages, materials, rows), [ms, msQueries, packages, materials, rows]);
   const agentById = useMemo(() => new Map((agents as Agent[]).map((a) => [a.id, a])), [agents]);
   const fresh = m.versions.length === 0;
-  const sentVersions = m.live.filter((v) => (m.facts.get(v.id)?.n ?? 0) > 0).length;
+  /* v2.1 B1 — Compare appears only with the full Tracking & performance section, on the same condition */
+  const tracking = trackingState(m);
 
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [modal, setModal] = useState<Modal>(null);
@@ -257,7 +258,7 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
               <p className="mh-by"><i /><em>of</em> {ms?.title ?? "your manuscript"}<i /></p>
               <div className="mh-b">
                 <button type="button" className="p1" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>+ New version</button>
-                {!fresh && sentVersions >= 2 ? <button type="button" className="p2" data-vv2="compare" onClick={goCompare}>Compare</button> : null}
+                {tracking === "full" ? <button type="button" className="p2" data-vv2="compare" onClick={goCompare}>Compare</button> : null}
                 <button type="button" className="hw" data-vv2="how" onClick={() => setModal({ kind: "how" })}><i>?</i><span>How version tracking works</span></button>
               </div>
             </div>
@@ -329,7 +330,7 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
                   <V2List ms={ms} m={m} locked={locked} onOpen={(id) => openVersion(id)} onEdit={openForm} onUse={(id) => void onUse(id)}
                     onBin={(id) => setModal({ kind: "confirm", id })} onBringBack={(id) => void onBringBack(id)} />
                   <V2Tree ms={ms} m={m} onOpen={(id) => openVersion(id)} />
-                  <V2Tracking m={m} rows={rows} onOpen={(id) => openVersion(id)} onPackage={goPackage} onFill={openPicker} />
+                  <V2Tracking m={m} rows={rows} onOpen={(id) => openVersion(id)} onPackage={goPackage} onFill={openPicker} queries={msQueries} today={today()} />
                 </>
               ) : null}
 

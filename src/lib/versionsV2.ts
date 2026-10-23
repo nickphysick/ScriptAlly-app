@@ -352,3 +352,52 @@ export function pickerDefault(q: Query, m: VersionsModel): string | null {
   const fits = m.live.filter((v) => savedBy(v, dayOfStored(q.dateSent)));
   return fits.length === 1 ? fits[0].id : null;
 }
+
+/* ══ v2.1 — Tracking & performance before there's enough to compare (design-refs/versions-v2-1, S30) ═══════════════
+   ⚠️ ONE THRESHOLD: "ready" is MIN_SENT_FOR_RATE sent (withdrawn excluded, the same `n` every figure reads), and the
+   full section needs two ready versions. Nothing here restates the number. */
+
+/** How many ready versions the full section needs. */
+export const READY_TO_COMPARE = 2;
+
+export type TrackingState = "hidden" | "warming" | "full";
+
+/** B1 — no live versions: hidden; fewer than two live versions with 5+ sent: warming up; otherwise the full section. */
+export function trackingState(m: Pick<VersionsModel, "live" | "facts">): TrackingState {
+  if (!m.live.length) return "hidden";
+  const ready = m.live.filter((v) => (m.facts.get(v.id)?.n ?? 0) >= MIN_SENT_FOR_RATE).length;
+  return ready >= READY_TO_COMPARE ? "full" : "warming";
+}
+
+/** B2 — the progress rows: live versions by sent (high first), ties by version number. */
+export const warmOrder = (fs: readonly VersionFacts[]): VersionFacts[] => [...fs].sort((a, b) => (b.n - a.n) || (a.v.num - b.v.num));
+
+/** B2 — queries still needed: over the two live versions with the most sent, the shortfall to 5 each; a missing
+ *  second version needs all 5. */
+export function warmNeed(fs: readonly VersionFacts[]): number {
+  const top = warmOrder(fs).slice(0, READY_TO_COMPARE);
+  return top.reduce((t, f) => t + Math.max(0, MIN_SENT_FOR_RATE - f.n), 0) + (READY_TO_COMPARE - top.length) * MIN_SENT_FOR_RATE;
+}
+
+/** A stored date's London calendar day, "YYYY-MM-DD" (a send late on the 30th in summer is the 31st in London). */
+export function londonDayOf(at: unknown): string | null {
+  const ms = typeof at === "string" ? Date.parse(at) : at && typeof (at as { toMillis?: () => number }).toMillis === "function" ? (at as { toMillis: () => number }).toMillis() : at instanceof Date ? at.getTime() : NaN;
+  if (!Number.isFinite(ms)) return null;
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
+}
+
+/** B2 — pace: this manuscript's queries sent in the last 30 London calendar days (today and the 29 before it),
+ *  withdrawn excluded, with any version or none. */
+export function warmPace(queries: readonly Query[], today: string): number {
+  const t = Date.parse(`${today}T12:00:00Z`);
+  return queries.filter((q) => {
+    if (!counts(q)) return false;
+    const d = londonDayOf(q.dateSent);
+    if (!d) return false;
+    const days = Math.round((t - Date.parse(`${d}T12:00:00Z`)) / 864e5);
+    return days >= 0 && days < 30;
+  }).length;
+}
+
+/** B2 — weeks at that pace, at least 1; null when nothing was sent in 30 days. */
+export const warmWeeks = (need: number, pace: number): number | null => (pace > 0 ? Math.max(1, Math.ceil(need / (pace / 30) / 7)) : null);
