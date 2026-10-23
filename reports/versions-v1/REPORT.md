@@ -161,3 +161,28 @@ In `shots/`, beside each `design-refs/versions-v1/screens/*` file, at both width
   only, `--project scriptally-dev`). **Dev now serves `index-wDx05B0j.js`.**
 - VER1 against the deployed site: 21 of 21 green at both widths, with the fixture unchanged afterwards.
 - Not merged to `main`. Prod untouched. No rules or functions changed.
+
+## Follow-up (23 Oct): the package form opens with a version chosen
+
+Nick's go-ahead: *"give the Submission packages page a link (e.g. ?new=1&version=…) that opens its new-package form
+with that version chosen, and point Versions' Change and Add to a package at it."*
+
+- **Submission packages reads `?new=1&version={id}`** on arrival. It waits for the manuscript to load, then opens its
+  package form (`openNew`, which already took a version) with that version chosen. A version the active manuscript
+  doesn't hold is ignored and the form opens empty. It sits beside `?tab=builder` and `?pkg=`, and nothing else on the
+  page changed.
+- **Versions:**
+  - every "Add to a package" (the row link, the row's ••• menu, the drawer's foot, the unsent card's button) now goes
+    to `/manuscripts/packages?new=1&version={id}` with its own version;
+  - **Change**, on a version no live package holds, goes there too. Its toast reads "No package holds {name} yet.
+    Here's a new one with it chosen."
+- **Lock E1** (both widths), on the version `ms21-filled` has never sent:
+  - the row link and Change each open the form with exactly that version chosen;
+  - `?new=1&version=bv-not-this-book` opens it with none;
+  - nothing is written.
+- **Red first:**
+  - against dev's build without the link (`index-Cp8ra_2G.js`): it fails;
+  - **M-E1a**, the packages page ignoring `?new=1`: the form never opens;
+  - **M-E1b**, Versions dropping the version: the URL check fails, `version=` empty.
+- **Gates:** tsc clean; build with no warnings; Vitest at baseline (the three `functions/` reds). VER1 23 of 23 and
+  `pk4` 39 of 39 on this build.

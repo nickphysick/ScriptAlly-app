@@ -16,12 +16,15 @@
  * ⚠️ THE PAGE DISPLAYS; THE DRAWER DOES EVERY CREATE AND EDIT (v3 decision 1). Viewing doesn't dim; forms do.
  * ⚠️ DEEP LINKS, read on every arrival (`location.key`): `?tab=builder` opens the package form (App's "New package"
  *    lands there), `?tab=tracking` scrolls to "What's getting replies", `?tab=packages` is the top of the page, and
- *    `?pkg={id}` opens that package's drawer (`&view=replies` its second tab).
+ *    `?pkg={id}` opens that package's drawer (`&view=replies` its second tab), and `?new=1&version={id}` opens the
+ *    package form with that book version chosen (the Versions page's Change and "Add to a package" land here). A
+ *    version the active manuscript doesn't hold is ignored, and the form opens empty.
  * ⚠️ OPEN TO ALL (D7). Nothing on this page reads the plan; the one gate is `addPackage`'s.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type { SubmissionPackage } from "../types";
+import { bookVersionsOf } from "../lib/bookVersions";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePopover } from "./shell/ListPills";
 import { suggestPackageName, type MatKind } from "../lib/packagesPage";
@@ -58,15 +61,27 @@ export const SubmissionPackages: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const tab = params.get("tab");
   const pkgParam = params.get("pkg");
+  const newParam = params.get("new") === "1";
+  const versionParam = params.get("version") ?? "";
+  const [pendingNew, setPendingNew] = useState<{ version: string } | null>(null);
   const [pendingTrack, setPendingTrack] = useState(false);
   const [pendingPkg, setPendingPkg] = useState<{ id: string; replies: boolean } | null>(null);
   useEffect(() => {
-    if (tab === "builder") openNew();
+    if (newParam) setPendingNew({ version: versionParam });
+    else if (tab === "builder") openNew();
     else if (tab === "tracking") setPendingTrack(true);
     else if (tab === "packages") { const s = scrollerOf(); if (s) s.scrollTop = 0; }
     if (pkgParam) setPendingPkg({ id: pkgParam, replies: params.get("view") === "replies" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key]);
+  /* ?new=1&version={id}: waits for the manuscript, so the version can be checked against the book's own */
+  useEffect(() => {
+    if (!pendingNew || !collectionsReady || !activeMs) return;
+    const ok = !!pendingNew.version && bookVersionsOf(activeMs).some((v) => v.id === pendingNew.version);
+    openNew(ok ? { version: pendingNew.version } : {});
+    setPendingNew(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingNew, collectionsReady, activeMs]);
   useEffect(() => {
     if (!pendingPkg || !msPkgs.some((p) => p.id === pendingPkg.id)) return;
     setView({ m: "pkg", id: pendingPkg.id, tab: pendingPkg.replies ? "replies" : "inside" });

@@ -292,5 +292,41 @@ for (const vp of VPS) {
       expect(r.banner + r.live, "banner + versions' live = the book's live queries").toBe(f.live);
       await ctx.close();
     });
+
+    test("E1 — Add to a package and Change open the package form with that version chosen; an unknown version opens it empty", async ({ browser, baseURL }) => {
+      test.skip(!run("E1"));
+      await assertLocalBundleIsDev();
+      const before = fx("--ms");
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      const chosen = async () => {
+        await page.waitForSelector('[data-pk4="pkgform"]', { timeout: 20_000 });
+        await page.waitForTimeout(300);
+        return page.locator('[data-pk4="pick-version"] [aria-checked="true"] strong').allInnerTexts();
+      };
+      /* from the row of a version that is not sent yet */
+      await openVersions(page);
+      const row = page.locator('[data-ver1="row"]').filter({ has: page.locator('[data-ver1="add-row"]') }).first();
+      const name = (await row.locator(".ver1-vl-id b").first().innerText()).trim();
+      const id = await row.getAttribute("data-version");
+      await row.locator('[data-ver1="add-row"]').click();
+      await expect(page).toHaveURL(new RegExp(`/manuscripts/packages\\?new=1&version=${id}`));
+      const fromRow = await chosen();
+      /* from Change, on a version no live package holds */
+      await openVersions(page);
+      await page.locator('[data-ver1="change"]').click();
+      await page.locator(`[data-ver1-opt="${id}"]`).click();
+      await expect(page).toHaveURL(/\/manuscripts\/packages\?new=1&version=/);
+      const fromChange = await chosen();
+      /* a version the book does not hold: the form opens with none chosen */
+      await page.goto("/manuscripts/packages?new=1&version=bv-not-this-book");
+      const fromBogus = await chosen();
+      console.log(`E1 ${vp.width}`, JSON.stringify({ name, id, fromRow, fromChange, fromBogus }));
+      expect(fromRow, "Add to a package: the form opens with that version chosen").toEqual([name]);
+      expect(fromChange, "Change: the form opens with that version chosen").toEqual([name]);
+      expect(fromBogus, "an unknown version: nothing chosen").toEqual([]);
+      expect(fx("--ms"), "opening the form wrote nothing").toBe(before);
+      await ctx.close();
+    });
   });
 }

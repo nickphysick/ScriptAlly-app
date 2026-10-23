@@ -15,7 +15,8 @@
  *    blurred under the lock card and writes nothing.
  * ⚠️ THE ACTIVE VERSION IS THE ACTIVE PACKAGE'S VERSION. Change makes a live package stating the chosen version the
  *    active package (`setActivePackage`) and Undo puts back the previous `activePackageId` exactly (a snapshot,
- *    never an inverse). With no package stating it, Change goes to Submission packages, where packages are made.
+ *    never an inverse). With no package stating it, Change opens Submission packages' package form with that version
+ *    chosen (`?new=1&version={id}`), as every "Add to a package" does.
  * ⚠️ STATUS IS ALWAYS THE REAL StatusDot. Positive is navy; rust is only eyebrows, the blush strip and the discs.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -110,15 +111,16 @@ export const VersionsV1Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     requestAnimationFrame(() => el?.focus());
   }, []);
 
-  const goPackages = () => navigate("/manuscripts/packages");
+  /* the package form, opened with this version chosen (Submission packages reads ?new=1&version={id}) */
+  const goPackages = (versionId: string) => navigate(`/manuscripts/packages?new=1&version=${encodeURIComponent(versionId)}`);
   const assign = () => { if (unversioned[0]) openQueryPanel(unversioned[0].id, "other"); };
 
   const pick = async (v: NumberedVersion) => {
     if (!ms || locked) return;
     const pkg = packageForVersion(ms, v.v.id, msPackages);
     if (!pkg) {
-      showToast({ message: `No package holds ${v.v.name} yet. Make one on Submission packages.` });
-      goPackages();
+      showToast({ message: `No package holds ${v.v.name} yet. Here’s a new one with it chosen.` });
+      goPackages(v.v.id);
       return;
     }
     const before = ms.activePackageId ?? "";
@@ -211,7 +213,7 @@ export const VersionsV1Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
       </div>
       {!locked && ms && open ? (
         <Insights s={statOf(open)} lead={lead} msTitle={ms.title} active={open === activeId} packages={msPackages}
-          agentById={agentById} rows={rows} onClose={closeInsights} onAdd={() => { closeInsights(); goPackages(); }}
+          agentById={agentById} rows={rows} onClose={closeInsights} onAdd={() => { const id = open; closeInsights(); goPackages(id); }}
           onEdit={() => { const v = statOf(open).nv.v; closeInsights(); setForm({ edit: v }); }} />
       ) : null}
       {!locked && ms && form ? (
@@ -352,7 +354,7 @@ const RowMenu: React.FC<{ name: string; onEdit: () => void; onAdd: () => void }>
 
 const VersionList: React.FC<{
   stats: VersionStats[]; activeId: string | null; leadId: string | null;
-  onOpen: (id: string, el: HTMLElement) => void; onEdit: (v: BookVersion) => void; onAdd: () => void;
+  onOpen: (id: string, el: HTMLElement) => void; onEdit: (v: BookVersion) => void; onAdd: (versionId: string) => void;
 }> = ({ stats, activeId, leadId, onOpen, onEdit, onAdd }) => (
   <div className="ver1-vl" data-ver1="list">
     <div className="ver1-vl-h" data-ver1="list-head">
@@ -382,10 +384,10 @@ const VersionList: React.FC<{
             {s.split.sent ? (
               <><b>{s.askedPct}<small>%</small></b><small>{s.split.requests} of {s.split.sent}</small></>
             ) : (
-              <button type="button" className="ver1-lnk" onClick={(e) => { e.stopPropagation(); onAdd(); }}>Add to a package</button>
+              <button type="button" className="ver1-lnk" data-ver1="add-row" onClick={(e) => { e.stopPropagation(); onAdd(s.nv.v.id); }}>Add to a package</button>
             )}
           </span>
-          <span className="ver1-vl-a"><RowMenu name={s.nv.v.name} onEdit={() => onEdit(s.nv.v)} onAdd={onAdd} /></span>
+          <span className="ver1-vl-a"><RowMenu name={s.nv.v.name} onEdit={() => onEdit(s.nv.v)} onAdd={() => onAdd(s.nv.v.id)} /></span>
         </div>
       );
     })}
@@ -562,7 +564,7 @@ const VersionForm: React.FC<{
 
 const Comparison: React.FC<{
   stats: VersionStats[]; activeId: string | null; lead: VersionStats | null; saved: number; sentCount: number;
-  unversioned: number; onSee: (id: string, el: HTMLElement) => void; onAdd: () => void; onAssign: () => void;
+  unversioned: number; onSee: (id: string, el: HTMLElement) => void; onAdd: (versionId: string) => void; onAssign: () => void;
 }> = ({ stats, activeId, lead, saved, sentCount, unversioned, onSee, onAdd, onAssign }) => {
   const [key, setKey] = useState<LeagueKey>("requests");
   const cards = cardOrder(stats);
@@ -611,7 +613,7 @@ const Comparison: React.FC<{
               <footer className="ver1-rc-f">
                 {unsent ? (
                   <><div><p className="ver1-rc-k">Saved</p><p className="ver1-rc-fv">{dayOf(s.nv.v.createdDate)}</p></div>
-                    <button type="button" className="ver1-rc-b p" onClick={onAdd}>Add to a package</button></>
+                    <button type="button" className="ver1-rc-b p" data-ver1="add-card" onClick={() => onAdd(s.nv.v.id)}>Add to a package</button></>
                 ) : (
                   <><div><p className="ver1-rc-k">Average reply</p><p className="ver1-rc-fv">{s.avgReply != null ? <>{s.avgReply} <small>days</small><em>from {s.replyN} {s.replyN === 1 ? "reply" : "replies"}</em></> : "–"}</p></div>
                     <button type="button" className="ver1-rc-b" onClick={(e) => onSee(s.nv.v.id, e.currentTarget)}>See queries</button></>
