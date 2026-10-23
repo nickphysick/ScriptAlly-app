@@ -235,6 +235,9 @@ export const foundingCounterLabel = (claimed: number, cap: number) =>
 export const foundingRemainingLabel = (claimed: number, cap: number) =>
   `${Math.max(0, cap - claimed)} left`;
 
+/** The phone nav's founding pill, beneath its ten segments: a BUILDER, never a number in a string. */
+export const navPlacesLeft = (left: number) => `${left} places left`;
+
 export const FOUNDING_NOTE: CopyRun[] = [
   "We'll only use your address to send your invite. ",
   { link: "Privacy", to: "privacy" },

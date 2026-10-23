@@ -15,6 +15,8 @@ import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
+import { FoundingNavPill } from "./FoundingNavPill";
+import { usePhone } from "./usePhone";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -141,6 +143,9 @@ export const MarketingShell: React.FC<{
   }, [menuOpen, closeMenu]);
 
   const nav = marketingNavState(user);
+  /* At and below 760px the anon CTA is the founding pill with its live places-left counter. Mounted
+     only there, so the count-up starts when the pill is actually on screen. */
+  const phone = usePhone();
 
   const toFeatures = () => {
     if (path === "/") {
@@ -203,9 +208,11 @@ export const MarketingShell: React.FC<{
               </button>
             )}
             {nav.mode === "anon" ? (
-              <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
-                {nav.primaryLabel}
-              </button>
+              phone ? <FoundingNavPill onGo={() => onNavigate("founders")} /> : (
+                <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
+                  {nav.primaryLabel}
+                </button>
+              )
             ) : (
               <>
                 <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("dashboard")}>

@@ -544,6 +544,48 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-scope { --mk-nav-h: 129px; }
 }
 
+/* ── Phones: one 60px ink row (23 Oct, ref design-refs/landing-hero-mobile-v1.html `.m-nav`) ──
+   Mark (26px) and "QueryHawk" in Source Serif 4, then the founding pill (`FoundingNavPill`), then the
+   burger, whose panel and behaviour are unchanged. Every pre-login page gets it.
+   ⚠️ DECLARED AFTER THE 600 BLOCK, AND THAT ORDER IS LOAD-BEARING: it UNDOES that block's wrap (the
+   pill is narrower than the CTA it replaces, so the row fits again at 320+), and both are
+   single-class media rules at equal specificity, so the later one wins.
+   ⚠️ THE ROW IS 60px IN BOTH STATES. The condense only ever changed padding and the wordmark's size;
+   here neither changes, because the landing's sticky stage sits at `top: var(--mk-nav-h)` and a bar
+   that shortened on scroll would open a gap above it. `--mk-nav-h` is the row's real height. */
+@media (max-width: 760px) {
+  .mk-nav, .mk-navwrap.mk-scrolled .mk-nav {
+    flex-wrap: nowrap; row-gap: 0; gap: 8px; height: 60px; box-sizing: border-box; padding: 0 10px 0 14px;
+  }
+  .mk-brand { gap: 8px; margin-right: auto; min-width: 0; }
+  .mk-logo, .mk-navwrap.mk-scrolled .mk-logo { height: 26px; }
+  .mk-navword, .mk-navwrap.mk-scrolled .mk-navword {
+    font: 700 17px/1 var(--mk-f-serif); letter-spacing: 0; width: auto; margin-left: 0;
+  }
+  .mk-navright { order: 0; width: auto; margin-left: 0; flex: none; }
+  .mk-navright .mk-btn { width: auto; padding: 9px 14px; font-size: 13.5px; }
+  .mk-burger { order: 0; margin-left: 0; width: 32px; padding: 8px 5px; flex: none; }
+  .mk-scope { --mk-nav-h: 60px; }
+}
+
+/* The founding pill: cream, 42px, two lines — the offer, then ten segments and the places left.
+   ⚠️ IT DECLARES ITS FAMILIES: `brand.tsx` gives every bare `button` and `span` the app's body face. */
+.mk-navpill {
+  height: 42px; box-sizing: border-box; padding: 0 13px; border: 0; border-radius: 21px;
+  background: var(--mk-cream-btn); color: var(--mk-ink-shell); cursor: pointer;
+  display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 4px;
+  font-family: var(--mk-f-sans); text-align: left;
+}
+.mk-navpill-t { font: 600 12.5px/1 var(--mk-f-sans); white-space: nowrap; }
+.mk-navpill-c { display: flex; align-items: center; gap: 7px; font-family: var(--mk-f-sans); }
+.mk-navpill-c i { display: flex; gap: 2px; flex: 1; }
+.mk-navpill-c b { flex: 1; height: 4px; border-radius: 1px; background: rgba(27, 36, 51, .14); }
+.mk-navpill-c b.mk-on { background: var(--mk-rust); }
+.mk-navpill-c em {
+  font: 600 9.5px/1 var(--mk-f-sans); font-style: normal; color: var(--mk-rust);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+
 /* ── The sheet: one light surface between the ink nav and the ink footer ──
    ⚠️ ONE BOX OWNS ALL FOUR CORNERS, AND IT IS THE SHELL'S. A page's first surface gets its top
    corners and its last surface its bottom ones from this rule, whatever the page is made of — so
