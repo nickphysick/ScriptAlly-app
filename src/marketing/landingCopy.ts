@@ -57,9 +57,66 @@ export const HERO_PHONE_Q = ["Hunting for a", "literary agent?"] as const;
 /** The founding sign-up that opens inside the drawer once the story ends. */
 export const HERO_PHONE_SIGNUP = "Enter your email for full, free access to QueryHawk as a founding writer.";
 export const HERO_PHONE_JOIN = "Join";
-/** The phone card's manuscript block: no title of a real book, and three small tags. */
-export const HERO_PHONE_MS = "Your novel";
+/** The phone card's manuscript block: no title of a real book, and three small tags. It is typed out
+ *  letter by letter on the front card (v2), and every phone card says the same thing. */
+export const HERO_PHONE_MS = "Your manuscript";
 export const HERO_PHONE_TAGS = ["Adult", "Literary fiction", "94,000 words"] as const;
+
+/* ── The phone card's story, v2 (ref design-refs/landing-hero-mobile-v2.html) ──
+   ⚠️ DEMO DATA, ALL OF IT: a marketing mock-up of the app's screens, built here and never read from
+   the app. The figures agree with each other (eleven live queries, sixteen agents on file) and with
+   nothing real. */
+/** S1 — the dashboard the front card deals in showing. */
+export const PHONE_DASH = {
+  title: "Dashboard",
+  active: "11 active queries",
+  axis: ["Jan", "Feb", "Mar"],
+  closed: { title: "3 closed", n: "3", keys: ["2 No reply", "1 Passed"] },
+  agents: { title: "Agents on file", n: "16", keys: ["14 Querying", "1 To query"] },
+  upNext: "Up next",
+  all: "All 4 →",
+  task: { kicker: "Agents are waiting", count: "1 of 2", lead: "Send your full to ", who: "Greg Panetta", meta: "Panetta Associates · Full requested", state: "Waiting on you", go: "View task →" },
+  log: "Log a query",
+  tabs: ["Home", "Queries", "Agents", "Materials", "More"],
+} as const;
+/** S2 — "Who are you querying?", and the five agents it offers. The third is the one picked. */
+export const PHONE_PICK = {
+  heading: "Who are you querying?",
+  agents: [
+    ["Amira Khan", "Northlight Agency"],
+    ["Tessa Rowe", "Marlowe & Finch"],
+    ["Eleanor Whitfield", "Greenfield Literary"],
+    ["Greg Panetta", "Panetta Associates"],
+    ["Tom Ellery", "Ellery & Finch"],
+  ],
+  picked: 2,
+} as const;
+/** S3 — the band while the query is being logged, before it is anyone's turn. */
+export const PHONE_LOGGING = "Logging query…";
+/** S5 — the quick query form the card becomes. */
+export const PHONE_FORM = {
+  sentBy: "Sent by", via: ["Email", "Query form", "Post"],
+  materials: "Materials", items: ["Letter v3", "Synopsis", "Sample"],
+  first: "First", units: ["Pages", "Chapters", "Words"],
+  sent: "Sent", when: ["Today · 14 Mar", "Yesterday", "Pick a date"],
+  go: "Log query",
+} as const;
+/** U3 — recording Eleanor's reply before the partial request lands on the card. */
+export const PHONE_RESPONSE = {
+  kicker: "RECORD A RESPONSE", title: "Eleanor replied", meta: "GREENFIELD LITERARY · QUERY SENT 14 MAR",
+  asked: "SHE ASKED FOR", options: ["A partial", "The full", "A call"],
+  pages: "WHICH PAGES", received: "RECEIVED", when: ["Today · 18 Apr", "Yesterday", "Pick a date"],
+  due: "Send it by", dueDate: "25 April", save: "Save response", cancel: "Cancel",
+} as const;
+/** U1 — the status pill each update raises, as [title, detail, icon]. Partial sent raises none. */
+export const PHONE_PILLS = {
+  sent: ["Query logged", "Reply expected by 9 May", "send"],
+  partial: ["Task created", "Send the first 3 chapters by 25 April", "todo"],
+  note: ["Note added", "Eleanor loved the voice in my opening", "pen"],
+  partialTask: ["Task created", "Make sure the partial showcases my protagonist’s voice", "todo"],
+  nudge: ["Reminder set", "We’ll nudge you again on 28 June", "bell"],
+  full: ["Task created", "Send the full by 5 July", "todo"],
+} as const;
 
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —

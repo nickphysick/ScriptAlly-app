@@ -1,0 +1,19 @@
+Landing hero on phones, v2 — red-before proofs (23 Oct). Build: worktree tip 6200449d + the Phase 4 tests, vite preview on 127.0.0.1:4731.
+Each line: the break applied -> the lock it must turn red : the result | the first error line.
+
+css HM9 -> HM9 :   1 failed  | Error: the name's size never jumps
+css HM9b -> HM9 :   1 failed  | Error: the row is never invisible
+css HM10 -> HM10 :   1 failed  | Error: the pill is hidden before the press
+css HM11 -> HM11 :   1 failed  | Error: @390: "Query loggedReply expected by " r edge
+Source mutations, all applied at once, each aimed at a different lock (restored from path-derived backups; git status clean under src/ afterwards):
+src: the ref's own rect-based slide (rect width / card width as the scale) -> HM9 : 1 failed | Error: disc jumped between 1189 and 1239ms (list→card) — 3.6px at the hand-over
+src: Partial sent given the Query-sent pill -> HM11 : 1 failed | Error: @390: the six pills, in order — and so none for Partial sent
+src: Partial sent added to the zoomed lines -> HM12 : 1 failed | Error: steps 0, 1, 4 — never Partial sent (2) or the nudge (3)
+src: the phone chip back to "10 pages" -> HM13 : 1 failed | Expected "15 pages"
+src: initials back in the phone discs -> HM6 : 1 failed | Error: every phone disc is a profile head, no initials
+src: the counter counting up from 0 -> HM4 : 1 failed | Error: it starts at the cap, or on its way down from it
+src: the fly-past back at 1500ms -> HM7 : 1 failed | toMatchObject (delay)
+src: the grown scale fixed at .86 -> HM8 : 1 failed | Error: @390x844: the last panel is above the grown drawer
+unit: a copy constant carrying "Lead future queries with the opening voice" -> landingCopy.test : 1 failed | the retired line: expected true to be false
+
+Green on the restored build: landingHeroMobile + landingHeroV3 + landingColoursV2 — 30 passed, 3 skipped (the colours suite's capture and shot cases, which run on request).
