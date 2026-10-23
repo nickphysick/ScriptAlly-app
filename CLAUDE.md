@@ -372,7 +372,7 @@
 - **⚠️ "No more winging it." is the drawer's strapline (`HERO_H1` itself) and the desktop H1 is not rendered on phones**; the drawer's question is the page's one h1. HM5 counts the phrase on the rendered page.
 - **⚠️ The drawer grows 128px and opens a real `FoundingSignup` (`idPrefix="mk-drawer"`, source `landing-panel`) only if the reader has not scrolled when the story ends.** Its state is DOM classes, never React state: the sheet holds the whole page.
 - **The phone nav's anon CTA is `FoundingNavPill`**: places left from the store (`round(claimed/cap×10)` segments, `cap − claimed`), first line only without a count. The nav is 60px in both scroll states because the stage sits at `top: var(--mk-nav-h)`.
-- **⚠️ The 0.56 pile floor and the "≤12px past the drawer" rule cannot both hold on a 667px screen** (57px measured); HM1 asserts the floor there. Nick's call, open.
+- **⚠️ The pile's floor is 0.45 (Nick, 23 Oct; the brief's 0.56 hid the card's last panel on a 667px screen).** The fit accounts for the front card's 0.8° turn and aims 1px inside the 12px allowance. **The grown scale is derived from the ref's reason, not its number:** min(.86, the scale keeping the last panel 2px above the grown drawer), which is .86 exactly at 390 × 844 and ~.67 at 375 × 667. HM1 and HM8 hold both.
 - **Locks:** `tests/e2e/landingHeroMobile.measure.ts` HM1–HM7 (`HM_MUTATE=<name>`); landingColoursV2 N2/N3/H1/S1 carry phone branches (`N2p`…`S1p`).
 
 ## Route tiers + public landing (landing build 5 Jul; refs = design-refs/landing-v13.html + chrome-overview-v1.html)

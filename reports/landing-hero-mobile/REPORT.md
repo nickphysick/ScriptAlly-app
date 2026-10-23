@@ -121,9 +121,23 @@ All of `landingHeroMobile`, `landingColoursV2` and `landingHeroV3` pass against 
 - **Dev now serves `index-C9MUhkiz.js`.** It contains the new hero (`mk-hp-sheet--grown` is present in the bundle). At 390 it matches Phase 3: `shots/dev-390-grown.png`, showing the live "98 places left".
 - Prod was not touched.
 
+## Follow-up — the floor lowered to 0.45 (Nick's ruling, 23 Oct)
+
+- **Floor 0.56 → 0.45.** At 375×667 the fit now decides (0.471, above the floor), so the floor doesn't bind on any of the three screens.
+- **The fit now accounts for the front card's 0.8° turn.** Without it, the card ended 13.6px past the drawer, 1.6px over the limit, because the turn carries the lower corner down.
+- **The fit aims 1px inside the 12px allowance.** Aimed exactly at 12, the card measured 12.000008px past, so float rounding decided the lock.
+- **At rest** (375×667): the card ends 11.0px past the drawer, and the last panel is 20.3px clear above it.
+- **Grown:** lowering the floor alone left the grown drawer 60px over the panel (95px at 0.56). The ref's .86 exists "so its final panel stays visible", so the grown scale is now that reason computed per screen: min(.86, the scale that keeps the panel 2px above the grown drawer).
+  - 390×844: exactly **.86**, so the ref's own screen is unchanged.
+  - 375×667: about **.67** (panel 2.1px clear).
+  - Cost: on a 667px screen the grown card is small, about 0.32 effective (`shots/hm8-375x667.png`).
+- **HM1 rewritten.** It now asserts, on all three screens: the 12px rule, the last panel above the resting drawer, and the scale at or above 0.45. It is **red against the previous dev build** ("@375x667: the front card ends at the drawer", 57px).
+- **HM8 new.** With the drawer grown, the last panel is above it at 390 and 375×667, and 390's grown scale is `scale(0.86)`. It is **red against the previous dev build** (panel 95px under the grown drawer at 375×667).
+- **Commit and dev bundle:** see the follow-up commit; the dev bundle is named in `mutation-proofs.txt`.
+
 ## Open for Nick
 
-1. **375×667:** lower the 0.56 floor (about 0.45 shows the final panel), or accept that the drawer covers the card's foot on short phones.
+1. ~~375×667 floor~~ — done: floor 0.45, and the grown scale is derived from the panel (see the follow-up).
 2. **The privacy note in the grown drawer:** keep it (it costs about 15px, and the hawk's branch reaches the bottom edge), or rule on a shorter wording or placement.
 3. **Segments at 2 of 100 read empty.** Keep round(claimed/cap × 10), or show at least one filled segment once anyone has claimed a place.
 4. `"hero-drawer"` as its own waitlist source needs a functions change and deploy; for now the drawer reports as `"landing-panel"`.
