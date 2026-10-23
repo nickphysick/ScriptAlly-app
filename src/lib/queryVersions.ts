@@ -6,7 +6,11 @@
  *
  * Design authority: design-refs/query-centre-version-impact.html.
  *
- * ⚠️ NOTHING HERE IS STORED ON A QUERY (D5). "Opening read" is the version on the sample in the
+ * ⚠️ REVERSED BY VERSIONS v2 (D3/D4): A QUERY NOW STORES THE BOOK VERSION IT WENT WITH (`Query.bookVersionId`),
+ * and `resolveQueryVersion` in lib/versionsV2.ts is the one reader of which version went. The lines below are the
+ * pre-v2 reasoning, kept as history; `VersionLines` now reads the resolver for "Opening read".
+ *
+ * (History) NOTHING HERE IS STORED ON A QUERY (D5). "Opening read" is the version on the sample in the
  * package that went out; "Manuscript held" is the version on the last full or partial sent. Both are
  * reads over records that already exist, so a query cannot drift out of step with the package it
  * used or the log it owns — the one-edge rule, one surface further along.

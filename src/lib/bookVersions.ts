@@ -11,18 +11,24 @@
  * `versions` subcollection, and this module is about the BOOK — "Prologue-first",
  * "Worldbuilding-first", "Post-R&R". Every identifier here says `bookVersion` for that reason.
  *
- * ⚠️ ONE EDGE, SO THE TWO CAN NEVER DISAGREE. A sample material references a book version; a
- * package references materials. **Packages never reference a version directly** — they inherit it
- * through the sample. That is the ref's held decision, and it is what makes "which package carries
- * which opening" a derivation rather than a second field to keep in step.
+ * ⚠️ SUPERSEDED — "PACKAGES NEVER REFERENCE A VERSION DIRECTLY" HAS NOT BEEN TRUE SINCE THE PACKAGES WORK.
+ * A package states its own version (`SubmissionPackage.bookVersionId`, and each `PackageEdition`
+ * carries one); the sample's `bookVersionId` is the older route. Versions v2 (design-refs/versions-v2,
+ * D4) also stores the version on the QUERY. The one reader of "which version went with this query" is
+ * `resolveQueryVersion` in lib/versionsV2.ts, in that order: the query's own, then its package's
+ * (credited edition, then the package, then its sample), then Original by date, else unrecorded.
  *
  * ⚠️ AND `recomputeQuery` IS UNTOUCHED. A version is payload on an activity, never a determinant of
  * state. Nothing in this module is read by the derivation, and nothing in it may become so.
  *
- * ⚠️ COUNTS, NEVER RATES (D15/D17). Two requests from eighteen sends against none from six is not a
- * result, and no function here returns a percentage — `materialUsage` next door returns a
- * `replyRate` and this deliberately does not. The app reports; the writer decides when the numbers
- * are big enough to mean anything.
+ * ⚠️ COUNTS HERE, RATES ON THE VERSIONS PAGE (D15/D17, reversed in part by Versions v2 R5). The
+ * functions in THIS module still return counts: they serve the Manuscripts and packages surfaces.
+ * The Versions page shows "asked for more" percentages — but only from 5 sent, below which it shows
+ * counts and "Too early to tell" — and that rule lives in lib/versionsV2.ts (`MIN_SENT_FOR_RATE`).
+ *
+ * ⚠️ AND `versionsActive` (two or more versions) IS NO LONGER THE FEATURE'S ONLY GATE. It still
+ * governs the Query Centre's chips and the Manuscripts surfaces; the Versions page exists for every
+ * Pro writer and shows its empty state with none (Versions v2, false premise d).
  */
 import { QueryStatus, ComponentType } from "../types";
 import type { Activity, BookVersion, BookVersionKind, Manuscript, ManuscriptVersion, Query } from "../types";
@@ -50,7 +56,8 @@ export const bookVersionsOf = (ms: Pick<Manuscript, "bookVersions"> | null | und
   Array.isArray(ms?.bookVersions) ? ms!.bookVersions.filter((v) => !!v && typeof v.id === "string") : [];
 
 /**
- * ⚠️ THE FEATURE'S ONE GATE, AND EVERY SURFACE READS IT (D8, D18, D22, and Part E's chips).
+ * ⚠️ THE GATE FOR THE MANUSCRIPTS AND QUERY CENTRE SURFACES (D8, D18, D22, and Part E's chips) — NOT
+ * FOR THE VERSIONS PAGE, which since Versions v2 exists for every Pro writer with any number of versions.
  *
  * A writer with fewer than two versions sees NONE of this: no panel, no dropdown, no chip, no
  * column. One version is just the book, and a panel listing it teaches a vocabulary the writer has
@@ -66,6 +73,10 @@ export const versionsActive = (ms: Pick<Manuscript, "bookVersions"> | null | und
  * ⚠️ "LATEST" IS A DATE FACT, NOT A VERDICT (D10). It says which one you made most recently and
  * nothing about which one is better, working, or the one to send. No caller may dress it as a
  * recommendation, and nothing in this module ranks versions.
+ *
+ * ⚠️ RANKING EXISTS — ON THE VERSIONS PAGE'S TRACKING & PERFORMANCE SECTION ONLY (Versions v2). There
+ * versions are sorted, ranked in a league table, and one with 5 or more sent may be marked "Leading".
+ * That lives in lib/versionsV2.ts; this module still ranks nothing.
  */
 export const latestVersion = (versions: readonly BookVersion[]): BookVersion | null => {
   if (versions.length === 0) return null;
@@ -584,3 +595,242 @@ export interface UnattributedOpening {
  * PACKAGES that state no version. Same honesty, one hop shorter — and it is a permanent bucket now
  * rather than a backlog, because a sent package can never gain a version (D3).
  */
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   VERSIONS v2 — the tree, Original, In use, archive and delete (design-refs/versions-v2, §DATA D1–D9)
+   ══════════════════════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ THIS SECTION REVERSES THREE OF THE HEADER'S RULES FOR THE VERSIONS PAGE, by the Versions v2 ruling:
+   - "append-only, there is no remove" (D9 above): a version can now be ARCHIVED (sent) or DELETED (never sent), each
+     with Undo. A delete never orphans: its children start from its parent instead.
+   - "a revision is a NEW version, never an edit of an old one": a version's name, changes and word count can be
+     edited; where it starts from can be edited only while it has never gone out.
+   - `kind` and the single `note` are retired from the UI; "What changed" is a list (1–8 × 1–80 characters).
+   Every function below is pure and returns the manuscript fields to write, so the page writes them in ONE batch and
+   its Undo is a snapshot of the same three fields (`versionSnapshot`). */
+
+export const ORIGINAL_NAME = "Original";
+export const MAX_VERSION_NAME = 40;
+export const MAX_CHANGES = 8;
+export const MAX_CHANGE_LEN = 80;
+
+/** One version as every Versions v2 surface reads it: numbered, parented, with its changes as a list. */
+export interface V2Version {
+  id: string;
+  num: number;
+  name: string;
+  /** null only on the root (Original, or a pre-v2 first version) */
+  parentId: string | null;
+  changes: string[];
+  original: boolean;
+  archived: boolean;
+  archivedDate: string | null;
+  createdDate: string;
+  wordCount: number | null;
+  raw: BookVersion;
+}
+
+/**
+ * Every version, in save order, read the v2 way (D1's legacy read). A record with no `num` takes its save order
+ * (Original 0; the rest from 1), no `parentId` the version saved before it, and a `note` with no `changes` reads as
+ * `changes: [note]`. Nothing here rewrites a stored record.
+ */
+export function readVersions(ms: Pick<Manuscript, "bookVersions"> | null | undefined): V2Version[] {
+  const list = bookVersionsOf(ms);
+  let next = 1;
+  return list.map((v, i) => {
+    const original = v.original === true;
+    const num = typeof v.num === "number" ? v.num : original ? 0 : next;
+    if (!original) next = Math.max(next, num) + 1;
+    const prev = i > 0 ? list[i - 1] : null;
+    const parentId = original ? null : v.parentId ?? (typeof v.num === "number" ? null : prev?.id ?? null);
+    const changes = Array.isArray(v.changes) ? v.changes.filter((c) => typeof c === "string") : v.note ? [v.note] : [];
+    return {
+      id: v.id, num, name: v.name, parentId, changes, original,
+      archived: v.archived === true, archivedDate: v.archivedDate ?? null,
+      createdDate: v.createdDate, wordCount: typeof v.wordCount === "number" ? v.wordCount : null, raw: v,
+    };
+  });
+}
+
+/** The highest number ever given, so the next is one more and a deleted number is never handed out again (R9). */
+export const versionSeq = (ms: Pick<Manuscript, "bookVersions" | "bookVersionSeq">): number =>
+  Math.max(typeof ms.bookVersionSeq === "number" ? ms.bookVersionSeq : 0, ...readVersions(ms).map((v) => v.num), 0);
+
+/** Every version that starts, directly or not, from `id`. */
+export function descendantsOf(versions: readonly V2Version[], id: string): Set<string> {
+  const out = new Set<string>();
+  const walk = (p: string) => { for (const v of versions) if (v.parentId === p && !out.has(v.id)) { out.add(v.id); walk(v.id); } };
+  walk(id);
+  return out;
+}
+
+const norm = (s: string) => s.trim().toLowerCase();
+
+/** R10 — 1–40 characters, unique within the manuscript ignoring case and surrounding spaces. */
+export function nameProblem(name: string, versions: readonly V2Version[], selfId?: string | null): "empty" | "long" | "taken" | null {
+  const t = name.trim();
+  if (!t) return "empty";
+  if (t.length > MAX_VERSION_NAME) return "long";
+  return versions.some((v) => v.id !== selfId && norm(v.name) === norm(t)) ? "taken" : null;
+}
+
+/** R3 — trimmed, empties dropped. Validated by `changesProblem`; never silently cut to fit. */
+export const cleanChanges = (list: readonly string[]): string[] => list.map((c) => c.trim()).filter(Boolean);
+
+export function changesProblem(list: readonly string[]): "none" | "many" | "long" | null {
+  const c = cleanChanges(list);
+  if (!c.length) return "none";
+  if (c.length > MAX_CHANGES) return "many";
+  return c.some((x) => x.length > MAX_CHANGE_LEN) ? "long" : null;
+}
+
+/** The three manuscript fields a version change writes. `null` clears a key. */
+export interface VersionFields {
+  bookVersions: BookVersion[];
+  inUseBookVersionId: string | null;
+  bookVersionSeq: number | null;
+}
+
+/** The state an Undo puts back exactly — absent stays absent. */
+export const versionSnapshot = (ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">): VersionFields => ({
+  bookVersions: bookVersionsOf(ms).map((v) => ({ ...v })),
+  inUseBookVersionId: ms.inUseBookVersionId ?? null,
+  bookVersionSeq: typeof ms.bookVersionSeq === "number" ? ms.bookVersionSeq : null,
+});
+
+export interface NewVersionInput { name: string; changes: readonly string[]; wordCount?: number | null; parentId?: string | null }
+
+/** Where a refused write says why — the page shows the same reason the form already shows, never a silent no-op. */
+export type VersionRefusal = "name" | "changes" | "parent" | "original" | "inUse" | "missing" | "cap";
+
+/**
+ * Save a version (D2, D5). With no versions on the manuscript this is the FIRST SAVE: Original is created in the
+ * same write (num 0, today's date, no word count of its own — it always shows the manuscript's), and the new version
+ * is num 1, starts from Original, and becomes in use. Otherwise the new version takes the next number, starts from
+ * `parentId` (default: the in-use version), and becomes in use.
+ */
+export function saveNewVersion(
+  ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">,
+  input: NewVersionInput,
+  today: string,
+  ids: { version: string; original?: string },
+): VersionFields | VersionRefusal {
+  const vs = readVersions(ms);
+  if (nameProblem(input.name, vs)) return "name";
+  if (changesProblem(input.changes)) return "changes";
+  const wc = typeof input.wordCount === "number" && input.wordCount > 0 ? Math.round(input.wordCount) : null;
+  const entry = (num: number, parentId: string): BookVersion => ({
+    id: ids.version, name: input.name.trim(), kind: "revision", createdDate: today, num, parentId,
+    changes: cleanChanges(input.changes), ...(wc ? { wordCount: wc } : {}),
+  });
+  if (!vs.length) {
+    const origId = ids.original ?? `${ids.version}-o`;
+    const original: BookVersion = { id: origId, name: ORIGINAL_NAME, kind: "initial", createdDate: today, num: 0, original: true };
+    return { bookVersions: [original, entry(1, origId)], inUseBookVersionId: ids.version, bookVersionSeq: 1 };
+  }
+  if (vs.length + 1 > MAX_BOOK_VERSIONS) return "cap";
+  const parent = input.parentId ?? ms.inUseBookVersionId ?? vs[vs.length - 1].id;
+  const p = vs.find((v) => v.id === parent);
+  if (!p || p.archived) return "parent";
+  const num = versionSeq(ms) + 1;
+  return { bookVersions: [...bookVersionsOf(ms), entry(num, parent)], inUseBookVersionId: ids.version, bookVersionSeq: num };
+}
+
+export interface EditVersionInput { name?: string; changes?: readonly string[]; wordCount?: number | null; parentId?: string }
+
+/**
+ * Edit one version (P9). Original's name and word count are locked and it has no changes or parent (R1), so an
+ * edit of Original changes nothing. `parentId` moves only while the version has never gone out (`sent` false), and
+ * never to itself or a descendant (R2).
+ */
+export function editVersion(
+  ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">,
+  id: string,
+  input: EditVersionInput,
+  sent: boolean,
+): VersionFields | VersionRefusal {
+  const vs = readVersions(ms);
+  const self = vs.find((v) => v.id === id);
+  if (!self) return "missing";
+  const snap = versionSnapshot(ms);
+  if (self.original) return snap;
+  if (input.name !== undefined && nameProblem(input.name, vs, id)) return "name";
+  if (input.changes !== undefined && changesProblem(input.changes)) return "changes";
+  if (input.parentId !== undefined && input.parentId !== self.parentId) {
+    if (sent) return "parent";
+    const p = vs.find((v) => v.id === input.parentId);
+    if (!p || p.archived || p.id === id || descendantsOf(vs, id).has(p.id)) return "parent";
+  }
+  const out = vs.map((v) => {
+    /* a pre-v2 record keeps reading the same: its derived number and parent are written down the first time it is edited */
+    if (v.id !== id) return v.raw;
+    const { note: _n, ...rest } = v.raw;
+    const wc = input.wordCount === undefined ? v.wordCount : typeof input.wordCount === "number" && input.wordCount > 0 ? Math.round(input.wordCount) : null;
+    const { wordCount: _w, ...base } = rest;
+    return {
+      ...base, num: v.num,
+      name: input.name !== undefined ? input.name.trim() : v.name,
+      changes: input.changes !== undefined ? cleanChanges(input.changes) : v.changes,
+      ...(input.parentId !== undefined ? { parentId: input.parentId } : v.parentId ? { parentId: v.parentId } : {}),
+      ...(wc ? { wordCount: wc } : {}),
+    } as BookVersion;
+  });
+  return { ...snap, bookVersions: out };
+}
+
+/** R7 — exactly one in use, in one write that replaces the previous value. An archived version can't be in use. */
+export function setInUse(ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">, id: string): VersionFields | VersionRefusal {
+  const v = readVersions(ms).find((x) => x.id === id);
+  if (!v) return "missing";
+  if (v.archived) return "parent";
+  return { ...versionSnapshot(ms), inUseBookVersionId: id };
+}
+
+/** R8 — archive a sent version. Never Original (R1), never the one in use (R7). */
+export function archiveVersion(ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">, id: string, today: string, inUseId: string | null): VersionFields | VersionRefusal {
+  const v = readVersions(ms).find((x) => x.id === id);
+  if (!v) return "missing";
+  if (v.original) return "original";
+  if (v.id === inUseId) return "inUse";
+  const snap = versionSnapshot(ms);
+  return { ...snap, bookVersions: snap.bookVersions.map((x) => (x.id === id ? { ...x, archived: true as const, archivedDate: today } : x)) };
+}
+
+/** Bring an archived version back to the list and the comparisons. */
+export function bringBackVersion(ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">, id: string): VersionFields {
+  const snap = versionSnapshot(ms);
+  return {
+    ...snap,
+    bookVersions: snap.bookVersions.map((x) => {
+      if (x.id !== id) return x;
+      const { archived: _a, archivedDate: _d, ...rest } = x;
+      return rest;
+    }),
+  };
+}
+
+/**
+ * R8 — delete a never-sent version (the caller has checked no query resolves to it). Its children start from its
+ * parent instead, so the versions stay a tree; the number it had is not given out again (R9: `bookVersionSeq` keeps
+ * the highest).
+ */
+export function deleteVersion(ms: Pick<Manuscript, "bookVersions" | "inUseBookVersionId" | "bookVersionSeq">, id: string, inUseId: string | null): VersionFields | VersionRefusal {
+  const vs = readVersions(ms);
+  const v = vs.find((x) => x.id === id);
+  if (!v) return "missing";
+  if (v.original) return "original";
+  if (v.id === inUseId) return "inUse";
+  const seq = versionSeq(ms);
+  const out = vs.filter((x) => x.id !== id).map((x) => {
+    const parentId = x.parentId === id ? v.parentId : x.parentId;
+    /* write down the derived number and parent of every survivor, so removing one cannot renumber or re-parent the
+       others under the legacy read */
+    const { parentId: _p, ...rest } = x.raw;
+    return { ...rest, num: x.num, ...(parentId ? { parentId } : {}) } as BookVersion;
+  });
+  return { bookVersions: out, inUseBookVersionId: ms.inUseBookVersionId ?? null, bookVersionSeq: seq };
+}
+
+/** The children of a version, for the delete confirm's dynamic line (S05). */
+export const childrenOf = (versions: readonly V2Version[], id: string): V2Version[] => versions.filter((v) => v.parentId === id);

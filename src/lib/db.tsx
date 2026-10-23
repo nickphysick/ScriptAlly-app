@@ -14,6 +14,7 @@ import {
   ManuscriptVersion,
   ComponentType,
   SubmissionPackage,
+  type BookVersion,
   Agent,
   SubmissionStatus,
   SubmissionMethod,
@@ -46,6 +47,7 @@ import {
 import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedCommunityAgents";
 import { narratesManuscriptWrite } from "./manuscriptFeed";
 import { packagesUnlocked } from "./entitlements";
+import { versionAtLogging } from "./versionsV2";
 
 import {
   signInWithEmailAndPassword,
@@ -445,6 +447,16 @@ interface DbContextType {
   ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
+  /**
+   * Versions v2 — ONE batched write of a manuscript's version fields (lib/bookVersions' `VersionFields`), with any
+   * package or query `bookVersionId`s the change carries (a delete clearing packages; the picker; Undo). `null` clears
+   * a key. Atomic, so a first save, a delete and every Undo land whole or not at all. Quiet: no feed narration.
+   */
+  writeVersionChange: (
+    msId: string,
+    fields: { bookVersions?: BookVersion[]; inUseBookVersionId?: string | null; bookVersionSeq?: number | null } | null,
+    extra?: { packages?: { id: string; bookVersionId: string | null }[]; queries?: { id: string; bookVersionId: string | null }[] },
+  ) => Promise<boolean>;
   deleteQuery: (id: string) => Promise<void>;
   
   // Journal Actions
@@ -2440,6 +2452,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       dateSent: importedSentDate(q.dateSent, opts, () => new Date().toISOString()),
       responseDeadline: q.status === QueryStatus.QUERIED ? (q as any).responseDeadline || dead : undefined
     };
+    /* ⚠️ VERSIONS v2 (D3a, R6) — EVERY LOGGED QUERY RECORDS THE BOOK VERSION IT WENT WITH: its package's version,
+       else the manuscript's in-use one. This is the one chokepoint every log path goes through (the drawer, the
+       Query Centre's create mode). An IMPORT is skipped (D7): what went with an imported query is not known, so it
+       stays unrecorded and the Versions page's banner asks. A caller that already names a version keeps it. */
+    if (!newQ.bookVersionId && !opts?.imported) {
+      const msRec = manuscripts.find((m) => m.id === q.manuscriptId) ?? null;
+      const pkgRec = q.packageId ? packages.find((p) => p.id === q.packageId) : (q as Query).sentPackageId ? packages.find((p) => p.id === (q as Query).sentPackageId) : undefined;
+      const stamp = versionAtLogging(msRec, pkgRec, packages, versions);
+      if (stamp) newQ.bookVersionId = stamp;
+    }
     // Firestore (no ignoreUndefinedProperties) rejects undefined fields. An advanced-status
     // import sets responseDeadline: undefined above; strip every undefined so the write — and
     // therefore the per-query log seed below — actually lands.
@@ -3319,6 +3341,28 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  const writeVersionChange: DbContextType["writeVersionChange"] = async (msId, fields, extra) => {
+    if (!currentUser) return false;
+    const orDelete = <T,>(v: T | null | undefined) => (v === null ? deleteField() : v);
+    try {
+      const batch = writeBatch(db);
+      if (fields) {
+        const up: Record<string, unknown> = {};
+        if (fields.bookVersions !== undefined) up.bookVersions = fields.bookVersions;
+        if (fields.inUseBookVersionId !== undefined) up.inUseBookVersionId = orDelete(fields.inUseBookVersionId);
+        if (fields.bookVersionSeq !== undefined) up.bookVersionSeq = orDelete(fields.bookVersionSeq);
+        batch.update(doc(db, "users", currentUser.id, "manuscripts", msId), up);
+      }
+      for (const p of extra?.packages ?? []) batch.update(doc(db, "users", currentUser.id, "packages", p.id), { bookVersionId: orDelete(p.bookVersionId) });
+      for (const q of extra?.queries ?? []) batch.update(doc(db, "users", currentUser.id, "queries", q.id), { bookVersionId: orDelete(q.bookVersionId) });
+      await batch.commit();
+      return true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${msId}`);
+      return false;
+    }
+  };
+
   // General add activity logger
   const addActivity = async (act: Omit<Activity, "id" | "userId"> & { id?: string }): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
@@ -4005,6 +4049,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         recordHoldingReply,
         undoQueryStatus,
         updateQuery,
+        writeVersionChange,
         deleteQuery,
         addJournalEntry,
         deleteJournalEntry,

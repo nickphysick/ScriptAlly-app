@@ -132,6 +132,17 @@ describe("D10 — \"latest\" is a date fact", () => {
      */
     expect(src).not.toMatch(/\b(recommend|best|winner|preferred|strongest|should send)\b/i);
   });
+
+  /* ⚠️ VERSIONS v2 (false premise c) — RANKING NOW EXISTS, ON THE VERSIONS PAGE'S TRACKING & PERFORMANCE ONLY, and
+     this lock now also locks its rule: only a version with 5 or more sent can be ranked first or marked Leading, and
+     this module still ranks nothing (the ranking is lib/versionsV2's). */
+  it("⚠️ the ranking that exists lives in versionsV2 and never crowns a version under 5 sent", () => {
+    const v2 = readFileSync(join(__dirname, "versionsV2.ts"), "utf8");
+    expect(v2).toMatch(/export const MIN_SENT_FOR_RATE = 5;/);
+    expect(v2).toMatch(/export function rated\([^)]*\)[^{]*\{\s*return fs\.filter\(\(f\) => !f\.early\)/);
+    expect(v2).toMatch(/export function leadingId[\s\S]*?const r = rated\(fs\);[\s\S]*?r\.length > 1 && r\[0\]\.ratePct! > r\[1\]\.ratePct!/);
+    expect(readFileSync(join(__dirname, "bookVersions.ts"), "utf8")).not.toMatch(/\bleadingId\b|\brated\(/);
+  });
 });
 
 describe("D10 — the R&R link degrades to nothing", () => {
@@ -251,6 +262,15 @@ describe("D15 — requests by opening, read from the package", () => {
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     expect(src).not.toContain("%");
     expect(src).not.toMatch(/\brate\b/i);
+  });
+
+  /* ⚠️ VERSIONS v2 (false premise b) — THE VERSIONS PAGE SHOWS RATES NOW, and this lock locks when: from 5 sent only.
+     Below that a version has no percentage at all, so "1 of 2" can never be printed as 50%. */
+  it("⚠️ the Versions page's rate is null below 5 sent (R5)", () => {
+    const v2 = readFileSync(join(__dirname, "versionsV2.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(v2).toContain("const early = n < MIN_SENT_FOR_RATE;");
+    expect(v2).toContain("ratePct: early ? null :");
+    expect(v2).toContain("repliedPct: early ? null :");
   });
 
   it("⚠️ THE PACKAGE'S OWN FIELD IS THE ONLY EDGE — no walk through a material", () => {

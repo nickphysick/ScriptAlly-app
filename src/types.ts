@@ -309,6 +309,22 @@ export interface BookVersion {
   /** The book's length at this version, where the writer gave one (manuscripts v21). Absent on every
    *  version saved before it, and never restated from the manuscript's own count. */
   wordCount?: number;
+  /* ══ Versions v2 (design-refs/versions-v2, D1) — additive; an old record keeps reading (lib/bookVersions
+     `readVersions`): no `num` reads as its save order, no `parentId` as the version saved before, and a `note`
+     with no `changes` as `changes: [note]`. `kind` is still stored and is read by no Versions v2 surface. ══ */
+  /** The display number: Original is 0, the rest 1, 2, 3… in save order. NEVER reused, even after a delete. */
+  num?: number;
+  /** The version this one starts from. Absent only on Original (and on a pre-v2 first version). One parent each,
+   *  so the versions are always a tree. */
+  parentId?: string;
+  /** "What changed": 1–8 items of 1–80 characters. Required on every version except Original. */
+  changes?: string[];
+  /** The auto-created Original: exactly one per manuscript once any v2 version exists. */
+  original?: true;
+  /** Archived: off the list and out of comparisons; its queries and totals stay. */
+  archived?: true;
+  /** Date-only "YYYY-MM-DD", London calendar. Present only with `archived`. */
+  archivedDate?: string;
 }
 
 export interface Manuscript {
@@ -399,6 +415,14 @@ export interface Manuscript {
    * limit (D6) — orderings of one book are one book. Locked in bookVersions.test.ts.
    */
   bookVersions?: BookVersion[];
+  /**
+   * Versions v2 (D2) — the version new queries go out with ("In use"). Exactly one once any version exists, set in
+   * ONE write that replaces the previous value. Absent on a pre-v2 manuscript; `lib/versionsV2.inUseId` then reads
+   * the active package's version, else the newest live version.
+   */
+  inUseBookVersionId?: string;
+  /** Versions v2 (D1) — the highest version number ever given, so a number is never reused after a delete. */
+  bookVersionSeq?: number;
 }
 
 export enum ComponentType {
@@ -860,6 +884,15 @@ export interface Query {
   /* ⚠️ QUERY ACTIONS v1 (27 Sep) — every field below is written by the query drawer and is FLAT,
      because a nested map meets the nested-allowlist denial in firestore.rules. Absent means "not
      recorded", never a default. See reports/query-actions-v1/RECON.md §2. */
+  /**
+   * Versions v2 (D3) — the BOOK version recorded for this query: stamped when it is logged (the package's version,
+   * else the manuscript's in-use one), or set by "Which version went?" / Change. Absent on every query logged before
+   * v2 and on imports; `lib/versionsV2.resolveQueryVersion` then works it out (D4) or reports it unrecorded.
+   *
+   * ⚠️ REVERSES "NOTHING HERE IS STORED ON A QUERY" (queryVersions.ts D5), by the Versions v2 ruling. And it is
+   * PAYLOAD, NEVER A DETERMINANT: `recomputeQuery` does not read it.
+   */
+  bookVersionId?: string;
   /** What went out, as it went out (P4): never read back from the live package. */
   sentPackageId?: string;
   sentMaterials?: string;

@@ -160,6 +160,11 @@ service cloud.firestore {
         // ⚠️ THE CAP IS ARTEFACT-LOCKED TO `MAX_BOOK_VERSIONS`. If the constant moves and this does
         // not, the client permits an append this rule denies with no message.
         && (!data.keys().hasAny(['bookVersions']) || (data.bookVersions is list && data.bookVersions.size() <= 50))
+        // VERSIONS v2 (D2, D1) — the version new queries go out with, and the highest number ever given (so a number
+        // is never reused). ⚠️ A RULE CANNOT LOOP OVER A LIST, so each version's own caps (a name of 1–40 characters,
+        // 1–8 changes of 1–80) are the single writer's (lib/bookVersions.ts) and its tests', not this rule's.
+        && (!data.keys().hasAny(['inUseBookVersionId']) || isValidId(data.inUseBookVersionId))
+        && (!data.keys().hasAny(['bookVersionSeq']) || (data.bookVersionSeq is int && data.bookVersionSeq >= 0 && data.bookVersionSeq <= 10000))
         && data.status is string && (
           data.status == 'Drafting' ||
           data.status == 'Revising' ||
@@ -513,6 +518,10 @@ service cloud.firestore {
         // ⚠️ QUERY ACTIONS v1 (27 Sep) — the drawer's fields, every one FLAT (a map meets the
         // nested-allowlist denial) and every one optional: absent means "not recorded".
         && (data.get('sentPackageId', null) == null || (data.sentPackageId is string && data.sentPackageId.size() <= 128))
+        // VERSIONS v2 (D3) — the book version this query went with: a version id on the manuscript, the same shape as
+        // every other id here. Optional; absent means "not recorded" and the client works it out (D4). It is payload,
+        // never a determinant: nothing about the query's status reads it.
+        && (data.get('bookVersionId', null) == null || isValidId(data.bookVersionId))
         && (data.get('sentMaterials', null) == null || (data.sentMaterials is string && data.sentMaterials.size() <= 1024))
         && (data.get('sentVersions', null) == null || (data.sentVersions is list && data.sentVersions.size() <= 10))
         // PACKAGE EDITIONS (docs/contracts/package-editions.md §C3, 28 Sep) — how the materials were
@@ -880,6 +889,8 @@ service cloud.firestore {
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
             'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions',
+            // Versions v2 (D2, D1)
+            'inUseBookVersionId', 'bookVersionSeq',
             // book profile amendment 2 — see the two clauses in isValidManuscript above.
             'elevatorPitch', 'synopsis',
             // Manuscripts v12 — the hero's setting and series, and nothing else (the ruling was
@@ -1057,7 +1068,9 @@ service cloud.firestore {
             'withdrawTold', 'agentRecheckOn',
             // Package editions (§C3, 28 Sep) — how the materials were recorded.
             'sentHow', 'sentPackageEdition', 'basedOnPackageId', 'basedOnPackageEdition',
-            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom', 'sentPackageName'
+            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom', 'sentPackageName',
+            // Versions v2 (D3) — "Which version went?" and Change, and the first-save backfill.
+            'bookVersionId'
           ])
         );
 
