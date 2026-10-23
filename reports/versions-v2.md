@@ -115,7 +115,7 @@ Differences, and what was done:
 ## 5. Open items for Nick
 
 1. **Founding members.** No flag exists. The gate is `VERSIONS_FOUNDING_ACCESS || Pro`, with the constant on, so no real account sees Free today. The Free state shows on dev builds through `sessionStorage["sa.dev.versionsFree"]="1"`.
-2. **The Query Centre version link.** Build a reachable version filter in the Query Centre, or leave the drawer link out for good?
+2. **The Query Centre version link — FOLLOW-UP (Nick, 23 Oct: leave it out for now).** The drawer ships without "See these N in the Query Centre →". When the Query Centre gains a reachable version filter (today it exists only in the retired three-column arm of `Queries.tsx`), add the link back to the drawer's footer, filtering by `resolveQueryVersion` so its count matches the drawer's.
 3. **Prod rules.** `Query.bookVersionId`, `Manuscript.inUseBookVersionId` and `bookVersionSeq` must be deployed to prod before this page reaches prod; otherwise every save and every logged query is denied silently.
 4. **`manuscriptSummary.queryVersionId`** (Manuscripts page) reads the query's own version and then the package's, but not Original by date. That step needs its callers (manuscripts files) to pass the versions.
 5. **Pre-v2 manuscripts** keep reading: their first version is the root, and no Original is created for them.
