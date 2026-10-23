@@ -223,6 +223,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-f-serif: "Source Serif 4", Georgia, serif;
   --mk-f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
   --mk-f-sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  /* The handwriting: the phone drawer's strapline ("No more winging it."), the ref's Caveat 600. */
+  --mk-f-hand: "Caveat", cursive;
   /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
      repo's no-colour-mix() rule. */
   --mk-illo-rim: rgba(162, 69, 42, 0.34);
@@ -566,6 +568,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-navright .mk-btn { width: auto; padding: 9px 14px; font-size: 13.5px; }
   .mk-burger { order: 0; margin-left: 0; width: 32px; padding: 8px 5px; flex: none; }
   .mk-scope { --mk-nav-h: 60px; }
+  /* The ref's faint rule under the bar (the condensed state's own .12 still outranks it). */
+  .mk-navwrap { box-shadow: 0 1px 0 rgba(244, 241, 234, .06); }
+  /* ⚠️ THE LANDING'S STAGE MEETS THE BAR SQUARE: the sheet's 18px top corners would show as two
+     lighter notches under the header against the navy stage. Its bottom corners are unchanged. */
+  .mk-sheet:has(.mk-hp) { border-top-left-radius: 0; border-top-right-radius: 0; }
 }
 
 /* The founding pill: cream, 42px, two lines — the offer, then ten segments and the places left.

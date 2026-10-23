@@ -24,11 +24,14 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
-import { HERO_AGAIN } from "./landingCopy";
+import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
 export const HERO_SHADOW = { src: "/images/hawk-shadow.png", version: "24b7a5ea", width: 1400, height: 1197 };
+/* The phone's flying shadow (ref `.fly img`), pre-rotated in the file. public/ is not fingerprinted,
+   so the version is the first eight hex digits of the file's own md5. */
+export const HERO_FLY = { src: "/images/hawk-fly.webp", version: "ebcb32c2", width: 700, height: 317 };
 
 /* ── the ref's glyphs, verbatim ── */
 const RING = <svg width="15" height="15" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /></svg>;
@@ -49,6 +52,8 @@ const BellIcon = ({ w = 11, h = 12, sw = 1.8, stroke = "currentColor" }: { w?: n
 
 const AgainIcon = () => <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M13 2.5v3.2H9.8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 
+const BookIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6.5C10 5 7.5 4.5 4 4.5v13c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2v-13c-3.5 0-6 .5-8 2z" /><path d="M12 6.5v13" /></svg>;
+
 /* ── the four cards behind, positions and angles from the ref ── */
 const BACKS = [
   { cls: "mk-lc--o", left: 640, top: 90, t: "rotate(-9deg) scale(.82)", band: ["#f5e6df", "#7c3a2a"], word: "With you", day: "Day 21", ini: "GP", name: "Greg Panetta", agency: "Panetta Associates", pillBg: "#f5e6df", pill: "Full requested", chips: ["ADULT", "LITERARY FICTION"] },
@@ -61,7 +66,25 @@ const BACKS = [
 interface StoryHooks {
   /** The last line has landed: the host may offer "Watch again". */
   onEnd?: () => void;
+  /** 0.6s after that: on a phone, the drawer may rise to offer the founding sign-up. */
+  onGrow?: () => void;
+  /** The phone layout: the form docks above the drawer, so it rises further (the mobile ref's). */
+  phone?: boolean;
 }
+
+/**
+ * On a phone the four sit tucked behind the front card, all at its place (688, 14), peeking over its
+ * top — the mobile ref's exact transforms, in BACKS' order. Numbers rather than strings because
+ * `HeroPhone.tsx` fits the whole pile to the screen from them.
+ */
+export const PHONE_BACKS = [
+  { tx: -10, ty: -30, r: -3.5, s: .95 },
+  { tx: -4, ty: -18, r: -1.5, s: .97 },
+  { tx: 12, ty: -26, r: 3.5, s: .95 },
+  { tx: 6, ty: -16, r: 1.8, s: .97 },
+] as const;
+export const PHONE_FRONT_ROTATE = .8;
+const phoneBackTransform = (b: typeof PHONE_BACKS[number]) => `translate(${b.tx}px,${b.ty}px) rotate(${b.r}deg) scale(${b.s})`;
 
 const reduceMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -256,14 +279,14 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     t = stamp(pnBtn, t + 300, 1.5);
     // the writer presses Nudge, and the form opens
     t = press(pnBtn, t + 600);
-    A(form, [{ opacity: 0, transform: "translateY(18px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: t + 60, fill: "forwards", easing: BOUNCE });
+    A(form, [{ opacity: 0, transform: hooks.phone ? "translateY(48px) scale(.96)" : "translateY(18px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: hooks.phone ? 460 : 380, delay: t + 60, fill: "forwards", easing: BOUNCE });
     t += 550;
     t = select(fToday, t);
     t = select(f2w, t + 350);
     t = type(noteText, t + 300, 24);
     t = press(fSave, t + 450);
     knots.push([t, 92]);   // saved on Day 92, 14 Jun
-    A(form, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(10px) scale(.98)" }], { duration: 280, delay: t + 80, fill: "forwards" });
+    A(form, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: hooks.phone ? "translateY(30px) scale(.98)" : "translateY(10px) scale(.98)" }], { duration: hooks.phone ? 300 : 280, delay: t + 80, fill: "forwards" });
     t += 420;
     // the nudge is logged; it's back with the agent
     A(pn, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.94)" }], { duration: 260, delay: t, fill: "forwards" });
@@ -282,6 +305,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     A(pfIcon, [{ transform: "scale(1) rotate(0)" }, { transform: "scale(1.35) rotate(25deg)" }, { transform: "scale(1) rotate(0)" }], { duration: 700, delay: t + 250, fill: "none", easing: "ease-in-out" });
     /* The story is over: offer it again (never on its own — it does not loop). */
     later(() => hooks.onEnd?.(), t + 900);
+    later(() => hooks.onGrow?.(), t + 1500);
     prepClock(); raf = requestAnimationFrame(runClock);
     later(scrollable, t + 900);
   }
@@ -334,40 +358,171 @@ function enter(root: HTMLElement, host: HTMLElement | null) {
   };
 }
 
-const BackCard: React.FC<{ c: typeof BACKS[number] }> = ({ c }) => (
-  <div className={"mk-lc mk-lc--back " + c.cls} style={{ left: c.left, top: c.top, transform: c.t }}>
+/** The manuscript block: "The Salt Road" on the desk, "Your novel" beside a book tile on a phone. */
+const Ms: React.FC<{ phone: boolean; chips: readonly string[] }> = ({ phone, chips }) => phone ? (
+  <div className="mk-lc-ms">
+    <small aria-hidden="true"><BookIcon /></small>
+    <b>{HERO_PHONE_MS}</b>
+    <div className="mk-lc-chips">{chips.map((x) => <span key={x}>{x}</span>)}</div>
+  </div>
+) : (
+  <div className="mk-lc-ms"><small>QUERYING</small><b>The Salt Road</b><div className="mk-lc-chips">{chips.map((x) => <span key={x}>{x}</span>)}</div></div>
+);
+
+/* ═════════════ the first impression on a phone (the mobile ref's ENTER and fly-past) ═════════════ */
+function enterPhone(scope: HTMLElement) {
+  const front = scope.querySelector<HTMLElement>('[data-hc="front"]')!;
+  const backs = [...scope.querySelectorAll<HTMLElement>(".mk-lc--back")];
+  const fly = scope.querySelector<HTMLElement>(".mk-hp-fly");
+  const anims: Animation[] = [];
+  const E = (el: Element, kf: Keyframe[], o: KeyframeAnimationOptions) => {
+    const a = el.animate(kf, Object.assign({ fill: "backwards", easing: "cubic-bezier(.16,1,.3,1)" }, o)); anims.push(a); return a;
+  };
+  // dealt from the side: each back card slides in from the right, spinning down onto the pile; the front lands last
+  backs.forEach((b, k) => E(b, [{ opacity: 0, translate: "720px -40px", rotate: "18deg" }, { opacity: 1, offset: .25 }, { opacity: 1, translate: "0 0", rotate: "0deg" }], { duration: 700, delay: 350 + k * 150 }));
+  E(front, [{ opacity: 0, translate: "760px -60px", rotate: "16deg" }, { opacity: 1, offset: .25 }, { opacity: 1, translate: "0 0", rotate: "0deg" }], { duration: 800, delay: 350 + 4 * 150 + 60 });
+  // the hawk's shadow: one pass, low left to top right along one curve, at a constant speed
+  if (fly) {
+    anims.push(fly.animate([{ opacity: 1, offsetDistance: "0%", scale: .94 }, { opacity: 1, offsetDistance: "100%", scale: 1.06 }], { duration: 1000, delay: 1500, easing: "linear", fill: "none" }));
+    const img = fly.querySelector("img");
+    if (img) anims.push(img.animate([{ filter: "blur(7px)" }, { filter: "blur(10px)" }], { duration: 1000, delay: 1500, fill: "none" }));
+  }
+  return () => { anims.forEach((a) => a.cancel()); };
+}
+
+const BackCard: React.FC<{ c: typeof BACKS[number]; phone: boolean; t?: string }> = ({ c, phone, t }) => (
+  <div className={"mk-lc mk-lc--back " + c.cls} style={phone ? { left: 688, top: 14, transform: t } : { left: c.left, top: c.top, transform: c.t }}>
     <div className="mk-lc-in">
       <div className="mk-lc-band" style={{ background: c.band[0], color: c.band[1] }}><span>{c.word}</span><span>{c.day}</span></div>
       <div className="mk-lc-agent"><span className="mk-lc-disc">{c.ini}</span><div><div className="mk-lc-nm">{c.name}</div><div className="mk-lc-ag">{c.agency}</div></div><span className="mk-lc-pill" style={{ background: c.pillBg }}>{RING}{c.pill}</span></div>
-      <div className="mk-lc-ms"><small>QUERYING</small><b>The Salt Road</b><div className="mk-lc-chips">{c.chips.map((x) => <span key={x}>{x}</span>)}</div></div>
+      <Ms phone={phone} chips={c.chips} />
       <div className="mk-lc-tabs"><span>Tracking</span><span>Agent</span><span>Materials</span></div>
       {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className={"mk-lc-line" + (i % 2 ? " mk-lc-line--s" : "")} />)}
     </div>
   </div>
 );
 
+/** The nudge form. On the desk it opens OVER the card; on a phone it docks above the drawer. */
+const NudgeForm: React.FC = () => (
+  <div className="mk-lf" data-hc="lf">
+    <div className="mk-lf-in">
+      <div className="mk-lf-h"><small>NUDGE</small><b>Nudge Eleanor</b><i>GREENFIELD LITERARY · PARTIAL SENT 22 APR</i></div>
+      <div className="mk-lf-b">
+        <span className="mk-lf-l">SENT</span>
+        <div className="mk-lf-row"><span className="mk-lf-ch" data-hc="lf-today">Today</span><span className="mk-lf-ch">Yesterday</span><span className="mk-lf-ch">Pick a date</span></div>
+        <span className="mk-lf-l">REMIND ME AGAIN IN</span>
+        <div className="mk-lf-row"><span className="mk-lf-ch">1 week</span><span className="mk-lf-ch" data-hc="lf-2w">2 weeks</span><span className="mk-lf-ch">3 weeks</span></div>
+        <span className="mk-lf-l">A NOTE (OPTIONAL)</span>
+        <div className="mk-lf-note" data-hc="lf-note">Just checking in on the partial. Hope all’s well!</div>
+      </div>
+      <div className="mk-lf-f"><b data-hc="lf-save">Save nudge</b><span>Cancel</span></div>
+    </div>
+  </div>
+);
+
+/** The living card. The nudge form rides inside it on the desk only. */
+const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
+    <div className="mk-lc" data-hc="front">
+      <div className="mk-lc-in">
+        <div className="mk-lc-band" data-hc="band" style={{ background: YOU.bg, color: YOU.fg }}>
+          <span data-hc="bandt">With you</span>
+          <span className="mk-lc-day" data-hc="day" data-n="99">Day 99</span>
+        </div>
+        <div className="mk-lc-agent">
+          <span className="mk-lc-disc">EW</span>
+          <div><div className="mk-lc-nm">Eleanor Whitfield</div><div className="mk-lc-ag">Greenfield Literary</div></div>
+          <span className="mk-lc-pill" data-hc="pill" style={{ background: YOU.pill }} dangerouslySetInnerHTML={{ __html: PILL.freq }} />
+        </div>
+        <Ms phone={phone} chips={phone ? HERO_PHONE_TAGS : ["ADULT", "LITERARY FICTION", "94,000 WORDS"]} />
+        <div className="mk-lc-tabs"><span>Tracking</span><span>Agent</span><span>Materials</span></div>
+        <div className="mk-lc-tlv mk-lc-tlv--scroll" data-hc="tlv">
+          <ol className="mk-lc-steps" data-hc="steps">
+            <i className="mk-lc-rail" aria-hidden="true" />
+            <li className="mk-lc-step">
+              <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /></svg>
+              <span className="mk-lc-t">Query sent <i>by email</i></span><span className="mk-lc-d">14 MAR</span>
+              <span className="mk-lc-att"><span><DocIcon />Letter v3</span><span><SynIcon />Synopsis</span><span><PagesIcon />10 pages</span></span>
+            </li>
+            <li className="mk-lc-step">
+              <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" strokeDasharray="2.2 2.2" /><path d="M10 4.5a5.5 5.5 0 0 1 0 11z" fill="#1c130f" /></svg>
+              <span className="mk-lc-t">Partial requested</span><span className="mk-lc-d">18 APR</span>
+              <span className="mk-lc-att"><span><PagesIcon />First 3 chapters</span></span>
+            </li>
+            <li className="mk-lc-step">
+              <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="#1c130f" /></svg>
+              <span className="mk-lc-t">Partial sent</span><span className="mk-lc-d" data-hc="psd">22 APR</span>
+              <span className="mk-lc-att"><span className="mk-ok"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5" /></svg>First 3 chapters</span></span>
+            </li>
+            <li className="mk-lc-step">
+              <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="10" r="7.5" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>
+              <span className="mk-lc-t">You nudged Eleanor</span><span className="mk-lc-d">14 JUN</span>
+              <span className="mk-lc-att"><span><BellIcon />Reminder in 2 weeks</span></span>
+            </li>
+            <li className="mk-lc-step">
+              <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#1c130f" stroke="#1c130f" strokeWidth="1.6" strokeDasharray="2.2 2.2" /></svg>
+              <span className="mk-lc-t">Full requested</span><span className="mk-lc-d">21 JUN</span>
+              <span className="mk-lc-att"><span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.1"><path d="M2 1.5h7a1.5 1.5 0 0 1 1.5 1.5v7.5H3.5A1.5 1.5 0 0 1 2 9z" /><path d="M2 9a1.5 1.5 0 0 1 1.5-1.5h7" /></svg>Full manuscript</span></span>
+            </li>
+          </ol>
+        </div>
+        <div className="mk-lc-slot" data-hc="slot">
+          <div className="mk-lc-panel" data-hc="pn"><p><BellIcon w={16} h={16} sw={1.6} stroke="#7c3a2a" /><span className="mk-lc-nt">Eleanor should’ve replied last week</span></p><b>Nudge</b></div>
+          <div className="mk-lc-panel mk-lc-panel--final" data-hc="pf"><p><svg width="17" height="17" viewBox="0 0 20 20" fill="#a2452a"><path d="M10 1.8l1.9 5.3 5.3 1.9-5.3 1.9L10 16.2l-1.9-5.3L2.8 9l5.3-1.9z" /><path d="M16 13.2l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" /></svg><span className="mk-lc-nt">Eleanor wants the full! Send it by 5 July.</span></p><b>Mark sent</b></div>
+        </div>
+        <div className="mk-lc-ft">
+          <span data-hc="ftl" className="mk-late"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="6" cy="6" r="5" /><path d="M6 3.2V6l2 1.3" /></svg><em data-hc="ftt">Send the full by 5 July</em></span>
+          <span data-hc="fta">Mark full sent</span>
+        </div>
+    {/* The nudge form opens OVER the card, and nothing darkens the card behind it. The "Today"
+        chip names no date, as the ref's does. On a phone it is docked outside the card instead. */}
+    {!phone && <NudgeForm />}
+  </div>
+</div>
+);
+
 /**
  * The pile. `host` is the hero element the pointer is measured against; the hero itself places and
- * scales the pile (see `Hero.tsx`'s `size()`), which reads `[data-hc="front"]` for the card's box.
+ * scales the pile (see `Hero.tsx`'s `size()`, or `HeroPhone.tsx` on a phone), which reads
+ * `[data-hc="front"]` for the card's box.
+ *
+ * ⚠️ ONE STORY, TWO LAYOUTS, FIXED PER MOUNT. `variant="phone"` (≤760px) draws the pile under the
+ * header with the ref's phone transforms, no blur and no cast shadow; the hawk's shadow flies over
+ * once instead; the nudge form docks above the drawer; and `onGrow` is called once the story ends so
+ * the drawer can rise. A change of breakpoint remounts the hero rather than re-rendering this.
  */
-export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> = React.memo(({ host }) => {
+export const HeroCard: React.FC<{
+  host: React.RefObject<HTMLElement | null>;
+  variant?: "desk" | "phone";
+  onGrow?: () => void;
+}> = React.memo(({ host, variant = "desk", onGrow }) => {
+  const phone = variant === "phone";
   const root = useRef<HTMLDivElement>(null);
+  const scope = useRef<HTMLDivElement>(null);
   const again = useRef<HTMLButtonElement>(null);
+  /* The latest `onGrow`, read when the story ends — never a dependency, so it cannot restart it. */
+  const grow = useRef(onGrow);
+  grow.current = onGrow;
 
   /* ⚠️ A LAYOUT EFFECT, SO THE ENTRANCE IS APPLIED BEFORE THE FIRST PAINT. With `fill: backwards` the
      cards and the shadow hold their first keyframe through their delays — invisible at 0.1s — and a
      plain effect would paint the resting pile for one frame before taking it away. */
   useLayoutEffect(() => {
-    const el = root.current; if (!el || reduceMotion()) return;
+    if (reduceMotion()) return;
+    if (phone) { const el = scope.current; return el ? enterPhone(el) : undefined; }
+    const el = root.current; if (!el) return;
     return enter(el, host.current);
-  }, [host]);
+  }, [host, phone]);
 
   useEffect(() => {
-    const el = root.current; if (!el) return;
+    const el = phone ? scope.current : root.current; if (!el) return;
     const btn = again.current;
     /* ⚠️ THE CLASS IS SET ON THE ELEMENT, NOT THROUGH STATE: this component must never re-render
        (see the docblock), and "Watch again" is the story's own business. */
-    const story = makeStory(el, { onEnd: () => btn?.classList.add("mk-again--on") });
+    const story = makeStory(el, {
+      phone,
+      onEnd: () => btn?.classList.add("mk-again--on"),
+      onGrow: () => grow.current?.(),
+    });
     if (reduceMotion()) return () => story.dispose();
     /* Watch again replays the STORY only — the card back to Day 32 and on to the end — and never the
        deal or the shadow, which are the page arriving rather than the query's life. */
@@ -382,82 +537,37 @@ export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> =
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     if (fonts?.ready) fonts.ready.then(go, go); else go();
     return () => { live = false; btn?.removeEventListener("click", replay); story.dispose(); };
-  }, []);
+  }, [phone]);
+
+  const againBtn = (
+    <button type="button" className={"mk-again" + (phone ? " mk-again--phone" : "")} ref={again}>
+      <AgainIcon />{HERO_AGAIN}
+    </button>
+  );
+
+  if (phone) return (
+    <div className="mk-hp-scope" ref={scope}>
+      <div className="mk-hp-hero">
+        <div className="mk-hc-pile mk-hc-pile--phone" ref={root} aria-hidden="true">
+          {BACKS.map((c, k) => <BackCard key={c.ini} c={c} phone t={phoneBackTransform(PHONE_BACKS[k])} />)}
+          <FrontCard phone />
+        </div>
+      </div>
+      {/* The hawk's shadow, once: above the pile, below the drawer (the stage is its own stacking
+          context, under the sheet), so it never darkens the drawer. */}
+      <div className="mk-hp-fly" aria-hidden="true">
+        <img src={HERO_FLY.src + "?v=" + HERO_FLY.version} alt="" width={HERO_FLY.width} height={HERO_FLY.height} />
+      </div>
+      {againBtn}
+      <div className="mk-hp-dock" aria-hidden="true"><NudgeForm /></div>
+    </div>
+  );
 
   return (
     <>
     <div className="mk-hc-pile" ref={root} aria-hidden="true">
-      {BACKS.map((c) => <BackCard key={c.ini} c={c} />)}
-
-      <div className="mk-lc" data-hc="front">
-        <div className="mk-lc-in">
-          <div className="mk-lc-band" data-hc="band" style={{ background: YOU.bg, color: YOU.fg }}>
-            <span data-hc="bandt">With you</span>
-            <span className="mk-lc-day" data-hc="day" data-n="99">Day 99</span>
-          </div>
-          <div className="mk-lc-agent">
-            <span className="mk-lc-disc">EW</span>
-            <div><div className="mk-lc-nm">Eleanor Whitfield</div><div className="mk-lc-ag">Greenfield Literary</div></div>
-            <span className="mk-lc-pill" data-hc="pill" style={{ background: YOU.pill }} dangerouslySetInnerHTML={{ __html: PILL.freq }} />
-          </div>
-          <div className="mk-lc-ms"><small>QUERYING</small><b>The Salt Road</b><div className="mk-lc-chips"><span>ADULT</span><span>LITERARY FICTION</span><span>94,000 WORDS</span></div></div>
-          <div className="mk-lc-tabs"><span>Tracking</span><span>Agent</span><span>Materials</span></div>
-          <div className="mk-lc-tlv mk-lc-tlv--scroll" data-hc="tlv">
-            <ol className="mk-lc-steps" data-hc="steps">
-              <i className="mk-lc-rail" aria-hidden="true" />
-              <li className="mk-lc-step">
-                <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /></svg>
-                <span className="mk-lc-t">Query sent <i>by email</i></span><span className="mk-lc-d">14 MAR</span>
-                <span className="mk-lc-att"><span><DocIcon />Letter v3</span><span><SynIcon />Synopsis</span><span><PagesIcon />10 pages</span></span>
-              </li>
-              <li className="mk-lc-step">
-                <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" strokeDasharray="2.2 2.2" /><path d="M10 4.5a5.5 5.5 0 0 1 0 11z" fill="#1c130f" /></svg>
-                <span className="mk-lc-t">Partial requested</span><span className="mk-lc-d">18 APR</span>
-                <span className="mk-lc-att"><span><PagesIcon />First 3 chapters</span></span>
-              </li>
-              <li className="mk-lc-step">
-                <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="#1c130f" /></svg>
-                <span className="mk-lc-t">Partial sent</span><span className="mk-lc-d" data-hc="psd">22 APR</span>
-                <span className="mk-lc-att"><span className="mk-ok"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5" /></svg>First 3 chapters</span></span>
-              </li>
-              <li className="mk-lc-step">
-                <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="10" r="7.5" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>
-                <span className="mk-lc-t">You nudged Eleanor</span><span className="mk-lc-d">14 JUN</span>
-                <span className="mk-lc-att"><span><BellIcon />Reminder in 2 weeks</span></span>
-              </li>
-              <li className="mk-lc-step">
-                <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#1c130f" stroke="#1c130f" strokeWidth="1.6" strokeDasharray="2.2 2.2" /></svg>
-                <span className="mk-lc-t">Full requested</span><span className="mk-lc-d">21 JUN</span>
-                <span className="mk-lc-att"><span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.1"><path d="M2 1.5h7a1.5 1.5 0 0 1 1.5 1.5v7.5H3.5A1.5 1.5 0 0 1 2 9z" /><path d="M2 9a1.5 1.5 0 0 1 1.5-1.5h7" /></svg>Full manuscript</span></span>
-              </li>
-            </ol>
-          </div>
-          <div className="mk-lc-slot" data-hc="slot">
-            <div className="mk-lc-panel" data-hc="pn"><p><BellIcon w={16} h={16} sw={1.6} stroke="#7c3a2a" /><span className="mk-lc-nt">Eleanor should’ve replied last week</span></p><b>Nudge</b></div>
-            <div className="mk-lc-panel mk-lc-panel--final" data-hc="pf"><p><svg width="17" height="17" viewBox="0 0 20 20" fill="#a2452a"><path d="M10 1.8l1.9 5.3 5.3 1.9-5.3 1.9L10 16.2l-1.9-5.3L2.8 9l5.3-1.9z" /><path d="M16 13.2l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" /></svg><span className="mk-lc-nt">Eleanor wants the full! Send it by 5 July.</span></p><b>Mark sent</b></div>
-          </div>
-          <div className="mk-lc-ft">
-            <span data-hc="ftl" className="mk-late"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="6" cy="6" r="5" /><path d="M6 3.2V6l2 1.3" /></svg><em data-hc="ftt">Send the full by 5 July</em></span>
-            <span data-hc="fta">Mark full sent</span>
-          </div>
-          {/* The nudge form opens OVER the card, and nothing darkens the card behind it. The "Today"
-              chip names no date, as the ref's does. */}
-          <div className="mk-lf" data-hc="lf">
-            <div className="mk-lf-in">
-              <div className="mk-lf-h"><small>NUDGE</small><b>Nudge Eleanor</b><i>GREENFIELD LITERARY · PARTIAL SENT 22 APR</i></div>
-              <div className="mk-lf-b">
-                <span className="mk-lf-l">SENT</span>
-                <div className="mk-lf-row"><span className="mk-lf-ch" data-hc="lf-today">Today</span><span className="mk-lf-ch">Yesterday</span><span className="mk-lf-ch">Pick a date</span></div>
-                <span className="mk-lf-l">REMIND ME AGAIN IN</span>
-                <div className="mk-lf-row"><span className="mk-lf-ch">1 week</span><span className="mk-lf-ch" data-hc="lf-2w">2 weeks</span><span className="mk-lf-ch">3 weeks</span></div>
-                <span className="mk-lf-l">A NOTE (OPTIONAL)</span>
-                <div className="mk-lf-note" data-hc="lf-note">Just checking in on the partial. Hope all’s well!</div>
-              </div>
-              <div className="mk-lf-f"><b data-hc="lf-save">Save nudge</b><span>Cancel</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {BACKS.map((c) => <BackCard key={c.ini} c={c} phone={false} />)}
+      <FrontCard phone={false} />
 
       {/* ⚠️ THE SHADOW IS CAST OVER THE PILE, not set in a column of its own: multiply, .2, blurred,
           turned −4°, and it never takes a click. */}
@@ -472,9 +582,7 @@ export const HeroCard: React.FC<{ host: React.RefObject<HTMLElement | null> }> =
     {/* ⚠️ OUTSIDE THE PILE, BECAUSE THE PILE IS `aria-hidden` and a button inside it would be
         focusable but unannounced. `Hero.tsx`'s `size()` places it just above the front card's
         top-right corner, in the pile's own coordinates. Hidden (and inert) until the story ends. */}
-    <button type="button" className="mk-again" ref={again}>
-      <AgainIcon />{HERO_AGAIN}
-    </button>
+    {againBtn}
     </>
   );
 });

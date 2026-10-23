@@ -47,6 +47,20 @@ export const HERO_LINK = "See how it works";
 /** The pill offered once the card's story has ended (both layouts). It never loops on its own. */
 export const HERO_AGAIN = "Watch again";
 
+/* ── The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ──
+   ⚠️ THE STRAPLINE IS `HERO_H1` ITSELF, NOT A SECOND STRING. On phones the desktop headline is not
+   rendered and "No more winging it." is the drawer's handwritten strapline — so the phrase keeps
+   exactly one owner here, and the "exactly once" lock stays true by construction.
+   "See how it works" is `HERO_LINK`, for the same reason. */
+/** The drawer's question, in two blocks: the second carries the rust highlighter. */
+export const HERO_PHONE_Q = ["Hunting for a", "literary agent?"] as const;
+/** The founding sign-up that opens inside the drawer once the story ends. */
+export const HERO_PHONE_SIGNUP = "Enter your email for full, free access to QueryHawk as a founding writer.";
+export const HERO_PHONE_JOIN = "Join";
+/** The phone card's manuscript block: no title of a real book, and three small tags. */
+export const HERO_PHONE_MS = "Your novel";
+export const HERO_PHONE_TAGS = ["Adult", "Literary fiction", "94,000 words"] as const;
+
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —
  * a single button is the whole ask, and two more things under it were competing for the click
