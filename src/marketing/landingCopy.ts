@@ -59,6 +59,8 @@ export const HERO_PHONE_SIGNUP = "Enter your email for full, free access to Quer
 export const HERO_PHONE_JOIN = "Join";
 /** The phone cards' manuscript (v3): the same invented title on every phone card, front and back. */
 export const HERO_PHONE_MS = "Lord of the Wings";
+/** v3.1 (C3): the FRONT card's manuscript; the back cards keep `HERO_PHONE_MS`. */
+export const HERO_PHONE_MS_FRONT = "The Taloned Mr Ripley";
 export const HERO_PHONE_TAGS = ["Adult", "Literary fiction", "94,000 words"] as const;
 
 /* ── The phone card's story, v3 (ref design-refs/landing-hero-mobile-v3.html): one short loop ──
@@ -73,10 +75,18 @@ export const PHONE_STORY = {
     nudged: ["Reminder on 28 June", "Record a response"],
     full: ["Send the full by 5 July", "Mark full sent"],
   },
-  /** [title, detail, icon] — shown beside the line it belongs to, then floated away. */
-  tags: {
-    partial: ["Task created", "Send the partial to Eleanor", "todo"],
-    nudge: ["Reminder set", "We’ll nudge you again on 28 June", "bell"],
+  /** v3.1 (C1) — [title, icon, kind]: a chip that stamps into its own line's chip row, holds and fades. */
+  chips: {
+    partial: ["Task created", "todo", ""],
+    partialSent: ["Task complete", "todo", "done"],
+    nudge: ["Reminder set", "bell", ""],
+  },
+  /** v3.1 (C2) — what Eleanor asked for: the popover under the status pill, flicked Words then Chapters. */
+  asked: {
+    label: "She asked for",
+    first: "First",
+    units: [["pages", "Pages"], ["chapters", "Chapters"], ["words", "Words"]],
+    pages: "50", words: "5,000", chapters: "3",
   },
 } as const;
 
