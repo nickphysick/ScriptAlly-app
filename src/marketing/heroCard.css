@@ -12,8 +12,7 @@
    chips, the tabs, the odometer's digits — would draw in the app's sans while its parent named the
    right face. `:where()` holds the reset to one class of specificity, so every single-class rule
    below still wins on source order. */
-.mk-hc-pile :where(span, div, p, b, i, em, small, li, ol, ul, nav, strong),
-.mk-hp-dock :where(span, div, p, b, i, em, small, li, ol, ul, nav, strong),
+.mk-hc-pile :where(span, div, p, b, i, em, small, li, ol),
 .mk-up :where(span, div, p, b, i, em) { font-family: inherit; }
 
 .mk-hc-pile { position: absolute; inset: 0; transform-origin: 0 0; pointer-events: none; }
@@ -199,7 +198,8 @@
   position: sticky; top: var(--mk-nav-h); z-index: 1;
   height: calc(100svh - var(--mk-nav-h));
   overflow-x: clip;
-  background: radial-gradient(circle at 50% 32%, #2e3d57 0, #1b2433 64%);
+  /* L1 (v3): plain navy with the ref's soft light — its last stage rule; no clouds, no stars. */
+  background: radial-gradient(circle at 50% 34%, #2b3a55 0, #1b2433 66%);
 }
 .mk-hp-scope { position: absolute; inset: 0; }
 .mk-hp-hero { position: absolute; left: 0; right: 0; top: 0; height: 100%; transform-origin: 50% 0; }
@@ -212,7 +212,7 @@
    very swipe that raises the drawer. */
 .mk-hc-pile--phone .mk-lc[data-hc="front"] { transform: rotate(.8deg); pointer-events: none; }
 .mk-hc-pile--phone .mk-lc-tlv { height: 336px; }
-/* The manuscript block: a book tile, "Your novel", then the tags. */
+/* The manuscript block: a book tile, the title, then the tags. */
 .mk-hc-pile--phone .mk-lc-ms { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; padding: 10px 16px 13px; }
 .mk-hc-pile--phone .mk-lc-ms small {
   grid-row: 1 / 3; width: 34px; height: 34px; border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px #e6dfd5;
@@ -230,21 +230,6 @@
   offset-path: path("M -170 600 C 30 470, 200 290, 610 -170"); offset-rotate: auto 90deg;
 }
 .mk-hp-fly img { display: block; width: 100%; height: auto; max-width: none; opacity: .19; filter: blur(8px); }
-
-/* Watch again, on a phone: the top-right of the stage, just above the card, not counter-scaled. */
-.mk-again.mk-again--phone { left: auto; right: 14px; top: 8px; transform-origin: 50% 50%; transform: translateY(-4px); }
-.mk-again.mk-again--phone.mk-again--on { transform: none; }
-
-/* The nudge form docks square to the screen, just above the drawer. */
-.mk-hp-dock {
-  position: absolute; left: 50%; width: 420px; bottom: 268px; z-index: 22; pointer-events: none;
-  transform: translateX(-50%) scale(.82); transform-origin: 50% 100%;
-}
-.mk-hp-dock .mk-lf { position: relative; left: auto; right: auto; top: auto; }
-/* ⚠️ CONTENT-BOX, AS THE REF IS. The mock has no Tailwind preflight, so its 32px chips and 40px note
-   come out 33 and 58 with their padding; the app's border-box made the docked form 22px shorter than
-   the ref draws it. Scoped to the dock: the desktop form keeps the v3 build's sizes untouched. */
-.mk-hp-dock .mk-lf-ch, .mk-hp-dock .mk-lf-note, .mk-hp-dock .mk-lf-f b { box-sizing: content-box; }
 
 /* The drawer: a 250px cream sheet at rest, 26px top corners (`HeroPhone` squares them off across
    the travel), over the foot of the stage. Its head holds the drawer's own contents and is the
@@ -330,166 +315,42 @@
   .mk-hp-fly { display: none; }
 }
 
-/* ═════════════ The phone card's story, v2 (ref design-refs/landing-hero-mobile-v2.html) ═════════════
-   ⚠️ THE REF IS CUMULATIVE — it restates `.lcq-p`, `.lcd`, `.lcd-chart`, `.lcd-ph` and others several
-   times — so every value below is the LAST declaration of its property, merged by hand and then
-   measured against the rendered ref. Its dead helpers (ghost, rise, notify, sentPop, bubbleGhost,
-   chartGhost, noteTask, drift, tag, the `#lq` form, the night sky) are not ported.
-   ⚠️ CONTENT-BOX, AS THE REF IS: it has no Tailwind preflight, so a 42px chip with 1px of padding is
-   43 there. These are new elements with no desk counterpart, so the ref's box model is simply theirs.
-   ⚠️ THE STAGE IS v1's. The ref also restyles `.stage` (a new gradient, `overflow: hidden`); the
-   brief keeps the stage as v1 built it, so those two rules are deliberately not ported. */
-.mk-lcd, .mk-lcd *, .mk-lcq, .mk-lcq *, .mk-lcf, .mk-lcf *, .mk-hp-dock .mk-smp, .mk-hp-dock .mk-smp * { box-sizing: content-box; }
+/* ═════════════ The phone card's story, v3 (ref design-refs/landing-hero-mobile-v3.html) ═════════════
+   ⚠️ ONLY WHAT `playShort()` REACHES. v2's dashboard, agent list, query form, sample control,
+   response form and bottom status pill are deleted with their markup; so is the hidden `.beat`
+   caption the ref still carries. Values are the ref's last declaration of each property. */
 
-/* P3 — profile heads in every phone disc. */
+/* Profile heads in every phone disc. */
 .mk-hc-pile--phone .mk-lc-disc { color: #b9b0a5; overflow: hidden; align-items: end; }
 .mk-hc-pile--phone .mk-lc-disc svg { width: 26px; height: 26px; margin-bottom: -3px; }
-/* S4 — the manuscript block with the ref's more generous room, and the typing caret. */
+/* The manuscript block, with the ref's more generous room. */
 .mk-hc-pile--phone .mk-lc-ms { padding: 16px 16px 17px; column-gap: 14px; }
 .mk-hc-pile--phone .mk-lc-ms small { width: 40px; height: 40px; border-radius: 10px; }
 .mk-hc-pile--phone .mk-lc-ms small svg { width: 21px; height: 21px; }
 .mk-hc-pile--phone .mk-lc-ms b { margin: 2px 0 11px; font-size: 30px; }
-.mk-hc-pile--phone .mk-lc-ms b.mk-typing::after {
-  content: ""; display: inline-block; width: 2px; height: .9em; margin-left: 2px; vertical-align: -.08em;
-  background: #a2452a; animation: mkHpBlink .9s steps(1) infinite;
-}
-@keyframes mkHpBlink { 50% { opacity: 0; } }
 
-/* S1 — the dashboard the card opens on (`.lcd`). */
-.mk-lcd {
-  position: absolute; inset: 7px; z-index: 8; display: flex; flex-direction: column; gap: 10px;
-  padding: 18px 20px 0; background: #f3f0ea; border-radius: 14px; opacity: 0; pointer-events: none;
-}
-.mk-lcd-title { margin: 0 0 2px; font: 400 32px/1.05 var(--mk-f-display); color: #1c130f; }
-.mk-lcd-panel { padding: 5px; border-radius: 14px; background: #fff; box-shadow: 0 10px 24px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.06); }
-.mk-lcd-ph { padding: 10px 14px 9px; border-radius: 10px 10px 0 0; background: #2a3a52; color: #f5f1eb; font: 400 20px/1 var(--mk-f-display); }
-.mk-lcd-chart { display: block; width: 100%; height: 52px; margin-top: 6px; border-left: 1px solid transparent; }
-.mk-lcd-ax { display: flex; justify-content: space-between; padding: 5px 10px 6px; margin: 0 6px; border-top: 1px solid rgba(28,19,15,.1); font: 400 11px/1 var(--mk-f-serif); color: rgba(28,19,15,.5); }
-.mk-lcd-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.mk-lcd-mini { padding: 4px; border-radius: 12px; background: #fff; box-shadow: 0 8px 20px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.06); }
-.mk-lcd-mh { padding: 8px 11px 7px; border-radius: 9px 9px 0 0; font: 400 16px/1 var(--mk-f-display); }
-.mk-lcd-mh--grey { background: #e7e2da; color: #1c130f; }
-.mk-lcd-mh--blue { background: #5d7393; color: #f5f1eb; }
-.mk-lcd-mb { display: flex; align-items: center; gap: 8px; padding: 8px 6px 6px; }
-.mk-lcd-mb svg { flex: none; width: 58px; height: 58px; }
-.mk-lcd-mb ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.mk-lcd-mb li { display: flex; align-items: center; gap: 6px; font: 400 12.5px/1.1 var(--mk-f-serif); color: #1c130f; white-space: nowrap; }
-.mk-lcd-mb li i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
-.mk-lcd-lh {
-  display: flex; align-items: baseline; justify-content: space-between; margin-top: 2px; padding-bottom: 6px;
-  background: linear-gradient(#a2452a, #a2452a) 0 100% / 44px 2.5px no-repeat;
-}
-.mk-lcd-lh b { font: 400 21px/1.1 var(--mk-f-display); color: #1c130f; }
-.mk-lcd-lh span { font: 500 11px/1 var(--mk-f-mono); letter-spacing: .14em; text-transform: uppercase; color: #1c130f; border-bottom: 1.5px solid #1c130f; padding-bottom: 2px; }
-.mk-lcd-task { border-radius: 12px; background: #fff; overflow: hidden; box-shadow: inset 4px 0 0 #a2452a, 0 8px 20px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.06); }
-.mk-lcd-th { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 8px 18px; background: #f5e6df; }
-.mk-lcd-th span { padding: 5px 8px 4px; border-radius: 4px; background: #2a3a52; color: #fff; font: 500 10px/1 var(--mk-f-mono); letter-spacing: .18em; text-transform: uppercase; }
-.mk-lcd-th em { font: 400 10.5px/1 var(--mk-f-mono); font-style: normal; letter-spacing: .14em; color: #6c675f; }
-.mk-lcd-tb { padding: 12px 14px 8px 18px; }
-.mk-lcd-ta { display: flex; align-items: center; gap: 12px; }
-.mk-lcd-ta i { flex: none; width: 42px; height: 42px; border-radius: 50%; background: #2a3a52; color: #8f9db4; display: grid; place-items: end center; overflow: hidden; }
-.mk-lcd-ta i svg { margin-bottom: -3px; }
-.mk-lcd-ta b { display: block; font: 400 18px/1.2 var(--mk-f-serif); color: #1c130f; }
-.mk-lcd-ta strong { font-weight: 700; }
-.mk-lcd-ta span { display: block; margin-top: 4px; font: 400 9.5px/1.2 var(--mk-f-mono); letter-spacing: .14em; text-transform: uppercase; color: #8a857e; }
-.mk-lcd-tf { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding: 8px 14px 8px 18px; border-top: 1px solid rgba(28,19,15,.08); }
-.mk-lcd-tf span { font: 400 15px/1 var(--mk-f-serif); color: rgba(28,19,15,.65); }
-.mk-lcd-tf b { padding: 9px 14px; border-radius: 8px; background: #2a3a52; color: #fff; font: 400 14px/1 var(--mk-f-display); }
-.mk-lcd-go {
-  margin-top: auto; align-self: stretch; display: flex; align-items: center; justify-content: center; gap: 10px;
-  height: 50px; border-radius: 12px; background: #2a3a52; color: #fff; font: 400 20px/1 var(--mk-f-display);
-}
-.mk-lcd-tabs { display: flex; justify-content: space-around; margin: 4px -20px 0; padding: 10px 6px 14px; border-top: 1px solid rgba(28,19,15,.1); background: #fbf9f5; border-radius: 0 0 14px 14px; }
-.mk-lcd-tab { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 62px; font: 400 12.5px/1 var(--mk-f-serif); color: rgba(28,19,15,.5); }
-.mk-lcd-tab.mk-on { color: #2a3a52; font-weight: 600; }
-.mk-lcd-tab.mk-on svg { color: #a2452a; }
-
-/* S2 — "Who are you querying?" (`.lcq`). Each row IS the card's agent row: same disc, same name and
-   agency classes, the same 14px 18px 11px padding and 14px gap — so it can slide onto it. */
-.mk-lcq {
-  position: absolute; left: 8px; right: 8px; top: 48px; bottom: 8px; z-index: 6; display: flex; flex-direction: column; gap: 8px;
-  padding: 20px 24px 24px; background: #fff; border-radius: 0 0 13px 13px; opacity: 0; pointer-events: none;
-}
-.mk-lcq-h { margin: 6px 0 10px; font: 400 30px/1.1 var(--mk-f-display); color: #1c130f; }
-.mk-lcq-list { display: flex; flex-direction: column; gap: 4px; }
-.mk-lcq-p {
-  position: relative; display: flex; align-items: center; gap: 14px; margin: 0 -24px; padding: 14px 18px 11px;
-  box-shadow: inset 0 -1px 0 rgba(28,19,15,.06); background: rgba(42,58,82,0);
-}
-
-/* S5 — the quick query form (`.lcf`). Its top is written by the story to sit 12px under the
-   manuscript block, whatever that block measures. */
-.mk-lcf {
-  position: absolute; left: 8px; right: 8px; bottom: 8px; top: 260px; z-index: 6; display: flex; flex-direction: column; gap: 8px;
-  padding: 6px 24px 22px; background: #fff; border-radius: 0 0 13px 13px; opacity: 0; pointer-events: none;
-}
-.mk-lcq-l { margin-top: 8px; font: 400 11px/1 var(--mk-f-mono); letter-spacing: .17em; text-transform: uppercase; color: #8a857e; }
-.mk-lcf .mk-lcq-l:first-child { margin-top: 4px; }
-.mk-lcq-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.mk-lcq-ch {
-  display: inline-flex; align-items: center; height: 42px; padding: 1px 16px 0; border-radius: 21px;
-  background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28,19,15,.18); font: 400 17px/1 var(--mk-f-display);
-}
-.mk-lcq-ch.mk-lcf-m { gap: 7px; }
-.mk-lcf-m svg { width: 14px; height: 14px; opacity: .6; }
-.mk-lcq-go {
-  align-self: flex-start; margin-top: 12px; display: inline-flex; align-items: center; height: 48px; padding: 2px 24px 0;
-  border-radius: 24px; background: #2a3a52; color: #fff; font: 400 18px/1 var(--mk-f-display);
-}
-/* The sample control: First [n] [Pages | Chapters | Words], faint until Sample is ticked. */
-.mk-smp { display: flex; align-items: center; gap: 12px; margin-top: 4px; opacity: .35; }
-.mk-smp-f { font: 400 18px/1 var(--mk-f-serif); color: rgba(28,19,15,.7); }
-.mk-smp-n {
-  min-width: 62px; height: 42px; padding: 0 10px; display: grid; place-items: center; border-radius: 10px;
-  box-shadow: inset 0 0 0 1px rgba(28,19,15,.2); font: 600 19px/1 var(--mk-f-serif); color: #1c130f; font-variant-numeric: tabular-nums;
-}
-.mk-smp-pm {
-  display: grid; place-items: center; width: 34px; height: 34px; margin-left: -6px; border-radius: 50%; background: #f2ede6;
-  box-shadow: inset 0 0 0 1px rgba(28,19,15,.12); font: 600 20px/1 var(--mk-f-sans); color: #2a3a52;
-}
-.mk-seg { position: relative; display: flex; padding: 4px; border-radius: 22px; background: #f2ede6; box-shadow: inset 0 0 0 1px rgba(28,19,15,.08); }
-.mk-seg i {
-  position: absolute; top: 4px; bottom: 4px; left: 4px; width: 0; border-radius: 18px; background: #2a3a52;
-  transition: left .28s cubic-bezier(.3,.7,.2,1), width .28s cubic-bezier(.3,.7,.2,1);
-}
-.mk-seg span { position: relative; z-index: 1; padding: 9px 14px 8px; font: 400 16px/1 var(--mk-f-display); color: rgba(28,19,15,.62); transition: color .2s; }
-.mk-seg span.mk-on { color: #fff; }
-/* the response form's size (`.sm2`): no stepper, smaller throughout, fully present */
-.mk-smp.mk-smp--small { opacity: 1; margin-top: 0; gap: 8px; }
-.mk-smp--small .mk-smp-f { font-size: 14px; }
-.mk-smp--small .mk-smp-n { min-width: 40px; height: 32px; font-size: 15px; border-radius: 8px; }
-.mk-smp--small .mk-seg { padding: 3px; }
-.mk-smp--small .mk-seg i { top: 3px; bottom: 3px; }
-.mk-smp--small .mk-seg span { padding: 7px 10px 6px; font-size: 13px; }
-@media (prefers-reduced-motion: reduce) { .mk-seg i, .mk-seg span { transition: none; } }
-
-/* Each new line's pop: a highlighter behind its words (the ref's `.lc-t` wash). The tone is set per
-   line by the story; the push-and-highlight sets its own rust over it. */
+/* B8 — each new line's pop: a highlighter behind its words (the ref's `.lc-t` wash), tone per line. */
 .mk-hc-pile--phone .mk-lc-t {
   --mk-wash: rgba(162,69,42,.18);
   display: inline-block; transform-origin: 0 60%;
   background-image: linear-gradient(var(--mk-wash), var(--mk-wash)); background-repeat: no-repeat;
   background-position: 0 88%; background-size: 0% 42%;
 }
-.mk-hp-hero { will-change: transform, translate, scale; }
 
-/* U1 — the status pill (`.up`, option 4): bottom right, just above the drawer. It may wrap to two
-   lines and is never wider than the screen less 14px each side. */
+/* B2/B4 — the status tag that appears BESIDE its line (the ref's `.up.tagf`): right-aligned 22px in,
+   its top written by the story from the line's own box. White, a small coloured icon disc, the title
+   in serif, the detail after a middle dot; it may wrap, and is never wider than 300px. */
 .mk-up {
-  position: absolute; right: 14px; bottom: 270px; z-index: 22; box-sizing: border-box; max-width: calc(100% - 28px);
+  position: absolute; right: 22px; z-index: 22; box-sizing: border-box; max-width: 300px;
   display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 14px 7px 10px;
   background: #fff; border-radius: 18px; white-space: normal; pointer-events: none; opacity: 0;
   box-shadow: 0 12px 24px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(28,19,15,.08);
 }
 .mk-up-i { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #f5e6df; color: #7c3a2a; }
-.mk-up--send .mk-up-i, .mk-up--bell .mk-up-i { background: #e2e6e0; color: #4d524a; }
+.mk-up--bell .mk-up-i { background: #e2e6e0; color: #4d524a; }
 .mk-up-i svg { width: 12px; height: 12px; }
 .mk-up-t { display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 2px; column-gap: 6px; }
 .mk-up-t b { font: 600 13.5px/1 var(--mk-f-serif); color: #1c130f; }
 .mk-up-t span { font: 400 12px/1.25 var(--mk-f-serif); color: rgba(28,19,15,.62); }
 .mk-up-t span::before { content: "· "; }
 @media (prefers-reduced-motion: reduce) { .mk-up { display: none; } }
-
-/* U3 — the response form's due line. */
-.mk-lr-due { margin: 4px 0 0; font: 400 14px/1.3 var(--mk-f-serif); color: rgba(28,19,15,.65); }
-.mk-lr-due b { font-weight: 600; color: #7c3a2a; }

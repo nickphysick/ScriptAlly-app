@@ -1,0 +1,38 @@
+Phone hero v3 — red-before proofs (24 Oct). Each lock run against one named break, at http://127.0.0.1:4731 (vite preview of build:dev). Source breaks restored from path-derived backups; src/ clean after.
+
+## HM1v3
+break: HM_MUTATE=HM1v3 — .mk-hp-hero{top:-40px!important} (card raised 40px)
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:101:3 › landing hero on phones › HM1 footer: every card inside the screen; the footer under the drawer, the final panel above it (3.2s)
+Error: @390x844: the footer's top is at or under the drawer's resting top
+1 failed
+
+## HM14
+break: HM_MUTATE=HM14 — .mk-up--tag at bottom:270px right:14px (a status pill at the bottom)
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:402:3 › landing hero on phones › HM14 tags: beside their lines, inside the screen, gone in 3.5s; no pill at the bottom (27.6s)
+Error: @390: "Task createdSend the" within 40px of its line
+1 failed
+
+## loop
+break: HeroCard.playPhone — the later(() => { looped = true; … playPhone(true) }) restart removed
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:425:3 › landing hero on phones › HM15 loop: the card leaves, a fresh one opens on Day 1 within 2s, and the drawer grows once (1.0m)
+Error: a fresh card reads Day 1
+1 failed
+
+## copy
+break: landingCopy HERO_PHONE_MS = "Your manuscript"
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:344:3 › landing hero on phones › HM13 copy: Lord of the Wings on every phone card, the 15-pages chip, and nothing of v2's story (1.1s)
+Error: population: five phone cards
+1 failed
+
+## reduced
+break: HeroPhone — 'if (reduceMotion()) grow(true);' removed
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:243:3 › landing hero on phones › HM6 reduced motion on a phone: the end state, the drawer grown, nothing moving (3.2s)
+Error: the drawer arrives grown
+1 failed
+
+## drawer
+break: HeroCard 'if (!looped)' guard dropped + HeroPhone grow toggles the class off when already grown
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:425:3 › landing hero on phones › HM15 loop: the card leaves, a fresh one opens on Day 1 within 2s, and the drawer grows once (1.0m)
+Error: the drawer grows once, after the first run, and stays grown
+1 failed
+

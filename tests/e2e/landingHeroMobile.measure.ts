@@ -1,30 +1,24 @@
 /**
- * The landing hero on phones (23 Oct, ref design-refs/landing-hero-mobile-v1.html) — the rendered locks.
+ * The landing hero on phones — the rendered locks. v3 (24 Oct, ref design-refs/landing-hero-mobile-v3.html):
+ * one short looping story on the card. (v1's long story and v2's dashboard story are retired; their locks
+ * HM9–HM12 went with v2.)
  *
- *   HM1  fit: at 390 × 844, 375 × 667 and 430 × 932 the front card and all four behind it are inside the
- *        viewport horizontally, the front card ends no more than 12px below the drawer's resting top, and
- *        its last panel (where the story ends) is wholly above the drawer — on all three screens
+ *   HM1  footer: at 390 × 844, 375 × 667 and 430 × 932 every card is inside the screen, the front card's
+ *        footer top is at or below the drawer's resting top, and its final panel's bottom is above it
  *   HM2  drawer: scrolling the drawer's travel brings the sheet's top to the header's foot with a 0px
  *        radius, and the hero is still in the DOM, sticky, behind it
- *   HM3  sign-up: with the story run to its end and no scroll, the sign-up shows and is a FoundingSignup
- *        (its field carries that component's label); scrolled first, it never appears
- *   HM4  counter: a stubbed count of 14 of 50 reads "36 places left" with 3 of 10 segments; no count, no number
+ *   HM3  sign-up: after the story's FIRST run, unscrolled, the sign-up shows and is a FoundingSignup;
+ *        scrolled first, it never appears
+ *   HM4  counter: counts down from the cap to the places left; no count, no number
  *   HM5  copy: "No more winging it." is on the rendered page exactly once, at 390 and at 1440
- *   HM6  reduced motion (phones): the static end state, the drawer grown, nothing animating, no fly-past
+ *   HM6  reduced motion (phones): the static end state, footer under the grown drawer, nothing moving
  *   HM7  phones draw no cast shadow; the fly-past is the versioned file, flown once along its curve
- *   HM8  with the drawer grown, the card's last panel is still above it, the scale never exceeds the
- *        ref's .86 and is .86 wherever the panel has room
- *  v2 (ref design-refs/landing-hero-mobile-v2.html) — one recorded run of the whole story per width:
- *   HM9  no flicker: across the agent pick the row is never invisible, and from the end of the slide to
- *        400ms after the land its disc never moves more than 1px, nor its name's size 0.5px, between
- *        50ms samples — and the list's row and the card's row agree at the hand-over
- *   HM10 band: before "Log query" the band reads "Logging query…" and the pill is hidden; 300ms after
- *        the press it reads "With the agent", and the pill shows "Queried" once its stamp lands
- *   HM11 pills: the six pills, in order, each settled ≥14px inside every edge at 390 and 375 wide;
- *        Partial sent raises none
- *   HM12 zoom: the push-and-highlight runs for Query sent, Partial requested and Full requested only
- *   HM13 copy: "Your manuscript" on every phone card, the Query sent chip "15 pages", and "Lead future
- *        queries with the opening voice" nowhere
+ *   HM8  with the drawer grown, the card's last panel is still above it and the scale never exceeds .86
+ *   HM13 copy: "Lord of the Wings" on every phone card, the 15-pages chip, and nothing of v2's story
+ *   HM14 tags: "Task created" and "Reminder set" each appear within 40px of their line, wholly inside the
+ *        screen, and are gone within 3.5s; every status pill is such a tag — none at the bottom
+ *   HM15 loop: after a full story the front card leaves and a fresh one reads Day 1 within 2s; the
+ *        drawer grows once and stays grown
  *
  * The public page needs no sign-in, so this file opens it itself. Run without the setup project:
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test landingHeroMobile --project measure --no-deps
@@ -49,10 +43,8 @@ const CSS_BREAKS: Record<string, string> = {
   HM3: ".mk-hp-sheet--grown .mk-hp-su{visibility:hidden!important;max-height:0!important}",
   HM4: ".mk-navpill-c{display:none!important}",
   HM6: ".mk-hp-fly{display:block!important}",
-  HM9: '.mk-lcq-p .mk-lc-nm{font-size:19px!important}',
-  HM9b: '[data-hc="agent"]{visibility:hidden!important}',
-  HM10: '[data-hc="pill"]{opacity:1!important}',
-  HM11: ".mk-up{right:6px!important}",
+  HM1v3: ".mk-hp-hero{top:-40px!important}",
+  HM14: ".mk-up--tag{top:auto!important;bottom:270px!important;right:14px!important}",
 };
 
 type Count = { claimed: number; cap: number } | null;
@@ -103,36 +95,38 @@ test.describe("landing hero on phones", () => {
      drawer at 375 × 667 and its last panel was hidden; this case is red against that build. It also
      reads the last panel itself, because "the card ends at the drawer" is a proxy for the claim that
      matters — the panel the story ends on can be seen. */
-  test("HM1 fit: every card inside the width; the front card ends at the drawer; its last panel above it", async ({ page }) => {
+  /* REWRITTEN (v3, L2): the footer sits under the drawer's resting top and the final panel above it —
+     the ref's own placement at 390 × 844 (S .73, TOP 64) leaves 3px and 1.3px, and every other size
+     keeps that relationship. Read at rest, after the deal, before anything has grown. */
+  test("HM1 footer: every card inside the screen; the footer under the drawer, the final panel above it", async ({ page }) => {
     const seen: string[] = [];
-    let held = 0;
     for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }, { width: 430, height: 932 }]) {
       await open(page, vp);
       await page.waitForTimeout(2600); // the deal is over by 1.81s
       const r = await page.evaluate(() => {
         const cards = [...document.querySelectorAll(".mk-hc-pile--phone .mk-lc")].map((e) => e.getBoundingClientRect());
-        const front = document.querySelector('[data-hc="front"]')!.getBoundingClientRect();
         const sheet = document.querySelector(".mk-hp-sheet")!.getBoundingClientRect();
-        const panel = document.querySelector('[data-hc="slot"]')!.getBoundingClientRect();
+        const foot = document.querySelector('[data-hc="front"] .mk-lc-ft')!.getBoundingClientRect();
+        const slot = document.querySelector('[data-hc="slot"]')!.getBoundingClientRect();
         return {
           n: cards.length, vw: document.documentElement.clientWidth,
           left: Math.min(...cards.map((c) => c.left)), right: Math.max(...cards.map((c) => c.right)),
-          below: front.bottom - sheet.top, panelBelow: panel.bottom - sheet.top, scale: Number((document.querySelector(".mk-hc-pile") as HTMLElement).dataset.scale),
+          footBelow: foot.top - sheet.top, panelBelow: slot.bottom - sheet.top,
+          scale: Number((document.querySelector(".mk-hc-pile") as HTMLElement).dataset.scale),
         };
       });
-      seen.push(`${vp.width}x${vp.height}: scale ${r.scale} below ${r.below.toFixed(1)} panel ${r.panelBelow.toFixed(1)}`);
+      seen.push(`${vp.width}x${vp.height}: scale ${r.scale} footer ${r.footBelow.toFixed(1)} panel ${r.panelBelow.toFixed(1)}`);
       console.log(`HM1 @${vp.width}x${vp.height}`, JSON.stringify(r));
       expect(r.n, "population: the front card and four behind it").toBe(5);
       expect(r.left, `@${vp.width}: nothing cut off on the left`).toBeGreaterThanOrEqual(0);
       expect(r.right, `@${vp.width}: nothing cut off on the right`).toBeLessThanOrEqual(r.vw);
-      if (r.below <= 12) held++;
-      expect(r.below, `@${vp.width}x${vp.height}: the front card ends at the drawer`).toBeLessThanOrEqual(12);
-      expect(r.panelBelow, `@${vp.width}x${vp.height}: the last panel is above the drawer`).toBeLessThanOrEqual(0);
+      expect(r.footBelow, `@${vp.width}x${vp.height}: the footer's top is at or under the drawer's resting top`).toBeGreaterThanOrEqual(0);
+      expect(r.panelBelow, `@${vp.width}x${vp.height}: the final panel is above it`).toBeLessThanOrEqual(0);
       expect(r.scale, `@${vp.width}x${vp.height}: never below the .45 floor`).toBeGreaterThanOrEqual(0.45);
+      if (vp.width === 390) expect(r.scale, "on the ref's screen the ref's .73").toBe(0.73);
       await shot(page, `hm1-${vp.width}x${vp.height}`);
     }
-    console.log("HM1", seen.join(" · "), `· held ${held}`);
-    expect(held, "population: all three screens measured and held").toBe(3);
+    console.log("HM1", seen.join(" · "));
   });
 
   test("HM2 drawer: the travel brings the sheet to the header, square, over a sticky hero", async ({ page }) => {
@@ -162,10 +156,9 @@ test.describe("landing hero on phones", () => {
     expect(r.behind).toBe(true);
   });
 
-  test("HM3 sign-up: it opens when the story ends unscrolled, is a FoundingSignup, and never after a scroll", async ({ page }) => {
-    /* REWRITTEN (v2): the story now opens on the dashboard and logs the query on the card, so it runs
-       ~59s to the grow (measured) where v1's ran ~30. The 60s wait raced it. */
-    test.setTimeout(330000);
+  test("HM3 sign-up: it opens after the first run unscrolled, is a FoundingSignup, and never after a scroll", async ({ page }) => {
+    /* REWRITTEN (v3): the drawer grows after the loop's FIRST run, ~26s in (measured), and never again. */
+    test.setTimeout(240000);
     await open(page, { width: 390, height: 844 });
     await page.waitForFunction(() => document.querySelector(".mk-hp-sheet")!.classList.contains("mk-hp-sheet--grown"), null, { timeout: 120000 });
     await page.waitForTimeout(1000);
@@ -188,8 +181,10 @@ test.describe("landing hero on phones", () => {
     await open(page, { width: 390, height: 844 });
     await page.waitForTimeout(3000);
     await page.evaluate(() => window.scrollTo(0, 120));
-    await page.waitForFunction(() => document.querySelector(".mk-again")!.classList.contains("mk-again--on"), null, { timeout: 120000 });
-    await page.waitForTimeout(2200); // the grow is due 0.6s after Watch again
+    /* There is no Watch again on a phone (v3): wait past the first run's own grow moment instead —
+       the moment the card is dealt away, which comes 1.4s after the grow would have. */
+    await page.waitForFunction(() => document.querySelector('[data-hc="front"]')!.getAnimations().some((a) => JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes("-130%")), null, { timeout: 120000, polling: 50 });
+    await page.waitForTimeout(3500);
     const s = await page.evaluate(() => ({ grown: document.querySelector(".mk-hp-sheet")!.classList.contains("mk-hp-sheet--grown"),
       vis: getComputedStyle(document.querySelector(".mk-hp-su")!).visibility }));
     console.log("HM3 scrolled first", JSON.stringify(s));
@@ -259,23 +254,22 @@ test.describe("landing hero on phones", () => {
         grown: document.querySelector(".mk-hp-sheet")!.classList.contains("mk-hp-sheet--grown"),
         su: getComputedStyle(document.querySelector(".mk-hp-su")!).visibility,
         fly: getComputedStyle(document.querySelector(".mk-hp-fly")!).display,
-        again: getComputedStyle(document.querySelector(".mk-again")!).display,
+        again: document.querySelectorAll(".mk-hp .mk-again").length,
+        footBelow: document.querySelector('[data-hc="front"] .mk-lc-ft')!.getBoundingClientRect().top - document.querySelector(".mk-hp-sheet")!.getBoundingClientRect().top,
         running: hp.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length,
-        /* v2 P6: "Your manuscript", the 15-pages chip and profile heads; no dashboard, forms, pills or zooms */
+        /* v3 L6: "Lord of the Wings", the 15-pages chip and profile heads; no tags, no zooms */
         titles: [...hp.querySelectorAll(".mk-hc-pile--phone .mk-lc-ms b")].map((b) => b.textContent),
         heads: [...hp.querySelectorAll(".mk-hc-pile--phone .mk-lc-agent .mk-lc-disc")].map((d) => !!d.querySelector("svg") && (d.textContent ?? "").trim() === ""),
         pages: [...hp.querySelectorAll('[data-hc="steps"] .mk-lc-step')][0]?.querySelectorAll(".mk-lc-att > span")[2]?.textContent ?? null,
-        overlays: ['[data-hc="lcd"]', '[data-hc="lcq"]', '[data-hc="lcf"]', '[data-hc="lr"]'].map((q) => getComputedStyle(document.querySelector(q)!).opacity),
         pills: hp.querySelectorAll(".mk-up").length,
         heroAnims: (document.querySelector(".mk-hp-hero") as HTMLElement).getAnimations().length,
       };
     });
     console.log("HM6", JSON.stringify(r));
-    expect(r.titles, "population: five phone cards, each 'Your manuscript'").toEqual(Array(5).fill("Your manuscript"));
+    expect(r.titles, "population: five phone cards, each 'Lord of the Wings'").toEqual(Array(5).fill("Lord of the Wings"));
     expect(r.heads, "every phone disc is a profile head, no initials").toEqual(Array(5).fill(true));
     expect(r.pages).toBe("15 pages");
-    expect(r.overlays, "no dashboard, agent list, query form or response form").toEqual(["0", "0", "0", "0"]);
-    expect(r.pills, "no status pills").toBe(0);
+    expect(r.pills, "no status tags").toBe(0);
     expect(r.heroAnims, "no push-and-highlight").toBe(0);
     expect(r.day).toBe("99");
     expect(r.band).toBe("With you");
@@ -285,7 +279,8 @@ test.describe("landing hero on phones", () => {
     expect(r.grown, "the drawer arrives grown").toBe(true);
     expect(r.su).toBe("visible");
     expect(r.fly, "no fly-past").toBe("none");
-    expect(r.again, "no Watch again").toBe("none");
+    expect(r.again, "no Watch again on a phone").toBe(0);
+    expect(r.footBelow, "the footer is under the drawer").toBeGreaterThanOrEqual(0);
     expect(r.running, "nothing animating in the hero").toBe(0);
     await shot(page, "hm6-reduced");
   });
@@ -316,12 +311,11 @@ test.describe("landing hero on phones", () => {
      On a short phone .86 left the grown drawer over the panel (95px at the .56 floor, 60 at .45), so the
      grown scale is derived from the panel; on the ref's own screen it must still come out at .86.
      Read under reduced motion, which arrives grown with nothing moving. */
-  /* REWRITTEN (v2): v2's roomier manuscript block makes the card 8px taller, so on the ref's own
-     390 × 844 the ref's fixed .86 would leave the last panel 3.8px under the grown drawer (measured on
-     the v2 ref). The ruling is the panel, so the grown scale is derived — 0.847 there — and this case
-     holds the RULE: the panel is above the drawer, the scale never exceeds the ref's .86, and it IS
-     .86 wherever the panel has the room (430 × 932). */
-  test("HM8 grown: the last panel stays above the drawer; the scale is .86 where it has room, never more", async ({ page }) => {
+  /* REWRITTEN (v3): the ref's v3 placement puts the final panel 1.3px above the RESTING drawer at
+     every size, so once the drawer rises 128px the card always has to ease back further than the ref's
+     fixed .86 to keep the panel in view (the ruling) — ~.76 at 390. The ".86 where there is room" clause
+     of v2's case has no screen left to hold on, and goes. */
+  test("HM8 grown: the last panel stays above the drawer, and the scale never exceeds .86", async ({ page }) => {
     const seen: string[] = [];
     for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }, { width: 430, height: 932 }]) {
       await open(page, vp, { reduce: true });
@@ -341,161 +335,103 @@ test.describe("landing hero on phones", () => {
       expect(r.panelBelow, `@${vp.width}x${vp.height}: the last panel is above the grown drawer`).toBeLessThanOrEqual(0);
       const k = Number(/scale\(([\d.]+)\)/.exec(r.k)?.[1]);
       expect(k, `@${vp.width}x${vp.height}: never more than the ref's .86`).toBeLessThanOrEqual(0.86);
-      if (vp.width === 430) expect(r.k, "with room for the panel the grown scale is the ref's").toBe("scale(0.86)");
       await shot(page, `hm8-${vp.width}x${vp.height}`);
     }
     console.log("HM8", seen.join(" · "));
   });
 
-  /* ═════ v2: one recorded run of the whole story per width ═════
-     The recorder goes in before the page loads and samples every 50ms: the visible agent row (the
-     list's while it is over the card, the card's once it shows), the band and the status pill, every
-     status pill box once settled (opacity exactly 1, i.e. after its slide-in and before its exit), and
-     each push-and-highlight with the line it is on. The run ends at the grow. */
-  type Run = {
-    schedule: Record<string, { start: number; end: number }>;
-    rows: { t: number; vis: string | null; x: number; y: number; fs: number; h: number }[];
-    hand: { list: number[]; card: number[] } | null;
-    band: { t: number; band: string; pillOp: number; pill: string }[];
-    pills: { text: string; created: number; settled: { l: number; r: number; t: number; b: number } | null }[];
-    zooms: number[]; vw: number; vh: number;
-  };
-  const RECORDER = () => {
-    const w = window as unknown as { __hm: Run };
-    const R: Run = { schedule: {}, rows: [], hand: null, band: [], pills: [], zooms: [], vw: innerWidth, vh: innerHeight };
-    w.__hm = R;
-    const q = (s: string) => document.querySelector<HTMLElement>(s);
-    const op = (el: Element) => +getComputedStyle(el).opacity;
-    /* a scheduled animation's window, found by a fragment of its keyframes */
-    const note = (key: string, el: HTMLElement | null, frag: string) => {
-      if (!el || R.schedule[key]) return;
-      for (const a of el.getAnimations()) {
-        const tm = a.effect!.getTiming(), kf = JSON.stringify((a.effect as KeyframeEffect).getKeyframes());
-        if (kf.includes(frag) && a.startTime != null) { const st = (a.startTime as number) + (tm.delay as number); R.schedule[key] = { start: st, end: st + (tm.duration as number) }; return; }
-      }
-    };
-    const seen = new Map<Element, Run["pills"][number]>();
-    setInterval(() => {
-      const t = document.timeline.currentTime as number;
-      const ag = q('[data-hc="agent"]'), ew = q('[data-hc="lcq-pick"]'), pick = q('[data-hc="lcq"]');
-      note("tap", ew, "0.86"); note("slide", ew, "translate("); note("land", ag, '"opacity":"1"'); /* getKeyframes() hands values back as strings */ note("go", q('[data-hc="lcf-go"]'), "0.86");
-      if (ag && ew && pick) {
-        const agVis = op(ag) >= .5 && getComputedStyle(ag).visibility !== "hidden", listVis = op(pick) * op(ew) >= .5;
-        const vis = agVis ? ag : listVis ? ew : null;
-        const d = vis?.querySelector(".mk-lc-disc")?.getBoundingClientRect(), nm = vis?.querySelector<HTMLElement>(".mk-lc-nm");
-        R.rows.push({ t, vis: vis === ag ? "card" : vis === ew ? "list" : null, x: d?.left ?? NaN, y: d?.top ?? NaN, fs: nm ? parseFloat(getComputedStyle(nm).fontSize) : NaN, h: nm?.getBoundingClientRect().height ?? NaN });
-        const sl = R.schedule.slide;
-        if (!R.hand && sl && t > sl.end + 20) {
-          const a = ag.querySelector(".mk-lc-disc")!.getBoundingClientRect(), b = ew.querySelector(".mk-lc-disc")!.getBoundingClientRect();
-          const an = ag.querySelector<HTMLElement>(".mk-lc-nm")!, bn = ew.querySelector<HTMLElement>(".mk-lc-nm")!;
-          R.hand = { list: [b.left, b.top, parseFloat(getComputedStyle(bn).fontSize), bn.getBoundingClientRect().height], card: [a.left, a.top, parseFloat(getComputedStyle(an).fontSize), an.getBoundingClientRect().height] };
-        }
-      }
-      const bandT = q('[data-hc="bandt"]'), pill = q('[data-hc="pill"]');
-      if (bandT && pill) R.band.push({ t, band: bandT.textContent ?? "", pillOp: op(pill), pill: (pill.textContent ?? "").trim() });
-      document.querySelectorAll<HTMLElement>(".mk-up").forEach((g) => {
-        let rec = seen.get(g);
-        if (!rec) { rec = { text: g.textContent ?? "", created: t, settled: null }; seen.set(g, rec); R.pills.push(rec); }
-        if (!rec.settled && getComputedStyle(g).opacity === "1") { const b = g.getBoundingClientRect(); rec.settled = { l: b.left, r: innerWidth - b.right, t: b.top, b: innerHeight - b.bottom }; }
-      });
-      const hero = q(".mk-hp-hero");
-      if (hero) for (const a of hero.getAnimations()) {
-        const kf = JSON.stringify((a.effect as KeyframeEffect).getKeyframes());
-        const id = (a as unknown as { __hm?: boolean });
-        if (kf.includes('"scale":"1.2"') && !id.__hm) { id.__hm = true; R.zooms.push(Number(hero.dataset.zoom)); }
-      }
-    }, 50);
-  };
-  async function walk(page: Page, vp: { width: number; height: number }) {
-    await page.addInitScript(RECORDER);
-    await open(page, vp);
-    await page.waitForFunction(() => document.querySelector(".mk-hp-sheet")!.classList.contains("mk-hp-sheet--grown"), null, { timeout: 150000 });
-    await page.waitForTimeout(400);
-    return page.evaluate(() => (window as unknown as { __hm: Run }).__hm);
-  }
-
-  test.describe("v2: the story, recorded", () => {
-    let r390: Run;
-    test.beforeAll(async ({ browser }) => {
-      test.setTimeout(240000);
-      const page = await browser.newPage({ storageState: { cookies: [], origins: [] } });
-      r390 = await walk(page, { width: 390, height: 844 });
-      await page.close();
-    });
-
-    test("HM9 no flicker: the picked row slides onto the card's row and hands over in one frame", async () => {
-      const r = r390, s = r.schedule;
-      expect(s.tap && s.slide && s.land, `population: the tap, slide and land were scheduled — ${JSON.stringify(s)}`).toBeTruthy();
-      const win = r.rows.filter((x) => x.t >= s.tap.start && x.t <= s.land.start + 400);
-      console.log("HM9 schedule", JSON.stringify(s), "samples", win.length, "hand", JSON.stringify(r.hand));
-      expect(win.length, "population: the pick was sampled every 50ms").toBeGreaterThan(20);
-      const gaps = win.filter((x) => x.vis === null);
-      expect(gaps.map((x) => Math.round(x.t - s.tap.start)), "the row is never invisible").toEqual([]);
-      const settle = win.filter((x) => x.t >= s.slide.end);
-      expect(settle.length, "population: samples after the slide").toBeGreaterThan(5);
-      expect(settle.some((x) => x.vis === "list") && settle.some((x) => x.vis === "card"), "the hand-over happens inside the window").toBe(true);
-      for (let i = 1; i < settle.length; i++) {
-        const a = settle[i - 1], b = settle[i];
-        expect(Math.hypot(b.x - a.x, b.y - a.y), `disc jumped between ${Math.round(a.t - s.tap.start)} and ${Math.round(b.t - s.tap.start)}ms (${a.vis}→${b.vis})`).toBeLessThanOrEqual(1);
-        expect(Math.abs(b.fs - a.fs), "the name's size never jumps").toBeLessThanOrEqual(0.5);
-        expect(Math.abs(b.h - a.h), "nor its drawn height").toBeLessThanOrEqual(0.5);
-      }
-      expect(r.hand, "the two rows were read at the hand-over").toBeTruthy();
-      const [L, C] = [r.hand!.list, r.hand!.card];
-      expect(Math.hypot(L[0] - C[0], L[1] - C[1]), "the list's row lands exactly on the card's").toBeLessThanOrEqual(1);
-      expect(Math.abs(L[2] - C[2]), "in the same type").toBeLessThanOrEqual(0.5);
-    });
-
-    test("HM10 band: Logging query… and no pill until Log query; With the agent and Queried after", async () => {
-      const r = r390, go = r.schedule.go;
-      expect(go, "population: the press of Log query was scheduled").toBeTruthy();
-      const pressEnd = go.end;
-      const before = r.band.filter((x) => x.t < go.start && x.t > go.start - 6000);
-      expect(before.length, "population: the band was read before the press").toBeGreaterThan(20);
-      expect([...new Set(before.map((x) => x.band))], "before the press").toEqual(["Logging query…"]);
-      expect(Math.max(...before.map((x) => x.pillOp)), "the pill is hidden before the press").toBeLessThan(.05);
-      const after = r.band.find((x) => x.t >= pressEnd + 300);
-      console.log("HM10 300ms after the press", JSON.stringify(after));
-      expect(after?.band).toBe("With the agent");
-      /* The pill stamps in from the press's end + 300ms over 340ms (the ref's), so "shows" is read once it has landed. */
-      const shown = r.band.find((x) => x.t >= pressEnd + 700);
-      expect(shown?.pill).toBe("Queried");
-      expect(shown?.pillOp).toBeGreaterThan(.95);
-    });
-
-    test("HM12 zoom: push-and-highlight for Query sent, Partial requested and Full requested only", async () => {
-      console.log("HM12 zoomed lines", JSON.stringify(r390.zooms));
-      expect(r390.zooms, "steps 0, 1, 4 — never Partial sent (2) or the nudge (3)").toEqual([0, 1, 4]);
-    });
-
-    test("HM11 pills: the six in order, each settled ≥14px inside the viewport, at 390 and 375; none for Partial sent", async ({ browser }) => {
-      test.setTimeout(240000);
-      const page = await browser.newPage({ storageState: { cookies: [], origins: [] } });
-      const r375 = await walk(page, { width: 375, height: 667 });
-      await page.close();
-      const want = ["Query logged", "Task created", "Note added", "Task created", "Reminder set", "Task created"];
-      for (const [w, r] of [["390", r390], ["375", r375]] as const) {
-        console.log(`HM11 @${w}`, JSON.stringify(r.pills.map((p) => [p.text.slice(0, 26), p.settled && Object.values(p.settled).map((v) => +v.toFixed(1))])));
-        expect(r.pills.map((p) => want.find((x) => p.text.startsWith(x)) ?? p.text), `@${w}: the six pills, in order — and so none for Partial sent`).toEqual(want);
-        for (const p of r.pills) {
-          expect(p.settled, `@${w}: "${p.text}" settled`).toBeTruthy();
-          for (const [edge, v] of Object.entries(p.settled!)) expect(v, `@${w}: "${p.text.slice(0, 30)}" ${edge} edge`).toBeGreaterThanOrEqual(13.5);
-        }
-      }
-    });
-  });
-
-  test("HM13 copy: Your manuscript on every phone card, the 15-pages chip, and no retired line", async ({ page }) => {
+  /* ═════ v3 ═════ */
+  test("HM13 copy: Lord of the Wings on every phone card, the 15-pages chip, and nothing of v2's story", async ({ page }) => {
     await open(page, { width: 390, height: 844 }, { reduce: true });
     await page.waitForTimeout(500);
     const r = await page.evaluate(() => ({
       titles: [...document.querySelectorAll(".mk-hc-pile--phone .mk-lc-ms b")].map((b) => b.textContent),
       chip: [...document.querySelectorAll('[data-hc="steps"] .mk-lc-step')][0]?.querySelectorAll(".mk-lc-att > span")[2]?.textContent,
-      retired: document.documentElement.outerHTML.includes("Lead future queries with the opening voice"),
+      html: document.querySelector(".mk-hp")!.outerHTML,
     }));
-    console.log("HM13", JSON.stringify(r));
-    expect(r.titles).toEqual(Array(5).fill("Your manuscript"));
+    const gone = ["Who are you querying?", "Logging query…", "11 active queries", "Agents on file", "mk-lcd", "mk-lcq", "mk-lcf", "mk-smp", "mk-seg", "Record a response · ", "RECORD A RESPONSE", "Lead future queries with the opening voice"];
+    const found = gone.filter((g) => r.html.includes(g));
+    console.log("HM13", JSON.stringify({ titles: r.titles, chip: r.chip, found }));
+    expect(r.titles, "population: five phone cards").toEqual(Array(5).fill("Lord of the Wings"));
     expect(r.chip).toBe("15 pages");
-    expect(r.retired).toBe(false);
+    expect(found, "nothing of v2's story in the rendered phone hero").toEqual([]);
+  });
+
+  /* One recorded run of the loop at a width: every status tag, with its line, as it settles and as it
+     goes; the card's out-sweep and the Day it opens on next; and every change to the drawer's grown class. */
+  type Rec = {
+    tags: { cls: string; text: string; createdAt: number; shownAt: number | null; goneAt: number | null; tag: number[] | null; line: number[] | null }[];
+    out: number | null; after: { t: number; day: string; op: number; band: string }[]; grownEvents: string[]; vw: number; vh: number;
+  };
+  const RECORDER = () => {
+    const R: Rec = { tags: [], out: null, after: [], grownEvents: [], vw: innerWidth, vh: innerHeight };
+    (window as unknown as { __hm3: Rec }).__hm3 = R;
+    const seen = new Map<Element, Rec["tags"][number]>();
+    let lastGrown: boolean | null = null;
+    setInterval(() => {
+      const t = document.timeline.currentTime as number;
+      const front = document.querySelector<HTMLElement>('[data-hc="front"]'), sheet = document.querySelector(".mk-hp-sheet");
+      if (!front || !sheet) return;
+      const grown = sheet.classList.contains("mk-hp-sheet--grown");
+      if (grown !== lastGrown) { if (lastGrown !== null || grown) R.grownEvents.push(grown ? "grow" : "shrink"); lastGrown = grown; }
+      const steps = [...document.querySelectorAll<HTMLElement>('[data-hc="steps"] .mk-lc-step')];
+      document.querySelectorAll<HTMLElement>(".mk-up").forEach((g) => {
+        let rec = seen.get(g);
+        if (!rec) { rec = { cls: g.className, text: g.textContent ?? "", createdAt: t, shownAt: null, goneAt: null, tag: null, line: null }; seen.set(g, rec); R.tags.push(rec); }
+        const op = +getComputedStyle(g).opacity;
+        if (rec.shownAt === null && op === 1) {
+          rec.shownAt = t; const b = g.getBoundingClientRect(); rec.tag = [b.left, b.top, b.right, b.bottom];
+          const line = steps[rec.text.startsWith("Reminder") ? 3 : 1].getBoundingClientRect(); rec.line = [line.top, line.bottom];
+        }
+        if (rec.shownAt !== null && rec.goneAt === null && op < .05) rec.goneAt = t;
+      });
+      for (const [g, rec] of seen) if (rec.shownAt !== null && rec.goneAt === null && !g.isConnected) rec.goneAt = t;
+      if (R.out === null) for (const a of front.getAnimations()) {
+        if (JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes("-130%") && a.startTime != null) R.out = (a.startTime as number) + (a.effect!.getTiming().delay as number);
+      }
+      if (R.out !== null && t > R.out && t < R.out + 4000) R.after.push({ t, day: document.querySelector('[data-hc="day"]')?.getAttribute("data-n") ?? "", op: +getComputedStyle(front).opacity, band: document.querySelector('[data-hc="bandt"]')?.textContent ?? "" });
+    }, 50);
+  };
+  async function record(page: Page, vp: { width: number; height: number }, ms: number) {
+    await page.addInitScript(RECORDER);
+    await open(page, vp);
+    await page.waitForTimeout(ms);
+    return page.evaluate(() => (window as unknown as { __hm3: Rec }).__hm3);
+  }
+
+  test("HM14 tags: beside their lines, inside the screen, gone in 3.5s; no pill at the bottom", async ({ page }) => {
+    test.setTimeout(240000);
+    for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }]) {
+      const r = await record(page, vp, 27000);
+      console.log(`HM14 @${vp.width}`, JSON.stringify(r.tags.map((x) => ({ text: x.text.slice(0, 24), tag: x.tag?.map((v) => +v.toFixed(1)), line: x.line?.map((v) => +v.toFixed(1)), held: x.goneAt && x.shownAt ? Math.round(x.goneAt - x.shownAt) : null }))));
+      /* The first run only: by 27s the loop's second run has already made its own two tags. */
+      expect(r.out, `@${vp.width}: population — the first run ended`).not.toBeNull();
+      const first = r.tags.filter((x) => x.createdAt < r.out!);
+      const want = ["Task created", "Reminder set"];
+      expect(first.map((x) => want.find((w) => x.text.startsWith(w)) ?? x.text), `@${vp.width}: population — the two tags, in order, and nothing else`).toEqual(want);
+      for (const x of first) {
+        expect(x.cls, `@${vp.width}: every status pill is a tag beside its line`).toContain("mk-up--tag");
+        expect(x.tag && x.line, `@${vp.width}: "${x.text.slice(0, 20)}" was shown`).toBeTruthy();
+        const [l, tp, rt, bt] = x.tag!, [lt, lb] = x.line!;
+        const gap = Math.max(0, tp - lb, lt - bt);
+        expect(gap, `@${vp.width}: "${x.text.slice(0, 20)}" within 40px of its line`).toBeLessThanOrEqual(40);
+        expect(l >= 0 && tp >= 0 && rt <= r.vw && bt <= r.vh, `@${vp.width}: "${x.text.slice(0, 20)}" wholly inside the screen ${JSON.stringify(x.tag)}`).toBe(true);
+        expect(x.goneAt, `@${vp.width}: "${x.text.slice(0, 20)}" went`).not.toBeNull();
+        expect(x.goneAt! - x.shownAt!, `@${vp.width}: "${x.text.slice(0, 20)}" gone within 3.5s`).toBeLessThanOrEqual(3500);
+      }
+    }
+  });
+
+  test("HM15 loop: the card leaves, a fresh one opens on Day 1 within 2s, and the drawer grows once", async ({ page }) => {
+    test.setTimeout(240000);
+    const r = await record(page, { width: 390, height: 844 }, 60000); // two runs of the loop
+    const fresh = r.after.find((x) => x.day === "1" && x.op > .9);
+    console.log("HM15", JSON.stringify({ out: r.out, fresh, grownEvents: r.grownEvents, samples: r.after.length }));
+    expect(r.out, "population: the card was dealt away").not.toBeNull();
+    expect(r.after.length, "population: the hand-over was sampled").toBeGreaterThan(20);
+    expect(fresh, "a fresh card reads Day 1").toBeTruthy();
+    expect(fresh!.t - r.out!, "within 2s of the card leaving").toBeLessThanOrEqual(2000);
+    expect(fresh!.band).toBe("With the agent");
+    expect(r.grownEvents, "the drawer grows once, after the first run, and stays grown").toEqual(["grow"]);
   });
 });

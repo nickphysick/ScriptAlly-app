@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e",
@@ -745,10 +745,11 @@
     "design-refs/versions-v1/versions-v1.html": "4055aaead8cbd57b31358e1ea74c71ebeb73c4b37f9b528a78fc17281b996beb",
     "design-refs/landing-hero-mobile-v1.html": "43c898a3141fbd166d4ccfa1ee1f51a66c6843a0c692433362f5c1384b1773dc",
     "design-refs/versions-v2/versions-v2.html": "16e95e7205a3e0d87a157fc199b3ab9237b2542285f3b0a47ceeb0325ebc4540",
-    "design-refs/landing-hero-mobile-v2.html": "116249277c60b304dd7d894f7bfa597529d1379b8b7af6430b4f821628c3d603"
+    "design-refs/landing-hero-mobile-v2.html": "116249277c60b304dd7d894f7bfa597529d1379b8b7af6430b4f821628c3d603",
+    "design-refs/landing-hero-mobile-v3.html": "9c830d5c74e5e703bf81267fb60cbd4be34de4d60141284e60ed1ae907a0f425"
   },
   "superseded": {
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
     "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }

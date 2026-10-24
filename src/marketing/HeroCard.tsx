@@ -24,7 +24,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
-import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_DASH, PHONE_PICK, PHONE_LOGGING, PHONE_FORM, PHONE_RESPONSE, PHONE_PILLS } from "./landingCopy";
+import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_STORY } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
@@ -59,132 +59,6 @@ const BookIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="non
 const Head = ({ w = 22 }: { w?: number }) => <svg viewBox="0 0 24 24" width={w} height={w} aria-hidden="true"><circle cx="12" cy="9" r="4.2" fill="currentColor" /><path d="M4.2 21c.9-4.2 4-6.6 7.8-6.6s6.9 2.4 7.8 6.6z" fill="currentColor" /></svg>;
 const Disc: React.FC<{ phone: boolean; ini: string }> = ({ phone, ini }) => <span className="mk-lc-disc">{phone ? <Head /> : ini}</span>;
 
-/* The dashboard tab bar's five glyphs, in PHONE_DASH.tabs' order. */
-const TAB_ICONS = [
-  <svg key="h" viewBox="0 0 16 16" width="22" height="22"><rect x="2.5" y="2.5" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="8.9" y="2.5" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="2.5" y="8.9" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="8.9" y="8.9" width="4.6" height="4.6" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>,
-  <svg key="q" viewBox="0 0 16 16" width="22" height="22"><path d="M2.5 8.3 13.5 3l-3.6 10.5-2.4-4.3z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M7.5 9.2 13.5 3" stroke="currentColor" strokeWidth="1.5" /></svg>,
-  <svg key="a" viewBox="0 0 16 16" width="22" height="22"><circle cx="8" cy="5.8" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M3.2 13.2c.8-2.4 2.6-3.6 4.8-3.6s4 1.2 4.8 3.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>,
-  <svg key="m" viewBox="0 0 16 16" width="22" height="22"><path d="M8 4.5C6.6 3.5 4.8 3.2 2.5 3.2v9c2.3 0 4.1.3 5.5 1.3 1.4-1 3.2-1.3 5.5-1.3v-9c-2.3 0-4.1.3-5.5 1.3z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M8 4.5v9" stroke="currentColor" strokeWidth="1.5" /></svg>,
-  <svg key="o" viewBox="0 0 16 16" width="22" height="22"><circle cx="3.5" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="12.5" cy="8" r="1.4" fill="currentColor" /></svg>,
-];
-/* A small ring with its figure in the middle (the ref's, verbatim geometry: r 30, 188.5 round). */
-const Ring: React.FC<{ n: string; dash: string; stroke: string }> = ({ n, dash, stroke }) => (
-  <svg viewBox="0 0 76 76" width="76" height="76"><circle cx="38" cy="38" r="30" fill="none" stroke="#e7e2da" strokeWidth="9" /><circle cx="38" cy="38" r="30" fill="none" stroke={stroke} strokeWidth="9" strokeDasharray={dash} transform="rotate(-90 38 38)" strokeLinecap="butt" /><text x="38" y="44" textAnchor="middle" fontSize="18" fontWeight="700" fill="#1c130f" style={{ fontFamily: "var(--mk-f-serif)" }}>{n}</text></svg>
-);
-
-/**
- * S1 — the dashboard the front card deals in showing (the ref's `.lcd`): a marketing mock-up of the
- * app's screen, built from `PHONE_DASH` and never from the app's own Dashboard component.
- */
-const PhoneDash: React.FC = () => {
-  const D = PHONE_DASH;
-  return (
-    <div className="mk-lcd" data-hc="lcd">
-      <b className="mk-lcd-title">{D.title}</b>
-      <div className="mk-lcd-panel">
-        <div className="mk-lcd-ph">{D.active}</div>
-        <svg className="mk-lcd-chart" viewBox="0 0 400 120" preserveAspectRatio="none">
-          <defs><linearGradient id="mk-lcdg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c9cdd6" stopOpacity=".75" /><stop offset="1" stopColor="#eef0f3" stopOpacity=".2" /></linearGradient></defs>
-          <path d="M8 96 C 60 92, 90 86, 130 70 S 200 44, 250 40 L 392 40 L 392 112 L 8 112 Z" fill="url(#mk-lcdg)" />
-          <path d="M8 96 C 60 92, 90 86, 130 70 S 200 44, 250 40 L 392 40" fill="none" stroke="#2a3a52" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="70" cy="91" r="5" fill="#2a3a52" /><circle cx="250" cy="40" r="5" fill="#2a3a52" /><circle cx="392" cy="40" r="6" fill="#2a3a52" />
-        </svg>
-        <div className="mk-lcd-ax">{D.axis.map((m) => <span key={m}>{m}</span>)}</div>
-      </div>
-      <div className="mk-lcd-two">
-        <div className="mk-lcd-mini"><div className="mk-lcd-mh mk-lcd-mh--grey">{D.closed.title}</div><div className="mk-lcd-mb"><Ring n={D.closed.n} dash="126.3 188.5" stroke="#8a837a" /><ul><li><i style={{ background: "#8a837a" }} />{D.closed.keys[0]}</li><li><i style={{ background: "#3d3833" }} />{D.closed.keys[1]}</li></ul></div></div>
-        <div className="mk-lcd-mini"><div className="mk-lcd-mh mk-lcd-mh--blue">{D.agents.title}</div><div className="mk-lcd-mb"><Ring n={D.agents.n} dash="177.4 188.5" stroke="#2a3a52" /><ul><li><i style={{ background: "#2a3a52" }} />{D.agents.keys[0]}</li><li><i style={{ background: "#c9c2b8" }} />{D.agents.keys[1]}</li></ul></div></div>
-      </div>
-      <div className="mk-lcd-lh"><b>{D.upNext}</b><span>{D.all}</span></div>
-      <div className="mk-lcd-task">
-        <div className="mk-lcd-th"><span>{D.task.kicker}</span><em>{D.task.count}</em></div>
-        <div className="mk-lcd-tb"><div className="mk-lcd-ta"><i><Head w={30} /></i><div><b>{D.task.lead}<strong>{D.task.who}</strong></b><span>{D.task.meta}</span></div></div></div>
-        <div className="mk-lcd-tf"><span>{D.task.state}</span><b>{D.task.go}</b></div>
-      </div>
-      <b className="mk-lcd-go" data-hc="lcd-go"><svg viewBox="0 0 16 16" width="18" height="18"><path d="M4 12 12 4M6 4h6v6" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /></svg>{D.log}</b>
-      <nav className="mk-lcd-tabs">{D.tabs.map((t, k) => <span key={t} className={"mk-lcd-tab" + (k === 0 ? " mk-on" : "")}>{TAB_ICONS[k]}{t}</span>)}</nav>
-    </div>
-  );
-};
-
-/**
- * S2 — "Who are you querying?" (the ref's `.lcq`). ⚠️ EACH ROW IS THE CARD'S AGENT ROW, NOT A LOOK-ALIKE:
- * the same disc markup (`Disc`), the same name and agency classes, so the chosen row slides onto the
- * card's own row by translation alone and the hand-over is one frame with nothing to change format.
- * (The ref draws the list's discs as a background image at a different head size; that difference
- * is exactly the flicker this is built to remove.)
- */
-const PhonePick: React.FC = () => (
-  <div className="mk-lcq" data-hc="lcq">
-    <span className="mk-lcq-h">{PHONE_PICK.heading}</span>
-    <div className="mk-lcq-list">
-      {PHONE_PICK.agents.map(([name, agency], k) => (
-        <div key={name} className="mk-lcq-p" data-hc={k === PHONE_PICK.picked ? "lcq-pick" : undefined}>
-          <Disc phone ini="" /><div><div className="mk-lc-nm">{name}</div><div className="mk-lc-ag">{agency}</div></div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const Tick = () => <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3.5 8.4 6.6 11.4 12.5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-
-/**
- * The sample control (the ref's `.smp`): "First [n] [Pages | Chapters | Words]" with a sliding navy
- * thumb. `small` is the response form's size (`.sm2`), which has no stepper. The thumb's place is
- * written by the story from the chosen option's own box, so it fits whatever the labels measure.
- */
-const Sample: React.FC<{ id: string; n: string; small?: boolean }> = ({ id, n, small }) => (
-  <div className={"mk-smp" + (small ? " mk-smp--small" : "")} data-hc={id}>
-    <span className="mk-smp-f">{PHONE_FORM.first}</span>
-    <span className="mk-smp-n" data-hc={id + "-n"}>{n}</span>
-    {!small && <b className="mk-smp-pm" data-hc={id + "-plus"}>+</b>}
-    <div className="mk-seg" data-hc={id + "-seg"}><i />{PHONE_FORM.units.map((u, k) => <span key={u} data-u={u.toLowerCase()} className={k === 0 ? "mk-on" : undefined}>{u}</span>)}</div>
-  </div>
-);
-
-/**
- * U3 — "Record a response · Eleanor replied" (the ref's `#lr`), docked above the drawer in the nudge
- * form's style and place. Its "Which pages" is the sample control at the small size.
- */
-const ResponseForm: React.FC = () => {
-  const R = PHONE_RESPONSE;
-  return (
-    <div className="mk-lf" data-hc="lr">
-      <div className="mk-lf-in">
-        <div className="mk-lf-h"><small>{R.kicker}</small><b>{R.title}</b><i>{R.meta}</i></div>
-        <div className="mk-lf-b">
-          <span className="mk-lf-l">{R.asked}</span>
-          <div className="mk-lf-row">{R.options.map((o, k) => <span key={o} className="mk-lf-ch" data-hc={k === 0 ? "lr-partial" : undefined}>{o}</span>)}</div>
-          <span className="mk-lf-l">{R.pages}</span>
-          <Sample id="smp2" n="50" small />
-          <span className="mk-lf-l">{R.received}</span>
-          <div className="mk-lf-row">{R.when.map((o, k) => <span key={o} className="mk-lf-ch" data-hc={k === 0 ? "lr-today" : undefined}>{o}</span>)}</div>
-          <p className="mk-lr-due">{R.due} <b data-hc="lr-due">—</b></p>
-        </div>
-        <div className="mk-lf-f"><b data-hc="lr-save">{R.save}</b><span>{R.cancel}</span></div>
-      </div>
-    </div>
-  );
-};
-
-/** S5 — the quick query form the rest of the front card becomes (the ref's `.lcf`). */
-const PhoneForm: React.FC = () => {
-  const F = PHONE_FORM;
-  return (
-    <div className="mk-lcf" data-hc="lcf">
-      <span className="mk-lcq-l">{F.sentBy}</span>
-      <div className="mk-lcq-row">{F.via.map((v, k) => <span key={v} className="mk-lcq-ch" data-hc={k === 0 ? "lcf-email" : undefined}>{v}</span>)}</div>
-      <span className="mk-lcq-l">{F.materials}</span>
-      <div className="mk-lcq-row">{F.items.map((v, k) => <span key={v} className="mk-lcq-ch mk-lcf-m" data-hc={"lcf-m" + k}><Tick />{v}</span>)}</div>
-      <Sample id="smp" n="10" />
-      <span className="mk-lcq-l">{F.sent}</span>
-      <div className="mk-lcq-row">{F.when.map((v, k) => <span key={v} className="mk-lcq-ch" data-hc={k === 0 ? "lcf-today" : undefined}>{v}</span>)}</div>
-      <b className="mk-lcq-go" data-hc="lcf-go">{F.go}</b>
-    </div>
-  );
-};
-
 /* ── the four cards behind, positions and angles from the ref ── */
 const BACKS = [
   { cls: "mk-lc--o", left: 640, top: 90, t: "rotate(-9deg) scale(.82)", band: ["#f5e6df", "#7c3a2a"], word: "With you", day: "Day 21", ini: "GP", name: "Greg Panetta", agency: "Panetta Associates", pillBg: "#f5e6df", pill: "Full requested", chips: ["ADULT", "LITERARY FICTION"] },
@@ -195,11 +69,11 @@ const BACKS = [
 
 /** What the story tells its host about its own progress. */
 interface StoryHooks {
-  /** The last line has landed: the host may offer "Watch again". */
+  /** The last line has landed: the desk host may offer "Watch again" (phones have none: v3 loops). */
   onEnd?: () => void;
-  /** 0.6s after that: on a phone, the drawer may rise to offer the founding sign-up. */
+  /** On a phone, after the FIRST run of the loop only: the drawer may rise to offer the founding sign-up. */
   onGrow?: () => void;
-  /** The phone layout: the form docks above the drawer, so it rises further (the mobile ref's). */
+  /** The phone layout (v3): the short looping story, its own pacing and the tags beside the lines. */
   phone?: boolean;
 }
 
@@ -253,7 +127,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     em: st.querySelector<HTMLElement>(".mk-lc-att em"), chars: [] as HTMLElement[],
   }));
   parts.forEach((p) => { p.chars = split(p.t); });
-  const pnText = split(pn.querySelector<HTMLElement>(".mk-lc-nt")!), pfText = split(pf.querySelector<HTMLElement>(".mk-lc-nt")!), noteText = split(fNote);
+  const pnText = split(pn.querySelector<HTMLElement>(".mk-lc-nt")!), pfText = split(pf.querySelector<HTMLElement>(".mk-lc-nt")!), noteText = fNote ? split(fNote) : []; /* the phone has no nudge form (v3): it nudges on the card */
   const pnIcon = pn.querySelector<SVGElement>("p svg")!, pfIcon = pf.querySelector<SVGElement>("p svg")!;
   const pnBtn = pn.querySelector<HTMLElement>(":scope > b")!, pfBtn = pf.querySelector<HTMLElement>(":scope > b")!;
 
@@ -348,8 +222,8 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     // the dots wait on the next line; the clock reaches this event's day as the dots clear
     /* ⚠️ 110ms A DAY, CAPPED AT 2.8s (D1, 23 Oct) — the long wait after "Partial sent" used to run
        240ms a day to a 12s ceiling, which was a held breath nobody waited out. Both layouts. */
-    /* P1 (v2): the phone's clock runs faster still — 55ms a day between 0.7s and 1.8s. */
-    const n = to - from, dur = hooks.phone ? Math.max(700, Math.min(1800, n * 55)) : Math.max(900, Math.min(2800, n * 110));
+    /* B7 (v3): the phone's clock runs faster still — 30ms a day between 0.45s and 0.95s. */
+    const n = to - from, dur = hooks.phone ? Math.max(450, Math.min(950, n * 30)) : Math.max(900, Math.min(2800, n * 110));
     A(w, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: t, fill: "forwards" });
     A(w, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: t + dur, fill: "forwards" });
     knots.push([t + dur, to]);
@@ -358,11 +232,12 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   }
   function step(p: typeof parts[number], t: number) {
     A(p.g, [{ transform: "scale(0)" }, { transform: "scale(1.2)", offset: .7 }, { transform: "scale(1)" }], { duration: 300, delay: t, easing: BOUNCE });
-    t = type(p.chars, t + 200);
+    /* B7 (v3): the phone types at 18ms a letter, sooner, and stamps its chips closer together. */
+    t = hooks.phone ? type(p.chars, t + 120, 18) : type(p.chars, t + 200);
     if (hooks.phone) pop(p, t + 40);
     A(p.d, [{ opacity: 0, transform: "translateY(3px)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: t + 120 });
     t += 200;
-    if (p.chips.length) { t += 380; p.chips.forEach((c) => { t = stamp(c, t); t += 160; }); }
+    if (p.chips.length) { t += hooks.phone ? 160 : 380; p.chips.forEach((c) => { t = stamp(c, t); t += hooks.phone ? 60 : 160; }); }
     if (p.em) { A(p.em, [{ opacity: 0, transform: "translateX(-6px)" }, { opacity: 1, transform: "none" }], { duration: 400, delay: t + 60 }); t += 420; }
     return t;
   }
@@ -378,9 +253,6 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     band.style.background = YOU.bg; band.style.color = YOU.fg; bandT.textContent = YOU.word; pill.style.background = YOU.pill; pill.innerHTML = PILL.freq;
     build(); show(99); psd.classList.remove("mk-late");
     ftT.textContent = "Send the full by 5 July"; ftA.textContent = "Mark full sent"; ftL.classList.add("mk-late");
-    /* The phone's typed title, whole again whatever a run left it as. (A hoisted function reading a
-       const declared further down: safe only because the first call is at the foot of makeStory.) */
-    if (msTitle) { msTitle.textContent = HERO_PHONE_MS; msTitle.classList.remove("mk-typing"); }
   }
   function cancelAll() { anims.forEach((a) => a.cancel()); anims = []; timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); }
   function stop() { cancelAll(); setStatic(); }
@@ -446,124 +318,11 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     later(scrollable, t + 900);
   }
 
-  /* ═════ the phone story, v2 (ref design-refs/landing-hero-mobile-v2.html): it opens on the card ═════ */
+  /* ═════ the phone story, v3 (ref design-refs/landing-hero-mobile-v3.html): one short loop ═════
+     The ref's `playShort()` and only what it reaches. v2's dashboard, agent pick, query form, sample
+     control, response form, bottom status pills and push-and-highlight are gone with it. */
   const front = $("front");
-  const dash = front.querySelector<HTMLElement>('[data-hc="lcd"]');
-  const pick = front.querySelector<HTMLElement>('[data-hc="lcq"]');
-  const agentRow = front.querySelector<HTMLElement>('[data-hc="agent"]');
-  const msBlock = front.querySelector<HTMLElement>('[data-hc="ms"]');
-  const msTitle = front.querySelector<HTMLElement>('[data-hc="ms-title"]');
-  const cardTabs = front.querySelector<HTMLElement>('[data-hc="tabs"]');
-  /** An element's place inside the front card in the card's OWN (unrotated, unscaled) units. */
-  const inCard = (el: HTMLElement) => {
-    let x = 0, y = 0;
-    for (let n: HTMLElement | null = el; n && n !== front; n = n.offsetParent as HTMLElement | null) { x += n.offsetLeft; y += n.offsetTop; }
-    return { x, y };
-  };
-
-  /**
-   * S1–S4: the dashboard, "Log a query", the agent list, Eleanor picked and slid onto the card's own
-   * agent row, then "Your manuscript" typed into the manuscript block. Returns when the card is ready
-   * for the query to be logged.
-   * ⚠️ THE SLIDE IS WORKED FROM OFFSETS, NOT RECTS. The ref divides a rect's width by the card's to get
-   * its scale, but the card is turned .8°, so that ratio is ~2% high and the hand-over lands a few
-   * pixels short — the jump S2 exists to remove. Offsets live in the card's own frame, so the
-   * translation is exact whatever the card is turned or scaled by.
-   */
-  function openOnCard(t: number) {
-    if (!dash || !pick || !agentRow || !msBlock || !msTitle || !cardTabs) return t;
-    const rows = [...pick.querySelectorAll<HTMLElement>(".mk-lcq-p")];
-    const ew = pick.querySelector<HTMLElement>('[data-hc="lcq-pick"]')!;
-    A(pick, [{ opacity: 1 }, { opacity: 1 }], { duration: 1, fill: "forwards" });
-    A(dash, [{ opacity: 1 }, { opacity: 1 }], { duration: 1, fill: "forwards" });
-    // the tab bar: Queries → More lift and darken in turn, then "Log a query" is pressed
-    [...dash.querySelectorAll<HTMLElement>(".mk-lcd-tab")].slice(1).forEach((x, k) =>
-      A(x, [{ transform: "none", color: "rgba(28,19,15,.5)" }, { transform: "translateY(-4px)", color: "#2a3a52", offset: .4 }, { transform: "none", color: "rgba(28,19,15,.5)" }], { duration: 460, delay: t + 700 + k * 180, fill: "none" }));
-    t += 1700; t = press(dash.querySelector('[data-hc="lcd-go"]')!, t);
-    A(dash, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(-24px)" }], { duration: 300, delay: t + 40, fill: "forwards", easing: "cubic-bezier(.4,0,.6,1)" });
-    A(pick, [{ opacity: 0, transform: "translateX(24px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: t + 120, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
-    t += 200 + 700;
-    // the highlight steps down two rows, and Eleanor is tapped
-    rows.slice(0, 2).forEach((r, k) => A(r, [{ background: "rgba(42,58,82,0)" }, { background: "rgba(42,58,82,.08)", offset: .3 }, { background: "rgba(42,58,82,.08)", offset: .7 }, { background: "rgba(42,58,82,0)" }], { duration: 400, delay: t + k * 360, fill: "none" }));
-    t += 720;
-    A(ew, [{ background: "rgba(42,58,82,0)" }, { background: "rgba(42,58,82,.1)" }], { duration: 160, delay: t, fill: "both" });
-    t = press(ew, t + 180);
-    rows.filter((r) => r !== ew).forEach((r) => A(r, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: t, fill: "both" }));
-    A(pick.querySelector(".mk-lcq-h")!, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: t, fill: "both" });
-    // her row slides onto the card's agent row, by translation alone
-    const from = inCard(ew.querySelector<HTMLElement>(".mk-lc-disc")!), to = inCard(agentRow.querySelector<HTMLElement>(".mk-lc-disc")!);
-    A(ew, [{ transform: "none" }, { transform: `translate(${to.x - from.x}px,${to.y - from.y}px)` }], { duration: 560, delay: t + 200, fill: "forwards", easing: "cubic-bezier(.3,.7,.2,1)" });
-    t += 820;
-    // the real row is now underneath, identical, in one frame; the list fades off it
-    A(agentRow, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: t, fill: "both" });
-    A(pick, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: t + 20, fill: "forwards" });
-    // the manuscript block pops in empty, and its title types out with a rust caret
-    A(msBlock, [{ opacity: 0, transform: "translateY(14px) scale(.94)" }, { opacity: 1, transform: "scale(1.03)", offset: .65 }, { opacity: 1, transform: "none" }], { duration: 500, delay: t + 380, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
-    const word = HERO_PHONE_MS, T0 = t + 760;
-    later(() => { msTitle.textContent = ""; msTitle.classList.add("mk-typing"); }, t);
-    for (let i = 1; i <= word.length; i++) later(() => { msTitle.textContent = word.slice(0, i); }, T0 + i * 55);
-    later(() => msTitle.classList.remove("mk-typing"), T0 + word.length * 55 + 500);
-    return T0 + word.length * 55 + 350;
-  }
-
-  /* The sample control. `seg` moves the thumb to a unit and changes the number with it; `segReset`
-     puts it back on Pages without the slide (the thumb's transition is lifted for the one write). */
-  const q = (k: string) => root.querySelector<HTMLElement>(`[data-hc="${k}"]`);
-  function seg(id: string, unit: string, val: string, t: number) {
-    const sg = q(id + "-seg"), n = q(id + "-n"); if (!sg || !n) return t + 420;
-    const opt = sg.querySelector<HTMLElement>(`[data-u="${unit}"]`)!;
-    press(opt, t);
-    later(() => {
-      sg.querySelectorAll("span").forEach((x) => x.classList.toggle("mk-on", x === opt));
-      const th = sg.querySelector<HTMLElement>("i")!; th.style.left = opt.offsetLeft + "px"; th.style.width = opt.offsetWidth + "px";
-    }, t + 60);
-    A(n, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }], { duration: 120, delay: t + 60, fill: "none" });
-    later(() => { n.textContent = val; }, t + 180);
-    A(n, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 180, delay: t + 180, fill: "none" });
-    return t + 420;
-  }
-  function segReset(id: string, val: string) {
-    const sg = q(id + "-seg"), n = q(id + "-n"); if (!sg || !n) return;
-    const opt = sg.querySelector<HTMLElement>('[data-u="pages"]')!;
-    sg.querySelectorAll("span").forEach((x) => x.classList.toggle("mk-on", x === opt));
-    const th = sg.querySelector<HTMLElement>("i")!;
-    th.style.transition = "none"; th.style.left = opt.offsetLeft + "px"; th.style.width = opt.offsetWidth + "px"; void th.offsetWidth; th.style.transition = "";
-    n.textContent = val;
-  }
-
-  /**
-   * S5 — the rest of the card becomes a quick query form: Sent by Email; Letter v3, Synopsis and
-   * Sample ticked in turn; the sample to Chapters, Words and back to Pages, then "+" five times to 15;
-   * Today; "Log query". Returns the moment "Log query" has been pressed.
-   */
-  function logOnCard(u: number) {
-    const f = q("lcf"); if (!f || !msBlock) return u;
-    /* The thumb is placed under Pages before the form is seen (the ref does it on load). */
-    later(() => { f.style.top = (msBlock.offsetTop + msBlock.offsetHeight + 12) + "px"; segReset("smp", "10"); }, u - 20);
-    A(f, [{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: u, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
-    u += 500; u = select(q("lcf-email")!, u);
-    later(() => segReset("smp", "10"), u - 30);
-    u = select(q("lcf-m0")!, u + 280); u = select(q("lcf-m1")!, u + 200); u = select(q("lcf-m2")!, u + 200);
-    A(q("smp")!, [{ opacity: .35 }, { opacity: 1 }], { duration: 260, delay: u, fill: "both" });
-    u = seg("smp", "chapters", "3", u + 350); u = seg("smp", "words", "2,500", u + 420); u = seg("smp", "pages", "10", u + 420);
-    u += 300;
-    const plus = q("smp-plus")!, num = q("smp-n")!;
-    for (let v = 11; v <= 15; v++) {
-      const vv = String(v);
-      press(plus, u); later(() => { num.textContent = vv; }, u + 90);
-      A(num, [{ transform: "scale(1)" }, { transform: "scale(1.12)", offset: .4 }, { transform: "scale(1)" }], { duration: 220, delay: u + 90, fill: "none" });
-      u += 230;
-    }
-    u = select(q("lcf-today")!, u + 300);
-    u = press(q("lcf-go")!, u + 420);
-    A(f, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-8px)" }], { duration: 260, delay: u + 40, fill: "forwards" });
-    return u;
-  }
-
-  /* ── v2's updates around the card: a pop on each new line, a status pill, a push-and-highlight ── */
-  const heroEl = root.querySelector<HTMLElement>(".mk-hp-hero");
-  const pileEl = root.querySelector<HTMLElement>(".mk-hc-pile");
-  /* The highlighter tone behind each line as it lands, in the steps' order (the ref's). */
+  /* The highlighter tone behind each line as it lands, in the steps' order (the ref's `pop`). */
   const WASH = ["rgba(122,154,130,.28)", "rgba(201,120,100,.24)", "rgba(122,154,130,.28)", "rgba(122,154,130,.28)", "rgba(201,120,100,.24)"];
   /** The newest line pops: a quick swell and a highlighter wash behind its words. */
   function pop(p: typeof parts[number], t: number) {
@@ -572,159 +331,96 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     p.t.style.setProperty("--mk-wash", WASH[parts.indexOf(p)]);
   }
   const UPI: Record<string, string> = {
-    send: '<path d="M2.5 8.3 13.5 3l-3.6 10.5-2.4-4.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.5 9.2 13.5 3" stroke="currentColor" stroke-width="1.5"/>',
     todo: '<rect x="2.5" y="2.5" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.2 8.2 7.2 10.2 10.8 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
     bell: '<path d="M4.5 11V7.5a3.5 3.5 0 0 1 7 0V11l1 1.2h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.8 13.6a1.4 1.4 0 0 0 2.4 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-    pen: '<path d="M3 13l.7-2.8L10.5 3.4a1.4 1.4 0 0 1 2 2L5.8 12.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.5 4.5l2 2" stroke="currentColor" stroke-width="1.5"/>',
   };
   /**
-   * U1 — a status pill, bottom right just above the drawer (the ref's `.up`): in as the line starts,
-   * about 2.4s, then down and away. The words go in as text, never as markup.
+   * B2/B4 — a status pill that appears RIGHT BESIDE the line it belongs to (the ref's `floatTag`):
+   * right-aligned 22px in, its top on the line's foot less 6px, in for 340ms, held, then up 46px and
+   * gone over 1.1s from +1.7s. The words go in as text, never as markup.
    */
-  function up(pill: readonly [string, string, string], t: number) {
-    const [title, detail, icon] = pill;
-    const g = document.createElement("div"); g.className = "mk-up mk-up--" + icon; g.setAttribute("aria-hidden", "true");
+  function floatTag(p: typeof parts[number], tag: readonly [string, string, string], t: number) {
+    const [title, detail, icon] = tag;
+    const g = document.createElement("div"); g.className = "mk-up mk-up--" + icon + " mk-up--tag"; g.setAttribute("aria-hidden", "true");
     const ic = document.createElement("span"); ic.className = "mk-up-i";
     ic.innerHTML = `<svg viewBox="0 0 16 16" width="15" height="15">${UPI[icon]}</svg>`;
     const tx = document.createElement("span"); tx.className = "mk-up-t";
     const b = document.createElement("b"); b.textContent = title;
     const d = document.createElement("span"); d.textContent = detail;
     tx.append(b, d); g.append(ic, tx);
-    later(() => root.appendChild(g), Math.max(0, t - 30));
-    later(() => g.remove(), t + 3200);
-    A(g, [{ opacity: 0, translate: "24px 0" }, { opacity: 1, translate: "0 0" }], { duration: 380, delay: t, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
-    A(g, [{ opacity: 1, translate: "0 0" }, { opacity: 0, translate: "0 10px" }], { duration: 360, delay: t + 2400, fill: "forwards", easing: "cubic-bezier(.4,0,1,1)" });
-  }
-  /**
-   * U2 — push and highlight: the hero pushes in to 1.2× about the new line's title, so the title is
-   * centred at the ref's Q point, holds, and eases back over 1.4s; a rust highlighter sweeps across the
-   * title and fades over 2.2s. No tilt. Worked from rects at the moment it starts, as the ref's is,
-   * with the timeline's own glide (`scrolled` against its current translation) added back in.
-   */
-  function zoomOn(el: HTMLElement, t0: number) {
-    later(() => {
-      if (!heroEl || !pileEl) return;
-      const h = heroEl.getBoundingClientRect(), r = el.getBoundingClientRect();
-      const st = getComputedStyle(heroEl).transformOrigin.split(" ").map(parseFloat);
-      const k = pileEl.getBoundingClientRect().width / pileEl.offsetWidth;
-      const cur = new DOMMatrix(getComputedStyle(ol).transform).f;
-      const P = [r.left - h.left + Math.min(r.width, 140) / 2, r.top - h.top + r.height / 2 + (-scrolled - cur) * k];
-      const Q = [heroEl.offsetWidth / 2, 250];
-      const tr = (Z: number) => `${Q[0] - st[0] - Z * (P[0] - st[0])}px ${Q[1] - st[1] - Z * (P[1] - st[1])}px`;
-      heroEl.dataset.zoom = String(parts.findIndex((p) => p.t === el));
-      A(heroEl, [{ translate: "0 0", scale: 1 }, { translate: tr(1.2), scale: 1.2, offset: .35 }, { translate: tr(1.2), scale: 1.2, offset: .7 }, { translate: "0 0", scale: 1 }], { duration: 1400, fill: "none", easing: "cubic-bezier(.45,0,.55,1)" });
-      el.style.setProperty("--mk-wash", "rgba(201,120,100,.28)");
-      A(el, [{ backgroundSize: "0% 46%" }, { backgroundSize: "100% 46%", offset: .3 }, { backgroundSize: "100% 46%", offset: .85 }, { backgroundSize: "100% 0%" }], { duration: 2200, fill: "none", easing: "cubic-bezier(.3,.7,.2,1)" });
-    }, t0);
-  }
-  /* Each line's pill, in the steps' order. Partial sent raises none. */
-  const LINE_PILLS = [PHONE_PILLS.sent, PHONE_PILLS.partial, null, PHONE_PILLS.nudge, PHONE_PILLS.full] as const;
-  /* U2 — the push-and-highlight runs on Query sent, Partial requested and Full requested only. */
-  const ZOOMS = new Set([0, 1, 4]);
-  function zstep(i: number, t: number) {
-    const p = parts[i], pl = LINE_PILLS[i];
-    if (pl) up(pl, t + 60);
-    const end = step(p, t);
-    if (ZOOMS.has(i)) zoomOn(p.t, t - 80);
-    return end;
-  }
-  /** U3 — the writer records Eleanor's reply: a partial, the first 3 chapters, received today. */
-  function recordForm(t: number) {
-    const f = q("lr"), due = q("lr-due"); if (!f || !due) return t;
-    later(() => segReset("smp2", "50"), Math.max(0, t - 20));
-    A(f, [{ opacity: 0, transform: "translateY(48px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 460, delay: t, fill: "forwards", easing: BOUNCE });
-    t += 600; t = select(q("lr-partial")!, t);
-    t = seg("smp2", "chapters", "3", t + 380); t = select(q("lr-today")!, t + 320);
-    later(() => { due.textContent = PHONE_RESPONSE.dueDate; }, t + 150);
-    A(due, [{ opacity: .35 }, { opacity: 1 }], { duration: 300, delay: t + 150, fill: "none" });
-    t = press(q("lr-save")!, t + 700);
-    A(f, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(30px) scale(.98)" }], { duration: 300, delay: t + 80, fill: "forwards" });
-    return t + 420;
+    root.appendChild(g); later(() => g.remove(), t + 3200);
+    later(() => { const r = p.st.getBoundingClientRect(), sr = root.getBoundingClientRect(); g.style.top = (r.top - sr.top + r.height - 6) + "px"; }, t - 20);
+    A(g, [{ opacity: 0, translate: "0 10px", scale: .9 }, { opacity: 1, translate: "0 0", scale: 1 }], { duration: 340, delay: t, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
+    A(g, [{ opacity: 1, translate: "0 0" }, { opacity: 0, translate: "0 -46px" }], { duration: 1100, delay: t + 1700, fill: "forwards", easing: "cubic-bezier(.4,0,.6,1)" });
   }
 
-  function playPhone() {
+  /**
+   * B1–B6 — one query, Query sent to Full requested in about 24 seconds, then the card is dealt away to
+   * the left, a fresh one comes in from the right, and the story plays again, for ever. After the
+   * FIRST run only, the drawer is offered its grow.
+   */
+  let looped = false;
+  function playPhone(again: boolean) {
+    const F = PHONE_STORY.foot;
     tilt = 0; scrolled = 0; ol.style.transform = "none"; tlv.classList.remove("mk-lc-tlv--scroll"); tlv.scrollTop = 0;
-    pill.style.background = AGENT.pill; pill.innerHTML = PILL.queried;
-    ftT.textContent = "Reply expected by 9 May"; ftA.textContent = "Record a response"; ftL.classList.remove("mk-late"); psd.classList.remove("mk-late");
+    band.style.background = AGENT.bg; band.style.color = AGENT.fg; bandT.textContent = AGENT.word; pill.style.background = AGENT.pill; pill.innerHTML = PILL.queried;
+    ftT.textContent = F.sent[0]; ftA.textContent = F.sent[1]; ftL.classList.remove("mk-late"); psd.classList.remove("mk-late");
     A(pf, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" });
-    let t = 700 + LEAD;
-    t0 = performance.now();
-    // S3: until the query is logged the band is neutral and nobody's turn, and the pill is hidden
-    [agentRow, msBlock, cardTabs].forEach((el) => el && A(el, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" }));
-    band.style.background = "#efe9df"; band.style.color = "#6b6257"; bandT.textContent = PHONE_LOGGING;
-    A(pill, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" });
-    // the clock opens on Day 1 and holds there while the query is logged
-    build(); show(1); knots = [[t, 1]];
-    t = logOnCard(openOnCard(t));
-    // S3: "Log query" pressed — now it is with the agent, and the Queried pill stamps in
-    court(AGENT, t + 120); stamp(pill, t + 300, -2, "both");
-    if (cardTabs) A(cardTabs, [{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: t + 200, fill: "both" });
-    t += 380;
-    // S6: Day 1 — the query goes out: its line types in, with the 15 pages the form logged
-    root.querySelectorAll(".mk-up").forEach((g) => g.remove());
-    const due = q("lr-due"); if (due) due.textContent = "—";
-    t = zstep(0, t + 150);
-    knots.push([t + 700, 2]);
-    // Day 36 — she asks for the partial; the writer logs her reply first, then it is your move
-    reveal(parts[1].st, t + 600);
-    t = climb(waits[1]!, 2, 36, t + 800);
-    t = recordForm(t + 250); knots.push([t, 37]);
-    court(YOU, t); setPill("preq", t); foot("Send the partial by 25 April", "Mark partial sent", true, t);
-    t = zstep(1, t);
-    // her request came with a comment: noted, and turned into something to act on before the partial goes
-    up(PHONE_PILLS.note, t + 1400);
-    up(PHONE_PILLS.partialTask, t + 4000);
-    knots.push([t + 6400, 38]); t += 5600;
-    // Day 40 — the partial goes, and it matches what she asked for (no pill, no zoom)
-    reveal(parts[2].st, t + 300);
-    t = climb(waits[2]!, 36, 40, t + 500);
-    court(AGENT, t); setPill("psent", t); foot("Response expected by 3 June", "Record a response", false, t);
-    t = zstep(2, t);
-    // the long wait — past the date she gave
-    t = climb(slotWait, 40, 86, t + 600);
-    court(YOU, t); later(() => psd.classList.add("mk-late"), t); foot("Response expected by 3 June", "Record a response", true, t);
-    A(psd, [{ transform: "scale(1)" }, { transform: "scale(1.25)", offset: .4 }, { transform: "scale(1)" }], { duration: 500, delay: t, fill: "none" });
-    t = stamp(pn, t + 200, -1.2);
-    A(pnIcon, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: t });
-    A(pnIcon, [{ transform: "rotate(0)" }, { transform: "rotate(-20deg)" }, { transform: "rotate(16deg)" }, { transform: "rotate(-8deg)" }, { transform: "rotate(0)" }], { duration: 700, delay: t + 60, fill: "none", easing: "ease-in-out" });
-    t = type(pnText, t + 200);
-    t = stamp(pnBtn, t + 300, 1.5);
-    // the writer presses Nudge, and the form opens
-    t = press(pnBtn, t + 600);
-    A(form, [{ opacity: 0, transform: "translateY(48px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 460, delay: t + 60, fill: "forwards", easing: BOUNCE });
-    t += 550;
-    t = select(fToday, t);
-    t = select(f2w, t + 350);
-    t = type(noteText, t + 300, 24);
-    t = press(fSave, t + 450);
-    knots.push([t, 92]);   // saved on Day 92, 14 Jun
-    A(form, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(30px) scale(.98)" }], { duration: 300, delay: t + 80, fill: "forwards" });
-    t += 420;
-    // the nudge is logged; it's back with the agent
-    A(pn, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.94)" }], { duration: 260, delay: t, fill: "forwards" });
-    reveal(parts[3].st, t);
-    court(AGENT, t); later(() => psd.classList.remove("mk-late"), t); foot("Reminder on 28 June", "Record a response", false, t);
-    t = zstep(3, t + 400);
-    // Day 99 — she wants the full
-    reveal(parts[4].st, t + 300);
-    t = climb(waits[4]!, 92, 99, t + 600);
-    court(YOU, t); setPill("freq", t); foot("Send the full by 5 July", "Mark full sent", true, t);
-    t = zstep(4, t);
-    t = stamp(pf, t + 500, -1.2);
-    A(pfIcon, [{ opacity: 0, transform: "scale(0) rotate(-90deg)" }, { opacity: 1, transform: "scale(1.3) rotate(10deg)", offset: .7 }, { opacity: 1, transform: "none" }], { duration: 520, delay: t, easing: BOUNCE });
-    t = type(pfText, t + 300);
-    t = stamp(pfBtn, t + 400, 1.5);
-    A(pfIcon, [{ transform: "scale(1) rotate(0)" }, { transform: "scale(1.35) rotate(25deg)" }, { transform: "scale(1) rotate(0)" }], { duration: 700, delay: t + 250, fill: "none", easing: "ease-in-out" });
-    /* The story is over: offer it again (never on its own — it does not loop). */
-    later(() => hooks.onEnd?.(), t + 900);
-    later(() => hooks.onGrow?.(), t + 1500);
+    root.querySelectorAll(".mk-up--tag").forEach((g) => g.remove());
+    let t = (again ? 650 : 450) + LEAD;
+    if (again) A(front, [{ translate: "130% 30px", rotate: "10deg", opacity: 0 }, { translate: "0 0", rotate: "0deg", opacity: 1 }], { duration: 620, fill: "both", easing: "cubic-bezier(.16,1,.3,1)" });
+    build(); show(1); knots = [[t, 1]]; t0 = performance.now();
+    court(AGENT, 0); pill.innerHTML = PILL.queried;
+    const hideChips = (p: typeof parts[number]) => p.chips.forEach((c) => A(c, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" }));
+    const stepNoChips = (p: typeof parts[number], u: number) => { const sv = p.chips; p.chips = []; const e = step(p, u); p.chips = sv; return e; };
+    hideChips(parts[0]);
+    // Day 1 — the query, and its three materials pop in
+    let e = stepNoChips(parts[0], t + 300);
+    let m = e + 500; parts[0].chips.forEach((c, k) => stamp(c, m + 150 + k * 380)); m += 150 + parts[0].chips.length * 380;
+    // Day 36 — the partial request; its task appears beside it and floats away
+    knots.push([m + 900, 1]); reveal(parts[1].st, m + 800);
+    const pr = climb(waits[1]!, 1, 36, m + 900) - 320;
+    court(YOU, pr); setPill("preq", pr); foot(F.partial[0], F.partial[1], true, pr);
+    e = step(parts[1], pr);
+    floatTag(parts[1], PHONE_STORY.tags.partial, e + 300);
+    // Day 40 — the partial goes
+    reveal(parts[2].st, e + 2600); knots.push([e + 2700, 36]);
+    const ps = climb(waits[2]!, 36, 40, e + 2700) - 320;
+    court(AGENT, ps); setPill("psent", ps); foot(F.partialSent[0], F.partialSent[1], false, ps);
+    e = step(parts[2], ps);
+    // Day 86 — it has gone quiet: the reminder, the nudge
+    knots.push([e + 500, 40]);
+    const L = climb(slotWait, 40, 86, e + 500) - 320;
+    court(YOU, L); later(() => psd.classList.add("mk-late"), L); foot(F.partialSent[0], F.partialSent[1], true, L);
+    A(psd, [{ transform: "scale(1)" }, { transform: "scale(1.25)", offset: .4 }, { transform: "scale(1)" }], { duration: 500, delay: L, fill: "none" });
+    stamp(pn, L + 200, -1.2); A(pnIcon, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: L + 200 }); type(pnText, L + 200, 1); stamp(pnBtn, L + 400, 1.5);
+    const np = press(pnBtn, L + 1500);
+    knots.push([np + 200, 88]);
+    A(pn, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.94)" }], { duration: 240, delay: np + 60, fill: "forwards" });
+    reveal(parts[3].st, np + 60);
+    court(AGENT, np + 60); later(() => psd.classList.remove("mk-late"), np + 60); foot(F.nudged[0], F.nudged[1], false, np + 60);
+    e = step(parts[3], np + 200);
+    floatTag(parts[3], PHONE_STORY.tags.nudge, e + 300);
+    // Day 99 — the full
+    reveal(parts[4].st, e + 2600); knots.push([e + 2700, 88]);
+    const Fu = climb(waits[4]!, 88, 99, e + 2700) - 320;
+    court(YOU, Fu); setPill("freq", Fu); foot(F.full[0], F.full[1], true, Fu);
+    e = step(parts[4], Fu);
+    e = stamp(pf, e + 150, -1.2);
+    A(pfIcon, [{ opacity: 0, transform: "scale(0) rotate(-90deg)" }, { opacity: 1, transform: "scale(1.3) rotate(10deg)", offset: .7 }, { opacity: 1, transform: "none" }], { duration: 520, delay: e, easing: BOUNCE });
+    e = type(pfText, e + 60, 9); stamp(pfBtn, e + 100, 1.5);
+    t = e + 1400;
     prepClock(); raf = requestAnimationFrame(runClock);
-    later(scrollable, t + 900);
+    if (!looped) later(() => hooks.onGrow?.(), t + 1200);
+    // hold, then this card is dealt away and the story starts again
+    const out = t + 2600;
+    A(front, [{ translate: "0 0", rotate: "0deg", opacity: 1 }, { translate: "-130% -20px", rotate: "-10deg", opacity: 0 }], { duration: 520, delay: out, fill: "forwards", easing: "cubic-bezier(.5,0,.75,0)" });
+    later(() => { looped = true; LEAD = 0; cancelAll(); playPhone(true); }, out + 540);
   }
-  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; if (hooks.phone) playPhone(); else play(); }
+  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; if (hooks.phone) { looped = false; playPhone(false); } else play(); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
-  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-up").forEach((g) => g.remove()); }
+  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-up--tag").forEach((g) => g.remove()); }
   setStatic();
   return { start, stop, dispose };
 }
@@ -815,7 +511,7 @@ const BackCard: React.FC<{ c: typeof BACKS[number]; phone: boolean; t?: string }
   </div>
 );
 
-/** The nudge form. On the desk it opens OVER the card; on a phone it docks above the drawer. */
+/** The nudge form. The desk card only: it opens OVER the card. A phone nudges on the card itself (v3). */
 const NudgeForm: React.FC = () => (
   <div className="mk-lf" data-hc="lf">
     <div className="mk-lf-in">
@@ -836,11 +532,6 @@ const NudgeForm: React.FC = () => (
 /** The living card. The nudge form rides inside it on the desk only. */
 const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
     <div className="mk-lc" data-hc="front">
-      {/* v2: the card opens on the dashboard and logs the query on itself. Overlays, all at rest
-          invisible, so without script the card is still the story's end state. */}
-      {phone && <PhoneDash />}
-      {phone && <PhoneForm />}
-      {phone && <PhonePick />}
       <div className="mk-lc-in">
         <div className="mk-lc-band" data-hc="band" style={{ background: YOU.bg, color: YOU.fg }}>
           <span data-hc="bandt">With you</span>
@@ -903,10 +594,11 @@ const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
  * scales the pile (see `Hero.tsx`'s `size()`, or `HeroPhone.tsx` on a phone), which reads
  * `[data-hc="front"]` for the card's box.
  *
- * ⚠️ ONE STORY, TWO LAYOUTS, FIXED PER MOUNT. `variant="phone"` (≤760px) draws the pile under the
+ * ⚠️ TWO STORIES, TWO LAYOUTS, FIXED PER MOUNT. `variant="phone"` (≤760px) draws the pile under the
  * header with the ref's phone transforms, no blur and no cast shadow; the hawk's shadow flies over
- * once instead; the nudge form docks above the drawer; and `onGrow` is called once the story ends so
- * the drawer can rise. A change of breakpoint remounts the hero rather than re-rendering this.
+ * once instead; and the card plays the v3 short loop (`playPhone`) — Query sent to Full requested,
+ * dealt away, dealt in, again — calling `onGrow` after its first run only. No Watch again on a phone.
+ * A change of breakpoint remounts the hero rather than re-rendering this.
  */
 export const HeroCard: React.FC<{
   host: React.RefObject<HTMLElement | null>;
@@ -951,7 +643,9 @@ export const HeroCard: React.FC<{
        moment they arrive with whatever lead is left, never early. */
     const born = performance.now();
     let live = true;
-    const go = () => { if (live) story.start(Math.max(0, 1700 - (performance.now() - born))); };
+    /* The ref's lead: `V4.start(1700)` on the desk, `V4.start(1300)` for the phone's short loop (v3). */
+    const lead = phone ? 1300 : 1700;
+    const go = () => { if (live) story.start(Math.max(0, lead - (performance.now() - born))); };
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     if (fonts?.ready) fonts.ready.then(go, go); else go();
     return () => { live = false; btn?.removeEventListener("click", replay); story.dispose(); };
@@ -976,9 +670,8 @@ export const HeroCard: React.FC<{
       <div className="mk-hp-fly" aria-hidden="true">
         <img src={HERO_FLY.src + "?v=" + HERO_FLY.version} alt="" width={HERO_FLY.width} height={HERO_FLY.height} />
       </div>
-      {againBtn}
-      <div className="mk-hp-dock" aria-hidden="true"><ResponseForm /></div>
-      <div className="mk-hp-dock" aria-hidden="true"><NudgeForm /></div>
+      {/* L5/B4 (v3): no Watch again on a phone (the story loops by itself) and no docked nudge form
+          (the nudge happens on the card). */}
     </div>
   );
 
