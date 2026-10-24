@@ -39,6 +39,7 @@ import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import "./qcvList138.css";
+import "./qcv142.css"; /* v149 — the toolbar heights and the filter strip (the Cards view that also imported it is gone) */
 import "./qcv144.css";
 
 const MON = MONTHS_SHORT;
