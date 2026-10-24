@@ -18,7 +18,7 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 import { PricingPage } from "./PricingPage";
 import { stepAnswered, stepInsight } from "./CampaignJourney";
 import { sliceBetween } from "../test/sliceBetween";
-import { PV3_H1, PV3_SUB, PV3_LAUNCH_LINE, PV3_FREE, PV3_PRO, PV3_FAQ } from "./pricingCopy";
+import { PV4_H1, PV4_SUB, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO, PV4_FAQ } from "./pricingCopy";
 
 const html = () => renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
 const textOf = (h: string) =>
@@ -61,12 +61,12 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
   });
 
   it("…and the constants are those lines (so an edit in one place cannot pass)", () => {
-    expect(PV3_H1).toBe(MUST[1]);
-    expect(PV3_SUB).toBe(MUST[2]);
-    expect(PV3_LAUNCH_LINE).toBe(MUST[3]);
-    expect([...PV3_FREE.list]).toEqual(MUST.slice(5, 10));
-    expect([...PV3_PRO.list]).toEqual(MUST.slice(12, 17));
-    expect(PV3_FAQ).toHaveLength(6);
+    expect(PV4_H1).toBe(MUST[1]);
+    expect(PV4_SUB).toBe(MUST[2]);
+    expect(PV4_LAUNCH_LINE).toBe(MUST[3]);
+    expect([...PV4_FREE.list]).toEqual(MUST.slice(5, 10));
+    expect([...PV4_PRO.list]).toEqual(MUST.slice(12, 17));
+    expect(PV4_FAQ).toHaveLength(6);
   });
 
   it("never names Wall of no or Corkboard, never says AI, never limits Smart Import to once", () => {
@@ -74,7 +74,7 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
     expect(t).not.toMatch(/wall of no/i);
     expect(t).not.toMatch(/corkboard/i);
     expect(t).not.toMatch(/\bAI\b/);
-    const line = PV3_FREE.list.find((l) => /Smart Import/.test(l))!;
+    const line = PV4_FREE.list.find((l) => /Smart Import/.test(l))!;
     expect(line).not.toMatch(/\bonce\b/i);
     expect(t).not.toMatch(/Smart Import[^.]{0,40}\bonce\b/i);
   });
@@ -83,15 +83,16 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
 describe("pricing v3: the banner", () => {
   it("puts the counter before the form", () => {
     const h = html();
-    const count = h.indexOf('class="mk-pv3count"');
-    const form = h.indexOf('class="mk-pv3form"');
+    const count = h.indexOf('class="mk-fbcount"');
+    const form = h.indexOf('class="mk-fbform"');
     expect(count, "the counter's slot renders").toBeGreaterThan(-1);
     expect(form, "the form renders").toBeGreaterThan(-1);
     expect(count).toBeLessThan(form);
   });
 
   it("with no figure from the store, draws no counter and states no number but the H1's 100", () => {
-    const band = sliceBetween(html(), '<section class="mk-pv3band"', '<section class="mk-pv3soon"');
+    /* Up to the perks panel: its "How it works" steps are numbered 1–3, which are not a places figure. */
+    const band = sliceBetween(html(), '<section class="mk-fb"', 'class="mk-fbdetail"');
     expect(band).not.toMatch(/["\s`]mk-fmcount["\s`]/);
     expect(band).not.toMatch(/["\s`]mk-fmbar["\s`]/);
     expect(textOf(band).match(/\d+/g)).toEqual(["100"]);
@@ -102,7 +103,7 @@ describe("pricing v3: the banner", () => {
     const h1s = [...h.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
     expect(h1s).toHaveLength(1);
     expect(textOf(h1s[0][1]).trim()).toBe("A free QueryHawk campaign for our first 100 writers.");
-    expect(h.indexOf("<h1")).toBeGreaterThan(h.indexOf('class="mk-pv3band"'));
+    expect(h.indexOf("<h1")).toBeGreaterThan(h.indexOf('class="mk-fb"'));
   });
 });
 

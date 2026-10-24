@@ -158,6 +158,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      green build and a green suite. `marketingTokens.test.ts` asserts that every `var(--mk-…)`
      this sheet READS resolves to a declaration; declaring them together here is what makes that
      guard cheap to keep satisfied. */
+  /* /pricing's founding box: the ref's blush (pricing-page-v2 `--blush`) and the step its white
+     fades through on the way there. Its kicker pill is the blush with rust type. */
+  --mk-blush: #f8e8e1;
+  --mk-blush-mid: #fcf4f0;
   --mk-blush-label: rgba(28, 19, 15, .62);
   --mk-blush-note: rgba(28, 19, 15, .62);
   --mk-blush-ph: rgba(28, 19, 15, .48);
@@ -729,7 +733,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* `.mk-eyebrow` is DELETED (21 Oct): the old pricing header was its last renderer — checked across
    `src/` after the removal, not from the diff. */
 
-/* The counter: a 5px bar and a mono tally, centred. Live or absent. */
+/* The counter (`FoundingCounter variant="left"`): a 5px bar and one mono line. Live or absent. */
 .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
 .mk-fmbar { height: 5px; border-radius: 999px; background: rgba(162, 69, 42, .16); overflow: hidden; }
 .mk-fmfill {
@@ -746,8 +750,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-blush-label); margin: 8px 0 0;
 }
-.mk-fmtally { color: var(--mk-rust); font-weight: 500; }
-.mk-fmof { opacity: .6; }
 
 
 /* ⚠️ BELOW 900px THE HERO STACKS — a default Nick has not ruled on (landing hero v3). The frame stops
@@ -1433,183 +1435,274 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      the same inset, in a media query nobody editing the banner would think to look in. */
 }
 
-/* ══════════════ Pricing (public /pricing, ref design-refs/pricing-page-v1.html, 21 Oct) ══════════════
+/* ══════════════ Pricing (public /pricing, ref design-refs/pricing-page-v2.html, 24 Oct) ══════════════
+   Pricing v4 rebuilt this block from v3's (ref pricing-page-v1): the navy band is gone, and the page
+   opens on the founding box laid across the boundary between the ink and the sheet.
    ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED. The three-tier page's `.mk-price*`,
    `.mk-tier*`, `.mk-cmp*` and `.mk-faq*` rules were deleted with it — nothing else in `src/`
    renders any of them (checked after the removal). Every value below is the ref's own, read from
    its stylesheet; where the ref and a marketing token say the same thing, the token is used.
-   ⚠️ EVERY SELECTOR IS `.mk-pv3 .x` (0-2-0) OR `.mk-scope .x` WITH `!important`. brand.tsx injects
+   ⚠️ EVERY SELECTOR IS `.mk-pv4 .x` (0-2-0) OR `.mk-scope .x` WITH `!important`. brand.tsx injects
    `p, span, div, button, input, label { font-family: … }` at 0-0-1 on every route, which beats
    inheritance; the page restates `inherit` on those elements at 0-1-0 (a `:where` list, so it adds
    nothing more) and every face below then wins on specificity rather than on source order. Its
    `h1:not(.wsh-title), h2, h3` rule is `!important`, so the headings take two classes AND the flag.
    ⚠️ SPECIAL ELITE IS WEIGHT 400 ONLY, AND EVERY RULE NAMING IT STATES 400. An `h2` or a `b`
    defaults to bold and would be drawn faux-bold. */
-.mk-pv3 {
-  padding: 18px 18px 0;
+.mk-pv4 {
+  /* The ref's `.sheet` padding: 18px each side, none at the top — the box reaches above it. */
+  padding: 0 18px;
   font-family: var(--mk-f-serif); color: var(--mk-nearblack);
   /* The ref's body states no line-height, so its text sits at \`normal\`; the sheet inherits 1.5,
      which ran every list row ~2.5px taller than the ref (measured at 1440). */
   line-height: normal;
 }
-.mk-pv3 :where(p, span, div, button, input, label, li, a, output, small, b, strong, h1, h2, h3) {
+.mk-pv4 :where(p, span, div, button, input, label, li, a, output, small, b, strong, h1, h2, h3) {
   font-family: inherit;
 }
 
-/* ── The navy band the tiers hang from ── */
-.mk-pv3 .mk-pv3band {
-  position: relative; overflow: hidden; text-align: center;
-  background: var(--mk-navy); color: var(--mk-cream);
-  border-radius: 22px; padding: 44px 40px 128px;
+/* ── The founding box, across the boundary (ref `.fb.fb--a`) ──
+   ⚠️ ON THIS PAGE ALONE THE INK RUNS ON BELOW THE NAV AND THE SHEET STARTS LOWER, so the box can sit
+   across the join: its top half on the ink, the rest on the sheet, the sheet's rounded top corners
+   showing either side. `:has()` scopes it to the page that renders the box, as the landing's phone
+   rule above does — no other page's sheet moves.
+   ⚠️ `overflow: visible` HERE, BECAUSE THE BOX IS MEANT TO LEAVE THE SHEET. The shell's `clip` would
+   cut its top half off at the sheet's edge. Nothing else on this page paints into the sheet's
+   corners (its last element is an empty spacer), so the corners lose nothing to it. */
+.mk-sheet:has(.mk-fb) { margin-top: 150px; overflow: visible; }
+.mk-pv4 .mk-fb {
+  position: relative; z-index: 2; max-width: 1120px; margin: -102px auto 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px;
+  border: 1px solid rgba(28, 19, 15, .08); border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 24px 50px -24px rgba(28, 19, 15, .28);
+  color: var(--mk-nearblack); text-align: left;
+  /* ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND: a gradient that failed to parse would
+     otherwise leave the box see-through, over the ink. White to 42%, through the blush's mid step at
+     62%, to the blush. */
+  background-color: #fff;
+  background-image: linear-gradient(90deg, #fff 0%, #fff 42%, var(--mk-blush-mid) 62%, var(--mk-blush) 100%);
 }
-.mk-pv3 .mk-pv3band::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(1200px 420px at 50% -10%, rgba(255, 255, 255, .07), transparent 60%);
+.mk-pv4 .mk-fbtext { padding: 40px 44px 14px; }
+.mk-pv4 .mk-fb--open .mk-fbtext { padding-bottom: 36px; }
+.mk-pv4 .mk-fbtag {
+  display: inline-block; padding: 5px 12px; border-radius: 999px;
+  background: var(--mk-blush); color: var(--mk-rust);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase;
 }
-/* The band's contents sit above its glow. */
-.mk-pv3 .mk-pv3band > * { position: relative; z-index: 1; }
-.mk-pv3 .mk-pv3kicker {
-  display: inline-block; font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem;
-  letter-spacing: .2em; text-transform: uppercase; line-height: normal;
-  background: var(--mk-cream-btn); color: var(--mk-nearblack); border-radius: 999px; padding: 6px 13px;
-}
-.mk-scope .mk-pv3h1 {
+.mk-scope .mk-fbh1 {
   font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: clamp(1.9rem, 2.8vw, 2.6rem); line-height: 1.14; color: var(--mk-cream);
-  margin: 16px auto 0; max-width: 26ch; text-wrap: balance;
+  font-size: clamp(1.8rem, 2.5vw, 2.35rem); line-height: 1.16; color: var(--mk-nearblack);
+  margin: 14px 0 0; text-wrap: balance;
 }
-.mk-pv3 .mk-pv3sub {
-  font-size: 1.12rem; font-weight: 300; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .78);
-  max-width: 60ch; margin: 14px auto 0; text-wrap: balance;
+.mk-pv4 .mk-fbsub { margin: 12px 0 0; font-size: 1.1rem; line-height: 1.55; color: var(--mk-body); }
+
+/* The counter on the light box: `FoundingCounter`'s `left` shape — a 5px track and one mono line. */
+.mk-pv4 .mk-fbcount { max-width: 380px; margin-top: 24px; }
+.mk-pv4 .mk-fbcount .mk-fmcount { max-width: none; margin: 0; }
+.mk-pv4 .mk-fbcount .mk-fmbar { background: rgba(28, 19, 15, .1); }
+.mk-pv4 .mk-fbcount .mk-fmfill { background: var(--mk-rust); opacity: 1; }
+.mk-pv4 .mk-fbcount .mk-fmmeta {
+  margin: 9px 0 0; font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mk-nearblack);
 }
 
-/* The counter, on navy. `FoundingCounter`'s `tally` shape restated for this ground and scoped to
-   the band, so its light-ground treatment elsewhere is untouched. */
-.mk-pv3 .mk-pv3count .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
-.mk-pv3 .mk-pv3count .mk-fmbar { background: rgba(var(--mk-cream-rgb), .18); }
-.mk-pv3 .mk-pv3count .mk-fmfill { background: var(--mk-stamp); opacity: 1; }
-.mk-pv3 .mk-pv3count .mk-fmmeta {
-  font-family: var(--mk-f-mono); margin: 9px 0 0; color: rgba(var(--mk-cream-rgb), .62);
+/* The claim form: a hairlined white field and the navy pill, side by side. */
+.mk-pv4 .mk-fbform { display: flex; gap: 10px; margin-top: 16px; max-width: 520px; }
+.mk-pv4 .mk-fbform input {
+  flex: 1; min-width: 0; height: 50px; border-radius: 999px; border: 1px solid var(--mk-hair);
+  padding: 0 22px; font-size: 1rem; font-weight: 400; color: var(--mk-nearblack); background: #fff;
 }
-.mk-pv3 .mk-pv3count .mk-fmtally { color: var(--mk-cream); font-weight: 600; }
+.mk-pv4 .mk-fbform input::placeholder { color: var(--mk-blush-ph); }
+.mk-pv4 .mk-fbform input:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pv4 .mk-fbform .mk-btn {
+  height: 50px; padding: 0 26px; justify-content: center; font-size: 1.02rem; font-weight: 600;
+}
+.mk-pv4 .mk-fbtext .mk-betanote { margin: 12px 0 0; font-size: .9rem; }
+.mk-pv4 .mk-fbtext .mk-betamsg { margin: 18px 0 0; }
 
-/* The claim form, on navy: a white field and a cream pill, side by side, centred. */
-.mk-pv3 .mk-pv3form { display: flex; gap: 10px; justify-content: center; margin: 18px auto 0; max-width: 520px; }
-.mk-pv3 .mk-pv3form input {
-  flex: 1; min-width: 0; height: 50px; border-radius: 999px; border: 0; padding: 0 22px;
-  font-size: 1rem; font-weight: 400; color: var(--mk-nearblack); background: #fff;
+.mk-pv4 .mk-fbpanel { display: grid; place-items: center; }
+/* Mirrored, so the older hawk points left, towards the words. */
+.mk-pv4 .mk-fbart { display: block; width: 270px; max-width: none; height: auto; transform: scaleX(-1); }
+
+/* What founding writers get: four cards and the three steps, across the box's full width. */
+.mk-pv4 .mk-fbdetail {
+  grid-column: 1 / -1; padding: 28px 44px 20px;
+  background: var(--mk-hero-ground); border-top: 1px dashed var(--mk-hair);
 }
-.mk-pv3 .mk-pv3form input::placeholder { color: var(--mk-blush-ph); }
-.mk-pv3 .mk-pv3form input:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 2px; }
-/* ⚠️ THE SHARED FORM RENDERS ITS SUBMIT AS `.mk-btn--navy`; ON A NAVY BAND THAT IS A BUTTON NOBODY
-   CAN FIND. The ref's cream pill is restated here, scoped to this form — the component is not
-   forked and its other mounts keep their navy. */
-.mk-pv3 .mk-pv3form .mk-btn {
-  height: 50px; padding: 0 26px; white-space: nowrap; justify-content: center;
-  background: var(--mk-cream-btn); border: 0; color: var(--mk-nearblack);
-  border-radius: 999px; font-size: 1.02rem; font-weight: 600; box-shadow: none;
-  transition: transform .18s ease, box-shadow .18s ease;
+.mk-pv4 .mk-fbdetail[hidden] { display: none; }
+.mk-pv4 .mk-fb--open .mk-fbdetail { animation: mkJyRise .35s ease; }
+.mk-pv4 .mk-fbgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mk-pv4 .mk-fbd {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; align-items: start;
+  background: #fff; border-radius: 16px; padding: 20px 22px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 16px -10px rgba(28, 19, 15, .18);
 }
-.mk-pv3 .mk-pv3form .mk-btn:hover { background: var(--mk-cream-btn); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 0, 0, .25); }
-.mk-pv3 .mk-pv3form .mk-btn:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+.mk-pv4 .mk-fbi { width: 44px; height: 44px; border-radius: 50%; background: var(--mk-blush); display: grid; place-items: center; }
+.mk-pv4 .mk-fbi svg {
+  width: 21px; height: 21px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-scope .mk-fbdh {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.12rem; line-height: 1.3; margin: 2px 0 0; color: var(--mk-nearblack);
+}
+.mk-pv4 .mk-fbdp { margin: 6px 0 0; font-size: .97rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pv4 .mk-fbsteps {
+  display: flex; align-items: center; gap: 26px; margin-top: 22px; padding: 16px 22px;
+  border-radius: 16px; background: var(--mk-navy); color: var(--mk-cream);
+}
+.mk-pv4 .mk-fbstepsh {
+  margin: 0; flex: none; font-family: var(--mk-f-mono); font-weight: 500; font-size: .62rem;
+  line-height: 1.2; letter-spacing: .2em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+}
+.mk-pv4 .mk-fbsteps ol { list-style: none; margin: 0; padding: 0; display: flex; flex: 1; align-items: center; gap: 12px; }
+.mk-pv4 .mk-fbsteps li { display: flex; align-items: center; gap: 10px; font-size: 1rem; color: #fff; white-space: nowrap; }
+.mk-pv4 .mk-fbsteps li + li::before {
+  content: ""; width: 28px; height: 1px; background: rgba(var(--mk-cream-rgb), .35); margin-right: 2px;
+}
+.mk-pv4 .mk-fbsteps li span {
+  width: 26px; height: 26px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--mk-terra); color: var(--mk-nearblack);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .72rem; line-height: 1;
+}
+
+/* The toggle: mono caps between two 70px hairlines, a rust chevron, centred at the box's foot.
+   ⚠️ OPEN, IT TAKES THE PANEL'S GROUND AND THE BOX'S BOTTOM CORNERS, so no strip of the box's
+   gradient shows between the panel and it — the two are adjacent grid rows with no gap. */
+.mk-pv4 .mk-fbmore {
+  grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 22px 44px 26px; margin: 0; border: 0; background: none; cursor: pointer;
+  color: var(--mk-nearblack); font-family: var(--mk-f-mono); font-weight: 500; font-size: .66rem;
+  line-height: 1; letter-spacing: .22em; text-transform: uppercase;
+}
+.mk-pv4 .mk-fbmore::after { content: ""; width: 70px; height: 1px; background: var(--mk-hair); margin-left: 4px; }
+.mk-pv4 .mk-fbmorelbl { display: inline-flex; align-items: center; gap: 14px; }
+.mk-pv4 .mk-fbmorelbl::before { content: ""; width: 70px; height: 1px; background: var(--mk-hair); }
+.mk-pv4 .mk-fbchev {
+  display: block; width: 14px; height: 14px; color: var(--mk-rust); fill: none; stroke: currentColor;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease;
+}
+.mk-pv4 .mk-fbmore[aria-expanded="true"] .mk-fbchev { transform: rotate(180deg); }
+.mk-pv4 .mk-fbmore:hover { color: var(--mk-rust); }
+.mk-pv4 .mk-fbmore:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 3px; }
+.mk-pv4 .mk-fb--open .mk-fbmore { padding-top: 6px; background: var(--mk-hero-ground); border-radius: 0 0 20px 20px; }
 @media (prefers-reduced-motion: reduce) {
-  .mk-pv3 .mk-pv3form .mk-btn { transition: none; }
-  .mk-pv3 .mk-pv3form .mk-btn:hover { transform: none; }
+  .mk-pv4 .mk-fbchev { transition: none; }
+  .mk-pv4 .mk-fb--open .mk-fbdetail { animation: none; }
 }
-/* The form's own notes and outcomes, centred and legible on navy. */
-.mk-pv3 .mk-pv3band .mk-betanote { margin: 14px auto 0; font-size: .9rem; color: rgba(var(--mk-cream-rgb), .62); }
-.mk-pv3 .mk-pv3band .mk-betanote a,
-.mk-pv3 .mk-pv3band .mk-betanote button,
-.mk-pv3 .mk-pv3band .mk-betanote .mk-doclink { color: var(--mk-cream); }
-.mk-pv3 .mk-pv3band .mk-betainvalid { margin: 12px auto 0; color: #f2c3ae; }
-.mk-pv3 .mk-pv3band .mk-betamsg { margin: 22px auto 0; text-align: left; }
+@media (max-width: 1100px) {
+  .mk-pv4 .mk-fbsteps { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .mk-pv4 .mk-fbsteps ol { flex-direction: column; align-items: flex-start; }
+  .mk-pv4 .mk-fbsteps li + li::before { display: none; }
+}
+@media (max-width: 980px) {
+  .mk-pv4 .mk-fb {
+    grid-template-columns: 1fr;
+    background-image: linear-gradient(180deg, #fff 0%, #fff 55%, var(--mk-blush) 100%);
+  }
+  .mk-pv4 .mk-fbpanel { padding: 18px 0; }
+  .mk-pv4 .mk-fbart { width: 180px; }
+}
+@media (max-width: 760px) {
+  .mk-pv4 .mk-fbgrid { grid-template-columns: 1fr; }
+  .mk-pv4 .mk-fbdetail { padding: 22px 16px 20px; }
+  .mk-pv4 .mk-fbsteps li { white-space: normal; }
+}
+@media (max-width: 640px) {
+  .mk-sheet:has(.mk-fb) { margin-top: 120px; }
+  .mk-pv4 .mk-fb { margin-top: -100px; }
+  .mk-pv4 .mk-fbtext { padding: 28px 20px 14px; }
+  .mk-pv4 .mk-fb--open .mk-fbtext { padding-bottom: 36px; }
+  .mk-pv4 .mk-fbform { flex-direction: column; }
+  .mk-pv4 .mk-fbform input { flex: none; }
+  .mk-pv4 .mk-fbpanel { display: none; }
+}
 
-/* ── Then, once we launch: the line and two tiers, hanging over the band's foot ──
-   ⚠️ THE NEGATIVE MARGIN IS THE REF'S AND IT IS THE DESIGN: the tiers hang from the band. The
-   band's 128px of bottom padding is the room they hang into. */
-.mk-pv3 .mk-pv3soon { position: relative; z-index: 1; max-width: 1240px; margin: -104px auto 0; padding: 0 22px; }
-.mk-pv3 .mk-pv3launch {
+/* ── Then, once we launch: the line and two tiers, on the light sheet ── */
+.mk-pv4 .mk-pv4soon { position: relative; z-index: 1; max-width: 1240px; margin: 44px auto 0; padding: 0 22px; }
+.mk-pv4 .mk-pv4launch {
   max-width: 920px; margin: 0 auto 12px; padding: 0 4px;
-  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3; color: #fff;
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3tiers {
+.mk-pv4 .mk-pv4tiers {
   display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start;
   max-width: 920px; margin: 0 auto;
 }
-.mk-pv3 .mk-pv3tier {
+.mk-pv4 .mk-pv4tier {
   background: #fff; border-radius: 20px; padding: 26px 30px 28px; margin: 8px;
   box-shadow: 0 0 0 7px #fff, 0 0 0 8px rgba(90, 70, 54, .08), 0 18px 40px rgba(28, 19, 15, .10);
 }
-.mk-pv3 .mk-pv3tier--pro { background: var(--mk-navy); color: var(--mk-cream); }
-.mk-scope .mk-pv3tname {
+.mk-pv4 .mk-pv4tier--pro { background: var(--mk-navy); color: var(--mk-cream); }
+.mk-scope .mk-pv4tname {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 1.4rem; line-height: 1.2; margin: 0; color: var(--mk-nearblack);
 }
-.mk-scope .mk-pv3tier--pro .mk-pv3tname { color: #fff; }
-.mk-pv3 .mk-pv3price { display: flex; align-items: flex-start; gap: 3px; margin: 10px 0 0; }
-.mk-pv3 .mk-pv3amt {
+.mk-scope .mk-pv4tier--pro .mk-pv4tname { color: #fff; }
+.mk-pv4 .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin: 10px 0 0; }
+.mk-pv4 .mk-pv4amt {
   font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1;
   letter-spacing: -.02em; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3cur {
+.mk-pv4 .mk-pv4cur {
   font-family: var(--mk-f-display); font-weight: 400; font-size: 1.2rem; line-height: 1;
   margin-top: 6px; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3tier--pro .mk-pv3amt, .mk-pv3 .mk-pv3tier--pro .mk-pv3cur { color: #fff; }
-.mk-pv3 .mk-pv3from, .mk-pv3 .mk-pv3per {
+.mk-pv4 .mk-pv4tier--pro .mk-pv4amt, .mk-pv4 .mk-pv4tier--pro .mk-pv4cur { color: #fff; }
+.mk-pv4 .mk-pv4from, .mk-pv4 .mk-pv4per {
   font-family: var(--mk-f-mono); font-weight: 500; font-size: .66rem; line-height: 1;
   letter-spacing: .14em; text-transform: uppercase; opacity: .75;
 }
-.mk-pv3 .mk-pv3from { margin: 12px 6px 0 0; }
-.mk-pv3 .mk-pv3per { align-self: flex-end; margin: 0 0 6px 8px; }
-.mk-pv3 .mk-pv3tsub { margin: 8px 0 0; font-size: .98rem; color: #5a4636; }
-.mk-pv3 .mk-pv3tier--pro .mk-pv3tsub { color: rgba(var(--mk-cream-rgb), .82); }
-.mk-pv3 .mk-pv3tlist {
+.mk-pv4 .mk-pv4from { margin: 12px 6px 0 0; }
+.mk-pv4 .mk-pv4per { align-self: flex-end; margin: 0 0 6px 8px; }
+.mk-pv4 .mk-pv4tsub { margin: 8px 0 0; font-size: .98rem; color: #5a4636; }
+.mk-pv4 .mk-pv4tier--pro .mk-pv4tsub { color: rgba(var(--mk-cream-rgb), .82); }
+.mk-pv4 .mk-pv4tlist {
   list-style: none; margin: 18px 0 0; padding: 16px 0 0; border-top: 1px dashed rgba(90, 70, 54, .3);
   display: grid; gap: 8px; font-size: .98rem; color: #3a2e27;
 }
-.mk-pv3 .mk-pv3tier--pro .mk-pv3tlist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
-.mk-pv3 .mk-pv3tlist li { position: relative; padding-left: 22px; }
-.mk-pv3 .mk-pv3tlist li::before {
+.mk-pv4 .mk-pv4tier--pro .mk-pv4tlist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
+.mk-pv4 .mk-pv4tlist li { position: relative; padding-left: 22px; }
+.mk-pv4 .mk-pv4tlist li::before {
   content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px;
   border-radius: 50%; background: var(--mk-rust);
 }
-.mk-pv3 .mk-pv3tier--pro .mk-pv3tlist li::before { background: var(--mk-terra); }
-.mk-pv3 .mk-pv3tlist li.mk-pv3plus { padding-left: 0; font-weight: 600; }
-.mk-pv3 .mk-pv3tlist li.mk-pv3plus::before { display: none; }
-.mk-pv3 .mk-pv3flex {
+.mk-pv4 .mk-pv4tier--pro .mk-pv4tlist li::before { background: var(--mk-terra); }
+.mk-pv4 .mk-pv4tlist li.mk-pv4plus { padding-left: 0; font-weight: 600; }
+.mk-pv4 .mk-pv4tlist li.mk-pv4plus::before { display: none; }
+.mk-pv4 .mk-pv4flex {
   margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--mk-cream-rgb), .08);
   font-size: .92rem; line-height: 1.45; color: rgba(var(--mk-cream-rgb), .88);
 }
-.mk-pv3 .mk-pv3tlink {
+.mk-pv4 .mk-pv4tlink {
   display: inline-block; margin-top: 14px; color: var(--mk-cream); font-weight: 600;
   text-decoration: none; border-bottom: 1px solid rgba(var(--mk-cream-rgb), .45);
 }
-.mk-pv3 .mk-pv3tlink::after { content: " ↓"; }
-.mk-pv3 .mk-pv3tlink:hover { border-bottom-color: var(--mk-cream); }
-.mk-pv3 .mk-pv3tlink:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+.mk-pv4 .mk-pv4tlink::after { content: " ↓"; }
+.mk-pv4 .mk-pv4tlink:hover { border-bottom-color: var(--mk-cream); }
+.mk-pv4 .mk-pv4tlink:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
 
 /* ── Sections below the tiers ── */
-.mk-pv3 .mk-pv3sect { max-width: 1240px; margin: 88px auto 0; padding: 0 22px; }
-.mk-scope .mk-pv3h2 {
+.mk-pv4 .mk-pv4sect { max-width: 1240px; margin: 88px auto 0; padding: 0 22px; }
+.mk-scope .mk-pv4h2 {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 2rem; line-height: 1.25; margin: 0 0 22px; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
-.mk-pv3 .mk-pv3qa { border-top: 1px solid var(--mk-hair); padding: 20px 0; }
-.mk-pv3 .mk-pv3q { font-weight: 600; margin: 0; font-size: 1.04rem; color: var(--mk-nearblack); }
-.mk-pv3 .mk-pv3a { color: rgba(28, 19, 15, .56); margin: 6px 0 0; line-height: 1.6; }
-.mk-pv3 .mk-pv3end { height: 110px; }
+.mk-pv4 .mk-pv4faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
+.mk-pv4 .mk-pv4qa { border-top: 1px solid var(--mk-hair); padding: 20px 0; }
+.mk-pv4 .mk-pv4q { font-weight: 600; margin: 0; font-size: 1.04rem; color: var(--mk-nearblack); }
+.mk-pv4 .mk-pv4a { color: rgba(28, 19, 15, .56); margin: 6px 0 0; line-height: 1.6; }
+.mk-pv4 .mk-pv4end { height: 110px; }
 
 /* ── How long will I need? (the ref's `.calc.jy`) ──
    ⚠️ `scroll-margin-top` COUNTS THE STICKY NAV. The ref's nav scrolls away, so its 24px is the
    whole margin; here the bar stays, and its full height is what lands the card below it. */
-.mk-pv3 .mk-pv3how { scroll-margin-top: calc(var(--mk-nav-h) + 24px); }
-.mk-pv3 .mk-jy {
+.mk-pv4 .mk-pv4how { scroll-margin-top: calc(var(--mk-nav-h) + 24px); }
+.mk-pv4 .mk-jy {
   background: #fff; border-radius: 20px; overflow: hidden;
   box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 30px 60px -40px rgba(28, 19, 15, .45);
 }
-.mk-pv3 .mk-jytop {
+.mk-pv4 .mk-jytop {
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap; min-height: 76px;
   padding: 22px 28px 20px; background: var(--mk-panel); color: var(--mk-cream);
 }
@@ -1617,95 +1710,95 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 22px; line-height: 1.3; margin: 0; color: var(--mk-cream);
 }
-.mk-pv3 .mk-jycount {
+.mk-pv4 .mk-jycount {
   margin: 0 0 0 auto; font-family: var(--mk-f-mono); font-size: .66rem; letter-spacing: .16em;
   text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
 }
-.mk-pv3 .mk-jydots { display: flex; gap: 6px; }
-.mk-pv3 .mk-jydots span {
+.mk-pv4 .mk-jydots { display: flex; gap: 6px; }
+.mk-pv4 .mk-jydots span {
   width: 8px; height: 8px; border-radius: 50%; background: rgba(var(--mk-cream-rgb), .25);
   transition: background .2s, width .2s;
 }
-.mk-pv3 .mk-jydots .mk-jydot--done { background: rgba(var(--mk-cream-rgb), .6); }
-.mk-pv3 .mk-jydots .mk-jydot--on { width: 22px; border-radius: 999px; background: var(--mk-terra); }
-.mk-pv3 .mk-jybody { padding: 34px 30px 32px; }
-.mk-pv3 .mk-jystep { max-width: 680px; margin: 0 auto; }
-.mk-pv3 .mk-jystep.mk-jyres { max-width: none; }
+.mk-pv4 .mk-jydots .mk-jydot--done { background: rgba(var(--mk-cream-rgb), .6); }
+.mk-pv4 .mk-jydots .mk-jydot--on { width: 22px; border-radius: 999px; background: var(--mk-terra); }
+.mk-pv4 .mk-jybody { padding: 34px 30px 32px; }
+.mk-pv4 .mk-jystep { max-width: 680px; margin: 0 auto; }
+.mk-pv4 .mk-jystep.mk-jyres { max-width: none; }
 .mk-scope .mk-jyq {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 1.7rem; line-height: 1.25; margin: 0 0 18px; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jyq:focus, .mk-pv3 .mk-jybig:focus { outline: none; }
-.mk-pv3 .mk-jyq:focus-visible, .mk-pv3 .mk-jybig:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
-.mk-pv3 .mk-jysub { margin: 22px 0 10px; font-weight: 600; color: var(--mk-nearblack); }
+.mk-pv4 .mk-jyq:focus, .mk-pv4 .mk-jybig:focus { outline: none; }
+.mk-pv4 .mk-jyq:focus-visible, .mk-pv4 .mk-jybig:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
+.mk-pv4 .mk-jysub { margin: 22px 0 10px; font-weight: 600; color: var(--mk-nearblack); }
 
-.mk-pv3 .mk-jyopts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.mk-pv3 .mk-jyopts--2 { grid-template-columns: 1fr 1fr; }
-.mk-pv3 .mk-jyopt {
+.mk-pv4 .mk-jyopts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mk-pv4 .mk-jyopts--2 { grid-template-columns: 1fr 1fr; }
+.mk-pv4 .mk-jyopt {
   text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--mk-hair);
   background: #fff; font-size: 1rem; font-weight: 600; line-height: 1.3; color: var(--mk-nearblack);
   cursor: pointer; transition: border-color .15s, box-shadow .15s, background .15s;
 }
-.mk-pv3 .mk-jyopt small {
+.mk-pv4 .mk-jyopt small {
   display: block; margin-top: 3px; font-weight: 400; font-size: .86rem; line-height: 1.35; color: rgba(28, 19, 15, .56);
 }
-.mk-pv3 .mk-jyopt:hover { background: #faf8f4; }
-.mk-pv3 .mk-jyopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: #f6f7f9; }
-.mk-pv3 .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
-.mk-pv3 .mk-jychip {
+.mk-pv4 .mk-jyopt:hover { background: #faf8f4; }
+.mk-pv4 .mk-jyopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: #f6f7f9; }
+.mk-pv4 .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
+.mk-pv4 .mk-jychip {
   height: 38px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
   font-size: .95rem; font-weight: 500; color: var(--mk-body); cursor: pointer;
   transition: background .15s, color .15s, border-color .15s;
 }
-.mk-pv3 .mk-jychip:hover { background: #faf8f4; }
-.mk-pv3 .mk-jychip[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
-.mk-pv3 .mk-jystepper { display: inline-flex; align-items: center; height: 38px; border-radius: 999px; border: 1px solid var(--mk-hair); }
-.mk-pv3 .mk-jystepper button {
+.mk-pv4 .mk-jychip:hover { background: #faf8f4; }
+.mk-pv4 .mk-jychip[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
+.mk-pv4 .mk-jystepper { display: inline-flex; align-items: center; height: 38px; border-radius: 999px; border: 1px solid var(--mk-hair); }
+.mk-pv4 .mk-jystepper button {
   width: 40px; height: 36px; border: 0; background: transparent; color: var(--mk-navy);
   font-size: 1.15rem; font-weight: 500; cursor: pointer; border-radius: 50%;
 }
-.mk-pv3 .mk-jystepper button:hover { background: #f3f1ed; }
-.mk-pv3 .mk-jystepper output { min-width: 56px; text-align: center; font-size: 1.3rem; font-weight: 600; color: var(--mk-nearblack); }
-.mk-pv3 .mk-jy button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pv4 .mk-jystepper button:hover { background: #f3f1ed; }
+.mk-pv4 .mk-jystepper output { min-width: 56px; text-align: center; font-size: 1.3rem; font-weight: 600; color: var(--mk-nearblack); }
+.mk-pv4 .mk-jy button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
 
-.mk-pv3 .mk-jyins {
+.mk-pv4 .mk-jyins {
   margin-top: 22px; padding: 14px 18px 16px; border-radius: 14px;
   background: #ebe1d4; border-left: 3px solid var(--mk-rust);
   animation: mkJyRise .35s ease;
 }
 @keyframes mkJyRise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.mk-pv3 .mk-jyk {
+.mk-pv4 .mk-jyk {
   margin: 0; font-family: var(--mk-f-mono); font-size: .6rem; letter-spacing: .18em;
   text-transform: uppercase; color: rgba(90, 70, 54, .75);
 }
-.mk-pv3 .mk-jyinst { margin: 6px 0 0; font-size: 1.02rem; line-height: 1.55; color: var(--mk-body); }
-.mk-pv3 .mk-jynav { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; }
-.mk-pv3 .mk-jy .mk-jynext { padding: 15px 30px; font-size: 1.02rem; font-weight: 600; }
-.mk-pv3 .mk-jy .mk-jynext:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
-.mk-pv3 .mk-jyback, .mk-pv3 .mk-jyagain {
+.mk-pv4 .mk-jyinst { margin: 6px 0 0; font-size: 1.02rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pv4 .mk-jynav { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; }
+.mk-pv4 .mk-jy .mk-jynext { padding: 15px 30px; font-size: 1.02rem; font-weight: 600; }
+.mk-pv4 .mk-jy .mk-jynext:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
+.mk-pv4 .mk-jyback, .mk-pv4 .mk-jyagain {
   background: none; border: 0; padding: 0; font-size: 1rem; font-weight: 600; color: var(--mk-navy);
   cursor: pointer; border-bottom: 1px solid rgba(42, 58, 82, .35);
 }
-.mk-pv3 .mk-jyback::before { content: "← "; }
-.mk-pv3 .mk-jyagain { margin-top: 18px; }
+.mk-pv4 .mk-jyback::before { content: "← "; }
+.mk-pv4 .mk-jyagain { margin-top: 18px; }
 
 /* The result. */
-.mk-pv3 .mk-jyrestop { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 34px; align-items: start; }
+.mk-pv4 .mk-jyrestop { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 34px; align-items: start; }
 .mk-scope .mk-jybig {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 2.4rem; line-height: 1.15; margin: 6px 0 0; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jywhy { margin: 12px 0 0; font-size: 1rem; line-height: 1.6; color: var(--mk-body); }
-.mk-pv3 .mk-jyprep {
+.mk-pv4 .mk-jywhy { margin: 12px 0 0; font-size: 1rem; line-height: 1.6; color: var(--mk-body); }
+.mk-pv4 .mk-jyprep {
   margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: #ebe1d4;
   font-size: .95rem; line-height: 1.55; color: var(--mk-body);
 }
-.mk-pv3 .mk-jyplan {
+.mk-pv4 .mk-jyplan {
   position: relative; background: var(--mk-navy); color: var(--mk-cream); border-radius: 20px;
   padding: 28px 28px 26px; margin: 8px;
   box-shadow: 0 0 0 7px #fff, 0 0 0 8px rgba(90, 70, 54, .1), 0 22px 44px rgba(28, 19, 15, .16);
 }
-.mk-pv3 .mk-jyflag {
+.mk-pv4 .mk-jyflag {
   position: absolute; top: -12px; left: 24px; z-index: 2; white-space: nowrap;
   font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem; letter-spacing: .2em;
   text-transform: uppercase; background: var(--mk-nearblack); color: var(--mk-cta-ink);
@@ -1715,74 +1808,71 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 1.4rem; line-height: 1.2; margin: 0; color: #fff;
 }
-.mk-pv3 .mk-jyplan .mk-pv3amt { font-size: 2.8rem; color: #fff; }
-.mk-pv3 .mk-jyplan .mk-pv3cur { color: #fff; }
-.mk-pv3 .mk-jypm {
+.mk-pv4 .mk-jyplan .mk-pv4amt { font-size: 2.8rem; color: #fff; }
+.mk-pv4 .mk-jyplan .mk-pv4cur { color: #fff; }
+.mk-pv4 .mk-jypm {
   margin: 8px 0 0; font-family: var(--mk-f-mono); font-size: .66rem; letter-spacing: .14em;
   text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .8);
 }
-.mk-pv3 .mk-jytail {
+.mk-pv4 .mk-jytail {
   margin: 16px 0 0; padding-top: 14px; border-top: 1px dashed rgba(var(--mk-cream-rgb), .3);
   font-size: 1rem; line-height: 1.5;
 }
-.mk-pv3 .mk-jyinc { margin: 10px 0 0; font-size: .92rem; line-height: 1.5; color: rgba(var(--mk-cream-rgb), .75); }
-.mk-pv3 .mk-jyall { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--mk-hair); }
-.mk-pv3 .mk-jyallh { margin: 0 0 12px; font-weight: 600; color: var(--mk-nearblack); }
-.mk-pv3 .mk-jyrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.mk-pv3 .mk-jymini { border-radius: 14px; padding: 14px 16px; background: #ebe1d4; }
-.mk-pv3 .mk-jymini:first-child { background: #fff; box-shadow: inset 0 0 0 1px var(--mk-hair); }
-.mk-pv3 .mk-jymini p {
+.mk-pv4 .mk-jyinc { margin: 10px 0 0; font-size: .92rem; line-height: 1.5; color: rgba(var(--mk-cream-rgb), .75); }
+.mk-pv4 .mk-jyall { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--mk-hair); }
+.mk-pv4 .mk-jyallh { margin: 0 0 12px; font-weight: 600; color: var(--mk-nearblack); }
+.mk-pv4 .mk-jyrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.mk-pv4 .mk-jymini { border-radius: 14px; padding: 14px 16px; background: #ebe1d4; }
+.mk-pv4 .mk-jymini:first-child { background: #fff; box-shadow: inset 0 0 0 1px var(--mk-hair); }
+.mk-pv4 .mk-jymini p {
   margin: 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 1rem; line-height: 1.2; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jymini b {
+.mk-pv4 .mk-jymini b {
   display: block; margin-top: 6px; font-family: var(--mk-f-display); font-weight: 400;
   font-size: 1.4rem; line-height: 1; letter-spacing: -.02em; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jymini small {
+.mk-pv4 .mk-jymini small {
   display: block; margin-top: 6px; font-family: var(--mk-f-mono); font-size: .6rem;
   letter-spacing: .12em; text-transform: uppercase; color: #5a4636;
 }
-.mk-pv3 .mk-jymini.mk-jymini--fit { background: var(--mk-navy); }
-.mk-pv3 .mk-jymini.mk-jymini--fit p, .mk-pv3 .mk-jymini.mk-jymini--fit b { color: #fff; }
-.mk-pv3 .mk-jymini.mk-jymini--fit small { color: rgba(var(--mk-cream-rgb), .75); }
-.mk-pv3 .mk-pv3source { margin: 14px 4px 0; font-size: .84rem; color: var(--mk-label); line-height: 1.55; }
-.mk-pv3 .mk-pv3source a { color: inherit; }
+.mk-pv4 .mk-jymini.mk-jymini--fit { background: var(--mk-navy); }
+.mk-pv4 .mk-jymini.mk-jymini--fit p, .mk-pv4 .mk-jymini.mk-jymini--fit b { color: #fff; }
+.mk-pv4 .mk-jymini.mk-jymini--fit small { color: rgba(var(--mk-cream-rgb), .75); }
+.mk-pv4 .mk-pv4source { margin: 14px 4px 0; font-size: .84rem; color: var(--mk-label); line-height: 1.55; }
+.mk-pv4 .mk-pv4source a { color: inherit; }
 
 /* ⚠️ AFTER THE RULES THEY OVERRIDE: a media query confers no specificity, so an earlier override
    loses at equal specificity. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-pv3 .mk-jyins { animation: none; }
-  .mk-pv3 .mk-jydots span, .mk-pv3 .mk-jyopt, .mk-pv3 .mk-jychip { transition: none; }
+  .mk-pv4 .mk-jyins { animation: none; }
+  .mk-pv4 .mk-jydots span, .mk-pv4 .mk-jyopt, .mk-pv4 .mk-jychip { transition: none; }
 }
 /* ⚠️ THE REF ALSO STACKS THE THREE-OPTION ROWS AT 1100px — a rule left from its earlier two-column
    calculator, where the questions shared the card with the answer. One question at a time, the row is
    680px wide at every desktop width; the pack says options stack at 640, and they do. */
 @media (max-width: 900px) {
-  .mk-pv3 .mk-jyrestop { grid-template-columns: 1fr; }
-  .mk-pv3 .mk-jyrow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mk-pv4 .mk-jyrestop { grid-template-columns: 1fr; }
+  .mk-pv4 .mk-jyrow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .mk-pv3 .mk-jybody { padding: 24px 18px; }
+  .mk-pv4 .mk-jybody { padding: 24px 18px; }
   .mk-scope .mk-jyq { font-size: 1.4rem; }
-  .mk-pv3 .mk-jyrow { grid-template-columns: 1fr 1fr; }
-  .mk-pv3 .mk-jyopts, .mk-pv3 .mk-jyopts--2 { grid-template-columns: 1fr; }
-  .mk-pv3 .mk-jycount { margin-left: 0; }
+  .mk-pv4 .mk-jyrow { grid-template-columns: 1fr 1fr; }
+  .mk-pv4 .mk-jyopts, .mk-pv4 .mk-jyopts--2 { grid-template-columns: 1fr; }
+  .mk-pv4 .mk-jycount { margin-left: 0; }
 }
 
 /* ── Narrow widths: the ref's breakpoints, widening to narrowing ── */
 @media (max-width: 900px) {
-  .mk-pv3 .mk-pv3faq { grid-template-columns: 1fr; }
+  .mk-pv4 .mk-pv4faq { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) {
-  .mk-pv3 .mk-pv3tiers { grid-template-columns: 1fr; }
-  .mk-pv3 .mk-pv3tier { padding: 22px 22px 24px; }
+  .mk-pv4 .mk-pv4tiers { grid-template-columns: 1fr; }
+  .mk-pv4 .mk-pv4tier { padding: 22px 22px 24px; }
 }
 @media (max-width: 640px) {
-  .mk-pv3 { padding: 10px 10px 0; }
-  .mk-pv3 .mk-pv3band { padding: 34px 18px 112px; }
-  .mk-pv3 .mk-pv3form { flex-direction: column; }
-  .mk-pv3 .mk-pv3form input { flex: none; }
-  .mk-pv3 .mk-pv3soon, .mk-pv3 .mk-pv3sect { padding: 0 12px; }
+  .mk-pv4 { padding: 0 10px; }
+  .mk-pv4 .mk-pv4soon, .mk-pv4 .mk-pv4sect { padding: 0 12px; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════

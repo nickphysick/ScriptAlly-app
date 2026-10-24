@@ -168,9 +168,9 @@ export const CampaignJourney: React.FC<{ today?: Date }> = ({ today }) => {
               <article className="mk-jyplan" data-fit={result.fit}>
                 <span className="mk-jyflag">{JY_FITS}</span>
                 <h4 className="mk-jyplanname">{card.name}</h4>
-                <div className="mk-pv3price">
-                  <span className="mk-pv3cur">£</span>
-                  <span className="mk-pv3amt">{card.price}</span>
+                <div className="mk-pv4price">
+                  <span className="mk-pv4cur">£</span>
+                  <span className="mk-pv4amt">{card.price}</span>
                 </div>
                 <p className="mk-jypm">{card.perMonth}</p>
                 <p className="mk-jytail">{result.tail}</p>

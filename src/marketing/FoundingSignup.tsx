@@ -27,7 +27,7 @@ import { isValidEmail } from "../lib/authActions";
 import {
   FOUNDING_FIELD_LABEL, FOUNDING_PLACEHOLDER, FOUNDING_CTA, FOUNDING_INVALID,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
-  foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
+  foundingCounterLabel, foundingCounterRest, foundingRemainingLabel, foundingPlacesLeftLabel,
 } from "./landingCopy";
 import { useFounding, ensureCount, submitFounding, FoundingState } from "./foundingStore";
 import { WAITLIST_HONEYPOT_FIELD, WaitlistSource } from "./waitlist";
@@ -190,8 +190,9 @@ export const FoundingSignup: React.FC<{
  */
 /**
  * ⚠️ STILL TWO VARIANTS, AND `bar` IS GONE RATHER THAN RETIRED BESIDE ITS REPLACEMENT. `claim`
- * takes its place on the founding band and takes the `/founders` hero off `tally` as well, so
- * `tally` is now the PRICING CARD's shape and nothing else. A replacement is SWAPPED, not added —
+ * takes its place on the founding band and takes the `/founders` hero off `tally` as well, which
+ * left `tally` as the pricing page's shape alone — until pricing v4 swapped it for `left`. A
+ * replacement is SWAPPED, not added —
  * a variant surviving its last caller is exactly how this file would grow a form nobody has
  * looked at in a year, and `line` already went that way once.
  *
@@ -201,10 +202,11 @@ export const FoundingSignup: React.FC<{
  *
  * `claim` — the offer's own counter: the figure, what is left, and a track beneath. Wide enough
  * to be read as the point of the card it closes.
- * `tally` — a 5px bar and one mono line, for a pricing tier's narrow column, where the counter is
- * a detail of a card rather than its subject.
+ * `left` — a 5px bar and one mono line, "63 places left", for /pricing's founding box (pricing v4,
+ * 24 Oct; ref pricing-page-v2). It REPLACES `tally` ("37/100 places claimed"), whose only caller was
+ * that page — swapped, not added beside it, by this docblock's own rule.
  */
-export const FoundingCounter: React.FC<{ variant: "claim" | "tally" }> = ({ variant }) => {
+export const FoundingCounter: React.FC<{ variant: "claim" | "left" }> = ({ variant }) => {
   /* ⚠️ THE COUNTER ASKS FOR ITS OWN FIGURE. It used to rely on a `FoundingSignup` being mounted
      beside it, which held on every surface until the pricing page rendered a counter with no form
      — and the failure is silent, because "no count yet" and "never asked" both render nothing.
@@ -216,34 +218,25 @@ export const FoundingCounter: React.FC<{ variant: "claim" | "tally" }> = ({ vari
   const pct = Math.min(100, Math.round((count.claimed / count.cap) * 100));
   const label = foundingCounterLabel(count.claimed, count.cap);
   /**
-   * ⚠️ `tally` IS A THIRD VARIANT RATHER THAN A RESTYLED `bar`, AND THE REASON IS THE LABEL. The
-   * panel's tint differences — a 5px track, a different fill alpha, a transition — are a
-   * wrapper-scoped override like the button already uses, and could have been done from outside.
-   * The label could not: `37/100 places claimed` with a dimmed `/100` is different MARKUP and
-   * different WORDING from the band's `37 of 100 places claimed`, and changing `bar` to suit the
-   * panel would reach into the sealed band, which renders on two pages and is not this surface.
-   * One branch, same component, same store.
+   * ⚠️ `left` STATES ONLY WHAT IS LEFT — the pricing ref's one line. The bar carries the full figure
+   * ("37 of 100 places claimed") for anyone who cannot see it; the line under it is then
+   * decorative to a screen reader, or it would be read out twice in two different wordings.
    */
-  if (variant === "tally") {
+  if (variant === "left") {
     return (
       <div className="mk-fmcount">
-        {/* The bar carries the figure for anyone who cannot see it; the text beneath is then
-            decorative to a screen reader and would otherwise be read out twice. */}
         <div className="mk-fmbar" role="img" aria-label={label}>
           <div className="mk-fmfill" style={{ width: `${pct}%` }} />
         </div>
-        <p className="mk-fmmeta" aria-hidden="true">
-          <span className="mk-fmtally">{count.claimed}<span className="mk-fmof">/{count.cap}</span></span>
-          {" places claimed"}
-        </p>
+        <p className="mk-fmmeta" aria-hidden="true">{foundingPlacesLeftLabel(count.claimed, count.cap)}</p>
       </div>
     );
   }
   /**
-   * ⚠️ THE TRACK IS `aria-hidden` HERE AND LABELLED IN `tally`, AND THE DIFFERENCE IS THE TEXT
+   * ⚠️ THE TRACK IS `aria-hidden` HERE AND LABELLED IN `left`, AND THE DIFFERENCE IS THE TEXT
    * BESIDE IT. This variant states the figure in readable prose — "1", " of 100 places claimed",
    * "99 left" — so a labelled track would have a reader hear the same sentence twice in a row.
-   * `tally`'s own line is `aria-hidden` for the mirror image of the reason: there the bar carries
+   * `left`'s own line is `aria-hidden` for the mirror image of the reason: there the bar carries
    * the label because the text under it is decorative.
    */
   return (

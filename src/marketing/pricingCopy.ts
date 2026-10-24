@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Public pricing-page copy — verbatim from design-refs/pricing-page-v1.html (21 Oct).
+ * Public pricing-page copy — verbatim from design-refs/pricing-page-v2.html (24 Oct), which
+ * supersedes pricing-page-v1.html for this route.
  *
  * ⚠️ THIS IS THE PUBLIC /pricing PAGE'S OWN MODULE, AND THE SIGNED-IN /plans PAGE NEVER READS IT.
  * `/plans` reads `PRICING_TIERS`, `PRO_PRICE_MONTHLY` and `PRO_PRICE_YEARLY` from `landingCopy.ts`,
@@ -19,12 +20,48 @@
 
 import { CopyRun } from "./CopyRuns";
 
-export const PRICING_V3_DOCUMENT_TITLE = "Pricing — QueryHawk";
+export const PRICING_DOCUMENT_TITLE = "Pricing — QueryHawk";
 
-/* ══════════════ The founding banner ══════════════ */
-export const PV3_KICKER = "Founding writers";
-export const PV3_H1 = "A free QueryHawk campaign for our first 100 writers.";
-export const PV3_SUB = "We're looking for founding writers to put QueryHawk through its paces.";
+/* ══════════════ The founding box ══════════════ */
+export const PV4_KICKER = "Founding writers";
+export const PV4_H1 = "A free QueryHawk campaign for our first 100 writers.";
+export const PV4_SUB = "We're looking for founding writers to put QueryHawk through its paces.";
+
+/** The toggle at the box's foot: its label closed, and open. */
+export const PV4_MORE = "What founding writers get";
+export const PV4_LESS = "Show less";
+
+/**
+ * The four cards behind the toggle. `icon` names one of the ref's four line drawings, which
+ * `PricingPage.tsx` holds — the words are here, the pictures are markup.
+ */
+export interface Pv4Perk { icon: "gift" | "chat" | "import" | "people"; title: string; body: string }
+export const PV4_PERKS: Pv4Perk[] = [
+  {
+    icon: "gift",
+    title: "The full power of QueryHawk, completely free of charge",
+    body: "Full access to QueryHawk Pro for an entire querying campaign.",
+  },
+  {
+    icon: "chat",
+    title: "A direct line to the founder",
+    body: "You'll shape QueryHawk for future users, and help countless other writers get their story told.",
+  },
+  {
+    icon: "import",
+    title: "Bring your list across",
+    body: "If you're already querying, Smart Import will read your list and turn your agents and queries " +
+      "into a smart QueryHawk database.",
+  },
+  {
+    icon: "people",
+    title: "Discounts for your network on launch",
+    body: "When QueryHawk launches properly, you'll be able to invite friends and fellow writers on board " +
+      "with an exclusive Early Bird discount.",
+  },
+];
+export const PV4_STEPS_H = "How it works";
+export const PV4_STEPS = ["Sign up", "Receive and confirm your invite", "Log in with your unique founder's code"];
 
 /* ══════════════ The passes — planned launch prices ══════════════
    ⚠️ ONE TABLE, AND EVERY OTHER FIGURE ON THE PAGE IS READ FROM IT. The per-month figure is DERIVED
@@ -58,9 +95,9 @@ export const passPerMonthLine = (p: Pass): string =>
 export const PRO_FROM = PASSES.map(perMonth).sort((a, b) => Number(a) - Number(b))[0];
 
 /* ══════════════ Then, once we launch ══════════════ */
-export const PV3_LAUNCH_LINE = "Then, once we launch:";
+export const PV4_LAUNCH_LINE = "Then, once we launch:";
 
-export const PV3_FREE = {
+export const PV4_FREE = {
   name: "Free",
   price: "0",
   sub: "For as long as you like",
@@ -73,7 +110,7 @@ export const PV3_FREE = {
   ],
 } as const;
 
-export const PV3_PRO = {
+export const PV4_PRO = {
   name: "Pro",
   from: "from",
   per: "a month",
@@ -94,8 +131,8 @@ export const PV3_PRO = {
 
 /* ══════════════ Questions ══════════════ */
 export interface Pv3Question { q: string; a: string }
-export const PV3_FAQ_H2 = "Questions";
-export const PV3_FAQ: Pv3Question[] = [
+export const PV4_FAQ_H2 = "Questions";
+export const PV4_FAQ: Pv3Question[] = [
   {
     q: "Will a pass renew without asking?",
     a: "No. A pass ends on its date. We'll remind you a week before, and you choose whether to extend.",
@@ -213,7 +250,7 @@ export const JY_TILES: { m: 0 | 1 | 3 | 6 | 12; name: string; price: string; sma
 ];
 
 /* ══════════════ The source note under the journey ══════════════ */
-export const PV3_SOURCE_NOTE: CopyRun[] = [
+export const PV4_SOURCE_NOTE: CopyRun[] = [
   "A rough guide, not a promise, based on typical reply times reported by querying writers (",
   { link: "QueryTracker figures", href: "https://rejectomancy.com/2023/09/28/query-quest-what-are-my-chances-part-ii/" },
   ") and the reply windows agencies state.",
