@@ -38,22 +38,20 @@ describe("the view — per device (qh.qc.view)", () => {
   });
   /* v141 §C — the default grouping moved from "Who it's with" (attention) to Status */
   it("a first visit: Status, due first, comfortable, List (v142 §A)", () => {
-    expect(readQcView()).toEqual({ group: "status", sort: { key: "due", reversed: false }, density: "comfortable", view: "list" });
+    expect(readQcView()).toEqual({ group: "status", sort: { key: "due", reversed: false }, density: "comfortable" });
   });
-  it("v142 §A — the view round-trips inside version 1, and a record without one reads as List", () => {
-    writeQcView({ view: "cards" });
-    expect(readQcView().view).toBe("cards");
-    g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: { key: "due", reversed: false }, density: "comfortable" }));
-    expect(readQcView().view).toBe("list");
-    g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: { key: "due", reversed: false }, density: "comfortable", view: "grid" }));
-    expect(readQcView().view).toBe("list");
+  it("v149 B5 — list only: a record still carrying v142's view keeps its other fields and is never written back", () => {
+    g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "action", sort: { key: "due", reversed: false }, density: "compact", view: "cards" }));
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "due", reversed: false }, density: "compact" });
+    writeQcView({ density: "comfortable" });
+    expect(JSON.parse(g.window!.localStorage.getItem(QC_VIEW_KEY)!)).not.toHaveProperty("view");
   });
   it("round-trips grouping, sort and density", () => {
     /* v141 §C — Status is the default now, so the round trip saves a grouping that is not (a saved choice is honoured) */
     writeQcView({ group: "action" });
     writeQcView({ sort: { key: "agent", reversed: true } });
     writeQcView({ density: "compact" });
-    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact", view: "list" });
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact" });
   });
   it("migrates sa.qcList.v1 once: its grouping and density move in, the old key goes", () => {
     g.window!.localStorage.setItem(QC_LIST_MEMORY_KEY, serialiseQcListMemory({ density: "compact", group: "package" }));

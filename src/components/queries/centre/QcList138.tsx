@@ -38,10 +38,7 @@ import { AgentDisc } from "../../shared/AgentDisc";
 import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
-import { FULL_ICON, type ListView } from "../../shell/ViewTitleRow";
-import { QcCards142, type CardTab } from "./QcCards142";
 import "./qcvList138.css";
-import "./qcv142.css";
 import "./qcv144.css";
 
 const MON = MONTHS_SHORT;
@@ -378,6 +375,8 @@ export interface QcList138Props {
   /** v138.1 §F — the search, in the navy row */
   onFind?: (v: string) => void;
   findRef?: React.Ref<HTMLInputElement>;
+  /** v149 A3 — the view chips and Find, above the list card (not drawn in full screen) */
+  viewRow?: React.ReactNode;
   ringId?: string | null;
   /** v138 §H — the page-load entrance is running: bands and the first 16 rows land in list order */
   entering?: boolean;
@@ -403,25 +402,18 @@ export interface QcList138Props {
   /** v140 §F — the unpinned scroll position, for the visit: read once for the list's first draw (a reload within the
    *  visit) and again when the route comes back with its scroller at the top; written as the list scrolls unpinned. */
   scrollMemory?: { read: () => number; write: (y: number) => void };
-  /** v142 §A — the Cards / List view (one state: the title row's pill and the full-screen toolbar's switch) */
-  view?: ListView;
-  onView?: (v: ListView) => void;
-  /** navy-bar v1 A1 — anything narrows the list (a filter or Find): the bar's count reads "8 of 27 queries" */
-  narrowed?: boolean;
-  /** v142 §D — a card's manuscript title, and its tabs (open the query's panel on that tab) */
-  bookOf?: (r: QcRow) => string | null;
-  onCardTab?: (id: string, tab: CardTab) => void;
+  /** v149 B1 — the navy bar's "heard back" figure */
+  heard?: { pct: number; of: number; total: number };
 }
 
 /** v140 §F — the arrival's values: 420ms on cubic-bezier(.2,.8,.2,1) from −10px and transparent, 24ms apart, the
  *  stagger capped at the 17th item */
-const QC_FULL = { "data-qc140": "pin", "data-qc138": "pin" };
 
 export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: -10, step: 24, items: 17 } as const;
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, view = "list", onView, narrowed, bookOf, onCardTab, onSort,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -641,25 +633,10 @@ export const QcList138: React.FC<QcList138Props> = ({
 
   return (
     <>
-    {/* navy-bar v1 A2 — THE PILL ABOVE THE LIST: Find (the left half, white) and Full screen (the right half, navy) as one
-        pill centred on the list card, 40 above it and 22 to it. It replaces v142's title row: the count and the Cards /
-        List switch moved into the navy bar. Not drawn in full screen, where Find is in the cream toolbar. */}
-    {!full ? (
-      <div className="qc144-srow" data-qc144="srow">
-        {onFind ? (
-          <label className="qc144-find" data-qc140="find" data-qc138="search" data-qc144="find">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
-            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
-          </label>
-        ) : null}
-        {/* data-qc140="pin" / data-qc138="pin": the v138.6–v142 locks find the full-screen control by these */}
-        <button type="button" className="qc144-fs" data-qc144="full" data-qc142="full" {...QC_FULL} data-pin-list="" aria-pressed={false} aria-keyshortcuts="F"
-          disabled={loading} onClick={onFull}>
-          {FULL_ICON}<span>Full screen</span>
-        </button>
-      </div>
-    ) : null}
-    <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view={view} ref={boxRef} {...tip.handlers}>
+    {/* v149 A3 — THE VIEW ROW ABOVE THE LIST (the page's: the view chips and Find), in the place navy-bar v1's pill row
+        held. Full screen moved into the navy bar (B1). Not drawn in full screen, where Find is in the cream toolbar. */}
+    {!full ? viewRow ?? null : null}
+    <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view="list" ref={boxRef} {...tip.handlers}>
       {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
           sheet's colour. v140 §A — what sticks is the toolbar (QcToolbar140), and under it the applied-filters row while
           anything narrows the list: `useStickyStack` measures the two together, so the headings and the current group
@@ -670,14 +647,14 @@ export const QcList138: React.FC<QcList138Props> = ({
               current group band stick under both */}
           {full ? band : null}
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
-            count={{ shown, total, narrowed: !!narrowed }}
+            heard={heard}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
-            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} view={view} onView={(v) => onView?.(v)} sort={sort} onSort={(s) => onSort?.(s)} />
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} sort={sort} onSort={(s) => onSort?.(s)} />
           {applied}
         </div>
       </div>
-      {/* v142 §C — the column headings belong to the List view; the Cards view draws none */}
-      {view === "list" ? (
+      {/* v149 B5 — list only: the headings are always drawn */}
+      {true ? (
         <div className="qc138-heads lth" data-qc138="headings" role="row">
           {/* navy-bar v1 A1 — THE HEADINGS ARE PLAIN LABELS: not buttons, no arrows, no sort state. Sorting is the Sort
               chip's (the same one state the headings used to write). Due's label is blank: its column is the date ring. */}
@@ -708,21 +685,15 @@ export const QcList138: React.FC<QcList138Props> = ({
           </div>
         ) : null}
         {groups.length === 0 && deadEnd ? deadEnd : null}
-        {/* v142 §D — THE CARDS VIEW: the same groups, in the same order, each under a ruled heading, as landing-page cards */}
-        {view === "cards" && rows.length ? (
-          <QcCards142 groups={groups} groupBy={groupBy} markOf={(g) => groupMark(g, toneOf(g))} nowMs={nowMs} bookOf={(r) => bookOf?.(r) ?? null}
-            packageOf={packageOf} coming={coming} selectedId={selectedId} ringId={ringId} loadPeek={loadPeek} onOpen={onOpen}
-            onTab={(id, t) => (onCardTab ?? ((x: string) => onOpen(x)))(id, t)} onAct={(id, b) => onAct?.(id, b)} />
-        ) : null}
         {/* v140 §D — No grouping is ONE list in the order the headings sort it: no bands */}
-        {view === "list" && groupBy === "none" && rows.length ? (
+        {groupBy === "none" && rows.length ? (
           <div className="qc138-grp qc140-flat" data-qcv="grp" data-group="all">
             <div role="listbox" aria-label={`All queries: ${rows.length} ${rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">
               {rows.map(renderRow)}
             </div>
           </div>
         ) : null}
-        {view !== "list" || groupBy === "none" ? null : groups.map((g) => {
+        {groupBy === "none" ? null : groups.map((g) => {
           const tone = toneOf(g);
           const shut = folded.has(g.key);
           const label = g.label || "All queries";

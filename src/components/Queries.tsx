@@ -95,11 +95,12 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { useQcListKeys } from "./queries/centre/useQcListKeys";
-import { readQcView, readQcVisit, writeQcView, writeQcVisit, type QcListView } from "../lib/qcViewMemory";
+import { readQcView, readQcVisit, writeQcView, writeQcVisit } from "../lib/qcViewMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
-import { QcHeader138 } from "./queries/centre/QcHeader138";
+import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
+import { pressView, waitingBanner } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
@@ -110,7 +111,6 @@ import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
 import { QcBand140 } from "./queries/centre/QcBand140";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
-import { QcCardsSkeleton } from "./queries/centre/QcCards142";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
 import { usePopover } from "./shell/ListPills";
 import { stripSent } from "../lib/qcStrip";
@@ -2428,10 +2428,6 @@ export const Queries: React.FC<{
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
   const [qcDensity, setQcDensityState] = useState<QcDensity>(() => qcRemView.density);
   const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcView({ density: d }); }, []);
-  /* v142 §A — Cards or List (List by default), remembered on this device inside `qh.qc.view`, read before the first paint
-     so the other view never flashes */
-  const [qcListView, setQcListViewState] = useState<QcListView>(() => qcRemView.view);
-  const setQcListView = useCallback((v: QcListView) => { setQcListViewState(v); writeQcView({ view: v }); }, []);
   /* v138.1 §F — the search lives in the list sheet's navy row. v138.6 §B: that row is the sticky row and the old
      pinned bar (with its mirrored search) is retired, so "/" (useQcListKeys) has the one field to focus. */
   const qcSheetFindRef = useRef<HTMLInputElement>(null);
@@ -2452,17 +2448,6 @@ export const Queries: React.FC<{
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
   /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
-  /* v142 §D — the card's Materials tab: once the panel has drawn its Tracking ledger, the "what was sent" slip
-     (`[data-qp="slip"]`) is scrolled into view. Polled for a moment, because the panel opens a frame or two later. */
-  const revealSentSlip = useCallback(() => {
-    let tries = 0;
-    const look = () => {
-      const slip = [...document.querySelectorAll<HTMLElement>('[data-qp="slip"]')].find((e) => e.getBoundingClientRect().height > 0);
-      if (slip) { slip.scrollIntoView({ block: "center", behavior: "auto" }); slip.setAttribute("data-qc142-shown", ""); return; }
-      if (++tries < 40) window.setTimeout(look, 50);
-    };
-    window.setTimeout(look, 50);
-  }, []);
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
   useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
@@ -3884,6 +3869,19 @@ export const Queries: React.FC<{
       sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
     });
   };
+  /* v149 A2/A3 — a view chip or the banner's "Show them": set (never toggle) the one "Where it stands" filter, or clear
+     it for All; from the banner, bring the list's top into view as a card row did */
+  const qcShowWhere = (k: WhereKey | null, scroll = true) => {
+    setQcF138((f) => ({ ...f, where: k }));
+    if (!k || !scroll || qcFull) return;
+    requestAnimationFrame(() => {
+      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc149="views-row"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const sc = tb?.closest<HTMLElement>(".wpg-scroll");
+      if (!tb || !sc) return;
+      const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
+      sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    });
+  };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
@@ -5207,21 +5205,19 @@ export const Queries: React.FC<{
      model; these names survive as plain consts because the unreachable three-column pane reads them. */
   const showGridSkeleton = qcLoad.loading;
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
+  /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
+     (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
+  const qc149Banner = showGridSkeleton ? null : waitingBanner(qcScoped, qcNow138);
   const qc138Header = qcDesk ? (
-    <QcHeader138
+    <QcHeader149
       loading={showGridSkeleton}
-      total={showGridSkeleton ? null : qcScoped.length}
       msTitle={qcLineTitle}
-      counts={qcGlyphCounts}
-      stages={qcStages}
-      onGlyph={pickGlyph}
-      entering={qc138In !== "done"}
+      banner={qc149Banner}
       onLog={() => onNavigate?.("queries", "Log a query")}
       onRecord={() => onNavigate?.("queries", "Record a response")}
+      onShowThem={() => qcShowWhere("you")}
       logDisabled={creating}
       logRef={logTriggerRef}
-      chart={<QcWhereCard counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} heard={qcBandFig.more + qcBandFig.passed}
-        heardPct={qcBandFig.heardPct} where={qcF138.where} onPick={(k) => qcPickWhere(k, true)} />}
     >
       <i ref={qc138Ref} hidden />
       <BulkBar138
@@ -5233,8 +5229,7 @@ export const Queries: React.FC<{
         onClose={() => startBulk("close")}
         onClear={() => setQcPicked(new Set())}
       />
-      {/* v138.6 §B — the old pinned bar is retired: the navy list header is the sticky row */}
-    </QcHeader138>
+    </QcHeader149>
   ) : undefined;
 
   /**
@@ -7389,7 +7384,7 @@ export const Queries: React.FC<{
             hasOpen={!!(panelRow && activeQuery)}
             body={
               showGridSkeleton ? (
-                qcDesk ? (qcListView === "cards" ? <QcCardsSkeleton /> : <QcList132Skeleton />) : <QcListSkeleton />
+                qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
               ) : !qcDesk && emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -7450,21 +7445,8 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
-                  /* navy-bar v1 A1 — the navy bar's count ("27 QUERIES" / "8 of 27 queries": the applied row's own figures) and
-                     the Cards / List view */
-                  narrowed={qc140Chips.length > 0}
-                  view={qcListView}
-                  onView={setQcListView}
-                  /* v142 §D — a card's book, and its tabs: Tracking and Agent open the panel on that tab; Materials opens
-                     Tracking and brings the ledger's "what was sent" slip into view (the panel has no Materials tab) */
-                  bookOf={(r) => manuscripts.find((m) => m.id === r.manuscriptId)?.title ?? null}
-                  onCardTab={(id, t) => {
-                    if (isPracticeId(id)) { openPip(); return; }
-                    requestPanelTab(t === "agent" ? "agent" : "tracking");
-                    cardSetRef.current = qcVisible.map((r) => r.id);
-                    onOpenQuery?.(id);
-                    if (t === "materials") revealSentSlip();
-                  }}
+                  /* v149 B1 — the bar's "heard back": the breakdown card's own figure (one computation, one number) */
+                  heard={{ pct: qcBandFig.heardPct, of: qcBandFig.more + qcBandFig.passed, total: qcScoped.length }}
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
@@ -7503,6 +7485,9 @@ export const Queries: React.FC<{
                   find={qcFind}
                   onFind={setQcFind}
                   findRef={qcSheetFindRef}
+                  viewRow={<QcViewRow149 counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
+                    onView={(k) => qcShowWhere(pressView(qcF138.where, k), false)} find={qcFind} onFind={setQcFind}
+                    findRef={qcFull ? undefined : qcSheetFindRef} loading={showGridSkeleton} />}
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
