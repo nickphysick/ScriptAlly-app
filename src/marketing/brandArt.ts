@@ -32,5 +32,15 @@ export const BRAND_WORDMARK: BrandArt = {
   src: "/images/queryhawk_title.png", version: "af9ca697", width: 500, height: 100,
 };
 
+/**
+ * The founding writers' drawing: an older hawk showing a young one the way. `/pricing` reads it.
+ * ⚠️ `FoundingBand.tsx` STILL TYPES THIS VERSION ITSELF (its own `ART`), because that file was
+ * outside the pricing v4 pack. The smoke tests hold BOTH to the file's md5, so neither can go stale
+ * alone; moving the band onto this constant is a one-line follow-up.
+ */
+export const FOUNDING_ART: BrandArt = {
+  src: "/images/founding-writers.png", version: "c3533e30", width: 1100, height: 1100,
+};
+
 /** The versioned URL a page asks for. */
 export const artUrl = (art: Pick<BrandArt, "src" | "version">): string => art.src + "?v=" + art.version;

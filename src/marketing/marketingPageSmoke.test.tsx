@@ -27,7 +27,7 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 import { Landing } from "./Landing";
 import { MarketingShell } from "./MarketingShell";
 import { PricingPage } from "./PricingPage";
-import { PASSES, ADD_MONTH_PRICE, perMonth } from "./pricingCopy";
+import { PRO_PLANS, ADD_MONTH_PRICE, perMonth } from "./pricingCopy";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
@@ -144,11 +144,11 @@ describe("the public pricing page sells nothing and writes nothing", () => {
    * instead — any £ figure must be £0 or a figure the table states or derives. The next invented
    * number fails here whichever number it is.
    */
-  it("quotes no price that the pass table does not state", () => {
+  it("quotes no price that the plan table does not state", () => {
     const text = textOf(renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing"));
     const amounts = [...text.matchAll(/£\s*([\d.,]+)/g)].map((m) => m[1]);
     expect(amounts.length, "the sweep found prices (not vacuous)").toBeGreaterThan(1);
-    const allowed = new Set(["0", ADD_MONTH_PRICE, ...PASSES.map((p) => p.price), ...PASSES.map(perMonth)]);
+    const allowed = new Set(["0", ADD_MONTH_PRICE, ...PRO_PLANS.map((p) => p.price), ...PRO_PLANS.map(perMonth)]);
     for (const a of amounts) expect(allowed, `£${a} has a source`).toContain(a);
     expect(text, "the old monthly figure is not this page's").not.toContain("£4.99");
   });
@@ -161,8 +161,9 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
     /* ⚠️ SCOPED TO THE BAND. The journey below says "Question 1 of 4", which is a count and not a
        places figure; a page-wide sweep for "N of M" reads it as the fabricated scarcity number. */
-    const band = sliceBetween(html, 'class="mk-pv3band"', 'class="mk-pv3soon"');
-    expect(band).toContain("mk-pv3count");
+    /* RE-POINTED (pricing v4, 24 Oct): the band is the founding box now (ref pricing-page-v2). */
+    const band = sliceBetween(html, 'class="mk-fb"', 'class="mk-pv4soon"');
+    expect(band).toContain("mk-fbcount");
     expect(band).not.toMatch(/\d+\s*(?:of|\/)\s*\d+/);
     expect(html).not.toContain("places claimed");
     expect(html).not.toContain("places left");
@@ -844,8 +845,9 @@ describe("the Founding Writers page", () => {
  * against the props actually rendered — rather than a count on either side alone, which would go
  * green the day both were changed in the same wrong direction.
  *
- * `claim` is the offer's own counter (the banner and the `/founders` hero); `tally` is the compact
- * bar in `/pricing`'s narrow tier column. `bar` was SWAPPED for `claim`, not added beside it.
+ * `claim` is the offer's own counter (the banner and the `/founders` hero); `left` is the compact
+ * bar and "N places left" line in `/pricing`'s founding box. `bar` was SWAPPED for `claim`, and
+ * `tally` for `left` (pricing v4, 24 Oct), never added beside them.
  */
 describe("the founding counter has two variants and no orphans", () => {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -861,16 +863,17 @@ describe("the founding counter has two variants and no orphans", () => {
       for (const m of read(f).matchAll(/<FoundingCounter variant="([a-z]+)"/g)) rendered.add(m[1]);
     }
     expect(declared, "every declared variant is rendered somewhere").toEqual([...rendered].sort());
-    expect(declared).toEqual(["claim", "tally"]);
-    /* The retired shapes, asserted absent so neither returns from a diff. */
+    expect(declared).toEqual(["claim", "left"]);
+    /* The retired shapes, asserted absent so none returns from a diff. */
     expect(union![1]).not.toContain('"bar"');
+    expect(union![1]).not.toContain('"tally"');
     expect(union![1]).not.toContain('"line"');
   });
 
   it("the banner and the founders hero draw the same shape, and pricing keeps its own", () => {
     expect(read("FoundingBand.tsx")).toContain('<FoundingCounter variant="claim" />');
     expect(read("FoundersPage.tsx")).toContain('<FoundingCounter variant="claim" />');
-    expect(read("PricingPage.tsx")).toContain('<FoundingCounter variant="tally" />');
+    expect(read("PricingPage.tsx")).toContain('<FoundingCounter variant="left" />');
   });
 
   /**
@@ -882,6 +885,7 @@ describe("the founding counter has two variants and no orphans", () => {
   it("builds both figures from the copy module, never from arithmetic in the component", () => {
     const src = read("FoundingSignup.tsx");
     expect(src).toContain("foundingRemainingLabel(count.claimed, count.cap)");
+    expect(src).toContain("foundingPlacesLeftLabel(count.claimed, count.cap)");
     expect(src).toContain("foundingCounterRest(count.cap)");
     expect(src, "no subtraction at the render site").not.toMatch(/count\.cap\s*-\s*count\.claimed/);
     /* Still the one gate that matters: no figure at all until the endpoint answers. */

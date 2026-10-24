@@ -1,0 +1,31 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+PV4-2 line "37/100 PLACES CLAIMED"
+  ✘  2 [measure] › tests/e2e/pricingV4.measure.ts:111:1 › PV4-2 the counter is live or absent, and reads '{n} places left' (1.0s)
+PV4-3 {"label":"About twelve months","fit":12,"navy":["12"]}
+  ✓  3 [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy (1.7s)
+
+
+  1) [measure] › tests/e2e/pricingV4.measure.ts:111:1 › PV4-2 the counter is live or absent, and reads '{n} places left' 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "63 places left"
+    Received: "37/100 places claimed"
+
+      120 |   console.log("PV4-2 line", JSON.stringify(line));
+      121 |   /* text-transform uppercases it on screen; the words are read from the DOM */
+    > 122 |   expect(await page.locator(".mk-fbcount .mk-fmmeta").textContent()).toBe("63 places left");
+          |                                                                      ^
+      123 |   expect(await page.locator(".mk-fbcount .mk-fmbar").getAttribute("aria-label")).toBe("37 of 100 places claimed");
+      124 | });
+      125 |
+        at /Users/nickphysick/ScriptAlly-pricing4/tests/e2e/pricingV4.measure.ts:122:70
+
+    Error Context: test-results/pricingV4.measure.ts-PV4-2-d7820-nt-and-reads-n-places-left--measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingV4.measure.ts:111:1 › PV4-2 the counter is live or absent, and reads '{n} places left' 
+  2 passed (21.2s)

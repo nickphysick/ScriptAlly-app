@@ -509,8 +509,8 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
     expect(cream.length, "the panel restates them (the sweep is not vacuous)").toBeGreaterThan(8);
     for (const m of cream) {
       for (const sel of m[1].split(",")) {
-        /* Two navy panels now: the banner card and /pricing's founding band (21 Oct). */
-        expect(sel.trim(), "starts at a navy panel").toMatch(/^(?:\.mk-claimcard|\.mk-pv3 \.mk-pv3band)\s/);
+        /* One navy panel again: /pricing's founding band became a light box (pricing v4, 24 Oct). */
+        expect(sel.trim(), "starts at a navy panel").toMatch(/^\.mk-claimcard\s/);
       }
     }
   });
@@ -808,9 +808,9 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",
-      /* /pricing's two tiers hanging over the founding band's foot (21 Oct, ref pricing-page-v1):
-         the band's 128px of bottom padding is the room they hang into. */
-      ".mk-pv3 .mk-pv3soon",
+      /* /pricing's founding box laid across the join between the ink and the sheet (pricing v4,
+         24 Oct, ref pricing-page-v2): the sheet starts 150px lower on that page to make the room. */
+      ".mk-pv4 .mk-fb",
       /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
          margin, so the picture, heading and body keep their column (landing colours v2) */
       ".mk-vpoint",

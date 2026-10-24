@@ -2,34 +2,42 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "How long will I need?" — four questions, one at a time, then a plan that fits. Ported from the
- * `.jy` markup and script in design-refs/pricing-page-v1.html; the arithmetic is
+ * "Which plan suits me best?" — four questions, one at a time, then a plan that fits. Ported from
+ * the `.jy` markup and script in design-refs/pricing-page-v2.html; the arithmetic is
  * `campaignEstimate.ts`, the words are `pricingCopy.ts`.
  *
  * ⚠️ IT WRITES NOTHING AND SELLS NOTHING. The answers live in this component's state and go nowhere;
- * the plan card names a planned launch pass and offers no way to buy it.
+ * the plan card names a planned launch plan and offers no way to buy it. The one thing it tells its
+ * host is which plan fits (`onFit`), so the host can turn that plan's tile navy.
  *
- * ⚠️ NOTHING IS PRE-SELECTED EXCEPT THE AGENTS COUNT (40). A pre-ticked answer would be the page
- * stating a fact about the reader they never gave it — and Next stays disabled until each question
- * is answered, a novel needing its length as well.
+ * ⚠️ NOTHING IS PRE-SELECTED. The agents stepper opens at 40 and needs no answer, as in the ref; every
+ * other question keeps Next disabled until it is answered, a novel needing its length as well.
+ * "I don't know" sets the count to 40 and dims the stepper; pressing − or + clears it.
  *
- * ⚠️ FOCUS MOVES TO THE NEW QUESTION ON NEXT AND BACK, AND ONLY THEN. Moving it on mount would pull
- * a reader scrolling the page into the middle of it.
+ * ⚠️ FOCUS MOVES TO THE NEW QUESTION ON NEXT AND BACK, AND WHEN THE HOST ASKS (`focusKey` changes,
+ * when the questions are opened) — never on mount, which would pull a reader scrolling the page
+ * into the middle of it.
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  JY_TITLE, JY_STEPS, jyStepLabel, JY_NEXT, JY_SEE_PLAN, JY_BACK, JY_AGAIN, JY_GOOD_TO_KNOW,
+  JY_TITLE, JY_STEPS, jyStepLabel, JY_NEXT, JY_SEE_PLAN, JY_BACK, JY_AGAIN,
   JY_Q_STAGE, JY_STAGES, JY_Q_KIND, JY_KINDS, JY_Q_LEN, JY_LENGTHS, JY_Q_AGENTS, JY_FEWER, JY_MORE,
-  JY_Q_PACE, JY_PACES, JY_INSIGHT, jyAgentsInsight, JY_YOUR_CAMPAIGN, JY_PREP_NOTE, JY_FITS,
-  JY_INCLUDES, JY_ALL_PLANS, JY_TILES, type JyOption,
+  JY_OR, JY_IDK, JY_Q_PACE, JY_PACES, JY_INSIGHT, jyAgentsInsight, JY_YOUR_CAMPAIGN, JY_PREP_NOTE, JY_FITS,
+  JY_INCLUDES, type JyOption,
 } from "./pricingCopy";
 import {
-  estimateCampaign, planCard, clampAgents, AGENTS_DEFAULT, AGENTS_STEP,
+  estimateCampaign, planCard, clampAgents, AGENTS_DEFAULT, AGENTS_STEP, AGENTS_UNKNOWN,
   type Stage, type Kind, type Length, type Pace,
 } from "./campaignEstimate";
 
-interface Answers { stage: Stage | null; kind: Kind | null; len: Length | null; pace: Pace | null; agents: number }
+export interface Answers {
+  stage: Stage | null; kind: Kind | null; len: Length | null; pace: Pace | null;
+  agents: number; agentsUnknown: boolean;
+}
+export const BLANK_ANSWERS: Answers = {
+  stage: null, kind: null, len: null, pace: null, agents: AGENTS_DEFAULT, agentsUnknown: false,
+};
 
 /** Whether step `n` has been answered — what enables its Next. Exported for the journey lock. */
 export const stepAnswered = (n: number, a: Answers): boolean =>
@@ -39,21 +47,27 @@ export const stepAnswered = (n: number, a: Answers): boolean =>
   : n === 3 ? !!a.pace
   : true;
 
-/** The "Good to know" sentence for step `n`, or "" while there is nothing to say. */
+/** The note for step `n`, or "" while there is nothing to say. */
 export const stepInsight = (n: number, a: Answers): string => {
   if (n === 0 && a.stage) return JY_INSIGHT.stage[a.stage];
   if (n === 1 && a.kind) return a.kind === "novel" ? (a.len ? JY_INSIGHT.len[a.len] : "") : JY_INSIGHT.kind[a.kind];
-  if (n === 2) return jyAgentsInsight(a.agents);
+  if (n === 2) return jyAgentsInsight(a.agents, a.agentsUnknown);
   if (n === 3 && a.pace) return JY_INSIGHT.pace[a.pace];
   return "";
 };
 
-/** One row of answer buttons. `chips` is the ref's pill treatment; otherwise the two-line card. */
-function Options<V extends string>({ opts, value, onPick, chips, two, label }: {
-  opts: JyOption<V>[]; value: V | null; onPick: (v: V) => void; chips?: boolean; two?: boolean; label: string;
+/** The stepper's press and "I don't know", as the ref's handlers do them. */
+export const stepAgents = (a: Answers, d: number): Answers =>
+  ({ ...a, agentsUnknown: false, agents: clampAgents(a.agents + d) });
+export const toggleUnknown = (a: Answers): Answers =>
+  a.agentsUnknown ? { ...a, agentsUnknown: false } : { ...a, agentsUnknown: true, agents: AGENTS_UNKNOWN };
+
+/** One row of answers. `chips` is the ref's pill treatment; otherwise the card with a radio dot. */
+function Options<V extends string>({ opts, value, onPick, chips, label }: {
+  opts: JyOption<V>[]; value: V | null; onPick: (v: V) => void; chips?: boolean; label: string;
 }) {
   return (
-    <div className={chips ? "mk-jychips" : "mk-jyopts" + (two ? " mk-jyopts--2" : "")} role="group" aria-label={label}>
+    <div className={chips ? "mk-jychips" : "mk-jyopts"} role="group" aria-label={label}>
       {opts.map((o) => (
         <button
           key={o.v}
@@ -70,11 +84,17 @@ function Options<V extends string>({ opts, value, onPick, chips, two, label }: {
   );
 }
 
-export const CampaignJourney: React.FC<{ today?: Date }> = ({ today }) => {
+export const CampaignJourney: React.FC<{
+  today?: Date;
+  /** Called with the fitting plan's months each time a result is reached. */
+  onFit?: (months: 1 | 3 | 6 | 12) => void;
+  /** Change this to move focus to the current question (the host does it when it opens them). */
+  focusKey?: number;
+}> = ({ today, onFit, focusKey }) => {
   /* The date the slow seasons are counted from, fixed for the visit. */
   const now = useMemo(() => today ?? new Date(), [today]);
   const [at, setAt] = useState(0);
-  const [a, setA] = useState<Answers>({ stage: null, kind: null, len: null, pace: null, agents: AGENTS_DEFAULT });
+  const [a, setA] = useState<Answers>(BLANK_ANSWERS);
   const headRef = useRef<HTMLElement | null>(null);
   const moved = useRef(false);
 
@@ -82,13 +102,19 @@ export const CampaignJourney: React.FC<{ today?: Date }> = ({ today }) => {
     if (!moved.current) return;
     headRef.current?.focus();
   }, [at]);
+  useEffect(() => {
+    if (!focusKey) return;
+    headRef.current?.focus({ preventScroll: true });
+  }, [focusKey]);
   const go = (n: number) => { moved.current = true; setAt(n); };
 
   const insight = stepInsight(at, a);
   const result = at === JY_STEPS && a.stage && a.kind && a.pace
-    ? estimateCampaign({ stage: a.stage, kind: a.kind, len: a.len, agents: a.agents, pace: a.pace }, now)
+    ? estimateCampaign({ stage: a.stage, kind: a.kind, len: a.len, agents: a.agents, agentsUnknown: a.agentsUnknown, pace: a.pace }, now)
     : null;
   const card = result ? planCard(result.fit) : null;
+  const fit = result?.fit;
+  useEffect(() => { if (fit) onFit?.(fit); }, [fit, onFit]);
   const titleId = "mk-jy-title";
 
   const nav = (n: number) => (
@@ -108,11 +134,8 @@ export const CampaignJourney: React.FC<{ today?: Date }> = ({ today }) => {
       <div className="mk-jytop">
         <h2 id={titleId} className="mk-jytitle">{JY_TITLE}</h2>
         <p className="mk-jycount">{jyStepLabel(at)}</p>
-        <div className="mk-jydots" aria-hidden="true">
-          {Array.from({ length: JY_STEPS + 1 }, (_, i) => (
-            <span key={i} className={i === at ? "mk-jydot--on" : i < at ? "mk-jydot--done" : undefined} />
-          ))}
-        </div>
+        {/* A thin progress line along the header's foot: a fifth per step, the result included. */}
+        <div className="mk-jyprog" aria-hidden="true"><span style={{ width: `${(at + 1) * 20}%` }} /></div>
       </div>
 
       <div className="mk-jybody" role="region" aria-labelledby={titleId}>
@@ -132,26 +155,27 @@ export const CampaignJourney: React.FC<{ today?: Date }> = ({ today }) => {
             </>}
             {at === 2 && <>
               {question(JY_Q_AGENTS)}
-              <div className="mk-jystepper">
-                <button type="button" aria-label={JY_FEWER} onClick={() => setA({ ...a, agents: clampAgents(a.agents - AGENTS_STEP) })}>−</button>
-                <output aria-live="polite">{a.agents}</output>
-                <button type="button" aria-label={JY_MORE} onClick={() => setA({ ...a, agents: clampAgents(a.agents + AGENTS_STEP) })}>+</button>
+              <div className={"mk-jyagents" + (a.agentsUnknown ? " mk-jyagents--idk" : "")}>
+                <div className="mk-jystepper">
+                  <button type="button" aria-label={JY_FEWER} onClick={() => setA(stepAgents(a, -AGENTS_STEP))}>−</button>
+                  <output aria-live="polite">{a.agents}</output>
+                  <button type="button" aria-label={JY_MORE} onClick={() => setA(stepAgents(a, AGENTS_STEP))}>+</button>
+                </div>
+                <span className="mk-jyor">{JY_OR}</span>
+                <button type="button" className="mk-jychip mk-jyidk" aria-pressed={a.agentsUnknown} onClick={() => setA(toggleUnknown(a))}>
+                  {JY_IDK}
+                </button>
               </div>
             </>}
             {at === 3 && <>
               {question(JY_Q_PACE)}
-              <Options label={JY_Q_PACE} two opts={JY_PACES} value={a.pace} onPick={(v) => setA({ ...a, pace: v })} />
+              <Options label={JY_Q_PACE} opts={JY_PACES} value={a.pace} onPick={(v) => setA({ ...a, pace: v })} />
             </>}
             {/* ⚠️ THE LIVE REGION IS ALWAYS MOUNTED; ITS CONTENT ARRIVES INTO IT. A region mounted with
-                its message is not reliably announced. The inner box is keyed on the sentence so the
-                rise-in replays when the advice changes. */}
+                its message is not reliably announced. The note is keyed on its sentence so the rise-in
+                replays when the advice changes. */}
             <div className="mk-jyinswrap" aria-live="polite">
-              {insight && (
-                <div className="mk-jyins" key={insight}>
-                  <p className="mk-jyk">{JY_GOOD_TO_KNOW}</p>
-                  <p className="mk-jyinst">{insight}</p>
-                </div>
-              )}
+              {insight && <p className="mk-jyins" key={insight}>{insight}</p>}
             </div>
             {nav(at)}
           </div>
@@ -168,26 +192,14 @@ export const CampaignJourney: React.FC<{ today?: Date }> = ({ today }) => {
               <article className="mk-jyplan" data-fit={result.fit}>
                 <span className="mk-jyflag">{JY_FITS}</span>
                 <h4 className="mk-jyplanname">{card.name}</h4>
-                <div className="mk-pv3price">
-                  <span className="mk-pv3cur">£</span>
-                  <span className="mk-pv3amt">{card.price}</span>
+                <div className="mk-pv4price">
+                  <span className="mk-pv4cur">£</span>
+                  <span className="mk-pv4amt">{card.price}</span>
                 </div>
                 <p className="mk-jypm">{card.perMonth}</p>
                 <p className="mk-jytail">{result.tail}</p>
                 <p className="mk-jyinc">{JY_INCLUDES}</p>
               </article>
-            </div>
-            <div className="mk-jyall">
-              <p className="mk-jyallh">{JY_ALL_PLANS}</p>
-              <div className="mk-jyrow">
-                {JY_TILES.map((t) => (
-                  <div key={t.m} className={"mk-jymini" + (t.m === result.fit ? " mk-jymini--fit" : "")} data-m={t.m}>
-                    <p>{t.name}</p>
-                    <b>£{t.price}</b>
-                    <small>{t.small}</small>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         ) : null}
