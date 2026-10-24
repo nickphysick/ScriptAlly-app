@@ -197,7 +197,7 @@ The living header (hawk, "{n} versions on file", "of {title}", Compare, "?", and
 - **D had already landed (v2.1),** so it was only checked: the warming-up CSS in the v2.2 mock is rule-for-rule identical to v2.1's (41 rules, no differences), and the S33 screenshot matches.
 
 ### 8.2 Recon
-- **0.1:** pack present; `shasum -a 256 -c SHA256SUMS` all OK; `versions-v2-2.html` = `5e9bba58…7ec77`. Committed on its own as `57de63ca`.
+- **0.1:** pack present; `shasum -a 256 -c SHA256SUMS` all OK; `versions-v2-2.html` = `5e9bba58…dbecec77`. Committed on its own as `57de63ca`.
 - **0.2:** v2.1 had landed: `053072a9` (pack), `47acf2c4` (panel), `53e667f3` (tests and report).
 - **0.3, as found:**
   - header: `VersionsV2Page.tsx:253–292` (hawk, title, "of {title}", New version · Compare · ?, donut card; donut built at `:224–234` from `lib/versionsV2.donut`);
