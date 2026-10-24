@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L9-1280",
+  "where": "population: a Queried row",
+  "ok": true,
+  "detail": "87"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "Save is disabled until an answer is chosen",
+  "ok": false,
+  "detail": "enabled"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "…and enabled after",
+  "ok": true,
+  "detail": "disabled"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "the panel stays open on the card",
+  "ok": true,
+  "detail": "closed or not in view mode"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "Tracking gains Full requested, dated today",
+  "ok": true,
+  "detail": "[{\"t\":\"Recorded from the imported status\",\"d\":\"1 SEP\"},{\"t\":\"Full requested\",\"d\":\"24 OCT\"}]"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "the pill reads Full requested",
+  "ok": true,
+  "detail": "Full requested"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "the primary is Mark full sent",
+  "ok": true,
+  "detail": "Mark full sent"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "the row in the list moved on",
+  "ok": true,
+  "detail": "Full Requested"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "UNDONE: the account is put back",
+  "ok": true,
+  "detail": "no undo bar — the account has been changed"
+ },
+ {
+  "lock": "L9-1280",
+  "where": "…the row is Queried again",
+  "ok": true,
+  "detail": "Queried"
+ }
+]

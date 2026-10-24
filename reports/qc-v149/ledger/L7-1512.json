@@ -1,0 +1,188 @@
+[
+ {
+  "lock": "L7-1512",
+  "where": "population: group headings",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#0 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#0 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#0 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#1 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#1 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#1 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#2 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#2 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#2 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#3 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#3 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#3 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#4 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#4 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#4 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#5 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#5 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#5 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#6 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#6 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#6 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#7 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#7 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#7 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#8 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#8 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#8 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#9 width is the list body's",
+  "ok": true,
+  "detail": "1208 vs 1208"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#9 background #f6f3ee",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "#9 no rule after the count",
+  "ok": true,
+  "detail": "rule drawn"
+ }
+]
