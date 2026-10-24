@@ -74,10 +74,10 @@ export async function tap(page: Page, sel: string): Promise<boolean> {
   return true;
 }
 /** the list's visible rows, in order: id, where, status, name */
-export async function rows(page: Page): Promise<{ id: string; where: string; status: string; name: string; due: number | null }[]> {
+export async function rows(page: Page): Promise<{ id: string; where: string; court: string; status: string; name: string; due: number | null }[]> {
   return page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")]
     .filter((r) => r.getBoundingClientRect().height > 0 && !r.closest("[data-qc139='practice']"))
-    .map((r) => ({ id: r.dataset.id ?? "", where: r.dataset.where ?? "", status: r.dataset.status ?? "", name: r.dataset.name ?? "", due: r.dataset.due ? Number(r.dataset.due) : null })));
+    .map((r) => ({ id: r.dataset.id ?? "", where: r.dataset.where ?? "", court: r.dataset.court ?? "", status: r.dataset.status ?? "", name: r.dataset.name ?? "", due: r.dataset.due ? Number(r.dataset.due) : null })));
 }
 export async function chipCounts(page: Page): Promise<Record<string, number | null>> {
   return page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-qc149='view']")]

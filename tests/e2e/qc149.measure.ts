@@ -33,7 +33,8 @@ async function versionsCard(page: Page, vp: { width: number; height: number }) {
   return { top: card && win ? card.t - win.t : null, c, h };
 }
 
-for (const vp of SIZES) {
+/* QC149_SIZE=1280|1512 runs one size — a serial file stops at its first red, so a red-first run takes each size alone */
+for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) === process.env.QC149_SIZE)) {
   const narrow = vp.width <= 1440;
   const inset = narrow ? 24 : 32;
   test.describe(`QC149 @ ${vp.width}`, () => {
@@ -154,6 +155,8 @@ for (const vp of SIZES) {
       test.skip(!run("L5"));
       const L = new Ledger(`L5-${vp.width}`);
       await openQc(page, vp);
+      /* the named break at 1280 (where the figure is hidden by design): show it */
+      await mutateCss(page, "L5", ".qcv-group[data-v138] .qc149-hb { display: inline-flex !important; }");
       const hb = await box(page, "[data-qc149='heard']");
       L.check(narrow ? "heard back hidden at ≤1440" : "heard back shown", narrow ? !hb : !!hb && /^\d+% heard back$/.test((await text(page, "[data-qc149='heard']")) ?? ""), String(await text(page, "[data-qc149='heard']")));
       for (const [k, sel] of [["Filters", "[data-qc140='filters']"], ["Group by", "[data-qc140='group']"], ["Sort", "[data-qc1421='sort']"], ["Full screen", "[data-qc149='full']"]] as const) L.check(`${k} in the bar`, !!(await box(page, sel)), sel);
@@ -255,17 +258,21 @@ for (const vp of SIZES) {
       const order = all.map((r) => r.id);
       const at = first ? order.indexOf(first.id) : -1;
       L.check("N / M matches the visible order", (await text(page, `${CARD} [data-qc149c='pos']`)) === `${at + 1} / ${order.length}`, `${await text(page, `${CARD} [data-qc149c='pos']`)} vs ${at + 1} / ${order.length}`);
-      await tap(page, `${CARD} [data-qc149c='next']`);
-      await page.waitForTimeout(1200);
+      /* read the button before pressing it: a disabled › is a red reading, never a click that waits out the timeout */
+      const nextOn = await page.evaluate((s) => { const b = document.querySelector<HTMLButtonElement>(`${s} [data-qc149c='next']`); return !!b && !b.disabled; }, CARD);
+      L.check("› is enabled on a row that has a next", nextOn && at + 1 < order.length, `enabled ${nextOn}`);
+      const cardIs = (id: string | undefined) => page.waitForFunction(([s, want]) => document.querySelector<HTMLElement>(s as string)?.dataset.id === want, [CARD, id] as const, { timeout: 6000 }).catch(() => {});
+      if (nextOn) { await tap(page, `${CARD} [data-qc149c='next']`); await cardIs(order[at + 1]); }
       const nid = await page.evaluate((s) => document.querySelector<HTMLElement>(s)?.dataset.id ?? null, CARD);
-      L.check("› opens the next row in the visible order", nid === order[at + 1], `${nid} vs ${order[at + 1]}`);
+      const cards = await page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].map((c) => `${c.dataset.id}:${c.querySelector("[data-qc149c='name']")?.textContent}:${Math.round(c.getBoundingClientRect().width)}`), CARD);
+      L.check("› opens the next row in the visible order", nid === order[at + 1], `${nid} vs ${order[at + 1]} · cards ${cards.join(" | ")}`);
       await tap(page, `${CARD} [data-qc149c='prev']`);
-      await page.waitForTimeout(1200);
+      await cardIs(order[at]);
       L.check("‹ goes back", (await page.evaluate((s) => document.querySelector<HTMLElement>(s)?.dataset.id ?? null, CARD)) === order[at], "not back");
       await page.keyboard.press("Escape");
       await page.waitForTimeout(800);
       L.check("Esc closes it", !(await box(page, "[data-qp='panel']")), "still open");
-      L.done(12);
+      L.done(13);
     });
 
     test("L9 · respond in the card: Save waits for a choice, then the panel stays and everything moves on (undone after)", async ({ page }) => {
@@ -424,6 +431,7 @@ for (const vp of SIZES) {
       const L = new Ledger(`L12-${vp.width}`);
       await openQc(page, vp);
       const chips = await chipCounts(page);
+      const court = Object.fromEntries((await rows(page)).map((r) => [r.id, r.court]));
       await tap(page, "[data-qc149='record']");
       await page.waitForTimeout(1000);
       const m = await page.evaluate(() => {
@@ -434,12 +442,14 @@ for (const vp of SIZES) {
       L.check("population: Who replied? with items", m.items.length > 0, String(m.items.length));
       L.check("each live query once", new Set(m.items.map((i) => i.id)).size === m.items.length, "duplicates");
       L.check("every live query: All less Closed", m.items.length === (chips.all ?? 0) - (chips.closed ?? 0), `${m.items.length} vs ${(chips.all ?? 0) - (chips.closed ?? 0)}`);
+      const wrong = m.items.filter((i) => i.g !== (court[i.id] === "agent" ? "waiting" : "you"));
+      L.check("each item is in its court's group (waiting = the agent's court)", m.items.length > 0 && wrong.length === 0, `${wrong.length} in the wrong group`);
       for (const g of ["waiting", "you"]) L.check(`the ${g} heading counts its items`, m.heads[g] === m.items.filter((i) => i.g === g).length, `${m.heads[g]} vs ${m.items.filter((i) => i.g === g).length}`);
       const pick = m.items[0];
       if (pick) await tap(page, `[data-qc149f='who-item'][data-id="${pick.id}"]`);
       await page.waitForTimeout(1600);
       L.check("a pick opens that query's card in respond mode", (await page.evaluate((s) => { const c = document.querySelector<HTMLElement>(s); return c ? `${c.dataset.id}|${c.dataset.mode}` : null; }, CARD)) === `${pick?.id}|respond`, "not in respond");
-      L.done(6);
+      L.done(7);
     });
   });
 }
