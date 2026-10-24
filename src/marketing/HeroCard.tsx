@@ -24,7 +24,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
-import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_TAGS, PHONE_STORY } from "./landingCopy";
+import { HERO_AGAIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, HERO_PHONE_TAGS, PHONE_STORY } from "./landingCopy";
 
 /* The shadow's own facts — unchanged from the previous hero, and a smoke test still reads the PNG's
    header against the size and its md5 against the version. Replace the file, change the version. */
@@ -335,23 +335,52 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     bell: '<path d="M4.5 11V7.5a3.5 3.5 0 0 1 7 0V11l1 1.2h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.8 13.6a1.4 1.4 0 0 0 2.4 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
   };
   /**
-   * B2/B4 — a status pill that appears RIGHT BESIDE the line it belongs to (the ref's `floatTag`):
-   * right-aligned 22px in, its top on the line's foot less 6px, in for 340ms, held, then up 46px and
-   * gone over 1.1s from +1.7s. The words go in as text, never as markup.
+   * v3.1 (C1) — a task chip stamped into the line's own chip row (the ref's on-line `floatTag`): in with
+   * the stamp, held, faded over 400ms from +2.6s, removed at +3.2s. The words go in as text.
    */
-  function floatTag(p: typeof parts[number], tag: readonly [string, string, string], t: number) {
-    const [title, detail, icon] = tag;
-    const g = document.createElement("div"); g.className = "mk-up mk-up--" + icon + " mk-up--tag"; g.setAttribute("aria-hidden", "true");
-    const ic = document.createElement("span"); ic.className = "mk-up-i";
-    ic.innerHTML = `<svg viewBox="0 0 16 16" width="15" height="15">${UPI[icon]}</svg>`;
-    const tx = document.createElement("span"); tx.className = "mk-up-t";
-    const b = document.createElement("b"); b.textContent = title;
-    const d = document.createElement("span"); d.textContent = detail;
-    tx.append(b, d); g.append(ic, tx);
-    root.appendChild(g); later(() => g.remove(), t + 3200);
-    later(() => { const r = p.st.getBoundingClientRect(), sr = root.getBoundingClientRect(); g.style.top = (r.top - sr.top + r.height - 6) + "px"; }, t - 20);
-    A(g, [{ opacity: 0, translate: "0 10px", scale: .9 }, { opacity: 1, translate: "0 0", scale: 1 }], { duration: 340, delay: t, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
-    A(g, [{ opacity: 1, translate: "0 0" }, { opacity: 0, translate: "0 -46px" }], { duration: 1100, delay: t + 1700, fill: "forwards", easing: "cubic-bezier(.4,0,.6,1)" });
+  function floatTag(p: typeof parts[number], chip: readonly [string, string, string], t: number) {
+    const [title, icon, kind] = chip;
+    const att = p.st.querySelector(".mk-lc-att"); if (!att) return;
+    const c = document.createElement("span"); c.className = "mk-taskchip" + (kind ? " mk-taskchip--" + kind : ""); c.setAttribute("aria-hidden", "true");
+    c.innerHTML = `<svg viewBox="0 0 16 16" width="12" height="12">${UPI[icon]}</svg>`;
+    c.append(title);
+    att.appendChild(c); later(() => c.remove(), t + 3200); stamp(c, t, -1.5);
+    A(c, [{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: t + 2600, fill: "forwards" });
+  }
+
+  /* v3.1 (C2) — the sample switch (the ref's `seg`/`segReset`): pages, chapters or words; the number
+     changes with the unit. Built on element references, never ids: the card can be mounted twice. */
+  type Seg = { sg: HTMLElement; n: HTMLElement };
+  function seg(w: Seg, unit: string, val: string, t: number) {
+    const opt = w.sg.querySelector<HTMLElement>(`[data-u="${unit}"]`)!;
+    press(opt, t);
+    later(() => { w.sg.querySelectorAll("span").forEach((x) => x.classList.toggle("mk-on", x === opt)); const th = w.sg.querySelector("i")!; th.style.left = opt.offsetLeft + "px"; th.style.width = opt.offsetWidth + "px"; }, t + 60);
+    A(w.n, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }], { duration: 120, delay: t + 60, fill: "none" });
+    later(() => { w.n.textContent = val; }, t + 180);
+    A(w.n, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 180, delay: t + 180, fill: "none" });
+    return t + 420;
+  }
+  function segReset(w: Seg, val: string) {
+    const opt = w.sg.querySelector<HTMLElement>('[data-u="pages"]')!;
+    w.sg.querySelectorAll("span").forEach((x) => x.classList.toggle("mk-on", x === opt));
+    const th = w.sg.querySelector<HTMLElement>("i")!; th.style.transition = "none"; th.style.left = opt.offsetLeft + "px"; th.style.width = opt.offsetWidth + "px"; void th.offsetWidth; th.style.transition = "";
+    w.n.textContent = val;
+  }
+  /** The popover under the status pill (the ref's `getPop`): built once on the front card, reused. */
+  function getPop(): { pop: HTMLElement; w: Seg } {
+    let g = front.querySelector<HTMLElement>(".mk-pillpop");
+    if (!g) {
+      const Q = PHONE_STORY.asked;
+      g = document.createElement("div"); g.className = "mk-pillpop"; g.setAttribute("aria-hidden", "true");
+      const sm = document.createElement("small"); sm.textContent = Q.label;
+      const row = document.createElement("div"); row.className = "mk-smp";
+      const f = document.createElement("span"); f.className = "mk-smp-f"; f.textContent = Q.first;
+      const n = document.createElement("span"); n.className = "mk-smp-n"; n.textContent = Q.pages;
+      const sg = document.createElement("div"); sg.className = "mk-seg"; sg.appendChild(document.createElement("i"));
+      for (const [u, label] of Q.units) { const o = document.createElement("span"); o.dataset.u = u; o.textContent = label; if (u === "pages") o.className = "mk-on"; sg.appendChild(o); }
+      row.append(f, n, sg); g.append(sm, row); front.appendChild(g);
+    }
+    return { pop: g, w: { sg: g.querySelector<HTMLElement>(".mk-seg")!, n: g.querySelector<HTMLElement>(".mk-smp-n")! } };
   }
 
   /**
@@ -366,7 +395,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     band.style.background = AGENT.bg; band.style.color = AGENT.fg; bandT.textContent = AGENT.word; pill.style.background = AGENT.pill; pill.innerHTML = PILL.queried;
     ftT.textContent = F.sent[0]; ftA.textContent = F.sent[1]; ftL.classList.remove("mk-late"); psd.classList.remove("mk-late");
     A(pf, [{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: "forwards" });
-    root.querySelectorAll(".mk-up--tag").forEach((g) => g.remove());
+    root.querySelectorAll(".mk-taskchip").forEach((g) => g.remove());
     let t = (again ? 650 : 450) + LEAD;
     if (again) A(front, [{ translate: "130% 30px", rotate: "10deg", opacity: 0 }, { translate: "0 0", rotate: "0deg", opacity: 1 }], { duration: 620, fill: "both", easing: "cubic-bezier(.16,1,.3,1)" });
     build(); show(1); knots = [[t, 1]]; t0 = performance.now();
@@ -381,13 +410,23 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     knots.push([m + 900, 1]); reveal(parts[1].st, m + 800);
     const pr = climb(waits[1]!, 1, 36, m + 900) - 320;
     court(YOU, pr); setPill("preq", pr); foot(F.partial[0], F.partial[1], true, pr);
-    e = step(parts[1], pr);
-    floatTag(parts[1], PHONE_STORY.tags.partial, e + 300);
+    /* C2 — what Eleanor asked for drops from the pill: Pages 50, flicked to Words 5,000 then Chapters 3,
+       tucked back up, and only then does "Partial requested" type in with its chip. The ref's times. */
+    {
+      const Q = PHONE_STORY.asked, { pop, w } = getPop(); let u = pr + 250;
+      later(() => { const k = front.getBoundingClientRect().width / front.offsetWidth, pb = pill.getBoundingClientRect(), c = front.getBoundingClientRect(); pop.style.top = ((pb.bottom - c.top) / k + 8) + "px"; segReset(w, Q.pages); }, u - 20);
+      A(pop, [{ opacity: 0, transform: "translateY(-8px) scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: u, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
+      u += 500; u = seg(w, "words", Q.words, u); u = seg(w, "chapters", Q.chapters, u + 300);
+      A(pop, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-8px) scale(.9)" }], { duration: 240, delay: u + 400, fill: "forwards" });
+      e = step(parts[1], u + 500);
+    }
+    floatTag(parts[1], PHONE_STORY.chips.partial, e + 100);
     // Day 40 — the partial goes
     reveal(parts[2].st, e + 2600); knots.push([e + 2700, 36]);
     const ps = climb(waits[2]!, 36, 40, e + 2700) - 320;
     court(AGENT, ps); setPill("psent", ps); foot(F.partialSent[0], F.partialSent[1], false, ps);
     e = step(parts[2], ps);
+    floatTag(parts[2], PHONE_STORY.chips.partialSent, e + 100);
     // Day 86 — it has gone quiet: the reminder, the nudge
     knots.push([e + 500, 40]);
     const L = climb(slotWait, 40, 86, e + 500) - 320;
@@ -400,7 +439,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     reveal(parts[3].st, np + 60);
     court(AGENT, np + 60); later(() => psd.classList.remove("mk-late"), np + 60); foot(F.nudged[0], F.nudged[1], false, np + 60);
     e = step(parts[3], np + 200);
-    floatTag(parts[3], PHONE_STORY.tags.nudge, e + 300);
+    floatTag(parts[3], PHONE_STORY.chips.nudge, e + 300);
     // Day 99 — the full
     reveal(parts[4].st, e + 2600); knots.push([e + 2700, 88]);
     const Fu = climb(waits[4]!, 88, 99, e + 2700) - 320;
@@ -420,7 +459,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; if (hooks.phone) { looped = false; playPhone(false); } else play(); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
-  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-up--tag").forEach((g) => g.remove()); }
+  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-taskchip, .mk-pillpop").forEach((g) => g.remove()); }
   setStatic();
   return { start, stop, dispose };
 }
@@ -470,7 +509,7 @@ function enter(root: HTMLElement, host: HTMLElement | null) {
 const Ms: React.FC<{ phone: boolean; chips: readonly string[]; front?: boolean }> = ({ phone, chips, front }) => phone ? (
   <div className="mk-lc-ms" data-hc={front ? "ms" : undefined}>
     <small aria-hidden="true"><BookIcon /></small>
-    <b data-hc={front ? "ms-title" : undefined}>{HERO_PHONE_MS}</b>
+    <b data-hc={front ? "ms-title" : undefined}>{front ? HERO_PHONE_MS_FRONT : HERO_PHONE_MS}</b>
     <div className="mk-lc-chips">{chips.map((x) => <span key={x}>{x}</span>)}</div>
   </div>
 ) : (

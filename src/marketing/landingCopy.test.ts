@@ -13,7 +13,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_H1_LINES, HERO_SUB, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
-  HERO_AGAIN, HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_TAGS,
+  HERO_AGAIN, HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, HERO_PHONE_TAGS, PHONE_STORY,
   DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
   VISION_HEADING, VISION_POINTS, VISION_LINK,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
@@ -55,8 +55,12 @@ describe("landing copy — verbatim locks", () => {
   /* REWRITTEN (v3, the short loop): the manuscript is "Lord of the Wings" on every phone card, and
      nothing of v2's story — its dashboard, agent pick, band, form, sample control, response form or
      bottom pills — survives in the copy module. */
-  it("the phone cards' manuscript is Lord of the Wings, and v2's story copy is gone", async () => {
+  /* v3.1: the FRONT card reads "The Taloned Mr Ripley"; the chips and the popover's words are data here. */
+  it("the phone cards' manuscripts, the v3.1 strings, and v2's story copy gone", async () => {
     expect(HERO_PHONE_MS).toBe("Lord of the Wings");
+    expect(HERO_PHONE_MS_FRONT).toBe("The Taloned Mr Ripley");
+    expect(Object.values(PHONE_STORY.chips).map((c) => c[0])).toEqual(["Task created", "Task complete", "Reminder set"]);
+    expect(PHONE_STORY.asked.label).toBe("She asked for");
     const src = (await import("node:fs")).readFileSync(new URL("./landingCopy.ts", import.meta.url), "utf8");
     for (const gone of ["Who are you querying?", "Logging query…", "PHONE_DASH", "PHONE_PICK", "PHONE_FORM", "PHONE_RESPONSE", "PHONE_PILLS", "Your manuscript", "Your novel", "Lead future queries with the opening voice"]) {
       expect(src.includes(gone), `retired: ${gone}`).toBe(false);
@@ -69,7 +73,7 @@ describe("landing copy — verbatim locks", () => {
       BAND_HEADING,
       HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
       /* The phone hero's own strings (23 Oct): its strapline IS `HERO_H1`, so none of these may say it. */
-      HERO_AGAIN, ...HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN, HERO_PHONE_MS, ...HERO_PHONE_TAGS,
+      HERO_AGAIN, ...HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, ...HERO_PHONE_TAGS, PHONE_STORY.asked.label, ...Object.values(PHONE_STORY.chips).map((c) => c[0]),
       VISION_HEADING, VISION_LINK,
       ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
       ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt]),

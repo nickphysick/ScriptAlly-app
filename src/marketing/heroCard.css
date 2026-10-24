@@ -12,8 +12,7 @@
    chips, the tabs, the odometer's digits — would draw in the app's sans while its parent named the
    right face. `:where()` holds the reset to one class of specificity, so every single-class rule
    below still wins on source order. */
-.mk-hc-pile :where(span, div, p, b, i, em, small, li, ol),
-.mk-up :where(span, div, p, b, i, em) { font-family: inherit; }
+.mk-hc-pile :where(span, div, p, b, i, em, small, li, ol) { font-family: inherit; }
 
 .mk-hc-pile { position: absolute; inset: 0; transform-origin: 0 0; pointer-events: none; }
 
@@ -266,11 +265,14 @@
   transform: rotate(-1.5deg); transform-origin: 0 50%;
 }
 
-/* The row: the navy "See how it works" with its chevron, and the binocular hawk to its right. */
+/* The row: the "See how it works" link with its chevron, and the binocular hawk to its right. */
 .mk-hp-row { display: grid; grid-template-columns: 1fr 112px; align-items: center; gap: 4px; margin-top: 6px; }
+/* v3.1 (C4): a text link, not a button — navy, no fill, left-aligned, rust underline 1.5px at 6px
+   (the ref's `.m-btn.m-how` as overridden in v3.1). */
 .mk-hp-how {
-  display: flex; width: 100%; box-sizing: border-box; height: 52px; border-radius: 26px; align-items: center; justify-content: center; gap: 8px;
-  background: #2a3a52; color: #fff; text-decoration: none; font: 600 15px/1 var(--mk-f-serif);
+  display: flex; width: auto; box-sizing: border-box; height: 40px; padding: 0; border-radius: 26px; align-items: center; justify-content: flex-start; gap: 8px;
+  background: transparent; color: #2a3a52; font: 600 15px/1 var(--mk-f-serif);
+  text-decoration: underline; text-decoration-color: #a2452a; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
 }
 .mk-hp-how svg { animation: mkHpSink 2.4s ease-in-out 4s infinite; }
 @keyframes mkHpSink { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(3px); } }
@@ -300,10 +302,10 @@
 .mk-hp-suform input[type="email"]::placeholder { color: rgba(28, 19, 15, .38); }
 .mk-hp-suform input[type="email"]:focus { outline: none; border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }
 .mk-hp-suform .mk-btn {
-  height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: #a2452a; color: #fff;
+  height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: #2a3a52; color: #fff; /* v3.1 (C4): ink navy */
   font: 600 15px/1 var(--mk-f-serif); box-shadow: none; transform: none;
 }
-.mk-hp-suform .mk-btn:hover { background: #8e3b23; }
+.mk-hp-suform .mk-btn:hover { background: #2a3a52; } /* the ref states no hover; it must not flash rust */
 /* ⚠️ THE PRIVACY NOTE IS NOT IN THE REF AND IS KEPT: `FoundingSignup` renders it on every surface
    that takes an address, by construction. It is set small and tight so the drawer's baked 128px rise
    still holds the line, the field and the note. */
@@ -339,20 +341,39 @@
   background-position: 0 88%; background-size: 0% 42%;
 }
 
-/* B2/B4 — the status tag that appears BESIDE its line (the ref's `.up.tagf`): right-aligned 22px in,
-   its top written by the story from the line's own box. White, a small coloured icon disc, the title
-   in serif, the detail after a middle dot; it may wrap, and is never wider than 300px. */
-.mk-up {
-  position: absolute; right: 22px; z-index: 22; box-sizing: border-box; max-width: 300px;
-  display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 14px 7px 10px;
-  background: #fff; border-radius: 18px; white-space: normal; pointer-events: none; opacity: 0;
-  box-shadow: 0 12px 24px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(28,19,15,.08);
+/* v3.1 (C1) — the task chip that stamps into its own line's chip row (the ref's `.lc-att .taskchip`):
+   rust for a task created or a reminder set, sage (`--done`) for a task complete. The floating pill
+   (v3's `.up.tagf`) is retired with its rules. */
+.mk-lc-att .mk-taskchip {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 6px;
+  background: #f5e6df; color: #7c3a2a; box-shadow: inset 0 0 0 1px rgba(162,69,42,.35);
+  font: 400 9.5px/1 var(--mk-f-mono); letter-spacing: .1em; text-transform: uppercase; opacity: 0;
 }
-.mk-up-i { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #f5e6df; color: #7c3a2a; }
-.mk-up--bell .mk-up-i { background: #e2e6e0; color: #4d524a; }
-.mk-up-i svg { width: 12px; height: 12px; }
-.mk-up-t { display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 2px; column-gap: 6px; }
-.mk-up-t b { font: 600 13.5px/1 var(--mk-f-serif); color: #1c130f; }
-.mk-up-t span { font: 400 12px/1.25 var(--mk-f-serif); color: rgba(28,19,15,.62); }
-.mk-up-t span::before { content: "· "; }
-@media (prefers-reduced-motion: reduce) { .mk-up { display: none; } }
+.mk-lc-att .mk-taskchip--done { background: #e6ece3; color: #3f5a39; box-shadow: inset 0 0 0 1px rgba(79,107,87,.4); }
+
+/* v3.1 (C2) — what Eleanor asked for: a white popover under the status pill, with its pointer (the
+   ref's `.pillpop`), holding the compact sample switcher (the ref's `.smp.sm2` and `.seg`). */
+.mk-pillpop {
+  position: absolute; right: 16px; z-index: 30; padding: 10px 12px 12px; border-radius: 14px; background: #fff;
+  box-shadow: 0 16px 30px -12px rgba(28,19,15,.45), 0 0 0 1px rgba(28,19,15,.08);
+  transform-origin: 85% 0; opacity: 0; pointer-events: none;
+}
+.mk-pillpop small { display: block; margin: 0 0 8px 2px; font: 400 10.5px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase; color: #8a857e; }
+.mk-pillpop::before {
+  content: ""; position: absolute; right: 46px; top: -6px; width: 12px; height: 12px; background: #fff;
+  transform: rotate(45deg); box-shadow: -1px -1px 0 rgba(28,19,15,.08);
+}
+.mk-smp { display: flex; align-items: center; gap: 8px; margin-top: 0; }
+.mk-smp-f { font: 400 14px/1 var(--mk-f-serif); color: rgba(28,19,15,.7); }
+.mk-smp-n {
+  min-width: 40px; height: 32px; padding: 0 10px; display: grid; place-items: center; border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(28,19,15,.2); font: 600 15px/1 var(--mk-f-serif); color: #1c130f; font-variant-numeric: tabular-nums;
+}
+.mk-seg { position: relative; display: flex; padding: 3px; border-radius: 22px; background: #f2ede6; box-shadow: inset 0 0 0 1px rgba(28,19,15,.08); }
+.mk-seg i {
+  position: absolute; top: 3px; bottom: 3px; left: 4px; width: 0; border-radius: 18px; background: #2a3a52;
+  transition: left .28s cubic-bezier(.3,.7,.2,1), width .28s cubic-bezier(.3,.7,.2,1);
+}
+.mk-seg span { position: relative; z-index: 1; padding: 7px 10px 6px; font: 400 13px/1 var(--mk-f-display); color: rgba(28,19,15,.62); transition: color .2s; }
+.mk-seg span.mk-on { color: #fff; }
+@media (prefers-reduced-motion: reduce) { .mk-pillpop, .mk-lc-att .mk-taskchip { display: none; } }
