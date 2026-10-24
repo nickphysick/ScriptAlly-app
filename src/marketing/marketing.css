@@ -1735,87 +1735,108 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-pv4 .mk-pv4a { color: rgba(28, 19, 15, .56); margin: 6px 0 0; line-height: 1.6; }
 .mk-pv4 .mk-pv4end { height: 110px; }
 
-/* ── How long will I need? (the ref's `.calc.jy`) ──
-   ⚠️ `scroll-margin-top` COUNTS THE STICKY NAV. The ref's nav scrolls away, so its 24px is the
-   whole margin; here the bar stays, and its full height is what lands the card below it. */
-.mk-pv4 .mk-pv4how { scroll-margin-top: calc(var(--mk-nav-h) + 24px); }
+/* ── The link, and "Which plan suits me best?" (the ref's `.suit-link` and `.suit .calc.jy`) ──
+   ⚠️ `scroll-margin-top` COUNTS THE STICKY NAV. The ref's nav scrolls away, so its 20px is the whole
+   margin; here the bar stays, and its full height is what lands the questions below it. */
+.mk-pv4 .mk-pv4suit {
+  flex: none; background: none; border: 0; padding: 0 0 2px; cursor: pointer; white-space: nowrap;
+  font-size: .98rem; font-weight: 600; line-height: 1.2; color: var(--mk-rust);
+  border-bottom: 1.5px solid var(--mk-rust);
+}
+.mk-pv4 .mk-pv4suit[aria-expanded="false"]::after { content: " ↓"; }
+.mk-pv4 .mk-pv4suit:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 3px; }
+.mk-pv4 .mk-pv4how { margin: 22px 0 0; scroll-margin-top: calc(var(--mk-nav-h) + 20px); }
+.mk-pv4 .mk-pv4how[hidden] { display: none; }
+.mk-pv4 .mk-pv4how:not([hidden]) { animation: mkJyRise .35s ease; }
 .mk-pv4 .mk-jy {
-  background: #fff; border-radius: 20px; overflow: hidden;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 30px 60px -40px rgba(28, 19, 15, .45);
+  background: #fff; border-radius: 22px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 18px 40px -22px rgba(28, 19, 15, .25);
 }
 .mk-pv4 .mk-jytop {
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap; min-height: 76px;
-  padding: 22px 28px 20px; background: var(--mk-panel); color: var(--mk-cream);
+  position: relative; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 24px 32px 22px; background: #fff; color: var(--mk-nearblack);
 }
 .mk-scope .mk-jytitle {
   font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: 22px; line-height: 1.3; margin: 0; color: var(--mk-cream);
+  font-size: 1.3rem; line-height: 1.3; margin: 0; color: var(--mk-nearblack);
 }
 .mk-pv4 .mk-jycount {
-  margin: 0 0 0 auto; font-family: var(--mk-f-mono); font-size: .66rem; letter-spacing: .16em;
-  text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+  margin: 0 0 0 auto; font-family: var(--mk-f-mono); font-weight: 400; font-size: .66rem; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(28, 19, 15, .56);
 }
-.mk-pv4 .mk-jydots { display: flex; gap: 6px; }
-.mk-pv4 .mk-jydots span {
-  width: 8px; height: 8px; border-radius: 50%; background: rgba(var(--mk-cream-rgb), .25);
-  transition: background .2s, width .2s;
+/* The progress line along the header's foot: a fifth per step. */
+.mk-pv4 .mk-jyprog {
+  position: absolute; left: 32px; right: 32px; bottom: 0; height: 4px;
+  border-radius: 999px; background: rgba(28, 19, 15, .08); overflow: hidden;
 }
-.mk-pv4 .mk-jydots .mk-jydot--done { background: rgba(var(--mk-cream-rgb), .6); }
-.mk-pv4 .mk-jydots .mk-jydot--on { width: 22px; border-radius: 999px; background: var(--mk-terra); }
-.mk-pv4 .mk-jybody { padding: 34px 30px 32px; }
-.mk-pv4 .mk-jystep { max-width: 680px; margin: 0 auto; }
-.mk-pv4 .mk-jystep.mk-jyres { max-width: none; }
+.mk-pv4 .mk-jyprog span { display: block; height: 100%; border-radius: 999px; background: var(--mk-rust); transition: width .35s ease; }
+.mk-pv4 .mk-jybody { padding: 30px 32px; }
 .mk-scope .mk-jyq {
   font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: 1.7rem; line-height: 1.25; margin: 0 0 18px; color: var(--mk-nearblack);
+  font-size: 1.55rem; line-height: 1.25; margin: 0 0 20px; color: var(--mk-nearblack);
 }
 .mk-pv4 .mk-jyq:focus, .mk-pv4 .mk-jybig:focus { outline: none; }
 .mk-pv4 .mk-jyq:focus-visible, .mk-pv4 .mk-jybig:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
 .mk-pv4 .mk-jysub { margin: 22px 0 10px; font-weight: 600; color: var(--mk-nearblack); }
 
+/* Answers as cards with a radio dot (navy when chosen). */
 .mk-pv4 .mk-jyopts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.mk-pv4 .mk-jyopts--2 { grid-template-columns: 1fr 1fr; }
 .mk-pv4 .mk-jyopt {
-  text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--mk-hair);
+  position: relative; display: flex; flex-direction: column; justify-content: flex-start;
+  text-align: left; padding: 16px 16px 16px 48px; border-radius: 14px; border: 1px solid var(--mk-hair);
   background: #fff; font-size: 1rem; font-weight: 600; line-height: 1.3; color: var(--mk-nearblack);
   cursor: pointer; transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.mk-pv4 .mk-jyopt::before {
+  content: ""; position: absolute; left: 17px; top: 18px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .3); transition: box-shadow .15s;
 }
 .mk-pv4 .mk-jyopt small {
   display: block; margin-top: 3px; font-weight: 400; font-size: .86rem; line-height: 1.35; color: rgba(28, 19, 15, .56);
 }
-.mk-pv4 .mk-jyopt:hover { background: #faf8f4; }
-.mk-pv4 .mk-jyopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: #f6f7f9; }
+.mk-pv4 .mk-jyopt:hover { background: var(--mk-hero-ground); border-color: rgba(28, 19, 15, .22); }
+.mk-pv4 .mk-jyopt[aria-pressed="true"] { background: var(--mk-hero-ground); border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); }
+.mk-pv4 .mk-jyopt[aria-pressed="true"]::before { box-shadow: inset 0 0 0 5px var(--mk-navy); }
 .mk-pv4 .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
 .mk-pv4 .mk-jychip {
-  height: 38px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
-  font-size: .95rem; font-weight: 500; color: var(--mk-body); cursor: pointer;
+  height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
+  font-size: .95rem; font-weight: 600; color: var(--mk-body); cursor: pointer;
   transition: background .15s, color .15s, border-color .15s;
 }
 .mk-pv4 .mk-jychip:hover { background: #faf8f4; }
 .mk-pv4 .mk-jychip[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
-.mk-pv4 .mk-jystepper { display: inline-flex; align-items: center; height: 38px; border-radius: 999px; border: 1px solid var(--mk-hair); }
+/* The agents: the stepper, "or", and "I don't know", which dims the stepper while it is chosen. */
+.mk-pv4 .mk-jyagents { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.mk-pv4 .mk-jyor { font-style: italic; color: rgba(28, 19, 15, .56); }
+.mk-pv4 .mk-jychip.mk-jyidk { height: 48px; padding: 0 22px; }
+.mk-pv4 .mk-jystepper { display: inline-flex; align-items: center; height: 48px; border-radius: 999px; border: 1px solid var(--mk-hair); }
+.mk-pv4 .mk-jyagents--idk .mk-jystepper { opacity: .4; }
 .mk-pv4 .mk-jystepper button {
-  width: 40px; height: 36px; border: 0; background: transparent; color: var(--mk-navy);
-  font-size: 1.15rem; font-weight: 500; cursor: pointer; border-radius: 50%;
+  width: 48px; height: 46px; border: 0; background: transparent; color: var(--mk-navy);
+  font-size: 1.3rem; font-weight: 500; cursor: pointer; border-radius: 50%;
 }
 .mk-pv4 .mk-jystepper button:hover { background: #f3f1ed; }
 .mk-pv4 .mk-jystepper output { min-width: 56px; text-align: center; font-size: 1.3rem; font-weight: 600; color: var(--mk-nearblack); }
 .mk-pv4 .mk-jy button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
 
+/* The note under the answers: a blush strip, no label. */
 .mk-pv4 .mk-jyins {
-  margin-top: 22px; padding: 14px 18px 16px; border-radius: 14px;
-  background: #ebe1d4; border-left: 3px solid var(--mk-rust);
+  margin: 20px 0 0; padding: 14px 18px; border-radius: 14px; background: var(--mk-blush);
+  font-size: 1rem; line-height: 1.55; color: #4a3a30;
   animation: mkJyRise .35s ease;
 }
 @keyframes mkJyRise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.mk-pv4 .mk-jyk {
-  margin: 0; font-family: var(--mk-f-mono); font-size: .6rem; letter-spacing: .18em;
-  text-transform: uppercase; color: rgba(90, 70, 54, .75);
+.mk-pv4 .mk-jynav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 22px; padding-top: 20px; border-top: 1px dashed var(--mk-hair);
 }
-.mk-pv4 .mk-jyinst { margin: 6px 0 0; font-size: 1.02rem; line-height: 1.55; color: var(--mk-body); }
-.mk-pv4 .mk-jynav { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; }
-.mk-pv4 .mk-jy .mk-jynext { padding: 15px 30px; font-size: 1.02rem; font-weight: 600; }
-.mk-pv4 .mk-jy .mk-jynext:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
+/* `gap: 0`: `.mk-btn` is a flex row with an 8px gap, which would push the arrow off its word. */
+.mk-pv4 .mk-jy .mk-jynext { padding: 12px 26px; gap: 0; font-size: .98rem; font-weight: 600; }
+.mk-pv4 .mk-jy .mk-jynext:not(:disabled)::after { content: " →"; white-space: pre; }
+.mk-pv4 .mk-jy .mk-jynext:disabled {
+  background: rgba(42, 58, 82, .18); border-color: transparent; color: #fff; opacity: 1;
+  cursor: default; transform: none; box-shadow: none;
+}
 .mk-pv4 .mk-jyback, .mk-pv4 .mk-jyagain {
   background: none; border: 0; padding: 0; font-size: 1rem; font-weight: 600; color: var(--mk-navy);
   cursor: pointer; border-bottom: 1px solid rgba(42, 58, 82, .35);
@@ -1824,14 +1845,18 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-pv4 .mk-jyagain { margin-top: 18px; }
 
 /* The result. */
-.mk-pv4 .mk-jyrestop { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 34px; align-items: start; }
+.mk-pv4 .mk-jyrestop { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 26px; align-items: center; }
+.mk-pv4 .mk-jyk {
+  margin: 0; font-family: var(--mk-f-mono); font-size: .6rem; letter-spacing: .18em;
+  text-transform: uppercase; color: rgba(90, 70, 54, .75);
+}
 .mk-scope .mk-jybig {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 2.4rem; line-height: 1.15; margin: 6px 0 0; color: var(--mk-nearblack);
 }
 .mk-pv4 .mk-jywhy { margin: 12px 0 0; font-size: 1rem; line-height: 1.6; color: var(--mk-body); }
 .mk-pv4 .mk-jyprep {
-  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: #ebe1d4;
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--mk-blush);
   font-size: .95rem; line-height: 1.55; color: var(--mk-body);
 }
 .mk-pv4 .mk-jyplan {
@@ -1860,46 +1885,22 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-size: 1rem; line-height: 1.5;
 }
 .mk-pv4 .mk-jyinc { margin: 10px 0 0; font-size: .92rem; line-height: 1.5; color: rgba(var(--mk-cream-rgb), .75); }
-.mk-pv4 .mk-jyall { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--mk-hair); }
-.mk-pv4 .mk-jyallh { margin: 0 0 12px; font-weight: 600; color: var(--mk-nearblack); }
-.mk-pv4 .mk-jyrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.mk-pv4 .mk-jymini { border-radius: 14px; padding: 14px 16px; background: #ebe1d4; }
-.mk-pv4 .mk-jymini:first-child { background: #fff; box-shadow: inset 0 0 0 1px var(--mk-hair); }
-.mk-pv4 .mk-jymini p {
-  margin: 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 1rem; line-height: 1.2; color: var(--mk-nearblack);
-}
-.mk-pv4 .mk-jymini b {
-  display: block; margin-top: 6px; font-family: var(--mk-f-display); font-weight: 400;
-  font-size: 1.4rem; line-height: 1; letter-spacing: -.02em; color: var(--mk-nearblack);
-}
-.mk-pv4 .mk-jymini small {
-  display: block; margin-top: 6px; font-family: var(--mk-f-mono); font-size: .6rem;
-  letter-spacing: .12em; text-transform: uppercase; color: #5a4636;
-}
-.mk-pv4 .mk-jymini.mk-jymini--fit { background: var(--mk-navy); }
-.mk-pv4 .mk-jymini.mk-jymini--fit p, .mk-pv4 .mk-jymini.mk-jymini--fit b { color: #fff; }
-.mk-pv4 .mk-jymini.mk-jymini--fit small { color: rgba(var(--mk-cream-rgb), .75); }
-.mk-pv4 .mk-pv4source { margin: 14px 4px 0; font-size: .84rem; color: var(--mk-label); line-height: 1.55; }
-.mk-pv4 .mk-pv4source a { color: inherit; }
+.mk-pv4 .mk-pv4source { margin: 12px 4px 0; font-size: .84rem; color: var(--mk-label); line-height: 1.55; }
+.mk-pv4 .mk-pv4source a { color: inherit; text-decoration: underline; }
 
 /* ⚠️ AFTER THE RULES THEY OVERRIDE: a media query confers no specificity, so an earlier override
    loses at equal specificity. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-pv4 .mk-jyins { animation: none; }
-  .mk-pv4 .mk-jydots span, .mk-pv4 .mk-jyopt, .mk-pv4 .mk-jychip { transition: none; }
+  .mk-pv4 .mk-jyins, .mk-pv4 .mk-pv4how:not([hidden]) { animation: none; }
+  .mk-pv4 .mk-jyprog span, .mk-pv4 .mk-jyopt, .mk-pv4 .mk-jyopt::before, .mk-pv4 .mk-jychip { transition: none; }
 }
-/* ⚠️ THE REF ALSO STACKS THE THREE-OPTION ROWS AT 1100px — a rule left from its earlier two-column
-   calculator, where the questions shared the card with the answer. One question at a time, the row is
-   680px wide at every desktop width; the pack says options stack at 640, and they do. */
-@media (max-width: 900px) {
-  .mk-pv4 .mk-jyrestop { grid-template-columns: 1fr; }
-  .mk-pv4 .mk-jyrow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+/* The ref stacks the answer cards at 1100px, as it always has; the result stacks at 900. */
+@media (max-width: 1100px) { .mk-pv4 .mk-jyopts { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .mk-pv4 .mk-jyrestop { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
+  .mk-pv4 .mk-jytop { padding: 20px 20px 16px; }
+  .mk-pv4 .mk-jyprog { left: 20px; right: 20px; }
   .mk-pv4 .mk-jybody { padding: 24px 18px; }
-  .mk-scope .mk-jyq { font-size: 1.4rem; }
-  .mk-pv4 .mk-jyrow { grid-template-columns: 1fr 1fr; }
-  .mk-pv4 .mk-jyopts, .mk-pv4 .mk-jyopts--2 { grid-template-columns: 1fr; }
   .mk-pv4 .mk-jycount { margin-left: 0; }
 }
 

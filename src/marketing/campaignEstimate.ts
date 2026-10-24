@@ -2,15 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "How long will I need?" — the arithmetic, pure. Ported from the script in
- * design-refs/pricing-page-v1.html (the IIFE that opens `const WPM = 4.345`), numbers unchanged.
+ * "Which plan suits me best?" — the arithmetic, pure. Ported from the script in
+ * design-refs/pricing-page-v2.html (the IIFE that opens `const WPM = 4.345`), numbers unchanged.
+ * Pricing v4 added the ref's two "I'm not sure" answers: "I don't know" for the agents count (about
+ * 40, and the sentence says it was a guess) and "Not sure yet" for the pace (estimated as steady).
  *
  * ⚠️ TODAY IS AN ARGUMENT, NEVER `new Date()` IN HERE. The slow seasons are counted over the months
  * the campaign spans FROM TODAY, so the same answers give a different estimate in June and in
  * October. A function that read the clock itself could only be tested on the day it was written.
  *
  * ⚠️ THE EXPECTED VALUES IN THE TEST COME FROM THE REF RUNNING, not from reading this file:
- * `scripts/pricing-v3-refoutputs.mjs` drives the ref's own script in a browser with the clock
+ * `scripts/pricing-v4-refoutputs.mjs` drives the ref's own script in a browser with the clock
  * pinned, across every answer combination, into `campaignEstimate.ref.json`.
  *
  * ⚠️ IT IS A ROUGH GUIDE AND THE PAGE SAYS SO. Nothing here is a reply-time model; it is the ref's
@@ -22,7 +24,7 @@ import { planFor, planPerMonthLine, ADD_MONTH_PRICE, type ProPlan } from "./pric
 export type Stage = "prep" | "ready" | "already";
 export type Kind = "novel" | "nonfic" | "pb";
 export type Length = "s" | "m" | "l";
-export type Pace = "steady" | "brisk";
+export type Pace = "steady" | "brisk" | "unsure";
 
 export interface CampaignAnswers {
   stage: Stage;
@@ -30,6 +32,8 @@ export interface CampaignAnswers {
   /** Required when `kind` is a novel; ignored otherwise. */
   len: Length | null;
   agents: number;
+  /** "I don't know": the count is taken as 40 and the sentence says so. */
+  agentsUnknown: boolean;
   pace: Pace;
 }
 
@@ -50,7 +54,8 @@ export interface CampaignEstimate {
 
 /** Weeks in a month. */
 export const WPM = 4.345;
-export const PACE: Record<Pace, { n: number; every: number; say: string }> = {
+/** "Not sure yet" is estimated at the steady pace — the ref's "We'll assume rounds of about ten". */
+export const PACE: Record<Exclude<Pace, "unsure">, { n: number; every: number; say: string }> = {
   steady: { n: 10, every: 6, say: "about six weeks apart" },
   brisk: { n: 15, every: 4.345, say: "about a month apart" },
 };
@@ -64,6 +69,8 @@ export const AGENTS_MIN = 5;
 export const AGENTS_MAX = 150;
 export const AGENTS_STEP = 5;
 export const AGENTS_DEFAULT = 40;
+/** What "I don't know" sets the count to. */
+export const AGENTS_UNKNOWN = 40;
 
 const WORD = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
   "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen"];
@@ -91,8 +98,10 @@ export const fitFor = (months: number): ProPlan["months"] =>
   months <= 1.25 ? 1 : months <= 3.5 ? 3 : months <= 7 ? 6 : 12;
 
 export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstimate => {
-  const pace = PACE[a.pace];
-  const rounds = Math.ceil(a.agents / pace.n);
+  const pace = PACE[a.pace === "unsure" ? "steady" : a.pace];
+  /* "I don't know" counts as 40 whatever the stepper last read — the ref sets it to 40 too. */
+  const agents = a.agentsUnknown ? AGENTS_UNKNOWN : a.agents;
+  const rounds = Math.ceil(agents / pace.n);
   const lastSend = (rounds - 1) * pace.every;
   const read = a.kind === "novel" ? READ[a.len ?? "m"] : a.kind === "nonfic" ? READ_NONFIC : READ_PB;
   let weeks = lastSend + Math.max(12, 5 + read + 2) + (a.stage === "prep" ? 8 : 0);
@@ -102,9 +111,12 @@ export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstim
   const r = Math.max(1, Math.round(months));
   const label = months > 13 ? "About a year or more" : `About ${w(r)} month${r > 1 ? "s" : ""}`;
 
+  /* A guessed count or a guessed pace is said to be one: "Going by a typical campaign, you'd…". */
+  const howMany = a.agentsUnknown ? `about ${AGENTS_UNKNOWN} queries` : `${agents} queries`;
+  const you = a.agentsUnknown || a.pace === "unsure" ? "Going by a typical campaign, you" : "You";
   const sends = rounds === 1
-    ? `You'd send all ${a.agents} queries at once`
-    : `You'd send ${a.agents} queries in ${w(rounds)} rounds, ${pace.say}`;
+    ? `${you}'d send all ${howMany} at once`
+    : `${you}'d send ${howMany} in ${w(rounds)} rounds, ${pace.say}`;
   const reads = a.kind === "novel"
     ? "agents who like your opening usually take two to three months to read the manuscript"
     : a.kind === "nonfic"

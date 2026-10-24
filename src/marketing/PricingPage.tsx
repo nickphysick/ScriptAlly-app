@@ -24,12 +24,12 @@
  * left" at 37%; `FoundingCounter` renders nothing until a real figure comes back.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   PRICING_DOCUMENT_TITLE, PV4_KICKER, PV4_H1, PV4_SUB, PV4_MORE, PV4_LESS, PV4_PERKS,
   PV4_STEPS_H, PV4_STEPS, type Pv4Perk, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO,
   PRO_FROM, PV4_FAQ_H2, PV4_FAQ, PV4_SOURCE_NOTE, PRO_PLANS, PLANS_TITLE, PLANS_SUB, planMonths,
-  planPrice, planTileLine,
+  planPrice, planTileLine, SUIT_LINK, SUIT_HIDE,
 } from "./pricingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { CampaignJourney } from "./CampaignJourney";
@@ -47,15 +47,14 @@ const Price: React.FC<{ amount: string; from?: string; per?: string }> = ({ amou
 );
 
 /**
- * ⚠️ THE "How long will I need?" LINK SCROLLS IN SCRIPT, NOT BY CHANGING THE HASH. The app reads
+ * ⚠️ THE QUESTIONS SCROLL INTO VIEW IN SCRIPT, NEVER BY CHANGING THE HASH. The app reads
  * `location.hash` for its pre-auth routes (`#/login`, `#/signup`), so a page that writes a hash of
- * its own is one listener away from being read as a route. `href` stays for the no-script reading
- * and the address a reader copies.
+ * its own is one listener away from being read as a route. The FAQ link keeps `href="#how-long"` for
+ * the no-script reading and the address a reader copies.
  */
-export const scrollToJourney = (e: React.MouseEvent) => {
+const scrollToQuestions = () => {
   const target = document.getElementById("how-long");
   if (!target) return;
-  e.preventDefault();
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
 };
@@ -148,6 +147,29 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
     return () => { document.title = prev; };
   }, []);
 
+  /* "Which plan suits me best?": the questions are hidden until the link (or the FAQ's link) opens
+     them; the plan they arrive at turns its tile navy. Their answers survive closing them. */
+  const [suitOpen, setSuitOpen] = useState(false);
+  const [fit, setFit] = useState<number | null>(null);
+  const [focusKey, setFocusKey] = useState(0);
+  const pending = useRef(false);
+  const openQuestions = () => { pending.current = true; setSuitOpen(true); };
+  const toggleQuestions = () => (suitOpen ? setSuitOpen(false) : openQuestions());
+  /* Once the opened questions have rendered: bring them into view, then put focus on the first
+     question — after the scroll has had a moment, as the ref does, so focus does not fight it. */
+  useEffect(() => {
+    if (!suitOpen || !pending.current) return;
+    pending.current = false;
+    scrollToQuestions();
+    const t = window.setTimeout(() => setFocusKey((k) => k + 1), 400);
+    return () => window.clearTimeout(t);
+  }, [suitOpen]);
+  const onFaqLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (suitOpen) scrollToQuestions(); else openQuestions();
+  };
+  const onFit = useCallback((m: number) => setFit(m), []);
+
   return (
     <div className="mk-pv4">
       <FoundingBox onNavigate={onNavigate} />
@@ -176,20 +198,29 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
           </article>
         </div>
 
-        {/* ── Pro plans: one hairline container round the four plans (and, from phase 3, the
-            questions). The prices are the one table in `pricingCopy.ts`. ── */}
+        {/* ── Pro plans: one hairline container round the four plans and the questions. The prices are
+            the one table in `pricingCopy.ts`. ── */}
         <div className="mk-pv4plans">
           <div className="mk-pv4phead">
             <div>
               <h2 className="mk-pv4ptitle">{PLANS_TITLE}</h2>
               <p className="mk-pv4psub">{PLANS_SUB}</p>
             </div>
+            <button
+              type="button"
+              className="mk-pv4suit"
+              aria-expanded={suitOpen}
+              aria-controls="how-long"
+              onClick={toggleQuestions}
+            >
+              {suitOpen ? SUIT_HIDE : SUIT_LINK}
+            </button>
           </div>
           <ul className="mk-pv4pgrid">
             {PRO_PLANS.map((p) => {
               const line = planTileLine(p);
               return (
-                <li className="mk-pv4ptile" key={p.months} data-m={p.months}>
+                <li className={"mk-pv4ptile" + (p.months === fit ? " mk-pv4ptile--fit" : "")} key={p.months} data-m={p.months}>
                   <p className="mk-pv4pname">{planMonths(p.months)}</p>
                   <b className="mk-pv4pprice">{planPrice(p)}</b>
                   <small className="mk-pv4pline">{line.lead}{line.save && <em>{line.save}</em>}</small>
@@ -197,13 +228,13 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
               );
             })}
           </ul>
-        </div>
-      </section>
 
-      {/* ── How long will I need? — the target of the Pro tier's link ── */}
-      <section className="mk-pv4sect mk-pv4how" id="how-long">
-        <CampaignJourney />
-        <p className="mk-pv4source"><Runs runs={PV4_SOURCE_NOTE} onNavigate={onNavigate} /></p>
+          {/* ── Which plan suits me best? — hidden until the link opens it ── */}
+          <div className="mk-pv4how" id="how-long" hidden={!suitOpen}>
+            <CampaignJourney onFit={onFit} focusKey={focusKey} />
+            <p className="mk-pv4source"><Runs runs={PV4_SOURCE_NOTE} onNavigate={onNavigate} /></p>
+          </div>
+        </div>
       </section>
 
       {/* ── Questions ── */}
@@ -216,7 +247,7 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
               <p className="mk-pv4a">
                 {qa.a.map((r, i) => typeof r === "string"
                   ? <React.Fragment key={i}>{r}</React.Fragment>
-                  : <a key={i} className="mk-pv4suitlink" href="#how-long" onClick={scrollToJourney}>{r.suit}</a>)}
+                  : <a key={i} className="mk-pv4suitlink" href="#how-long" onClick={onFaqLink}>{r.suit}</a>)}
               </p>
             </div>
           ))}

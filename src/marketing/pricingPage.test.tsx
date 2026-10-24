@@ -112,7 +112,7 @@ describe("pricing v3: the banner", () => {
 });
 
 describe("pricing v3: the journey's gates", () => {
-  const blank = { stage: null, kind: null, len: null, pace: null, agents: 40 } as const;
+  const blank = { stage: null, kind: null, len: null, pace: null, agents: 40, agentsUnknown: false } as const;
   it("opens on question 1 with Next disabled and nothing pre-selected", () => {
     const h = html();
     expect(h).toContain("Question 1 of 4");
@@ -131,9 +131,10 @@ describe("pricing v3: the journey's gates", () => {
     expect(stepAnswered(3, { ...blank, pace: "brisk" })).toBe(true);
   });
   it("the agents insight moves with the count", () => {
-    expect(stepInsight(2, { ...blank, agents: 15 })).toMatch(/^That's a short list/);
-    expect(stepInsight(2, { ...blank, agents: 40 })).toMatch(/^That's in line/);
-    expect(stepInsight(2, { ...blank, agents: 65 })).toMatch(/^A long list/);
+    expect(stepInsight(2, { ...blank, agents: 15 })).toMatch(/^That's a fairly short list/);
+    expect(stepInsight(2, { ...blank, agents: 40 })).toMatch(/^That's about typical/);
+    expect(stepInsight(2, { ...blank, agents: 65 })).toMatch(/^That's a long list/);
+    expect(stepInsight(2, { ...blank, agentsUnknown: true })).toMatch(/^No problem. We'll go with about 40/);
     expect(stepInsight(1, { ...blank, kind: "novel" }), "a novel says nothing until its length").toBe("");
   });
 });

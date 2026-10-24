@@ -200,17 +200,17 @@ export const PV4_FAQ: Pv4Question[] = [
 /** An answer's text, the link's words included — for locks and for anything that needs it flat. */
 export const faqText = (a: FaqRun[]): string => a.map((r) => (typeof r === "string" ? r : r.suit)).join("");
 
-/* ══════════════ How long will I need? — one question at a time ══════════════
-   ⚠️ VERBATIM FROM THE REF'S MARKUP AND SCRIPT. The arithmetic is `campaignEstimate.ts`; these are
-   the words around it. */
-export const JY_TITLE = "How long will I need?";
+/* ══════════════ Which plan suits me best? — one question at a time ══════════════
+   ⚠️ VERBATIM FROM THE REF'S MARKUP AND SCRIPT (its `INS` object and `agentsIns`). The arithmetic is
+   `campaignEstimate.ts`; these are the words around it. The notes under the answers carry no label
+   — the ref's v18 retired "Good to know". */
+export const JY_TITLE = SUIT_LINK;
 export const JY_STEPS = 4;
 export const jyStepLabel = (n: number): string => (n < JY_STEPS ? `Question ${n + 1} of ${JY_STEPS}` : "Your plan");
 export const JY_NEXT = "Next";
 export const JY_SEE_PLAN = "See my plan";
 export const JY_BACK = "Back";
 export const JY_AGAIN = "Change my answers";
-export const JY_GOOD_TO_KNOW = "Good to know";
 
 export interface JyOption<V extends string> { v: V; title: string; small?: string }
 
@@ -232,40 +232,45 @@ export const JY_LENGTHS: JyOption<"s" | "m" | "l">[] = [
   { v: "m", title: "80,000 to 110,000" },
   { v: "l", title: "Over 110,000" },
 ];
-export const JY_Q_AGENTS = "How many agents are on your list?";
+export const JY_Q_AGENTS = "How many agents do you plan to query?";
 export const JY_FEWER = "Fewer agents";
 export const JY_MORE = "More agents";
+export const JY_OR = "or";
+export const JY_IDK = "I don't know";
 export const JY_Q_PACE = "How will you send them?";
-export const JY_PACES: JyOption<"steady" | "brisk">[] = [
+export const JY_PACES: JyOption<"steady" | "brisk" | "unsure">[] = [
   { v: "steady", title: "A few at a time", small: "Rounds of about ten" },
   { v: "brisk", title: "Bigger batches", small: "Rounds of fifteen or more" },
+  { v: "unsure", title: "Not sure yet", small: "We'll assume a typical pace" },
 ];
 
-/** "Good to know", per answer. */
+/** The note under each answer. */
 export const JY_INSIGHT = {
   stage: {
-    prep: "Getting ready counts. Most writers spend a month or two building their list and polishing their letter before the first query goes out.",
-    ready: "Good timing. Your first round teaches you the most, so it pays to send it organised.",
-    already: "We'll count from today. Replies to queries you've already sent can keep arriving for up to three months.",
+    prep: "That part takes longer than people expect. Most writers spend a month or two on their list and their letter, so we'll count it in.",
+    ready: "Then you're nearly there. A small first round is a good idea: the replies tell you whether your letter is working.",
+    already: "We'll count from today. Agents can take up to three months to reply, so queries you've already sent may still come back.",
   },
   kind: {
-    nonfic: "Non-fiction usually sells on a proposal, and agents read a proposal faster than a full manuscript.",
-    pb: "Agents read a picture book alongside your query, so decisions tend to come sooner.",
+    nonfic: "Non-fiction usually sells on a proposal rather than a finished book, and agents get through those faster.",
+    pb: "Agents read a picture book with your query, so you tend to hear back sooner.",
   },
   len: {
-    s: "Agents who like your opening ask for the full manuscript. Shorter books get read a little faster.",
-    m: "Agents who like your opening ask for the full manuscript. At this length, reading it usually takes two to three months.",
-    l: "Agents who like your opening ask for the full manuscript. Longer books take longer to read, so allow a few extra weeks.",
+    s: "If an agent likes your opening, they'll ask for the full manuscript. A shorter book gets read a little quicker.",
+    m: "If an agent likes your opening, they'll ask for the full manuscript. At this length they usually take two to three months to read it.",
+    l: "If an agent likes your opening, they'll ask for the full manuscript. A longer book takes them longer to read, so we've allowed a few extra weeks.",
   },
   pace: {
-    steady: "Small rounds give you time to change your letter if the first replies are quiet.",
-    brisk: "Bigger batches finish sooner, but leave less room to improve your letter between rounds.",
+    steady: "Small rounds give you the chance to change your letter if the first replies are quiet.",
+    brisk: "Bigger batches get you through your list sooner, but leave less room to change your letter between rounds.",
+    unsure: "That's fine. We'll assume rounds of about ten, which is what most writers do.",
   },
 } as const;
-export const jyAgentsInsight = (n: number): string =>
-  n < 20 ? "That's a short list. Most writers query more agents than that before they're done, so it's worth building up."
-  : n <= 60 ? "That's in line with most campaigns. Querying writers send around 40 to 50 queries on average."
-  : "A long list. It takes more rounds to get through, so your campaign runs longer.";
+export const jyAgentsInsight = (n: number, unknown: boolean): string =>
+  unknown ? "No problem. We'll go with about 40, which is roughly what most writers end up sending."
+  : n < 20 ? "That's a fairly short list. Most writers end up querying more agents than they first planned."
+  : n <= 60 ? "That's about typical. Most writers send somewhere between 40 and 50 queries."
+  : "That's a long list, so it'll take more rounds to get through. We've allowed for that.";
 
 /* The result screen. */
 export const JY_YOUR_CAMPAIGN = "Your campaign";
@@ -275,19 +280,8 @@ export const JY_PREP_NOTE =
   "packages, so you start querying organised.";
 export const JY_FITS = "Fits your campaign";
 export const JY_INCLUDES = "Every Pro feature: manuscript versions, submission packages, Smart email drop and The Scout.";
-export const JY_ALL_PLANS = "See all plans";
-/** The five tiles under the result. `m` 0 is Free. */
-export const JY_TILES: { m: 0 | 1 | 3 | 6 | 12; name: string; price: string; small: string }[] = [
-  { m: 0, name: "Free", price: "0", small: "No time limit" },
-  ...PRO_PLANS.map((p) => ({
-    m: p.months,
-    name: planMonths(p.months),
-    price: p.price,
-    small: p.months === 1 ? "Top up any plan" : `£${perMonth(p)} a month`,
-  })),
-];
 
-/* ══════════════ The source note under the journey ══════════════ */
+/* ══════════════ The source note under the questions ══════════════ */
 export const PV4_SOURCE_NOTE: CopyRun[] = [
   "A rough guide, not a promise, based on typical reply times reported by querying writers (",
   { link: "QueryTracker figures", href: "https://rejectomancy.com/2023/09/28/query-quest-what-are-my-chances-part-ii/" },
