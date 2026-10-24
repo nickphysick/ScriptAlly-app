@@ -28,7 +28,8 @@ import React, { useEffect, useState } from "react";
 import {
   PRICING_DOCUMENT_TITLE, PV4_KICKER, PV4_H1, PV4_SUB, PV4_MORE, PV4_LESS, PV4_PERKS,
   PV4_STEPS_H, PV4_STEPS, type Pv4Perk, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO,
-  PRO_FROM, PV4_FAQ_H2, PV4_FAQ, PV4_SOURCE_NOTE,
+  PRO_FROM, PV4_FAQ_H2, PV4_FAQ, PV4_SOURCE_NOTE, PRO_PLANS, PLANS_TITLE, PLANS_SUB, planMonths,
+  planPrice, planTileLine,
 } from "./pricingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { CampaignJourney } from "./CampaignJourney";
@@ -172,8 +173,30 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
               {PV4_PRO.list.map((f) => <li key={f}>{f}</li>)}
             </ul>
             <p className="mk-pv4flex">{PV4_PRO.flex}</p>
-            <a className="mk-pv4tlink" href="#how-long" onClick={scrollToJourney}>{PV4_PRO.link}</a>
           </article>
+        </div>
+
+        {/* ── Pro plans: one hairline container round the four plans (and, from phase 3, the
+            questions). The prices are the one table in `pricingCopy.ts`. ── */}
+        <div className="mk-pv4plans">
+          <div className="mk-pv4phead">
+            <div>
+              <h2 className="mk-pv4ptitle">{PLANS_TITLE}</h2>
+              <p className="mk-pv4psub">{PLANS_SUB}</p>
+            </div>
+          </div>
+          <ul className="mk-pv4pgrid">
+            {PRO_PLANS.map((p) => {
+              const line = planTileLine(p);
+              return (
+                <li className="mk-pv4ptile" key={p.months} data-m={p.months}>
+                  <p className="mk-pv4pname">{planMonths(p.months)}</p>
+                  <b className="mk-pv4pprice">{planPrice(p)}</b>
+                  <small className="mk-pv4pline">{line.lead}{line.save && <em>{line.save}</em>}</small>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
@@ -190,7 +213,11 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
           {PV4_FAQ.map((qa) => (
             <div className="mk-pv4qa" key={qa.q}>
               <p className="mk-pv4q">{qa.q}</p>
-              <p className="mk-pv4a">{qa.a}</p>
+              <p className="mk-pv4a">
+                {qa.a.map((r, i) => typeof r === "string"
+                  ? <React.Fragment key={i}>{r}</React.Fragment>
+                  : <a key={i} className="mk-pv4suitlink" href="#how-long" onClick={scrollToJourney}>{r.suit}</a>)}
+              </p>
             </div>
           ))}
         </div>

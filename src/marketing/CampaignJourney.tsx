@@ -7,7 +7,7 @@
  * `campaignEstimate.ts`, the words are `pricingCopy.ts`.
  *
  * ⚠️ IT WRITES NOTHING AND SELLS NOTHING. The answers live in this component's state and go nowhere;
- * the plan card names a planned launch pass and offers no way to buy it.
+ * the plan card names a planned launch plan and offers no way to buy it.
  *
  * ⚠️ NOTHING IS PRE-SELECTED EXCEPT THE AGENTS COUNT (40). A pre-ticked answer would be the page
  * stating a fact about the reader they never gave it — and Next stays disabled until each question

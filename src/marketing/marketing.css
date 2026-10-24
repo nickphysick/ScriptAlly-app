@@ -1674,13 +1674,54 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--mk-cream-rgb), .08);
   font-size: .92rem; line-height: 1.45; color: rgba(var(--mk-cream-rgb), .88);
 }
-.mk-pv4 .mk-pv4tlink {
-  display: inline-block; margin-top: 14px; color: var(--mk-cream); font-weight: 600;
-  text-decoration: none; border-bottom: 1px solid rgba(var(--mk-cream-rgb), .45);
+/* ── Pro plans: one hairline container round the four plans and the questions (ref `.plansbox`) ──
+   The plans are one white-rimmed sheet holding four cream tiles; the one that fits the reader's
+   campaign turns navy once the questions have answered — the tiers' own grammar. */
+.mk-pv4 .mk-pv4plans {
+  max-width: 952px; margin: 40px auto 0; padding: 24px 24px 26px;
+  border: 1px solid var(--mk-hair); border-radius: 26px;
 }
-.mk-pv4 .mk-pv4tlink::after { content: " ↓"; }
-.mk-pv4 .mk-pv4tlink:hover { border-bottom-color: var(--mk-cream); }
-.mk-pv4 .mk-pv4tlink:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+.mk-pv4 .mk-pv4phead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 0 0 16px; }
+.mk-scope .mk-pv4ptitle {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.3rem; line-height: 1.3; margin: 0; color: var(--mk-nearblack);
+}
+.mk-pv4 .mk-pv4psub { margin: 4px 0 0; font-size: .98rem; color: rgba(28, 19, 15, .56); }
+.mk-pv4 .mk-pv4pgrid {
+  list-style: none; margin: 0; padding: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+  background: #fff; border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 18px 40px -22px rgba(28, 19, 15, .25);
+}
+.mk-pv4 .mk-pv4ptile {
+  position: relative; display: flex; flex-direction: column; min-height: 132px;
+  background: var(--mk-cream); border-radius: 15px; padding: 20px 20px 18px;
+  transition: background .25s, color .25s;
+}
+.mk-pv4 .mk-pv4pname {
+  margin: 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.1rem; line-height: 1.2; color: #5a4636;
+}
+.mk-pv4 .mk-pv4pprice {
+  display: block; margin-top: 10px; font-family: var(--mk-f-display); font-weight: 400;
+  font-size: 2.3rem; line-height: 1; letter-spacing: -.02em; color: var(--mk-nearblack);
+}
+.mk-pv4 .mk-pv4pline {
+  display: block; margin-top: auto; padding-top: 12px; font-family: var(--mk-f-mono); font-weight: 500;
+  font-size: .6rem; line-height: 1.2; letter-spacing: .14em; text-transform: uppercase; color: #5a4636; opacity: .85;
+}
+.mk-pv4 .mk-pv4pline em { font-style: normal; color: var(--mk-rust); }
+.mk-pv4 .mk-pv4ptile--fit { background: var(--mk-navy); }
+.mk-pv4 .mk-pv4ptile--fit .mk-pv4pname { color: rgba(var(--mk-cream-rgb), .8); }
+.mk-pv4 .mk-pv4ptile--fit .mk-pv4pprice { color: #fff; }
+.mk-pv4 .mk-pv4ptile--fit .mk-pv4pline { color: rgba(var(--mk-cream-rgb), .75); }
+.mk-pv4 .mk-pv4ptile--fit .mk-pv4pline em { color: #f2c3ae; }
+@media (prefers-reduced-motion: reduce) { .mk-pv4 .mk-pv4ptile { transition: none; } }
+@media (max-width: 760px) { .mk-pv4 .mk-pv4pgrid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) {
+  .mk-pv4 .mk-pv4plans { padding: 18px 12px 20px; border-radius: 22px; }
+  .mk-pv4 .mk-pv4phead { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+/* The FAQ's own link to the questions (ref `.faq-suit`). */
+.mk-pv4 .mk-pv4suitlink { color: var(--mk-rust); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--mk-rust); }
 
 /* ── Sections below the tiers ── */
 .mk-pv4 .mk-pv4sect { max-width: 1240px; margin: 88px auto 0; padding: 0 22px; }

@@ -17,7 +17,7 @@
  * rule of thumb, and the source note under the journey states where its figures come from.
  */
 
-import { passFor, passPerMonthLine, ADD_MONTH_PRICE, type Pass } from "./pricingCopy";
+import { planFor, planPerMonthLine, ADD_MONTH_PRICE, type ProPlan } from "./pricingCopy";
 
 export type Stage = "prep" | "ready" | "already";
 export type Kind = "novel" | "nonfic" | "pb";
@@ -42,8 +42,8 @@ export interface CampaignEstimate {
   why: string;
   /** True when the getting-ready note shows. */
   prep: boolean;
-  /** The pass that fits: 1, 3, 6 or 12 months. */
-  fit: Pass["months"];
+  /** The plan that fits: 1, 3, 6 or 12 months. */
+  fit: ProPlan["months"];
   /** The plan card's closing sentence. */
   tail: string;
 }
@@ -86,8 +86,8 @@ export const slowWeeks = (weeks: number, today: Date): { lost: number; seen: str
   return { lost, seen };
 };
 
-/** The pass that fits a campaign of `months`. */
-export const fitFor = (months: number): Pass["months"] =>
+/** The plan that fits a campaign of `months`. */
+export const fitFor = (months: number): ProPlan["months"] =>
   months <= 1.25 ? 1 : months <= 3.5 ? 3 : months <= 7 ? 6 : 12;
 
 export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstimate => {
@@ -124,8 +124,8 @@ export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstim
   return { months, label, why, prep: a.stage === "prep", fit, tail };
 };
 
-/** The plan card's lines for a fitting pass: "Pro, 6 months", "29", "£4.83 a month · save 40%". */
-export const planCard = (fit: Pass["months"]) => {
-  const p = passFor(fit);
-  return { name: `Pro, ${fit} month${fit > 1 ? "s" : ""}`, price: p.price, perMonth: passPerMonthLine(p) };
+/** The plan card's lines for a fitting plan: "Pro, 6 months", "29", "£4.83 a month · save 40%". */
+export const planCard = (fit: ProPlan["months"]) => {
+  const p = planFor(fit);
+  return { name: `Pro, ${fit} month${fit > 1 ? "s" : ""}`, price: p.price, perMonth: planPerMonthLine(p) };
 };

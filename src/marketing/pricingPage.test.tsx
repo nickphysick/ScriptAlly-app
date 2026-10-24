@@ -27,7 +27,7 @@ const textOf = (h: string) =>
 beforeEach(useSignedOutDb);
 afterEach(restoreSmokeUser);
 
-describe("pricing v3: the copy is the ref's, word for word", () => {
+describe("pricing v4: the copy is the ref's, word for word", () => {
   /* Literals on purpose: the constants are what is under test, so the expected side may not read them. */
   const MUST = [
     "Founding writers",
@@ -37,23 +37,27 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
     "For as long as you like",
     "One manuscript", "Up to 20 agents", "Unlimited queries and response tracking", "To-do list",
     "Bring your list across with Smart Import",
-    "A pass sized to your campaign. No subscription.", "Everything in Free, plus:",
+    "A plan sized to your campaign. No subscription.", "Everything in Free, plus:",
     "Unlimited agents", "Manuscript versions, one for each draft", "Submission packages and materials tracking",
     "Smart email drop", "The Scout",
-    "Pick 1, 3, 6 or 12 months. Add a month whenever you need one, pause while you revise, and keep unused months if you sign.",
-    "How long will I need?",
-    "Will a pass renew without asking?",
-    "No. A pass ends on its date. We'll remind you a week before, and you choose whether to extend.",
-    "Which pass should I buy?",
-    "Most first campaigns run around six months, with a few rounds of sending and waiting. If you're not sure, start there and extend if you need to.",
-    "What happens to my months if I sign?",
-    "Record your signing and any whole months left are kept as credit. They start again when you begin querying your next book.",
-    "Why can I only add one manuscript right now?",
-    "Adding a second manuscript is coming soon, on every pass.",
-    "What happens when the hundred founding places are gone?",
-    "Founding places close, and QueryHawk opens to everyone on the plans above. Founding writers stay free for their whole campaign.",
-    "Will anything here charge me today?",
-    "No. Passes aren't on sale yet, and nothing changes on your account until you choose to buy one.",
+    "Pick 1, 3, 6 or 12 months. It never renews automatically, and we'll be in touch with options before it ends.",
+    "Pro plans", "Every Pro feature, for as long as your campaign runs.",
+    "Is it really free for founding writers?",
+    "Yes, completely. Founding writers get the full power of QueryHawk Pro for an entire querying campaign, free of charge. No card, and no catch.",
+    "What happens when my founding campaign ends?",
+    "Just drop us a note to let us know you're done. We'd love to hear how it went.",
+    "What's the difference between Free and Pro?",
+    "Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. Pro adds the tools that make querying smarter, from manuscript versions and submission packages to Smart email drop and The Scout.",
+    "Is Pro a subscription?",
+    "No. You choose a plan that matches how long you expect to be querying, from one month to twelve, and it simply ends on its date. We'll remind you a week before, so you're never charged for something you didn't ask for.",
+    "Which plan should I choose?",
+    "Querying usually takes longer than writers expect, often six months or more once agents start reading full manuscripts. Answer four quick questions under Which plan suits me best? and we'll suggest one for you.",
+    "What if my campaign runs longer than planned?",
+    "Before your current plan ends, we'll get in touch with options to extend it. Whatever you decide, you'll never lose your data.",
+    "What if I sign with an agent before my plan runs out?",
+    "Congratulations! There's nothing you need to do. Your plan will simply run to the end of its months, and it won't renew automatically.",
+    "Can I bring across the spreadsheet I already use?",
+    "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again.",
   ];
   it("renders every line", () => {
     const t = textOf(html());
@@ -66,7 +70,7 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
     expect(PV4_LAUNCH_LINE).toBe(MUST[3]);
     expect([...PV4_FREE.list]).toEqual(MUST.slice(5, 10));
     expect([...PV4_PRO.list]).toEqual(MUST.slice(12, 17));
-    expect(PV4_FAQ).toHaveLength(6);
+    expect(PV4_FAQ).toHaveLength(8);
   });
 
   it("never names Wall of no or Corkboard, never says AI, never limits Smart Import to once", () => {
