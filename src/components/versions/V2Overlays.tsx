@@ -443,7 +443,7 @@ export const ArchiveConfirm: React.FC<{ m: VersionsModel; v: V2Version; packageN
             <p>Archiving takes it off your list and out of the comparisons, so it stops competing with the versions you’re still sending.</p>
             <ul>
               <li><b>Its {q} {q === 1 ? "query keeps" : "queries keep"} their version.</b> Nothing about them changes.</li>
-              <li><b>It still counts in your totals</b>, like the donut and “Sent with queries so far”.</li>
+              <li><b>It still counts in your totals.</b></li>
               <li><b>You can bring it back</b> any time from Archived, at the foot of your list.</li>
             </ul>
           </>

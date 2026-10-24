@@ -86,3 +86,39 @@ body > .vv2[data-vv2="layer"] {
   .vv2 .wt-art { height:150px }
   .vv2 .wt-pg { grid-column:1/-1 }
 }
+
+/* ══ v2.2 A — the title card (design-refs/versions-v2-2 `.hb`, S31), ported from the mock's source text ══
+   (the mock's own `.db-new,.db-ghost{display:none}` is not ported: the app's list heading never had either) */
+.vv2 .hb { display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:center;gap:32px;margin:24px 24px 0;padding:30px 36px;border-radius:18px;background:#fbf8f4;box-shadow:0 1px 2px rgba(28,19,15,.05),0 18px 34px -28px rgba(28,19,15,.4),inset 0 0 0 1px rgba(28,19,15,.1);overflow:hidden }
+.vv2 .hb h1 { display:flex;align-items:center;gap:12px;margin:0;font:400 34px/1.1 var(--machine);color:#1c130f;letter-spacing:-.01em }
+.vv2 .hb-tag { display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#f6e2d8;font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#a2452a }
+.vv2 .hb-tx>p { max-width:640px;margin:12px 0 0;font:400 16.5px/1.55 var(--serif);color:rgba(28,19,15,.78) }
+.vv2 .hb-tx>p b { font-weight:600;color:#1c130f }
+.vv2 .hb-b { display:flex;gap:10px;margin-top:20px }
+.vv2 .hb-b button { height:42px;padding:0 20px;border-radius:10px;font:400 15px var(--machine);cursor:pointer }
+.vv2 .hb-p { border:0;background:#2a3a52;color:#f4eee5;box-shadow:0 6px 14px -8px rgba(42,58,82,.6) }
+.vv2 .hb-p:hover { background:#334763 }
+.vv2 .hb-s { border:1px solid rgba(28,19,15,.22);background:#fff;color:#1c130f }
+.vv2 .hb-s:hover { border-color:rgba(28,19,15,.45) }
+.vv2 .hb-b button:focus-visible { outline:2px solid #c9765d;outline-offset:2px }
+.vv2 .hb-art { position:relative;height:150px;display:grid;place-items:center }
+.vv2 .hb-art img { height:180px;width:auto;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(28,19,15,.18)) }
+.vv2 #vWarn, .vv2 .wb { margin-top:20px }
+@container sheet (max-width:1200px) {
+  .vv2 .hb { grid-template-columns:minmax(0,1fr) 210px;padding:26px 28px }
+  .vv2 .hb-art img { height:150px }
+}
+/* brand.tsx forces h1/h2/h3 to its serif with !important; the claw-back, as for the warming title */
+.vv2.vv2 .hb h1 { font-family: var(--machine) !important; }
+
+/* ══ v2.2 B — the list section in the tinted panel (the mock's `body[data-ct=d] #secTiles`, S32). The mock sets
+   data-ct=d on load and draws no other option, so the attribute is dropped and the rules apply always. Its
+   `margin:28px …` keeps the mock's cascade: `#secTiles.cx-sec.first { margin-top:56px!important }` wins the top in the
+   mock and here alike (measured on the mock: 56). ══ */
+.vv2 #secTiles { margin:28px 24px 0;padding:24px 24px 26px!important;border-radius:22px }
+.vv2 #secTiles>.db-sh { margin-top:0 }
+.vv2 #secTiles { background:#e8ecf2;box-shadow:inset 0 0 0 1px rgba(42,58,82,.10) }
+.vv2 .db-sep span { color:rgba(42,58,82,.6) }
+@container sheet (max-width:1200px) {
+  .vv2 #secTiles { margin:24px 16px 0;padding:18px 16px 20px!important }
+}

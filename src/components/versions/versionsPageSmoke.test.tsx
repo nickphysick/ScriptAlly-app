@@ -42,16 +42,21 @@ const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").repl
 afterEach(() => { vi.restoreAllMocks(); });
 
 describe("/manuscripts/versions renders", () => {
-  it("populated: the header and donut, the banner, the list with the in-use card first, the tree and the tracking band", () => {
+  it("populated: the title card (no header, no donut), the banner, the list with the in-use card first, the tree and the tracking band", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([O, V1, V2], { inUseBookVersionId: "bv-2" })],
       queries: [Q("q1", QueryStatus.QUERIED, { bookVersionId: "bv-1" }), Q("q2", QueryStatus.PARTIAL_REQUESTED, { bookVersionId: "bv-2" }), Q("q3", QueryStatus.QUERIED)] };
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="filled"');
-    expect(t).toContain("— Versions —");
-    expect(t).toContain("3 versions on file");
-    expect(t).toContain("of Harbour of Glass");
-    expect(t).toContain("Sent with queries so far");
+    /* v2.2 A — the title card replaces the living header and its donut */
+    expect(h).toContain('data-vv2="title"');
+    expect(t).toContain("Save each version of Harbour of Glass as it changes.");
+    expect(t).toContain("+ New version");
+    expect(t).toContain("How it works");
+    expect(t).not.toContain("— Versions —");
+    expect(t).not.toContain("versions on file");
+    expect(t).not.toContain("Sent with queries so far");
+    expect(h).not.toContain('data-vv2="donut"');
     expect(t).toContain("1 query is out with agents without a version assigned.");
     expect(t).toContain("3 versions saved");
     const rows = h.match(/data-vv2="row" data-id="([^"]+)"/g) ?? [];
@@ -63,7 +68,7 @@ describe("/manuscripts/versions renders", () => {
     expect(t).not.toContain("How each version is doing");
     expect(h).not.toContain('data-vv2="compare"');
   });
-  it("two versions with 5 sent each: the full Tracking & performance section and Compare, no warming-up panel", () => {
+  it("two versions with 5 sent each: the full Tracking & performance section, no warming-up panel, and no Compare (v2.2 A1)", () => {
     const five = (v: string, p: string) => Array.from({ length: 5 }, (_, i) => Q(`${p}${i}`, QueryStatus.QUERIED, { bookVersionId: v }));
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([O, V1, V2], { inUseBookVersionId: "bv-2" })], queries: [...five("bv-1", "a"), ...five("bv-2", "b")] };
     const h = render();
@@ -71,13 +76,13 @@ describe("/manuscripts/versions renders", () => {
     expect(t).toContain("How each version is doing");
     expect(t).toContain("Which version is out in front?");
     expect(t).not.toContain("Warming up");
-    expect(h).toContain('data-vv2="compare"');
+    expect(h).not.toContain('data-vv2="compare"');
   });
   it("before any version, with queries out: the zero ring, the earlier-queries note and the steps", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [Q("q1", QueryStatus.QUERIED), Q("q2", QueryStatus.REJECTED)] };
     const h = render();
     expect(h).toContain('data-state="pre"');
-    expect(text(h)).toContain("No versions yet");
+    expect(text(h)).toContain("+ Save your first version");
     expect(text(h)).toContain("You’ve already sent 2 queries.");
     expect(text(h)).toContain("Start tracking versions");
   });
@@ -85,7 +90,7 @@ describe("/manuscripts/versions renders", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [] };
     const h = render();
     expect(h).toContain('data-state="fresh"');
-    expect(text(h)).toContain("Versions saved");
+    expect(text(h)).toContain("+ Save your first version");
     expect(h).not.toContain('data-vv2="pre-note"');
   });
   it("locked: the lock card over an inert page", () => {

@@ -17,8 +17,8 @@ import {
   type VersionFields,
 } from "./bookVersions";
 import {
-  MIN_SENT_FOR_RATE, carouselOrder, donut, inUseId, laterBy, leadingId, leagueOrder, pickerDefault, rated, resolveQueryVersion,
-  savedBy, treeModel, versionAtLogging, versionColour, versionsModel, VERSION_NOT_SURE,
+  MIN_SENT_FOR_RATE, carouselOrder, inUseId, laterBy, leadingId, leagueOrder, pickerDefault, rated, resolveQueryVersion,
+  savedBy, treeModel, versionAtLogging, versionsModel, VERSION_NOT_SURE,
 } from "./versionsV2";
 
 const TODAY = "2026-10-23";
@@ -277,24 +277,6 @@ describe("R11 — a later-saved version may be assigned, with a soft warning", (
     expect(pickerDefault(m.unrecorded[0], m)).toBe("o");
     const m2 = versionsModel(two, [q("r", { dateSent: "2026-10-01T09:00:00Z" })], [], [], new Map([row("r")]));
     expect(pickerDefault(m2.unrecorded[0], m2)).toBeNull();
-  });
-});
-
-describe("R12 — the donut: Original navy, later versions lighter by number, Not recorded striped", () => {
-  it("interpolates exactly as the ref's sh()", () => {
-    expect(versionColour(0, 4)).toBe("rgb(42,58,82)");
-    expect(versionColour(4, 4)).toBe("rgb(197,208,224)");
-  });
-  it("shows up to four versions, the in-use one always among them, then the rest, then Not recorded", () => {
-    let ms = seeded();
-    for (let i = 4; i <= 7; i++) ms = apply(ms, saveNewVersion(ms, { name: `V${i}`, changes: ["c"], parentId: "v0" }, TODAY, { version: `v${i}` }));
-    ms = apply(ms, setInUse(ms, "v7"));
-    const qs: Query[] = []; const rows: [string, AnalyticsRow][] = [];
-    for (const [ver, n] of [["v0", 6], ["v1", 5], ["v2", 4], ["v3", 3], ["v7", 1]] as const) for (let i = 0; i < n; i++) { qs.push(q(`${ver}-${i}`, { bookVersionId: ver, dateSent: "2026-10-20T09:00:00Z" })); rows.push(row(`${ver}-${i}`)); }
-    qs.push(q("none", { dateSent: "2026-10-20T09:00:00Z" })); rows.push(row("none"));
-    const d = donut(versionsModel(ms, qs, [], [], new Map(rows)));
-    expect(d.map((s) => s.name)).toEqual(["Original", "Fast-paced opening", "Tighter first chapter", "V7", "1 other version", "Not recorded"]);
-    expect(d.find((s) => s.inUse)?.versionId).toBe("v7");
   });
 });
 
