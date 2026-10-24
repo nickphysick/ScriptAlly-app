@@ -84,13 +84,13 @@ async function pickGroup(page: Page, g: string) {
 }
 
 /** the card's four counts, the hero's total, and which row is pressed */
+/* v149 (QC149 L13) — RE-POINTED: the breakdown card is gone; the four sets are the view chips above the list, and the total is the All chip's. The law is the same. */
 const card = (page: Page) => page.evaluate(() => {
-  const c = [...document.querySelectorAll<HTMLElement>("[data-qc141='card']")].find((e) => e.getBoundingClientRect().height > 0);
-  const t = [...document.querySelectorAll<HTMLElement>("[data-qc138='title-n']")].find((e) => e.getBoundingClientRect().height > 0);
-  if (!c) return null;
-  const n: Record<string, number> = {}; const on: string[] = [];
-  for (const r of c.querySelectorAll<HTMLElement>("[data-qc141='card-row']")) { n[r.dataset.k!] = Number(r.dataset.n); if (r.getAttribute("aria-pressed") === "true") on.push(r.dataset.k!); }
-  return { n, on, total: t ? Number(t.textContent) : NaN };
+  const chips = [...document.querySelectorAll<HTMLElement>("[data-qc149='view']")].filter((e) => e.getBoundingClientRect().height > 0);
+  if (!chips.length) return null;
+  const n: Record<string, number> = {}; const on: string[] = []; let total = NaN;
+  for (const r of chips) { if (r.dataset.k === "all") { total = Number(r.dataset.n); continue; } n[r.dataset.k!] = Number(r.dataset.n); if (r.getAttribute("aria-pressed") === "true") on.push(r.dataset.k!); }
+  return { n, on, total };
 });
 const band = (page: Page) => page.evaluate(() => {
   const b = [...document.querySelectorAll<HTMLElement>("[data-qc140='band']")].find((e) => e.getBoundingClientRect().height > 0);
@@ -152,7 +152,7 @@ test.describe("Query Centre v141", () => {
       L.check("L2", `${vp.width} population`, all.length > 0 && !!c, `${all.length} rows`);
       const seen = new Map<string, string[]>();
       for (const k of KEYS) {
-        await press(page, `[data-qc141='card-row'][data-k='${k}']`);
+        await press(page, `[data-qc149='view'][data-k='${k}']`);
         await page.waitForTimeout(700);
         const shown = await rows(page);
         for (const r of shown) seen.set(r.id, [...(seen.get(r.id) ?? []), k]);
@@ -160,7 +160,7 @@ test.describe("Query Centre v141", () => {
         L.check("L2", `${vp.width} ${k}: the filter shows exactly the rows' own set`, JSON.stringify(shown.map((r) => r.id).sort()) === JSON.stringify(want),
           `${shown.length} shown vs ${want.length} from the rows`);
         L.check("L2", `${vp.width} ${k}: its count is the card's`, c?.n[k] === want.length, `${c?.n[k]} vs ${want.length}`);
-        await press(page, `[data-qc141='card-row'][data-k='${k}']`);
+        await press(page, `[data-qc149='view'][data-k='${k}']`);
         await page.waitForTimeout(500);
       }
       const multi = [...seen].filter(([, ks]) => ks.length !== 1);
@@ -179,7 +179,7 @@ test.describe("Query Centre v141", () => {
       const all = await rows(page);
       const want = all.filter((r) => setOf(r, now) === "quiet").map((r) => r.id).sort();
       L.check("L3", `${vp.width} population`, want.length > 0, `${want.length} gone quiet`);
-      await press(page, "[data-qc141='card-row'][data-k='quiet']");
+      await press(page, "[data-qc149='view'][data-k='quiet']");
       await page.waitForTimeout(800);
       const shown = (await rows(page)).map((r) => r.id).sort();
       L.check("L3", `${vp.width} (a) the list is exactly that set`, JSON.stringify(shown) === JSON.stringify(want), `${shown.length} vs ${want.length}`);
@@ -209,7 +209,7 @@ test.describe("Query Centre v141", () => {
       await open(page, vp);
       const c = await card(page);
       L.check("L4", `${vp.width} population`, (c?.n.quiet ?? 0) > 0 && (c?.n.quiet ?? 0) < (c?.total ?? 0), JSON.stringify(c));
-      await press(page, "[data-qc141='card-row'][data-k='quiet']");
+      await press(page, "[data-qc149='view'][data-k='quiet']");
       await page.waitForTimeout(700);
       await press(page, `${G} [data-qc140='filters']`);
       await page.waitForTimeout(700);
@@ -285,7 +285,9 @@ test.describe("Query Centre v141", () => {
     L.done(10);
   });
 
-  test("L9 · header: the card's width and right inset are the H6 tokens; it is no taller than the stack", async ({ page }) => {
+  /* RETIRED (v149, QC149 L13): the breakdown card this measured is gone — the Query Centre's header is the shared
+     PageHeaderCard, held to the Versions card by QC149-L1 and to the view row's edges by QC149-L2. */
+  test.skip("L9 · header: the card's width and right inset are the H6 tokens; it is no taller than the stack", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("L9");
     for (const vp of SIZES) {

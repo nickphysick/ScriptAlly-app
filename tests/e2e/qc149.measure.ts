@@ -170,8 +170,14 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       await page.waitForTimeout(1200);
       L.check("full screen: no Cards/List switch", !(await box(page, ".cl20-vs, .cl20-vsi, [data-qc142='view-tb']")), "switch in full screen");
       L.check("full screen: Exit full screen", !!(await box(page, "[data-qc142='full-tb']")), "no exit");
+      /* the full-screen pinned band (v141 b2) is untouched: the header card and the banner go, as the old header did, and
+         the band sits at the sheet's top (QC140-C1 found them still drawn above it) */
+      await mutateCss(page, "L5fs", ".qcv-group[data-v138][data-full] > .qc149-hd { display: block !important; }");
+      const fs = { card: await box(page, "[data-qc149='card']"), banner: await box(page, "[data-qc149='banner']"), band: await box(page, "[data-qc140='band']"), win: await box(page, ".ws-window") };
+      L.check("full screen: no header card or banner", !fs.card && !fs.banner, `card ${!!fs.card} · banner ${!!fs.banner}`);
+      L.check("full screen: the band is at the sheet's top", !!fs.band && !!fs.win && near(fs.band.t, fs.win.t, 1.5), `${fs.band?.t} vs ${fs.win?.t}`);
       await tap(page, "[data-qc142='full-tb']");
-      L.done(11);
+      L.done(13);
     });
 
     test("L6 · the hover timeline: one-line summary, nothing past the list card's edges", async ({ page }) => {

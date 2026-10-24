@@ -110,7 +110,9 @@ test.describe("Query Centre v140", () => {
       });
       /* v142 §A — re-pointed: no Pin on the page; unpinned the toolbar has four controls, in full screen the fifth is
          "Exit full screen" (the toolbar's Full screen) */
-      L.check("A1", `${w} ${pinned ? "five" : "three"} controls`, r.n === (pinned ? 5 : 3), `${r.n}`);
+      /* v149 (QC149 L13) — RE-POINTED: unpinned the bar gains Full screen (B1), so it holds four controls — Filters,
+         Group by, Sort and Full screen; the heard-back figure is a reading, not a control. Pinned is unchanged. */
+      L.check("A1", `${w} ${pinned ? "five" : "four"} controls`, r.n === (pinned ? 5 : 4), `${r.n}`);
       L.check("A1", `${w} one line (every top within 2px)`, Math.max(...r.tops) - Math.min(...r.tops) <= 2, r.tops.map((x) => x.toFixed(1)).join(","));
       /* v142 §B — re-pointed: unpinned the toolbar is the Contact list's, 52 tall with 34px controls (was 64 and 40) */
       L.check("A1", `${w} height`, near(r.h, pinned ? 72 : 52, 0.6), `${r.h}`);
@@ -146,7 +148,8 @@ test.describe("Query Centre v140", () => {
         const ring = (s: string) => { const e = g.querySelector<HTMLElement>(s); if (!e) return "none"; const c = getComputedStyle(e); return `${c.boxShadow}|${c.borderTopWidth}|${c.outlineStyle}`; };
         return { corners: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomLeftRadius, cs.borderBottomRightRadius], pin: getComputedStyle(pin).backgroundColor, pinText: pin.textContent?.trim(), rings: [ring("[data-qc140='find']"), ring("[data-qc140='group']"), ring("[data-qc140='filters']")] };
       });
-      L.check("B1", `${vp.width} card corners 18`, r.corners.every((c) => c === "18px"), r.corners.join(","));
+      /* v149 (QC149 L13) — RE-POINTED: the list's frame takes radius 20 (pack B2; QC149-L5's frame reading) */
+      L.check("B1", `${vp.width} card corners 20`, r.corners.every((c) => c === "20px"), r.corners.join(","));
       /* v142 §A — RETIRED: "Pin cream" and "Pin reads 'Pin list'". There is no Pin on the page; QC142-L3 asserts its absence. */
       void r.pin; void r.pinText;
       /* cards-sort-search v1 §C — re-pointed: Find is the recessed well now, whose inset drop and 14% cream ring ARE its look;
@@ -323,16 +326,25 @@ test.describe("Query Centre v140", () => {
         const sheet = g.querySelector<HTMLElement>(".qc138-sheet")!.getBoundingClientRect();
         const dials = [...g.querySelectorAll<HTMLElement>("[data-qcv='row-dial']")].filter((d) => d.getBoundingClientRect().width > 0).map((d) => d.getBoundingClientRect().right);
         const names = [...g.querySelectorAll<HTMLElement>("[data-qcv='row-name']")].slice(0, 30).map((n) => ({ over: n.scrollWidth > n.clientWidth + 1, title: n.getAttribute("title"), text: n.textContent }));
-        return { widths: hs.map((h) => h.width), gaps: hs.slice(1).map((h, i) => h.left - hs[i].right), sheetR: sheet.right, dialR: dials.length ? Math.max(...dials) : null, names };
+        const spill: string[] = [];
+        for (const row of [...g.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].filter((x) => x.getBoundingClientRect().height > 0))
+          for (const [i, c] of [...row.children].entries()) {
+            const cr = (c as HTMLElement).getBoundingClientRect();
+            const out = [...(c as HTMLElement).querySelectorAll<HTMLElement>("*")].find((d) => !d.closest(".qc138-tray") && d.getBoundingClientRect().width > 0 && (d.getBoundingClientRect().right > cr.right + 1 || d.getBoundingClientRect().left < cr.left - 1));
+            if (out) spill.push(`${row.dataset.qid}#${i}`);
+          }
+        return { spill, widths: hs.map((h) => h.width), gaps: hs.slice(1).map((h, i) => h.left - hs[i].right), sheetR: sheet.right, dialR: dials.length ? Math.max(...dials) : null, names };
       });
       L.check("E1", `${w} six columns`, r.widths.length === 6, `${r.widths.length}`);
-      L.check("E1", `${w} Agent ≤ 264`, r.widths[0] <= 264.5, `${r.widths[0]}`);
-      L.check("E1", `${w} every column ≥ its minimum`, r.widths.every((x, i) => x >= MIN[i] - 0.5), r.widths.map((x) => x.toFixed(1)).join(","));
+      /* v149 (QC149 L13) — RE-POINTED: the columns are flexible (pack B3), so v140's fixed bounds — Agent ≤ 264 and a
+         minimum per column — no longer describe the design. What they protected is that nothing spills out of its cell:
+         that is asserted instead, every row, the hover tray excepted (it overlays its neighbour by design, on the base too). */
+      L.check("E1", `${w} no cell's content spills out of its column (the tray excepted)`, r.spill.length === 0, r.spill.slice(0, 3).join(" ; "));
       if (vp.width === 1512) L.check("E1", `${w} gaps between First queried, Where it stands and What you sent ≥ 32`, r.gaps[1] >= 31.5 && r.gaps[2] >= 31.5, r.gaps.map((x) => x.toFixed(1)).join(","));
       if (vp.width === 1280) L.check("E1", `${w} the Due dial ends inside the card`, r.dialR != null && r.dialR <= r.sheetR + 0.5, `${r.dialR} vs ${r.sheetR}`);
       L.check("E1", `${w} a truncated agent name carries its full name in title`, r.names.every((n) => !n.over || n.title === n.text?.trim()), JSON.stringify(r.names.filter((n) => n.over && n.title !== n.text?.trim()).slice(0, 2)));
     }
-    L.done(20);
+    L.done(16);
   });
 
   test("F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame", async ({ page }) => {

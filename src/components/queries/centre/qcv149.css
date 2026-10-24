@@ -136,3 +136,10 @@
   .qcv-group[data-v138] .qc138-sheet .qc1421-sort .sc-sby { display: none; }
   .qcv-group[data-v138] .qc138-sheet .qc149-fs { width: 34px; padding: 0; justify-content: center; }
 }
+
+/* v149 — FULL SCREEN HIDES THE HEADER, AS IT HID THE OLD ONE. The full-screen pinned band (v141 b2) sits at the sheet's
+   top; `.qc138-hd` was hidden by qcvList138.css and the header card and banner replace it, so they take the same rule
+   (QC140-C1 measured the band 366px down without it). */
+@media (min-width: 768px) {
+  .qcv-group[data-v138][data-full] > .qc149-hd { display: none; }
+}
