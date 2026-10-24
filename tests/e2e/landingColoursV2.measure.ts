@@ -58,6 +58,8 @@ const MUTATIONS: Record<string, string> = {
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
   H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
+  /* pricing v4: the founding box's counter line turned cream on its light ground — F2's /pricing block alone. */
+  F2pricing: ".mk-fbcount .mk-fmmeta{color:#f4eee5!important}",
 };
 
 async function mutate(page: Page) {
@@ -433,9 +435,11 @@ test.describe("LC2", () => {
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
       expect(Math.abs(s!.footTop - s!.docBottom), "the footer starts where the sheet ends").toBeLessThanOrEqual(0.5);
       const L = s!.left, R = s!.right - 1;
-      /* ⚠️ /pricing OPENS ON A NAVY BAND INSET INTO THE SHEET (pricing v3, 21 Oct; ref pricing-page-v1):
-         18px of oat round it, 10px below 640. At 390 the "20px in" point is inside the band, so on that
-         page the sheet's own ground is read in its side gutter, 5px in and 60px down — past the arc. */
+      /* ⚠️ /pricing OPENS ON THE FOUNDING BOX, LAID ACROSS THE SHEET'S TOP EDGE (pricing v4, 24 Oct; ref
+         pricing-page-v2): the sheet starts lower on that page and the box rises above it, inset 18px
+         each side (10px below 640). At 390 the "20px in" point is inside the box, so on that page the
+         sheet's own ground is read in its side gutter, 5px in and 60px down — past the arc. The four
+         corners themselves are still the shell's and still ink-against-oat, which this lock reads. */
       const inset: [number, number][] = route === "/pricing" ? [[L + 5, s!.top + 60], [R - 5, s!.top + 60]] : [[L + 20, s!.top + 20], [R - 20, s!.top + 20]];
       const topPx = await pixels(page, [[L + 2, s!.top + 2], [R - 2, s!.top + 2], ...inset]);
       /* Bring the sheet's bottom edge into the middle of the viewport, then read its corners. */
@@ -553,8 +557,20 @@ test.describe("LC2", () => {
       expect(btn.length).toBe(1);
       expect(btn[0].ratio, "the hero's submit: its label on its own fill").toBeGreaterThanOrEqual(4.5);
       expect(near(btn[0].ground, [42, 58, 82]), "on a light ground the submit stays the navy button").toBe(true);
-      /* ⚠️ RETIRED HERE (pricing v3, 21 Oct): /pricing's tally sits on the founding band's NAVY now,
-         so it is no longer a light mount. Its contrast on navy is asserted in pricingV3.measure.ts. */
+    }
+    /* ⚠️ RE-ADDED (pricing v4, 24 Oct): /pricing's counter and form sit on the founding box's LIGHT
+       ground again (pricing v3 had put them on navy and taken them out of this lock). */
+    for (const vp of VPS) {
+      await open(page, "/pricing", vp, "count");
+      const B = ".mk-fbtext ";
+      await light("pricing box", B + "input[type=email]");
+      await light("pricing box", B + "input[type=email]", 3, "::placeholder");
+      await light("pricing box", B + ".mk-betanote, " + B + ".mk-betanote .mk-doclink");
+      await light("pricing box", B + ".mk-fmmeta");
+      const btn = await inks(page, B + "button[type=submit]");
+      expect(btn.length).toBe(1);
+      expect(btn[0].ratio, "the box's submit: its label on its own fill").toBeGreaterThanOrEqual(4.5);
+      expect(near(btn[0].ground, [42, 58, 82]), "on a light ground the submit stays the navy button").toBe(true);
     }
     expect(n).toBeGreaterThan(20);
   });

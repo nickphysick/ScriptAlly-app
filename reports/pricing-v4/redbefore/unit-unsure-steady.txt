@@ -1,0 +1,1797 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-pricing4
+
+ ✓ src/marketing/pricingCounter.test.tsx (1 test) 8ms
+ ✓ src/marketing/pricingPage.test.tsx (12 tests) 32ms
+ ❯ src/marketing/campaignEstimate.test.ts (818 tests | 242 failed) 71ms
+   ✓ estimateCampaign agrees with the ref, case for case > the ref file is the full sweep (not vacuous) 1ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · unsure 3ms
+     → expected 'About six months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · unsure 0ms
+     → expected 'About seven months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · unsure 1ms
+     → expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · unsure 0ms
+     → expected 'About seven months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · brisk 2ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · unsure 0ms
+     → expected 'About eight months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · unsure 0ms
+     → expected 'About six months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · unsure 0ms
+     → expected 'About four months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · unsure 0ms
+     → expected 'About six months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · unsure 0ms
+     → expected 'About seven months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · unsure 0ms
+     → expected 'About eight months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · unsure 0ms
+     → expected 'About six months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · unsure 0ms
+     → expected 'About six months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · unsure 0ms
+     → expected 'About three months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · unsure 0ms
+     → expected 'About six months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · unsure 0ms
+     → expected 'About seven months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · brisk 1ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · unsure 0ms
+     → expected 'About three months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · unsure 0ms
+     → expected 'About six months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · unsure 0ms
+     → expected 'About seven months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · unsure 0ms
+     → expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · unsure 0ms
+     → expected 'About four months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · unsure 0ms
+     → expected 'About six months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · unsure 0ms
+     → expected 'About seven months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · unsure 0ms
+     → expected 'About eight months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · unsure 0ms
+     → expected 'About six months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · unsure 0ms
+     → expected 'About six months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · unsure 0ms
+     → expected 'About three months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · unsure 0ms
+     → expected 'About six months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · unsure 0ms
+     → expected 'About seven months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · unsure 0ms
+     → expected 'About three months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · unsure 0ms
+     → expected 'About six months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · unsure 0ms
+     → expected 'About seven months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · unsure 0ms
+     → expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · unsure 0ms
+     → expected 'About seven months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · unsure 0ms
+     → expected 'About nine months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · unsure 0ms
+     → expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · steady 1ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · unsure 0ms
+     → expected 'About nine months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · unsure 0ms
+     → expected 'About eight months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · unsure 0ms
+     → expected 'About eight months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · unsure 0ms
+     → expected 'About ten months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · unsure 0ms
+     → expected 'About ten months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · unsure 0ms
+     → expected 'About six months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · unsure 0ms
+     → expected 'About six months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · steady 1ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · unsure 0ms
+     → expected 'About six months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · unsure 0ms
+     → expected 'About seven months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · unsure 0ms
+     → expected 'About six months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · unsure 0ms
+     → expected 'About three months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · unsure 0ms
+     → expected 'About seven months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · unsure 0ms
+     → expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · unsure 0ms
+     → expected 'About five months' to be 'About six months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · unsure 0ms
+     → expected 'About nine months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · unsure 0ms
+     → expected 'About eleven months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · unsure 0ms
+     → expected 'About seven months' to be 'About nine months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · unsure 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · unsure 0ms
+     → expected 'About six months' to be 'About seven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · unsure 0ms
+     → expected 'About nine months' to be 'About thirteen months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · unsure 0ms
+     → expected 'About twelve months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · unsure 0ms
+     → expected 'About eight months' to be 'About ten months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · unsure 0ms
+     → expected 'About six months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · unsure 0ms
+     → expected 'About seven months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · unsure 0ms
+     → expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · unsure 0ms
+     → expected 'About six months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · unsure 1ms
+     → expected 'About three months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · unsure 0ms
+     → expected 'About four months' to be 'About five months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · unsure 0ms
+     → expected 'About seven months' to be 'About eleven months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · unsure 0ms
+     → expected 'About eight months' to be 'About twelve months' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · unsure 0ms
+     → expected 'About ten months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · unsure 0ms
+     → expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · brisk 0ms
+   × estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · unsure 0ms
+     → expected 'About five months' to be 'About eight months' // Object.is equality
+   × the pack's named cases, today fixed at 24 Oct 2026 > (a) Getting ready, a novel of 80–110k, I don't know, Not sure yet 0ms
+     → expected 'About nine months' to be 'About twelve months' // Object.is equality
+   ✓ the pack's named cases, today fixed at 24 Oct 2026 > (b) Ready to start, non-fiction, 40 agents, bigger batches 0ms
+   ✓ the parts > the fit thresholds are 1.25, 3.5 and 7 months — including the one-month plan the sweep never reaches 0ms
+   ✓ the parts > each slow season is counted once, in the order the campaign meets it 0ms
+   ✓ the parts > the agents stepper runs 5 to 150 0ms
+   ✓ the parts > I don't know sets 40; a stepper press clears it; pressing it again clears it too 0ms
+   × the parts > Not sure yet is estimated at the steady pace, said to be a guess 0ms
+     → expected 'About five months' to be 'About seven months' // Object.is equality
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  242 failed | 589 passed (831)
+   Start at  14:28:20
+   Duration  332ms (transform 130ms, setup 0ms, collect 333ms, tests 111ms, environment 0ms, prepare 120ms)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 242 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · unsure
+AssertionError: expected 'About six months' to be 'About eight months' // Object.is equality
+
+Expected: [32m"About [7meight[27m months"[39m
+Received: [31m"About [7msix[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · unsure
+AssertionError: expected 'About seven months' to be 'About eight months' // Object.is equality
+
+Expected: [32m"About [7meight[27m months"[39m
+Received: [31m"About [7mseven[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · unsure
+AssertionError: expected 'About eight months' to be 'About eleven months' // Object.is equality
+
+Expected: [32m"About e[7mleven[27m months"[39m
+Received: [31m"About e[7might[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · unsure
+AssertionError: expected 'About nine months' to be 'About a year or more' // Object.is equality
+
+Expected: [32m"About [7ma year or more[27m"[39m
+Received: [31m"About [7mnine months[27m"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · unsure
+AssertionError: expected 'About eleven months' to be 'About a year or more' // Object.is equality
+
+Expected: [32m"About [7ma year or more[27m"[39m
+Received: [31m"About [7meleven months[27m"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · unsure
+AssertionError: expected 'About thirteen months' to be 'About a year or more' // Object.is equality
+
+Expected: [32m"About [7ma year or more[27m"[39m
+Received: [31m"About [7mthirteen months[27m"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · unsure
+AssertionError: expected 'Going by a typical campaign, you\'d s…' to be 'Going by a typical campaign, you\'d s…' // Object.is equality
+
+Expected: [32m"Going by a typical campaign, you'd send 150 queries in [7mfifte[27men rounds, about [7msix weeks[27m apart. Replies take up to three months, and agents who like your opening usually take two to three months to read the manuscript. We've added about two months to get ready. We've allowed for Christmas and August, when agents slow down."[39m
+Received: [31m"Going by a typical campaign, you'd send 150 queries in [7mt[27men rounds, about [7ma month[27m apart. Replies take up to three months, and agents who like your opening usually take two to three months to read the manuscript. We've added about two months to get ready. We've allowed for Christmas and August, when agents slow down."[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:44:21
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+     44|       expect(e.why).toBe(c.why);
+       |                     ^
+     45|       expect(e.prep).toBe(c.prep);
+     46|       expect(e.fit).toBe(c.fit);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · unsure
+AssertionError: expected 'About nine months' to be 'About twelve months' // Object.is equality
+
+Expected: [32m"About [7mtwelv[27me months"[39m
+Received: [31m"About [7mnin[27me months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · unsure
+AssertionError: expected 'About ten months' to be 'About a year or more' // Object.is equality
+
+Expected: [32m"About [7ma year or more[27m"[39m
+Received: [31m"About [7mten months[27m"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · unsure
+AssertionError: expected 'About seven months' to be 'About nine months' // Object.is equality
+
+Expected: [32m"About [7mnine[27m months"[39m
+Received: [31m"About [7mseven[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · unsure
+AssertionError: expected 'About eight months' to be 'About nine months' // Object.is equality
+
+Expected: [32m"About [7mnine[27m months"[39m
+Received: [31m"About [7meight[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · unsure
+AssertionError: expected 'About twelve months' to be 'About a year or more' // Object.is equality
+
+Expected: [32m"About [7ma year or more[27m"[39m
+Received: [31m"About [7mtwelve months[27m"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · unsure
+AssertionError: expected 'About five months' to be 'About seven months' // Object.is equality
+
+Expected: [32m"About [7mse[27mve[7mn[27m months"[39m
+Received: [31m"About [7mfi[27mve months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · unsure
+AssertionError: expected 'About six months' to be 'About seven months' // Object.is equality
+
+Expected: [32m"About s[7meven[27m months"[39m
+Received: [31m"About s[7mix[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · unsure
+AssertionError: expected 'About eight months' to be 'About thirteen months' // Object.is equality
+
+Expected: [32m"About [7mthirteen[27m months"[39m
+Received: [31m"About [7meight[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · unsure
+AssertionError: expected 'About five months' to be 'About six months' // Object.is equality
+
+Expected: [32m"About [7msix[27m months"[39m
+Received: [31m"About [7mfive[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · unsure
+AssertionError: expected 'About four months' to be 'About six months' // Object.is equality
+
+Expected: [32m"About [7msix[27m months"[39m
+Received: [31m"About [7mfour[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · unsure
+AssertionError: expected 'About six months' to be 'About nine months' // Object.is equality
+
+Expected: [32m"About [7mnine[27m months"[39m
+Received: [31m"About [7msix[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · unsure
+AssertionError: expected 'About seven months' to be 'About twelve months' // Object.is equality
+
+Expected: [32m"About [7mtwel[27mve months"[39m
+Received: [31m"About [7mse[27mve[7mn[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · unsure
+AssertionError: expected 'About eight months' to be 'About a year or more' // Object.is equality
+
+Expected: [32m"About [7ma year or more[27m"[39m
+Received: [31m"About [7meight months[27m"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · unsure
+AssertionError: expected 'About eight months' to be 'About twelve months' // Object.is equality
+
+Expected: [32m"About [7mtwelve[27m months"[39m
+Received: [31m"About [7meight[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · unsure
+AssertionError: expected 'About three months' to be 'About five months' // Object.is equality
+
+Expected: [32m"About [7mfiv[27me months"[39m
+Received: [31m"About [7mthre[27me months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · unsure
+AssertionError: expected 'About four months' to be 'About five months' // Object.is equality
+
+Expected: [32m"About f[7mive[27m months"[39m
+Received: [31m"About f[7mour[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · unsure
+AssertionError: expected 'About five months' to be 'About eight months' // Object.is equality
+
+Expected: [32m"About [7meight[27m months"[39m
+Received: [31m"About [7mfive[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · unsure
+AssertionError: expected 'About six months' to be 'About eleven months' // Object.is equality
+
+Expected: [32m"About [7meleven[27m months"[39m
+Received: [31m"About [7msix[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · unsure
+AssertionError: expected 'About nine months' to be 'About eleven months' // Object.is equality
+
+Expected: [32m"About [7meleven[27m months"[39m
+Received: [31m"About [7mnine[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · unsure
+AssertionError: expected 'About ten months' to be 'About twelve months' // Object.is equality
+
+Expected: [32m"About t[7mwelv[27me months"[39m
+Received: [31m"About te[7mn[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · unsure
+AssertionError: expected 'About eight months' to be 'About ten months' // Object.is equality
+
+Expected: [32m"About [7mten[27m months"[39m
+Received: [31m"About [7meight[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · unsure
+AssertionError: expected 'About nine months' to be 'About thirteen months' // Object.is equality
+
+Expected: [32m"About [7mthirteen[27m months"[39m
+Received: [31m"About [7mnine[27m months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · unsure
+ FAIL  src/marketing/campaignEstimate.test.ts > estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · unsure
+AssertionError: expected 'About seven months' to be 'About eleven months' // Object.is equality
+
+Expected: [32m"About [7mel[27meven months"[39m
+Received: [31m"About [7ms[27meven months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:43:23
+     41|     it(`${c.today} · ${a.stage} · ${a.kind}${a.len ? "/" + a.len : ""}…
+     42|       const e = estimateCampaign(a, day(c.today));
+     43|       expect(e.label).toBe(c.label);
+       |                       ^
+     44|       expect(e.why).toBe(c.why);
+     45|       expect(e.prep).toBe(c.prep);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > the pack's named cases, today fixed at 24 Oct 2026 > (a) Getting ready, a novel of 80–110k, I don't know, Not sure yet
+AssertionError: expected 'About nine months' to be 'About twelve months' // Object.is equality
+
+Expected: [32m"About [7mtwelv[27me months"[39m
+Received: [31m"About [7mnin[27me months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:63:21
+     61|   it("(a) Getting ready, a novel of 80–110k, I don't know, Not sure ye…
+     62|     const e = estimateCampaign({ stage: "prep", kind: "novel", len: "m…
+     63|     expect(e.label).toBe("About twelve months");
+       |                     ^
+     64|     expect(e.fit).toBe(12);
+     65|     expect(e.why.startsWith("Going by a typical campaign, you'd send a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/242]⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > the parts > Not sure yet is estimated at the steady pace, said to be a guess
+AssertionError: expected 'About five months' to be 'About seven months' // Object.is equality
+
+Expected: [32m"About [7mse[27mve[7mn[27m months"[39m
+Received: [31m"About [7mfi[27mve months"[39m
+
+ ❯ src/marketing/campaignEstimate.test.ts:109:26
+    107|     const steady = estimateCampaign({ ...base, pace: "steady" }, day("…
+    108|     const unsure = estimateCampaign({ ...base, pace: "unsure" }, day("…
+    109|     expect(unsure.label).toBe(steady.label);
+       |                          ^
+    110|     expect(unsure.fit).toBe(steady.fit);
+    111|     expect(unsure.why).toBe(steady.why.replace(/^You/, "Going by a typ…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/242]⎯
+

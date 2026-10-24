@@ -1,0 +1,47 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-pricing4
+
+ ✓ src/marketing/pricingCounter.test.tsx (1 test) 8ms
+ ✓ src/marketing/campaignEstimate.test.ts (818 tests) 55ms
+ ❯ src/marketing/pricingPage.test.tsx (12 tests | 1 failed) 37ms
+   ✓ pricing v4: the copy is the ref's, word for word > renders every line: the box, its panel, the tiers, the plan tiles and the eight questions 8ms
+   ✓ pricing v4: the copy is the ref's, word for word > …and the constants are those lines (so an edit in one place cannot pass) 0ms
+   ✓ pricing v4: the copy is the ref's, word for word > says plans, never passes; never names Wall of no or Corkboard; never says AI or 'no card needed' 4ms
+   ✓ pricing v4: the copy is the ref's, word for word > never limits Smart Import to once 4ms
+   ✓ pricing v4: the founding box > puts the counter before the form 3ms
+   ✓ pricing v4: the founding box > with no figure from the store, draws no counter and states no number but the H1's 100 4ms
+   ✓ pricing v4: the founding box > the toggle is a real disclosure, and its panel is hidden until it opens 3ms
+   × pricing v4: the founding box > has exactly one h1, and it is the box's 6ms
+     → expected [ [ …(2), index: 219, …(2) ], …(4) ] to have a length of 1 but got 5
+   ✓ pricing v4: the questions > are hidden behind a real disclosure, inside the Pro plans container, under the tiles 2ms
+   ✓ pricing v4: the questions > open on question 1 with Next disabled, nothing pre-selected and no tile navy 2ms
+   ✓ pricing v4: the questions > each step opens only once it is answered, and a novel needs its length 0ms
+   ✓ pricing v4: the questions > the agents note moves with the count, and says so when it is a guess 0ms
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 830 passed (831)
+   Start at  14:28:17
+   Duration  319ms (transform 117ms, setup 0ms, collect 297ms, tests 100ms, environment 0ms, prepare 115ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/marketing/pricingPage.test.tsx > pricing v4: the founding box > has exactly one h1, and it is the box's
+AssertionError: expected [ [ …(2), index: 219, …(2) ], …(4) ] to have a length of 1 but got 5
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 5[39m
+
+ ❯ src/marketing/pricingPage.test.tsx:159:17
+    157|     const h = html();
+    158|     const h1s = [...h.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
+    159|     expect(h1s).toHaveLength(1);
+       |                 ^
+    160|     expect(textOf(h1s[0][1]).trim()).toBe("A free QueryHawk campaign f…
+    161|     expect(h.indexOf("<h1")).toBeGreaterThan(h.indexOf('<section class…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
