@@ -44,7 +44,9 @@ test.afterAll(() => { fx("--seed"); fx("--guide-reset"); });
 
 for (const vp of VPS) {
   test.describe(`VER2 @ ${vp.width}`, () => {
-    test("S01 — header, donut and banner state what the fixture holds", async ({ browser, baseURL }) => {
+    /* v2.2 re-pointed S01: the header's title and its donut are deleted (A1), so the claim that the page states what the
+       fixture holds is now made by the banner and the list's own count, and the faces are read off the title card */
+    test("S01 — the banner and the list's count state what the fixture holds; the faces are the ref's", async ({ browser, baseURL }) => {
       test.skip(!run("S01"));
       const f = facts();
       expect(f.live, "fixture: versions to show").toBeGreaterThan(2);
@@ -53,30 +55,20 @@ for (const vp of VPS) {
       await openV2(page);
       await closePop(page);
       const r = await page.evaluate(() => ({
-        title: document.querySelector("#vTitle")?.textContent,
-        total: document.querySelector('[data-vv2="donut"] .hpie-n')?.textContent,
-        legend: [...document.querySelectorAll('[data-vv2="donut"] .hpie-r')].map((e) => [e.querySelector("span")?.textContent, e.querySelector("b")?.textContent]),
+        count: document.querySelector("#vCnt")?.textContent,
         banner: document.querySelector('[data-vv2="banner"] .wb-h')?.textContent,
-        /* the title's ink against the donut card: the ref's own title spills 3px past its box at 1280 into the gap, so
-           the claim is that it never reaches the card, not that it fits its box */
-        h1: (() => { const s = document.querySelector("#vTitle") as HTMLElement; const card = document.querySelector('[data-vv2="donut"] .hpie, [data-vv2="donut"] .mcard') as HTMLElement; return s && card ? { inkRight: s.getBoundingClientRect().right, cardLeft: card.getBoundingClientRect().left } : null; })(),
       }));
       console.log(`S01 ${vp.width}`, JSON.stringify(r));
-      expect(r.title).toBe(`${f.live} versions on file`);
-      expect(Number(r.total)).toBe(f.sentTotal);
-      const sum = r.legend.reduce((a, l) => a + Number(l[1]), 0);
-      expect(sum, "the legend sums to the total").toBe(f.sentTotal);
-      expect(r.legend.find((l) => l[0] === "Not recorded")?.[1]).toBe(String(f.unrecorded));
+      expect(Number(r.count)).toBe(f.live);
       expect(r.banner).toContain(`${f.unrecorded} queries are out with agents`);
-      expect(r.h1!.inkRight, "the title ends before the donut card").toBeLessThan(r.h1!.cardLeft);
       /* the faces, read off the page: a token cycle once made every one resolve to nothing with every other lock green */
       const type = await page.evaluate(() => {
         const f = (s: string) => { const e = document.querySelector(s); return e ? { family: getComputedStyle(e).fontFamily, size: parseFloat(getComputedStyle(e).fontSize) } : null; };
-        return { h1: f("#msH1"), h2: f("#msRH"), body: f('[data-vv2="page"] .mh-by em'), pill: f('[data-vv2="list"] .db-ch li') };
+        return { h1: f("#hbT"), h2: f("#msRH"), body: f('[data-vv2="title"] .hb-tx > p'), pill: f('[data-vv2="list"] .db-ch li') };
       });
       console.log(`S01 type ${vp.width}`, JSON.stringify(type));
       expect(type.h1!.family).toMatch(/Special Elite/);
-      expect(type.h1!.size).toBeGreaterThanOrEqual(40);
+      expect(type.h1!.size).toBe(34);
       expect(type.h2!.family).toMatch(/Special Elite/);
       expect(type.body!.family).toMatch(/Source Serif 4/);
       expect(type.pill!.family).toMatch(/Source Serif 4/);
@@ -308,7 +300,8 @@ for (const vp of VPS) {
       const page = await ctx.newPage();
       await openV2(page, VER2_PRE);
       await closePop(page);
-      expect(await page.locator('[data-vv2="pre-note"]').innerText()).toContain("You’ve already sent 4 queries.");
+      /* v2.2 re-pointed: the pre-note is now the empty state's line (C1) */
+      expect(await page.locator('[data-vv2="ev-sub"]').innerText()).toContain("You’ve already sent 4 queries.");
       await page.locator('[data-vv2="first"]').click();
       expect(await page.locator('[data-vv2="first-note"]').innerText()).toContain("You already have 4 queries out.");
       await page.locator('[data-vv2="name"]').fill("Shorter opening");
@@ -322,8 +315,10 @@ for (const vp of VPS) {
       const ms = JSON.parse(fx("--ms", VER2_PRE));
       expect(ms.bookVersions.map((v: { name: string; num: number; original?: boolean }) => [v.name, v.num, !!v.original])).toEqual([["Original", 0, true], ["Shorter opening", 1, false]]);
       expect(ms.inUseBookVersionId).toBe(ms.bookVersions[1].id);
-      const legend = await page.evaluate(() => [...document.querySelectorAll('[data-vv2="donut"] .hpie-r')].map((e) => [e.querySelector("span")?.textContent, e.querySelector("b")?.textContent]));
-      expect(legend).toEqual([["Original", "4"]]);
+      /* v2.2 re-pointed: the donut's legend is deleted (A1); Original's own card now carries the 4 */
+      await expect.poll(() => page.locator('[data-vv2="row"]').count(), { timeout: 8000 }).toBe(2);
+      const orig = await page.locator(`[data-vv2="row"][data-id="${ms.bookVersions[0].id}"] .db-q b`).innerText();
+      expect(orig).toBe("4");
       await toastUndo(page);
       expect(fx("--ms", VER2_PRE), "Undo restores the book with no versions").toBe(before);
       await ctx.close();
@@ -418,7 +413,8 @@ for (const vp of VPS) {
       expect(await page.evaluate(() => (window as unknown as { __vv2Mark?: number }).__vv2Mark), "no reload happened").toBe(1);
       expect(r.carousel, "the carousel arrived").toBe(1);
       expect(r.league, "the league arrived").toBe(1);
-      expect(r.compare, "Compare appeared").toBe(1);
+      /* v2.2 re-pointed: the header's Compare is deleted (A1, D6), so the full section arrives with no Compare anywhere */
+      expect(r.compare, "no Compare button (v2.2 A1)").toBe(0);
       await ctx.close();
       fx("--seed");
     });
@@ -445,6 +441,193 @@ for (const vp of VPS) {
       const r = await warm(page);
       expect(r.band || r.panel, "no band, no panel").toBe(false);
       await ctx.close();
+    });
+
+    /* ══ v2.2 — the title card, the tinted list panel, the empty states (design-refs/versions-v2-2, S31–S37) ══ */
+    const card = async (page: Page) => page.evaluate(() => {
+      const c = document.querySelector('[data-vv2="title"]');
+      const t = (s: string) => c?.querySelector(s)?.textContent?.replace(/\s+/g, " ").trim() ?? null;
+      return {
+        card: !!c,
+        hero: document.querySelectorAll('[data-vv2="header"], .mh.vh, #msH1').length,
+        donut: document.querySelectorAll('[data-vv2="donut"], .hpie, .mh-r').length,
+        h1: t("h1"), tag: t(".hb-tag"), line: t(".hb-tx > p"),
+        buttons: [...(c?.querySelectorAll("button") ?? [])].map((b) => b.textContent?.replace(/\s+/g, " ").trim()),
+      };
+    });
+
+    test("T1 — no header hero and no donut; the title card states Versions, PRO, the title and both buttons", async ({ browser, baseURL }) => {
+      test.skip(!run("T1"));
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page);
+      await closePop(page);
+      expect(await page.locator('[data-vv2="row"]').count(), "population: versions on file").toBeGreaterThan(0);
+      const a = await card(page);
+      console.log(`T1 full ${vp.width}`, JSON.stringify(a));
+      expect(a.card, "the title card is on the page").toBe(true);
+      expect(a.hero, "the header hero is gone from the DOM").toBe(0);
+      expect(a.donut, "the donut is gone from the DOM").toBe(0);
+      expect(a.h1).toBe("Versions Pro");
+      expect(a.tag).toBe("Pro");
+      expect(a.line).toBe("Save each version of Tide Tables as it changes. QueryHawk records which one went out with every query, so you can see which gets agents asking for more.");
+      expect(a.buttons).toEqual(["+ New version", "How it works"]);
+      await openV2(page, VER2_FRESH);
+      await closePop(page);
+      expect(await page.locator('[data-vv2="empty"]').count(), "population: a book with no versions").toBe(1);
+      const b = await card(page);
+      console.log(`T1 fresh ${vp.width}`, JSON.stringify(b));
+      expect(b.buttons).toEqual(["+ Save your first version", "How it works"]);
+      expect(b.line).toContain("Dead Reckoning");
+      await page.locator('[data-vv2="title"] [data-vv2="how"]').click();
+      await expect(page.locator(".cx-explain h4")).toHaveText("How version tracking works", { timeout: 5000 });
+      await ctx.close();
+    });
+
+    test("T2 — the list section sits in the tinted panel, heading row and every card inside", async ({ browser, baseURL }) => {
+      test.skip(!run("T2"));
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page);
+      await closePop(page);
+      const r = await page.evaluate(() => {
+        const sec = document.querySelector<HTMLElement>('[data-vv2="list-sec"]');
+        const rows = [...document.querySelectorAll('[data-vv2="row"]')];
+        return { bg: sec ? getComputedStyle(sec).backgroundColor : null, radius: sec ? getComputedStyle(sec).borderTopLeftRadius : null,
+          head: !!sec?.querySelector("#msRH"), rows: rows.length, inside: rows.filter((x) => sec?.contains(x)).length,
+          sep: (() => { const e = sec?.querySelector(".db-sep span"); return e ? getComputedStyle(e).color : null; })() };
+      });
+      console.log(`T2 ${vp.width}`, JSON.stringify(r));
+      expect(r.rows, "population: cards").toBeGreaterThan(0);
+      expect(r.bg).toBe("rgb(232, 236, 242)");
+      expect(r.radius).toBe("22px");
+      expect(r.head).toBe(true);
+      expect(r.inside, "every card is inside the panel").toBe(r.rows);
+      expect(r.sep).toBe("rgba(42, 58, 82, 0.6)");
+      await ctx.close();
+    });
+
+    test("T3 — empty, no queries: a hairline container, Original 'None yet', the dashed row opens the first save, Original saved with it", async ({ browser, baseURL }) => {
+      test.skip(!run("T3"));
+      fx("--seed");
+      const before = fx("--ms", VER2_FRESH);
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      const errs: string[] = [];
+      page.on("pageerror", (e) => errs.push(e.message));
+      page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+      await openV2(page, VER2_FRESH);
+      await closePop(page);
+      const r = await page.evaluate(() => {
+        const ev = document.querySelector<HTMLElement>('[data-vv2="empty"]');
+        const t = (s: string) => ev?.querySelector(s)?.textContent?.replace(/\s+/g, " ").trim() ?? null;
+        return { ev: !!ev, bg: ev ? getComputedStyle(ev).backgroundColor : null, ring: ev ? getComputedStyle(ev).boxShadow : null,
+          h2: t("h2"), sub: t('[data-vv2="ev-sub"]'), q: t('[data-vv2="ev-q"]'), add: t('[data-vv2="first"]'), foot: t(".ev-foot"),
+          heads: [...(ev?.querySelectorAll(".ev-h span") ?? [])].map((x) => x.textContent) };
+      });
+      console.log(`T3 ${vp.width}`, JSON.stringify(r));
+      expect(r.ev, "population: the empty state").toBe(true);
+      expect(r.bg, "a hairline container: no fill").toBe("rgba(0, 0, 0, 0)");
+      expect(r.ring).toContain("rgba(28, 19, 15, 0.14)");
+      expect(r.h2).toBe("No versions yet");
+      expect(r.sub).toBe("Your list will start with two: your original manuscript, and your first change to it.");
+      expect(r.heads).toEqual(["Version", "What changed", "Words", "Queries sent"]);
+      expect(r.q).toBe("None yet");
+      for (const part of ["Your first version", "Starts from Original", "e.g. Cut the prologue", "Opens on the ferry at dawn", "+ Save your first version"]) expect(r.add, `the dashed row says "${part}"`).toContain(part);
+      expect(r.foot).toBe("A version is the same story told a different way. A new book is a new manuscript.");
+      await page.locator('[data-vv2="first"]').click();
+      await page.waitForSelector('[data-vv2="name"]');
+      const note = await page.locator('[data-vv2="first-note"] p').innerText();
+      expect(note).toBe("We’ll save your original manuscript as Original too, so this version has somewhere to start from.");
+      await page.locator('[data-vv2="name"]').fill("Ferry at dawn");
+      await page.locator('[data-vv2="change-in"]').fill("Opens on the ferry at dawn");
+      await page.keyboard.press("Enter");
+      /* wait for the re-render: the line is read after Enter adds the change */
+      await expect(page.locator("#vReady")).toHaveText("Ready. Original is saved too.", { timeout: 5000 });
+      const subs = await page.locator("#cgPv .ln-v small").allTextContents();
+      expect(subs[0], "the diagram's parent sub-line").toBe("Your original manuscript");
+      await page.locator('[data-vv2="save"]').click();
+      await page.waitForTimeout(1500);
+      expect(await page.locator(".sa-toast").first().innerText()).toContain("Saved Ferry at dawn, and Original with it.");
+      const ms = JSON.parse(fx("--ms", VER2_FRESH));
+      expect(ms.bookVersions.map((v: { name: string; num: number; original?: boolean }) => [v.name, v.num, !!v.original])).toEqual([["Original", 0, true], ["Ferry at dawn", 1, false]]);
+      expect(errs, "no console errors").toEqual([]);
+      await toastUndo(page);
+      expect(fx("--ms", VER2_FRESH), "Undo restores the book with no versions").toBe(before);
+      await ctx.close();
+    });
+
+    test("T4 — empty, queries already out: the line and Original's queries name them", async ({ browser, baseURL }) => {
+      test.skip(!run("T4"));
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page, VER2_PRE);
+      await closePop(page);
+      const r = await page.evaluate(() => ({
+        sub: document.querySelector('[data-vv2="ev-sub"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+        q: [document.querySelector('[data-vv2="ev-q"] b')?.textContent ?? null, document.querySelector('[data-vv2="ev-q"] small')?.textContent ?? null],
+        bold: document.querySelector('[data-vv2="ev-sub"] b')?.textContent ?? null,
+      }));
+      console.log(`T4 ${vp.width}`, JSON.stringify(r));
+      expect(r.sub).toBe("You’ve already sent 4 queries. When you save your first version, we’ll count them towards your Original. If any went out differently, it’s easy to change.");
+      expect(r.bold).toBe("4 queries");
+      expect(r.q).toEqual(["4", "already out · they’ll count here"]);
+      await ctx.close();
+    });
+
+    test("T5 — the comparisons note only with no versions; warming with fewer than two ready; the full section otherwise", async ({ browser, baseURL }) => {
+      test.skip(!run("T5"));
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      const read = () => page.evaluate(() => ({
+        note: document.querySelectorAll('[data-vv2="compare-note"]').length,
+        warming: document.querySelectorAll('[data-vv2="warming"]').length,
+        state: document.querySelector('[data-vv2="tracking"]')?.getAttribute("data-state") ?? null,
+        noteText: document.querySelector('[data-vv2="compare-note"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+        tiles: [...document.querySelectorAll('[data-vv2="compare-note"] figcaption b')].map((b) => b.textContent),
+      }));
+      await openV2(page, VER2_FRESH); await closePop(page);
+      const a = await read();
+      await openV2(page, VER2_WARM); await closePop(page);
+      const b = await read();
+      await openV2(page); await closePop(page);
+      const c = await read();
+      console.log(`T5 ${vp.width}`, JSON.stringify({ a, b, c }));
+      expect(a).toMatchObject({ note: 1, warming: 0, state: null });
+      for (const part of ["Tracking & performance", "Your versions, compared, right here", "Once two versions have each gone out with 5 queries, this page shows which one gets agents asking for more.", "Sort by asked for more, most sent or fastest replies.", "Every version side by side, ranked by requests.", "Sent, replied, asked for more, offers."]) expect(a.noteText, `the note says "${part}"`).toContain(part);
+      expect(a.tiles).toEqual(["A card for every version", "A league table", "How far each one gets"]);
+      expect(b).toMatchObject({ note: 0, warming: 1, state: "warming" });
+      expect(c).toMatchObject({ note: 0, warming: 0, state: "full" });
+      await ctx.close();
+    });
+
+    test("T6 — the guide's step 1 spotlight lands on a visible button, empty and populated", async ({ browser, baseURL }) => {
+      test.skip(!run("T6"));
+      fx("--guide-reset");
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      for (const ms of [VER2_FRESH, undefined]) {
+        await openV2(page, ms);
+        const pill = page.locator('[data-pck="pill"]');
+        await expect(pill).toBeVisible({ timeout: 10_000 });
+        if (!(await page.locator('[data-pck="popover"]').count())) await pill.click();
+        await page.locator('[data-pck="item"][data-k="add"] > button').click();
+        await page.waitForSelector('[data-pck="dim"][data-hole]', { timeout: 8000 });
+        await page.waitForTimeout(700);
+        const r = await page.evaluate(() => {
+          const h = JSON.parse(document.querySelector('[data-pck="dim"]')!.getAttribute("data-hole")!);
+          const x = h.left + h.width / 2, y = h.top + h.height / 2;
+          const hit = document.elementsFromPoint(x, y).find((e) => !e.closest('[data-pck="spot"]')) as HTMLElement | undefined;
+          const btn = hit?.closest<HTMLElement>('[data-vv2="title"] button, button[data-vv2="first"]') ?? null;
+          return { hole: h, inView: y > 0 && y < innerHeight && x > 0 && x < innerWidth, btn: btn ? btn.textContent?.replace(/\s+/g, " ").trim() : null, where: btn?.closest('[data-vv2="title"]') ? "title" : btn ? "empty" : hit?.className ?? null };
+        });
+        console.log(`T6 ${ms ?? "ver2-ms"} ${vp.width}`, JSON.stringify(r));
+        expect(r.inView, "the hole is on screen").toBe(true);
+        expect(r.btn, "the hole's centre is a visible Add button").not.toBeNull();
+        await page.keyboard.press("Escape");
+      }
+      await ctx.close();
+      fx("--guide-reset");
     });
 
     test("S29 — Free sees the lock over an inert, blurred page that opens nothing", async ({ browser, baseURL }) => {
