@@ -89,7 +89,9 @@
 
   /* B2 · the columns flex with the list; rows and headings carry their own 26px, the body none */
   .qcv-group[data-v138] .qc138-sheet {
-    --qc138-cols: minmax(170px, 1.5fr) minmax(78px, 0.62fr) minmax(140px, 1.15fr) minmax(130px, 1.2fr) minmax(130px, 1.15fr) 64px;
+    /* the second track's floor is its own heading: "FIRST QUERIED" in mono caps is ~101px, so a 78px floor let it run into
+       "WHERE IT STANDS" at a 1280 window. QC149-L5 reads every heading's label against its column. */
+    --qc138-cols: minmax(170px, 1.5fr) minmax(112px, 0.62fr) minmax(140px, 1.15fr) minmax(130px, 1.2fr) minmax(130px, 1.15fr) 64px;
   }
   .qcv-group[data-v138] .qc138-sheet .qc138-body { padding: 0 0 18px; }
   .qcv-group[data-v138] .qc138-sheet .qc138-heads { padding-left: 26px; padding-right: 26px; }

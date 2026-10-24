@@ -162,6 +162,12 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       for (const [k, sel] of [["Filters", "[data-qc140='filters']"], ["Group by", "[data-qc140='group']"], ["Sort", "[data-qc1421='sort']"], ["Full screen", "[data-qc149='full']"]] as const) L.check(`${k} in the bar`, !!(await box(page, sel)), sel);
       for (const [k, sel] of [["the Cards/List switch", ".cl20-vs, [data-qc144='view-bar'], [data-qc142='view-tb']"], ["the count", "[data-qc144='count']"], ["the jump row", "[data-qc140='jump'], .qc140-jump"]] as const) L.check(`no ${k}`, !(await box(page, sel)), sel);
       const tracks = await page.evaluate(() => { const r = [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].find((x) => x.getBoundingClientRect().height > 0); return r ? getComputedStyle(r).gridTemplateColumns.split(" ").length : 0; });
+      await mutateCss(page, "L5hd", ".qcv-group[data-v138] .qc138-sheet { --qc138-cols: minmax(170px, 1.5fr) minmax(78px, 0.62fr) minmax(140px, 1.15fr) minmax(130px, 1.2fr) minmax(130px, 1.15fr) 64px !important; }");
+      await page.waitForTimeout(200);
+      const tight = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet .qc138-heads [data-qc138='heading']")].filter((h) => h.getBoundingClientRect().width > 0)
+        .map((h) => { const r = document.createRange(); r.selectNodeContents(h); const pl = parseFloat(getComputedStyle(h).paddingLeft) || 0; return { t: h.textContent?.trim() ?? "", ink: r.getBoundingClientRect().width, room: h.getBoundingClientRect().width - pl }; })
+        .filter((h) => h.t && h.ink > h.room - 8));
+      L.check("every column heading fits its column with 8px to spare", tight.length === 0, JSON.stringify(tight));
       L.check("six column tracks", tracks === 6 || (tracks === 5 && narrow), String(tracks));
       const lastH = await page.evaluate(() => { const hs = [...document.querySelectorAll<HTMLElement>("[data-qc138='heading']")].filter((h) => h.getBoundingClientRect().width > 0); const s = document.querySelector("[data-qc138='sheet']")!.getBoundingClientRect(); return hs.length ? s.right - hs[hs.length - 1].getBoundingClientRect().right : null; });
       L.check("the last heading is within 40 of the right edge", lastH != null && lastH <= 40, String(lastH));
@@ -177,7 +183,7 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       L.check("full screen: no header card or banner", !fs.card && !fs.banner, `card ${!!fs.card} · banner ${!!fs.banner}`);
       L.check("full screen: the band is at the sheet's top", !!fs.band && !!fs.win && near(fs.band.t, fs.win.t, 1.5), `${fs.band?.t} vs ${fs.win?.t}`);
       await tap(page, "[data-qc142='full-tb']");
-      L.done(13);
+      L.done(14);
     });
 
     test("L6 · the hover timeline: one-line summary, nothing past the list card's edges", async ({ page }) => {
