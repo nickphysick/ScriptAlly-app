@@ -43,6 +43,8 @@ import {
 } from "../../lib/pageChecklist";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { PageChecklist } from "../shell/guide/PageChecklist";
+import { PageHeaderCard } from "../shared/PageHeaderCard";
+import { PageAlertBanner } from "../shared/PageAlertBanner";
 import heroArt from "../../assets/manuscripts/hero-archivist.png";
 import { agentLine, today } from "./v2Bits";
 import { V2List } from "./V2List";
@@ -246,17 +248,11 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
         ) : null}
         <div className="ms25">
           {/* v2.2 A — the title card (S31): replaces the living header, its Compare and "?" buttons and the donut */}
-          <section className="hb" aria-labelledby="hbT" data-vv2="title">
-            <div className="hb-tx">
-              <h1 id="hbT" data-page-title>Versions <span className="hb-tag">Pro</span></h1>
-              <p>Save each version of <b>{ms?.title ?? "your manuscript"}</b> as it changes. QueryHawk records which one went out with every query, so you can see which gets agents asking for more.</p>
-              <div className="hb-b">
-                <button type="button" className="hb-p" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>{fresh ? "+ Save your first version" : "+ New version"}</button>
-                <button type="button" className="hb-s" data-vv2="how" onClick={() => setModal({ kind: "how" })}>How it works</button>
-              </div>
-            </div>
-            <div className="hb-art" aria-hidden="true"><img src={heroArt} alt="" /></div>
-          </section>
+          <PageHeaderCard classPrefix="hb" titleId="hbT" data={{ "data-vv2": "title" }} titleData={{ "data-page-title": "true" }}
+            title="Versions" tag="Pro" art={heroArt}
+            body={<>Save each version of <b>{ms?.title ?? "your manuscript"}</b> as it changes. QueryHawk records which one went out with every query, so you can see which gets agents asking for more.</>}
+            primary={{ label: fresh ? "+ Save your first version" : "+ New version", data: { "data-vv2": "new" }, disabled: !ms || locked, onClick: () => openForm(null) }}
+            secondary={{ label: "How it works", data: { "data-vv2": "how" }, onClick: () => setModal({ kind: "how" }) }} />
 
           <div className="mc lockwrap">
             {locked ? (
@@ -281,15 +277,11 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
 
             <div className="under" inert={locked || undefined} data-vv2="under">
               {!fresh && m.unrecorded.length ? (
-                <div className="wb is-full" id="msNote" role="status" data-vv2="banner">
-                  <span className="wb-i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3.5 2.8 19.5h18.4z" /><path d="M12 10v4.2M12 17.2v.1" /></svg></span>
-                  <div className="wb-t">
-                    <p className="wb-h" id="msNoteT"><b>{m.unrecorded.length} {m.unrecorded.length === 1 ? "query is" : "queries are"} out with agents</b> without a version assigned.</p>
-                    <p className="wb-s">Until you say which version went, their replies don’t count towards any version.</p>
-                  </div>
-                  <span className="wb-g" id="msNoteG">{m.unrecorded.slice(0, 6).map((q) => { const a = agentLine(q, agentById); return <span key={q.id} title={`${a.name}${a.agency ? `, ${a.agency}` : ""}`}>{a.initials}</span>; })}</span>
-                  <button type="button" className="wb-b" data-vv2="assign" onClick={openPicker}>Assign versions</button>
-                </div>
+                <PageAlertBanner classPrefix="wb" className="is-full" id="msNote" headlineId="msNoteT" facesId="msNoteG" data={{ "data-vv2": "banner" }}
+                  headline={<><b>{m.unrecorded.length} {m.unrecorded.length === 1 ? "query is" : "queries are"} out with agents</b> without a version assigned.</>}
+                  line="Until you say which version went, their replies don’t count towards any version."
+                  faces={m.unrecorded.slice(0, 6).map((q) => { const a = agentLine(q, agentById); return { key: q.id, initials: a.initials, title: `${a.name}${a.agency ? `, ${a.agency}` : ""}` }; })}
+                  action={{ label: "Assign versions", data: { "data-vv2": "assign" }, onClick: openPicker }} />
               ) : null}
 
               {ms && !fresh ? (

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L2-1280",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"card\":true,\"ban\":true,\"row\":true,\"list\":true}"
+ },
+ {
+  "lock": "L2-1280",
+  "where": "banner shares the card's left and right",
+  "ok": true,
+  "detail": "296/1224 vs 296/1224"
+ },
+ {
+  "lock": "L2-1280",
+  "where": "view row shares the card's left and right",
+  "ok": true,
+  "detail": "296/1224 vs 296/1224"
+ },
+ {
+  "lock": "L2-1280",
+  "where": "list's left is 24 further out",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "L2-1280",
+  "where": "list's right is 24 further out",
+  "ok": false,
+  "detail": "0.0"
+ }
+]

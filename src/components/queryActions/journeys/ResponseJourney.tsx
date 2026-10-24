@@ -14,11 +14,10 @@
 import { QueryPicker } from "./QueryPicker";
 import { REMIND } from "../../../lib/queryActions/sendBy";
 import React, { useMemo, useState } from "react";
-import { collection, deleteDoc, deleteField, doc, getDocs, query as fsQuery, where } from "firebase/firestore";
-import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, type EventKey, type Query } from "../../../types";
-import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
+import { type RecordResponseData } from "../../../lib/recordResponse";
+import { saveResponse } from "../../../lib/queryActions/respondSave";
 import { isPracticeId, practiceRespond } from "../../../lib/practiceQuery";
 import {
   addDays, dayIso, fmt, futureWeeks, offWeekend, pastAnchors, toDay, up,
@@ -256,37 +255,10 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
         practiceRespond(data, extra);
         return { queryId: q.id, message: `${SAVED_LABEL[type]} · ${agentName(agent)}`, sub: "PRACTICE · NOTHING SAVED", touched: [] };
       }
-      await recordQueryResponse({ userId: db.currentUser.id, query: q, agent, manuscript: ms }, data);
-      /* A late reply to a query closed as NO REPLY replaces that ending.
-         AFTER THE REPLY, NEVER BEFORE IT, so the query never reads No Response with no closure step
-         in between. (That order once also beat the runtime repair to the rung; the repair is deleted,
-         28 Sep, and the order is kept because it is still the one that never leaves a gap.) A closure
-         step may be a reconstructed one (`act-status-no-response-<qid>`). The status is unchanged by
-         its going: the reply is the last rung.
-         ⚠️ NOT `db.deleteActivity`: it finds its target in the FEED, and a closure written only to the
-         query's own log has no feed row. Both stores are cleared here, by id and by the projection's
-         status; the undo snapshot holds every document either delete touches. */
-      if (closedNoReply) {
-        const uid = db.currentUser.id;
-        const log = await db.readQueryActivity(q.id);
-        const closures = log.filter((e) => (e.data.resultingStatus ?? e.data.type) === QueryStatus.NO_RESPONSE);
-        for (const c of closures) await deleteDoc(doc(fsdb, "users", uid, "queries", q.id, "activity", c.id));
-        const feed = await getDocs(fsQuery(collection(fsdb, "users", uid, "activities"), where("queryId", "==", q.id)));
-        for (const f of feed.docs) if (closures.some((c) => c.id === f.id) || f.data().resultingStatus === QueryStatus.NO_RESPONSE) await deleteDoc(f.ref);
-      }
-      const extra: Record<string, unknown> = {};
-      if (q.nudgeDate) extra.nudgeDate = deleteField();
-      if (q.closePlan) extra.closePlan = deleteField();
-      if (type === "rr" && sendBy) extra.expectedSendDate = dayIso(sendBy);
-      if (type === "partial") {
-        extra.requestSynopsis = syn;
-        if (s.sect) { extra.requestFrom = s.from; extra.requestFromUnit = s.fu ?? (s.unit === "pages" ? "page" : "chapter"); }
-        else { if (q.requestFrom != null) extra.requestFrom = deleteField(); if (q.requestFromUnit) extra.requestFromUnit = deleteField(); }
-      }
-      if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>);
-      if (type === "offer" && notify) {
-        for (const o of others) await db.updateQuery(o.id, { offerRefQueryId: q.id, offerTold: false } as Partial<Query>);
-      }
+      /* v149 — the write is the shared response save (lib/queryActions/respondSave), the query card's too */
+      await saveResponse(db, { q, agent, ms }, {
+        type, recv, s, syn, sendBy: none ? null : sendBy, noDateTask, remindOn: none ? null : remindOn, fb, note, rrNote, offerBy, notify, others,
+      });
       return {
         queryId: q.id,
         message: `${SAVED_LABEL[type]} · ${agentName(agent)}`,

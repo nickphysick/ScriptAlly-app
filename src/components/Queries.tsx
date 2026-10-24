@@ -24,6 +24,7 @@ import {
   getDocs
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import { useNavigate } from "react-router-dom";
 /* §6 — the same atomic path the Edit drawer saves its dates through; recompute derives the rest. */
 import { commitQueryEdits } from "../lib/saveQueryEdits";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType , SubmissionPackage} from "../types";
@@ -95,11 +96,31 @@ import type { LivingHeader } from "./shell/PageHeader";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcWorkspaceHead, type QcDensity } from "./queries/centre/QcWorkspace";
 import { useQcListKeys } from "./queries/centre/useQcListKeys";
-import { readQcView, readQcVisit, writeQcView, writeQcVisit, type QcListView } from "../lib/qcViewMemory";
+import { readQcView, readQcVisit, writeQcView, writeQcVisit } from "../lib/qcViewMemory";
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
-import { QcHeader138 } from "./queries/centre/QcHeader138";
+import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
+import { QcLogFlow149, QcWhoReplied149, type FlowAgent, type LogAnswers } from "./queries/centre/QcFlows149";
+import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
+import { packagesFor } from "../lib/queryActions/packages";
+import { previousQueryFor } from "../lib/requery";
+import { QcQueryCard149, fieldDay, parseDay, type CardEdits, type CardMode, type CardStep, type RespChoice, type StepChoice } from "./queries/centre/QcQueryCard149";
+import { RESP_SAVED, offerOthers, respondDefaults, saveResponse as saveResponseShared } from "../lib/queryActions/respondSave";
+import { nudgeDefaults, saveNudgeSent, saveSent, sentDefaults, type SentKind } from "../lib/queryActions/stepSaves";
+import { individualNext, packageNext, sentCorrectionFields, type SentNext } from "../lib/queryActions/sentCorrect";
+import { currentVersion, editionsOn, readSummary } from "../lib/queryActions/packages";
+import { sentRecordOf } from "../lib/queryActions/sentRecord";
+import { blankSample } from "../lib/queryActions/sample";
+import { dayIso } from "../lib/queryActions/dates";
+import { isLive as qaIsLive, viaLabel } from "./queryActions/journeys/common";
+import { commitCardSave } from "../lib/agentCardSave";
+import { copyText } from "./agents/contact/ContactCells";
+import type { AgentEditPatch } from "../lib/saveAgentEdits";
+import type { RowSpec } from "./reading-pane/QueryTimeline";
+import type { QcRow } from "../lib/qcSummary";
+import { nextLine } from "../lib/qcRowLines";
+import { pressView, waitingBanner } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
@@ -110,7 +131,6 @@ import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
 import { QcBand140 } from "./queries/centre/QcBand140";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
 import { BulkBar138, QC138_FOLD_KEY, QcList138, type BandTone } from "./queries/centre/QcList138";
-import { QcCardsSkeleton } from "./queries/centre/QcCards142";
 import { ESC_LEVEL, useEscapeLayer } from "../lib/escapeStack";
 import { usePopover } from "./shell/ListPills";
 import { stripSent } from "../lib/qcStrip";
@@ -675,7 +695,14 @@ export const Queries: React.FC<{
 
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
    *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
+  /* v149 Part D — on the desktop Query Centre, while it is the page on screen, the header's two actions open in the
+     query panel as cards; everywhere else the drawer's journeys stand. Written each render once `qcDesk` is known. */
+  const qcFlowGate = useRef({ desk: false, active: false });
   const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
+    if (qcFlowGate.current.desk && qcFlowGate.current.active) {
+      setQcFlow({ kind: "log", agentId: seed.agentId ?? null, manuscriptId: seed.manuscriptId ?? null });
+      return;
+    }
     /* ⚠️ QUERY ACTIONS v1 — every "Log query" in the app funnels here, so this one line moves them
        all to the drawer at once. The create pane below stays until the cut-over deletes it. */
     if (DRAWER_LIVE.log) {
@@ -1727,6 +1754,15 @@ export const Queries: React.FC<{
    * v1 met on the late reply. The undo is the drawer's SNAPSHOT, so it puts back exactly the
    * documents that were there, whichever store held them.
    */
+  /* v149 Part C — the query card's mode (view · respond · edit), the step it lights after a save, and a mode asked for
+     before the card has opened (the header's "Who replied?" opens a query straight into respond) */
+  const [qcCardMode, setQcCardMode] = useState<CardMode>("view");
+  const [qcCardFresh, setQcCardFresh] = useState<string | null>(null);
+  const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* v149 Part D — the header's two flows in the same panel: a new query, and "Who replied?" */
+  const [qcFlow, setQcFlow] = useState<null | { kind: "log"; agentId: string | null; manuscriptId: string | null } | { kind: "who" }>(null);
+  const scriptDb = useScriptAllyDb();
+  const routerNav = useNavigate();
   const [entryDel, setEntryDel] = useState<null | { activityId: string; ids: string[]; labels: string[]; whole: boolean }>(null);
   /* the confirm belongs to the query it was asked on — opening another query drops it */
   useEffect(() => { setEntryDel(null); }, [selectedQueryId]);
@@ -2359,6 +2395,7 @@ export const Queries: React.FC<{
   const queriesRef = useRef<Query[]>([]);
   const agentsRef = useRef<Agent[]>([]);
   useEffect(() => subscribeResponsePicker(() => {
+    if (qcFlowGate.current.desk && qcFlowGate.current.active) { setQcFlow({ kind: "who" }); return; }
     const had = openIdRef.current;
     const q = had ? queriesRef.current.find((x) => x.id === had) : undefined;
     const ag = q ? agentsRef.current.find((a) => a.id === q.agentId) : undefined;
@@ -2428,10 +2465,6 @@ export const Queries: React.FC<{
      versioned key (`sa.qcList.v1`). The list had no memory before: group, sort and filter are page state. */
   const [qcDensity, setQcDensityState] = useState<QcDensity>(() => qcRemView.density);
   const setQcDensity = useCallback((d: QcDensity) => { setQcDensityState(d); writeQcView({ density: d }); }, []);
-  /* v142 §A — Cards or List (List by default), remembered on this device inside `qh.qc.view`, read before the first paint
-     so the other view never flashes */
-  const [qcListView, setQcListViewState] = useState<QcListView>(() => qcRemView.view);
-  const setQcListView = useCallback((v: QcListView) => { setQcListViewState(v); writeQcView({ view: v }); }, []);
   /* v138.1 §F — the search lives in the list sheet's navy row. v138.6 §B: that row is the sticky row and the old
      pinned bar (with its mirrored search) is retired, so "/" (useQcListKeys) has the one field to focus. */
   const qcSheetFindRef = useRef<HTMLInputElement>(null);
@@ -2452,17 +2485,6 @@ export const Queries: React.FC<{
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
   /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
-  /* v142 §D — the card's Materials tab: once the panel has drawn its Tracking ledger, the "what was sent" slip
-     (`[data-qp="slip"]`) is scrolled into view. Polled for a moment, because the panel opens a frame or two later. */
-  const revealSentSlip = useCallback(() => {
-    let tries = 0;
-    const look = () => {
-      const slip = [...document.querySelectorAll<HTMLElement>('[data-qp="slip"]')].find((e) => e.getBoundingClientRect().height > 0);
-      if (slip) { slip.scrollIntoView({ block: "center", behavior: "auto" }); slip.setAttribute("data-qc142-shown", ""); return; }
-      if (++tries < 40) window.setTimeout(look, 50);
-    };
-    window.setTimeout(look, 50);
-  }, []);
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
   useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
@@ -2489,6 +2511,7 @@ export const Queries: React.FC<{
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  qcFlowGate.current = { desk: qcDesk, active: routeActive };
   /* v138.6 §A — the pin is the shared hook (`usePinList`, the Contact list's too): held sidebar, remembered per page
      and restored on the first frame, F and Esc, and the scroll position put back on the way out. `qcFull` keeps its
      name. */
@@ -2889,6 +2912,11 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  /* v149 C — another query in the panel opens in view mode, unless a flow asked for respond on that very query */
+  useEffect(() => {
+    const p = qcCardPendingMode.current;
+    if (p && p.id === cardQueryId) { setQcCardMode(p.mode); qcCardPendingMode.current = null; } else setQcCardMode("view");
+  }, [cardQueryId]);
   /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
      `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
   const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
@@ -3878,6 +3906,19 @@ export const Queries: React.FC<{
     if (!next || !scroll || qcFull) return;
     requestAnimationFrame(() => {
       const tb = [...document.querySelectorAll<HTMLElement>('[data-qc140="toolbar"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const sc = tb?.closest<HTMLElement>(".wpg-scroll");
+      if (!tb || !sc) return;
+      const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
+      sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    });
+  };
+  /* v149 A2/A3 — a view chip or the banner's "Show them": set (never toggle) the one "Where it stands" filter, or clear
+     it for All; from the banner, bring the list's top into view as a card row did */
+  const qcShowWhere = (k: WhereKey | null, scroll = true) => {
+    setQcF138((f) => ({ ...f, where: k }));
+    if (!k || !scroll || qcFull) return;
+    requestAnimationFrame(() => {
+      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc149="views-row"]')].find((e) => e.getBoundingClientRect().height > 0);
       const sc = tb?.closest<HTMLElement>(".wpg-scroll");
       if (!tb || !sc) return;
       const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
@@ -5207,21 +5248,19 @@ export const Queries: React.FC<{
      model; these names survive as plain consts because the unreachable three-column pane reads them. */
   const showGridSkeleton = qcLoad.loading;
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
+  /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
+     (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
+  const qc149Banner = showGridSkeleton ? null : waitingBanner(qcScoped, qcNow138);
   const qc138Header = qcDesk ? (
-    <QcHeader138
+    <QcHeader149
       loading={showGridSkeleton}
-      total={showGridSkeleton ? null : qcScoped.length}
       msTitle={qcLineTitle}
-      counts={qcGlyphCounts}
-      stages={qcStages}
-      onGlyph={pickGlyph}
-      entering={qc138In !== "done"}
+      banner={qc149Banner}
       onLog={() => onNavigate?.("queries", "Log a query")}
       onRecord={() => onNavigate?.("queries", "Record a response")}
+      onShowThem={() => qcShowWhere("you")}
       logDisabled={creating}
       logRef={logTriggerRef}
-      chart={<QcWhereCard counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} heard={qcBandFig.more + qcBandFig.passed}
-        heardPct={qcBandFig.heardPct} where={qcF138.where} onPick={(k) => qcPickWhere(k, true)} />}
     >
       <i ref={qc138Ref} hidden />
       <BulkBar138
@@ -5233,8 +5272,7 @@ export const Queries: React.FC<{
         onClose={() => startBulk("close")}
         onClear={() => setQcPicked(new Set())}
       />
-      {/* v138.6 §B — the old pinned bar is retired: the navy list header is the sticky row */}
-    </QcHeader138>
+    </QcHeader149>
   ) : undefined;
 
   /**
@@ -5472,6 +5510,28 @@ export const Queries: React.FC<{
    * and both must show the same timeline, the same agent tab and the same notes thread, wired to
    * the same handlers. Built here, handed to whichever is mounted; nothing about them changed.
    */
+  /* v149 — where things stand (lib/standCard), built ONCE for the ledger's stand card and the query card's note, so
+     the two cannot describe one query differently */
+  const qcStandView = (ledgerRows: RowSpec[], qcRow: QcRow, standNow: number) => {
+    const activeQuery0 = activeQuery!;
+    return standCard({
+      status: qcRow.status,
+      first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
+      agency: (activeAgent?.agency || "").trim(),
+      court: qcRow.court,
+      stageStartMs: qcRow.stageStartMs,
+      expectedMs: qcRow.expectedMs,
+      windowWeeks: typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null,
+      unansweredNudgeMs: ledgerRows.filter((r) => r.kind === "nudge" && /no reply/i.test(r.title) && (r.timeMs ?? 0) >= (qcRow.stageStartMs ?? 0))
+        .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
+      closedHow: qcRow.closedHow,
+      manuscriptTitle: activeMs?.title ?? null,
+      hasSentDate: !!activeQuery0.dateSent,
+      keepTracking: (activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
+      /* an open "Nudge {agent}" to-do for this query: "Remind me later" must not add a second */
+      reminderOpen: (userTasks ?? []).some((t) => !t.done && t.queryId === activeQuery0.id && /^Nudge /.test(t.text ?? "")),
+    }, standNow);
+  };
   const qpTracking = panelRow && activeQuery ? ((() => {
                 /* §2 (respond-nudge) — while a response is being drafted the timeline shows the
                    PROPOSED world: the ghost activity appended to the real events (same builder,
@@ -5522,23 +5582,7 @@ export const Queries: React.FC<{
                 const qcRow = qcById.get(activeQuery.id);
                 const standNow = Date.now();
                 const stand = qcRow ? (
-                  <StandCard key={activeQuery.id} view={standCard({
-                    status: qcRow.status,
-                    first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
-                    agency: (activeAgent?.agency || "").trim(),
-                    court: qcRow.court,
-                    stageStartMs: qcRow.stageStartMs,
-                    expectedMs: qcRow.expectedMs,
-                    windowWeeks: typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null,
-                    unansweredNudgeMs: ledgerRows.filter((r) => r.kind === "nudge" && /no reply/i.test(r.title) && (r.timeMs ?? 0) >= (qcRow.stageStartMs ?? 0))
-                      .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
-                    closedHow: qcRow.closedHow,
-                    manuscriptTitle: activeMs?.title ?? null,
-                    hasSentDate: !!activeQuery.dateSent,
-                    keepTracking: (activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
-                    /* an open "Nudge {agent}" to-do for this query: "Remind me later" must not add a second */
-                    reminderOpen: (userTasks ?? []).some((t) => !t.done && t.queryId === activeQuery.id && /^Nudge /.test(t.text ?? "")),
-                  }, standNow)}
+                  <StandCard key={activeQuery.id} view={qcStandView(ledgerRows, qcRow, standNow)}
                   /* Ruling 3 — each link goes to the control that already did the job; nothing here is a new write. */
                   onLink={(link, anchor) => {
                     if (link === "addSentDate") {
@@ -5650,6 +5694,301 @@ export const Queries: React.FC<{
   const fromAgent = extPanel?.from === "agent" ? queryPanelBack() : null;
   const backToAgent = () => closeQueryPanel();
   const closeFromAgent = () => { window.dispatchEvent(new CustomEvent("sa:agent-panel-close")); closeQueryPanel(); };
+  /* ══ v149 Part C — THE QUERY PANEL IS THE QUERY CARD ══════════════════════════════════════════════════════════════
+     The panel (QueryPanelHost) is unchanged; on the desktop Query Centre it holds QcQueryCard149 instead of QcOpenCard.
+     Every save below is an existing writer under one snapshot with the undo bar: the response journey's save, the
+     entry date edit (`editActivity`), the entry delete (`deleteTimelineEntries`, behind the same root and dependency
+     guards), the sent and nudge saves, the "what was sent" correction, and the agent card's own save path. */
+  const qcCardNode = (() => {
+    if (!qcDesk || !panelRow || !activeQuery || !currentUser) return null;
+    const row = qcById.get(activeQuery.id);
+    if (!row) return null;
+    const q = activeQuery as Query;
+    const ag = (activeAgent ?? null) as Agent | null;
+    const ms = (activeMs ?? null) as Manuscript | null;
+    const now = Date.now();
+    const ledger = [...buildTimelineRows(trackingEvents, q, ag)].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+    const steps: CardStep[] = ledger.map((r0, i) => ({ key: r0.key, activityId: r0.activityId, title: r0.title, ms: r0.timeMs ?? null, status: r0.kind ? null : r0.status, root: i === 0 }));
+    const sv = sentView(q, packages);
+    const capWord = (t: string) => t.replace(/^./, (c) => c.toUpperCase());
+    const sent = sv.pieces.map((pc) => ({ label: pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label }));
+    const sv0 = qcStandView(ledger, row, now);
+    const stand = { heading: sv0.heading, text: sv0.paragraph.map((x) => x.text).join("") };
+    const nl = nextLine(row, null, now);
+    const door = row.court === "closed" ? null : nextDoor(row, now);
+    const order = qcVisible.map((r) => r.id);
+    const idx = Math.max(0, order.indexOf(q.id));
+    const first = (ag?.name || "").trim().split(/\s+/)[0] || "the agent";
+    /* what was sent, as the edit mode's select and pieces read it (EditJourney's own derivations) */
+    const rec = sentRecordOf(q);
+    const sentDay = q.dateSent ? dayIso(new Date(q.dateSent)) : dayIso(new Date(now));
+    const editions = editionsOn(q.manuscriptId, sentDay, packages, scriptDb.versions, ms?.bookVersions);
+    const recKey = rec.how === "package" && rec.packageId ? `${rec.packageId}#${rec.edition ?? 1}` : "__ind";
+    const packageChoices = [{ key: "__ind", label: "Sent individually" }, ...editions.map((c) => ({ key: c.key, label: `${c.name} · ${ordinal(c.edition)} edition` }))];
+    if (recKey !== "__ind" && !editions.some((c) => c.key === recKey)) packageChoices.push({ key: recKey, label: sv.how === "package" && sv.name ? sv.name : "The recorded package" });
+    const was = readSummary(rec.materials);
+    const recordedPortion = was.pieces.find((x) => x.key === "sample")?.value.split(" · ")[0] ?? "";
+    const has = (k: string) => was.pieces.some((x) => x.key === k);
+    const pieces = [
+      { key: "ql", label: "Query letter", on: has("ql") },
+      { key: "syn", label: "Synopsis", on: has("syn") },
+      { key: "sample", label: recordedPortion ? capWord(recordedPortion) : "Opening sample", on: has("sample") },
+    ];
+    const qlV = currentVersion(q.manuscriptId, scriptDb.versions, ComponentType.QUERY_LETTER);
+    const synV = currentVersion(q.manuscriptId, scriptDb.versions, ComponentType.SYNOPSIS);
+    /* the steps that may follow where the query stands now (the next-move engine's own stages) */
+    const st = q.status as QueryStatus;
+    const stepChoices: StepChoice[] = [];
+    if ([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED].includes(st)) {
+      if (st === QueryStatus.QUERIED) stepChoices.push({ key: "r:partial", label: "Partial requested" });
+      stepChoices.push({ key: "r:full", label: "Full requested" }, { key: "r:pass", label: "Passed" }, { key: "r:offer", label: "Offer" }, { key: "nudge", label: "Nudge sent" });
+    }
+    if (st === QueryStatus.PARTIAL_REQUESTED) stepChoices.push({ key: "s:partial", label: "Partial sent" });
+    if (st === QueryStatus.FULL_REQUESTED) stepChoices.push({ key: "s:full", label: "Full sent" });
+    const removable = (id: string): string[] => {
+      const evts = guardEvents();
+      const me = evts.find((e) => e.activityId === id);
+      if (!me || rootGuard(me, evts).kind === "route") return [];
+      const dep = dependencyGuard(me, evts);
+      return [id, ...(dep.kind === "cascade" ? dep.partners.map((x) => x.activityId!) : [])];
+    };
+    const sameDay = (a: number, b: number) => new Date(a).toDateString() === new Date(b).toDateString();
+
+    const onRespond = async (k: RespChoice, dayMs: number, note: string): Promise<boolean> => {
+      const others = k === "offer" ? offerOthers(q, queries, qaIsLive) : [];
+      const uid = currentUser.id;
+      let snap;
+      try {
+        snap = await takeSnapshot(uid, [q.id, ...others.map((o) => o.id)]);
+        await saveResponseShared(scriptDb, { q, agent: ag, ms }, respondDefaults(k, new Date(dayMs), note, others));
+      } catch (e) {
+        console.error("[query card] response save failed", e);
+        showToast({ message: "Couldn't save the response. Nothing was changed." });
+        return false;
+      }
+      const kept = note.trim() && k !== "pass" ? note.trim() : "";
+      if (kept) await addJournalEntry(q.id, kept);
+      setQcCardFresh("__last");
+      window.setTimeout(() => setQcCardFresh(null), 1600);
+      const s0 = snap;
+      showUndoBar({
+        message: `Saved. ${RESP_SAVED[k]} added to the story.`,
+        sub: k === "pass" ? "CLOSED · ADDED TO YOUR WALL OF NO" : k === "offer" ? "DECIDE BY YOUR DATE" : "YOUR MOVE",
+        undo: async () => {
+          await restoreSnapshot(s0);
+          if (kept) { const j = journalEntries.find((x) => x.queryId === q.id && x.entryText === kept); if (j) await deleteJournalEntry(j.id); }
+        },
+      });
+      return true;
+    };
+
+    const onSaveEdits = async (e: CardEdits): Promise<boolean> => {
+      const uid = currentUser.id;
+      let snap;
+      let agentUndo: (() => Promise<boolean>) | undefined;
+      try {
+        snap = await takeSnapshot(uid, [q.id, ...(await offerMarkedBy(uid, q.id))]);
+        const extra: Record<string, unknown> = {};
+        /* 1 · the dates (both stores, then recompute); a moved send moves dateSent, a moved latest nudge its date */
+        const lastNudge = [...steps].reverse().find((x) => /nudge/i.test(x.title));
+        for (const [aid, txt] of Object.entries(e.dates)) {
+          const stp = steps.find((x) => x.activityId === aid);
+          const ms0 = parseDay(txt, now);
+          if (!stp || ms0 == null || e.removed.includes(aid) || (stp.ms != null && sameDay(ms0, stp.ms))) continue;
+          await editActivity(q.id, aid, { date: dayIso(new Date(ms0)) });
+          if (stp.root) extra.dateSent = dayIso(new Date(ms0));
+          if (lastNudge && lastNudge.activityId === aid) extra.lastNudgeSentDate = dayIso(new Date(ms0));
+        }
+        /* 2 · what was sent: a package edition, or the pieces chosen individually */
+        let next: SentNext | null = null;
+        if (e.packageKey != null && e.packageKey !== recKey && e.packageKey !== "__ind") {
+          const picked = editions.find((c) => c.key === e.packageKey);
+          if (picked) next = packageNext(picked, recordedPortion);
+        } else if (Object.keys(e.pieces).length || (e.packageKey === "__ind" && recKey !== "__ind")) {
+          const on = (k: string) => e.pieces[k] ?? has(k);
+          next = individualNext({ ql: on("ql"), syn: on("syn"), s: { ...blankSample(), unit: "none" } }, qlV, synV, on("sample") ? recordedPortion : "");
+        }
+        /* a change of record is a change of how it went, of package or edition, or of the pieces' words — a query with
+           nothing recorded has an empty summary either way, so the words alone would call a switch "no change" */
+        const recChanged = !!next && (next.summary !== (q.sentMaterials ?? "") || next.sentHow !== rec.how
+          || (next.id ?? null) !== (rec.packageId ?? null) || (next.edition ?? null) !== (rec.edition ?? null));
+        if (next && recChanged) Object.assign(extra, sentCorrectionFields(scriptDb, q, ms, next));
+        else next = null;
+        if (Object.keys(extra).length) await updateQuery(q.id, extra as Partial<Query>, next?.id ? { stampPackage: next.id } as never : undefined);
+        const oldPkg = q.sentPackageId || q.packageId;
+        if (next && oldPkg && oldPkg !== next.id) await scriptDb.reconcileStamps([oldPkg]);
+        /* 3 · the steps removed (one batch: the entry, its feed row and the fields it owned) */
+        if (e.removed.length) await deleteTimelineEntries(uid, q.id, e.removed);
+        /* 4 · the step added, through the journey's own write for that step */
+        if (e.added && e.added.kind) {
+          const fresh = (await getDoc(doc(db, "users", uid, "queries", q.id))).data() ?? {};
+          const q2 = { ...q, ...fresh, id: q.id } as Query;
+          const day = new Date(parseDay(e.added.date, now)!);
+          const [kind, sub] = e.added.kind.split(":");
+          if (kind === "r") {
+            const t = sub as RespChoice;
+            const others = t === "offer" ? offerOthers(q2, queries, qaIsLive) : [];
+            await saveResponseShared(scriptDb, { q: q2, agent: ag, ms }, respondDefaults(t, day, "", others));
+          } else if (kind === "s") {
+            const sk = sub as SentKind;
+            await saveSent(scriptDb, q2, { kind: sk, sent: day, ...sentDefaults(sk, day) });
+          } else if (kind === "nudge") {
+            const nd = nudgeDefaults(q2, ag, day);
+            await saveNudgeSent(scriptDb, q2, ag, { sent: day, then: nd.then, via: nd.via, said: "", viaWords: viaLabel(nd.via) });
+          }
+        }
+        /* 5 · the agent's own record, through the agent card's save path (its own snapshot and undo) */
+        if (ag) {
+          const patch: AgentEditPatch = {};
+          const a0 = e.agent;
+          if (a0.name != null && a0.name.trim() !== (ag.name ?? "")) patch.name = a0.name.trim();
+          if (a0.agency != null && a0.agency.trim() !== (ag.agency ?? "")) patch.agency = a0.agency.trim();
+          if (a0.email != null && a0.email.trim() !== (ag.email ?? "")) patch.email = a0.email.trim();
+          if (a0.replyWeeks != null) {
+            const w = a0.replyWeeks.trim() === "" ? null : Number(a0.replyWeeks.trim());
+            if (w !== (typeof ag.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null)) patch.responseTimeWeeks = w;
+          }
+          if (Object.keys(patch).length) {
+            const out = await commitCardSave({ uid, agent: ag, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
+            if ("error" in out.res) throw new Error(String(out.res.error));
+            agentUndo = out.undo;
+          }
+        }
+      } catch (err) {
+        console.error("[query card] edit save failed", err);
+        if (snap) { try { await restoreSnapshot(snap); } catch { /* the bar below says so */ } }
+        showToast({ message: "Couldn't save the changes. Nothing was changed." });
+        return false;
+      }
+      const s0 = snap;
+      setQcCardFresh(e.added ? "__last" : null);
+      if (e.added) window.setTimeout(() => setQcCardFresh(null), 1600);
+      showUndoBar({
+        message: `Changes saved · ${ag?.name || ag?.agency || "The agent"}`,
+        sub: e.removed.length ? `${e.removed.length} ${e.removed.length === 1 ? "STEP" : "STEPS"} REMOVED` : "THE QUERY IS UPDATED",
+        undo: async () => { await restoreSnapshot(s0); if (agentUndo) await agentUndo(); },
+      });
+      return true;
+    };
+
+    return (
+      <QcQueryCard149
+        row={row}
+        nowMs={now}
+        msTitle={ms?.title ?? null}
+        packageName={sv.how === "package" ? sv.name : null}
+        sent={sent}
+        agent={{
+          name: ag?.name || ag?.agency || row.agentName,
+          agency: ag?.name ? (ag?.agency ?? "") : "",
+          email: ag?.email ?? "",
+          replyWeeks: typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null,
+          firstQueried: row.sentMs != null ? `${fieldDay(row.sentMs)}${row.dayN != null ? ` · day ${row.dayN}` : ""}` : "Not dated",
+          first: (ag?.name || "").trim().split(/\s+/)[0] || null,
+        }}
+        steps={steps}
+        freshKey={qcCardFresh === "__last" ? (steps[steps.length - 1]?.activityId ?? steps[steps.length - 1]?.key ?? null) : qcCardFresh}
+        stand={stand}
+        due={row.court === "closed" ? { line: nl.line, hot: false } : { line: nl.line, hot: nl.hot }}
+        primary={door ? { label: door.label, respond: door.mode === "resp", close: door.mode === "close" } : null}
+        index={idx}
+        total={order.length}
+        notes={journalEntries.filter((j) => j.queryId === q.id)
+          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
+          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" }))}
+        mode={qcCardMode}
+        onMode={setQcCardMode}
+        onClose={fromAgent ? closeFromAgent : closeQueryCard}
+        onStep={(d) => { const nid = order[idx + d]; if (nid) { cardSetRef.current = order; onOpenQuery?.(nid); } }}
+        onPrimary={() => { if (!door) return; if (door.mode === "resp") setQcCardMode("respond"); else stepRow({ mode: door.mode, queryId: q.id }); }}
+        onCloseQuery={() => stepRow({ mode: "close", queryId: q.id })}
+        onContactList={() => { if (ag) routerNav(`/agents?agent=${encodeURIComponent(ag.id)}`); else onNavigate?.("agents"); }}
+        onCopyEmail={() => {
+          if (!ag?.email) return;
+          const em = ag.email;
+          void copyText(em).then((ok) => showToast({ message: ok ? `Copied ${em}` : "Couldn't copy the email" }));
+        }}
+        onOpenPiece={() => { if (sv.how === "package") onNavigate?.("manuscripts", "Submission packages"); else routerNav("/manuscripts/versions"); }}
+        onAddNote={(t) => { void addJournalEntry(q.id, t).then(() => showToast({ message: `Note added for ${first}` })); }}
+        onRespond={onRespond}
+        packageChoices={packageChoices}
+        packageKey={recKey}
+        pieces={pieces}
+        stepChoices={stepChoices}
+        removable={removable}
+        onSaveEdits={onSaveEdits}
+      />
+    );
+  })();
+  /* ══ v149 Part D — THE HEADER'S ACTIONS IN THE SAME PANEL: a new query card, and "Who replied?" ══════════════════ */
+  const qcFlowNode = (() => {
+    if (!qcDesk || !qcFlow || !currentUser) return null;
+    const now = Date.now();
+    if (qcFlow.kind === "who") {
+      /* every live query in the page's scope, once: waiting on the agent first, then those already with the writer */
+      const items = qcScoped.filter((r) => qaIsLive(r.query)).map((r) => ({
+        id: r.id, initials: r.initials, name: r.agentName, agency: r.agency, status: r.status, statusLabel: STAGE_NAME[r.status], you: r.court !== "agent",
+      })).sort((a, b) => a.name.localeCompare(b.name));
+      return (
+        <QcWhoReplied149 items={items} onClose={() => setQcFlow(null)}
+          onPick={(id) => {
+            setQcFlow(null);
+            cardSetRef.current = qcVisible.map((r) => r.id);
+            if (cardQueryId === id) { setQcCardMode("respond"); return; }
+            qcCardPendingMode.current = { id, mode: "respond" };
+            onOpenQuery?.(id);
+          }} />
+      );
+    }
+    /* the book: the one the door named, else the page's (the header's own), else the first that can be queried */
+    const scopeMs = qcScope && qcScope !== QC_UNASSIGNED ? qcScope : manuscripts.length === 1 ? manuscripts[0].id : undefined;
+    const msId = resolveInitialManuscriptId(qcFlow.manuscriptId ?? scopeMs, pickableManuscripts(manuscripts));
+    const ms = manuscripts.find((m) => m.id === msId) ?? null;
+    if (!ms) return null;
+    const cards = packagesFor(ms.id, packages, scriptDb.versions, ms.bookVersions);
+    const forBook = queries.filter((q) => q.manuscriptId === ms.id);
+    const flowAgents: FlowAgent[] = agents.map((a) => ({
+      id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a), querying: forBook.some((q) => q.agentId === a.id && qaIsLive(q)),
+      via: (a.submissionMethod as SubmissionMethod) || null,
+    }));
+    const onSaveLog = async (x: LogAnswers): Promise<boolean> => {
+      const ag = agents.find((a) => a.id === x.agentId);
+      if (!ag) return false;
+      const uid = currentUser.id;
+      const sent = new Date(x.sent);
+      const pkCard = x.packageId ? cards.find((c) => c.id === x.packageId) ?? null : null;
+      const mat = { ql: x.ql, syn: x.syn, s: x.sample ? blankSample() : { ...blankSample(), unit: "none" as const } };
+      const qlV = currentVersion(ms.id, scriptDb.versions, ComponentType.QUERY_LETTER);
+      const synV = currentVersion(ms.id, scriptDb.versions, ComponentType.SYNOPSIS);
+      const id = doc(collection(db, "users", uid, "queries")).id;
+      const prev = previousQueryFor({ id: "__new__", agentId: ag.id, manuscriptId: ms.id, status: QueryStatus.QUERIED, dateSent: "" }, forBook, sent.getTime());
+      let snap;
+      try {
+        snap = await takeSnapshot(uid, [id]);
+        await saveLog(scriptDb, { id, manuscriptId: ms.id, agent: ag, sent, via: x.via, pkCard, mat, pieceV: pieceVersions(pkCard, mat, qlV, synV), basedOn: null, ...logDefaults(ag, sent), requery: !!prev });
+      } catch (e) {
+        console.error("[query card] log save failed", e);
+        showToast({ message: "Couldn't log the query. Nothing was saved." });
+        return false;
+      }
+      if (x.note) await addJournalEntry(id, x.note);
+      const s0 = snap;
+      const nm = (ag.name || ag.agency || "The agent").trim();
+      setQcFlow(null);
+      setQcCardFresh("__last");
+      window.setTimeout(() => setQcCardFresh(null), 1600);
+      cardSetRef.current = qcVisible.map((r) => r.id);
+      onOpenQuery?.(id);
+      showUndoBar({ message: `Logged. ${nm} is now in your Query Centre.`, sub: `SENT ${fieldDay(x.sent).toUpperCase()}`, undo: async () => { await restoreSnapshot(s0); } });
+      return true;
+    };
+    return (
+      <QcLogFlow149 nowMs={now} agents={flowAgents} seedAgentId={qcFlow.agentId} bookTitle={ms.title || "Untitled manuscript"}
+        packages={cards.map((c) => ({ id: c.id, name: c.name, ql: c.ql, syn: c.syn, sample: !!c.bookVersion }))}
+        defaultPackageId={ms.activePackageId && cards.some((c) => c.id === ms.activePackageId) ? ms.activePackageId : null}
+        onClose={() => setQcFlow(null)} onSave={onSaveLog} />
+    );
+  })();
   const qcOpenCardNode = panelRow && activeQuery && qcById.get(activeQuery.id) ? (
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
@@ -5978,7 +6317,7 @@ export const Queries: React.FC<{
     );
   })() : null;
   const pipStepOpen = useSyncExternalStore(subscribeDrawer, () => { const r = currentDrawerRequest(); return !!r && isPracticeId(r.queryId) && !!r.panel; }, () => false);
-  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking);
+  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking || qcFlow);
   const guideFlowShown = pipFlow ?? guideFlow;
   useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
 
@@ -7389,7 +7728,7 @@ export const Queries: React.FC<{
             hasOpen={!!(panelRow && activeQuery)}
             body={
               showGridSkeleton ? (
-                qcDesk ? (qcListView === "cards" ? <QcCardsSkeleton /> : <QcList132Skeleton />) : <QcListSkeleton />
+                qcDesk ? <QcList132Skeleton /> : <QcListSkeleton />
               ) : !qcDesk && emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -7450,21 +7789,8 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
-                  /* navy-bar v1 A1 — the navy bar's count ("27 QUERIES" / "8 of 27 queries": the applied row's own figures) and
-                     the Cards / List view */
-                  narrowed={qc140Chips.length > 0}
-                  view={qcListView}
-                  onView={setQcListView}
-                  /* v142 §D — a card's book, and its tabs: Tracking and Agent open the panel on that tab; Materials opens
-                     Tracking and brings the ledger's "what was sent" slip into view (the panel has no Materials tab) */
-                  bookOf={(r) => manuscripts.find((m) => m.id === r.manuscriptId)?.title ?? null}
-                  onCardTab={(id, t) => {
-                    if (isPracticeId(id)) { openPip(); return; }
-                    requestPanelTab(t === "agent" ? "agent" : "tracking");
-                    cardSetRef.current = qcVisible.map((r) => r.id);
-                    onOpenQuery?.(id);
-                    if (t === "materials") revealSentSlip();
-                  }}
+                  /* v149 B1 — the bar's "heard back": the breakdown card's own figure (one computation, one number) */
+                  heard={{ pct: qcBandFig.heardPct, of: qcBandFig.more + qcBandFig.passed, total: qcScoped.length }}
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
@@ -7503,6 +7829,9 @@ export const Queries: React.FC<{
                   find={qcFind}
                   onFind={setQcFind}
                   findRef={qcSheetFindRef}
+                  viewRow={<QcViewRow149 counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
+                    onView={(k) => qcShowWhere(pressView(qcF138.where, k), false)} find={qcFind} onFind={setQcFind}
+                    findRef={qcFull ? undefined : qcSheetFindRef} loading={showGridSkeleton} />}
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
@@ -7666,11 +7995,11 @@ export const Queries: React.FC<{
               and never the panel: the journey's form is portalled into this element's slot. */}
           {/* v139 §B — the same one host holds the practice query's panel while it is open (built over Pip's in-memory
               object); the page's own query and the picker otherwise. Opening Pip closes any real query first. */}
-          {(pipShown || (qcOpenCardNode && cardQueryId) || picking) && (
-            <QueryPanelHost id={pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
-              step={pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
-              onClose={pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
-              {pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
+          {(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode) && (
+            <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
+              step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
+              onClose={qcFlowNode ? () => setQcFlow(null) : pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
+              {qcFlowNode ?? (pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? (qcCardNode ?? qcOpenCardNode) : null)}
             </QueryPanelHost>
           )}
           </>

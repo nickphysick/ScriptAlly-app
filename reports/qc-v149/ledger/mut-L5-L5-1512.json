@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L5-1512",
+  "where": "heard back shown",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Filters in the bar",
+  "ok": true,
+  "detail": "[data-qc140='filters']"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Group by in the bar",
+  "ok": true,
+  "detail": "[data-qc140='group']"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Sort in the bar",
+  "ok": true,
+  "detail": "[data-qc1421='sort']"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Full screen in the bar",
+  "ok": true,
+  "detail": "[data-qc149='full']"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no the Cards/List switch",
+  "ok": true,
+  "detail": ".cl20-vs, [data-qc144='view-bar'], [data-qc142='view-tb']"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no the count",
+  "ok": true,
+  "detail": "[data-qc144='count']"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no the jump row",
+  "ok": true,
+  "detail": "[data-qc140='jump'], .qc140-jump"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "six column tracks",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "the last heading is within 40 of the right edge",
+  "ok": true,
+  "detail": "26.015625"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "full screen: no Cards/List switch",
+  "ok": true,
+  "detail": "switch in full screen"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "full screen: Exit full screen",
+  "ok": true,
+  "detail": "no exit"
+ }
+]

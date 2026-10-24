@@ -19,7 +19,6 @@
  * `expectedSendDate` and `sendReminderDate` and NOTHING else: no entry is edited, so nothing is recomputed.
  */
 import React, { useEffect, useState } from "react";
-import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, type Query } from "../../../types";
 import { activityEventLabel } from "../../../lib/activityEvent";
@@ -27,9 +26,9 @@ import { dayDiff, dayIso, dm, fmt, pastAnchors, toDay, up, type Anchor } from ".
 import { EVENT_LABEL, isEventKey } from "../../../lib/queryActions/eventKeys";
 import { Chips, DateField, Fl, Note, SampleControl, TextBox, Toggle, Who } from "../controls";
 import { ComponentType } from "../../../types";
-import { currentVersion, editionsOn, readSummary, sentPieces, summaryOf, summaryWith, type EditionChoice } from "../../../lib/queryActions/packages";
+import { currentVersion, editionsOn, readSummary, sentPieces, summaryOf, type EditionChoice } from "../../../lib/queryActions/packages";
 import { sentRecordOf } from "../../../lib/queryActions/sentRecord";
-import { packageVersion } from "../../../lib/versionsV2";
+import { individualNext, packageNext, sentCorrectionFields } from "../../../lib/queryActions/sentCorrect";
 import { bookOf, blankSample, type Materials, type Sample } from "../../../lib/queryActions/sample";
 import { ordinal } from "../SentHow";
 import type { JourneyProps } from "../QueryDrawer";
@@ -201,20 +200,8 @@ export function EditJourney({ req, today, children }: JourneyProps) {
   const indMat: Materials = sent?.how === "individual" ? sent.mat : { ql: true, syn: !!synV, s: blankSample() };
   /** The new record, or null when nothing about what was sent has changed. */
   const next = !sent ? null : sent.how === "package"
-    ? (picked ? {
-        sentHow: "package" as const, id: picked.id, edition: picked.edition, name: picked.name,
-        summary: summaryWith([
-          ...sentPieces({ ql: picked.ql, syn: picked.syn, s: { ...blankSample(), unit: "none" } }, { ...picked, bookVersion: null }).filter((x) => x.key !== "other"),
-          ...(recordedPortion || picked.bookVersion ? [{ key: "sample" as const, label: "Sample", value: [recordedPortion, picked.bookVersion].filter(Boolean).join(" · ") }] : []),
-          ...(picked.other ? [{ key: "other" as const, label: "Also", value: picked.other }] : []),
-        ], picked.name, null),
-        versions: [picked.qlId, picked.synId].filter((x): x is string => !!x),
-      } : null)
-    : {
-        sentHow: "individual" as const, id: null, edition: null, name: null,
-        summary: summaryWith(sentPieces(sent.mat, { qlVersion: qlV?.versionName ?? null, synVersion: synV?.versionName ?? null, bookVersion: null, other: null }), null, null),
-        versions: [sent.mat.ql ? qlV?.id : null, sent.mat.syn ? synV?.id : null].filter((x): x is string => !!x),
-      };
+    ? (picked ? packageNext(picked, recordedPortion) : null)
+    : individualNext(sent.mat, qlV, synV);
   const sentChanged = !!next && next.summary !== (q.sentMaterials ?? "");
   const describe = (name: string | null, how: string) => (name ? `${name}` : how === "unrecorded" ? "not recorded" : "chosen individually");
   const requestRungs = (log ?? []).filter((x) => x.status === QueryStatus.PARTIAL_REQUESTED || x.status === QueryStatus.FULL_REQUESTED || x.status === QueryStatus.REVISE_RESUBMIT);
@@ -290,27 +277,9 @@ export function EditJourney({ req, today, children }: JourneyProps) {
       if (moved && isLatestNudge) extra.lastNudgeSentDate = dayIso(day);
       /* §A4 — the snapshot is REPLACED, and the old summary kept beside the correction. Results move
          by themselves: they are worked out from the query, never stored on an entry (LP10). */
-      if (sentChanged && next) {
-        const none = deleteField() as unknown as undefined;
-        Object.assign(extra, {
-          sentHow: next.sentHow,
-          packageId: next.id ?? "",
-          sentPackageId: next.id ?? none,
-          sentPackageEdition: next.edition ?? none,
-          sentPackageName: next.id ? (next.name ?? none) : none,
-          basedOnPackageId: none, basedOnPackageEdition: none, sentChanges: none,
-          sentMaterials: next.summary,
-          sentVersions: next.versions,
-          sentCorrectedAt: new Date().toISOString(),
-          sentCorrectedFrom: q.sentMaterials ?? "",
-        });
-        /* Versions v2 (D3) — a correction of what was sent is a correction of which book version went: the corrected
-           package's version replaces the stored one. With no package, or a package stating none, the record stands. */
-        if (next.id) {
-          const pv = packageVersion({ ...q, sentHow: "package", packageId: next.id, sentPackageId: next.id, sentPackageEdition: next.edition ?? undefined } as Query, db.packages, db.versions);
-          if (pv && (ms?.bookVersions ?? []).some((v) => v.id === pv)) extra.bookVersionId = pv;
-        }
-      }
+      /* §A4 — the snapshot is REPLACED, and the old summary kept beside the correction (v149: the shared fields,
+         lib/queryActions/sentCorrect, which the query card's edit mode writes too). */
+      if (sentChanged && next) Object.assign(extra, sentCorrectionFields(db, q, ms, next));
       if (Object.keys(extra).length) await db.updateQuery(q.id, extra as Partial<Query>, sentChanged && next?.id ? { stampPackage: next.id } : undefined);
       /* the stale-stamp rule (Nick, 28 Sep): the package this query WAS sent with may now have none */
       const oldPkg = q.sentPackageId || q.packageId;

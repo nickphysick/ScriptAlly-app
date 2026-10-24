@@ -1,0 +1,28 @@
+/* ══ PageHeaderCard — moved from versionsV2.app.css (v2.2 A, `.vv2 .hb*`) for Query Centre v149, values unchanged ══
+   ⚠️ EVERY SELECTOR KEEPS THE SPECIFICITY THE VERSIONS RULE HAD (0-2-0 / 0-2-1 / 0-3-1). Versions opens with
+      `.vv2 :where(*:not(svg, svg *)) { all: revert }` at 0-1-0, so a weaker selector here would be reverted on that page.
+   ⚠️ THE FACES ARE DECLARED ON THE ROOT, not read from `.vv2`'s --machine/--serif/--mono, which do not exist on any
+      other page. Same values: --machine was var(--sp-type), --serif var(--sp-serif). Proved equal by QC149-L0.
+   The card's MARGIN is the page's (Versions keeps `.vv2 .hb { margin: 24px 24px 0 }`). */
+.phc.phc { --phc-machine:var(--sp-type);--phc-serif:var(--sp-serif);--phc-mono:'JetBrains Mono',monospace;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:center;gap:32px;padding:30px 36px;border-radius:18px;background:#fbf8f4;box-shadow:0 1px 2px rgba(28,19,15,.05),0 18px 34px -28px rgba(28,19,15,.4),inset 0 0 0 1px rgba(28,19,15,.1);overflow:hidden }
+.phc.phc h1 { display:flex;align-items:center;gap:12px;margin:0;font:400 34px/1.1 var(--phc-machine);color:#1c130f;letter-spacing:-.01em }
+.phc .phc-tag { display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#f6e2d8;font:600 10px var(--phc-mono);letter-spacing:.14em;text-transform:uppercase;color:#a2452a }
+.phc .phc-tx>p { max-width:640px;margin:12px 0 0;font:400 16.5px/1.55 var(--phc-serif);color:rgba(28,19,15,.78) }
+.phc .phc-tx>p b { font-weight:600;color:#1c130f }
+.phc .phc-b { display:flex;gap:10px;margin-top:20px }
+.phc .phc-b button { height:42px;padding:0 20px;border-radius:10px;font:400 15px var(--phc-machine);cursor:pointer }
+.phc .phc-p { border:0;background:#2a3a52;color:#f4eee5;box-shadow:0 6px 14px -8px rgba(42,58,82,.6) }
+.phc .phc-p:hover { background:#334763 }
+.phc .phc-s { border:1px solid rgba(28,19,15,.22);background:#fff;color:#1c130f }
+.phc .phc-s:hover { border-color:rgba(28,19,15,.45) }
+.phc .phc-b button:focus-visible { outline:2px solid #c9765d;outline-offset:2px }
+.phc .phc-art { position:relative;height:150px;display:grid;place-items:center }
+.phc .phc-art img { height:180px;width:auto;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(28,19,15,.18)) }
+/* the `sheet` container is the Versions page root's (versionsV2.app.css); on a page without one this never applies */
+@container sheet (max-width:1200px) {
+  .phc.phc { grid-template-columns:minmax(0,1fr) 210px;padding:26px 28px }
+  .phc .phc-art img { height:150px }
+}
+/* brand.tsx forces h1/h2/h3 to its serif with !important; the claw-back (was `.vv2.vv2 .hb h1`, 0-3-1) */
+.phc.phc.phc h1 { font-family: var(--phc-machine) !important; }

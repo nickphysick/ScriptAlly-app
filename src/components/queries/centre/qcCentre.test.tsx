@@ -124,7 +124,9 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
     expect(page.split("<QueryPanelHost").length - 1).toBe(1);
     /* v139 — retargeted, same law: the ONE host's condition gained the practice query (Pip's panel uses this host
        rather than a second one), so it is still one mount for a chosen query, the picker, or Pip */
-    expect(page).toContain("{(pipShown || (qcOpenCardNode && cardQueryId) || picking) && (");
+    /* v149 — retargeted, same law: the one host's condition gained the header's two flows (a new query, "Who
+       replied?"), which open in this host rather than a second one */
+    expect(page).toContain("{(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode) && (");
     expect(page).not.toContain("<QcQueryModal");
     expect(page).not.toContain("qcDocked === false && (");
   });

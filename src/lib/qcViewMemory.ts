@@ -34,12 +34,12 @@ const STATUSES: readonly string[] = Object.values(QueryStatus);
 
 export const QC_VIEW_KEY = "qh.qc.view";
 export const QC_VIEW_VERSION = 1;
-/** v142 §A — Cards or List; List by default. Carried inside version 1 (absent reads as List), as the Contact list's is. */
-export type QcListView = "cards" | "list";
-export interface QcView { group: GroupBy; sort: Qc138Sort; density: QcDensity; view: QcListView }
+/* ⚠️ v149 B5 — THE PAGE IS LIST-ONLY: v142's `view` field ("cards" | "list") is no longer read or written. A record still
+   carrying `view: "cards"` keeps its other fields and opens the list. */
+export interface QcView { group: GroupBy; sort: Qc138Sort; density: QcDensity }
 /** v141 §C — the list opens grouped by Status (was "Who it's with", `attention`); a saved choice is still honoured */
 export const DEFAULT_QC_GROUP: GroupBy = "status";
-export const DEFAULT_QC_VIEW = (): QcView => ({ group: DEFAULT_QC_GROUP, sort: { ...DEFAULT_SORT_138 }, density: "comfortable", view: "list" });
+export const DEFAULT_QC_VIEW = (): QcView => ({ group: DEFAULT_QC_GROUP, sort: { ...DEFAULT_SORT_138 }, density: "comfortable" });
 
 /** a stored view made safe, field by field — null when it is not this version's shape at all */
 export function sanitiseQcView(raw: unknown): QcView | null {
@@ -53,12 +53,11 @@ export function sanitiseQcView(raw: unknown): QcView | null {
     group: GROUPS.includes(r.group as GroupBy) ? (r.group as GroupBy) : d.group,
     sort: { key, reversed: key === s.key && s.reversed === true },
     density: r.density === "compact" ? "compact" : "comfortable",
-    view: r.view === "cards" ? "cards" : "list",
   };
 }
 
 export const serialiseQcView = (m: QcView): string =>
-  JSON.stringify({ v: QC_VIEW_VERSION, group: m.group, sort: { key: m.sort.key, reversed: m.sort.reversed }, density: m.density, view: m.view });
+  JSON.stringify({ v: QC_VIEW_VERSION, group: m.group, sort: { key: m.sort.key, reversed: m.sort.reversed }, density: m.density });
 
 /** The device's view. Absent reads as the defaults — except that a device still carrying v132's `sa.qcList.v1` keeps
  *  its grouping and density, moved once into `qh.qc.view` (the old key is removed). */

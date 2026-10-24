@@ -57,7 +57,9 @@ const PAGES: PageMap[] = [
   { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-nb1='book']" }, /* RE-POINTED (navy-bar v1 B1): the Contact list's content starts with the address book */
   /* RE-POINTED (Contact list v20 §A): the Contact list's content now opens on its title row (the count, the Cards / List
      pill, Full screen), which sits where the toolbar did; the toolbar follows 54 lower */
-  { key: "queries", route: "/queries", header: "[data-qc138='header']", eyebrow: "[data-qc138='eyebrow']", title: "[data-qc138='title']", byline: "[data-qc138='byline']", acts: "[data-qc138='acts']", art: "[data-qc138='hawk']", right: "[data-qc138='chart-col']", rightTokenW: true, content: ".qcv-group > .qcv-page" },
+  /* RETIRED FOR THE QUERY CENTRE (v149, QC149 L13): its open header is gone — the page opens on the shared PageHeaderCard
+     (Part A), held to the Versions card by QC149-L1 and to the view row's edges by QC149-L2. Its pinned layout is still
+     HR1-8's ("queries pinned"), untouched. */
   { key: "analytics", route: "/queries/analytics", header: "[data-a21='header']", eyebrow: "[data-a21='eyebrow']", title: "[data-a21='title']", byline: "[data-a21='byline']", acts: "[data-a21='acts']", right: "[data-a21='card']", rightTokenW: true, content: ".a21-desk" },
   { key: "responses", route: "/queries/responses", header: "[data-rsp='header']", eyebrow: "[data-rsp='eyebrow']", title: ".rsp-hd h1", byline: "[data-rsp='byline']", acts: "[data-rsp='acts']", right: "[data-rsp='card']", content: ".rsp-pos" },
   { key: "discover", route: "/agents/discover", header: "[data-dv1='header']", eyebrow: "[data-dv1='header'] [data-dv1='eyebrow']", title: ".dv1-hd h1", byline: "[data-dv1='byline']", acts: "[data-dv1='header'] [data-dv1='acts']", right: "[data-dv1='header'] .dv1-card", rightTokenW: true, content: ".dv1-hd + *", init: "live" },
@@ -193,7 +195,7 @@ test.describe("Header rules v1.1", () => {
         if (r.content) L["HR1-6"].check(`${w} content − stack bottom = 44`, near(r.content.t - r.stackB!, 44, 1), `${(r.content.t - r.stackB!).toFixed(2)} (content ${r.content.t}, stack ${r.stackB})`);
       }
       /* HR1-7 — the pairs under one folder tab: Contact list / Discover, Query Centre / Analytics */
-      for (const [a, b] of [["contacts", "discover"], ["queries", "analytics"]] as const) {
+      for (const [a, b] of [["contacts", "discover"]] as const) { /* v149: the queries/analytics pair went with the QC hero */
         const A = all[a]?.[vp.width], B = all[b]?.[vp.width];
         const p = L["HR1-7"];
         const w = `${a}/${b} ${vp.width}`;

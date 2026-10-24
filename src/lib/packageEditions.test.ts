@@ -174,8 +174,12 @@ describe("sentPackageName — the name as it was on the day (Nick, 28 Sep)", () 
     expect(sentHowWords({ sentHow: "package", sentPackageId: "p1", sentPackageName: "Standard" }, "Live")).toBe("Sent as the Standard package");
   });
   it("both writers set it: the log, and a correction (cleared when the correction is not a package)", () => {
-    expect(decls(read("src/components/queryActions/journeys/LogJourney.tsx"))).toContain("sentPackageName: pkCard.name");
-    expect(decls(read("src/components/queryActions/journeys/EditJourney.tsx"))).toContain("sentPackageName: next.id ? (next.name ?? none) : none");
+    /* v149 RE-POINTED (relocation): both writers' fields moved to lib/queryActions (logSave, sentCorrect), which the
+       journeys and the query card call. Law held: the log and a correction both set the day's name — both halves. */
+    expect(decls(read("src/components/queryActions/journeys/LogJourney.tsx"))).toContain("await saveLog(db, {");
+    expect(decls(read("src/lib/queryActions/logSave.ts"))).toContain("sentPackageName: p.pkCard.name");
+    expect(decls(read("src/components/queryActions/journeys/EditJourney.tsx"))).toContain("sentCorrectionFields(db, q, ms, next)");
+    expect(decls(read("src/lib/queryActions/sentCorrect.ts"))).toContain("sentPackageName: next.id ? (next.name ?? none) : none");
   });
 });
 

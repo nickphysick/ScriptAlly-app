@@ -157,8 +157,15 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
    */
   it("every timeline edit funnels through the fork — no direct editActivity survives", () => {
     const calls = [...src.matchAll(/editActivity\(/g)].length;
-    /* exactly two: the desk's commit, and its undo closure — both inside CorrectionEdit's onSave */
-    expect(calls, `editActivity is called ${calls} times; expected 2 (commit + undo)`).toBe(2);
+    /* exactly three: the desk's commit and its undo closure — both inside CorrectionEdit's onSave — and (v149, the pack's
+       baked decision: editing happens IN the query card) the card's edit save, the one other sanctioned route, asserted
+       below to sit inside that save and nowhere else. The law is "no stray editActivity", not "one route". */
+    expect(calls, `editActivity is called ${calls} times; expected 3 (desk commit + undo, the card's edit save)`).toBe(3);
+    const cs = src.indexOf("const onSaveEdits = async (e: CardEdits)");
+    const ce = src.indexOf("return (\n      <QcQueryCard149", cs);
+    expect(cs, "the card's edit save").toBeGreaterThan(-1);
+    expect(ce, "the end of the card's block").toBeGreaterThan(cs);
+    expect([...src.slice(cs, ce).matchAll(/editActivity\(/g)].length, "the card's edit save calls editActivity once").toBe(1);
     /* the correcting host's OWN desk — the verb desk (respond-nudge) shares the component and
        carries no editActivity, so a first-match slice reported an escape that never happened */
     const guard = src.indexOf("{correcting && activeQuery && (");

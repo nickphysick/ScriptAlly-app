@@ -12,13 +12,14 @@
  */
 import { previousQueryFor } from "../../../lib/requery";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { materialsToQuery, saveLog, type IfNo } from "../../../lib/queryActions/logSave";
 import { useNavigate } from "react-router-dom";
 import { collection, doc } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
-import { ComponentType, QueryStatus, SubmissionMethod, type Agent, type QueryMaterial } from "../../../types";
+import { ComponentType, QueryStatus, SubmissionMethod, type Agent } from "../../../types";
 import {
-  addDays, dayDiff, dayIso, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
+  addDays, dayDiff, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
 import {
   bookOf, capFirst, materialsName, sameSample, sampleName, type Materials, type Sample,
@@ -39,23 +40,10 @@ import {
   agencyOf, agentName, dayIn, dayOut, firstName, isLive, seedOf, viaLabel, viaOptions, whoLine,
 } from "./common";
 
-type IfNo = "nudge" | "close" | "nothing";
-const IF_NO_STORED: Record<IfNo, string> = {
-  nudge: "Remind me to nudge",
-  close: "Mark as no response automatically",
-  nothing: "Do nothing",
-};
-
 const noSample = (): Sample => ({ unit: "none", amt: 3, from: 1, sect: false, fu: null });
 
-/** Materials → the query's stored `materialsWanted`, the shape the rest of the app reads. */
-export function materialsToQuery(m: Materials): (string | QueryMaterial)[] {
-  const out: (string | QueryMaterial)[] = [];
-  if (m.ql) out.push("Query Letter");
-  if (m.syn) out.push("Synopsis");
-  if (m.s.unit !== "none") out.push({ material: "Sample Pages", type: m.s.unit, quantity: m.s.amt });
-  return out;
-}
+/** Materials → the query's stored `materialsWanted` (v149: one definition, in lib/queryActions/logSave). */
+export { materialsToQuery };
 
 function readActiveManuscript(): string | null {
   try { return localStorage.getItem("scriptally_active_manuscript_id"); } catch { return null; }
@@ -529,38 +517,15 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     touched: () => [newId.current],
     commit: async () => {
       if (!agent) throw new Error("No agent chosen");
-      /* §C3 — how the materials were recorded, frozen here and never read back from a live package. */
-      const summary = summaryWith(pieces, pkCard?.name ?? null, !pkCard && basedOn && changes.length ? basedOn.name : null);
-      const versionIds = [pieceV.qlId, pieceV.synId].filter((x): x is string => !!x);
-      const record: Record<string, unknown> = pkCard
-        ? { sentHow: "package", sentPackageId: pkCard.id, sentPackageEdition: pkCard.edition, sentPackageName: pkCard.name }
-        : { sentHow: "individual", ...(basedOn && changes.length ? { basedOnPackageId: basedOn.id, basedOnPackageEdition: basedOn.edition, sentChanges: changes } : {}) };
+      /* §C3 — how the materials were recorded, frozen here and never read back from a live package. v149: the payload
+         and the write are the shared log save (lib/queryActions/logSave), the query card's "+ Log a query" too. */
       const writerExpected = !wks || expectMode !== "usual";
-      const payload: Record<string, unknown> = {
-        id: newId.current,
-        manuscriptId: msId,
-        agentId: agent.id,
-        /* kept in step with sentPackageId for older readers — empty when not a package (§C3) */
-        packageId: pkCard ? pkCard.id : "",
-        materialsWanted: materialsToQuery(mat),
-        personalisationNotes: "",
-        sendMethod: via,
-        dateSent: dayIso(sent),
-        ifNoResponse: IF_NO_STORED[ifNo],
-        ...record,
-        sentMaterials: summary,
-        sentVersions: versionIds,
-        ...(nudgeDate ? { nudgeDate: dayIso(nudgeDate) } : {}),
-        ...(writerExpected ? { writerExpectedDate: dayIso(expect), writerExpectedSetAt: new Date().toISOString() } : {}),
-        ...(prev || (dup && requery) ? { requery: true } : {}),
-        ...(nrmnNow !== !!agent.noResponseMeansNo ? { nrmnOverride: nrmnNow } : {}),
-      };
-      const details = summary;
-      const res = await db.addQuery(payload as never, false, { eventKey: prev || (dup && requery) ? "requery_sent" : "query_sent", details, stampPackage: !!pkCard });
-      if (!res.success) throw new Error(res.error || "Couldn't log the query");
-      /* "Close it" is the app's existing auto-close, which fires from `responseDeadline` — so the
-         writer's choice writes that date, and only that choice does. */
-      if (ifNo === "close") await db.updateQuery(newId.current, { responseDeadline: dayIso(expect) });
+      await saveLog(db, {
+        id: newId.current, manuscriptId: msId, agent, sent, via, pkCard, mat, pieceV,
+        basedOn: !pkCard && basedOn ? { pk: basedOn, changes } : null,
+        expect, writerExpected, ifNo, nudgeDate, requery: !!(prev || (dup && requery)),
+        nrmnOverride: nrmnNow !== !!agent.noResponseMeansNo ? nrmnNow : null,
+      });
       const keep = { sent, via, how: (pkCard ? "package" : "individual") as "package" | "individual", pkg: pkCard ? pkCard.id : "custom", mat, manuscriptId: msId };
       return {
         queryId: newId.current,

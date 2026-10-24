@@ -5,12 +5,12 @@
  * Query Centre v140 §A — THE LIST'S TOOLBAR, rebuilt by navy-bar v1 (ref design-refs/navy-bar-address-book-v1/
  * query-centre-v144.html, "all in navy"):
  *
- *   unpinned (the navy bar, 52 tall): the count · the Cards / List switch · … · Filters · Group by · Sort
- *   full screen (the cream toolbar):  Find · Filters · Group by · Sort · the icon Cards / List switch · Exit full screen
+ *   unpinned (the navy bar, 52 tall): heard back · … · Filters · Group by · Sort · Full screen   (v149 B1)
+ *   full screen (the cream toolbar):  Find · Filters · Group by · Sort · Exit full screen       (v149: list only)
  *
  * The jump row is retired in both modes, and so is every keycap hint on the page (the keys still work). Sort is in both
- * views; the column headings are plain labels and sort nothing. Unpinned, Find and Full screen are the pill above the
- * list (QcList138's `.qc144-srow`).
+ * views; the column headings are plain labels and sort nothing. Unpinned, Find is in the view row above the list
+ * (QcHeader149's `QcViewRow149`).
  *
  * ⚠️ ONE POPOVER AT A TIME: Filters, Group by and Sort share one `usePopover`, which closes on an outside press, and
  *    Escape closes the open one through the escape stack (ESC_LEVEL.page) — before the pin's Escape (pageMode).
@@ -21,7 +21,7 @@ import { createPortal } from "react-dom";
 import { quietScroll, usePopover, type PopoverState } from "../../shell/ListPills";
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import type { QcDensity } from "../../../lib/qcListMemory";
-import { FULL_ICON, ViewSwitch, type ListView } from "../../shell/ViewTitleRow";
+import { FULL_ICON } from "../../shell/ViewTitleRow";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import "../../shell/findWell.css";
 import { QC_SORT_FIELDS } from "../../../lib/cardsSort";
@@ -139,18 +139,15 @@ export interface QcToolbar140Props {
   /** the Filters menu, drawn while it is open */
   filtersMenu: (pop: PopoverState<Qc140Pop>) => React.ReactNode;
   onPin: () => void;
-  /** v142 §A — the Cards / List view (the title row's pill and, in full screen, this toolbar's switch: one state) */
-  view: ListView;
-  onView: (v: ListView) => void;
-  /** navy-bar v1 A1 — the bar's count: what shows, of how many, and whether anything narrows the list */
-  count?: { shown: number; total: number; narrowed: boolean };
+  /** v149 B1 — the heard-back figure on the bar's left (unpinned) */
+  heard?: { pct: number; of: number; total: number };
   /** cards-sort-search v1 §B — the page's one sort, read and written by the Sort chip (both views since navy-bar v1) */
   sort: Qc138Sort;
   onSort: (s: Qc138Sort) => void;
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, count, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, view, onView, sort, onSort,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -162,18 +159,12 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
   return (
     <div className="qc140-tbw" data-qc140="toolbar-wrap">
       <div className="qc140-tb qc144-tb" data-qc140="toolbar" data-qc138="top" data-qcv="ws-head" data-pinned={pinned ? "" : undefined} ref={rowRef}>
-        {/* navy-bar v1 A1 — THE NAVY BAR'S LEFT: the count ("27 QUERIES", "8 of 27 queries" while narrowed), then the Cards /
-            List switch on the navy. The jump row is retired (both modes): Filters · Group by · Sort carry the list. Full
-            screen has neither: its navy band says the count, and the switch is the toolbar's icon pair. */}
-        {!pinned && count ? (
-          <span className="qc144-nt" data-qc144="count" aria-live="polite" aria-atomic="true">
-            {count.narrowed
-              ? <><b>{count.shown}</b>{" "}<span>of {count.total} {count.total === 1 ? "query" : "queries"}</span></>
-              : <><b>{count.total}</b>{" "}<span>{count.total === 1 ? "query" : "queries"}</span></>}
+        {/* v149 B1 — THE NAVY BAR'S LEFT: "37% heard back", the breakdown card's own figure (bandFigures). The count and the
+            Cards / List switch are gone: the page is list-only, and the view chips above the list carry the counts. */}
+        {!pinned && heard ? (
+          <span className="qc149-hb" data-qc149="heard" title={`${heard.of} of ${heard.total} agents have answered`}>
+            <b>{heard.pct}%</b>{" "}<span>heard back</span>
           </span>
-        ) : null}
-        {!pinned ? (
-          <ViewSwitch view={view} onView={onView} variant="pill" ns="qc144" probe="view-bar" noun="queries" disabled={loading} />
         ) : null}
         {/* A3 — in full screen the search is in this cream toolbar, a rounded white field left of Filters */}
         {pinned && onFind ? (
@@ -230,9 +221,15 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
         {/* v142 §A — no Pin on the page: "Full screen" lives in the title row (shell/ViewTitleRow). In full screen (today's
             pinned mode) the toolbar carries the icon Cards / List switch and "Exit full screen", after Filters, placed as
             on the Contact list (v20 §C). */}
+        {/* v149 B1 — Full screen, an outlined button on the navy (it left the pill row above the list) */}
+        {!pinned ? (
+          <button type="button" className="qc149-fs" data-qc149="full" data-qc144="full" data-qc142="full" data-qc140="pin" data-qc138="pin" data-pin-list=""
+            aria-pressed={false} aria-keyshortcuts="F" aria-label="Full screen" disabled={loading} onClick={onPin}>
+            {FULL_ICON}<span className="qc149-fsl">Full screen</span>
+          </button>
+        ) : null}
         {pinned ? (
           <>
-            <ViewSwitch view={view} onView={onView} variant="icons" labels={false} disabled={loading} ns="qc142" probe="view-tb" noun="queries" />
             <button type="button" className="qc140-pin qc142-xfs" data-qc140="pin" data-qc138="pin" data-qc142="full-tb" data-pin-list="" aria-pressed={pinned} aria-keyshortcuts="F"
               aria-label="Exit full screen" disabled={loading} onClick={onPin}>
               {FULL_ICON}<span className="qc140-pin-l">Exit full screen</span>

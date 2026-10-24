@@ -1,0 +1,17 @@
+/* ══ PageAlertBanner — moved from versionsV2.css (`.vv2 .wb*`) for Query Centre v149, values unchanged ══
+   ⚠️ Same specificity as the Versions rules (0-2-0 and up), for the same reason as pageHeaderCard.css: Versions reverts
+      every element at 0-1-0. The padding is the one the Versions page RENDERED: its generated sheet declared the base
+      rule twice and the later one (16px 18px 16px 20px) won.
+   The banner's MARGINS are the page's (Versions keeps them in versionsV2.app.css). */
+.pab.pab { --pab-machine:var(--sp-type);--pab-serif:var(--sp-serif);--pab-mono:'JetBrains Mono',monospace;--pab-ink:#1c130f;
+  display:flex;align-items:center;gap:16px;padding:16px 18px 16px 20px;border-radius:14px;background:#f8e9e2;box-shadow:inset 0 0 0 1px rgba(162,69,42,.22);border-left:5px solid #a2452a }
+.pab .pab-i { flex:none;width:38px;height:38px;border-radius:50%;background:#fff;color:#a2452a;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(162,69,42,.25) }
+.pab .pab-i svg { width:20px;height:20px }
+.pab .pab-t { flex:1;min-width:0 }
+.pab .pab-h { margin:0;font:400 17px var(--pab-machine);color:var(--pab-ink) }
+.pab .pab-h b { font:400 17px var(--pab-machine)!important;color:#8a3a24;display:inline!important }
+.pab .pab-s { margin:3px 0 0;font:italic 14.5px var(--pab-serif);color:rgba(28,19,15,.65) }
+.pab .pab-g { display:flex;flex:none }
+.pab .pab-g span { width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 2px #f8e9e2;margin-left:-6px;font:600 9px var(--pab-mono);color:rgba(28,19,15,.65) }
+.pab .pab-b { flex:none;height:40px;padding:0 18px;border-radius:999px;border:0;background:#2a3a52;color:#f4eee5;font:400 15px var(--pab-machine);cursor:pointer }
+.pab .pab-b:hover { background:#1f2c40 }

@@ -15,7 +15,7 @@
  * what a check is for.
  */
 import React, { useMemo, useState } from "react";
-import { deleteField } from "firebase/firestore";
+import { saveSent } from "../../../lib/queryActions/stepSaves";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, SubmissionMethod, type Agent, type Query } from "../../../types";
 import {
@@ -236,22 +236,8 @@ export function SentJourney({ req, today, children }: JourneyProps) {
     touched: () => [q.id],
     commit: async () => {
       const label = kind === "partial" ? capFirst(`${syn ? "synopsis and " : ""}${sampleName(s)}`) : `${kind === "full" ? "Full manuscript" : "Revised manuscript"}${verName ? ` · ${verName}` : ""}${syn ? " and synopsis" : ""}`;
-      await db.recordMaterialsSent({
-        queryId: q.id,
-        targetStatus: target,
-        sentDate: dayIso(sent),
-        isResubmit: kind === "rr",
-        writerExpectedDate: dayIso(exp),
-        ...(nd ? { nudgeDate: dayIso(nd) } : {}),
-        note: kind === "rr" ? changed : undefined,
-        ...(kind !== "partial" && ver ? { bookVersionId: ver } : {}),
-        eventKey: kind === "partial" ? "partial_sent" : kind === "full" ? "full_sent" : "resubmitted",
-      } as never);
-      const extra: Record<string, unknown> = { lastSentLabel: label };
-      if (q.expectedSendDate) extra.expectedSendDate = deleteField();
-      if (q.sendReminderDate) extra.sendReminderDate = deleteField();
-      if (!nd && q.nudgeDate) extra.nudgeDate = deleteField();
-      await db.updateQuery(q.id, extra as Partial<Query>);
+      /* v149 — the write is the shared sent save (lib/queryActions/stepSaves), the query card's "+ Add a step" too */
+      await saveSent(db, q, { kind, sent, exp, nd, label, note: changed, bookVersionId: ver });
       return { queryId: q.id, message: `${lab} · ${agentName(agent)}`, sub: `REPLY EXPECTED ${up(exp)}`, touched: [q.id] };
     },
   };

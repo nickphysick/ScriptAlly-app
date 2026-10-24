@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "L11-1512",
+  "where": "the panel opens on the new card",
+  "ok": true,
+  "detail": "no pick step"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "an agent already querying cannot be picked",
+  "ok": true,
+  "detail": "it was picked"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the card fills in",
+  "ok": true,
+  "detail": "no fill"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "it becomes the live query: WITH THE AGENT",
+  "ok": true,
+  "detail": "With the agent"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "…with its day",
+  "ok": true,
+  "detail": "Day 0"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the list gains the row",
+  "ok": true,
+  "detail": "87 → 88 · Alasdair Crewe"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "UNDONE: the logged query is removed",
+  "ok": true,
+  "detail": "no undo bar — the account has been changed"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "…the list is back to its count",
+  "ok": true,
+  "detail": "87"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the top bar's + Log a query opens the same card",
+  "ok": true,
+  "detail": "no card"
+ }
+]
