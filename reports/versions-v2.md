@@ -177,3 +177,86 @@ Once a book has a live version, the section stays on the page. If fewer than two
 - **Deployed to dev 23 Oct (hosting only)** from a clean checkout of the pushed `dev/ver1-nbab-pkglink-hm1-ver21` (`40100845`, which is v2's integration branch with `versions-v2` merged in). Served before: `index-OojVGv_5.js`. Served after: **`index-DIv_ZsAq.js`**.
 - Gates on the merged tip: tsc clean, vitest 652 files · 10,025 passed · 3 skipped, `build:dev` with no warnings.
 - **Prod is untouched.** No prod deploy, no rules change and no data-model change.
+
+## 8. v2.2 — title card, tinted list panel, new empty states (24 Oct; ref `design-refs/versions-v2-2`, S31–S37)
+
+The living header (hawk, "{n} versions on file", "of {title}", Compare, "?", and the "Sent with queries so far" donut) is gone. The page now opens on one title card. The version list sits in a pale blue panel. A book with no versions shows "No versions yet": a preview of the list whose dashed row opens the first save, and under it the comparisons note. The first save on a book with no queries now says "Original is saved too", not "your 0 queries".
+
+### 8.1 False premises
+- **0.4's crash does not happen.** On dev's build at the time (`index-eXm3BypA.js`), on a Pro book with no versions and no queries ("Dead Reckoning"), New version → name → one change → Save worked:
+  - Original and the version were both saved (two rows);
+  - no console errors and no error boundary.
+  - The form already treats any book with no versions as a first save (`V2Overlays.tsx:246`, `first = !v && !m.versions.length`), whatever the query count.
+
+  What was wrong was the copy: the ready line read "Ready. Original is saved too, with your 0 queries.", the diagram read "Your original manuscript · 0 queries", and the toast read "Your 0 earlier queries count towards Original." C4 fixes the copy; there was no crash to fix.
+- **The spec is `tests/e2e/versionsV2.measure.ts`**, not `e2e/versions-v2.spec.ts`. The pack was in `~/Downloads`, not the repo root.
+- **The list panel's top margin renders 56px, not 28.** The mock's `margin:28px 24px 0` loses to its own older `#secTiles.cx-sec.first { margin-top:56px !important }`. Measured on the rendered mock: 56. The app's generated sheet carries the same rule, so the literal port gives the same 56. The ref is the oracle.
+- **The empty state's side margin renders 0, not 24.** The mock's `.ev` sits level with the title card (24px from the sheet, measured), not 24px further in as B1's numbers suggest. The port keeps the mock's cascade, so it matches.
+- **The v2.2 mock still says a version "still counts in your totals, like the donut and 'Sent with queries so far'"** in the archive confirm. Both are deleted, so the app reads "It still counts in your totals." A sentence must not point at things that are not there.
+- **I did not regenerate `versionsV2.css`.** The extractor keeps every rule that matches the ref's DOM, and the v2.2 mock still carries the old header in its markup (hidden, `tb2-old`). A regenerated sheet would keep `.mh`/`.hpie` all the same. Those rules remain in the generated sheet and nothing renders them. Everything new is hand-ported, scoped to `.vv2`, in `versionsV2.app.css`.
+- **D had already landed (v2.1),** so it was only checked: the warming-up CSS in the v2.2 mock is rule-for-rule identical to v2.1's (41 rules, no differences), and the S33 screenshot matches.
+
+### 8.2 Recon
+- **0.1:** pack present; `shasum -a 256 -c SHA256SUMS` all OK; `versions-v2-2.html` = `5e9bba58…7ec77`. Committed on its own as `57de63ca`.
+- **0.2:** v2.1 had landed: `053072a9` (pack), `47acf2c4` (panel), `53e667f3` (tests and report).
+- **0.3, as found:**
+  - header: `VersionsV2Page.tsx:253–292` (hawk, title, "of {title}", New version · Compare · ?, donut card; donut built at `:224–234` from `lib/versionsV2.donut`);
+  - empty state: `:337–355` ("Start tracking versions", pre-note, three steps);
+  - first-save notes: `V2Overlays.tsx:246` (`first`), `:262` (ready line), `:283` (earlier-queries note), `:327` (diagram sub-line); toast at `VersionsV2Page.tsx:147`.
+- **0.4:** see 8.1.
+- **0.5:** T1–T6 written first and run against dev's build before any of this was deployed. All six were red:
+  - T1: no title card
+  - T2: list background transparent
+  - T3: no hairline ring
+  - T4: no "already sent" line
+  - T5: no comparisons note
+  - T6: the spotlight's hole is not on an Add button
+
+### 8.3 Commits and red proofs
+- `57de63ca`: the pack.
+- `c6ba8996`, Phase 1 (A + B):
+  - the title card;
+  - the header, Compare and donut deleted, including `donut`/`versionColour`/`DonutSlice` and their R12 tests;
+  - the tinted list panel;
+  - the guide's "Add a version" now targets the title card's button, or the dashed row when that is the one on screen.
+- `fee0275c`, Phase 2 (C):
+  - `V2Empty` (No versions yet and the comparisons note);
+  - the three-step empty state removed;
+  - `ExampleTiles` built once and shared with the warming panel;
+  - C4's copy;
+  - `firstSaveMessage`;
+  - `firstSave.test.tsx` (3 cases). Proved red twice: HEAD's form fails the zero-query case, and the old toast wording fails the toast case.
+- Phase 3 (this commit): T1–T6 at both widths, and the S31–S37 shots. Four existing cases were re-pointed because they read what A1 deleted, each with its reason stated at the change:
+  - S01 now reads the list's count, the banner and the title card's faces;
+  - S27 reads the empty state's line and Original's own card;
+  - W2 asserts no Compare;
+  - the smoke test reads the title card.
+
+### 8.4 Gates against baseline
+| | Baseline (57de63ca) | After |
+|---|---|---|
+| tsc | clean | clean (after each phase) |
+| `vite build` (whole log grepped) | no errors or warnings | no errors or warnings (after each phase) |
+| vitest | 651 files · 10,010 passed · 3 skipped | Phase 1: 651 · 10,008 (the 2 donut tests deleted) · Phase 2: 652 · 10,011 (+3 C4) · 3 skipped |
+| VER2 locally (127.0.0.1:4615) | — | 45 of 45 (S, W and T at both widths, plus setup) |
+| VER2 on dev | 33 of 33 (`index-eXm3BypA.js`) | every case green at both widths on `index-Bf3T4TiO.js` (see below) |
+
+### 8.5 Screenshots (`reports/versions-v2-2/`, beside the refs)
+- **31, 32:** the title card (Versions + PRO, the line with the bold title, the two buttons, the quill hawk at 180/150) and the tinted panel (`#e8ecf2`, radius 22, inset ring, the OTHER VERSIONS label in slate) match.
+- **33:** matches S33.
+- **34, 36:** the empty state matches (hairline container, four-column preview, Original "None yet" or "{n} already out · they'll count here", the dashed row and its pill).
+- **35:** the comparisons note and its three tiles match.
+- **37:** the note, "Starts from" fixed to Original, the diagram's "Your original manuscript" and the ready line match.
+- **Differences, none needing a change:**
+  - the fixture's titles, word counts and query counts are not the mock's;
+  - the app's sheet is about 8px narrower than the mock's frame, so the title-card line wraps a word earlier;
+  - the first-save drawer is slightly wider than the mock's, as in v2 (the form beyond C4 is out of scope).
+  - Shot 32's first framing clipped the heading; I re-shot it.
+
+### 8.6 Dev
+- **Deployed to dev 24 Oct (hosting only)** from a clean checkout of the pushed `dev/ver1-nbab-pkglink-hm1-ver21-hm2-hm3-ver22` (`b18c8ef5`, which is dev's then-current `…-hm2-hm3` with `versions-v2` merged in). Served before: `index-CKMg5_xB.js`. Served after: **`index-Bf3T4TiO.js`**.
+  - Gates on the merged tip: tsc clean; vitest 653 files · 10,027 passed · 3 skipped; `build:dev` with no warnings.
+- **Dev moved twice during the pass,** and both times the build was rebased rather than deployed over someone else's work. At recon it served `index-eXm3BypA.js` (`…-hm2`, another session's build on top of v2.1). At deploy time it served `index-CKMg5_xB.js` (`…-hm2-hm3`, phone hero v3, 26 minutes old). My first integration branch was cut from `-hm2`; I deleted it unpushed and rebuilt on `-hm3`.
+- **The dev run, in full:** the whole spec ran 40 passed, with T3 at 1280 red on a timing slip in my own case: it read the ready line the instant Enter was pressed, before React re-rendered, and saw "Add at least one change.". The case now waits for the text. A follow-up run of T3–T6 and S29 at both widths (everything serial mode had skipped, plus T3 at 1512 again) was 11 of 11 with setup. T3's save was undone by its own Undo, and the fixture was re-seeded after.
+- **One flake, recorded:** in one of four local full runs, S19's "use" tick did not arrive within 8s. It passed alone at both widths twice in a row, the next full run was 45 of 45, and the dev baseline and the dev run also passed it. Nothing in the guide was changed by this pass.
+- **Prod is untouched.** No prod deploy, no rules change, no data-model change.
