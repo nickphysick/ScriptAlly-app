@@ -17,7 +17,10 @@ const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\
 
 describe("D3a — every log path goes through addQuery, which records the version", () => {
   it("the drawer's log journey and the Query Centre's create mode call addQuery without the import flag", () => {
-    const log = strip(read("components/queryActions/journeys/LogJourney.tsx"));
+    /* v149 RE-POINTED (relocation): the log journey's write moved to lib/queryActions/logSave, which the journey and the
+       query card both call. Law held: every log path is one addQuery without the import flag — both halves asserted. */
+    expect(strip(read("components/queryActions/journeys/LogJourney.tsx"))).toContain("await saveLog(db, {");
+    const log = strip(read("lib/queryActions/logSave.ts"));
     expect(log).toMatch(/db\.addQuery\(payload as never, false, \{ eventKey:/);
     expect(log).not.toMatch(/db\.addQuery\([^)]*imported: true/);
     const qc = strip(read("components/Queries.tsx"));
@@ -29,7 +32,10 @@ describe("D3a — every log path goes through addQuery, which records the versio
     }
   });
   it("a correction of what was sent re-records the version from the corrected package", () => {
-    const ed = strip(read("components/queryActions/journeys/EditJourney.tsx"));
+    /* v149 RE-POINTED (relocation): the correction's fields moved to lib/queryActions/sentCorrect, which the edit journey
+       and the query card's edit mode both call. Law held: the corrected package re-records the version — both halves. */
+    expect(strip(read("components/queryActions/journeys/EditJourney.tsx"))).toContain("sentCorrectionFields(db, q, ms, next)");
+    const ed = strip(read("lib/queryActions/sentCorrect.ts"));
     expect(ed).toContain("const pv = packageVersion(");
     expect(ed).toContain("extra.bookVersionId = pv;");
   });

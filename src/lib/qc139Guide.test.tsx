@@ -134,7 +134,10 @@ describe("B · the practice query", () => {
   it("⚠️ the journey's one write is swapped at one seam, and the drawer neither snapshots, undoes nor parks him", () => {
     const j = read("src/components/queryActions/journeys/ResponseJourney.tsx");
     expect(j).toMatch(/if \(isPracticeId\(q\.id\)\) \{[\s\S]*?practiceRespond\(data, extra\);[\s\S]*?return \{/);
-    expect(j.indexOf("practiceRespond(data, extra)")).toBeLessThan(j.indexOf("await recordQueryResponse("));
+    /* v149 RE-POINTED (relocation): the real write is the shared response save (lib/queryActions/respondSave), still
+       called AFTER the practice seam returns — so Pip's stand-in still runs first and nothing real runs for him. */
+    expect(j.indexOf("practiceRespond(data, extra)")).toBeLessThan(j.indexOf("await saveResponse(db, { q, agent, ms }, {"));
+    expect(read("src/lib/queryActions/respondSave.ts")).toContain("await recordQueryResponse(");
     const d = read("src/components/queryActions/QueryDrawer.tsx");
     expect(d).toMatch(/if \(isPracticeId\(r\.queryId\)\) \{[\s\S]*?await view\.commit\(\);[\s\S]*?return;\n    \}\n    try \{\n      const snap = await takeSnapshot/);
     expect(d).toMatch(/if \(isPracticeId\(r\.queryId\)\) \{ close\(\); return; \}/);
