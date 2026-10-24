@@ -3,8 +3,10 @@
  * one short looping story on the card. (v1's long story and v2's dashboard story are retired; their locks
  * HM9–HM12 went with v2.)
  *
- *   HM1  footer: at 390 × 844, 375 × 667 and 430 × 932 every card is inside the screen, the front card's
- *        footer top is at or below the drawer's resting top, and its final panel's bottom is above it
+ *   HM1  footer: at 390 × 844, 375 × 667, 412 × 915 and 430 × 932 every card is inside the screen, the
+ *        front card's footer top is at or below the drawer's resting top, and its final panel's bottom is
+ *        above it; where the screen has the height, the card's top is within 42px of the header and the
+ *        pile uses the width (within 8px of each edge) — Nick, 24 Oct: "reach a bit higher"
  *   HM2  drawer: scrolling the drawer's travel brings the sheet's top to the header's foot with a 0px
  *        radius, and the hero is still in the DOM, sticky, behind it
  *   HM3  sign-up: after the story's FIRST run, unscrolled, the sign-up shows and is a FoundingSignup;
@@ -100,7 +102,7 @@ test.describe("landing hero on phones", () => {
      keeps that relationship. Read at rest, after the deal, before anything has grown. */
   test("HM1 footer: every card inside the screen; the footer under the drawer, the final panel above it", async ({ page }) => {
     const seen: string[] = [];
-    for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }, { width: 430, height: 932 }]) {
+    for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }, { width: 412, height: 915 }, { width: 430, height: 932 }]) {
       await open(page, vp);
       await page.waitForTimeout(2600); // the deal is over by 1.81s
       const r = await page.evaluate(() => {
@@ -108,14 +110,17 @@ test.describe("landing hero on phones", () => {
         const sheet = document.querySelector(".mk-hp-sheet")!.getBoundingClientRect();
         const foot = document.querySelector('[data-hc="front"] .mk-lc-ft')!.getBoundingClientRect();
         const slot = document.querySelector('[data-hc="slot"]')!.getBoundingClientRect();
+        const nav = document.querySelector(".mk-nav")!.getBoundingClientRect().bottom;
+        const front = document.querySelector('[data-hc="front"]')!.getBoundingClientRect();
         return {
+          frontTop: front.top - nav,
           n: cards.length, vw: document.documentElement.clientWidth,
           left: Math.min(...cards.map((c) => c.left)), right: Math.max(...cards.map((c) => c.right)),
           footBelow: foot.top - sheet.top, panelBelow: slot.bottom - sheet.top,
           scale: Number((document.querySelector(".mk-hc-pile") as HTMLElement).dataset.scale),
         };
       });
-      seen.push(`${vp.width}x${vp.height}: scale ${r.scale} footer ${r.footBelow.toFixed(1)} panel ${r.panelBelow.toFixed(1)}`);
+      seen.push(`${vp.width}x${vp.height}: scale ${r.scale} top ${r.frontTop.toFixed(1)} footer ${r.footBelow.toFixed(1)} panel ${r.panelBelow.toFixed(1)}`);
       console.log(`HM1 @${vp.width}x${vp.height}`, JSON.stringify(r));
       expect(r.n, "population: the front card and four behind it").toBe(5);
       expect(r.left, `@${vp.width}: nothing cut off on the left`).toBeGreaterThanOrEqual(0);
@@ -123,7 +128,10 @@ test.describe("landing hero on phones", () => {
       expect(r.footBelow, `@${vp.width}x${vp.height}: the footer's top is at or under the drawer's resting top`).toBeGreaterThanOrEqual(0);
       expect(r.panelBelow, `@${vp.width}x${vp.height}: the final panel is above it`).toBeLessThanOrEqual(0);
       expect(r.scale, `@${vp.width}x${vp.height}: never below the .45 floor`).toBeGreaterThanOrEqual(0.45);
-      if (vp.width === 390) expect(r.scale, "on the ref's screen the ref's .73").toBe(0.73);
+      if (vp.height >= 800) {
+        expect(r.frontTop, `@${vp.width}x${vp.height}: the card reaches up to within 42px of the header`).toBeLessThanOrEqual(42);
+        expect(Math.max(r.left, r.vw - r.right), `@${vp.width}x${vp.height}: the pile uses the width`).toBeLessThanOrEqual(8);
+      }
       await shot(page, `hm1-${vp.width}x${vp.height}`);
     }
     console.log("HM1", seen.join(" · "));
@@ -132,8 +140,10 @@ test.describe("landing hero on phones", () => {
   test("HM2 drawer: the travel brings the sheet to the header, square, over a sticky hero", async ({ page }) => {
     await open(page, { width: 390, height: 844 });
     await page.waitForTimeout(800);
-    const run = await page.evaluate(() => window.innerHeight - document.querySelector(".mk-nav")!.getBoundingClientRect().height - 250);
-    expect(run, "the travel is the stage less the drawer (784 − 250)").toBe(534);
+    /* The drawer's resting height is at least 250 and grows on a tall phone (24 Oct), so the travel is
+       read from the page: the stage less the drawer as it actually rests. */
+    const run = await page.evaluate(() => window.innerHeight - document.querySelector(".mk-nav")!.getBoundingClientRect().height + parseFloat(getComputedStyle(document.querySelector(".mk-hp-sheet")!).marginTop));
+    expect(run, "the travel is the stage less the resting drawer").toBeGreaterThan(400);
     await page.evaluate((y) => window.scrollTo(0, y), run);
     await page.waitForTimeout(300);
     const r = await page.evaluate(() => {

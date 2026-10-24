@@ -231,16 +231,18 @@
 }
 .mk-hp-fly img { display: block; width: 100%; height: auto; max-width: none; opacity: .19; filter: blur(8px); }
 
-/* The drawer: a 250px cream sheet at rest, 26px top corners (`HeroPhone` squares them off across
+/* The drawer: a cream sheet at rest (`--mk-hp-rest`, set by `HeroPhone`: at least 250px, more on a
+   tall phone so the card can sit higher), 26px top corners (`HeroPhone` squares them off across
    the travel), over the foot of the stage. Its head holds the drawer's own contents and is the
    drawer's resting height, so the page that follows starts below the fold. */
 .mk-hp-sheet {
-  position: relative; z-index: 20; margin-top: -250px;
+  --mk-hp-rest: 250px; /* the ref's; HeroPhone sets the measured value inline, which wins */
+  position: relative; z-index: 20; margin-top: calc(-1 * var(--mk-hp-rest));
   background: #fbf9f5; border-radius: 26px 26px 0 0;
   box-shadow: 0 -18px 36px -14px rgba(0, 0, 0, .45);
   transition: margin-top .8s cubic-bezier(.2, .8, .2, 1);
 }
-.mk-hp-sheet.mk-hp-sheet--grown { margin-top: -378px; }
+.mk-hp-sheet.mk-hp-sheet--grown { margin-top: calc(-1 * (var(--mk-hp-rest) + 128px)); }
 .mk-hp-head {
   box-sizing: border-box; min-height: 250px; padding: 10px 24px max(22px, env(safe-area-inset-bottom));
   transition: min-height .8s cubic-bezier(.2, .8, .2, 1);
