@@ -16,9 +16,14 @@
  *   HM6  reduced motion (phones): the static end state, footer under the grown drawer, nothing moving
  *   HM7  phones draw no cast shadow; the fly-past is the versioned file, flown once along its curve
  *   HM8  with the drawer grown, the card's last panel is still above it and the scale never exceeds .86
- *   HM13 copy: "Lord of the Wings" on every phone card, the 15-pages chip, and nothing of v2's story
- *   HM14 tags: "Task created" and "Reminder set" each appear within 40px of their line, wholly inside the
- *        screen, and are gone within 3.5s; every status pill is such a tag — none at the bottom
+ *   HM13 copy (v3.1): the front card reads "The Taloned Mr Ripley", every back card "Lord of the Wings";
+ *        the 15-pages chip, and nothing of v2's story
+ *   HM14 chips (v3.1, rewritten): "Task created", "Task complete" and "Reminder set" each appear INSIDE
+ *        their own line's chip row (.mk-lc-att), wholly inside the screen, and are gone within 3.5s; no
+ *        floating pill element exists at any moment
+ *   HM16 popover (v3.1): "She asked for" drops from the status pill — its top within 16px below the
+ *        pill — and is gone before "Partial requested" starts typing
+ *   HM17 buttons (v3.1): Join is ink navy rgb(42, 58, 82); See how it works has no fill and an underline
  *   HM15 loop: after a full story the front card leaves and a fresh one reads Day 1 within 2s; the
  *        drawer grows once and stays grown
  *
@@ -46,7 +51,9 @@ const CSS_BREAKS: Record<string, string> = {
   HM4: ".mk-navpill-c{display:none!important}",
   HM6: ".mk-hp-fly{display:block!important}",
   HM1v3: ".mk-hp-hero{top:-40px!important}",
-  HM14: ".mk-up--tag{top:auto!important;bottom:270px!important;right:14px!important}",
+  HM16: ".mk-pillpop{margin-top:40px!important}",
+  HM17: ".mk-hp-suform .mk-btn{background:#a2452a!important}",
+  HM17b: ".mk-hp-how{background:#2a3a52!important;text-decoration:none!important}",
 };
 
 type Count = { claimed: number; cap: number } | null;
@@ -267,19 +274,20 @@ test.describe("landing hero on phones", () => {
         again: document.querySelectorAll(".mk-hp .mk-again").length,
         footBelow: document.querySelector('[data-hc="front"] .mk-lc-ft')!.getBoundingClientRect().top - document.querySelector(".mk-hp-sheet")!.getBoundingClientRect().top,
         running: hp.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length,
-        /* v3 L6: "Lord of the Wings", the 15-pages chip and profile heads; no tags, no zooms */
+        /* v3 L6 (+ v3.1 C3/C6): the front card's title, the 15-pages chip and profile heads; no chips, no popover */
         titles: [...hp.querySelectorAll(".mk-hc-pile--phone .mk-lc-ms b")].map((b) => b.textContent),
         heads: [...hp.querySelectorAll(".mk-hc-pile--phone .mk-lc-agent .mk-lc-disc")].map((d) => !!d.querySelector("svg") && (d.textContent ?? "").trim() === ""),
         pages: [...hp.querySelectorAll('[data-hc="steps"] .mk-lc-step')][0]?.querySelectorAll(".mk-lc-att > span")[2]?.textContent ?? null,
-        pills: hp.querySelectorAll(".mk-up").length,
+        pills: hp.querySelectorAll(".mk-up, .mk-taskchip, .mk-pillpop").length,
         heroAnims: (document.querySelector(".mk-hp-hero") as HTMLElement).getAnimations().length,
       };
     });
     console.log("HM6", JSON.stringify(r));
-    expect(r.titles, "population: five phone cards, each 'Lord of the Wings'").toEqual(Array(5).fill("Lord of the Wings"));
+    expect(r.titles, "population: five phone cards — the front card first in the DOM order").toHaveLength(5);
+    expect([...r.titles].sort(), "the front card's title and four 'Lord of the Wings'").toEqual(["Lord of the Wings", "Lord of the Wings", "Lord of the Wings", "Lord of the Wings", "The Taloned Mr Ripley"]);
     expect(r.heads, "every phone disc is a profile head, no initials").toEqual(Array(5).fill(true));
     expect(r.pages).toBe("15 pages");
-    expect(r.pills, "no status tags").toBe(0);
+    expect(r.pills, "no chips, no popover, no floating pill").toBe(0);
     expect(r.heroAnims, "no push-and-highlight").toBe(0);
     expect(r.day).toBe("99");
     expect(r.band).toBe("With you");
@@ -351,18 +359,22 @@ test.describe("landing hero on phones", () => {
   });
 
   /* ═════ v3 ═════ */
-  test("HM13 copy: Lord of the Wings on every phone card, the 15-pages chip, and nothing of v2's story", async ({ page }) => {
+  /* REWRITTEN (v3.1, C3): the FRONT card is "The Taloned Mr Ripley"; the back cards stay "Lord of the Wings". */
+  test("HM13 copy: the front card's title, Lord of the Wings on every back card, and nothing of v2's story", async ({ page }) => {
     await open(page, { width: 390, height: 844 }, { reduce: true });
     await page.waitForTimeout(500);
     const r = await page.evaluate(() => ({
-      titles: [...document.querySelectorAll(".mk-hc-pile--phone .mk-lc-ms b")].map((b) => b.textContent),
+      front: document.querySelector('[data-hc="front"] .mk-lc-ms b')?.textContent,
+      backs: [...document.querySelectorAll(".mk-hc-pile--phone .mk-lc")].filter((c) => c.getAttribute("data-hc") !== "front").map((c) => c.querySelector(".mk-lc-ms b")?.textContent),
       chip: [...document.querySelectorAll('[data-hc="steps"] .mk-lc-step')][0]?.querySelectorAll(".mk-lc-att > span")[2]?.textContent,
       html: document.querySelector(".mk-hp")!.outerHTML,
     }));
-    const gone = ["Who are you querying?", "Logging query…", "11 active queries", "Agents on file", "mk-lcd", "mk-lcq", "mk-lcf", "mk-smp", "mk-seg", "Record a response · ", "RECORD A RESPONSE", "Lead future queries with the opening voice"];
+    /* (v3.1: the sample switcher's classes are live again — in the popover — so they leave this list.) */
+    const gone = ["Who are you querying?", "Logging query…", "11 active queries", "Agents on file", "mk-lcd", "mk-lcq", "mk-lcf", "Record a response · ", "RECORD A RESPONSE", "Lead future queries with the opening voice"];
     const found = gone.filter((g) => r.html.includes(g));
-    console.log("HM13", JSON.stringify({ titles: r.titles, chip: r.chip, found }));
-    expect(r.titles, "population: five phone cards").toEqual(Array(5).fill("Lord of the Wings"));
+    console.log("HM13", JSON.stringify({ front: r.front, backs: r.backs, chip: r.chip, found }));
+    expect(r.front, "the front card's manuscript").toBe("The Taloned Mr Ripley");
+    expect(r.backs, "population: four back cards, each 'Lord of the Wings'").toEqual(Array(4).fill("Lord of the Wings"));
     expect(r.chip).toBe("15 pages");
     expect(found, "nothing of v2's story in the rendered phone hero").toEqual([]);
   });
@@ -370,11 +382,12 @@ test.describe("landing hero on phones", () => {
   /* One recorded run of the loop at a width: every status tag, with its line, as it settles and as it
      goes; the card's out-sweep and the Day it opens on next; and every change to the drawer's grown class. */
   type Rec = {
-    tags: { cls: string; text: string; createdAt: number; shownAt: number | null; goneAt: number | null; tag: number[] | null; line: number[] | null }[];
+    tags: { cls: string; text: string; createdAt: number; shownAt: number | null; goneAt: number | null; tag: number[] | null; lineIdx: number; inAtt: boolean }[];
+    floating: number; pop: { shownAt: number | null; gap: number | null; goneAt: number | null; typeAt: number | null; opAtType: number | null };
     out: number | null; after: { t: number; day: string; op: number; band: string }[]; grownEvents: string[]; vw: number; vh: number;
   };
   const RECORDER = () => {
-    const R: Rec = { tags: [], out: null, after: [], grownEvents: [], vw: innerWidth, vh: innerHeight };
+    const R: Rec = { tags: [], floating: 0, pop: { shownAt: null, gap: null, goneAt: null, typeAt: null, opAtType: null }, out: null, after: [], grownEvents: [], vw: innerWidth, vh: innerHeight };
     (window as unknown as { __hm3: Rec }).__hm3 = R;
     const seen = new Map<Element, Rec["tags"][number]>();
     let lastGrown: boolean | null = null;
@@ -385,14 +398,24 @@ test.describe("landing hero on phones", () => {
       const grown = sheet.classList.contains("mk-hp-sheet--grown");
       if (grown !== lastGrown) { if (lastGrown !== null || grown) R.grownEvents.push(grown ? "grow" : "shrink"); lastGrown = grown; }
       const steps = [...document.querySelectorAll<HTMLElement>('[data-hc="steps"] .mk-lc-step')];
-      document.querySelectorAll<HTMLElement>(".mk-up").forEach((g) => {
+      R.floating = Math.max(R.floating, document.querySelectorAll(".mk-up").length);
+      /* The popover: its gap below the pill once fully in, the moment it is gone, and the moment the
+         Partial requested line's first letter appears. */
+      const pop = front.querySelector<HTMLElement>(".mk-pillpop"), pill = document.querySelector('[data-hc="pill"]');
+      if (pop && pill) {
+        const op = +getComputedStyle(pop).opacity;
+        if (R.pop.shownAt === null && op > .99) { R.pop.shownAt = t; R.pop.gap = pop.getBoundingClientRect().top - pill.getBoundingClientRect().bottom; }
+        if (R.pop.shownAt !== null && R.pop.goneAt === null && op < .05) R.pop.goneAt = t;
+      }
+      const ch = steps[1]?.querySelector<HTMLElement>(".mk-lc-t span");
+      if (R.pop.shownAt !== null && R.pop.typeAt === null && ch && +getComputedStyle(ch).opacity > 0) {
+        R.pop.typeAt = t; R.pop.opAtType = pop ? +getComputedStyle(pop).opacity : 0; // read on the SAME sample
+      }
+      document.querySelectorAll<HTMLElement>(".mk-taskchip, .mk-up").forEach((g) => {
         let rec = seen.get(g);
-        if (!rec) { rec = { cls: g.className, text: g.textContent ?? "", createdAt: t, shownAt: null, goneAt: null, tag: null, line: null }; seen.set(g, rec); R.tags.push(rec); }
+        if (!rec) { rec = { cls: g.className, text: g.textContent ?? "", createdAt: t, shownAt: null, goneAt: null, tag: null, lineIdx: steps.indexOf(g.closest<HTMLElement>(".mk-lc-step")!), inAtt: !!g.parentElement?.matches(".mk-lc-att") }; seen.set(g, rec); R.tags.push(rec); }
         const op = +getComputedStyle(g).opacity;
-        if (rec.shownAt === null && op === 1) {
-          rec.shownAt = t; const b = g.getBoundingClientRect(); rec.tag = [b.left, b.top, b.right, b.bottom];
-          const line = steps[rec.text.startsWith("Reminder") ? 3 : 1].getBoundingClientRect(); rec.line = [line.top, line.bottom];
-        }
+        if (rec.shownAt === null && op > .99) { rec.shownAt = t; const b = g.getBoundingClientRect(); rec.tag = [b.left, b.top, b.right, b.bottom]; }
         if (rec.shownAt !== null && rec.goneAt === null && op < .05) rec.goneAt = t;
       });
       for (const [g, rec] of seen) if (rec.shownAt !== null && rec.goneAt === null && !g.isConnected) rec.goneAt = t;
@@ -409,27 +432,61 @@ test.describe("landing hero on phones", () => {
     return page.evaluate(() => (window as unknown as { __hm3: Rec }).__hm3);
   }
 
-  test("HM14 tags: beside their lines, inside the screen, gone in 3.5s; no pill at the bottom", async ({ page }) => {
+  /* REWRITTEN (v3.1, C1): the notes are chips in their own line's chip row, never a floating pill. */
+  test("HM14 chips: inside their own line's chip row, inside the screen, gone in 3.5s; no floating pill", async ({ page }) => {
     test.setTimeout(240000);
+    let k0 = 0;
     for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }]) {
       const r = await record(page, vp, 27000);
-      console.log(`HM14 @${vp.width}`, JSON.stringify(r.tags.map((x) => ({ text: x.text.slice(0, 24), tag: x.tag?.map((v) => +v.toFixed(1)), line: x.line?.map((v) => +v.toFixed(1)), held: x.goneAt && x.shownAt ? Math.round(x.goneAt - x.shownAt) : null }))));
-      /* The first run only: by 27s the loop's second run has already made its own two tags. */
+      console.log(`HM14 @${vp.width}`, JSON.stringify({ floating: r.floating, chips: r.tags.map((x) => ({ text: x.text, line: x.lineIdx, inAtt: x.inAtt, tag: x.tag?.map((v) => +v.toFixed(1)), held: x.goneAt && x.shownAt ? Math.round(x.goneAt - x.shownAt) : null })) }));
+      /* The first run only: by 27s the loop's second run may have made its own. */
       expect(r.out, `@${vp.width}: population — the first run ended`).not.toBeNull();
       const first = r.tags.filter((x) => x.createdAt < r.out!);
-      const want = ["Task created", "Reminder set"];
-      expect(first.map((x) => want.find((w) => x.text.startsWith(w)) ?? x.text), `@${vp.width}: population — the two tags, in order, and nothing else`).toEqual(want);
-      for (const x of first) {
-        expect(x.cls, `@${vp.width}: every status pill is a tag beside its line`).toContain("mk-up--tag");
-        expect(x.tag && x.line, `@${vp.width}: "${x.text.slice(0, 20)}" was shown`).toBeTruthy();
-        const [l, tp, rt, bt] = x.tag!, [lt, lb] = x.line!;
-        const gap = Math.max(0, tp - lb, lt - bt);
-        expect(gap, `@${vp.width}: "${x.text.slice(0, 20)}" within 40px of its line`).toBeLessThanOrEqual(40);
-        expect(l >= 0 && tp >= 0 && rt <= r.vw && bt <= r.vh, `@${vp.width}: "${x.text.slice(0, 20)}" wholly inside the screen ${JSON.stringify(x.tag)}`).toBe(true);
-        expect(x.goneAt, `@${vp.width}: "${x.text.slice(0, 20)}" went`).not.toBeNull();
-        expect(x.goneAt! - x.shownAt!, `@${vp.width}: "${x.text.slice(0, 20)}" gone within 3.5s`).toBeLessThanOrEqual(3500);
-      }
+      const want: [string, number][] = [["Task created", 1], ["Task complete", 2], ["Reminder set", 3]];
+      expect(first.map((x) => x.text), `@${vp.width}: population — the three chips, in order, and nothing else`).toEqual(want.map((w) => w[0]));
+      expect(r.floating, `@${vp.width}: no floating pill element at any moment`).toBe(0);
+      first.forEach((x, k) => {
+        expect(x.cls, `@${vp.width}: "${x.text}" is a task chip`).toContain("mk-taskchip");
+        expect(x.inAtt && x.lineIdx === want[k][1], `@${vp.width}: "${x.text}" sits in line ${want[k][1]}'s chip row (found line ${x.lineIdx}, in row ${x.inAtt})`).toBe(true);
+        expect(x.tag, `@${vp.width}: "${x.text}" was shown`).toBeTruthy();
+        const [l, tp, rt, bt] = x.tag!;
+        expect(l >= 0 && tp >= 0 && rt <= r.vw && bt <= r.vh, `@${vp.width}: "${x.text}" wholly inside the screen ${JSON.stringify(x.tag)}`).toBe(true);
+        expect(x.goneAt, `@${vp.width}: "${x.text}" went`).not.toBeNull();
+        expect(x.goneAt! - x.shownAt!, `@${vp.width}: "${x.text}" gone within 3.5s`).toBeLessThanOrEqual(3500);
+      });
+      if (k0++ === 0) expect(first.map((x) => x.cls.includes("--done")), "only Task complete is the sage chip").toEqual([false, true, false]);
     }
+  });
+
+  test("HM16 popover: it drops from the status pill and is gone before Partial requested types", async ({ page }) => {
+    test.setTimeout(120000);
+    const r = await record(page, { width: 390, height: 844 }, 14000);
+    console.log("HM16", JSON.stringify(r.pop));
+    expect(r.pop.shownAt, "population: the popover came in").not.toBeNull();
+    expect(r.pop.gap!, "its top is below the pill").toBeGreaterThanOrEqual(0);
+    expect(r.pop.gap!, "within 16px of it").toBeLessThanOrEqual(16);
+    expect(r.pop.goneAt, "it went").not.toBeNull();
+    expect(r.pop.typeAt, "population: the line typed in").not.toBeNull();
+    /* Read on the sample that first sees a letter, so two 50ms-sampled times are never compared. */
+    expect(r.pop.opAtType!, "already gone when the first letter of Partial requested appears").toBeLessThan(.05);
+  });
+
+  test("HM17 buttons: Join is ink navy; See how it works is an underlined link with no fill", async ({ page }) => {
+    await open(page, { width: 390, height: 844 }, { reduce: true }); // the drawer arrives grown
+    await page.waitForTimeout(500);
+    const r = await page.evaluate(() => {
+      const join = document.querySelector<HTMLElement>(".mk-hp-suform .mk-btn")!, how = document.querySelector<HTMLElement>(".mk-hp-how")!;
+      const j = getComputedStyle(join), h = getComputedStyle(how);
+      return { joinText: join.textContent?.trim(), joinBg: j.backgroundColor, joinFg: j.color, howBg: h.backgroundColor, howLine: h.textDecorationLine, howHref: how.getAttribute("href"), howChevron: !!how.querySelector("svg") };
+    });
+    console.log("HM17", JSON.stringify(r));
+    expect(r.joinText, "population: the drawer's Join").toBe("Join");
+    expect(r.joinBg).toBe("rgb(42, 58, 82)");
+    expect(r.joinFg).toBe("rgb(255, 255, 255)");
+    expect(r.howBg, "See how it works has no fill").toBe("rgba(0, 0, 0, 0)");
+    expect(r.howLine, "and is underlined").toContain("underline");
+    expect(r.howHref, "still a jump to the status band").toBe("#pulse");
+    expect(r.howChevron, "with its chevron").toBe(true);
   });
 
   test("HM15 loop: the card leaves, a fresh one opens on Day 1 within 2s, and the drawer grows once", async ({ page }) => {

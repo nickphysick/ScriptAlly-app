@@ -1,0 +1,50 @@
+Phone hero v3.1 — red-before proofs (24 Oct). Each lock run against one named break at http://127.0.0.1:4731 (vite preview of build:dev). Source breaks restored from path-derived backups; src/ clean after.
+
+## floating
+break (HM14): floatTag appends the chip to the card's root as a floating .mk-up instead of into the line's .mk-lc-att
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:436:3 › landing hero on phones › HM14 chips: inside their own line's chip row, inside the screen, gone in 3.5s; no floating pill (27.8s)
+Error: @390: no floating pill element at any moment
+Expected: 0
+Received: 3
+1 failed
+
+## HM16
+break (HM16): HM_MUTATE=HM16 — .mk-pillpop{margin-top:40px} (the popover detached from the pill)
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:461:3 › landing hero on phones › HM16 popover: it drops from the status pill and is gone before Partial requested types (14.6s)
+Error: within 16px of it
+Expected: <= 16
+Received:    40.35072326660156
+1 failed
+
+## lingers
+break (HM16): the popover's tuck delayed from u+400 to u+1400 (still showing as Partial requested types)
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:461:3 › landing hero on phones › HM16 popover: it drops from the status pill and is gone before Partial requested types (14.8s)
+Error: already gone when the first letter of Partial requested appears
+Expected: < 0.05
+Received:   1
+1 failed
+
+## HM17
+break (HM17): HM_MUTATE=HM17 — Join back to rust #a2452a
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:474:3 › landing hero on phones › HM17 buttons: Join is ink navy; See how it works is an underlined link with no fill (1.1s)
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: "rgb(42, 58, 82)"
+Received: "rgb(162, 69, 42)"
+1 failed
+
+## HM17b
+break (HM17): HM_MUTATE=HM17b — See how it works filled navy, no underline
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:474:3 › landing hero on phones › HM17 buttons: Join is ink navy; See how it works is an underlined link with no fill (1.1s)
+Error: See how it works has no fill
+Expected: "rgba(0, 0, 0, 0)"
+Received: "rgb(42, 58, 82)"
+1 failed
+
+## title
+break (HM13): HERO_PHONE_MS_FRONT = "Lord of the Wings"
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:363:3 › landing hero on phones › HM13 copy: the front card's title, Lord of the Wings on every back card, and nothing of v2's story (1.2s)
+Error: the front card's manuscript
+Expected: "The Taloned Mr Ripley"
+Received: "Lord of the Wings"
+1 failed
+
