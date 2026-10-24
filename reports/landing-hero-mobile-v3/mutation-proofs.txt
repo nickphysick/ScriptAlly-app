@@ -36,3 +36,16 @@ break: HeroCard 'if (!looped)' guard dropped + HeroPhone grow toggles the class 
 Error: the drawer grows once, after the first run, and stays grown
 1 failed
 
+
+# 24 Oct follow-up — the cards reach higher (HM1's new checks)
+## low
+break: HeroPhone.phonePileFit — the TOP_AIM cap removed (the drawer stays 250, the card sits low as before)
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:103:3 › landing hero on phones › HM1 footer: every card inside the screen; the footer under the drawer, the final panel above it (3.3s)
+Error: @390x844: the card reaches up to within 42px of the header
+1 failed
+
+## cap
+break: S_MAX back to .73 (the card does not use the width on a wider phone)
+✘  1 [measure] › tests/e2e/landingHeroMobile.measure.ts:103:3 › landing hero on phones › HM1 footer: every card inside the screen; the footer under the drawer, the final panel above it (8.7s)
+Error: @412x915: the pile uses the width
+1 failed

@@ -27,11 +27,15 @@ import { HERO_H1, HERO_LINK, HERO_PHONE_Q, HERO_PHONE_SIGNUP, HERO_PHONE_JOIN } 
 /* The binocular hawk in the drawer (ref `.bird`). The version is the file's own md5, first 8. */
 export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c0031", width: 380, height: 372 };
 
-/* The ref's numbers. */
-const REST = 250, GROWN = 378;          // the drawer's resting and grown heights
-/* GUTTER 4 (v3): the ref's .73 at 390 × 844 brings the outermost back card within ~5px of the screen's
-   edge, so v1's 16px gutter would have forced .69 on the ref's own screen. Nothing is cut off. */
-const S_MAX = .73, S_MIN = .45, TOP_MIN = 24, GUTTER = 4;
+/* The drawer's resting height is at least the ref's 250, and grows by the ref's 128. */
+const REST = 250, GROW_BY = 128;
+/* GUTTER 4 (v3): the outermost back card stays within ~5px of the screen's edge, so v1's 16px gutter
+   would have forced .69 on the ref's own screen. Nothing is cut off.
+   ⚠️ S_MAX .86 and TOP_AIM 40 (Nick, 24 Oct: "the cards need to reach a bit higher"): the ref's .73
+   cap left the card sitting low on any phone taller than 390 × 844 (131px under the band at 430 × 932),
+   because its bottom is pinned to the drawer. Now the card takes the width it has and its top sits
+   40px under the band; the drawer's resting top follows the card down, never the other way. */
+const S_MAX = .86, S_MIN = .45, TOP_MIN = 24, TOP_AIM = 40, GUTTER = 4;
 /**
  * L2 (v3) — the ref's placement at 390 × 844 (S .73, TOP 64) expressed in the CARD's own units: the
  * drawer's resting top sits this far below the card's top, (784 − 250 − 64) / .73. Held at every size,
@@ -56,7 +60,7 @@ const reduceMotion = () =>
  * rect: the entrance deals the cards in from 720px off to the right, so a rect read now would be
  * the animation's, not the layout's.
  */
-export function phonePileFit(screenW: number, stageH: number, front: { w: number; h: number }, backH: number): { s: number; top: number } {
+export function phonePileFit(screenW: number, stageH: number, front: { w: number; h: number }, backH: number): { s: number; top: number; rest: number } {
   const rad = (d: number) => Math.abs(d) * Math.PI / 180;
   const half = (w: number, h: number, r: number, s: number) => s * (w / 2 * Math.cos(rad(r)) + h / 2 * Math.sin(rad(r)));
   let reach = half(front.w, front.h, PHONE_FRONT_ROTATE, 1);
@@ -64,7 +68,11 @@ export function phonePileFit(screenW: number, stageH: number, front: { w: number
   const sW = (screenW / 2 - GUTTER) / reach;
   const sH = (stageH - REST - TOP_MIN) / DRAWER_DEPTH;
   const s = Math.max(S_MIN, Math.min(S_MAX, sW, sH));
-  return { s, top: Math.max(TOP_MIN, stageH - REST - DRAWER_DEPTH * s) };
+  /* The top is the room left over, but never more than TOP_AIM; whatever is spare below the card
+     goes to the drawer, whose resting top stays DRAWER_DEPTH below the card's top (footer hidden). */
+  const top = Math.max(TOP_MIN, Math.min(TOP_AIM, stageH - REST - DRAWER_DEPTH * s));
+  /* Whole pixels: the scroll lands on integers, so a fractional travel never quite squares the corners. */
+  return { s, top, rest: Math.max(REST, Math.floor(stageH - top - DRAWER_DEPTH * s)) };
 }
 
 /** The sign-up inside the drawer: its line, then the shared form. The line goes with the form. */
@@ -94,7 +102,7 @@ export const HeroPhone: React.FC<{
   const wrap = useRef<HTMLDivElement>(null);
   /* The drawer's state lives in refs and classes, never React state: the sheet holds the whole rest
      of the page, and the card above must never re-render. */
-  const st = useRef({ grown: false, k: K_REST, kGrown: K_GROWN, run: 0, stageH: 0 });
+  const st = useRef({ grown: false, k: K_REST, kGrown: K_GROWN, run: 0, stageH: 0, rest: REST });
 
   const parts = () => {
     const el = wrap.current;
@@ -127,10 +135,12 @@ export const HeroPhone: React.FC<{
     s.stageH = window.innerHeight - nav;
     p0.stage.style.height = s.stageH + "px";
     const f = { w: p0.front.offsetWidth, h: p0.front.offsetHeight };
-    const { s: S, top } = phonePileFit(p0.stage.clientWidth, s.stageH, f, p0.back?.offsetHeight || 600);
+    const { s: S, top, rest } = phonePileFit(p0.stage.clientWidth, s.stageH, f, p0.back?.offsetHeight || 600);
     const cx = p0.front.offsetLeft + f.w / 2;
     p0.pile.style.transform = `translate(${p0.stage.clientWidth / 2 - cx * S}px,${top - p0.front.offsetTop * S}px) scale(${S})`;
     p0.pile.dataset.scale = S.toFixed(3);
+    s.rest = rest;
+    p0.sheet.style.setProperty("--mk-hp-rest", rest + "px");
     /* ⚠️ THE GROWN SCALE IS THE REF'S REASON, NOT ITS NUMBER. The ref eases the card to .86 "so its
        final panel stays visible; only its footer is covered" — true at 390 × 844 and false on a short
        phone, where the grown drawer covered the panel by 60px. So the grown scale is the smaller of
@@ -144,11 +154,11 @@ export const HeroPhone: React.FC<{
       for (let n: HTMLElement | null = slot; n && n !== p0.front; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
       const turn = f.w / 2 * Math.sin(PHONE_FRONT_ROTATE * Math.PI / 180);
       const panelBottom = top + S * (y + turn);
-      s.kGrown = Math.min(K_GROWN, (s.stageH - GROWN - PANEL_CLEAR) / panelBottom);
+      s.kGrown = Math.min(K_GROWN, (s.stageH - rest - GROW_BY - PANEL_CLEAR) / panelBottom);
       p0.pile.dataset.kGrown = s.kGrown.toFixed(3);
       if (s.grown) s.k = s.kGrown;
     }
-    s.run = s.stageH - (s.grown ? GROWN : REST);
+    s.run = s.stageH - (s.grown ? rest + GROW_BY : rest);
     onScroll();
   }, [onScroll]);
 
@@ -164,7 +174,7 @@ export const HeroPhone: React.FC<{
       window.setTimeout(() => { p0.hero.style.transition = ""; }, 900);
     }
     s.k = s.kGrown;
-    s.run = s.stageH - GROWN;
+    s.run = s.stageH - s.rest - GROW_BY;
     onScroll();
   }, [onScroll]);
   const onGrow = useCallback(() => grow(false), [grow]);
