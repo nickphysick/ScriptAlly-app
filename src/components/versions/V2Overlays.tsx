@@ -259,7 +259,7 @@ export const VersionForm: React.FC<VersionFormProps> = ({ ms, m, edit, earlier, 
   const dup = !root && !!nm && nameProblem(nm, m.versions, v?.id ?? null) === "taken";
   const full = list.length >= MAX_CHANGES;
   const ok = !!nm && !dup && (root || !changesProblem(list));
-  const ready = dup ? "Choose a different name." : !nm ? "Give it a name." : !root && !list.length ? "Add at least one change." : first ? `Ready. Original is saved too, with your ${earlier} queries.` : "Ready to save.";
+  const ready = dup ? "Choose a different name." : !nm ? "Give it a name." : !root && !list.length ? "Add at least one change." : first ? (earlier ? `Ready. Original is saved too, with your ${earlier} ${earlier === 1 ? "query" : "queries"}.` : "Ready. Original is saved too.") : "Ready to save.";
   const add = () => { const t = draft.trim(); if (!t || list.length >= MAX_CHANGES) return; setList([...list, t.slice(0, MAX_CHANGE_LEN)]); setDraft(""); inp.current?.focus(); };
   const p = first ? null : from ? m.versions.find((x) => x.id === from) ?? null : null;
   const pf = p ? m.facts.get(p.id) ?? null : null;
@@ -280,7 +280,9 @@ export const VersionForm: React.FC<VersionFormProps> = ({ ms, m, edit, earlier, 
         {v && root
           ? <div className="fv-note"><span className="ic">i</span><p><b>Original is your manuscript as you first sent it.</b> Its name stays Original, and its word count comes from your <button type="button" className="cx-lnk" onClick={onDetails}>manuscript details</button>.</p></div>
           : sent ? <div className="fv-note"><span className="ic">i</span><p><b>Sent with {nSent} {nSent === 1 ? "query" : "queries"}.</b> Edits update its record here, not what agents received.</p></div> : null}
-        {first && earlier ? <div className="fv-note" data-vv2="first-note"><span className="ic">i</span><p>You already have <b>{earlier} queries</b> out. We’ll assume the materials that went with them were part of your <em>original manuscript</em>. Don’t worry: if that’s not the case, it’s easy to update.</p></div> : null}
+        {/* v2.2 C4 — the first save, with or without earlier queries (S27, S37) */}
+        {first && earlier ? <div className="fv-note" data-vv2="first-note"><span className="ic">i</span><p>You already have <b>{earlier} {earlier === 1 ? "query" : "queries"}</b> out. We’ll assume the materials that went with them were part of your <em>original manuscript</em>. Don’t worry: if that’s not the case, it’s easy to update.</p></div> : null}
+        {first && !earlier ? <div className="fv-note" data-vv2="first-note"><span className="ic">i</span><p>We’ll save your <em>original manuscript</em> as <b>Original</b> too, so this version has somewhere to start from.</p></div> : null}
         {root ? null : (
           <div className="cx-sect"><h4><span className="n">1</span>Starts from</h4>
             {first
@@ -324,7 +326,7 @@ export const VersionForm: React.FC<VersionFormProps> = ({ ms, m, edit, earlier, 
             <h5>How it will look</h5>
             <div id="cgPv">
               <Lineage
-                parent={first ? { v: { original: true, num: 0 }, name: "Original", sub: `Your original manuscript · ${earlier} queries`, om: true }
+                parent={first ? { v: { original: true, num: 0 }, name: "Original", sub: earlier ? `Your original manuscript · ${earlier} ${earlier === 1 ? "query" : "queries"}` : "Your original manuscript", om: true }
                   : { v: p, name: p ? p.name : "", sub: outcomeLine(pf), on: !!p && p.id === m.inUse, om: !!p?.original }}
                 changes={list}
                 child={{ v: { original: false, num: nextNum }, name: nm || "Your new version", sub: v ? outcomeLine(m.facts.get(v.id) ?? null) : "Used for new queries once it’s in a package" }} />
@@ -443,7 +445,7 @@ export const ArchiveConfirm: React.FC<{ m: VersionsModel; v: V2Version; packageN
             <p>Archiving takes it off your list and out of the comparisons, so it stops competing with the versions you’re still sending.</p>
             <ul>
               <li><b>Its {q} {q === 1 ? "query keeps" : "queries keep"} their version.</b> Nothing about them changes.</li>
-              <li><b>It still counts in your totals</b>, like the donut and “Sent with queries so far”.</li>
+              <li><b>It still counts in your totals.</b></li>
               <li><b>You can bring it back</b> any time from Archived, at the foot of your list.</li>
             </ul>
           </>

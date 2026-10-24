@@ -55,27 +55,33 @@ export const V2Warming: React.FC<{ m: VersionsModel; queries: readonly Query[]; 
         </div>
       </div>
       <p className="wt-k">What you’ll see here</p>
-      <div className="wt-ex">
-        <figure>
-          <div className="wt-g g1" aria-hidden="true"><i className="d" /><b /><s /><u><em style={{ width: "40%" }} /></u><span><i /><i /><i /><i /><i /></span></div>
-          <figcaption><b>A card for every version</b>Sort by asked for more, most sent or fastest replies.</figcaption>
-        </figure>
-        <figure>
-          <div className="wt-g g2" aria-hidden="true">{[86, 62, 40, 24].map((w) => <p key={w}><i className="d" /><b /><u><em style={{ width: `${w}%` }} /></u></p>)}</div>
-          <figcaption><b>A league table</b>Every version side by side, ranked by requests.</figcaption>
-        </figure>
-        <figure>
-          <div className="wt-g g3" aria-hidden="true">
-            <svg viewBox="0 0 120 70" aria-hidden="true">
-              <path d="M8 4H112C108 14 96 18 92 22H28C24 18 12 14 8 4Z" fill="#d9d0c3" />
-              <path d="M28 24H92C88 32 80 36 78 40H42C40 36 32 32 28 24Z" fill="#2a3a52" />
-              <path d="M42 42H78C76 48 70 52 68 56H52C50 52 44 48 42 42Z" fill="#a2452a" />
-              <path d="M52 58H68C66 62 64 64 64 67H56C56 64 54 62 52 58Z" fill="#ece6dc" />
-            </svg>
-          </div>
-          <figcaption><b>How far each one gets</b>Sent, replied, asked for more, offers.</figcaption>
-        </figure>
-      </div>
+      <ExampleTiles />
     </div>
   );
 };
+
+/** v2.1 B3 / v2.2 C2 — the three static EXAMPLE tiles, built once: the warming-up panel and the empty state's
+ *  comparisons note both show them. No data reaches them, so nothing here can be read as a figure about the writer. */
+export const ExampleTiles: React.FC = () => (
+  <div className="wt-ex">
+    <figure>
+      <div className="wt-g g1" aria-hidden="true"><i className="d" /><b /><s /><u><em style={{ width: "40%" }} /></u><span><i /><i /><i /><i /><i /></span></div>
+      <figcaption><b>A card for every version</b>Sort by asked for more, most sent or fastest replies.</figcaption>
+    </figure>
+    <figure>
+      <div className="wt-g g2" aria-hidden="true">{[86, 62, 40, 24].map((w) => <p key={w}><i className="d" /><b /><u><em style={{ width: `${w}%` }} /></u></p>)}</div>
+      <figcaption><b>A league table</b>Every version side by side, ranked by requests.</figcaption>
+    </figure>
+    <figure>
+      <div className="wt-g g3" aria-hidden="true">
+        <svg viewBox="0 0 120 70" aria-hidden="true">
+          <path d="M8 4H112C108 14 96 18 92 22H28C24 18 12 14 8 4Z" fill="#d9d0c3" />
+          <path d="M28 24H92C88 32 80 36 78 40H42C40 36 32 32 28 24Z" fill="#2a3a52" />
+          <path d="M42 42H78C76 48 70 52 68 56H52C50 52 44 48 42 42Z" fill="#a2452a" />
+          <path d="M52 58H68C66 62 64 64 64 67H56C56 64 54 62 52 58Z" fill="#ece6dc" />
+        </svg>
+      </div>
+      <figcaption><b>How far each one gets</b>Sent, replied, asked for more, offers.</figcaption>
+    </figure>
+  </div>
+);

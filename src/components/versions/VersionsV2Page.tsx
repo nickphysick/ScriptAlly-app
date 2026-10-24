@@ -5,11 +5,16 @@
  * ══ VERSIONS v2 — /manuscripts/versions ═══════════════════════════════════════════════════════════════════════════
  *
  * Design authority: design-refs/versions-v2/versions-v2.html (its markup, CSS and copy are ported wholesale; its data is
- * invented). Supersedes Versions v1 (design-refs/versions-v1), whose page is deleted in the same commit.
+ * invented), amended by v2.1 (design-refs/versions-v2-1, the warming-up panel) and v2.2 (design-refs/versions-v2-2: the
+ * title card, the tinted list panel and the empty states). Supersedes Versions v1, whose page is deleted.
  *
- * The page: the header (the quill hawk, "{n} versions on file", "of {title}", New version · Compare · ?, and the donut of
- * queries sent so far) → the warning banner (queries with no version) → "{n} versions saved" → the family tree → the
- * navy Tracking & performance band (the carousel and the league table). Pro (and founding members); Free sees the lock.
+ * The page: the title card ("Versions" PRO, one line naming the manuscript, New version · How it works, the quill hawk)
+ * → the warning banner (queries with no version) → "{n} versions saved" in its tinted panel → the family tree → the navy
+ * Tracking & performance band. With no versions: "No versions yet" (a preview of the list) and the comparisons note.
+ * Pro (and founding members); Free sees the lock.
+ *
+ * ⚠️ v2.2 DELETED THE LIVING HEADER AND ITS DONUT ("Sent with queries so far"), and with them the Compare button. The
+ *    folder tab already names the page; the title card is the page's one header.
  *
  * ⚠️ THE ROUTE STAYS /manuscripts/versions — the app's routing convention (its siblings are /manuscripts/comps and
  *    /manuscripts/packages, and every route register already lists it). The prompt's "/versions" said to follow it.
@@ -31,7 +36,7 @@ import {
 } from "../../lib/bookVersions";
 import { buildRows } from "../../lib/analytics";
 import { versionsUnlocked, VERSIONS_FOUNDING_ACCESS } from "../../lib/entitlements";
-import { VERSION_NOT_SURE, donut, hasGoneOut, packagesHolding, trackingState, versionsModel } from "../../lib/versionsV2";
+import { VERSION_NOT_SURE, firstSaveMessage, hasGoneOut, packagesHolding, versionsModel } from "../../lib/versionsV2";
 import {
   VERSIONS_CHECKLIST, VERSIONS_GUIDE_HIDDEN_PATH, VERSIONS_GUIDE_SEEN_PATH, VERSIONS_GUIDE_UNHIDE_PATH, VERSIONS_LOCKED, VERSIONS_STEP_TEXT,
   versionsGuideDonePath, versionsGuideOf, type VersionsGuideKey,
@@ -43,6 +48,7 @@ import { agentLine, today } from "./v2Bits";
 import { V2List } from "./V2List";
 import { V2Tree } from "./V2Tree";
 import { V2Tracking } from "./V2Tracking";
+import { V2Empty } from "./V2Empty";
 import { ArchiveConfirm, DrawerShell, Explainer, Layer, ModalShell, Picker, VersionDrawer, VersionForm, type FormSave, type PickerMode } from "./V2Overlays";
 import "./versionsV2.css";
 import "./versionsV2.app.css";
@@ -76,8 +82,6 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const m = useMemo(() => versionsModel(ms, msQueries, packages, materials, rows), [ms, msQueries, packages, materials, rows]);
   const agentById = useMemo(() => new Map((agents as Agent[]).map((a) => [a.id, a])), [agents]);
   const fresh = m.versions.length === 0;
-  /* v2.1 B1 — Compare appears only with the full Tracking & performance section, on the same condition */
-  const tracking = trackingState(m);
 
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [modal, setModal] = useState<Modal>(null);
@@ -98,7 +102,12 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const targetFor = useCallback((k: VersionsGuideKey) => {
     const page = document.querySelector<HTMLElement>('[data-vv2="page"]');
     const rowsEl = [...(page?.querySelectorAll<HTMLElement>('[data-vv2="row"]') ?? [])];
-    const el = k === "add" ? page?.querySelector<HTMLElement>('[data-vv2="new"]') ?? null
+    /* v2.2 A3 — "Add a version" points at the title card's button, or at the empty state's dashed row when that is the
+       one on screen and the title card's has scrolled away */
+    const onScreen = (e: HTMLElement | null) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
+    const titleBtn = page?.querySelector<HTMLElement>('[data-vv2="title"] [data-vv2="new"]') ?? null;
+    const dashed = page?.querySelector<HTMLElement>('button[data-vv2="first"]') ?? null;
+    const el = k === "add" ? (dashed && !onScreen(titleBtn) && onScreen(dashed) ? dashed : titleBtn)
       : k === "edit" ? rowsEl[0]?.querySelector<HTMLElement>('[data-vv2="edit"]') ?? null
         : k === "use" ? rowsEl.find((r) => !r.classList.contains("use"))?.querySelector<HTMLElement>('[data-vv2="use"]') ?? null
           : rowsEl.find((r) => !r.querySelector(".db-q > em")) ?? rowsEl[0] ?? null;
@@ -144,7 +153,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     tick("add");
     flash(id);
     showToast({
-      message: first ? `Saved ${s.name}. Your ${earlier} earlier ${earlier === 1 ? "query counts" : "queries count"} towards Original.` : `Saved ${s.name}. Add it to a package to send it.`,
+      /* v2.2 C4 — with no earlier queries the first save says only that Original came with it (S37) */
+      message: first ? firstSaveMessage(s.name, earlier) : `Saved ${s.name}. Add it to a package to send it.`,
       undo: async () => { await writeVersionChange(ms.id, before); },
     });
   };
@@ -215,25 +225,10 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const openForm = (edit: string | null) => { if (!locked) setDrawer({ kind: "form", edit }); };
   const openPicker = () => { if (!locked && m.unrecorded.length) setModal({ kind: "picker", mode: { kind: "assign" } }); };
   const goPackage = (id: string) => navigate(`/manuscripts/packages?new=1&version=${encodeURIComponent(id)}`);
-  const goCompare = () => document.getElementById("msLH")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const attrs = { "data-page": "v", "data-tier": locked ? "free" : "pro", "data-ms": fresh ? "fresh" : "full" };
   const state = !collectionsReady ? "loading" : locked ? "locked" : fresh ? (msQueries.length ? "pre" : "fresh") : "filled";
 
-  /* ── the header's right: the donut (or, with nothing saved, the zero ring) ── */
-  const slices = donut(m);
-  const tot = m.sentTotal;
-  const R = 44, CC = 2 * Math.PI * R;
-  let off = 0;
-  const arcs = slices.map((s) => {
-    const L = tot ? (s.n / tot) * CC : 0, gap = slices.length > 1 ? 2 : 0;
-    const a = <circle key={s.key} cx="60" cy="60" r={R} fill="none" stroke={s.colour} strokeWidth="16" strokeDasharray={`${Math.max(L - gap, 0.5)} ${CC}`} strokeDashoffset={-off} transform="rotate(-90 60 60)" />;
-    off += L;
-    return a;
-  });
-
-  const liveN = m.live.length;
-  const title = liveN ? `${liveN} ${liveN === 1 ? "version" : "versions"} on file` : "No versions yet";
   const dv = lastDrawer.current;
   const drawerV = dv?.kind === "version" ? m.versions.find((v) => v.id === dv.id) ?? null : null;
   const formEdit = dv?.kind === "form" && dv.edit ? m.versions.find((v) => v.id === dv.edit) ?? null : null;
@@ -250,46 +245,18 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
             quiet={!!drawer || !!modal} empty={fresh} />
         ) : null}
         <div className="ms25">
-          <header className="mh vh" aria-labelledby="msH1" data-vv2="header">
-            <img className="mh-art" alt="" aria-hidden="true" src={heroArt} />
-            <div className="mh-t">
-              <p className="mh-k">— Versions —</p>
-              <h1 id="msH1" data-page-title><span id="vTitle">{title}</span></h1>
-              <p className="mh-by"><i /><em>of</em> {ms?.title ?? "your manuscript"}<i /></p>
-              <div className="mh-b">
-                <button type="button" className="p1" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>+ New version</button>
-                {tracking === "full" ? <button type="button" className="p2" data-vv2="compare" onClick={goCompare}>Compare</button> : null}
-                <button type="button" className="hw" data-vv2="how" onClick={() => setModal({ kind: "how" })}><i>?</i><span>How version tracking works</span></button>
+          {/* v2.2 A — the title card (S31): replaces the living header, its Compare and "?" buttons and the donut */}
+          <section className="hb" aria-labelledby="hbT" data-vv2="title">
+            <div className="hb-tx">
+              <h1 id="hbT" data-page-title>Versions <span className="hb-tag">Pro</span></h1>
+              <p>Save each version of <b>{ms?.title ?? "your manuscript"}</b> as it changes. QueryHawk records which one went out with every query, so you can see which gets agents asking for more.</p>
+              <div className="hb-b">
+                <button type="button" className="hb-p" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>{fresh ? "+ Save your first version" : "+ New version"}</button>
+                <button type="button" className="hb-s" data-vv2="how" onClick={() => setModal({ kind: "how" })}>How it works</button>
               </div>
             </div>
-            <div className="mh-r" id="mhR" style={fresh ? { width: "190px" } : undefined} data-vv2="donut">
-              {fresh ? (
-                <div className="mcard" style={{ gridTemplateColumns: "1fr" }}>
-                  <button type="button" className="rg" disabled={!ms || locked} onClick={() => openForm(null)}>
-                    <svg viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="34" fill="none" stroke="#ece6dc" strokeWidth="9" /><text x="42" y="50" textAnchor="middle" fontSize="23" fill="#1c130f" style={{ fontFamily: "var(--machine)" }}>0</text></svg>
-                    <b>Versions saved<small>Save one to start tracking</small></b>
-                  </button>
-                </div>
-              ) : (
-                <div className="hpie">
-                  <svg className="hpie-g" viewBox="0 0 120 120" role="img" aria-label={`${tot} queries sent, split by version`}>
-                    <defs><pattern id="vv2hz" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#efe9e0" /><path d="M0 0v5" stroke="#b9ad9d" strokeWidth="2" /></pattern></defs>
-                    <circle cx="60" cy="60" r={R} fill="none" stroke="#f1ece4" strokeWidth="16" />
-                    {arcs}
-                    <text x="60" y="62" textAnchor="middle" className="hpie-n">{tot}</text>
-                    <text x="60" y="78" textAnchor="middle" className="hpie-l">QUERIES SENT</text>
-                  </svg>
-                  <div className="hpie-k">
-                    <p className="hpie-t">Sent with queries so far</p>
-                    {slices.map((s) => s.versionId
-                      ? <button type="button" key={s.key} className={`hpie-r${s.inUse ? " use" : ""}`} data-vv2="legend" onClick={() => flash(s.versionId!)}><i style={{ background: s.colour }} /><span>{s.name}</span><b>{s.n}</b></button>
-                      : s.rest ? <p key={s.key} className="hpie-r o"><i style={{ background: s.colour }} /><span>{s.name}</span><b>{s.n}</b></p>
-                        : <button type="button" key={s.key} className="hpie-r un" onClick={openPicker}><i className="hz" /><span>Not recorded</span><b>{s.n}</b></button>)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </header>
+            <div className="hb-art" aria-hidden="true"><img src={heroArt} alt="" /></div>
+          </section>
 
           <div className="mc lockwrap">
             {locked ? (
@@ -334,25 +301,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
                 </>
               ) : null}
 
-              {fresh && collectionsReady ? (
-                <section className="cx-sec first is-fresh" aria-labelledby="msVH0" data-vv2="empty">
-                  <div className="cx-sh"><h2 id="msVH0">Start tracking versions</h2></div>
-                  {msQueries.length ? (
-                    <div className="pre-note" id="preNote" data-vv2="pre-note"><span className="ic">i</span><div>
-                      <h3 id="preNoteH">You’ve already sent {m.sentTotal} {m.sentTotal === 1 ? "query" : "queries"}.</h3>
-                      <p>When you save your first version, we’ll assume they went out with your <b>original manuscript</b> and count them there. If any went out differently, it’s easy to change.</p>
-                    </div></div>
-                  ) : null}
-                  <div className="vsteps">
-                    <ol>
-                      <li><i>1</i><h3>Save the manuscript as it stands.</h3><p>Your first version is the book you’re sending now. Give it a name you’ll recognise.</p><div className="ex">e.g. <b>Prologue first</b></div></li>
-                      <li><i>2</i><h3>Save a new version when the opening changes.</h3><p>List what you changed, one thing at a time. We’ll draw how each version leads to the next.</p><div className="ex">e.g. <b>Fast-paced opening</b> · Cut the prologue · Opens on the ferry</div></li>
-                      <li><i>3</i><h3>Each query records the version that went.</h3><p>Over time you’ll see which opening gets agents asking for more.</p><div className="ex">e.g. <b>40%</b> asked for more, from 5 queries</div></li>
-                    </ol>
-                    <div className="foot"><p>A version is the same story told a different way. A new book is a new manuscript.</p><button type="button" className="cx-b p" data-vv2="first" disabled={!ms || locked} onClick={() => openForm(null)}>+ Save your first version</button></div>
-                  </div>
-                </section>
-              ) : null}
+              {/* v2.2 C — "No versions yet" (a preview of the list) and the comparisons note (S34–S36) */}
+              {ms && fresh && collectionsReady ? <V2Empty ms={ms} out={m.sentTotal} disabled={locked} onFirst={() => openForm(null)} /> : null}
             </div>
           </div>
         </div>

@@ -201,7 +201,7 @@ export interface VersionsModel {
   inUse: string | null;
   resolved: Map<string, string | null>;
   facts: Map<string, VersionFacts>;
-  /** counted queries with no version (the banner, the donut's striped slice, the picker) */
+  /** counted queries with no version (the banner and the picker) */
   unrecorded: Query[];
   /** every counted query on the manuscript */
   sentTotal: number;
@@ -251,35 +251,6 @@ export function rated(fs: readonly VersionFacts[]): VersionFacts[] {
 export function leadingId(fs: readonly VersionFacts[]): string | null {
   const r = rated(fs);
   return r.length > 1 && r[0].ratePct! > r[1].ratePct! ? r[0].v.id : null;
-}
-
-/* ══ the donut (P1) ══════════════════════════════════════════════════════════════════════════════════════════ */
-
-export interface DonutSlice { key: string; n: number; colour: string; name: string; versionId?: string; inUse?: boolean; rest?: number; unrecorded?: boolean }
-
-/** R12 — Original navy, each later version lighter blue by its number (the ref's `sh()`). */
-export function versionColour(num: number, maxNum: number): string {
-  const A = [42, 58, 82], B = [205, 216, 231];
-  const t = num ? 0.2 + 0.75 * (num / Math.max(1, maxNum)) : 0;
-  return `rgb(${A.map((a, i) => Math.round(a + (B[i] - a) * t)).join(",")})`;
-}
-
-/**
- * The donut and its legend: up to 4 versions (the in-use one always among them), in version order, then
- * "{k} other versions", then the striped "Not recorded". Archived versions keep their slice (their totals stay, R8).
- */
-export function donut(m: VersionsModel): DonutSlice[] {
-  const maxNum = Math.max(1, ...m.versions.map((v) => v.num));
-  const segs = m.versions.map((v) => ({ v, n: m.facts.get(v.id)!.n })).filter((s) => s.n > 0).sort((a, b) => b.n - a.n);
-  const us = segs.find((s) => s.v.id === m.inUse);
-  const top = us && segs.indexOf(us) > 3 ? [...segs.slice(0, 3), us] : segs.slice(0, 4);
-  const rest = segs.filter((s) => !top.includes(s));
-  const out: DonutSlice[] = [...top].sort((a, b) => a.v.num - b.v.num)
-    .map((s) => ({ key: s.v.id, n: s.n, colour: versionColour(s.v.num, maxNum), name: s.v.name, versionId: s.v.id, inUse: s.v.id === m.inUse }));
-  const rn = rest.reduce((a, s) => a + s.n, 0);
-  if (rn) out.push({ key: "rest", n: rn, colour: "#e6ebf2", name: `${rest.length} other ${rest.length === 1 ? "version" : "versions"}`, rest: rest.length });
-  if (m.unrecorded.length) out.push({ key: "unrecorded", n: m.unrecorded.length, colour: "url(#vv2hz)", name: "Not recorded", unrecorded: true });
-  return out;
 }
 
 /* ══ the carousel and the league (P6, P7) ════════════════════════════════════════════════════════════════════ */
@@ -401,3 +372,13 @@ export function warmPace(queries: readonly Query[], today: string): number {
 
 /** B2 — weeks at that pace, at least 1; null when nothing was sent in 30 days. */
 export const warmWeeks = (need: number, pace: number): number | null => (pace > 0 ? Math.max(1, Math.ceil(need / (pace / 30) / 7)) : null);
+
+/* ══ v2.2 C4 — the first save's toast ═════════════════════════════════════════════════════════════════════════ */
+
+/** What the first save says. With queries already out they count towards Original; with none, Original simply came
+ *  with the version (S37) — never "your 0 earlier queries". */
+export function firstSaveMessage(name: string, earlier: number): string {
+  return earlier
+    ? `Saved ${name}. Your ${earlier} earlier ${earlier === 1 ? "query counts" : "queries count"} towards Original.`
+    : `Saved ${name}, and Original with it.`;
+}

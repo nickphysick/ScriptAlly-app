@@ -12,7 +12,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { ctxFor, openV2, scrollInto, VER2_PRE, VPS } from "./ver2Lib";
+import { ctxFor, openV2, scrollInto, VER2_COLD, VER2_FRESH, VER2_PRE, VER2_WARM, VPS } from "./ver2Lib";
 
 test.setTimeout(300_000);
 test.describe.configure({ mode: "serial" });
@@ -356,6 +356,95 @@ for (const vp of VPS) {
       await expect.poll(count, { timeout: 8000 }).toMatch(/4 of 4|✓/);
       await ctx.close();
       fx("--seed"); fx("--guide-reset");
+    });
+
+    /* ══ v2.1 — Tracking & performance warming up (design-refs/versions-v2-1, S30) ══ */
+    const warm = async (page: Page) => page.evaluate(() => ({
+      band: !!document.querySelector('[data-vv2="tracking"]'),
+      panel: !!document.querySelector('[data-vv2="warming"]'),
+      carousel: document.querySelectorAll('[data-vv2="carousel"]').length,
+      league: document.querySelectorAll('[data-vv2="league"]').length,
+      compare: document.querySelectorAll('[data-vv2="compare"]').length,
+      ready: document.querySelector('[data-vv2="warm-ready"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+      eta: document.querySelector('[data-vv2="warm-eta"]')?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+      rows: [...document.querySelectorAll('[data-vv2="warm-row"]')].map((r) => r.textContent?.replace(/\s+/g, " ").trim()),
+      examples: [...document.querySelectorAll('[data-vv2="warming"] figcaption b')].map((b) => b.textContent),
+      titleFace: (() => { const h = document.querySelector('[data-vv2="warming"] .wt-tx h3'); return h ? getComputedStyle(h).fontFamily : null; })(),
+    }));
+
+    test("W1 — two versions short of 5 sent each: the divider and the warming-up panel, no carousel, no league, no Compare", async ({ browser, baseURL }) => {
+      test.skip(!run("W1"));
+      fx("--seed");
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page, VER2_WARM);
+      await closePop(page);
+      const rows = await page.locator('[data-vv2="row"]').count();
+      expect(rows, "population: the book's two versions are on the page").toBe(2);
+      const r = await warm(page);
+      console.log(`W1 ${vp.width}`, JSON.stringify(r));
+      expect(r.band, "the navy divider band shows").toBe(true);
+      expect(r.panel, "the warming-up panel shows").toBe(true);
+      expect(r.carousel + r.league, "no carousel, no league").toBe(0);
+      expect(r.compare, "no Compare button").toBe(0);
+      expect(r.ready).toBe("Progress 1 of 2 versions ready");
+      expect(r.rows.length, "population: progress rows").toBe(2);
+      expect(r.rows[0]).toMatch(/Original.*7 sent.*Ready/i);
+      expect(r.rows[1]).toMatch(/Shorter first page.*2 sent.*3 to go/);
+      expect(r.eta).toBe("About 7 weeks away at your pace: you sent 2 queries in the last 30 days, and 3 more are needed.");
+      expect(r.examples).toEqual(["A card for every version", "A league table", "How far each one gets"]);
+      expect(r.titleFace, "the title is in the typewriter face, not brand.tsx's forced heading face").toMatch(/Special Elite/);
+      await ctx.close();
+    });
+
+    test("W2 — logging queries until the second version reaches 5 swaps the panel for the full section, without a reload", async ({ browser, baseURL }) => {
+      test.skip(!run("W2"));
+      fx("--seed");
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page, VER2_WARM);
+      await closePop(page);
+      expect((await warm(page)).panel, "precondition: the panel is showing").toBe(true);
+      await page.evaluate(() => { (window as unknown as { __vv2Mark: number }).__vv2Mark = 1; });
+      fx("--warm-log", "2");
+      await page.waitForTimeout(2500);
+      const mid = await warm(page);
+      expect(mid.panel, "one short: still warming up").toBe(true);
+      expect(mid.rows[1]).toMatch(/4 sent.*1 to go/);
+      fx("--warm-log", "1");
+      await expect.poll(async () => (await warm(page)).panel, { timeout: 15_000 }).toBe(false);
+      const r = await warm(page);
+      console.log(`W2 ${vp.width}`, JSON.stringify(r));
+      expect(await page.evaluate(() => (window as unknown as { __vv2Mark?: number }).__vv2Mark), "no reload happened").toBe(1);
+      expect(r.carousel, "the carousel arrived").toBe(1);
+      expect(r.league, "the league arrived").toBe(1);
+      expect(r.compare, "Compare appeared").toBe(1);
+      await ctx.close();
+      fx("--seed");
+    });
+
+    test("W3 — nothing sent in 30 days: the pace-0 copy", async ({ browser, baseURL }) => {
+      test.skip(!run("W3"));
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page, VER2_COLD);
+      await closePop(page);
+      const r = await warm(page);
+      expect(r.panel, "population: the panel is showing").toBe(true);
+      expect(r.eta).toBe("3 more queries needed. Send with your versions and this fills in by itself.");
+      await ctx.close();
+    });
+
+    test("W4 — the empty state still hides the band", async ({ browser, baseURL }) => {
+      test.skip(!run("W4"));
+      const ctx = await ctxFor(browser, baseURL!, vp);
+      const page = await ctx.newPage();
+      await openV2(page, VER2_FRESH);
+      await closePop(page);
+      expect(await page.locator('[data-vv2="empty"]').count(), "population: the empty state is showing").toBe(1);
+      const r = await warm(page);
+      expect(r.band || r.panel, "no band, no panel").toBe(false);
+      await ctx.close();
     });
 
     test("S29 — Free sees the lock over an inert, blurred page that opens nothing", async ({ browser, baseURL }) => {
