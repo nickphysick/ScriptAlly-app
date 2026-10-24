@@ -5808,7 +5808,11 @@ export const Queries: React.FC<{
           const on = (k: string) => e.pieces[k] ?? has(k);
           next = individualNext({ ql: on("ql"), syn: on("syn"), s: { ...blankSample(), unit: "none" } }, qlV, synV, on("sample") ? recordedPortion : "");
         }
-        if (next && next.summary !== (q.sentMaterials ?? "")) Object.assign(extra, sentCorrectionFields(scriptDb, q, ms, next));
+        /* a change of record is a change of how it went, of package or edition, or of the pieces' words — a query with
+           nothing recorded has an empty summary either way, so the words alone would call a switch "no change" */
+        const recChanged = !!next && (next.summary !== (q.sentMaterials ?? "") || next.sentHow !== rec.how
+          || (next.id ?? null) !== (rec.packageId ?? null) || (next.edition ?? null) !== (rec.edition ?? null));
+        if (next && recChanged) Object.assign(extra, sentCorrectionFields(scriptDb, q, ms, next));
         else next = null;
         if (Object.keys(extra).length) await updateQuery(q.id, extra as Partial<Query>, next?.id ? { stampPackage: next.id } as never : undefined);
         const oldPkg = q.sentPackageId || q.packageId;

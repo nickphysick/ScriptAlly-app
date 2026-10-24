@@ -21,7 +21,7 @@ import { Mark } from "../QueryCard";
 import type { SubmissionPackage } from "../../../types";
 import type { GroupBy, ListGroup } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
-import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
+import { STAGE_NAME, tileCourt, whereItStands } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
@@ -559,7 +559,7 @@ export const QcList138: React.FC<QcList138Props> = ({
     const peekOpen = peekId === r.id;
     return (
       <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}${picked ? " picked" : ""}`} data-picked={picked ? "" : undefined} data-ring={ringId === r.id || undefined} data-peek={peekOpen ? peekTone(due, nowMs, closed) : undefined}
-        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-where={whereItStands(r, nowMs)} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"}
         data-due={due ?? undefined} data-first={r.sentMs ?? undefined} data-from={r.stageStartMs ?? r.lastMs} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
