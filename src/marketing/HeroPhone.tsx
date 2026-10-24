@@ -13,10 +13,10 @@
  * ⚠️ "No more winging it." IS THE STRAPLINE HERE AND THE DESKTOP H1 IS NOT RENDERED AT ALL — the
  * phrase is on the page exactly once at every width. The drawer's question is the page's one h1.
  *
- * ⚠️ WHEN THE STORY ENDS, AND ONLY IF THE READER HAS NOT SCROLLED, THE DRAWER RISES 128px and the
- * founding sign-up opens inside it — a real `FoundingSignup`, one state machine with every other
- * surface. The card eases back to .86 so its final panel stays in view. "Watch again" never shrinks
- * it. Under reduced motion the drawer is already grown on arrival.
+ * ⚠️ WHEN THE STORY'S FIRST RUN ENDS, AND ONLY IF THE READER HAS NOT SCROLLED, THE DRAWER RISES 128px
+ * and the founding sign-up opens inside it — a real `FoundingSignup`, one state machine with every
+ * other surface. It grows once: the story then loops on the card (v3) and never shrinks it. The card
+ * eases back so its final panel stays in view. Under reduced motion the drawer is already grown.
  */
 import React, { useCallback, useLayoutEffect, useRef } from "react";
 import { HeroCard, PHONE_BACKS, PHONE_FRONT_ROTATE } from "./HeroCard";
@@ -29,9 +29,16 @@ export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c003
 
 /* The ref's numbers. */
 const REST = 250, GROWN = 378;          // the drawer's resting and grown heights
-const S_MAX = .68, S_MIN = .45, TOP = 40, TOP_MIN = 24, GUTTER = 16, OVERLAP = 12;
-/* The fit aims 1px inside the 12px allowance: aimed AT it, sub-pixel rounding decides the lock (measured 12.000008). */
-const OVERLAP_FIT = OVERLAP - 1;
+/* GUTTER 4 (v3): the ref's .73 at 390 × 844 brings the outermost back card within ~5px of the screen's
+   edge, so v1's 16px gutter would have forced .69 on the ref's own screen. Nothing is cut off. */
+const S_MAX = .73, S_MIN = .45, TOP_MIN = 24, GUTTER = 4;
+/**
+ * L2 (v3) — the ref's placement at 390 × 844 (S .73, TOP 64) expressed in the CARD's own units: the
+ * drawer's resting top sits this far below the card's top, (784 − 250 − 64) / .73. Held at every size,
+ * it keeps the footer entirely under the drawer and the reminder and final panel above it — the
+ * window between the two is the 12px above the footer's rule, so it scales with the card.
+ */
+const DRAWER_DEPTH = (784 - REST - 64) / .73;
 const K_REST = 1, K_GROWN = .86, K_SCROLLED = .06;
 /* The gap kept between the last panel and the grown drawer's top. The ref's own .86 leaves just
    under 3px at 390 × 844 (measured 2.9–3.2), so 2 keeps the derived scale at exactly .86 there. */
@@ -41,14 +48,10 @@ const reduceMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * The pile's scale and top: the ref's .68 and 40px at 390 × 844, smaller where the screen is
- * narrower or shorter — so the front card and all four behind it fit the width inside 16px gutters,
- * and the front card ends at the drawer's resting top (12px of overlap allowed) — but never below .45.
- * ⚠️ THE FLOOR IS .45, LOWERED FROM THE BRIEF'S .56 (Nick, 23 Oct). At .56 a 375 × 667 phone put the
- * front card 57px under the drawer and hid its last panel — the panel the story ends on. At .45 the
- * fit itself decides that screen (≈.48) and the card ends at the drawer. Should a screen ever be short
- * enough for the floor to bind again, the pile rises, its top coming in from 40 toward 24 (the least
- * that still shows the back cards peeking below the header), to keep as much of the card in view.
+ * The pile's scale and top (v3, L2). The ref's .73 and 64px at 390 × 844; elsewhere the card keeps the
+ * ref's depth below the drawer (`DRAWER_DEPTH`), so the footer is always hidden and the final panel
+ * always shows. The scale is smaller only where the width needs it (all five cards inside the
+ * screen, 4px clear) or where the card would otherwise rise within 24px of the header — never below .45.
  * The widths are worked from each card's own transform (the ref's numbers), never from a measured
  * rect: the entrance deals the cards in from 720px off to the right, so a rect read now would be
  * the animation's, not the layout's.
@@ -59,14 +62,9 @@ export function phonePileFit(screenW: number, stageH: number, front: { w: number
   let reach = half(front.w, front.h, PHONE_FRONT_ROTATE, 1);
   for (const b of PHONE_BACKS) reach = Math.max(reach, Math.abs(b.tx) + half(front.w, backH, b.r, b.s));
   const sW = (screenW / 2 - GUTTER) / reach;
-  /* The front card's bottom as drawn: its top is placed at TOP, and its .8° turn carries the lower
-     corner a little further down than its height alone — measured 1.6px at .48, enough to break 12. */
-  const r = rad(PHONE_FRONT_ROTATE);
-  const drawnH = front.h / 2 + front.h / 2 * Math.cos(r) + front.w / 2 * Math.sin(r);
-  const sH = (stageH - REST + OVERLAP_FIT - TOP) / drawnH;
+  const sH = (stageH - REST - TOP_MIN) / DRAWER_DEPTH;
   const s = Math.max(S_MIN, Math.min(S_MAX, sW, sH));
-  const short = Math.max(0, TOP + drawnH * s - (stageH - REST + OVERLAP_FIT));
-  return { s, top: Math.max(TOP_MIN, TOP - short) };
+  return { s, top: Math.max(TOP_MIN, stageH - REST - DRAWER_DEPTH * s) };
 }
 
 /** The sign-up inside the drawer: its line, then the shared form. The line goes with the form. */

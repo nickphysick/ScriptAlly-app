@@ -52,13 +52,15 @@ describe("landing copy — verbatim locks", () => {
    * ⚠️ THE PHRASE HAS EXACTLY ONE HOME, AND IT IS THE HERO NOW. Counted across every string the page
    * renders rather than checked on the hero alone, so a second owner anywhere fails.
    */
-  /* v2 (landing hero on phones): the manuscript is "Your manuscript" on every phone card, and the
-     retired partial-request line is gone from the copy module altogether. */
-  it("the phone cards' manuscript is Your manuscript, and the retired line is nowhere", async () => {
-    expect(HERO_PHONE_MS).toBe("Your manuscript");
+  /* REWRITTEN (v3, the short loop): the manuscript is "Lord of the Wings" on every phone card, and
+     nothing of v2's story — its dashboard, agent pick, band, form, sample control, response form or
+     bottom pills — survives in the copy module. */
+  it("the phone cards' manuscript is Lord of the Wings, and v2's story copy is gone", async () => {
+    expect(HERO_PHONE_MS).toBe("Lord of the Wings");
     const src = (await import("node:fs")).readFileSync(new URL("./landingCopy.ts", import.meta.url), "utf8");
-    expect(src.includes("Lead future queries with the opening voice"), "the retired line").toBe(false);
-    expect(src.includes("Your novel"), "v1's title is retired with it").toBe(false);
+    for (const gone of ["Who are you querying?", "Logging query…", "PHONE_DASH", "PHONE_PICK", "PHONE_FORM", "PHONE_RESPONSE", "PHONE_PILLS", "Your manuscript", "Your novel", "Lead future queries with the opening voice"]) {
+      expect(src.includes(gone), `retired: ${gone}`).toBe(false);
+    }
   });
 
   it("says `No more winging it.` exactly once on the page", () => {
