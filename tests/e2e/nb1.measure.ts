@@ -49,32 +49,36 @@ const scrollPageTo = (page: Page, y: number | "end") => page.evaluate((v) => {
 }, y);
 
 /* ── L1 · the Query Centre's navy bar ───────────────────────────────────────────────────────────────────────────── */
+/* v149 (QC149 L13) — RE-POINTED: list-only (Part B), and the bar's count and Cards / List toggle are gone; the bar is heard
+   back (unpinned, from 1441px), then Filters, Group by, Sort and Full screen (B1). No jump row, no title row, as before. */
 test("NB1-L1 QC bar", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L1");
-  for (const vp of SIZES) for (const view of ["list", "cards"] as const) {
-    await openQc(page, vp, { view });
+  for (const vp of SIZES) {
+    await openQc(page, vp, { view: "list" });
     await mutate(page, "L1");
     const r = await page.evaluate(`(() => { ${vis}
       const tb = vis('[data-qc140="toolbar"]');
       const x = (s) => { const e = tb && vis(s, tb); return e ? Math.round(e.getBoundingClientRect().left) : null; };
-      return { tb: !!tb, count: x('[data-qc144="count"]'), toggle: x('[data-qc144="view-bar"]'), filters: x('[data-qc140="filters"]'),
-        group: x('[data-qc140="group"]'), sort: x('[data-qc1421="sort-chip"] button'),
-        countText: (tb && vis('[data-qc144="count"]', tb)?.textContent) || "",
+      return { tb: !!tb, heard: x('[data-qc149="heard"]'), filters: x('[data-qc140="filters"]'),
+        group: x('[data-qc140="group"]'), sort: x('[data-qc1421="sort-chip"] button'), full: x('[data-qc149="full"]'),
+        count: !!(tb && vis('[data-qc144="count"]', tb)), toggle: !!(tb && vis('[data-qc144="view-bar"]', tb)),
         jump: !!vis('[data-qc140="jump"]'), titleRow: !!vis('.qcv-group [data-qc142="title-row"], .qcv-group .vw-top') };
     })()`) as Record<string, unknown>;
-    const at = `${vp.width} ${view}`;
+    const at = `${vp.width}`;
     L.check(`${at} · population: the bar`, r.tb === true, JSON.stringify(r));
-    const xs = [r.count, r.toggle, r.filters, r.group, r.sort] as (number | null)[];
-    L.check(`${at} · count, toggle, then Filters, Group by, Sort in order`, xs.every((v) => typeof v === "number") && xs.every((v, i) => i === 0 || (v as number) > (xs[i - 1] as number)), JSON.stringify(xs));
-    L.check(`${at} · the count reads "N QUERIES"`, /^\d+\s*queries$/i.test(String(r.countText).trim()), String(r.countText));
+    const xs = [...(vp.width > 1440 ? [r.heard] : []), r.filters, r.group, r.sort, r.full] as (number | null)[];
+    L.check(`${at} · ${vp.width > 1440 ? "heard back, then " : ""}Filters, Group by, Sort, Full screen in order`, xs.every((v) => typeof v === "number") && xs.every((v, i) => i === 0 || (v as number) > (xs[i - 1] as number)), JSON.stringify(xs));
+    L.check(`${at} · no count and no Cards / List toggle`, r.count === false && r.toggle === false, `count ${r.count} · toggle ${r.toggle}`);
     L.check(`${at} · no jump row`, r.jump === false, String(r.jump));
     L.check(`${at} · no title row above the list card`, r.titleRow === false, String(r.titleRow));
   }
-  L.done(20);
+  L.done(10);
 });
 
 /* ── L2 · the pill above the list ──────────────────────────────────────────────────────────────────────────────── */
+/* v149 (QC149 L13) — RE-POINTED: the pill above the list is gone. Find is the view row's, on the list's edges (QC149-L2),
+   and Full screen is in the navy bar (QC149-L5). What survives: Find is there, and no keycap shows on the sheet. */
 test("NB1-L2 QC pill", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L2");
@@ -82,22 +86,14 @@ test("NB1-L2 QC pill", async ({ page }) => {
     await openQc(page, vp, { view: "list" });
     await mutate(page, "L2");
     const r = await page.evaluate(`(() => { ${vis}
-      const f = vis('[data-qc144="find"]'), b = vis('[data-qc144="full"]'), sheet = vis('.qc138-sheet');
-      const box = (e) => e ? e.getBoundingClientRect() : null;
-      const F = box(f), B = box(b), S = box(sheet);
-      /* the page: the sheet under the shell's bar (the bar's own search keeps its ⌘K on every route; reported) */
       const kbd = [...document.querySelectorAll('.ws-window kbd')].filter((k) => { const r = k.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(k).visibility !== 'hidden'; }).length;
-      return { f: !!F, b: !!B, s: !!S, fRight: F && F.right, bLeft: B && B.left, fH: F && F.height, bH: B && B.height, fTop: F && F.top, bTop: B && B.top,
-        joint: F && B ? (F.left + B.right) / 2 : null, sheetC: S ? (S.left + S.right) / 2 : null, kbd };
+      return { find: !!vis('[data-qc149="find"]'), pill: !!vis('[data-qc144="srow"]'), kbd };
     })()`) as Record<string, number | boolean | null>;
     const at = `${vp.width}`;
-    L.check(`${at} · population: search, Full screen and the list card`, r.f && r.b && r.s, JSON.stringify(r));
-    L.check(`${at} · search and Full screen are adjacent`, near(r.fRight as number, r.bLeft as number, 1) && near(r.fTop as number, r.bTop as number, 1), JSON.stringify(r));
-    L.check(`${at} · both 60 tall (±1)`, near(r.fH as number, 60, 1) && near(r.bH as number, 60, 1), JSON.stringify(r));
-    L.check(`${at} · their joint centre is the list card's (±2)`, near(r.joint as number, r.sheetC as number, 2), `${r.joint} vs ${r.sheetC}`);
+    L.check(`${at} · Find is in the view row, and the pill row is gone`, r.find === true && r.pill === false, JSON.stringify(r));
     L.check(`${at} · no keycap visible on the page (the sheet)`, r.kbd === 0, `${r.kbd} visible kbd`);
   }
-  L.done(10);
+  L.done(4);
 });
 
 /* ── L3 · full screen: search in the cream toolbar ─────────────────────────────────────────────────────────────── */
@@ -123,7 +119,10 @@ test("NB1-L3 QC full screen", async ({ page }) => {
 });
 
 /* ── L4 · the ruled headings, both views ───────────────────────────────────────────────────────────────────────── */
-test("NB1-L4 QC headings", async ({ page }) => {
+/* RETIRED (v149, QC149 L13): the ruled white headings became full-width #f6f3ee bands with no rule (Part B4,
+   QC149-L7) — the 23px label, the rule to the right edge, the white stuck heading and its white fade no longer describe
+   the design; the Cards half went with the Cards view. */
+test.skip("NB1-L4 QC headings", async ({ page }) => {
   test.setTimeout(500_000);
   const L = new Ledger("L4");
   for (const vp of SIZES) for (const view of ["list", "cards"] as const) {

@@ -82,7 +82,8 @@ const press = (page: Page, sel: string) => page.evaluate((s) => { const e = [...
 const textOf = (page: Page, sel: string) => page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0)?.textContent?.trim() ?? null, sel);
 
 /* ── L1 · three columns from a 1,100px list card ────────────────────────────────────────────────────────────────── */
-test("CSS1-L1 columns", async ({ page }) => {
+/* RETIRED (v149, QC149 L13): it counted the Cards view's grid columns; the page is list-only (Part B). */
+test.skip("CSS1-L1 columns", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L1");
   for (const vp of SIZES) for (const full of [false, true]) {
@@ -153,13 +154,14 @@ test("CSS1-L4 keys", async ({ page }) => {
   const L = new Ledger("L4");
   for (const vp of SIZES) {
     const at = `${vp.width}`;
-    await openQc(page, vp, { view: "cards" });
+    /* v149 (QC149 L13) — RE-POINTED: the Cards view is gone; the same keys ring the list's rows (the `kf` ring) */
+    await openQc(page, vp);
     await page.mouse.click(5, 300);
-    const ring = () => page.evaluate(() => { const cs = [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qc142='card']")]; const i = cs.findIndex((c) => c.classList.contains("kf")); return { i, id: i >= 0 ? cs[i].dataset.id : null, n: cs.length, second: cs[1]?.dataset.id ?? null }; });
+    const ring = () => page.evaluate(() => { const cs = [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].filter((c) => c.getBoundingClientRect().height > 0 && !c.closest("[data-qc139='practice']")); const i = cs.findIndex((c) => c.classList.contains("kf")); return { i, id: i >= 0 ? cs[i].dataset.id : null, n: cs.length, second: cs[1]?.dataset.id ?? null }; });
     await page.keyboard.press("j"); await page.waitForTimeout(300);
     const r1 = await ring();
-    L.check(`${at} · population`, r1.n > 2, `${r1.n} cards`);
-    L.check(`${at} · j rings the first card`, r1.i === 0, JSON.stringify(r1));
+    L.check(`${at} · population`, r1.n > 2, `${r1.n} rows`);
+    L.check(`${at} · j rings the first row`, r1.i === 0, JSON.stringify(r1));
     await page.keyboard.press("j"); await page.waitForTimeout(300);
     const r2 = await ring();
     L.check(`${at} · j again moves to the next`, r2.i === 1 && r2.id === r1.second, JSON.stringify(r2));
@@ -174,16 +176,16 @@ test("CSS1-L4 keys", async ({ page }) => {
 test("CSS1-L5 skeleton", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("L5");
-  for (const vp of SIZES) for (const view of ["cards", "list"] as const) {
+  /* v149 (QC149 L13) — RE-POINTED: list-only, so the remembered view is always the list; the Cards half is retired */
+  for (const vp of SIZES) for (const view of ["list"] as const) {
     await openQc(page, vp, { view, hold: 30_000 });
     await page.waitForTimeout(2500);
     const r = await page.evaluate(() => ({ cards: [...document.querySelectorAll("[data-qc142='sk-card']")].filter((e) => e.getBoundingClientRect().height > 0).length, rows: [...document.querySelectorAll("[data-qcv='sk-row']")].filter((e) => e.getBoundingClientRect().height > 0).length }));
     const at = `${vp.width} remembered ${view}`;
     L.check(`${at} · population: a placeholder shows`, r.cards + r.rows > 0, JSON.stringify(r));
-    if (view === "cards") L.check(`${at} · card placeholders and no row placeholders`, r.cards >= 4 && r.rows === 0, JSON.stringify(r));
-    else L.check(`${at} · row placeholders and no card placeholders`, r.rows > 0 && r.cards === 0, JSON.stringify(r));
+    L.check(`${at} · row placeholders and no card placeholders`, r.rows > 0 && r.cards === 0, JSON.stringify(r));
   }
-  L.done(8);
+  L.done(4);
 });
 
 async function chipPick(page: Page, ns: string, key: string, reversed: boolean) {
@@ -198,7 +200,9 @@ const order = (page: Page, sel: string, attr: string) => page.evaluate(({ s, a }
    RE-POINTED (navy-bar-address-book v1): the Query Centre's headings are plain labels now (A1), so the half that read the
    active heading and pressed headings is retired; the Contact list's Cards and List are the address book (its sorts and
    sections are NB1-L9). What survives: a chip pick in Cards orders the List the same way. */
-test("CSS1-L6 one sort", async ({ page }) => {
+/* RETIRED (v149, QC149 L13): "both views draw the same order" needs two views; the page is list-only. The chip's
+   place is CSS1-L7's and its sort is the list's own. */
+test.skip("CSS1-L6 one sort", async ({ page }) => {
   test.setTimeout(1_200_000);
   const L = new Ledger("L6");
   const vp = SIZES[1];

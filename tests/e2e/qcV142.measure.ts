@@ -140,15 +140,8 @@ test("QC142-L3 no pin", async ({ page }) => {
     const exitBtn = await rect(page, "[data-qc142='full-tb']");
     const exitWords = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc142='full-tb']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent?.trim() ?? "");
     L.check(`${at} · in full screen the toolbar says Exit full screen`, exitBtn && /Exit full screen/.test(exitWords), exitWords);
-    const sw = await rect(page, "[data-qc142='view-tb']");
-    L.check(`${at} · in full screen the toolbar carries the icon toggle`, !!sw, JSON.stringify(sw));
-    await press(page, "[data-qc142='view-tb'] [data-view='cards']");
-    await page.waitForTimeout(700);
-    const cards = await page.evaluate(() => !!document.querySelector(".qc138-sheet[data-view='cards'] [data-qc142='card']"));
-    await press(page, "[data-qc142='view-tb'] [data-view='list']");
-    await page.waitForTimeout(700);
-    const list = await page.evaluate(() => !!document.querySelector(".qc138-sheet[data-view='list'] [data-qcv='row']"));
-    L.check(`${at} · the icon toggle switches to Cards and back`, cards && list, `cards ${cards} · list ${list}`);
+    /* v149 (QC149 L13) — RE-POINTED: no Cards / List toggle in either mode (list-only, Part B); its absence is read here */
+    L.check(`${at} · in full screen there is no Cards / List toggle`, !(await rect(page, "[data-qc142='view-tb']")), "toggle drawn");
     await press(page, "[data-qc142='full-tb']");
     await page.waitForTimeout(1200);
     L.check(`${at} · Exit full screen leaves`, !(await full()), "pressed");
@@ -159,7 +152,7 @@ test("QC142-L3 no pin", async ({ page }) => {
     await page.waitForTimeout(1200);
     L.check(`${at} · Esc leaves`, !(await full()), "");
   }
-  L.done(18);
+  L.done(16);
 });
 
 /* ── L4 · Cards and List show the same queries, and the title counts them ──────────────────────────────────────── */
@@ -187,7 +180,9 @@ async function filterChip(page: Page, sel: string) {
   await page.waitForTimeout(400);
   return ok;
 }
-test("QC142-L4 parity", async ({ page }) => {
+/* RETIRED (v149, QC149 L13): Cards and List no longer both exist — the page is list-only (Part B) — and the bar's count
+   is gone; the chips' counts are each set's size (QC149-L4). */
+test.skip("QC142-L4 parity", async ({ page }) => {
   test.setTimeout(600_000);
   const L = new Ledger("L4");
   const vp = SIZES[1];
@@ -239,12 +234,18 @@ test("QC142-L5 card format", async ({ page }) => {
   const land = await pick();
   for (const vp of SIZES) {
     const at = `${vp.width}`;
-    await openQc(page, vp, { view: "cards" });
+    /* v149 (QC149 L13) — RE-POINTED: the Cards view is gone and the query card is the panel's (Part C), drawn from the
+       same .mk-lc* classes. The mat is the panel's surface; the inner border, band and name are the card's. The band's
+       word is read on five queries in turn (the panel shows one at a time); the per-set counts are QC149-L4's. */
+    await openQc(page, vp);
     await mutate(page, "L5");
+    const first = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].find((r) => r.getBoundingClientRect().height > 0 && !r.closest("[data-qc139='practice']"))?.dataset.id ?? null);
+    if (first) { await page.locator(`.qc138-sheet [data-qcv='row'][data-id="${first}"] [data-qcv='row-first']`).first().click(); await page.waitForTimeout(1400); }
     const qc = await page.evaluate(() => {
       const st = (e: Element | null) => { if (!e) return null; const c = getComputedStyle(e); return { pad: c.padding, bw: c.borderTopWidth, bc: c.borderTopColor, br: c.borderTopLeftRadius, fs: c.fontSize, fw: c.fontWeight, ls: c.letterSpacing, tt: c.textTransform, lh: c.lineHeight, ff: c.fontFamily, bg: c.backgroundColor }; };
-      const m = [...document.querySelectorAll("[data-qc142='mat']")].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      return { mat: st(m), inner: st(m?.querySelector(".mk-lc-in") ?? null), band: st(m?.querySelector(".mk-lc-band") ?? null), name: st(m?.querySelector(".mk-lc-nm") ?? null) };
+      const card = document.querySelector("[data-qp='panel'] [data-qc149c='card']");
+      const m = card?.closest(".spanel") ?? null;
+      return { mat: st(m), inner: st(card?.querySelector(".mk-lc-in") ?? null), band: st(card?.querySelector(".mk-lc-band") ?? null), name: st(card?.querySelector(".mk-lc-nm") ?? null) };
     });
     L.check(`${at} · population`, land.mat && land.inner && land.band && land.name && qc.mat && qc.inner && qc.band && qc.name, `landing ${!!land.mat} · QC ${!!qc.mat}`);
     if (!land.mat || !qc.mat || !land.inner || !qc.inner || !land.band || !qc.band || !land.name || !qc.name) continue;
@@ -252,33 +253,29 @@ test("QC142-L5 card format", async ({ page }) => {
     L.check(`${at} · the inner border`, qc.inner.bw === land.inner.bw && qc.inner.bc === land.inner.bc && qc.inner.br === land.inner.br, `QC ${qc.inner.bw} ${qc.inner.bc} r${qc.inner.br} · landing ${land.inner.bw} ${land.inner.bc} r${land.inner.br}`);
     L.check(`${at} · the band's font`, qc.band.fs === land.band.fs && qc.band.fw === land.band.fw && qc.band.ls === land.band.ls && qc.band.tt === land.band.tt && qc.band.lh === land.band.lh && fam(qc.band.ff) === fam(land.band.ff),
       `QC ${qc.band.fw} ${qc.band.fs}/${qc.band.lh} ${fam(qc.band.ff)} ${qc.band.ls} ${qc.band.tt} · landing ${land.band.fw} ${land.band.fs}/${land.band.lh} ${fam(land.band.ff)} ${land.band.ls} ${land.band.tt}`);
-    L.check(`${at} · the agent's name font`, qc.name.fs === land.name.fs && qc.name.fw === land.name.fw && qc.name.ls === land.name.ls && fam(qc.name.ff) === fam(land.name.ff),
-      `QC ${qc.name.fw} ${qc.name.fs} ${fam(qc.name.ff)} · landing ${land.name.fw} ${land.name.fs} ${fam(land.name.ff)}`);
-    /* the band's word is whereItStands: tallied over every card, it must equal the hero's four counts (the same sets) */
-    const t = await page.evaluate(() => {
-      const words: Record<string, number> = {};
-      const LABEL: Record<string, string> = { you: "With you", agent: "With the agent", quiet: "Gone quiet", closed: "Closed" };
-      let agree = 0, disagree = 0;
-      for (const c of document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qc142='card']")) {
-        if (c.closest("[data-qc139='practice']")) continue;
-        const k = c.dataset.where ?? "";
-        const w = c.querySelector("[data-qc142='band-word']")?.textContent?.trim() ?? "";
-        if (LABEL[k] === w) agree += 1; else disagree += 1;
-        words[k] = (words[k] ?? 0) + 1;
-      }
-      const hero: Record<string, number> = {};
-      for (const r of document.querySelectorAll<HTMLElement>("[data-qc141='card-row']")) if (r.getBoundingClientRect().height > 0) hero[r.dataset.k ?? ""] = Number(r.dataset.n);
-      return { words, hero, agree, disagree };
-    });
-    L.check(`${at} · population: cards tallied`, t.agree + t.disagree > 10 && Object.keys(t.hero).length === 4, JSON.stringify(t));
-    L.check(`${at} · each band says its set`, t.disagree === 0, `${t.agree} agree · ${t.disagree} disagree`);
-    for (const k of ["you", "agent", "quiet", "closed"]) L.check(`${at} · ${k}: cards = the hero's count`, (t.words[k] ?? 0) === t.hero[k], `cards ${t.words[k] ?? 0} · hero ${t.hero[k]}`);
+    /* the name is the landing card's face at the v149 ref's own size, `.cbr .lc-nm { font-size: 25px !important }`; its
+       tracking is the same -.005em, so it is compared in em */
+    L.check(`${at} · the agent's name font`, qc.name.fs === "25px" && qc.name.fw === land.name.fw && Math.abs(parseFloat(qc.name.ls) / parseFloat(qc.name.fs) - parseFloat(land.name.ls) / parseFloat(land.name.fs)) < 1e-4 && fam(qc.name.ff) === fam(land.name.ff),
+      `QC ${qc.name.fw} ${qc.name.fs} ${fam(qc.name.ff)} ls ${qc.name.ls} · landing ${land.name.fw} ${land.name.fs} ${fam(land.name.ff)} ls ${land.name.ls}`);
+    const LABEL: Record<string, string> = { you: "With you", agent: "With the agent", quiet: "Gone quiet", closed: "Closed" };
+    let agree = 0, disagree = 0;
+    for (let i = 0; i < 5; i += 1) {
+      const w = await page.evaluate(() => { const c = document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc149c='card']"); return { id: c?.dataset.id, where: c?.dataset.where ?? "", word: c?.querySelector("[data-qc149c='band-word']")?.textContent?.trim() ?? "" }; });
+      if (LABEL[w.where] && LABEL[w.where] === w.word) agree += 1; else disagree += 1;
+      const was = w.id;
+      await page.evaluate(() => document.querySelector<HTMLButtonElement>("[data-qp='panel'] [data-qc149c='next']")?.click());
+      await page.waitForFunction((x) => document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc149c='card']")?.dataset.id !== x, was, { timeout: 6000 }).catch(() => {});
+    }
+    L.check(`${at} · each band says its set (five queries in turn)`, agree === 5 && disagree === 0, `${agree} agree · ${disagree} disagree`);
+    await page.keyboard.press("Escape");
   }
-  L.done(22);
+  L.done(12);
 });
 
 /* ── L6 · a stuck heading never covers a card ──────────────────────────────────────────────────────────────────── */
-test("QC142-L6 not covered", async ({ page }) => {
+/* RETIRED (v149, QC149 L13): it measured the Cards view's group headings over its cards; the list's headings are full-
+   width bands (QC149-L7). */
+test.skip("QC142-L6 not covered", async ({ page }) => {
   test.setTimeout(600_000);
   const L = new Ledger("L6");
   for (const vp of SIZES) {
