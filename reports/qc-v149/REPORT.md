@@ -163,4 +163,11 @@ logged) were written and undone in the same run. The account's data differs from
 
 ## 9 · Integration and deploy
 
-See the end of this file once the integration run is done.
+- **Integration branch `dev/hm31-pv4-qc149`**, cut from `origin/dev/hm31-pv4` (e629f2b0, what dev served:
+  `index-BkePzY_g.js`) with `query-centre-v149` merged in: **c91ebc4a**. Its tree is byte-identical to the branch tip.
+- **Re-run there:** tsc clean · production build clean (no warnings) · Vitest 10,355 passed, the same three `functions/`
+  reds as the base · QC149 L1–L12 all green at both sizes · L0 green (0 styles; 16 px = 0.0016% at 1280, 0 at 1512)
+  against a base reference captured in the same run.
+- **Deployed to dev only** (hosting, `--config firebase.dev.json --project scriptally-dev`), from that worktree, clean at
+  the pushed tip, with the served hash checked in the same command. **Dev now serves `index-Cbftfy9e.js`.**
+- **Not merged to `main`.** Prod untouched; no rules or functions deployed.
