@@ -72,6 +72,17 @@ for (let i = 0; i < out.length; i++) {
   out[i] = out[i].replace(/--(sp-serif|sp-type|font-mono)\s*:\s*var\(--(serif|machine|mono)\)\s*;?/g, "");
   out[i] = out[i].replace(/--machine:\s*'Special Elite',\s*monospace/g, "--machine:var(--sp-type)").replace(/--serif:\s*'Source Serif 4',\s*Georgia,\s*serif/g, "--serif:var(--sp-serif)");
 }
+/* ⚠️ THE BANNER'S LOOK MOVED TO src/components/shared/pageAlertBanner.css (Query Centre v149, lock QC149-L0): the
+   page renders it through PageAlertBanner. Its parts go; its two base rules keep only their margins, which are the
+   page's. Without this a regeneration would put a second copy of the look back under .vv2. */
+for (let i = 0; i < out.length; i++) {
+  out[i] = out[i].split("\n").flatMap((l) => {
+    if (/^\.vv2 \.wb-(i|i svg|t|h|h b|s|g|g span|b|b:hover) \{/.test(l)) return [];
+    if (l.startsWith(".vv2 .wb { display:flex")) return [".vv2 .wb { margin:30px 0 0 }"];
+    if (l.startsWith(".vv2 .wb { margin-top:44px!important;")) return [".vv2 .wb { margin-top:44px!important }"];
+    return [l];
+  }).join("\n");
+}
 const allText = out.join("\n");
 for (const k of kf) if (new RegExp(`\\b${k.name}\\b`).test(allText)) out.push(k.text);
 writeFileSync(outPath, out.join("\n") + "\n");
