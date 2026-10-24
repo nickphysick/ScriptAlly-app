@@ -122,3 +122,53 @@ body > .vv2[data-vv2="layer"] {
 @container sheet (max-width:1200px) {
   .vv2 #secTiles { margin:24px 16px 0;padding:18px 16px 20px!important }
 }
+
+/* ══ v2.2 C — the empty states (design-refs/versions-v2-2 `.ev`, `.ev2`, S34–S36), ported from the mock's source text in
+   its order: the first block draws `.ev` in the tinted panel, the second (the mock's own later override) turns it into
+   the hairline container with no fill, as C1 asks. ══ */
+.vv2 .ev { margin:28px 24px 0;padding:26px 24px 22px!important;border-radius:22px;background:#e8ecf2;box-shadow:inset 0 0 0 1px rgba(42,58,82,.10) }
+.vv2 .ev-hd h2 { margin:0;font:400 28px var(--machine);color:#1c130f }
+.vv2 .ev-hd p { margin:6px 0 0;max-width:760px;font:400 16px/1.5 var(--serif);color:rgba(28,19,15,.72) }
+.vv2 .ev-hd b { color:#1c130f }
+.vv2 .ev-list { margin-top:20px }
+.vv2 .ev-h, .vv2 .ev-r { display:grid;grid-template-columns:minmax(220px,1fr) minmax(280px,2.4fr) 130px 150px;gap:20px;align-items:center;padding:0 20px }
+.vv2 .ev-h { padding-bottom:10px;font:600 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:rgba(28,19,15,.55) }
+.vv2 .ev-h .r { text-align:right }
+.vv2 .ev-r { min-height:84px;margin-bottom:10px;border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(28,19,15,.05),inset 0 0 0 1px rgba(28,19,15,.08);text-align:left;font:inherit;width:100%;border:0 }
+.vv2 .ev-r.orig { background:#fbf9f5 }
+.vv2 .ev-r.add { background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1.5px rgba(42,58,82,.35);border:0;outline:1.5px dashed rgba(42,58,82,.4);outline-offset:-1.5px;box-shadow:none;cursor:pointer;transition:background .15s }
+.vv2 .ev-r.add:hover { background:#fff }
+.vv2 .ev-id { display:flex;align-items:center;gap:12px }
+.vv2 .ev-n { display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px #2a3a52;color:#2a3a52;flex:none }
+.vv2 .ev-n svg { width:16px;height:16px }
+.vv2 .ev-n.p { background:#2a3a52;color:#f4eee5;box-shadow:none;font:400 19px/1 var(--machine) }
+.vv2 .ev-id b { display:block;font:400 16.5px var(--machine);color:#1c130f }
+.vv2 .ev-id small { display:block;margin-top:2px;font:italic 13.5px var(--serif);color:rgba(28,19,15,.55) }
+.vv2 .ev-ch { font:italic 14.5px/1.45 var(--serif);color:rgba(28,19,15,.6);display:flex;flex-wrap:wrap;gap:7px }
+.vv2 .ev-pill { padding:5px 12px 6px;border-radius:999px;background:#f8ebe4;font:400 14px var(--serif);font-style:normal;color:rgba(92,42,28,.6) }
+.vv2 .ev-w { text-align:right;font:400 15px var(--machine);color:#1c130f }
+.vv2 .ev-w small { display:block;margin-top:3px;font:600 9px var(--mono);letter-spacing:.04em;color:rgba(28,19,15,.45) }
+.vv2 .ev-q { text-align:right }
+.vv2 .ev-q b { display:block;font:400 22px/1 var(--machine);color:#2a3a52 }
+.vv2 .ev-q small { display:block;margin-top:5px;font:italic 13px var(--serif);color:rgba(28,19,15,.55) }
+.vv2 .ev-q em { font:italic 14px var(--serif);color:rgba(28,19,15,.45) }
+.vv2 .ev-cta { grid-column:3/5;justify-self:end;display:inline-flex;align-items:center;height:38px;padding:0 18px;border-radius:999px;background:#2a3a52;color:#f4eee5;font:400 14.5px var(--machine) }
+.vv2 .ev-foot { margin:8px 4px 0;font:italic 14px var(--serif);color:rgba(42,58,82,.6) }
+@container sheet (max-width:1200px) {
+  .vv2 .ev { margin:24px 16px 0;padding:20px 16px 18px!important }
+  .vv2 .ev-h, .vv2 .ev-r { grid-template-columns:minmax(190px,1fr) minmax(200px,2fr) 110px 130px;gap:14px }
+}
+.vv2 .ev { background:transparent!important;box-shadow:inset 0 0 0 1px rgba(28,19,15,.14)!important }
+.vv2 .ev-r.add { background:rgba(255,255,255,.45) }
+.vv2 .ev-foot { color:rgba(28,19,15,.5)!important }
+.vv2 .ev2 { margin:36px 24px 0;padding:0!important }
+.vv2 .ev2-hd { display:flex;gap:16px;align-items:flex-start;margin-bottom:16px }
+.vv2 .ev2-ic { display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#2a3a52;color:#f4eee5;flex:none }
+.vv2 .ev2-ic svg { width:20px;height:20px }
+.vv2 .ev2-hd h2 { margin:4px 0 4px;font:400 22px var(--machine);color:#1c130f }
+.vv2 .ev2-hd p:not(.oh-k) { margin:0;font:400 15.5px/1.5 var(--serif);color:rgba(28,19,15,.7) }
+@container sheet (max-width:1200px) {
+  .vv2 .ev2 { margin:30px 16px 0 }
+}
+/* brand.tsx forces h2 to its serif with !important; the claw-back */
+.vv2.vv2 .ev-hd h2, .vv2.vv2 .ev2-hd h2 { font-family: var(--machine) !important; }

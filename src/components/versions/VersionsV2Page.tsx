@@ -36,7 +36,7 @@ import {
 } from "../../lib/bookVersions";
 import { buildRows } from "../../lib/analytics";
 import { versionsUnlocked, VERSIONS_FOUNDING_ACCESS } from "../../lib/entitlements";
-import { VERSION_NOT_SURE, hasGoneOut, packagesHolding, versionsModel } from "../../lib/versionsV2";
+import { VERSION_NOT_SURE, firstSaveMessage, hasGoneOut, packagesHolding, versionsModel } from "../../lib/versionsV2";
 import {
   VERSIONS_CHECKLIST, VERSIONS_GUIDE_HIDDEN_PATH, VERSIONS_GUIDE_SEEN_PATH, VERSIONS_GUIDE_UNHIDE_PATH, VERSIONS_LOCKED, VERSIONS_STEP_TEXT,
   versionsGuideDonePath, versionsGuideOf, type VersionsGuideKey,
@@ -48,6 +48,7 @@ import { agentLine, today } from "./v2Bits";
 import { V2List } from "./V2List";
 import { V2Tree } from "./V2Tree";
 import { V2Tracking } from "./V2Tracking";
+import { V2Empty } from "./V2Empty";
 import { ArchiveConfirm, DrawerShell, Explainer, Layer, ModalShell, Picker, VersionDrawer, VersionForm, type FormSave, type PickerMode } from "./V2Overlays";
 import "./versionsV2.css";
 import "./versionsV2.app.css";
@@ -152,7 +153,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     tick("add");
     flash(id);
     showToast({
-      message: first ? `Saved ${s.name}. Your ${earlier} earlier ${earlier === 1 ? "query counts" : "queries count"} towards Original.` : `Saved ${s.name}. Add it to a package to send it.`,
+      /* v2.2 C4 — with no earlier queries the first save says only that Original came with it (S37) */
+      message: first ? firstSaveMessage(s.name, earlier) : `Saved ${s.name}. Add it to a package to send it.`,
       undo: async () => { await writeVersionChange(ms.id, before); },
     });
   };
@@ -299,25 +301,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
                 </>
               ) : null}
 
-              {fresh && collectionsReady ? (
-                <section className="cx-sec first is-fresh" aria-labelledby="msVH0" data-vv2="empty">
-                  <div className="cx-sh"><h2 id="msVH0">Start tracking versions</h2></div>
-                  {msQueries.length ? (
-                    <div className="pre-note" id="preNote" data-vv2="pre-note"><span className="ic">i</span><div>
-                      <h3 id="preNoteH">You’ve already sent {m.sentTotal} {m.sentTotal === 1 ? "query" : "queries"}.</h3>
-                      <p>When you save your first version, we’ll assume they went out with your <b>original manuscript</b> and count them there. If any went out differently, it’s easy to change.</p>
-                    </div></div>
-                  ) : null}
-                  <div className="vsteps">
-                    <ol>
-                      <li><i>1</i><h3>Save the manuscript as it stands.</h3><p>Your first version is the book you’re sending now. Give it a name you’ll recognise.</p><div className="ex">e.g. <b>Prologue first</b></div></li>
-                      <li><i>2</i><h3>Save a new version when the opening changes.</h3><p>List what you changed, one thing at a time. We’ll draw how each version leads to the next.</p><div className="ex">e.g. <b>Fast-paced opening</b> · Cut the prologue · Opens on the ferry</div></li>
-                      <li><i>3</i><h3>Each query records the version that went.</h3><p>Over time you’ll see which opening gets agents asking for more.</p><div className="ex">e.g. <b>40%</b> asked for more, from 5 queries</div></li>
-                    </ol>
-                    <div className="foot"><p>A version is the same story told a different way. A new book is a new manuscript.</p><button type="button" className="cx-b p" data-vv2="first" disabled={!ms || locked} onClick={() => openForm(null)}>+ Save your first version</button></div>
-                  </div>
-                </section>
-              ) : null}
+              {/* v2.2 C — "No versions yet" (a preview of the list) and the comparisons note (S34–S36) */}
+              {ms && fresh && collectionsReady ? <V2Empty ms={ms} out={m.sentTotal} disabled={locked} onFirst={() => openForm(null)} /> : null}
             </div>
           </div>
         </div>

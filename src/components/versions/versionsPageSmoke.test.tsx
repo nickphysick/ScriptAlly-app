@@ -78,20 +78,29 @@ describe("/manuscripts/versions renders", () => {
     expect(t).not.toContain("Warming up");
     expect(h).not.toContain('data-vv2="compare"');
   });
-  it("before any version, with queries out: the zero ring, the earlier-queries note and the steps", () => {
+  it("before any version, with queries out: No versions yet, the line naming them, Original holding them, the comparisons note", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [Q("q1", QueryStatus.QUERIED), Q("q2", QueryStatus.REJECTED)] };
     const h = render();
     expect(h).toContain('data-state="pre"');
-    expect(text(h)).toContain("+ Save your first version");
-    expect(text(h)).toContain("You’ve already sent 2 queries.");
-    expect(text(h)).toContain("Start tracking versions");
+    const t = text(h);
+    expect(t).toContain("+ Save your first version");
+    expect(t).toContain("No versions yet");
+    expect(t).toContain("You’ve already sent 2 queries . When you save your first version, we’ll count them towards your Original.");
+    expect(t).toContain("already out · they’ll count here");
+    expect(t).toContain("Your versions, compared, right here");
+    /* v2.2 C3 — the three steps, whose first contradicted the Original model, are gone */
+    expect(t).not.toContain("Start tracking versions");
+    expect(t).not.toContain("Save the manuscript as it stands.");
   });
-  it("before any version, with nothing sent: no earlier-queries note", () => {
+  it("before any version, with nothing sent: the two-row line and Original's None yet", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [] };
     const h = render();
     expect(h).toContain('data-state="fresh"');
-    expect(text(h)).toContain("+ Save your first version");
-    expect(h).not.toContain('data-vv2="pre-note"');
+    const t = text(h);
+    expect(t).toContain("+ Save your first version");
+    expect(t).toContain("Your list will start with two: your original manuscript, and your first change to it.");
+    expect(t).toContain("None yet");
+    expect(t).not.toContain("already sent");
   });
   it("locked: the lock card over an inert page", () => {
     vi.spyOn(ent, "versionsUnlocked").mockReturnValue(false);

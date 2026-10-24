@@ -372,3 +372,13 @@ export function warmPace(queries: readonly Query[], today: string): number {
 
 /** B2 — weeks at that pace, at least 1; null when nothing was sent in 30 days. */
 export const warmWeeks = (need: number, pace: number): number | null => (pace > 0 ? Math.max(1, Math.ceil(need / (pace / 30) / 7)) : null);
+
+/* ══ v2.2 C4 — the first save's toast ═════════════════════════════════════════════════════════════════════════ */
+
+/** What the first save says. With queries already out they count towards Original; with none, Original simply came
+ *  with the version (S37) — never "your 0 earlier queries". */
+export function firstSaveMessage(name: string, earlier: number): string {
+  return earlier
+    ? `Saved ${name}. Your ${earlier} earlier ${earlier === 1 ? "query counts" : "queries count"} towards Original.`
+    : `Saved ${name}, and Original with it.`;
+}
