@@ -79,8 +79,6 @@
   /* B1 · the frame: white, a hairline and a soft drop, 20px corners */
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet.qc138-sheet {
     border-radius: 20px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.11), 0 18px 30px -28px rgba(28, 19, 15, 0.35);
-    /* v149.1 B6 — the push's narrowing and its release, one ease */
-    margin-right: var(--qc149-push, 0px); transition: margin-right 0.28s ease;
   }
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tbw, .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tb { border-radius: 20px 20px 0 0; }
   /* B1 · the navy bar: "37% heard back" on the left; Filters · Group by · Sort · Full screen on the right */
