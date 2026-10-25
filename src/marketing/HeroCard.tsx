@@ -412,8 +412,14 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   return { start, stop, dispose };
 }
 
-/* ═════════════ the first impression (the ref's ENTER, ported) ═════════════ */
-function enter(root: HTMLElement, host: HTMLElement | null) {
+/* ═════════════ the first impression on the desk (the v4 ref's ENTER: ENTRIES['4'] + hk 'b') ═════════════ */
+/* The fly-past's numbers, the ref's: from 300ms, 1250ms along one curve, in a 1280-wide frame. */
+const FLY = { at: 300, dur: 1250, frame: 1280 };
+/* ⚠️ `host` IS THE REF, READ WHEN NEEDED — never `host.current` captured at mount. This runs in the
+   pile's layout effect, which React runs BEFORE it attaches the parent's ref, so `host.current` is
+   still null here. v3 captured it, and so its pointer depth never ran at all (the move handler
+   returned on a null host); v4 reads it on each move, and builds the fly layer one frame later. */
+function enter(root: HTMLElement, hostRef: React.RefObject<HTMLElement | null>) {
   const front = root.querySelector<HTMLElement>('[data-hc="front"]')!;
   const backs = [...root.querySelectorAll<HTMLElement>(".mk-lc--back")];
   const cast = root.querySelector<HTMLElement>(".mk-lc-cast")!;
@@ -422,23 +428,50 @@ function enter(root: HTMLElement, host: HTMLElement | null) {
     const a = el.animate(kf, Object.assign({ fill: "backwards", easing: "cubic-bezier(.2,.7,.2,1)" }, o)); anims.push(a); return a;
   };
   // the headline, line and actions are all there on load and stay still
-  // the pile deals itself out: the back cards fan in, then the front card lands
-  backs.forEach((b, k) => E(b, [{ opacity: 0, translate: "0 30px" }, { opacity: 1, offset: .3 }, { opacity: 1, translate: "0 0" }], { duration: 650, delay: 900 + k * 110 }));
-  E(front, [{ opacity: 0, translate: "0 46px" }, { opacity: 1, translate: "0 0" }], { duration: 800, delay: 1350, easing: "cubic-bezier(.2,.8,.2,1)" });
-  // the hawk's shadow passes in over the page and settles
-  E(cast, [{ opacity: 0, translate: "-260px -90px" }, { opacity: .2, translate: "0 0" }], { duration: 2600, delay: 500, easing: "cubic-bezier(.25,.6,.25,1)" });
+  /* E1 — pop: the front card pops in with a little overshoot, solid within its first 30%; the back
+     cards a beat later, 70ms apart. No dealing, no rise. */
+  const SPR = "cubic-bezier(.34,1.45,.5,1)";
+  E(front, [{ opacity: 0, scale: ".86" }, { opacity: 1, offset: .3 }, { opacity: 1, scale: "1" }], { duration: 620, delay: 450, easing: SPR });
+  backs.forEach((b, k) => E(b, [{ opacity: 0, scale: ".9" }, { opacity: 1, offset: .3 }, { opacity: 1, scale: "1" }], { duration: 520, delay: 800 + k * 70, easing: SPR }));
 
-  // a little depth: the card and the shadow drift apart as the pointer moves — pointer devices only
+  /* H1/H2 — the hawk flies past once, in front of EVERYTHING. ⚠️ IT CANNOT LIVE IN THE HERO: the hero
+     wrapper is a stacking context at z-index 2 under the sticky nav (60), and the page's sheet clips
+     (`overflow: clip`). So the layer is appended to <body> at z-index 200, laid over the hero in the
+     ref's 1280 frame (the wrapper's own box, scaled by width / 1280, the same `k` as `size()`), and
+     nothing between it and the root clips it; it may leave by the viewport's edge. */
+  let layer: HTMLElement | null = null, flyRaf = 0;
+  const born = performance.now();
+  const fly = () => {
+    const host = hostRef.current; if (!host) return;
+    layer = document.createElement("div"); layer.className = "mk-hfly"; layer.setAttribute("aria-hidden", "true");
+    const bird = document.createElement("div"); bird.className = "mk-hfly-bird";
+    const img = document.createElement("img"); img.src = HERO_FLY.src + "?v=" + HERO_FLY.version; img.alt = ""; img.width = HERO_FLY.width; img.height = HERO_FLY.height;
+    bird.appendChild(img); layer.appendChild(bird); document.body.appendChild(layer);
+    const r = host.getBoundingClientRect(), k = host.clientWidth / FLY.frame;
+    layer.style.left = r.left + window.scrollX + "px"; layer.style.top = r.top + window.scrollY + "px";
+    layer.style.width = FLY.frame + "px"; layer.style.height = host.clientHeight / k + "px";
+    layer.style.transform = `scale(${k})`;
+    /* The delay is counted from mount, so the frame this waited does not push the pass back. */
+    const at = FLY.at - (performance.now() - born);
+    anims.push(bird.animate([{ opacity: 1, offsetDistance: "0%", scale: .94 }, { opacity: 1, offsetDistance: "100%", scale: 1.06 }], { duration: FLY.dur, delay: at, easing: "linear", fill: "none" }));
+    anims.push(img.animate([{ filter: "blur(7px)" }, { filter: "blur(11px)" }], { duration: FLY.dur, delay: at, fill: "none" }));
+  };
+  flyRaf = requestAnimationFrame(fly);
+  /* H3 — then it rests: the cast shadow, hidden at load, fades in once the fly-past is over. */
+  E(cast, [{ opacity: 0 }, { opacity: .2 }], { duration: 1400, delay: FLY.at + FLY.dur + 200, easing: "ease-out", fill: "both" });
+
+  /* E3 — a little depth: the cards drift as the pointer moves (pointer devices only). The shadow no
+     longer moves with the pointer (v4). */
   let px = 0, py = 0, tx = 0, ty = 0, on = false, raf = 0;
   const fine = !!window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   function drift() {
     px += (tx - px) * .08; py += (ty - py) * .08;
     front.style.translate = `${px * 10}px ${py * 8}px`;
     backs.forEach((b, k) => { b.style.translate = `${px * (4 + k)}px ${py * (3 + k)}px`; });
-    cast.style.translate = `${-px * 22}px ${-py * 14}px`;
     if (Math.abs(tx - px) + Math.abs(ty - py) > .002) raf = requestAnimationFrame(drift); else on = false;
   }
   const move = (e: PointerEvent) => {
+    const host = hostRef.current;
     if (e.pointerType === "touch" || !host) return;
     const r = host.getBoundingClientRect(); if (!r.width || !r.height) return;
     tx = ((e.clientX - r.left) / r.width - .5); ty = ((e.clientY - r.top) / r.height - .5);
@@ -448,8 +481,9 @@ function enter(root: HTMLElement, host: HTMLElement | null) {
   return () => {
     anims.forEach((a) => a.cancel());
     window.removeEventListener("pointermove", move);
-    cancelAnimationFrame(raf);
-    [front, cast, ...backs].forEach((el) => { el.style.translate = ""; });
+    cancelAnimationFrame(raf); cancelAnimationFrame(flyRaf);
+    layer?.remove();
+    [front, ...backs].forEach((el) => { el.style.translate = ""; });
   };
 }
 
@@ -584,20 +618,20 @@ export const HeroCard: React.FC<{
     if (reduceMotion()) return;
     if (phone) { const el = scope.current; return el ? enterPhone(el) : undefined; }
     const el = root.current; if (!el) return;
-    return enter(el, host.current);
+    return enter(el, host);
   }, [host, phone]);
 
   useEffect(() => {
     const el = phone ? scope.current : root.current; if (!el) return;
     const story = makeStory(el, { phone, onGrow: () => grow.current?.() });
     if (reduceMotion()) return () => story.dispose();
-    /* The story starts 1.7s after load, as the ref's `V4.start(1700)` — but its first act measures
+    /* The story starts at the ref's lead — but its first act measures
        the timeline's lines, so it waits for the fonts. If they are slower than that, it starts the
        moment they arrive with whatever lead is left, never early. */
     const born = performance.now();
     let live = true;
-    /* The ref's lead: `V4.start(1700)` on the desk, `V4.start(1300)` for the phone's short loop (v3). */
-    const lead = phone ? 1300 : 1700;
+    /* The refs' leads: `V4.start(1500)` on the desk after the pop (v4 E2), `V4.start(1300)` on a phone. */
+    const lead = phone ? 1300 : 1500;
     const go = () => { if (live) story.start(Math.max(0, lead - (performance.now() - born))); };
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     if (fonts?.ready) fonts.ready.then(go, go); else go();

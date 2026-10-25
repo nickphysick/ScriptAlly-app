@@ -120,7 +120,18 @@
 .mk-odo-s { display: block; will-change: transform; }
 .mk-odo-s i { display: block; height: 1.25em; font-style: normal; text-align: center; }
 
-/* The hawk's shadow, cast over the pile and the copy. It moves and scales with the pile. */
+/* The desk's fly-past (v4 H1/H2; the ref's `.flyclip` and `.fly`): a layer on <body> laid over the
+   hero in the 1280 frame (HeroCard sets its box and scale), above everything (z-index 200), clipping
+   nothing and taking no clicks. The bird is hidden except while its animation runs. */
+.mk-hfly { position: absolute; z-index: 200; overflow: visible; pointer-events: none; transform-origin: 0 0; }
+.mk-hfly-bird {
+  position: absolute; left: 0; top: 0; width: 1150px; pointer-events: none; opacity: 0; will-change: offset-distance;
+  offset-path: path("M 420 900 C 640 640, 860 330, 1560 -330"); offset-rotate: auto 90deg;
+}
+.mk-hfly-bird img { display: block; width: 100%; height: auto; max-width: none; opacity: .17; filter: blur(8px); mix-blend-mode: multiply; }
+
+/* The hawk's shadow at rest, cast over the pile and the copy. It moves and scales with the pile; on
+   the desk it fades in once the fly-past is over (v4 H3), and is still. */
 .mk-lc-cast {
   position: absolute; left: 250px; top: 6px; width: 860px; height: auto; max-width: none;
   pointer-events: none; z-index: 5; mix-blend-mode: multiply; opacity: .2; filter: blur(7px); transform: rotate(-4deg);
