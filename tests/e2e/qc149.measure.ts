@@ -55,12 +55,15 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       L.check("+ Log a query", (await text(page, "[data-qc149='log']")) === "+ Log a query", String(await text(page, "[data-qc149='log']")));
       L.check("Record a response", (await text(page, "[data-qc149='record']")) === "Record a response", String(await text(page, "[data-qc149='record']")));
       const art = await page.evaluate(() => { const i = [...document.querySelectorAll<HTMLImageElement>("[data-qc149='card'] img")].find((x) => x.getBoundingClientRect().height > 0); return i ? { w: i.naturalWidth, bw: i.getBoundingClientRect().width, bh: i.getBoundingClientRect().height } : null; });
-      L.check("the art, drawn, 180 × 160", !!art && art.w > 0 && near(art.bw, 180) && near(art.bh, 160), JSON.stringify(art));
+      /* re-pointed by v150 A2: the hawk is 140 tall (its box 160 × 140) */
+      L.check("the art, drawn, 160 × 140 (v150 A2)", !!art && art.w > 0 && near(art.bw, 160) && near(art.bh, 140), JSON.stringify(art));
       L.check("its top equals the Versions card's below the content top", !!card && !!win && near(card.t - win.t, ver.top ?? undefined), `qc ${card && win ? (card.t - win.t).toFixed(1) : "-"} · versions ${ver.top?.toFixed(1)}`);
       const c = await css(page, "[data-qc149='card']", ["border-top-left-radius", "background-color", "box-shadow"]);
       const h = await css(page, "[data-qc149='card'] h1", ["font-family", "font-size"]);
       for (const p of ["border-top-left-radius", "background-color", "box-shadow"]) L.check(`card ${p} equals Versions'`, !!c && !!ver.c && c[p] === ver.c[p], `${c?.[p]} vs ${ver.c?.[p]}`);
-      for (const p of ["font-family", "font-size"]) L.check(`title ${p} equals Versions'`, !!h && !!ver.h && h[p] === ver.h[p], `${h?.[p]} vs ${ver.h?.[p]}`);
+      /* re-pointed by v150 A2: the face is still Versions'; the size is the Query Centre's own 40px */
+      L.check("title font-family equals Versions'", !!h && !!ver.h && h["font-family"] === ver.h["font-family"], `${h?.["font-family"]} vs ${ver.h?.["font-family"]}`);
+      L.check("title font-size 40px (v150 A2)", !!h && h["font-size"] === "40px", `${h?.["font-size"]}`);
       L.check("no living hero", (await box(page, "[data-qc138='header']")) === null, "qc138 header present");
       L.check("no breakdown card", (await box(page, "[data-qc141='card']")) === null, "breakdown present");
       L.done(14);
@@ -84,7 +87,8 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       L.done(5);
     });
 
-    test("L3 · the banner counts the With you set; Show them shows it; at zero it is absent", async ({ page }) => {
+    /* RETIRED by v150 A3: the banner is removed; its count, "Next" and "Show them" are the Your move card's (QC150 L2/L3) */
+    test.skip("L3 · the banner counts the With you set; Show them shows it; at zero it is absent", async ({ page }) => {
       test.skip(!run("L3"));
       const L = new Ledger(`L3-${vp.width}`);
       await openQc(page, vp);
@@ -109,7 +113,8 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       L.done(7);
     });
 
-    test("L4 · each chip is its set, they sum to All, one at a time, and they combine with Filters", async ({ page }) => {
+    /* RETIRED by v150 B4: the quick-filter chips are replaced by the stat cards (QC150 L2 counts, L3 filter) */
+    test.skip("L4 · each chip is its set, they sum to All, one at a time, and they combine with Filters", async ({ page }) => {
       test.skip(!run("L4"));
       const L = new Ledger(`L4-${vp.width}`);
       await openQc(page, vp);
@@ -159,7 +164,8 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       /* the named break at 1280 (where the figure is hidden by design): show it */
       await mutateCss(page, "L5", ".qcv-group[data-v138] .qc149-hb { display: inline-flex !important; }");
       const hb = await box(page, "[data-qc149='heard']");
-      L.check(narrow ? "heard back hidden at ≤1440" : "heard back shown", narrow ? !hb : !!hb && /^\d+% heard back$/.test((await text(page, "[data-qc149='heard']")) ?? ""), String(await text(page, "[data-qc149='heard']")));
+      /* re-pointed by v150 B4: "heard back" left the bar at every width (it is in the list title's count line) */
+      L.check("heard back not in the bar (v150 B4)", !hb, String(await text(page, "[data-qc149='heard']")));
       for (const [k, sel] of [["Filters", "[data-qc140='filters']"], ["Group by", "[data-qc140='group']"], ["Sort", "[data-qc1421='sort']"], ["Full screen", "[data-qc149='full']"]] as const) L.check(`${k} in the bar`, !!(await box(page, sel)), sel);
       for (const [k, sel] of [["the Cards/List switch", ".cl20-vs, [data-qc144='view-bar'], [data-qc142='view-tb']"], ["the count", "[data-qc144='count']"], ["the jump row", "[data-qc140='jump'], .qc140-jump"]] as const) L.check(`no ${k}`, !(await box(page, sel)), sel);
       const tracks = await page.evaluate(() => { const r = [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].find((x) => x.getBoundingClientRect().height > 0); return r ? getComputedStyle(r).gridTemplateColumns.split(" ").length : 0; });
@@ -444,7 +450,9 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       test.skip(!run("L12"));
       const L = new Ledger(`L12-${vp.width}`);
       await openQc(page, vp);
-      const chips = await chipCounts(page);
+      /* re-pointed by v150 B4: the chips are gone, so All and Closed are read off the list's own rows (the stat cards count the same sets) */
+      const rows0 = await rows(page);
+      const chips = { all: rows0.length, closed: rows0.filter((r) => r.where === "closed").length };
       const court = Object.fromEntries((await rows(page)).map((r) => [r.id, r.court]));
       await tap(page, "[data-qc149='record']");
       await page.waitForTimeout(1000);

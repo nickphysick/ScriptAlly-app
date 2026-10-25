@@ -3,7 +3,7 @@
   "lock": "L9-1280",
   "where": "population: a Queried row",
   "ok": true,
-  "detail": "87"
+  "detail": "88"
  },
  {
   "lock": "L9-1280",
@@ -27,7 +27,7 @@
   "lock": "L9-1280",
   "where": "Tracking gains Full requested, dated today",
   "ok": true,
-  "detail": "[{\"t\":\"Recorded from the imported status\",\"d\":\"1 SEP\"},{\"t\":\"Full requested\",\"d\":\"25 OCT\"}]"
+  "detail": "[{\"t\":\"Recorded from the imported status queried\",\"d\":\"1 SEP\"},{\"t\":\"Full requested\",\"d\":\"25 OCT\"}]"
  },
  {
   "lock": "L9-1280",
@@ -37,9 +37,9 @@
  },
  {
   "lock": "L9-1280",
-  "where": "the primary is Mark full sent",
+  "where": "the primary is the strip's Mark sent",
   "ok": true,
-  "detail": "Mark full sent"
+  "detail": "Mark sent"
  },
  {
   "lock": "L9-1280",

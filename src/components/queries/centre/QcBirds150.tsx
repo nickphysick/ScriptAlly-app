@@ -132,7 +132,8 @@ export const QcBirds150: React.FC<{
     leftDate.current = scale.r0 + (o / scale.ppd) * DAY;
     root.querySelectorAll<HTMLElement>("[data-qc150-tl]").forEach((el) => { el.scrollLeft = o; });
     const V = ax.clientWidth;
-    const whole = (l: number, r: number) => l >= o - 0.5 && r <= o + V + 0.5;
+    /* a measured width can be a pixel off the painted one, so "wholly in view" keeps 2px clear of each edge */
+    const whole = (l: number, r: number) => l >= o + 2 && r <= o + V - 2;
     /* a current bar's label pins (sticky) and is hidden once less than its full width is visible */
     root.querySelectorAll<HTMLElement>("[data-lb]").forEach((el) => {
       const l = +el.dataset.l!, r = +el.dataset.r!, lw = +el.dataset.lw!;
@@ -291,7 +292,7 @@ export const QcBirds150: React.FC<{
   const openRow = (id: string) => onOpen(id);
 
   return (
-    <div className="qc150-be" ref={rootRef} data-qc150="birds" data-zoom={zoom}>
+    <div className="qc150-be" ref={rootRef} data-qc150="birds" data-zoom={zoom} data-r0={scale?.r0} data-ppd={scale?.ppd}>
       <div className="qc150-bvh" data-qc150="daterow">
         <div className="qc150-zc">
           <div className="qc150-zp" role="group" aria-label="Time" data-qc150="zoom">

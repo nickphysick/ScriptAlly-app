@@ -3,7 +3,7 @@
   "lock": "L12-1512",
   "where": "population: Who replied? with items",
   "ok": true,
-  "detail": "70"
+  "detail": "71"
  },
  {
   "lock": "L12-1512",
@@ -15,7 +15,7 @@
   "lock": "L12-1512",
   "where": "every live query: All less Closed",
   "ok": true,
-  "detail": "70 vs 70"
+  "detail": "71 vs 71"
  },
  {
   "lock": "L12-1512",
@@ -27,7 +27,7 @@
   "lock": "L12-1512",
   "where": "the waiting heading counts its items",
   "ok": true,
-  "detail": "54 vs 54"
+  "detail": "55 vs 55"
  },
  {
   "lock": "L12-1512",

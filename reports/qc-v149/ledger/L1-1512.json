@@ -21,7 +21,7 @@
   "lock": "L1-1512",
   "where": "body names the page's book in bold, or says every query you've sent",
   "ok": true,
-  "detail": "Every query you’ve sent, wherever it stands. Log what you send, record · ms null"
+  "detail": "Every query you’ve sent, wherever it stands. · ms null"
  },
  {
   "lock": "L1-1512",
@@ -37,9 +37,9 @@
  },
  {
   "lock": "L1-1512",
-  "where": "the art, drawn, 180 × 160",
+  "where": "the art, drawn, 160 × 140 (v150 A2)",
   "ok": true,
-  "detail": "{\"w\":440,\"bw\":180,\"bh\":160}"
+  "detail": "{\"w\":440,\"bw\":160,\"bh\":140}"
  },
  {
   "lock": "L1-1512",
@@ -73,9 +73,9 @@
  },
  {
   "lock": "L1-1512",
-  "where": "title font-size equals Versions'",
+  "where": "title font-size 40px (v150 A2)",
   "ok": true,
-  "detail": "34px vs 34px"
+  "detail": "40px"
  },
  {
   "lock": "L1-1512",
