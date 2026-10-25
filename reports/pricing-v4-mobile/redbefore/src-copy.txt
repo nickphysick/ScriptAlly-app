@@ -1,0 +1,300 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+PVM-9 tails ["There's a little room in it for slow replies.","It leaves room for slow replies, or for revising if an agent asks.","If you're still querying after that, we'll be in touch with options to extend.","If your last replies run late, add a month for £5.99."]
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:371:1 › PVM-9 no 'pass', no £5.99 in any of the four tails, and the eight questions verbatim (3.6s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:371:1 › PVM-9 no 'pass', no £5.99 in any of the four tails, and the eight questions verbatim 
+
+    Error: the eight questions and answers, verbatim
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -10,11 +10,11 @@
+        Array [
+          "What's the difference between Free and Pro?",
+          "Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. Pro adds the tools that make querying smarter, from manuscript versions and submission packages to Smart email drop and The Scout.",
+        ],
+        Array [
+    -     "Is Pro a subscription?",
+    +     "Is Pro a subscription plan?",
+          "No. You choose a plan that matches how long you expect to be querying, from one month to twelve, and it simply ends on its date. We'll remind you a week before, so you're never charged for something you didn't ask for.",
+        ],
+        Array [
+          "Which plan should I choose?",
+          "Querying usually takes longer than writers expect, often six months or more once agents start reading full manuscripts. Answer four quick questions under Which plan suits me best? and we'll suggest one for you.",
+
+      376 |   const qa = await page.$$eval(".mk-pvqa", (els) => els.map((e) => [e.querySelector("button span")!.textContent!, (e.querySelector(".mk-pvqaa") as HTMLElement).innerText]));
+      377 |   expect.soft(REF_QAS.length, "the ref has eight questions (not vacuous)").toBe(8);
+    > 378 |   expect.soft(qa.map(([q, a]) => [q, flat(a)]), "the eight questions and answers, verbatim").toEqual(REF_QAS.map(([q, a]) => [q, flat(a)]));
+          |                                                                                              ^
+      379 |   /* One case per tail, from the ref's own recording on this date. */
+      380 |   const today = TODAY.slice(0, 10);
+      381 |   const byTail = new Map<string, CampaignAnswers>();
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:378:94
+
+    Error: and the ref's
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "If your last replies run late, we'll be in touch with options to extend."
+    Received: "If your last replies run late, add a month for £5.99."
+
+      392 |     seen.push(got);
+      393 |     expect.soft(got, "the tail is the estimate module's").toBe(estimateCampaign(a, new Date(TODAY)).tail);
+    > 394 |     expect.soft(got, "and the ref's").toBe(tail);
+          |                                       ^
+      395 |     expect.soft(await page.locator(".mk-pvsheet").innerText(), "no £5.99 in any result").not.toMatch(/5\.99/);
+      396 |     await page.keyboard.press("Escape");
+      397 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:394:39
+
+    Error: no £5.99 in any result
+
+    expect(received).not.toMatch(expected)
+
+    Expected pattern: not /5\.99/
+    Received string:      "Which plan suits me best?
+    YOUR PLAN
+    
+    YOUR CAMPAIGN
+    
+    About thirteen months
+    
+    FITS YOUR CAMPAIGN
+    Pro, 12 months
+    £
+    45
+    
+    £3.75 A MONTH · SAVE 53%
+    
+    If your last replies run late, add a month for £5.99.
+    
+    You'd send 100 queries in seven rounds, about a month apart. Replies take up to three months, and agents who like your opening usually take two to three months to read the manuscript. We've added about two months to get ready. We've allowed for Christmas and August, when agents slow down.
+    
+    That getting-ready time counts too. Build your agent list with what each agent wants, find comparable titles and new agents with The Scout, and put your letter, synopsis and sample into submission packages, so you start querying organised.
+    
+    Change my answers
+    
+    A rough guide, not a promise, based on typical reply times reported by querying writers (QueryTracker figures) and the reply windows agencies state.
+    
+    See it in the plans"
+
+      393 |     expect.soft(got, "the tail is the estimate module's").toBe(estimateCampaign(a, new Date(TODAY)).tail);
+      394 |     expect.soft(got, "and the ref's").toBe(tail);
+    > 395 |     expect.soft(await page.locator(".mk-pvsheet").innerText(), "no £5.99 in any result").not.toMatch(/5\.99/);
+          |                                                                                              ^
+      396 |     await page.keyboard.press("Escape");
+      397 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+      398 |   }
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:395:94
+
+    Error: the page never calls a plan a pass
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "pass",
+    + ]
+
+      402 |   const text = await page.evaluate(() => document.body.innerText);
+      403 |   const passes = text.match(/\bpass(es)?\b/gi) ?? [];
+    > 404 |   expect.soft(passes, "the page never calls a plan a pass").toEqual([]);
+          |                                                             ^
+      405 |   expect.soft(text, "no £5.99 anywhere on the page").not.toMatch(/5\.99/);
+      406 | });
+      407 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:404:61
+
+    Error: no £5.99 anywhere on the page
+
+    expect(received).not.toMatch(expected)
+
+    Expected pattern: not /5\.99/
+    Received string:      "Skip to content
+    QueryHawk
+    Become a founding writer
+    63 places left
+    63 places left
+    FOUNDING WRITERS
+    A free QueryHawk campaign for our first 100 writers.
+    
+    We're looking for founding writers to put QueryHawk through its paces.
+    
+    63 PLACES LEFT
+    
+    Email address
+    Leave this field empty
+    Claim your place
+    
+    We'll only use your address to send your invite. Privacy.
+    
+    WHAT FOUNDING WRITERS GET
+    
+    Then, once we launch:
+    
+    Free
+    Pro
+    FROM £3.75
+    Free
+    £
+    0
+    
+    For as long as you like
+    
+    One manuscript
+    Up to 20 agents
+    Unlimited queries and response tracking
+    To-do list
+    Bring your list across with Smart Import
+    Pro
+    FROM
+    £
+    3.75
+    A MONTH
+    
+    A plan sized to your campaign. No subscription.
+    
+    Everything in Free, plus:
+    Unlimited agents
+    Manuscript versions, one for each draft
+    Submission packages and materials tracking
+    Smart email drop
+    The Scout
+    
+    Pick 1, 3, 6 or 12 months. It never renews automatically, and we'll be in touch with options before it ends.
+    
+    Pro plans
+    
+    Every Pro feature, for as long as your campaign runs.
+    
+    1 month
+    
+    £7.99
+    ADD TO ANY PLAN
+    
+    3 months
+    
+    £19
+    £6.33 A MONTH
+    SAVE 20%
+    
+    6 months
+    
+    £29
+    £4.83 A MONTH
+    SAVE 40%
+    FITS YOUR CAMPAIGN
+    
+    12 months
+    
+    £45
+    £3.75 A MONTH
+    SAVE 53%
+    Which plan suits me best?
+    
+    Four quick questions to find your pass.
+    
+    Questions
+    Is it really free for founding writers?
+    
+    Yes, completely. Founding writers get the full power of QueryHawk Pro for an entire querying campaign, free of charge. No card, and no catch.
+    
+    What happens when my founding campaign ends?
+    
+    Just drop us a note to let us know you're done. We'd love to hear how it went.
+    
+    What's the difference between Free and Pro?
+    
+    Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. Pro adds the tools that make querying smarter, from manuscript versions and submission packages to Smart email drop and The Scout.
+    
+    Is Pro a subscription plan?
+    
+    No. You choose a plan that matches how long you expect to be querying, from one month to twelve, and it simply ends on its date. We'll remind you a week before, so you're never charged for something you didn't ask for.
+    
+    Which plan should I choose?
+    
+    Querying usually takes longer than writers expect, often six months or more once agents start reading full manuscripts. Answer four quick questions under Which plan suits me best? and we'll suggest one for you.
+    
+    What if my campaign runs longer than planned?
+    
+    Before your current plan ends, we'll get in touch with options to extend it. Whatever you decide, you'll never lose your data.
+    
+    What if I sign with an agent before my plan runs out?
+    
+    Congratulations! There's nothing you need to do. Your plan will simply run to the end of its months, and it won't renew automatically.
+    
+    Can I bring across the spreadsheet I already use?
+    
+    Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again.
+    
+    QueryHawk
+    
+    A bird's-eye view of your querying campaign. Built in the UK for writers looking for a literary agent.
+    
+    Product
+    Features
+    Pricing
+    Open QueryHawk
+    Company
+    About
+    Founding writers
+    Contact
+    Legal
+    Privacy
+    Terms
+    
+    © 2026 QueryHawk
+    
+    Made in the UK, for writers
+    
+    hello@queryhawk.net
+    Which plan suits me best?
+    YOUR PLAN
+    
+    YOUR CAMPAIGN
+    
+    About thirteen months
+    
+    FITS YOUR CAMPAIGN
+    Pro, 12 months
+    £
+    45
+    
+    £3.75 A MONTH · SAVE 53%
+    
+    If your last replies run late, add a month for £5.99.
+    
+    You'd send 100 queries in seven rounds, about a month apart. Replies take up to three months, and agents who like your opening usually take two to three months to read the manuscript. We've added about two months to get ready. We've allowed for Christmas and August, when agents slow down.
+    
+    That getting-ready time counts too. Build your agent list with what each agent wants, find comparable titles and new agents with The Scout, and put your letter, synopsis and sample into submission packages, so you start querying organised.
+    
+    Change my answers
+    
+    A rough guide, not a promise, based on typical reply times reported by querying writers (QueryTracker figures) and the reply windows agencies state.
+    
+    See it in the plans"
+
+      403 |   const passes = text.match(/\bpass(es)?\b/gi) ?? [];
+      404 |   expect.soft(passes, "the page never calls a plan a pass").toEqual([]);
+    > 405 |   expect.soft(text, "no £5.99 anywhere on the page").not.toMatch(/5\.99/);
+          |                                                          ^
+      406 | });
+      407 |
+      408 | /* ═══════════════ PVM-10 the faces ═══════════════ */
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:405:58
+
+    Error Context: test-results/pricingMobile.measure.ts-P-58405-he-eight-questions-verbatim-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:371:1 › PVM-9 no 'pass', no £5.99 in any of the four tails, and the eight questions verbatim 
+  1 passed (22.5s)

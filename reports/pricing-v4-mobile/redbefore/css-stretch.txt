@@ -1,0 +1,58 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.7s)
+PVM-5 @390 tap Pro {"left":314,"free":0,"pro":314} [ 'false', 'true' ]
+PVM-5 @390 swipe Free {"left":0,"free":0,"pro":314} [ 'true', 'false' ]
+PVM-5 @390 heights free 539.75 pro 539.75
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @390: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro (1.5s)
+PVM-5 @375 tap Pro {"left":299,"free":0,"pro":299} [ 'false', 'true' ]
+PVM-5 @375 swipe Free {"left":0,"free":0,"pro":299} [ 'true', 'false' ]
+PVM-5 @375 heights free 560.625 pro 560.625
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @375: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro (1.5s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @390: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro 
+
+    Error: the Free card keeps its own height
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 539.75
+    Received:   539.75
+
+      233 |     const free = await rect(page, "#mk-pvtier-free"), pro = await rect(page, "#mk-pvtier-pro");
+      234 |     console.log(`PVM-5 @${vp.width} heights free ${free.height} pro ${pro.height}`);
+    > 235 |     expect(free.height, "the Free card keeps its own height").toBeLessThan(pro.height);
+          |                                                               ^
+      236 |   });
+      237 | }
+      238 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:235:63
+
+    Error Context: test-results/pricingMobile.measure.ts-P-c5b22-pe-Free-is-shorter-than-Pro-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @375: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro 
+
+    Error: the Free card keeps its own height
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 560.625
+    Received:   560.625
+
+      233 |     const free = await rect(page, "#mk-pvtier-free"), pro = await rect(page, "#mk-pvtier-pro");
+      234 |     console.log(`PVM-5 @${vp.width} heights free ${free.height} pro ${pro.height}`);
+    > 235 |     expect(free.height, "the Free card keeps its own height").toBeLessThan(pro.height);
+          |                                                               ^
+      236 |   });
+      237 | }
+      238 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:235:63
+
+    Error Context: test-results/pricingMobile.measure.ts-P-267e3-pe-Free-is-shorter-than-Pro-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @390: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro 
+    [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @375: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro 
+  1 passed (20.7s)

@@ -59,7 +59,7 @@ const MUTATIONS: Record<string, string> = {
   H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
   /* pricing v4: the founding box's counter line turned cream on its light ground — F2's /pricing block alone. */
-  F2pricing: ".mk-fbcount .mk-fmmeta{color:#f4eee5!important}",
+  F2pricing: ".mk-fbcount .mk-fmmeta,.mk-pvcount .mk-fmmeta{color:#f4eee5!important}",
 };
 
 async function mutate(page: Page) {
@@ -431,7 +431,11 @@ test.describe("LC2", () => {
       /* RETARGET (phone hero, 23 Oct): on the landing at ≤760px the navy stage meets the bar square, so
          the sheet's top corners are 0 there and only its bottom arcs are read. */
       const phoneLanding = route === "/" && vp.width <= PHONE;
-      expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
+      /* RETARGET (pricing on phones, 25 Oct; ref pricing-page-mobile-v1): at ≤760px /pricing renders its
+         phone tree, whose sheet takes the ref's 20px top corners; its bottom corners stay the shell's 18. */
+      const phonePricing = route === "/pricing" && vp.width <= PHONE;
+      expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"]
+        : phonePricing ? ["20px", "20px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
       expect(Math.abs(s!.footTop - s!.docBottom), "the footer starts where the sheet ends").toBeLessThanOrEqual(0.5);
       const L = s!.left, R = s!.right - 1;
@@ -562,7 +566,9 @@ test.describe("LC2", () => {
        ground again (pricing v3 had put them on navy and taken them out of this lock). */
     for (const vp of VPS) {
       await open(page, "/pricing", vp, "count");
-      const B = ".mk-fbtext ";
+      /* RETARGET (pricing on phones, 25 Oct): at ≤760px the box is the phone tree's `.mk-pvbox`, whose
+         counter and form sit in `.mk-pvin` — the same shared parts on the same light ground. */
+      const B = vp.width <= PHONE ? ".mk-pvin " : ".mk-fbtext ";
       await light("pricing box", B + "input[type=email]");
       await light("pricing box", B + "input[type=email]", 3, "::placeholder");
       await light("pricing box", B + ".mk-betanote, " + B + ".mk-betanote .mk-doclink");

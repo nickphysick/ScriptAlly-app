@@ -1,0 +1,31 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.0s)
+PVM-8 answer height 0
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:342:1 › PVM-8 opening a question sets aria-expanded and shows its answer (1.0s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:342:1 › PVM-8 opening a question sets aria-expanded and shows its answer 
+
+    Error: the answer shows
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      350 |   const a = await rect(page, `#${id}`);
+      351 |   console.log("PVM-8 answer height", a.height);
+    > 352 |   expect(await page.locator(`#${id}`).isVisible(), "the answer shows").toBe(true);
+          |                                                                        ^
+      353 |   expect(a.height, "…with its text").toBeGreaterThan(40);
+      354 | });
+      355 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:352:72
+
+    Error Context: test-results/pricingMobile.measure.ts-P-932c0-panded-and-shows-its-answer-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:342:1 › PVM-8 opening a question sets aria-expanded and shows its answer 
+  1 passed (20.0s)

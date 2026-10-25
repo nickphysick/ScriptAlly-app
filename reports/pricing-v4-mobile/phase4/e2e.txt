@@ -1,0 +1,485 @@
+
+Running 39 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.3s)
+  -   2 [measure] › tests/e2e/landingColoursV2.measure.ts:256:3 › LC2 › capture: the pre-pack geometry
+LC2 N1 readings 42
+  ✓   3 [measure] › tests/e2e/landingColoursV2.measure.ts:273:3 › LC2 › N1 the nav's ground is ink, opaque, at rest and condensed, on every public route (5.4s)
+LC2 N2 @1440 Features 8.74 · About 8.74 · Pricing 8.74 · Contact 8.74 · Log in 9.52
+LC2 N2 @1280 Features 8.74 · About 8.74 · Pricing 8.74 · Contact 8.74 · Log in 9.52
+LC2 N2 @390 Features 10.33 · About 10.33 · Pricing 10.33 · Contact 10.33 · Log in 10.33
+  ✓   4 [measure] › tests/e2e/landingColoursV2.measure.ts:296:3 › LC2 › N2 the wordmark is type on ink, the primary is the cream button, and every link reads (1.3s)
+LC2 N3 anchor @1440: 16.00 (was 16.00)
+LC2 N3 anchor @1280: 16.00 (was 16.00)
+LC2 N3 anchor @390: 0.00 (was 8.52)
+  ✓   5 [measure] › tests/e2e/landingColoursV2.measure.ts:334:3 › LC2 › N3 the nav's heights and the anchor landing are the pre-pack ones (11.5s)
+LC2 H1 @1440 {"top":[250,248,244],"foot":[238,235,229],"title":"rgb(28, 19, 15)"}
+LC2 H1 @1280 {"top":[250,248,244],"foot":[238,235,229],"title":"rgb(28, 19, 15)"}
+LC2 H1 @390 phone {"stage":[29,38,55],"drawer":[251,249,245],"title":"rgb(28, 19, 15)"}
+  ✓   6 [measure] › tests/e2e/landingColoursV2.measure.ts:368:3 › LC2 › H1 the hero is paper white fading to its foot, with ink type (1.5s)
+LC2 S1 routes x widths 21
+  ✓   7 [measure] › tests/e2e/landingColoursV2.measure.ts:412:3 › LC2 › S1 one light sheet with four 18px corners between the ink nav and the ink footer (8.7s)
+  ✓   8 [measure] › tests/e2e/landingColoursV2.measure.ts:464:3 › LC2 › V1 the vision band is stone, holding three white cards (1.7s)
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 idle · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 idle · .mk-claimcard input[type=email]::placeholder · 3.41 · "you@example.com"
+LC2 F1 idle · .mk-claimcard .mk-claimform button[type=submit] · 13.50 · "Claim your place"
+LC2 F1 idle · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 idle · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 invalid · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 invalid · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 invalid · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 invalid · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 invalid · .mk-claimcard .mk-betainvalid · 5.25 · "That doesn't look like an email address."
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 sending · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 sending · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 sending · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 sending · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 sent · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "You're on the list. We'll email your inv"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "38"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "62 left"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 dupe · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "You're already on the list — no need to "
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 full · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "All hundred founding places are claimed."
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "100"
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "0 left"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 error · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 error · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 error · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 error · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 error · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "That didn't send. Check the address and "
+LC2 F1 error · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "email us"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 down · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "Sign-ups are briefly unavailable. Try ag"
+LC2 F1 down · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "email us"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 idle · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 idle · .mk-claimcard input[type=email]::placeholder · 3.41 · "you@example.com"
+LC2 F1 idle · .mk-claimcard .mk-claimform button[type=submit] · 13.50 · "Claim your place"
+LC2 F1 idle · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 idle · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 invalid · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 invalid · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 invalid · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 invalid · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 invalid · .mk-claimcard .mk-betainvalid · 5.25 · "That doesn't look like an email address."
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 sending · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 sending · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 sending · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 sending · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 sent · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "You're on the list. We'll email your inv"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "38"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "62 left"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 dupe · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "You're already on the list — no need to "
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 full · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "All hundred founding places are claimed."
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "100"
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "0 left"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 error · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 error · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 error · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 error · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 error · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "That didn't send. Check the address and "
+LC2 F1 error · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "email us"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 down · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "Sign-ups are briefly unavailable. Try ag"
+LC2 F1 down · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "email us"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 idle · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 idle · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 idle · .mk-claimcard input[type=email]::placeholder · 3.41 · "you@example.com"
+LC2 F1 idle · .mk-claimcard .mk-claimform button[type=submit] · 13.50 · "Claim your place"
+LC2 F1 idle · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 idle · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 idle · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 invalid · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 invalid · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 invalid · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 invalid · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 invalid · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 invalid · .mk-claimcard .mk-betainvalid · 5.25 · "That doesn't look like an email address."
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 invalid · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 sending · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 sending · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 sending · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 sending · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 sending · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 sending · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 sent · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 sent · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "You're on the list. We'll email your inv"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "38"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 sent · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "62 left"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 dupe · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 dupe · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "You're already on the list — no need to "
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 dupe · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 full · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 full · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "All hundred founding places are claimed."
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "100"
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 full · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "0 left"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 error · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 error · .mk-claimcard input[type=email] · 8.41 · "you@example.com"
+LC2 F1 error · .mk-claimcard .mk-claimform button[type=submit] · 15.59 · "Claim your place"
+LC2 F1 error · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 4.91 · "We'll only use your address to send your"
+LC2 F1 error · .mk-claimcard .mk-betanote, .mk-claimcard .mk-betanote .mk-doclink · 9.94 · "Privacy"
+LC2 F1 error · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "That didn't send. Check the address and "
+LC2 F1 error · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "email us"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 9.94 · "37"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "of 100 places claimed"
+LC2 F1 error · .mk-claimcard .mk-claimnum, .mk-claimcard .mk-claimof, .mk-claimcard .mk-claimleft · 6.02 · "63 left"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 5.25 · "Founding writers"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Join as a founding writer"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "You get:"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Early access to QueryHawk"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "A direct line to the founder"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "The full experience free of charge for 6"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 9.94 · "Half price for as long as you need it af"
+LC2 F1 down · .mk-claimcard .mk-claimkicker, .mk-claimcard .mk-claimh2, .mk-claimcard .mk-claimlead, .mk-claimcard .mk-claimlist li, .mk-claimcard .mk-claimask · 6.02 · "All we ask is that you give us occasiona"
+LC2 F1 down · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "Sign-ups are briefly unavailable. Try ag"
+LC2 F1 down · .mk-claimcard .mk-betamsg, .mk-claimcard .mk-betamsg a, .mk-claimcard .mk-betamsg button · 7.95 · "email us"
+LC2 F1 states measured: 24
+  ✓   9 [measure] › tests/e2e/landingColoursV2.measure.ts:486:3 › LC2 › F1 everything on the navy founding panel reads, in every outcome state (21.1s)
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 pricing box · .mk-fbtext input[type=email] · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-fbtext .mk-fmmeta · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email] · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-fbtext .mk-fmmeta · 18.27
+LC2 F2 pricing box · .mk-pvin input[type=email] · 18.27
+LC2 F2 pricing box · .mk-pvin input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-pvin .mk-betanote, .mk-pvin .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-pvin .mk-betanote, .mk-pvin .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-pvin .mk-fmmeta · 18.27
+  ✓  10 [measure] › tests/e2e/landingColoursV2.measure.ts:540:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment (3.2s)
+  ✓  11 [measure] › tests/e2e/landingColoursV2.measure.ts:584:3 › LC2 › T1 the footer is the page's ink ground, with no rule above it (2.6s)
+  -  12 [measure] › tests/e2e/landingColoursV2.measure.ts:609:3 › LC2 › shots: every public page, top to bottom
+  -  13 [measure] › tests/e2e/landingColoursV2.measure.ts:623:1 › LC2 signed in: the nav offers the dashboard on the cream button, beside a cream avatar
+  ✓  14 [measure] › tests/e2e/pricingMobile.desktop.measure.ts:66:3 › desktop /pricing is unchanged @1440 (3.5s)
+  ✓  15 [measure] › tests/e2e/pricingMobile.desktop.measure.ts:66:3 › desktop /pricing is unchanged @761 (1.7s)
+PVM-1 @760 {"h1":1,"phoneH1":1,"deskH1":0,"phoneTree":true,"deskTree":false}
+PVM-1 @761 {"h1":1,"phoneH1":0,"deskH1":1,"phoneTree":false,"deskTree":true}
+  ✓  16 [measure] › tests/e2e/pricingMobile.measure.ts:140:1 › PVM-1 at 760 the phone tree renders and at 761 the desktop one — one h1 either way, the box's (1.5s)
+PVM-2 @390 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✓  17 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (938ms)
+PVM-2 @375 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✓  18 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (933ms)
+PVM-3 .mk-pvh1 160.1–261.3
+PVM-3 .mk-pvcount .mk-fmcount 343.2–368.1
+PVM-3 .mk-pvform input[type=email] 382.1–434.1
+PVM-3 .mk-pvform button[type=submit] 444.1–496.1
+PVM-3 .mk-pvmore 549.5–604.5
+  ✓  19 [measure] › tests/e2e/pricingMobile.measure.ts:181:1 › PVM-3 @390 × 844: the H1, the counter, the field, Claim and the toggle are all on screen (940ms)
+PVM-4 @390 [false,false,true,false]
+  ✓  20 [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @390: swiping to the third perk moves the current dot to the third (1.2s)
+PVM-4 @375 [false,false,true,false]
+  ✓  21 [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @375: swiping to the third perk moves the current dot to the third (1.2s)
+PVM-5 @390 tap Pro {"left":314,"free":0,"pro":314} [ 'false', 'true' ]
+PVM-5 @390 swipe Free {"left":0,"free":0,"pro":314} [ 'true', 'false' ]
+PVM-5 @390 heights free 385.171875 pro 539.75
+  ✓  22 [measure] › tests/e2e/pricingMobile.measure.ts:216:3 › PVM-5 @390: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro (1.7s)
+PVM-5 @375 tap Pro {"left":299,"free":0,"pro":299} [ 'false', 'true' ]
+PVM-5 @375 swipe Free {"left":0,"free":0,"pro":299} [ 'true', 'false' ]
+PVM-5 @375 heights free 385.171875 pro 560.625
+  ✓  23 [measure] › tests/e2e/pricingMobile.measure.ts:216:3 › PVM-5 @375: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro (1.6s)
+PVM-6 @390 scroll 1217 → 1217
+PVM-6 @390 lit [12] want 12 plansTop 70.3
+  ✓  24 [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @390: the sheet is modal, Escape returns focus, and the result lights exactly one tile (3.2s)
+PVM-6 @375 scroll 1238 → 1238
+PVM-6 @375 lit [12] want 12 plansTop 70.2
+  ✓  25 [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @375: the sheet is modal, Escape returns focus, and the result lights exactly one tile (3.2s)
+PVM-7 @390 bar 770.0 lowest footer link 742.3 of 9
+PVM-7 @390 field {"focused":true,"top":345.140625,"bottom":397.140625}
+  ✓  26 [measure] › tests/e2e/pricingMobile.measure.ts:296:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.4s)
+PVM-7 @375 bar 593.0 lowest footer link 565.2 of 9
+PVM-7 @375 field {"focused":true,"top":328.140625,"bottom":380.140625}
+  ✓  27 [measure] › tests/e2e/pricingMobile.measure.ts:296:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.2s)
+PVM-7b stick 0 counter 0
+  ✓  28 [measure] › tests/e2e/pricingMobile.measure.ts:335:1 › PVM-7b with no counter figure the sticky bar is absent (1.5s)
+PVM-8 answer height 166.78125
+  ✓  29 [measure] › tests/e2e/pricingMobile.measure.ts:347:1 › PVM-8 opening a question sets aria-expanded and shows its answer (1.1s)
+PVM-9 tails ["There's a little room in it for slow replies.","It leaves room for slow replies, or for revising if an agent asks.","If you're still querying after that, we'll be in touch with options to extend.","If your last replies run late, we'll be in touch with options to extend."]
+  ✓  30 [measure] › tests/e2e/pricingMobile.measure.ts:371:1 › PVM-9 no 'pass', no £5.99 in any of the four tails, and the eight questions verbatim (4.1s)
+PVM-10 .mk-pvh1 Special Elite 400
+PVM-10 .mk-pvptprice Special Elite 400
+PVM-10 .mk-pvsub Source Serif 4 400
+PVM-10 .mk-pvform button[type=submit] Source Serif 4 600
+PVM-10 .mk-pvsuit Source Serif 4 600
+PVM-10 .mk-pvmore JetBrains Mono 500
+PVM-10 .mk-pvcount .mk-fmmeta JetBrains Mono 600
+PVM-10 .mk-pvsheet .mk-pvq Special Elite 400
+PVM-10 .mk-pvsheet .mk-pvopt Source Serif 4 600
+  ✓  31 [measure] › tests/e2e/pricingMobile.measure.ts:409:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them (1.3s)
+  -  32 [measure] › tests/e2e/pricingMobile.measure.ts:443:1 › shots: the seven phones beside the ref's, and the top and result at 375 × 667
+PV4-1 across {"box":[136,563.578125],"sheetTop":238}
+PV4-1 art transform matrix(-1, 0, 0, 1, 0, 0)
+PV4-1 toggle centre 719.99 box centre 720.00
+PV4-1 open gap 0.000
+  ✓  33 [measure] › tests/e2e/pricingV4.measure.ts:77:1 › PV4-1 the box sits across the join, its drawing mirrored, its toggle centred and flush (933ms)
+PV4-2 line "63 PLACES LEFT"
+  ✓  34 [measure] › tests/e2e/pricingV4.measure.ts:112:1 › PV4-2 the counter is live or absent, and reads '{n} places left' (1.4s)
+PV4-3 {"label":"About twelve months","fit":12,"navy":["12"]}
+  ✓  35 [measure] › tests/e2e/pricingV4.measure.ts:131:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy (1.9s)
+PV4-4 loaded [["Special Elite",1,true],["Source Serif 4",1,true],["JetBrains Mono",2,true]]
+PV4-4 .mk-fbh1 Special Elite 400
+PV4-4 .mk-pv4pprice Special Elite 400
+PV4-4 .mk-jyq Special Elite 400
+PV4-4 .mk-fbsub Source Serif 4 400
+PV4-4 .mk-fbform button Source Serif 4 600
+PV4-4 .mk-pv4suit Source Serif 4 600
+PV4-4 .mk-fbtag JetBrains Mono 600
+PV4-4 .mk-fbcount .mk-fmmeta JetBrains Mono 600
+PV4-4 .mk-fbmore JetBrains Mono 500
+PV4-4 .mk-jybig Special Elite 400
+  ✓  36 [measure] › tests/e2e/pricingV4.measure.ts:191:1 › PV4-4 the faces (1.6s)
+PV4-5 @1440 .mk-fbh1 215.9–299.4
+PV4-5 @1440 .mk-fbcount .mk-fmcount 362.7–388.6
+PV4-5 @1440 .mk-fbform 404.6–454.6
+PV4-5 @1440 .mk-fbmore 500.6–562.6
+  ✓  37 [measure] › tests/e2e/pricingV4.measure.ts:229:3 › PV4-5 the fold @1440: the H1, the counter, the form and the toggle are on screen (865ms)
+PV4-5 @1280 .mk-fbh1 215.9–290.1
+PV4-5 @1280 .mk-fbcount .mk-fmcount 353.4–379.3
+PV4-5 @1280 .mk-fbform 395.3–445.3
+PV4-5 @1280 .mk-fbmore 491.3–553.3
+  ✓  38 [measure] › tests/e2e/pricingV4.measure.ts:229:3 › PV4-5 the fold @1280: the H1, the counter, the form and the toggle are on screen (842ms)
+  -  39 [measure] › tests/e2e/pricingV4.measure.ts:240:1 › shots: top closed and open, Pro plans on question 1, the result — app beside ref
+
+  5 skipped
+  34 passed (2.0m)

@@ -1,0 +1,42 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-pv4m
+
+ ❯ src/marketing/pricingPhone.test.tsx (9 tests | 1 failed) 26ms
+   ✓ the phone tree > has one h1, and it is the founding box's 7ms
+   ✓ the phone tree > is not what renders without a phone width — the desktop tree is 4ms
+   ✓ the phone tree > reads every perk, step and question from the shared copy module 3ms
+   ✓ the phone tree > says plans, never passes 3ms
+   ✓ the phone tree > the toggle and every question are disclosures over a hidden region 3ms
+   ✓ the phone tree > the Free / Pro switch is a tablist with Free selected 2ms
+   ✓ the phone tree > no plan is lit before the questions have been answered 2ms
+   × the parts > the current perk follows the scroll, and stops at the last 3ms
+     → expected +0 to be 2 // Object.is equality
+   ✓ the parts > a tile's phone line puts the saving on its own line, and the one-month plan reads 'Add to any plan' 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/marketing/pricingPhone.test.tsx > the parts > the current perk follows the scroll, and stops at the last
+AssertionError: expected +0 to be 2 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 0[39m
+
+ ❯ src/marketing/pricingPhone.test.tsx:66:40
+     64|   it("the current perk follows the scroll, and stops at the last", () …
+     65|     expect(perkIndex(0, 262, 4)).toBe(0);
+     66|     expect(perkIndex(2 * 272, 262, 4)).toBe(2);
+       |                                        ^
+     67|     expect(perkIndex(760, 262, 4)).toBe(3);
+     68|     expect(perkIndex(9999, 262, 4)).toBe(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  22:45:15
+   Duration  345ms (transform 94ms, setup 0ms, collect 149ms, tests 26ms, environment 0ms, prepare 48ms)
+

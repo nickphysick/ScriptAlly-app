@@ -1,0 +1,61 @@
+
+Running 18 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.9s)
+PVM-1 @760 {"h1":1,"phoneH1":1,"deskH1":0,"phoneTree":true,"deskTree":false}
+PVM-1 @761 {"h1":1,"phoneH1":0,"deskH1":1,"phoneTree":false,"deskTree":true}
+  ✓   2 [measure] › tests/e2e/pricingMobile.measure.ts:140:1 › PVM-1 at 760 the phone tree renders and at 761 the desktop one — one h1 either way, the box's (1.3s)
+PVM-2 @390 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✓   3 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (721ms)
+PVM-2 @375 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✓   4 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (772ms)
+PVM-3 .mk-pvh1 160.1–261.3
+PVM-3 .mk-pvcount .mk-fmcount 343.2–368.1
+PVM-3 .mk-pvform input[type=email] 382.1–434.1
+PVM-3 .mk-pvform button[type=submit] 444.1–496.1
+PVM-3 .mk-pvmore 549.5–604.5
+  ✓   5 [measure] › tests/e2e/pricingMobile.measure.ts:176:1 › PVM-3 @390 × 844: the H1, the counter, the field, Claim and the toggle are all on screen (729ms)
+PVM-4 @390 [false,false,true,false]
+  ✓   6 [measure] › tests/e2e/pricingMobile.measure.ts:189:3 › PVM-4 @390: swiping to the third perk moves the current dot to the third (1.2s)
+PVM-4 @375 [false,false,true,false]
+  ✓   7 [measure] › tests/e2e/pricingMobile.measure.ts:189:3 › PVM-4 @375: swiping to the third perk moves the current dot to the third (1.0s)
+PVM-5 @390 tap Pro {"left":314,"free":0,"pro":314} [ 'false', 'true' ]
+PVM-5 @390 swipe Free {"left":0,"free":0,"pro":314} [ 'true', 'false' ]
+PVM-5 @390 heights free 385.171875 pro 539.75
+  ✓   8 [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @390: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro (1.5s)
+PVM-5 @375 tap Pro {"left":299,"free":0,"pro":299} [ 'false', 'true' ]
+PVM-5 @375 swipe Free {"left":0,"free":0,"pro":299} [ 'true', 'false' ]
+PVM-5 @375 heights free 385.171875 pro 560.625
+  ✓   9 [measure] › tests/e2e/pricingMobile.measure.ts:211:3 › PVM-5 @375: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro (1.7s)
+PVM-6 @390 scroll 1217 → 1217
+PVM-6 @390 lit [12] want 12 plansTop 70.3
+  ✓  10 [measure] › tests/e2e/pricingMobile.measure.ts:241:3 › PVM-6 @390: the sheet is modal, Escape returns focus, and the result lights exactly one tile (2.8s)
+PVM-6 @375 scroll 1238 → 1238
+PVM-6 @375 lit [12] want 12 plansTop 70.2
+  ✓  11 [measure] › tests/e2e/pricingMobile.measure.ts:241:3 › PVM-6 @375: the sheet is modal, Escape returns focus, and the result lights exactly one tile (2.9s)
+PVM-7 @390 bar 770.0 lowest footer link 742.3 of 9
+PVM-7 @390 field {"focused":true,"top":337.140625,"bottom":389.140625}
+  ✓  12 [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.2s)
+PVM-7 @375 bar 593.0 lowest footer link 565.2 of 9
+PVM-7 @375 field {"focused":true,"top":318.140625,"bottom":370.140625}
+  ✓  13 [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.1s)
+PVM-7b stick 0 counter 0
+  ✓  14 [measure] › tests/e2e/pricingMobile.measure.ts:330:1 › PVM-7b with no counter figure the sticky bar is absent (1.4s)
+PVM-8 answer height 166.78125
+  ✓  15 [measure] › tests/e2e/pricingMobile.measure.ts:342:1 › PVM-8 opening a question sets aria-expanded and shows its answer (812ms)
+PVM-9 tails ["There's a little room in it for slow replies.","It leaves room for slow replies, or for revising if an agent asks.","If you're still querying after that, we'll be in touch with options to extend.","If your last replies run late, we'll be in touch with options to extend."]
+  ✓  16 [measure] › tests/e2e/pricingMobile.measure.ts:366:1 › PVM-9 no 'pass', no £5.99 in any of the four tails, and the eight questions verbatim (3.6s)
+PVM-10 .mk-pvh1 Special Elite 400
+PVM-10 .mk-pvptprice Special Elite 400
+PVM-10 .mk-pvsub Source Serif 4 400
+PVM-10 .mk-pvform button[type=submit] Source Serif 4 600
+PVM-10 .mk-pvsuit Source Serif 4 600
+PVM-10 .mk-pvmore JetBrains Mono 500
+PVM-10 .mk-pvcount .mk-fmmeta JetBrains Mono 600
+PVM-10 .mk-pvsheet .mk-pvq Special Elite 400
+PVM-10 .mk-pvsheet .mk-pvopt Source Serif 4 600
+  ✓  17 [measure] › tests/e2e/pricingMobile.measure.ts:404:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them (1.1s)
+  -  18 [measure] › tests/e2e/pricingMobile.measure.ts:438:1 › shots: the seven phones beside the ref's, and the top and result at 375 × 667
+
+  1 skipped
+  17 passed (46.4s)

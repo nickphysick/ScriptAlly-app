@@ -1,0 +1,88 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.8s)
+PVM-7 @390 bar 770.0 lowest footer link 742.3 of 9
+PVM-7 @390 field {"focused":true,"top":337.140625,"bottom":389.140625}
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.2s)
+PVM-7 @375 bar 593.0 lowest footer link 565.2 of 9
+PVM-7 @375 field {"focused":true,"top":316.140625,"bottom":368.140625}
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.2s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+
+    Error: hidden while the form is on screen
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      295 |       return c.visibility === "visible" && r.top < window.innerHeight && r.bottom > 0;
+      296 |     });
+    > 297 |     expect.soft(await shown(), "hidden while the form is on screen").toBe(false);
+          |                                                                      ^
+      298 |     await scrollTo(page, await docTop(page, ".mk-pvlaunch"));
+      299 |     expect.soft(await shown(), "shown once the form has scrolled away").toBe(true);
+      300 |     /* hidden while the questions sheet is open */
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:297:70
+
+    Error: hidden while the sheet is open
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      302 |     await page.click(".mk-pvsuit");
+      303 |     await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
+    > 304 |     expect.soft(await shown(), "hidden while the sheet is open").toBe(false);
+          |                                                                  ^
+      305 |     await page.keyboard.press("Escape");
+      306 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+      307 |     expect.soft(await shown(), "back once the sheet has closed").toBe(true);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:304:66
+
+    Error Context: test-results/pricingMobile.measure.ts-P-88c49-r-and-brings-the-field-back-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+
+    Error: hidden while the form is on screen
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      295 |       return c.visibility === "visible" && r.top < window.innerHeight && r.bottom > 0;
+      296 |     });
+    > 297 |     expect.soft(await shown(), "hidden while the form is on screen").toBe(false);
+          |                                                                      ^
+      298 |     await scrollTo(page, await docTop(page, ".mk-pvlaunch"));
+      299 |     expect.soft(await shown(), "shown once the form has scrolled away").toBe(true);
+      300 |     /* hidden while the questions sheet is open */
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:297:70
+
+    Error: hidden while the sheet is open
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      302 |     await page.click(".mk-pvsuit");
+      303 |     await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
+    > 304 |     expect.soft(await shown(), "hidden while the sheet is open").toBe(false);
+          |                                                                  ^
+      305 |     await page.keyboard.press("Escape");
+      306 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+      307 |     expect.soft(await shown(), "back once the sheet has closed").toBe(true);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:304:66
+
+    Error Context: test-results/pricingMobile.measure.ts-P-a8bd3-r-and-brings-the-field-back-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+    [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+  1 passed (22.2s)

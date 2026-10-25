@@ -1,0 +1,10 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+PVM-2 @390 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✓  2 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (1.1s)
+PVM-2 @375 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✓  3 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (758ms)
+
+  3 passed (21.4s)
