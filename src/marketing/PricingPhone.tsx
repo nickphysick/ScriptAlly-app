@@ -33,6 +33,7 @@ import { useFounding } from "./foundingStore";
 import { foundingPlacesLeftLabel, FOUNDING_CTA } from "./landingCopy";
 import { FOUNDING_ART, artUrl } from "./brandArt";
 import { PERK_ICON, Price } from "./pricingParts";
+import { PlanSheetPhone } from "./PlanSheetPhone";
 
 type Nav = (tab: string, subPageName?: string) => void;
 
@@ -314,10 +315,29 @@ export const PricingPhone: React.FC<{ onNavigate: Nav }> = ({ onNavigate }) => {
      sheet's stacking context. Found once the page is mounted. */
   const [host, setHost] = useState<Element | null>(null);
   useLayoutEffect(() => { setHost(root.current?.closest(".mk-scope") ?? null); }, []);
+  /* The questions sheet: open, closed, and the plan it last arrived at (which turns its tile navy). */
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [fit] = useState<number | null>(null);
-  const openSheet = useCallback((_opener: HTMLElement) => { setSheetOpen(true); }, []);
-  void setSheetOpen;
+  const [fit, setFit] = useState<number | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  const openSheet = useCallback((el: HTMLElement) => { opener.current = el; setSheetOpen(true); }, []);
+  const closeSheet = useCallback(() => {
+    setSheetOpen(false);
+    opener.current?.focus({ preventScroll: true });
+  }, []);
+  /* "See it in the plans": close, then bring Pro plans into view under the nav (the ref's 70px is
+     its 58px nav plus 12; here the nav's own height plus the same 10). Focus goes to the plans'
+     own button rather than back to the opener — the FAQ's link would scroll the page back down. */
+  const seePlans = useCallback(() => {
+    setSheetOpen(false);
+    const section = plans.current;
+    if (!section) return;
+    section.querySelector<HTMLElement>(".mk-pvsuit")?.focus({ preventScroll: true });
+    window.setTimeout(() => {
+      const navH = document.querySelector(".mk-navwrap")?.getBoundingClientRect().height ?? 0;
+      window.scrollTo({ top: section.getBoundingClientRect().top + window.scrollY - navH - 10, behavior: scrollBehavior() });
+    }, reduceMotion() ? 0 : 300);
+  }, []);
+  const onFit = useCallback((m: number) => setFit(m), []);
   return (
     <div className="mk-pvm" ref={root}>
       <FoundingBoxPhone onNavigate={onNavigate} formArea={formArea} />
@@ -325,6 +345,7 @@ export const PricingPhone: React.FC<{ onNavigate: Nav }> = ({ onNavigate }) => {
       <PlansPhone ref={plans} fit={fit} onSuit={openSheet} />
       <FaqPhone onSuit={openSheet} />
       <StickyClaim host={host} formArea={formArea} blocked={sheetOpen} />
+      <PlanSheetPhone host={host} open={sheetOpen} onClose={closeSheet} onSeePlans={seePlans} onFit={onFit} onNavigate={onNavigate} />
     </div>
   );
 };

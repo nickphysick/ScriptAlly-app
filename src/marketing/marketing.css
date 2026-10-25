@@ -2002,6 +2002,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   height: 52px; padding: 0; border: 0; justify-content: center;
   font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
 }
+/* ⚠️ NO LIFT ON HOVER. A phone keeps `:hover` stuck on whatever was last tapped, so the shared navy
+   button's lift and shadow would stay on after the tap; the ref darkens on `:active` only. */
+.mk-pvm .mk-pvform .mk-btn:hover { background: var(--mk-navy); transform: none; box-shadow: none; }
 .mk-pvm .mk-pvform .mk-btn:active { background: var(--mk-navy-hov); }
 .mk-pvm .mk-pvin .mk-betanote { margin: 10px 0 0; font-size: .85rem; line-height: 1.45; }
 .mk-pvm .mk-pvin .mk-betamsg { margin: 14px 0 0; }
@@ -2238,10 +2241,149 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    last link can always be scrolled clear of it. */
 .mk-scope:has(.mk-pvstick.mk-on) { padding-bottom: 74px; }
 
-/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity. */
+/* ── Which plan suits me best? — the bottom sheet (ref .scrim, .jsheet), portalled into `.mk-scope` ──
+   ⚠️ CLOSED IT IS STILL MOUNTED, SO ITS ANSWERS SURVIVE — and `visibility` follows the slide (the
+   component also sets `inert`), so nothing in a closed sheet can be reached. Above the nav (60). */
+.mk-pvlayer.mk-pvjs { font-family: var(--mk-f-serif); color: var(--mk-nearblack); line-height: normal; }
+.mk-pvlayer .mk-pvscrim {
+  position: fixed; inset: 0; z-index: 90; background: rgba(17, 22, 32, .45); opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.mk-pvlayer .mk-pvsheet {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 90%; z-index: 91; box-sizing: border-box;
+  background: #fff; border-radius: 24px 24px 0 0; display: flex; flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .25);
+  transform: translateY(102%); visibility: hidden;
+  transition: transform .38s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .38s;
+}
+.mk-pvlayer.mk-open .mk-pvscrim { opacity: 1; pointer-events: auto; }
+.mk-pvlayer.mk-open .mk-pvsheet { transform: none; visibility: visible; transition: transform .38s cubic-bezier(.22, .8, .3, 1), visibility 0s; }
+.mk-pvlayer .mk-pvgrab { width: 40px; height: 5px; border-radius: 999px; background: rgba(28, 19, 15, .18); margin: 9px auto 0; flex: none; }
+.mk-pvlayer .mk-pvjshead { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 0 22px; flex: none; }
+.mk-scope .mk-pvjsh {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.08rem; line-height: 1.2; margin: 0;
+  color: var(--mk-nearblack);
+}
+.mk-pvlayer .mk-pvjsx {
+  width: 36px; height: 36px; border-radius: 50%; border: 0; background: #f2eee8; display: grid; place-items: center;
+  cursor: pointer; padding: 0;
+}
+.mk-pvlayer .mk-pvjsx svg { width: 13px; height: 13px; stroke: var(--mk-nearblack); stroke-width: 2; stroke-linecap: round; }
+.mk-pvlayer .mk-pvjsmeta { display: flex; align-items: center; gap: 12px; padding: 14px 22px 0; flex: none; }
+.mk-pvlayer .mk-pvjsprog { flex: 1; height: 4px; border-radius: 999px; background: rgba(28, 19, 15, .08); overflow: hidden; }
+.mk-pvlayer .mk-pvjsprog span { display: block; height: 100%; background: var(--mk-rust); border-radius: 999px; transition: width .35s; }
+.mk-pvlayer .mk-pvjscount {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .56rem; line-height: 1; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(28, 19, 15, .56); white-space: nowrap;
+}
+.mk-pvlayer .mk-pvjsbody { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 22px 22px 20px; scrollbar-width: none; }
+.mk-pvlayer .mk-pvjsbody::-webkit-scrollbar { display: none; }
+.mk-pvlayer .mk-pvq { margin: 0 0 18px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.5rem; line-height: 1.22; }
+.mk-pvlayer .mk-pvq:focus { outline: none; }
+.mk-pvlayer .mk-pvsubq { margin: 22px 0 10px; font-weight: 600; }
+.mk-pvlayer .mk-pvopts { display: grid; gap: 9px; }
+.mk-pvlayer .mk-pvopt {
+  position: relative; display: block; width: 100%; text-align: left; padding: 15px 16px 15px 48px; border-radius: 14px;
+  border: 1px solid var(--mk-hair); background: #fff; color: var(--mk-nearblack); cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem; line-height: 1.3;
+}
+.mk-pvlayer .mk-pvopt small { display: block; margin-top: 3px; font-weight: 400; font-size: .9rem; color: rgba(28, 19, 15, .56); }
+.mk-pvlayer .mk-pvopt::before {
+  content: ""; position: absolute; left: 17px; top: 17px; width: 17px; height: 17px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .3); transition: box-shadow .15s;
+}
+.mk-pvlayer .mk-pvopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: var(--mk-hero-ground); }
+.mk-pvlayer .mk-pvopt[aria-pressed="true"]::before { box-shadow: inset 0 0 0 5.5px var(--mk-navy); }
+.mk-pvlayer .mk-pvopt:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvlayer .mk-pvopts--row { grid-template-columns: 1fr 1fr 1fr; }
+.mk-pvlayer .mk-pvopts--row .mk-pvopt { padding: 14px 8px; text-align: center; font-size: .95rem; }
+.mk-pvlayer .mk-pvopts--row .mk-pvopt::before { display: none; }
+.mk-pvlayer .mk-pvagents { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 0; }
+.mk-pvlayer .mk-pvstepper { display: flex; align-items: center; gap: 6px; }
+.mk-pvlayer .mk-pvstepper button {
+  width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--mk-hair); background: #fff; padding: 0;
+  font-family: var(--mk-f-sans); font-weight: 400; font-size: 1.6rem; line-height: 1; color: var(--mk-navy); cursor: pointer;
+}
+.mk-pvlayer .mk-pvstepper output {
+  min-width: 100px; text-align: center; font-family: var(--mk-f-display); font-weight: 400; font-size: 3rem; line-height: 1;
+}
+.mk-pvlayer .mk-pvagents--idk .mk-pvstepper { opacity: .35; }
+.mk-pvlayer .mk-pvidk {
+  height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .98rem; color: var(--mk-nearblack); cursor: pointer;
+}
+.mk-pvlayer .mk-pvidk[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
+.mk-pvlayer .mk-pvins {
+  margin: 18px 0 0; padding: 14px 16px; border-radius: 14px; background: var(--mk-blush);
+  font-size: 1rem; line-height: 1.5; color: #4a3a30; animation: mkJyRise .35s ease;
+}
+.mk-pvlayer .mk-pvjsfoot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 18px 26px 22px; border-top: 1px solid rgba(28, 19, 15, .08); background: #fff;
+}
+.mk-pvlayer .mk-pvjsback {
+  border: 0; background: none; padding: 8px 0; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; color: var(--mk-navy);
+}
+/* Hidden on the first question and the result, keeping its place so Next does not move. */
+.mk-pvlayer .mk-pvjsback.mk-off { visibility: hidden; }
+.mk-pvlayer .mk-pvjsnext {
+  flex: 1; max-width: 220px; height: 52px; padding: 0; border: 0; justify-content: center;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
+}
+.mk-pvlayer .mk-pvjsnext:hover { background: var(--mk-navy); transform: none; box-shadow: none; }
+.mk-pvlayer .mk-pvjsnext:active { background: var(--mk-navy-hov); }
+.mk-pvlayer .mk-pvjsnext:disabled { background: rgba(42, 58, 82, .18); border-color: transparent; cursor: default; transform: none; box-shadow: none; }
+
+/* The result: the estimate, the navy plan card, then why (ref .res-*). */
+.mk-pvlayer .mk-pvresk {
+  margin: 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .18em; text-transform: uppercase; color: rgba(28, 19, 15, .56);
+}
+.mk-pvlayer .mk-pvresbig { margin: 6px 0 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 2.15rem; line-height: 1.12; }
+.mk-pvlayer .mk-pvresbig:focus { outline: none; }
+.mk-pvlayer .mk-pvrescard {
+  position: relative; margin: 26px 2px 22px; padding: 22px 20px 20px; border-radius: 18px;
+  background: var(--mk-navy); color: var(--mk-cream);
+  box-shadow: 0 0 0 6px #fff, 0 0 0 7px rgba(28, 19, 15, .08), 0 18px 34px -16px rgba(28, 19, 15, .4);
+}
+.mk-pvlayer .mk-pvresflag {
+  position: absolute; top: -11px; left: 18px; padding: 5px 10px; border-radius: 999px;
+  background: var(--mk-nearblack); color: var(--mk-cream);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .54rem; line-height: 1; letter-spacing: .18em; text-transform: uppercase;
+}
+.mk-scope .mk-pvresname {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.3rem; line-height: 1.2; margin: 0; color: #fff;
+}
+.mk-pvlayer .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin-top: 10px; }
+.mk-pvlayer .mk-pv4cur { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.15rem; line-height: 1; margin-top: 6px; color: #fff; }
+.mk-pvlayer .mk-pv4amt { font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1; letter-spacing: -.02em; color: #fff; }
+.mk-pvlayer .mk-pvrespm {
+  margin: 6px 0 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .6rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .8);
+}
+.mk-pvlayer .mk-pvrestail {
+  margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed rgba(var(--mk-cream-rgb), .3); font-size: 1rem; line-height: 1.5;
+}
+.mk-pvlayer .mk-pvreswhy { margin: 8px 0 0; font-size: 1rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pvlayer .mk-pvresprep {
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--mk-blush); font-size: .95rem; line-height: 1.5; color: #4a3a30;
+}
+.mk-pvlayer .mk-pvresagain {
+  margin-top: 18px; border: 0; background: none; padding: 0; cursor: pointer; border-bottom: 1px solid rgba(42, 58, 82, .35);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; color: var(--mk-navy);
+}
+.mk-pvlayer .mk-pvressrc { margin: 18px 0 0; font-size: .8rem; line-height: 1.45; color: var(--mk-label); }
+.mk-pvlayer .mk-pvressrc a { color: inherit; text-decoration: underline; }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity. Under reduced motion the
+   sheet appears in place, the thumb, chevron and + do not turn or slide, and the notes do not rise. */
 @media (prefers-reduced-motion: reduce) {
   .mk-pvm .mk-pvchev, .mk-pvm .mk-pvdots i, .mk-pvm .mk-pvthumb, .mk-pvm .mk-pvpm, .mk-pvm .mk-pvpt,
-  .mk-pvlayer.mk-pvstick, .mk-pvlayer.mk-pvstick.mk-on { transition: none; }
+  .mk-pvlayer.mk-pvstick, .mk-pvlayer.mk-pvstick.mk-on,
+  .mk-pvlayer .mk-pvscrim, .mk-pvlayer .mk-pvsheet, .mk-pvlayer.mk-open .mk-pvsheet,
+  .mk-pvlayer .mk-pvjsprog span, .mk-pvlayer .mk-pvopt::before { transition: none; }
+  .mk-pvlayer .mk-pvins { animation: none; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════
