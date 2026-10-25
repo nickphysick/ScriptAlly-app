@@ -1,17 +1,30 @@
 /**
- * Landing hero v3 (20 Oct, ref design-refs/landing-hero-v3.html) — the rendered locks LH1–LH8.
+ * Landing hero on the desk — v3 (20 Oct, ref design-refs/landing-hero-v3.html), with the card's story,
+ * entrance and hawk from v4 (25 Oct, ref design-refs/landing-hero-v4.html) — the rendered locks.
  * The unit locks (copy strings, rule values, the end-state markup) live in src/marketing/*.test.*;
  * these are the claims only a rendered page can carry.
  *
  *   LH1  the sub is the typewriter face, the brand on its rust highlighter, two lines breaking
  *        after "representation?" — at 1440 and 1280
- *   LH2  with reduced motion: the card is the story's end state and its feed is scrollable
+ *   LH2  with reduced motion (v4 R1/H4): the card is the story's end state — the new titles, head discs
+ *        and 15-pages chip, no chips or popover — its feed scrollable; no fly-past; the cast shadow at
+ *        rest (.2) from first paint
  *   LH3  the headline, the sub and the actions never animate and are opaque from first paint
- *   LH4  the day counter never goes back and never holds a day for more than 2.5s, Day 32 → 99
- *   LH5  when the nudge form is open nothing over the card is filled but the form itself
+ *   LH4  loop (v4, rewritten): the counter never goes back within a run, Day 1 → 99; then the card
+ *        leaves and a fresh one reads Day 1 within 2s
+ *   LH5  RETIRED (v4): there is no nudge form on the desk any more
  *   LH6  the band's heading is on screen and on one line, and the front card is centred on the copy
  *   LH7  the hawk's shadow loads with its version, sits above the cards and copy at .2, uncropped
  *   LH8  the pile is aria-hidden and the headline is the page's only h1
+ *   LH9  popover (v4): its top within 16px below the status pill; it shows 10, then 1, 2, 3 in that
+ *        order; gone when "Partial requested" starts typing
+ *   LH10 chips (v4): each chip inside its own line's chip row, rust rgb(245, 230, 223) or sage
+ *        rgb(230, 236, 227), gone within 3.5s; no floating pill
+ *   LH11 hawk (v4): the fly layer is a child of <body> above the nav and the pile, nothing between it
+ *        and the root clips it, it animates once and is still by 3s; the cast shadow is at .2 by 4s and
+ *        does not move with the pointer, while the cards do
+ *   LH12 entrance (v4): no back card animates translate on load; the front's first keyframe is scale .86
+ *   LH13 copy (v4): "The Taloned Mr Ripley" on the front card, "Lord of the Wings" on every back card
  *
  * The public page needs no sign-in, so this file opens it itself. Run it without the setup project:
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test landingHeroV3 --project measure --no-deps
@@ -37,18 +50,13 @@ const CSS_BREAKS: Record<string, string> = {
   LH6b: ".mk-hc-pile{margin-top:60px!important}",
   LH7: ".mk-lc-cast{opacity:.5!important}",
   LH7b: ".mk-lc-cast{left:-420px!important}",
+  LH9: ".mk-pillpop{margin-top:40px!important}",
+  LH11: ".mk-hfly{z-index:10!important}",
 };
 
 async function open(page: Page, vp: { width: number; height: number }, reduce = false) {
   await page.setViewportSize(vp);
   await page.emulateMedia({ reducedMotion: reduce ? "reduce" : "no-preference" });
-  if (MUTATE === "LH4") {
-    /* LH4's break: the clock's frames arrive only every three seconds, so a day is held too long. */
-    await page.addInitScript(() => {
-      const raf = window.requestAnimationFrame.bind(window);
-      window.requestAnimationFrame = (cb) => window.setTimeout(() => raf(cb), 3000) as unknown as number;
-    });
-  }
   await page.goto("/", { waitUntil: "commit" });
   await page.waitForSelector(".mk-herotitle", { state: "attached" });
   const css = CSS_BREAKS[MUTATE];
@@ -57,7 +65,7 @@ async function open(page: Page, vp: { width: number; height: number }, reduce = 
 
 const settle = async (page: Page) => {
   await page.evaluate(() => document.fonts.ready);
-  await page.waitForTimeout(3200); // the entrance is over by 2.15s and the shadow by 3.1s
+  await page.waitForTimeout(3700); // v4: the pop is over by 1.4s, the cast shadow settles by ~3.15s after mount
 };
 
 const shot = async (page: Page, name: string) => {
@@ -107,7 +115,8 @@ test.describe("landing hero v3", () => {
     }
   });
 
-  test("LH2 reduced motion: the card is the story's end state, and the feed scrolls", async ({ page }) => {
+  /* REWRITTEN (v4 R1/H4): the new card, no chips or popover, no fly-past, the cast at .2 from first paint. */
+  test("LH2 reduced motion: the card is the story's end state, the feed scrolls, the hawk is at rest", async ({ page }) => {
     await open(page, { width: 1440, height: 780 }, true);
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(400);
@@ -118,7 +127,14 @@ test.describe("landing hero v3", () => {
       return {
         day: q("day").getAttribute("aria-label"), band: q("bandt").textContent, pill: q("pill").textContent,
         final: q("pf").querySelector(".mk-lc-nt")!.textContent, finalBtn: q("pf").querySelector("b")!.textContent, finalOpacity: getComputedStyle(q("pf")).opacity,
-        nudgeOpacity: getComputedStyle(q("pn")).opacity, formOpacity: getComputedStyle(q("lf")).opacity,
+        nudgeOpacity: getComputedStyle(q("pn")).opacity,
+        front: q("front").querySelector(".mk-lc-ms b")!.textContent,
+        backs: Array.from(document.querySelectorAll(".mk-hc-pile .mk-lc--back .mk-lc-ms b")).map((b) => b.textContent),
+        heads: Array.from(document.querySelectorAll(".mk-hc-pile .mk-lc-disc")).map((d) => !!d.querySelector("svg") && (d.textContent ?? "").trim() === ""),
+        pages: q("steps").querySelectorAll(".mk-lc-step")[0].querySelectorAll(".mk-lc-att > span")[2]?.textContent,
+        extras: document.querySelectorAll(".mk-taskchip, .mk-pillpop, .mk-up").length,
+        fly: document.querySelectorAll(".mk-hfly").length,
+        cast: getComputedStyle(document.querySelector(".mk-lc-cast")!).opacity, castAnims: document.querySelector(".mk-lc-cast")!.getAnimations().length,
         foot: q("ftt").textContent, act: q("fta").textContent,
         steps: document.querySelectorAll(".mk-lc-step").length,
         overflowY: getComputedStyle(tlv).overflowY, sh: tlv.scrollHeight, ch: tlv.clientHeight, st: tlv.scrollTop,
@@ -134,7 +150,14 @@ test.describe("landing hero v3", () => {
     expect(r.finalBtn).toBe("Mark sent");
     expect(r.finalOpacity).toBe("1");
     expect(r.nudgeOpacity, "the nudge panel is not showing").toBe("0");
-    expect(r.formOpacity, "the form is closed").toBe("0");
+    expect(r.front, "the front card's manuscript").toBe("The Taloned Mr Ripley");
+    expect(r.backs, "population: four back cards, each 'Lord of the Wings'").toEqual(Array(4).fill("Lord of the Wings"));
+    expect(r.heads, "every disc is a profile head, no initials").toEqual(Array(5).fill(true));
+    expect(r.pages).toBe("15 pages");
+    expect(r.extras, "no task chips, popover or floating pill").toBe(0);
+    expect(r.fly, "no fly-past under reduced motion").toBe(0);
+    expect(r.cast, "the cast shadow at rest").toBe("0.2");
+    expect(r.castAnims, "and still").toBe(0);
     expect(r.foot).toBe("Send the full by 5 July");
     expect(r.act).toBe("Mark full sent");
     expect(r.overflowY, "the feed is the writer's to scroll").toBe("auto");
@@ -164,86 +187,41 @@ test.describe("landing hero v3", () => {
     for (const x of readings) expect(x.ok, `at ${x.at}ms: ${x.detail}`).toBe(true);
   });
 
-  test("LH4 the clock never goes back and never holds a day for more than 2.5s, Day 32 → 99", async ({ page }) => {
+ /* REWRITTEN (v4 S5): the story runs Day 1 → 99, never going back, then the card leaves and a fresh one
+     reads Day 1 within 2s. (v3's "Day 32 → 99, no day held over 2.5s" is retired with the long story.) */
+  test("LH4 loop: the counter never goes back within a run; the card leaves and a new one reads Day 1 within 2s", async ({ page }) => {
     test.setTimeout(120000);
+    await page.addInitScript(() => {
+      const R = { seq: [] as [number, number][], out: null as number | null, fresh: null as number | null };
+      (window as unknown as { __lh4: typeof R }).__lh4 = R;
+      const tick = () => {
+        const t = performance.now(), d = document.querySelector('[data-hc="day"]'), f = document.querySelector<HTMLElement>('[data-hc="front"]');
+        if (d && f) {
+          const n = Number(d.getAttribute("data-n")); const last = R.seq[R.seq.length - 1];
+          if (!last || last[1] !== n) R.seq.push([Math.round(t), n]);
+          if (R.out === null) for (const a of f.getAnimations()) if (JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes("-130%") && a.startTime != null) R.out = (a.startTime as number) + (a.effect!.getTiming().delay as number);
+          if (R.out !== null && R.fresh === null && t > R.out && n === 1 && +getComputedStyle(f).opacity > .9) R.fresh = Math.round(t);
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
     await open(page, { width: 1440, height: 780 });
-    const seq: { t: number; n: number }[] = [];
-    const t0 = Date.now();
-    while (Date.now() - t0 < 60000) {
-      const n = await page.evaluate(() => Number(document.querySelector('[data-hc="day"]')?.getAttribute("data-n")));
-      seq.push({ t: Date.now() - t0, n });
-      if (n === 99 && seq.some((s) => s.n === 32)) break;
-      await page.waitForTimeout(500);
-    }
-    /* The story opens on Day 32 (the markup's static Day 99 hands over to it while the card is still
-       invisible); the run is from the first 32 to the first 99. The clock starts moving at 2.4s, and
-       the hold that counts is from the first day it LEAVES 32. */
-    const from = seq.findIndex((s) => s.n === 32);
-    const to = seq.findIndex((s, i) => i > from && s.n === 99);
-    const run = seq.slice(from, to + 1);
-    const moved = run.findIndex((s) => s.n !== 32);
-    console.log("LH4", run.map((s) => `${(s.t / 1000).toFixed(1)}:${s.n}`).join(" "));
-    expect(from, "the story reached Day 32").toBeGreaterThanOrEqual(0);
+    await page.waitForFunction(() => (window as unknown as { __lh4: { fresh: number | null } }).__lh4.fresh !== null, null, { timeout: 90000, polling: 200 });
+    const r = await page.evaluate(() => (window as unknown as { __lh4: { seq: [number, number][]; out: number; fresh: number } }).__lh4);
+    /* The first run: from the story's first Day 1 to its Day 99 (the markup's static 99 comes before it). */
+    const from = r.seq.findIndex((x) => x[1] === 1), to = r.seq.findIndex((x, i) => i > from && x[1] === 99);
+    const run = r.seq.slice(from, to + 1);
+    console.log("LH4", JSON.stringify({ run: run.map((x) => x[1]), out: Math.round(r.out), fresh: r.fresh }));
+    expect(from, "population: the run reached Day 1").toBeGreaterThanOrEqual(0);
     expect(to, "and Day 99").toBeGreaterThan(from);
-    expect(moved, "the clock left Day 32").toBeGreaterThan(0);
-    let longest = 0, since = run[moved].t;
-    for (let i = moved; i < run.length; i++) {
-      expect(run[i].n, `at ${run[i].t}ms the counter went back`).toBeGreaterThanOrEqual(run[i - 1].n);
-      if (run[i].n !== run[i - 1].n) since = run[i].t;
-      longest = Math.max(longest, run[i].t - since);
-    }
-    console.log(`LH4 samples ${run.length}, longest hold ${longest}ms`);
-    expect(run.length, "population: the run was sampled").toBeGreaterThan(40);
-    expect(longest, "no day is held for more than 2.5s").toBeLessThanOrEqual(2500);
+    expect(run.length, "population: the clock moved through the run").toBeGreaterThan(20);
+    for (let i = 1; i < run.length; i++) expect(run[i][1], `at ${run[i][0]}ms the counter went back`).toBeGreaterThanOrEqual(run[i - 1][1]);
+    expect(r.fresh - r.out, "a fresh card reads Day 1 within 2s of the card leaving").toBeLessThanOrEqual(2000);
   });
 
-  test("LH5 the nudge form opens over the card, and nothing dims the card behind it", async ({ page }) => {
-    test.setTimeout(90000);
-    await open(page, { width: 1440, height: 780 });
-    await page.waitForFunction(() => +getComputedStyle(document.querySelector('[data-hc="lf"]')!).opacity > 0.95, null, { timeout: 60000, polling: 100 });
-    if (MUTATE === "LH5") {
-      await page.evaluate(() => {
-        const d = document.createElement("div");
-        d.style.cssText = "position:absolute;inset:0;background:rgba(28,19,15,.35);z-index:20;border-radius:20px";
-        document.querySelector('[data-hc="front"]')!.appendChild(d);
-      });
-    }
-    const r = await page.evaluate(() => {
-      const card = document.querySelector('[data-hc="front"]') as HTMLElement;
-      const form = document.querySelector('[data-hc="lf"]') as HTMLElement;
-      const cr = card.getBoundingClientRect();
-      /* The card's own face — the element that HOLDS its band — is the card, not something over it. */
-      const band = card.querySelector('[data-hc="band"]')!;
-      const filled = (e: Element, pseudo?: string) => {
-        const c = getComputedStyle(e, pseudo);
-        return !/rgba\(0, 0, 0, 0\)|transparent/.test(c.backgroundColor) || c.backgroundImage !== "none";
-      };
-      const bad = new Set<string>();
-      let points = 0;
-      for (let fx = 0.08; fx < 1; fx += 0.12) for (let fy = 0.06; fy < 1; fy += 0.11) {
-        const x = cr.left + cr.width * fx, y = cr.top + cr.height * fy;
-        const stack = document.elementsFromPoint(x, y);
-        const at = stack.indexOf(card); if (at < 0) continue;
-        points++;
-        for (const e of stack.slice(0, at)) {
-          if (form.contains(e) || e.classList.contains("mk-lc-cast") || e.contains(band)) continue;
-          const b = e.getBoundingClientRect();
-          /* An overlay is something laid over the card's face — at least half its area. */
-          if (b.width * b.height >= cr.width * cr.height * 0.5 && filled(e)) bad.add(e.className || e.tagName);
-        }
-      }
-      for (const host of [card, card.firstElementChild!]) for (const p of ["::before", "::after"]) {
-        const c = getComputedStyle(host, p);
-        if (c.content !== "none" && c.content !== "normal" && filled(host, p)) bad.add((host as HTMLElement).className + p);
-      }
-      return { points, bad: [...bad], formShadow: getComputedStyle(form).boxShadow };
-    });
-    console.log("LH5", JSON.stringify(r));
-    expect(r.points, "population: points over the card").toBeGreaterThan(30);
-    expect(r.bad, "nothing but the form fills the space over the card").toEqual([]);
-    expect(r.formShadow, "the form carries its own soft shadow").not.toBe("none");
-    await shot(page, "nudge-form-1440x780");
-  });
+  /* LH5 RETIRED (v4 S4): there is no nudge form on the desk — Nudge is pressed and the reminder goes
+     straight to "You nudged Eleanor". Its "nothing dims the card" claim had nothing left to hold. */
 
   test("LH6 the band's heading is on screen and on one line; the front card is centred on the copy", async ({ page }) => {
     for (const vp of [{ width: 1204, height: 594 }, { width: 1440, height: 780 }, { width: 1920, height: 1080 }]) {
@@ -305,6 +283,149 @@ test.describe("landing hero v3", () => {
       expect(r.sw, `@${vp.width}: and the page does not scroll sideways`).toBeLessThanOrEqual(r.cw);
       if (vp.width === 820) await shot(page, "hero-820x900");
     }
+  });
+
+  /* One recorded run of the desk story: the popover (its gap below the pill, the numbers it shows in
+     order, its opacity on the sample that first sees a letter of Partial requested) and every chip. */
+  type Rec = {
+    pop: { gap: number | null; seq: string[]; opAtType: number | null };
+    chips: { text: string; line: number; inAtt: boolean; bg: string; createdAt: number; shownAt: number | null; goneAt: number | null }[];
+    floating: number; out: number | null;
+  };
+  const RECORDER = () => {
+    const R: Rec = { pop: { gap: null, seq: [], opAtType: null }, chips: [], floating: 0, out: null };
+    (window as unknown as { __lhr: Rec }).__lhr = R;
+    const seen = new Map<Element, Rec["chips"][number]>();
+    setInterval(() => {
+      const t = performance.now(), front = document.querySelector<HTMLElement>('[data-hc="front"]'); if (!front) return;
+      const steps = Array.from(front.querySelectorAll<HTMLElement>(".mk-lc-step"));
+      R.floating = Math.max(R.floating, document.querySelectorAll(".mk-up").length);
+      const pop = front.querySelector<HTMLElement>(".mk-pillpop"), pill = front.querySelector('[data-hc="pill"]');
+      if (pop && pill) {
+        const op = +getComputedStyle(pop).opacity;
+        if (op > .99) {
+          if (R.pop.gap === null) R.pop.gap = pop.getBoundingClientRect().top - pill.getBoundingClientRect().bottom;
+          const n = pop.querySelector(".mk-smp-n")!.textContent ?? "";
+          if (R.pop.seq[R.pop.seq.length - 1] !== n) R.pop.seq.push(n);
+        }
+      }
+      const ch = steps[1]?.querySelector<HTMLElement>(".mk-lc-t span");
+      if (R.pop.gap !== null && R.pop.opAtType === null && ch && +getComputedStyle(ch).opacity > 0) R.pop.opAtType = pop ? +getComputedStyle(pop).opacity : 0;
+      document.querySelectorAll<HTMLElement>(".mk-taskchip, .mk-up").forEach((g) => {
+        let rec = seen.get(g);
+        if (!rec) { rec = { text: g.textContent ?? "", line: steps.indexOf(g.closest<HTMLElement>(".mk-lc-step")!), inAtt: !!g.parentElement?.matches(".mk-lc-att"), bg: getComputedStyle(g).backgroundColor, createdAt: t, shownAt: null, goneAt: null }; seen.set(g, rec); R.chips.push(rec); }
+        const op = +getComputedStyle(g).opacity;
+        if (rec.shownAt === null && op > .99) rec.shownAt = t;
+        if (rec.shownAt !== null && rec.goneAt === null && op < .05) rec.goneAt = t;
+      });
+      for (const [g, rec] of seen) if (rec.shownAt !== null && rec.goneAt === null && !g.isConnected) rec.goneAt = t;
+      if (R.out === null) for (const a of front.getAnimations()) if (JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes("-130%") && a.startTime != null) R.out = (a.startTime as number) + (a.effect!.getTiming().delay as number);
+    }, 40);
+  };
+  async function record(page: Page, ms: number) {
+    await page.addInitScript(RECORDER);
+    await open(page, { width: 1440, height: 780 });
+    await page.waitForTimeout(ms);
+    return page.evaluate(() => (window as unknown as { __lhr: Rec }).__lhr);
+  }
+
+  test("LH9 popover: under the status pill, 10 then 1, 2, 3, and gone before Partial requested types", async ({ page }) => {
+    test.setTimeout(90000);
+    const r = await record(page, 13000);
+    console.log("LH9", JSON.stringify(r.pop));
+    expect(r.pop.gap, "population: the popover came in").not.toBeNull();
+    expect(r.pop.gap!, "its top is below the pill").toBeGreaterThanOrEqual(0);
+    expect(r.pop.gap!, "within 16px of it").toBeLessThanOrEqual(16);
+    expect(r.pop.seq, "it shows 10, then 1, 2, 3, in that order").toEqual(["10", "1", "2", "3"]);
+    expect(r.pop.opAtType, "population: the line typed in").not.toBeNull();
+    expect(r.pop.opAtType!, "already gone when the first letter of Partial requested appears").toBeLessThan(.05);
+  });
+
+  test("LH10 chips: in their own line's chip row, rust or sage, gone within 3.5s; no floating pill", async ({ page }) => {
+    test.setTimeout(120000);
+    const r = await record(page, 26000);
+    const first = r.chips.filter((x) => r.out === null || x.createdAt < r.out);
+    console.log("LH10", JSON.stringify({ floating: r.floating, chips: first.map((x) => ({ ...x, held: x.goneAt && x.shownAt ? Math.round(x.goneAt - x.shownAt) : null })) }));
+    const want: [string, number, string][] = [["Task created", 1, "rgb(245, 230, 223)"], ["Task complete", 2, "rgb(230, 236, 227)"], ["Reminder set", 3, "rgb(245, 230, 223)"]];
+    expect(first.map((x) => x.text), "population: the three chips, in order").toEqual(want.map((w) => w[0]));
+    expect(r.floating, "no floating pill at any moment").toBe(0);
+    first.forEach((x, k) => {
+      expect(x.inAtt && x.line === want[k][1], `"${x.text}" sits in line ${want[k][1]}'s chip row (found line ${x.line}, in row ${x.inAtt})`).toBe(true);
+      expect(x.bg, `"${x.text}" is ${k === 1 ? "sage" : "rust"}, never the cream chip`).toBe(want[k][2]);
+      expect(x.shownAt, `"${x.text}" was shown`).not.toBeNull();
+      expect(x.goneAt, `"${x.text}" went`).not.toBeNull();
+      expect(x.goneAt! - x.shownAt!, `"${x.text}" gone within 3.5s`).toBeLessThanOrEqual(3500);
+    });
+  });
+
+  test("LH11 hawk: above the nav and the pile, unclipped, flown once; the cast settles at .2 and stays still", async ({ page }) => {
+    test.setTimeout(60000);
+    await open(page, { width: 1440, height: 780 });
+    await page.waitForSelector(".mk-hfly", { state: "attached" });
+    const a = await page.evaluate(() => {
+      const layer = document.querySelector<HTMLElement>(".mk-hfly")!, bird = layer.querySelector<HTMLElement>(".mk-hfly-bird")!;
+      const z = (e: Element) => parseInt(getComputedStyle(e).zIndex) || 0;
+      /* ⚠️ <html> and <body> clip the x axis at the viewport's edge (marketing.css), which the brief
+         allows ("it may leave via the viewport edge"); the claim is that nothing between the layer and
+         them clips it — the hero, the sheet, any container. */
+      const clips: string[] = [];
+      for (let n: HTMLElement | null = bird.parentElement; n && n !== document.body; n = n.parentElement) { const c = getComputedStyle(n); if (/hidden|clip/.test(c.overflow + c.overflowX + c.overflowY)) clips.push(n.className); }
+      return { parent: layer.parentElement === document.body, z: z(layer), nav: z(document.querySelector(".mk-navwrap")!), hero: z(document.querySelector(".mk-herowrap")!), clips, anims: bird.getAnimations().length };
+    });
+    await page.waitForTimeout(3000);
+    const still = await page.evaluate(() => document.querySelector<HTMLElement>(".mk-hfly-bird")!.getAnimations().filter((x) => x.playState === "running").length);
+    await page.waitForTimeout(1200);
+    await page.mouse.move(300, 300); await page.waitForTimeout(100);
+    const before = await page.evaluate(() => ({ cast: getComputedStyle(document.querySelector(".mk-lc-cast")!).translate, front: getComputedStyle(document.querySelector('[data-hc="front"]')!).translate }));
+    await page.mouse.move(1300, 650, { steps: 8 }); await page.waitForTimeout(900);
+    const b = await page.evaluate(() => {
+      return { castOp: getComputedStyle(document.querySelector(".mk-lc-cast")!).opacity,
+               cast: getComputedStyle(document.querySelector(".mk-lc-cast")!).translate, front: getComputedStyle(document.querySelector('[data-hc="front"]')!).translate };
+    });
+    console.log("LH11", JSON.stringify({ a, still, before, b }));
+    expect(a.parent, "the fly layer is a child of <body>, outside the hero and the sheet").toBe(true);
+    expect(a.z, "above the nav").toBeGreaterThan(a.nav);
+    expect(a.z, "and above the hero and its pile").toBeGreaterThan(a.hero);
+    expect(a.clips, "nothing between it and the root clips it").toEqual([]);
+    expect(a.anims, "it flies once").toBe(1);
+    expect(still, "and is not running at 3s").toBe(0);
+    expect(b.castOp, "the cast shadow is at .2 by 4s").toBe("0.2");
+    expect(b.cast, "the cast shadow does not move with the pointer").toBe(before.cast);
+    expect(b.front, "while the front card does").not.toBe(before.front);
+  });
+
+  test("LH12 entrance: the cards pop — no back card is dealt, the front starts at scale .86", async ({ page }) => {
+    await page.addInitScript(() => {
+      const kf: string[] = [];
+      (window as unknown as { __lh12: string[] }).__lh12 = kf;
+      const orig = Element.prototype.animate;
+      Element.prototype.animate = function (this: Element, k: Keyframe[] | PropertyIndexedKeyframes | null, o?: number | KeyframeAnimationOptions) {
+        if (this.matches?.(".mk-hc-pile .mk-lc") && Array.isArray(k)) kf.push(JSON.stringify({ front: this.getAttribute("data-hc") === "front", k }));
+        return orig.call(this, k, o as KeyframeAnimationOptions);
+      };
+    });
+    await open(page, { width: 1440, height: 780 });
+    await page.waitForTimeout(1200);
+    const raw = await page.evaluate(() => (window as unknown as { __lh12: string[] }).__lh12);
+    const all = raw.map((x) => JSON.parse(x) as { front: boolean; k: Record<string, unknown>[] });
+    const backs = all.filter((x) => !x.front), front = all.filter((x) => x.front);
+    console.log("LH12", JSON.stringify({ backs: backs.length, front: front.map((f) => f.k[0]) }));
+    expect(backs.length, "population: the four back cards' entrances").toBe(4);
+    expect(backs.filter((x) => x.k.some((f) => "translate" in f)).length, "no back card animates translate on load (no dealing)").toBe(0);
+    expect(front.length, "population: the front card's entrance").toBeGreaterThan(0);
+    expect(parseFloat(String(front[0].k[0].scale)), "its first keyframe is scale .86").toBe(.86);
+  });
+
+  test("LH13 copy: The Taloned Mr Ripley on the front card, Lord of the Wings on every back card", async ({ page }) => {
+    await open(page, { width: 1440, height: 780 }, true);
+    await page.waitForTimeout(300);
+    const r = await page.evaluate(() => ({
+      front: document.querySelector('.mk-hc-pile [data-hc="front"] .mk-lc-ms b')?.textContent,
+      backs: Array.from(document.querySelectorAll(".mk-hc-pile .mk-lc--back .mk-lc-ms b")).map((b) => b.textContent),
+    }));
+    console.log("LH13", JSON.stringify(r));
+    expect(r.front).toBe("The Taloned Mr Ripley");
+    expect(r.backs, "population: four back cards").toEqual(Array(4).fill("Lord of the Wings"));
   });
 
   test("LH8 the pile is decorative; the headline is the page's only h1", async ({ page }) => {
