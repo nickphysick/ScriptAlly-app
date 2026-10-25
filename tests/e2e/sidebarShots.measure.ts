@@ -11,7 +11,7 @@ import { mkdirSync } from "node:fs";
 import { openRoute } from "./measure";
 
 const WHICH = process.env.SB_SHOTS ?? "";
-const OUT = `reports/sidebar-short-labels/shots/${WHICH}`;
+const OUT = `reports/sidebar-short-labels/shots/${WHICH}`; // "card-fits" = the 25 Oct follow-up (full card at 1512×982)
 
 const clipOf = (page: import("@playwright/test").Page) => page.evaluate(() => {
   const s = document.getElementById("ws-sidebar") ?? document.querySelector(".ws-panel");

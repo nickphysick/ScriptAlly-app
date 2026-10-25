@@ -9,7 +9,7 @@
  *   SB2  one line: at 1512 and 1280, sidebar expanded, the Packages row is Versions' height and its PRO tag's right
  *        edge is Versions' (±1px)
  *   SB3  no heading above Dashboard
- *   SB4  never hidden: at 1512×982, 1440×900, 1280×800 and 1280×720 (and 1512×1000, where the full card shows), every nav row's box is clear of the feedback
+ *   SB4  never hidden: at 1512×982, 1440×900, 1280×800 and 1280×720 (and 1512×1000; the full card shows at 1512×982 and 1000), every nav row's box is clear of the feedback
  *        card's box, and the last Tasks row can be scrolled fully into view inside the nav
  *
  * Each was proved red before its green was believed: against the build before the change (`SA_E2E_BASE_URL=dev`
@@ -171,8 +171,8 @@ for (const size of [{ width: 1512, height: 1000 }, { width: 1512, height: 982 },
     const fullCard = fb?.form === "ws-fbc";
     L.check(fullCard ? "the full card shows only where every row fits" : "the folded button where the full card would cut a row",
       fullCard ? st.over <= 1 : true, JSON.stringify({ form: fb?.form, ...st }));
-    /* …and the card is not folded where it fits: 1000 tall is above the derived 995 */
-    L.check("where the column holds it (≥995 tall), the full card shows", size.height < 995 || fullCard, JSON.stringify({ h: size.height, form: fb?.form }));
+    /* …and the card is not folded where it fits: 982 and 1000 tall are above the derived 967 */
+    L.check("where the column holds it (≥967 tall), the full card shows", size.height < 967 || fullCard, JSON.stringify({ h: size.height, form: fb?.form }));
     L.check("an overflowing nav shows its bottom edge fade", st.over <= 3 || st.bottomFade === "1", JSON.stringify(st));
     /* the last Tasks row, scrolled into view inside the nav, is wholly visible */
     const last = await page.evaluate(() => {

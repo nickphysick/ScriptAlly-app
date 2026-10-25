@@ -103,13 +103,40 @@ None is new.
 
 ## Dev deploy
 
-See the closing record in this folder's commit history; it goes onto `dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26`.
+Dev was serving the v26.1 deploy (`index-CN7x9BIo.js`). This change (19f80e8d) was merged onto the same dev branch:
+**`dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26` 7b327c34**, with no conflicts.
+- **Gates on the merge:** tsc clean; build clean; vitest 661 files, 10,433 passed.
+- **Deployed** from a clean worktree. **Dev now serves `index-Bq_JbPw1.js`.**
+- **Smoke:** SB1–SB4, 10/10 tests, pass against the deployed site.
 
 ## Open for Nick
 
-- **At 1512×982 the card folds** (13px short). To keep the full card there, something must give 13px. Candidates:
-  - the 2px gaps between rows;
-  - a smaller card;
-  - the spacing above Dashboard and its heading (which would move off the ref).
+- ~~At 1512×982 the card folds~~ — resolved by the follow-up below.
 - **Corkboard, not Noteboard.** If "Noteboard" in the pack was deliberate, that is a rename of the page, which this
   pack does not touch.
+
+## Follow-up (25 Oct): the full card at 1512×982
+
+You asked for 13px so the full card fits at 1512×982 with every row visible. This pass found 21px, all from the
+v26 ref's own sidebar spacing:
+- **Rows 1px apart, was 2px.** The ref's rows are 32px tall and 1px apart; ours stay 33px tall. With 13 rows,
+  that is 13px.
+- **Headings 5px above their first row, was 7px.** That is the ref's `h6` to the row below it. With 4 headings,
+  that is 8px.
+
+The row height, the labels, the card and the 11px and 15px around Dashboard are unchanged. The settings rail's
+rows ("the main nav's, exactly") follow the gap. The first heading's margin went from 13 to 14px, so it still
+sits 15px under Dashboard.
+
+**The fold is re-derived again: 994 → 966.** The card now folds below 967px of window height.
+- The full card shows every row from **967px**; the folded button needs **882**.
+- So **1512×982 shows the full card with 15px to spare** (`shots/card-fits/`).
+
+**Locks.** SB4 now also asserts that the full card shows wherever it fits (from 967px), and 1512×982 is one of
+those sizes.
+- **Red before the change:** on dev, which folded at 982 (`ledger/card-fits/red-on-dev-SB4-1512x982.json`).
+- **Red under a break:** with the fold set too high (`ledger/card-fits/mut-SB4-1512x982.SB4-hi.json`).
+- **Green here:** SB1–SB4, all 10 tests.
+- **Shell suites:** the same 8 fail on this build as before, with the same messages.
+
+**Gates:** tsc clean; production build clean; vitest 660 files, 10,430 passed.

@@ -481,8 +481,10 @@
      together doubled the rhythm and cost 30px of a column that has none to spare. */
   .ws-nav { gap: 0; }
   .ws-ni .ws-lbl { margin-left: 11px; }
+  /* ⚠️ 5px UNDER EACH HEADING, the v26 ref's (`.nav h6` to its first row) — it was 7. With the rows' 1px below, it is
+     part of the 21px that lets the full feedback card hold every row at 1512×982 (25 Oct; inkShell.css's fold note). */
   .ws-glabel {
-    margin: 22px 10px 7px;
+    margin: 22px 10px 5px;
     font-family: "JetBrains Mono", monospace;
     font-weight: 600;
     font-size: 8.5px;
@@ -491,17 +493,19 @@
     transition: opacity 0.16s ease, height 0.24s var(--ink-ease), margin 0.24s var(--ink-ease);
   }
   .ws-nav > .ws-glabel:first-child { margin-top: 24px; }
-  /* Dashboard on its own (25 Oct): the first heading sits 15px under Dashboard, the ref's spacing — 13 here plus
-     the row's own 2px `margin-bottom`. (The rule above now matches nothing on the desktop: the nav opens on a row.) */
-  .ws-nav > .ws-ni:first-child + .ws-glabel { margin-top: 13px; }
+  /* Dashboard on its own (25 Oct): the first heading sits 15px under Dashboard, the ref's spacing — 14 here plus
+     the row's own 1px `margin-bottom`. (The rule above now matches nothing on the desktop: the nav opens on a row.) */
+  .ws-nav > .ws-ni:first-child + .ws-glabel { margin-top: 14px; }
   /* …and Dashboard itself sits 11px under the manuscript selector, the ref's spacing. The pin's gap is 0 in the ink
      shell, so the room used to come from the first HEADING's margin, and with the heading gone it was 0. */
   .ws-nav > .ws-ni:first-child { margin-top: 11px; }
   /* no rules between groups — the spacing says it */
   .ws-glabel::after { content: none; }
+  /* ⚠️ 1px BETWEEN ROWS, the v26 ref's pitch (32px rows, 1px apart; ours stay 33 tall) — it was 2. Thirteen rows × 1px
+     is 13 of the 21px that let the full feedback card hold every row at 1512×982 (25 Oct). */
   .ws-ni {
     height: 33px;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
     padding: 0 10px;
     border-radius: 9px;
     font-size: 15px;
@@ -722,13 +726,14 @@
    (1440 wide, eleven rows, five labels, the selector, the card and the foot) that point is ~917px: at 900
    the literal 820 left the nav 17px short and Noteboard half under the card. The reference's own column
    (~918px of content in an 878px frame) has the same shortfall. 820 and below still get the button. */
-/* ⚠️ RE-DERIVED 25 OCT, 920 → 994 (sidebar: short labels, Dashboard on its own, Tasks always visible). Measured on
-   the new list — thirteen rows, four headings — the column holds the FULL card with every row visible only from
-   995px of window height (1512, 1440 and 1280 wide alike: the nav's overflow plus the viewport, 995 each time); the
-   folded button needs 902. The old 920 left the card up between 921 and 994 with Calendar cut at the nav's foot and
-   Corkboard below it — the reported "card covers Calendar". Below 902 the nav scrolls under its edge fade.
-   sidebarNav.measure.ts SB4 holds it: wherever the full card shows, no row is cut. */
-@media (min-width: 768px) and (max-height: 994px) {
+/* ⚠️ RE-DERIVED 25 OCT, 920 → 966 (sidebar: short labels, Dashboard on its own, Tasks always visible; then the
+   v26 ref's row pitch). Measured on the list — thirteen rows 1px apart, four headings 5px above their rows — the
+   column holds the FULL card with every row visible from 967px of window height (1440 and 1280 wide alike: the nav's
+   overflow plus the viewport); the folded button needs 882. So 1512×982 shows the card, with 15px to spare. The old
+   920 left the card up between 921 and 994 with Calendar cut at the nav's foot and Corkboard below it — the reported
+   "card covers Calendar". Below 882 the nav scrolls under its edge fade. sidebarNav.measure.ts SB4 holds it: wherever
+   the full card shows, no row is cut, and from 967 tall it does show. */
+@media (min-width: 768px) and (max-height: 966px) {
   .ws-fbc { display: none; }
   .ws-fbb { display: flex; }
 }
@@ -1125,7 +1130,7 @@
   .set-mode .set-railitem {
     position: relative;
     height: 33px;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
     padding: 0 10px;
     gap: 11px;
     border-radius: 9px;

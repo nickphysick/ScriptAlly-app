@@ -2,27 +2,27 @@
  {
   "where": "the card and the rows are on screen",
   "ok": true,
-  "detail": "{\"fb\":{\"top\":866.15625,\"bottom\":906.15625,\"form\":\"ws-fbb\"},\"rows\":13}"
+  "detail": "{\"fb\":{\"top\":780.859375,\"bottom\":906.15625,\"form\":\"ws-fbc\"},\"rows\":13}"
  },
  {
   "where": "no nav row's box meets the feedback card's",
   "ok": true,
-  "detail": "{\"fb\":{\"top\":866.15625,\"bottom\":906.15625,\"form\":\"ws-fbb\"},\"under\":[]}"
+  "detail": "{\"fb\":{\"top\":780.859375,\"bottom\":906.15625,\"form\":\"ws-fbc\"},\"under\":[]}"
  },
  {
   "where": "the nav region ends above the card",
   "ok": true,
-  "detail": "{\"navBox\":{\"top\":163.75,\"bottom\":866.15625},\"fb\":{\"top\":866.15625,\"bottom\":906.15625,\"form\":\"ws-fbb\"}}"
+  "detail": "{\"navBox\":{\"top\":163.75,\"bottom\":780.859375},\"fb\":{\"top\":780.859375,\"bottom\":906.15625,\"form\":\"ws-fbc\"}}"
  },
  {
-  "where": "the folded button where the full card would cut a row",
+  "where": "the full card shows only where every row fits",
   "ok": true,
-  "detail": "{\"form\":\"ws-fbb\",\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
+  "detail": "{\"form\":\"ws-fbc\",\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
  },
  {
-  "where": "where the column holds it (≥995 tall), the full card shows",
+  "where": "where the column holds it (≥967 tall), the full card shows",
   "ok": true,
-  "detail": "{\"h\":982,\"form\":\"ws-fbb\"}"
+  "detail": "{\"h\":982,\"form\":\"ws-fbc\"}"
  },
  {
   "where": "an overflowing nav shows its bottom edge fade",
@@ -32,6 +32,6 @@
  {
   "where": "the last Tasks row can be scrolled fully into view",
   "ok": true,
-  "detail": "{\"name\":\"Corkboard\",\"top\":751,\"bottom\":784,\"navTop\":163.75,\"navBottom\":866.15625}"
+  "detail": "{\"name\":\"Corkboard\",\"top\":732,\"bottom\":765,\"navTop\":163.75,\"navBottom\":780.859375}"
  }
 ]
