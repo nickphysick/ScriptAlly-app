@@ -33,7 +33,7 @@ import { firstNameOf, methodAnswer } from "../../../lib/agentPanel";
 import { hrefFor } from "../../../lib/quickAdd";
 import { canDestroy } from "../../../lib/cascade";
 import { CARD_TONE } from "../../queries/centre/QcQueryCard149";
-import { socialOf } from "../book/ContactBook";
+import { socialOf } from "./ContactFilters24";
 import { StateDisc } from "./ContactSheet24";
 import { SET_BAND, bandRight, callBox, footLinks, FOOT_WORD, type CallBox, type Colleagues, type FootLink, type SetKey } from "../../../lib/contactV24";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
@@ -381,6 +381,88 @@ export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
           <Call call={m.call} p={p} />
         </div>
         <Foot p={p} set={x.stand} />
+      </div>
+    </div>
+  );
+};
+
+/* ── Part D · the wide card (full screen): the same card laid out wide, three columns, no tabs ──────────────────── */
+
+const RING_TICK = <svg className="cl24w-tk" viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="#fff" stroke="#1c130f" strokeWidth="1.5" /><path d="M6.8 10.2l2.2 2.1 4.2-4.4" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+const NEXT_RING = <svg className="cl24w-tk" viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="#fff" stroke="#a59a90" strokeWidth="1.5" strokeDasharray="2 2" /></svg>;
+
+export interface WideExtras {
+  /** the agent's materials, as chips ("Query letter", "First 3 chapters"), or none */
+  materials: string[];
+  /** the active book's steps for this agent (lib/contactBook `bookSteps`), and what comes next */
+  steps: { key: string; status: QueryStatus; label: string; date: string; current: boolean }[];
+  next: { title: string; date: string; due: boolean } | null;
+}
+
+export const AgentCardWide24: React.FC<AgentCard24Props & { extras: WideExtras }> = (p) => {
+  const m = useCardModel(p);
+  const { x, extras } = p;
+  const primary = m.call?.kind === "you" ? { label: m.call.button, run: () => p.onJourney((m.call as Extract<CallBox, { kind: "you" }>).door.mode, (m.call as Extract<CallBox, { kind: "you" }>).queryId) }
+    : m.call?.kind === "log" ? { label: "Log a query", run: p.onLog }
+    : x.stand === "agent" && x.q ? { label: "Record a response", run: () => p.onJourney("resp", x.q!.id) }
+    : null;
+  return (
+    <div className="cl24w" data-cl24="wide-card" data-id={x.agent.id} data-k={x.stand}>
+      <div className="qc149c qcv-legacy cl24c cl24w-c">
+        <div className="mk-lc-in qc149c-in">
+          <Band x={x} right={m.right} tone={m.tone} />
+          <div className="cl24w-hd">
+            <StateDisc x={x} size={58} />
+            <div className="cl24w-who">
+              <div className="cl24w-nm" data-cl24="card-name">{agentPrimary(m.a)}</div>
+              <div className="cl24w-agy">{[(m.a.name ?? "").trim() ? (m.a.agency ?? "").trim() : "", x.loc].filter(Boolean).join(" · ")}</div>
+              <Stars n={m.a.starRating} />
+            </div>
+            <span className="cl24w-pillw"><StagePill x={x} pill={m.tone.pill} /></span>
+            <div className="cl24w-acts">
+              {primary ? <button type="button" className="p" data-cl24="wide-primary" onClick={primary.run}>{primary.label}</button> : null}
+              <button type="button" className="s" data-cl24="wide-edit" data-nb1="edit" onClick={() => p.onEdit("who")}>Edit agent</button>
+            </div>
+          </div>
+          <div className="cl24w-bd" data-cl24="wide-body">
+            <section className="sa" data-cl24="col" data-col="a">
+              <h3>What {m.first}’s looking for</h3>
+              <Wishlist p={p} first={m.first} heading={false} />
+              <span className="qc149c-k">What to send</span>
+              <div className="cl24w-mats" data-cl24="materials">
+                {extras.materials.length ? extras.materials.map((t) => <span key={t}>{ICON.form}{t}</span>)
+                  : <button type="button" className="mt" onClick={() => p.onEdit("want", "materials")}>+ Add what they ask for</button>}
+              </div>
+              <AlsoAt p={p} />
+            </section>
+            <section className="sb" data-cl24="col" data-col="b">
+              <h3>How to reach {m.first}</h3>
+              <Facts facts={m.facts} grid2 />
+              <Contact p={p} first={m.first} heading={false} />
+            </section>
+            <section className="sc" data-cl24="col" data-col="c">
+              <h3>You and {m.first}</h3>
+              {extras.steps.length ? (
+                <>
+                  {p.bookTitle ? <span className="qc149c-k">{p.bookTitle}</span> : null}
+                  <ol className="cl24w-steps" data-cl24="steps">
+                    {extras.steps.map((s) => (
+                      <li key={s.key} className={s.current ? "now" : undefined}>
+                        {s.current ? <span className="cl24w-tk"><StatusDot status={s.status} overrideSize={17} /></span> : RING_TICK}
+                        <span className="t">{s.label}</span><span className="d">{s.date}</span>
+                      </li>
+                    ))}
+                    {extras.next ? <li className="next">{NEXT_RING}<span className="t">{extras.next.title}</span><span className={`d${extras.next.due ? " due" : ""}`}>{extras.next.date}</span></li> : null}
+                  </ol>
+                </>
+              ) : <p className="cl24w-noq">No queries to {m.first} yet.</p>}
+              <Call call={m.call} p={p} button={false} />
+              <span className="qc149c-k">Notes</span>
+              <Notes p={p} first={m.first} />
+            </section>
+          </div>
+          <Foot p={p} set={x.stand} wide />
+        </div>
       </div>
     </div>
   );

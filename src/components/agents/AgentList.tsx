@@ -46,12 +46,17 @@ import {
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader24, ContactViewRow24 } from "./contact/ContactHeader24";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
-import { AgentCard24 } from "./contact/AgentCard24";
+import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
+import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
+import { bookSteps, stepDate } from "../../lib/contactBook";
+import { materialRowsFromAgent } from "../../lib/agentMaterials";
+import { materialWords } from "../../lib/agentPanel";
+import type { AgentFacts as Facts24 } from "../../lib/contactList";
 import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
 import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView } from "../../lib/contactListMemory";
-import { bannerFigures, inSet, setCounts, setGroups, type SetKey } from "../../lib/contactV24";
+import { bannerFigures, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -81,7 +86,6 @@ import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklis
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
-import { BookSkeleton, ContactBook } from "./book/ContactBook";
 import { downloadAgentsCsv } from "../../lib/agentCsv";
 import "./agentList.css";
 
@@ -182,7 +186,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      owns F. The URL still carries it and Esc still leaves it last. */
   /* v19 §A — the pin no longer holds the sidebar at its icons: pinned, the list is the whole sheet and the sidebar
      stays as the writer left it (the mock's pinned state) */
-  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, holdSidebar: false, store: CONTACT_PIN_STORE });
+  /* v24 D — full screen is the address book, and the sidebar folds to its icons while it is on (the hook's default, as
+     on the Query Centre and in the v24 mock); v19 §A had held it open */
+  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, store: CONTACT_PIN_STORE });
   /* v19 §A — pin and unpin in one view transition (old out 220ms, new in 300ms); instant under reduced motion or
      where the browser has none. */
   const togglePin = useCallback(() => {
@@ -789,15 +795,29 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* an agent that is no longer on file closes its card */
   useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
   const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);
-  const cardQueries = useMemo(() => (cardFacts ? queries.filter((q) => q.agentId === cardFacts.agent.id) : []), [cardFacts, queries]);
-  const cardHistory = useMemo(
-    () => (cardFacts ? agentHistory({ agent: cardFacts.agent, queries: cardQueries, activities, notes: [], titleOf, nowMs }) : []),
-    [cardFacts, cardQueries, activities, titleOf, nowMs],
-  );
-  const cardDeletes = useMemo(
-    () => (cardFacts ? destroyManifest("agent", cardFacts.agent.id, { queries, activities, taskFlags }).queries : 0),
-    [cardFacts, queries, activities, taskFlags],
-  );
+  /** v24 C/D — ONE card-props builder for the panel's card and full screen's wide card */
+  const cardPropsFor = (x: Facts24, index: number, total: number, onStep: (d: -1 | 1) => void, onOpenAgent: (id: string) => void, onClose?: () => void): AgentCard24Props => {
+    const id = x.agent.id;
+    const toAgent = queries.filter((q) => q.agentId === id);
+    return {
+      x, all: factsAll, nowMs, bookTitle: scoped?.title?.trim() || null,
+      genreWord: (raw) => genreLabel(raw, personalGenres), genreHit: bookHit,
+      queries: toAgent, titleOf, history: agentHistory({ agent: x.agent, queries: toAgent, activities, notes: [], titleOf, nowMs }),
+      index, total, onStep, onClose,
+      onJourney: (mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId }),
+      onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
+      onEdit: (tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" }),
+      onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),
+      onNotes: async (text) => (await writeAgentPatch(id, { notes: text })).ok,
+      fit: null, colleagues: null, onOpenAgent,
+      deleteQueries: destroyManifest("agent", id, { queries, activities, taskFlags }).queries,
+      onDelete: () => {
+        const name = (x.agent.name ?? "").trim() || x.agent.agency;
+        onClose?.();
+        void deleteAgent(id).catch(() => setNotice({ text: `Couldn’t delete ${name} — try again.`, kind: "failed", agentId: id, canUndo: false }));
+      },
+    };
+  };
   /* ‹ › step through the list in the order it is DRAWN: grouped by Status, the groups' runs; else the sorted pool */
   const drawnOrder = useMemo(() => (byStatus ? setGroups(visibleFacts).flatMap((g) => g.ids) : visibleFacts.map((x) => x.agent.id)), [byStatus, visibleFacts]);
   const cardIndex = cardFacts ? drawnOrder.indexOf(cardFacts.agent.id) : -1;
@@ -899,7 +919,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             addRef={addBtnRef} onAdd={openAdd} onFill={openHk}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
-        {pageState === "settling" && (full ? <BookSkeleton /> : <SheetSkeleton />)}
+        {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -925,50 +945,25 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
         ) : (
-        <ContactBook
-          pool={visibleFacts} all={factsAll} narrowed={anyActive}
-          search={search} onSearch={setSearch}
-          filters={filters} onFilters={setFilters} onClearAll={clearFilters}
+        <ContactAddressBook24 pool={visibleFacts} all={factsAll} counts={counts} set={set} onSet={setSet}
+          health={pageState === "list" ? health : null} onFill={openHk} onAdd={openAdd}
+          search={search} onSearch={setSearch} filters={filters} onFilters={setFilters} onClearAll={clearFilters}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-          genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
-          bookTitle={scoped?.title?.trim() || null} nowMs={nowMs}
-          full={fullOn} onFull={togglePin} active={active}
-          selectRequest={bookReq}
-          onEdit={(id, tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" })}
-          onMore={(id) => openAgentCard(id, { from: "button" })}
-          onJourney={(id, mode, queryId) => {
-            if (mode === "log" || !queryId) { openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
-            if (mode === "edit") { openAgentCard(id, { tab: "who", from: "row" }); return; }
-            openQueryDrawer({ mode, queryId });
-          }}
-          onOpenQuery={(queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`)}
-          gapsOf={(id) => { const g = agentGapLine(hk, id); return g ? `Missing: ${g.words.join(", ")}` : null; }}
-          onFillIn={(id) => { setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
-          onNotes={async (id, text) => (await writeAgentPatch(id, { notes: text })).ok}
+          genreWord={(raw) => genreLabel(raw, personalGenres)} onExit={togglePin} nowMs={nowMs} selectRequest={bookReq}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
-        />
+          renderCard={(x, index, total, onStep, onSelect) => (
+            <AgentCardWide24 {...cardPropsFor(x, index, total, onStep, onSelect)}
+              extras={{
+                materials: materialRowsFromAgent(x.agent.materialsWanted).filter((r) => r.on).map(materialWords),
+                steps: x.q && x.stand !== "none" ? bookSteps(x.q).map((st, k) => ({ key: `${st.status}-${k}`, status: st.status, label: st.label, date: stepDate(st.dateMs), current: st.current })) : [],
+                next: wideNext(x, nowMs),
+              }} />
+          )} />
         )}
         {cardFacts && active ? (
           <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
-            <AgentCard24 x={cardFacts} all={factsAll} nowMs={nowMs} bookTitle={scoped?.title?.trim() || null}
-              genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
-              queries={cardQueries} titleOf={titleOf} history={cardHistory}
-              index={cardIndex} total={drawnOrder.length}
-              onStep={(d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }}
-              onClose={() => setCardId(null)}
-              onJourney={(mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId })}
-              onLog={() => openQueryDrawer({ mode: "log", agentId: cardFacts.agent.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
-              onEdit={(tab, focus) => openAgentCard(cardFacts.agent.id, { tab: tab ?? "who", focus, from: "row" })}
-              onOpenQuery={(queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`)}
-              onNotes={async (text) => (await writeAgentPatch(cardFacts.agent.id, { notes: text })).ok}
-              fit={null} colleagues={null} onOpenAgent={(id) => setCardId(id)}
-              deleteQueries={cardDeletes}
-              onDelete={() => {
-                const id = cardFacts.agent.id;
-                const name = (cardFacts.agent.name ?? "").trim() || cardFacts.agent.agency;
-                setCardId(null);
-                void deleteAgent(id).catch(() => setNotice({ text: `Couldn’t delete ${name} — try again.`, kind: "failed", agentId: id, canUndo: false }));
-              }} />
+            <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
+              (d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }, (id) => setCardId(id), () => setCardId(null))} />
           </AgentCardPanel24>
         ) : null}
         </>

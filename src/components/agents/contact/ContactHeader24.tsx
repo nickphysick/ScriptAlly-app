@@ -33,7 +33,7 @@ export const ContactHeader24: React.FC<{
   onFill: () => void;
 }> = ({ loading, msTitle, health, banner, onAdd, addRef, onDiscover, onFill }) => (
   <header className="cl24-hd" data-cl24="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-    <PageHeaderCard className="cl24-card" titleId="cl24T" data={{ "data-cl24": "card" }} titleData={{ "data-page-title": "true", "data-cl24": "title" }}
+    <PageHeaderCard className="cl24-card" titleId="cl24T" data={{ "data-cl24": "hd-card" }} titleData={{ "data-page-title": "true", "data-cl24": "title" }}
       title="Contact list" art={CONTACT_ART}
       body={<>Every agent you might query{msTitle ? <> with <b data-cl24="ms">{msTitle}</b></> : null}, in one place. Keep what they’re looking for, how long they take to reply and how to reach them, and QueryHawk shows you who’s next.</>}
       primary={{ label: "+ Add an agent", onClick: onAdd, disabled: loading, buttonRef: addRef, data: { "data-cl24": "add", "data-cl17": "add" } }}

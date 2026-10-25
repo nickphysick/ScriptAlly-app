@@ -27,7 +27,7 @@ import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { FULL_ICON } from "../../shell/ViewTitleRow";
-import { FilterMenu } from "../book/ContactBook";
+import { FilterMenu } from "./ContactFilters24";
 import { AgentPaperCard, type PaperAddKey } from "../../shared/AgentPaperCard";
 import { paperDataOf } from "../../../lib/contactCards";
 import type { PersonalGenre } from "../../../lib/genres";

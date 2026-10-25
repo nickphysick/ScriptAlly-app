@@ -230,3 +230,16 @@ export function rowSecond(x: Pick<AgentFacts, "stand" | "q">, nowMs: number): { 
   }
   return q.sentMs != null ? { text: `Sent ${dm(q.sentMs)}`, due: false } : null;
 }
+
+/** the wide card's faint last step: what comes next and when ("Send the partial", "30 SEP"); null once closed or unqueried */
+export function wideNext(x: Pick<AgentFacts, "stand" | "q">, nowMs: number): { title: string; date: string; due: boolean } | null {
+  const q = x.q;
+  if (!q || x.stand === "none" || x.stand === "closed") return null;
+  if (x.stand === "you") {
+    const door = nextDoor(q as QcRow, nowMs);
+    const title = door ? CALL_BUTTON[door.label] ?? door.label : "Your move";
+    const date = q.court === "agent" || (q.expectedMs != null && q.expectedMs < nowMs) ? "DUE NOW" : q.expectedMs != null ? dm(q.expectedMs).toUpperCase() : "";
+    return { title, date, due: true };
+  }
+  return { title: "Reply expected", date: q.expectedMs != null ? dm(q.expectedMs).toUpperCase() : "", due: false };
+}

@@ -326,3 +326,179 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
 .cl24c-del button.go:disabled { opacity: 0.45; cursor: default; }
 /* the Profile pane's blocks, 13 apart (the mock's) */
 .cl24c.qc149c .qc149c-pg { display: flex; flex-direction: column; gap: 13px; padding: 14px 18px 12px; }
+
+/* ═════════ D · full screen = the address book ═════════
+   ⚠️ OVER THE PAGE SHEET, NOT THE WINDOW: the sheet's published edges and the shell bar's measured bottom. z 50: over
+      the page, under the popovers (60), the side panel (66) and the drawers. */
+@media (min-width: 768px) {
+  .clv-group[data-v24][data-full] > .cl24-hd, .clv-group[data-v24][data-full] .cl24-vr { display: none; }
+  html[data-cl24-full] .agl-wpg .wpg-scroll { overflow: hidden !important; }
+  /* the folder tab and the sheet's lip join the navy band (the Query Centre's own pinned rule, this page's flag) */
+  html[data-cl24-full] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
+  html[data-cl24-full] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
+  html[data-cl24-full] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  .cl24-ab {
+    position: fixed; z-index: 50; top: var(--cl24-top, 80px); left: var(--ink-sheet-l, 0px); right: var(--ink-sheet-r, 0px); bottom: var(--ink-sheet-b, 0px);
+    display: flex; flex-direction: column; overflow: hidden; border-radius: 0 12px 12px 12px; background: #f2eee8; color: #1c130f;
+  }
+  /* the top: the band, then the cream row, the archivist breaking out over both */
+  .cl24-fsh { position: relative; z-index: 6; flex: none; }
+  .cl24-fart { position: absolute; z-index: 3; left: 22px; top: 6px; height: 150px; width: auto; pointer-events: none; filter: drop-shadow(0 10px 12px rgba(10, 14, 22, 0.35)); }
+  .cl24-fband { display: flex; align-items: center; gap: 26px; height: 92px; padding: 0 22px 0 250px; background: #2a3a52; color: #f4eee5; box-sizing: border-box; }
+  .cl24-fhero { all: unset; display: flex; align-items: baseline; gap: 10px; white-space: nowrap; cursor: pointer; border-radius: 9px; padding: 4px 6px; margin: -4px -6px; }
+  .cl24-fhero b { font: 400 44px/1 var(--sp-type) !important; color: #f4eee5; }
+  .cl24-fhero .cl24-fw { font: 400 18.5px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.78); }
+  .cl24-fhero .cl24-fs2 { display: none; font: 400 17px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.78); }
+  .cl24-fhero:focus-visible, .cl24-fseg:focus-visible, .cl24-fring:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  .cl24-fdiv { flex: none; width: 1px; height: 46px; background: rgba(244, 238, 229, 0.18); }
+  .cl24-fsegs { flex: 1; display: flex; gap: 6px; min-width: 0; }
+  .cl24-fseg { all: unset; box-sizing: border-box; flex: var(--w) 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 9px; padding: 6px 6px 4px; border-radius: 9px; cursor: pointer; color: inherit; }
+  .cl24-fseg:hover { background: rgba(244, 238, 229, 0.06); }
+  .cl24-fseg[aria-pressed="true"] { background: rgba(244, 238, 229, 0.12); }
+  .cl24-fseg > i { display: block; height: 6px; border-radius: 3px; background: var(--c); }
+  .cl24-fseg--none > i { background: repeating-linear-gradient(135deg, #b8c3d4 0 4px, #7d8ca5 4px 8px); }
+  .cl24-fseg > span { display: flex; align-items: baseline; gap: 7px; white-space: nowrap; font: 400 17px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.9); }
+  .cl24-fseg > span::before { content: ""; flex: none; align-self: center; width: 9px; height: 9px; border-radius: 2px; background: var(--c); }
+  .cl24-fseg--none > span::before { background: repeating-linear-gradient(135deg, #b8c3d4 0 2px, #7d8ca5 2px 4px); }
+  .cl24-fseg b { font: 400 22px/1 var(--sp-type) !important; color: #f4eee5; }
+  .cl24-fring { all: unset; display: flex; align-items: center; gap: 12px; white-space: nowrap; cursor: pointer; border-radius: 9px; }
+  .cl24-fring svg { flex: none; width: 40px; height: 40px; }
+  .cl24-frt b { display: block; font: 400 21px/1 var(--sp-type) !important; color: #f4eee5; }
+  .cl24-frt b em { margin-left: 6px; font: italic 400 17px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.85); }
+  .cl24-frt small { display: block; margin-top: 4px; font: italic 400 14px var(--sp-serif) !important; color: rgba(244, 238, 229, 0.6); }
+  .cl24-fadd { all: unset; flex: none; box-sizing: border-box; height: 44px; padding: 0 20px; border-radius: 10px; background: #f4eee5; color: #1c130f; cursor: pointer; white-space: nowrap; font: 400 16px/44px var(--sp-type) !important; }
+  .cl24-fadd:hover { background: #fff; }
+  .cl24-ftool { display: flex; align-items: center; gap: 10px; height: 66px; padding: 0 14px 0 250px; background: #f2eee8; border-bottom: 1px solid rgba(28, 19, 15, 0.1); box-sizing: border-box; }
+  .cl24-ffind { box-sizing: border-box; flex: 1; max-width: 600px; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); color: rgba(28, 19, 15, 0.6); }
+  .cl24-ffind:focus-within { box-shadow: inset 0 0 0 2px #2a3a52; }
+  .cl24-ffind input { all: unset; flex: 1; min-width: 0; font: italic 400 16px var(--sp-serif) !important; color: #1c130f; }
+  .cl24-ffind input::placeholder { color: rgba(28, 19, 15, 0.48); }
+  .cl24-fch {
+    all: unset; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 14px; border-radius: 10px;
+    background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); color: #1c130f; cursor: pointer; white-space: nowrap; font: 400 15.5px/1 var(--sp-serif) !important;
+  }
+  .cl24-fch .cl24-ic { flex: none; color: #2a3a52; }
+  .cl24-fch .cl24-cl { font: inherit !important; }
+  .cl24-fch .cl24-n { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: #2a3a52; color: #f4eee5; font: 500 12px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; font-style: normal; }
+  .cl24-fex { all: unset; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 16px; border-radius: 10px; background: #2a3a52; color: #f4eee5; cursor: pointer; white-space: nowrap; }
+  .cl24-fex span { font: 400 15.5px var(--sp-serif) !important; color: inherit; }
+  .cl24-fex:hover { background: #334763; }
+  .cl24-fch:focus-visible, .cl24-fex:focus-visible, .cl24-fadd:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .cl24-fsel { flex: 1; display: flex; align-items: center; gap: 14px; height: 42px; min-width: 0; }
+  .cl24-fsel b { font: 400 16px var(--sp-type) !important; }
+  .cl24-fsel button { all: unset; cursor: pointer; font: 400 15px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, 0.35); }
+  .cl24-fsel button:disabled { opacity: 0.45; cursor: default; }
+  /* the body: the light A–Z list and the wide card */
+  .cl24-fsb { flex: 1; min-height: 0; display: grid; grid-template-columns: 372px minmax(0, 1fr); }
+  .cl24-fsl { position: relative; display: flex; min-height: 0; background: #fff; border-right: 1px solid rgba(28, 19, 15, 0.1); }
+  .cl24-scr { flex: 1; min-width: 0; overflow: auto; outline: 0; }
+  .cl24-scr:focus-visible { box-shadow: inset 0 0 0 2px #2a3a52; }
+  .cl24-lh { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 18px; background: #f6f3ee; }
+  .cl24-lh span { font: 400 16px/1 var(--sp-type) !important; color: #1c130f; }
+  .cl24-lh small { margin-left: auto; font: 500 10px var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: rgba(28, 19, 15, 0.5); }
+  .cl24-br { position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 16px 0 18px; border-bottom: 1px solid rgba(28, 19, 15, 0.06); cursor: pointer; outline: 0; }
+  .cl24-br:hover { background: #f8f5f0; }
+  .cl24-br[aria-current="true"] { background: #eef2f7; box-shadow: inset 3px 0 0 #2a3a52; }
+  .cl24-br .cl24-whot { flex: 1; min-width: 0; }
+  .cl24-br .cl24-whot b { font-size: 16px !important; line-height: 1.25 !important; }
+  .cl24-br .cl24-whot small { font-size: 13.5px !important; }
+  .cl24-rt { flex: none; display: flex; align-items: center; gap: 6px; font: 500 10px var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+  .cl24-rt.due { color: #a2452a; }
+  .cl24-bav { position: relative; flex: none; display: grid; }
+  .cl24-tk {
+    all: unset; position: absolute; inset: 0; box-sizing: border-box; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    background: #2a3a52; color: #f4eee5; opacity: 0;
+  }
+  .cl24-br:hover .cl24-tk, .cl24-br[data-ticked] .cl24-tk, .cl24-tk:focus-visible { opacity: 1; }
+  .cl24-br:hover:not([data-ticked]) .cl24-tk { background: rgba(42, 58, 82, 0.85); }
+  .cl24-alpha { flex: none; width: 22px; display: flex; flex-direction: column; justify-content: center; gap: 1px; border-left: 1px solid rgba(28, 19, 15, 0.06); background: #fbf9f6; }
+  .cl24-alpha button { all: unset; cursor: pointer; padding: 2px 0; text-align: center; font: 500 9.5px var(--sp-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.55); }
+  .cl24-alpha button:hover:not(:disabled) { color: #2a3a52; font-weight: 700 !important; }
+  .cl24-alpha button:disabled { opacity: 0.25; cursor: default; }
+  .cl24-fsd { min-width: 0; min-height: 0; display: flex; padding: 14px; background: #f6f3ee; }
+  .cl24-slide { flex: 1; min-width: 0; min-height: 0; display: flex; animation: cl24Slide 240ms cubic-bezier(0.22, 0.8, 0.3, 1); }
+}
+@keyframes cl24Slide { from { opacity: 0.35; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cl24-slide { animation: none !important; } }
+/* ≤1440 of window, or a band whose sets would collide (`tight`, measured): the drawing and the inset shrink, the count
+   reads "{N} agents" and the ring stands alone */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .cl24-fsb { grid-template-columns: 330px minmax(0, 1fr); }
+  .cl24-ftool .cl24-sort .sc-sby { display: none; }
+}
+@media (min-width: 768px) {
+  .cl24-fseg { min-width: max-content; }
+  .cl24-fband.tight { padding-left: 200px; gap: 16px; }
+  .cl24-ab.tight .cl24-fart { height: 124px; left: 16px; top: 10px; }
+  .cl24-ab.tight .cl24-ftool { padding-left: 200px; }
+  .cl24-fband.tight .cl24-fhero b { font-size: 36px !important; }
+  .cl24-fband.tight .cl24-fhero .cl24-fw { display: none; }
+  .cl24-fband.tight .cl24-fhero .cl24-fs2 { display: inline; }
+  .cl24-fband.tight .cl24-fseg > span { font-size: 15px !important; }
+  .cl24-fband.tight .cl24-frt { display: none; }
+  .cl24-fband.tight .cl24-fadd { padding: 0 14px; }
+}
+@media (min-width: 768px) and (max-width: 1440px) {
+  .cl24-fband { padding-left: 200px; gap: 16px; }
+  .cl24-fart { height: 124px; left: 16px; top: 10px; }
+  .cl24-ftool { padding-left: 200px; }
+  .cl24-fhero b { font-size: 36px !important; }
+  .cl24-fhero .cl24-fw { display: none; }
+  .cl24-fhero .cl24-fs2 { display: inline; }
+  .cl24-fseg > span { font-size: 15px !important; }
+  .cl24-frt { display: none; }
+  .cl24-fadd { padding: 0 14px; }
+}
+
+/* the wide card */
+.cl24w { flex: 1; min-width: 0; min-height: 0; display: flex; padding: 7px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 26px 48px -20px rgba(28, 19, 15, 0.42); }
+.cl24w > .cl24w-c { flex: 1; min-width: 0; min-height: 0; }
+.cl24w-hd { flex: none; display: flex; align-items: center; gap: 16px; padding: 20px 24px 18px; border-bottom: 1px solid #ece6de; }
+.cl24w-who { min-width: 0; }
+.cl24w-nm { font: 700 30px/1.1 var(--sp-serif); color: #1c130f; }
+.cl24w-agy { margin-top: 6px; font: 400 11px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.17em; color: #8a857e; text-transform: uppercase; }
+.cl24w-pillw { margin-left: 14px; }
+.cl24w-pillw .qc149c-pill { margin-left: 0; }
+.cl24w-acts { margin-left: auto; display: flex; gap: 8px; }
+.cl24w-acts button { all: unset; box-sizing: border-box; height: 40px; padding: 0 18px; border-radius: 10px; cursor: pointer; white-space: nowrap; font: 400 15px/40px var(--sp-type); }
+.cl24w-acts .p { background: #2a3a52; color: #f4eee5; box-shadow: 0 6px 14px -8px rgba(42, 58, 82, 0.6); }
+.cl24w-acts .p:hover { background: #334763; }
+.cl24w-acts .s { border: 1px solid rgba(28, 19, 15, 0.22); background: #fff; color: #1c130f; line-height: 38px; }
+.cl24w-acts button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl24w-bd { flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.05fr); grid-template-areas: "a b c"; }
+.cl24w-bd > section { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px 22px; }
+.cl24w-bd > section + section { border-left: 1px solid #ece6de; }
+.cl24w-bd .sa { grid-area: a; } .cl24w-bd .sb { grid-area: b; } .cl24w-bd .sc { grid-area: c; }
+.cl24w-bd h3 { margin: 0; font: 400 19px/1.2 var(--sp-type) !important; color: #1c130f; }
+.cl24w-bd .qc149c-wl q { font-size: 19px; margin-top: 0; }
+.cl24w-mats { display: flex; flex-wrap: wrap; gap: 6px; }
+.cl24w-mats span { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; background: #f5f1ea; font: 400 10px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
+.cl24w-mats span svg { width: 13px; height: 13px; }
+.cl24w-mats .mt { all: unset; cursor: pointer; display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 6px; border: 1px dashed #d9d2c7; font: italic 400 14px var(--sp-serif); color: #9a948b; }
+.cl24c .qc149c-facts.cl24c-g2 { grid-template-columns: 1fr 1fr; }
+.cl24c .qc149c-facts.cl24c-g2 > div:nth-child(3) { border-left: 0; }
+.cl24c .qc149c-facts.cl24c-g2 > div:nth-child(n + 3) { border-top: 1px solid #ece6de; }
+.cl24w-steps { list-style: none; margin: 0; padding: 2px 0 0; position: relative; }
+.cl24w-steps::before { content: ""; position: absolute; left: 8px; top: 12px; bottom: 18px; width: 1px; background: #e4ddd3; }
+.cl24w-steps li { position: relative; display: grid; grid-template-columns: 18px 1fr auto; column-gap: 12px; padding-bottom: 14px; align-items: baseline; }
+.cl24w-steps .cl24w-tk { position: relative; top: 3px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px #fff; }
+.cl24w-steps .t { font: 400 16.5px/1.25 var(--sp-serif); }
+.cl24w-steps li.now .t { font-weight: 600; }
+.cl24w-steps .d { font: 400 10.5px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.1em; color: #8f8a82; text-transform: uppercase; white-space: nowrap; }
+.cl24w-steps .d.due { color: #a2452a; }
+.cl24w-steps li.next .t { font-style: italic; color: #7a746c; }
+.cl24w-noq { margin: 0; font: italic 400 15.5px var(--sp-serif); color: #7a746c; }
+.cl24w-bd .sc .cl24c-call { position: static; margin: 0; }
+.cl24w-bd .sc .cl24c-notes { flex: 1 1 auto; min-height: 120px; resize: none; }
+.cl24w-ft { margin: 0; padding: 12px 22px 13px; border-top: 1px solid #ece6de; }
+.cl24w-ft .qc149c-l2 { margin-top: 0; gap: 18px; }
+.cl24w-ft .qc149c-nvb button { width: 30px; height: 30px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px #e6dfd5; display: inline-grid; place-items: center; }
+@media (max-width: 1440px) {
+  .cl24w-bd { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "a c" "b c"; }
+  .cl24w-bd .sb { border-left: 0; border-top: 1px solid #ece6de; }
+  .cl24w-bd .sc { border-left: 1px solid #ece6de; grid-row: 1 / span 2; }
+  .cl24w-pillw { display: none; }
+}
+/* ⚠️ qcv149card.css gives every child of the frame `flex: none` (0-2-0): the wide body must take the rest and scroll, or
+   the footer is pushed out of the frame and clipped */
+.cl24w .cl24c .qc149c-in > .cl24w-bd { flex: 1 1 auto; min-height: 0; }
