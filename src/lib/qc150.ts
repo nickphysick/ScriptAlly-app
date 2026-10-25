@@ -255,3 +255,17 @@ export function beTicks(s: BeScale, nowMs: number): { ms: number; x: number; lab
   }
   return out;
 }
+
+/** the list title's sort phrase: "soonest due first" (the mock's), and the same shape for the other sorts */
+export function sortPhrase(key: string, reversed: boolean, orderLabel: string, fieldLabel: string): string {
+  switch (key) {
+    case "due": return reversed ? "latest due first" : "soonest due first";
+    case "first": return reversed ? "newest queried first" : "oldest queried first";
+    case "changed": return reversed ? "most recently changed first" : "least recently changed first";
+    case "stage": return reversed ? "furthest on first" : "earliest stage first";
+    case "agent": return `agents ${orderLabel}`;
+    default: return `${fieldLabel.toLowerCase()} ${orderLabel}`;
+  }
+}
+/** "grouped by status" · "not grouped" */
+export const groupPhrase = (key: string, short: string): string => (key === "none" ? "not grouped" : `grouped by ${short}`);

@@ -144,10 +144,12 @@ export interface QcToolbar140Props {
   /** cards-sort-search v1 §B — the page's one sort, read and written by the Sort chip (both views since navy-bar v1) */
   sort: Qc138Sort;
   onSort: (s: Qc138Sort) => void;
+  /** v150 C — the search sits in the navy bar while unpinned */
+  findInBar?: boolean;
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort, findInBar = false,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -167,6 +169,13 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
           </span>
         ) : null}
         {/* A3 — in full screen the search is in this cream toolbar, a rounded white field left of Filters */}
+        {/* v150 C — unpinned too: the navy bar's own search, first (its view row above the list is retired) */}
+        {!pinned && findInBar && onFind ? (
+          <label className="qc150-bfind" data-qc150="find" data-qc140="find" data-qc138="search" data-qc149="find" data-qc144="find">
+            {FIND_ICON}
+            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
+          </label>
+        ) : null}
         {pinned && onFind ? (
           <label className="qc140-find qc144-tfind" data-qc140="find" data-qc138="search" data-qc144="find-tb">
             {FIND_ICON}

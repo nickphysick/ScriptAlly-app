@@ -111,3 +111,48 @@
   .qc150-c[data-on] .qc150-faces--you .qc150-face { box-shadow: 0 0 0 2.5px #2a3a52, inset 0 0 0 1.5px rgba(162, 69, 42, 0.5); }
   .qc150-c[data-on] .qc150-show { background: #f4eee5; color: #1c130f; }
 }
+
+/* ══ Part C · the list's width, its title and the view switch ════════════════════════════════════════════════════
+   ⚠️ C1 SUPERSEDES v149.2's "+80 from a 1500 sheet" FOR THE LIST ONLY: the list is min(S − 40, 1320), centred. The
+      header card and the stat cards keep the v149.2 column rule, so `--qc149-w` is pinned to that rule here rather
+      than derived from the list as it was (0-2-0, over qcv149.css's 0-1-0 on the same element). */
+@media (min-width: 768px) {
+  .qcv-group.qcv-group {
+    --qc149-w: calc(var(--qc149-col) + var(--qc149-ext) - 2 * var(--qc149-in));
+    --qc149-list: min(calc(var(--hsheet-w) - 40px), 1320px);
+  }
+  /* C2 · the title: 28 below the cards (the page's own margin), 16 above the list */
+  .qc150-lt { display: flex; flex-direction: column; align-items: center; margin: 0 0 16px; }
+  .qc150-ltt { display: flex; align-items: center; gap: 26px; width: 100%; padding: 4px 0; }
+  .qc150-ltt::before, .qc150-ltt::after { content: ""; flex: 1 1 0; min-width: 0; height: 1px; background: rgba(28, 19, 15, 0.18); }
+  .qc150-lt .qc150-ltt h2 { flex: none; margin: 0; font: 400 24px/24px var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+  .qc150-lts { margin: 8px 0 0; font: italic 400 15px/21px var(--sp-serif) !important; color: #5b4f47; text-align: center; }
+  .qc150-lts b { font: 400 16px/1 var(--sp-type) !important; font-style: normal; color: #1c130f; }
+  /* C3 · the switch: a cream segmented control, centred 14 under the count line */
+  .qc150-vsw {
+    display: inline-flex; gap: 0; margin-top: 14px; padding: 4px; border-radius: 12px; background: #fbf9f5;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 10px 18px -12px rgba(28, 19, 15, 0.4);
+  }
+  .qc150-vsw button {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 18px;
+    border-radius: 9px; font: 400 16px/1 var(--sp-type) !important; color: #5b4f47; white-space: nowrap;
+  }
+  .qc150-vsw button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .qc150-vsw button:hover:not([aria-pressed="true"]):not(:disabled) { color: #1c130f; }
+  .qc150-vsw button[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; }
+  .qc150-vsw button:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  /* the title is not drawn in full screen (the pinned band is the list's head there) */
+  .qcv-group[data-full] .qc150-lt { display: none; }
+}
+/* C — the navy bar's search (its view row above the list is retired): a dark well on the navy, first in the bar */
+@media (min-width: 768px) {
+  .qc140-tb .qc150-bfind {
+    box-sizing: border-box; flex: 0 1 300px; min-width: 200px; height: 34px; display: flex; align-items: center; gap: 10px;
+    padding: 0 10px 0 13px; border-radius: 9px; background: rgba(10, 18, 32, 0.32); color: rgba(244, 238, 229, 0.75);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(244, 238, 229, 0.14);
+  }
+  .qc140-tb .qc150-bfind:focus-within { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.7); }
+  .qc140-tb .qc150-bfind svg { flex: none; }
+  .qc140-tb .qc150-bfind input { all: unset; flex: 1; min-width: 0; font: 400 15.5px/1.2 var(--sp-serif) !important; color: #f4eee5; }
+  .qc140-tb .qc150-bfind input::placeholder { color: rgba(244, 238, 229, 0.55); font: italic 400 15.5px/1.2 var(--sp-serif); }
+}

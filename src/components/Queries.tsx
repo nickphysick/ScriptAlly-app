@@ -102,7 +102,11 @@ import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
 import { QcStatCards150 } from "./queries/centre/QcStatCards150";
-import { statCards } from "../lib/qc150";
+import { groupPhrase, readView150, sortPhrase, statCards, writeView150, type QcView150 } from "../lib/qc150";
+import { QcListTitle150 } from "./queries/centre/QcListTitle150";
+import { QC_SORT_FIELDS } from "../lib/cardsSort";
+import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
+import { eyeRows } from "../lib/qcBirdsEye";
 import { QcLogFlow149, QcWhoReplied149, type FlowAgent, type LogAnswers } from "./queries/centre/QcFlows149";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
@@ -3938,13 +3942,28 @@ export const Queries: React.FC<{
     setQcF138((f) => ({ ...f, where: k }));
     if (!k || !scroll || qcFull) return;
     requestAnimationFrame(() => {
-      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc149="views-row"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc150="title"]')].find((e) => e.getBoundingClientRect().height > 0);
       const sc = tb?.closest<HTMLElement>(".wpg-scroll");
       if (!tb || !sc) return;
       const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
       sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
     });
   };
+  /* v150 C3 — the list's view: List or Birds-eye, remembered for the session (the app's view prefs are per device,
+     never per user, so the session is the honest scope) */
+  const [qcView150, setQcView150] = useState<QcView150>(() => readView150());
+  const pickView150 = (v: QcView150) => { setQcView150(v); writeView150(v); };
+  /* v150 C2 — the count line's figures follow the active filter: the rows the list shows */
+  const qc150Sort = QC_SORT_FIELDS.find((f) => f.key === qcSort138.key);
+  const qc150SortOrder = qc150Sort?.order.find((o) => o.reversed === qcSort138.reversed)?.label ?? "";
+  const qc150Group = GROUP_BY_OPTIONS.find((o) => o.key === qcGroup);
+  const qc150ListLine = {
+    n: qcVisible.length,
+    heardPct: bandFigures(qcVisible, qcNow138).heardPct,
+    group: groupPhrase(qcGroup, qc150Group?.short ?? ""),
+    sort: sortPhrase(qcSort138.key, qcSort138.reversed, qc150SortOrder.toLowerCase(), qc150Sort?.label ?? ""),
+  };
+  const qc150BeLive = eyeRows(qcVisible, qcNow138).length;
   /* v150 B2 — a stat card's detail link: that card's filter (Part D also switches the list to Birds-eye) */
   const qc150Detail = (k: WhereKey) => { qcShowWhere(k); };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
@@ -7888,9 +7907,11 @@ export const Queries: React.FC<{
                   find={qcFind}
                   onFind={setQcFind}
                   findRef={qcSheetFindRef}
-                  viewRow={<QcViewRow149 views={false} counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
-                    onView={(k) => qcShowWhere(pressView(qcF138.where, k), false)} find={qcFind} onFind={setQcFind}
-                    findRef={qcFull ? undefined : qcSheetFindRef} loading={showGridSkeleton} />}
+                  /* v150 C — the list's title, its count line and the List | Birds-eye switch replace the view row; the
+                     search moved into the navy bar */
+                  findInBar
+                  viewRow={<QcListTitle150 view={qcView150} onView={pickView150} loading={showGridSkeleton}
+                    list={showGridSkeleton ? null : qc150ListLine} birds={showGridSkeleton ? null : { n: qc150BeLive }} />}
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
