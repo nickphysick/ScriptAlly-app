@@ -25,7 +25,7 @@ const PAGES: [string, string, string, string?][] = [
   ["analytics", "/queries/analytics", "[data-a21='header']"],
   ["responses", "/queries/responses", "[data-rsp='header']"],
   ["discover", "/agents/discover", "[data-dv1='header']", "live"],
-  ["packages", "/manuscripts/packages", "[data-pk4='header']"],
+  /* Submission packages left the shared hero with v26 (25 Oct); its own shots are pk26Shots.measure.ts */
   ["todo", "/todo", "[data-td5='header']"],
 ];
 const RULES: Record<number, { textX: number; stackB: number; ri: number; content: number }> = {

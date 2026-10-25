@@ -33,7 +33,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Discover",            route: "/agents/discover",      cls: "dv1-wpg"   },
   { name: "Manuscripts",         route: "/manuscripts",          cls: "msv12-wpg" }, /* v12 route repoint */
   { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
-  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
+  { name: "Submission packages", route: "/queries/packages", cls: "pkgw-wpg" },
   { name: "To-do list",          route: "/todo",                 cls: "td5-wpg"  },
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
   { name: "Noteboard",           route: "/todo/corkboard",       cls: "tpl-wpg"  },

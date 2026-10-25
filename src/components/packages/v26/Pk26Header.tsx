@@ -38,7 +38,7 @@ export const AnimStage: React.FC = () => (
 
 /** The navy header card, in use (ref `.phd` · `.hd-in`, HD = "a"). */
 export const Pk26Header: React.FC<{ count: number | null; title: string | null; onNew: () => void; onHow: () => void }> = ({ count, title, onNew, onHow }) => (
-  <section className="p6-phd" aria-labelledby="p6-hdT" data-pk26="header">
+  <section className="p6-phd" aria-labelledby="p6-hdT" data-pk26="header" data-own-header="">
     <div className="p6-hd-in">
       <div className="p6-hd-tx">
         <p className="p6-hd-k">Submission packages <span className="p6-hb-tag">Pro</span></p>
@@ -60,7 +60,7 @@ export const Pk26Header: React.FC<{ count: number | null; title: string | null; 
 
 /** The empty state's promise (ref `.pb-hero`): headline over two lines, the lede, three steps, the animation. */
 export const Pk26Hero: React.FC<{ onBuild: () => void; onHow: () => void }> = ({ onBuild, onHow }) => (
-  <section className="p6-pb-hero" aria-labelledby="p6-pbT" data-pk26="hero">
+  <section className="p6-pb-hero" aria-labelledby="p6-pbT" data-pk26="hero" data-own-header="">
     <div className="p6-pb-hero-tx">
       <p className="p6-pb-k">Submission packages <span className="p6-hb-tag">Pro</span></p>
       <h1 className="p6-id-pbT" id="p6-pbT" data-page-title>Bundle it. Send it. Know what went.</h1>

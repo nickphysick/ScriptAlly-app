@@ -37,7 +37,7 @@ test("every drawer's spine tab holds its whole label", async ({ page }) => {
   const seen: Record<string, unknown>[] = [];
 
   /* 1 — the packages explainer, and 2 — the package drawer */
-  await openRoute(page, "/manuscripts/packages", { width: 1440, height: 1200 });
+  await openRoute(page, "/queries/packages", { width: 1440, height: 1200 });
   await page.waitForTimeout(900);
   const how = page.getByRole("button", { name: /how it works/i }).first();
   if (await how.isVisible().catch(() => false)) {

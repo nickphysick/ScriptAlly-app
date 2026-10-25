@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "PK26-S",
+  "where": "the sent package is listed",
+  "ok": true,
+  "detail": "[{\"name\":\"Sent one\",\"early\":false,\"label\":\"50%\"},{\"name\":\"Drag target\",\"early\":false,\"label\":\"Not sent\"}]"
+ },
+ {
+  "lock": "PK26-S",
+  "where": "…marked Too early",
+  "ok": false,
+  "detail": "{\"name\":\"Sent one\",\"early\":false,\"label\":\"50%\"}"
+ },
+ {
+  "lock": "PK26-S",
+  "where": "…and not named as the best in the lead",
+  "ok": true,
+  "detail": "Nothing has had 4 answers yet, so it's too early to compare packages."
+ },
+ {
+  "lock": "PK26-S",
+  "where": "the unsent one reads Not sent",
+  "ok": true,
+  "detail": "[{\"name\":\"Sent one\",\"early\":false,\"label\":\"50%\"},{\"name\":\"Drag target\",\"early\":false,\"label\":\"Not sent\"}]"
+ },
+ {
+  "lock": "PK26-S",
+  "where": "the footnote states the threshold",
+  "ok": true,
+  "detail": "Your average across everything: –. Packages with fewer than 4 answers are shown but not ranked. Bars run to 50%; the faint line marks 25%."
+ }
+]

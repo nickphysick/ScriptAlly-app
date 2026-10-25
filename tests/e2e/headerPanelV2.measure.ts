@@ -61,7 +61,7 @@ test("P1 P4 P5 P7 · the panel on every workspace route", async ({ page }) => {
   L.check("P4 population: several routes carry an intro", "all", withIntro >= 6, `${withIntro} intros`);
   L.done(SIZES.length * WORKSPACE.length * 8);
 });
-const PHONE_AS_BUILT: Record<string, number> = { "/manuscripts/comps": 396, "/manuscripts/packages": 396 };
+const PHONE_AS_BUILT: Record<string, number> = { "/manuscripts/comps": 396, "/queries/packages": 396 };
 
 test("P7 · no horizontal overflow at 390", async ({ page }) => {
   const L = new Ledger(process.env.HP2_MUTATE === "P7" ? "P7-390" : "P7-390");

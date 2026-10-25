@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "PK26-X",
+  "where": "the package now sends the extra",
+  "ok": true,
+  "detail": "[\"pk26-ext\"] · Author bio"
+ },
+ {
+  "lock": "PK26-X",
+  "where": "ticking it started the next edition",
+  "ok": true,
+  "detail": "edition=2"
+ },
+ {
+  "lock": "PK26-X",
+  "where": "the 1st edition (what went) has no extras",
+  "ok": false,
+  "detail": "{\"queryLetterVersionId\":\"pk26-let-a\",\"synopsisVersionId\":\"\",\"n\":1,\"summary\":\"Query letter Letter A\",\"startedAt\":\"2026-09-20T16:50:11.295Z\",\"extraIds\":[\"pk26-ext\"],\"versions\":[\"pk26-let-a\"],\"otherMaterials\":\"Author bio\"}"
+ },
+ {
+  "lock": "PK26-X",
+  "where": "the sent query's record is unchanged",
+  "ok": true,
+  "detail": "Query letter Letter A · ed 1"
+ }
+]

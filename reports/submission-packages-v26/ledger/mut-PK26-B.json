@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PK26-B",
+  "where": "the drag target is open",
+  "ok": true,
+  "detail": "open package"
+ },
+ {
+  "lock": "PK26-B",
+  "where": "the package is marked as dragging",
+  "ok": true,
+  "detail": "{\"dragging\":true,\"ok\":[\"let\"]}"
+ },
+ {
+  "lock": "PK26-B",
+  "where": "only the Query letter row is highlighted",
+  "ok": true,
+  "detail": "[\"let\"]"
+ },
+ {
+  "lock": "PK26-B",
+  "where": "a letter dropped on Synopsis changes nothing",
+  "ok": false,
+  "detail": "ql=pk26-let-b syn="
+ },
+ {
+  "lock": "PK26-B",
+  "where": "dropped on Query letter, it fills it",
+  "ok": true,
+  "detail": "ql=pk26-let-b"
+ },
+ {
+  "lock": "PK26-B",
+  "where": "Add by keyboard fills the Synopsis row",
+  "ok": true,
+  "detail": "syn=pk26-syn"
+ }
+]

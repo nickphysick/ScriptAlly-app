@@ -8,7 +8,7 @@
  */
 import { test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
-import { openRoute } from "./measure";
+import { liftMotionSuppression, openRoute } from "./measure";
 
 const ON = process.env.PK26_SHOTS === "1";
 const ONLY = process.env.PK26_ONLY ?? "";
@@ -49,3 +49,28 @@ for (const size of SIZES) {
     await page.locator('[data-pk26="header"] .p6-hd-p').click(); await page.waitForTimeout(500); await shot("04-new-package-dialog");
   });
 }
+
+/* 09 · 10 · 11 — the empty state, its Results, and the animation at the ref's six moments (seeked, not waited) */
+for (const size of SIZES) {
+  const w = size.width;
+  test(`v26 empty ${w}`, async ({ page }) => {
+    test.skip(!ON, "PK26_SHOTS=1");
+    test.setTimeout(300_000);
+    mkdirSync(OUT, { recursive: true });
+    const shot = async (n: string) => { if (!ONLY || ONLY === n) await page.screenshot({ path: `${OUT}/${n}-${w}.png` }); };
+    await openPk26(page, size, process.env.PK26_EMPTY_MS ?? "seed-ms-2");
+    await shot("09-empty-state");
+    await scrollToPart(page, "results", 24); await page.waitForTimeout(300); await shot("10-empty-results");
+    if (w !== 1512) return;
+    await liftMotionSuppression(page);
+    await page.reload(); await page.locator('[data-pk26="page"]').first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(800);
+    await scrollToPart(page, "page", 0); await page.waitForTimeout(300);
+    const stage = page.locator('[data-pk26="hero"] .p6-pb-stage').first();
+    for (const [i, t] of [[1, 0.3], [2, 1.8], [3, 3.0], [4, 4.6], [5, 6.0], [6, 8.0]] as const) {
+      await page.evaluate((ms) => { for (const a of document.getAnimations()) { const el = (a.effect as KeyframeEffect | null)?.target as Element | null; if (el && el.closest('[data-pk26="hero"]')) { a.pause(); a.currentTime = ms; } } }, t * 1000);
+      await page.waitForTimeout(150);
+      if (!ONLY || ONLY === "11") await stage.screenshot({ path: `${OUT}/11-animation-${i}-t${t.toFixed(1)}s.png` });
+    }
+  });
+}
+

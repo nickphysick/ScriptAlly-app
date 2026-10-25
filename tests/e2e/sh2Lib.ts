@@ -21,7 +21,7 @@ export const rgb = (c: number[]) => `rgb(${c.join(", ")})`;
 export const FLAP = 26;
 
 /** Every signed-in route (routeTiers WORKSPACE_PATHS; the settings chassis is represented by /account). */
-export const ROUTES = ["/dashboard", "/queries", "/queries/analytics", "/todo", "/todo/calendar", "/todo/corkboard", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import", "/account", "/plans", "/help"] as const;
+export const ROUTES = ["/dashboard", "/queries", "/queries/analytics", "/todo", "/todo/calendar", "/todo/corkboard", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/import", "/account", "/plans", "/help"] as const;
 export const SHEET_ROUTES = ROUTES.filter((r) => hasHeaderSheet(r));
 export const NO_SHEET_ROUTES = ROUTES.filter((r) => !hasHeaderSheet(r));
 export const OWN_ROUTES = OWN_HEADER_ROUTES.filter((r) => hasHeaderSheet(r));
@@ -31,7 +31,8 @@ export const ART: Record<string, { sel: string; crosses: boolean }> = {
   "/queries": { sel: ".qcoh img", crosses: false },
   "/agents": { sel: '[data-cl15="header-art"] img', crosses: false },
   "/manuscripts": { sel: ".ms21-art img", crosses: false },
-  "/manuscripts/packages": { sel: '.ph [data-probe="art"] img', crosses: false },
+  /* Submission packages v26: the Archivist and his boxes sit in the navy card's own art slot */
+  "/queries/packages": { sel: '[data-pk26="header"] .p6-hd-art img', crosses: false },
 };
 /** Section bands: the element whose box is the band, and where its tint is painted. */
 export const BANDS: readonly { route: string; sel: string; pseudo: string | null }[] = [

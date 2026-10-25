@@ -209,9 +209,9 @@ for (const vp of SIZES) {
   /* RETIRED (header panel v2, 10 Oct): see tests/e2e/RETIRED-header-panel-v2.md. HP2 P1, P5, P6. */
   test.skip(`§2 · Submission packages' full header at ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`v2-full-packages-${vp.width}`);
-    await openApp(page, "/manuscripts/packages", vp);
+    await openApp(page, "/queries/packages", vp);
     const r = await readFull(page, '[data-ppv="rail"]');
-    const ctx = { route: "/manuscripts/packages", size: `${vp.width}`, state: "expanded" };
+    const ctx = { route: "/queries/packages", size: `${vp.width}`, state: "expanded" };
     L.check("§2 · the full header was found", ctx, !!r, JSON.stringify(r));
     /* the page is held to its own mock in pkgMat.measure.ts */
     if (r) judgeFull(L, r, ctx, undefined, { withArt: true });
@@ -229,8 +229,8 @@ test.skip("§4.4 · the full headers are one header", async ({ page }) => {
     await openApp(page, "/queries", vp); const q = await readTops(page);
     await openApp(page, "/agents", vp); const c = await readTops(page);
     await openApp(page, "/manuscripts/comps", vp); const m = await readTops(page);
-    await openApp(page, "/manuscripts/packages", vp); const pk = await readTops(page);
-    const ctx = { route: "/queries vs /agents vs /manuscripts/comps vs /manuscripts/packages", size: `${vp.width}`, state: "expanded" };
+    await openApp(page, "/queries/packages", vp); const pk = await readTops(page);
+    const ctx = { route: "/queries vs /agents vs /manuscripts/comps vs /queries/packages", size: `${vp.width}`, state: "expanded" };
     /* ⚠️ RETARGETED BY LIVING HEADERS v3 (1 Oct): all four full headers are living, so they are ONE header
        again — the header's and the title's tops agree across all four, and none carries an eyebrow (the
        section is the bar's crumb; livingHeadersV3.measure LH5 holds its words). */
@@ -242,7 +242,7 @@ test.skip("§4.4 · the full headers are one header", async ({ page }) => {
        framed route is held to being its register's band or plate. */
     const qcPlate = PLATE_ROUTES.includes("/queries");
     const framed = (route: string) => PLATE_ROUTES.includes(route) || BAND_ROUTES.includes(route) || OWN_HEADER_ROUTES.includes(route);
-    const open = ([["the Query Centre", "/queries", q], ["the Contact list", "/agents", c], ["Comparable titles", "/manuscripts/comps", m], ["Submission packages", "/manuscripts/packages", pk]] as [string, string, typeof q][])
+    const open = ([["the Query Centre", "/queries", q], ["the Contact list", "/agents", c], ["Comparable titles", "/manuscripts/comps", m], ["Submission packages", "/queries/packages", pk]] as [string, string, typeof q][])
       .filter(([, route]) => !framed(route));
     const [anchorName, , anchor] = open[0];
     const others = open.slice(1).map(([nm, , o]) => [nm, o]) as [string, typeof q][];
@@ -277,7 +277,7 @@ test.skip("§4.4 · the full headers are one header", async ({ page }) => {
      band route — counted from the registers, so a register change cannot leave this stale */
   /* framed among THESE four only: a band route that is not one of them (Analytics v17) adds its own band
      row through the loop above and takes no open header away */
-  const FOUR = ["/queries", "/agents", "/manuscripts/comps", "/manuscripts/packages"];
+  const FOUR = ["/queries", "/agents", "/manuscripts/comps", "/queries/packages"];
   const openN = FOUR.filter((r) => !PLATE_ROUTES.includes(r) && !BAND_ROUTES.includes(r) && !OWN_HEADER_ROUTES.includes(r)).length;
   expect(L.rows.length).toBe(SIZES.length * (2 * (openN - 1) + 1 + (PLATE_ROUTES.includes("/queries") ? 1 : 0) + BAND_ROUTES.length + OWN_HEADER_ROUTES.length));
   expect(L.failures().map((f) => `${f.lock} · ${f.size} — ${f.detail}`)).toEqual([]);

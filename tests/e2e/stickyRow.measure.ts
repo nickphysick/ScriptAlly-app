@@ -23,7 +23,7 @@ const SCROLLING: [string, string][] = [
   ["Analytics", "/queries/analytics"],
   ["Discover", "/agents/discover"],
   ["Comparable titles", "/manuscripts/comps"],
-  ["Submission packages", "/manuscripts/packages"],
+  ["Submission packages", "/queries/packages"],
 ];
 
 const read = (page: Page) => page.evaluate(() => {
