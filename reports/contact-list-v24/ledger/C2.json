@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "call sent query cv25-q-06"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 the call box's journey = the Query Centre's",
+  "ok": true,
+  "detail": "cl sent qc sent"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 a closed agent exists",
+  "ok": true,
+  "detail": "no closed row"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 closed: no primary, \"See the query\", no \"Record a response\"",
+  "ok": true,
+  "detail": "{\"primary\":false,\"links\":[\"See the query\",\"Edit agent\",\"Remove\"]}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "call sent query cv25-q-06"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 the call box's journey = the Query Centre's",
+  "ok": true,
+  "detail": "cl sent qc sent"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 a closed agent exists",
+  "ok": true,
+  "detail": "no closed row"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 closed: no primary, \"See the query\", no \"Record a response\"",
+  "ok": true,
+  "detail": "{\"primary\":false,\"links\":[\"See the query\",\"Edit agent\",\"Remove\"]}"
+ }
+]

@@ -22,6 +22,11 @@ describe("the four sets", () => {
     expect(c).toEqual({ you: 1, agent: 1, none: 2, closed: 1 });
     expect(c.you + c.agent + c.none + c.closed).toBe(xs.length);
   });
+  /* CL24-A3's unit half: the harness account has no nudge-due agent, so the rendered lock cannot see this break */
+  it("a nudge-due agent (Your move on the agent's court) counts in Your move, not Querying", () => {
+    const nudge = { ...facts("n", "you"), q: { court: "agent", pastExpected: true } } as unknown as AgentFacts;
+    expect(setCounts([nudge, facts("q", "agent")])).toEqual({ you: 1, agent: 1, none: 0, closed: 0 });
+  });
   it("filters on one set, or none", () => {
     expect(xs.filter((x) => inSet(x, "none")).map((x) => x.agent.id)).toEqual(["c", "d"]);
     expect(xs.filter((x) => inSet(x, null))).toHaveLength(5);

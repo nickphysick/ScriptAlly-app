@@ -1,0 +1,216 @@
+
+Running 12 tests using 1 worker
+
+[1/12] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/12] [measure] › tests/e2e/hr1.measure.ts:139:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs
+[3/12] [measure] › tests/e2e/hr1.measure.ts:223:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base
+  1) [measure] › tests/e2e/hr1.measure.ts:223:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+
+    Error: HR1-8: the reference is older than twelve hours; capture it again
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 43200000
+    Received:   500565162
+
+      254 |     expect(existsSync(REF), "HR1-8: capture the base reference first (HR1_CAPTURE=1 against the base preview)").toBe(true);
+      255 |     const ref = JSON.parse(readFileSync(REF, "utf8")) as { capturedAt: number; got: Record<string, (number[] | null)[]> };
+    > 256 |     expect(Date.now() - ref.capturedAt, "HR1-8: the reference is older than twelve hours; capture it again").toBeLessThan(12 * 3600_000);
+          |                                                                                                              ^
+      257 |     for (const c of cases) {
+      258 |       const a = ref.got[c.name], b = got[c.name];
+      259 |       L.check(`${c.name} found on the base and here`, !!a && !!b && a.every(Boolean) && b.every(Boolean), JSON.stringify({ a, b }));
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/hr1.measure.ts:256:110
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-c0f4a-ages-measure-as-on-the-base-measure/error-context.md
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-c0f4a-ages-measure-as-on-the-base-measure/error-context.md
+
+
+[4/12] [measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton
+[measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton
+  ✗ A1 · agents the toolbar's own pin (v19 §A) — null
+
+  ✗ A1 · agents aria-keyshortcuts F — undefined
+
+  2) [measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "A1 · agents the toolbar's own pin (v19 §A) — null",
+    +   "A1 · agents aria-keyshortcuts F — undefined",
+    + ]
+
+      52 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      53 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 54 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      55 |   }
+      56 | }
+      57 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:54:95)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:101:7
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-bbad1-th-pages-draw-PinListButton-measure/error-context.md
+
+
+[5/12] [measure] › tests/e2e/qcV1386.measure.ts:104:3 › QC138.6 › A2 · keys: F pins and unpins; not in the search; Esc closes what is open first
+  3) [measure] › tests/e2e/qcV1386.measure.ts:104:3 › QC138.6 › A2 · keys: F pins and unpins; not in the search; Esc closes what is open first 
+
+    Test timeout of 400000ms exceeded.
+
+    Error: locator.click: Test timeout of 400000ms exceeded.
+    Call log:
+      - waiting for locator('.clv-group [data-cl13-find="banner"] input').first()
+
+
+      113 |       L.check("A2", `${p.key} F unpins`, (await pinned(page, p)) === "false", `${await pinned(page, p)}`);
+      114 |       const find = page.locator(vis(p, p.find)).first();
+    > 115 |       await find.click(); await page.keyboard.type("f"); await page.waitForTimeout(500);
+          |                  ^
+      116 |       L.check("A2", `${p.key} F in the search does nothing`, (await pinned(page, p)) === "false" && (await find.inputValue()) === "f", `${await pinned(page, p)} · "${await find.inputValue()}"`);
+      117 |       await find.fill(""); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      118 |       /* pinned, with the Filters panel open: Esc closes the panel only; a second Esc unpins */
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:115:18
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-7c0ec-c-closes-what-is-open-first-measure/error-context.md
+
+
+[6/12] [measure] › tests/e2e/qcV1386.measure.ts:143:3 › QC138.6 › A3 · remembered per page, restored with no transition
+  4) [measure] › tests/e2e/qcV1386.measure.ts:143:3 › QC138.6 › A3 · remembered per page, restored with no transition 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'click')
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at pressPin (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:86:51)
+        at clickPin (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:87:60)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:160:13
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-8c4c2-restored-with-no-transition-measure/error-context.md
+
+
+[7/12] [measure] › tests/e2e/qcV1386.measure.ts:180:3 › QC138.6 › A4 · scroll: 1200, pin, unpin → 1200 ±2
+  5) [measure] › tests/e2e/qcV1386.measure.ts:180:3 › QC138.6 › A4 · scroll: 1200, pin, unpin → 1200 ±2 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'click')
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at pressPin (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:86:51)
+        at clickPin (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:87:60)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:187:13
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-b0bc2-ll-1200-pin-unpin-→-1200-±2-measure/error-context.md
+
+
+[8/12] [measure] › tests/e2e/qcV1386.measure.ts:198:3 › QC138.6 › A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title
+  6) [measure] › tests/e2e/qcV1386.measure.ts:198:3 › QC138.6 › A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title 
+
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'childNodes')
+        at eval (eval at evaluate (:311:30), <anonymous>:7:24)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:7:24)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at read (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:204:31)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:211:23
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-9fd18-t-F-pinned-Unpin-F-no-title-measure/error-context.md
+
+
+[9/12] [measure] › tests/e2e/qcV1386.measure.ts:224:3 › QC138.6 › B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through
+  7) [measure] › tests/e2e/qcV1386.measure.ts:224:3 › QC138.6 › B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'getBoundingClientRect')
+        at eval (eval at evaluate (:311:30), <anonymous>:4:96)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:4:96)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:231:28
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-fa5c5-er-it-nothing-shows-through-measure/error-context.md
+
+
+[10/12] [measure] › tests/e2e/qcV1386.measure.ts:260:3 › QC138.6 › B2 · one bar: no old pinned bar on either page, scrolled or pinned
+  8) [measure] › tests/e2e/qcV1386.measure.ts:260:3 › QC138.6 › B2 · one bar: no old pinned bar on either page, scrolled or pinned 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'click')
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at pressPin (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:86:51)
+        at clickPin (/Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:87:60)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:265:22
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-d504d-her-page-scrolled-or-pinned-measure/error-context.md
+
+
+[11/12] [measure] › tests/e2e/qcV1386.measure.ts:273:3 › QC138.6 › B3 · no jitter: stepping 1px through the stick point and back
+  9) [measure] › tests/e2e/qcV1386.measure.ts:273:3 › QC138.6 › B3 · no jitter: stepping 1px through the stick point and back 
+
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+        at eval (eval at evaluate (:311:30), <anonymous>:4:52)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:4:52)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:278:32
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-15c73-gh-the-stick-point-and-back-measure/error-context.md
+
+
+[12/12] [measure] › tests/e2e/qcV1386.measure.ts:306:3 › QC138.6 › C1 · letters: clicking M lands the first M row just under the sticky stack
+  10) [measure] › tests/e2e/qcV1386.measure.ts:306:3 › QC138.6 › C1 · letters: clicking M lands the first M row just under the sticky stack 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('.clv-group [data-cl19="letter"][data-l="M"]').first()
+
+
+      311 |       await open(page, p, vp, "C1");
+      312 |       /* RE-POINTED by v19 §B: the only A to Z is the list toolbar's */
+    > 313 |       await page.locator(vis(p, '[data-cl19="letter"][data-l="M"]')).first().click();
+          |                                                                              ^
+      314 |       await page.waitForTimeout(1600);
+      315 |       const r = await page.evaluate((g) => {
+      316 |         const grp = [...document.querySelectorAll<HTMLElement>(g)].find((e) => e.getBoundingClientRect().width > 0)!;
+        at /Users/nickphysick/ScriptAlly-cl24base/tests/e2e/qcV1386.measure.ts:313:78
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-0cb81-just-under-the-sticky-stack-measure/error-context.md
+
+
+  Slow test file: [measure] › tests/e2e/hr1.measure.ts (5.1m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  10 failed
+    [measure] › tests/e2e/hr1.measure.ts:223:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+    [measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton 
+    [measure] › tests/e2e/qcV1386.measure.ts:104:3 › QC138.6 › A2 · keys: F pins and unpins; not in the search; Esc closes what is open first 
+    [measure] › tests/e2e/qcV1386.measure.ts:143:3 › QC138.6 › A3 · remembered per page, restored with no transition 
+    [measure] › tests/e2e/qcV1386.measure.ts:180:3 › QC138.6 › A4 · scroll: 1200, pin, unpin → 1200 ±2 
+    [measure] › tests/e2e/qcV1386.measure.ts:198:3 › QC138.6 › A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title 
+    [measure] › tests/e2e/qcV1386.measure.ts:224:3 › QC138.6 › B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through 
+    [measure] › tests/e2e/qcV1386.measure.ts:260:3 › QC138.6 › B2 · one bar: no old pinned bar on either page, scrolled or pinned 
+    [measure] › tests/e2e/qcV1386.measure.ts:273:3 › QC138.6 › B3 · no jitter: stepping 1px through the stick point and back 
+    [measure] › tests/e2e/qcV1386.measure.ts:306:3 › QC138.6 › C1 · letters: clicking M lands the first M row just under the sticky stack 
+  2 passed (19.5m)

@@ -182,7 +182,8 @@ test.skip("NB1-L4 QC headings", async ({ page }) => {
 });
 
 /* ── L5 · the Contact list is one view, one box ────────────────────────────────────────────────────────────────── */
-test("NB1-L5 CL one view", async ({ page }) => {
+/* RETIRED (Contact list v24): the address book is no longer the page. List and Cards are back under one navy-barred sheet, the switch in the bar (CL24-B1); the address book is full screen (CL24-D). */
+test.skip("NB1-L5 CL one view", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L5");
   for (const vp of SIZES) {
@@ -208,7 +209,8 @@ test("NB1-L5 CL one view", async ({ page }) => {
 });
 
 /* ── L6 · docked, never sticky ─────────────────────────────────────────────────────────────────────────────────── */
-test("NB1-L6 CL dock", async ({ page }) => {
+/* RETIRED (Contact list v24): the docked two-column box is gone; the list is a sheet in the page, and full screen is a fixed address book over the page sheet (CL24-D1/D2). */
+test.skip("NB1-L6 CL dock", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L6");
   for (const vp of SIZES) {
@@ -258,7 +260,8 @@ test("NB1-L6 CL dock", async ({ page }) => {
 });
 
 /* ── L7 · the header's count ───────────────────────────────────────────────────────────────────────────────────── */
-test("NB1-L7 CL count", async ({ page }) => {
+/* RETIRED (Contact list v24): the navy column's "{n} of {N} agents" count is gone; the view row's chips carry the counts (CL24-A3) and full screen's band its total (CL24-D1). */
+test.skip("NB1-L7 CL count", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L7");
   for (const vp of SIZES) {
@@ -294,7 +297,8 @@ const AVATAR = {
   you: { bg: "rgb(217, 128, 95)", color: "rgb(255, 255, 255)", border: "none", ring: "rgba(217, 128, 95, 0.22) 0px 0px 0px 3px", selColor: "rgb(255, 255, 255)", selBg: "rgb(217, 128, 95)" },
   closed: { bg: "rgba(0, 0, 0, 0)", color: "rgba(244, 238, 229, 0.42)", border: "none", ring: "rgba(244, 238, 229, 0.22) 0px 0px 0px 1.5px inset", selColor: "rgba(28, 19, 15, 0.45)" },
 } as const;
-test("NB1-L8 CL avatars", async ({ page }) => {
+/* RETIRED (Contact list v24): the navy column's avatars are gone; the state disc on the light rows and the book is held to its set by CL24-B2 (List) and CL24-D1 (the book's segments). */
+test.skip("NB1-L8 CL avatars", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L8");
   for (const vp of SIZES) {
@@ -337,11 +341,12 @@ test("NB1-L9 CL sections", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L9");
   for (const vp of SIZES) for (const sort of ["added", "surname"] as const) {
-    await openCl(page, vp, { sort });
+    /* RE-POINTED (Contact list v24 D3): the sections and the A–Z strip are full screen's book's (`book-section`, `alpha`) */
+    await openCl(page, vp, { sort, full: true });
     const r = await page.evaluate(`(() => {
       const b = [...document.querySelectorAll('[data-nb1="book"]')].find((e) => e.getBoundingClientRect().height > 0);
-      const labels = b ? [...b.querySelectorAll('[data-nb1="section"]')].map((s) => s.getAttribute('data-label')) : [];
-      const th = b && b.querySelector('[data-nb1="thumb"]');
+      const labels = b ? [...b.querySelectorAll('[data-cl24="book-section"]')].map((s) => s.getAttribute('data-label')) : [];
+      const th = b && b.querySelector('[data-cl24="alpha"]');
       return { labels, thumb: !!(th && th.getBoundingClientRect().height > 0) };
     })()`) as { labels: string[]; thumb: boolean };
     const at = `${vp.width} ${sort}`;
@@ -357,64 +362,48 @@ test("NB1-L9 CL sections", async ({ page }) => {
   L.done(12);
 });
 
-/* ── L10 · the card ────────────────────────────────────────────────────────────────────────────────────────────── */
+/* ── L10 · the card's Notes ─────────────────────────────────────────────────────────────────────────────────── */
+/* RE-POINTED (Contact list v24 C): the card is the agent card in the Query Centre's panel. Its band, ‹ › and position are
+   CL24-C1's; what this lock still holds is NB1's B4 — Notes on `Agent.notes`, saved on blur and kept across a reload
+   (now on the card's Notes tab). The original note is put back. */
 const NOTE = "NB1 lock note — safe to delete";
 test("NB1-L10 CL card", async ({ page }) => {
   test.setTimeout(500_000);
   const L = new Ledger("L10");
-  for (const vp of SIZES) {
-    await openCl(page, vp);
-    const at = `${vp.width}`;
-    const card = () => page.evaluate(`(() => {
-      const b = [...document.querySelectorAll('[data-nb1="book"]')].find((e) => e.getBoundingClientRect().height > 0); if (!b) return null;
-      const c = b.querySelector('[data-nb1="card"]'); const sel = b.querySelector('[data-nb1="name-row"][aria-current="true"]');
-      const ids = [...b.querySelectorAll('[data-nb1="name-row"]')].map((r) => r.getAttribute('data-id'));
-      return { band: c ? c.querySelector('[data-nb1="band"] span').textContent : '', name: c ? c.querySelector('[data-nb1="card-name"]').textContent : '',
-        wish: !!(c && c.querySelector('[data-nb1="wishlist"]')), query: !!(c && c.querySelector('[data-nb1="query"]')), notes: !!(c && c.querySelector('[data-nb1="notes"] textarea')),
-        cardId: c ? c.getAttribute('data-id') : null, selId: sel ? sel.getAttribute('data-id') : null, selName: sel ? sel.querySelector('.nb1-tx b').textContent : '',
-        pos: (b.querySelector('[data-nb1="pos"]') || {}).textContent || '', ids };
-    })()`) as Promise<{ band: string; name: string; wish: boolean; query: boolean; notes: boolean; cardId: string | null; selId: string | null; selName: string; pos: string; ids: string[] } | null>;
-    const c0 = await card();
-    L.check(`${at} · population: the card`, !!c0 && !!c0.cardId && c0.ids.length >= 3, JSON.stringify(c0 && { ...c0, ids: c0.ids.length }));
-    if (!c0) continue;
-    L.check(`${at} · band word, name, wishlist, query block and Notes`, ["With you", "With the agent", "Not queried yet", "Closed"].includes(c0.band) && c0.name === c0.selName && c0.wish && c0.query && c0.notes, JSON.stringify(c0));
-    /* ‹ › step the visible order — narrowed by a pill */
-    await tap(page, "[data-nb1='book'] [data-nb1='pill'][data-k='agent']");
-    await page.waitForTimeout(300);
-    const v0 = await card();
-    L.check(`${at} · population: Querying narrows the list`, !!v0 && v0.ids.length >= 2 && v0.ids.length < c0.ids.length, JSON.stringify(v0 && v0.ids.length));
-    if (v0) {
-      L.check(`${at} · "1 OF ${v0.ids.length}" on the first visible agent`, v0.pos === `1 OF ${v0.ids.length}` && v0.selId === v0.ids[0], `${v0.pos} ${v0.selId}`);
-      await tap(page, "[data-nb1='book'] [data-nb1='next']");
-      await page.waitForTimeout(250);
-      const v1 = await card();
-      L.check(`${at} · › steps to the next visible agent, "2 OF ${v0.ids.length}"`, !!v1 && v1.selId === v0.ids[1] && v1.cardId === v0.ids[1] && v1.pos === `2 OF ${v0.ids.length}`, `${v1?.selId} ${v1?.pos}`);
-      await tap(page, "[data-nb1='book'] [data-nb1='pill'][data-k='all']");
-      await page.waitForTimeout(250);
-    }
-    /* Notes persist across a reload, then the original is put back */
-    if (vp.width === SIZES[0].width && !BASE) {
-      const ta = page.locator("[data-nb1='book'] [data-nb1='notes'] textarea").first();
-      if (!(await ta.count())) { L.check(`${at} · population: Notes`, false, "no Notes field"); continue; }
-      const original = await ta.inputValue();
-      const selId = (await card())?.selId;
-      await ta.fill(NOTE); await ta.blur(); await page.waitForTimeout(2500);
-      await page.reload(); await page.locator(BOOK_ROW).first().waitFor({ timeout: 30_000 }); await page.waitForTimeout(1500);
-      const after = await card();
-      const kept = await page.locator("[data-nb1='book'] [data-nb1='notes'] textarea").first().inputValue();
-      L.check(`${at} · Notes persist across a reload (the same agent selected)`, after?.selId === selId && kept === NOTE, `${after?.selId} vs ${selId} · ${kept}`);
-      const t2 = page.locator("[data-nb1='book'] [data-nb1='notes'] textarea").first();
-      await t2.fill(original); await t2.blur(); await page.waitForTimeout(2500);
-      await page.reload(); await page.locator(BOOK_ROW).first().waitFor({ timeout: 30_000 }); await page.waitForTimeout(1200);
-      const back = await page.locator("[data-nb1='book'] [data-nb1='notes'] textarea").first().inputValue();
-      L.check(`${at} · the original note is put back`, back === original, JSON.stringify(back));
-    }
-  }
-  L.done(10);
+  const vp = SIZES[1];
+  const at = `${vp.width}`;
+  await openCl(page, vp);
+  if (BASE) { L.check(`${at} · population: a v24 row`, (await page.locator("[data-cl24='row']").count()) > 0, "base build"); L.done(1); return; }
+  const id = await page.evaluate(() => document.querySelector<HTMLElement>("[data-cl24='row']")?.dataset.id ?? null);
+  L.check(`${at} · population: a row`, !!id, String(id));
+  if (!id) { L.done(1); return; }
+  const openNotes = async () => {
+    await page.locator("[data-cl24='panel'] [data-cl24='tab'][data-tab='notes']").first().click({ timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    return page.locator("[data-cl24='panel'] [data-cl24='notes']").first();
+  };
+  await page.locator(`[data-cl24='row'][data-id='${id}'] .cl24-whot`).first().click();
+  await page.waitForTimeout(800);
+  const ta = await openNotes();
+  L.check(`${at} · population: Notes on the card`, (await ta.count()) > 0, "no Notes field");
+  if (!(await ta.count())) { L.done(2); return; }
+  const original = await ta.inputValue();
+  await ta.fill(NOTE); await ta.blur(); await page.waitForTimeout(2500);
+  await page.goto(`/agents?agent=${encodeURIComponent(id)}`);
+  await page.locator("[data-cl24='panel'] [data-cl24='agent-card']").first().waitFor({ timeout: 30_000 });
+  const kept = await (await openNotes()).inputValue();
+  L.check(`${at} · Notes persist across a reload`, kept === NOTE, JSON.stringify(kept));
+  const t2 = await openNotes();
+  await t2.fill(original); await t2.blur(); await page.waitForTimeout(2500);
+  await page.goto(`/agents?agent=${encodeURIComponent(id)}`);
+  await page.locator("[data-cl24='panel'] [data-cl24='agent-card']").first().waitFor({ timeout: 30_000 });
+  const back = await (await openNotes()).inputValue();
+  L.check(`${at} · the original note is put back`, back === original, JSON.stringify(back));
+  L.done(4);
 });
 
-/* ── L11 · full screen ─────────────────────────────────────────────────────────────────────────────────────────── */
-test("NB1-L11 CL full screen", async ({ page }) => {
+/* RETIRED (Contact list v24): full screen is no longer the same box fixed at inset 20 over the window; it is the address book over the page sheet under the navy band (CL24-D1/D2/D3). */
+test.skip("NB1-L11 CL full screen", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("L11");
   for (const vp of SIZES) {
@@ -453,13 +442,15 @@ test("NB1-L12 CL kept functions", async ({ page }) => {
   const L = new Ledger("L12");
   mkdirSync(`${DIR}/runs`, { recursive: true });
   for (const vp of SIZES) {
-    await openCl(page, vp);
+    /* RE-POINTED (Contact list v24 D2): the ticks, the selection's bar and Export live in full screen's book, which keeps
+       NB1's hooks; the pills are the band's segments; "+ Add email" is the wide card's contact row */
+    await openCl(page, vp, { full: true });
     await mutate(page, "L12");
     const at = `${vp.width}`;
-    /* two ticks: hover each avatar, press its checkbox */
+    /* two ticks: hover each row, press its checkbox (it lies over the disc) */
     const rows = page.locator("[data-nb1='book'] [data-nb1='name-row']");
     for (const i of [1, 2]) {
-      const av = rows.nth(i).locator("[data-nb1='avatar']");
+      const av = rows.nth(i);
       if (!(await av.count())) break;
       await av.hover();
       await page.waitForTimeout(150);
@@ -472,7 +463,7 @@ test("NB1-L12 CL kept functions", async ({ page }) => {
     L.check(`${at} · two ticks show "2 selected" and the bulk actions`, !!sel && sel.n === "2 selected" && sel.acts.some((a) => /^Export 2$/.test(a)) && sel.acts.includes("Clear"), JSON.stringify(sel));
     if (sel) await tap(page, "[data-nb1='bulk-clear']");
     /* Export in Filters downloads the rows showing */
-    await tap(page, "[data-nb1='book'] [data-nb1='pill'][data-k='agent']");
+    await tap(page, "[data-cl24='band-seg'][data-k='agent']");
     await page.waitForTimeout(250);
     const v = await page.locator("[data-nb1='book'] [data-nb1='name-row']").count();
     await tap(page, "[data-nb1='book'] [data-nb1='filters']");
@@ -486,12 +477,12 @@ test("NB1-L12 CL kept functions", async ({ page }) => {
       L.check(`${at} · "Export ${v} agents" downloads ${v} rows`, label.trim() === `Export ${v} agents` && csvRows(p) === v, `${label} · ${csvRows(p)} rows`);
     }
     await page.keyboard.press("Escape");
-    await tap(page, "[data-nb1='book'] [data-nb1='pill'][data-k='all']");
+    await tap(page, "[data-cl24='band-count']");
     await page.waitForTimeout(250);
     /* "+ Add email" opens the agent form at email */
     const target = await page.evaluate(() => {
       const b = [...document.querySelectorAll<HTMLElement>("[data-nb1='book']")].find((e) => e.getBoundingClientRect().height > 0);
-      const add = b?.querySelector<HTMLElement>("[data-nb1='card'] [data-nb1='add'][data-field='email']");
+      const add = b?.querySelector<HTMLElement>("[data-cl24='wide-card'] [data-cl24='ct-row'][data-k='email'] [data-cl24='ct-add']");
       return !!add;
     });
     if (!target) {
@@ -500,10 +491,10 @@ test("NB1-L12 CL kept functions", async ({ page }) => {
       for (const id of ids.slice(0, 20)) {
         await tap(page, `[data-nb1='book'] [data-nb1='name-row'][data-id='${id}']`);
         await page.waitForTimeout(150);
-        if (await page.locator("[data-nb1='card'] [data-nb1='add'][data-field='email']").count()) break;
+        if (await page.locator("[data-cl24='wide-card'] [data-cl24='ct-row'][data-k='email'] [data-cl24='ct-add']").count()) break;
       }
     }
-    const add = page.locator("[data-nb1='card'] [data-nb1='add'][data-field='email']").first();
+    const add = page.locator("[data-cl24='wide-card'] [data-cl24='ct-row'][data-k='email'] [data-cl24='ct-add']").first();
     L.check(`${at} · population: an agent with no email`, (await add.count()) > 0, "");
     if (await add.count()) {
       await add.click();

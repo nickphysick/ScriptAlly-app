@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "col true"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 list column 372",
+  "ok": true,
+  "detail": "width 372"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 selected row pale with a navy edge",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(238, 242, 247)\",\"sh\":\"rgb(42, 58, 82) 3px 0px 0px 0px inset\"}"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the A–Z strip lands \"M\" at the top",
+  "ok": true,
+  "detail": "{\"gap\":0,\"room\":1448}"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 the wide card has 3 columns",
+  "ok": true,
+  "detail": "columns 3"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "col true"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 list column 330",
+  "ok": true,
+  "detail": "width 330"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 selected row pale with a navy edge",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(238, 242, 247)\",\"sh\":\"rgb(42, 58, 82) 3px 0px 0px 0px inset\"}"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 the A–Z strip lands \"M\" at the top",
+  "ok": true,
+  "detail": "{\"gap\":0,\"room\":1548}"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 the wide card has 2 columns",
+  "ok": true,
+  "detail": "columns 2"
+ }
+]

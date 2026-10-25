@@ -1,0 +1,30 @@
+=== CODE MUTATION A2 (CL24-A1 A2 A3)
+applied A2 src/lib/contactV24.ts
+[A1] 26/26 green
+  ✗ A2 · 1512 k agents, at least one and no more than the gaps — k 102 n 78
+  ✗ A2 · 1280 k agents, at least one and no more than the gaps — k 102 n 78
+[A2] 8/10 green
+  1 failed
+  1 passed (45.0s)
+=== CODE MUTATION A3 (CL24-A1 A2 A3)
+applied A3 src/lib/contactV24.ts
+[A1] 26/26 green
+[A2] 10/10 green
+[A3] 16/16 green
+  2 passed (44.4s)
+=== CODE MUTATION B1 (CL24-B1 B2 B3)
+applied B1 src/components/agents/AgentList.tsx
+  ✗ B1 · 1512 switching keeps Find, the filters and the sort — find "" sort "Your query ↓" rows 51→52
+  ✗ B1 · 1280 switching keeps Find, the filters and the sort — find "" sort "Your query ↓" rows 51→52
+[B1] 5/7 green
+  1 failed
+  1 passed (42.4s)
+=== CODE MUTATION C2 (CL24-C1)
+applied C2 src/lib/contactV24.ts
+[C1] 12/12 green
+  ✗ C2 · 1512 closed: no primary, "See the query", no "Record a response" — {"primary":false,"links":["Record a response","Edit agent","Open query"]}
+  ✗ C2 · 1280 closed: no primary, "See the query", no "Record a response" — {"primary":false,"links":["Record a response","Edit agent","Open query"]}
+[C2] 6/8 green
+  1 failed
+  1 passed (1.1m)
+clean rebuild 0

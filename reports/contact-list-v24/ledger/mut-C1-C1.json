@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "qc panel true your-move row true"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the panel is the Query Centre's box",
+  "ok": true,
+  "detail": "cl {\"l\":944,\"r\":1504,\"t\":105.796875,\"b\":892,\"w\":560,\"h\":786.203125} qc {\"l\":944,\"r\":1504,\"t\":105.796875,\"b\":892,\"w\":560,\"h\":786.203125}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 no scrim",
+  "ok": false,
+  "detail": "scrim opacity 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 the band is CARD_TONE for its set",
+  "ok": true,
+  "detail": "{\"k\":\"you\",\"bg\":\"rgb(245, 230, 223)\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 › steps to the next row",
+  "ok": true,
+  "detail": "now cv25-agent-08 expected cv25-agent-08"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 Esc closes",
+  "ok": true,
+  "detail": "panel still open"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "qc panel true your-move row true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the panel is the Query Centre's box",
+  "ok": true,
+  "detail": "cl {\"l\":752,\"r\":1272,\"t\":105.796875,\"b\":792,\"w\":520,\"h\":686.203125} qc {\"l\":752,\"r\":1272,\"t\":105.796875,\"b\":792,\"w\":520,\"h\":686.203125}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 no scrim",
+  "ok": false,
+  "detail": "scrim opacity 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 the band is CARD_TONE for its set",
+  "ok": true,
+  "detail": "{\"k\":\"you\",\"bg\":\"rgb(245, 230, 223)\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 › steps to the next row",
+  "ok": true,
+  "detail": "now cv25-agent-08 expected cv25-agent-08"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 Esc closes",
+  "ok": true,
+  "detail": "panel still open"
+ }
+]

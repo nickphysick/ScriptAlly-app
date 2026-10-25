@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "qc {\"card\":{\"l\":340,\"r\":1412,\"t\":129.75,\"b\":377.828125,\"w\":1072,\"h\":248.078125},\"ban\":{\"l\":340,\"r\":1412,\"t\":399.828125,\"b\":471.828125,\"w\":1072,\"h\":72},\"vr\":{\"l\":340,\"r\":1412,\"t\":499.828125,\"b\":537.828125,\"w\":1072,\"h\":38},\"sheet\":{\"l\":308,\"r\":1444,\"t\":551.828125,\"b\":8907.625,\"w\":1136,\"h\":8355.796875}} cl {\"card\":null,\"ban\":null,\"vr\":null,\"sheet\":null}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 ban",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 vr",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sheet",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card top",
+  "ok": false,
+  "detail": "qc 129.75 cl undefined"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 row→sheet gap",
+  "ok": false,
+  "detail": "qc 14.0 cl NaN"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "qc {\"card\":{\"l\":304,\"r\":1216,\"t\":129.75,\"b\":377.828125,\"w\":912,\"h\":248.078125},\"ban\":{\"l\":304,\"r\":1216,\"t\":399.828125,\"b\":471.828125,\"w\":912,\"h\":72},\"vr\":{\"l\":304,\"r\":1216,\"t\":499.828125,\"b\":537.828125,\"w\":912,\"h\":38},\"sheet\":{\"l\":280,\"r\":1240,\"t\":551.828125,\"b\":8907.625,\"w\":960,\"h\":8355.796875}} cl {\"card\":null,\"ban\":null,\"vr\":null,\"sheet\":null}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 ban",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 vr",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sheet",
+  "ok": false,
+  "detail": "missing (qc true, cl false)"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card top",
+  "ok": false,
+  "detail": "qc 129.75 cl undefined"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 row→sheet gap",
+  "ok": false,
+  "detail": "qc 14.0 cl NaN"
+ }
+]

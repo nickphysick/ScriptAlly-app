@@ -54,7 +54,9 @@ const RIGHT_W = (w: number) => (w === 1920 ? 370 : 332);
 
 type PageMap = { key: string; route: string; header: string; eyebrow: string; title: string; byline: string; acts: string; art?: string; right?: string; rightTokenW?: boolean; content: string; init?: string };
 const PAGES: PageMap[] = [
-  { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-nb1='book']" }, /* RE-POINTED (navy-bar v1 B1): the Contact list's content starts with the address book */
+  /* RETIRED FOR THE CONTACT LIST (Contact list v24 Part A): its open hero is gone — the page opens on the shared
+     PageHeaderCard, as the Query Centre's did in v149, held to the Query Centre's boxes by CL24-A1. HR1-1 (the Contact
+     list against its oracle) therefore has no subject, and the contacts/discover pair (HR1-7) goes with it. */
   /* RE-POINTED (Contact list v20 §A): the Contact list's content now opens on its title row (the count, the Cards / List
      pill, Full screen), which sits where the toolbar did; the toolbar follows 54 lower */
   /* RETIRED FOR THE QUERY CENTRE (v149, QC149 L13): its open header is gone — the page opens on the shared PageHeaderCard
@@ -195,7 +197,8 @@ test.describe("Header rules v1.1", () => {
         if (r.content) L["HR1-6"].check(`${w} content − stack bottom = 44`, near(r.content.t - r.stackB!, 44, 1), `${(r.content.t - r.stackB!).toFixed(2)} (content ${r.content.t}, stack ${r.stackB})`);
       }
       /* HR1-7 — the pairs under one folder tab: Contact list / Discover, Query Centre / Analytics */
-      for (const [a, b] of [["contacts", "discover"]] as const) { /* v149: the queries/analytics pair went with the QC hero */
+      /* v149: the queries/analytics pair went with the QC hero; v24: the contacts/discover pair with the Contact list's */
+      for (const [a, b] of [] as unknown as readonly (readonly [string, string])[]) {
         const A = all[a]?.[vp.width], B = all[b]?.[vp.width];
         const p = L["HR1-7"];
         const w = `${a}/${b} ${vp.width}`;
@@ -215,8 +218,8 @@ test.describe("Header rules v1.1", () => {
     const bad: string[] = [];
     for (const l of Object.values(L)) { l.write(); bad.push(...l.bad()); }
     for (const x of bad.slice(0, 60)) console.log(`  ✗ ${x}`);
-    expect(L["HR1-1"].rows.length, "HR1-1: fewer readings than it claims").toBeGreaterThanOrEqual(28);
-    expect(L["HR1-3"].rows.length, "HR1-3: fewer readings than it claims").toBeGreaterThanOrEqual(56);
+    /* v24: HR1-1's subject (the Contact list's hero) is retired; HR1-3 reads six pages, not seven */
+    expect(L["HR1-3"].rows.length, "HR1-3: fewer readings than it claims").toBeGreaterThanOrEqual(48);
     expect(bad).toEqual([]);
   });
 
