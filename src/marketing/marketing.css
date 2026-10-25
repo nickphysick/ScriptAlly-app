@@ -688,6 +688,39 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   position: absolute; left: 175px; top: 150px; width: 560px;
   display: flex; flex-direction: column; transform-origin: 0 0;
 }
+/* ── v4.1 (25 Oct, ref design-refs/landing-hero-v4-1.html): the hero in a card over the navy ──
+   Desktop only (`--carded` is set by `size()` above 900px; the stacked layout never gets it).
+   ⚠️ THE NAVY IS THE WRAPPER'S, IN SCREEN PIXELS: the nav's ink carries on to `--mk-navy-to` (36% of
+   the way down the card, written by `size()`), then the light ground runs from the lower surface to
+   the band's top colour — so the hero meets the status band (`--mk-band-top` → `--mk-lower`, the
+   ref's `.peek`) with no seam. The 3px ink shadow upward is the ref's seam fix: it covers any
+   hairline between the nav and the band. Colour and image separately, never the shorthand. */
+.mk-herowrap.mk-herowrap--carded {
+  --mk-navy-to: 190px; /* the ref's default; `size()` writes the measured one inline */
+  background-color: var(--mk-band-top);
+  background-image: linear-gradient(180deg, var(--mk-ink-shell) 0, var(--mk-ink-shell) var(--mk-navy-to), var(--mk-lower) var(--mk-navy-to), var(--mk-band-top) 100%);
+  box-shadow: 0 -3px 0 var(--mk-ink-shell);
+}
+/* The card (the ref's `.hcard`): 64px in from each side of the frame, radius 22, white fading to blush
+   at its right edge, the layered shadow and 1px hairline. Its top and bottom are `size()`'s. Below
+   the copy and the pile (first in the frame), decorative, and it takes no clicks. */
+.mk-hcard { display: none; }
+.mk-herowrap--carded .mk-hcard {
+  display: block; position: absolute; left: 64px; right: 64px; top: 6px; bottom: 26px; border-radius: 22px;
+  background-color: #fff; background-image: linear-gradient(100deg, #fff 0%, #fff 46%, #f7ece7 100%);
+  box-shadow: 0 1px 2px rgba(28,19,15,.06), 0 24px 50px -26px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.05);
+  pointer-events: none;
+}
+/* The places counter under the actions (the ref's `.places`). Hidden in the stacked layout, which this
+   pass does not change. */
+.mk-places { margin-top: 26px; width: 318px; }
+.mk-places--wait { visibility: hidden; }
+.mk-places-bar { height: 4px; border-radius: 2px; background: #e9e4dd; overflow: hidden; }
+.mk-places-bar i { display: block; height: 100%; width: 0; border-radius: 2px; background: #a2452a; }
+.mk-places span { display: block; margin-top: 11px; font: 500 11.5px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase; color: #1c130f; }
+.mk-places b { font-weight: 600; }
+.mk-herowrap--narrow .mk-places { display: none; }
+
 /* The pile's box IS the frame above 900px, so the pile's coordinates are the ref's. */
 .mk-herobox { position: absolute; inset: 0; pointer-events: none; }
 

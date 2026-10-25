@@ -280,6 +280,9 @@ export const foundingRemainingLabel = (claimed: number, cap: number) =>
 
 /** The phone nav's founding pill, beneath its ten segments: a BUILDER, never a number in a string. */
 export const navPlacesLeft = (left: number) => `${left} places left`;
+/** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
+export const HERO_PLACES_REST = " places left";
+export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
 export const FOUNDING_NOTE: CopyRun[] = [
   "We'll only use your address to send your invite. ",

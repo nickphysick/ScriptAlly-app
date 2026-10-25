@@ -29,9 +29,29 @@
 import React, { useLayoutEffect, useRef } from "react";
 import { HERO_H1_LINES, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK } from "./landingCopy";
 import { HeroCard } from "./HeroCard";
+import { HeroPlaces } from "./HeroPlaces";
 
 /* The ref's own numbers, in frame units. */
 const FRAME_W = 1280, PEEK = 130, HMAX = 672, HMIN = 400, RIGHT = 1075, NARROW = 900;
+
+/**
+ * The visible pile's vertical extent in its own (unscaled) coordinates: the union of every shown
+ * card's box under its STATIC CSS transform (rotate/scale about its centre). ⚠️ NEVER A LIVE RECT —
+ * the cards are popping in, drifting and being dealt away, and a rect read now would be the
+ * animation's. The individual `scale`/`translate`/`rotate` properties those animations use are not
+ * part of the computed `transform`, so this reads the resting pile.
+ */
+function pileExtent(pile: HTMLElement): [number, number] {
+  let top = Infinity, bottom = -Infinity;
+  pile.querySelectorAll<HTMLElement>(".mk-lc").forEach((c) => {
+    if (c.offsetParent === null) return;
+    const m = new DOMMatrixReadOnly(getComputedStyle(c).transform === "none" ? undefined : getComputedStyle(c).transform);
+    const hy = Math.abs(m.b) * c.offsetWidth / 2 + Math.abs(m.d) * c.offsetHeight / 2;
+    const cy = c.offsetTop + c.offsetHeight / 2;
+    top = Math.min(top, cy - hy); bottom = Math.max(bottom, cy + hy);
+  });
+  return [top, bottom];
+}
 
 /** The ref's `size()`, against the app's elements. */
 function size(wrap: HTMLElement) {
@@ -40,7 +60,8 @@ function size(wrap: HTMLElement) {
   const card = wrap.querySelector<HTMLElement>('[data-hc="front"]');
   const cast = wrap.querySelector<HTMLElement>(".mk-lc-cast");
   const box = wrap.querySelector<HTMLElement>(".mk-herobox");
-  if (!copy || !pile || !card || !cast || !box) return;
+  const hcard = wrap.querySelector<HTMLElement>(".mk-hcard");
+  if (!copy || !pile || !card || !cast || !box || !hcard) return;
   const w = wrap.clientWidth, vh = window.innerHeight;
   const nav = parseFloat(getComputedStyle(wrap).getPropertyValue("--mk-nav-h")) || 88;
 
@@ -49,6 +70,8 @@ function size(wrap: HTMLElement) {
        in it. The shadow is re-placed across the box rather than 438 frame units to the card's left,
        where at a phone's scale it would run off the screen. */
     wrap.classList.add("mk-herowrap--narrow");
+    wrap.classList.remove("mk-herowrap--carded");
+    hcard.style.top = ""; hcard.style.bottom = ""; wrap.style.removeProperty("--mk-navy-to");
     wrap.style.removeProperty("--mk-hero-k"); wrap.style.removeProperty("--mk-hero-h");
     copy.style.transform = ""; copy.style.top = "";
     /* Centred on what is VISIBLE — the front card and the two back cards left showing — rather than
@@ -71,6 +94,7 @@ function size(wrap: HTMLElement) {
   }
 
   wrap.classList.remove("mk-herowrap--narrow");
+  wrap.classList.add("mk-herowrap--carded");
   box.style.height = ""; cast.style.width = ""; cast.style.left = ""; cast.style.top = "";
   const k = w / FRAME_W;
   const heroH = Math.round(Math.max(HMIN, Math.min(HMAX, (vh - nav) / k - PEEK)));
@@ -79,11 +103,26 @@ function size(wrap: HTMLElement) {
   wrap.style.setProperty("--mk-hero-h", heroH + "px");
   const cs = Math.max(.8, Math.min(1, s + .18));
   copy.style.transform = `scale(${cs})`;
-  copy.style.top = Math.max(20, Math.round((heroH - copy.offsetHeight * cs) / 2)) + "px";
-  // the pile: its right edge sits in from the frame, and the front card is centred on the copy block
-  const cTop = parseFloat(copy.style.top), cMid = cTop + copy.offsetHeight * cs / 2;
-  const cardMidY = card.offsetTop + card.offsetHeight / 2, cardRight = card.offsetLeft + card.offsetWidth;
-  const dx = RIGHT - cardRight * s, dy = cMid - cardMidY * s;
+  /* ⚠️ v4.1 (ref design-refs/landing-hero-v4-1.html, the CARDED 'b' branch of its `size()`): the hero
+     sits in a white card over the navy, and the card is SHORTER than the pile — its height is the
+     larger of the copy block + 90 and the front card's scaled height − 150, centred in the hero —
+     so the pile breaks out of it by about the same amount above and below. The copy is centred in
+     the card. ⚠️ ONE DEVIATION, STATED: the ref places the pile by "front card's centre at the card's
+     middle less 10px × scale", and that only looked even in the ref because its first `size()` ran
+     before its webfonts loaded and it never re-ran (re-run it and the ref itself breaks out 10.7px
+     above and 40.7px below at 1440 × 860). The design asks for the pile to break out by the same
+     amount above and below, so the visible pile's extent (`pileExtent`) is centred on the card. The navy
+     stops 36% of the way down the card (`--mk-navy-to`, written in SCREEN pixels because the
+     wrapper that paints it is not inside the scaled frame). */
+  const cardRight = card.offsetLeft + card.offsetWidth;
+  const dx = RIGHT - cardRight * s;
+  const fh = card.offsetHeight * s, ch = Math.round(Math.max(copy.offsetHeight * cs + 90, fh - 150));
+  const top = Math.round((heroH - ch) / 2), mid = top + ch / 2;
+  hcard.style.top = top + "px"; hcard.style.bottom = (heroH - top - ch) + "px";
+  wrap.style.setProperty("--mk-navy-to", (top + Math.round(ch * .36)) * k + "px");
+  copy.style.top = Math.round(mid - copy.offsetHeight * cs / 2) + "px";
+  const [eTop, eBot] = pileExtent(pile);
+  const dy = mid - (eTop + eBot) / 2 * s;
   pile.style.transform = `translate(${dx}px,${dy}px) scale(${s})`;
   placeAgain(wrap, card, dx, dy, s, k);
 }
@@ -128,6 +167,8 @@ export const Hero: React.FC<{
   return (
     <div className="mk-herowrap" ref={wrap}>
       <section className="mk-hero">
+        {/* v4.1: the white card the hero sits in, over the navy. Decorative: it says nothing. */}
+        <div className="mk-hcard" aria-hidden="true" />
         <div className="mk-herocopy">
           {/* Two blocks, one sentence: the break is the design's. The space between them is real
               text, so the heading's accessible name is the sentence. */}
@@ -147,6 +188,7 @@ export const Hero: React.FC<{
                 `id="pulse"` and `scroll-margin-top` keep its heading clear of the sticky nav. */}
             <a className="mk-herolink" href="#pulse">{HERO_LINK}</a>
           </div>
+          <HeroPlaces />
         </div>
         <div className="mk-herobox">
           <HeroCard host={wrap} />

@@ -244,6 +244,8 @@ const LOWER_READERS = [
   ".mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
   /* the status band continues the hero's lower ground into the oat (landing hero v3) */
   ".mk-lower", ".mk-statband",
+  /* the carded desktop hero (v4.1): below the navy its ground runs from the oat to the band's top colour */
+  ".mk-herowrap.mk-herowrap--carded",
   /* the sheet itself: every page continues on the oat */
   ".mk-sheet",
 ].sort();
