@@ -66,13 +66,15 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
   /* ⚠️ RETARGETED A THIRD TIME (sidebar metrics pass): Dashboard gets its WORKSPACE heading back — the
      capture button takes the top slot, so the first rule separates it from the nav — and ACCOUNT
      left the nav: Settings is the foot's gear again (reversing P5, Nick's call). */
-  it("the groups run in the work's order — Workspace first, Tasks last, no Account", () => {
+  it("the groups run in the work's order — Dashboard first on its own, Tasks last, no Account", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    /* Submission packages v26 (25 Oct): the Materials group is "Your book" now */
-    expect(labels).toEqual(["Workspace", "Queries", "Agents", "Your book", "Tasks"]);
+    /* Submission packages v26 (25 Oct): the Materials group is "Your book" now. Dashboard sits on its own with NO
+       heading (Nick's ruling, 25 Oct): the "Workspace" heading is gone, and Dashboard's row comes before every heading. */
+    expect(labels).toEqual(["Queries", "Agents", "Your book", "Tasks"]);
     expect(html).toContain(">Dashboard<");
+    expect(html.indexOf(">Dashboard<")).toBeLessThan(html.indexOf("ws-glabel"));
     // the nav renders no Settings row; the foot's gear is the door (SB5)
-    const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the sidebar nav");
+    const nav = sliceBetween(html, 'class="ws-nav"', "</nav>", "the sidebar nav");
     expect(nav).not.toContain(">Settings<");
   });
 

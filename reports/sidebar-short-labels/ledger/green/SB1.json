@@ -1,0 +1,42 @@
+[
+ {
+  "where": "the sidebar reads Queries",
+  "ok": true,
+  "detail": "[\"Dashboard\",\"Queries\",\"Packages\",\"Analytics\",\"Responses\",\"Contact list\",\"Discover\",\"Manuscripts\",\"Versions\",\"Comparable titles\",\"To-do list\",\"Calendar\",\"Corkboard\"]"
+ },
+ {
+  "where": "the sidebar reads Packages",
+  "ok": true,
+  "detail": "[\"Dashboard\",\"Queries\",\"Packages\",\"Analytics\",\"Responses\",\"Contact list\",\"Discover\",\"Manuscripts\",\"Versions\",\"Comparable titles\",\"To-do list\",\"Calendar\",\"Corkboard\"]"
+ },
+ {
+  "where": "the folder tab on /queries reads Query Centre",
+  "ok": true,
+  "detail": "Query Centre"
+ },
+ {
+  "where": "…and its Packages sibling is named Submission packages",
+  "ok": true,
+  "detail": "Submission packages"
+ },
+ {
+  "where": "the folder tab on /queries/packages reads Submission packages",
+  "ok": true,
+  "detail": "Submission packages"
+ },
+ {
+  "where": "…and its Queries sibling is named Query Centre",
+  "ok": true,
+  "detail": "Query Centre"
+ },
+ {
+  "where": "the palette finds \"Query Centre\" by its full name",
+  "ok": true,
+  "detail": "[\"Query Centre\"]"
+ },
+ {
+  "where": "the palette finds \"Submission packages\" by its full name",
+  "ok": true,
+  "detail": "[\"Submission packages\"]"
+ }
+]

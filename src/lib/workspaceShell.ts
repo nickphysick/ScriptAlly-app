@@ -27,7 +27,12 @@ import { routeBase } from "./helpPath";
  *  optional path here: absence is expressed by omitting the child. */
 export interface ShellChild {
   id: string;
+  /** The page's FULL name — the folder tab (active and siblings), the bar, breadcrumbs and every reader but the
+   *  sidebar's own row. */
   label: string;
+  /** The sidebar row's SHORT label, where it differs (Nick's ruling, 25 Oct: "Queries", "Packages"). The sidebar
+   *  ALONE reads it — `sidebarLabel()` — so the page keeps its full name everywhere else. */
+  navLabel?: string;
   /** Where it goes, search included (e.g. "/queries?status=attention"). */
   path: string;
   count?: number;
@@ -50,7 +55,13 @@ export interface ShellSection {
   def?: string;
   count?: number;
   urgent?: boolean;
+  /** The sidebar draws no heading over this group (Dashboard's, 25 Oct). The label stays: the folder tab and every
+   *  section lookup still read it. */
+  noHeading?: boolean;
 }
+
+/** The text the SIDEBAR prints for a row — its short `navLabel` where it has one, else its full `label`. */
+export const sidebarLabel = (ch: Pick<ShellChild, "label" | "navLabel">): string => ch.navLabel ?? ch.label;
 
 /** What the route says is lit. `child` is absent for childless sections. */
 export interface ShellHit {

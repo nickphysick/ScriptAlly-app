@@ -277,10 +277,12 @@ test.describe("ink shell", () => {
   });
 
   /* ── INK13 · feedback ─────────────────────────────────────────────────────────────────────────── */
-  /* ⚠️ AMENDED TWICE (7 Oct): the fold stays at 920px, and — superseding the filled version of the earlier
+  /* ⚠️ RE-DERIVED 25 OCT: the fold is now below 995px (the full card is up only where every nav row fits —
+     sidebarNav.measure.ts SB4); 1000 still shows the card and 900/800 the button, so these readings hold.
+     ⚠️ AMENDED TWICE (7 Oct): the fold stayed at 920px, and — superseding the filled version of the earlier
      follow-up — the folded state is the reference's `.fbb`: no fill, a 1.5px terracotta ring, a cream
      label, a terracotta icon, the BETA tag on an 18% wash. Asserted at 900 (inside the fold) and 800. */
-  test("INK13 · the card opens FeedbackDock; below 920px the outlined .fbb; collapsed, the icon with its dot", async ({ page }) => {
+  test("INK13 · the card opens FeedbackDock; below 995px the outlined .fbb; collapsed, the icon with its dot", async ({ page }) => {
     await inkOpen(page, "/queries", 1440, { height: 1000, scope: "ink13" });
     await expect(page.locator(".ws-fbc"), "the card at 1000px tall").toBeVisible();
     await expect(page.locator(".ws-fbb")).toBeHidden();

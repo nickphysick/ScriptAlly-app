@@ -214,7 +214,8 @@ describe("buildCorpus — second lines carry context, over already-loaded data",
 
   it("pages and features are results — including Task settings and Help centre", () => {
     const corpus = buildCorpus(input);
-    expect(rankItems(corpus, "pack").some((r) => r.title === "Packages")).toBe(true);
+    /* the palette names pages by their FULL names (25 Oct: only the sidebar says "Packages") */
+    expect(rankItems(corpus, "pack").some((r) => r.title === "Submission packages")).toBe(true);
     expect(rankItems(corpus, "settings").some((r) => r.title === "Task settings")).toBe(true);
     expect(rankItems(corpus, "help").some((r) => r.title === "Help centre")).toBe(true);
   });

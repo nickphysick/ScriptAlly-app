@@ -62,7 +62,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   "PK26-D": { css: `.p6-cx-drw .p6-dh { margin-left: -8px !important; margin-right: -8px !important; }` },
   /* rank everything, the too-early too */
   /* v26.1 — the packages row goes back to two lines' height and loses the right padding that sets its tag's edge */
-  "PK26-N": { css: `button.ws-ni[aria-label="Submission packages"] { height: 48px !important; padding-right: 3px !important; }` },
+  "PK26-N": { css: `button.ws-ni[aria-label="Packages"] { height: 48px !important; padding-right: 3px !important; }` },
   /* v26.1 — the stuck bar's ground reaches only the ref's 32px past the tabs */
   "PK26-T": { css: `.p6 .p6-ptabs::before { left: -32px !important; right: -32px !important; }` },
   "PK26-S": { js: `document.addEventListener('DOMContentLoaded', () => { const put = () => { for (const r of document.querySelectorAll('.p6-rs-r.p6-early')) { r.classList.remove('p6-early'); const em = r.querySelector('.p6-rs-bar em'); if (em && em.textContent === 'Too early') em.textContent = '50%'; } }; new MutationObserver(put).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true }); put(); })` },
@@ -258,7 +258,7 @@ for (const size of SIZES) {
     test.setTimeout(180_000);
     const L = new Ledger(`PK26-N-${size.width}`);
     await open(page, size);
-    const r = await page.evaluate(() => ["Submission packages", "Versions"].map((n) => {
+    const r = await page.evaluate(() => ["Packages", "Versions"].map((n) => {
       const b = [...document.querySelectorAll(`button.ws-ni[aria-label="${n}"]`)].find((e) => (e as HTMLElement).offsetParent) as HTMLElement | undefined;
       if (!b) return null;
       const t = b.querySelector(".ws-qpro"), l = b.querySelector(".ws-lbl");
@@ -271,7 +271,7 @@ for (const size of SIZES) {
       L.check("same height as Versions (±1)", Math.abs(pk.h - ver.h) <= 1, `${pk.h} vs ${ver.h}`);
       L.check("PRO tag's right edge where Versions' is (±1)", pk.tagR != null && ver.tagR != null && Math.abs(pk.tagR - ver.tagR) <= 1, `${pk.tagR} vs ${ver.tagR}`);
       L.check("no second line", pk.lines === 0, String(pk.lines));
-      L.check("the label is \"Submission packages\"", pk.text === "Submission packages", pk.text);
+      L.check("the label is \"Packages\" (the sidebar's short label, 25 Oct)", pk.text === "Packages", pk.text);
       L.check("the label stops before its tag", pk.lblR != null && pk.tagL != null && pk.lblR <= pk.tagL + 0.5, `${pk.lblR} vs ${pk.tagL}`);
     }
     L.done(6);

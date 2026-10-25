@@ -16,7 +16,7 @@ import {
   parseStatusFilter, queriesPathFor,
 } from "./queriesFilterParam";
 import { TOPNAV_SHELL_PATHS, WORKSPACE_SHELL_PATHS } from "./shellForRoute";
-import { shellHitFor } from "./workspaceShell";
+import { shellHitFor, sidebarLabel } from "./workspaceShell";
 
 const NAV = workspaceSections({ todo: 4 });
 const byId = (id: string) => NAV.find((s) => s.id === id)!;
@@ -148,6 +148,12 @@ describe("The IA renders what exists — and nothing else", () => {
     expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Submission packages", "Analytics", "Responses"]);
     const pkg = byId("queries").children!.find((c) => c.label === "Submission packages")!;
     expect(pkg).toMatchObject({ path: "/queries/packages", pro: true });
+    /* SHORT IN THE SIDEBAR ONLY (25 Oct): `label` stays the page's full name; `navLabel` is what the row prints */
+    expect(pkg).toMatchObject({ label: "Submission packages", navLabel: "Packages" });
+    expect(byId("queries").children!.find((c) => c.id === "q-centre")).toMatchObject({ label: "Query Centre", navLabel: "Queries" });
+    expect(sidebarLabel(pkg)).toBe("Packages");
+    expect(sidebarLabel(byId("agents").children![0])).toBe("Contact list");
+    expect(byId("workspace").noHeading).toBe(true);
     expect(byId("materials").label).toBe("Your book");
     expect(byId("materials").children!.map((c) => c.label)).toEqual(["Manuscripts", "Versions", "Comparable titles"]);
   });
