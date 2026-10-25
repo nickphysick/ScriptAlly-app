@@ -95,7 +95,7 @@ const Detail: React.FC<{
             <div><b>{days ?? "–"}</b><span>days to a reply, on average</span></div>
           </div>
           {warn ? <p className="p6-rs-warn">{warn}</p> : null}
-          <button type="button" className="p6-cx-lnk p6-rs-go" onClick={() => onSeeQueries(qs.map((q) => q.id))}>See these {qs.length} quer{qs.length === 1 ? "y" : "ies"} in the Query Centre</button>
+          <button type="button" className="p6-cx-lnk p6-rs-go" onClick={() => onSeeQueries(qs.map((q) => q.id))}>{qs.length === 1 ? "See this query" : `See these ${qs.length} queries`} in the Query Centre</button>
         </>
       ) : <p className="p6-rs-warn">Nothing has gone out with this {RESULTS_NOUN[kind]} yet.</p>}
     </aside>

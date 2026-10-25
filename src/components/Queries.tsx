@@ -490,6 +490,12 @@ export const Queries: React.FC<{
   /** The shell's Queries child, as `?status=`. Absent = the plain hub, filters untouched. */
   statusFilter?: QueriesStatusFilter;
   /**
+   * Submission packages v26 — `?ids=a,b,c` from a Results row's "See these queries in the Query Centre". The list
+   * narrows to those queries and says so in ONE removable chip of the applied row; removing it, or "Clear all",
+   * shows every query again. It arrives as a prop, on the same seam as `statusFilter`.
+   */
+  idsFilter?: string | null;
+  /**
    * ⚠️ THE VIEW IS A ROUTE AND ARRIVES AS A PROP, on the same seam as `statusFilter` and `?q=`.
    * `cards` is the browsing grid; `detail` is the two-pane surface. App.tsx derives it — `?q=<id>`
    * implies `detail`, so every existing deep link from To-do, Calendar and Noteboard opens a record
@@ -499,7 +505,7 @@ export const Queries: React.FC<{
   onSelectView?: (view: "cards" | "detail") => void;
   /** opening a card is a NAVIGATION — it sets `?q=<id>`, which is what puts the page in detail view */
   onOpenQuery?: (id: string) => void;
-}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, view = "cards", onSelectView, onOpenQuery }) => {
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, idsFilter = null, view = "cards", onSelectView, onOpenQuery }) => {
   const {
     currentUser,
     manuscripts,
@@ -2587,6 +2593,12 @@ export const Queries: React.FC<{
        reply" (needsOverdue), so it maps to Past expected — see `filterForStatusParam`. */
     setQcFilter(filterForStatusParam(statusFilter));
   }, [statusFilter]);
+  /* v26 — the Results link's queries. Re-applied only when the PARAM changes, like `statusFilter`. */
+  const [qcIds, setQcIds] = useState<Set<string> | null>(null);
+  useEffect(() => {
+    const ids = (idsFilter ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+    setQcIds(ids.length ? new Set(ids) : null);
+  }, [idsFilter]);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
 
@@ -3865,7 +3877,7 @@ export const Queries: React.FC<{
      phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
   const qcCourtOn = qcDesk ? qcCzCourt : null;
   const qcNow138 = Date.now();
-  const qcFiltered = qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
+  const qcFiltered = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
   /* v138 §C — on the desk the headings sort; the phone keeps the v126 sort */
   const qcVisible = qcDesk
     ? sort138(qcFiltered, qcSort138, {
@@ -3888,6 +3900,8 @@ export const Queries: React.FC<{
     ...(qcFilter !== "all" ? [{ key: "sentence", label: qcFilter === "you" ? "With you" : qcFilter === "agent" ? "With the agent" : qcFilter === "offers" ? "Offers" : qcFilter === "past" ? "Past expected" : qcFilter === "closed" ? "Closed" : qcFilter.startsWith("stage:") ? STAGE_NAME[qcFilter.slice(6) as QueryStatus] ?? "Stage" : qcFilter === "court:agent" ? "With agents" : qcFilter === "court:closed" ? "Closed" : "With you", off: () => setQcFilter("all") }] : []),
     ...(qcCourtOn ? [{ key: `court:${qcCourtOn}`, label: qcCourtOn === "you" ? "Your move" : qcCourtOn === "agent" ? "With agents" : "Closed", off: () => setQcCzCourt(null) }] : []),
     ...(qcFind.trim() ? [{ key: "find", label: `“${qcFind.trim()}”`, off: () => setQcFind("") }] : []),
+    /* v26 — from Submission packages' Results */
+    ...(qcIds ? [{ key: "ids", label: `${qcIds.size} from Submission packages`, off: () => setQcIds(null) }] : []),
   ];
   /* v140 §D — the quick picks' counts, over the scoped rows */
   const qc140QuickN = {
@@ -3930,8 +3944,8 @@ export const Queries: React.FC<{
     });
   };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
-  const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
-  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
+  const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn || !!qcIds;
+  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); };
   /* v138 §C — a band's tint from its group (Part D settles the groups themselves) */
   /* v139 §C — under Status and Next action the band follows whose court it is; packages are powder */
   const qc138Tone = (g: { key: string }): BandTone => bandToneOf(qcGroup, g.key);
