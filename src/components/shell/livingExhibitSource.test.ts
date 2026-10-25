@@ -16,8 +16,9 @@ const FILES = [
   "src/components/agents/contact/ContactExhibit.tsx",
   "src/components/todo/v2/TodoExhibit.tsx",
   "src/components/packages/PackagesExhibit.tsx",
-  /* Submission packages v4 F: the empty page's example package is fixed sample content, never a record */
-  "src/components/packages/v4/PkgEmpty4.tsx",
+  /* Submission packages v26 (25 Oct): the empty state's animation (and How it works) is fixed sample content — a
+     letter, a synopsis, pages and an agent drawn from constants — never a record */
+  "src/components/packages/v26/Pk26Header.tsx",
   "src/components/shell/LivingExhibition.tsx",
 ];
 const DATA_PATHS = [/useScriptAllyDb/, /from "[^"]*lib\/db"/, /firebase/, /\bfetch\(/, /onSnapshot/, /getDocs?\(/, /useContext\(/];

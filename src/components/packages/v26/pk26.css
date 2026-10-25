@@ -45,15 +45,17 @@
   animation-play-state: paused !important;
 }
 
-/* reduced motion: the finished frame, still (the ref's own block, with the prefix) */
+/* reduced motion: the finished frame, still (the ref's own block, with the prefix). ⚠️ `!important` because the
+   generated rules that state each element's resting frame are more specific than these, and an animation that is
+   switched off leaves the resting (hidden) frame — measured: the chip stayed at opacity 0 without it. */
 @media (prefers-reduced-motion: reduce) {
   .p6-an * { animation: none !important; }
-  .p6-an .p6-an-c { transform: translateY(134px); }
-  .p6-an .p6-an-t i { background: #f3d4d6; }
-  .p6-an .p6-an-r { opacity: 1; width: 42px; margin-left: 6px; }
-  .p6-an .p6-an-chip { opacity: 1; transform: translate(205px, 150px); }
-  .p6-an .p6-an-qx { opacity: 1; }
-  .p6-cx-drw { transition: none; }
+  .p6-an .p6-an-c { transform: translateY(134px) !important; }
+  .p6-an .p6-an-t i { background: #f3d4d6 !important; }
+  .p6-an .p6-an-r { opacity: 1 !important; width: 42px !important; margin-left: 6px !important; }
+  .p6-an .p6-an-chip { opacity: 1 !important; transform: translate(205px, 150px) !important; }
+  .p6-an .p6-an-qx { opacity: 1 !important; }
+  .p6-cx-drw { transition: none !important; }
 }
 
 /* the row controls the ref reveals on hover stay visible where nothing hovers */
