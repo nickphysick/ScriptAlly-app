@@ -2068,9 +2068,180 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   background: var(--mk-terra); color: var(--mk-nearblack);
   font-family: var(--mk-f-mono); font-weight: 600; font-size: .7rem; line-height: 1;
 }
+/* ── Then, once we launch: the Free / Pro switch and the two cards (ref .launch, .seg, .track, .tier) ── */
+.mk-pvm .mk-pvlaunch { margin-top: 38px; }
+.mk-pvm .mk-pvlaunchh {
+  margin: 0 4px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3;
+}
+.mk-pvm .mk-pvseg {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; margin: 14px 4px 0; padding: 4px;
+  border-radius: 999px; background: #e6e0d6;
+}
+.mk-pvm .mk-pvthumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px;
+  background: #fff; box-shadow: 0 2px 6px rgba(28, 19, 15, .12);
+  transition: transform .28s cubic-bezier(.22, .8, .3, 1);
+}
+.mk-pvm .mk-pvseg[data-on="1"] .mk-pvthumb { transform: translateX(100%); }
+.mk-pvm .mk-pvseg button {
+  position: relative; z-index: 1; height: 44px; border: 0; background: none; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .98rem; line-height: 1; color: rgba(28, 19, 15, .56);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.mk-pvm .mk-pvseg button[aria-selected="true"] { color: var(--mk-nearblack); }
+.mk-pvm .mk-pvseg button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; border-radius: 999px; }
+.mk-pvm .mk-pvseg small {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .56rem; line-height: 1;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--mk-rust);
+}
+/* ⚠️ `align-items: flex-start`: each card keeps its own height — a short Free card is never
+   stretched to Pro's. `position: relative` makes the track the cards' offset parent, which is what
+   the switch's scroll arithmetic measures from. */
+.mk-pvm .mk-pvtrack {
+  position: relative; display: flex; align-items: flex-start; gap: 12px; overflow-x: auto;
+  scroll-snap-type: x mandatory; margin: 14px -14px 0; padding: 8px 18px 10px; scroll-padding: 0 18px;
+  scrollbar-width: none;
+}
+.mk-pvm .mk-pvtrack::-webkit-scrollbar { display: none; }
+.mk-pvm .mk-pvtier {
+  flex: 0 0 calc(100% - 26px); scroll-snap-align: start; background: #fff; border-radius: 22px; padding: 7px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 16px 30px -20px rgba(28, 19, 15, .3);
+}
+.mk-pvm .mk-pvtierin { border-radius: 16px; padding: 22px 20px; height: 100%; }
+.mk-pvm .mk-pvtier--pro .mk-pvtierin { background: var(--mk-navy); color: var(--mk-cream); }
+.mk-scope .mk-pvtname {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.35rem; line-height: 1.2; margin: 0;
+  color: inherit;
+}
+.mk-pvm .mk-pvtier--pro .mk-pvtname { color: #fff; }
+.mk-pvm .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin-top: 10px; }
+.mk-pvm .mk-pv4cur { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.15rem; line-height: 1; margin-top: 6px; }
+.mk-pvm .mk-pv4amt { font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1; letter-spacing: -.02em; }
+.mk-pvm .mk-pv4from, .mk-pvm .mk-pv4per {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .6rem; line-height: 1;
+  letter-spacing: .14em; text-transform: uppercase; opacity: .75;
+}
+.mk-pvm .mk-pv4from { margin: 12px 6px 0 0; }
+.mk-pvm .mk-pv4per { align-self: flex-end; margin: 0 0 6px 8px; }
+.mk-pvm .mk-pvtsub { margin: 8px 0 0; font-size: .98rem; color: #5a4636; }
+.mk-pvm .mk-pvtier--pro .mk-pvtsub { color: rgba(var(--mk-cream-rgb), .82); }
+.mk-pvm .mk-pvtlist {
+  list-style: none; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px dashed rgba(90, 70, 54, .3);
+  display: grid; gap: 9px; font-size: .98rem; color: #3a2e27;
+}
+.mk-pvm .mk-pvtier--pro .mk-pvtlist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
+.mk-pvm .mk-pvtlist li { position: relative; padding-left: 20px; line-height: 1.4; }
+.mk-pvm .mk-pvtlist li::before {
+  content: ""; position: absolute; left: 2px; top: .52em; width: 7px; height: 7px; border-radius: 50%; background: var(--mk-rust);
+}
+.mk-pvm .mk-pvtier--pro .mk-pvtlist li::before { background: var(--mk-terra); }
+.mk-pvm .mk-pvtlist li.mk-pvplus { padding-left: 0; font-weight: 600; }
+.mk-pvm .mk-pvtlist li.mk-pvplus::before { display: none; }
+.mk-pvm .mk-pvtnote {
+  margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--mk-cream-rgb), .08);
+  font-size: .9rem; line-height: 1.45; color: rgba(var(--mk-cream-rgb), .88);
+}
+
+/* ── Pro plans (ref .plans, .pgrid, .pt) ── */
+.mk-pvm .mk-pvplans { margin: 30px 0 0; padding: 18px 12px 14px; border: 1px solid var(--mk-hair); border-radius: 24px; }
+.mk-scope .mk-pvplanst {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.2rem; line-height: 1.3; margin: 0 6px;
+  color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvplanss { margin: 4px 6px 0; font-size: .95rem; color: rgba(28, 19, 15, .56); }
+.mk-pvm .mk-pvpgrid {
+  list-style: none; margin: 14px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 7px;
+  background: #fff; border-radius: 20px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 14px 30px -20px rgba(28, 19, 15, .28);
+}
+.mk-pvm .mk-pvpt {
+  background: var(--mk-cream); border-radius: 14px; padding: 14px 14px 12px; min-height: 112px;
+  display: flex; flex-direction: column; transition: background .3s;
+}
+.mk-pvm .mk-pvptname { margin: 0; font-family: var(--mk-f-display); font-weight: 400; font-size: .98rem; line-height: 1.2; color: #5a4636; }
+.mk-pvm .mk-pvptprice {
+  display: block; margin-top: 8px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.75rem; line-height: 1;
+  letter-spacing: -.02em; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvptline {
+  margin-top: auto; padding-top: 10px; font-family: var(--mk-f-mono); font-weight: 500; font-size: .54rem; line-height: 1.5;
+  letter-spacing: .12em; text-transform: uppercase; color: #5a4636;
+}
+.mk-pvm .mk-pvptline em { font-style: normal; color: var(--mk-rust); display: block; }
+.mk-pvm .mk-pvpt--fit { background: var(--mk-navy); }
+.mk-pvm .mk-pvpt--fit .mk-pvptname { color: rgba(var(--mk-cream-rgb), .8); }
+.mk-pvm .mk-pvpt--fit .mk-pvptprice { color: #fff; }
+.mk-pvm .mk-pvpt--fit .mk-pvptline { color: rgba(var(--mk-cream-rgb), .75); }
+.mk-pvm .mk-pvpt--fit .mk-pvptline em { color: #f2c3ae; }
+.mk-pvm .mk-pvfittag {
+  align-self: flex-start; margin: -2px 0 8px; padding: 3px 7px; border-radius: 999px; background: var(--mk-terra);
+  color: var(--mk-nearblack); font-family: var(--mk-f-mono); font-weight: 600; font-size: .5rem; line-height: 1.2;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.mk-pvm .mk-pvsuit {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 50px; margin-top: 12px;
+  border-radius: 999px; border: 1px solid rgba(162, 69, 42, .4); background: #fff; color: var(--mk-rust);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; cursor: pointer;
+}
+.mk-pvm .mk-pvsuit svg {
+  width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-pvm .mk-pvsuit:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvm .mk-pvplansnote { margin: 10px 6px 0; font-size: .82rem; line-height: 1.45; color: var(--mk-label); text-align: center; }
+
+/* ── Questions, as an accordion (ref .faq, .qa) ── */
+.mk-pvm .mk-pvfaq { margin-top: 40px; }
+.mk-scope .mk-pvfaqh {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.5rem; line-height: 1.2; margin: 0 4px 12px;
+  color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvqa { border-top: 1px solid var(--mk-hair); }
+.mk-pvm .mk-pvqa:last-child { border-bottom: 1px solid var(--mk-hair); }
+.mk-pvm .mk-pvqa > button {
+  display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 4px;
+  border: 0; background: none; text-align: left; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem; line-height: 1.35; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvqa > button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: -2px; }
+.mk-pvm .mk-pvpm {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px var(--mk-hair);
+  display: grid; place-items: center; transition: transform .25s, background .2s;
+}
+.mk-pvm .mk-pvpm svg { width: 12px; height: 12px; stroke: var(--mk-rust); stroke-width: 2; stroke-linecap: round; }
+.mk-pvm .mk-pvqa--open .mk-pvpm { transform: rotate(45deg); background: var(--mk-blush); }
+.mk-pvm .mk-pvqaa { margin: 0; padding: 0 40px 18px 4px; font-size: 1rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pvm .mk-pvqaa[hidden] { display: none; }
+.mk-pvm .mk-pvsuitlink { color: var(--mk-rust); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--mk-rust); }
+
+/* ── The sticky sign-up (ref .stick), portalled into `.mk-scope` ──
+   ⚠️ `visibility` FOLLOWS THE SLIDE, so a hidden bar cannot be tabbed to or read out. */
+.mk-pvlayer.mk-pvstick {
+  position: fixed; left: 12px; right: 12px; bottom: 14px; z-index: 50; box-sizing: border-box;
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px;
+  background: var(--mk-ink-shell); color: var(--mk-cream); box-shadow: 0 14px 30px -10px rgba(0, 0, 0, .45);
+  transform: translateY(140%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .3s;
+  font-family: var(--mk-f-serif);
+}
+.mk-pvlayer.mk-pvstick.mk-on { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.22, .8, .3, 1), visibility 0s; }
+.mk-pvlayer.mk-pvstick p {
+  margin: 0; flex: 1; font-family: var(--mk-f-mono); font-weight: 600; font-size: .6rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+.mk-pvlayer.mk-pvstick p span { display: block; color: rgba(var(--mk-cream-rgb), .6); font-weight: 500; }
+.mk-pvlayer.mk-pvstick button {
+  height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--mk-cream); color: var(--mk-nearblack);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .95rem; cursor: pointer;
+}
+.mk-pvlayer.mk-pvstick button:focus-visible { outline: 2px solid var(--mk-terra); outline-offset: 2px; }
+/* ⚠️ WHILE THE BAR SHOWS, THE PAGE ENDS 74px LOWER (its 60px plus its 14px inset), so the footer's
+   last link can always be scrolled clear of it. */
+.mk-scope:has(.mk-pvstick.mk-on) { padding-bottom: 74px; }
+
 /* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-pvm .mk-pvchev, .mk-pvm .mk-pvdots i { transition: none; }
+  .mk-pvm .mk-pvchev, .mk-pvm .mk-pvdots i, .mk-pvm .mk-pvthumb, .mk-pvm .mk-pvpm, .mk-pvm .mk-pvpt,
+  .mk-pvlayer.mk-pvstick, .mk-pvlayer.mk-pvstick.mk-on { transition: none; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════
