@@ -1,0 +1,102 @@
+Desktop hero v4 — red-before proofs (25 Oct). Each lock run against one named break at http://127.0.0.1:4731 (vite preview of build:dev). Source breaks restored from path-derived backups; src/ clean after.
+
+## css-LH9
+break: LH9 — LH3_MUTATE=LH9: .mk-pillpop{margin-top:40px} (the popover detached from the pill)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:332:3 › landing hero v3 › LH9 popover: under the status pill, 10 then 1, 2, 3, and gone before Partial requested types (13.7s)
+Error: within 16px of it
+Expected: <= 16
+Received:    37.06825256347656
+1 failed
+
+## seq
+break: LH9 — the desk's + steps cut to one (the popover shows 10, 1, 3)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:332:3 › landing hero v3 › LH9 popover: under the status pill, 10 then 1, 2, 3, and gone before Partial requested types (13.8s)
+Error: it shows 10, then 1, 2, 3, in that order
+1 failed
+
+## linger
+break: LH9 — the popover's tuck delayed from u+400 to u+1400 (still showing as Partial requested types)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:332:3 › landing hero v3 › LH9 popover: under the status pill, 10 then 1, 2, 3, and gone before Partial requested types (13.6s)
+Error: already gone when the first letter of Partial requested appears
+Expected: < 0.05
+Received:   1
+1 failed
+
+## cream
+break: LH10 — the chip rule's selector weakened from `.mk-lc-att .mk-taskchip` to `.mk-taskchip` (the mock's regression: the plain cream chip wins)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:344:3 › landing hero v3 › LH10 chips: in their own line's chip row, rust or sage, gone within 3.5s; no floating pill (26.6s)
+Error: "Task created" is rust, never the cream chip
+Expected: "rgb(245, 230, 223)"
+Received: "rgb(245, 241, 234)"
+1 failed
+
+## css-LH11
+break: LH11 — LH3_MUTATE=LH11: .mk-hfly{z-index:10} (the fly layer under the nav)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:361:3 › landing hero v3 › LH11 hawk: above the nav and the pile, unclipped, flown once; the cast settles at .2 and stays still (5.8s)
+Error: above the nav
+Expected: > 60
+Received:   10
+1 failed
+
+## inhero
+break: LH11 — the fly layer appended inside the hero wrapper instead of <body>
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:361:3 › landing hero v3 › LH11 hawk: above the nav and the pile, unclipped, flown once; the cast settles at .2 and stays still (6.3s)
+Error: the fly layer is a child of <body>, outside the hero and the sheet
+Expected: true
+Received: false
+1 failed
+
+## castdrift
+break: LH11 — the cast shadow's pointer drift restored
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:361:3 › landing hero v3 › LH11 hawk: above the nav and the pile, unclipped, flown once; the cast settles at .2 and stays still (5.8s)
+Error: the cast shadow does not move with the pointer
+Expected: "2.83715px 0.689921px"
+Received: "-8.76301px -7.35548px"
+1 failed
+
+## loop
+break: LH4 — the loop's restart removed (no fresh card ever arrives)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:192:3 › landing hero v3 › LH4 loop: the counter never goes back within a run; the card leaves and a new one reads Day 1 within 2s (1.5m)
+TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.
+1 failed
+
+## back
+break: LH4 — the Day 40 knot lowered to 20 (the counter runs backwards)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:192:3 › landing hero v3 › LH4 loop: the counter never goes back within a run; the card leaves and a new one reads Day 1 within 2s (30.0s)
+Error: at 14219ms the counter went back
+Expected: >= 39
+Received:    38
+1 failed
+
+## deal
+break: LH12 — the back cards dealt (translate) instead of popped
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:397:3 › landing hero v3 › LH12 entrance: the cards pop — no back card is dealt, the front starts at scale .86 (1.8s)
+Error: no back card animates translate on load (no dealing)
+Expected: 0
+Received: 4
+1 failed
+
+## frontscale
+break: LH12 — the front's entrance from scale .95 instead of .86
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:397:3 › landing hero v3 › LH12 entrance: the cards pop — no back card is dealt, the front starts at scale .86 (1.8s)
+Error: its first keyframe is scale .86
+Expected: 0.86
+Received: 0.95
+1 failed
+
+## title
+break: LH13 — HERO_PHONE_MS_FRONT = "Lord of the Wings"
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:419:3 › landing hero v3 › LH13 copy: The Taloned Mr Ripley on the front card, Lord of the Wings on every back card (812ms)
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: "The Taloned Mr Ripley"
+Received: "Lord of the Wings"
+1 failed
+
+## reduce
+break: LH2 — the reduced-motion guard on the entrance removed (the fly-past runs under reduced motion)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:119:3 › landing hero v3 › LH2 reduced motion: the card is the story's end state, the feed scrolls, the hawk is at rest (932ms)
+Error: no fly-past under reduced motion
+Expected: 0
+Received: 1
+1 failed
+
