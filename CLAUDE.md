@@ -1055,6 +1055,15 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
   brief says 25px/1.32.** Measured in the rendered mockup. A reasoned value in prose beats an
   unreasoned one in an artefact; `text-wrap: balance` survived there only by accident.
 
+## Submission packages v26 — the packages-led page (25 Oct; ref = design-refs/submission-packages-v26/submission-packages-v26.html; report reports/submission-packages-v26/REPORT.md; branch `submission-packages-v26`, NOT merged; dev via `dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26`, index-DQ4bM-WA.js)
+- **The page lives at `/queries/packages`, in QUERIES; `/manuscripts/packages` redirects there with its query string and hash** (`lib/packagesRoute`, above the unknown-path guard). MATERIALS is renamed YOUR BOOK (Manuscripts · Versions · Comparable titles). Parts in `components/packages/v26/`; derivations in `lib/packagesV26`.
+- **⚠️ `pk26.generated.css` IS GENERATED FROM THE REF'S COMPUTED CASCADE** (`scripts/pk26/extract.cjs` → `gen.py` → `verify.cjs`) — never hand-edit it; hand rules go in `pk26.css`. The faces are `var(--sp-type)` / `var(--sp-serif)` (the marketing census forbids a third file naming them).
+- **Named extras replace `otherMaterials` as free text:** the manuscript holds `extras`, a package ticks `extraIds`, and `otherMaterials` stays as the ticked names joined — the one string the send drawer, editions and frozen summaries read, so ticking an extra on a sent package starts its next edition. A one-time migration runs on open (dev: 1 package migrated).
+- **Results is packageReplies' figures and threshold (4 answers), never the mock's "5 sent".** Its link opens `/queries?ids=…`, which the Query Centre shows as one removable chip.
+- **Attachments are disabled ("coming soon"): Storage is not set up on dev.** Phase 5 was stopped by the pack's own rule.
+- **Dev rules deployed (empty package, `icon`, `extraIds` frozen with the migration exception, manuscript `extras`); prod rules are Nick's.**
+- **Locks:** `tests/e2e/pk26.measure.ts` PK26-R/W/B/E/X/D/S, each proved red (`pk26Mutate.mjs` for the source breaks); fixture `seedPk26.mjs`; unit `packagesV26.test.ts`. Retired: `tests/e2e/RETIRED-packages-v26.md`.
+
 ## Submission packages v2 — one page, open to all (27 Sep; ref = design-refs/materials/packages-v2.html; report reports/packages-v2/REPORT.md)
 - **`/manuscripts/packages` is ONE page: the Packages · Builder · Tracking tabs are retired.** Same group as Comparable titles: `masthead={null}`, the FULL `PageHeader` (the padded archivist, `PACKAGES_HERO`, a 600×566 copy never trimmed) as row 1, the main column and the shared `PageRail` (Materials) as row 2. OPTED_OUT is 5; FULL_PAGES has four; WITH_ART gains the route. The deep links survive: `?tab=builder` opens the composer, `?tab=tracking` scrolls to Side by side, `?tab=packages` is the top.
 - **⚠️ OPEN TO ALL (D7) — `PACKAGES_OPEN_TO_ALL = true` in `lib/entitlements.ts`, and `packagesUnlocked(user)` is the ONE gate** read by `addPackage`, the Manuscripts page, `MaterialsField` and `canAttachPackages`. `UserPlan`/`isProUser` stay; turning gating back on is that one constant.
